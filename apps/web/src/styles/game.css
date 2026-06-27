@@ -1,0 +1,255 @@
+.game {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+}
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tr-space-3);
+}
+.game-body {
+  display: flex;
+  gap: var(--tr-space-4);
+  align-items: flex-start;
+}
+.board-wrap {
+  flex: 1 1 60%;
+  min-width: 0;
+}
+.board {
+  width: 100%;
+  height: auto;
+  max-height: 78vh;
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+}
+.route.claimable line {
+  transition: stroke-width 0.1s ease;
+}
+.route.claimable:hover line:first-child {
+  stroke-width: 3.2;
+}
+
+.hud {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+}
+@media (max-width: 820px) {
+  .game-body {
+    flex-direction: column;
+  }
+  .hud {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
+
+.trackers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-1);
+}
+.tracker {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-1) var(--tr-space-2);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  font-size: 0.85em;
+}
+.tracker.current {
+  border-color: var(--tr-ember);
+  background: color-mix(in srgb, var(--tr-ember) 8%, transparent);
+}
+.tracker-name {
+  font-weight: 600;
+}
+.tracker-stats {
+  margin-left: auto;
+  display: flex;
+  gap: var(--tr-space-2);
+  color: var(--tr-ink-soft);
+}
+.tracker-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.market {
+  display: flex;
+  gap: var(--tr-space-2);
+  align-items: center;
+}
+.deck {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 44px;
+}
+.market-slots {
+  display: flex;
+  gap: var(--tr-space-1);
+  flex-wrap: wrap;
+}
+.market-slot {
+  width: 34px;
+  height: 46px;
+  font-size: 1.1em;
+  font-weight: 700;
+}
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: var(--tr-radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+}
+.swatch-count {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  background: var(--tr-ink);
+  color: var(--tr-paper);
+  border-radius: 999px;
+  font-size: 0.7em;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+.hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tr-space-3);
+}
+
+.ticket-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85em;
+}
+.ticket {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 6px;
+  border-left: 3px solid var(--tr-line);
+}
+.ticket.long {
+  border-left-color: var(--tr-ember);
+  font-weight: 600;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 25, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tr-space-4);
+  z-index: 50;
+}
+.modal {
+  background: var(--tr-surface);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  padding: var(--tr-space-6);
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+  max-height: 90vh;
+  overflow: auto;
+}
+.payment-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-2);
+}
+.payment-options button {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  width: 100%;
+}
+.ticket-choices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ticket-choices label {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-2);
+  border-radius: var(--tr-radius-sm);
+  cursor: pointer;
+}
+.ticket-choices label.chosen {
+  background: color-mix(in srgb, var(--tr-blue) 10%, transparent);
+}
+.ticket-choices b {
+  margin-left: auto;
+}
+.reveal {
+  gap: var(--tr-space-2);
+}
+.reveal-card {
+  width: 34px;
+  height: 46px;
+  border-radius: var(--tr-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.scoreboard table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.scoreboard th,
+.scoreboard td {
+  padding: 4px 8px;
+  text-align: left;
+}
+.scoreboard tr.winner {
+  background: color-mix(in srgb, var(--tr-ember) 12%, transparent);
+}
+
+.toast {
+  position: fixed;
+  bottom: var(--tr-space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--tr-danger);
+  color: #fff;
+  padding: var(--tr-space-2) var(--tr-space-4);
+  border-radius: 999px;
+  z-index: 60;
+}
