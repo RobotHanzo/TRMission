@@ -34,8 +34,9 @@ describe('Board', () => {
       />,
     );
     expect(screen.getByRole('img', { name: /Taiwan/i })).toBeInTheDocument();
-    // 85 routes are authored; each draws at least one <line>.
-    expect(container.querySelectorAll('line').length).toBeGreaterThan(80);
+    // Every authored route draws a roadbed path plus a chain of car slots.
+    expect(container.querySelectorAll('path.bed').length).toBeGreaterThan(80);
+    expect(container.querySelectorAll('rect.slot').length).toBeGreaterThan(80);
     // A known station label is present in Traditional Chinese.
     expect(screen.getAllByText('臺北').length).toBeGreaterThan(0);
   });

@@ -9,8 +9,10 @@ import {
 import { Plus, Minus, LocateFixed, Maximize, Minimize } from 'lucide-react';
 import type { GameSnapshot } from '@trm/proto';
 import type { RouteColor } from '@trm/shared';
-import { CITIES, ROUTES, cityById, cityName } from '../game/content';
+import { CITIES, ROUTES, cityName } from '../game/content';
+import { ROUTE_GEOMETRY } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
+import { zoomBucket, cityTier } from '../game/lod';
 import {
   BASE_VIEW,
   ISLANDS,
@@ -32,42 +34,10 @@ interface BoardProps {
 
 const VIEWBOX = `${BASE_VIEW.x} ${BASE_VIEW.y} ${BASE_VIEW.w} ${BASE_VIEW.h}`;
 
-// Perpendicular offset for double-route siblings so the parallel tracks don't overlap.
-const doubleOffsets = (): Map<string, number> => {
-  const groups = new Map<string, string[]>();
-  for (const r of ROUTES)
-    if (r.doubleGroup)
-      groups.set(r.doubleGroup, [...(groups.get(r.doubleGroup) ?? []), r.id as string]);
-  const m = new Map<string, number>();
-  for (const ids of groups.values()) {
-    ids.sort();
-    ids.forEach((id, i) => m.set(id, (i - (ids.length - 1) / 2) * 1.8));
-  }
-  return m;
-};
-
 const colorOf = (rc: RouteColor): string =>
   rc === 'GRAY' ? GRAY_TOKEN.hex : CARD_COLOR_TOKENS[rc].hex;
 const glyphOf = (rc: RouteColor): string =>
   rc === 'GRAY' ? GRAY_TOKEN.glyph : CARD_COLOR_TOKENS[rc].glyph;
-
-// Hub cities whose labels survive the zoomed-out view; the dense corridor in between
-// reveals its labels as you zoom in (cartographic level-of-detail).
-const MAJORS = new Set([
-  'taipei',
-  'hsinchu',
-  'taichung',
-  'chiayi',
-  'tainan',
-  'kaohsiung',
-  'hualien',
-  'taitung',
-  'yilan',
-  'hengchun',
-]);
-// Home is `initialScale` 1.9 → "mid", so the default view already shows every label and
-// length badge; zooming out to ~minScale reaches "far" (a clean labels-thinned overview).
-const zoomBucket = (scale: number): string => (scale < 1.4 ? 'far' : scale < 2.4 ? 'mid' : 'near');
 
 /**
  * Reflects the live zoom onto the viewport: `data-zoom` drives label/badge level-of-detail,
@@ -186,13 +156,14 @@ export function Board({
   onPickRoute,
   onPickCity,
 }: BoardProps) {
-  const offsets = useMemo(doubleOffsets, []);
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const stationCities = useMemo(() => new Set(snapshot.stations.map((s) => s.cityId)), [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
+  // data-zoom seeds at the home tier (initialScale 1.9 → district) to avoid a first-paint
+  // label flash before ZoomTracker takes over.
   return (
-    <div className="board-viewport" data-zoom="far" ref={viewportRef}>
+    <div className="board-viewport" data-zoom="district" ref={viewportRef}>
       <TransformWrapper
         minScale={0.8}
         maxScale={8}
@@ -213,62 +184,77 @@ export function Board({
             <Geography />
 
             {ROUTES.map((r) => {
-              const a = cityById.get(r.a as string);
-              const b = cityById.get(r.b as string);
-              if (!a || !b) return null;
-              const dx = b.x - a.x;
-              const dy = b.y - a.y;
-              const len = Math.hypot(dx, dy) || 1;
-              const off = offsets.get(r.id as string) ?? 0;
-              const nx = (-dy / len) * off;
-              const ny = (dx / len) * off;
-              const x1 = a.x + nx;
-              const y1 = a.y + ny;
-              const x2 = b.x + nx;
-              const y2 = b.y + ny;
-              const mid = { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
+              const g = ROUTE_GEOMETRY.get(r.id as string);
+              if (!g) return null;
 
               const o = owned.get(r.id as string);
               const claimable = canAct && !o;
-              const stroke =
+              // Unclaimed → route colour; claimed → owner's seat colour; locked → muted grey.
+              const fill =
                 o?.ownerSeat !== undefined
                   ? (SEAT_COLORS[o.ownerSeat % 5] ?? '#888')
                   : o?.locked
                     ? '#9aa0a6'
                     : colorOf(r.color);
-              // Tunnel = dashes, ferry = dots; the dash pattern is counter-scaled in CSS
-              // (with var(--inv-scale)) so it stays a clean dotted/dashed line at every zoom
-              // instead of fat blobs when zoomed out.
-              const kind = r.isTunnel ? ' tunnel' : r.ferryLocos > 0 ? ' ferry' : '';
-
+              const carOpacity = o?.locked ? 0.45 : 1;
+              const isFerry = r.ferryLocos > 0;
+              const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
               const cls = 'route' + (claimable ? ' claimable' : '') + (o ? ' owned' : '') + kind;
+
               return (
                 <g
                   key={r.id as string}
                   className={cls}
                   onClick={claimable ? () => onPickRoute(r.id as string) : undefined}
                 >
-                  {/* Paper casing so coloured tracks stay legible over land and sea. */}
-                  <line className="track-casing" x1={x1} y1={y1} x2={x2} y2={y2} />
-                  <line
-                    className="track"
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke={stroke}
-                    opacity={o?.locked ? 0.4 : 1}
-                  />
-                  {claimable && (
-                    <line className="hit" x1={x1} y1={y1} x2={x2} y2={y2}>
-                      <title>{`${cityName(r.a as string, locale)}–${cityName(r.b as string, locale)} · ${r.length}`}</title>
-                    </line>
+                  {/* Paper roadbed seats the cars legibly over land and sea. */}
+                  <path className="bed" d={g.path} />
+                  {/* Tunnel: a dashed sleeper track shows between the shorter cars. */}
+                  {r.isTunnel && <path className="tunnel-track" d={g.path} />}
+
+                  {isFerry ? (
+                    // Ferry: a dotted sea crossing carrying round locomotive pips, not land cars.
+                    <>
+                      <path className="ferry-line" d={g.path} />
+                      {g.slots.map((s, i) => (
+                        <circle
+                          key={i}
+                          className="ferry-pip"
+                          cx={s.x}
+                          cy={s.y}
+                          fill={fill}
+                          opacity={carOpacity}
+                        />
+                      ))}
+                    </>
+                  ) : (
+                    // Each car = one train-length, so the slot count reads the cost at a glance.
+                    // x/width (along the path) are map-bound; y/height (thickness) counter-scale
+                    // in CSS so the cars hold a constant on-screen weight as you zoom.
+                    g.slots.map((s, i) => (
+                      <rect
+                        key={i}
+                        className="slot"
+                        x={-s.len / 2}
+                        width={s.len}
+                        fill={fill}
+                        opacity={carOpacity}
+                        transform={`translate(${s.x.toFixed(2)} ${s.y.toFixed(2)}) rotate(${s.angle.toFixed(1)})`}
+                      />
+                    ))
                   )}
-                  {!o && (
-                    <g className="len-badge">
-                      <circle cx={mid.x} cy={mid.y} />
-                      <text x={mid.x} y={mid.y}>
-                        {colorBlind ? glyphOf(r.color) : r.length}
+
+                  {claimable && (
+                    <path className="hit" d={g.path}>
+                      <title>{`${cityName(r.a as string, locale)}–${cityName(r.b as string, locale)} · ${r.length}`}</title>
+                    </path>
+                  )}
+                  {/* Colour-blind aid: a glyph chip naming the colour you pay (length is the car count). */}
+                  {colorBlind && !o && (
+                    <g className="glyph-badge">
+                      <circle cx={g.mid.x} cy={g.mid.y} />
+                      <text x={g.mid.x} y={g.mid.y}>
+                        {glyphOf(r.color)}
                       </text>
                     </g>
                   )}
@@ -279,10 +265,13 @@ export function Board({
             {CITIES.map((c) => {
               const hasStation = stationCities.has(c.id as string);
               const buildable = canAct && !hasStation;
+              // Tier drives the cartographic label level-of-detail (see game/lod.ts + the
+              // [data-zoom] rules in game.css); islands always keep their label.
+              const tier = cityTier(c.id as string);
               const cls =
                 'city' +
                 (c.isIsland ? ' island' : '') +
-                (MAJORS.has(c.id as string) ? ' major' : '');
+                (tier !== 'minor' ? ` ${tier}` : '');
               return (
                 <g key={c.id as string} className={cls}>
                   <circle
