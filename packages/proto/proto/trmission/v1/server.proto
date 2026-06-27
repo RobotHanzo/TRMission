@@ -1,0 +1,176 @@
+syntax = "proto3";
+
+// Server → client frames: the authoritative snapshot, cosmetic event batches,
+// rejections, and chat/heartbeat. The client treats `Snapshot` as ground truth
+// and `EventBatch` as animation hints (delta-replay is deferred; ADR A7/A17).
+package trmission.v1;
+
+import "trmission/v1/common.proto";
+
+// Sent once after a valid ClientHello.
+message Welcome {
+  string game_id = 1;
+  string player_id = 2; // "" for a spectator
+  uint32 seat = 3;
+  uint32 protocol_version = 4;
+}
+
+// ── Game events (mirror engine GameEvent). Redacted per-recipient by the gateway:
+//    private events are only delivered to their owner, and secret-bearing fields
+//    (e.g. CardDrawnBlind.card) are blanked for everyone else. ──
+
+message GameStarted {
+  repeated string turn_order = 1;
+}
+
+message InitialTicketsOffered { // private → owner only
+  string player_id = 1;
+  repeated string ticket_ids = 2;
+}
+
+message InitialTicketsKept {
+  string player_id = 1;
+  uint32 kept_count = 2;
+}
+
+message TurnStarted {
+  string player_id = 1;
+  uint32 order_index = 2;
+}
+
+message CardDrawnBlind { // private → owner sees `card`; opponents get UNSPECIFIED
+  string player_id = 1;
+  CardColor card = 2;
+}
+
+message CardTakenFaceup {
+  string player_id = 1;
+  uint32 slot = 2;
+  CardColor card = 3;
+}
+
+message MarketRefilled {
+  repeated CardColor market = 1;
+}
+
+message MarketRecycled {} // triggered by three face-up locomotives
+
+message DeckReshuffled {}
+
+message RouteClaimed {
+  string player_id = 1;
+  string route_id = 2;
+  uint32 points_awarded = 3;
+}
+
+message DoubleRouteLocked {
+  string route_id = 1;
+}
+
+message TunnelRevealed {
+  string player_id = 1;
+  string route_id = 2;
+  repeated CardColor revealed = 3;
+  uint32 extra_required = 4;
+}
+
+message TunnelResolved {
+  string player_id = 1;
+  string route_id = 2;
+  bool committed = 3;
+}
+
+message StationBuilt {
+  string player_id = 1;
+  string city_id = 2;
+}
+
+message TicketsOffered { // private → owner only
+  string player_id = 1;
+  repeated string ticket_ids = 2;
+}
+
+message TicketsKept {
+  string player_id = 1;
+  uint32 kept_count = 2;
+}
+
+message PlayerPassed {
+  string player_id = 1;
+}
+
+message TurnEnded {
+  string player_id = 1;
+}
+
+message EndgameTriggered {
+  string player_id = 1;
+  uint32 final_turns_remaining = 2;
+}
+
+message GameEnded {}
+
+message GameEvent {
+  oneof event {
+    GameStarted game_started = 1;
+    InitialTicketsOffered initial_tickets_offered = 2;
+    InitialTicketsKept initial_tickets_kept = 3;
+    TurnStarted turn_started = 4;
+    CardDrawnBlind card_drawn_blind = 5;
+    CardTakenFaceup card_taken_faceup = 6;
+    MarketRefilled market_refilled = 7;
+    MarketRecycled market_recycled = 8;
+    DeckReshuffled deck_reshuffled = 9;
+    RouteClaimed route_claimed = 10;
+    DoubleRouteLocked double_route_locked = 11;
+    TunnelRevealed tunnel_revealed = 12;
+    TunnelResolved tunnel_resolved = 13;
+    StationBuilt station_built = 14;
+    TicketsOffered tickets_offered = 15;
+    TicketsKept tickets_kept = 16;
+    PlayerPassed player_passed = 17;
+    TurnEnded turn_ended = 18;
+    EndgameTriggered endgame_triggered = 19;
+    GameEnded game_ended = 20;
+  }
+}
+
+message Snapshot {
+  GameSnapshot snapshot = 1;
+}
+
+message EventBatch {
+  uint32 state_version = 1; // resulting state version after these events
+  repeated GameEvent events = 2;
+}
+
+message Rejection {
+  uint32 ack_client_seq = 1;
+  RejectionCode code = 2;
+  string message_key = 3; // i18n key (errors:*)
+  string message = 4;     // developer-facing English
+}
+
+message ChatBroadcast {
+  string player_id = 1;
+  string text = 2;
+}
+
+message Pong {
+  uint32 nonce = 1;
+}
+
+// Single outbound frame. `ack_client_seq` echoes the command this frame answers
+// (0 when unsolicited, e.g. a broadcast).
+message ServerEnvelope {
+  uint32 server_seq = 1;
+  uint32 ack_client_seq = 2;
+  oneof event {
+    Welcome welcome = 3;
+    Snapshot snapshot = 4;
+    EventBatch events = 5;
+    Rejection rejection = 6;
+    ChatBroadcast chat = 7;
+    Pong pong = 8;
+  }
+}

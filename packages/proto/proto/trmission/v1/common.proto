@@ -1,0 +1,209 @@
+syntax = "proto3";
+
+// TRMission (台鐵任務) wire protocol — shared enums + messages.
+//
+// This package is the single source of truth for the realtime wire format
+// (protobuf over WebSocket, ADR A1). It deliberately has NO dependency on the
+// game engine: the server's codec maps the engine's RedactedView / GameEvent /
+// Action onto these messages.
+//
+// Hidden-information guarantee (risk #1): opponents are represented ONLY by the
+// counts-carrying `PublicPlayerState`, which has no field able to hold a colour,
+// card, or ticket id. A viewer's own secrets live in the disjoint `SelfView`,
+// which is embedded ONLY in a snapshot addressed to that viewer.
+package trmission.v1;
+
+// Card kinds. Values 1..9 line up with @trm/shared CARD_COLORS (canonical order),
+// shifted by the proto3 zero value. UNSPECIFIED doubles as "empty market slot"
+// and "no coloured portion" in a Payment.
+enum CardColor {
+  CARD_COLOR_UNSPECIFIED = 0;
+  CARD_COLOR_RED = 1;
+  CARD_COLOR_ORANGE = 2;
+  CARD_COLOR_YELLOW = 3;
+  CARD_COLOR_GREEN = 4;
+  CARD_COLOR_BLUE = 5;
+  CARD_COLOR_PURPLE = 6;
+  CARD_COLOR_BLACK = 7;
+  CARD_COLOR_WHITE = 8;
+  CARD_COLOR_LOCOMOTIVE = 9;
+}
+
+// Turn/phase FSM — mirrors engine `Phase`.
+enum Phase {
+  PHASE_UNSPECIFIED = 0;
+  PHASE_SETUP_TICKETS = 1;
+  PHASE_AWAIT_ACTION = 2;
+  PHASE_DRAWING_CARDS = 3;
+  PHASE_TICKET_SELECTION = 4;
+  PHASE_TUNNEL_PENDING = 5;
+  PHASE_GAME_OVER = 6;
+}
+
+// Rejection reasons. 1..99 = protocol/transport layer; 100+ mirror every engine
+// RuleViolationCode 1:1 (ADR A18 — one taxonomy across engine/proto/REST/i18n).
+enum RejectionCode {
+  REJECTION_CODE_UNSPECIFIED = 0;
+
+  // transport / session
+  REJECTION_CODE_UNAUTHENTICATED = 1;
+  REJECTION_CODE_BAD_SEQUENCE = 2;
+  REJECTION_CODE_MALFORMED = 3;
+  REJECTION_CODE_NOT_IN_GAME = 4;
+  REJECTION_CODE_RATE_LIMITED = 5;
+  REJECTION_CODE_INTERNAL = 6;
+
+  // engine rule violations (RuleViolationCode)
+  REJECTION_CODE_NOT_YOUR_TURN = 100;
+  REJECTION_CODE_WRONG_PHASE = 101;
+  REJECTION_CODE_GAME_OVER = 102;
+  REJECTION_CODE_INSUFFICIENT_CARDS = 103;
+  REJECTION_CODE_UNKNOWN_ROUTE = 104;
+  REJECTION_CODE_UNKNOWN_CITY = 105;
+  REJECTION_CODE_UNKNOWN_TICKET = 106;
+  REJECTION_CODE_ROUTE_TAKEN = 107;
+  REJECTION_CODE_ROUTE_LOCKED = 108;
+  REJECTION_CODE_DOUBLE_ROUTE_OWN_BOTH = 109;
+  REJECTION_CODE_BAD_PAYMENT_LENGTH = 110;
+  REJECTION_CODE_BAD_PAYMENT_COLOR = 111;
+  REJECTION_CODE_FERRY_LOCOS_SHORT = 112;
+  REJECTION_CODE_NOT_ENOUGH_TRAINS = 113;
+  REJECTION_CODE_NOT_A_TUNNEL = 114;
+  REJECTION_CODE_TUNNEL_BAD_EXTRA = 115;
+  REJECTION_CODE_TUNNEL_EXTRA_UNPAYABLE = 116;
+  REJECTION_CODE_STATION_LIMIT = 117;
+  REJECTION_CODE_STATION_CITY_TAKEN = 118;
+  REJECTION_CODE_STATION_ALREADY_THIS_TURN = 119;
+  REJECTION_CODE_TICKET_KEEP_TOO_FEW = 120;
+  REJECTION_CODE_TICKET_INVALID_SELECTION = 121;
+  REJECTION_CODE_MARKET_SLOT_EMPTY = 122;
+  REJECTION_CODE_FACEUP_LOCO_SECOND_DRAW = 123;
+  REJECTION_CODE_NO_LEGAL_MOVE_REQUIRED = 124;
+  REJECTION_CODE_NOTHING_TO_DRAW = 125;
+}
+
+// A colour-count multiset (a hand or the discard pile). Fixed fields in canonical
+// colour order keep the encoding deterministic and compact.
+message CardCounts {
+  uint32 red = 1;
+  uint32 orange = 2;
+  uint32 yellow = 3;
+  uint32 green = 4;
+  uint32 blue = 5;
+  uint32 purple = 6;
+  uint32 black = 7;
+  uint32 white = 8;
+  uint32 locomotive = 9;
+}
+
+// Payment for a claim / station / tunnel-extra: `color_count` cards of a single
+// `color` plus `locomotives` wilds. `color` is UNSPECIFIED iff color_count == 0
+// (an all-locomotive payment) and must never be LOCOMOTIVE.
+message Payment {
+  CardColor color = 1;
+  uint32 color_count = 2;
+  uint32 locomotives = 3;
+}
+
+// routeId → owner, or a locked (closed double-route sibling, 2–3p). Absent from
+// the snapshot's ownership list ⇒ the route is still open.
+message RouteOwnership {
+  string route_id = 1;
+  oneof cell {
+    string owner_player_id = 2;
+    bool locked = 3;
+  }
+}
+
+message StationPlacement {
+  string player_id = 1;
+  string city_id = 2;
+}
+
+message Endgame {
+  bool triggered = 1;
+  int32 trigger_player_index = 2;
+  uint32 final_turns_remaining = 3;
+}
+
+// A tunnel awaiting its claimant's continue/abort decision — public information.
+message TunnelReveal {
+  string player_id = 1;
+  string route_id = 2;
+  repeated CardColor revealed = 3;
+  uint32 extra_required = 4;
+}
+
+// Opponent / public view of a player. COUNTS ONLY — by construction this message
+// cannot carry a hand, a ticket id, or a card colour (risk #1).
+message PublicPlayerState {
+  string id = 1;
+  uint32 seat = 2;
+  uint32 train_cars = 3;
+  uint32 stations_remaining = 4;
+  uint32 route_points = 5;
+  uint32 hand_count = 6;
+  uint32 ticket_count = 7;
+}
+
+// The viewer's own private state. Embedded ONLY in a snapshot addressed to this
+// player (absent for spectators).
+message SelfView {
+  string player_id = 1;
+  CardCounts hand = 2;
+  repeated string kept_ticket_ids = 3;
+  repeated string pending_offer_ticket_ids = 4;
+}
+
+// One player's end-of-game score breakdown. `kept_ticket_ids` are revealed here
+// (game over only) — never on PublicPlayerState.
+message PlayerFinal {
+  string player_id = 1;
+  int32 route_points = 2;
+  int32 ticket_net = 3;
+  uint32 tickets_completed = 4;
+  uint32 stations_used = 5;
+  uint32 unused_stations = 6;
+  int32 station_bonus = 7;
+  uint32 longest_trail_length = 8;
+  int32 longest_bonus = 9;
+  int32 total = 10;
+  repeated string kept_ticket_ids = 11;
+}
+
+// Final ranking as equivalence groups; a group of >1 = tied co-winners/places.
+message RankingGroup {
+  repeated string player_ids = 1;
+}
+
+message FinalScoreboard {
+  repeated PlayerFinal players = 1;
+  repeated RankingGroup ranking = 2;
+}
+
+// Per-viewer authoritative projection of the whole game (maps from the engine's
+// RedactedView via the server codec). The client treats this as ground truth.
+message GameSnapshot {
+  uint32 state_version = 1; // engine actionSeq; the reconnect/idempotency key (A7)
+  uint32 schema_version = 2;
+  string content_hash = 3;
+  Phase phase = 4;
+  uint32 order_index = 5;
+  string current_player_id = 6; // "" at GAME_OVER
+  repeated string turn_order = 7;
+
+  repeated CardColor market = 8; // UNSPECIFIED = empty slot
+  uint32 deck_count = 9;
+  CardCounts discard = 10;
+  uint32 ticket_deck_long_count = 11;
+  uint32 ticket_deck_short_count = 12;
+
+  repeated RouteOwnership ownership = 13;
+  repeated StationPlacement stations = 14;
+  Endgame endgame = 15;
+  TunnelReveal pending_tunnel = 16; // unset when no tunnel is pending
+
+  repeated PublicPlayerState players = 17;
+  SelfView you = 18;                  // unset for spectators
+  FinalScoreboard final_scores = 19;  // set only at GAME_OVER
+}

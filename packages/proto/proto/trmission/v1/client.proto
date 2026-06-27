@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+// Client → server commands. Every in-game command maps 1:1 onto an engine Action;
+// the gateway decode→validate→apply pipeline is the sole authority (ADR A14).
+package trmission.v1;
+
+import "trmission/v1/common.proto";
+
+// First frame on a fresh socket: presents the short-lived ws-game ticket (A8).
+message ClientHello {
+  string ticket = 1;
+  uint32 protocol_version = 2;
+  string client_info = 3; // optional UA / build string
+}
+
+// SETUP_TICKETS: keep ≥ minKeepInitial of the initial offer (engine KEEP_INITIAL_TICKETS).
+message KeepInitialTickets {
+  repeated string ticket_ids = 1;
+}
+
+// Draw one card blind from the deck top (engine DRAW_BLIND).
+message DrawBlind {}
+
+// Take one face-up market card by slot (engine DRAW_FACEUP).
+message DrawFaceUp {
+  uint32 slot = 1;
+}
+
+// Begin a draw-tickets turn → offers 3 (engine DRAW_TICKETS).
+message DrawTickets {}
+
+// Resolve a mid-game ticket offer, keeping ≥ minKeepNormal (engine KEEP_TICKETS).
+message KeepTickets {
+  repeated string ticket_ids = 1;
+}
+
+// Claim a route, or begin a tunnel claim → TUNNEL_PENDING (engine CLAIM_ROUTE).
+message ClaimRoute {
+  string route_id = 1;
+  Payment payment = 2;
+}
+
+// Build a station in a city (engine BUILD_STATION).
+message BuildStation {
+  string city_id = 1;
+  Payment payment = 2;
+}
+
+// Resolve a pending tunnel: commit (paying `extra`) or abort (engine RESOLVE_TUNNEL).
+// `extra` is ignored when commit == false.
+message ResolveTunnel {
+  bool commit = 1;
+  Payment extra = 2;
+}
+
+// Pass — only legal when the player has no other move (A15 termination).
+message Pass {}
+
+// Ask the server for a fresh full snapshot (reconnect / desync recovery).
+message Resync {}
+
+message Chat {
+  string text = 1;
+}
+
+message Ping {
+  uint32 nonce = 1;
+}
+
+// Single inbound frame. `client_seq` is monotonic per socket and is the durable
+// idempotency key the gateway dedupes on (ADR A7).
+message ClientEnvelope {
+  uint32 client_seq = 1;
+  oneof command {
+    ClientHello hello = 2;
+    KeepInitialTickets keep_initial_tickets = 3;
+    DrawBlind draw_blind = 4;
+    DrawFaceUp draw_faceup = 5;
+    DrawTickets draw_tickets = 6;
+    KeepTickets keep_tickets = 7;
+    ClaimRoute claim_route = 8;
+    BuildStation build_station = 9;
+    ResolveTunnel resolve_tunnel = 10;
+    Pass pass = 11;
+    Resync resync = 12;
+    Chat chat = 13;
+    Ping ping = 14;
+  }
+}

@@ -7,11 +7,11 @@
       "outputs": ["dist/**", "src/gen/**"]
     },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "build"]
     },
     "lint": {},
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "build"],
       "outputs": ["coverage/**"]
     }
   }
