@@ -160,7 +160,10 @@ export function Board({
   onPickCity,
 }: BoardProps) {
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
-  const stationCities = useMemo(() => new Set(snapshot.stations.map((s) => s.cityId)), [snapshot]);
+  const stationCities = useMemo(() => {
+    const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
+    return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
+  }, [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // data-zoom seeds at the home tier (initialScale 1.9 → district) to avoid a first-paint
@@ -275,7 +278,8 @@ export function Board({
             })}
 
             {CITIES.map((c) => {
-              const hasStation = stationCities.has(c.id as string);
+              const stationSeat = stationCities.get(c.id as string);
+              const hasStation = stationSeat !== undefined;
               const buildable = canAct && !hasStation;
               const isHub = HUB_CITIES.has(c.id as string);
               // Tier drives the cartographic label level-of-detail (see game/lod.ts + the
@@ -310,7 +314,14 @@ export function Board({
                       <title>{cityName(c.id as string, locale)}</title>
                     </circle>
                   )}
-                  {hasStation && <circle className="station" cx={c.x} cy={c.y} />}
+                  {hasStation && (
+                    <circle
+                      className="station"
+                      cx={c.x}
+                      cy={c.y}
+                      style={{ fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' }}
+                    />
+                  )}
                   <text className="city-label" x={c.x} y={c.y}>
                     {cityName(c.id as string, locale)}
                   </text>
