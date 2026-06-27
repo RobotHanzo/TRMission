@@ -6,6 +6,8 @@ import { GameHub, type GameHubOptions } from './ws/hub';
 import { attachWsServer } from './ws/ws-server';
 import { connectMongo } from './db/mongo';
 import { MongoGameStore, ensureIndexes } from './persistence/game-store';
+import { OpenApiHolder } from './openapi/openapi.holder';
+import { buildOpenApiDocument } from './openapi/openapi';
 import { seedDevGame } from './dev-seed';
 import { env } from './config/env';
 
@@ -27,6 +29,9 @@ async function bootstrap(): Promise<void> {
 
   const hub = new GameHub(app.get(GameRegistry), options);
   attachWsServer(app.getHttpServer(), hub);
+
+  // Build the OpenAPI document from the live app and expose it via Scalar at /docs.
+  app.get(OpenApiHolder).set(buildOpenApiDocument(app));
 
   if (env.devGame) {
     const { gameId, tickets } = await seedDevGame(hub);
