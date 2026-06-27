@@ -456,6 +456,9 @@
   height: 46px;
   font-size: 1.1em;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .swatch {
