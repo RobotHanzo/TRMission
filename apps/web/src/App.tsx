@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUi } from './store/ui';
+import { useUi, roomCodeFromPath } from './store/ui';
 import { useSession } from './store/session';
 import { AppHeader } from './components/AppHeader';
 import { HomeScreen } from './screens/HomeScreen';
@@ -13,12 +13,40 @@ export function App() {
   const view = useUi((s) => s.view);
   const theme = useUi((s) => s.theme);
   const locale = useUi((s) => s.locale);
+  const syncFromUrl = useUi((s) => s.syncFromUrl);
+  const enterRoom = useUi((s) => s.enterRoom);
+  const user = useSession((s) => s.user);
   const booting = useSession((s) => s.booting);
   const restore = useSession((s) => s.restore);
 
   useEffect(() => {
     void restore();
   }, [restore]);
+
+  // Once the session probe settles, adopt the view from the URL exactly once — this is
+  // what turns a hard reload of /room/:code back into that lobby/game.
+  const bootstrapped = useRef(false);
+  useEffect(() => {
+    if (booting || bootstrapped.current) return;
+    bootstrapped.current = true;
+    syncFromUrl(!!user);
+  }, [booting, user, syncFromUrl]);
+
+  // Keep the view in step with browser back/forward.
+  useEffect(() => {
+    const onPop = (): void => syncFromUrl(!!useSession.getState().user);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [syncFromUrl]);
+
+  // A /room/:code link opened while logged out shows the auth gate (view stays 'home' with
+  // the URL preserved). Once the user signs in or plays as guest, resume into that room —
+  // RoomScreen then joins it if they aren't already a member.
+  useEffect(() => {
+    if (booting || !user || view !== 'home') return;
+    const code = roomCodeFromPath();
+    if (code) enterRoom(code);
+  }, [booting, user, view, enterRoom]);
 
   // Apply the chosen locale to i18next + <html lang> (covers the localStorage-seeded initial value).
   useEffect(() => {
@@ -40,7 +68,7 @@ export function App() {
   }, [theme]);
 
   return (
-    <div className="app">
+    <div className={view === 'game' ? 'app app--game' : 'app'}>
       <AppHeader />
       <main className={view === 'game' ? 'app-main app-main--game' : 'app-main'}>
         {booting ? (

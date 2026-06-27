@@ -1,10 +1,19 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Settings, Monitor, Sun, Moon, X, type LucideIcon } from 'lucide-react';
+import {
+  Settings,
+  Monitor,
+  Sun,
+  Moon,
+  PanelRight,
+  PanelBottom,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import type { Theme } from '../net/rest';
-import type { Locale } from '../store/ui';
+import type { BoardLayout, Locale } from '../store/ui';
 
 interface Props {
   onClose(): void;
@@ -21,14 +30,21 @@ const LOCALE_OPTIONS: { value: Locale; label: string }[] = [
   { value: 'en', label: 'English' },
 ];
 
+const LAYOUT_OPTIONS: { value: BoardLayout; icon: LucideIcon; labelKey: string }[] = [
+  { value: 'rail', icon: PanelRight, labelKey: 'layoutRail' },
+  { value: 'tray', icon: PanelBottom, labelKey: 'layoutTray' },
+];
+
 export function SettingsModal({ onClose }: Props) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const theme = useUi((s) => s.theme);
   const colorBlind = useUi((s) => s.colorBlind);
+  const boardLayout = useUi((s) => s.boardLayout);
   const setLocale = useUi((s) => s.setLocale);
   const setTheme = useUi((s) => s.setTheme);
   const setColorBlind = useUi((s) => s.setColorBlind);
+  const setBoardLayout = useUi((s) => s.setBoardLayout);
   const savePreferences = useSession((s) => s.savePreferences);
 
   useEffect(() => {
@@ -99,6 +115,25 @@ export function SettingsModal({ onClose }: Props) {
                 onClick={() => setLocale(value)}
               >
                 <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="setting">
+          <div className="setting-label">{t('layout')}</div>
+          <div className="segmented" role="radiogroup" aria-label={t('layout')}>
+            {LAYOUT_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={boardLayout === value}
+                className={boardLayout === value ? 'segment active' : 'segment'}
+                onClick={() => setBoardLayout(value)}
+              >
+                <Icon size={16} aria-hidden />
+                <span>{t(labelKey)}</span>
               </button>
             ))}
           </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Phase, type GameSnapshot } from '@trm/proto';
+import { Phase } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
 import { useGame } from '../store/game';
 import { useUi } from '../store/ui';
@@ -32,20 +32,15 @@ type Claim =
   | { kind: 'route'; route: RouteDef; payments: Payment[] }
   | { kind: 'station'; cityId: string; payments: Payment[] };
 
-const otherLabel = (snap: GameSnapshot): string => {
-  const p = snap.players.find((pl) => pl.id === snap.currentPlayerId);
-  return p ? `P${p.seat + 1}` : '';
-};
-
 export function GameScreen() {
   const { t } = useTranslation();
   const ticket = useUi((s) => s.ticket);
   const locale = useUi((s) => s.locale);
   const colorBlind = useUi((s) => s.colorBlind);
+  const boardLayout = useUi((s) => s.boardLayout);
   const goHome = useUi((s) => s.goHome);
 
   const snapshot = useGame((s) => s.snapshot);
-  const status = useGame((s) => s.status);
   const rejection = useGame((s) => s.rejection);
   const setRejection = useGame((s) => s.setRejection);
 
@@ -148,75 +143,80 @@ export function GameScreen() {
       ? enumerateTunnelExtra(hand, tunnelColor, snapshot.pendingTunnel.extraRequired)
       : [];
 
-  const turnLabel =
-    phase === Phase.GAME_OVER
-      ? t('gameOver')
-      : myTurn
-        ? t('yourTurn')
-        : t('turnOf', { name: otherLabel(snapshot) });
+  const boardPanel = (
+    <div className="game-board">
+      <Board
+        snapshot={snapshot}
+        locale={locale}
+        colorBlind={colorBlind}
+        canAct={canAct}
+        onPickRoute={pickRoute}
+        onPickCity={pickCity}
+      />
+    </div>
+  );
+  const trackers = (
+    <div className="hud-block">
+      <PlayerTrackers snapshot={snapshot} />
+    </div>
+  );
+  const market = (
+    <div className="hud-block">
+      <CardMarket
+        snapshot={snapshot}
+        canDraw={canDraw}
+        onDrawFaceUp={(slot) => socket?.drawFaceUp(slot)}
+        onDrawBlind={() => socket?.drawBlind()}
+      />
+      <div className="hud-actions">
+        <button className="accent" disabled={!canAct} onClick={() => socket?.drawTickets()}>
+          {t('drawTickets')}
+        </button>
+        <button disabled={!canAct} onClick={() => socket?.pass()}>
+          {t('pass')}
+        </button>
+      </div>
+    </div>
+  );
+  const handSection = (
+    <section className="tray-section">
+      <div className="tray-head">
+        <h4>{t('cards')}</h4>
+        <span className="tray-count">{myPub?.handCount ?? 0}</span>
+      </div>
+      <PlayerHand hand={snapshot.you?.hand} />
+    </section>
+  );
+  const ticketsSection = (
+    <section className="tray-section tray-missions">
+      <div className="tray-head">
+        <h4>{t('tickets')}</h4>
+        <span className="tray-count">{snapshot.you?.keptTicketIds.length ?? 0}</span>
+      </div>
+      <TicketPanel ticketIds={snapshot.you?.keptTicketIds ?? []} />
+    </section>
+  );
 
   return (
-    <div className="game">
-      <header className="game-header">
-        <span className={`conn conn-${status}`}>
-          {status === 'open'
-            ? t('connected')
-            : status === 'closed'
-              ? t('disconnected')
-              : t('reconnecting')}
-        </span>
-        <strong>{turnLabel}</strong>
-        <button onClick={leave}>{t('leave')}</button>
-      </header>
-
-      <div className="game-stage">
-        <div className="board-wrap">
-          <Board
-            snapshot={snapshot}
-            locale={locale}
-            colorBlind={colorBlind}
-            canAct={canAct}
-            onPickRoute={pickRoute}
-            onPickCity={pickCity}
-          />
-        </div>
-        <aside className="hud">
-          <PlayerTrackers snapshot={snapshot} />
-          <div className="hud-block">
-            <CardMarket
-              snapshot={snapshot}
-              canDraw={canDraw}
-              onDrawFaceUp={(slot) => socket?.drawFaceUp(slot)}
-              onDrawBlind={() => socket?.drawBlind()}
-            />
-            <div className="hud-actions">
-              <button className="accent" disabled={!canAct} onClick={() => socket?.drawTickets()}>
-                {t('drawTickets')}
-              </button>
-              <button disabled={!canAct} onClick={() => socket?.pass()}>
-                {t('pass')}
-              </button>
-            </div>
-          </div>
+    <div className={`game game--${boardLayout}`}>
+      {boardPanel}
+      {boardLayout === 'rail' ? (
+        <aside className="game-rail">
+          {trackers}
+          {market}
+          {handSection}
+          {ticketsSection}
         </aside>
-      </div>
-
-      <div className="card-tray">
-        <section className="tray-section">
-          <div className="tray-head">
-            <h4>{t('cards')}</h4>
-            <span className="tray-count">{myPub?.handCount ?? 0}</span>
-          </div>
-          <PlayerHand hand={snapshot.you?.hand} />
-        </section>
-        <section className="tray-section tray-missions">
-          <div className="tray-head">
-            <h4>{t('tickets')}</h4>
-            <span className="tray-count">{snapshot.you?.keptTicketIds.length ?? 0}</span>
-          </div>
-          <TicketPanel ticketIds={snapshot.you?.keptTicketIds ?? []} />
-        </section>
-      </div>
+      ) : (
+        <>
+          <aside className="game-rail">
+            {trackers}
+            {market}
+            {ticketsSection}
+          </aside>
+          <div className="game-hand-strip">{handSection}</div>
+        </>
+      )}
 
       {claim && (
         <PaymentModal

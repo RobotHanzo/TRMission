@@ -3,13 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { TrainFront, Settings, LogOut, User } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
+import { useGame } from '../store/game';
+import { turnStatus } from '../game/view';
 import { SettingsModal } from './SettingsModal';
 
 export function AppHeader() {
   const { t } = useTranslation();
+  const view = useUi((s) => s.view);
   const goHome = useUi((s) => s.goHome);
   const user = useSession((s) => s.user);
   const logout = useSession((s) => s.logout);
+  const snapshot = useGame((s) => s.snapshot);
+  const status = useGame((s) => s.status);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const onLogout = () => {
@@ -17,12 +22,33 @@ export function AppHeader() {
     goHome();
   };
 
+  // In-game, the header doubles as the game status bar (connection + whose turn) and
+  // carries the "leave" action, so there is a single top bar rather than two stacked rows.
+  const inGame = view === 'game' && !!snapshot;
+  const turn = snapshot ? turnStatus(snapshot) : null;
+
   return (
     <header className="app-header">
       <div className="brand">
         <TrainFront size={22} aria-hidden />
         <strong>{t('appName')}</strong>
       </div>
+
+      {inGame && turn && (
+        <div className="header-status">
+          <span className={`conn conn-${status}`}>
+            {status === 'open'
+              ? t('connected')
+              : status === 'closed'
+                ? t('disconnected')
+                : t('reconnecting')}
+          </span>
+          <strong className="turn-label">
+            {turn.params ? t(turn.key, turn.params) : t(turn.key)}
+          </strong>
+        </div>
+      )}
+
       <div className="header-actions">
         {user && (
           <span className="user-chip" title={user.isGuest ? t('guest') : (user.email ?? '')}>
@@ -41,6 +67,7 @@ export function AppHeader() {
             <LogOut size={16} aria-hidden />
           </button>
         )}
+        {inGame && <button onClick={goHome}>{t('leave')}</button>}
       </div>
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </header>
