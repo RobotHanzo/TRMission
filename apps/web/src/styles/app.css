@@ -30,6 +30,11 @@
   margin: 0 auto;
   padding: var(--tr-space-8) var(--tr-space-4);
 }
+/* The in-game view breaks out of the reading-width column to use the full screen. */
+.app-main--game {
+  max-width: min(1680px, 100%);
+  padding: var(--tr-space-4) var(--tr-space-6);
+}
 
 .stack {
   display: flex;
@@ -158,4 +163,123 @@
 }
 .conn-closed {
   color: var(--tr-danger);
+}
+
+/* ── Modal base (global so modals work on any screen, not just in-game) ──────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 25, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tr-space-4);
+  z-index: 50;
+}
+.modal {
+  background: var(--tr-surface);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  padding: var(--tr-space-6);
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+  max-height: 90vh;
+  overflow: auto;
+}
+
+/* ── Settings modal ─────────────────────────────────────────────────────────── */
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tr-space-3);
+}
+.modal-head h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  margin: 0;
+}
+.setting {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-2);
+}
+.setting-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.setting-label {
+  font-weight: 600;
+}
+.setting-desc {
+  font-size: 0.85em;
+}
+
+/* Segmented control (theme picker) */
+.segmented {
+  display: flex;
+  gap: var(--tr-space-1);
+  background: var(--tr-surface-2);
+  border-radius: var(--tr-radius-sm);
+  padding: 3px;
+}
+.segment {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--tr-ink-soft);
+  padding: var(--tr-space-2);
+}
+.segment:hover:not(:disabled) {
+  filter: none;
+  color: var(--tr-ink);
+}
+.segment.active {
+  background: var(--tr-surface);
+  border-color: var(--tr-line);
+  color: var(--tr-ink);
+  box-shadow: var(--tr-shadow);
+}
+
+/* Toggle switch (colour-blind) */
+.switch {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--tr-line);
+  background: var(--tr-surface-2);
+  transition: background 0.15s ease;
+}
+.switch.on {
+  background: var(--tr-blue);
+  border-color: var(--tr-blue);
+}
+.switch:hover:not(:disabled) {
+  filter: none;
+}
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+.switch.on .switch-knob {
+  transform: translateX(18px);
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { randomInt } from 'node:crypto';
 import type { Request, Response } from 'express';
@@ -10,10 +10,12 @@ import {
   RegisterDto,
   UpgradeDto,
   LoginDto,
+  UpdatePreferencesDto,
   GuestSchema,
   RegisterSchema,
   UpgradeSchema,
   LoginSchema,
+  PreferencesSchema,
   AuthResultSchema,
   AccessResultSchema,
   PublicUserSchema,
@@ -125,5 +127,15 @@ export class AuthController {
   @ApiResponse({ status: 200, schema: apiSchema(PublicUserSchema) })
   async me(@CurrentUser() user: AuthUser) {
     return this.auth.me(user.userId);
+  }
+
+  @Patch('me/preferences')
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Update display preferences (theme, colour-blind)' })
+  @ApiBody({ schema: apiSchema(PreferencesSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(PublicUserSchema) })
+  async updatePreferences(@CurrentUser() user: AuthUser, @Body() body: UpdatePreferencesDto) {
+    return this.auth.updatePreferences(user.userId, body);
   }
 }

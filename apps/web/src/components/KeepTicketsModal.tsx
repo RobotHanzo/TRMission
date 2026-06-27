@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ticketLabel } from '../game/content';
-import { useUi } from '../store/ui';
+import { TicketCard } from './TicketCard';
 
 interface Props {
   offered: string[];
@@ -11,7 +10,6 @@ interface Props {
 
 export function KeepTicketsModal({ offered, minKeep, onConfirm }: Props) {
   const { t } = useTranslation();
-  const locale = useUi((s) => s.locale);
   const [kept, setKept] = useState<Set<string>>(() => new Set(offered)); // default: keep all
 
   const toggle = (id: string) =>
@@ -24,33 +22,20 @@ export function KeepTicketsModal({ offered, minKeep, onConfirm }: Props) {
 
   return (
     <div className="modal-backdrop">
-      <div className="modal" role="dialog" aria-modal="true">
+      <div className="modal modal-tickets" role="dialog" aria-modal="true">
         <h3>{t('chooseTickets')}</h3>
         <p className="muted">{t('keepAtLeast', { n: minKeep })}</p>
-        <ul className="ticket-choices">
-          {offered.map((id) => {
-            const l = ticketLabel(id, locale);
-            if (!l) return null;
-            return (
-              <li key={id}>
-                <label className={kept.has(id) ? 'chosen' : ''}>
-                  <input type="checkbox" checked={kept.has(id)} onChange={() => toggle(id)} />
-                  <span>
-                    {l.a} – {l.b}
-                  </span>
-                  <b>{l.value}</b>
-                  {l.long && <em> ★</em>}
-                </label>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="ticket-cards">
+          {offered.map((id) => (
+            <TicketCard key={id} ticketId={id} selected={kept.has(id)} onToggle={toggle} />
+          ))}
+        </div>
         <button
           className="primary"
           disabled={kept.size < minKeep}
           onClick={() => onConfirm([...kept])}
         >
-          {t('keep')}
+          {t('keep')} ({kept.size})
         </button>
       </div>
     </div>

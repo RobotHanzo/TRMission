@@ -1,0 +1,65 @@
+import { useTranslation } from 'react-i18next';
+import { ticketById, ticketLabel } from '../game/content';
+import { useUi } from '../store/ui';
+import { RoutePreview } from './RoutePreview';
+
+interface Props {
+  ticketId: string;
+  /** When provided the card becomes a toggle (used while choosing tickets). */
+  selected?: boolean;
+  onToggle?: (id: string) => void;
+}
+
+/**
+ * A mission (destination ticket) card: a mini-map preview of the two endpoint
+ * cities over the Taiwan board, a perforated ticket stub with the city pair, and
+ * the point value. Long routes wear an EMU-blue livery, short routes a warm one.
+ */
+export function TicketCard({ ticketId, selected, onToggle }: Props) {
+  const { t } = useTranslation();
+  const locale = useUi((s) => s.locale);
+  const def = ticketById.get(ticketId);
+  const label = ticketLabel(ticketId, locale);
+  if (!def || !label) return null;
+
+  const tone = label.long ? 'long' : 'short';
+  const selectable = onToggle !== undefined;
+  const aria = `${label.a} – ${label.b}, ${label.value} ${t('points')}`;
+
+  const body = (
+    <>
+      <div className="ticket-map">
+        <RoutePreview aId={def.a as string} bId={def.b as string} tone={tone} />
+        {label.long && <span className="ticket-flag">{t('longRoute')}</span>}
+        {selectable && <span className="ticket-check" aria-hidden />}
+      </div>
+      <div className="ticket-foot">
+        <span className="ticket-route">
+          <b>{label.a}</b>
+          <span className="ticket-dash" aria-hidden />
+          <b>{label.b}</b>
+        </span>
+        <span className="ticket-value">{label.value}</span>
+      </div>
+    </>
+  );
+
+  if (selectable) {
+    return (
+      <button
+        type="button"
+        className={`ticket-card tone-${tone}${selected ? ' is-selected' : ''}`}
+        aria-pressed={selected}
+        aria-label={aria}
+        onClick={() => onToggle(ticketId)}
+      >
+        {body}
+      </button>
+    );
+  }
+  return (
+    <div className={`ticket-card tone-${tone}`} role="img" aria-label={aria}>
+      {body}
+    </div>
+  );
+}

@@ -3,13 +3,15 @@ import { randomUUID } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
 import { MONGO_DB } from '../db/tokens';
 import { env } from '../config/env';
-import type { Locale, PublicUser } from './auth.types';
+import type { Locale, PublicUser, UserPreferences } from './auth.types';
+import { DEFAULT_PREFERENCES } from './auth.types';
 
 export interface UserDoc {
   _id: string;
   displayName: string;
   isGuest: boolean;
   locale: Locale;
+  preferences?: UserPreferences; // optional for back-compat with pre-preferences docs
   email?: string;
   passwordHash?: string;
   tokenVersion: number;
@@ -22,6 +24,7 @@ export const toPublicUser = (u: UserDoc): PublicUser => ({
   displayName: u.displayName,
   isGuest: u.isGuest,
   locale: u.locale,
+  preferences: u.preferences ?? DEFAULT_PREFERENCES,
   ...(u.email ? { email: u.email } : {}),
 });
 
@@ -52,6 +55,7 @@ export class UserRepo implements OnModuleInit {
       displayName,
       isGuest: true,
       locale,
+      preferences: DEFAULT_PREFERENCES,
       tokenVersion: 0,
       createdAt: new Date(),
       guestExpiresAt: new Date(Date.now() + env.guestTtlMs),
@@ -71,6 +75,7 @@ export class UserRepo implements OnModuleInit {
       displayName,
       isGuest: false,
       locale,
+      preferences: DEFAULT_PREFERENCES,
       email: email.toLowerCase(),
       passwordHash,
       tokenVersion: 0,
@@ -78,6 +83,14 @@ export class UserRepo implements OnModuleInit {
     };
     await this.col.insertOne(doc);
     return doc;
+  }
+
+  updatePreferences(userId: string, preferences: UserPreferences): Promise<UserDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: userId },
+      { $set: { preferences } },
+      { returnDocument: 'after' },
+    );
   }
 
   /** Upgrade a guest in place (keeps the same _id and game history). */

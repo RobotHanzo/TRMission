@@ -1,17 +1,16 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrainFront, Eye, LogOut, User } from 'lucide-react';
+import { TrainFront, Settings, LogOut, User } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
+import { SettingsModal } from './SettingsModal';
 
 export function AppHeader() {
   const { t } = useTranslation();
-  const locale = useUi((s) => s.locale);
-  const setLocale = useUi((s) => s.setLocale);
   const goHome = useUi((s) => s.goHome);
-  const colorBlind = useUi((s) => s.colorBlind);
-  const toggleColorBlind = useUi((s) => s.toggleColorBlind);
   const user = useSession((s) => s.user);
   const logout = useSession((s) => s.logout);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const onLogout = () => {
     void logout();
@@ -31,13 +30,11 @@ export function AppHeader() {
           </span>
         )}
         <button
-          onClick={() => setLocale(locale === 'zh-Hant' ? 'en' : 'zh-Hant')}
-          aria-label={t('language')}
+          onClick={() => setSettingsOpen(true)}
+          aria-label={t('settings')}
+          title={t('settings')}
         >
-          {locale === 'zh-Hant' ? 'EN' : '中'}
-        </button>
-        <button onClick={toggleColorBlind} aria-pressed={colorBlind} title={t('colorBlind')}>
-          <Eye size={16} aria-hidden />
+          <Settings size={16} aria-hidden />
         </button>
         {user && (
           <button onClick={onLogout} aria-label={t('logout')} title={t('logout')}>
@@ -45,6 +42,7 @@ export function AppHeader() {
           </button>
         )}
       </div>
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </header>
   );
 }

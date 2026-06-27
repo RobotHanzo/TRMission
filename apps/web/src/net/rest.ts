@@ -1,11 +1,17 @@
 // Typed REST client for the control plane. The access token lives in memory; the
 // refresh token is an httpOnly cookie sent automatically (credentials: 'include').
 // A 401 triggers one silent refresh + retry.
+export type Theme = 'system' | 'light' | 'dark';
+export interface UserPreferences {
+  theme: Theme;
+  colorBlind: boolean;
+}
 export interface PublicUser {
   id: string;
   displayName: string;
   isGuest: boolean;
   locale: 'zh-Hant' | 'en';
+  preferences: UserPreferences;
   email?: string;
 }
 export interface AuthResult {
@@ -111,6 +117,8 @@ export const api = {
   upgrade: (email: string, password: string) =>
     req<AuthResult>('POST', '/auth/upgrade', { email, password }).then(captureToken),
   me: () => req<PublicUser>('GET', '/auth/me'),
+  updatePreferences: (prefs: UserPreferences) =>
+    req<PublicUser>('PATCH', '/auth/me/preferences', prefs),
   logout: () => req<void>('POST', '/auth/logout').then(() => setAccessToken(null)),
 
   createRoom: (maxPlayers?: number) => req<RoomView>('POST', '/rooms', { maxPlayers }),

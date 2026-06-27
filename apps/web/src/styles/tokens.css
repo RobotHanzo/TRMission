@@ -13,6 +13,13 @@
   --tr-danger: #c0392b;
   --tr-ok: #3a9d5c;
 
+  /* Cartography (board map) */
+  --tr-sea: #d6e4ec; /* sea */
+  --tr-sea-line: rgba(31, 90, 130, 0.12); /* graticule */
+  --tr-land: #efe6cf; /* island land */
+  --tr-coast: #b9a47b; /* coastline ink */
+  --tr-relief: #d9c9a1; /* central mountain range */
+
   --tr-radius-sm: 6px;
   --tr-radius: 10px;
   --tr-radius-lg: 16px;
@@ -29,13 +36,39 @@
   --tr-font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
 }
 
+/* Dark theme. The app resolves the user's choice (system → OS preference) and stamps
+   data-theme="light"|"dark" on <html>; the inline bootstrap in index.html does this
+   before first paint to avoid a flash. */
+:root[data-theme='dark'] {
+  --tr-paper: #1a1c1f;
+  --tr-surface: #232629;
+  --tr-surface-2: #2c2f33;
+  --tr-ink: #ececec;
+  --tr-ink-soft: #a8adb3;
+  --tr-line: #3a3e43;
+
+  --tr-sea: #15222b;
+  --tr-sea-line: rgba(150, 190, 215, 0.1);
+  --tr-land: #2a2e25;
+  --tr-coast: #515a44;
+  --tr-relief: #39402e;
+}
+
+/* Fallback for the brief window before JS runs / if JS is disabled: honour the OS
+   preference unless the user has explicitly chosen a theme. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']):not([data-theme='dark']) {
     --tr-paper: #1a1c1f;
     --tr-surface: #232629;
     --tr-surface-2: #2c2f33;
     --tr-ink: #ececec;
     --tr-ink-soft: #a8adb3;
     --tr-line: #3a3e43;
+
+    --tr-sea: #15222b;
+    --tr-sea-line: rgba(150, 190, 215, 0.1);
+    --tr-land: #2a2e25;
+    --tr-coast: #515a44;
+    --tr-relief: #39402e;
   }
 }

@@ -1,4 +1,13 @@
 export type Locale = 'zh-Hant' | 'en';
+export type Theme = 'system' | 'light' | 'dark';
+
+/** Per-account display preferences (synced for registered users; guests use localStorage). */
+export interface UserPreferences {
+  theme: Theme;
+  colorBlind: boolean;
+}
+
+export const DEFAULT_PREFERENCES: UserPreferences = { theme: 'system', colorBlind: false };
 
 /** Shape attached to the request by AccessTokenGuard. */
 export interface AuthUser {
@@ -28,6 +37,7 @@ export interface PublicUser {
   displayName: string;
   isGuest: boolean;
   locale: Locale;
+  preferences: UserPreferences;
   email?: string;
 }
 

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { api, setOnTokenChange, type PublicUser } from '../net/rest';
+import { api, setOnTokenChange, type PublicUser, type UserPreferences } from '../net/rest';
+import { useUi } from './ui';
 
 interface SessionState {
   user: PublicUser | null;
@@ -15,10 +16,19 @@ interface SessionState {
   register(email: string, password: string, displayName: string): Promise<void>;
   upgrade(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
+  /** Persist display prefs to the account for registered users (guests stay localStorage-only). */
+  savePreferences(prefs: UserPreferences): Promise<void>;
   clearError(): void;
 }
 
-export const useSession = create<SessionState>()((set) => {
+// Registered accounts are the source of truth for their own display prefs; on sign-in we
+// adopt them into the ui store. Guests have no server-side prefs, so we leave the ui store
+// on whatever it already loaded from localStorage.
+const hydratePrefs = (user: PublicUser | null): void => {
+  if (user && !user.isGuest) useUi.getState().applyPreferences(user.preferences);
+};
+
+export const useSession = create<SessionState>()((set, get) => {
   setOnTokenChange((t) => set({ accessToken: t }));
 
   const run = async (action: () => Promise<{ user: PublicUser }>): Promise<void> => {
@@ -26,6 +36,7 @@ export const useSession = create<SessionState>()((set) => {
     try {
       const r = await action();
       set({ user: r.user, loading: false });
+      hydratePrefs(r.user);
     } catch (e) {
       set({ loading: false, error: (e as Error).message });
     }
@@ -43,6 +54,7 @@ export const useSession = create<SessionState>()((set) => {
       try {
         const user = await api.me();
         set({ user, booting: false });
+        hydratePrefs(user);
       } catch {
         set({ user: null, booting: false });
       }
@@ -55,6 +67,15 @@ export const useSession = create<SessionState>()((set) => {
     async logout() {
       await api.logout().catch(() => undefined);
       set({ user: null, accessToken: null });
+    },
+    async savePreferences(prefs) {
+      const u = get().user;
+      if (!u || u.isGuest) return; // guests + anonymous persist via localStorage only
+      try {
+        set({ user: await api.updatePreferences(prefs) });
+      } catch {
+        /* non-fatal: the ui store + localStorage already hold the new value */
+      }
     },
     clearError: () => set({ error: null }),
   };

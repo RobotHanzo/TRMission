@@ -3,7 +3,7 @@ import { hash, verify } from '@node-rs/argon2';
 import { UserRepo, toPublicUser, type UserDoc } from './user.repo';
 import { SessionRepo } from './session.repo';
 import { TokenService } from './token.service';
-import type { IssuedAuth, Locale, PublicUser } from './auth.types';
+import type { IssuedAuth, Locale, PublicUser, UserPreferences } from './auth.types';
 
 @Injectable()
 export class AuthService {
@@ -73,6 +73,12 @@ export class AuthService {
 
   async me(userId: string): Promise<PublicUser> {
     const user = await this.users.findById(userId);
+    if (!user) throw new UnauthorizedException('user not found');
+    return toPublicUser(user);
+  }
+
+  async updatePreferences(userId: string, preferences: UserPreferences): Promise<PublicUser> {
+    const user = await this.users.updatePreferences(userId, preferences);
     if (!user) throw new UnauthorizedException('user not found');
     return toPublicUser(user);
   }

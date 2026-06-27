@@ -145,7 +145,7 @@ export function GameScreen() {
         <button onClick={leave}>{t('leave')}</button>
       </header>
 
-      <div className="game-body">
+      <div className="game-stage">
         <div className="board-wrap">
           <Board
             snapshot={snapshot}
@@ -158,26 +158,40 @@ export function GameScreen() {
         </div>
         <aside className="hud">
           <PlayerTrackers snapshot={snapshot} />
-          <CardMarket
-            snapshot={snapshot}
-            canDraw={canDraw}
-            onDrawFaceUp={(slot) => socket?.drawFaceUp(slot)}
-            onDrawBlind={() => socket?.drawBlind()}
-          />
-          <div className="row">
-            <button disabled={!canAct} onClick={() => socket?.drawTickets()}>
-              {t('drawTickets')}
-            </button>
-            <button disabled={!canAct} onClick={() => socket?.pass()}>
-              {t('pass')}
-            </button>
-          </div>
-          <TicketPanel ticketIds={snapshot.you?.keptTicketIds ?? []} />
-          <div>
-            <h4>{t('cards')}</h4>
-            <PlayerHand hand={snapshot.you?.hand} />
+          <div className="hud-block">
+            <CardMarket
+              snapshot={snapshot}
+              canDraw={canDraw}
+              onDrawFaceUp={(slot) => socket?.drawFaceUp(slot)}
+              onDrawBlind={() => socket?.drawBlind()}
+            />
+            <div className="hud-actions">
+              <button className="accent" disabled={!canAct} onClick={() => socket?.drawTickets()}>
+                {t('drawTickets')}
+              </button>
+              <button disabled={!canAct} onClick={() => socket?.pass()}>
+                {t('pass')}
+              </button>
+            </div>
           </div>
         </aside>
+      </div>
+
+      <div className="card-tray">
+        <section className="tray-section">
+          <div className="tray-head">
+            <h4>{t('cards')}</h4>
+            <span className="tray-count">{myPub?.handCount ?? 0}</span>
+          </div>
+          <PlayerHand hand={snapshot.you?.hand} />
+        </section>
+        <section className="tray-section tray-missions">
+          <div className="tray-head">
+            <h4>{t('tickets')}</h4>
+            <span className="tray-count">{snapshot.you?.keptTicketIds.length ?? 0}</span>
+          </div>
+          <TicketPanel ticketIds={snapshot.you?.keptTicketIds ?? []} />
+        </section>
       </div>
 
       {claim && (
