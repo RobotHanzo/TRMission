@@ -1,0 +1,73 @@
+@import './tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--tr-paper);
+  color: var(--tr-ink);
+  font-family: var(--tr-font-cjk);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--tr-line);
+  background: var(--tr-surface);
+  color: var(--tr-ink);
+  border-radius: var(--tr-radius-sm);
+  padding: var(--tr-space-2) var(--tr-space-3);
+  transition: filter 0.12s ease;
+}
+button:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.primary {
+  background: var(--tr-blue);
+  border-color: var(--tr-blue);
+  color: #fff;
+}
+button.accent {
+  background: var(--tr-ember);
+  border-color: var(--tr-ember);
+  color: #fff;
+}
+
+input {
+  font: inherit;
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  background: var(--tr-surface);
+  color: var(--tr-ink);
+}
+
+.card {
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  padding: var(--tr-space-6);
+}
+
+.muted {
+  color: var(--tr-ink-soft);
+}
+
+:focus-visible {
+  outline: 3px solid var(--tr-ember);
+  outline-offset: 2px;
+}

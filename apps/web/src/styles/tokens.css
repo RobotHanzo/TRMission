@@ -1,0 +1,41 @@
+/* TRMission design tokens — "railway timetable on warm paper". */
+:root {
+  --tr-blue: #0f5fa6; /* EMU blue (primary) */
+  --tr-ember: #ee6b1f; /* express ember (accent) */
+
+  --tr-paper: #f6f1e7; /* warm paper background */
+  --tr-surface: #fffdf8;
+  --tr-surface-2: #efe8da;
+  --tr-ink: #1f2328;
+  --tr-ink-soft: #5b6168;
+  --tr-line: #d9d0be;
+
+  --tr-danger: #c0392b;
+  --tr-ok: #3a9d5c;
+
+  --tr-radius-sm: 6px;
+  --tr-radius: 10px;
+  --tr-radius-lg: 16px;
+
+  --tr-space-1: 4px;
+  --tr-space-2: 8px;
+  --tr-space-3: 12px;
+  --tr-space-4: 16px;
+  --tr-space-6: 24px;
+  --tr-space-8: 32px;
+
+  --tr-shadow: 0 1px 2px rgba(31, 35, 40, 0.08), 0 4px 16px rgba(31, 35, 40, 0.08);
+  --tr-font-cjk: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --tr-font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tr-paper: #1a1c1f;
+    --tr-surface: #232629;
+    --tr-surface-2: #2c2f33;
+    --tr-ink: #ececec;
+    --tr-ink-soft: #a8adb3;
+    --tr-line: #3a3e43;
+  }
+}

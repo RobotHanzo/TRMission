@@ -1,0 +1,110 @@
+.app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--tr-space-3) var(--tr-space-6);
+  border-bottom: 1px solid var(--tr-line);
+  background: var(--tr-surface);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  color: var(--tr-blue);
+}
+.header-actions {
+  display: flex;
+  gap: var(--tr-space-2);
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--tr-space-8) var(--tr-space-4);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-4);
+}
+.row {
+  display: flex;
+  gap: var(--tr-space-2);
+  align-items: center;
+}
+.row.between {
+  justify-content: space-between;
+}
+
+.error {
+  color: var(--tr-danger);
+}
+.room-code {
+  font-family: var(--tr-font-mono);
+  font-size: 1.2em;
+  letter-spacing: 2px;
+  background: var(--tr-surface-2);
+  padding: 2px 8px;
+  border-radius: var(--tr-radius-sm);
+}
+
+.member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-2);
+}
+.member-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  padding: var(--tr-space-2) var(--tr-space-3);
+}
+.seat-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex: none;
+}
+.badge {
+  margin-left: auto;
+  font-size: 0.8em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tr-surface-2);
+  color: var(--tr-ink-soft);
+}
+.badge.ok {
+  background: color-mix(in srgb, var(--tr-ok) 20%, transparent);
+  color: var(--tr-ok);
+}
+
+.conn {
+  font-size: 0.85em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tr-surface-2);
+}
+.conn-open {
+  color: var(--tr-ok);
+}
+.conn-reconnecting {
+  color: var(--tr-ember);
+}
+.conn-closed {
+  color: var(--tr-danger);
+}
