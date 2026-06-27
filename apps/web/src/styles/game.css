@@ -262,12 +262,12 @@
 .glyph-badge circle {
   fill: var(--tr-surface);
   stroke: var(--tr-ink-soft);
-  stroke-width: calc(0.18px * var(--inv-scale));
-  r: calc(1.15px * var(--inv-scale));
+  stroke-width: calc(0.22px * var(--inv-scale));
+  r: calc(1.6px * var(--inv-scale));
 }
 .glyph-badge text {
   fill: var(--tr-ink);
-  font-size: calc(1.7px * var(--inv-scale));
+  font-size: calc(2.3px * var(--inv-scale));
   text-anchor: middle;
   dominant-baseline: central;
   font-weight: 700;
