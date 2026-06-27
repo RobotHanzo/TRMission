@@ -1,0 +1,98 @@
+import type { TrainColor } from '@trm/shared';
+import type { Result, RuleViolation } from '@trm/shared';
+import { ok, err, violation } from '@trm/shared';
+import type { RouteDef } from '@trm/map-data';
+import type { Payment } from './types/actions';
+import type { PlayerState } from './types/state';
+import type { CardCounts } from './hand';
+import { emptyHand } from './hand';
+
+export interface PaymentPlan {
+  /** The single non-loco colour used, or null for an all-locomotive payment. */
+  readonly playedColor: TrainColor | null;
+  /** The exact multiset of cards to remove from hand. */
+  readonly spent: CardCounts;
+}
+
+function spentFrom(color: TrainColor | null, colorCount: number, locomotives: number): CardCounts {
+  const spent = emptyHand();
+  if (color && colorCount > 0) spent[color] += colorCount;
+  spent.LOCOMOTIVE += locomotives;
+  return spent;
+}
+
+function handHas(player: PlayerState, spent: CardCounts): boolean {
+  for (const k of Object.keys(spent) as (keyof CardCounts)[]) {
+    if (player.hand[k] < spent[k]) return false;
+  }
+  return true;
+}
+
+/** Validate a payment to claim `route` of the given required length. */
+export function validateRoutePayment(
+  route: RouteDef,
+  payment: Payment,
+  player: PlayerState,
+): Result<PaymentPlan, RuleViolation> {
+  const { color, colorCount, locomotives } = payment;
+  if (colorCount < 0 || locomotives < 0) {
+    return err(violation('BAD_PAYMENT_LENGTH', 'negative card counts'));
+  }
+  if (colorCount + locomotives !== route.length) {
+    return err(
+      violation('BAD_PAYMENT_LENGTH', `payment ${colorCount}+${locomotives} != length ${route.length}`, {
+        length: route.length,
+      }),
+    );
+  }
+  if (colorCount > 0 && color === null) {
+    return err(violation('BAD_PAYMENT_COLOR', 'colored cards require a colour'));
+  }
+  // Colour matching: a specific-colour route demands that colour; gray accepts any single colour.
+  if (route.color !== 'GRAY' && colorCount > 0 && color !== route.color) {
+    return err(
+      violation('BAD_PAYMENT_COLOR', `route needs ${route.color}, got ${color}`, { needed: route.color }),
+    );
+  }
+  // Ferry: enough locomotives for the symbols.
+  if (route.ferryLocos > 0 && locomotives < route.ferryLocos) {
+    return err(
+      violation('FERRY_LOCOS_SHORT', `ferry needs ${route.ferryLocos} locomotives`, {
+        needed: route.ferryLocos,
+      }),
+    );
+  }
+  if (player.trainCars < route.length) {
+    return err(violation('NOT_ENOUGH_TRAINS', `needs ${route.length} trains`, { needed: route.length }));
+  }
+  const playedColor = colorCount > 0 ? color : null;
+  const spent = spentFrom(playedColor, colorCount, locomotives);
+  if (!handHas(player, spent)) {
+    return err(violation('INSUFFICIENT_CARDS', 'not enough cards in hand'));
+  }
+  return ok({ playedColor, spent });
+}
+
+/** Validate a payment to build a station costing `cost` cards of one colour (locos wild). */
+export function validateStationPayment(
+  cost: number,
+  payment: Payment,
+  player: PlayerState,
+): Result<PaymentPlan, RuleViolation> {
+  const { color, colorCount, locomotives } = payment;
+  if (colorCount < 0 || locomotives < 0) {
+    return err(violation('BAD_PAYMENT_LENGTH', 'negative card counts'));
+  }
+  if (colorCount + locomotives !== cost) {
+    return err(violation('BAD_PAYMENT_LENGTH', `station cost is ${cost}`, { cost }));
+  }
+  if (colorCount > 0 && color === null) {
+    return err(violation('BAD_PAYMENT_COLOR', 'colored cards require a colour'));
+  }
+  const playedColor = colorCount > 0 ? color : null;
+  const spent = spentFrom(playedColor, colorCount, locomotives);
+  if (!handHas(player, spent)) {
+    return err(violation('INSUFFICIENT_CARDS', 'not enough cards in hand'));
+  }
+  return ok({ playedColor, spent });
+}
