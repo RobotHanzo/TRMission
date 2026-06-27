@@ -1,21 +1,44 @@
+/* The game view fills the window below the merged header. Two arrangements share the same
+   children (board + a right rail of panels) and only swap the grid template:
+     rail — board fills full height; trackers/deck/hand/tickets stack in a scrolling rail.
+     tray — board + right rail on top; the player's hand is a full-width strip at the bottom.
+   Either way the (very vertical) map gets the whole height instead of a fixed slice. */
 .game {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: var(--tr-space-3);
+  --tr-rail-w: 340px;
+}
+.game--rail {
+  grid-template-columns: minmax(0, 1fr) var(--tr-rail-w);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: 'board rail';
+}
+.game--tray {
+  grid-template-columns: minmax(0, 1fr) var(--tr-rail-w);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'board rail'
+    'hand  hand';
+}
+.game-board {
+  grid-area: board;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+.game-rail {
+  grid-area: rail;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--tr-space-3);
 }
-.game-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--tr-space-3);
-}
-.game-stage {
-  display: flex;
-  gap: var(--tr-space-4);
-  align-items: stretch;
-}
-.board-wrap {
-  flex: 1 1 62%;
+.game-hand-strip {
+  grid-area: hand;
   min-width: 0;
 }
 /* ── Map viewport (pan/zoom via react-zoom-pan-pinch) ───────────────────────── */
@@ -27,8 +50,11 @@
      initial scale of 1.9. */
   --inv-scale: 0.53;
   --marker-scale: 0.72;
-  width: 100%;
-  height: clamp(360px, 58vh, 660px);
+  /* Fill the board cell (which the grid stretches to the full game height); the min keeps
+     the map usable when the view collapses to a single column on narrow screens. */
+  flex: 1;
+  min-width: 0;
+  min-height: 360px;
   overflow: hidden;
   background: var(--tr-sea);
   border: 1px solid var(--tr-line);
@@ -148,12 +174,20 @@
 .bed {
   fill: none;
   stroke: var(--tr-surface);
-  stroke-width: calc(2.45px * var(--inv-scale));
+  stroke-width: calc(2.8px * var(--inv-scale));
   stroke-linecap: round;
   opacity: 0.95;
 }
+[data-theme='dark'] .bed {
+  stroke: #ddd8cc;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) .bed {
+    stroke: #ddd8cc;
+  }
+}
 .route.owned .bed {
-  stroke-width: calc(2.7px * var(--inv-scale));
+  stroke-width: calc(3.1px * var(--inv-scale));
 }
 /* x/width (along the path) come from the geometry as attributes; y/height (the across-track
    thickness) live here so the car counter-scales to a constant on-screen size, like a city dot. */
@@ -260,6 +294,18 @@
 .city-hub.buildable:hover {
   fill: color-mix(in srgb, var(--tr-ember) 35%, var(--tr-surface));
 }
+[data-theme='dark'] .city-dot,
+[data-theme='dark'] .city-hub {
+  fill: #fffdf8;
+  stroke: #1f2328;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) .city-dot,
+  :root:not([data-theme='light']):not([data-theme='dark']) .city-hub {
+    fill: #fffdf8;
+    stroke: #1f2328;
+  }
+}
 .station {
   fill: var(--tr-ember);
   stroke: var(--tr-surface);
@@ -309,12 +355,6 @@
   display: none;
 }
 
-.hud {
-  flex: 0 0 300px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--tr-space-3);
-}
 .hud-block {
   display: flex;
   flex-direction: column;
@@ -330,15 +370,6 @@
 }
 .hud-actions button {
   flex: 1;
-}
-@media (max-width: 920px) {
-  .game-stage {
-    flex-direction: column;
-  }
-  .hud {
-    flex-basis: auto;
-    width: 100%;
-  }
 }
 
 .trackers {
@@ -425,12 +456,7 @@
   justify-content: center;
   padding: 0 3px;
 }
-/* ── Bottom card tray ───────────────────────────────────────────────────────── */
-.card-tray {
-  display: flex;
-  gap: var(--tr-space-4);
-  align-items: flex-start;
-}
+/* ── Card / ticket panels (shared by the rail and the bottom hand strip) ─────── */
 .tray-section {
   background: var(--tr-surface);
   border: 1px solid var(--tr-line);
@@ -438,12 +464,6 @@
   box-shadow: var(--tr-shadow);
   padding: var(--tr-space-3) var(--tr-space-4) var(--tr-space-4);
   min-width: 0;
-}
-.tray-section:first-child {
-  flex: 1 1 auto;
-}
-.tray-missions {
-  flex: 0 1 auto;
 }
 .tray-head {
   display: flex;
@@ -822,9 +842,24 @@ button.ticket-card:hover {
   max-width: 560px;
 }
 
+/* Narrow screens can't afford a side rail: collapse either layout to a single column with a
+   tall-ish map on top and everything stacked below, letting the page scroll normally. */
 @media (max-width: 920px) {
-  .card-tray {
+  .app-main--game {
+    overflow: visible;
+    display: block;
+  }
+  .game--rail,
+  .game--tray {
+    display: flex;
     flex-direction: column;
+    height: auto;
+  }
+  .game-board {
+    min-height: 60vh;
+  }
+  .game-rail {
+    overflow: visible;
   }
 }
 @media (prefers-reduced-motion: reduce) {
