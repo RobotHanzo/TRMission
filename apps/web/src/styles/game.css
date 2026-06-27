@@ -415,7 +415,18 @@
     transform 0.12s ease,
     box-shadow 0.12s ease;
 }
+/* One card behind = a hand of 2. */
 .train-card.is-stacked {
+  box-shadow:
+    3px 4px 0 -1px var(--tr-surface),
+    3px 4px 0 0 var(--tr-coast),
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.35),
+    var(--tr-shadow);
+  margin-right: 4px;
+  margin-bottom: 5px;
+}
+/* Two cards behind = a hand of 3 or more. */
+.train-card.is-stacked.is-stacked-deep {
   box-shadow:
     3px 4px 0 -1px var(--tr-surface),
     3px 4px 0 0 var(--tr-coast),
@@ -424,7 +435,7 @@
     inset 0 0 0 1.5px rgba(255, 255, 255, 0.35),
     var(--tr-shadow);
   margin-right: 6px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 .hand .train-card:hover {
   transform: translateY(-4px);

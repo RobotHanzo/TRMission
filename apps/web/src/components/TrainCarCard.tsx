@@ -27,10 +27,14 @@ const WILD_WASH = `linear-gradient(150deg, ${TRAIN_COLORS.slice(0, 6)
 export function TrainCarCard({ color, count, showGlyph = true }: Props) {
   const tok = CARD_COLOR_TOKENS[color];
   const isLoco = color === 'LOCOMOTIVE';
-  const stacked = (count ?? 0) > 1;
+  // The stacked-deck shadow should read as the real count: 2 → one card behind,
+  // 3+ → two cards behind (visually capped at a 3-deep stack).
+  const n = count ?? 0;
+  const stacked = n > 1;
+  const deep = n > 2;
   return (
     <div
-      className={`train-card${stacked ? ' is-stacked' : ''}${isLoco ? ' is-loco' : ''}`}
+      className={`train-card${stacked ? ' is-stacked' : ''}${deep ? ' is-stacked-deep' : ''}${isLoco ? ' is-loco' : ''}`}
       style={{
         // Livery wash over the theme surface — works in light and dark.
         background: isLoco
