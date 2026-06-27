@@ -36,6 +36,22 @@
   display: flex;
   flex-direction: column;
   gap: var(--tr-space-3);
+  /* Custom scrollbar — thin, themed, avoids the system default. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--tr-line) transparent;
+}
+.game-rail::-webkit-scrollbar {
+  width: 6px;
+}
+.game-rail::-webkit-scrollbar-track {
+  background: transparent;
+}
+.game-rail::-webkit-scrollbar-thumb {
+  background: var(--tr-line);
+  border-radius: 999px;
+}
+.game-rail::-webkit-scrollbar-thumb:hover {
+  background: var(--tr-ink-soft);
 }
 .game-hand-strip {
   grid-area: hand;
@@ -339,9 +355,7 @@
 .board-viewport[data-zoom='far'] .city:not(.major):not(.island) .city-label {
   display: none;
 }
-.board-viewport[data-zoom='regional']
-  .city:not(.major):not(.secondary):not(.island)
-  .city-label {
+.board-viewport[data-zoom='regional'] .city:not(.major):not(.secondary):not(.island) .city-label {
   display: none;
 }
 .board-viewport[data-zoom='district']
@@ -618,6 +632,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--tr-space-3);
+}
+/* In the sidebar missions panel: two cards per row, stretching to fill the rail width. */
+.tray-missions .ticket-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+.tray-missions .ticket-card {
+  width: 100%;
 }
 .ticket-card {
   /* reset for the <button> variant used while choosing tickets */
