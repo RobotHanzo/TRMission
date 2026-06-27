@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { GameHub } from './ws/hub';
 import { TokenService } from './auth/token.service';
@@ -13,6 +14,8 @@ import { env } from './config/env';
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
+  // CSP is disabled so the Scalar /docs page can load its CDN bundle; tighten in prod.
+  app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
   app.use(cookieParser());
   if (env.corsOrigins.length > 0) app.enableCors({ origin: env.corsOrigins, credentials: true });
 

@@ -1,5 +1,6 @@
 import { Controller, Get, Header, Inject, NotFoundException } from '@nestjs/common';
 import { ApiExcludeEndpoint, type OpenAPIObject } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { OpenApiHolder } from './openapi.holder';
 
 // Serves the generated spec + a Scalar reference UI (loaded from CDN, so no extra
@@ -18,6 +19,7 @@ const SCALAR_HTML = `<!doctype html>
   </body>
 </html>`;
 
+@SkipThrottle()
 @Controller()
 export class DocsController {
   constructor(@Inject(OpenApiHolder) private readonly holder: OpenApiHolder) {}

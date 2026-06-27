@@ -33,4 +33,10 @@ describe('OpenAPI + Scalar docs', () => {
     const res = await request(t.app.getHttpServer()).get('/version').expect(200);
     expect(res.body.protocolVersion).toBe(1);
   });
+
+  it('exposes Prometheus metrics including the leak guard', async () => {
+    const res = await request(t.app.getHttpServer()).get('/metrics').expect(200);
+    expect(res.text).toContain('trm_security_leak_blocked_total');
+    expect(res.text).toContain('trm_active_connections');
+  });
 });

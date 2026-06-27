@@ -12,6 +12,7 @@ import {
   type GameEvent as PbGameEvent,
 } from '@trm/proto';
 import { asPlayerId, messageKeyFor } from '@trm/shared';
+import type { PlayerId } from '@trm/shared';
 import { taiwanBoard } from '@trm/engine';
 import type { Board, GameConfig, GameEvent } from '@trm/engine';
 import type { GameRegistry, Match } from '../game/game-registry';
@@ -19,6 +20,7 @@ import { GameSession } from '../game/game-session';
 import { Connection, type Sink } from './connection';
 import { DevTicketVerifier, type TicketVerifier } from './ticket';
 import type { GameStorePort } from '../persistence/types';
+import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
 import {
   rejectionToPb,
   viewToSnapshot,
@@ -36,6 +38,7 @@ export interface GameHubOptions {
   verifier?: TicketVerifier;
   store?: GameStorePort;
   boardResolver?: (config: GameConfig) => Board;
+  metrics?: MetricsHooks;
 }
 
 export class GameHub {
@@ -45,6 +48,7 @@ export class GameHub {
   private readonly verifier: TicketVerifier;
   private readonly store: GameStorePort | undefined;
   private readonly boardResolver: (config: GameConfig) => Board;
+  private readonly metrics: MetricsHooks;
 
   constructor(
     private readonly registry: GameRegistry,
@@ -53,6 +57,7 @@ export class GameHub {
     this.verifier = options.verifier ?? new DevTicketVerifier();
     this.store = options.store;
     this.boardResolver = options.boardResolver ?? (() => taiwanBoard());
+    this.metrics = options.metrics ?? NOOP_METRICS;
   }
 
   async createMatch(gameId: string, board: Board, config: GameConfig): Promise<Match> {
@@ -85,16 +90,19 @@ export class GameHub {
   openConnection(id: string, sink: Sink): Connection {
     const conn = new Connection(id, sink);
     this.connections.set(id, conn);
+    this.metrics.connectionOpened();
     return conn;
   }
 
   closeConnection(id: string): void {
     const conn = this.connections.get(id);
-    if (conn?.binding) {
+    if (!conn) return;
+    if (conn.binding) {
       const m = this.members.get(conn.binding.gameId);
       if (m?.get(conn.binding.player as string) === conn) m.delete(conn.binding.player as string);
     }
     this.connections.delete(id);
+    this.metrics.connectionClosed();
   }
 
   async receive(connId: string, bytes: Uint8Array): Promise<void> {
@@ -235,6 +243,8 @@ export class GameHub {
     await match.queue.run(async () => {
       // Idempotency: client_seq is monotonic per socket; a replay is dropped (A7/A14).
       if (env.clientSeq <= conn.lastClientSeq) return;
+      this.metrics.commandReceived();
+      const startedAt = performance.now();
 
       const action = commandToAction(env.command, player);
       if (!action) {
@@ -246,6 +256,7 @@ export class GameHub {
       if (!prep.ok) {
         // A rule-rejected action is deterministic — consume the seq so a resend is a no-op.
         conn.lastClientSeq = env.clientSeq;
+        this.metrics.commandRejected(prep.violation.code);
         conn.send(
           rejectionFrame(
             env.clientSeq,
@@ -292,18 +303,30 @@ export class GameHub {
         }
       }
       this.broadcast(match, prepared.events, conn, env.clientSeq);
+      this.metrics.commandApplied((performance.now() - startedAt) / 1000);
     });
   }
 
   // ── fan-out ──────────────────────────────────────────────────────────────
 
+  /** Build the per-viewer snapshot, guard against mis-addressed private data, then send. */
+  private sendProjected(
+    conn: Connection,
+    match: Match,
+    player: PlayerId | null,
+    ack: number,
+  ): void {
+    const snap = viewToSnapshot(match.session.project(player), match.session.stateVersion, player);
+    // Egress guard (defence in depth): a snapshot's private `you` must be the recipient's.
+    if (snap.you && snap.you.playerId !== (player as string | null)) {
+      this.metrics.leakBlocked();
+      return;
+    }
+    conn.send(snapshotFrame(snap), ack);
+  }
+
   private sendSnapshot(conn: Connection, match: Match, ackClientSeq = 0): void {
-    const player = conn.binding?.player ?? null;
-    const view = match.session.project(player);
-    conn.send(
-      snapshotFrame(viewToSnapshot(view, match.session.stateVersion, player)),
-      ackClientSeq,
-    );
+    this.sendProjected(conn, match, conn.binding?.player ?? null, ackClientSeq);
   }
 
   private broadcast(
@@ -318,9 +341,7 @@ export class GameHub {
 
     for (const [playerIdStr, member] of members) {
       const player = asPlayerId(playerIdStr);
-      const view = match.session.project(player);
-      const ack = member === actor ? ackClientSeq : 0;
-      member.send(snapshotFrame(viewToSnapshot(view, version, player)), ack);
+      this.sendProjected(member, match, player, member === actor ? ackClientSeq : 0);
 
       const pbEvents = events
         .map((e) => eventToProto(e, player))
