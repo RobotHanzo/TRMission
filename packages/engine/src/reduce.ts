@@ -82,6 +82,7 @@ function validateKeep(
   offer: readonly TicketId[] | null,
   keep: readonly TicketId[],
   minKeep: number,
+  mustKeepLong = false,
 ): RuleViolation | null {
   if (!offer) return violation('WRONG_PHASE', 'no ticket offer pending');
   const offerSet = new Set(offer as readonly string[]);
@@ -93,6 +94,12 @@ function validateKeep(
     seen.add(id as string);
   }
   if (keep.length < minKeep) return violation('TICKET_KEEP_TOO_FEW', `keep at least ${minKeep}`, { min: minKeep });
+  if (mustKeepLong) {
+    for (const id of offer) {
+      if (board.ticketById.get(id as string)?.deck === 'LONG' && !seen.has(id as string))
+        return violation('TICKET_INVALID_SELECTION', 'long route tickets must all be kept');
+    }
+  }
   return null;
 }
 
@@ -124,7 +131,7 @@ function applyKeepInitial(
   const p = getPlayer(state, player);
   if (!p) return err(violation('NOT_YOUR_TURN', 'unknown player'));
   if (!p.pendingTicketOffer) return err(violation('WRONG_PHASE', 'already kept initial tickets'));
-  const v = validateKeep(board, p.pendingTicketOffer, keep, state.ruleParams.minKeepInitial);
+  const v = validateKeep(board, p.pendingTicketOffer, keep, state.ruleParams.minKeepInitial, true);
   if (v) return err(v);
 
   const { ticketDeckLong, ticketDeckShort } = returnTickets(board, state, p.pendingTicketOffer, keep);

@@ -4,13 +4,15 @@ import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
 import { useGame } from '../store/game';
 import { useUi } from '../store/ui';
-import { connectGame, getSocket, disconnectGame } from '../net/connection';
+import { connectGame, getSocket } from '../net/connection';
 import { routeById } from '../game/content';
 import { isMyTurn } from '../game/view';
 import {
   handFromCounts,
   enumerateRoutePayments,
   enumerateStationPayments,
+  routeShortfall,
+  stationShortfall,
   paymentToProto,
   type Payment,
 } from '../game/payments';
@@ -49,6 +51,8 @@ export function GameScreen() {
 
   const [claim, setClaim] = useState<Claim | null>(null);
   const [tunnelColor, setTunnelColor] = useState<Payment['color']>(null);
+  // Client-side nudge (e.g. "not enough cards") shown when a click can't open a modal.
+  const [notice, setNotice] = useState<string | null>(null);
 
   const version = snapshot?.stateVersion ?? 0;
 
@@ -63,11 +67,13 @@ export function GameScreen() {
     const id = setTimeout(() => setRejection(null), 3000);
     return () => clearTimeout(id);
   }, [rejection, setRejection]);
+  useEffect(() => {
+    if (!notice) return;
+    const id = setTimeout(() => setNotice(null), 3500);
+    return () => clearTimeout(id);
+  }, [notice]);
 
-  const leave = () => {
-    disconnectGame();
-    goHome();
-  };
+  const leave = () => goHome(); // goHome tears down the socket
 
   if (!snapshot) {
     return (
@@ -90,13 +96,31 @@ export function GameScreen() {
     const route = routeById.get(routeId);
     if (!route) return;
     const payments = enumerateRoutePayments(hand, route);
-    if (payments.length) setClaim({ kind: 'route', route, payments });
+    if (payments.length) {
+      setClaim({ kind: 'route', route, payments });
+      return;
+    }
+    const s = routeShortfall(hand, route);
+    setNotice(
+      s.kind === 'locos'
+        ? t('insufficientLocos', { need: s.need, have: s.have })
+        : t('insufficientCards', { need: s.need, have: s.have }),
+    );
   };
   const pickCity = (cityId: string) => {
     const remaining = myPub?.stationsRemaining ?? 0;
-    if (remaining <= 0) return;
-    const payments = enumerateStationPayments(hand, 3 - remaining + 1);
-    if (payments.length) setClaim({ kind: 'station', cityId, payments });
+    if (remaining <= 0) {
+      setNotice(t('noStationsLeft'));
+      return;
+    }
+    const cost = 3 - remaining + 1;
+    const payments = enumerateStationPayments(hand, cost);
+    if (payments.length) {
+      setClaim({ kind: 'station', cityId, payments });
+      return;
+    }
+    const s = stationShortfall(hand, cost);
+    setNotice(t('insufficientCards', { need: s.need, have: s.have }));
   };
   const confirmPayment = (p: Payment) => {
     if (!socket || !claim) return;
@@ -206,6 +230,7 @@ export function GameScreen() {
         <KeepTicketsModal
           offered={snapshot.you?.pendingOfferTicketIds ?? []}
           minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
+          lockLong={phase === Phase.SETUP_TICKETS}
           onConfirm={confirmKeep}
         />
       )}
@@ -225,6 +250,11 @@ export function GameScreen() {
         />
       )}
       {phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={leave} />}
+      {notice && (
+        <div className="toast toast-notice" role="status">
+          {notice}
+        </div>
+      )}
       {rejection && <div className="toast">{t('actionRejected')}</div>}
     </div>
   );

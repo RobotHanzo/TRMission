@@ -8,6 +8,8 @@ interface Props {
   /** When provided the card becomes a toggle (used while choosing tickets). */
   selected?: boolean;
   onToggle?: (id: string) => void;
+  /** Prevents toggling (for mandatory long tickets during initial selection). */
+  disabled?: boolean;
 }
 
 /**
@@ -15,7 +17,7 @@ interface Props {
  * cities over the Taiwan board, a perforated ticket stub with the city pair, and
  * the point value. Long routes wear an EMU-blue livery, short routes a warm one.
  */
-export function TicketCard({ ticketId, selected, onToggle }: Props) {
+export function TicketCard({ ticketId, selected, onToggle, disabled }: Props) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const def = ticketById.get(ticketId);
@@ -48,9 +50,10 @@ export function TicketCard({ ticketId, selected, onToggle }: Props) {
     return (
       <button
         type="button"
-        className={`ticket-card tone-${tone}${selected ? ' is-selected' : ''}`}
+        className={`ticket-card tone-${tone}${selected ? ' is-selected' : ''}${disabled ? ' is-locked' : ''}`}
         aria-pressed={selected}
         aria-label={aria}
+        disabled={disabled}
         onClick={() => onToggle(ticketId)}
       >
         {body}
