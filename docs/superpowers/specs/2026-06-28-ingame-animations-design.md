@@ -137,6 +137,59 @@ RoomScreen, rest.ts, payments, TrainCarCard, global.css, vitest.setup, new tests
 `feat/ingame-animations`; only animation files are staged/committed. The WIP is left untouched.
 
 ## Out of scope
-- Engine-authoritative live ticket scoring for all players (a scoring-rules change).
 - Sound effects.
 - A user-facing animation on/off toggle beyond OS `prefers-reduced-motion` (can be added later).
+
+---
+
+## REVISION 1 (2026-06-28) — finished tickets are public; instant points for all
+
+Supersedes the earlier "instant ticket scoring is self-only" decision. User decisions:
+
+- **Finished tickets are not secret.** Once a player completes a ticket it is revealed to everyone
+  (in-progress tickets stay secret). The client cannot derive an opponent's tickets, so this needs a
+  small **backend** change to reveal finished tickets through the sanctioned projection.
+- **Own-track instant completion.** A ticket counts as completed — instantly, permanently, points
+  awarded, revealed, animated — the moment the player's **own** routes connect its two cities (no
+  station borrowing in the instant trigger). Such a ticket is *guaranteed* to also count at game-end,
+  so **end-game scoring and the station-borrow optimisation are unchanged** and the live total can
+  never diverge from the final. The rare ticket completable only via a station borrow resolves at
+  game-end exactly as today (no instant award for it).
+- **Fanfare scope:** the local player's completion → full-screen confetti fanfare + board sweep; an
+  opponent's completion → *subtle* cue (revealed ticket near their tracker + board path glow in their
+  seat colour + score float), **no** full-screen takeover.
+
+### Backend changes (security-preserving)
+
+`PublicPlayerState` stays **COUNTS ONLY** (risk #1 invariant) — we do **not** put ticket ids on it.
+Instead add a separate, explicitly-public collection:
+
+- **proto** (`common.proto`): new `message CompletedTicket { string player_id = 1; string ticket_id = 2; }`
+  and `repeated CompletedTicket completed_tickets = N;` on `GameSnapshot`. Regenerate (`buf`).
+- **engine**:
+  - `graph/connectivity.ts`: add pure `ownConnectedTicketIds({ ownEdges, tickets, vertices }): string[]`
+    (union-find over own edges; `tickets` carry `{ id, a, b }`).
+  - `selectors.ts`: change `redactFor(state, viewer)` → `redactFor(board, state, viewer)`; compute each
+    player's own-track completed tickets (route endpoints from `board`, kept tickets + ownership from
+    `state`) and add `completedTickets: { player; ticket }[]` to `RedactedView` (`types/view.ts`).
+    Visible to all viewers — these are public.
+  - update the single prod caller `game-session.project` → `redactFor(this.board, this.state, viewer)`
+    and the 3 calls in `test/redact.spec.ts`.
+- **server codec** (`codec/snapshot.ts`): map `view.completedTickets` → proto `completed_tickets`.
+- **tests:** `connectivity.spec.ts` for `ownConnectedTicketIds`; `redact.spec.ts` asserts completed
+  own-track tickets surface in `completedTickets` for all viewers and incomplete ones do not; the wire
+  leak e2e remains valid (it asserts no in-progress secrets; `completed_tickets` is sanctioned public).
+
+### Web changes (vs the original plan)
+
+- Completion is now read from the wire (`snapshot.completedTickets`), authoritative for **all**
+  players — not derived locally. So `game/tickets.ts` reduces to: `pathForTicket(snapshot, playerId,
+  ticketId)` (BFS over that player's public owned routes between the ticket's endpoints, for the
+  sweep) and `playerLiveTotal(snapshot, playerId)` (= `routePoints` + Σ value of that player's
+  `completedTickets`).
+- `useAnimationDriver` diffs `snapshot.completedTickets` (per player) across snapshots to fire
+  completion intents — `ticketComplete` carries `{ playerId, ticketId, isYou, long, seat, path }`.
+  Self → full-screen fanfare; opponent → subtle cue. First snapshot initialises without firing.
+- Score display: **every** player's tracker total = `playerLiveTotal` (not just self).
+- The opponent-subtle cue: a small revealed `TicketCard` floating near the owner's tracker
+  (`data-player-id`) for ~2.5s + the board path glow + a score float; no backdrop.

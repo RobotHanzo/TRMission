@@ -431,3 +431,93 @@ it('liveTicketPoints sums completed ticket values', () => {
 **Type consistency:** `AnimIntent` kinds defined in Task 4 are the exact set consumed by `pushIntent` (Task 5) and produced by the driver (Task 7). `Fanfare` shape consistent between store (Task 5), driver/model (`ticketComplete` intent, Task 4), and `TicketFanfare` (Task 13). `completedTicketIds`/`pathForTicket`/`liveTicketPoints` signatures consistent across Tasks 3/4/7/14. `scoreFloat` added in Task 4 model and re-confirmed in Task 14.
 
 **Placeholders:** none — each task names exact files, the interfaces, and concrete test assertions. CSS keyframe names are fixed (`anim-*`) and shared between the css task and consumers.
+
+---
+
+## REVISION 1 — backend reveal of finished tickets (own-track instant, all players)
+
+These backend tasks run **first** (B1→B4), before the web tasks. They make finished tickets public
+through the sanctioned projection without weakening the COUNTS-ONLY `PublicPlayerState` invariant.
+Web Tasks 3/7/14 are revised below to consume the wire field instead of deriving completion locally.
+
+### Task B1: proto — `completed_tickets` on `GameSnapshot`
+
+**Files:** Modify `packages/proto/proto/trmission/v1/common.proto`; regenerate.
+
+- [ ] **Step 1:** Add `message CompletedTicket { string player_id = 1; string ticket_id = 2; }` and, on `GameSnapshot`, `repeated CompletedTicket completed_tickets = 23;` (use the next free field number — verify by reading the message; do NOT reuse a number).
+- [ ] **Step 2:** `yarn workspace @trm/proto generate` → regenerates `src/gen/`.
+- [ ] **Step 3:** `yarn workspace @trm/proto test` → PASS (round-trip + PROTOCOL_VERSION).
+- [ ] **Step 4: Commit** `git commit -m "Proto: reveal finished tickets via GameSnapshot.completed_tickets"`
+
+### Task B2: engine — own-track completion + redactFor reveal
+
+**Files:**
+- Modify `packages/engine/src/graph/connectivity.ts` (add `ownConnectedTicketIds`)
+- Modify `packages/engine/src/types/view.ts` (add `completedTickets` to `RedactedView`)
+- Modify `packages/engine/src/selectors.ts` (`redactFor` signature + compute)
+- Modify `packages/engine/src/game-session.ts` caller is in server — update there in B3
+- Modify `packages/engine/src/index.ts` (export `ownConnectedTicketIds` + its types if useful)
+- Test: `packages/engine/test/connectivity.spec.ts`, `packages/engine/test/redact.spec.ts`
+
+**Interfaces:**
+- Produces: `ownConnectedTicketIds(args: { ownEdges: readonly Edge[]; tickets: readonly { id: string; a: string; b: string }[]; vertices: readonly string[] }): string[]` — ids whose endpoints are connected by `ownEdges`.
+- `RedactedView.completedTickets: readonly { player: PlayerId; ticket: TicketId }[]`.
+- `redactFor(board: Board, state: GameState, viewer: PlayerId | null): RedactedView`.
+
+- [ ] **Step 1: Failing test (connectivity.spec.ts)**
+
+```ts
+import { ownConnectedTicketIds } from '../src/graph/connectivity';
+it('ownConnectedTicketIds: marks tickets joined by own edges', () => {
+  const r = ownConnectedTicketIds({
+    ownEdges: [{ a: 'X', b: 'Y' }, { a: 'Y', b: 'Z' }],
+    tickets: [{ id: 't1', a: 'X', b: 'Z' }, { id: 't2', a: 'X', b: 'Q' }],
+    vertices: ['X', 'Y', 'Z', 'Q'],
+  });
+  expect(r).toEqual(['t1']);
+});
+```
+
+- [ ] **Step 2: FAIL.** `yarn workspace @trm/engine test --run connectivity`
+- [ ] **Step 3: Implement** `ownConnectedTicketIds` (UnionFind over ownEdges; filter tickets by `connected(a,b)`; map to id).
+- [ ] **Step 4: PASS.**
+- [ ] **Step 5: Failing test (redact.spec.ts)** — update `afterSetup` to also return `board`; change the 3 `redactFor(state, viewer)` calls to `redactFor(board, state, viewer)`. Add: build a state where p0 owns routes connecting one of p0's kept tickets, assert `view.completedTickets` contains `{player: p0, ticket}` for that ticket and is visible from an opponent's view too; assert an unconnected kept ticket is absent.
+- [ ] **Step 6: FAIL** (signature/field missing).
+- [ ] **Step 7: Implement** — add `completedTickets` to `RedactedView`; in `redactFor` add `board` param; for each player build `ownEdges` (ownership entries with `owner===id` → `getRoute(board,routeId).{a,b}`), `tickets` (`state.players[id].keptTickets` → `getTicket(board, tid).{a,b}` with `id=tid`), `vertices` (cities touched), call `ownConnectedTicketIds`, flat-map to `{player:id, ticket}`.
+- [ ] **Step 8: PASS;** run full engine suite `yarn workspace @trm/engine test` (property/golden unaffected — no state shape change, only projection).
+- [ ] **Step 9: Commit** `git commit -m "Engine: redactFor reveals own-track completed tickets (public)"`
+
+### Task B3: server codec — map completed_tickets
+
+**Files:**
+- Modify `apps/server/src/game/game-session.ts` (`redactFor(this.board, this.state, viewer)`)
+- Modify `apps/server/src/codec/snapshot.ts` (map `view.completedTickets` → `completedTickets`)
+- Test: `apps/server/test/wire-game.e2e.spec.ts` (extend leak test with a benign subset assertion + comment)
+
+- [ ] **Step 1:** Update `project` caller signature.
+- [ ] **Step 2:** In `viewToSnapshot`, add `completedTickets: view.completedTickets.map((c) => ({ playerId: c.player as string, ticketId: c.ticket as string }))`.
+- [ ] **Step 3:** In `wire-game.e2e.spec.ts`, add a comment that finished tickets are intentionally public via `completed_tickets`, and (optional) assert that any opponent id in `completed_tickets` is a real player id. Keep existing assertions.
+- [ ] **Step 4:** `yarn workspace @trm/server test --run wire-game` → PASS; then `yarn workspace @trm/server test` → PASS.
+- [ ] **Step 5: Commit** `git commit -m "Server: carry completed_tickets through the snapshot codec"`
+
+### Web task revisions
+
+**Task 3 (REVISED) — `game/tickets.ts`:** drop client-side completion derivation. Implement only:
+- `pathForTicket(snapshot: GameSnapshot, playerId: string, ticketId: string): string[]` — BFS over the routes owned by `playerId` (from `snapshot.ownership`) between the ticket's endpoints (`ticketById`), returning ordered route ids (or `[]`).
+- `playerLiveTotal(snapshot: GameSnapshot, playerId: string): number` — that player's `routePoints` + Σ value of their entries in `snapshot.completedTickets`.
+Tests: path found / not found; live total sums revealed completed tickets.
+
+**Task 7 (REVISED) — `useAnimationDriver`:** detect completion by diffing `snapshot.completedTickets`
+(grouped by player) across snapshots — not via local union-find. For each newly-added `{playerId,
+ticketId}` emit a `ticketComplete` intent `{ playerId, ticketId, isYou: playerId===you, long, seat,
+path: pathForTicket(snapshot, playerId, ticketId) }`. Initialise the prev set on first snapshot
+(no fire). `intentsFromEvents` still handles claim/station/draw/turn/market.
+
+**Task 13 (REVISED) — fanfare:** `TicketFanfare` only renders for `isYou` completions (full-screen +
+confetti + board sweep). Opponent completions render a **subtle cue** in `AnimationLayer`: a small
+revealed `TicketCard` anchored near `[data-player-id]` for ~2.5s + the board path glow (reuse the
+sweep overlay, shorter) + a score float. No backdrop for opponents.
+
+**Task 14 (REVISED) — score display:** `PlayerTrackers` shows `playerLiveTotal(snapshot, p.id)` for
+**every** player (not just self). The completion `scoreFloat` is emitted in the driver (Task 7) for
+the completing player.
