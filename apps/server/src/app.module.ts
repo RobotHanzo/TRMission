@@ -3,18 +3,18 @@ import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { DatabaseModule } from './db/database.module';
 import { AuthModule } from './auth/auth.module';
+import { GameModule } from './game/game.module';
+import { LobbyModule } from './lobby/lobby.module';
+import { HistoryModule } from './history/history.module';
 import { HealthController } from './health/health.controller';
 import { DocsController } from './openapi/docs.controller';
 import { OpenApiHolder } from './openapi/openapi.holder';
-import { GameRegistry } from './game/game-registry';
 
-// REST control plane: database wiring, auth, health, and API docs. A global
-// ZodValidationPipe validates every request body against its zod DTO. The GameHub
-// (WebSocket) is constructed in main.ts from the DI-provided store.
+// REST control plane: database, auth, lobby, match history, the realtime hub (DI),
+// health, and API docs. A global ZodValidationPipe validates every request body.
 @Module({
-  imports: [DatabaseModule, AuthModule],
+  imports: [DatabaseModule, AuthModule, GameModule, LobbyModule, HistoryModule],
   controllers: [HealthController, DocsController],
-  providers: [GameRegistry, OpenApiHolder, { provide: APP_PIPE, useClass: ZodValidationPipe }],
-  exports: [GameRegistry],
+  providers: [OpenApiHolder, { provide: APP_PIPE, useClass: ZodValidationPipe }],
 })
 export class AppModule {}

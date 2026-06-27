@@ -286,7 +286,7 @@ export class GameHub {
       match.session.commit(prepared, action);
       if (this.store && prepared.state.turn.phase === 'GAME_OVER') {
         try {
-          await this.store.markCompleted(match.session.gameId, prepared.digest);
+          await this.store.recordCompletion(match.session.gameId, prepared.state);
         } catch {
           // non-fatal: status is a convenience flag; the event log remains the source of truth.
         }

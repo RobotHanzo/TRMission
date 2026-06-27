@@ -77,7 +77,7 @@ async function driveDirect(
     );
     session.commit(prep.prepared, action);
     if (prep.prepared.state.turn.phase === 'GAME_OVER')
-      await store.markCompleted(gameId, prep.prepared.digest);
+      await store.recordCompletion(gameId, prep.prepared.state);
   }
 }
 

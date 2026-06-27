@@ -5,7 +5,7 @@
 // snapshot + the tail of events.
 import { asPlayerId } from '@trm/shared';
 import type { RuleParams, SeatIndex } from '@trm/shared';
-import type { GameConfig, GameState, Action } from '@trm/engine';
+import type { GameConfig, GameState, Action, FinalScoreboard } from '@trm/engine';
 
 export interface StoredConfig {
   seed: string | number;
@@ -51,6 +51,18 @@ export interface RecoveryData {
   tail: { seq: number; action: Action; stateDigest: string }[];
 }
 
+/** Denormalised archive of a finished game, for history listing + leaderboards. */
+export interface MatchHistoryDoc {
+  _id: string; // gameId
+  players: { userId: string; seat: number }[];
+  turnOrder: string[];
+  seed: string | number;
+  contentHash: string;
+  finalScores: FinalScoreboard;
+  winners: string[];
+  completedAt: Date;
+}
+
 export interface GameStorePort {
   createGame(
     gameId: string,
@@ -65,7 +77,8 @@ export interface GameStorePort {
     stateDigest: string,
     state: GameState,
   ): Promise<void>;
-  markCompleted(gameId: string, finalDigest: string): Promise<void>;
+  /** At game over: mark COMPLETED and archive a match-history record. */
+  recordCompletion(gameId: string, finalState: GameState): Promise<void>;
   loadForRecovery(gameId: string): Promise<RecoveryData | null>;
 }
 

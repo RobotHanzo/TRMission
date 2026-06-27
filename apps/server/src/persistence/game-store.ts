@@ -14,6 +14,7 @@ import {
   type GameDoc,
   type GameEventDoc,
   type GameSnapshotDoc,
+  type MatchHistoryDoc,
 } from './types';
 
 /** Write a full checkpoint snapshot every N actions (also at game over). */
@@ -27,17 +28,22 @@ export async function ensureIndexes(db: Db): Promise<void> {
     .collection<GameSnapshotDoc>('gameSnapshots')
     .createIndex({ gameId: 1, seq: 1 }, { unique: true });
   await db.collection<GameDoc>('games').createIndex({ status: 1, updatedAt: -1 });
+  await db
+    .collection<MatchHistoryDoc>('matchHistory')
+    .createIndex({ 'players.userId': 1, completedAt: -1 });
 }
 
 export class MongoGameStore implements GameStorePort {
   private readonly games: Collection<GameDoc>;
   private readonly events: Collection<GameEventDoc>;
   private readonly snapshots: Collection<GameSnapshotDoc>;
+  private readonly history: Collection<MatchHistoryDoc>;
 
   constructor(db: Db) {
     this.games = db.collection<GameDoc>('games');
     this.events = db.collection<GameEventDoc>('gameEvents');
     this.snapshots = db.collection<GameSnapshotDoc>('gameSnapshots');
+    this.history = db.collection<MatchHistoryDoc>('matchHistory');
   }
 
   async createGame(
@@ -89,10 +95,29 @@ export class MongoGameStore implements GameStorePort {
     await this.games.updateOne({ _id: gameId }, { $set: { currentSeq: seq, updatedAt: now } });
   }
 
-  async markCompleted(gameId: string, _finalDigest: string): Promise<void> {
-    await this.games.updateOne(
+  async recordCompletion(gameId: string, finalState: GameState): Promise<void> {
+    const now = new Date();
+    await this.games.updateOne({ _id: gameId }, { $set: { status: 'COMPLETED', updatedAt: now } });
+
+    const game = await this.games.findOne({ _id: gameId });
+    const scores = finalState.finalScores;
+    if (!game || !scores) return;
+
+    // Idempotent archive (game over only fires once, but recovery could replay it).
+    await this.history.updateOne(
       { _id: gameId },
-      { $set: { status: 'COMPLETED', updatedAt: new Date() } },
+      {
+        $setOnInsert: {
+          players: game.config.players.map((p) => ({ userId: p.id, seat: p.seat })),
+          turnOrder: finalState.turnOrder.map((id) => id as string),
+          seed: game.seed,
+          contentHash: game.contentHash,
+          finalScores: scores,
+          winners: (scores.ranking[0] ?? []).map((id) => id as string),
+          completedAt: now,
+        },
+      },
+      { upsert: true, writeConcern: { w: 'majority' } },
     );
   }
 
