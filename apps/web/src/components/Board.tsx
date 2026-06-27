@@ -318,9 +318,6 @@ export function Board({
                       className={buildable ? 'city-hub buildable' : 'city-hub'}
                       transform={`translate(${c.x} ${c.y})`}
                       onClick={onPick}
-                      style={
-                        hasStation ? { fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' } : undefined
-                      }
                     >
                       <title>{cityName(c.id as string, locale)}</title>
                     </rect>
@@ -330,13 +327,25 @@ export function Board({
                       cx={c.x}
                       cy={c.y}
                       onClick={onPick}
-                      style={
-                        hasStation ? { fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' } : undefined
-                      }
                     >
                       <title>{cityName(c.id as string, locale)}</title>
                     </circle>
                   )}
+                  {hasStation &&
+                    (isHub ? (
+                      <rect
+                        className="station-hub"
+                        transform={`translate(${c.x} ${c.y})`}
+                        style={{ fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' }}
+                      />
+                    ) : (
+                      <circle
+                        className="station"
+                        cx={c.x}
+                        cy={c.y}
+                        style={{ fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' }}
+                      />
+                    ))}
                   <text className="city-label" x={c.x} y={c.y}>
                     {cityName(c.id as string, locale)}
                   </text>
