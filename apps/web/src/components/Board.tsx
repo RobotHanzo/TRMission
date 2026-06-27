@@ -65,8 +65,8 @@ const MAJORS = new Set([
   'yilan',
   'hengchun',
 ]);
-// `centerOnInit` fits the island at ~0.8×, so "far" (overview) covers the home view
-// and the first zoom-in already reveals the full label/badge detail.
+// Home is `initialScale` 1.9 → "mid", so the default view already shows every label and
+// length badge; zooming out to ~minScale reaches "far" (a clean labels-thinned overview).
 const zoomBucket = (scale: number): string => (scale < 1.4 ? 'far' : scale < 2.4 ? 'mid' : 'near');
 
 /**
@@ -196,7 +196,7 @@ export function Board({
       <TransformWrapper
         minScale={0.8}
         maxScale={8}
-        initialScale={1}
+        initialScale={1.9}
         centerOnInit
         wheel={{ step: 0.0022 }}
         doubleClick={{ mode: 'zoomIn', step: 0.6 }}
@@ -236,9 +236,12 @@ export function Board({
                   : o?.locked
                     ? '#9aa0a6'
                     : colorOf(r.color);
-              const dash = r.isTunnel ? '2.4 1.6' : r.ferryLocos > 0 ? '0.55 1.7' : undefined;
+              // Tunnel = dashes, ferry = dots; the dash pattern is counter-scaled in CSS
+              // (with var(--inv-scale)) so it stays a clean dotted/dashed line at every zoom
+              // instead of fat blobs when zoomed out.
+              const kind = r.isTunnel ? ' tunnel' : r.ferryLocos > 0 ? ' ferry' : '';
 
-              const cls = 'route' + (claimable ? ' claimable' : '') + (o ? ' owned' : '');
+              const cls = 'route' + (claimable ? ' claimable' : '') + (o ? ' owned' : '') + kind;
               return (
                 <g
                   key={r.id as string}
@@ -254,7 +257,6 @@ export function Board({
                     x2={x2}
                     y2={y2}
                     stroke={stroke}
-                    {...(dash ? { strokeDasharray: dash } : {})}
                     opacity={o?.locked ? 0.4 : 1}
                   />
                   {claimable && (

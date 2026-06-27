@@ -15,7 +15,7 @@
 
   /* Cartography (board map) */
   --tr-sea: #d6e4ec; /* sea */
-  --tr-sea-line: rgba(31, 90, 130, 0.12); /* graticule */
+  --tr-sea-line: rgba(31, 90, 130, 0.2); /* graticule */
   --tr-land: #efe6cf; /* island land */
   --tr-coast: #b9a47b; /* coastline ink */
   --tr-relief: #d9c9a1; /* central mountain range */
@@ -48,7 +48,7 @@
   --tr-line: #3a3e43;
 
   --tr-sea: #15222b;
-  --tr-sea-line: rgba(150, 190, 215, 0.1);
+  --tr-sea-line: rgba(150, 190, 215, 0.17);
   --tr-land: #2a2e25;
   --tr-coast: #515a44;
   --tr-relief: #39402e;
@@ -66,7 +66,7 @@
     --tr-line: #3a3e43;
 
     --tr-sea: #15222b;
-    --tr-sea-line: rgba(150, 190, 215, 0.1);
+    --tr-sea-line: rgba(150, 190, 215, 0.17);
     --tr-land: #2a2e25;
     --tr-coast: #515a44;
     --tr-relief: #39402e;

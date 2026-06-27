@@ -22,8 +22,9 @@
 .board-viewport {
   position: relative;
   /* ≈ 1/zoom — counter-scales markers/labels/tracks so they hold a constant on-screen
-     size as the geography zooms (set live by ZoomTracker; this is the home default). */
-  --inv-scale: 1.25;
+     size as the geography zooms (set live by ZoomTracker; this is the home default
+     for the initial scale of 1.9). */
+  --inv-scale: 0.53;
   width: 100%;
   height: clamp(360px, 58vh, 660px);
   overflow: hidden;
@@ -84,8 +85,9 @@
 }
 .graticule line {
   stroke: var(--tr-sea-line);
-  stroke-width: 0.15;
-  stroke-dasharray: 0.6 1.2;
+  /* Counter-scaled so the grid holds a constant, gently-visible weight at every zoom. */
+  stroke-width: calc(0.32px * var(--inv-scale));
+  stroke-dasharray: calc(0.9px * var(--inv-scale)) calc(1.7px * var(--inv-scale));
 }
 .land-surf {
   fill: none;
@@ -161,6 +163,17 @@
 }
 .route.claimable:hover .track {
   stroke-width: calc(3.4px * var(--inv-scale));
+}
+/* Tunnel = dashes, ferry = round dots. Both the track and its paper casing carry the
+   pattern (so the sea/land shows through the gaps), and both dash + gap counter-scale with
+   --inv-scale so the line stays a crisp dotted/dashed stroke at every zoom level. */
+.route.tunnel .track,
+.route.tunnel .track-casing {
+  stroke-dasharray: calc(2.3px * var(--inv-scale)) calc(1.5px * var(--inv-scale));
+}
+.route.ferry .track,
+.route.ferry .track-casing {
+  stroke-dasharray: 0 calc(3px * var(--inv-scale));
 }
 .len-badge circle {
   fill: var(--tr-surface);
