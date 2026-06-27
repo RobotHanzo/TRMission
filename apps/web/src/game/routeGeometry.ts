@@ -8,7 +8,9 @@ import { CITIES, ROUTES, cityById } from './content';
  *  1. Express routes that skip a town (e.g. Taichung→Yuanlin past Changhua) used to run
  *     straight over the stacked short-route chain. Each route now bows AWAY from the most
  *     intruding city it would otherwise cross, so the express arcs clear of the corridor.
- *  2. Double-route siblings barely separated. They now bow to opposite sides by a clear gap.
+ *  2. Double-route siblings barely separated. They are now drawn as two STRAIGHT parallel
+ *     tracks — each shifted to its own side of the shared chord — rather than mirror curves,
+ *     so a pair of parallel rails reads at a glance. (Only the bypass routes in (1) curve.)
  *
  * The slot count communicates the route length, so the map needs no number badges.
  */
@@ -32,8 +34,8 @@ export interface RouteGeometry {
   readonly mid: { readonly x: number; readonly y: number };
 }
 
-/** Half the perpendicular gap between a double-route pair's two arcs. */
-const DOUBLE_BOW = 1.5;
+/** Half the perpendicular gap between a double-route pair's two parallel tracks. */
+const DOUBLE_OFFSET = 1.5;
 /** A non-endpoint city within this distance of a straight route is "in the way". */
 const INTRUSION_DIST = 5.5;
 /** How firmly to arc around an intruding city (scales the raw clearance). */
@@ -48,12 +50,21 @@ const SLOT_FILL = 0.86;
 /** Tunnels use shorter cars so the dashed track shows between them. */
 const SLOT_FILL_TUNNEL = 0.62;
 
+/** How a route deviates from its straight chord. */
+interface RouteOffset {
+  /** Parallel perpendicular shift of the WHOLE straight line — a double-pair's two tracks. */
+  readonly shift: number;
+  /** Perpendicular bow of the curve's apex — a single route arcing around an intruding town. */
+  readonly bow: number;
+}
+
 /**
- * Signed perpendicular bow for every route. Double siblings split symmetrically; every other
- * route bows away from the nearest city its chord would otherwise pass over.
+ * Per-route deviation from the straight chord. A double-route pair's siblings each become a
+ * straight track shifted to opposite sides (so they read as parallel rails); every other route
+ * stays on its endpoints and bows away from the nearest city its chord would otherwise cross.
  */
-function computeBows(): Map<string, number> {
-  const bow = new Map<string, number>();
+function computeOffsets(): Map<string, RouteOffset> {
+  const out = new Map<string, RouteOffset>();
 
   const groups = new Map<string, string[]>();
   for (const r of ROUTES)
@@ -61,15 +72,17 @@ function computeBows(): Map<string, number> {
       groups.set(r.doubleGroup, [...(groups.get(r.doubleGroup) ?? []), r.id as string]);
   for (const ids of groups.values()) {
     ids.sort();
-    ids.forEach((id, i) => bow.set(id, (i - (ids.length - 1) / 2) * 2 * DOUBLE_BOW));
+    ids.forEach((id, i) =>
+      out.set(id, { shift: (i - (ids.length - 1) / 2) * 2 * DOUBLE_OFFSET, bow: 0 }),
+    );
   }
 
   for (const r of ROUTES) {
-    if (bow.has(r.id as string)) continue;
+    if (out.has(r.id as string)) continue;
     const a = cityById.get(r.a as string);
     const b = cityById.get(r.b as string);
     if (!a || !b) {
-      bow.set(r.id as string, 0);
+      out.set(r.id as string, { shift: 0, bow: 0 });
       continue;
     }
     const abx = b.x - a.x;
@@ -94,10 +107,29 @@ function computeBows(): Map<string, number> {
       const signed = -Math.sign(side || 1) * (INTRUSION_DIST - dist);
       if (Math.abs(signed) > Math.abs(best)) best = signed;
     }
-    bow.set(r.id as string, Math.max(-MAX_BOW, Math.min(MAX_BOW, best * BOW_GAIN)));
+    out.set(r.id as string, { shift: 0, bow: Math.max(-MAX_BOW, Math.min(MAX_BOW, best * BOW_GAIN)) });
   }
-  return bow;
+  return out;
 }
+
+/** A city with at least this many incident routes reads as a hub — drawn as a station "slot". */
+export const HUB_MIN_DEGREE = 4;
+
+/** Cities where enough routes converge to warrant the larger slot-shaped station marker. */
+function computeHubs(): Set<string> {
+  const degree = new Map<string, number>();
+  for (const r of ROUTES) {
+    degree.set(r.a as string, (degree.get(r.a as string) ?? 0) + 1);
+    degree.set(r.b as string, (degree.get(r.b as string) ?? 0) + 1);
+  }
+  const hubs = new Set<string>();
+  for (const c of CITIES)
+    if (!c.isIsland && (degree.get(c.id as string) ?? 0) >= HUB_MIN_DEGREE) hubs.add(c.id as string);
+  return hubs;
+}
+
+/** Precomputed set of hub city ids (the content graph is static). */
+export const HUB_CITIES: ReadonlySet<string> = computeHubs();
 
 const qPoint = (
   a: { x: number; y: number },
@@ -123,20 +155,22 @@ const qTangent = (
 };
 
 function buildGeometry(): Map<string, RouteGeometry> {
-  const bows = computeBows();
+  const offsets = computeOffsets();
   const out = new Map<string, RouteGeometry>();
   for (const r of ROUTES) {
-    const a = cityById.get(r.a as string);
-    const b = cityById.get(r.b as string);
-    if (!a || !b) continue;
-    const abx = b.x - a.x;
-    const aby = b.y - a.y;
-    const len = Math.hypot(abx, aby) || 1;
-    const nx = -aby / len;
-    const ny = abx / len;
+    const ca = cityById.get(r.a as string);
+    const cb = cityById.get(r.b as string);
+    if (!ca || !cb) continue;
+    const len = Math.hypot(cb.x - ca.x, cb.y - ca.y) || 1;
+    const nx = -(cb.y - ca.y) / len;
+    const ny = (cb.x - ca.x) / len;
+    const { shift, bow } = offsets.get(r.id as string) ?? { shift: 0, bow: 0 };
+    // A double pair shifts the whole straight track sideways; a bypass keeps its endpoints and
+    // bows the apex. So endpoints carry the (parallel) shift, the control point carries the bow.
+    const a = { x: ca.x + nx * shift, y: ca.y + ny * shift };
+    const b = { x: cb.x + nx * shift, y: cb.y + ny * shift };
     const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-    const bow = bows.get(r.id as string) ?? 0;
-    // Control point chosen so the curve's apex deviates from the chord by exactly `bow`.
+    // Control point chosen so the curve's apex deviates from the (shifted) chord by exactly `bow`.
     const c = { x: mid.x + nx * 2 * bow, y: mid.y + ny * 2 * bow };
 
     // Arc length by sampling, to space the cars evenly.

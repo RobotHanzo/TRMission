@@ -37,6 +37,8 @@ describe('Board', () => {
     // Every authored route draws a roadbed path plus a chain of car slots.
     expect(container.querySelectorAll('path.bed').length).toBeGreaterThan(80);
     expect(container.querySelectorAll('rect.slot').length).toBeGreaterThan(80);
+    // Multi-route junctions render as slot-shaped hub stations.
+    expect(container.querySelectorAll('rect.city-hub').length).toBeGreaterThan(0);
     // A known station label is present in Traditional Chinese.
     expect(screen.getAllByText('臺北').length).toBeGreaterThan(0);
   });

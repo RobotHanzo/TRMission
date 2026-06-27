@@ -21,10 +21,12 @@
 /* ── Map viewport (pan/zoom via react-zoom-pan-pinch) ───────────────────────── */
 .board-viewport {
   position: relative;
-  /* ≈ 1/zoom — counter-scales markers/labels/tracks so they hold a constant on-screen
-     size as the geography zooms (set live by ZoomTracker; this is the home default
-     for the initial scale of 1.9). */
+  /* ≈ 1/zoom — counter-scales labels/track weight so they hold a constant on-screen size as
+     the geography zooms. --marker-scale is the inverse intent: station markers GROW with zoom
+     (≈ √zoom on screen). Both are set live by ZoomTracker; these are the home defaults for the
+     initial scale of 1.9. */
   --inv-scale: 0.53;
+  --marker-scale: 0.72;
   width: 100%;
   height: clamp(360px, 58vh, 660px);
   overflow: hidden;
@@ -222,15 +224,17 @@
 }
 
 /* ── Cities + stations ──────────────────────────────────────────────────────── */
+/* Station markers size off --marker-scale, so they GROW as you zoom in (the dots get easier to
+   aim at up close) while still shrinking when you pull back to see the whole island. */
 .city-dot {
   fill: var(--tr-surface);
   stroke: var(--tr-ink);
-  stroke-width: calc(0.4px * var(--inv-scale));
-  r: calc(1.15px * var(--inv-scale));
+  stroke-width: calc(0.4px * var(--marker-scale));
+  r: calc(1.15px * var(--marker-scale));
 }
 .city.island .city-dot {
   stroke: var(--tr-blue);
-  r: calc(1.4px * var(--inv-scale));
+  r: calc(1.4px * var(--marker-scale));
 }
 .city-dot.buildable {
   cursor: pointer;
@@ -238,11 +242,29 @@
 .city-dot.buildable:hover {
   fill: color-mix(in srgb, var(--tr-ember) 35%, var(--tr-surface));
 }
+/* Hub junctions: a wider slot-shaped station, centred on the city via the element's transform.
+   Geometry lives here so it counter-grows with --marker-scale like the round dots. */
+.city-hub {
+  x: calc(-1.25px * var(--marker-scale));
+  y: calc(-0.8px * var(--marker-scale));
+  width: calc(2.5px * var(--marker-scale));
+  height: calc(1.6px * var(--marker-scale));
+  rx: calc(0.8px * var(--marker-scale));
+  fill: var(--tr-surface);
+  stroke: var(--tr-ink);
+  stroke-width: calc(0.4px * var(--marker-scale));
+}
+.city-hub.buildable {
+  cursor: pointer;
+}
+.city-hub.buildable:hover {
+  fill: color-mix(in srgb, var(--tr-ember) 35%, var(--tr-surface));
+}
 .station {
   fill: var(--tr-ember);
   stroke: var(--tr-surface);
-  stroke-width: calc(0.3px * var(--inv-scale));
-  r: calc(0.8px * var(--inv-scale));
+  stroke-width: calc(0.3px * var(--marker-scale));
+  r: calc(0.8px * var(--marker-scale));
 }
 .city-label {
   fill: var(--tr-ink);
@@ -254,8 +276,8 @@
   stroke-width: calc(1.1px * var(--inv-scale));
   stroke-linejoin: round;
   pointer-events: none;
-  /* Keep the label hugging the (constant-size) dot instead of drifting up when zoomed. */
-  transform: translateY(calc(-3.6px * var(--inv-scale)));
+  /* Sit the label just above the marker; track --marker-scale so it stays clear as the dot grows. */
+  transform: translateY(calc(-3.6px * var(--marker-scale)));
 }
 .city.island .city-label {
   stroke: var(--tr-sea);

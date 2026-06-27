@@ -10,7 +10,7 @@ import { Plus, Minus, LocateFixed, Maximize, Minimize } from 'lucide-react';
 import type { GameSnapshot } from '@trm/proto';
 import type { RouteColor } from '@trm/shared';
 import { CITIES, ROUTES, cityName } from '../game/content';
-import { ROUTE_GEOMETRY } from '../game/routeGeometry';
+import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
 import { zoomBucket, cityTier } from '../game/lod';
 import {
@@ -40,10 +40,12 @@ const glyphOf = (rc: RouteColor): string =>
   rc === 'GRAY' ? GRAY_TOKEN.glyph : CARD_COLOR_TOKENS[rc].glyph;
 
 /**
- * Reflects the live zoom onto the viewport: `data-zoom` drives label/badge level-of-detail,
- * and `--inv-scale` (≈ 1/scale) counter-scales the markers, labels, and tracks so they keep a
- * roughly constant on-screen size as the geography zooms — instead of ballooning (Google-Maps
- * behaviour). The land, coastline, and relief are NOT counter-scaled, so the island still grows.
+ * Reflects the live zoom onto the viewport: `data-zoom` drives label/badge level-of-detail.
+ * `--inv-scale` (≈ 1/scale) counter-scales the labels and track weight so they keep a roughly
+ * constant on-screen size as the geography zooms (instead of ballooning, Google-Maps style).
+ * `--marker-scale` is the opposite: station markers GROW with zoom — but gently (≈ √zoom on
+ * screen) and clamped, so they pop as you zoom in without swallowing the corridor or vanishing
+ * when zoomed out. The land, coastline, and relief are not scaled either way, so the island grows.
  */
 function ZoomTracker({ targetRef }: { targetRef: RefObject<HTMLDivElement | null> }) {
   useTransformEffect((ref) => {
@@ -52,6 +54,7 @@ function ZoomTracker({ targetRef }: { targetRef: RefObject<HTMLDivElement | null
     const s = ref.state.scale;
     el.dataset.zoom = zoomBucket(s);
     el.style.setProperty('--inv-scale', String(Math.max(0.12, Math.min(1.5, 1 / s))));
+    el.style.setProperty('--marker-scale', String(Math.max(0.34, Math.min(0.82, 1 / Math.sqrt(s)))));
   });
   return null;
 }
@@ -265,23 +268,39 @@ export function Board({
             {CITIES.map((c) => {
               const hasStation = stationCities.has(c.id as string);
               const buildable = canAct && !hasStation;
+              const isHub = HUB_CITIES.has(c.id as string);
               // Tier drives the cartographic label level-of-detail (see game/lod.ts + the
               // [data-zoom] rules in game.css); islands always keep their label.
               const tier = cityTier(c.id as string);
               const cls =
                 'city' +
                 (c.isIsland ? ' island' : '') +
+                (isHub ? ' hub' : '') +
                 (tier !== 'minor' ? ` ${tier}` : '');
+              const onPick = buildable ? () => onPickCity(c.id as string) : undefined;
               return (
                 <g key={c.id as string} className={cls}>
-                  <circle
-                    className={buildable ? 'city-dot buildable' : 'city-dot'}
-                    cx={c.x}
-                    cy={c.y}
-                    onClick={buildable ? () => onPickCity(c.id as string) : undefined}
-                  >
-                    <title>{cityName(c.id as string, locale)}</title>
-                  </circle>
+                  {/* Junctions where many lines converge read as a wider slot-shaped station;
+                      ordinary stops stay round. Geometry comes from CSS (so it can grow with
+                      zoom via --marker-scale); the transform just plants it on the city. */}
+                  {isHub ? (
+                    <rect
+                      className={buildable ? 'city-hub buildable' : 'city-hub'}
+                      transform={`translate(${c.x} ${c.y})`}
+                      onClick={onPick}
+                    >
+                      <title>{cityName(c.id as string, locale)}</title>
+                    </rect>
+                  ) : (
+                    <circle
+                      className={buildable ? 'city-dot buildable' : 'city-dot'}
+                      cx={c.x}
+                      cy={c.y}
+                      onClick={onPick}
+                    >
+                      <title>{cityName(c.id as string, locale)}</title>
+                    </circle>
+                  )}
                   {hasStation && <circle className="station" cx={c.x} cy={c.y} />}
                   <text className="city-label" x={c.x} y={c.y}>
                     {cityName(c.id as string, locale)}

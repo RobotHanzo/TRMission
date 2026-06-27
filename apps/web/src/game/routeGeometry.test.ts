@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ROUTES, cityById } from './content';
-import { ROUTE_GEOMETRY } from './routeGeometry';
+import { ROUTE_GEOMETRY, HUB_CITIES } from './routeGeometry';
 
 const geom = (id: string) => {
   const g = ROUTE_GEOMETRY.get(id);
@@ -20,14 +20,36 @@ describe('route geometry', () => {
     for (const r of ROUTES) expect(geom(r.id as string).slots).toHaveLength(r.length);
   });
 
-  it('starts and ends each curve on its two endpoint cities', () => {
+  it('starts and ends each single route on its two endpoint cities', () => {
+    // Double pairs deliberately shift off the centres into parallel tracks — covered below.
     for (const r of ROUTES) {
+      if (r.doubleGroup) continue;
       const a = cityById.get(r.a as string)!;
       const b = cityById.get(r.b as string)!;
       const path = geom(r.id as string).path;
       expect(path.startsWith(`M ${a.x.toFixed(2)} ${a.y.toFixed(2)}`)).toBe(true);
       expect(path.endsWith(`${b.x.toFixed(2)} ${b.y.toFixed(2)}`)).toBe(true);
     }
+  });
+
+  it('draws parallel double routes as straight, parallel tracks (not curves)', () => {
+    // R56 / R57 are the Tainan–Kaohsiung pair (double group I), two cars each.
+    const g56 = geom('R56');
+    const g57 = geom('R57');
+    const a56 = g56.slots[0]!.angle;
+    const a57 = g57.slots[0]!.angle;
+    // Straight ⇒ every car on a track shares the same (constant) heading.
+    for (const s of g56.slots) expect(Math.abs(s.angle - a56)).toBeLessThan(0.01);
+    for (const s of g57.slots) expect(Math.abs(s.angle - a57)).toBeLessThan(0.01);
+    // The two tracks run parallel to each other.
+    expect(Math.abs(a56 - a57)).toBeLessThan(0.01);
+  });
+
+  it('marks high-degree junctions as hubs and leaves through-stations plain', () => {
+    expect(HUB_CITIES.has('kaohsiung')).toBe(true); // degree 8
+    expect(HUB_CITIES.has('taipei')).toBe(true); // degree 6
+    expect(HUB_CITIES.has('tamsui')).toBe(false); // degree 2 — a spur
+    expect(HUB_CITIES.has('matsu')).toBe(false); // island ferry stub
   });
 
   it('arcs the Taichung→Yuanlin express east, clear of Changhua to its west', () => {
@@ -39,7 +61,7 @@ describe('route geometry', () => {
     expect(geom('R38').mid.x).toBeLessThan(chordMid('R38').x - 1);
   });
 
-  it('bows double-route siblings to opposite sides of their shared chord', () => {
+  it('shifts double-route siblings to opposite sides of their shared chord', () => {
     // R6 / R7 are the Taipei–Banqiao pair (double group A).
     const mid = chordMid('R6');
     const s6 = Math.sign(geom('R6').mid.x - mid.x) || Math.sign(geom('R6').mid.y - mid.y);
