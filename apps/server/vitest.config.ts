@@ -18,5 +18,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['test/**/*.spec.ts'],
+    // Bots play instantly in tests (no inter-move delay) so games finish fast.
+    env: { TRM_BOT_DELAY_MS: '0' },
   },
 });

@@ -8,7 +8,9 @@ underlying mechanics and the real Taiwanese place-names are reused. Offered in
 
 2–5 players claim coloured routes across an original Taiwan map (TRA / THSR / branch
 lines), run ferries to the outlying islands, dig tunnels through the central mountains,
-build stations, and race to complete secret destination tickets.
+build stations, and race to complete secret destination tickets. Play as a guest or a
+registered account, and the host can fill empty seats with **autonomous bots** (Easy /
+Medium / Hard) so a short table still plays out.
 
 ## Architecture
 
@@ -50,7 +52,8 @@ yarn workspace @trm/server dev      # REST + ws on :3001, docs at /docs
 yarn workspace @trm/web dev         # app on :5173 (proxies /api + /ws → :3001)
 ```
 
-Open http://localhost:5173, play as a guest, create a room, share the code, and start.
+Open http://localhost:5173, sign in (guest or a registered account), create a room, share
+the code — or add a few bots — and start. A lone player can fill the table with bots.
 
 ### Full stack with Docker
 
@@ -85,6 +88,14 @@ payment enumerator, stores).
   persist→fan-out; a unique `(gameId, seq)` index is the durable double-apply guard.
 - **Auth** — guest play via room codes + optional accounts (argon2id); HS256 access tokens
   with rotating refresh tokens and reuse detection (no multi-document transactions needed).
+  The web client surfaces the full flow — guest, sign-in, register, and stat-preserving
+  guest→account upgrade — and resumes a session from the refresh cookie on reload.
+- **Bots** — a bot is an ordinary seated player driven entirely server-side; the engine
+  never knows it is a bot. The driver runs each bot through the same validate→persist→
+  fan-out path as a human, choosing moves from the engine's own `legalActions` (so a bot
+  can never make an illegal move). Difficulty (Easy/Medium/Hard) tunes ticket-routing,
+  card drafting, station use, and randomness. Bot moves are logged actions, so replay and
+  crash recovery are unaffected; the roster is persisted and resumes after recovery.
 
 Observability: `/metrics` (Prometheus). Security: Helmet + rate limiting.
 

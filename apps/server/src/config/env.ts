@@ -9,6 +9,8 @@ export const env = {
   persistence: process.env.TRM_PERSISTENCE !== '0',
   /** When set, seed a demo game on boot and log dev tickets for manual smoke play. */
   devGame: process.env.TRM_DEV_GAME === '1',
+  /** Delay between consecutive bot moves (ms) so humans can follow the play. */
+  botMoveDelayMs: Number(process.env.TRM_BOT_DELAY_MS ?? 600),
 
   // Auth (Step C). The default secret is for local dev only — set JWT_SECRET in prod.
   jwtSecret: process.env.JWT_SECRET ?? 'dev-insecure-secret-change-me',

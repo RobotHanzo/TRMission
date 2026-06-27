@@ -6,6 +6,7 @@
 import type { Db, Collection } from 'mongodb';
 import { ENGINE_VERSION } from '@trm/engine';
 import type { GameConfig, GameState, Action } from '@trm/engine';
+import type { BotProfile } from '../bots/types';
 import {
   configToStored,
   storedToConfig,
@@ -51,6 +52,7 @@ export class MongoGameStore implements GameStorePort {
     config: GameConfig,
     genesisState: GameState,
     genesisDigest: string,
+    bots: readonly BotProfile[] = [],
   ): Promise<void> {
     const now = new Date();
     await this.games.insertOne({
@@ -62,6 +64,7 @@ export class MongoGameStore implements GameStorePort {
       schemaVersion: genesisState.schemaVersion,
       status: 'LIVE',
       currentSeq: 0,
+      ...(bots.length > 0 ? { bots: bots.map((b) => ({ ...b })) } : {}),
       createdAt: now,
       updatedAt: now,
     });
@@ -136,6 +139,7 @@ export class MongoGameStore implements GameStorePort {
       config: storedToConfig(game.config),
       snapshot: snap ? { seq: snap.seq, state: snap.state } : null,
       tail: tail.map((e) => ({ seq: e.seq, action: e.action, stateDigest: e.stateDigest })),
+      bots: game.bots ?? [],
     };
   }
 }

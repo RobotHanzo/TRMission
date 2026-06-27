@@ -6,6 +6,7 @@
 import { asPlayerId } from '@trm/shared';
 import type { RuleParams, SeatIndex } from '@trm/shared';
 import type { GameConfig, GameState, Action, FinalScoreboard } from '@trm/engine';
+import type { BotProfile } from '../bots/types';
 
 export interface StoredConfig {
   seed: string | number;
@@ -24,6 +25,8 @@ export interface GameDoc {
   schemaVersion: number;
   status: 'LIVE' | 'COMPLETED';
   currentSeq: number;
+  /** Bot players in this game (so the driver resumes them after crash recovery). */
+  bots?: BotProfile[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,6 +52,7 @@ export interface RecoveryData {
   config: GameConfig;
   snapshot: { seq: number; state: GameState } | null;
   tail: { seq: number; action: Action; stateDigest: string }[];
+  bots: BotProfile[];
 }
 
 /** Denormalised archive of a finished game, for history listing + leaderboards. */
@@ -69,6 +73,7 @@ export interface GameStorePort {
     config: GameConfig,
     genesisState: GameState,
     genesisDigest: string,
+    bots?: readonly BotProfile[],
   ): Promise<void>;
   appendAction(
     gameId: string,

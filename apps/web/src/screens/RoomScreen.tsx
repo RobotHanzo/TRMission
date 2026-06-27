@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Bot, X } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
-import { api, type RoomView } from '../net/rest';
+import { api, type RoomView, type RoomMember, type BotDifficulty } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { SEAT_COLORS } from '../theme/colors';
+
+const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
 
 export function RoomScreen() {
   const { t } = useTranslation();
@@ -47,12 +50,16 @@ export function RoomScreen() {
   const me = room.members.find((m) => m.userId === user?.id);
   const isHost = room.hostId === user?.id;
   const allReady = room.members.length >= 2 && room.members.every((m) => m.ready);
+  const canAddBot = isHost && room.members.length < room.maxPlayers;
 
-  const toggleReady = () =>
-    void api
-      .setReady(code, !me?.ready)
-      .then(setRoom)
-      .catch((e: Error) => setErr(e.message));
+  const memberName = (m: RoomMember): string =>
+    m.isBot ? t('botName', { level: t(`difficulty_${m.difficulty ?? 'EASY'}`) }) : m.displayName;
+
+  const guard = (p: Promise<RoomView>) => p.then(setRoom).catch((e: Error) => setErr(e.message));
+
+  const toggleReady = () => void guard(api.setReady(code, !me?.ready));
+  const addBot = (d: BotDifficulty) => void guard(api.addBot(code, d));
+  const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const start = async () => {
     try {
       const tk = await api.startRoom(code);
@@ -84,15 +91,41 @@ export function RoomScreen() {
               style={{ background: SEAT_COLORS[m.seat % 5] ?? '#888' }}
               aria-hidden
             />
-            <span>{m.displayName}</span>
+            {m.isBot && <Bot size={15} aria-hidden />}
+            <span>{memberName(m)}</span>
             {m.userId === room.hostId && <em className="muted">({t('host')})</em>}
             {m.userId === user?.id && <em className="muted">({t('you')})</em>}
-            <span className={m.ready ? 'badge ok' : 'badge'}>
-              {m.ready ? t('ready') : t('notReady')}
-            </span>
+            {m.isBot ? (
+              <span className="badge bot">{t('botTag')}</span>
+            ) : (
+              <span className={m.ready ? 'badge ok' : 'badge'}>
+                {m.ready ? t('ready') : t('notReady')}
+              </span>
+            )}
+            {isHost && m.isBot && (
+              <button
+                className="icon-btn"
+                aria-label={t('removeBot')}
+                title={t('removeBot')}
+                onClick={() => removeBot(m.userId)}
+              >
+                <X size={14} aria-hidden />
+              </button>
+            )}
           </li>
         ))}
       </ul>
+
+      {canAddBot && (
+        <div className="row bot-controls">
+          <span className="muted">{t('addBot')}</span>
+          {DIFFICULTIES.map((d) => (
+            <button key={d} onClick={() => addBot(d)}>
+              {t(`difficulty_${d}`)}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="row">
         <button onClick={toggleReady}>{me?.ready ? t('cancelReady') : t('markReady')}</button>

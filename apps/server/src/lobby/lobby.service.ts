@@ -12,6 +12,7 @@ import { RoomRepo, type RoomDoc, type RoomMember } from './room.repo';
 import { GameHub } from '../ws/hub';
 import { TokenService } from '../auth/token.service';
 import type { AuthUser } from '../auth/auth.types';
+import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '../bots/types';
 
 export interface RoomView {
   code: string;
@@ -84,6 +85,30 @@ export class LobbyService {
     return toView(r);
   }
 
+  /** Host adds a computer player of the given difficulty into a free seat. */
+  async addBot(code: string, user: AuthUser, difficulty: BotDifficulty): Promise<RoomView> {
+    const botId = `${BOT_ID_PREFIX}${randomUUID()}`;
+    const r = await this.rooms.addBot(code, user.userId, {
+      userId: botId,
+      displayName: `Bot-${difficulty}`,
+      difficulty,
+    });
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'forbidden') throw new ForbiddenException('only the host can add bots');
+    if (r === 'full') throw new BadRequestException('room is full');
+    return toView(r);
+  }
+
+  /** Host removes a bot from the room. */
+  async removeBot(code: string, user: AuthUser, botId: string): Promise<RoomView> {
+    const r = await this.rooms.removeBot(code, user.userId, botId);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'forbidden') throw new ForbiddenException('only the host can remove bots');
+    return toView(r);
+  }
+
   /** Host starts the game: create the authoritative match, mark the room STARTED, hand back a ticket. */
   async start(code: string, user: AuthUser): Promise<TicketResult> {
     const room = await this.require(code);
@@ -100,11 +125,14 @@ export class LobbyService {
       .sort((a, b) => a.seat - b.seat)
       .map((m) => ({ id: asPlayerId(m.userId), seat: m.seat as SeatIndex }));
     const config: GameConfig = { seed, players, contentHash: CONTENT_HASH };
+    const bots: BotProfile[] = room.members
+      .filter((m) => m.isBot && m.difficulty)
+      .map((m) => ({ playerId: m.userId, difficulty: m.difficulty as BotDifficulty }));
 
     if (!(await this.rooms.markStarted(code, user.userId, gameId, seed))) {
       throw new BadRequestException('could not start (already started?)');
     }
-    await this.hub.createMatch(gameId, taiwanBoard(), config);
+    await this.hub.createMatch(gameId, taiwanBoard(), config, bots);
     return { gameId, ticket: this.ticketFor(gameId, user.userId, this.seatOf(room, user.userId)) };
   }
 

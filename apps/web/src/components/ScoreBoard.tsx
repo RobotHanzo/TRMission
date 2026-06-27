@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { Crown } from 'lucide-react';
+import { Crown, Bot } from 'lucide-react';
 import type { GameSnapshot } from '@trm/proto';
 import { SEAT_COLORS } from '../theme/colors';
 import { seatByPlayer } from '../game/view';
+
+const isBot = (id: string): boolean => id.startsWith('bot:');
 
 export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLeave(): void }) {
   const { t } = useTranslation();
@@ -41,7 +43,10 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
                     />
                     {winners.has(p.playerId) && <Crown size={14} aria-hidden />}
                   </td>
-                  <td>{isMe ? t('you') : `P${seat + 1}`}</td>
+                  <td>
+                    {isBot(p.playerId) && <Bot size={13} aria-hidden />}{' '}
+                    {isMe ? t('you') : `P${seat + 1}`}
+                  </td>
                   <td>{p.routePoints}</td>
                   <td>{p.ticketNet}</td>
                   <td>{p.longestBonus > 0 ? '★' : ''}</td>

@@ -7,6 +7,7 @@ import type { GameStorePort } from '../persistence/types';
 import { TokenService } from '../auth/token.service';
 import { AuthModule } from '../auth/auth.module';
 import { MetricsService } from '../observability/metrics.service';
+import { env } from '../config/env';
 
 // Provides the WebSocket hub through DI (verifier = JWT ws-ticket, metrics wired), so
 // the lobby can start games and main can attach it to the raw ws server.
@@ -21,7 +22,13 @@ import { MetricsService } from '../observability/metrics.service';
         store: GameStorePort,
         tokens: TokenService,
         metrics: MetricsService,
-      ) => new GameHub(registry, { store, verifier: new JwtTicketVerifier(tokens), metrics }),
+      ) =>
+        new GameHub(registry, {
+          store,
+          verifier: new JwtTicketVerifier(tokens),
+          metrics,
+          botMoveDelayMs: env.botMoveDelayMs,
+        }),
       inject: [GameRegistry, GAME_STORE, TokenService, MetricsService],
     },
   ],

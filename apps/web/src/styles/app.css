@@ -93,6 +93,57 @@
   color: var(--tr-ok);
 }
 
+.badge.bot {
+  background: color-mix(in srgb, var(--tr-blue) 18%, transparent);
+  color: var(--tr-blue);
+}
+
+.tabs {
+  display: flex;
+  gap: var(--tr-space-2);
+}
+.tab {
+  flex: 1;
+  background: var(--tr-surface-2);
+  color: var(--tr-ink-soft);
+}
+.tab.active {
+  background: var(--tr-blue);
+  color: #fff;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85em;
+  color: var(--tr-ink-soft);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tr-surface-2);
+}
+
+.bot-controls {
+  flex-wrap: wrap;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
+.link {
+  background: none;
+  border: none;
+  color: var(--tr-blue);
+  text-decoration: underline;
+  padding: 0;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
 .conn {
   font-size: 0.85em;
   padding: 2px 8px;

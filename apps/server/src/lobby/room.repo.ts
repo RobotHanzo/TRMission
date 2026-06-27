@@ -2,6 +2,7 @@ import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
 import { MONGO_DB } from '../db/tokens';
+import type { BotDifficulty } from '../bots/types';
 
 export type RoomStatus = 'LOBBY' | 'STARTED' | 'CLOSED';
 
@@ -11,6 +12,9 @@ export interface RoomMember {
   isGuest: boolean;
   seat: number;
   ready: boolean;
+  /** Bot members are computer-controlled; they are always ready and never connect. */
+  isBot?: boolean;
+  difficulty?: BotDifficulty;
 }
 
 export interface RoomDoc {
@@ -26,6 +30,8 @@ export interface RoomDoc {
 }
 
 export type JoinResult = RoomDoc | 'not_found' | 'full' | 'started' | 'already';
+export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidden';
+export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 
 // Room codes: 6 chars, no easily-confused glyphs (no I/O/0/1).
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -135,5 +141,59 @@ export class RoomRepo implements OnModuleInit {
       { $set: { status: 'STARTED', gameId, seed, updatedAt: new Date() } },
     );
     return res.modifiedCount === 1;
+  }
+
+  /** Host-only: append a bot member into the next free seat (atomic on member-count). */
+  async addBot(
+    code: string,
+    hostId: string,
+    bot: { userId: string; displayName: string; difficulty: BotDifficulty },
+  ): Promise<AddBotResult> {
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const room = await this.col.findOne({ _id: code });
+      if (!room) return 'not_found';
+      if (room.status !== 'LOBBY') return 'started';
+      if (room.hostId !== hostId) return 'forbidden';
+      if (room.members.length >= room.maxPlayers) return 'full';
+
+      const seat = room.members.length;
+      const member: RoomMember = {
+        userId: bot.userId,
+        displayName: bot.displayName,
+        isGuest: false,
+        seat,
+        ready: true,
+        isBot: true,
+        difficulty: bot.difficulty,
+      };
+      const res = await this.col.updateOne(
+        { _id: code, hostId, status: 'LOBBY', members: { $size: seat } },
+        { $push: { members: member }, $set: { updatedAt: new Date() } },
+      );
+      if (res.modifiedCount === 1) {
+        const updated = await this.col.findOne({ _id: code });
+        if (updated) return updated;
+      }
+    }
+    throw new Error('addBot contention');
+  }
+
+  /** Host-only: remove a bot member and keep seats contiguous. */
+  async removeBot(code: string, hostId: string, botId: string): Promise<RemoveBotResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    if (room.hostId !== hostId) return 'forbidden';
+    const target = room.members.find((m) => m.userId === botId);
+    if (!target || !target.isBot) return room; // not a bot in this room — no-op
+
+    const remaining = room.members
+      .filter((m) => m.userId !== botId)
+      .map((m, i) => ({ ...m, seat: i }));
+    await this.col.updateOne(
+      { _id: code },
+      { $set: { members: remaining, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
 }

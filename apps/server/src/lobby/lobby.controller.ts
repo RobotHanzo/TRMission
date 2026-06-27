@@ -6,8 +6,10 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import {
   CreateRoomDto,
   ReadyDto,
+  AddBotDto,
   CreateRoomSchema,
   ReadySchema,
+  AddBotSchema,
   RoomViewSchema,
   TicketResultSchema,
 } from './lobby.schemas';
@@ -59,6 +61,27 @@ export class LobbyController {
   @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
   ready(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: ReadyDto) {
     return this.lobby.ready(code.toUpperCase(), user, body.ready);
+  }
+
+  @Post(':code/bots')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Host adds a bot player of a given difficulty' })
+  @ApiBody({ schema: apiSchema(AddBotSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  addBot(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: AddBotDto) {
+    return this.lobby.addBot(code.toUpperCase(), user, body.difficulty);
+  }
+
+  @Post(':code/bots/:botId/remove')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Host removes a bot player' })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  removeBot(
+    @CurrentUser() user: AuthUser,
+    @Param('code') code: string,
+    @Param('botId') botId: string,
+  ) {
+    return this.lobby.removeBot(code.toUpperCase(), user, botId);
   }
 
   @Post(':code/start')

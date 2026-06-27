@@ -12,12 +12,16 @@ export interface AuthResult {
   user: PublicUser;
   accessToken: string;
 }
+export type BotDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
+
 export interface RoomMember {
   userId: string;
   displayName: string;
   isGuest: boolean;
   seat: number;
   ready: boolean;
+  isBot?: boolean;
+  difficulty?: BotDifficulty;
 }
 export interface RoomView {
   code: string;
@@ -104,6 +108,8 @@ export const api = {
     req<AuthResult>('POST', '/auth/login', { email, password }).then(captureToken),
   register: (email: string, password: string, displayName: string) =>
     req<AuthResult>('POST', '/auth/register', { email, password, displayName }).then(captureToken),
+  upgrade: (email: string, password: string) =>
+    req<AuthResult>('POST', '/auth/upgrade', { email, password }).then(captureToken),
   me: () => req<PublicUser>('GET', '/auth/me'),
   logout: () => req<void>('POST', '/auth/logout').then(() => setAccessToken(null)),
 
@@ -113,6 +119,10 @@ export const api = {
   leaveRoom: (code: string) => req<RoomView>('POST', `/rooms/${code}/leave`),
   setReady: (code: string, ready: boolean) =>
     req<RoomView>('POST', `/rooms/${code}/ready`, { ready }),
+  addBot: (code: string, difficulty: BotDifficulty) =>
+    req<RoomView>('POST', `/rooms/${code}/bots`, { difficulty }),
+  removeBot: (code: string, botId: string) =>
+    req<RoomView>('POST', `/rooms/${code}/bots/${encodeURIComponent(botId)}/remove`),
   startRoom: (code: string) => req<TicketResult>('POST', `/rooms/${code}/start`),
   getTicket: (code: string) => req<TicketResult>('POST', `/rooms/${code}/ticket`),
 

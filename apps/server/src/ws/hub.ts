@@ -16,11 +16,13 @@ import type { PlayerId } from '@trm/shared';
 import { taiwanBoard } from '@trm/engine';
 import type { Board, GameConfig, GameEvent } from '@trm/engine';
 import type { GameRegistry, Match } from '../game/game-registry';
-import { GameSession } from '../game/game-session';
+import { GameSession, type Prepared } from '../game/game-session';
 import { Connection, type Sink } from './connection';
 import { DevTicketVerifier, type TicketVerifier } from './ticket';
 import type { GameStorePort } from '../persistence/types';
 import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
+import { chooseBotAction } from '../bots/policy';
+import type { BotProfile } from '../bots/types';
 import {
   rejectionToPb,
   viewToSnapshot,
@@ -39,7 +41,11 @@ export interface GameHubOptions {
   store?: GameStorePort;
   boardResolver?: (config: GameConfig) => Board;
   metrics?: MetricsHooks;
+  /** Pause between consecutive bot moves so humans can follow the action (0 in tests). */
+  botMoveDelayMs?: number;
 }
+
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 export class GameHub {
   private readonly connections = new Map<string, Connection>();
@@ -49,6 +55,11 @@ export class GameHub {
   private readonly store: GameStorePort | undefined;
   private readonly boardResolver: (config: GameConfig) => Board;
   private readonly metrics: MetricsHooks;
+  private readonly botMoveDelayMs: number;
+  /** gameId → (botPlayerId → profile). */
+  private readonly bots = new Map<string, Map<string, BotProfile>>();
+  /** gameIds with an in-flight bot driver loop (prevents overlapping drivers). */
+  private readonly driving = new Set<string>();
 
   constructor(
     private readonly registry: GameRegistry,
@@ -58,14 +69,29 @@ export class GameHub {
     this.store = options.store;
     this.boardResolver = options.boardResolver ?? (() => taiwanBoard());
     this.metrics = options.metrics ?? NOOP_METRICS;
+    this.botMoveDelayMs = options.botMoveDelayMs ?? 600;
   }
 
-  async createMatch(gameId: string, board: Board, config: GameConfig): Promise<Match> {
+  async createMatch(
+    gameId: string,
+    board: Board,
+    config: GameConfig,
+    bots: readonly BotProfile[] = [],
+  ): Promise<Match> {
     this.members.set(gameId, new Map());
     const match = this.registry.create(gameId, board, config);
+    if (bots.length > 0) this.bots.set(gameId, new Map(bots.map((b) => [b.playerId, b])));
     if (this.store) {
-      await this.store.createGame(gameId, config, match.session.raw(), match.session.digest());
+      await this.store.createGame(
+        gameId,
+        config,
+        match.session.raw(),
+        match.session.digest(),
+        bots,
+      );
     }
+    // Bots resolve their initial tickets and play any opening turns immediately.
+    void this.driveBots(gameId);
     return match;
   }
 
@@ -84,6 +110,16 @@ export class GameHub {
     );
     const match = this.registry.adopt(gameId, session);
     if (!this.members.has(gameId)) this.members.set(gameId, new Map());
+    if (data.bots && data.bots.length > 0 && !this.bots.has(gameId)) {
+      this.bots.set(
+        gameId,
+        new Map(
+          data.bots.map((b) => [b.playerId, { playerId: b.playerId, difficulty: b.difficulty }]),
+        ),
+      );
+    }
+    // A recovered game may be waiting on a bot — resume the driver.
+    void this.driveBots(gameId);
     return match;
   }
 
@@ -239,6 +275,7 @@ export class GameHub {
       return;
     }
     const player = conn.binding.player;
+    const gameId = conn.binding.gameId;
 
     await match.queue.run(async () => {
       // Idempotency: client_seq is monotonic per socket; a replay is dropped (A7/A14).
@@ -268,43 +305,131 @@ export class GameHub {
         return;
       }
 
-      const { prepared } = prep;
-      if (this.store) {
-        try {
-          // Write-ahead: durable before visible. On failure we do NOT advance the seq,
-          // so the client may safely retry this exact command.
-          await this.store.appendAction(
-            match.session.gameId,
-            prepared.stateVersion,
-            action,
-            prepared.digest,
-            prepared.state,
-          );
-        } catch (err) {
-          conn.send(
-            rejectionFrame(
-              env.clientSeq,
-              RejectionCode.INTERNAL,
-              'errors:internal',
-              `persist failed: ${(err as Error).message}`,
-            ),
-          );
-          return;
-        }
+      const applied = await this.applyPrepared(match, action, prep.prepared);
+      if (!applied.ok) {
+        // Write-ahead persist failed: do NOT advance the seq, so the client may safely
+        // retry this exact command.
+        conn.send(
+          rejectionFrame(
+            env.clientSeq,
+            RejectionCode.INTERNAL,
+            'errors:internal',
+            `persist failed: ${applied.error?.message ?? 'unknown'}`,
+          ),
+        );
+        return;
       }
-
       conn.lastClientSeq = env.clientSeq;
-      match.session.commit(prepared, action);
-      if (this.store && prepared.state.turn.phase === 'GAME_OVER') {
-        try {
-          await this.store.recordCompletion(match.session.gameId, prepared.state);
-        } catch {
-          // non-fatal: status is a convenience flag; the event log remains the source of truth.
-        }
-      }
-      this.broadcast(match, prepared.events, conn, env.clientSeq);
+      this.broadcast(match, prep.prepared.events, conn, env.clientSeq);
       this.metrics.commandApplied((performance.now() - startedAt) / 1000);
     });
+
+    // A human move may have handed the turn to a bot — let the driver pick it up.
+    void this.driveBots(gameId);
+  }
+
+  // ── bots ───────────────────────────────────────────────────────────────────
+
+  /**
+   * Write-ahead persist → commit → archive-on-completion, shared by human commands and
+   * bot moves. Returns ok:false (without committing) if the durable append fails.
+   */
+  private async applyPrepared(
+    match: Match,
+    action: Parameters<GameSession['commit']>[1],
+    prepared: Prepared,
+  ): Promise<{ ok: true } | { ok: false; error?: Error }> {
+    if (this.store) {
+      try {
+        await this.store.appendAction(
+          match.session.gameId,
+          prepared.stateVersion,
+          action,
+          prepared.digest,
+          prepared.state,
+        );
+      } catch (err) {
+        return { ok: false, error: err as Error };
+      }
+    }
+    match.session.commit(prepared, action);
+    if (this.store && prepared.state.turn.phase === 'GAME_OVER') {
+      try {
+        await this.store.recordCompletion(match.session.gameId, prepared.state);
+      } catch {
+        // non-fatal: status is a convenience flag; the event log remains the source of truth.
+      }
+    }
+    return { ok: true };
+  }
+
+  /**
+   * Drive every bot that can currently act, one move at a time through the match queue
+   * (so bot moves interleave safely with human commands), until the turn returns to a
+   * human or the game ends. Re-entrancy is guarded so only one driver runs per game.
+   */
+  private async driveBots(gameId: string): Promise<void> {
+    const bots = this.bots.get(gameId);
+    if (!bots || bots.size === 0 || this.driving.has(gameId)) return;
+    this.driving.add(gameId);
+    try {
+      for (let guard = 0; guard < 10_000; guard++) {
+        const match = this.registry.get(gameId);
+        if (!match || match.session.phase === 'GAME_OVER') break;
+        const profile = this.nextActableBot(match, bots);
+        if (!profile) break; // nothing for a bot to do → waiting on a human
+        if (this.botMoveDelayMs > 0) await sleep(this.botMoveDelayMs);
+
+        let moved = false;
+        await match.queue.run(async () => {
+          moved = await this.botMove(match, profile);
+        });
+        if (!moved) break;
+      }
+    } finally {
+      this.driving.delete(gameId);
+    }
+  }
+
+  /** The first bot with a move available right now (turn owner, or a pending offer/tunnel). */
+  private nextActableBot(match: Match, bots: Map<string, BotProfile>): BotProfile | undefined {
+    const s = match.session;
+    const phase = s.phase;
+    const current = s.currentPlayer;
+    const tunnelPlayer = s.raw().pendingTunnel?.playerId ?? null;
+    for (const profile of bots.values()) {
+      const pid = asPlayerId(profile.playerId);
+      if (phase === 'SETUP_TICKETS') {
+        if (s.hasPendingOffer(pid)) return profile;
+      } else if (phase === 'TICKET_SELECTION') {
+        if (current === pid && s.hasPendingOffer(pid)) return profile;
+      } else if (phase === 'TUNNEL_PENDING') {
+        if (tunnelPlayer === pid) return profile;
+      } else if (current === pid) {
+        return profile; // AWAIT_ACTION / DRAWING_CARDS
+      }
+    }
+    return undefined;
+  }
+
+  /** Choose + apply one move for `profile`. Returns false if there was nothing valid to do. */
+  private async botMove(match: Match, profile: BotProfile): Promise<boolean> {
+    const action = chooseBotAction(
+      match.session.board,
+      match.session.raw(),
+      asPlayerId(profile.playerId),
+      profile.difficulty,
+    );
+    if (!action) return false;
+    const prep = match.session.prepare(action);
+    if (!prep.ok) return false; // defensive: the policy only ever returns legal actions
+    this.metrics.commandReceived();
+    const startedAt = performance.now();
+    const applied = await this.applyPrepared(match, action, prep.prepared);
+    if (!applied.ok) return false; // persist failure — retry on the next driver pass
+    this.broadcast(match, prep.prepared.events, null, 0);
+    this.metrics.commandApplied((performance.now() - startedAt) / 1000);
+    return true;
   }
 
   // ── fan-out ──────────────────────────────────────────────────────────────
@@ -332,7 +457,7 @@ export class GameHub {
   private broadcast(
     match: Match,
     events: readonly GameEvent[],
-    actor: Connection,
+    actor: Connection | null,
     ackClientSeq: number,
   ): void {
     const members = this.members.get(match.session.gameId);

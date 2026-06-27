@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { Train, Building2, Trophy, Layers, Ticket } from 'lucide-react';
+import { Train, Building2, Trophy, Layers, Ticket, Bot } from 'lucide-react';
 import type { GameSnapshot } from '@trm/proto';
 import { SEAT_COLORS } from '../theme/colors';
+
+const isBot = (id: string): boolean => id.startsWith('bot:');
 
 export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
   const { t } = useTranslation();
@@ -17,6 +19,7 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
               style={{ background: SEAT_COLORS[p.seat % 5] ?? '#888' }}
               aria-hidden
             />
+            {isBot(p.id) && <Bot size={13} aria-hidden />}
             <span className="tracker-name">{isMe ? t('you') : `P${p.seat + 1}`}</span>
             <span className="tracker-stats">
               <span title="trains">

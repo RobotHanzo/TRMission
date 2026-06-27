@@ -1,11 +1,15 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 
+const botDifficulty = z.enum(['EASY', 'MEDIUM', 'HARD']);
+
 export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).max(5).optional() });
 export const ReadySchema = z.object({ ready: z.boolean() });
+export const AddBotSchema = z.object({ difficulty: botDifficulty });
 
 export class CreateRoomDto extends createZodDto(CreateRoomSchema) {}
 export class ReadyDto extends createZodDto(ReadySchema) {}
+export class AddBotDto extends createZodDto(AddBotSchema) {}
 
 export const RoomMemberSchema = z.object({
   userId: z.string(),
@@ -13,6 +17,8 @@ export const RoomMemberSchema = z.object({
   isGuest: z.boolean(),
   seat: z.number(),
   ready: z.boolean(),
+  isBot: z.boolean().optional(),
+  difficulty: botDifficulty.optional(),
 });
 export const RoomViewSchema = z.object({
   code: z.string(),
