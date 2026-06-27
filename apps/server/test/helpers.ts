@@ -7,7 +7,9 @@ import {
   type ClientEnvelope,
   type ServerEnvelope,
 } from '@trm/proto';
-import type { Action, Payment } from '@trm/engine';
+import { legalActions } from '@trm/engine';
+import type { Action, Payment, Board, GameState } from '@trm/engine';
+import type { PlayerId } from '@trm/shared';
 import { cardOrNullToPb } from '../src/codec';
 
 type Command = NonNullable<MessageInitShape<typeof ClientEnvelopeSchema>['command']>;
@@ -63,3 +65,35 @@ export const decodeClient = (bytes: Uint8Array): ClientEnvelope =>
 
 export const decodeServer = (bytes: Uint8Array): ServerEnvelope =>
   fromBinary(ServerEnvelopeSchema, bytes);
+
+type ClaimAction = Extract<Action, { t: 'CLAIM_ROUTE' }>;
+
+/**
+ * Deterministic driver shared by the e2e specs: prefer claiming the longest affordable
+ * NON-TUNNEL route (drains trains toward the endgame without the tunnel reveal/commit
+ * branch), else draw, draw tickets, build, or pass. Tunnels and every other mechanic are
+ * covered by the engine's own tests; here we just need games that run to completion.
+ */
+export function pickAction(board: Board, state: GameState, player: PlayerId): Action {
+  const legal = legalActions(board, state, player);
+  if (legal.length === 0) throw new Error(`no legal action for ${player}`);
+  if (state.turn.phase === 'AWAIT_ACTION') {
+    const claims = legal.filter(
+      (a): a is ClaimAction =>
+        a.t === 'CLAIM_ROUTE' && board.routeById.get(a.routeId as string)?.isTunnel !== true,
+    );
+    if (claims.length > 0) {
+      claims.sort((a, b) => {
+        const la = board.routeById.get(a.routeId as string)?.length ?? 0;
+        const lb = board.routeById.get(b.routeId as string)?.length ?? 0;
+        return lb - la || (a.routeId as string).localeCompare(b.routeId as string);
+      });
+      return claims[0] as Action;
+    }
+    for (const t of ['DRAW_BLIND', 'DRAW_TICKETS', 'BUILD_STATION', 'PASS'] as const) {
+      const hit = legal.find((a) => a.t === t);
+      if (hit) return hit;
+    }
+  }
+  return legal[0] as Action;
+}

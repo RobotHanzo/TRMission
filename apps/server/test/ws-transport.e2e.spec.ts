@@ -29,7 +29,11 @@ describe('real WebSocket transport', () => {
       { id: asPlayerId('p1'), seat: 0 },
       { id: asPlayerId('p2'), seat: 1 },
     ];
-    hub.createMatch('sock', taiwanBoard(), { seed: 'sock-1', players, contentHash: CONTENT_HASH });
+    await hub.createMatch('sock', taiwanBoard(), {
+      seed: 'sock-1',
+      players,
+      contentHash: CONTENT_HASH,
+    });
     attachWsServer(http, hub, '/ws');
     const port = await listen(http);
 

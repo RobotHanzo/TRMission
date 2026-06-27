@@ -1,8 +1,9 @@
 // The dispatcher: decode an inbound frame → authenticate/route → (for game
-// commands) serialize through the match queue → apply on the authoritative engine
-// → fan out a per-recipient redacted Snapshot + cosmetic EventBatch. This is the
-// whole realtime loop; it operates on bytes + a Sink, so the full game can be
-// driven over real protobuf without a socket (Step A proof).
+// commands) serialize through the match queue → write-ahead persist → commit on the
+// authoritative engine → fan out a per-recipient redacted Snapshot + cosmetic
+// EventBatch. It operates on bytes + a Sink, so the full loop can be driven over real
+// protobuf without a socket. Persistence is optional (Step A ran without it); when a
+// store is present, actions are durable-before-visible and games recover on reconnect.
 import { fromBinary } from '@bufbuild/protobuf';
 import {
   ClientEnvelopeSchema,
@@ -11,10 +12,13 @@ import {
   type GameEvent as PbGameEvent,
 } from '@trm/proto';
 import { asPlayerId, messageKeyFor } from '@trm/shared';
+import { taiwanBoard } from '@trm/engine';
 import type { Board, GameConfig, GameEvent } from '@trm/engine';
 import type { GameRegistry, Match } from '../game/game-registry';
+import { GameSession } from '../game/game-session';
 import { Connection, type Sink } from './connection';
 import { DevTicketVerifier, type TicketVerifier } from './ticket';
+import type { GameStorePort } from '../persistence/types';
 import {
   rejectionToPb,
   viewToSnapshot,
@@ -28,19 +32,54 @@ import {
   pongFrame,
 } from '../codec';
 
+export interface GameHubOptions {
+  verifier?: TicketVerifier;
+  store?: GameStorePort;
+  boardResolver?: (config: GameConfig) => Board;
+}
+
 export class GameHub {
   private readonly connections = new Map<string, Connection>();
   /** gameId → (playerId → that player's current connection). */
   private readonly members = new Map<string, Map<string, Connection>>();
+  private readonly verifier: TicketVerifier;
+  private readonly store: GameStorePort | undefined;
+  private readonly boardResolver: (config: GameConfig) => Board;
 
   constructor(
     private readonly registry: GameRegistry,
-    private readonly verifier: TicketVerifier = new DevTicketVerifier(),
-  ) {}
+    options: GameHubOptions = {},
+  ) {
+    this.verifier = options.verifier ?? new DevTicketVerifier();
+    this.store = options.store;
+    this.boardResolver = options.boardResolver ?? (() => taiwanBoard());
+  }
 
-  createMatch(gameId: string, board: Board, config: GameConfig): Match {
+  async createMatch(gameId: string, board: Board, config: GameConfig): Promise<Match> {
     this.members.set(gameId, new Map());
-    return this.registry.create(gameId, board, config);
+    const match = this.registry.create(gameId, board, config);
+    if (this.store) {
+      await this.store.createGame(gameId, config, match.session.raw(), match.session.digest());
+    }
+    return match;
+  }
+
+  /** Rehydrate a persisted game into memory (crash recovery / lazy load on reconnect). */
+  async recoverMatch(gameId: string): Promise<Match | null> {
+    if (!this.store) return null;
+    const data = await this.store.loadForRecovery(gameId);
+    if (!data) return null;
+    const board = this.boardResolver(data.config);
+    const session = GameSession.restore(
+      gameId,
+      board,
+      data.config,
+      data.snapshot?.state ?? null,
+      data.tail,
+    );
+    const match = this.registry.adopt(gameId, session);
+    if (!this.members.has(gameId)) this.members.set(gameId, new Map());
+    return match;
   }
 
   openConnection(id: string, sink: Sink): Connection {
@@ -73,7 +112,7 @@ export class GameHub {
     const cmd = env.command;
     switch (cmd.case) {
       case 'hello':
-        this.onHello(conn, env.clientSeq, cmd.value.ticket);
+        await this.onHello(conn, env.clientSeq, cmd.value.ticket);
         return;
       case 'ping':
         conn.send(pongFrame(cmd.value.nonce), env.clientSeq);
@@ -102,7 +141,7 @@ export class GameHub {
 
   // ── routing ────────────────────────────────────────────────────────────────
 
-  private onHello(conn: Connection, clientSeq: number, ticket: string): void {
+  private async onHello(conn: Connection, clientSeq: number, ticket: string): Promise<void> {
     const binding = this.verifier.verify(ticket);
     if (!binding) {
       conn.send(
@@ -115,7 +154,11 @@ export class GameHub {
       );
       return;
     }
-    const match = this.registry.get(binding.gameId);
+    let match = this.registry.get(binding.gameId);
+    if (!match) {
+      const recovered = await this.recoverMatch(binding.gameId);
+      if (recovered) match = recovered;
+    }
     if (!match) {
       conn.send(
         rejectionFrame(clientSeq, RejectionCode.NOT_IN_GAME, 'errors:notInGame', 'unknown game'),
@@ -189,28 +232,66 @@ export class GameHub {
     }
     const player = conn.binding.player;
 
-    await match.queue.run(() => {
-      // Idempotency: client_seq is monotonic per socket; a replay (reconnect resend)
-      // is dropped before it can apply twice (A7/A14).
+    await match.queue.run(async () => {
+      // Idempotency: client_seq is monotonic per socket; a replay is dropped (A7/A14).
       if (env.clientSeq <= conn.lastClientSeq) return;
-      conn.lastClientSeq = env.clientSeq;
 
       const action = commandToAction(env.command, player);
-      if (!action) return;
+      if (!action) {
+        conn.lastClientSeq = env.clientSeq;
+        return;
+      }
 
-      const result = match.session.apply(action);
-      if (!result.ok) {
+      const prep = match.session.prepare(action);
+      if (!prep.ok) {
+        // A rule-rejected action is deterministic — consume the seq so a resend is a no-op.
+        conn.lastClientSeq = env.clientSeq;
         conn.send(
           rejectionFrame(
             env.clientSeq,
-            rejectionToPb(result.violation.code),
-            messageKeyFor(result.violation.code),
-            result.violation.message,
+            rejectionToPb(prep.violation.code),
+            messageKeyFor(prep.violation.code),
+            prep.violation.message,
           ),
         );
         return;
       }
-      this.broadcast(match, result.events, conn, env.clientSeq);
+
+      const { prepared } = prep;
+      if (this.store) {
+        try {
+          // Write-ahead: durable before visible. On failure we do NOT advance the seq,
+          // so the client may safely retry this exact command.
+          await this.store.appendAction(
+            match.session.gameId,
+            prepared.stateVersion,
+            action,
+            prepared.digest,
+            prepared.state,
+          );
+        } catch (err) {
+          conn.send(
+            rejectionFrame(
+              env.clientSeq,
+              RejectionCode.INTERNAL,
+              'errors:internal',
+              `persist failed: ${(err as Error).message}`,
+            ),
+          );
+          return;
+        }
+      }
+
+      conn.lastClientSeq = env.clientSeq;
+      match.session.commit(prepared, action);
+      if (this.store && prepared.state.turn.phase === 'GAME_OVER') {
+        try {
+          await this.store.markCompleted(match.session.gameId, prepared.digest);
+        } catch {
+          // non-fatal: status is a convenience flag; the event log remains the source of truth.
+        }
+      }
+      this.broadcast(match, prepared.events, conn, env.clientSeq);
     });
   }
 

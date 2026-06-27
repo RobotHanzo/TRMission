@@ -1,21 +1,13 @@
 import { Module } from '@nestjs/common';
 import { HealthController } from './health/health.controller';
 import { GameRegistry } from './game/game-registry';
-import { GameHub } from './ws/hub';
 
-// Step A module: the in-memory game registry + the realtime hub, plus a health
-// controller. REST/auth/lobby modules (and a Mongo-backed registry) arrive in
-// Steps B/C; the hub's public surface stays the same.
+// Step A/B module: the in-memory live-game registry + a health controller. The
+// GameHub is constructed in main.ts because it depends on the (runtime-acquired)
+// Mongo store. REST/auth/lobby modules arrive in Step C.
 @Module({
   controllers: [HealthController],
-  providers: [
-    GameRegistry,
-    {
-      provide: GameHub,
-      useFactory: (registry: GameRegistry) => new GameHub(registry),
-      inject: [GameRegistry],
-    },
-  ],
-  exports: [GameHub, GameRegistry],
+  providers: [GameRegistry],
+  exports: [GameRegistry],
 })
 export class AppModule {}

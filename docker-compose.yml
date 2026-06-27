@@ -1,0 +1,23 @@
+# Dev infrastructure for TRMission.
+#
+# Step B uses a standalone MongoDB — the persistence layer is single-writer-per-game
+# (the per-game command queue) and needs no multi-document transactions, so a replica
+# set isn't required yet. Step C (auth token rotation) will upgrade this to a single-
+# node replica set for transactions + change streams.
+services:
+  mongo:
+    image: mongo:7
+    container_name: trm-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - trm-mongo-data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  trm-mongo-data:

@@ -23,6 +23,13 @@ export class GameRegistry {
     return match;
   }
 
+  /** Register an already-built session (e.g. recovered from the store) with a fresh queue. */
+  adopt(gameId: string, session: GameSession): Match {
+    const match: Match = { session, queue: new CommandQueue() };
+    this.matches.set(gameId, match);
+    return match;
+  }
+
   get(gameId: string): Match | undefined {
     return this.matches.get(gameId);
   }

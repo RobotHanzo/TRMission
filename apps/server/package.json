@@ -20,6 +20,7 @@
     "@trm/map-data": "workspace:*",
     "@trm/proto": "workspace:*",
     "@trm/shared": "workspace:*",
+    "mongodb": "^6.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "ws": "^8.18.0"
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^22.10.5",
     "@types/ws": "^8.5.13",
+    "mongodb-memory-server": "^10.1.4",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "vitest": "^2.1.8"

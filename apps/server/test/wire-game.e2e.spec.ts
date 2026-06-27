@@ -5,8 +5,6 @@ import {
   replay,
   stateDigest,
   CONTENT_HASH,
-  type Board,
-  type GameState,
   type Action,
   type GameConfig,
   type PlayerSeed,
@@ -16,40 +14,7 @@ import { CardColor, type ServerEnvelope } from '@trm/proto';
 import { GameRegistry } from '../src/game/game-registry';
 import { GameHub } from '../src/ws/hub';
 import { makeDevTicket } from '../src/ws/ticket';
-import { actionToCommand, encodeClient, decodeServer } from './helpers';
-
-type ClaimAction = Extract<Action, { t: 'CLAIM_ROUTE' }>;
-
-/**
- * A deterministic driver that prefers claiming the longest affordable NON-TUNNEL route
- * (to drain trains and reach the endgame without the tunnel reveal/commit branch), else
- * draws, else draws tickets, else builds, else passes. Coverage of tunnels and every
- * other mechanic is the engine's own job; here we only need a full game to complete over
- * the wire so we can prove transport + determinism + no information leak.
- */
-function pickAction(board: Board, state: GameState, player: PlayerId): Action {
-  const legal = legalActions(board, state, player);
-  if (legal.length === 0) throw new Error(`no legal action for ${player}`);
-  if (state.turn.phase === 'AWAIT_ACTION') {
-    const claims = legal.filter(
-      (a): a is ClaimAction =>
-        a.t === 'CLAIM_ROUTE' && board.routeById.get(a.routeId as string)?.isTunnel !== true,
-    );
-    if (claims.length > 0) {
-      claims.sort((a, b) => {
-        const la = board.routeById.get(a.routeId as string)?.length ?? 0;
-        const lb = board.routeById.get(b.routeId as string)?.length ?? 0;
-        return lb - la || (a.routeId as string).localeCompare(b.routeId as string);
-      });
-      return claims[0] as Action;
-    }
-    for (const t of ['DRAW_BLIND', 'DRAW_TICKETS', 'BUILD_STATION', 'PASS'] as const) {
-      const hit = legal.find((a) => a.t === t);
-      if (hit) return hit;
-    }
-  }
-  return legal[0] as Action;
-}
+import { actionToCommand, encodeClient, decodeServer, pickAction } from './helpers';
 
 const players: PlayerSeed[] = [
   { id: asPlayerId('p1'), seat: 0 },
@@ -70,7 +35,7 @@ beforeAll(async () => {
   const board = taiwanBoard();
   const registry = new GameRegistry();
   const hub = new GameHub(registry);
-  const match = hub.createMatch(gameId, board, config);
+  const match = await hub.createMatch(gameId, board, config);
   const { session } = match;
 
   const seq = new Map<string, number>();
@@ -189,7 +154,7 @@ describe('idempotency (A7) — a resent command never applies twice', () => {
       { id: asPlayerId('a'), seat: 0 as SeatIndex },
       { id: asPlayerId('b'), seat: 1 as SeatIndex },
     ];
-    const match = hub.createMatch('idem', board, {
+    const match = await hub.createMatch('idem', board, {
       seed: 'idem-1',
       players: two,
       contentHash: CONTENT_HASH,

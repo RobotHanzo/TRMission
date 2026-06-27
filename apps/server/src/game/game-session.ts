@@ -1,7 +1,8 @@
-// The authoritative in-memory game (Step A — no persistence yet). It owns the
-// engine GameState; the only way to mutate it is `apply`, which runs the pure
-// reducer and records the action so the whole game can be replayed deterministically
-// (the basis for Step B persistence/recovery and for the determinism test).
+// The authoritative live game. It owns the engine GameState; mutation goes through
+// `prepare` (pure — compute the next state) then `commit` (apply it), so the hub can
+// write-ahead persist between the two. `apply` = prepare+commit for callers that don't
+// persist (recovery, tests). `restore` rebuilds a session from a stored snapshot + the
+// tail of recorded actions, the basis of crash recovery and the determinism tests.
 import { initGame, reduce, redactFor, stateDigest, currentPlayerId } from '@trm/engine';
 import type {
   Board,
@@ -16,6 +17,18 @@ import type { PlayerId, RuleViolation } from '@trm/shared';
 
 export type ApplyResult =
   | { readonly ok: true; readonly events: GameEvent[]; readonly stateVersion: number }
+  | { readonly ok: false; readonly violation: RuleViolation };
+
+/** A computed-but-not-yet-committed action result (write-ahead log: persist, then commit). */
+export interface Prepared {
+  readonly state: GameState;
+  readonly events: GameEvent[];
+  readonly stateVersion: number;
+  readonly digest: string;
+}
+
+export type PrepareResult =
+  | { readonly ok: true; readonly prepared: Prepared }
   | { readonly ok: false; readonly violation: RuleViolation };
 
 export class GameSession {
@@ -61,12 +74,59 @@ export class GameSession {
     return this.state.players[player as string]?.pendingTicketOffer != null;
   }
 
-  apply(action: Action): ApplyResult {
+  /** Pure: compute the result without mutating, so the hub can persist before committing. */
+  prepare(action: Action): PrepareResult {
     const res = reduce(this.board, this.state, action);
     if (!res.ok) return { ok: false, violation: res.error };
-    this.state = res.value.state;
+    return {
+      ok: true,
+      prepared: {
+        state: res.value.state,
+        events: res.value.events,
+        stateVersion: res.value.state.actionSeq,
+        digest: stateDigest(res.value.state),
+      },
+    };
+  }
+
+  /** Commit a previously prepared result (after it has been durably persisted). */
+  commit(prepared: Prepared, action: Action): void {
+    this.state = prepared.state;
     this.appliedActions.push(action);
-    return { ok: true, events: res.value.events, stateVersion: this.state.actionSeq };
+  }
+
+  apply(action: Action): ApplyResult {
+    const p = this.prepare(action);
+    if (!p.ok) return { ok: false, violation: p.violation };
+    this.commit(p.prepared, action);
+    return { ok: true, events: p.prepared.events, stateVersion: p.prepared.stateVersion };
+  }
+
+  /**
+   * Rebuild a live session from a base snapshot (or genesis) + the tail of recorded
+   * actions, verifying each step's digest against what was stored. A mismatch means the
+   * persisted log diverged from the engine — recovery aborts rather than resume a corrupt
+   * game (risk #2/#3).
+   */
+  static restore(
+    gameId: string,
+    board: Board,
+    config: GameConfig,
+    snapshotState: GameState | null,
+    tail: ReadonlyArray<{ action: Action; stateDigest: string }>,
+  ): GameSession {
+    const s = new GameSession(gameId, board, config);
+    if (snapshotState) s.state = snapshotState;
+    for (const { action, stateDigest: expected } of tail) {
+      const res = s.apply(action);
+      if (!res.ok)
+        throw new Error(
+          `recovery: action at seq ${s.stateVersion} rejected: ${res.violation.code}`,
+        );
+      if (s.digest() !== expected)
+        throw new Error(`recovery: digest mismatch at seq ${s.stateVersion}`);
+    }
+    return s;
   }
 
   /** Per-viewer projection (the ONLY thing that should ever reach the wire). */
