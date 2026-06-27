@@ -14,6 +14,26 @@ export interface View {
 /** Home view: frames the main island plus every outlying island (Kinmen west → Orchid SE). */
 export const BASE_VIEW: View = { x: -4, y: -2, w: 84, h: 98 };
 
+/** Pan/zoom bounds — kept in sync with the TransformWrapper props in Board.tsx. */
+export const MIN_SCALE = 0.8;
+export const MAX_SCALE = 8;
+
+/**
+ * The home/reset zoom, derived from the live viewport so the island *fills* the board on any
+ * window shape. The board cell is `flex: 1`, so its aspect ratio changes with the window width;
+ * a single fixed scale only ever frames one ratio (the old hard-coded 1.9 left a band of sea on
+ * wider boards, reading as "too small"). This returns the react-zoom-pan-pinch scale that makes
+ * BASE_VIEW *cover* the viewport — the generalisation of that 1.9, which was exactly this
+ * cover-fit for the ~1200×760 board it was tuned on.
+ */
+export function homeScale(viewportW: number, viewportH: number): number {
+  if (viewportW <= 0 || viewportH <= 0) return 1.9; // not measured yet — sane default
+  const fitW = viewportW / BASE_VIEW.w;
+  const fitH = viewportH / BASE_VIEW.h;
+  const cover = Math.max(fitW, fitH) / Math.min(fitW, fitH);
+  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, cover));
+}
+
 /**
  * Main-island coastline, clockwise from the Tamsui river mouth. Points are smoothed
  * into a natural curve by `smoothClosedPath`; every land city sits inside this hull.

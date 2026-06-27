@@ -55,7 +55,10 @@ function ZoomTracker({ targetRef }: { targetRef: RefObject<HTMLDivElement | null
     const s = ref.state.scale;
     el.dataset.zoom = zoomBucket(s);
     el.style.setProperty('--inv-scale', String(Math.max(0.12, Math.min(1.5, 1 / s))));
-    el.style.setProperty('--marker-scale', String(Math.max(0.34, Math.min(0.82, 1 / Math.sqrt(s)))));
+    el.style.setProperty(
+      '--marker-scale',
+      String(Math.max(0.34, Math.min(0.82, 1 / Math.sqrt(s)))),
+    );
   });
   return null;
 }
@@ -108,8 +111,15 @@ function Geography() {
  */
 function MapControls({ targetRef }: { targetRef: RefObject<HTMLDivElement | null> }) {
   const { t } = useTranslation();
-  const { zoomIn, zoomOut, resetTransform } = useControls();
+  const { zoomIn, zoomOut, centerView, instance } = useControls();
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Re-centre at the cover-fit for the *current* viewport, so reset fills the board whatever
+  // its shape (a fixed scale only ever frames one window size — see homeScale).
+  const resetView = (): void => {
+    const wrap = instance.wrapperComponent;
+    centerView(homeScale(wrap?.offsetWidth ?? 0, wrap?.offsetHeight ?? 0), 200, 'easeOut');
+  };
 
   // Track fullscreen via the platform event so the icon/label stay correct even when the
   // user exits with Esc or the OS chrome rather than our button.
@@ -137,7 +147,7 @@ function MapControls({ targetRef }: { targetRef: RefObject<HTMLDivElement | null
       <button type="button" aria-label={t('zoomOut')} onClick={() => zoomOut()}>
         <Minus size={16} aria-hidden />
       </button>
-      <button type="button" aria-label={t('resetView')} onClick={() => resetTransform()}>
+      <button type="button" aria-label={t('resetView')} onClick={resetView}>
         <LocateFixed size={15} aria-hidden />
       </button>
       <button
@@ -167,7 +177,7 @@ export function Board({
   }, [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  // data-zoom seeds at the home tier (initialScale 1.9 → district) to avoid a first-paint
+  // data-zoom seeds at the home tier (initialScale ≈ home → district) to avoid a first-paint
   // label flash before ZoomTracker takes over.
   return (
     <div className="board-viewport" data-zoom="district" ref={viewportRef}>
@@ -176,6 +186,12 @@ export function Board({
         maxScale={8}
         initialScale={1.9}
         centerOnInit
+        // Snap to the cover-fit for the real viewport once measured, matching the reset button,
+        // so first paint frames the island regardless of window shape (not the fixed 1.9 seed).
+        onInit={(ref) => {
+          const wrap = ref.instance.wrapperComponent;
+          ref.centerView(homeScale(wrap?.offsetWidth ?? 0, wrap?.offsetHeight ?? 0), 0);
+        }}
         wheel={{ step: 0.0022 }}
         doubleClick={{ mode: 'zoomIn', step: 0.6 }}
         panning={{ velocityDisabled: true }}
@@ -302,7 +318,9 @@ export function Board({
                       className={buildable ? 'city-hub buildable' : 'city-hub'}
                       transform={`translate(${c.x} ${c.y})`}
                       onClick={onPick}
-                      style={hasStation ? { fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' } : undefined}
+                      style={
+                        hasStation ? { fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' } : undefined
+                      }
                     >
                       <title>{cityName(c.id as string, locale)}</title>
                     </rect>
@@ -312,7 +330,9 @@ export function Board({
                       cx={c.x}
                       cy={c.y}
                       onClick={onPick}
-                      style={hasStation ? { fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' } : undefined}
+                      style={
+                        hasStation ? { fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' } : undefined
+                      }
                     >
                       <title>{cityName(c.id as string, locale)}</title>
                     </circle>
