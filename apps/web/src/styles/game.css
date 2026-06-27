@@ -214,16 +214,16 @@
 }
 .city-label {
   fill: var(--tr-ink);
-  font-size: calc(2.6px * var(--inv-scale));
-  font-weight: 600;
+  font-size: calc(4px * var(--inv-scale));
+  font-weight: 700;
   text-anchor: middle;
   paint-order: stroke;
   stroke: var(--tr-land);
-  stroke-width: calc(0.8px * var(--inv-scale));
+  stroke-width: calc(1.1px * var(--inv-scale));
   stroke-linejoin: round;
   pointer-events: none;
   /* Keep the label hugging the (constant-size) dot instead of drifting up when zoomed. */
-  transform: translateY(calc(-2.7px * var(--inv-scale)));
+  transform: translateY(calc(-3.6px * var(--inv-scale)));
 }
 .city.island .city-label {
   stroke: var(--tr-sea);
