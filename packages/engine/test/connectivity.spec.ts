@@ -1,8 +1,35 @@
 import { describe, it, expect } from 'vitest';
-import { evaluateTickets } from '../src/graph/connectivity';
+import { evaluateTickets, ownConnectedTicketIds } from '../src/graph/connectivity';
 import type { Edge } from '../src/graph/connectivity';
 
 const V = ['a', 'b', 'c', 'd'];
+
+describe('ownConnectedTicketIds', () => {
+  it('marks only tickets joined by own edges (no borrowing)', () => {
+    const r = ownConnectedTicketIds({
+      ownEdges: [
+        { a: 'X', b: 'Y' },
+        { a: 'Y', b: 'Z' },
+      ],
+      tickets: [
+        { id: 't1', a: 'X', b: 'Z' },
+        { id: 't2', a: 'X', b: 'Q' },
+      ],
+      vertices: ['X', 'Y', 'Z', 'Q'],
+    });
+    expect(r).toEqual(['t1']);
+  });
+
+  it('returns [] when no own edges connect the endpoints', () => {
+    expect(
+      ownConnectedTicketIds({
+        ownEdges: [{ a: 'X', b: 'Y' }],
+        tickets: [{ id: 't1', a: 'X', b: 'Z' }],
+        vertices: ['X', 'Y', 'Z'],
+      }),
+    ).toEqual([]);
+  });
+});
 
 describe('evaluateTickets', () => {
   it('scores a directly-connected ticket', () => {

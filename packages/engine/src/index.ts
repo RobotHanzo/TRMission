@@ -37,8 +37,8 @@ export { checkInvariants } from './invariants';
 
 export { longestTrail } from './graph/longestTrail';
 export type { TrailEdge } from './graph/longestTrail';
-export { evaluateTickets } from './graph/connectivity';
-export type { Edge, TicketGoal, TicketEvaluation } from './graph/connectivity';
+export { evaluateTickets, ownConnectedTicketIds } from './graph/connectivity';
+export type { Edge, TicketGoal, TicketEvaluation, IdTicketGoal } from './graph/connectivity';
 export { UnionFind } from './graph/unionFind';
 
 // Re-export the canonical content + helpers for convenience.

@@ -11,6 +11,28 @@ export interface TicketGoal {
   readonly value: number;
 }
 
+export interface IdTicketGoal {
+  readonly id: string;
+  readonly a: string;
+  readonly b: string;
+}
+
+/**
+ * Tickets whose endpoints are connected using ONLY the player's own edges (no station
+ * borrowing). This is monotonic — once connected, always connected — so it is the basis for
+ * *instant* ticket completion: a ticket joined by your own track is guaranteed to also count
+ * under the full end-game `evaluateTickets` pass, so the two can never disagree.
+ */
+export function ownConnectedTicketIds(args: {
+  ownEdges: readonly Edge[];
+  tickets: readonly IdTicketGoal[];
+  vertices?: readonly string[];
+}): string[] {
+  const uf = new UnionFind(args.vertices);
+  for (const e of args.ownEdges) uf.union(e.a, e.b);
+  return args.tickets.filter((t) => uf.connected(t.a, t.b)).map((t) => t.id);
+}
+
 export interface TicketEvaluation {
   readonly net: number;
   readonly completed: number;

@@ -46,4 +46,10 @@ export interface RedactedView {
 
   readonly players: readonly RedactedPlayer[];
   readonly finalScores: FinalScoreboard | null;
+
+  /**
+   * Tickets revealed because their owner has COMPLETED them with their own routes (own-track
+   * connectivity, no station borrowing). Public to every viewer — in-progress tickets stay secret.
+   */
+  readonly completedTickets: readonly { readonly player: PlayerId; readonly ticket: TicketId }[];
 }

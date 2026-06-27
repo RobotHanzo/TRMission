@@ -8,6 +8,8 @@ import type { RedactedView, RedactedPlayer } from './types/view';
 import { reduce, hasAnyLegalMove } from './reduce';
 import { currentPlayerId } from './turn';
 import { getPlayer } from './reducers/common';
+import { ownConnectedTicketIds } from './graph/connectivity';
+import type { TicketId } from '@trm/shared';
 
 type Hand = Record<CardColor, number>;
 
@@ -146,8 +148,34 @@ function handCount(hand: Readonly<Hand>): number {
  * counts only. At GAME_OVER all kept tickets are revealed. The gateway sends ONLY this (never
  * raw GameState), so hidden information is structurally impossible to leak (ADR / risk #1).
  */
-export function redactFor(state: GameState, viewer: PlayerId | null): RedactedView {
+export function redactFor(board: Board, state: GameState, viewer: PlayerId | null): RedactedView {
   const gameOver = state.turn.phase === 'GAME_OVER';
+
+  // Finished tickets are public (own-track completion). Computed once for every player; the
+  // result is viewer-independent, so the same list reaches everyone.
+  const completedTickets: { player: PlayerId; ticket: TicketId }[] = [];
+  for (const id of state.turnOrder) {
+    const p = state.players[id as string];
+    if (!p || p.keptTickets.length === 0) continue;
+    const ownEdges: { a: string; b: string }[] = [];
+    for (const [routeId, cell] of Object.entries(state.ownership)) {
+      if ('owner' in cell && cell.owner === id) {
+        const r = board.routeById.get(routeId);
+        if (r) ownEdges.push({ a: r.a as string, b: r.b as string });
+      }
+    }
+    const tickets = p.keptTickets
+      .map((tid) => {
+        const t = board.ticketById.get(tid as string);
+        return t ? { id: tid as string, a: t.a as string, b: t.b as string } : null;
+      })
+      .filter((x): x is { id: string; a: string; b: string } => x !== null);
+    const done = new Set(ownConnectedTicketIds({ ownEdges, tickets }));
+    for (const tid of p.keptTickets) {
+      if (done.has(tid as string)) completedTickets.push({ player: id, ticket: tid });
+    }
+  }
+
   const players: RedactedPlayer[] = state.turnOrder.map((id) => {
     const p = state.players[id as string];
     const isSelf = id === viewer;
@@ -193,5 +221,6 @@ export function redactFor(state: GameState, viewer: PlayerId | null): RedactedVi
       : null,
     players,
     finalScores: state.finalScores,
+    completedTickets,
   };
 }
