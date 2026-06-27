@@ -44,8 +44,8 @@ describe('route geometry', () => {
   });
 
   it('gives single routes no perpendicular nudge', () => {
-    // A bypass curve (not a double pair) draws on its chord, no twin-track offset.
-    expect(geom('R35').perp).toEqual({ x: 0, y: 0 });
+    // A lone route (not a double pair) draws on its chord, no twin-track offset.
+    expect(geom('R38').perp).toEqual({ x: 0, y: 0 });
   });
 
   it('marks high-degree junctions as hubs and leaves through-stations plain', () => {
@@ -55,13 +55,22 @@ describe('route geometry', () => {
     expect(HUB_CITIES.has('matsu')).toBe(false); // island ferry stub
   });
 
-  it('arcs the Taichung→Yuanlin express east, clear of Changhua to its west', () => {
-    // Changhua (x=39) sits west of the straight chord; the express must bow east around it.
-    expect(geom('R35').mid.x).toBeGreaterThan(chordMid('R35').x + 1);
+  it('bows the Miaoli→Taichung line west, clear of Fengyuan to its east', () => {
+    // Fengyuan (x=43) sits east of the straight chord; the line must bow west around it.
+    expect(geom('R22').mid.x).toBeLessThan(chordMid('R22').x - 1);
   });
 
-  it('arcs the Changhua→Douliu express west, clear of Yuanlin/Ershui to its east', () => {
-    expect(geom('R38').mid.x).toBeLessThan(chordMid('R38').x - 1);
+  it('bows the flagged routes outward into open space', () => {
+    // Keelung–Matsu ferry arcs north (smaller y) of its straight crossing, off the coast.
+    expect(geom('R81').mid.y).toBeLessThan(chordMid('R81').y - 3);
+    // Hsinchu–Miaoli bows west of its chord, clear of Zhunan and the corridor.
+    expect(geom('R17').mid.x).toBeLessThan(chordMid('R17').x - 1);
+    // Taoyuan–Hsinchu bends north-west (opposite the auto-bow), off the Zhongli junction.
+    expect(geom('R14').mid.x).toBeLessThan(chordMid('R14').x - 1);
+    // Hengchun–Taitung bends north-west (opposite the auto-bow), inland past Dawu.
+    expect(geom('R70').mid.x).toBeLessThan(chordMid('R70').x - 1);
+    // Kaohsiung–Kinmen ferry curves south-west through the strait, clear of Penghu island.
+    expect(geom('R85').mid.y).toBeGreaterThan(chordMid('R85').y + 2);
   });
 
   it('nudges double-route siblings to opposite sides of their shared chord', () => {

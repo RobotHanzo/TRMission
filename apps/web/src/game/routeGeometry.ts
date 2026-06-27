@@ -41,13 +41,37 @@ export interface RouteGeometry {
 }
 
 /** Half the (counter-scaled) on-screen gap between a double-route pair's two parallel tracks. */
-const DOUBLE_GAP = 1.0;
+const DOUBLE_GAP = 1.35;
 /** A non-endpoint city within this distance of a straight route is "in the way". */
 const INTRUSION_DIST = 5.5;
 /** How firmly to arc around an intruding city (scales the raw clearance). */
 const BOW_GAIN = 0.72;
 /** Cap so no single route balloons across the board. */
 const MAX_BOW = 4.6;
+
+/**
+ * Hand-tuned outward bows (board units, signed along the chord normal) for routes whose straight
+ * or auto-bowed path would cut across other content. Each value arcs the route into open space;
+ * it replaces the auto-bow and is NOT clamped by MAX_BOW, and it composes with the double-gap so a
+ * pair bows together yet stays a twin track. Positive/negative just picks the side.
+ */
+const BOW_OVERRIDE: Record<string, number> = {
+  // Keelung–Matsu ferry: the straight crossing skims Tamsui and the north coast, and the auto-bow
+  // would push it further into land — arc it north over the open sea (but kept inside the top edge).
+  R81: 6,
+  // Hsinchu–Miaoli: the auto-bow leans east into the corridor; flip it west, clear of Zhunan.
+  R17: 4,
+  // Taoyuan–Hsinchu: the auto-bow leans south-east over the Zhongli junction; bend it the other
+  // way (north-west, toward the coast) instead.
+  R14: 4,
+  // Hengchun–Taitung: the auto-bow arcs it south-east toward the coast; bend it the other way
+  // (north-west, inland past Dawu) instead.
+  R70: -3.5,
+  // Kaohsiung–Kinmen ferry: the straight crossing runs right over Penghu — and the auto-bow skips
+  // it because Penghu is an island. Curve it south-west through the open strait, clear of Penghu.
+  // (The Kaohsiung–Penghu ferry has no intruder, so it stays straight on its own.)
+  R85: -5,
+};
 
 /** Cap on a single car's length so long routes read as many cars, not few long bars. */
 const SLOT_MAX_LEN = 2.6;
@@ -112,6 +136,12 @@ function computeOffsets(): Map<string, RouteOffset> {
       if (Math.abs(signed) > Math.abs(best)) best = signed;
     }
     out.set(r.id as string, { gap: 0, bow: Math.max(-MAX_BOW, Math.min(MAX_BOW, best * BOW_GAIN)) });
+  }
+
+  // Hand-tuned outward bows win over the automatic one, keeping any double-gap intact.
+  for (const [id, bow] of Object.entries(BOW_OVERRIDE)) {
+    const o = out.get(id);
+    if (o) out.set(id, { gap: o.gap, bow });
   }
   return out;
 }
