@@ -12,15 +12,15 @@ describe('Taiwan map content', () => {
   it('has the expected size and shape after the one-station-per-county reduction', () => {
     const s = result.stats;
     expect(s.cityCount).toBe(39);
-    expect(s.routeCount).toBe(67);
-    expect(s.distinctPairCount).toBe(59); // 59 distinct pairs + 8 second-of-pair double edges
+    expect(s.routeCount).toBe(68);
+    expect(s.distinctPairCount).toBe(60); // 60 distinct pairs + 8 second-of-pair double edges
     expect(s.doublePairCount).toBe(8);
     expect(s.tunnelCount).toBe(14);
     expect(s.ferryCount).toBe(9);
     expect(s.ferryLocoSymbols).toBe(15);
-    // Sum over ALL 67 segments. (Counting each double-route pair once gives 160, the
+    // Sum over ALL 68 segments. (Counting each double-route pair once gives 166, the
     // usable track in 2–3p where only one parallel is claimable.)
-    expect(s.totalTrackLength).toBe(173);
+    expect(s.totalTrackLength).toBe(179);
     expect(s.ticketCount).toBe(42);
     expect(s.longTicketCount).toBe(6);
   });
@@ -31,7 +31,7 @@ describe('Taiwan map content', () => {
       GREEN: 8,
       BLUE: 8,
       WHITE: 8,
-      ORANGE: 5,
+      ORANGE: 6,
       YELLOW: 6,
       PURPLE: 6,
       BLACK: 5,

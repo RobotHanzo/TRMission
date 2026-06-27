@@ -71,29 +71,41 @@ type ClaimAction = Extract<Action, { t: 'CLAIM_ROUTE' }>;
 /**
  * Deterministic driver shared by the e2e specs: prefer claiming the longest affordable
  * NON-TUNNEL route (drains trains toward the endgame without the tunnel reveal/commit
- * branch), else draw, draw tickets, build, or pass. Tunnels and every other mechanic are
- * covered by the engine's own tests; here we just need games that run to completion.
+ * branch), else draw, draw tickets, build, or pass. Here we just need games that run to
+ * completion; the individual mechanics have their own engine tests.
+ *
+ * Tunnels are still resolved when forced: a pending tunnel commits when the surcharge is
+ * affordable (else aborts), and a tunnel is claimed as a last resort once the board is down
+ * to tunnels and the deck is dry — otherwise a sparse late game can livelock with no PASS
+ * available (PASS is legal only when no other move is).
  */
 export function pickAction(board: Board, state: GameState, player: PlayerId): Action {
   const legal = legalActions(board, state, player);
   if (legal.length === 0) throw new Error(`no legal action for ${player}`);
-  if (state.turn.phase === 'AWAIT_ACTION') {
-    const claims = legal.filter(
-      (a): a is ClaimAction =>
-        a.t === 'CLAIM_ROUTE' && board.routeById.get(a.routeId as string)?.isTunnel !== true,
+
+  if (state.turn.phase === 'TUNNEL_PENDING') {
+    return (
+      legal.find((a) => a.t === 'RESOLVE_TUNNEL' && a.commit) ??
+      legal.find((a) => a.t === 'RESOLVE_TUNNEL') ??
+      (legal[0] as Action)
     );
-    if (claims.length > 0) {
-      claims.sort((a, b) => {
-        const la = board.routeById.get(a.routeId as string)?.length ?? 0;
-        const lb = board.routeById.get(b.routeId as string)?.length ?? 0;
-        return lb - la || (a.routeId as string).localeCompare(b.routeId as string);
-      });
-      return claims[0] as Action;
-    }
+  }
+
+  if (state.turn.phase === 'AWAIT_ACTION') {
+    const byLongest = (a: ClaimAction, b: ClaimAction): number => {
+      const la = board.routeById.get(a.routeId as string)?.length ?? 0;
+      const lb = board.routeById.get(b.routeId as string)?.length ?? 0;
+      return lb - la || (a.routeId as string).localeCompare(b.routeId as string);
+    };
+    const claims = legal.filter((a): a is ClaimAction => a.t === 'CLAIM_ROUTE');
+    const nonTunnel = claims.filter((a) => board.routeById.get(a.routeId as string)?.isTunnel !== true);
+    if (nonTunnel.length > 0) return [...nonTunnel].sort(byLongest)[0] as Action;
     for (const t of ['DRAW_BLIND', 'DRAW_TICKETS', 'BUILD_STATION', 'PASS'] as const) {
       const hit = legal.find((a) => a.t === t);
       if (hit) return hit;
     }
+    // Board down to tunnels and the deck is dry: claim a tunnel to keep draining trains.
+    if (claims.length > 0) return [...claims].sort(byLongest)[0] as Action;
   }
   return legal[0] as Action;
 }

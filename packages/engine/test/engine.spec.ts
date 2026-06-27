@@ -43,8 +43,11 @@ describe('full games (greedy policy)', () => {
       expect(finalState.turn.phase).toBe('GAME_OVER');
       expect(finalState.finalScores).not.toBeNull();
       expect(finalState.finalScores!.players).toHaveLength(numPlayers);
-      // Endgame must have triggered (someone hit ≤2 trains) OR all-pass — greedy claims, so trigger.
-      expect(finalState.endgame.triggered).toBe(true);
+      // The game must terminate cleanly. Smaller tables drive a player down to ≤2 trains
+      // (the train-depletion endgame); but on the reduced one-station-per-county map there
+      // isn't enough track for a full 5-player table to do so, so it terminates by board
+      // exhaustion (every player forced to PASS) instead — still a valid GAME_OVER.
+      if (numPlayers <= 4) expect(finalState.endgame.triggered).toBe(true);
       expect(log.length).toBeGreaterThan(numPlayers * 5);
     });
   }

@@ -51,6 +51,7 @@ const ROWS: readonly Row[] = [
   ['R60', 'tainan', 'pingtung', 'PURPLE', 3, ''],
   ['R61', 'pingtung', 'chaozhou', 'BLUE', 1, ''],
   ['R62', 'kaohsiung', 'chaozhou', 'GREEN', 2, ''],
+  ['R94', 'chaozhou', 'hengchun', 'ORANGE', 6, ''], // 潮州–恆春: reconnects the Hengchun cape after 枋寮 was removed
   ['R66', 'dawu', 'zhiben', 'GREEN', 2, 'T'],
   ['R67', 'zhiben', 'taitung', 'RED', 1, ''],
   ['R69', 'hengchun', 'dawu', 'YELLOW', 3, 'T'],

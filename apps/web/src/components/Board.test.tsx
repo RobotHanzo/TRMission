@@ -35,7 +35,7 @@ describe('Board', () => {
     );
     expect(screen.getByRole('img', { name: /Taiwan/i })).toBeInTheDocument();
     // Every authored route draws a roadbed path plus a chain of car slots.
-    expect(container.querySelectorAll('path.bed').length).toBeGreaterThan(80);
+    expect(container.querySelectorAll('path.bed').length).toBeGreaterThan(60);
     expect(container.querySelectorAll('rect.slot').length).toBeGreaterThan(80);
     // Multi-route junctions render as slot-shaped hub stations.
     expect(container.querySelectorAll('rect.city-hub').length).toBeGreaterThan(0);

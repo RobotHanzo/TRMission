@@ -52,14 +52,11 @@ export const TERTIARY_CITIES: ReadonlySet<string> = new Set([
   'zhongli', // 中壢
   'zhunan', // 竹南
   'fengyuan', // 豐原
-  'yuanlin', // 員林
   'nantou', // 南投
-  'xinying', // 新營
   'chaozhou', // 潮州
-  'fangliao', // 枋寮
   'suao', // 蘇澳
 ]);
-// Everything else (淡水, 板橋, 瑞芳, 二水, 大武, 知本, 池上, 頭城, …) is `minor` and only
+// Everything else (淡水, 板橋, 瑞芳, 大武, 知本, 池上, 頭城, …) is `minor` and only
 // appears at `local`. Islands always show their label regardless of tier (handled in CSS).
 
 export const cityTier = (id: string): CityTier =>

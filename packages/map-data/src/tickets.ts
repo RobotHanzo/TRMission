@@ -22,7 +22,6 @@ const shortRows: readonly Row[] = [
   ['S7', 'tamsui', 'hsinchu', 6],
   ['S8', 'hsinchu', 'changhua', 6],
   ['S9', 'taichung', 'chiayi', 6],
-  ['S10', 'miaoli', 'yuanlin', 5],
   ['S11', 'taichung', 'sunmoonlake', 5],
   ['S12', 'changhua', 'alishan', 7],
   ['S13', 'taichung', 'yuli', 12],
@@ -31,12 +30,10 @@ const shortRows: readonly Row[] = [
   ['S16', 'chiayi', 'kaohsiung', 5],
   ['S17', 'tainan', 'pingtung', 4],
   ['S18', 'douliu', 'tainan', 4],
-  ['S19', 'kaohsiung', 'fangliao', 5],
   ['S20', 'changhua', 'tainan', 7],
   ['S21', 'nantou', 'tainan', 6],
   ['S22', 'pingtung', 'taitung', 11],
   ['S23', 'kaohsiung', 'hengchun', 8],
-  ['S24', 'fangliao', 'zhiben', 7],
   ['S25', 'taitung', 'hualien', 6],
   ['S26', 'dawu', 'chishang', 6],
   ['S27', 'hualien', 'yilan', 6],
@@ -51,7 +48,6 @@ const shortRows: readonly Row[] = [
   ['S36', 'tainan', 'penghu', 7],
   ['S37', 'chiayi', 'kinmen', 8],
   ['S38', 'taitung', 'greenisland', 3],
-  ['S39', 'fangliao', 'liuqiu', 3],
   ['S40', 'taitung', 'orchidisland', 4],
 ];
 

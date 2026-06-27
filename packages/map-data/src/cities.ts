@@ -12,7 +12,8 @@ const c = (
   isIsland = false,
 ): CityDef => ({ id: asCityId(id), nameZh, nameEn, x, y, region, isIsland });
 
-/** 43 cities — original Taiwan-geography graph inspired by real TRA / THSR / branch-line stations. */
+/** 39 cities — original Taiwan-geography graph inspired by real TRA / THSR / branch-line stations.
+ *  At most one station per county outside the dense north metro and the eastern seaboard. */
 export const CITIES: readonly CityDef[] = [
   c('keelung', '基隆', 'Keelung', 63, 5, 'North'),
   c('ruifang', '瑞芳', 'Ruifang', 66, 8, 'North'),
@@ -27,19 +28,15 @@ export const CITIES: readonly CityDef[] = [
   c('fengyuan', '豐原', 'Fengyuan', 43, 34, 'Central-West'),
   c('taichung', '臺中', 'Taichung', 41, 38, 'Central-West'),
   c('changhua', '彰化', 'Changhua', 39, 41, 'Central-West'),
-  c('yuanlin', '員林', 'Yuanlin', 40, 44, 'Central-West'),
   c('nantou', '南投', 'Nantou', 47, 43, 'Interior'),
   c('sunmoonlake', '日月潭', 'Sun Moon Lake', 51, 46, 'Interior'),
-  c('ershui', '二水', 'Ershui', 40, 46, 'Central-West'),
   c('douliu', '斗六', 'Douliu', 40, 49, 'Yun-Chia-Nan'),
   c('chiayi', '嘉義', 'Chiayi', 38, 53, 'Yun-Chia-Nan'),
   c('alishan', '阿里山', 'Alishan', 48, 55, 'Interior'),
-  c('xinying', '新營', 'Xinying', 37, 57, 'Yun-Chia-Nan'),
   c('tainan', '臺南', 'Tainan', 36, 61, 'Yun-Chia-Nan'),
   c('kaohsiung', '高雄', 'Kaohsiung', 38, 66, 'South'),
   c('pingtung', '屏東', 'Pingtung', 44, 66, 'South'),
   c('chaozhou', '潮州', 'Chaozhou', 45, 70, 'South'),
-  c('fangliao', '枋寮', 'Fangliao', 45, 75, 'South'),
   c('hengchun', '恆春', 'Hengchun', 48, 86, 'South'),
   c('dawu', '大武', 'Dawu', 53, 80, 'South-link'),
   c('taitung', '臺東', 'Taitung', 58, 76, 'South-link'),
