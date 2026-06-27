@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/coverage
+**/.turbo
+**/src/gen
+.git
+.yarn/cache
+.yarn/install-state.gz
+te_rules_2015_en.pdf
+**/*.log
+.env
+.env.*

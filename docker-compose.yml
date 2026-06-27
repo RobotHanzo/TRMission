@@ -1,9 +1,10 @@
-# Dev infrastructure for TRMission.
+# TRMission infrastructure.
 #
-# Step B uses a standalone MongoDB — the persistence layer is single-writer-per-game
-# (the per-game command queue) and needs no multi-document transactions, so a replica
-# set isn't required yet. Step C (auth token rotation) will upgrade this to a single-
-# node replica set for transactions + change streams.
+#   docker compose up -d mongo            # dev DB only (run server/web via `yarn dev`)
+#   docker compose --profile full up --build   # full stack: mongo + server + web
+#
+# Step C uses a standalone MongoDB — the persistence layer is single-writer-per-game
+# and needs no multi-document transactions yet.
 services:
   mongo:
     image: mongo:7
@@ -18,6 +19,35 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  server:
+    profiles: ['full']
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    environment:
+      PORT: '3001'
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DB: trmission
+      JWT_SECRET: ${JWT_SECRET:-dev-insecure-change-me}
+      CORS_ORIGINS: http://localhost:8080
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - '3001:3001'
+    restart: unless-stopped
+
+  web:
+    profiles: ['full']
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    depends_on:
+      - server
+    ports:
+      - '8080:80'
+    restart: unless-stopped
 
 volumes:
   trm-mongo-data:
