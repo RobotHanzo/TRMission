@@ -5,24 +5,28 @@ import {
   TransformComponent,
   useControls,
   useTransformEffect,
+  type ReactZoomPanPinchContentRef,
 } from 'react-zoom-pan-pinch';
-import { Plus, Minus, LocateFixed, Maximize, Minimize } from 'lucide-react';
-import type { GameSnapshot } from '@trm/proto';
+import { Plus, Minus, LocateFixed, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
+import type { GameSnapshot, GameEvent } from '@trm/proto';
 import type { RouteColor } from '@trm/shared';
-import { CITIES, ROUTES, cityName } from '../game/content';
+import { CITIES, ROUTES, cityById, cityName } from '../game/content';
 import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
 import { zoomBucket, cityTier } from '../game/lod';
+import { transformToView, viewToTransform, type BoardTransform } from '../game/boardView';
 import {
   BASE_VIEW,
   ISLANDS,
   GRATICULE,
   TAIWAN_LAND_PATH,
   CENTRAL_RANGE_PATH,
-  homeScale,
+  fitTransform,
 } from '../game/geography';
 import { CARD_COLOR_TOKENS, GRAY_TOKEN, SEAT_COLORS } from '../theme/colors';
-import type { Locale } from '../store/ui';
+import { useUi, type Locale } from '../store/ui';
+import { useGame } from '../store/game';
+import { getSocket } from '../net/connection';
 
 interface BoardProps {
   snapshot: GameSnapshot;
@@ -106,20 +110,166 @@ function Geography() {
 }
 
 /**
+ * The home/reset view: frame the Taiwan silhouette (`path.land`) to the live viewport and centre
+ * it. The pan/zoom content sizes to the SVG's intrinsic box (not the viewport), so the island's
+ * on-screen size can't be modelled from the viewport alone — we measure the rendered land box and
+ * the current transform, recover the island's content-space rect, and fit that. This holds at any
+ * window shape, and replaces the old fixed scale that left the island tiny on wide boards.
+ */
+function frameHome(ref: ReactZoomPanPinchContentRef, animationTime: number): void {
+  const { instance, setTransform } = ref;
+  const wrap = instance.wrapperComponent;
+  const content = instance.contentComponent;
+  const land = content?.querySelector<SVGPathElement>('path.land');
+  if (!wrap || !content || !land || typeof DOMMatrix === 'undefined') return; // needs a real DOM
+  const wr = wrap.getBoundingClientRect();
+  const lr = land.getBoundingClientRect();
+  if (!wr.width || !wr.height || !lr.width || !lr.height) return; // not laid out yet (e.g. jsdom)
+  // Read the live transform straight off the DOM so it's consistent with the measured rect —
+  // `instance.state` can still lag `centerOnInit` at onInit time, which would skew the centring.
+  const css = getComputedStyle(content).transform;
+  const m = css && css !== 'none' ? new DOMMatrix(css) : new DOMMatrix();
+  const scale = m.a;
+  if (!scale) return;
+  // Un-apply that transform to recover the island's rect in the content's own pixel space.
+  const target = {
+    cx: (lr.left + lr.width / 2 - wr.left - m.e) / scale,
+    cy: (lr.top + lr.height / 2 - wr.top - m.f) / scale,
+    w: lr.width / scale,
+    h: lr.height / scale,
+  };
+  const t = fitTransform(target, { w: wr.width, h: wr.height });
+  setTransform(t.x, t.y, t.scale, animationTime, 'easeOut');
+}
+
+/** Board units spanned when auto-framing a bot's action POI (a comfortable close-up). */
+const BOT_FOLLOW_SPAN = 34;
+
+/** Turn the follow toggle off without subscribing the caller to its state. */
+const disengageFollow = (): void => {
+  const ui = useUi.getState();
+  if (ui.followActing) ui.setFollowActing(false);
+};
+
+/** Board coordinate (+ a stable key) of the most recent spatial action in the event tail. */
+function latestActionPoi(
+  events: readonly GameEvent[],
+): { x: number; y: number; key: string } | null {
+  for (let i = events.length - 1; i >= 0; i--) {
+    const e = events[i]?.event;
+    if (!e) continue;
+    if (e.case === 'routeClaimed' || e.case === 'tunnelRevealed') {
+      const g = ROUTE_GEOMETRY.get(e.value.routeId);
+      if (g) return { x: g.mid.x, y: g.mid.y, key: `${e.case}:${e.value.routeId}:${i}` };
+    } else if (e.case === 'stationBuilt') {
+      const c = cityById.get(e.value.cityId);
+      if (c) return { x: c.x, y: c.y, key: `station:${e.value.cityId}:${i}` };
+    }
+  }
+  return null;
+}
+
+/**
+ * "Follow the acting player": a headless child of the pan/zoom context that, when armed,
+ * drives the local camera. While it is MY turn it broadcasts my framing (board-space, so it
+ * survives any window size) at ≈12 Hz; while another HUMAN acts it mirrors their relayed
+ * framing; while a BOT acts — which has no camera — it glides to the POI of each action the
+ * bot takes. A manual gesture disarms the toggle elsewhere, so this never fights the user.
+ */
+function CameraSync({
+  snapshot,
+  viewportRef,
+}: {
+  snapshot: GameSnapshot;
+  viewportRef: RefObject<HTMLDivElement | null>;
+}) {
+  const { setTransform } = useControls();
+  const followActing = useUi((s) => s.followActing);
+  const actingCamera = useGame((s) => s.actingCamera);
+  const recentEvents = useGame((s) => s.recentEvents);
+
+  const me = snapshot.you?.playerId ?? null;
+  const current = snapshot.currentPlayerId;
+  const myTurn = !!me && current === me;
+  const currentIsBot = current.startsWith('bot:');
+
+  // Mirror the live transform into a ref so the broadcast timer can sample it cheaply.
+  const liveRef = useRef<BoardTransform>({ positionX: 0, positionY: 0, scale: 1 });
+  useTransformEffect((ref) => {
+    liveRef.current = {
+      positionX: ref.state.positionX,
+      positionY: ref.state.positionY,
+      scale: ref.state.scale,
+    };
+  });
+
+  // ── Broadcast my framing while it's my turn (≈12 Hz, and only when it actually moves) ──
+  useEffect(() => {
+    if (!myTurn) return;
+    let last: { cx: number; cy: number; span: number } | null = null;
+    const tick = (): void => {
+      const socket = getSocket();
+      const w = viewportRef.current?.clientWidth ?? 0;
+      const h = viewportRef.current?.clientHeight ?? 0;
+      if (!socket || w <= 0 || h <= 0) return;
+      const view = transformToView(liveRef.current, w, h);
+      if (
+        last &&
+        Math.abs(last.cx - view.cx) < 0.05 &&
+        Math.abs(last.cy - view.cy) < 0.05 &&
+        Math.abs(last.span - view.span) < 0.05
+      )
+        return;
+      last = view;
+      socket.cameraUpdate(view);
+    };
+    tick(); // one frame immediately so a follower sees where I start
+    const id = setInterval(tick, 80);
+    return () => clearInterval(id);
+  }, [myTurn, viewportRef]);
+
+  // ── Follow a HUMAN actor: mirror their relayed framing as it streams in ──
+  useEffect(() => {
+    if (!followActing || myTurn || currentIsBot) return;
+    if (!actingCamera || actingCamera.playerId !== current) return;
+    const w = viewportRef.current?.clientWidth ?? 0;
+    const h = viewportRef.current?.clientHeight ?? 0;
+    if (w <= 0 || h <= 0) return;
+    const t = viewToTransform(actingCamera.view, w, h);
+    setTransform(t.positionX, t.positionY, t.scale, 150, 'easeOut');
+  }, [followActing, myTurn, currentIsBot, current, actingCamera, setTransform, viewportRef]);
+
+  // ── Follow a BOT actor: glide to the POI of each NEW spatial action ──
+  const lastPoiKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (!followActing || myTurn || !currentIsBot) {
+      lastPoiKey.current = null;
+      return;
+    }
+    const poi = latestActionPoi(recentEvents);
+    if (!poi || poi.key === lastPoiKey.current) return;
+    lastPoiKey.current = poi.key;
+    const w = viewportRef.current?.clientWidth ?? 0;
+    const h = viewportRef.current?.clientHeight ?? 0;
+    if (w <= 0 || h <= 0) return;
+    const t = viewToTransform({ cx: poi.x, cy: poi.y, span: BOT_FOLLOW_SPAN }, w, h);
+    setTransform(t.positionX, t.positionY, t.scale, 600, 'easeOut');
+  }, [followActing, myTurn, currentIsBot, recentEvents, setTransform, viewportRef]);
+
+  return null;
+}
+
+/**
  * Zoom controls wired to the pan/zoom context, plus reset (re-centre) and a real
  * fullscreen toggle that drives the Fullscreen API on the board viewport.
  */
 function MapControls({ targetRef }: { targetRef: RefObject<HTMLDivElement | null> }) {
   const { t } = useTranslation();
-  const { zoomIn, zoomOut, centerView, instance } = useControls();
+  const controls = useControls();
+  const { zoomIn, zoomOut } = controls;
+  const followActing = useUi((s) => s.followActing);
+  const setFollowActing = useUi((s) => s.setFollowActing);
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  // Re-centre at the cover-fit for the *current* viewport, so reset fills the board whatever
-  // its shape (a fixed scale only ever frames one window size — see homeScale).
-  const resetView = (): void => {
-    const wrap = instance.wrapperComponent;
-    centerView(homeScale(wrap?.offsetWidth ?? 0, wrap?.offsetHeight ?? 0), 200, 'easeOut');
-  };
 
   // Track fullscreen via the platform event so the icon/label stay correct even when the
   // user exits with Esc or the OS chrome rather than our button.
@@ -141,13 +291,44 @@ function MapControls({ targetRef }: { targetRef: RefObject<HTMLDivElement | null
 
   return (
     <div className="map-controls">
-      <button type="button" aria-label={t('zoomIn')} onClick={() => zoomIn()}>
+      <button
+        type="button"
+        className="follow-toggle"
+        aria-label={t(followActing ? 'stopFollowing' : 'followView')}
+        aria-pressed={followActing}
+        title={t(followActing ? 'stopFollowing' : 'followView')}
+        onClick={() => setFollowActing(!followActing)}
+      >
+        {followActing ? <Eye size={15} aria-hidden /> : <EyeOff size={15} aria-hidden />}
+      </button>
+      <button
+        type="button"
+        aria-label={t('zoomIn')}
+        onClick={() => {
+          disengageFollow();
+          zoomIn();
+        }}
+      >
         <Plus size={16} aria-hidden />
       </button>
-      <button type="button" aria-label={t('zoomOut')} onClick={() => zoomOut()}>
+      <button
+        type="button"
+        aria-label={t('zoomOut')}
+        onClick={() => {
+          disengageFollow();
+          zoomOut();
+        }}
+      >
         <Minus size={16} aria-hidden />
       </button>
-      <button type="button" aria-label={t('resetView')} onClick={resetView}>
+      <button
+        type="button"
+        aria-label={t('resetView')}
+        onClick={() => {
+          disengageFollow();
+          frameHome(controls, 200);
+        }}
+      >
         <LocateFixed size={15} aria-hidden />
       </button>
       <button
@@ -177,26 +358,34 @@ export function Board({
   }, [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  // data-zoom seeds at the home tier (initialScale ≈ home → district) to avoid a first-paint
-  // label flash before ZoomTracker takes over.
+  // data-zoom seeds at the framed home tier (`local`) to avoid a first-paint label flash before
+  // ZoomTracker takes over.
   return (
-    <div className="board-viewport" data-zoom="district" ref={viewportRef}>
+    <div
+      className="board-viewport"
+      data-zoom="local"
+      ref={viewportRef}
+      onDoubleClick={disengageFollow}
+    >
       <TransformWrapper
         minScale={0.8}
         maxScale={8}
         initialScale={1.9}
         centerOnInit
-        // Snap to the cover-fit for the real viewport once measured, matching the reset button,
-        // so first paint frames the island regardless of window shape (not the fixed 1.9 seed).
-        onInit={(ref) => {
-          const wrap = ref.instance.wrapperComponent;
-          ref.centerView(homeScale(wrap?.offsetWidth ?? 0, wrap?.offsetHeight ?? 0), 0);
-        }}
+        // Frame the island to the real viewport once measured (same as the reset button), so first
+        // paint is the proper home view on any window shape rather than the fixed 1.9 seed.
+        onInit={(ref) => frameHome(ref, 0)}
         wheel={{ step: 0.0022 }}
         doubleClick={{ mode: 'zoomIn', step: 0.6 }}
         panning={{ velocityDisabled: true }}
+        // A real user gesture takes back the camera: it disarms "follow" so we never fight them.
+        // These fire only on input, not on our own setTransform, so following never disarms itself.
+        onPanningStart={disengageFollow}
+        onWheelStart={disengageFollow}
+        onPinchStart={disengageFollow}
       >
         <ZoomTracker targetRef={viewportRef} />
+        <CameraSync snapshot={snapshot} viewportRef={viewportRef} />
         <MapControls targetRef={viewportRef} />
         <TransformComponent
           wrapperClass="board-transform"

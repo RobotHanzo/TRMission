@@ -48,6 +48,31 @@ describe('@trm/proto wire round-trip', () => {
     expect(back.command.value.protocolVersion).toBe(PROTOCOL_VERSION);
   });
 
+  it('round-trips a CameraUpdate command carrying a board-space view', () => {
+    const env = create(ClientEnvelopeSchema, {
+      clientSeq: 11,
+      command: { case: 'cameraUpdate', value: { view: { cx: 50, cy: 42.5, span: 30 } } },
+    });
+    const back = fromBinary(ClientEnvelopeSchema, toBinary(ClientEnvelopeSchema, env));
+    expect(back.command.case).toBe('cameraUpdate');
+    if (back.command.case !== 'cameraUpdate') throw new Error('wrong case');
+    expect(back.command.value.view?.cx).toBeCloseTo(50);
+    expect(back.command.value.view?.cy).toBeCloseTo(42.5);
+    expect(back.command.value.view?.span).toBeCloseTo(30);
+  });
+
+  it('round-trips a CameraMoved event addressed to a player', () => {
+    const env = create(ServerEnvelopeSchema, {
+      serverSeq: 9,
+      event: { case: 'cameraMoved', value: { playerId: 'p2', view: { cx: 12, cy: 80, span: 18 } } },
+    });
+    const back = fromBinary(ServerEnvelopeSchema, toBinary(ServerEnvelopeSchema, env));
+    expect(back.event.case).toBe('cameraMoved');
+    if (back.event.case !== 'cameraMoved') throw new Error('wrong case');
+    expect(back.event.value.playerId).toBe('p2');
+    expect(back.event.value.view?.span).toBeCloseTo(18);
+  });
+
   it('round-trips a server Rejection with an i18n message key', () => {
     const env = create(ServerEnvelopeSchema, {
       serverSeq: 42,

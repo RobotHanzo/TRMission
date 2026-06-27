@@ -9,6 +9,7 @@ import {
   type GameEvent,
   type Rejection,
   type Welcome,
+  type CameraView,
   type PaymentSchema,
 } from '@trm/proto';
 
@@ -24,7 +25,12 @@ export interface SocketHandlers {
   onEvents?(stateVersion: number, events: GameEvent[]): void;
   onRejection?(rejection: Rejection): void;
   onChat?(playerId: string, text: string): void;
+  /** Another member's camera framing, relayed for "follow the acting player". */
+  onCameraMoved?(playerId: string, view: CameraView): void;
 }
+
+/** A board-space camera framing (board units), the payload of a camera update. */
+export type CameraViewInit = { cx: number; cy: number; span: number };
 
 function defaultWsUrl(): string {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -93,6 +99,10 @@ export class GameSocket {
       case 'chat':
         this.handlers.onChat?.(env.event.value.playerId, env.event.value.text);
         break;
+      case 'cameraMoved':
+        if (env.event.value.view)
+          this.handlers.onCameraMoved?.(env.event.value.playerId, env.event.value.view);
+        break;
       default:
         break; // pong / unset
     }
@@ -116,6 +126,10 @@ export class GameSocket {
   }
   chat(text: string): void {
     this.send({ case: 'chat', value: { text } });
+  }
+  /** Broadcast this client's camera framing so others can follow (ephemeral, cosmetic). */
+  cameraUpdate(view: CameraViewInit): void {
+    this.send({ case: 'cameraUpdate', value: { view } });
   }
   keepInitialTickets(ticketIds: string[]): void {
     this.send({ case: 'keepInitialTickets', value: { ticketIds } });

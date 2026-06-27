@@ -4,7 +4,7 @@
 //
 // The current protocol version. Bump on any breaking wire change; `ClientHello`
 // and `Welcome` carry it so peers can reject incompatible builds.
-export const PROTOCOL_VERSION = 1;
+export const PROTOCOL_VERSION = 2;
 
 export * from './gen/trmission/v1/common_pb';
 export * from './gen/trmission/v1/client_pb';

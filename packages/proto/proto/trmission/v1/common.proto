@@ -105,6 +105,17 @@ message Payment {
   uint32 locomotives = 3;
 }
 
+// A viewer's camera framing, expressed in BOARD units (the same 0–100 space as
+// city coordinates) so it is independent of any one client's window size: the
+// viewport centre (`cx`,`cy`) plus how many board units span the view (`span`).
+// Purely cosmetic — this is the "follow the acting player" side channel and never
+// enters the engine, the command queue, persistence, or the state digest.
+message CameraView {
+  float cx = 1;
+  float cy = 2;
+  float span = 3;
+}
+
 // routeId → owner, or a locked (closed double-route sibling, 2–3p). Absent from
 // the snapshot's ownership list ⇒ the route is still open.
 message RouteOwnership {

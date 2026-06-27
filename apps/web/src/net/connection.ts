@@ -12,6 +12,7 @@ export function connectGame(ticket: string): GameSocket {
     onSnapshot: (snapshot) => useGame.getState().applySnapshot(snapshot),
     onEvents: (version, events) => useGame.getState().applyEvents(version, events),
     onRejection: (r) => useGame.getState().setRejection({ code: r.code, messageKey: r.messageKey }),
+    onCameraMoved: (playerId, view) => useGame.getState().applyCameraMoved(playerId, view),
   });
   socket.connect();
   return socket;

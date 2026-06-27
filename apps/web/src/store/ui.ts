@@ -81,6 +81,8 @@ interface UiState {
   theme: Theme;
   colorBlind: boolean;
   boardLayout: BoardLayout;
+  /** "Follow the acting player" camera toggle — in-memory, off on each load. */
+  followActing: boolean;
   goHome(): void;
   enterRoom(code: string): void;
   enterGame(gameId: string, ticket: string): void;
@@ -90,6 +92,7 @@ interface UiState {
   setTheme(theme: Theme): void;
   setColorBlind(colorBlind: boolean): void;
   setBoardLayout(boardLayout: BoardLayout): void;
+  setFollowActing(followActing: boolean): void;
   /** Adopt preferences from a signed-in account (the account is the source of truth). */
   applyPreferences(prefs: UserPreferences): void;
 }
@@ -104,6 +107,7 @@ export const useUi = create<UiState>()((set) => ({
   theme: readTheme(),
   colorBlind: readColorBlind(),
   boardLayout: readBoardLayout(),
+  followActing: false,
   goHome: () => {
     disconnectGame();
     pushPath('/');
@@ -146,6 +150,7 @@ export const useUi = create<UiState>()((set) => ({
     writeLocal(BOARD_LAYOUT_KEY, boardLayout);
     set({ boardLayout });
   },
+  setFollowActing: (followActing) => set({ followActing }),
   applyPreferences: (prefs) => {
     writeLocal(THEME_KEY, prefs.theme);
     writeLocal(COLOR_BLIND_KEY, prefs.colorBlind ? '1' : '0');

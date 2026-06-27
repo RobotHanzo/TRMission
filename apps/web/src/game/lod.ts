@@ -8,9 +8,9 @@
 export type ZoomBucket = 'far' | 'regional' | 'district' | 'local';
 
 /**
- * Live zoom → level-of-detail bucket. Boundaries are tuned so the home view (the cover-fit
- * `homeScale`, ≈ 1.8–2.3 on common boards) sits at `district` (majors + secondary + tertiary),
- * and a deliberate zoom-in past 2.4 is needed to reveal every minor station.
+ * Live zoom → level-of-detail bucket. Boundaries thin out the dense corridors when zoomed out:
+ * `far` keeps only majors, `regional` adds secondary, `district` adds tertiary, and `local`
+ * (the framed home view's zoom and tighter) reveals every minor station.
  */
 export const zoomBucket = (scale: number): ZoomBucket =>
   scale < 1.25 ? 'far' : scale < 1.7 ? 'regional' : scale < 2.4 ? 'district' : 'local';

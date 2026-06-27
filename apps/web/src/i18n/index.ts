@@ -68,6 +68,8 @@ const resources = {
       resetView: '重置視圖',
       fullscreen: '全螢幕',
       exitFullscreen: '退出全螢幕',
+      followView: '跟隨當前玩家視角',
+      stopFollowing: '停止跟隨',
 
       connecting: '連線中…',
       connected: '已連線',
@@ -173,6 +175,8 @@ const resources = {
       resetView: 'Reset view',
       fullscreen: 'Fullscreen',
       exitFullscreen: 'Exit fullscreen',
+      followView: "Follow the current player's view",
+      stopFollowing: 'Stop following',
 
       connecting: 'Connecting…',
       connected: 'Connected',

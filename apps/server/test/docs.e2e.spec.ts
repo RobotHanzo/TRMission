@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { PROTOCOL_VERSION } from '@trm/proto';
 import { createTestApp, type TestApp } from './app';
 
 let t: TestApp;
@@ -31,7 +32,7 @@ describe('OpenAPI + Scalar docs', () => {
   it('keeps the health + version endpoints working', async () => {
     await request(t.app.getHttpServer()).get('/healthz').expect(200, { status: 'ok' });
     const res = await request(t.app.getHttpServer()).get('/version').expect(200);
-    expect(res.body.protocolVersion).toBe(1);
+    expect(res.body.protocolVersion).toBe(PROTOCOL_VERSION);
   });
 
   it('exposes Prometheus metrics including the leak guard', async () => {

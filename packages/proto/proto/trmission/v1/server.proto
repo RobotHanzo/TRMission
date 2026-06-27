@@ -156,6 +156,14 @@ message ChatBroadcast {
   string text = 2;
 }
 
+// Ephemeral, non-authoritative: another member's current camera framing, relayed so
+// this viewer can "follow" the acting player. Cosmetic only — not part of the
+// authoritative snapshot, and carries no hidden information (just board coordinates).
+message CameraMoved {
+  string player_id = 1;
+  CameraView view = 2;
+}
+
 message Pong {
   uint32 nonce = 1;
 }
@@ -172,5 +180,6 @@ message ServerEnvelope {
     Rejection rejection = 6;
     ChatBroadcast chat = 7;
     Pong pong = 8;
+    CameraMoved camera_moved = 9;
   }
 }

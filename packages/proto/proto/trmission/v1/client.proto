@@ -63,6 +63,13 @@ message Chat {
   string text = 1;
 }
 
+// Ephemeral, non-authoritative: the sender's current camera framing, fanned out to
+// other members so they can "follow" the acting player. Never an engine action — the
+// gateway handles it like Chat, bypassing the command queue, persistence, and digest.
+message CameraUpdate {
+  CameraView view = 1;
+}
+
 message Ping {
   uint32 nonce = 1;
 }
@@ -85,5 +92,6 @@ message ClientEnvelope {
     Resync resync = 12;
     Chat chat = 13;
     Ping ping = 14;
+    CameraUpdate camera_update = 15;
   }
 }

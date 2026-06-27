@@ -4,6 +4,7 @@ import type { MessageInitShape } from '@bufbuild/protobuf';
 import type {
   GameSnapshot,
   GameEvent as PbGameEvent,
+  CameraView,
   RejectionCode,
   ServerEnvelopeSchema,
 } from '@trm/proto';
@@ -39,6 +40,13 @@ export const rejectionFrame = (
 export const chatFrame = (playerId: string, text: string): ServerEvent => ({
   case: 'chat',
   value: { playerId, text },
+});
+
+// Ephemeral cosmetic relay of another member's camera framing (board-space). Not part
+// of the authoritative snapshot; carries no hidden information.
+export const cameraMovedFrame = (playerId: string, view: CameraView): ServerEvent => ({
+  case: 'cameraMoved',
+  value: { playerId, view },
 });
 
 export const pongFrame = (nonce: number): ServerEvent => ({ case: 'pong', value: { nonce } });

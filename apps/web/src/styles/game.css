@@ -122,6 +122,13 @@
   border: 1px solid var(--tr-line);
   box-shadow: var(--tr-shadow);
 }
+/* The follow toggle, while engaged, reads as a lit accent so the auto-driven camera
+   is unmistakably distinct from a normal control. */
+.map-controls button.follow-toggle[aria-pressed='true'] {
+  background: var(--tr-ember);
+  border-color: var(--tr-ember);
+  color: #fff;
+}
 
 /* ── Cartography ────────────────────────────────────────────────────────────── */
 .sea {

@@ -1,29 +1,31 @@
 import { describe, it, expect } from 'vitest';
-import { BASE_VIEW, MAX_SCALE, homeScale } from './geography';
+import { MIN_SCALE, MAX_SCALE, fitTransform } from './geography';
 
-describe('homeScale', () => {
-  // The board fills its cell, so the viewport's aspect ratio varies with window width. The
-  // home/reset zoom must be the scale that makes BASE_VIEW *cover* that viewport, generalising
-  // the old hard-coded 1.9 (which was exactly this cover-fit for one ~1200×760 board).
-  it('reproduces the legacy ~1.84 cover-fit for the board it was tuned on', () => {
-    expect(homeScale(1200, 760)).toBeCloseTo(1.842, 2);
+describe('fitTransform', () => {
+  // The board is tall-and-narrow inside a wide viewport, so the home/reset view fits the island
+  // bounding box to the viewport (contain, minus a margin) and centres it. fitTransform is the
+  // pure core: it takes the island's content-space rect (measured live) + the viewport size.
+  it('scales the target to fill the constraining axis, minus the padding', () => {
+    // Tall target in a wide viewport → height is the limiting axis.
+    const t = fitTransform({ cx: 100, cy: 100, w: 50, h: 200 }, { w: 1000, h: 500 }, 0.9);
+    expect(t.scale).toBeCloseTo((0.9 * 500) / 200, 5); // 2.25, not the looser width fit
   });
 
-  it('is 1 when the viewport already matches the BASE_VIEW aspect ratio', () => {
-    // vw/w === vh/h → nothing to cover, so scale is 1.
-    expect(homeScale(BASE_VIEW.w * 10, BASE_VIEW.h * 10)).toBeCloseTo(1, 5);
+  it('centres the target in the viewport', () => {
+    const vp = { w: 1000, h: 600 };
+    const t = fitTransform({ cx: 120, cy: 80, w: 40, h: 100 }, vp, 0.9);
+    // The target centre must map to the viewport centre: scale*c + offset === size/2.
+    expect(t.scale * 120 + t.x).toBeCloseTo(vp.w / 2, 5);
+    expect(t.scale * 80 + t.y).toBeCloseTo(vp.h / 2, 5);
   });
 
-  it('zooms in more as the viewport gets wider (so the map never shrinks to side margins)', () => {
-    expect(homeScale(1500, 760)).toBeGreaterThan(homeScale(1200, 760));
+  it('clamps a tiny target to MAX_SCALE instead of zooming past the limit', () => {
+    expect(fitTransform({ cx: 10, cy: 10, w: 1, h: 1 }, { w: 1000, h: 1000 }).scale).toBe(MAX_SCALE);
   });
 
-  it('clamps absurd aspect ratios to the max scale instead of overscaling', () => {
-    expect(homeScale(8000, 100)).toBe(MAX_SCALE);
-  });
-
-  it('falls back to a sane default when the viewport has not been measured yet', () => {
-    expect(homeScale(0, 760)).toBe(1.9);
-    expect(homeScale(1200, 0)).toBe(1.9);
+  it('clamps a huge target to MIN_SCALE instead of vanishing', () => {
+    expect(
+      fitTransform({ cx: 5000, cy: 5000, w: 100000, h: 100000 }, { w: 800, h: 600 }).scale,
+    ).toBe(MIN_SCALE);
   });
 });

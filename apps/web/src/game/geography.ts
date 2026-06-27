@@ -18,20 +18,35 @@ export const BASE_VIEW: View = { x: -4, y: -2, w: 84, h: 98 };
 export const MIN_SCALE = 0.8;
 export const MAX_SCALE = 8;
 
+/** A rectangle in the pan/zoom content's own pixel space (the island silhouette, measured live). */
+export interface FitTarget {
+  cx: number;
+  cy: number;
+  w: number;
+  h: number;
+}
+/** A react-zoom-pan-pinch transform: `translate(x, y) scale(scale)`, origin top-left. */
+export interface FitTransform {
+  scale: number;
+  x: number;
+  y: number;
+}
+
 /**
- * The home/reset zoom, derived from the live viewport so the island *fills* the board on any
- * window shape. The board cell is `flex: 1`, so its aspect ratio changes with the window width;
- * a single fixed scale only ever frames one ratio (the old hard-coded 1.9 left a band of sea on
- * wider boards, reading as "too small"). This returns the react-zoom-pan-pinch scale that makes
- * BASE_VIEW *cover* the viewport — the generalisation of that 1.9, which was exactly this
- * cover-fit for the ~1200×760 board it was tuned on.
+ * Frame a target rect to the viewport: the largest scale that *contains* the target (with a
+ * `padding` margin), then the offset that centres it. This is the home/reset view — Taiwan is
+ * tall-and-narrow inside a mostly-sea board, so a fixed scale (or a fit of the whole sea-padded
+ * BASE_VIEW) leaves the island tiny; fitting the island itself keeps it large and centred on any
+ * window shape. Pure so it can be unit-tested; Board.tsx measures the live `target`/`viewport`.
  */
-export function homeScale(viewportW: number, viewportH: number): number {
-  if (viewportW <= 0 || viewportH <= 0) return 1.9; // not measured yet — sane default
-  const fitW = viewportW / BASE_VIEW.w;
-  const fitH = viewportH / BASE_VIEW.h;
-  const cover = Math.max(fitW, fitH) / Math.min(fitW, fitH);
-  return Math.min(MAX_SCALE, Math.max(MIN_SCALE, cover));
+export function fitTransform(
+  target: FitTarget,
+  viewport: { w: number; h: number },
+  padding = 0.9,
+): FitTransform {
+  const raw = Math.min((padding * viewport.w) / target.w, (padding * viewport.h) / target.h);
+  const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, raw));
+  return { scale, x: viewport.w / 2 - scale * target.cx, y: viewport.h / 2 - scale * target.cy };
 }
 
 /**

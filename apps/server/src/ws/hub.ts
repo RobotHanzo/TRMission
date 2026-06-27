@@ -10,6 +10,7 @@ import {
   RejectionCode,
   type ClientEnvelope,
   type GameEvent as PbGameEvent,
+  type CameraView,
 } from '@trm/proto';
 import { asPlayerId, messageKeyFor } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
@@ -33,6 +34,7 @@ import {
   eventsFrame,
   rejectionFrame,
   chatFrame,
+  cameraMovedFrame,
   pongFrame,
 } from '../codec';
 
@@ -60,6 +62,12 @@ export class GameHub {
   private readonly bots = new Map<string, Map<string, BotProfile>>();
   /** gameIds with an in-flight bot driver loop (prevents overlapping drivers). */
   private readonly driving = new Set<string>();
+  /**
+   * gameId → the most recent camera framing seen for that game, so a member who
+   * (re)connects or toggles "follow" mid-turn gets the acting player's view at once.
+   * Ephemeral and cosmetic — never persisted; the client filters it by current player.
+   */
+  private readonly lastCamera = new Map<string, { playerId: string; view: CameraView }>();
 
   constructor(
     private readonly registry: GameRegistry,
@@ -167,6 +175,9 @@ export class GameHub {
       case 'chat':
         this.onChat(conn, cmd.value.text);
         return;
+      case 'cameraUpdate':
+        this.onCameraUpdate(conn, cmd.value.view);
+        return;
       case undefined:
         conn.send(
           rejectionFrame(
@@ -229,6 +240,7 @@ export class GameHub {
 
     conn.send(welcomeFrame(binding.gameId, binding.playerId, binding.seat), clientSeq);
     this.sendSnapshot(conn, match);
+    this.sendCachedCamera(conn);
   }
 
   private onResync(conn: Connection): void {
@@ -239,7 +251,10 @@ export class GameHub {
       return;
     }
     const match = this.registry.get(conn.binding.gameId);
-    if (match) this.sendSnapshot(conn, match);
+    if (match) {
+      this.sendSnapshot(conn, match);
+      this.sendCachedCamera(conn);
+    }
   }
 
   private onChat(conn: Connection, text: string): void {
@@ -248,6 +263,30 @@ export class GameHub {
     if (!members) return;
     for (const member of members.values())
       member.send(chatFrame(conn.binding.player as string, text));
+  }
+
+  /**
+   * Relay a member's camera framing to the other members so they can "follow" the
+   * acting player. Deliberately OUTSIDE the command queue / persistence / digest: it
+   * is cosmetic, carries no hidden information (board coordinates only), and so is a
+   * sibling of chat rather than an engine action.
+   */
+  private onCameraUpdate(conn: Connection, view: CameraView | undefined): void {
+    if (!conn.binding || !view) return;
+    const playerId = conn.binding.player as string;
+    this.lastCamera.set(conn.binding.gameId, { playerId, view });
+    const members = this.members.get(conn.binding.gameId);
+    if (!members) return;
+    for (const [memberId, member] of members)
+      if (memberId !== playerId) member.send(cameraMovedFrame(playerId, view));
+  }
+
+  /** Replay the cached camera framing to a freshly (re)connected member, if any. */
+  private sendCachedCamera(conn: Connection): void {
+    if (!conn.binding) return;
+    const cam = this.lastCamera.get(conn.binding.gameId);
+    if (!cam || cam.playerId === (conn.binding.player as string)) return;
+    conn.send(cameraMovedFrame(cam.playerId, cam.view));
   }
 
   private async onGameCommand(conn: Connection, env: ClientEnvelope): Promise<void> {
