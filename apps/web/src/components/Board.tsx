@@ -203,11 +203,20 @@ export function Board({
               const isFerry = r.ferryLocos > 0;
               const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
               const cls = 'route' + (claimable ? ' claimable' : '') + (o ? ' owned' : '') + kind;
+              // Double-route siblings split apart by a perpendicular nudge that counter-scales with
+              // the track weight (--inv-scale), so the twin tracks stay snug at any zoom.
+              const perpStyle =
+                g.perp.x || g.perp.y
+                  ? {
+                      transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
+                    }
+                  : undefined;
 
               return (
                 <g
                   key={r.id as string}
                   className={cls}
+                  style={perpStyle}
                   onClick={claimable ? () => onPickRoute(r.id as string) : undefined}
                 >
                   {/* Paper roadbed seats the cars legibly over land and sea. */}

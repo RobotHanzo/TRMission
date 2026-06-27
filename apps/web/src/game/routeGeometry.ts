@@ -8,9 +8,9 @@ import { CITIES, ROUTES, cityById } from './content';
  *  1. Express routes that skip a town (e.g. Taichung→Yuanlin past Changhua) used to run
  *     straight over the stacked short-route chain. Each route now bows AWAY from the most
  *     intruding city it would otherwise cross, so the express arcs clear of the corridor.
- *  2. Double-route siblings barely separated. They are now drawn as two STRAIGHT parallel
- *     tracks — each shifted to its own side of the shared chord — rather than mirror curves,
- *     so a pair of parallel rails reads at a glance. (Only the bypass routes in (1) curve.)
+ *  2. Double-route siblings barely separated. They are now two STRAIGHT parallel tracks sharing
+ *     their stations, split by a perpendicular `perp` nudge the renderer counter-scales — so the
+ *     pair stays a snug, constant-width twin track at every zoom. (Only bypass routes (1) curve.)
  *
  * The slot count communicates the route length, so the map needs no number badges.
  */
@@ -32,10 +32,16 @@ export interface RouteGeometry {
   readonly slots: readonly Slot[];
   /** Curve midpoint — anchor for the colour-blind glyph chip. */
   readonly mid: { readonly x: number; readonly y: number };
+  /**
+   * Perpendicular nudge (board units) that separates a double-route pair into two parallel
+   * tracks. The renderer multiplies it by `--inv-scale`, so the twin tracks hold a constant
+   * on-screen gap (and stay snug, like the car thickness) at every zoom. `{0,0}` for a lone route.
+   */
+  readonly perp: { readonly x: number; readonly y: number };
 }
 
-/** Half the perpendicular gap between a double-route pair's two parallel tracks. */
-const DOUBLE_OFFSET = 1.5;
+/** Half the (counter-scaled) on-screen gap between a double-route pair's two parallel tracks. */
+const DOUBLE_GAP = 1.0;
 /** A non-endpoint city within this distance of a straight route is "in the way". */
 const INTRUSION_DIST = 5.5;
 /** How firmly to arc around an intruding city (scales the raw clearance). */
@@ -52,16 +58,16 @@ const SLOT_FILL_TUNNEL = 0.62;
 
 /** How a route deviates from its straight chord. */
 interface RouteOffset {
-  /** Parallel perpendicular shift of the WHOLE straight line — a double-pair's two tracks. */
-  readonly shift: number;
+  /** Signed half-gap (board units) separating a double-pair's two parallel tracks; 0 otherwise. */
+  readonly gap: number;
   /** Perpendicular bow of the curve's apex — a single route arcing around an intruding town. */
   readonly bow: number;
 }
 
 /**
- * Per-route deviation from the straight chord. A double-route pair's siblings each become a
- * straight track shifted to opposite sides (so they read as parallel rails); every other route
- * stays on its endpoints and bows away from the nearest city its chord would otherwise cross.
+ * Per-route deviation from the straight chord. A double-route pair's siblings keep their shared
+ * endpoints but take equal-and-opposite perpendicular gaps (applied counter-scaled at render, so
+ * the pair stays snug); every other route bows away from the nearest city its chord would cross.
  */
 function computeOffsets(): Map<string, RouteOffset> {
   const out = new Map<string, RouteOffset>();
@@ -72,9 +78,7 @@ function computeOffsets(): Map<string, RouteOffset> {
       groups.set(r.doubleGroup, [...(groups.get(r.doubleGroup) ?? []), r.id as string]);
   for (const ids of groups.values()) {
     ids.sort();
-    ids.forEach((id, i) =>
-      out.set(id, { shift: (i - (ids.length - 1) / 2) * 2 * DOUBLE_OFFSET, bow: 0 }),
-    );
+    ids.forEach((id, i) => out.set(id, { gap: (i - (ids.length - 1) / 2) * 2 * DOUBLE_GAP, bow: 0 }));
   }
 
   for (const r of ROUTES) {
@@ -82,7 +86,7 @@ function computeOffsets(): Map<string, RouteOffset> {
     const a = cityById.get(r.a as string);
     const b = cityById.get(r.b as string);
     if (!a || !b) {
-      out.set(r.id as string, { shift: 0, bow: 0 });
+      out.set(r.id as string, { gap: 0, bow: 0 });
       continue;
     }
     const abx = b.x - a.x;
@@ -107,7 +111,7 @@ function computeOffsets(): Map<string, RouteOffset> {
       const signed = -Math.sign(side || 1) * (INTRUSION_DIST - dist);
       if (Math.abs(signed) > Math.abs(best)) best = signed;
     }
-    out.set(r.id as string, { shift: 0, bow: Math.max(-MAX_BOW, Math.min(MAX_BOW, best * BOW_GAIN)) });
+    out.set(r.id as string, { gap: 0, bow: Math.max(-MAX_BOW, Math.min(MAX_BOW, best * BOW_GAIN)) });
   }
   return out;
 }
@@ -158,20 +162,20 @@ function buildGeometry(): Map<string, RouteGeometry> {
   const offsets = computeOffsets();
   const out = new Map<string, RouteGeometry>();
   for (const r of ROUTES) {
-    const ca = cityById.get(r.a as string);
-    const cb = cityById.get(r.b as string);
-    if (!ca || !cb) continue;
-    const len = Math.hypot(cb.x - ca.x, cb.y - ca.y) || 1;
-    const nx = -(cb.y - ca.y) / len;
-    const ny = (cb.x - ca.x) / len;
-    const { shift, bow } = offsets.get(r.id as string) ?? { shift: 0, bow: 0 };
-    // A double pair shifts the whole straight track sideways; a bypass keeps its endpoints and
-    // bows the apex. So endpoints carry the (parallel) shift, the control point carries the bow.
-    const a = { x: ca.x + nx * shift, y: ca.y + ny * shift };
-    const b = { x: cb.x + nx * shift, y: cb.y + ny * shift };
+    const a = cityById.get(r.a as string);
+    const b = cityById.get(r.b as string);
+    if (!a || !b) continue;
+    const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    const nx = -(b.y - a.y) / len;
+    const ny = (b.x - a.x) / len;
+    const { gap, bow } = offsets.get(r.id as string) ?? { gap: 0, bow: 0 };
+    // Every route keeps its endpoints on the two city centres. A bypass bows its apex around an
+    // intruding town; a double pair instead carries a perpendicular `perp` nudge applied (counter-
+    // scaled) at render time, so its twin tracks separate without ever leaving their stations.
     const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-    // Control point chosen so the curve's apex deviates from the (shifted) chord by exactly `bow`.
+    // Control point chosen so the curve's apex deviates from the chord by exactly `bow`.
     const c = { x: mid.x + nx * 2 * bow, y: mid.y + ny * 2 * bow };
+    const perp = gap ? { x: nx * gap, y: ny * gap } : { x: 0, y: 0 };
 
     // Arc length by sampling, to space the cars evenly.
     let arc = 0;
@@ -198,6 +202,7 @@ function buildGeometry(): Map<string, RouteGeometry> {
       path: `M ${f(a.x)} ${f(a.y)} Q ${f(c.x)} ${f(c.y)} ${f(b.x)} ${f(b.y)}`,
       slots,
       mid: qPoint(a, c, b, 0.5),
+      perp,
     });
   }
   return out;

@@ -20,10 +20,8 @@ describe('route geometry', () => {
     for (const r of ROUTES) expect(geom(r.id as string).slots).toHaveLength(r.length);
   });
 
-  it('starts and ends each single route on its two endpoint cities', () => {
-    // Double pairs deliberately shift off the centres into parallel tracks — covered below.
+  it('keeps every route on its two endpoint cities (doubles separate at render time)', () => {
     for (const r of ROUTES) {
-      if (r.doubleGroup) continue;
       const a = cityById.get(r.a as string)!;
       const b = cityById.get(r.b as string)!;
       const path = geom(r.id as string).path;
@@ -45,6 +43,11 @@ describe('route geometry', () => {
     expect(Math.abs(a56 - a57)).toBeLessThan(0.01);
   });
 
+  it('gives single routes no perpendicular nudge', () => {
+    // A bypass curve (not a double pair) draws on its chord, no twin-track offset.
+    expect(geom('R35').perp).toEqual({ x: 0, y: 0 });
+  });
+
   it('marks high-degree junctions as hubs and leaves through-stations plain', () => {
     expect(HUB_CITIES.has('kaohsiung')).toBe(true); // degree 8
     expect(HUB_CITIES.has('taipei')).toBe(true); // degree 6
@@ -61,11 +64,12 @@ describe('route geometry', () => {
     expect(geom('R38').mid.x).toBeLessThan(chordMid('R38').x - 1);
   });
 
-  it('shifts double-route siblings to opposite sides of their shared chord', () => {
-    // R6 / R7 are the Taipei–Banqiao pair (double group A).
-    const mid = chordMid('R6');
-    const s6 = Math.sign(geom('R6').mid.x - mid.x) || Math.sign(geom('R6').mid.y - mid.y);
-    const s7 = Math.sign(geom('R7').mid.x - mid.x) || Math.sign(geom('R7').mid.y - mid.y);
+  it('nudges double-route siblings to opposite sides of their shared chord', () => {
+    // R6 / R7 are the Taipei–Banqiao pair (double group A): same path, opposite perp offsets.
+    const p6 = geom('R6').perp;
+    const p7 = geom('R7').perp;
+    const s6 = Math.sign(p6.x) || Math.sign(p6.y);
+    const s7 = Math.sign(p7.x) || Math.sign(p7.y);
     expect(s6).not.toBe(0);
     expect(s6).toBe(-s7);
   });
