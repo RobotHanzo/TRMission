@@ -322,21 +322,6 @@
     stroke: #1f2328;
   }
 }
-.station {
-  fill: var(--tr-ember);
-  stroke: var(--tr-surface);
-  stroke-width: calc(0.3px * var(--marker-scale));
-  r: calc(0.8px * var(--marker-scale));
-}
-.station-hub {
-  x: calc(-1.25px * var(--marker-scale));
-  y: calc(-0.8px * var(--marker-scale));
-  width: calc(2.5px * var(--marker-scale));
-  height: calc(1.6px * var(--marker-scale));
-  rx: calc(0.4px * var(--marker-scale));
-  stroke: var(--tr-surface);
-  stroke-width: calc(0.3px * var(--marker-scale));
-}
 .city-label {
   fill: var(--tr-ink);
   font-size: calc(4px * var(--inv-scale));
