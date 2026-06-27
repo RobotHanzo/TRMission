@@ -165,15 +165,15 @@
 .len-badge circle {
   fill: var(--tr-surface);
   stroke: var(--tr-ink-soft);
-  stroke-width: calc(0.25px * var(--inv-scale));
-  r: calc(1.4px * var(--inv-scale));
+  stroke-width: calc(0.32px * var(--inv-scale));
+  r: calc(1.95px * var(--inv-scale));
 }
 .len-badge text {
   fill: var(--tr-ink);
-  font-size: calc(1.9px * var(--inv-scale));
+  font-size: calc(2.7px * var(--inv-scale));
   text-anchor: middle;
   dominant-baseline: central;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* ── Cities + stations ──────────────────────────────────────────────────────── */
@@ -201,15 +201,16 @@
 }
 .city-label {
   fill: var(--tr-ink);
-  font-size: calc(1.8px * var(--inv-scale));
+  font-size: calc(2.6px * var(--inv-scale));
+  font-weight: 600;
   text-anchor: middle;
   paint-order: stroke;
   stroke: var(--tr-land);
-  stroke-width: calc(0.6px * var(--inv-scale));
+  stroke-width: calc(0.8px * var(--inv-scale));
   stroke-linejoin: round;
   pointer-events: none;
   /* Keep the label hugging the (constant-size) dot instead of drifting up when zoomed. */
-  transform: translateY(calc(-2.1px * var(--inv-scale)));
+  transform: translateY(calc(-2.7px * var(--inv-scale)));
 }
 .city.island .city-label {
   stroke: var(--tr-sea);

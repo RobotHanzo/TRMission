@@ -12,7 +12,7 @@ export * from './validate';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',
-  version: 1,
+  version: 2,
   nameZh: '台灣本島與離島',
   nameEn: 'Taiwan & Outlying Islands',
 };

@@ -34,14 +34,6 @@ const ROWS: readonly Row[] = [
   ['R22', 'miaoli', 'taichung', 'WHITE', 3, ''],
   ['R23', 'taichung', 'changhua', 'ORANGE', 1, 'D-E'],
   ['R24', 'taichung', 'changhua', 'GREEN', 1, 'D-E'],
-  ['R25', 'zhunan', 'dajia', 'WHITE', 2, ''],
-  ['R26', 'dajia', 'shalu', 'YELLOW', 1, ''],
-  ['R27', 'dajia', 'miaoli', 'GREEN', 2, ''],
-  ['R28', 'shalu', 'changhua', 'PURPLE', 2, ''],
-  ['R29', 'shalu', 'taichung', 'RED', 1, ''],
-  ['R30', 'shalu', 'yuanlin', 'BLUE', 3, ''],
-  ['R31', 'changhua', 'lukang', 'RED', 1, ''],
-  ['R32', 'lukang', 'yuanlin', 'ORANGE', 2, ''],
   ['R33', 'changhua', 'yuanlin', 'BLUE', 1, 'D-F'],
   ['R34', 'changhua', 'yuanlin', 'BLACK', 1, 'D-F'],
   ['R35', 'taichung', 'yuanlin', 'YELLOW', 2, ''],
@@ -100,6 +92,11 @@ const ROWS: readonly Row[] = [
   ['R88', 'taitung', 'greenisland', 'GRAY', 2, 'F1'],
   ['R89', 'taitung', 'orchidisland', 'GRAY', 3, 'F2'],
   ['R90', 'greenisland', 'orchidisland', 'GRAY', 2, 'F1'],
+  // Cross-island mountain railways — original tunnels spanning the central range so the
+  // east is reachable from several latitudes (north / central / south), not just one spine.
+  ['R91', 'taoyuan', 'yilan', 'PURPLE', 6, 'T'], // 北橫: a second northern crossing
+  ['R92', 'nantou', 'yuli', 'GRAY', 8, 'T'], // 中橫: the deep central crossing to the Rift Valley
+  ['R93', 'alishan', 'chishang', 'YELLOW', 6, 'T'], // 南橫: the southern high-mountain crossing
 ];
 
 function build([id, a, b, color, length, flag]: Row): RouteDef {

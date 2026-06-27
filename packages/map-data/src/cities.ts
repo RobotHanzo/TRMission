@@ -12,7 +12,7 @@ const c = (
   isIsland = false,
 ): CityDef => ({ id: asCityId(id), nameZh, nameEn, x, y, region, isIsland });
 
-/** 46 cities — original Taiwan-geography graph inspired by real TRA / THSR / branch-line stations. */
+/** 43 cities — original Taiwan-geography graph inspired by real TRA / THSR / branch-line stations. */
 export const CITIES: readonly CityDef[] = [
   c('keelung', '基隆', 'Keelung', 63, 5, 'North'),
   c('ruifang', '瑞芳', 'Ruifang', 66, 8, 'North'),
@@ -24,12 +24,9 @@ export const CITIES: readonly CityDef[] = [
   c('hsinchu', '新竹', 'Hsinchu', 43, 22, 'Northwest'),
   c('zhunan', '竹南', 'Zhunan', 42, 25, 'Northwest'),
   c('miaoli', '苗栗', 'Miaoli', 41, 29, 'Northwest'),
-  c('dajia', '大甲', 'Dajia', 38, 31, 'Central-West'),
-  c('shalu', '沙鹿', 'Shalu', 37, 35, 'Central-West'),
   c('fengyuan', '豐原', 'Fengyuan', 43, 34, 'Central-West'),
   c('taichung', '臺中', 'Taichung', 41, 38, 'Central-West'),
   c('changhua', '彰化', 'Changhua', 39, 41, 'Central-West'),
-  c('lukang', '鹿港', 'Lukang', 35, 42, 'Central-West'),
   c('yuanlin', '員林', 'Yuanlin', 40, 44, 'Central-West'),
   c('nantou', '南投', 'Nantou', 47, 43, 'Interior'),
   c('sunmoonlake', '日月潭', 'Sun Moon Lake', 51, 46, 'Interior'),

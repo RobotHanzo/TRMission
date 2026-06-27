@@ -11,31 +11,31 @@ describe('Taiwan map content', () => {
 
   it('has the expected size and shape (plan §6)', () => {
     const s = result.stats;
-    expect(s.cityCount).toBe(46);
-    expect(s.routeCount).toBe(90);
-    expect(s.distinctPairCount).toBe(80); // 80 distinct pairs + 10 double pairs
+    expect(s.cityCount).toBe(43);
+    expect(s.routeCount).toBe(85);
+    expect(s.distinctPairCount).toBe(75); // 75 distinct pairs + 10 second-of-pair double edges
     expect(s.doublePairCount).toBe(10);
-    expect(s.tunnelCount).toBe(15);
+    expect(s.tunnelCount).toBe(18);
     expect(s.ferryCount).toBe(10);
     expect(s.ferryLocoSymbols).toBe(16);
-    // Sum over ALL 90 segments. (Counting each double-route pair once gives 188, the
+    // Sum over ALL 85 segments. (Counting each double-route pair once gives 194, the
     // usable track in 2–3p where only one parallel is claimable.)
-    expect(s.totalTrackLength).toBe(204);
+    expect(s.totalTrackLength).toBe(210);
     expect(s.ticketCount).toBe(46);
     expect(s.longTicketCount).toBe(6);
   });
 
   it('has the planned colour balance', () => {
     expect(result.stats.colorBalance).toMatchObject({
-      RED: 10,
-      GREEN: 10,
-      BLUE: 10,
-      WHITE: 10,
-      ORANGE: 9,
+      RED: 8,
+      GREEN: 9,
+      BLUE: 9,
+      WHITE: 9,
+      ORANGE: 8,
       YELLOW: 9,
       PURPLE: 8,
       BLACK: 8,
-      GRAY: 16,
+      GRAY: 17,
     });
   });
 
