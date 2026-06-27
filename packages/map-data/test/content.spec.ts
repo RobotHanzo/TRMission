@@ -9,33 +9,33 @@ describe('Taiwan map content', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('has the expected size and shape (plan §6)', () => {
+  it('has the expected size and shape after the one-station-per-county reduction', () => {
     const s = result.stats;
-    expect(s.cityCount).toBe(43);
-    expect(s.routeCount).toBe(85);
-    expect(s.distinctPairCount).toBe(75); // 75 distinct pairs + 10 second-of-pair double edges
-    expect(s.doublePairCount).toBe(10);
-    expect(s.tunnelCount).toBe(18);
-    expect(s.ferryCount).toBe(10);
-    expect(s.ferryLocoSymbols).toBe(16);
-    // Sum over ALL 85 segments. (Counting each double-route pair once gives 194, the
+    expect(s.cityCount).toBe(39);
+    expect(s.routeCount).toBe(67);
+    expect(s.distinctPairCount).toBe(59); // 59 distinct pairs + 8 second-of-pair double edges
+    expect(s.doublePairCount).toBe(8);
+    expect(s.tunnelCount).toBe(14);
+    expect(s.ferryCount).toBe(9);
+    expect(s.ferryLocoSymbols).toBe(15);
+    // Sum over ALL 67 segments. (Counting each double-route pair once gives 160, the
     // usable track in 2–3p where only one parallel is claimable.)
-    expect(s.totalTrackLength).toBe(210);
-    expect(s.ticketCount).toBe(46);
+    expect(s.totalTrackLength).toBe(173);
+    expect(s.ticketCount).toBe(42);
     expect(s.longTicketCount).toBe(6);
   });
 
   it('has the planned colour balance', () => {
     expect(result.stats.colorBalance).toMatchObject({
-      RED: 8,
-      GREEN: 9,
-      BLUE: 9,
-      WHITE: 9,
-      ORANGE: 8,
-      YELLOW: 9,
-      PURPLE: 8,
-      BLACK: 8,
-      GRAY: 17,
+      RED: 7,
+      GREEN: 8,
+      BLUE: 8,
+      WHITE: 8,
+      ORANGE: 5,
+      YELLOW: 6,
+      PURPLE: 6,
+      BLACK: 5,
+      GRAY: 14,
     });
   });
 
