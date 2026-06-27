@@ -39,18 +39,43 @@ export default tseslint.config(
     rules: {
       'no-restricted-globals': [
         'error',
-        { name: 'Date', message: 'The engine must be deterministic — no wall-clock. Pass time in via state/config.' },
+        {
+          name: 'Date',
+          message:
+            'The engine must be deterministic — no wall-clock. Pass time in via state/config.',
+        },
       ],
       'no-restricted-properties': [
         'error',
-        { object: 'Math', property: 'random', message: 'Use the seeded counter PRNG from @trm/shared.' },
-        { object: 'Date', property: 'now', message: 'The engine must be deterministic — no wall-clock.' },
-        { object: 'crypto', property: 'randomUUID', message: 'No nondeterministic ids in the engine.' },
+        {
+          object: 'Math',
+          property: 'random',
+          message: 'Use the seeded counter PRNG from @trm/shared.',
+        },
+        {
+          object: 'Date',
+          property: 'now',
+          message: 'The engine must be deterministic — no wall-clock.',
+        },
+        {
+          object: 'crypto',
+          property: 'randomUUID',
+          message: 'No nondeterministic ids in the engine.',
+        },
       ],
       'no-restricted-syntax': [
         'error',
         { selector: "NewExpression[callee.name='Date']", message: 'No wall-clock in the engine.' },
       ],
+    },
+  },
+  // NestJS DI resolves constructor dependencies from emitted decorator metadata, which
+  // requires injected classes to be VALUE imports. consistent-type-imports can't see
+  // that usage, so it is disabled here; verbatimModuleSyntax still enforces correctness.
+  {
+    files: ['apps/server/**/*.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'off',
     },
   },
   // Tests may use whatever they need.
