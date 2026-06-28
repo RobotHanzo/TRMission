@@ -58,7 +58,7 @@ the code — or add a few bots — and start. A lone player can fill the table w
 ### Docker profiles
 
 ```bash
-# mongo + server (dev mode, hot-reload) — run web locally on :5173
+# mongo + server (hot-reload) + Vite web dev server — open http://localhost:5173
 cp apps/server/.env.example apps/server/.env   # once; fill in secrets
 docker compose --profile dev-server up --build
 
@@ -66,8 +66,9 @@ docker compose --profile dev-server up --build
 docker compose --profile full up --build
 ```
 
-The `dev-server` profile sources configuration from `apps/server/.env` (see `.env.example`).
-`MONGO_URL` is automatically overridden to reach the containerised MongoDB.
+The `dev-server` profile sources server configuration from `apps/server/.env` (see `.env.example`).
+`MONGO_URL` is automatically overridden to reach the containerised MongoDB; the Vite proxy is
+pointed at the server container via `VITE_SERVER_HOST`.
 
 ## Testing & quality
 

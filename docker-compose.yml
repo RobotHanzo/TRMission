@@ -1,7 +1,7 @@
 # TRMission infrastructure.
 #
 #   docker compose up -d mongo                        # dev DB only (run server/web via `yarn dev`)
-#   docker compose --profile dev-server up --build    # mongo + server in dev mode; run web locally
+#   docker compose --profile dev-server up --build    # mongo + server + vite web dev (http://localhost:5173)
 #   docker compose --profile full up --build          # full stack: mongo + server + web
 #
 # The dev-server profile reads env from apps/server/.env (copy .env.example to get started).
@@ -25,8 +25,7 @@ services:
       retries: 5
 
   # Dev server: reads config from apps/server/.env, overrides MONGO_URL for the Docker network,
-  # and runs with --watch for hot-reload. Useful when you want the server containerised but the
-  # web running locally on :5173.
+  # and runs with --watch for hot-reload.
   dev-server:
     profiles: ['dev-server']
     build:
@@ -43,6 +42,23 @@ services:
         condition: service_healthy
     ports:
       - '3001:3001'
+    restart: unless-stopped
+
+  # Vite dev server: proxies /api + /ws to the dev-server container.
+  # VITE_SERVER_HOST routes the proxy to the Docker service name instead of localhost.
+  web-dev:
+    profiles: ['dev-server']
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+      target: deps
+    command: yarn workspace @trm/web dev
+    environment:
+      VITE_SERVER_HOST: dev-server
+    depends_on:
+      - dev-server
+    ports:
+      - '5173:5173'
     restart: unless-stopped
 
   server:
