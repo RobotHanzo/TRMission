@@ -38,7 +38,6 @@ describe('GameScreen spectator mode', () => {
   it('shows the spectating banner and disables actions when there is no SelfView', () => {
     render(<GameScreen />);
     expect(screen.getByText('觀戰中')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '跳過' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: '抽任務卡' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /抽任務卡/ })).toBeDisabled();
   });
 });
