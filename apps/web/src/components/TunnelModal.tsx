@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { CardColor as PbCardColor } from '@trm/proto';
 import { CARD_COLOR_TOKENS } from '../theme/colors';
@@ -6,6 +6,7 @@ import { pbToCard } from '../game/cards';
 import type { Payment } from '../game/payments';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { TrainCarCard } from './TrainCarCard';
+import { soundPlayer } from '../sound/player';
 
 interface Props {
   revealed: PbCardColor[];
@@ -36,6 +37,8 @@ export function TunnelModal({ revealed, extraRequired, options, onCommit, onAbor
   // Hold the surcharge result + payment choices back until every card has flipped in, so the
   // outcome isn't spoiled before the reveal finishes building suspense.
   const [showResult, setShowResult] = useState(reduced);
+  // Fire the success/payment cue exactly once per opened tunnel.
+  const resultCuePlayed = useRef(false);
 
   useEffect(() => {
     if (reduced) {
@@ -47,6 +50,26 @@ export function TunnelModal({ revealed, extraRequired, options, onCommit, onAbor
     const timer = window.setTimeout(() => setShowResult(true), ms);
     return () => clearTimeout(timer);
   }, [revealed, reduced]);
+
+  // Card-placement tick per revealed tunnel card, synced to the flip stagger.
+  useEffect(() => {
+    if (reduced) {
+      soundPlayer.play('tunnelDraw');
+      return;
+    }
+    const timers = revealed.map((_, i) =>
+      window.setTimeout(() => soundPlayer.play('tunnelDraw'), i * REVEAL_STAGGER_MS),
+    );
+    return () => timers.forEach((id) => clearTimeout(id));
+  }, [revealed, reduced]);
+
+  // Result cue once the surcharge outcome is shown.
+  useEffect(() => {
+    if (showResult && !resultCuePlayed.current) {
+      resultCuePlayed.current = true;
+      soundPlayer.play(extraRequired === 0 ? 'tunnelSuccess' : 'tunnelPayment');
+    }
+  }, [showResult, extraRequired]);
 
   return (
     <div className="modal-backdrop">
