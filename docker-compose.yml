@@ -26,6 +26,8 @@ services:
 
   # Dev server: reads config from apps/server/.env, overrides MONGO_URL for the Docker network,
   # and runs with --watch for hot-reload.
+  # Source files are bind-mounted for live sync; named volumes shield the container's
+  # node_modules and generated proto files from being overwritten by the host tree.
   dev-server:
     profiles: ['dev-server']
     build:
@@ -42,6 +44,11 @@ services:
         condition: service_healthy
     ports:
       - '3001:3001'
+    volumes:
+      - .:/app
+      - trm-node-modules:/app/node_modules
+      - trm-yarn-state:/app/.yarn
+      - trm-proto-gen:/app/packages/proto/src/gen
     restart: unless-stopped
 
   # Vite dev server: proxies /api + /ws to the dev-server container.
@@ -59,6 +66,11 @@ services:
       - dev-server
     ports:
       - '5173:5173'
+    volumes:
+      - .:/app
+      - trm-node-modules:/app/node_modules
+      - trm-yarn-state:/app/.yarn
+      - trm-proto-gen:/app/packages/proto/src/gen
     restart: unless-stopped
 
   server:
@@ -102,3 +114,6 @@ services:
 
 volumes:
   trm-mongo-data:
+  trm-node-modules:
+  trm-yarn-state:
+  trm-proto-gen:
