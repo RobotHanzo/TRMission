@@ -63,8 +63,12 @@ export function KeepTicketsModal({ offered, minKeep, lockLong, onConfirm }: Prop
   };
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal modal-tickets" role="dialog" aria-modal="true">
+    <div className={confirming ? 'modal-backdrop is-flying' : 'modal-backdrop'}>
+      <div
+        className={confirming ? 'modal modal-tickets is-flying' : 'modal modal-tickets'}
+        role="dialog"
+        aria-modal="true"
+      >
         <h3>{t('chooseTickets')}</h3>
         <p className="muted">{t('keepAtLeast', { n: minKeep })}</p>
         <div className={confirming ? 'ticket-cards is-confirming' : 'ticket-cards'}>

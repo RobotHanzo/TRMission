@@ -226,6 +226,23 @@
     transform 0.5s cubic-bezier(0.4, 0, 0.6, 1),
     opacity 0.5s ease;
 }
+/* While cards fly to the tray, dissolve the dialog chrome and stop the modal clipping
+   (.modal has overflow:auto) so the flight crosses the whole view, not just the box. */
+.modal-backdrop.is-flying {
+  background: transparent;
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+.modal-tickets.is-flying {
+  overflow: visible;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.modal-tickets.is-flying > :not(.ticket-cards) {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
 
 /* ── Opponent-subtle completion cue (item 4) ─────────────────────────────────── */
 @keyframes anim-cue-pop {
