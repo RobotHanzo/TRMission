@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   TransformWrapper,
@@ -26,7 +26,10 @@ import {
 import { CARD_COLOR_TOKENS, GRAY_TOKEN, SEAT_COLORS } from '../theme/colors';
 import { useUi, type Locale } from '../store/ui';
 import { useGame } from '../store/game';
+import { useAnimations } from '../store/animations';
 import { getSocket } from '../net/connection';
+
+const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
 
 interface BoardProps {
   snapshot: GameSnapshot;
@@ -358,6 +361,30 @@ export function Board({
   }, [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
+  // Transient claim/station glow + the ticket-completion path sweep (cleared on a timer).
+  const glowingRoutes = useAnimations((s) => s.glowingRoutes);
+  const glowingStations = useAnimations((s) => s.glowingStations);
+  const sweeps = useAnimations((s) => s.sweeps);
+  const clearGlowRoute = useAnimations((s) => s.clearGlowRoute);
+  const clearGlowStation = useAnimations((s) => s.clearGlowStation);
+  const removeSweep = useAnimations((s) => s.removeSweep);
+
+  useEffect(() => {
+    if (glowingRoutes.size === 0) return;
+    const timers = [...glowingRoutes.keys()].map((id) => window.setTimeout(() => clearGlowRoute(id), 1300));
+    return () => timers.forEach(clearTimeout);
+  }, [glowingRoutes, clearGlowRoute]);
+  useEffect(() => {
+    if (glowingStations.size === 0) return;
+    const timers = [...glowingStations.keys()].map((id) => window.setTimeout(() => clearGlowStation(id), 1100));
+    return () => timers.forEach(clearTimeout);
+  }, [glowingStations, clearGlowStation]);
+  useEffect(() => {
+    if (sweeps.length === 0) return;
+    const timers = sweeps.map((sw) => window.setTimeout(() => removeSweep(sw.id), sw.path.length * 320 + 900));
+    return () => timers.forEach(clearTimeout);
+  }, [sweeps, removeSweep]);
+
   // data-zoom seeds at the framed home tier (`local`) to avoid a first-paint label flash before
   // ZoomTracker takes over.
   return (
@@ -411,21 +438,29 @@ export function Board({
               const carOpacity = o?.locked ? 0.45 : 1;
               const isFerry = r.ferryLocos > 0;
               const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
-              const cls = 'route' + (claimable ? ' claimable' : '') + (o ? ' owned' : '') + kind;
+              const glowSeat = glowingRoutes.get(r.id as string);
+              const cls =
+                'route' +
+                (claimable ? ' claimable' : '') +
+                (o ? ' owned' : '') +
+                (glowSeat !== undefined ? ' just-claimed' : '') +
+                kind;
               // Double-route siblings split apart by a perpendicular nudge that counter-scales with
               // the track weight (--inv-scale), so the twin tracks stay snug at any zoom.
-              const perpStyle =
-                g.perp.x || g.perp.y
+              const groupStyle: CSSProperties = {
+                ...(g.perp.x || g.perp.y
                   ? {
                       transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
                     }
-                  : undefined;
+                  : null),
+                ...(glowSeat !== undefined ? ({ '--seat': seatColor(glowSeat) } as CSSProperties) : null),
+              };
 
               return (
                 <g
                   key={r.id as string}
                   className={cls}
-                  style={perpStyle}
+                  style={groupStyle}
                   onClick={claimable ? () => onPickRoute(r.id as string) : undefined}
                 >
                   {/* Paper roadbed seats the cars legibly over land and sea. */}
@@ -497,6 +532,8 @@ export function Board({
                 (isHub ? ' hub' : '') +
                 (tier !== 'minor' ? ` ${tier}` : '');
               const onPick = buildable ? () => onPickCity(c.id as string) : undefined;
+              const builtSeat = glowingStations.get(c.id as string);
+              const justBuilt = builtSeat !== undefined;
               return (
                 <g key={c.id as string} className={cls}>
                   {/* Junctions where many lines converge read as a wider slot-shaped station;
@@ -523,24 +560,54 @@ export function Board({
                   {hasStation &&
                     (isHub ? (
                       <rect
-                        className="station-hub"
+                        className={justBuilt ? 'station-hub just-built' : 'station-hub'}
                         transform={`translate(${c.x} ${c.y})`}
-                        style={{ fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' }}
+                        style={{ fill: seatColor(stationSeat!) }}
                       />
                     ) : (
                       <circle
-                        className="station"
+                        className={justBuilt ? 'station just-built' : 'station'}
                         cx={c.x}
                         cy={c.y}
-                        style={{ fill: SEAT_COLORS[stationSeat! % 5] ?? '#888' }}
+                        style={{ fill: seatColor(stationSeat!) }}
                       />
                     ))}
+                  {justBuilt && (
+                    <circle
+                      className="station-ring"
+                      cx={c.x}
+                      cy={c.y}
+                      r={0.5}
+                      style={{ '--seat': seatColor(builtSeat) } as CSSProperties}
+                    />
+                  )}
                   <text className="city-label" x={c.x} y={c.y}>
                     {cityName(c.id as string, locale)}
                   </text>
                 </g>
               );
             })}
+
+            {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path. */}
+            {sweeps.map((sw) => (
+              <g key={sw.id} className="sweep-layer" pointerEvents="none">
+                {sw.path.map((rid, i) => {
+                  const sg = ROUTE_GEOMETRY.get(rid);
+                  if (!sg) return null;
+                  return (
+                    <path
+                      key={i}
+                      className="sweep-seg"
+                      d={sg.path}
+                      pathLength={1}
+                      style={
+                        { '--seat': seatColor(sw.seat), '--delay': `${i * 0.32}s` } as CSSProperties
+                      }
+                    />
+                  );
+                })}
+              </g>
+            ))}
           </svg>
         </TransformComponent>
       </TransformWrapper>
