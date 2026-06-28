@@ -29,6 +29,7 @@ import { KeepTicketsModal } from '../components/KeepTicketsModal';
 import { TunnelModal } from '../components/TunnelModal';
 import { ScoreBoard } from '../components/ScoreBoard';
 import { AnimationLayer } from '../components/AnimationLayer';
+import { Toast } from '../components/Toast';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import '../styles/game.css';
 import '../styles/animations.css';
@@ -267,12 +268,8 @@ export function GameScreen() {
         />
       )}
       {phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={leave} />}
-      {notice && (
-        <div className="toast toast-notice" role="status">
-          {notice}
-        </div>
-      )}
-      {rejection && <div className="toast">{t('actionRejected')}</div>}
+      <Toast message={notice} variant="toast-notice" />
+      <Toast message={rejection ? t('actionRejected') : null} />
       <AnimationLayer />
     </div>
   );
