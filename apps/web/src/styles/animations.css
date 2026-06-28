@@ -109,6 +109,11 @@
   background: linear-gradient(150deg, var(--tr-primary, #0f4c81), #0b3a63);
   color: #fff;
 }
+/* Ticket chooser: offered missions deal out one at a time as the chooser opens. */
+.ticket-deal-in {
+  animation: anim-card-flip-in 0.4s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.12s);
+}
 
 /* ── Score +N float (item 5 / item 4) ────────────────────────────────────────── */
 @keyframes anim-float-up {
@@ -385,6 +390,7 @@
   .sweep-seg,
   .tunnel-reveal-card,
   .tunnel-result,
+  .ticket-deal-in,
   .market-slot.is-flipping,
   .score-float,
   .tracker.is-turn-cue,

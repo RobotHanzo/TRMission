@@ -1011,6 +1011,14 @@ button.ticket-card:hover {
 .peek-body {
   padding: var(--tr-space-1) 0;
 }
+/* Kept-missions peek: two cards per row, stretched to the rail width (mirrors the missions tray). */
+.peek-body .ticket-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+.peek-body .ticket-card {
+  width: 100%;
+}
 .chooser-confirm {
   width: 100%;
 }

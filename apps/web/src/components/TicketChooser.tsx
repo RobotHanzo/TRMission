@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { CardCounts } from '@trm/proto';
@@ -66,8 +66,9 @@ export function TicketChooser({
       </p>
 
       <div className="chooser-offer">
-        {offered.map((id) => (
-          <div key={id} className="ticket-slot">
+        {offered.map((id, i) => (
+          // `--i` staggers the draw-in flip so the offered tickets deal out one after another.
+          <div key={id} className="ticket-slot ticket-deal-in" style={{ '--i': i } as CSSProperties}>
             <TicketCard
               ticketId={id}
               selected={kept.has(id)}
@@ -77,6 +78,14 @@ export function TicketChooser({
           </div>
         ))}
       </div>
+
+      <button
+        className="primary chooser-confirm"
+        disabled={kept.size < minKeep}
+        onClick={() => onConfirm([...kept])}
+      >
+        {t('keep')} ({kept.size})
+      </button>
 
       {/* Peek at the player's own cards/tickets — hidden because the chooser replaced the rail. */}
       <div className="chooser-peeks">
@@ -116,14 +125,6 @@ export function TicketChooser({
           </div>
         )}
       </div>
-
-      <button
-        className="primary chooser-confirm"
-        disabled={kept.size < minKeep}
-        onClick={() => onConfirm([...kept])}
-      >
-        {t('keep')} ({kept.size})
-      </button>
     </section>
   );
 }
