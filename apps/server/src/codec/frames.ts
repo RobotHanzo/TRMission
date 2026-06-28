@@ -10,6 +10,7 @@ import type {
 } from '@trm/proto';
 import { PROTOCOL_VERSION } from '@trm/proto';
 
+
 export type ServerEvent = NonNullable<MessageInitShape<typeof ServerEnvelopeSchema>['event']>;
 
 export const welcomeFrame = (gameId: string, playerId: string, seat: number): ServerEvent => ({
@@ -50,3 +51,18 @@ export const cameraMovedFrame = (playerId: string, view: CameraView): ServerEven
 });
 
 export const pongFrame = (nonce: number): ServerEvent => ({ case: 'pong', value: { nonce } });
+
+// One-shot backfill of the game's event history (already redacted) + persisted chat,
+// sent after the snapshot on (re)connect. The client routes this to the log/chat only.
+export const historyReplayFrame = (
+  events: PbGameEvent[],
+  chat: readonly { playerId: string; text: string; ts: number }[],
+  stateVersion: number,
+): ServerEvent => ({
+  case: 'history',
+  value: {
+    events,
+    chat: chat.map((c) => ({ playerId: c.playerId, text: c.text, ts: BigInt(c.ts) })),
+    stateVersion,
+  },
+});
