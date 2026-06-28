@@ -1016,6 +1016,13 @@ button.ticket-card:hover {
   justify-content: center;
   gap: var(--tr-space-3);
 }
+/* The outcome (surcharge + payment choices) appears only once the reveal completes. */
+.tunnel-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+  animation: anim-fanfare-in 0.35s ease-out;
+}
 .tunnel-surcharge {
   text-align: center;
   font-weight: 600;

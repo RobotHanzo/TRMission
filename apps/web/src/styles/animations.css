@@ -340,13 +340,9 @@
   font-weight: 900;
   color: #fff;
 }
+/* Wrap shrinks to the card's natural size; the panel grid (justify-items: center) centres it. */
 .fanfare-card-wrap {
-  width: min(70vw, 320px);
   filter: drop-shadow(0 12px 40px rgba(0, 0, 0, 0.5));
-}
-/* Fill the wrap so the card is enlarged and centred (the default 150px would left-align). */
-.fanfare-card-wrap .ticket-card {
-  width: 100%;
 }
 .fanfare-skip {
   margin-top: 6px;
@@ -362,6 +358,7 @@
   .station-ring,
   .sweep-seg,
   .tunnel-reveal-card,
+  .tunnel-result,
   .market-slot.is-flipping,
   .score-float,
   .tracker.is-turn-cue,
