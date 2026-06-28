@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 2 (bumped for the ruleParams + completedTickets state additions)', () => {
-    expect(ENGINE_VERSION).toBe(2);
+  it('is engine version 3 (bumped for rule 7.5 — forced ticket re-draw)', () => {
+    expect(ENGINE_VERSION).toBe(3);
   });
 
   it('replays byte-identically under each variant', () => {

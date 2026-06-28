@@ -122,4 +122,6 @@ export interface GameState {
 }
 
 export const SCHEMA_VERSION = 1;
-export const ENGINE_VERSION = 2;
+// v3: rule 7.5 — a player with every kept ticket already own-connected is forced to draw new
+// tickets at the start of their turn (turn opens in TICKET_SELECTION instead of AWAIT_ACTION).
+export const ENGINE_VERSION = 3;
