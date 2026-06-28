@@ -149,3 +149,36 @@ CREDITS.md rather than silently shipping a wrong/placeholder sound.
 - Account-synced sound preferences.
 - Background music / ambient loops.
 - Per-cue user customization or a separate SFX/music volume split.
+
+---
+
+## REVISION 1 (2026-06-28) — final sourced assets
+
+The 10 cues were sourced (all **Mixkit**, Free Sound Effects License — commercial-OK, no attribution
+required; credited anyway in `apps/web/public/sounds/CREDITS.md`). Final files shipped under
+`apps/web/public/sounds/`:
+
+| Cue (catalog key) | File | Mixkit source | Edit |
+|-------------------|------|---------------|------|
+| `cardDraw` | `card-draw.mp3` | Poker card flick (2002) | — |
+| `yourTurn` | `your-turn.mp3` | Elegant door announcement (224) | trim + 2× speed (pitch-up) |
+| `tunnelDraw` | `tunnel-draw.mp3` | Poker card **placement** (2001) | — (see behaviour below) |
+| `tunnelSuccess` | `tunnel-success.mp3` | Achievement bell (600) | — |
+| `tunnelPayment` | `tunnel-payment.mp3` | Negative tone interface tap (2569) | — |
+| `missionComplete` | `mission-complete.mp3` | Arcade complete / approved mission (205) | — |
+| `gameOverWin` | `game-over-win.mp3` | Successful horns fanfare (722) | — |
+| `gameOverNormal` | `game-over-normal.mp3` | Orchestral violin jingle (2280) | — |
+| `stationBuilt` | `station-built.mp3` | Metal hammer hit (833) | trim + ×3 + pitch-down/bass (heavier) |
+| `railwayBuilt` | `railway-built.mp3` | Wood hard hit (2182) | trim + ×3 |
+
+**Behaviour change — tunnel draw is per-card.** Instead of one long whoosh, `tunnelDraw` plays the
+short card-*placement* sound **once per revealed card (3 total)**, fired from `TunnelModal` in step
+with the existing card-flip stagger (`REVEAL_STAGGER_MS`). The `soundModel`/driver does not emit this
+cue; `TunnelModal` schedules the three plays (and still emits `tunnelSuccess`/`tunnelPayment` at the
+result). This makes `card-draw` vs `tunnel-draw` two distinct card timbres on purpose.
+
+**Reserved for future.** `apps/web/public/sounds/future/mission-complete-levelup.mp3` (Mixkit "Game
+level completed", 2059) is kept for a planned event system and is **not** wired up now.
+
+The `station-built.mp3` and `railway-built.mp3` files are pre-baked triple-hits, so the driver plays
+them as a single one-shot per build (no in-code repetition for these two).
