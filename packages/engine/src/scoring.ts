@@ -37,6 +37,23 @@ function borrowCandidatesForCity(
   return out;
 }
 
+/** All non-locked opponent edges incident to any city where `playerId` built a station (deduped). */
+export function stationBorrowEdges(board: Board, state: GameState, playerId: PlayerId): Edge[] {
+  const out: Edge[] = [];
+  const seen = new Set<string>();
+  for (const s of state.stations) {
+    if (s.playerId !== playerId) continue;
+    for (const e of borrowCandidatesForCity(board, state, s.cityId as string, playerId)) {
+      const key = e.a < e.b ? `${e.a}|${e.b}` : `${e.b}|${e.a}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(e);
+      }
+    }
+  }
+  return out;
+}
+
 /** End-of-game destination-ticket result for one player, including WHICH kept tickets count. */
 export interface PlayerTicketDetail {
   /** Net ticket points (completed values minus failed values; may be negative). */
@@ -76,6 +93,28 @@ export function evaluatePlayerTickets(
       return t ? { id, a: t.a as string, b: t.b as string, value: t.value } : null;
     })
     .filter((g): g is { id: TicketId; a: string; b: string; value: number } => g !== null);
+
+  // Unlimited-borrow variant: every station borrows ALL its incident opponent edges, so completion
+  // is a single monotonic union — no per-station optimisation. This matches the locked completion
+  // set maintained mid-game (the monotonicity invariant), so banked == final.
+  if (state.ruleParams.unlimitedStationBorrow) {
+    const uf = new UnionFind(cityIds);
+    for (const e of edges) uf.union(e.u, e.v);
+    for (const e of stationBorrowEdges(board, state, playerId)) uf.union(e.a, e.b);
+    let net = 0;
+    let completed = 0;
+    const completedTicketIds: TicketId[] = [];
+    for (const g of goals) {
+      if (uf.connected(g.a, g.b)) {
+        net += g.value;
+        completed += 1;
+        completedTicketIds.push(g.id);
+      } else if (!state.ruleParams.noUnfinishedTicketPenalty) {
+        net -= g.value;
+      }
+    }
+    return { net, completed, completedTicketIds };
+  }
 
   const ticketEval = evaluateTickets({
     ownEdges: edges.map((e) => ({ a: e.u, b: e.v })),

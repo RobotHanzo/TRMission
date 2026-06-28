@@ -33,6 +33,23 @@ export function ownConnectedTicketIds(args: {
   return args.tickets.filter((t) => uf.connected(t.a, t.b)).map((t) => t.id);
 }
 
+/**
+ * Tickets connected by the player's own edges UNION all their station-borrowed edges. Under the
+ * `unlimitedStationBorrow` variant every station borrows ALL its incident opponent edges, so the
+ * borrow graph only grows — this union is monotonic and is the basis for instant, locked completion.
+ */
+export function borrowConnectedTicketIds(args: {
+  ownEdges: readonly Edge[];
+  borrowEdges: readonly Edge[];
+  tickets: readonly IdTicketGoal[];
+  vertices?: readonly string[];
+}): string[] {
+  const uf = new UnionFind(args.vertices);
+  for (const e of args.ownEdges) uf.union(e.a, e.b);
+  for (const e of args.borrowEdges) uf.union(e.a, e.b);
+  return args.tickets.filter((t) => uf.connected(t.a, t.b)).map((t) => t.id);
+}
+
 export interface TicketEvaluation {
   readonly net: number;
   readonly completed: number;
