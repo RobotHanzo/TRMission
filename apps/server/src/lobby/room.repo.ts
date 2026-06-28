@@ -5,6 +5,25 @@ import { MONGO_DB } from '../db/tokens';
 import type { BotDifficulty } from '../bots/types';
 
 export type RoomStatus = 'LOBBY' | 'STARTED' | 'CLOSED';
+export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
+
+/** Host-configured per-game settings. Rule variants flow into the engine at start; spectating &
+ *  visibility are control-plane only. */
+export interface RoomSettings {
+  unlimitedStationBorrow: boolean;
+  secondDrawAfterBlindRainbow: boolean;
+  noUnfinishedTicketPenalty: boolean;
+  allowSpectating: boolean;
+  visibility: RoomVisibility;
+}
+
+export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
+  unlimitedStationBorrow: false,
+  secondDrawAfterBlindRainbow: false,
+  noUnfinishedTicketPenalty: false,
+  allowSpectating: true,
+  visibility: 'PUBLIC',
+};
 
 export interface RoomMember {
   userId: string;
@@ -23,11 +42,18 @@ export interface RoomDoc {
   status: RoomStatus;
   members: RoomMember[];
   maxPlayers: number;
+  settings: RoomSettings;
   gameId?: string;
   seed?: string;
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type UpdateSettingsResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
+
+/** A settings patch from the wire: each field optional and may be explicitly undefined (matches the
+ *  zod `.partial()` DTO under exactOptionalPropertyTypes). Undefined values are ignored on merge. */
+export type RoomSettingsPatch = { [K in keyof RoomSettings]?: RoomSettings[K] | undefined };
 
 export type JoinResult = RoomDoc | 'not_found' | 'full' | 'started' | 'already';
 export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidden';
@@ -49,6 +75,7 @@ export class RoomRepo implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.col.createIndex({ status: 1, updatedAt: -1 });
+    await this.col.createIndex({ 'settings.visibility': 1, status: 1, updatedAt: -1 });
   }
 
   get(code: string): Promise<RoomDoc | null> {
@@ -64,6 +91,7 @@ export class RoomRepo implements OnModuleInit {
         status: 'LOBBY',
         members: [{ ...host, seat: 0, ready: false }],
         maxPlayers,
+        settings: { ...DEFAULT_ROOM_SETTINGS },
         createdAt: now,
         updatedAt: now,
       };
@@ -134,6 +162,44 @@ export class RoomRepo implements OnModuleInit {
       );
     }
     return this.col.findOne({ _id: code });
+  }
+
+  /** Host-only, LOBBY-only: merge a settings patch onto the room. */
+  async updateSettings(
+    code: string,
+    hostId: string,
+    patch: RoomSettingsPatch,
+  ): Promise<UpdateSettingsResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    if (room.hostId !== hostId) return 'forbidden';
+    const clean: Partial<RoomSettings> = {};
+    for (const [k, v] of Object.entries(patch)) {
+      if (v !== undefined) (clean as Record<string, unknown>)[k] = v;
+    }
+    const settings: RoomSettings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings, ...clean };
+    await this.col.updateOne(
+      { _id: code, hostId, status: 'LOBBY' },
+      { $set: { settings, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /** Public rooms for the home screen: PUBLIC lobbies (joinable) + PUBLIC started games that
+   *  allow spectating (watchable). Newest first. */
+  async findPublic(limit = 50): Promise<RoomDoc[]> {
+    return this.col
+      .find({
+        'settings.visibility': 'PUBLIC',
+        $or: [
+          { status: 'LOBBY' },
+          { status: 'STARTED', 'settings.allowSpectating': true },
+        ],
+      })
+      .sort({ updatedAt: -1 })
+      .limit(limit)
+      .toArray();
   }
 
   async markStarted(code: string, hostId: string, gameId: string, seed: string): Promise<boolean> {

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LobbyService } from './lobby.service';
 import { AccessTokenGuard } from '../auth/access-token.guard';
@@ -7,9 +7,11 @@ import {
   CreateRoomDto,
   ReadyDto,
   AddBotDto,
+  UpdateSettingsDto,
   CreateRoomSchema,
   ReadySchema,
   AddBotSchema,
+  UpdateSettingsSchema,
   RoomViewSchema,
   TicketResultSchema,
 } from './lobby.schemas';
@@ -94,6 +96,19 @@ export class LobbyController {
     @Param('userId') userId: string,
   ) {
     return this.lobby.kick(code.toUpperCase(), user, userId);
+  }
+
+  @Patch(':code/settings')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Host updates per-game settings (LOBBY only)' })
+  @ApiBody({ schema: apiSchema(UpdateSettingsSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  updateSettings(
+    @CurrentUser() user: AuthUser,
+    @Param('code') code: string,
+    @Body() body: UpdateSettingsDto,
+  ) {
+    return this.lobby.updateSettings(code.toUpperCase(), user, body);
   }
 
   @Post(':code/start')
