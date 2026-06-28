@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { CardColor as PbCardColor } from '@trm/proto';
 import { tokenForPb } from '../game/cards';
@@ -25,7 +26,12 @@ export function TunnelModal({ revealed, extraRequired, options, onCommit, onAbor
               <span
                 key={i}
                 className="reveal-card"
-                style={tok ? { background: tok.hex, color: tok.ink } : undefined}
+                style={
+                  {
+                    '--i': i,
+                    ...(tok ? { background: tok.hex, color: tok.ink } : {}),
+                  } as CSSProperties
+                }
               >
                 {tok ? tok.glyph : '·'}
               </span>
