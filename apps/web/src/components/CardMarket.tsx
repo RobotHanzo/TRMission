@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Layers } from 'lucide-react';
 import { CardColor as PbCardColor, type GameSnapshot } from '@trm/proto';
 import { tokenForPb } from '../game/cards';
+import { LOCOMOTIVE_GRADIENT } from '../theme/colors';
 import { useAnimations } from '../store/animations';
 
 interface Props {
@@ -32,6 +33,8 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
         {snapshot.market.map((card, slot) => {
           const tok = tokenForPb(card);
           const empty = card === PbCardColor.UNSPECIFIED || !tok;
+          // The wild loco is "any colour" — paint it with the rainbow wash, not its flat grey hex.
+          const isLoco = tok?.key === 'LOCOMOTIVE';
           // A covered slot has a real (refilled) card underneath but stays face-down until the
           // active draw resolves — still drawable, just not yet revealed.
           const covered = coveredSlots.has(slot);
@@ -48,7 +51,11 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
               disabled={!canDraw || empty}
               onClick={() => onDrawFaceUp(slot)}
               onAnimationEnd={() => clearMarketFlip(slot)}
-              style={covered || empty ? undefined : { background: tok.hex, color: tok.ink }}
+              style={
+                covered || empty
+                  ? undefined
+                  : { background: isLoco ? LOCOMOTIVE_GRADIENT : tok.hex, color: tok.ink }
+              }
               aria-label={covered ? t('drawBlind') : tok ? tok.nameZh : 'empty'}
             >
               {covered ? <Layers size={18} aria-hidden /> : tok ? tok.glyph : '·'}

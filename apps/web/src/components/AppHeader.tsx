@@ -5,6 +5,7 @@ import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import { useGame } from '../store/game';
 import { turnStatus } from '../game/view';
+import { usePlayerName } from '../game/playerName';
 import { SettingsModal } from './SettingsModal';
 
 export function AppHeader() {
@@ -15,6 +16,7 @@ export function AppHeader() {
   const logout = useSession((s) => s.logout);
   const snapshot = useGame((s) => s.snapshot);
   const status = useGame((s) => s.status);
+  const nameOf = usePlayerName();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const onLogout = () => {
@@ -44,7 +46,9 @@ export function AppHeader() {
                 : t('reconnecting')}
           </span>
           <strong className="turn-label">
-            {turn.params ? t(turn.key, turn.params) : t(turn.key)}
+            {turn.key === 'turnOf' && turn.player
+              ? t('turnOf', { name: nameOf(turn.player) })
+              : t(turn.key)}
           </strong>
         </div>
       )}

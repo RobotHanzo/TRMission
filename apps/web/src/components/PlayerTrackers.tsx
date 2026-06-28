@@ -5,11 +5,13 @@ import type { GameSnapshot } from '@trm/proto';
 import { SEAT_COLORS } from '../theme/colors';
 import { useAnimations } from '../store/animations';
 import { playerLiveTotal } from '../game/tickets';
+import { usePlayerName } from '../game/playerName';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
 
 export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
   const { t } = useTranslation();
+  const nameOf = usePlayerName();
   const turnCue = useAnimations((s) => s.turnCue);
   const clearTurnCue = useAnimations((s) => s.clearTurnCue);
 
@@ -38,21 +40,21 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
               aria-hidden
             />
             {isBot(p.id) && <Bot size={13} aria-hidden />}
-            <span className="tracker-name">{isMe ? t('you') : `P${p.seat + 1}`}</span>
+            <span className="tracker-name">{nameOf({ id: p.id, seat: p.seat, isMe })}</span>
             <span className="tracker-stats">
-              <span title="trains">
+              <span title={t('trainCars')}>
                 <Train size={13} aria-hidden /> {p.trainCars}
               </span>
-              <span title="score">
+              <span title={t('score')}>
                 <Trophy size={13} aria-hidden /> {playerLiveTotal(snapshot, p.id)}
               </span>
-              <span title="cards">
+              <span title={t('cards')}>
                 <Layers size={13} aria-hidden /> {p.handCount}
               </span>
-              <span title="tickets">
+              <span title={t('tickets')}>
                 <Ticket size={13} aria-hidden /> {p.ticketCount}
               </span>
-              <span title="stations">
+              <span title={t('stations')}>
                 <Building2 size={13} aria-hidden /> {p.stationsRemaining}
               </span>
             </span>

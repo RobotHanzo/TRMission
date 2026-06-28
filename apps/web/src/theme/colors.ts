@@ -24,11 +24,22 @@ export const CARD_COLOR_TOKENS: Record<CardColor, ColorToken> = {
   PURPLE: { key: 'PURPLE', hex: '#7B4DA6', ink: '#FFFFFF', nameZh: '紫', glyph: '✦' },
   BLACK: { key: 'BLACK', hex: '#2B2D31', ink: '#FFFFFF', nameZh: '黑', glyph: '⬢' },
   WHITE: { key: 'WHITE', hex: '#E8EAED', ink: '#1B1C1E', nameZh: '白', glyph: '○' },
-  LOCOMOTIVE: { key: 'LOCOMOTIVE', hex: '#9AA0A6', ink: '#13161A', nameZh: '機', glyph: '★' },
+  // The wild card reads as "any colour" — themed as the rainbow locomotive (彩虹車頭).
+  LOCOMOTIVE: { key: 'LOCOMOTIVE', hex: '#9AA0A6', ink: '#13161A', nameZh: '彩虹車頭', glyph: '★' },
 };
 
 /** Gray routes (any single colour). */
 export const GRAY_TOKEN = { hex: '#B8BEC6', ink: '#1B1C1E', nameZh: '灰', glyph: '—' } as const;
+
+/**
+ * Rainbow wash for the wild LOCOMOTIVE card (the six liveries) — so a face-up loco in the
+ * card market reads as "any colour" rather than a flat grey chip.
+ */
+export const LOCOMOTIVE_GRADIENT = `linear-gradient(135deg, ${(
+  ['RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE'] as const
+)
+  .map((c) => CARD_COLOR_TOKENS[c].hex)
+  .join(', ')})`;
 
 /** Seat colours — deliberately distinct from the 8 card colours (ADR A11). */
 export const SEAT_COLORS = ['#0E8C8C', '#C0398B', '#E8A33D', '#5A6B7B', '#7CB342'] as const;

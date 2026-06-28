@@ -4,6 +4,8 @@ import { Phase } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
 import { useGame } from '../store/game';
 import { useUi } from '../store/ui';
+import { useRoster } from '../store/roster';
+import { api } from '../net/rest';
 import { connectGame, getSocket } from '../net/connection';
 import { routeById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
@@ -41,6 +43,7 @@ type Claim =
 export function GameScreen() {
   const { t } = useTranslation();
   const ticket = useUi((s) => s.ticket);
+  const roomCode = useUi((s) => s.roomCode);
   const locale = useUi((s) => s.locale);
   const colorBlind = useUi((s) => s.colorBlind);
   const boardLayout = useUi((s) => s.boardLayout);
@@ -49,6 +52,7 @@ export function GameScreen() {
   const snapshot = useGame((s) => s.snapshot);
   const rejection = useGame((s) => s.rejection);
   const setRejection = useGame((s) => s.setRejection);
+  const setRoster = useRoster((s) => s.setMembers);
 
   // Translate events + snapshot diffs into animations (claim glow, draws, fanfare, …).
   useAnimationDriver();
@@ -65,6 +69,22 @@ export function GameScreen() {
   useEffect(() => {
     if (ticket && !getSocket()) connectGame(ticket);
   }, [ticket]);
+  // Pull the room's members (real account names / bot labels) so the trackers, scoreboard and
+  // turn banner can show them instead of "P{seat+1}". Snapshots carry ids only — names are lobby
+  // data. Best-effort: on failure the UI just keeps the P{seat+1} fallback.
+  useEffect(() => {
+    if (!roomCode) return;
+    let cancelled = false;
+    api
+      .getRoom(roomCode)
+      .then((r) => {
+        if (!cancelled) setRoster(r.members);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [roomCode, setRoster]);
   useEffect(() => {
     setRejection(null);
   }, [version, setRejection]);

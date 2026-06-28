@@ -4,6 +4,7 @@ import { Crown, Bot, Eye, Map as MapIcon, X } from 'lucide-react';
 import type { GameSnapshot, PlayerFinal } from '@trm/proto';
 import { SEAT_COLORS } from '../theme/colors';
 import { seatByPlayer } from '../game/view';
+import { usePlayerName } from '../game/playerName';
 import { ticketById } from '../game/content';
 import { useAnimations } from '../store/animations';
 import { useConfetti } from '../hooks/useConfetti';
@@ -31,6 +32,7 @@ type TicketModal = { kind: 'completed' | 'failed'; playerId: string };
 
 export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLeave(): void }) {
   const { t } = useTranslation();
+  const playerName = usePlayerName();
   const setRouteReveal = useAnimations((s) => s.setRouteReveal);
   const clearRouteReveal = useAnimations((s) => s.clearRouteReveal);
 
@@ -50,7 +52,7 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
   const sorted = [...fs.players].sort((a, b) => b.total - a.total);
   const seatOf = (id: string): number => seats.get(id) ?? 0;
   const nameOf = (id: string): string =>
-    id === snapshot.you?.playerId ? t('you') : `P${seatOf(id) + 1}`;
+    playerName({ id, seat: seatOf(id), isMe: id === snapshot.you?.playerId });
 
   const openMap = (pf: PlayerFinal): void => {
     if (pf.longestTrailRouteIds.length === 0) return;
@@ -110,7 +112,6 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
             <tbody>
               {sorted.map((pf) => {
                 const seat = seatOf(pf.playerId);
-                const isMe = pf.playerId === snapshot.you?.playerId;
                 const { completed, failed, gain, loss } = ticketSplit(pf);
                 return (
                   <tr key={pf.playerId} className={winners.has(pf.playerId) ? 'winner' : ''}>
@@ -122,8 +123,7 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
                       {winners.has(pf.playerId) && <Crown size={14} aria-hidden />}
                     </td>
                     <td>
-                      {isBot(pf.playerId) && <Bot size={13} aria-hidden />}{' '}
-                      {isMe ? t('you') : `P${seat + 1}`}
+                      {isBot(pf.playerId) && <Bot size={13} aria-hidden />} {nameOf(pf.playerId)}
                     </td>
                     <td className="num">{pf.routePoints}</td>
                     <td className="num gain">

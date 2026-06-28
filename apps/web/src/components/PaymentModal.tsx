@@ -14,13 +14,12 @@ interface Props {
 // in the modal while still reading as the same rolling-stock cards as the deck.
 const CARD_SIZE = 104;
 
-/** Describes a spend option for assistive tech, e.g. "藍 ×2 + 機車頭 ×1". */
+/** Describes a spend option for assistive tech, e.g. "藍 ×2 + 彩虹車頭 ×1". */
 const describe = (p: Payment): string => {
   const parts: string[] = [];
   if (p.color && p.colorCount > 0)
     parts.push(`${CARD_COLOR_TOKENS[p.color].nameZh} ×${p.colorCount}`);
-  if (p.locomotives > 0)
-    parts.push(`${CARD_COLOR_TOKENS.LOCOMOTIVE.nameZh} ×${p.locomotives}`);
+  if (p.locomotives > 0) parts.push(`${CARD_COLOR_TOKENS.LOCOMOTIVE.nameZh} ×${p.locomotives}`);
   return parts.join(' + ');
 };
 
