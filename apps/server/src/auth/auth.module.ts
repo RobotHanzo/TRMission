@@ -7,11 +7,23 @@ import { TokenService } from './token.service';
 import { UserRepo } from './user.repo';
 import { SessionRepo } from './session.repo';
 import { AccessTokenGuard } from './access-token.guard';
+import { AuthConfig } from './auth-config';
+import { OauthService } from './oauth.service';
+import { OAUTH_HTTP, FetchOauthHttp } from './oauth.http';
 
 @Module({
   imports: [JwtModule.register({ secret: env.jwtSecret })],
   controllers: [AuthController],
-  providers: [AuthService, TokenService, UserRepo, SessionRepo, AccessTokenGuard],
+  providers: [
+    AuthService,
+    TokenService,
+    UserRepo,
+    SessionRepo,
+    AccessTokenGuard,
+    AuthConfig,
+    OauthService,
+    { provide: OAUTH_HTTP, useClass: FetchOauthHttp },
+  ],
   // Exported so the lobby can sign ws-game tickets and guard its routes.
   exports: [TokenService, AccessTokenGuard, UserRepo],
 })

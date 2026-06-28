@@ -65,8 +65,11 @@ export const useSession = create<SessionState>()((set, get) => {
       run(() => api.register(email.trim(), password, displayName.trim())),
     upgrade: (email, password) => run(() => api.upgrade(email.trim(), password)),
     async logout() {
-      await api.logout().catch(() => undefined);
+      // Clear local session state SYNCHRONOUSLY first: the login route's auto-redirect gates on
+      // `user`, so it must see the signed-out state immediately — not after the network round-trip
+      // (otherwise it briefly treats the user as still logged in and lands them on a blank home).
       set({ user: null, accessToken: null });
+      await api.logout().catch(() => undefined);
     },
     async savePreferences(prefs) {
       const u = get().user;

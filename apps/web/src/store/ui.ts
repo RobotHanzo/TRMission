@@ -9,22 +9,52 @@ import { disconnectGame } from '../net/connection';
 //    'tray' — board + right rail on top; the player's hand sits in a bottom strip.
 export type { Locale, BoardLayout };
 
-export type View = 'home' | 'room' | 'game';
+export type View = 'home' | 'room' | 'game' | 'login' | 'loginCallback';
 
 // --- URL routing -----------------------------------------------------------
 // The browser path is the durable source of truth for *where* the user is:
-//   /            → home
-//   /room/:code  → lobby and in-game alike (the room code re-mints a ws ticket
-//                  and reports lobby-vs-started, so it is the only handle needed).
+//   /                → home (requires auth; redirects to /login otherwise)
+//   /login           → the login screen (guest + password + OAuth)
+//   /login/callback  → lands here after an OAuth round-trip; resumes the session and continues
+//   /room/:code      → lobby and in-game alike (the room code re-mints a ws ticket
+//                      and reports lobby-vs-started, so it is the only handle needed).
 const ROOM_PATH = /^\/room\/([^/]+)$/;
+const LOGIN_PATH = '/login';
+const LOGIN_CALLBACK_PATH = '/login/callback';
 
 export const roomCodeFromPath = (): string | null => {
   const code = ROOM_PATH.exec(window.location.pathname)?.[1];
   return code ? decodeURIComponent(code).toUpperCase() : null;
 };
+
+// Keep a post-login target same-origin (mirrors the server's `safeRedirect`) so the redirect
+// param can never become an open redirect.
+const safePath = (p: string | null | undefined): string => {
+  if (!p || !p.startsWith('/') || p.startsWith('//')) return '/';
+  if (p.includes('\\') || p.includes('://')) return '/';
+  return p;
+};
+/** The `?redirect=` target carried on /login and /login/callback (validated; default '/'). */
+export const readRedirectParam = (): string => {
+  try {
+    return safePath(new URLSearchParams(window.location.search).get('redirect'));
+  } catch {
+    return '/';
+  }
+};
+const loginPathFor = (returnTo: string): string => {
+  const safe = safePath(returnTo);
+  return safe === '/' ? LOGIN_PATH : `${LOGIN_PATH}?redirect=${encodeURIComponent(safe)}`;
+};
+
 // Guard each navigation against a no-op so we never stack duplicate history entries.
 const pushPath = (path: string): void => {
   if (window.location.pathname !== path) window.history.pushState(null, '', path);
+};
+// Replace (not push) for auth-gate redirects, so the back button never bounces through /login.
+const replacePath = (path: string): void => {
+  if (window.location.pathname + window.location.search !== path)
+    window.history.replaceState(null, '', path);
 };
 
 const THEME_KEY = 'trm.theme';
@@ -88,6 +118,10 @@ interface UiState {
   goHome(): void;
   enterRoom(code: string): void;
   enterGame(gameId: string, ticket: string): void;
+  /** Send an unauthenticated visitor to /login, remembering where they were headed. */
+  navigateLogin(returnTo: string): void;
+  /** After any successful sign-in, resume the `?redirect=` target (default home). */
+  navigateAfterAuth(): void;
   /** Reconcile the view with the current browser path (initial load + back/forward). */
   syncFromUrl(authed: boolean): void;
   setLocale(locale: Locale): void;
@@ -99,7 +133,7 @@ interface UiState {
   applyPreferences(prefs: UserPreferences): void;
 }
 
-export const useUi = create<UiState>()((set) => ({
+export const useUi = create<UiState>()((set, get) => ({
   view: 'home',
   roomCode: null,
   gameId: null,
@@ -121,19 +155,61 @@ export const useUi = create<UiState>()((set) => ({
   },
   // The URL is already /room/:code (the room was entered first), so leave it untouched.
   enterGame: (gameId, ticket) => set({ view: 'game', gameId, ticket }),
-  syncFromUrl: (authed) => {
-    const code = roomCodeFromPath();
-    // Entering a room needs an authenticated session.
-    if (code && authed) {
-      set({ view: 'room', roomCode: code });
+  navigateLogin: (returnTo) => {
+    disconnectGame();
+    replacePath(loginPathFor(returnTo));
+    set({ view: 'login', roomCode: null, gameId: null, ticket: null });
+  },
+  navigateAfterAuth: () => {
+    const target = readRedirectParam();
+    const code = ROOM_PATH.exec(target)?.[1];
+    if (code) {
+      // Replace (not push) the /login (or /login/callback) entry — routing through enterRoom would
+      // PUSH /room/:code on top of it, trapping the back button into re-entering the room.
+      const room = decodeURIComponent(code).toUpperCase();
+      replacePath(`/room/${room}`);
+      set({ view: 'room', roomCode: room });
       return;
     }
-    // No room, or a /room/:code link opened while logged out. In the logged-out case we
-    // deliberately keep the URL untouched so signing in (or playing as guest) can resume
-    // straight into that room — see the resume effect in App. The auth gate shows because
-    // there is no user yet.
-    disconnectGame();
+    replacePath('/');
     set({ view: 'home', roomCode: null, gameId: null, ticket: null });
+  },
+  syncFromUrl: (authed) => {
+    const path = window.location.pathname;
+    // The OAuth landing page: resume the session (App's restore()) then continue; the
+    // LoginCallback screen handles both the success redirect and any ?error.
+    if (path === LOGIN_CALLBACK_PATH) {
+      disconnectGame();
+      set({ view: 'loginCallback', roomCode: null, gameId: null, ticket: null });
+      return;
+    }
+    // Already signed in but sitting on /login → bounce straight to the intended target.
+    if (path === LOGIN_PATH) {
+      if (authed) {
+        get().navigateAfterAuth();
+        return;
+      }
+      disconnectGame();
+      set({ view: 'login', roomCode: null, gameId: null, ticket: null });
+      return;
+    }
+    // Entering a room needs an authenticated session; otherwise gate to /login and remember it.
+    const code = roomCodeFromPath();
+    if (code) {
+      if (authed) {
+        set({ view: 'room', roomCode: code });
+        return;
+      }
+      get().navigateLogin(`/room/${code}`);
+      return;
+    }
+    // Home (or any unknown path) → home when authed, else the login gate.
+    if (authed) {
+      disconnectGame();
+      set({ view: 'home', roomCode: null, gameId: null, ticket: null });
+      return;
+    }
+    get().navigateLogin('/');
   },
   setLocale: (locale) => {
     writeLocal(LOCALE_KEY, locale);

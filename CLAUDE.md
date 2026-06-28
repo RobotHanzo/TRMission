@@ -103,3 +103,13 @@ These mirror the ADRs in the development plan; treat them as binding.
 `COOKIE_SECURE`, `TRM_PERSISTENCE` (`0` = in-memory, no auth/lobby), `TRM_DEV_GAME` (`1` = seed a
 demo game on boot), `TRM_BOT_DELAY_MS` (pause between bot moves; `0` in tests),
 `JWT_ACCESS_TTL`, `WS_TICKET_TTL`, `REFRESH_TTL_MS`, `GUEST_TTL_MS`.
+
+**Auth methods** (each independently switchable; the web reads `GET /auth/config`, the server
+enforces): `AUTH_PASSWORD_LOGIN_ENABLED` (`0` disables email/password login+register+upgrade),
+`AUTH_GUEST_ENABLED` (`0` disables guest sessions). **OAuth** (bound by *verified* email — same
+email = same account across providers + password): `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`,
+`DISCORD_CLIENT_ID`/`DISCORD_CLIENT_SECRET` (a provider is enabled only when both are set),
+`OAUTH_REDIRECT_BASE` (public base URL — builds the provider `redirect_uri` and the post-callback
+web redirect; **must be the same origin that serves the SPA** so the Strict refresh cookie survives
+the callback), `OAUTH_STATE_TTL_MS` (signed-state + nonce-cookie lifetime, ms). OAuth carries the
+provider avatar URL onto the account for display.

@@ -151,6 +151,13 @@
   border-radius: 999px;
   background: var(--tr-surface-2);
 }
+.user-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
 
 .bot-controls {
   flex-wrap: wrap;
@@ -272,6 +279,113 @@
   border-color: var(--tr-line);
   color: var(--tr-ink);
   box-shadow: var(--tr-shadow);
+}
+
+/* ── Login screen (full-bleed blurred map backdrop + centered card) ─────────── */
+.app-main--login {
+  max-width: 100%;
+  padding: 0;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  overflow: hidden;
+}
+.login-screen {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tr-space-8) var(--tr-space-4);
+}
+/* The map, blurred and faded. Scaled up a touch so the blur never reveals transparent edges. */
+.login-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  filter: blur(8px);
+  opacity: 0.55;
+  transform: scale(1.08);
+}
+.login-backdrop .board {
+  width: 100%;
+  height: 100%;
+}
+/* Wash the backdrop toward the paper colour (theme-aware) so the card stays legible. */
+.login-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    125% 90% at 50% 45%,
+    color-mix(in srgb, var(--tr-paper) 32%, transparent),
+    color-mix(in srgb, var(--tr-paper) 80%, transparent)
+  );
+}
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 380px;
+}
+.login-head h1 {
+  margin: 0 0 var(--tr-space-1);
+}
+.login-head p {
+  margin: 0;
+}
+
+/* OAuth */
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  color: var(--tr-ink-soft);
+  font-size: 0.85em;
+}
+.oauth-divider::before,
+.oauth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--tr-line);
+}
+.oauth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tr-space-2);
+  text-decoration: none;
+  font: inherit;
+  font-weight: 600;
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border-radius: var(--tr-radius-sm);
+  border: 1px solid var(--tr-line);
+  background: var(--tr-surface);
+  color: var(--tr-ink);
+  transition: filter 0.12s ease;
+}
+.oauth-btn:hover {
+  filter: brightness(0.97);
+}
+.oauth-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+.oauth-google {
+  background: #fff;
+  border-color: #dadce0;
+  color: #3c4043;
+}
+.oauth-discord {
+  background: #5865f2;
+  border-color: #5865f2;
+  color: #fff;
 }
 
 /* Toggle switch (colour-blind) */

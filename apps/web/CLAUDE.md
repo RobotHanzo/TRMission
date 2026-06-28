@@ -25,7 +25,12 @@ that can disagree with the server.
   `restore()` which the app calls on mount to resume a session from the httpOnly refresh cookie
   (works for guests and registered users alike). The in-memory access token is restored via the
   401→refresh path; `booting` gates first render.
-- `store/ui.ts` — view routing (`home`/`room`/`game`), locale, colour-blind toggle.
+- `store/ui.ts` — view routing (`home`/`room`/`game`/`login`/`loginCallback` ⇄ `/`, `/room/:code`,
+  `/login`, `/login/callback`), locale, colour-blind toggle. Login is its own route: `syncFromUrl`
+  gates unauthenticated visitors to `/login?redirect=<original>` and `navigateAfterAuth()` resumes
+  that target on success (replaces the old implicit "keep the URL + resume" effect). OAuth lands on
+  `/login/callback`, where the refresh cookie set by the server callback drives the normal
+  `restore()` path (no token ever in the URL).
 
 ## Net layer
 
@@ -42,7 +47,10 @@ The game flow: lobby `start`/`ticket` (REST) → `connectGame(ticket)` → socke
 
 - `components/Board.tsx` — one fluid SVG (viewBox) drawing all routes/cities from the content
   catalog; city coordinates come from `@trm/map-data` normalized x/y. Self-developed graphics only —
-  **no copied artwork**; Lucide icons are UI chrome only.
+  **no copied artwork**; Lucide icons are UI chrome only. The static cartography is factored into
+  `components/Geography.tsx`, shared with `components/MapBackdrop.tsx` — a non-interactive,
+  base-colour render of the board used as the blurred backdrop on `LoginScreen` (it pins
+  `--inv-scale` since there's no in-game `.board-viewport` to set it live).
 - `theme/colors.ts` — the 8 card colours (each with a colour-blind glyph) and `SEAT_COLORS` (abstract
   seat indices coloured here, distinct from card colours). Respect the colour-blind setting.
 - `i18n/index.ts` — react-i18next, zh-Hant primary + en fallback. UI strings live here; **city/ticket

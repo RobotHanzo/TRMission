@@ -22,4 +22,32 @@ export const env = {
   cookieSecure: process.env.COOKIE_SECURE === '1',
   /** CORS allowlist (comma-separated). Empty ⇒ reflect dev origin. */
   corsOrigins: (process.env.CORS_ORIGINS ?? '').split(',').filter(Boolean),
+
+  // Auth-method toggles. Each entry method is independently switchable; the web reads the
+  // resulting flags from GET /auth/config and the server enforces them (UI hiding is not enough).
+  /** Email + password login/registration/upgrade. Set AUTH_PASSWORD_LOGIN_ENABLED=0 to disable. */
+  authPasswordLogin: process.env.AUTH_PASSWORD_LOGIN_ENABLED !== '0',
+  /** Instant guest sessions. Set AUTH_GUEST_ENABLED=0 to disable. */
+  authGuest: process.env.AUTH_GUEST_ENABLED !== '0',
+
+  // OAuth providers. A provider is "enabled" only when BOTH its id and secret are set.
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+  discordClientId: process.env.DISCORD_CLIENT_ID ?? '',
+  discordClientSecret: process.env.DISCORD_CLIENT_SECRET ?? '',
+  /**
+   * Public base URL the browser uses to reach this app. Builds both the provider `redirect_uri`
+   * (`${base}/api/v1/auth/oauth/:provider/callback`) and the post-callback web redirect
+   * (`${base}/login/callback`). Must be the SAME origin that serves the SPA (so the Strict refresh
+   * cookie is sent on the follow-up /auth/refresh). Defaults to the first CORS origin, else dev web.
+   */
+  oauthRedirectBase:
+    process.env.OAUTH_REDIRECT_BASE ??
+    (process.env.CORS_ORIGINS ?? '').split(',').filter(Boolean)[0] ??
+    'http://localhost:5173',
+  /**
+   * Signed OAuth `state` lifetime (ms) — the round-trip to the provider and back. The `trm_oauth`
+   * nonce cookie is given this exact maxAge, so the cookie never out-/under-lives the state it guards.
+   */
+  oauthStateTtlMs: Number(process.env.OAUTH_STATE_TTL_MS ?? 10 * 60 * 1000),
 } as const;

@@ -16,11 +16,19 @@ export interface PublicUser {
   isGuest: boolean;
   preferences: UserPreferences;
   email?: string;
+  avatarUrl?: string;
 }
 export interface AuthResult {
   user: PublicUser;
   accessToken: string;
 }
+/** Which sign-in methods the server has enabled — drives what the login screen renders. */
+export interface AuthConfig {
+  passwordLogin: boolean;
+  guest: boolean;
+  providers: { google: boolean; discord: boolean };
+}
+export type OauthProvider = 'google' | 'discord';
 export type BotDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
 export interface RoomMember {
@@ -126,6 +134,7 @@ function captureToken(r: AuthResult): AuthResult {
 }
 
 export const api = {
+  config: () => req<AuthConfig>('GET', '/auth/config'),
   guest: (displayName?: string) =>
     req<AuthResult>('POST', '/auth/guest', { displayName }).then(captureToken),
   login: (email: string, password: string) =>

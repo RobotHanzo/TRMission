@@ -93,4 +93,27 @@ export class SessionRepo implements OnModuleInit {
     const parsed = decode(token);
     if (parsed) await this.col.updateOne({ _id: parsed.familyId }, { $set: { revoked: true } });
   }
+
+  /**
+   * Revoke every live refresh family for a user. Called when an account's nature changes
+   * (guest→registered upgrade) so prior sessions can't outlive the upgrade. Indexed by `userId`.
+   */
+  async revokeAllForUser(userId: string): Promise<void> {
+    await this.col.updateMany({ userId, revoked: { $ne: true } }, { $set: { revoked: true } });
+  }
+
+  /**
+   * Resolve the owning user from a refresh token WITHOUT rotating it. Used by the OAuth `start`
+   * route: a top-level navigation cannot send a Bearer header, so a logged-in guest is identified
+   * from the `trm_refresh` cookie here and carried (signed) into the flow — the callback arrives
+   * cross-site without the cookie, and a rotation here would invalidate the user's live session.
+   */
+  async peekUserId(token: string | undefined): Promise<string | null> {
+    if (!token) return null;
+    const parsed = decode(token);
+    if (!parsed) return null;
+    const family = await this.col.findOne({ _id: parsed.familyId });
+    if (!family || family.revoked || family.expiresAt.getTime() <= Date.now()) return null;
+    return family.currentHash === sha256(parsed.secret) ? family.userId : null;
+  }
 }

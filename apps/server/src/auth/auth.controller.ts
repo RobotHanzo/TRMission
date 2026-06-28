@@ -1,10 +1,32 @@
-import { Body, Controller, Get, HttpCode, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiExcludeEndpoint,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { randomInt } from 'node:crypto';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AccessTokenGuard } from './access-token.guard';
 import { CurrentUser } from './current-user.decorator';
+import { AuthConfig, OAUTH_PROVIDERS, type OauthProvider } from './auth-config';
+import { OauthService } from './oauth.service';
 import {
   GuestDto,
   RegisterDto,
@@ -18,6 +40,7 @@ import {
   PreferencesSchema,
   AuthResultSchema,
   AccessResultSchema,
+  AuthConfigSchema,
   PublicUserSchema,
 } from './auth.schemas';
 import { apiSchema } from '../openapi/openapi';
@@ -26,12 +49,23 @@ import type { AuthUser, IssuedAuth } from './auth.types';
 
 const REFRESH_COOKIE = 'trm_refresh';
 const REFRESH_PATH = '/api/v1/auth';
+// CSRF nonce for the OAuth round-trip. SameSite=Lax (NOT Strict): the provider callback is a
+// cross-site top-level navigation, on which Strict cookies would be withheld — breaking every
+// callback. Scoped to the oauth subtree so it never rides along with ordinary auth calls.
+const OAUTH_NONCE_COOKIE = 'trm_oauth';
+const OAUTH_NONCE_PATH = '/api/v1/auth/oauth';
 const randomGuestName = (): string => `旅客${randomInt(1000, 10000)}`;
+const asProvider = (p: string): OauthProvider | null =>
+  (OAUTH_PROVIDERS as readonly string[]).includes(p) ? (p as OauthProvider) : null;
 
 @ApiTags('auth')
 @Controller('api/v1/auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly authConfig: AuthConfig,
+    private readonly oauth: OauthService,
+  ) {}
 
   private setRefresh(res: Response, token: string): void {
     res.cookie(REFRESH_COOKIE, token, {
@@ -51,11 +85,19 @@ export class AuthController {
     return { user: issued.user, accessToken: issued.accessToken };
   }
 
+  @Get('config')
+  @ApiOperation({ summary: 'Which sign-in methods are enabled (UI hint)' })
+  @ApiResponse({ status: 200, schema: apiSchema(AuthConfigSchema) })
+  config() {
+    return this.authConfig.publicConfig();
+  }
+
   @Post('guest')
   @ApiOperation({ summary: 'Create a guest session (play instantly)' })
   @ApiBody({ schema: apiSchema(GuestSchema) })
   @ApiResponse({ status: 201, schema: apiSchema(AuthResultSchema) })
   async guest(@Body() body: GuestDto, @Res({ passthrough: true }) res: Response) {
+    if (!this.authConfig.guest) throw new ForbiddenException('guest sign-in disabled');
     return this.finish(
       res,
       await this.auth.guest(body.displayName ?? randomGuestName(), body.locale ?? 'zh-Hant'),
@@ -67,6 +109,7 @@ export class AuthController {
   @ApiBody({ schema: apiSchema(RegisterSchema) })
   @ApiResponse({ status: 201, schema: apiSchema(AuthResultSchema) })
   async register(@Body() body: RegisterDto, @Res({ passthrough: true }) res: Response) {
+    if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
     return this.finish(
       res,
       await this.auth.register(
@@ -90,6 +133,7 @@ export class AuthController {
     @Body() body: UpgradeDto,
     @Res({ passthrough: true }) res: Response,
   ) {
+    if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
     return this.finish(res, await this.auth.upgrade(user.userId, body.email, body.password));
   }
 
@@ -99,6 +143,7 @@ export class AuthController {
   @ApiBody({ schema: apiSchema(LoginSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(AuthResultSchema) })
   async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
+    if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
     return this.finish(res, await this.auth.login(body.email, body.password));
   }
 
@@ -137,5 +182,69 @@ export class AuthController {
   @ApiResponse({ status: 200, schema: apiSchema(PublicUserSchema) })
   async updatePreferences(@CurrentUser() user: AuthUser, @Body() body: UpdatePreferencesDto) {
     return this.auth.updatePreferences(user.userId, body);
+  }
+
+  // ── OAuth (browser navigations, not JSON — excluded from the OpenAPI doc) ──────────────────
+  // Both routes are unguarded: the user is not yet authenticated. Identity is carried through the
+  // provider in a signed `state`, bound to this browser by the `trm_oauth` nonce cookie.
+
+  @Get('oauth/:provider/start')
+  @ApiExcludeEndpoint()
+  async oauthStart(
+    @Param('provider') providerParam: string,
+    @Query('redirect') redirect: string | undefined,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const provider = asProvider(providerParam);
+    if (!provider || !this.authConfig.provider(provider)) {
+      res.redirect(this.authConfig.webCallback({ error: 'provider_disabled' }));
+      return;
+    }
+    // A logged-in guest (identified from the refresh cookie, which IS sent on this same-site
+    // navigation) is carried into the flow so the callback can upgrade them in place.
+    const guestUserId = await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
+    const built = this.oauth.buildAuthorize(provider, redirect, guestUserId);
+    if (!built) {
+      res.redirect(this.authConfig.webCallback({ error: 'provider_disabled' }));
+      return;
+    }
+    res.cookie(OAUTH_NONCE_COOKIE, built.nonce, {
+      httpOnly: true,
+      secure: env.cookieSecure,
+      sameSite: 'lax',
+      path: OAUTH_NONCE_PATH,
+      maxAge: env.oauthStateTtlMs, // same lifetime as the signed state it guards
+    });
+    res.redirect(built.url);
+  }
+
+  @Get('oauth/:provider/callback')
+  @ApiExcludeEndpoint()
+  async oauthCallback(
+    @Param('provider') providerParam: string,
+    @Query('code') code: string | undefined,
+    @Query('state') state: string | undefined,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    res.clearCookie(OAUTH_NONCE_COOKIE, { path: OAUTH_NONCE_PATH });
+    const provider = asProvider(providerParam);
+    if (!provider) {
+      res.redirect(this.authConfig.webCallback({ error: 'provider_disabled' }));
+      return;
+    }
+    const result = await this.oauth.handleCallback(
+      provider,
+      code,
+      state,
+      req.cookies?.[OAUTH_NONCE_COOKIE],
+    );
+    if (!result.ok) {
+      res.redirect(this.authConfig.webCallback({ redirect: result.redirect, error: result.error }));
+      return;
+    }
+    this.setRefresh(res, result.issued.refreshToken);
+    res.redirect(this.authConfig.webCallback({ redirect: result.redirect }));
   }
 }

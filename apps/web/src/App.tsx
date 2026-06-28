@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUi, roomCodeFromPath } from './store/ui';
+import { useUi } from './store/ui';
 import { useSession } from './store/session';
 import { AppHeader } from './components/AppHeader';
 import { HomeScreen } from './screens/HomeScreen';
 import { RoomScreen } from './screens/RoomScreen';
 import { GameScreen } from './screens/GameScreen';
+import { LoginScreen } from './screens/LoginScreen';
+import { LoginCallback } from './screens/LoginCallback';
 import './styles/app.css';
 
 export function App() {
@@ -14,7 +16,6 @@ export function App() {
   const theme = useUi((s) => s.theme);
   const locale = useUi((s) => s.locale);
   const syncFromUrl = useUi((s) => s.syncFromUrl);
-  const enterRoom = useUi((s) => s.enterRoom);
   const user = useSession((s) => s.user);
   const booting = useSession((s) => s.booting);
   const restore = useSession((s) => s.restore);
@@ -39,15 +40,6 @@ export function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, [syncFromUrl]);
 
-  // A /room/:code link opened while logged out shows the auth gate (view stays 'home' with
-  // the URL preserved). Once the user signs in or plays as guest, resume into that room —
-  // RoomScreen then joins it if they aren't already a member.
-  useEffect(() => {
-    if (booting || !user || view !== 'home') return;
-    const code = roomCodeFromPath();
-    if (code) enterRoom(code);
-  }, [booting, user, view, enterRoom]);
-
   // Apply the chosen locale to i18next + <html lang> (covers the localStorage-seeded initial value).
   useEffect(() => {
     void i18n.changeLanguage(locale);
@@ -67,14 +59,24 @@ export function App() {
     return () => mq.removeEventListener('change', apply);
   }, [theme]);
 
+  const isLogin = view === 'login' || view === 'loginCallback';
+  const mainClass =
+    view === 'game'
+      ? 'app-main app-main--game'
+      : isLogin
+        ? 'app-main app-main--login'
+        : 'app-main';
+
   return (
     <div className={view === 'game' ? 'app app--game' : 'app'}>
       <AppHeader />
-      <main className={view === 'game' ? 'app-main app-main--game' : 'app-main'}>
+      <main className={mainClass}>
         {booting ? (
           <div className="card">{t('connecting')}</div>
         ) : (
           <>
+            {view === 'login' && <LoginScreen />}
+            {view === 'loginCallback' && <LoginCallback />}
             {view === 'home' && <HomeScreen />}
             {view === 'room' && <RoomScreen />}
             {view === 'game' && <GameScreen />}

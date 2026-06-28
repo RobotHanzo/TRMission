@@ -37,6 +37,15 @@ export const PublicUserSchema = z.object({
   isGuest: z.boolean(),
   preferences: PreferencesSchema,
   email: z.string().optional(),
+  avatarUrl: z.string().optional(),
 });
 export const AuthResultSchema = z.object({ user: PublicUserSchema, accessToken: z.string() });
 export const AccessResultSchema = z.object({ accessToken: z.string() });
+
+// Tells the web which entry methods are available so it renders only those (the server still
+// enforces each one independently). `providers` flags whether each OAuth provider is configured.
+export const AuthConfigSchema = z.object({
+  passwordLogin: z.boolean(),
+  guest: z.boolean(),
+  providers: z.object({ google: z.boolean(), discord: z.boolean() }),
+});

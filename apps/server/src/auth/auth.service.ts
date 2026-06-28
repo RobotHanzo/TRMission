@@ -18,6 +18,11 @@ export class AuthService {
     return { user: toPublicUser(user), accessToken: this.tokens.signAccess(user), refreshToken };
   }
 
+  /** Mint a fresh session for an already-resolved user (used by the OAuth flow). */
+  issueFor(user: UserDoc): Promise<IssuedAuth> {
+    return this.issue(user);
+  }
+
   async guest(displayName: string, locale: Locale): Promise<IssuedAuth> {
     return this.issue(await this.users.createGuest(displayName, locale));
   }
@@ -41,6 +46,8 @@ export class AuthService {
       throw new ConflictException('email already registered');
     const user = await this.users.upgradeGuest(userId, email, await hash(password));
     if (!user) throw new UnauthorizedException('not a guest account');
+    // Prior guest refresh families die with the upgrade; the fresh one is minted just below.
+    await this.sessions.revokeAllForUser(user._id);
     return this.issue(user);
   }
 

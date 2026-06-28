@@ -63,7 +63,20 @@ transactions — every write for a game is serialized by its command queue.
 
 - `src/auth/` — guests are real `users` docs (`isGuest`, TTL); HS256 access tokens + rotating refresh
   tokens with **family reuse-detection** (single-doc CAS, no transactions). `token.service` also mints
-  the short-lived ws-game ticket the gateway verifies on `ClientHello`.
+  the short-lived ws-game ticket the gateway verifies on `ClientHello`. Which entry methods are on is
+  an injectable `AuthConfig` (derived from env; tests override it via `new AuthConfig(overrides)`);
+  the controller enforces the flags (`/auth/config` is only a UI hint). **OAuth** (`oauth.service` +
+  `oauth.http`, hand-rolled with global `fetch`, no passport): authorization-code + PKCE; the profile
+  comes from the provider's userinfo endpoint (no id_token signature work). Bound by **verified
+  email** → upgrade a live guest in place, else auto-link the same-email account, else create a
+  passwordless user. The only network seam is `OAUTH_HTTP` (faked in e2e). Cookie rules that bite:
+  the OAuth nonce cookie `trm_oauth` is **`SameSite=Lax`** (the provider callback is a cross-site
+  top-level navigation — a Strict cookie would be withheld, breaking every callback), while
+  `trm_refresh` stays **Strict** (set in the callback, read by the same-origin `/auth/refresh`). That
+  requires the **web app and API to be the same registrable domain** — keep `OAUTH_REDIRECT_BASE` on
+  the SPA's origin. A logged-in guest's id is read from the refresh cookie at `/oauth/:p/start`
+  (`SessionRepo.peekUserId`, no rotation) and carried in the signed `state`, because the callback
+  arrives cross-site without the cookie.
 - `src/lobby/` — rooms lifecycle with atomic seat CAS; `start` builds the `GameConfig`, calls
   `hub.createMatch`, and hands back a ws-ticket. Bot add/remove are host-only.
 - `src/bots/` — a bot is an **ordinary seated player driven server-side**; the engine never knows.

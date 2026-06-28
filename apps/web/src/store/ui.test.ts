@@ -53,21 +53,46 @@ describe('ui store routing', () => {
     expect(useUi.getState().roomCode).toBe('ABCD');
   });
 
-  it('syncFromUrl(not authed) on /room/:code shows home but keeps the link to resume after login', () => {
+  it('syncFromUrl(not authed) on /room/:code gates to /login, remembering the target', () => {
     window.history.replaceState(null, '', '/room/ABCD');
     useUi.getState().syncFromUrl(false);
-    expect(useUi.getState().view).toBe('home');
+    expect(useUi.getState().view).toBe('login');
     expect(useUi.getState().roomCode).toBeNull();
-    // The pending room link is preserved so signing in (or playing as guest) resumes the join.
-    expect(path()).toBe('/room/ABCD');
+    // The intended room is carried in ?redirect= so any sign-in resumes the join.
+    expect(window.location.pathname + window.location.search).toBe('/login?redirect=%2Froom%2FABCD');
   });
 
-  it('syncFromUrl on / yields the home view', () => {
+  it('syncFromUrl(not authed) on / gates to /login', () => {
+    window.history.replaceState(null, '', '/');
+    useUi.getState().syncFromUrl(false);
+    expect(useUi.getState().view).toBe('login');
+    expect(path()).toBe('/login');
+  });
+
+  it('syncFromUrl on / (authed) yields the home view', () => {
     useUi.setState({ view: 'room', roomCode: 'ABCD' });
     window.history.replaceState(null, '', '/');
     useUi.getState().syncFromUrl(true);
     expect(useUi.getState().view).toBe('home');
     expect(useUi.getState().roomCode).toBeNull();
+  });
+
+  it('navigateAfterAuth resumes the ?redirect= room target by REPLACING (no back-button trap)', () => {
+    window.history.replaceState(null, '', '/login?redirect=%2Froom%2FWXYZ');
+    const len = window.history.length;
+    useUi.getState().navigateAfterAuth();
+    expect(useUi.getState().view).toBe('room');
+    expect(useUi.getState().roomCode).toBe('WXYZ');
+    expect(path()).toBe('/room/WXYZ');
+    // The /login entry must be replaced, not pushed over — otherwise Back re-enters the room.
+    expect(window.history.length).toBe(len);
+  });
+
+  it('navigateAfterAuth defaults to home when there is no redirect target', () => {
+    window.history.replaceState(null, '', '/login');
+    useUi.getState().navigateAfterAuth();
+    expect(useUi.getState().view).toBe('home');
+    expect(path()).toBe('/');
   });
 });
 

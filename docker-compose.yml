@@ -31,6 +31,16 @@ services:
       MONGO_DB: trmission
       JWT_SECRET: ${JWT_SECRET:-dev-insecure-change-me}
       CORS_ORIGINS: http://localhost:8080
+      # Auth-method toggles (default on). Set to 0 to disable.
+      AUTH_PASSWORD_LOGIN_ENABLED: ${AUTH_PASSWORD_LOGIN_ENABLED:-1}
+      AUTH_GUEST_ENABLED: ${AUTH_GUEST_ENABLED:-1}
+      # OAuth — a provider is enabled only when both id+secret are set. The web app + API must be
+      # the same origin (nginx serves both here), so the Strict refresh cookie survives the callback.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE:-http://localhost:8080}
     depends_on:
       mongo:
         condition: service_healthy

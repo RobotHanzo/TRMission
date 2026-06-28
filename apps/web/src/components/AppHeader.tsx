@@ -12,6 +12,7 @@ export function AppHeader() {
   const { t } = useTranslation();
   const view = useUi((s) => s.view);
   const goHome = useUi((s) => s.goHome);
+  const navigateLogin = useUi((s) => s.navigateLogin);
   const user = useSession((s) => s.user);
   const logout = useSession((s) => s.logout);
   const snapshot = useGame((s) => s.snapshot);
@@ -21,7 +22,7 @@ export function AppHeader() {
 
   const onLogout = () => {
     void logout();
-    goHome();
+    navigateLogin('/'); // home requires auth, so land back on the login screen
   };
 
   // In-game, the header doubles as the game status bar (connection + whose turn) and
@@ -56,7 +57,19 @@ export function AppHeader() {
       <div className="header-actions">
         {user && (
           <span className="user-chip" title={user.isGuest ? t('guest') : (user.email ?? '')}>
-            <User size={14} aria-hidden /> {user.displayName}
+            {user.avatarUrl ? (
+              <img
+                className="user-avatar"
+                src={user.avatarUrl}
+                alt=""
+                width={16}
+                height={16}
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <User size={14} aria-hidden />
+            )}{' '}
+            {user.displayName}
           </span>
         )}
         <button

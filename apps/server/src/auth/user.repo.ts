@@ -5,6 +5,7 @@ import { MONGO_DB } from '../db/tokens';
 import { env } from '../config/env';
 import type { Locale, PublicUser, UserPreferences } from './auth.types';
 import { DEFAULT_PREFERENCES } from './auth.types';
+import type { OauthProvider } from './auth-config';
 
 export interface UserDoc {
   _id: string;
@@ -14,6 +15,10 @@ export interface UserDoc {
   preferences?: UserPreferences; // optional for back-compat with pre-preferences docs
   email?: string;
   passwordHash?: string;
+  /** Linked OAuth identities: provider → the provider's subject id. Binding key stays `email`. */
+  oauth?: Partial<Record<OauthProvider, string>>;
+  /** Avatar URL carried over from an OAuth provider (refreshed on each OAuth sign-in). */
+  avatarUrl?: string;
   tokenVersion: number;
   createdAt: Date;
   guestExpiresAt?: Date; // TTL-expired for abandoned guests
@@ -31,6 +36,7 @@ export const toPublicUser = (u: UserDoc): PublicUser => ({
     ...u.preferences,
   },
   ...(u.email ? { email: u.email } : {}),
+  ...(u.avatarUrl ? { avatarUrl: u.avatarUrl } : {}),
 });
 
 @Injectable()
@@ -107,5 +113,71 @@ export class UserRepo implements OnModuleInit {
       },
       { returnDocument: 'after' },
     );
+  }
+
+  /**
+   * Upgrade a guest in place via OAuth: attach the verified email + provider identity, keep the
+   * same _id (and match history), no password. Bumps tokenVersion like the password upgrade since
+   * the account's nature changed. Only succeeds while the doc is still a guest.
+   */
+  async attachOauthToGuest(
+    userId: string,
+    email: string,
+    provider: OauthProvider,
+    sub: string,
+    avatarUrl: string | null,
+  ): Promise<UserDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: userId, isGuest: true },
+      {
+        $set: {
+          isGuest: false,
+          email: email.toLowerCase(),
+          [`oauth.${provider}`]: sub,
+          ...(avatarUrl ? { avatarUrl } : {}),
+        },
+        $unset: { guestExpiresAt: '' },
+        $inc: { tokenVersion: 1 },
+      },
+      { returnDocument: 'after' },
+    );
+  }
+
+  /** Record a provider identity on an existing account (idempotent re-link); refresh the avatar. */
+  linkOauthIdentity(
+    userId: string,
+    provider: OauthProvider,
+    sub: string,
+    avatarUrl: string | null,
+  ): Promise<UserDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: userId },
+      { $set: { [`oauth.${provider}`]: sub, ...(avatarUrl ? { avatarUrl } : {}) } },
+      { returnDocument: 'after' },
+    );
+  }
+
+  /** Create a passwordless registered user from a verified OAuth profile. */
+  async createOauthUser(
+    email: string,
+    displayName: string,
+    provider: OauthProvider,
+    sub: string,
+    locale: Locale,
+    avatarUrl: string | null,
+  ): Promise<UserDoc> {
+    const doc: UserDoc = {
+      _id: randomUUID(),
+      displayName,
+      isGuest: false,
+      preferences: { ...DEFAULT_PREFERENCES, locale },
+      email: email.toLowerCase(),
+      oauth: { [provider]: sub },
+      ...(avatarUrl ? { avatarUrl } : {}),
+      tokenVersion: 0,
+      createdAt: new Date(),
+    };
+    await this.col.insertOne(doc);
+    return doc;
   }
 }

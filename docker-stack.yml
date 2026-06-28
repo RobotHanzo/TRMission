@@ -1,0 +1,56 @@
+# TRMission — Portainer / Docker Swarm stack
+#
+# Deploy via Portainer UI → Stacks → Add Stack → paste this file, or:
+#   docker stack deploy -c docker-stack.yml trmission
+#
+# Prerequisites:
+#   1. Build and push the two app images first:
+#        docker build -f Dockerfile.server -t <registry>/trm-server:latest .
+#        docker build -f apps/web/Dockerfile -t <registry>/trm-web:latest .
+#        docker push <registry>/trm-server:latest
+#        docker push <registry>/trm-web:latest
+#   2. Set JWT_SECRET in Portainer → Stacks → Environment variables
+#      (or via `docker secret` and reference it below).
+#
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - trm-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      restart_policy:
+        condition: any
+
+  server:
+    image: <registry>/trm-server:latest   # replace with your image
+    environment:
+      PORT: "3001"
+      MONGO_URL: mongodb://mongo:27017
+      MONGO_DB: trmission
+      JWT_SECRET: ${JWT_SECRET}            # set in Portainer env vars
+      CORS_ORIGINS: http://localhost:8080
+    ports:
+      - "3001:3001"
+    deploy:
+      restart_policy:
+        condition: any
+
+  web:
+    image: <registry>/trm-web:latest      # replace with your image
+    ports:
+      - "8080:80"
+    deploy:
+      restart_policy:
+        condition: any
+
+volumes:
+  trm-mongo-data:
