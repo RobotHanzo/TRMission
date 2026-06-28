@@ -134,6 +134,29 @@ describe('ui store account preferences', () => {
   });
 });
 
+describe('ui store sound preferences', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useUi.setState({ soundEnabled: true, soundVolume: 0.6 });
+  });
+
+  it('persists enabled + volume to localStorage', () => {
+    useUi.getState().setSoundEnabled(false);
+    useUi.getState().setSoundVolume(0.25);
+    expect(useUi.getState().soundEnabled).toBe(false);
+    expect(useUi.getState().soundVolume).toBeCloseTo(0.25);
+    expect(localStorage.getItem('trm.soundEnabled')).toBe('0');
+    expect(localStorage.getItem('trm.soundVolume')).toBe('0.25');
+  });
+
+  it('clamps volume to 0..1', () => {
+    useUi.getState().setSoundVolume(5);
+    expect(useUi.getState().soundVolume).toBe(1);
+    useUi.getState().setSoundVolume(-1);
+    expect(useUi.getState().soundVolume).toBe(0);
+  });
+});
+
 describe('roomCodeFromPath', () => {
   beforeEach(() => window.history.replaceState(null, '', '/'));
 

@@ -61,6 +61,8 @@ const THEME_KEY = 'trm.theme';
 const COLOR_BLIND_KEY = 'trm.colorBlind';
 const LOCALE_KEY = 'trm.locale';
 const BOARD_LAYOUT_KEY = 'trm.boardLayout';
+const SOUND_ENABLED_KEY = 'trm.soundEnabled';
+const SOUND_VOLUME_KEY = 'trm.soundVolume';
 const THEMES: Theme[] = ['system', 'light', 'dark'];
 const LOCALES: Locale[] = ['zh-Hant', 'en'];
 const BOARD_LAYOUTS: BoardLayout[] = ['rail', 'tray'];
@@ -96,6 +98,22 @@ const readBoardLayout = (): BoardLayout => {
     return 'rail';
   }
 };
+const readSoundEnabled = (): boolean => {
+  try {
+    const v = localStorage.getItem(SOUND_ENABLED_KEY);
+    return v === null ? true : v === '1';
+  } catch {
+    return true;
+  }
+};
+const readSoundVolume = (): number => {
+  try {
+    const v = Number(localStorage.getItem(SOUND_VOLUME_KEY));
+    return Number.isFinite(v) && v >= 0 && v <= 1 ? v : 0.6;
+  } catch {
+    return 0.6;
+  }
+};
 const writeLocal = (key: string, value: string): void => {
   try {
     localStorage.setItem(key, value);
@@ -113,6 +131,9 @@ interface UiState {
   theme: Theme;
   colorBlind: boolean;
   boardLayout: BoardLayout;
+  /** Sound effects on/off + volume — per-device (localStorage only, never account-synced). */
+  soundEnabled: boolean;
+  soundVolume: number;
   /** "Follow the acting player" camera toggle — in-memory, off on each load. */
   followActing: boolean;
   goHome(): void;
@@ -128,6 +149,8 @@ interface UiState {
   setTheme(theme: Theme): void;
   setColorBlind(colorBlind: boolean): void;
   setBoardLayout(boardLayout: BoardLayout): void;
+  setSoundEnabled(soundEnabled: boolean): void;
+  setSoundVolume(soundVolume: number): void;
   setFollowActing(followActing: boolean): void;
   /** Adopt preferences from a signed-in account (the account is the source of truth). */
   applyPreferences(prefs: UserPreferences): void;
@@ -143,6 +166,8 @@ export const useUi = create<UiState>()((set, get) => ({
   theme: readTheme(),
   colorBlind: readColorBlind(),
   boardLayout: readBoardLayout(),
+  soundEnabled: readSoundEnabled(),
+  soundVolume: readSoundVolume(),
   followActing: false,
   goHome: () => {
     disconnectGame();
@@ -226,6 +251,15 @@ export const useUi = create<UiState>()((set, get) => ({
   setBoardLayout: (boardLayout) => {
     writeLocal(BOARD_LAYOUT_KEY, boardLayout);
     set({ boardLayout });
+  },
+  setSoundEnabled: (soundEnabled) => {
+    writeLocal(SOUND_ENABLED_KEY, soundEnabled ? '1' : '0');
+    set({ soundEnabled });
+  },
+  setSoundVolume: (soundVolume) => {
+    const v = Math.max(0, Math.min(1, soundVolume));
+    writeLocal(SOUND_VOLUME_KEY, String(v));
+    set({ soundVolume: v });
   },
   setFollowActing: (followActing) => set({ followActing }),
   applyPreferences: (prefs) => {
