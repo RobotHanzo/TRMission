@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, X } from 'lucide-react';
+import { Bot, UserMinus, X } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import { api, ApiError, type RoomView, type RoomMember, type BotDifficulty } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { SEAT_COLORS } from '../theme/colors';
+import { Toast } from '../components/Toast';
 
 const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
 
@@ -18,12 +19,26 @@ export function RoomScreen() {
 
   const [room, setRoom] = useState<RoomView | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [kicked, setKicked] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const flashToast = (msg: string) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 2000);
+  };
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
 
   // Poll the room (lobby push is a later enhancement); auto-enter the game when started.
   // `active` doubles as the terminal flag: a terminal outcome clears it, and the interval
   // tears itself down on the next tick so we never re-poll (or re-spam join) after one.
   useEffect(() => {
+    if (!code) return; // no room to poll (e.g. mid-navigation after leaving/being kicked)
     let active = true;
+    // Whether we have ever been seated here. Once true, vanishing from the roster means the
+    // host kicked us — go home instead of silently rejoining on the next tick.
+    let wasMember = false;
     const poll = async () => {
       try {
         let r = await api.getRoom(code);
@@ -38,6 +53,15 @@ export function RoomScreen() {
         // (Existing members of a STARTED game skip this and reconnect via the ticket below —
         // the server rejects join on a started room even for members.)
         if (!r.members.some((m) => m.userId === user?.id)) {
+          if (wasMember) {
+            // We were seated and have been dropped. In LOBBY that's a host kick — surface a
+            // modal and let the player dismiss it home; otherwise just bail home.
+            active = false;
+            if (r.status === 'LOBBY') setKicked(true);
+            else goHome();
+            return;
+          }
+          // A started game we aren't in can't be joined: bail home rather than trap.
           if (r.status !== 'LOBBY') {
             active = false;
             goHome();
@@ -46,6 +70,7 @@ export function RoomScreen() {
           r = await api.joinRoom(code);
           if (!active) return;
         }
+        wasMember = true;
         setRoom(r);
         if (r.status === 'STARTED' && r.gameId) {
           const ticket = await api.getTicket(code);
@@ -109,6 +134,14 @@ export function RoomScreen() {
   const toggleReady = () => void guard(api.setReady(code, !me?.ready));
   const addBot = (d: BotDifficulty) => void guard(api.addBot(code, d));
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
+  const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
+  const copy = (text: string) => {
+    if (!navigator.clipboard) return;
+    void Promise.resolve(navigator.clipboard.writeText(text)).then(
+      () => flashToast(t('copied')),
+      () => undefined,
+    );
+  };
   const start = async () => {
     try {
       const tk = await api.startRoom(code);
@@ -130,10 +163,8 @@ export function RoomScreen() {
           {t('room')} <code className="room-code">{code}</code>
         </h2>
         <div className="row">
-          <button onClick={() => void navigator.clipboard?.writeText(code)}>{t('copyCode')}</button>
-          <button onClick={() => void navigator.clipboard?.writeText(roomLink)}>
-            {t('copyLink')}
-          </button>
+          <button onClick={() => copy(code)}>{t('copyCode')}</button>
+          <button onClick={() => copy(roomLink)}>{t('copyLink')}</button>
         </div>
       </div>
 
@@ -164,6 +195,16 @@ export function RoomScreen() {
                 onClick={() => removeBot(m.userId)}
               >
                 <X size={14} aria-hidden />
+              </button>
+            )}
+            {isHost && !m.isBot && m.userId !== room.hostId && (
+              <button
+                className="icon-btn"
+                aria-label={t('kickPlayer')}
+                title={t('kickPlayer')}
+                onClick={() => kick(m.userId)}
+              >
+                <UserMinus size={14} aria-hidden />
               </button>
             )}
           </li>
@@ -197,6 +238,26 @@ export function RoomScreen() {
         {room.members.length < 2 ? t('waitingForPlayers') : !allReady ? t('waitingForReady') : ''}
       </p>
       {err && <p className="error">{err}</p>}
+      <Toast message={toast} variant="toast-success" />
+      {kicked && (
+        <div className="modal-backdrop" onClick={goHome}>
+          <div
+            className="modal stack"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="kicked-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="kicked-title">{t('kickedTitle')}</h3>
+            <p>{t('kickedBody')}</p>
+            <div className="row">
+              <button className="primary" onClick={goHome}>
+                {t('kickedAck')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

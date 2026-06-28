@@ -32,6 +32,7 @@ export interface RoomDoc {
 export type JoinResult = RoomDoc | 'not_found' | 'full' | 'started' | 'already';
 export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidden';
 export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
+export type KickResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
 
 // Room codes: 6 chars, no easily-confused glyphs (no I/O/0/1).
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -189,6 +190,26 @@ export class RoomRepo implements OnModuleInit {
 
     const remaining = room.members
       .filter((m) => m.userId !== botId)
+      .map((m, i) => ({ ...m, seat: i }));
+    await this.col.updateOne(
+      { _id: code },
+      { $set: { members: remaining, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /** Host-only: remove another member (human or bot) and keep seats contiguous.
+   *  The host cannot kick themselves — leaving is a separate, host-transferring path. */
+  async kick(code: string, hostId: string, targetId: string): Promise<KickResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    if (room.hostId !== hostId) return 'forbidden';
+    if (targetId === hostId) return 'invalid';
+    if (!room.members.some((m) => m.userId === targetId)) return 'invalid';
+
+    const remaining = room.members
+      .filter((m) => m.userId !== targetId)
       .map((m, i) => ({ ...m, seat: i }));
     await this.col.updateOne(
       { _id: code },

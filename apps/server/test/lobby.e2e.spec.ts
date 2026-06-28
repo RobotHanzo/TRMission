@@ -81,6 +81,42 @@ describe('lobby: room lifecycle + ws-ticket handoff', () => {
   });
 });
 
+describe('lobby: host kicks a player', () => {
+  it('removes a member on host request, re-seats, and rejects non-host / self kicks', async () => {
+    const a = await guest('Ada');
+    const b = await guest('Ben');
+    const c = await guest('Cy');
+
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(c.token)).expect(200);
+
+    // A non-host cannot kick anyone.
+    await request(server())
+      .post(`/api/v1/rooms/${code}/kick/${c.id}`)
+      .set(auth(b.token))
+      .expect(403);
+    // The host cannot kick themselves.
+    await request(server())
+      .post(`/api/v1/rooms/${code}/kick/${a.id}`)
+      .set(auth(a.token))
+      .expect(400);
+
+    const kicked = await request(server())
+      .post(`/api/v1/rooms/${code}/kick/${b.id}`)
+      .set(auth(a.token))
+      .expect(200);
+    expect(kicked.body.members.map((m: { userId: string }) => m.userId)).toEqual([a.id, c.id]);
+    // Seats stay contiguous after the removal.
+    expect(kicked.body.members.map((m: { seat: number }) => m.seat)).toEqual([0, 1]);
+  });
+});
+
 describe('lobby → game → history (end to end)', () => {
   it('plays a started game to completion and archives it to match history', async () => {
     const a = await guest('Hana');

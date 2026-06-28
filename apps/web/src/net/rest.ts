@@ -146,6 +146,8 @@ export const api = {
     req<RoomView>('POST', `/rooms/${code}/bots`, { difficulty }),
   removeBot: (code: string, botId: string) =>
     req<RoomView>('POST', `/rooms/${code}/bots/${encodeURIComponent(botId)}/remove`),
+  kickPlayer: (code: string, userId: string) =>
+    req<RoomView>('POST', `/rooms/${code}/kick/${encodeURIComponent(userId)}`),
   startRoom: (code: string) => req<TicketResult>('POST', `/rooms/${code}/start`),
   getTicket: (code: string) => req<TicketResult>('POST', `/rooms/${code}/ticket`),
 

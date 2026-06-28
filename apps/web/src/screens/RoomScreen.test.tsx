@@ -29,6 +29,7 @@ vi.mock('../net/rest', () => {
       leaveRoom: vi.fn(),
       addBot: vi.fn(),
       removeBot: vi.fn(),
+      kickPlayer: vi.fn(),
       startRoom: vi.fn(),
     },
   };
@@ -64,6 +65,7 @@ const mocked = api as unknown as {
   getRoom: ReturnType<typeof vi.fn>;
   getTicket: ReturnType<typeof vi.fn>;
   joinRoom: ReturnType<typeof vi.fn>;
+  kickPlayer: ReturnType<typeof vi.fn>;
 };
 
 beforeEach(() => {
@@ -136,5 +138,56 @@ describe('RoomScreen copy link', () => {
     const copyLink = await screen.findByRole('button', { name: '複製連結' });
     fireEvent.click(copyLink);
     expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/room/ABCD`);
+  });
+
+  it('flashes a success toast once the copy resolves', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    render(<RoomScreen />);
+    const copyCode = await screen.findByRole('button', { name: '複製房號' });
+    fireEvent.click(copyCode);
+    await screen.findByText('已複製'); // "Copied"
+  });
+});
+
+describe('RoomScreen kick', () => {
+  const meHost = { userId: 'u-me', displayName: 'Me', isGuest: true, seat: 0, ready: false };
+  const guestMember = { userId: 'g1', displayName: 'Guest', isGuest: true, seat: 1, ready: false };
+
+  it('lets the host remove a human member', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [meHost, guestMember] }));
+    mocked.kickPlayer.mockResolvedValue(room({ hostId: 'u-me', members: [meHost] }));
+    render(<RoomScreen />);
+    const kickBtn = await screen.findByRole('button', { name: '移除玩家' });
+    fireEvent.click(kickBtn);
+    expect(mocked.kickPlayer).toHaveBeenCalledWith('ABCD', 'g1');
+  });
+
+  it('shows no kick button to a non-host', async () => {
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    render(<RoomScreen />);
+    await screen.findByText('host');
+    expect(screen.queryByRole('button', { name: '移除玩家' })).toBeNull();
+  });
+
+  it('shows a "removed" modal (and does not rejoin) when the host kicks us', async () => {
+    vi.useFakeTimers();
+    try {
+      mocked.getRoom
+        .mockResolvedValueOnce(room({ members: [member('host'), member('u-me')] })) // seated
+        .mockResolvedValue(room({ members: [member('host')] })); // kicked — roster drops us
+      render(<RoomScreen />);
+      await vi.advanceTimersByTimeAsync(100); // first poll: we are a member
+      await vi.advanceTimersByTimeAsync(2100); // next poll: gone → kicked modal
+      expect(mocked.joinRoom).not.toHaveBeenCalled();
+      // Still mounted with a modal, not silently bounced; acknowledging returns home.
+      expect(useUi.getState().view).toBe('room');
+      const ack = screen.getByRole('button', { name: '返回首頁' });
+      fireEvent.click(ack);
+      expect(useUi.getState().view).toBe('home');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

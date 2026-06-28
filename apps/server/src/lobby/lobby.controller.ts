@@ -84,6 +84,18 @@ export class LobbyController {
     return this.lobby.removeBot(code.toUpperCase(), user, botId);
   }
 
+  @Post(':code/kick/:userId')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Host removes another player from the room' })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  kick(
+    @CurrentUser() user: AuthUser,
+    @Param('code') code: string,
+    @Param('userId') userId: string,
+  ) {
+    return this.lobby.kick(code.toUpperCase(), user, userId);
+  }
+
   @Post(':code/start')
   @HttpCode(200)
   @ApiOperation({ summary: 'Host starts the game; returns your ws-game ticket' })

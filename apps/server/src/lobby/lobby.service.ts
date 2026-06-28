@@ -109,6 +109,16 @@ export class LobbyService {
     return toView(r);
   }
 
+  /** Host removes another player from the room. */
+  async kick(code: string, user: AuthUser, targetId: string): Promise<RoomView> {
+    const r = await this.rooms.kick(code, user.userId, targetId);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'forbidden') throw new ForbiddenException('only the host can remove players');
+    if (r === 'invalid') throw new BadRequestException('cannot remove that player');
+    return toView(r);
+  }
+
   /** Host starts the game: create the authoritative match, mark the room STARTED, hand back a ticket. */
   async start(code: string, user: AuthUser): Promise<TicketResult> {
     const room = await this.require(code);
