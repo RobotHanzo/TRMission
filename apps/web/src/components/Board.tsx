@@ -33,8 +33,8 @@ import { BASE_VIEW, fitTransform } from '../game/geography';
 import { Geography } from './Geography';
 import { CARD_COLOR_TOKENS, GRAY_TOKEN, SEAT_COLORS, LIVERY_COLORS } from '../theme/colors';
 import { useUi, type Locale } from '../store/ui';
-import { useGame } from '../store/game';
-import { useAnimations } from '../store/animations';
+import { useGame, useGameStore } from '../store/game';
+import { useAnimationsStore } from '../store/animations';
 import { getSocket } from '../net/connection';
 
 const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
@@ -48,6 +48,8 @@ interface BoardProps {
   onPickCity(cityId: string): void;
   /** Cities to softly highlight (the offered tickets' endpoints, while choosing tickets). */
   highlightCities?: ReadonlySet<string> | undefined;
+  /** Sandbox (tutorial/encyclopedia): suppress the live camera broadcast + follow. */
+  sandbox?: boolean | undefined;
 }
 
 const VIEWBOX = `${BASE_VIEW.x} ${BASE_VIEW.y} ${BASE_VIEW.w} ${BASE_VIEW.h}`;
@@ -183,8 +185,8 @@ function CameraSync({
 }) {
   const { setTransform } = useControls();
   const followActing = useUi((s) => s.followActing);
-  const actingCamera = useGame((s) => s.actingCamera);
-  const recentEvents = useGame((s) => s.recentEvents);
+  const actingCamera = useGameStore((s) => s.actingCamera);
+  const recentEvents = useGameStore((s) => s.recentEvents);
 
   const me = snapshot.you?.playerId ?? null;
   const current = snapshot.currentPlayerId;
@@ -326,7 +328,7 @@ function RouteGlowGate({
  */
 function RevealFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement | null> }) {
   const { setTransform } = useControls();
-  const reveal = useAnimations((s) => s.routeReveal);
+  const reveal = useAnimationsStore((s) => s.routeReveal);
   useEffect(() => {
     if (!reveal || reveal.path.length === 0) return;
     let minX = Infinity;
@@ -449,6 +451,7 @@ export function Board({
   onPickRoute,
   onPickCity,
   highlightCities,
+  sandbox,
 }: BoardProps) {
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const stationCities = useMemo(() => {
@@ -460,13 +463,13 @@ export function Board({
   // Transient claim/station glow + the ticket-completion path sweep (cleared on a timer).
   // `armedGlowRoutes` = claimed-but-not-yet-shown (the store); `startedGlowRoutes` = glow actually
   // running (promoted by RouteGlowGate once the railway is ≥50% in view). The class reads the latter.
-  const armedGlowRoutes = useAnimations((s) => s.glowingRoutes);
-  const glowingStations = useAnimations((s) => s.glowingStations);
-  const sweeps = useAnimations((s) => s.sweeps);
-  const routeReveal = useAnimations((s) => s.routeReveal);
-  const clearGlowRoute = useAnimations((s) => s.clearGlowRoute);
-  const clearGlowStation = useAnimations((s) => s.clearGlowStation);
-  const removeSweep = useAnimations((s) => s.removeSweep);
+  const armedGlowRoutes = useAnimationsStore((s) => s.glowingRoutes);
+  const glowingStations = useAnimationsStore((s) => s.glowingStations);
+  const sweeps = useAnimationsStore((s) => s.sweeps);
+  const routeReveal = useAnimationsStore((s) => s.routeReveal);
+  const clearGlowRoute = useAnimationsStore((s) => s.clearGlowRoute);
+  const clearGlowStation = useAnimationsStore((s) => s.clearGlowStation);
+  const removeSweep = useAnimationsStore((s) => s.removeSweep);
 
   const [startedGlowRoutes, setStartedGlowRoutes] = useState<Map<string, number>>(new Map());
   const startedGlowRef = useRef(startedGlowRoutes);
@@ -566,7 +569,7 @@ export function Board({
         onPinchStart={disengageFollow}
       >
         <ZoomTracker targetRef={viewportRef} />
-        <CameraSync snapshot={snapshot} viewportRef={viewportRef} />
+        {!sandbox && <CameraSync snapshot={snapshot} viewportRef={viewportRef} />}
         <RevealFramer viewportRef={viewportRef} />
         <RouteGlowGate
           armed={armedGlowRoutes}
@@ -646,13 +649,14 @@ export function Board({
                   {/* Paper roadbed seats the cars legibly over land and sea. */}
                   <path className="bed" d={g.path} />
                   {/* Tunnel: diagonal ties, each rotated angle+45° so they cross at 45° to the track. */}
-                  {r.isTunnel && g.ties?.map((t, i) => (
-                    <rect
-                      key={i}
-                      className="tunnel-tie"
-                      transform={`translate(${t.x.toFixed(2)} ${t.y.toFixed(2)}) rotate(${(t.angle + 45).toFixed(1)})`}
-                    />
-                  ))}
+                  {r.isTunnel &&
+                    g.ties?.map((t, i) => (
+                      <rect
+                        key={i}
+                        className="tunnel-tie"
+                        transform={`translate(${t.x.toFixed(2)} ${t.y.toFixed(2)}) rotate(${(t.angle + 45).toFixed(1)})`}
+                      />
+                    ))}
 
                   {isFerry ? (
                     // Ferry: a dotted sea crossing carrying round pips. The `ferryLocos` pips that

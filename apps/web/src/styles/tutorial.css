@@ -116,3 +116,57 @@
     animation: none;
   }
 }
+
+/* In-game encyclopedia: a full-screen overlay above the live game; its board runs on an isolated
+   sandbox store so the live game underneath is never disturbed. */
+.enc-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: stretch;
+  padding: clamp(0.5rem, 2vh, 1.25rem);
+}
+.enc-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface, #fff);
+  color: var(--text, #111);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+}
+.enc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+}
+.enc-title {
+  font-size: 1.05rem;
+}
+.enc-blurb {
+  margin: 0;
+  flex: 1 1 14rem;
+  min-width: 8rem;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+.enc-x {
+  margin-left: auto;
+}
+.enc-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+/* Make the reused full-screen game layout fill the modal stage instead of the viewport. */
+.enc-stage .game {
+  height: 100%;
+  width: 100%;
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Phase, type GameSnapshot } from '@trm/proto';
-import { useGame } from '../store/game';
-import { useAnimations } from '../store/animations';
+import { useGameStore, useGameStoreApi } from '../store/game';
+import { useAnimationsStore } from '../store/animations';
 import { intentsFromEvents } from '../game/animationModel';
 import { completedByPlayer, pathForTicket } from '../game/tickets';
 import { ticketById } from '../game/content';
@@ -14,11 +14,12 @@ import { ticketById } from '../game/content';
  *    baseline, so resuming a game never replays a stale fanfare.
  */
 export function useAnimationDriver(): void {
-  const snapshot = useGame((s) => s.snapshot);
-  const lastBatch = useGame((s) => s.lastBatch);
-  const pushIntent = useAnimations((s) => s.pushIntent);
-  const revealMarketSlots = useAnimations((s) => s.revealMarketSlots);
-  const showEndgameWarning = useAnimations((s) => s.showEndgameWarning);
+  const gameStore = useGameStoreApi();
+  const snapshot = useGameStore((s) => s.snapshot);
+  const lastBatch = useGameStore((s) => s.lastBatch);
+  const pushIntent = useAnimationsStore((s) => s.pushIntent);
+  const revealMarketSlots = useAnimationsStore((s) => s.revealMarketSlots);
+  const showEndgameWarning = useAnimationsStore((s) => s.showEndgameWarning);
 
   const prevCompleted = useRef<Map<string, Set<string>>>(new Map());
   const seeded = useRef(false);
@@ -32,10 +33,10 @@ export function useAnimationDriver(): void {
   useEffect(() => {
     if (!lastBatch || lastBatch.seq === seenBatchSeq.current) return;
     seenBatchSeq.current = lastBatch.seq;
-    const snap = useGame.getState().snapshot;
+    const snap = gameStore.getState().snapshot;
     if (!snap) return;
     for (const intent of intentsFromEvents(snap, lastBatch.events)) pushIntent(intent);
-  }, [lastBatch, pushIntent]);
+  }, [lastBatch, pushIntent, gameStore]);
 
   // Ticket completion via snapshot diff (authoritative `completedTickets`).
   useEffect(() => {

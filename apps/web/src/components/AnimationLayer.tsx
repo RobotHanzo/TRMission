@@ -1,8 +1,8 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useAnimations, type Flight, type Float, type TicketCue } from '../store/animations';
-import { useGame } from '../store/game';
+import { useAnimationsStore, type Flight, type Float, type TicketCue } from '../store/animations';
+import { useGameStore } from '../store/game';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { SEAT_COLORS } from '../theme/colors';
 import { FlyingCard } from './FlyingCard';
@@ -20,8 +20,8 @@ const CARD_H = Math.round((CARD_W * 92) / 132);
 
 /** One in-flight card, animated from its source (deck/market slot) to its target (hand/tracker). */
 function FlightMover({ flight }: { flight: Flight }) {
-  const removeFlight = useAnimations((s) => s.removeFlight);
-  const me = useGame((s) => s.snapshot?.you?.playerId ?? null);
+  const removeFlight = useAnimationsStore((s) => s.removeFlight);
+  const me = useGameStore((s) => s.snapshot?.you?.playerId ?? null);
   const reduced = useReducedMotion();
   const [style, setStyle] = useState<CSSProperties>({ opacity: 0 });
   const done = useRef(false);
@@ -88,8 +88,10 @@ function FlightMover({ flight }: { flight: Flight }) {
 
 /** A floating "+N" rising from a player's tracker when they score. */
 function FloatMover({ float }: { float: Float }) {
-  const removeFloat = useAnimations((s) => s.removeFloat);
-  const seat = useGame((s) => s.snapshot?.players.find((p) => p.id === float.playerId)?.seat ?? 0);
+  const removeFloat = useAnimationsStore((s) => s.removeFloat);
+  const seat = useGameStore(
+    (s) => s.snapshot?.players.find((p) => p.id === float.playerId)?.seat ?? 0,
+  );
   const [style, setStyle] = useState<CSSProperties>({ display: 'none' });
 
   useLayoutEffect(() => {
@@ -113,7 +115,7 @@ function FloatMover({ float }: { float: Float }) {
 /** An opponent's completion: a small revealed ticket card near their tracker (no screen takeover). */
 function TicketCueView({ cue }: { cue: TicketCue }) {
   const { t } = useTranslation();
-  const removeTicketCue = useAnimations((s) => s.removeTicketCue);
+  const removeTicketCue = useAnimationsStore((s) => s.removeTicketCue);
   const [style, setStyle] = useState<CSSProperties>({ display: 'none' });
 
   useLayoutEffect(() => {
@@ -143,13 +145,13 @@ function TicketCueView({ cue }: { cue: TicketCue }) {
 
 /** Fixed full-viewport overlay: travelling cards, score floats, opponent cues, and the fanfare. */
 export function AnimationLayer() {
-  const flights = useAnimations((s) => s.flights);
-  const floats = useAnimations((s) => s.floats);
-  const ticketCues = useAnimations((s) => s.ticketCues);
-  const fanfare = useAnimations((s) => s.fanfare);
-  const dismissFanfare = useAnimations((s) => s.dismissFanfare);
-  const endgameCue = useAnimations((s) => s.endgameCue);
-  const dismissEndgameWarning = useAnimations((s) => s.dismissEndgameWarning);
+  const flights = useAnimationsStore((s) => s.flights);
+  const floats = useAnimationsStore((s) => s.floats);
+  const ticketCues = useAnimationsStore((s) => s.ticketCues);
+  const fanfare = useAnimationsStore((s) => s.fanfare);
+  const dismissFanfare = useAnimationsStore((s) => s.dismissFanfare);
+  const endgameCue = useAnimationsStore((s) => s.endgameCue);
+  const dismissEndgameWarning = useAnimationsStore((s) => s.dismissEndgameWarning);
   const reduced = useReducedMotion();
   if (typeof document === 'undefined') return null;
   return createPortal(

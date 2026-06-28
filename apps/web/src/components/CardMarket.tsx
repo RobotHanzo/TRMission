@@ -3,7 +3,7 @@ import { Layers } from 'lucide-react';
 import { CardColor as PbCardColor, type GameSnapshot } from '@trm/proto';
 import { tokenForPb } from '../game/cards';
 import { LOCOMOTIVE_GRADIENT } from '../theme/colors';
-import { useAnimations } from '../store/animations';
+import { useAnimationsStore } from '../store/animations';
 
 interface Props {
   snapshot: GameSnapshot;
@@ -14,9 +14,9 @@ interface Props {
 
 export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Props) {
   const { t } = useTranslation();
-  const marketFlips = useAnimations((s) => s.marketFlips);
-  const clearMarketFlip = useAnimations((s) => s.clearMarketFlip);
-  const coveredSlots = useAnimations((s) => s.coveredMarketSlots);
+  const marketFlips = useAnimationsStore((s) => s.marketFlips);
+  const clearMarketFlip = useAnimationsStore((s) => s.clearMarketFlip);
+  const coveredSlots = useAnimationsStore((s) => s.coveredMarketSlots);
   return (
     <div className="market">
       <button

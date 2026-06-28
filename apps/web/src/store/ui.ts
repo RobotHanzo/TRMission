@@ -137,6 +137,8 @@ interface UiState {
   soundVolume: number;
   /** "Follow the acting player" camera toggle — in-memory, off on each load. */
   followActing: boolean;
+  /** The in-game rules encyclopedia overlay (a local sandbox; never touches the live game). */
+  encyclopediaOpen: boolean;
   goHome(): void;
   enterRoom(code: string): void;
   enterGame(gameId: string, ticket: string): void;
@@ -155,6 +157,7 @@ interface UiState {
   setSoundEnabled(soundEnabled: boolean): void;
   setSoundVolume(soundVolume: number): void;
   setFollowActing(followActing: boolean): void;
+  setEncyclopediaOpen(open: boolean): void;
   /** Adopt preferences from a signed-in account (the account is the source of truth). */
   applyPreferences(prefs: UserPreferences): void;
 }
@@ -172,6 +175,7 @@ export const useUi = create<UiState>()((set, get) => ({
   soundEnabled: readSoundEnabled(),
   soundVolume: readSoundVolume(),
   followActing: false,
+  encyclopediaOpen: false,
   goHome: () => {
     disconnectGame();
     pushPath('/');
@@ -276,6 +280,7 @@ export const useUi = create<UiState>()((set, get) => ({
     set({ soundVolume: v });
   },
   setFollowActing: (followActing) => set({ followActing }),
+  setEncyclopediaOpen: (encyclopediaOpen) => set({ encyclopediaOpen }),
   applyPreferences: (prefs) => {
     writeLocal(THEME_KEY, prefs.theme);
     writeLocal(COLOR_BLIND_KEY, prefs.colorBlind ? '1' : '0');

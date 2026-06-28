@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Train, Building2, Trophy, Layers, Ticket, Bot } from 'lucide-react';
 import type { GameSnapshot } from '@trm/proto';
 import { SEAT_COLORS } from '../theme/colors';
-import { useAnimations } from '../store/animations';
+import { useAnimationsStore } from '../store/animations';
 import { playerLiveTotal } from '../game/tickets';
 import { usePlayerName } from '../game/playerName';
 
@@ -12,8 +12,8 @@ const isBot = (id: string): boolean => id.startsWith('bot:');
 export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
   const { t } = useTranslation();
   const nameOf = usePlayerName();
-  const turnCue = useAnimations((s) => s.turnCue);
-  const clearTurnCue = useAnimations((s) => s.clearTurnCue);
+  const turnCue = useAnimationsStore((s) => s.turnCue);
+  const clearTurnCue = useAnimationsStore((s) => s.clearTurnCue);
 
   useEffect(() => {
     if (!turnCue) return;

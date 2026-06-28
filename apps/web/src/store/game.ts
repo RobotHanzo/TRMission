@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { create, useStore, type StateCreator } from 'zustand';
+import { createContext, useContext } from 'react';
 import type { GameSnapshot, GameEvent, CameraView } from '@trm/proto';
 import type { SocketStatus } from '../net/socket';
 import type { ViewDescriptor } from '../game/boardView';
@@ -37,7 +38,7 @@ interface GameState {
   reset(): void;
 }
 
-export const useGame = create<GameState>()((set) => ({
+const creator: StateCreator<GameState> = (set) => ({
   snapshot: null,
   status: 'closed',
   recentEvents: [],
@@ -75,4 +76,28 @@ export const useGame = create<GameState>()((set) => ({
       rejection: null,
       actingCamera: null,
     }),
-}));
+});
+
+/** The live game's store singleton (the WebSocket client writes here; app chrome reads here). */
+export const useGame = create<GameState>()(creator);
+
+/** Create an ISOLATED game store instance. The in-game encyclopedia uses one so its sandbox replay
+ *  never touches the live game's store (the live snapshot keeps flowing into `useGame` behind it). */
+export const createGameStore = () => create<GameState>()(creator);
+
+export type GameStoreApi = typeof useGame;
+const GameStoreContext = createContext<GameStoreApi | null>(null);
+export const GameStoreProvider = GameStoreContext.Provider;
+
+/** Subscribe to the contextual game store — the isolated one under a `GameStoreProvider`, else the
+ *  live singleton. In-game board/HUD components use this so they can be re-pointed at a sandbox. */
+export function useGameStore<T>(selector: (s: GameState) => T): T {
+  const store = useContext(GameStoreContext) ?? useGame;
+  return useStore(store, selector);
+}
+
+/** The contextual store object itself — for imperative `.getState()` reads inside effects/callbacks
+ *  (the driver hooks read the latest snapshot this way to dodge stale closures). */
+export function useGameStoreApi(): GameStoreApi {
+  return useContext(GameStoreContext) ?? useGame;
+}

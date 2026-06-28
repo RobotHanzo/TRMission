@@ -12,6 +12,7 @@ import './styles/app.css';
 
 // Lazy so @trm/engine + @trm/codec land in a separate chunk, not the main bundle.
 const TutorialScreen = lazy(() => import('./features/tutorial/TutorialScreen'));
+const EncyclopediaModal = lazy(() => import('./features/tutorial/EncyclopediaModal'));
 
 export function App() {
   const { t, i18n } = useTranslation();
@@ -19,6 +20,8 @@ export function App() {
   const theme = useUi((s) => s.theme);
   const locale = useUi((s) => s.locale);
   const syncFromUrl = useUi((s) => s.syncFromUrl);
+  const encyclopediaOpen = useUi((s) => s.encyclopediaOpen);
+  const setEncyclopediaOpen = useUi((s) => s.setEncyclopediaOpen);
   const user = useSession((s) => s.user);
   const booting = useSession((s) => s.booting);
   const restore = useSession((s) => s.restore);
@@ -91,6 +94,11 @@ export function App() {
           </>
         )}
       </main>
+      {encyclopediaOpen && (
+        <Suspense fallback={null}>
+          <EncyclopediaModal onClose={() => setEncyclopediaOpen(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }

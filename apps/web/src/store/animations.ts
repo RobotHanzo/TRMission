@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { create, useStore, type StateCreator } from 'zustand';
+import { createContext, useContext } from 'react';
 import type { CardColor } from '@trm/shared';
 import type { AnimIntent } from '../game/animationModel';
 
@@ -111,7 +112,7 @@ const initial = () => ({
   routeReveal: null as RouteReveal | null,
 });
 
-export const useAnimations = create<AnimState>()((set) => ({
+const creator: StateCreator<AnimState> = (set) => ({
   ...initial(),
 
   pushIntent: (intent) =>
@@ -234,4 +235,20 @@ export const useAnimations = create<AnimState>()((set) => ({
   setRouteReveal: (seat, path) => set({ routeReveal: { seat, path } }),
   clearRouteReveal: () => set({ routeReveal: null }),
   reset: () => set(initial()),
-}));
+});
+
+/** The live game's animation store singleton. */
+export const useAnimations = create<AnimState>()(creator);
+
+/** Create an ISOLATED animation store instance (the in-game encyclopedia sandbox uses its own). */
+export const createAnimationsStore = () => create<AnimState>()(creator);
+
+export type AnimationsStoreApi = typeof useAnimations;
+const AnimationsStoreContext = createContext<AnimationsStoreApi | null>(null);
+export const AnimationsStoreProvider = AnimationsStoreContext.Provider;
+
+/** Subscribe to the contextual animation store — isolated under a provider, else the live singleton. */
+export function useAnimationsStore<T>(selector: (s: AnimState) => T): T {
+  const store = useContext(AnimationsStoreContext) ?? useAnimations;
+  return useStore(store, selector);
+}

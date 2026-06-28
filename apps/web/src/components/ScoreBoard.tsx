@@ -6,7 +6,7 @@ import { SEAT_COLORS } from '../theme/colors';
 import { seatByPlayer } from '../game/view';
 import { usePlayerName } from '../game/playerName';
 import { ticketById } from '../game/content';
-import { useAnimations } from '../store/animations';
+import { useAnimationsStore } from '../store/animations';
 import { useConfetti } from '../hooks/useConfetti';
 import { TicketCard } from './TicketCard';
 
@@ -33,8 +33,8 @@ type TicketModal = { kind: 'completed' | 'failed'; playerId: string };
 export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLeave(): void }) {
   const { t } = useTranslation();
   const playerName = usePlayerName();
-  const setRouteReveal = useAnimations((s) => s.setRouteReveal);
-  const clearRouteReveal = useAnimations((s) => s.clearRouteReveal);
+  const setRouteReveal = useAnimationsStore((s) => s.setRouteReveal);
+  const clearRouteReveal = useAnimationsStore((s) => s.clearRouteReveal);
 
   const [ticketModal, setTicketModal] = useState<TicketModal | null>(null);
   const [viewingMap, setViewingMap] = useState<string | null>(null);

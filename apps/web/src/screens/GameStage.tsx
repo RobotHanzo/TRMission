@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
-import { useGame } from '../store/game';
+import { useGameStore } from '../store/game';
 import { useUi } from '../store/ui';
 import { routeById, ticketById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
@@ -52,6 +52,8 @@ export interface GameStageProps {
   overlay?: ReactNode;
   /** Cities the tutorial wants glowed this beat (merged with any ticket-endpoint highlights). */
   spotlightCities?: string[] | undefined;
+  /** Sandbox (tutorial/encyclopedia): suppress the live camera broadcast on the board. */
+  sandbox?: boolean | undefined;
 }
 
 export function GameStage({
@@ -60,14 +62,15 @@ export function GameStage({
   onLeave,
   overlay,
   spotlightCities,
+  sandbox,
 }: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const colorBlind = useUi((s) => s.colorBlind);
   const boardLayout = useUi((s) => s.boardLayout);
 
-  const rejection = useGame((s) => s.rejection);
-  const setRejection = useGame((s) => s.setRejection);
+  const rejection = useGameStore((s) => s.rejection);
+  const setRejection = useGameStore((s) => s.setRejection);
 
   // Translate events + snapshot diffs into animations (claim glow, draws, fanfare, …) and sounds.
   useAnimationDriver();
@@ -191,6 +194,7 @@ export function GameStage({
         onPickRoute={pickRoute}
         onPickCity={pickCity}
         highlightCities={highlightCities}
+        sandbox={sandbox}
       />
     </div>
   );
