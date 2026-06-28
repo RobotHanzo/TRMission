@@ -3,7 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Bot, UserMinus, X } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
-import { api, ApiError, type RoomView, type RoomMember, type BotDifficulty } from '../net/rest';
+import {
+  api,
+  ApiError,
+  type RoomView,
+  type RoomMember,
+  type RoomSettings,
+  type BotDifficulty,
+} from '../net/rest';
 import { connectGame } from '../net/connection';
 import { SEAT_COLORS } from '../theme/colors';
 import { Toast } from '../components/Toast';
@@ -131,6 +138,15 @@ export function RoomScreen() {
 
   const guard = (p: Promise<RoomView>) => p.then(setRoom).catch((e: Error) => setErr(e.message));
 
+  const settings = room.settings;
+  const settingsLocked = !isHost || room.status !== 'LOBBY';
+  const setSetting = (patch: Partial<RoomSettings>) => void guard(api.updateRoomSettings(code, patch));
+  const RULE_TOGGLES = [
+    ['unlimitedStationBorrow', 'settingUnlimitedStationBorrow', 'settingUnlimitedStationBorrowDesc'],
+    ['secondDrawAfterBlindRainbow', 'settingSecondDrawAfterRainbow', 'settingSecondDrawAfterRainbowDesc'],
+    ['noUnfinishedTicketPenalty', 'settingNoUnfinishedPenalty', 'settingNoUnfinishedPenaltyDesc'],
+  ] as const;
+
   const toggleReady = () => void guard(api.setReady(code, !me?.ready));
   const addBot = (d: BotDifficulty) => void guard(api.addBot(code, d));
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
@@ -210,6 +226,52 @@ export function RoomScreen() {
           </li>
         ))}
       </ul>
+
+      <fieldset className="card stack game-settings" disabled={settingsLocked}>
+        <legend>{t('gameSettings')}</legend>
+        {RULE_TOGGLES.map(([key, label, desc]) => (
+          <label key={key} className="row between setting-row">
+            <span>
+              <strong>{t(label)}</strong>
+              <br />
+              <span className="muted">{t(desc)}</span>
+            </span>
+            <input
+              type="checkbox"
+              aria-label={t(label)}
+              checked={settings[key]}
+              onChange={(e) => setSetting({ [key]: e.target.checked } as Partial<RoomSettings>)}
+            />
+          </label>
+        ))}
+        <label className="row between setting-row">
+          <span>
+            <strong>{t('allowSpectating')}</strong>
+          </span>
+          <input
+            type="checkbox"
+            aria-label={t('allowSpectating')}
+            checked={settings.allowSpectating}
+            onChange={(e) => setSetting({ allowSpectating: e.target.checked })}
+          />
+        </label>
+        <div className="row between setting-row">
+          <strong>{t('roomVisibility')}</strong>
+          <div className="row">
+            {(['PUBLIC', 'INVITE_ONLY'] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                className={settings.visibility === v ? 'primary' : ''}
+                onClick={() => setSetting({ visibility: v })}
+                disabled={settingsLocked}
+              >
+                {t(`visibility_${v}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </fieldset>
 
       {canAddBot && (
         <div className="row bot-controls">
