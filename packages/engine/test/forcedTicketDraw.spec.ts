@@ -19,7 +19,12 @@ function cfg(ruleParams?: GameConfig['ruleParams']): { board: Board; config: Gam
   const players = [0, 1].map((i) => ({ id: asPlayerId(`p${i}`), seat: i as SeatIndex }));
   return {
     board,
-    config: { seed: 'forced', players, contentHash: CONTENT_HASH, ...(ruleParams ? { ruleParams } : {}) },
+    config: {
+      seed: 'forced',
+      players,
+      contentHash: CONTENT_HASH,
+      ...(ruleParams ? { ruleParams } : {}),
+    },
   };
 }
 
