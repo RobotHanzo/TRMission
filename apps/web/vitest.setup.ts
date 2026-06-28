@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom/vitest';
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+
+// canvas-confetti uses HTMLCanvasElement which jsdom does not implement; stub it globally.
+vi.mock('canvas-confetti', () => ({ default: vi.fn() }));
 
 // Vitest isn't run with `globals: true`, so React Testing Library can't auto-register its
 // afterEach cleanup. Without this, rendered trees (and their polling effects) leak across
