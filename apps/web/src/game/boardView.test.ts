@@ -3,6 +3,7 @@ import {
   transformToView,
   viewToTransform,
   boardProjection,
+  visibleFraction,
   type BoardTransform,
   type BoardProjection,
 } from './boardView';
@@ -82,5 +83,46 @@ describe('boardProjection — read the board→pixel affine off the live <svg>',
       getCTM: () => ({ a: 9, b: 0, c: 0, d: 9, e: 30, f: -10 }),
     } as unknown as SVGSVGElement;
     expect(boardProjection(svg)).toEqual({ k: 9, e: 30, f: -10 });
+  });
+});
+
+describe('visibleFraction — how much of a railway is on screen', () => {
+  const W = 1000;
+  const H = 800;
+  const proj = projFor(10, 0, 0); // 10 px per board unit, no letterbox offset
+
+  // Centre the view (span via scale) so board point (50,40) sits at the viewport centre.
+  const centred = viewToTransform({ cx: 50, cy: 40, span: 60 }, proj, W, H);
+
+  it('is 1 when every car sits inside the viewport', () => {
+    const pts = [
+      { x: 49, y: 39 },
+      { x: 50, y: 40 },
+      { x: 51, y: 41 },
+    ];
+    expect(visibleFraction(pts, centred, proj, W, H)).toBe(1);
+  });
+
+  it('is 0 when the railway is entirely off screen', () => {
+    // Far to the south-east of a view centred on (50,40) with a 60-unit span.
+    const pts = [
+      { x: 200, y: 200 },
+      { x: 210, y: 205 },
+    ];
+    expect(visibleFraction(pts, centred, proj, W, H)).toBe(0);
+  });
+
+  it('reports the in-view share for a half-on, half-off railway', () => {
+    const pts = [
+      { x: 50, y: 40 }, // centre — on screen
+      { x: 51, y: 40 }, // on screen
+      { x: 500, y: 40 }, // way off east — off screen
+      { x: 520, y: 40 }, // off screen
+    ];
+    expect(visibleFraction(pts, centred, proj, W, H)).toBe(0.5);
+  });
+
+  it('is 0 for an empty point set', () => {
+    expect(visibleFraction([], centred, proj, W, H)).toBe(0);
   });
 });

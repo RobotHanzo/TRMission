@@ -79,6 +79,31 @@ export function transformToView(
   };
 }
 
+/**
+ * Fraction (0–1) of the given board-space points that currently fall within the W×H viewport,
+ * under the live transform `t` and projection `proj`. Used to gate the route-claim glow: feeding
+ * the route's car centres tells us how much of the railway is on screen, so the highlight can wait
+ * until it's at least half in view instead of flashing while the follow-camera is still panning.
+ */
+export function visibleFraction(
+  points: readonly { x: number; y: number }[],
+  t: BoardTransform,
+  proj: BoardProjection,
+  wrapperW: number,
+  wrapperH: number,
+): number {
+  if (points.length === 0) return 0;
+  const s = t.scale || 1;
+  let inside = 0;
+  for (const p of points) {
+    // board → content-pixel (k·board + offset) → screen (position + content·scale).
+    const sx = t.positionX + (proj.k * p.x + proj.e) * s;
+    const sy = t.positionY + (proj.k * p.y + proj.f) * s;
+    if (sx >= 0 && sx <= wrapperW && sy >= 0 && sy <= wrapperH) inside++;
+  }
+  return inside / points.length;
+}
+
 /** A received descriptor → the transform THIS viewer must apply to match the framing. */
 export function viewToTransform(
   view: ViewDescriptor,

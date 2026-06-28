@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   TransformWrapper,
@@ -18,6 +26,7 @@ import {
   transformToView,
   viewToTransform,
   boardProjection,
+  visibleFraction,
   type BoardTransform,
 } from '../game/boardView';
 import {
@@ -153,27 +162,50 @@ function frameHome(ref: ReactZoomPanPinchContentRef, animationTime: number): voi
 /** Board units spanned when auto-framing a bot's action POI (a comfortable close-up). */
 const BOT_FOLLOW_SPAN = 34;
 
-/** Turn the follow toggle off without subscribing the caller to its state. */
+/** A claimed route glows for this long once it actually comes into view. */
+const GLOW_MS = 1300;
+/** Drop an armed glow that never reaches half-visibility within this window (claim never seen). */
+const GLOW_WAIT_MS = 2600;
+/** The glow fires once at least this fraction of the route's cars sit inside the viewport. */
+const GLOW_VISIBLE_FRACTION = 0.5;
+
+/**
+ * Turn the follow toggle off in response to a manual gesture — UNLESS it's the local player's
+ * own turn. During my turn the camera I'm panning/zooming is my OWN board view (it's even being
+ * broadcast to followers), so a gesture must not cancel follow; it stays armed and resumes on the
+ * next player once my turn lapses. On any other player's turn a gesture takes the camera back.
+ */
 const disengageFollow = (): void => {
   const ui = useUi.getState();
-  if (ui.followActing) ui.setFollowActing(false);
+  if (!ui.followActing) return;
+  const snap = useGame.getState().snapshot;
+  const myTurn = !!snap?.you?.playerId && snap.currentPlayerId === snap.you.playerId;
+  if (myTurn) return;
+  ui.setFollowActing(false);
 };
 
 /** The live board→pixel projection read off the rendered <svg.board> within this viewport. */
 const viewportProjection = (viewportEl: HTMLDivElement | null) =>
   boardProjection(viewportEl?.querySelector<SVGSVGElement>('svg.board'));
 
-/** Board coordinate (+ a stable key) of the most recent spatial action in the event tail. */
+/**
+ * Board coordinate (+ a stable key) of `playerId`'s most recent spatial action in the event tail.
+ * Scoped to that player so following a bot glides only to ITS moves — never to a stale action from
+ * the previous turn (which matters now that follow can stay armed through the viewer's own turn).
+ */
 function latestActionPoi(
   events: readonly GameEvent[],
+  playerId: string,
 ): { x: number; y: number; key: string } | null {
   for (let i = events.length - 1; i >= 0; i--) {
     const e = events[i]?.event;
     if (!e) continue;
     if (e.case === 'routeClaimed' || e.case === 'tunnelRevealed') {
+      if (e.value.playerId !== playerId) continue;
       const g = ROUTE_GEOMETRY.get(e.value.routeId);
       if (g) return { x: g.mid.x, y: g.mid.y, key: `${e.case}:${e.value.routeId}:${i}` };
     } else if (e.case === 'stationBuilt') {
+      if (e.value.playerId !== playerId) continue;
       const c = cityById.get(e.value.cityId);
       if (c) return { x: c.x, y: c.y, key: `station:${e.value.cityId}:${i}` };
     }
@@ -260,7 +292,7 @@ function CameraSync({
       lastPoiKey.current = null;
       return;
     }
-    const poi = latestActionPoi(recentEvents);
+    const poi = latestActionPoi(recentEvents, current);
     if (!poi || poi.key === lastPoiKey.current) return;
     const w = viewportRef.current?.clientWidth ?? 0;
     const h = viewportRef.current?.clientHeight ?? 0;
@@ -269,7 +301,66 @@ function CameraSync({
     lastPoiKey.current = poi.key;
     const t = viewToTransform({ cx: poi.x, cy: poi.y, span: BOT_FOLLOW_SPAN }, proj, w, h);
     setTransform(t.positionX, t.positionY, t.scale, 600, 'easeOut');
-  }, [followActing, myTurn, currentIsBot, recentEvents, setTransform, viewportRef]);
+  }, [followActing, myTurn, currentIsBot, current, recentEvents, setTransform, viewportRef]);
+
+  return null;
+}
+
+/**
+ * Gates the route-claim glow on visibility. A freshly-claimed route is "armed" the instant the
+ * event lands, but its glow only STARTS once at least half its cars are within the viewport — so
+ * when the follow-camera is mid-pan toward a bot's claim the highlight waits for the railway to
+ * arrive on screen rather than flashing while it's still off in the corner. Lives inside the
+ * pan/zoom context so it can re-test on every transform frame of the glide; `onStart` hands the
+ * promotion back to the Board, which owns the glow's expiry timers.
+ */
+function RouteGlowGate({
+  armed,
+  started,
+  onStart,
+  viewportRef,
+}: {
+  armed: Map<string, number>;
+  started: Map<string, number>;
+  onStart: (routeId: string, seat: number) => void;
+  viewportRef: RefObject<HTMLDivElement | null>;
+}) {
+  const live = useRef<BoardTransform>({ positionX: 0, positionY: 0, scale: 1 });
+  const startedRef = useRef(started);
+  startedRef.current = started;
+
+  // Held in a ref so both the transform effect and the armed-change effect call the same closure
+  // without either needing the other's deps.
+  const evaluate = useRef<() => void>(() => {});
+  evaluate.current = (): void => {
+    if (armed.size === 0) return;
+    const w = viewportRef.current?.clientWidth ?? 0;
+    const h = viewportRef.current?.clientHeight ?? 0;
+    const proj = viewportProjection(viewportRef.current);
+    if (!proj || w <= 0 || h <= 0) return;
+    for (const [routeId, seat] of armed) {
+      if (startedRef.current.has(routeId)) continue;
+      const g = ROUTE_GEOMETRY.get(routeId);
+      // No geometry to test → start it immediately; otherwise wait until it's half in view.
+      if (!g || visibleFraction(g.slots, live.current, proj, w, h) >= GLOW_VISIBLE_FRACTION) {
+        onStart(routeId, seat);
+      }
+    }
+  };
+
+  // Re-check on every transform frame, so a follow-pan promotes the route as it slides into view…
+  useTransformEffect((ref) => {
+    live.current = {
+      positionX: ref.state.positionX,
+      positionY: ref.state.positionY,
+      scale: ref.state.scale,
+    };
+    evaluate.current();
+  });
+  // …and whenever the armed set changes (a claim made while the route is already on screen).
+  useEffect(() => {
+    evaluate.current();
+  }, [armed]);
 
   return null;
 }
@@ -374,20 +465,71 @@ export function Board({
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // Transient claim/station glow + the ticket-completion path sweep (cleared on a timer).
-  const glowingRoutes = useAnimations((s) => s.glowingRoutes);
+  // `armedGlowRoutes` = claimed-but-not-yet-shown (the store); `startedGlowRoutes` = glow actually
+  // running (promoted by RouteGlowGate once the railway is ≥50% in view). The class reads the latter.
+  const armedGlowRoutes = useAnimations((s) => s.glowingRoutes);
   const glowingStations = useAnimations((s) => s.glowingStations);
   const sweeps = useAnimations((s) => s.sweeps);
   const clearGlowRoute = useAnimations((s) => s.clearGlowRoute);
   const clearGlowStation = useAnimations((s) => s.clearGlowStation);
   const removeSweep = useAnimations((s) => s.removeSweep);
 
+  const [startedGlowRoutes, setStartedGlowRoutes] = useState<Map<string, number>>(new Map());
+  const startedGlowRef = useRef(startedGlowRoutes);
+  startedGlowRef.current = startedGlowRoutes;
+  const startGlow = useCallback((routeId: string, seat: number) => {
+    setStartedGlowRoutes((m) => (m.has(routeId) ? m : new Map(m).set(routeId, seat)));
+  }, []);
+
+  // Once a route's glow STARTS (it came into view), run it for GLOW_MS then clear local + store.
+  // Each route schedules exactly one clear (guarded by the ref) so a re-render never resets it.
+  const glowClearTimers = useRef(new Map<string, number>());
   useEffect(() => {
-    if (glowingRoutes.size === 0) return;
-    const timers = [...glowingRoutes.keys()].map((id) =>
-      window.setTimeout(() => clearGlowRoute(id), 1300),
-    );
-    return () => timers.forEach(clearTimeout);
-  }, [glowingRoutes, clearGlowRoute]);
+    for (const id of startedGlowRoutes.keys()) {
+      if (glowClearTimers.current.has(id)) continue;
+      const tid = window.setTimeout(() => {
+        glowClearTimers.current.delete(id);
+        setStartedGlowRoutes((m) => {
+          if (!m.has(id)) return m;
+          const n = new Map(m);
+          n.delete(id);
+          return n;
+        });
+        clearGlowRoute(id);
+      }, GLOW_MS);
+      glowClearTimers.current.set(id, tid);
+    }
+  }, [startedGlowRoutes, clearGlowRoute]);
+
+  // An armed route that never reaches half-visibility within the grace window (e.g. a bot's claim
+  // while not following) is dropped unseen, so it neither glows late nor piles up in the store.
+  const glowWaitTimers = useRef(new Map<string, number>());
+  useEffect(() => {
+    for (const id of armedGlowRoutes.keys()) {
+      if (glowWaitTimers.current.has(id)) continue;
+      const tid = window.setTimeout(() => {
+        glowWaitTimers.current.delete(id);
+        if (!startedGlowRef.current.has(id)) clearGlowRoute(id);
+      }, GLOW_WAIT_MS);
+      glowWaitTimers.current.set(id, tid);
+    }
+    for (const id of [...glowWaitTimers.current.keys()]) {
+      if (!armedGlowRoutes.has(id)) {
+        clearTimeout(glowWaitTimers.current.get(id));
+        glowWaitTimers.current.delete(id);
+      }
+    }
+  }, [armedGlowRoutes, clearGlowRoute]);
+
+  // Tidy any still-pending glow timers on unmount.
+  useEffect(
+    () => () => {
+      for (const tid of glowClearTimers.current.values()) clearTimeout(tid);
+      for (const tid of glowWaitTimers.current.values()) clearTimeout(tid);
+    },
+    [],
+  );
+
   useEffect(() => {
     if (glowingStations.size === 0) return;
     const timers = [...glowingStations.keys()].map((id) =>
@@ -431,6 +573,12 @@ export function Board({
       >
         <ZoomTracker targetRef={viewportRef} />
         <CameraSync snapshot={snapshot} viewportRef={viewportRef} />
+        <RouteGlowGate
+          armed={armedGlowRoutes}
+          started={startedGlowRoutes}
+          onStart={startGlow}
+          viewportRef={viewportRef}
+        />
         <MapControls targetRef={viewportRef} />
         <TransformComponent
           wrapperClass="board-transform"
@@ -456,7 +604,7 @@ export function Board({
               const carOpacity = o?.locked ? 0.45 : 1;
               const isFerry = r.ferryLocos > 0;
               const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
-              const glowSeat = glowingRoutes.get(r.id as string);
+              const glowSeat = startedGlowRoutes.get(r.id as string);
               const cls =
                 'route' +
                 (claimable ? ' claimable' : '') +
