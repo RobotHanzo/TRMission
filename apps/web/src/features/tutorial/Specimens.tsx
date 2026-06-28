@@ -9,7 +9,7 @@ import type { SpecimenSpec } from './types';
 const CARD_W = 56;
 
 /** A short straight route drawn with the live board classes on a tiny fixed viewBox. */
-function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'double' }) {
+export function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'double' }) {
   // Geometry: a horizontal track of `count` car-slots across a 120x28 viewBox.
   const count = variant === 'tunnel' ? 4 : variant === 'ferry' ? 3 : variant === 'double' ? 2 : 3;
   const slotW = 18;
@@ -87,7 +87,7 @@ function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'do
   );
 }
 
-function RouteCompareSpecimen() {
+export function RouteCompareSpecimen() {
   const { t } = useTranslation();
   const rows: Array<['rail' | 'ferry' | 'tunnel', string]> = [
     ['rail', t('tutorial.glossary.rail')],
@@ -106,7 +106,7 @@ function RouteCompareSpecimen() {
   );
 }
 
-function CardRowSpecimen() {
+export function CardRowSpecimen() {
   const colors: CardColor[] = [...TRAIN_COLORS, 'LOCOMOTIVE'];
   return (
     <div className="tut-card-row" data-testid="tut-specimen">
@@ -117,7 +117,7 @@ function CardRowSpecimen() {
   );
 }
 
-function StationSpecimen() {
+export function StationSpecimen() {
   return (
     <svg
       className="tut-station-specimen"
@@ -132,7 +132,7 @@ function StationSpecimen() {
   );
 }
 
-function TicketSpecimen({ id }: { id: string }) {
+export function TicketSpecimen({ id }: { id: string }) {
   return (
     <div className="tut-ticket-specimen" data-testid="tut-specimen">
       <TicketCard ticketId={id} />
