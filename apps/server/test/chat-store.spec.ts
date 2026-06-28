@@ -28,8 +28,8 @@ describe('chat persistence', () => {
     await store.appendChat('cg', 1, 'p2', 'second');
     const out = await store.loadChat('cg');
     expect(out.map((c) => c.text)).toEqual(['first', 'second']);
-    expect(out[0].playerId).toBe('p1');
-    expect(typeof out[0].ts).toBe('number');
+    expect(out[0]?.playerId).toBe('p1');
+    expect(typeof out[0]?.ts).toBe('number');
   });
 
   it('keeps games isolated and rejects duplicate (gameId, seq)', async () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { taiwanBoard, CONTENT_HASH, type GameConfig } from '@trm/engine';
+import { taiwanBoard, CONTENT_HASH, type GameConfig, type PlayerSeed } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
 import { RejectionCode, type ServerEnvelope } from '@trm/proto';
 import { GameRegistry } from '../src/game/game-registry';
@@ -7,7 +7,7 @@ import { GameHub } from '../src/ws/hub';
 import { makeDevTicket } from '../src/ws/ticket';
 import { encodeClient, decodeServer, pickAction } from './helpers';
 
-const players = [
+const players: PlayerSeed[] = [
   { id: asPlayerId('p1'), seat: 0 },
   { id: asPlayerId('p2'), seat: 1 },
 ];

@@ -37,7 +37,9 @@ export function LogPanel() {
   const lineText = (e: LogEntry): string => {
     const seat = seatOf(snapshot, e.playerId);
     const name =
-      e.playerId === null ? '' : nameOf({ id: e.playerId, seat: seat ?? 0, isMe: e.playerId === me });
+      e.playerId === null
+        ? ''
+        : nameOf({ id: e.playerId, seat: seat ?? 0, isMe: e.playerId === me });
     switch (e.kind) {
       case 'gameStarted':
         return t('log.gameStarted');
@@ -46,7 +48,11 @@ export function LogPanel() {
       case 'turnStarted':
         return t('log.turnStarted', { name });
       case 'routeClaimed':
-        return t('log.routeClaimed', { name, route: routeName(String(e.data.routeId)), points: e.data.points });
+        return t('log.routeClaimed', {
+          name,
+          route: routeName(String(e.data.routeId)),
+          points: e.data.points,
+        });
       case 'stationBuilt':
         return t('log.stationBuilt', { name, city: cityName(String(e.data.cityId), locale) });
       case 'tunnelRevealed':
@@ -60,7 +66,7 @@ export function LogPanel() {
       case 'tookFaceup':
         return t('log.tookFaceup', { name });
       case 'ticketsKept':
-        return t('log.ticketsKept', { name, count: e.data.count });
+        return t('log.ticketsKept', { name, count: Number(e.data.count) });
       case 'passed':
         return t('log.passed', { name });
       case 'endgame':

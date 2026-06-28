@@ -14,8 +14,8 @@ describe('useLog', () => {
     useLog.getState().ingestLive([turn('p2')]);
     const e = useLog.getState().entries;
     expect(e).toHaveLength(2);
-    expect(e[0].id).not.toBe(e[1].id);
-    expect(e[1].playerId).toBe('p2');
+    expect(e[0]?.id).not.toBe(e[1]?.id);
+    expect(e[1]?.playerId).toBe('p2');
   });
 
   it('applies history only when empty (history precedes live)', () => {

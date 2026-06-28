@@ -9,7 +9,7 @@ describe('useChat', () => {
     useChat.getState().ingest({ playerId: 'p2', text: 'yo' });
     const m = useChat.getState().messages;
     expect(m.map((x) => x.text)).toEqual(['hi', 'yo']);
-    expect(m[0].id).not.toBe(m[1].id);
+    expect(m[0]?.id).not.toBe(m[1]?.id);
   });
 
   it('applies history only when empty', () => {

@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { create } from '@bufbuild/protobuf';
+import { create, type MessageInitShape } from '@bufbuild/protobuf';
 import { GameEventSchema, CardColor } from '@trm/proto';
 import { entriesFromEvents } from './logModel';
 
-const ev = (event: Parameters<typeof create<typeof GameEventSchema>>[1]['event']) =>
+const ev = (event: NonNullable<MessageInitShape<typeof GameEventSchema>['event']>) =>
   create(GameEventSchema, { event });
 
 describe('entriesFromEvents', () => {
@@ -14,7 +14,12 @@ describe('entriesFromEvents', () => {
       ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2 } }),
     ]);
     expect(out).toEqual([
-      { kind: 'routeClaimed', playerId: 'p1', data: { routeId: 'R1', points: 7 }, importance: 'highlight' },
+      {
+        kind: 'routeClaimed',
+        playerId: 'p1',
+        data: { routeId: 'R1', points: 7 },
+        importance: 'highlight',
+      },
       { kind: 'stationBuilt', playerId: 'p2', data: { cityId: 'C9' }, importance: 'highlight' },
       { kind: 'endgame', playerId: 'p1', data: { turns: 2 }, importance: 'alert' },
     ]);
