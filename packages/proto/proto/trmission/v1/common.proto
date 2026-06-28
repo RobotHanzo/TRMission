@@ -131,6 +131,15 @@ message StationPlacement {
   string city_id = 2;
 }
 
+// A destination ticket revealed because its owner has COMPLETED it (their own
+// routes connect both endpoints). Finished tickets are public by design; in-progress
+// tickets stay secret (see SelfView). This deliberately exposes a ticket id, so it
+// lives OUTSIDE the counts-only PublicPlayerState (risk #1 invariant preserved).
+message CompletedTicket {
+  string player_id = 1;
+  string ticket_id = 2;
+}
+
 message Endgame {
   bool triggered = 1;
   int32 trigger_player_index = 2;
@@ -217,4 +226,7 @@ message GameSnapshot {
   repeated PublicPlayerState players = 17;
   SelfView you = 18;                  // unset for spectators
   FinalScoreboard final_scores = 19;  // set only at GAME_OVER
+
+  // Finished tickets, revealed for ALL players (own-track completion). Public by design.
+  repeated CompletedTicket completed_tickets = 20;
 }
