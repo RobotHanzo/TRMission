@@ -230,13 +230,14 @@
 .route.owned .slot {
   stroke-width: calc(0.42px * var(--inv-scale));
 }
-/* Tunnel: a dark dashed sleeper track peeks between the (shorter) cars. */
+/* Tunnel: dark sleeper ties cross the full roadbed, poking past the cars and filling every gap. */
 .tunnel-track {
   fill: none;
-  stroke: #5c5346;
-  stroke-width: calc(0.55px * var(--inv-scale));
-  stroke-linecap: round;
-  stroke-dasharray: 1 1;
+  stroke: #3d352b; /* dark sleeper timber — fixed; the roadbed is light in both themes */
+  stroke-width: calc(3.8px * var(--inv-scale)); /* wider than the 2.8px bed → ties poke past the rails */
+  stroke-linecap: butt; /* crisp rectangular sleepers — round would turn them into lozenges */
+  stroke-dasharray: 0.28 1.09; /* thinner ties, same 1.37-unit cycle → crisper hatch, same density */
+  opacity: 0.9;
 }
 /* Ferry: a dotted open-sea crossing under the round locomotive pips. */
 .ferry-line {
