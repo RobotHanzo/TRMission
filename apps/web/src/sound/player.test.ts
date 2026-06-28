@@ -22,8 +22,9 @@ function mockContext() {
 }
 
 beforeEach(() => {
-  // @ts-expect-error test shim for fetch
-  global.fetch = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)) });
+  global.fetch = vi
+    .fn()
+    .mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)) }) as typeof fetch;
 });
 
 describe('sound player', () => {

@@ -33,6 +33,7 @@ import { ScoreBoard } from '../components/ScoreBoard';
 import { AnimationLayer } from '../components/AnimationLayer';
 import { Toast } from '../components/Toast';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
+import { useSoundDriver } from '../hooks/useSoundDriver';
 import '../styles/game.css';
 import '../styles/animations.css';
 
@@ -56,6 +57,8 @@ export function GameScreen() {
 
   // Translate events + snapshot diffs into animations (claim glow, draws, fanfare, …).
   useAnimationDriver();
+  // Translate the same streams into sound effects.
+  useSoundDriver();
 
   const [claim, setClaim] = useState<Claim | null>(null);
   // The base payment committed to a pending tunnel claim. Its cards stay in hand until the tunnel
