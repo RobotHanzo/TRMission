@@ -44,7 +44,6 @@ export function useSpotlightRects(spotlight: Spotlight | undefined): FlatRect[] 
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('resize', measure);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
   return rects;
