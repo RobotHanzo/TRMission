@@ -16,7 +16,7 @@ interface Props {
 
 /**
  * Full-screen celebration for the local player's own ticket completion (item 4). Confetti (more for
- * a long-haul), the enlarged ticket card, and instant points. Skippable: click / Escape / auto, and
+ * a long-haul), the centred ticket card at its natural size, and instant points. Skippable: click / Escape / auto, and
  * always under the 7s cap. Reduced motion → a static banner with no confetti.
  */
 export function TicketFanfare({ fanfare, reducedMotion, onDone }: Props) {
