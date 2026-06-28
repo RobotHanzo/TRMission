@@ -177,7 +177,7 @@ function applyKeepTickets(
   if (v) return err(v);
   const offer = p.pendingTicketOffer as readonly TicketId[];
   const { ticketDeckLong, ticketDeckShort } = returnTickets(board, state, offer, keep);
-  const next: GameState = {
+  let next: GameState = {
     ...withPlayer(state, player, (pl) => ({
       ...pl,
       keptTickets: [...pl.keptTickets, ...keep],
@@ -186,10 +186,17 @@ function applyKeepTickets(
     ticketDeckLong,
     ticketDeckShort,
   };
+  // A freshly-kept ticket may already be satisfied by the player's existing network — lock it now.
+  const lock = lockCompletedTickets(board, next);
+  next = lock.state;
   const out = endTurn(board, next, { wasPass: false });
   return ok({
     state: out.state,
-    events: [{ e: 'TICKETS_KEPT', player, keptCount: keep.length, visibility: 'PUBLIC' }, ...out.events],
+    events: [
+      { e: 'TICKETS_KEPT', player, keptCount: keep.length, visibility: 'PUBLIC' },
+      ...lock.events,
+      ...out.events,
+    ],
   });
 }
 
