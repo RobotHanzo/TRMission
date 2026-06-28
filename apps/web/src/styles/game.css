@@ -1009,18 +1009,26 @@ button.ticket-card:hover {
   height: 19px;
   font-size: 0.72rem;
 }
-.reveal {
-  gap: var(--tr-space-2);
-}
-.reveal-card {
-  width: 34px;
-  height: 46px;
-  border-radius: var(--tr-radius-sm);
+/* ── Tunnel reveal (the three drawn cards) ───────────────────────────────────── */
+.tunnel-reveal {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--tr-space-3);
+}
+.tunnel-surcharge {
+  text-align: center;
+  font-weight: 600;
+  margin: 0;
+}
+/* Zero-surcharge tunnels have no cards to spend; the option reads as a confirm button. */
+.payment-confirm {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 64px;
+  padding: 0 var(--tr-space-4);
   font-weight: 700;
-  border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
 .scoreboard table {

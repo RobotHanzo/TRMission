@@ -96,9 +96,10 @@
     opacity: 1;
   }
 }
-.reveal-card {
-  animation: anim-card-flip-in 0.4s ease-out both;
-  animation-delay: calc(var(--i, 0) * 0.18s);
+/* Tunnel reveal: big cards flip in one at a time, slowly, for suspense. */
+.tunnel-reveal-card {
+  animation: anim-card-flip-in 0.6s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.5s);
 }
 .market-slot.is-flipping {
   animation: anim-card-flip-in 0.45s ease-out;
@@ -360,7 +361,7 @@
   .station-hub.just-built,
   .station-ring,
   .sweep-seg,
-  .reveal-card,
+  .tunnel-reveal-card,
   .market-slot.is-flipping,
   .score-float,
   .tracker.is-turn-cue,
