@@ -1028,6 +1028,13 @@ button.ticket-card:hover {
   font-weight: 600;
   margin: 0;
 }
+/* Can't afford the surcharge: the lone, centred status message (no payment screen). */
+.tunnel-cannot {
+  text-align: center;
+  font-weight: 600;
+  color: var(--tr-ember, #c0392b);
+  margin: 0;
+}
 /* Zero-surcharge tunnels have no cards to spend; the option reads as a confirm button. */
 .payment-confirm {
   display: inline-flex;

@@ -67,35 +67,39 @@ export function TunnelModal({ revealed, extraRequired, options, onCommit, onAbor
         </div>
         {showResult && (
           <div className="tunnel-result">
-            <p className="tunnel-surcharge">
-              {extraRequired === 0 ? t('tunnelNoExtra') : t('payExtra', { n: extraRequired })}
-            </p>
             {options.length === 0 ? (
-              <p className="muted">{t('cannotAfford')}</p>
+              // Can't afford the surcharge — there's nothing to pay, so skip the payment screen
+              // and just state it (centred). Abort is the only way on.
+              <p className="tunnel-cannot">{t('cannotAfford')}</p>
             ) : (
-              <ul className="payment-options card-options">
-                {options.map((p, i) => {
-                  const hasCards = (p.color && p.colorCount > 0) || p.locomotives > 0;
-                  return (
-                    <li key={i}>
-                      <button
-                        type="button"
-                        className="payment-card"
-                        aria-label={hasCards ? describe(p) : t('confirm')}
-                        onClick={() => onCommit(p)}
-                      >
-                        {p.color && p.colorCount > 0 && (
-                          <TrainCarCard color={p.color} count={p.colorCount} size={CARD_SIZE} />
-                        )}
-                        {p.locomotives > 0 && (
-                          <TrainCarCard color="LOCOMOTIVE" count={p.locomotives} size={CARD_SIZE} />
-                        )}
-                        {!hasCards && <span className="payment-confirm">{t('confirm')}</span>}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
+              <>
+                <p className="tunnel-surcharge">
+                  {extraRequired === 0 ? t('tunnelNoExtra') : t('payExtra', { n: extraRequired })}
+                </p>
+                <ul className="payment-options card-options">
+                  {options.map((p, i) => {
+                    const hasCards = (p.color && p.colorCount > 0) || p.locomotives > 0;
+                    return (
+                      <li key={i}>
+                        <button
+                          type="button"
+                          className="payment-card"
+                          aria-label={hasCards ? describe(p) : t('confirm')}
+                          onClick={() => onCommit(p)}
+                        >
+                          {p.color && p.colorCount > 0 && (
+                            <TrainCarCard color={p.color} count={p.colorCount} size={CARD_SIZE} />
+                          )}
+                          {p.locomotives > 0 && (
+                            <TrainCarCard color="LOCOMOTIVE" count={p.locomotives} size={CARD_SIZE} />
+                          )}
+                          {!hasCards && <span className="payment-confirm">{t('confirm')}</span>}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
             )}
             <div className="row">
               <button type="button" onClick={onAbort}>
