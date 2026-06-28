@@ -51,6 +51,36 @@ export function enumerateRoutePayments(hand: Hand, route: RouteDef): Payment[] {
   return out;
 }
 
+export interface Shortfall {
+  /** `locos` = a ferry's locomotive minimum isn't met; `cards` = not enough matching cards. */
+  kind: 'cards' | 'locos';
+  /** How many are required. */
+  need: number;
+  /** How many usable cards the hand can put toward it. */
+  have: number;
+}
+
+/**
+ * Why a route can't be claimed with this hand. Mirrors `enumerateRoutePayments` — only
+ * meaningful when that returns no payment. Locomotives are wild, so `have` for a colour
+ * shortfall is the best single colour plus every locomotive.
+ */
+export function routeShortfall(hand: Hand, route: RouteDef): Shortfall {
+  const locoHave = hand.LOCOMOTIVE;
+  if (route.ferryLocos > locoHave) {
+    return { kind: 'locos', need: route.ferryLocos, have: locoHave };
+  }
+  const bestColor =
+    route.color === 'GRAY' ? Math.max(...TRAIN_COLORS.map((c) => hand[c])) : hand[route.color];
+  return { kind: 'cards', need: route.length, have: bestColor + locoHave };
+}
+
+/** Why a station can't be built with this hand. Mirrors `enumerateStationPayments`. */
+export function stationShortfall(hand: Hand, cost: number): Shortfall {
+  const bestColor = Math.max(...TRAIN_COLORS.map((c) => hand[c]));
+  return { kind: 'cards', need: cost, have: bestColor + hand.LOCOMOTIVE };
+}
+
 /** Station cost = (#stations already built) + 1, paid in one colour (locos wild). */
 export function enumerateStationPayments(hand: Hand, cost: number): Payment[] {
   const out: Payment[] = [];

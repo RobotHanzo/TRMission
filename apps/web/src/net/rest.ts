@@ -67,13 +67,28 @@ export const setOnTokenChange = (cb: (t: string | null) => void): void => {
   onToken = cb;
 };
 
-async function tryRefresh(): Promise<boolean> {
-  const res = await fetch('/api/v1/auth/refresh', { method: 'POST', credentials: 'include' });
-  if (!res.ok) return false;
-  const data = (await res.json()) as { accessToken: string };
-  accessToken = data.accessToken;
-  onToken?.(data.accessToken);
-  return true;
+// Single-flight: a refresh token may be rotated only once, so concurrent 401s (e.g. two
+// `me()` probes racing on reload — React StrictMode double-invokes effects) must share one
+// rotation. A second, independent rotation of the same token trips the server's reuse
+// detection and burns the whole session family, logging the user out.
+let refreshing: Promise<boolean> | null = null;
+function tryRefresh(): Promise<boolean> {
+  if (refreshing) return refreshing;
+  refreshing = (async () => {
+    try {
+      const res = await fetch('/api/v1/auth/refresh', { method: 'POST', credentials: 'include' });
+      if (!res.ok) return false;
+      const data = (await res.json()) as { accessToken: string };
+      accessToken = data.accessToken;
+      onToken?.(data.accessToken);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      refreshing = null;
+    }
+  })();
+  return refreshing;
 }
 
 async function raw(path: string, init: RequestInit): Promise<Response> {

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { CARD_COLOR_TOKENS } from '../theme/colors';
 import type { Payment } from '../game/payments';
-import { CardSwatch } from './CardSwatch';
+import { TrainCarCard } from './TrainCarCard';
 
 interface Props {
   title: string;
@@ -8,6 +9,20 @@ interface Props {
   onPick(p: Payment): void;
   onCancel(): void;
 }
+
+// Cards are scaled down from the hand size so a couple of spend-options stack neatly
+// in the modal while still reading as the same rolling-stock cards as the deck.
+const CARD_SIZE = 104;
+
+/** Describes a spend option for assistive tech, e.g. "藍 ×2 + 機車頭 ×1". */
+const describe = (p: Payment): string => {
+  const parts: string[] = [];
+  if (p.color && p.colorCount > 0)
+    parts.push(`${CARD_COLOR_TOKENS[p.color].nameZh} ×${p.colorCount}`);
+  if (p.locomotives > 0)
+    parts.push(`${CARD_COLOR_TOKENS.LOCOMOTIVE.nameZh} ×${p.locomotives}`);
+  return parts.join(' + ');
+};
 
 /** Lets the player choose which combination of cards to spend. */
 export function PaymentModal({ title, options, onPick, onCancel }: Props) {
@@ -19,15 +34,20 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
         {options.length === 0 ? (
           <p className="muted">{t('cannotAfford')}</p>
         ) : (
-          <ul className="payment-options">
+          <ul className="payment-options card-options">
             {options.map((p, i) => (
               <li key={i}>
-                <button onClick={() => onPick(p)}>
+                <button
+                  type="button"
+                  className="payment-card"
+                  aria-label={describe(p)}
+                  onClick={() => onPick(p)}
+                >
                   {p.color && p.colorCount > 0 && (
-                    <CardSwatch color={p.color} count={p.colorCount} size={24} />
+                    <TrainCarCard color={p.color} count={p.colorCount} size={CARD_SIZE} />
                   )}
                   {p.locomotives > 0 && (
-                    <CardSwatch color="LOCOMOTIVE" count={p.locomotives} size={24} />
+                    <TrainCarCard color="LOCOMOTIVE" count={p.locomotives} size={CARD_SIZE} />
                   )}
                 </button>
               </li>
@@ -35,7 +55,9 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
           </ul>
         )}
         <div className="row">
-          <button onClick={onCancel}>{t('back')}</button>
+          <button type="button" onClick={onCancel}>
+            {t('back')}
+          </button>
         </div>
       </div>
     </div>

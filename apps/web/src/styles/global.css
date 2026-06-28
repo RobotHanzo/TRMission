@@ -45,6 +45,16 @@ button.accent {
   border-color: var(--tr-ember);
   color: #fff;
 }
+button.success {
+  background: var(--tr-ok);
+  border-color: var(--tr-ok);
+  color: #fff;
+}
+button.danger {
+  background: var(--tr-danger);
+  border-color: var(--tr-danger);
+  color: #fff;
+}
 
 input {
   font: inherit;

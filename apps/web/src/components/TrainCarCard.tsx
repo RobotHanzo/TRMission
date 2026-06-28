@@ -11,6 +11,8 @@ interface Props {
   count?: number;
   /** Show the colour-blind glyph chip. */
   showGlyph?: boolean;
+  /** Override the card width (px); height follows the fixed aspect ratio. */
+  size?: number;
 }
 
 /**
@@ -24,7 +26,7 @@ const WILD_WASH = `linear-gradient(150deg, ${TRAIN_COLORS.slice(0, 6)
   .map((c) => rgba(CARD_COLOR_TOKENS[c].hex, 0.2))
   .join(', ')})`;
 
-export function TrainCarCard({ color, count, showGlyph = true }: Props) {
+export function TrainCarCard({ color, count, showGlyph = true, size }: Props) {
   const tok = CARD_COLOR_TOKENS[color];
   const isLoco = color === 'LOCOMOTIVE';
   // The stacked-deck shadow should read as the real count: 2 → one card behind,
@@ -36,6 +38,7 @@ export function TrainCarCard({ color, count, showGlyph = true }: Props) {
     <div
       className={`train-card${stacked ? ' is-stacked' : ''}${deep ? ' is-stacked-deep' : ''}${isLoco ? ' is-loco' : ''}`}
       style={{
+        ...(size !== undefined ? { width: size } : null),
         // Livery wash over the theme surface — works in light and dark.
         background: isLoco
           ? `${WILD_WASH}, var(--tr-surface)`

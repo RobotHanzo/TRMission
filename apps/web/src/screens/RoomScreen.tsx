@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Bot, X } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
-import { api, type RoomView, type RoomMember, type BotDifficulty } from '../net/rest';
+import { api, ApiError, type RoomView, type RoomMember, type BotDifficulty } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { SEAT_COLORS } from '../theme/colors';
 
@@ -20,12 +20,32 @@ export function RoomScreen() {
   const [err, setErr] = useState<string | null>(null);
 
   // Poll the room (lobby push is a later enhancement); auto-enter the game when started.
+  // `active` doubles as the terminal flag: a terminal outcome clears it, and the interval
+  // tears itself down on the next tick so we never re-poll (or re-spam join) after one.
   useEffect(() => {
     let active = true;
     const poll = async () => {
       try {
-        const r = await api.getRoom(code);
+        let r = await api.getRoom(code);
         if (!active) return;
+        if (r.status === 'CLOSED') {
+          active = false;
+          goHome(); // the room is gone — nothing to wait in or rejoin
+          return;
+        }
+        // A shared link can land a non-member here. Join the lobby once; a game already in
+        // progress that we aren't part of can't be joined, so bail home rather than trap.
+        // (Existing members of a STARTED game skip this and reconnect via the ticket below —
+        // the server rejects join on a started room even for members.)
+        if (!r.members.some((m) => m.userId === user?.id)) {
+          if (r.status !== 'LOBBY') {
+            active = false;
+            goHome();
+            return;
+          }
+          r = await api.joinRoom(code);
+          if (!active) return;
+        }
         setRoom(r);
         if (r.status === 'STARTED' && r.gameId) {
           const ticket = await api.getTicket(code);
@@ -34,21 +54,50 @@ export function RoomScreen() {
           enterGame(ticket.gameId, ticket.ticket);
         }
       } catch (e) {
-        if (active) setErr((e as Error).message);
+        if (!active) return;
+        // A room we can't fetch (deleted, or we're not a member) can't be restored —
+        // e.g. landing on a stale /room/:code after a reload. Bail home, don't trap.
+        if (e instanceof ApiError && (e.status === 404 || e.status === 403)) {
+          active = false;
+          goHome();
+          return;
+        }
+        // A 400 from join (room full, or the host started the game mid-poll) is terminal —
+        // stop polling so we don't re-spam join every 2s; the error card offers a way home.
+        if (e instanceof ApiError && e.status === 400) {
+          active = false;
+          setErr((e as Error).message);
+          return;
+        }
+        setErr((e as Error).message);
       }
     };
     void poll();
-    const id = setInterval(() => void poll(), 2000);
+    const id = setInterval(() => {
+      if (!active) {
+        clearInterval(id);
+        return;
+      }
+      void poll();
+    }, 2000);
     return () => {
       active = false;
       clearInterval(id);
     };
-  }, [code, enterGame]);
+  }, [code, user?.id, enterGame, goHome]);
 
-  if (!room) return <div className="card">{err ?? t('connecting')}</div>;
+  if (!room)
+    return (
+      <div className="card stack">
+        <span>{err ?? t('connecting')}</span>
+        <button onClick={goHome}>{t('back')}</button>
+      </div>
+    );
 
   const me = room.members.find((m) => m.userId === user?.id);
   const isHost = room.hostId === user?.id;
+  // A shareable link that drops a friend straight into this room (joins on open, after login).
+  const roomLink = `${window.location.origin}/room/${code}`;
   const allReady = room.members.length >= 2 && room.members.every((m) => m.ready);
   const canAddBot = isHost && room.members.length < room.maxPlayers;
 
@@ -80,7 +129,12 @@ export function RoomScreen() {
         <h2>
           {t('room')} <code className="room-code">{code}</code>
         </h2>
-        <button onClick={() => void navigator.clipboard?.writeText(code)}>{t('copyCode')}</button>
+        <div className="row">
+          <button onClick={() => void navigator.clipboard?.writeText(code)}>{t('copyCode')}</button>
+          <button onClick={() => void navigator.clipboard?.writeText(roomLink)}>
+            {t('copyLink')}
+          </button>
+        </div>
       </div>
 
       <ul className="member-list">
@@ -128,7 +182,9 @@ export function RoomScreen() {
       )}
 
       <div className="row">
-        <button onClick={toggleReady}>{me?.ready ? t('cancelReady') : t('markReady')}</button>
+        <button className={me?.ready ? 'danger' : 'success'} onClick={toggleReady}>
+          {me?.ready ? t('cancelReady') : t('markReady')}
+        </button>
         {isHost && (
           <button className="primary" disabled={!allReady} onClick={() => void start()}>
             {t('start')}
