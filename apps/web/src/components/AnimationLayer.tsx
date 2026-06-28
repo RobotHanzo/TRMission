@@ -1,10 +1,13 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { useAnimations, type Flight, type Float } from '../store/animations';
+import { useTranslation } from 'react-i18next';
+import { useAnimations, type Flight, type Float, type TicketCue } from '../store/animations';
 import { useGame } from '../store/game';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { SEAT_COLORS } from '../theme/colors';
 import { FlyingCard } from './FlyingCard';
+import { TicketCard } from './TicketCard';
+import { TicketFanfare } from './TicketFanfare';
 
 const rectOf = (selector: string): DOMRect | null =>
   document.querySelector(selector)?.getBoundingClientRect() ?? null;
@@ -99,10 +102,45 @@ function FloatMover({ float }: { float: Float }) {
   );
 }
 
-/** Fixed full-viewport overlay for travelling cards, score floats (cues/fanfare added later). */
+/** An opponent's completion: a small revealed ticket card near their tracker (no screen takeover). */
+function TicketCueView({ cue }: { cue: TicketCue }) {
+  const { t } = useTranslation();
+  const removeTicketCue = useAnimations((s) => s.removeTicketCue);
+  const [style, setStyle] = useState<CSSProperties>({ display: 'none' });
+
+  useLayoutEffect(() => {
+    const r = rectOf(`[data-player-id="${cue.playerId}"]`);
+    if (!r) {
+      removeTicketCue(cue.id);
+      return;
+    }
+    setStyle({
+      left: Math.min(r.left, window.innerWidth - 180),
+      top: r.bottom + 6,
+      '--seat': seatColor(cue.seat),
+    } as CSSProperties);
+    const fallback = window.setTimeout(() => removeTicketCue(cue.id), 2800);
+    return () => clearTimeout(fallback);
+  }, [cue, removeTicketCue]);
+
+  return (
+    <div className="ticket-cue" style={style} onAnimationEnd={() => removeTicketCue(cue.id)}>
+      <span className="ticket-cue-label">{t('completedTicket')}</span>
+      <div style={{ width: 150 }}>
+        <TicketCard ticketId={cue.ticketId} />
+      </div>
+    </div>
+  );
+}
+
+/** Fixed full-viewport overlay: travelling cards, score floats, opponent cues, and the fanfare. */
 export function AnimationLayer() {
   const flights = useAnimations((s) => s.flights);
   const floats = useAnimations((s) => s.floats);
+  const ticketCues = useAnimations((s) => s.ticketCues);
+  const fanfare = useAnimations((s) => s.fanfare);
+  const dismissFanfare = useAnimations((s) => s.dismissFanfare);
+  const reduced = useReducedMotion();
   if (typeof document === 'undefined') return null;
   return createPortal(
     <>
@@ -112,6 +150,17 @@ export function AnimationLayer() {
       {floats.map((f) => (
         <FloatMover key={f.id} float={f} />
       ))}
+      {ticketCues.map((c) => (
+        <TicketCueView key={c.id} cue={c} />
+      ))}
+      {fanfare && (
+        <TicketFanfare
+          key={fanfare.id}
+          fanfare={fanfare}
+          reducedMotion={reduced}
+          onDone={dismissFanfare}
+        />
+      )}
     </>,
     document.body,
   );

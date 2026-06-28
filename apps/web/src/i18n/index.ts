@@ -106,6 +106,11 @@ const resources = {
       player: '玩家',
       score: '分數',
 
+      fanfareTitle: '任務完成',
+      fanfareLong: '長途任務！',
+      completedTicket: '完成任務',
+      skip: '略過',
+
       back: '返回',
       retry: '重試',
       somethingWentWrong: '發生錯誤',
@@ -212,6 +217,11 @@ const resources = {
       buildStation: 'Build station',
       player: 'Player',
       score: 'Score',
+
+      fanfareTitle: 'Ticket Complete',
+      fanfareLong: 'Long Haul!',
+      completedTicket: 'completed a ticket',
+      skip: 'Skip',
 
       back: 'Back',
       retry: 'Retry',
