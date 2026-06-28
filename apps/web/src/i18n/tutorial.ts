@@ -51,6 +51,7 @@ export const tutorialZh = {
   special: {
     title: '特殊路線',
     blurb: '雙線、渡輪與隧道的規則。',
+    intro: '台鐵的路線分成三種：一般鐵路、跨海渡輪與穿山隧道。下面比較它們的外觀：',
     double:
       '雙線路線：兩座城市之間有兩條平行線。2–3 人時，一條被占下、另一條就鎖住；4–5 人時兩條都可用。你不能同時擁有同一組的兩條。',
     ferry: '渡輪路線（通往離島）：支付時必須包含「足夠數量的火車頭」，圖示會標明需要幾個。',
@@ -147,6 +148,7 @@ export const tutorialEn = {
   special: {
     title: 'Special routes',
     blurb: 'Double, ferry, and tunnel routes.',
+    intro: 'Routes come in three kinds: ordinary railways, sea ferries, and mountain tunnels. Compare how they look below:',
     double:
       'Double routes: two parallel lines between two cities. With 2–3 players, claiming one locks the other; with 4–5, both stay open. You can never own both of a pair.',
     ferry:

@@ -4,6 +4,8 @@ import type { Action, Board, GameConfig, GameState } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
 import { LESSONS } from './curriculum';
 import type { ExpectSpec, Lesson } from './types';
+import { cityById, routeById, ticketById } from '../../game/content';
+import { isAllowedHudSelector } from './focus';
 
 // Replays every lesson through the REAL engine: setup actions, scripted `auto` actions, and a
 // synthesized action for each `await` beat (so the chain stays in a valid state). Any rule, content
@@ -109,4 +111,43 @@ describe('tutorial scenarios replay through the engine', () => {
     const pays = enumerateClaimPayments(board, state, asPlayerId(lesson.viewer), route);
     expect(pays.length).toBeGreaterThan(0);
   });
+});
+
+describe('tutorial beat visual references resolve to real content', () => {
+  for (const lesson of LESSONS) {
+    for (const beat of lesson.beats) {
+      const sp = beat.spotlight;
+      if (sp?.kind === 'cities') {
+        it(`${lesson.id}/${beat.id} spotlight cities exist`, () => {
+          for (const id of sp.ids) expect(cityById.get(id), id).toBeTruthy();
+        });
+      }
+      if (sp?.kind === 'route') {
+        it(`${lesson.id}/${beat.id} spotlight routes exist`, () => {
+          for (const id of sp.ids) expect(routeById.get(id), id).toBeTruthy();
+        });
+      }
+      if (sp?.kind === 'hud') {
+        it(`${lesson.id}/${beat.id} hud selector is allow-listed`, () => {
+          expect(isAllowedHudSelector(sp.selector), sp.selector).toBe(true);
+        });
+      }
+      if (beat.frame) {
+        it(`${lesson.id}/${beat.id} frame ids exist`, () => {
+          for (const id of beat.frame!.ids) {
+            const ok = beat.frame!.kind === 'route' ? routeById.get(id) : cityById.get(id);
+            expect(ok, id).toBeTruthy();
+          }
+        });
+      }
+      if (beat.specimen?.kind === 'ticket') {
+        it(`${lesson.id}/${beat.id} ticket specimen exists`, () => {
+          expect(
+            ticketById.get(beat.specimen!.kind === 'ticket' ? beat.specimen!.id : ''),
+            'ticket',
+          ).toBeTruthy();
+        });
+      }
+    }
+  }
 });
