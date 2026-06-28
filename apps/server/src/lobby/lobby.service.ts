@@ -179,6 +179,18 @@ export class LobbyService {
     return { gameId, ticket: this.ticketFor(gameId, user.userId, this.seatOf(room, user.userId)) };
   }
 
+  /** Mint a spectator ws-ticket (seat -1) for a started room, if it allows spectating. */
+  async spectateTicket(code: string, user: AuthUser): Promise<TicketResult> {
+    const room = await this.require(code);
+    const s = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+    if (!s.allowSpectating) throw new ForbiddenException('spectating is disabled for this room');
+    if (!room.gameId) throw new BadRequestException('game has not started');
+    return {
+      gameId: room.gameId,
+      ticket: this.tokens.signWsTicket({ gameId: room.gameId, playerId: user.userId, seat: -1 }),
+    };
+  }
+
   /** Mint a ws-game ticket for the current member of a started room (initial + reconnect). */
   async ticket(code: string, user: AuthUser): Promise<TicketResult> {
     const room = await this.require(code);

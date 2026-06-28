@@ -126,4 +126,12 @@ export class LobbyController {
   ticket(@CurrentUser() user: AuthUser, @Param('code') code: string) {
     return this.lobby.ticket(code.toUpperCase(), user);
   }
+
+  @Post(':code/spectate')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Mint a spectator ws-ticket for a live game (if spectating is allowed)' })
+  @ApiResponse({ status: 200, schema: apiSchema(TicketResultSchema) })
+  spectate(@CurrentUser() user: AuthUser, @Param('code') code: string) {
+    return this.lobby.spectateTicket(code.toUpperCase(), user);
+  }
 }
