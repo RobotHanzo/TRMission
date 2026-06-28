@@ -8,7 +8,14 @@ import { randomUUID } from 'node:crypto';
 import { taiwanBoard, CONTENT_HASH } from '@trm/engine';
 import type { GameConfig, PlayerSeed } from '@trm/engine';
 import { asPlayerId, type SeatIndex } from '@trm/shared';
-import { RoomRepo, type RoomDoc, type RoomMember } from './room.repo';
+import {
+  RoomRepo,
+  DEFAULT_ROOM_SETTINGS,
+  type RoomDoc,
+  type RoomMember,
+  type RoomSettings,
+  type RoomSettingsPatch,
+} from './room.repo';
 import { GameHub } from '../ws/hub';
 import { TokenService } from '../auth/token.service';
 import type { AuthUser } from '../auth/auth.types';
@@ -20,6 +27,7 @@ export interface RoomView {
   status: RoomDoc['status'];
   maxPlayers: number;
   members: RoomMember[];
+  settings: RoomSettings;
   gameId?: string;
 }
 
@@ -34,6 +42,7 @@ const toView = (r: RoomDoc): RoomView => ({
   status: r.status,
   maxPlayers: r.maxPlayers,
   members: r.members,
+  settings: { ...DEFAULT_ROOM_SETTINGS, ...r.settings },
   ...(r.gameId ? { gameId: r.gameId } : {}),
 });
 
@@ -119,6 +128,20 @@ export class LobbyService {
     return toView(r);
   }
 
+  /** Host updates the per-game settings while the room is still in LOBBY. */
+  async updateSettings(code: string, user: AuthUser, patch: RoomSettingsPatch): Promise<RoomView> {
+    const r = await this.rooms.updateSettings(code, user.userId, patch);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'forbidden') throw new ForbiddenException('only the host can change settings');
+    return toView(r);
+  }
+
+  /** Public rooms for the home screen (no auth required). */
+  async listPublic(): Promise<RoomView[]> {
+    return (await this.rooms.findPublic()).map(toView);
+  }
+
   /** Host starts the game: create the authoritative match, mark the room STARTED, hand back a ticket. */
   async start(code: string, user: AuthUser): Promise<TicketResult> {
     const room = await this.require(code);
@@ -134,7 +157,17 @@ export class LobbyService {
       .slice()
       .sort((a, b) => a.seat - b.seat)
       .map((m) => ({ id: asPlayerId(m.userId), seat: m.seat as SeatIndex }));
-    const config: GameConfig = { seed, players, contentHash: CONTENT_HASH };
+    const s = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+    const config: GameConfig = {
+      seed,
+      players,
+      contentHash: CONTENT_HASH,
+      ruleParams: {
+        unlimitedStationBorrow: s.unlimitedStationBorrow,
+        secondDrawAfterBlindRainbow: s.secondDrawAfterBlindRainbow,
+        noUnfinishedTicketPenalty: s.noUnfinishedTicketPenalty,
+      },
+    };
     const bots: BotProfile[] = room.members
       .filter((m) => m.isBot && m.difficulty)
       .map((m) => ({ playerId: m.userId, difficulty: m.difficulty as BotDifficulty }));
@@ -144,6 +177,18 @@ export class LobbyService {
     }
     await this.hub.createMatch(gameId, taiwanBoard(), config, bots);
     return { gameId, ticket: this.ticketFor(gameId, user.userId, this.seatOf(room, user.userId)) };
+  }
+
+  /** Mint a spectator ws-ticket (seat -1) for a started room, if it allows spectating. */
+  async spectateTicket(code: string, user: AuthUser): Promise<TicketResult> {
+    const room = await this.require(code);
+    const s = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+    if (!s.allowSpectating) throw new ForbiddenException('spectating is disabled for this room');
+    if (!room.gameId) throw new BadRequestException('game has not started');
+    return {
+      gameId: room.gameId,
+      ticket: this.tokens.signWsTicket({ gameId: room.gameId, playerId: user.userId, seat: -1 }),
+    };
   }
 
   /** Mint a ws-game ticket for the current member of a started room (initial + reconnect). */

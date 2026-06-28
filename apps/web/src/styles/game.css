@@ -1240,3 +1240,14 @@ button.ticket-card:hover {
     animation: none;
   }
 }
+
+/* Spectator banner: a quiet, full-width strip telling watchers the view is read-only. */
+.spectator-banner {
+  grid-column: 1 / -1;
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent, #4a7) 14%, transparent);
+  color: var(--text-muted, #889);
+  font-size: 0.9rem;
+  text-align: center;
+}

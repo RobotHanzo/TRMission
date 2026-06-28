@@ -31,6 +31,7 @@ vi.mock('../net/rest', () => {
       removeBot: vi.fn(),
       kickPlayer: vi.fn(),
       startRoom: vi.fn(),
+      updateRoomSettings: vi.fn(),
     },
   };
 });
@@ -62,6 +63,13 @@ const baseRoom = () => ({
   status: 'LOBBY' as 'LOBBY' | 'STARTED' | 'CLOSED',
   maxPlayers: 5,
   members: [member('host')] as ReturnType<typeof member>[],
+  settings: {
+    unlimitedStationBorrow: false,
+    secondDrawAfterBlindRainbow: false,
+    noUnfinishedTicketPenalty: false,
+    allowSpectating: true,
+    visibility: 'PUBLIC' as 'PUBLIC' | 'INVITE_ONLY',
+  },
   gameId: undefined as string | undefined,
 });
 
@@ -70,6 +78,7 @@ const mocked = api as unknown as {
   getTicket: ReturnType<typeof vi.fn>;
   joinRoom: ReturnType<typeof vi.fn>;
   kickPlayer: ReturnType<typeof vi.fn>;
+  updateRoomSettings: ReturnType<typeof vi.fn>;
 };
 
 beforeEach(() => {
@@ -152,6 +161,29 @@ describe('RoomScreen copy link', () => {
     const copyCode = await screen.findByRole('button', { name: '複製房號' });
     fireEvent.click(copyCode);
     await screen.findByText('已複製'); // "Copied"
+  });
+});
+
+describe('RoomScreen game settings panel', () => {
+  it('lets the host toggle a rule variant via updateRoomSettings', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    mocked.updateRoomSettings.mockResolvedValue(
+      room({ hostId: 'u-me', members: [member('u-me')] }),
+    );
+    render(<RoomScreen />);
+    const toggle = await screen.findByRole('checkbox', { name: '車站無限借用路線' });
+    expect(toggle).not.toBeDisabled();
+    fireEvent.click(toggle);
+    expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', {
+      unlimitedStationBorrow: true,
+    });
+  });
+
+  it('disables the settings controls for a non-host', async () => {
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    render(<RoomScreen />);
+    const toggle = await screen.findByRole('checkbox', { name: '車站無限借用路線' });
+    expect(toggle).toBeDisabled();
   });
 });
 

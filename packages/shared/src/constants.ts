@@ -34,6 +34,13 @@ export interface RuleParams {
   deckPerColor: number;
   locomotiveCount: number;
   routePoints: Readonly<Record<number, number>>;
+  /** Variant: a station may borrow ALL incident opponent routes (not just one), and ticket
+   *  completion is recorded + scored the moment it connects. */
+  unlimitedStationBorrow: boolean;
+  /** Variant: a rainbow (LOCOMOTIVE) as the first BLIND draw does NOT end the draw. */
+  secondDrawAfterBlindRainbow: boolean;
+  /** Variant: unfinished destination tickets score 0 instead of subtracting their value. */
+  noUnfinishedTicketPenalty: boolean;
 }
 
 export const DEFAULT_RULE_PARAMS: RuleParams = Object.freeze({
@@ -55,10 +62,15 @@ export const DEFAULT_RULE_PARAMS: RuleParams = Object.freeze({
   deckPerColor: 12,
   locomotiveCount: 14,
   routePoints: SCORING_TABLE,
+  unlimitedStationBorrow: false,
+  secondDrawAfterBlindRainbow: false,
+  noUnfinishedTicketPenalty: false,
 });
 
 /** Build the full deck composition as a colour-count multiset (e.g. 12 each colour + 14 loco = 110). */
-export function buildDeckComposition(params: RuleParams = DEFAULT_RULE_PARAMS): Record<CardColor, number> {
+export function buildDeckComposition(
+  params: RuleParams = DEFAULT_RULE_PARAMS,
+): Record<CardColor, number> {
   const comp = {} as Record<CardColor, number>;
   for (const c of TRAIN_COLORS) comp[c] = params.deckPerColor;
   comp.LOCOMOTIVE = params.locomotiveCount;

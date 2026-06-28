@@ -49,7 +49,13 @@ export function initGame(board: Board, config: GameConfig): GameState {
   }
 
   // (4) Market.
-  const refill = refillMarket(new Array(ruleParams.marketSize).fill(null), deck, discard, rng, ruleParams);
+  const refill = refillMarket(
+    new Array(ruleParams.marketSize).fill(null),
+    deck,
+    discard,
+    rng,
+    ruleParams,
+  );
   const market = refill.market;
   deck = refill.deck;
   discard = refill.discard;
@@ -85,6 +91,7 @@ export function initGame(board: Board, config: GameConfig): GameState {
       keptTickets: [],
       pendingTicketOffer: offer,
       routePoints: 0,
+      completedTickets: [],
     };
   }
 

@@ -63,6 +63,13 @@ export interface RedactedView {
   readonly players: readonly RedactedPlayer[];
   readonly finalScores: RedactedFinalScoreboard | null;
 
+  /** Active rule variants for this game (display only — consequences are already baked in). */
+  readonly settings: {
+    readonly unlimitedStationBorrow: boolean;
+    readonly secondDrawAfterBlindRainbow: boolean;
+    readonly noUnfinishedTicketPenalty: boolean;
+  };
+
   /**
    * Tickets revealed because their owner has COMPLETED them with their own routes (own-track
    * connectivity, no station borrowing). Public to every viewer — in-progress tickets stay secret.

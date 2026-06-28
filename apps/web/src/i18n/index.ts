@@ -48,6 +48,24 @@ const resources = {
       difficulty_MEDIUM: '普通',
       difficulty_HARD: '困難',
 
+      gameSettings: '遊戲設定',
+      settingUnlimitedStationBorrow: '車站無限借用路線',
+      settingUnlimitedStationBorrowDesc:
+        '每個車站可借用所有相鄰的對手路線；任務於連通當下即時鎖定計分。',
+      settingSecondDrawAfterRainbow: '盲抽彩虹後可再抽一張',
+      settingSecondDrawAfterRainbowDesc: '關閉時，第一張盲抽到彩虹（火車頭）即結束抽牌。',
+      settingNoUnfinishedPenalty: '未完成任務不扣分',
+      settingNoUnfinishedPenaltyDesc: '開啟時，未完成的任務卡計 0 分而非扣分。',
+      allowSpectating: '允許觀戰',
+      roomVisibility: '房間可見度',
+      visibility_PUBLIC: '公開',
+      visibility_INVITE_ONLY: '僅限邀請',
+      publicRooms: '公開房間',
+      noPublicRooms: '目前沒有公開房間',
+      watch: '觀戰',
+      spectating: '觀戰中',
+      spectatingHint: '你正在觀戰，無法進行操作。',
+
       createRoom: '建立房間',
       joinRoom: '加入房間',
       roomCode: '房號',
@@ -190,6 +208,26 @@ const resources = {
       difficulty_EASY: 'Easy',
       difficulty_MEDIUM: 'Medium',
       difficulty_HARD: 'Hard',
+
+      gameSettings: 'Game settings',
+      settingUnlimitedStationBorrow: 'Unlimited station borrowing',
+      settingUnlimitedStationBorrowDesc:
+        'Each station may borrow every adjacent opponent route; tickets lock in and score the moment they connect.',
+      settingSecondDrawAfterRainbow: 'Second draw after a blind rainbow',
+      settingSecondDrawAfterRainbowDesc:
+        'When off, drawing a rainbow (locomotive) as your first blind draw ends your draw.',
+      settingNoUnfinishedPenalty: 'No penalty for unfinished tickets',
+      settingNoUnfinishedPenaltyDesc:
+        'When on, unfinished destination tickets score 0 instead of subtracting their value.',
+      allowSpectating: 'Allow spectating',
+      roomVisibility: 'Room visibility',
+      visibility_PUBLIC: 'Public',
+      visibility_INVITE_ONLY: 'Invite only',
+      publicRooms: 'Public rooms',
+      noPublicRooms: 'No public rooms right now',
+      watch: 'Watch',
+      spectating: 'Spectating',
+      spectatingHint: "You're spectating — you can't take actions.",
 
       createRoom: 'Create room',
       joinRoom: 'Join room',
