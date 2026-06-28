@@ -229,6 +229,11 @@ function applyDrawBlind(board: Board, state: GameState, player: PlayerId): Reduc
   events.push({ e: 'CARD_DRAWN_BLIND', player, card: d.card, visibility: { private: player } });
 
   if (isFirst) {
+    if (d.card === 'LOCOMOTIVE' && !state.ruleParams.secondDrawAfterBlindRainbow) {
+      // Variant default: a blind rainbow consumes the whole draw — end the turn now.
+      const out = endTurn(board, next, { wasPass: false });
+      return ok({ state: out.state, events: [...events, ...out.events] });
+    }
     next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 1 } };
     return ok({ state: next, events });
   }
