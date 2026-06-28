@@ -55,11 +55,19 @@ yarn workspace @trm/web dev         # app on :5173 (proxies /api + /ws → :3001
 Open http://localhost:5173, sign in (guest or a registered account), create a room, share
 the code — or add a few bots — and start. A lone player can fill the table with bots.
 
-### Full stack with Docker
+### Docker profiles
 
 ```bash
-docker compose --profile full up --build    # mongo + server + web on http://localhost:8080
+# mongo + server (dev mode, hot-reload) — run web locally on :5173
+cp apps/server/.env.example apps/server/.env   # once; fill in secrets
+docker compose --profile dev-server up --build
+
+# full stack: mongo + server + web on http://localhost:8080
+docker compose --profile full up --build
 ```
+
+The `dev-server` profile sources configuration from `apps/server/.env` (see `.env.example`).
+`MONGO_URL` is automatically overridden to reach the containerised MongoDB.
 
 ## Testing & quality
 
