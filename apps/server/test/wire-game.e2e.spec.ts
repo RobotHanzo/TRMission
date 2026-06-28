@@ -126,6 +126,11 @@ describe('hidden-information leak test (risk #1) — over every captured frame',
           if (snap && snap.phase !== 6 /* PHASE_GAME_OVER */) {
             expect(snap.finalScores).toBeUndefined();
           }
+          // `completed_tickets` intentionally reveals FINISHED tickets to everyone (own-track
+          // completion); in-progress tickets stay secret. Each entry must name a real player.
+          for (const c of snap?.completedTickets ?? []) {
+            expect(playerIds.map((p) => p as string)).toContain(c.playerId);
+          }
         } else if (env.event.case === 'events') {
           for (const ev of env.event.value.events) {
             if (

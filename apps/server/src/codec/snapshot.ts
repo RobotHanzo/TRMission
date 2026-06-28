@@ -122,6 +122,12 @@ export function viewToSnapshot(
             extraRequired: view.pendingTunnel.extraRequired,
           },
     players: view.players.map(publicPlayer),
+    // Finished tickets, public for all players (own-track completion). Kept off the
+    // counts-only PublicPlayerState so the risk #1 invariant holds.
+    completedTickets: view.completedTickets.map((c) => ({
+      playerId: c.player as string,
+      ticketId: c.ticket as string,
+    })),
     you:
       self === undefined || self.hand === null
         ? undefined

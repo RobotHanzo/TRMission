@@ -58,8 +58,9 @@ describe('command codec — action ⇄ proto round-trip', () => {
 
 describe('snapshot codec — RedactedView → GameSnapshot', () => {
   it('keeps the viewer’s own pending offer and renders opponents as counts only', () => {
-    const state = initGame(taiwanBoard(), config);
-    const view = redactFor(state, p1);
+    const board = taiwanBoard();
+    const state = initGame(board, config);
+    const view = redactFor(board, state, p1);
     const snap = viewToSnapshot(view, 0, p1);
 
     expect(snap.phase).toBe(Phase.SETUP_TICKETS);

@@ -131,6 +131,6 @@ export class GameSession {
 
   /** Per-viewer projection (the ONLY thing that should ever reach the wire). */
   project(viewer: PlayerId | null): RedactedView {
-    return redactFor(this.state, viewer);
+    return redactFor(this.board, this.state, viewer);
   }
 }
