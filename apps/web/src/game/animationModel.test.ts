@@ -36,7 +36,7 @@ describe('intentsFromEvents', () => {
     expect(mine).toContainEqual({ kind: 'cardFly', toPlayerId: 'p0', faceUp: false, color: 'RED', slot: null });
 
     const opp = intentsFromEvents(snap, [
-      event({ case: 'cardDrawnBlind', value: { playerId: 'p1', card: Pb.CARD_COLOR_UNSPECIFIED } as never }),
+      event({ case: 'cardDrawnBlind', value: { playerId: 'p1', card: Pb.UNSPECIFIED } as never }),
     ]);
     expect(opp).toContainEqual({ kind: 'cardFly', toPlayerId: 'p1', faceUp: false, color: null, slot: null });
   });
