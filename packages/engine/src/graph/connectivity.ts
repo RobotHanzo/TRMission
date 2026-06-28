@@ -56,8 +56,11 @@ export function evaluateTickets(args: {
   borrowCandidates: ReadonlyMap<string, readonly Edge[]>;
   tickets: readonly TicketGoal[];
   vertices: readonly string[];
+  /** Variant: unfinished tickets contribute 0 instead of −value. */
+  noUnfinishedTicketPenalty?: boolean;
 }): TicketEvaluation {
   const { ownEdges, stationCities, borrowCandidates, tickets, vertices } = args;
+  const noUnfinishedTicketPenalty = args.noUnfinishedTicketPenalty ?? false;
 
   // Per-station option list: index 0 = borrow nothing (null), then each candidate edge.
   const optionsPerStation: (Edge | null)[][] = stationCities.map((city) => {
@@ -80,7 +83,7 @@ export function evaluateTickets(args: {
       if (uf.connected(t.a, t.b)) {
         net += t.value;
         completed++;
-      } else {
+      } else if (!noUnfinishedTicketPenalty) {
         net -= t.value;
       }
     }

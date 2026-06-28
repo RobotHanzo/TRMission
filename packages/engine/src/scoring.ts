@@ -83,6 +83,7 @@ export function evaluatePlayerTickets(
     borrowCandidates,
     tickets: goals.map((g) => ({ a: g.a, b: g.b, value: g.value })),
     vertices: cityIds,
+    noUnfinishedTicketPenalty: state.ruleParams.noUnfinishedTicketPenalty,
   });
 
   // Re-derive which tickets are connected under the chosen borrow assignment so the listed
