@@ -42,4 +42,19 @@ describe('Board', () => {
     // A known station label is present in Traditional Chinese.
     expect(screen.getAllByText('臺北').length).toBeGreaterThan(0);
   });
+
+  it('tags routes and cities with data attributes for the tutorial spotlight', () => {
+    const { container } = render(
+      <Board
+        snapshot={snap}
+        locale="zh-Hant"
+        colorBlind={false}
+        canAct={false}
+        onPickRoute={() => {}}
+        onPickCity={() => {}}
+      />,
+    );
+    expect(container.querySelectorAll('[data-route-id]').length).toBeGreaterThan(60);
+    expect(container.querySelector('[data-city-id="taipei"]')).toBeTruthy();
+  });
 });

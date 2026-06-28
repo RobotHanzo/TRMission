@@ -36,6 +36,8 @@ import { useUi, type Locale } from '../store/ui';
 import { useGame, useGameStore } from '../store/game';
 import { useAnimationsStore } from '../store/animations';
 import { getSocket } from '../net/connection';
+import { useReducedMotion } from '../hooks/useReducedMotion';
+import type { BoardFrameTarget } from '../game/boardView';
 
 const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
 
@@ -50,6 +52,8 @@ interface BoardProps {
   highlightCities?: ReadonlySet<string> | undefined;
   /** Sandbox (tutorial/encyclopedia): suppress the live camera broadcast + follow. */
   sandbox?: boolean | undefined;
+  /** Tutorial auto-pan: frame these routes/cities. Null/undefined leaves the camera alone. */
+  frameTarget?: BoardFrameTarget | null | undefined;
 }
 
 const VIEWBOX = `${BASE_VIEW.x} ${BASE_VIEW.y} ${BASE_VIEW.w} ${BASE_VIEW.h}`;
@@ -360,6 +364,53 @@ function RevealFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement |
 }
 
 /**
+ * Tutorial auto-pan: frames the board on a set of routes/cities (the current beat's `frame`). Lives
+ * inside the pan/zoom context for `setTransform`; re-fits whenever the target changes, inert otherwise.
+ */
+function SpotlightFramer({
+  viewportRef,
+  target,
+}: {
+  viewportRef: RefObject<HTMLDivElement | null>;
+  target: BoardFrameTarget | null | undefined;
+}) {
+  const { setTransform } = useControls();
+  const reduced = useReducedMotion();
+  const key = target ? `${target.kind}:${target.ids.join(',')}` : '';
+  useEffect(() => {
+    if (!target || target.ids.length === 0) return;
+    const cityIds =
+      target.kind === 'route'
+        ? target.ids.flatMap((rid) => {
+            const r = routeById.get(rid);
+            return r ? [r.a as string, r.b as string] : [];
+          })
+        : target.ids;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const cid of cityIds) {
+      const c = cityById.get(cid);
+      if (!c) continue;
+      minX = Math.min(minX, c.x);
+      maxX = Math.max(maxX, c.x);
+      minY = Math.min(minY, c.y);
+      maxY = Math.max(maxY, c.y);
+    }
+    if (!Number.isFinite(minX)) return;
+    const w = viewportRef.current?.clientWidth ?? 0;
+    const h = viewportRef.current?.clientHeight ?? 0;
+    const proj = viewportProjection(viewportRef.current);
+    if (!proj || w <= 0 || h <= 0) return;
+    const span = Math.min(100, Math.max(22, Math.max(maxX - minX, maxY - minY) + 16));
+    const t = viewToTransform({ cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, span }, proj, w, h);
+    setTransform(t.positionX, t.positionY, t.scale, reduced ? 0 : 600, 'easeOut');
+  }, [key, reduced]);
+  return null;
+}
+
+/**
  * Zoom controls wired to the pan/zoom context, plus reset (re-centre) and a real
  * fullscreen toggle that drives the Fullscreen API on the board viewport.
  */
@@ -452,6 +503,7 @@ export function Board({
   onPickCity,
   highlightCities,
   sandbox,
+  frameTarget,
 }: BoardProps) {
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const stationCities = useMemo(() => {
@@ -571,6 +623,7 @@ export function Board({
         <ZoomTracker targetRef={viewportRef} />
         {!sandbox && <CameraSync snapshot={snapshot} viewportRef={viewportRef} />}
         <RevealFramer viewportRef={viewportRef} />
+        <SpotlightFramer viewportRef={viewportRef} target={frameTarget ?? null} />
         <RouteGlowGate
           armed={armedGlowRoutes}
           started={startedGlowRoutes}
@@ -641,6 +694,7 @@ export function Board({
                 <g
                   key={r.id as string}
                   className={cls}
+                  data-route-id={r.id as string}
                   style={groupStyle}
                   onClick={claimable ? () => onPickRoute(r.id as string) : undefined}
                 >
@@ -742,7 +796,11 @@ export function Board({
               const justBuilt = builtSeat !== undefined;
               const isTarget = highlightCities?.has(c.id as string) ?? false;
               return (
-                <g key={c.id as string} className={isTarget ? `${cls} ticket-target` : cls}>
+                <g
+                  key={c.id as string}
+                  data-city-id={c.id as string}
+                  className={isTarget ? `${cls} ticket-target` : cls}
+                >
                   {/* Offered-ticket endpoint: a soft halo behind the marker so the player can trace
                       the railways a ticket needs while the chooser holds the rail. */}
                   {isTarget && <circle className="ticket-target-halo" cx={c.x} cy={c.y} />}

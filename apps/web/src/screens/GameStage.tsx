@@ -23,6 +23,7 @@ import {
 } from '../game/payments';
 import { enumerateTunnelExtra } from '../game/tunnel';
 import type { GameCommands } from '../net/commands';
+import type { BoardFrameTarget } from '../game/boardView';
 import { Board } from '../components/Board';
 import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
@@ -54,6 +55,8 @@ export interface GameStageProps {
   spotlightCities?: string[] | undefined;
   /** Sandbox (tutorial/encyclopedia): suppress the live camera broadcast on the board. */
   sandbox?: boolean | undefined;
+  /** Tutorial auto-pan target (sandbox only); live game leaves this undefined. */
+  frameTarget?: BoardFrameTarget | null | undefined;
 }
 
 export function GameStage({
@@ -63,6 +66,7 @@ export function GameStage({
   overlay,
   spotlightCities,
   sandbox,
+  frameTarget,
 }: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -195,6 +199,7 @@ export function GameStage({
         onPickCity={pickCity}
         highlightCities={highlightCities}
         sandbox={sandbox}
+        frameTarget={frameTarget}
       />
     </div>
   );
