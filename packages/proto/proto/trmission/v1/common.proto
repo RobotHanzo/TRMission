@@ -206,6 +206,14 @@ message FinalScoreboard {
   repeated RankingGroup ranking = 2;
 }
 
+// Active rule variants for a game (display only — the engine has already baked their
+// consequences into the snapshot). Present for players and spectators alike.
+message GameSettings {
+  bool unlimited_station_borrow = 1;
+  bool second_draw_after_blind_rainbow = 2;
+  bool no_unfinished_ticket_penalty = 3;
+}
+
 // Per-viewer authoritative projection of the whole game (maps from the engine's
 // RedactedView via the server codec). The client treats this as ground truth.
 message GameSnapshot {
@@ -234,4 +242,7 @@ message GameSnapshot {
 
   // Finished tickets, revealed for ALL players (own-track completion). Public by design.
   repeated CompletedTicket completed_tickets = 20;
+
+  // Active rule variants for this game (display only).
+  GameSettings game_settings = 21;
 }
