@@ -29,6 +29,19 @@ export function handFromCounts(c: CardCounts | undefined): Hand {
 export const handTotal = (h: Hand): number => CARD_COLORS.reduce((n, c) => n + h[c], 0);
 
 /**
+ * The hand remaining after a payment's cards are set aside. Used to gate a follow-up spend that
+ * must be afforded from what's LEFT — e.g. a tunnel surcharge, since the base claim cards stay in
+ * hand until the tunnel resolves (engine spends base + surcharge together).
+ */
+export function handAfterPayment(hand: Hand, payment: Payment): Hand {
+  const out = { ...hand };
+  if (payment.color && payment.colorCount > 0)
+    out[payment.color] = Math.max(0, out[payment.color] - payment.colorCount);
+  out.LOCOMOTIVE = Math.max(0, out.LOCOMOTIVE - payment.locomotives);
+  return out;
+}
+
+/**
  * Every legal payment for a route, given the hand — mirrors the engine's selector so
  * the UI only ever offers payments the server will accept.
  */

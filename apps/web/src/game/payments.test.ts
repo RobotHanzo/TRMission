@@ -7,8 +7,11 @@ import {
   enumerateStationPayments,
   routeShortfall,
   stationShortfall,
+  handAfterPayment,
   type Hand,
+  type Payment,
 } from './payments';
+import { enumerateTunnelExtra } from './tunnel';
 
 const emptyHand = (): Hand => Object.fromEntries(CARD_COLORS.map((c) => [c, 0])) as unknown as Hand;
 
@@ -112,5 +115,49 @@ describe('station shortfall', () => {
     h.RED = 1;
     h.LOCOMOTIVE = 1;
     expect(stationShortfall(h, 3)).toEqual({ kind: 'cards', need: 3, have: 2 });
+  });
+});
+
+describe('handAfterPayment', () => {
+  it('subtracts the colour and locomotive cards spent', () => {
+    const h = emptyHand();
+    h.BLUE = 3;
+    h.LOCOMOTIVE = 2;
+    const after = handAfterPayment(h, { color: 'BLUE', colorCount: 2, locomotives: 1 });
+    expect(after.BLUE).toBe(1);
+    expect(after.LOCOMOTIVE).toBe(1);
+  });
+
+  it('treats a colourless (all-loco) payment as locomotives only', () => {
+    const h = emptyHand();
+    h.LOCOMOTIVE = 2;
+    const after = handAfterPayment(h, { color: null, colorCount: 0, locomotives: 2 });
+    expect(after.LOCOMOTIVE).toBe(0);
+  });
+});
+
+describe('tunnel surcharge affordability (against the hand minus the base claim)', () => {
+  it('excludes combos whose cards the base claim already consumed', () => {
+    const h = emptyHand();
+    h.BLUE = 4;
+    const base: Payment = { color: 'BLUE', colorCount: 3, locomotives: 0 };
+    // The full hand would wrongly offer a 2-blue surcharge…
+    expect(enumerateTunnelExtra(h, 'BLUE', 2)).toContainEqual({
+      color: 'BLUE',
+      colorCount: 2,
+      locomotives: 0,
+    });
+    // …but only 1 blue remains after the base payment, so nothing is affordable.
+    expect(enumerateTunnelExtra(handAfterPayment(h, base), 'BLUE', 2)).toHaveLength(0);
+  });
+
+  it('still offers surcharges payable from the remainder', () => {
+    const h = emptyHand();
+    h.BLUE = 4;
+    h.LOCOMOTIVE = 1;
+    const base: Payment = { color: 'BLUE', colorCount: 3, locomotives: 0 };
+    const opts = enumerateTunnelExtra(handAfterPayment(h, base), 'BLUE', 1);
+    expect(opts).toContainEqual({ color: 'BLUE', colorCount: 1, locomotives: 0 });
+    expect(opts).toContainEqual({ color: null, colorCount: 0, locomotives: 1 });
   });
 });

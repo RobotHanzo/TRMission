@@ -10,6 +10,7 @@ import { completedByPlayer } from '../game/tickets';
 import { isMyTurn } from '../game/view';
 import {
   handFromCounts,
+  handAfterPayment,
   enumerateRoutePayments,
   enumerateStationPayments,
   routeShortfall,
@@ -52,7 +53,9 @@ export function GameScreen() {
   useAnimationDriver();
 
   const [claim, setClaim] = useState<Claim | null>(null);
-  const [tunnelColor, setTunnelColor] = useState<Payment['color']>(null);
+  // The base payment committed to a pending tunnel claim. Its cards stay in hand until the tunnel
+  // resolves, so the surcharge must be enumerated against the hand minus this.
+  const [tunnelBase, setTunnelBase] = useState<Payment | null>(null);
   // Client-side nudge (e.g. "not enough cards") shown when a click can't open a modal.
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -127,7 +130,7 @@ export function GameScreen() {
   const confirmPayment = (p: Payment) => {
     if (!socket || !claim) return;
     if (claim.kind === 'route') {
-      if (claim.route.isTunnel) setTunnelColor(p.color);
+      if (claim.route.isTunnel) setTunnelBase(p);
       socket.claimRoute(claim.route.id as string, paymentToProto(p));
     } else {
       socket.buildStation(claim.cityId, paymentToProto(p));
@@ -147,7 +150,11 @@ export function GameScreen() {
   const tunnelMine = phase === Phase.TUNNEL_PENDING && snapshot.pendingTunnel?.playerId === me;
   const tunnelExtras =
     tunnelMine && snapshot.pendingTunnel
-      ? enumerateTunnelExtra(hand, tunnelColor, snapshot.pendingTunnel.extraRequired)
+      ? enumerateTunnelExtra(
+          tunnelBase ? handAfterPayment(hand, tunnelBase) : hand,
+          tunnelBase?.color ?? null,
+          snapshot.pendingTunnel.extraRequired,
+        )
       : [];
 
   const boardPanel = (
@@ -251,11 +258,11 @@ export function GameScreen() {
           options={tunnelExtras}
           onCommit={(p) => {
             socket?.resolveTunnel(true, paymentToProto(p));
-            setTunnelColor(null);
+            setTunnelBase(null);
           }}
           onAbort={() => {
             socket?.resolveTunnel(false);
-            setTunnelColor(null);
+            setTunnelBase(null);
           }}
         />
       )}
