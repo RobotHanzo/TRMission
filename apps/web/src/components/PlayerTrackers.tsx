@@ -13,7 +13,7 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
         const current = p.id === snapshot.currentPlayerId;
         const isMe = p.id === snapshot.you?.playerId;
         return (
-          <li key={p.id} className={current ? 'tracker current' : 'tracker'}>
+          <li key={p.id} className={current ? 'tracker current' : 'tracker'} data-player-id={p.id}>
             <span
               className="seat-dot"
               style={{ background: SEAT_COLORS[p.seat % 5] ?? '#888' }}

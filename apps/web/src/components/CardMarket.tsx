@@ -16,6 +16,7 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
     <div className="market">
       <button
         className="deck"
+        data-anim="deck"
         disabled={!canDraw || snapshot.deckCount === 0}
         onClick={onDrawBlind}
         title={t('drawBlind')}
@@ -31,6 +32,8 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
             <button
               key={slot}
               className="market-slot"
+              data-anim="market-slot"
+              data-slot={slot}
               disabled={!canDraw || empty}
               onClick={() => onDrawFaceUp(slot)}
               style={empty ? undefined : { background: tok.hex, color: tok.ink }}

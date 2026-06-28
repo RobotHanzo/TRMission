@@ -184,6 +184,14 @@
   letter-spacing: 0.04em;
   opacity: 0.9;
 }
+.flying-card-face {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  font-weight: 800;
+  font-size: 1.3em;
+}
 
 /* ── Ticket dialog motion (item 2) ───────────────────────────────────────────── */
 @keyframes anim-slide-up {

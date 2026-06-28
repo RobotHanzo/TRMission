@@ -10,7 +10,7 @@ export function PlayerHand({ hand }: { hand: CardCounts | undefined }) {
   const h = handFromCounts(hand);
   const present = CARD_COLORS.filter((c) => h[c] > 0);
   return (
-    <div className="hand">
+    <div className="hand" data-anim="hand">
       {present.length === 0 ? (
         <span className="muted">{t('noCards')}</span>
       ) : (

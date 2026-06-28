@@ -26,6 +26,8 @@ import { PaymentModal } from '../components/PaymentModal';
 import { KeepTicketsModal } from '../components/KeepTicketsModal';
 import { TunnelModal } from '../components/TunnelModal';
 import { ScoreBoard } from '../components/ScoreBoard';
+import { AnimationLayer } from '../components/AnimationLayer';
+import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import '../styles/game.css';
 import '../styles/animations.css';
 
@@ -44,6 +46,9 @@ export function GameScreen() {
   const snapshot = useGame((s) => s.snapshot);
   const rejection = useGame((s) => s.rejection);
   const setRejection = useGame((s) => s.setRejection);
+
+  // Translate events + snapshot diffs into animations (claim glow, draws, fanfare, …).
+  useAnimationDriver();
 
   const [claim, setClaim] = useState<Claim | null>(null);
   const [tunnelColor, setTunnelColor] = useState<Payment['color']>(null);
@@ -189,7 +194,7 @@ export function GameScreen() {
     </section>
   );
   const ticketsSection = (
-    <section className="tray-section tray-missions">
+    <section className="tray-section tray-missions" data-anim="tickets">
       <div className="tray-head">
         <h4>{t('tickets')}</h4>
         <span className="tray-count">{snapshot.you?.keptTicketIds.length ?? 0}</span>
@@ -257,6 +262,7 @@ export function GameScreen() {
         </div>
       )}
       {rejection && <div className="toast">{t('actionRejected')}</div>}
+      <AnimationLayer />
     </div>
   );
 }
