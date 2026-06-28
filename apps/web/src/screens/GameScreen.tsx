@@ -32,8 +32,10 @@ import { TunnelModal } from '../components/TunnelModal';
 import { ScoreBoard } from '../components/ScoreBoard';
 import { AnimationLayer } from '../components/AnimationLayer';
 import { Toast } from '../components/Toast';
+import { CommsPanel } from '../components/CommsPanel';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import { useSoundDriver } from '../hooks/useSoundDriver';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import '../styles/game.css';
 import '../styles/animations.css';
 
@@ -49,6 +51,9 @@ export function GameScreen() {
   const colorBlind = useUi((s) => s.colorBlind);
   const boardLayout = useUi((s) => s.boardLayout);
   const goHome = useUi((s) => s.goHome);
+
+  const wide = useMediaQuery('(min-width: 1200px)');
+  const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
 
   const snapshot = useGame((s) => s.snapshot);
   const rejection = useGame((s) => s.rejection);
@@ -221,8 +226,12 @@ export function GameScreen() {
         onDrawBlind={() => socket?.drawBlind()}
       />
       <div className="hud-actions">
+        <button disabled={!canAct} onClick={() => socket?.pass()}>
+          {t('pass')}
+        </button>
         <button
           className="accent"
+          aria-label={t('drawTickets')}
           disabled={!canAct || snapshot.ticketDeckShortCount === 0}
           onClick={() => socket?.drawTickets()}
         >
@@ -256,44 +265,76 @@ export function GameScreen() {
     </section>
   );
 
+  const railInner = needKeep ? (
+    <TicketChooser
+      offered={snapshot.you?.pendingOfferTicketIds ?? []}
+      minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
+      lockLong={phase === Phase.SETUP_TICKETS}
+      hand={snapshot.you?.hand}
+      handCount={myPub?.handCount ?? 0}
+      keptTicketIds={snapshot.you?.keptTicketIds ?? []}
+      completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
+      onConfirm={confirmKeep}
+    />
+  ) : boardLayout === 'rail' ? (
+    <>
+      {trackers}
+      {market}
+      {handSection}
+      {ticketsSection}
+    </>
+  ) : (
+    <>
+      {trackers}
+      {market}
+      {ticketsSection}
+    </>
+  );
+  const showHandStrip = !needKeep && boardLayout === 'tray';
+  const comms = <CommsPanel chatDisabled={isSpectator} />;
+
   return (
-    <div className={`game game--${boardLayout}`}>
+    <div className={`game game--${boardLayout}`} data-comms-tab={commsTab}>
       {isSpectator && (
         <div className="spectator-banner" role="status">
           <strong>{t('spectating')}</strong> — {t('spectatingHint')}
         </div>
       )}
       {boardPanel}
-      {needKeep ? (
-        // Choosing tickets takes over the rail so the board stays visible and pan/zoomable; the
-        // hand and kept missions move into the chooser's own peek toggles.
-        <aside className="game-rail">
-          <TicketChooser
-            offered={snapshot.you?.pendingOfferTicketIds ?? []}
-            minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
-            lockLong={phase === Phase.SETUP_TICKETS}
-            hand={snapshot.you?.hand}
-            handCount={myPub?.handCount ?? 0}
-            keptTicketIds={snapshot.you?.keptTicketIds ?? []}
-            completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
-            onConfirm={confirmKeep}
-          />
-        </aside>
-      ) : boardLayout === 'rail' ? (
-        <aside className="game-rail">
-          {trackers}
-          {market}
-          {handSection}
-          {ticketsSection}
-        </aside>
+      {wide ? (
+        <>
+          <aside className="game-rail">{railInner}</aside>
+          {showHandStrip && <div className="game-hand-strip">{handSection}</div>}
+          <aside className="game-comms">{comms}</aside>
+        </>
       ) : (
         <>
           <aside className="game-rail">
-            {trackers}
-            {market}
-            {ticketsSection}
+            <div className="comms-tabs" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={commsTab === 'rail'}
+                className={commsTab === 'rail' ? 'active' : ''}
+                onClick={() => setCommsTab('rail')}
+              >
+                {t('tabRail')}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={commsTab === 'comms'}
+                className={commsTab === 'comms' ? 'active' : ''}
+                onClick={() => setCommsTab('comms')}
+              >
+                {t('tabComms')}
+              </button>
+            </div>
+            {commsTab === 'rail' ? railInner : comms}
           </aside>
-          <div className="game-hand-strip">{handSection}</div>
+          {showHandStrip && commsTab === 'rail' && (
+            <div className="game-hand-strip">{handSection}</div>
+          )}
         </>
       )}
 
