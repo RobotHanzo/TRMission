@@ -2,6 +2,7 @@
 // optional component specimen (the visual glossary), a progress bar, a connector caret toward the
 // spotlighted target, and the right control for the beat mode. It dodges to the top when a target
 // would sit under the bottom-anchored bubble.
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, RotateCcw, X } from 'lucide-react';
 import type { Beat, SpecimenSpec } from './types';
@@ -36,17 +37,36 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
     typeof window !== 'undefined' ? coachPosition(spotRects, window.innerHeight) : 'bottom';
   const progress = total > 0 ? Math.round(((index + 1) / total) * 100) : 0;
 
-  // Caret horizontal position: aim at the first target's centre (clamped within the bubble width).
-  const caretLeft = spotRects[0] ? spotRects[0].x + spotRects[0].w / 2 : null;
+  // Caret horizontal position: coach-relative, aimed at the first target's centre.
+  const coachRef = useRef<HTMLDivElement>(null);
+  const [caretLeft, setCaretLeft] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const target = spotRects[0];
+    const coach = coachRef.current;
+    if (!target || !coach) {
+      setCaretLeft(null);
+      return;
+    }
+    const cr = coach.getBoundingClientRect();
+    if (cr.width === 0) {
+      setCaretLeft(null); // no layout (jsdom) — skip the caret
+      return;
+    }
+    const targetCx = target.x + target.w / 2;
+    const pad = 24; // ~1.5rem bubble padding
+    setCaretLeft(Math.max(pad, Math.min(cr.width - pad, targetCx - cr.left)));
+  }, [spotRects]);
 
   return (
-    <div className="tut-coach" data-pos={pos} role="dialog" aria-label={t('tutorial.title')}>
+    <div
+      ref={coachRef}
+      className="tut-coach"
+      data-pos={pos}
+      role="dialog"
+      aria-label={t('tutorial.title')}
+    >
       {caretLeft !== null && (
-        <span
-          className="tut-coach-caret"
-          aria-hidden
-          style={{ left: `clamp(1.5rem, ${Math.round(caretLeft)}px, calc(100% - 1.5rem))` }}
-        />
+        <span className="tut-coach-caret" aria-hidden style={{ left: `${caretLeft}px` }} />
       )}
 
       <div className="tut-coach-head">

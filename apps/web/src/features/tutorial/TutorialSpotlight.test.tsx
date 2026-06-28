@@ -16,7 +16,7 @@ describe('TutorialSpotlight', () => {
       />,
     );
     expect(document.querySelectorAll('.tut-spotlight-ring').length).toBe(2);
-    expect(document.querySelectorAll('#tut-spot-mask rect[fill="black"]').length).toBe(2);
+    expect(document.querySelectorAll('mask rect[fill="black"]').length).toBe(2);
   });
 
   it('renders a global dim with no cutouts when there are no targets', () => {

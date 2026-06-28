@@ -40,15 +40,15 @@ export interface FlatRect {
 
 /**
  * Where to anchor the bottom coachmark so it never covers the spotlighted element. If a target
- * sits in the lower band of the viewport and overlaps the horizontal centre (where the bottom
- * coachmark lives), flip the coachmark to the top.
+ * sits in the lower band of the viewport, flip the coachmark to the top.
  */
 export function coachPosition(rects: FlatRect[], vh: number): 'bottom' | 'top' {
   const lowBand = vh * 0.62;
   for (const r of rects) {
     const overlapsBottom = r.y + r.h > lowBand;
-    // The bottom coachmark spans roughly the centre 60% of the width; approximate as 20%..80% of
-    // a nominal 1440px-or-narrower stage by using a fractional check on the rect's own centre.
+    // Any spotlight target sitting in the lower band of the viewport would be covered by the
+    // bottom-anchored coachmark, so flip the coachmark to the top. (Vertical band only — the
+    // authored bottom targets are horizontally central, so a horizontal check isn't needed.)
     if (overlapsBottom) return 'top';
   }
   return 'bottom';

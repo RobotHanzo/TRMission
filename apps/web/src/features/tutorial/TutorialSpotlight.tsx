@@ -1,6 +1,6 @@
 // A non-blocking focus scrim: dims the whole viewport and punches a lit, ringed hole around each
 // spotlight target. pointer-events:none, so the learner can still click the highlighted element.
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { FlatRect } from './focus';
 
@@ -19,6 +19,7 @@ export function TutorialSpotlight({
   rects: FlatRect[];
   reducedMotion: boolean;
 }) {
+  const maskId = `tut-spot-mask-${useId().replace(/:/g, '')}`;
   const [vp, setVp] = useState(viewport);
   useEffect(() => {
     const onResize = (): void => setVp(viewport());
@@ -35,7 +36,7 @@ export function TutorialSpotlight({
     <div className={'tut-spotlight' + (hasHoles ? '' : ' is-global')} aria-hidden>
       <svg className="tut-spotlight-svg" width={w} height={h}>
         <defs>
-          <mask id="tut-spot-mask">
+          <mask id={maskId}>
             <rect x={0} y={0} width={w} height={h} fill="white" />
             {rects.map((r, i) => (
               <rect
@@ -57,7 +58,7 @@ export function TutorialSpotlight({
           y={0}
           width={w}
           height={h}
-          mask={hasHoles ? 'url(#tut-spot-mask)' : undefined}
+          mask={hasHoles ? `url(#${maskId})` : undefined}
         />
         {rects.map((r, i) => (
           <rect
