@@ -42,6 +42,11 @@ export interface Fanfare {
   long: boolean;
   seat: number;
 }
+/** A persistent route highlight (the longest-trail review from the final scoreboard). */
+export interface RouteReveal {
+  seat: number;
+  path: string[];
+}
 
 interface AnimState {
   glowingRoutes: Map<string, number>;
@@ -56,6 +61,8 @@ interface AnimState {
   coveredMarketSlots: Set<number>;
   fanfare: Fanfare | null;
   fanfareQueue: Fanfare[];
+  /** Longest-trail route highlight shown while reviewing the final scoreboard (null = none). */
+  routeReveal: RouteReveal | null;
   pushIntent(intent: AnimIntent): void;
   clearGlowRoute(id: string): void;
   clearGlowStation(id: string): void;
@@ -68,6 +75,8 @@ interface AnimState {
   /** Flip every covered slot into view (called when a draw completes). */
   revealMarketSlots(): void;
   dismissFanfare(): void;
+  setRouteReveal(seat: number, path: string[]): void;
+  clearRouteReveal(): void;
   reset(): void;
 }
 
@@ -86,6 +95,7 @@ const initial = () => ({
   coveredMarketSlots: new Set<number>(),
   fanfare: null as Fanfare | null,
   fanfareQueue: [] as Fanfare[],
+  routeReveal: null as RouteReveal | null,
 });
 
 export const useAnimations = create<AnimState>()((set) => ({
@@ -118,7 +128,12 @@ export const useAnimations = create<AnimState>()((set) => ({
             ],
           };
         case 'scoreFloat':
-          return { floats: [...s.floats, { id: nextId(), playerId: intent.playerId, amount: intent.amount }] };
+          return {
+            floats: [
+              ...s.floats,
+              { id: nextId(), playerId: intent.playerId, amount: intent.amount },
+            ],
+          };
         case 'turnCue':
           return { turnCue: { id: nextId(), playerId: intent.playerId, isYou: intent.isYou } };
         case 'marketFlip': {
@@ -148,7 +163,12 @@ export const useAnimations = create<AnimState>()((set) => ({
             sweeps,
             ticketCues: [
               ...s.ticketCues,
-              { id: nextId(), playerId: intent.playerId, ticketId: intent.ticketId, seat: intent.seat },
+              {
+                id: nextId(),
+                playerId: intent.playerId,
+                ticketId: intent.ticketId,
+                seat: intent.seat,
+              },
             ],
           };
         }
@@ -195,5 +215,7 @@ export const useAnimations = create<AnimState>()((set) => ({
       const [next, ...rest] = s.fanfareQueue;
       return { fanfare: next ?? null, fanfareQueue: rest };
     }),
+  setRouteReveal: (seat, path) => set({ routeReveal: { seat, path } }),
+  clearRouteReveal: () => set({ routeReveal: null }),
   reset: () => set(initial()),
 }));

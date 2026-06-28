@@ -22,21 +22,27 @@ export { SCHEMA_VERSION, ENGINE_VERSION } from './types/state';
 
 export type { Action, ActionType, Payment } from './types/actions';
 export type { GameEvent, GameEventType, Visibility } from './types/events';
-export type { RedactedView, RedactedPlayer } from './types/view';
+export type {
+  RedactedView,
+  RedactedPlayer,
+  RedactedPlayerFinal,
+  RedactedFinalScoreboard,
+} from './types/view';
 
 export { initGame } from './setup';
 export { reduce, hasAnyLegalMove } from './reduce';
 export type { ReduceResult, ReduceOutput } from './reduce';
 export { currentPlayerId, endTurn } from './turn';
 
-export { computeFinalScores } from './scoring';
+export { computeFinalScores, evaluatePlayerTickets, longestTrailRouteIdsFor } from './scoring';
+export type { PlayerTicketDetail } from './scoring';
 export { legalActions, enumerateClaimPayments, redactFor } from './selectors';
 export { stateDigest, cloneState, replay } from './serialize';
 export type { ReplayResult } from './serialize';
 export { checkInvariants } from './invariants';
 
-export { longestTrail } from './graph/longestTrail';
-export type { TrailEdge } from './graph/longestTrail';
+export { longestTrail, longestTrailWithPath } from './graph/longestTrail';
+export type { TrailEdge, TrailResult } from './graph/longestTrail';
 export { evaluateTickets, ownConnectedTicketIds } from './graph/connectivity';
 export type { Edge, TicketGoal, TicketEvaluation, IdTicketGoal } from './graph/connectivity';
 export { UnionFind } from './graph/unionFind';

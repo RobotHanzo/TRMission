@@ -1,5 +1,21 @@
 import type { PlayerId, RouteId, TicketId, CardColor, SeatIndex, Hand } from '@trm/shared';
-import type { Phase, OwnerCell, StationPlacement, Endgame, FinalScoreboard } from './state';
+import type { Phase, OwnerCell, StationPlacement, Endgame, PlayerFinal } from './state';
+
+/**
+ * A player's end-game score, enriched for display: which kept tickets are completed (gains) vs
+ * failed (losses), and the route ids of one optimal longest trail (to highlight on the map).
+ * These are deterministic functions of game state, derived at the projection boundary so the
+ * authoritative {@link PlayerFinal} stored in `GameState` stays minimal.
+ */
+export interface RedactedPlayerFinal extends PlayerFinal {
+  readonly completedTicketIds: readonly TicketId[];
+  readonly longestTrailRouteIds: readonly RouteId[];
+}
+
+export interface RedactedFinalScoreboard {
+  readonly players: readonly RedactedPlayerFinal[];
+  readonly ranking: readonly (readonly PlayerId[])[];
+}
 
 /** A player as seen by a particular viewer: own secrets included, opponents' are counts only. */
 export interface RedactedPlayer {
@@ -45,7 +61,7 @@ export interface RedactedView {
   } | null;
 
   readonly players: readonly RedactedPlayer[];
-  readonly finalScores: FinalScoreboard | null;
+  readonly finalScores: RedactedFinalScoreboard | null;
 
   /**
    * Tickets revealed because their owner has COMPLETED them with their own routes (own-track

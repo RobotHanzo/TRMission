@@ -6,6 +6,13 @@ export interface TrailEdge {
   readonly w: number;
 }
 
+export interface TrailResult {
+  /** Maximum-weight trail value (the longest-path bonus length). */
+  readonly length: number;
+  /** Indices into the input `edges`, in trail order, for one optimal trail (`[]` when empty). */
+  readonly edges: number[];
+}
+
 /**
  * Longest *continuous path* bonus = the maximum-weight TRAIL (no edge reused, vertices may
  * repeat) over a single player's claimed edges, weighted by route length. This is the
@@ -19,7 +26,19 @@ export interface TrailEdge {
  * replay stays deterministic).
  */
 export function longestTrail(edges: readonly TrailEdge[], stepBudget = 5_000_000): number {
-  if (edges.length === 0) return 0;
+  return longestTrailWithPath(edges, stepBudget).length;
+}
+
+/**
+ * Same search as {@link longestTrail}, but also returns the edges of one optimal trail (in
+ * traversal order). Deterministic: the first optimal trail found under the fixed start-vertex
+ * and adjacency order wins. Used at game end to highlight a player's longest route on the map.
+ */
+export function longestTrailWithPath(
+  edges: readonly TrailEdge[],
+  stepBudget = 5_000_000,
+): TrailResult {
+  if (edges.length === 0) return { length: 0, edges: [] };
 
   // Partition edges into connected components.
   const uf = new UnionFind();
@@ -33,11 +52,12 @@ export function longestTrail(edges: readonly TrailEdge[], stepBudget = 5_000_000
   });
 
   const steps = { n: 0 };
-  let globalBest = 0;
+  let best: TrailResult = { length: 0, edges: [] };
   for (const edgeIdx of components.values()) {
-    globalBest = Math.max(globalBest, longestInComponent(edges, edgeIdx, steps, stepBudget));
+    const r = longestInComponent(edges, edgeIdx, steps, stepBudget);
+    if (r.length > best.length) best = r;
   }
-  return globalBest;
+  return best;
 }
 
 function longestInComponent(
@@ -45,7 +65,7 @@ function longestInComponent(
   edgeIdx: readonly number[],
   steps: { n: number },
   stepBudget: number,
-): number {
+): TrailResult {
   // Local, compact representation: vertices → incident (edgeLocalIndex, otherVertex).
   const adj = new Map<string, Array<{ e: number; to: string }>>();
   const weights: number[] = [];
@@ -64,13 +84,18 @@ function longestInComponent(
   const totalWeight = weights.reduce((a, b) => a + b, 0);
   const used = new Array<boolean>(weights.length).fill(false);
   let best = 0;
+  let bestPath: number[] = []; // local edge indices of the best trail
   let remaining = totalWeight;
+  const stack: number[] = []; // local edge indices on the current DFS path
 
   // Deterministic vertex start order.
   const startVerts = [...vertices].sort();
 
   const dfs = (vertex: string, acc: number): void => {
-    if (acc > best) best = acc;
+    if (acc > best) {
+      best = acc;
+      bestPath = stack.slice();
+    }
     if (steps.n++ > stepBudget) return;
     // Upper-bound prune: even using every remaining edge can't beat best.
     if (acc + remaining <= best) return;
@@ -80,7 +105,9 @@ function longestInComponent(
       if (used[e]) continue;
       used[e] = true;
       remaining -= weights[e] as number;
+      stack.push(e);
       dfs(to, acc + (weights[e] as number));
+      stack.pop();
       used[e] = false;
       remaining += weights[e] as number;
     }
@@ -90,5 +117,5 @@ function longestInComponent(
     dfs(s, 0);
     if (best === totalWeight) break; // can't do better than every edge.
   }
-  return best;
+  return { length: best, edges: bestPath.map((local) => edgeIdx[local] as number) };
 }

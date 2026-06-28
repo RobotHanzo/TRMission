@@ -955,6 +955,9 @@ button.ticket-card:hover {
   .card-options .payment-card:hover:not(:disabled) {
     transform: none;
   }
+  .toast {
+    animation: none;
+  }
 }
 
 /* Base .modal-backdrop / .modal live in app.css so modals work outside the game view. */
@@ -1045,6 +1048,12 @@ button.ticket-card:hover {
   font-weight: 700;
 }
 
+.modal.scoreboard {
+  max-width: min(760px, 95vw);
+}
+.scoreboard-scroll {
+  overflow-x: auto;
+}
 .scoreboard table {
   width: 100%;
   border-collapse: collapse;
@@ -1054,8 +1063,114 @@ button.ticket-card:hover {
   padding: 4px 8px;
   text-align: left;
 }
+.scoreboard th {
+  white-space: nowrap;
+  font-size: 0.82em;
+  color: var(--tr-ink-soft);
+  font-weight: 600;
+}
+.scoreboard td.num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.scoreboard td.gain {
+  color: var(--tr-ok);
+}
+.scoreboard td.loss {
+  color: var(--tr-danger);
+}
+.scoreboard td.total {
+  font-size: 1.05em;
+}
 .scoreboard tr.winner {
   background: color-mix(in srgb, var(--tr-ember) 12%, transparent);
+}
+.cell-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.cell-view {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  color: var(--tr-ink-soft);
+  cursor: pointer;
+  border-radius: 6px;
+}
+.cell-view:hover {
+  color: var(--tr-ink);
+  background: color-mix(in srgb, var(--tr-ink) 12%, transparent);
+}
+
+/* Done / Failed ticket breakdown modal. */
+.modal.ticket-list-modal {
+  max-width: min(680px, 95vw);
+}
+.ticket-list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tr-space-3);
+}
+.ticket-list-head h3 {
+  margin: 0;
+}
+.ticket-list-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tr-space-3);
+  justify-content: center;
+}
+.ticket-list-grid .ticket-card {
+  width: 150px;
+}
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  color: var(--tr-ink-soft);
+  cursor: pointer;
+  border-radius: 8px;
+}
+.icon-button:hover {
+  background: color-mix(in srgb, var(--tr-ink) 12%, transparent);
+}
+
+/* Map-review bar: viewing a player's longest route on the board (no backdrop, board pannable). */
+.scoreboard-review {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--tr-space-4);
+}
+.review-bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-4);
+  background: var(--tr-surface);
+  box-shadow: var(--tr-shadow);
+  border-radius: 999px;
+  padding: var(--tr-space-2) var(--tr-space-2) var(--tr-space-2) var(--tr-space-4);
+}
+.review-caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
 }
 
 .toast {
@@ -1069,10 +1184,27 @@ button.ticket-card:hover {
   border-radius: 999px;
   z-index: 60;
   box-shadow: var(--tr-shadow);
+  /* Slide up + fade in on mount. Toasts unmount when cleared, so there is no exit
+     animation; the keyframe ends on translateX(-50%) to match the resting transform. */
+  animation: tr-toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes tr-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
 }
 /* Informational nudge (e.g. "not enough cards"): EMU-blue, lifted clear of the red
    rejection toast so the two never overlap if both happen to show. */
 .toast.toast-notice {
   background: var(--tr-blue);
   bottom: calc(var(--tr-space-6) + 48px);
+}
+/* Confirmation (e.g. "copied"): green, so it reads as a success rather than a warning. */
+.toast.toast-success {
+  background: var(--tr-ok);
 }

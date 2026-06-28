@@ -4,17 +4,23 @@ import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
 import type { GameState } from './types/state';
 import type { Action, Payment } from './types/actions';
-import type { RedactedView, RedactedPlayer } from './types/view';
+import type { RedactedView, RedactedPlayer, RedactedFinalScoreboard } from './types/view';
 import { reduce, hasAnyLegalMove } from './reduce';
 import { currentPlayerId } from './turn';
 import { getPlayer } from './reducers/common';
 import { ownConnectedTicketIds } from './graph/connectivity';
+import { evaluatePlayerTickets, longestTrailRouteIdsFor } from './scoring';
 import type { TicketId } from '@trm/shared';
 
 type Hand = Record<CardColor, number>;
 
 /** All valid payments for claiming a route, given the player's hand & trains. */
-export function enumerateClaimPayments(board: Board, state: GameState, player: PlayerId, route: RouteDef): Payment[] {
+export function enumerateClaimPayments(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  route: RouteDef,
+): Payment[] {
   const p = getPlayer(state, player);
   if (!p) return [];
   if (p.trainCars < route.length) return [];
@@ -38,7 +44,8 @@ function enumeratePayments(
       continue;
     }
     if (opts.specific) {
-      if (hand[opts.specific] >= colorCount) out.push({ color: opts.specific, colorCount, locomotives: loco });
+      if (hand[opts.specific] >= colorCount)
+        out.push({ color: opts.specific, colorCount, locomotives: loco });
     } else {
       for (const c of TRAIN_COLORS) {
         if (hand[c] >= colorCount) out.push({ color: c, colorCount, locomotives: loco });
@@ -95,7 +102,8 @@ export function legalActions(board: Board, state: GameState, player: PlayerId): 
     const stationPayments = enumeratePayments(p.hand, built + 1, { ferryLocos: 0, specific: null });
     for (const city of board.cityIds) {
       if (state.stations.some((s) => s.cityId === city)) continue;
-      for (const payment of stationPayments) candidates.push({ t: 'BUILD_STATION', player, cityId: city, payment });
+      for (const payment of stationPayments)
+        candidates.push({ t: 'BUILD_STATION', player, cityId: city, payment });
     }
     candidates.push({ t: 'PASS', player });
   } else if (phase === 'DRAWING_CARDS') {
@@ -196,6 +204,20 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
 
   const discardTotal = (): Record<CardColor, number> => ({ ...state.discard });
 
+  // Enrich the stored final scoreboard with display-only derivations (gains/losses split and the
+  // longest-trail route ids). Computed here, at the projection boundary, so `GameState` stays minimal.
+  const finalScores: RedactedFinalScoreboard | null =
+    state.finalScores === null
+      ? null
+      : {
+          players: state.finalScores.players.map((pf) => ({
+            ...pf,
+            completedTicketIds: evaluatePlayerTickets(board, state, pf.playerId).completedTicketIds,
+            longestTrailRouteIds: longestTrailRouteIdsFor(board, state, pf.playerId),
+          })),
+          ranking: state.finalScores.ranking,
+        };
+
   return {
     schemaVersion: state.schemaVersion,
     contentHash: state.contentHash,
@@ -220,7 +242,7 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
         }
       : null,
     players,
-    finalScores: state.finalScores,
+    finalScores,
     completedTickets,
   };
 }

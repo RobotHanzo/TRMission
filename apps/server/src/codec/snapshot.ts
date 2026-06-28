@@ -6,7 +6,7 @@
 // tickets even if a future redaction bug slipped through (risk #1, defence in depth).
 import { create } from '@bufbuild/protobuf';
 import type { CardColor, Hand, PlayerId } from '@trm/shared';
-import type { RedactedView, RedactedPlayer, PlayerFinal } from '@trm/engine';
+import type { RedactedView, RedactedPlayer, RedactedPlayerFinal } from '@trm/engine';
 import {
   GameSnapshotSchema,
   CardCountsSchema,
@@ -41,7 +41,7 @@ function publicPlayer(p: RedactedPlayer) {
   };
 }
 
-function finalProto(pf: PlayerFinal, keptTicketIds: readonly string[]) {
+function finalProto(pf: RedactedPlayerFinal, keptTicketIds: readonly string[]) {
   return {
     playerId: pf.playerId as string,
     routePoints: pf.routePoints,
@@ -54,6 +54,8 @@ function finalProto(pf: PlayerFinal, keptTicketIds: readonly string[]) {
     longestBonus: pf.longestBonus,
     total: pf.total,
     keptTicketIds: [...keptTicketIds],
+    completedTicketIds: pf.completedTicketIds.map((id) => id as string),
+    longestTrailRouteIds: pf.longestTrailRouteIds.map((id) => id as string),
   };
 }
 

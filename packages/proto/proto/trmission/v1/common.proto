@@ -189,6 +189,11 @@ message PlayerFinal {
   int32 longest_bonus = 9;
   int32 total = 10;
   repeated string kept_ticket_ids = 11;
+  // Kept tickets that count as completed at game end (gains; the rest are losses). Authoritative
+  // with station borrowing — unlike `completed_tickets`, which is own-track only.
+  repeated string completed_ticket_ids = 12;
+  // Route ids of one optimal longest trail for this player (to highlight on the map).
+  repeated string longest_trail_route_ids = 13;
 }
 
 // Final ranking as equivalence groups; a group of >1 = tied co-winners/places.

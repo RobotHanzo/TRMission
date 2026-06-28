@@ -1,10 +1,11 @@
-import type { PlayerId } from '@trm/shared';
+import type { PlayerId, RouteId, TicketId } from '@trm/shared';
 import type { Board } from './board';
 import type { GameState, FinalScoreboard, PlayerFinal } from './types/state';
-import { longestTrail } from './graph/longestTrail';
+import { longestTrail, longestTrailWithPath } from './graph/longestTrail';
 import type { TrailEdge } from './graph/longestTrail';
 import { evaluateTickets } from './graph/connectivity';
 import type { Edge } from './graph/connectivity';
+import { UnionFind } from './graph/unionFind';
 
 /** Routes a player owns, as graph edges (with length weight for the longest-trail bonus). */
 function ownedEdges(board: Board, state: GameState, player: PlayerId): TrailEdge[] {
@@ -36,9 +37,89 @@ function borrowCandidatesForCity(
   return out;
 }
 
+/** End-of-game destination-ticket result for one player, including WHICH kept tickets count. */
+export interface PlayerTicketDetail {
+  /** Net ticket points (completed values minus failed values; may be negative). */
+  readonly net: number;
+  /** Number of kept tickets connected under the optimal station-borrow assignment. */
+  readonly completed: number;
+  /** The kept ticket ids that count as completed (matches `completed`), in kept order. */
+  readonly completedTicketIds: TicketId[];
+}
+
+/**
+ * Score a player's kept tickets at game end with the station-borrow optimisation, and recover
+ * exactly which kept tickets are completed under the chosen assignment. The completed set is the
+ * authoritative basis for the end-game gains/losses breakdown — unlike the in-game public
+ * `completedTickets`, which is own-track only and can omit a borrow-completed ticket.
+ */
+export function evaluatePlayerTickets(
+  board: Board,
+  state: GameState,
+  playerId: PlayerId,
+): PlayerTicketDetail {
+  const player = state.players[playerId as string];
+  if (!player) return { net: 0, completed: 0, completedTicketIds: [] };
+
+  const cityIds = board.cityIds.map((c) => c as string);
+  const edges = ownedEdges(board, state, playerId);
+  const stationCities = state.stations
+    .filter((s) => s.playerId === playerId)
+    .map((s) => s.cityId as string);
+  const borrowCandidates = new Map<string, Edge[]>();
+  for (const city of stationCities) {
+    borrowCandidates.set(city, borrowCandidatesForCity(board, state, city, playerId));
+  }
+  const goals = player.keptTickets
+    .map((id) => {
+      const t = board.ticketById.get(id as string);
+      return t ? { id, a: t.a as string, b: t.b as string, value: t.value } : null;
+    })
+    .filter((g): g is { id: TicketId; a: string; b: string; value: number } => g !== null);
+
+  const ticketEval = evaluateTickets({
+    ownEdges: edges.map((e) => ({ a: e.u, b: e.v })),
+    stationCities,
+    borrowCandidates,
+    tickets: goals.map((g) => ({ a: g.a, b: g.b, value: g.value })),
+    vertices: cityIds,
+  });
+
+  // Re-derive which tickets are connected under the chosen borrow assignment so the listed
+  // tickets always reconcile with `net`/`completed`.
+  const uf = new UnionFind(cityIds);
+  for (const e of edges) uf.union(e.u, e.v);
+  for (const b of ticketEval.borrows) if (b) uf.union(b.a, b.b);
+  const completedTicketIds = goals.filter((g) => uf.connected(g.a, g.b)).map((g) => g.id);
+
+  return { net: ticketEval.net, completed: ticketEval.completed, completedTicketIds };
+}
+
+/**
+ * The route ids of one optimal longest trail for a player (in traversal order) — the segments to
+ * highlight on the map when reviewing the longest-path bonus at game end. `[]` if they own none.
+ */
+export function longestTrailRouteIdsFor(
+  board: Board,
+  state: GameState,
+  playerId: PlayerId,
+): RouteId[] {
+  const routeOf: RouteId[] = [];
+  const edges: TrailEdge[] = [];
+  for (const [routeId, cell] of Object.entries(state.ownership)) {
+    if ('owner' in cell && cell.owner === playerId) {
+      const r = board.routeById.get(routeId);
+      if (r) {
+        routeOf.push(routeId as RouteId);
+        edges.push({ u: r.a as string, v: r.b as string, w: r.length });
+      }
+    }
+  }
+  return longestTrailWithPath(edges).edges.map((i) => routeOf[i] as RouteId);
+}
+
 export function computeFinalScores(board: Board, state: GameState): FinalScoreboard {
   const { stationsPerPlayer, stationBonus, longestPathBonus } = state.ruleParams;
-  const cityIds = board.cityIds.map((c) => c as string);
 
   const trailLengths = new Map<string, number>();
   const partials: Omit<PlayerFinal, 'longestBonus' | 'total' | 'longestTrailLength'>[] = [];
@@ -50,25 +131,7 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
     const trailLen = longestTrail(edges);
     trailLengths.set(playerId as string, trailLen);
 
-    const stationCities = state.stations
-      .filter((s) => s.playerId === playerId)
-      .map((s) => s.cityId as string);
-    const borrowCandidates = new Map<string, Edge[]>();
-    for (const city of stationCities) {
-      borrowCandidates.set(city, borrowCandidatesForCity(board, state, city, playerId));
-    }
-    const tickets = player.keptTickets
-      .map((id) => board.ticketById.get(id as string))
-      .filter((t): t is NonNullable<typeof t> => t !== undefined)
-      .map((t) => ({ a: t.a as string, b: t.b as string, value: t.value }));
-
-    const ticketEval = evaluateTickets({
-      ownEdges: edges.map((e) => ({ a: e.u, b: e.v })),
-      stationCities,
-      borrowCandidates,
-      tickets,
-      vertices: cityIds,
-    });
+    const ticketDetail = evaluatePlayerTickets(board, state, playerId);
 
     const stationsUsed = stationsPerPlayer - player.stationsRemaining;
     const unusedStations = player.stationsRemaining;
@@ -76,8 +139,8 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
     partials.push({
       playerId,
       routePoints: player.routePoints,
-      ticketNet: ticketEval.net,
-      ticketsCompleted: ticketEval.completed,
+      ticketNet: ticketDetail.net,
+      ticketsCompleted: ticketDetail.completed,
       stationsUsed,
       unusedStations,
       stationBonus: unusedStations * stationBonus,

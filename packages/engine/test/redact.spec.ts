@@ -46,7 +46,9 @@ describe('redactFor — hidden information', () => {
     }
 
     // The ONLY ticket ids structurally present in the per-player view are the viewer's own.
-    const ownTickets = new Set(state.players[viewer as string]!.keptTickets.map((t) => t as string));
+    const ownTickets = new Set(
+      state.players[viewer as string]!.keptTickets.map((t) => t as string),
+    );
     const visibleTicketIds = new Set<string>();
     for (const p of view.players) {
       for (const t of p.keptTickets ?? []) visibleTicketIds.add(t as string);
@@ -77,7 +79,9 @@ describe('redactFor — hidden information', () => {
     // From an OPPONENT's view, p0's finished tickets are still revealed (public by design).
     const oppView = redactFor(board, owned, asPlayerId('p1'));
     const completedForP0 = new Set(
-      oppView.completedTickets.filter((c) => (c.player as string) === 'p0').map((c) => c.ticket as string),
+      oppView.completedTickets
+        .filter((c) => (c.player as string) === 'p0')
+        .map((c) => c.ticket as string),
     );
     expect(completedForP0).toEqual(p0Tickets);
     // p1 owns nothing → none of p1's tickets are completed.
@@ -97,6 +101,43 @@ describe('redactFor — hidden information', () => {
       expect(p.keptTickets).not.toBeNull();
     }
     expect(view.finalScores).not.toBeNull();
+  });
+
+  it('enriches the GAME_OVER scoreboard so the breakdown reconciles with each total', () => {
+    const board = taiwanBoard();
+    const { finalState } = playGreedyGame(3, 'redact-breakdown');
+    const view = redactFor(board, finalState, asPlayerId('p0'));
+    const final = view.finalScores!;
+    expect(final).not.toBeNull();
+
+    for (const pf of final.players) {
+      const kept = new Set(
+        (view.players.find((p) => p.id === pf.playerId)!.keptTickets ?? []).map((t) => t as string),
+      );
+      const completed = pf.completedTicketIds.map((t) => t as string);
+
+      // Completed ⊆ kept, count matches, and gains − losses == the net used in the total.
+      for (const id of completed) expect(kept.has(id)).toBe(true);
+      expect(completed.length).toBe(pf.ticketsCompleted);
+      const completedSet = new Set(completed);
+      let gain = 0;
+      let loss = 0;
+      for (const id of kept) {
+        const value = board.ticketById.get(id)!.value;
+        if (completedSet.has(id)) gain += value;
+        else loss += value;
+      }
+      expect(gain - loss).toBe(pf.ticketNet);
+
+      // The longest-trail route ids are owned by this player and weigh exactly the bonus length.
+      let trailLen = 0;
+      for (const rid of pf.longestTrailRouteIds) {
+        const cell = finalState.ownership[rid as string];
+        expect(cell && 'owner' in cell && cell.owner === pf.playerId).toBe(true);
+        trailLen += board.routeById.get(rid as string)!.length;
+      }
+      expect(trailLen).toBe(pf.longestTrailLength);
+    }
   });
 
   it('a spectator (null viewer) sees no hands and no tickets pre-endgame', () => {

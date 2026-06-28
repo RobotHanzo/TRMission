@@ -18,7 +18,7 @@ import {
 import { Plus, Minus, LocateFixed, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
 import type { GameSnapshot, GameEvent } from '@trm/proto';
 import type { RouteColor } from '@trm/shared';
-import { CITIES, ROUTES, cityById, cityName } from '../game/content';
+import { CITIES, ROUTES, cityById, routeById, cityName } from '../game/content';
 import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
 import { zoomBucket, cityTier } from '../game/lod';
@@ -366,6 +366,44 @@ function RouteGlowGate({
 }
 
 /**
+ * Frames the board on the longest-trail route reveal (triggered from the final scoreboard) so the
+ * highlighted path is brought into view. Lives inside the pan/zoom context for `setTransform`; it
+ * re-fits whenever the revealed path changes and is otherwise inert.
+ */
+function RevealFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement | null> }) {
+  const { setTransform } = useControls();
+  const reveal = useAnimations((s) => s.routeReveal);
+  useEffect(() => {
+    if (!reveal || reveal.path.length === 0) return;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const rid of reveal.path) {
+      const r = routeById.get(rid);
+      if (!r) continue;
+      for (const cid of [r.a as string, r.b as string]) {
+        const c = cityById.get(cid);
+        if (!c) continue;
+        minX = Math.min(minX, c.x);
+        maxX = Math.max(maxX, c.x);
+        minY = Math.min(minY, c.y);
+        maxY = Math.max(maxY, c.y);
+      }
+    }
+    if (!Number.isFinite(minX)) return;
+    const w = viewportRef.current?.clientWidth ?? 0;
+    const h = viewportRef.current?.clientHeight ?? 0;
+    const proj = viewportProjection(viewportRef.current);
+    if (!proj || w <= 0 || h <= 0) return;
+    const span = Math.min(100, Math.max(22, Math.max(maxX - minX, maxY - minY) + 16));
+    const t = viewToTransform({ cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, span }, proj, w, h);
+    setTransform(t.positionX, t.positionY, t.scale, 500, 'easeOut');
+  }, [reveal, setTransform, viewportRef]);
+  return null;
+}
+
+/**
  * Zoom controls wired to the pan/zoom context, plus reset (re-centre) and a real
  * fullscreen toggle that drives the Fullscreen API on the board viewport.
  */
@@ -470,6 +508,7 @@ export function Board({
   const armedGlowRoutes = useAnimations((s) => s.glowingRoutes);
   const glowingStations = useAnimations((s) => s.glowingStations);
   const sweeps = useAnimations((s) => s.sweeps);
+  const routeReveal = useAnimations((s) => s.routeReveal);
   const clearGlowRoute = useAnimations((s) => s.clearGlowRoute);
   const clearGlowStation = useAnimations((s) => s.clearGlowStation);
   const removeSweep = useAnimations((s) => s.removeSweep);
@@ -573,6 +612,7 @@ export function Board({
       >
         <ZoomTracker targetRef={viewportRef} />
         <CameraSync snapshot={snapshot} viewportRef={viewportRef} />
+        <RevealFramer viewportRef={viewportRef} />
         <RouteGlowGate
           armed={armedGlowRoutes}
           started={startedGlowRoutes}
@@ -776,6 +816,30 @@ export function Board({
                 })}
               </g>
             ))}
+
+            {/* Longest-trail review: a persistent seat-colour sweep along the player's longest route. */}
+            {routeReveal && (
+              <g className="sweep-layer reveal-layer" pointerEvents="none">
+                {routeReveal.path.map((rid, i) => {
+                  const sg = ROUTE_GEOMETRY.get(rid);
+                  if (!sg) return null;
+                  return (
+                    <path
+                      key={rid}
+                      className="sweep-seg"
+                      d={sg.path}
+                      pathLength={1}
+                      style={
+                        {
+                          '--seat': seatColor(routeReveal.seat),
+                          '--delay': `${i * 0.12}s`,
+                        } as CSSProperties
+                      }
+                    />
+                  );
+                })}
+              </g>
+            )}
           </svg>
         </TransformComponent>
       </TransformWrapper>
