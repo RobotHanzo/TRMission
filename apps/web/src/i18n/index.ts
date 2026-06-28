@@ -191,9 +191,11 @@ const resources = {
         spectatorDisabled: '觀戰中無法聊天',
         send: '傳送',
         rateLimited: '傳送太快，請稍候…',
+        tooLong: '訊息過長（上限 2048 字）',
       },
       tabRail: '遊戲面板',
       tabComms: '紀錄 · 聊天',
+      commsTabsLabel: '面板切換',
     },
   },
   en: {
@@ -385,9 +387,11 @@ const resources = {
         spectatorDisabled: "Spectators can't chat",
         send: 'Send',
         rateLimited: 'Slow down a moment…',
+        tooLong: 'Message too long (max 2048).',
       },
       tabRail: 'Game',
       tabComms: 'Log & chat',
+      commsTabsLabel: 'Panel tabs',
     },
   },
 } as const;

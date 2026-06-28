@@ -22,6 +22,7 @@ beforeEach(() => {
       players: [{ id: 'p1', seat: 0, trainCars: 45, stationsRemaining: 3 }],
       you: { playerId: 'p1', hand: {}, keptTicketIds: [], pendingOfferTicketIds: [] },
     }),
+    rejection: null,
   });
 });
 
@@ -43,5 +44,11 @@ describe('ChatPanel', () => {
   it('disables the input for spectators', () => {
     render(<ChatPanel disabled />);
     expect(screen.getByRole('button', { name: '傳送' })).toBeDisabled();
+  });
+
+  it('shows an inline hint for a server chat rejection', () => {
+    useGame.setState({ rejection: { code: 5, messageKey: 'errors:chatRateLimited' } });
+    render(<ChatPanel />);
+    expect(screen.getByText('傳送太快，請稍候…')).toBeInTheDocument();
   });
 });

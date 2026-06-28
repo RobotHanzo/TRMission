@@ -5,6 +5,7 @@ import { useGame } from '../store/game';
 import { getSocket } from '../net/connection';
 import { usePlayerName } from '../game/playerName';
 import { SEAT_COLORS } from '../theme/colors';
+import { chatRejectionHintKey } from '../game/chatErrors';
 
 const MAX_LEN = 2048;
 const RATE_MAX = 5;
@@ -14,6 +15,7 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
   const { t } = useTranslation();
   const messages = useChat((s) => s.messages);
   const snapshot = useGame((s) => s.snapshot);
+  const rejection = useGame((s) => s.rejection);
   const nameOf = usePlayerName();
   const me = snapshot?.you?.playerId ?? null;
   const [draft, setDraft] = useState('');
@@ -25,6 +27,14 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
     const el = listRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
+
+  // Surface a server-side chat rejection (length / rate limit) as inline chat feedback
+  // instead of the generic action toast. Client guards usually prevent it ever firing.
+  useEffect(() => {
+    if (!rejection) return;
+    const key = chatRejectionHintKey(rejection.messageKey);
+    if (key) setHint(t(key));
+  }, [rejection, t]);
 
   const seatOf = (pid: string): number => snapshot?.players.find((p) => p.id === pid)?.seat ?? 0;
 
@@ -54,7 +64,10 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
         ) : (
           messages.map((m) => (
             <div className="chat-msg" key={m.id}>
-              <span className="chat-author" style={{ color: SEAT_COLORS[seatOf(m.playerId) % 5] ?? '#888' }}>
+              <span
+                className="chat-author"
+                style={{ color: SEAT_COLORS[seatOf(m.playerId) % 5] ?? '#888' }}
+              >
                 {nameOf({ id: m.playerId, seat: seatOf(m.playerId), isMe: m.playerId === me })}
               </span>
               <span className="chat-text">{m.text}</span>

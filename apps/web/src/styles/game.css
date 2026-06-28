@@ -205,6 +205,10 @@
   border-color: var(--tr-ember);
   color: #fff;
 }
+/* The tabpanel wrapper is a11y-only; `display: contents` keeps the rail/comms layout intact. */
+.comms-tabpanel {
+  display: contents;
+}
 /* ── Map viewport (pan/zoom via react-zoom-pan-pinch) ───────────────────────── */
 .board-viewport {
   position: relative;

@@ -10,6 +10,7 @@ import { connectGame, getSocket } from '../net/connection';
 import { routeById, ticketById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
 import { isMyTurn } from '../game/view';
+import { isChatRejectionKey } from '../game/chatErrors';
 import {
   handFromCounts,
   handAfterPayment,
@@ -290,7 +291,7 @@ export function GameScreen() {
   const comms = <CommsPanel chatDisabled={isSpectator} />;
 
   return (
-    <div className={`game game--${boardLayout}`} data-comms-tab={commsTab}>
+    <div className={`game game--${boardLayout}`}>
       {isSpectator && (
         <div className="spectator-banner" role="status">
           <strong>{t('spectating')}</strong> — {t('spectatingHint')}
@@ -306,10 +307,12 @@ export function GameScreen() {
       ) : (
         <>
           <aside className="game-rail">
-            <div className="comms-tabs" role="tablist">
+            <div className="comms-tabs" role="tablist" aria-label={t('commsTabsLabel')}>
               <button
                 type="button"
                 role="tab"
+                id="comms-tab-rail"
+                aria-controls="comms-tabpanel"
                 aria-selected={commsTab === 'rail'}
                 className={commsTab === 'rail' ? 'active' : ''}
                 onClick={() => setCommsTab('rail')}
@@ -319,6 +322,8 @@ export function GameScreen() {
               <button
                 type="button"
                 role="tab"
+                id="comms-tab-comms"
+                aria-controls="comms-tabpanel"
                 aria-selected={commsTab === 'comms'}
                 className={commsTab === 'comms' ? 'active' : ''}
                 onClick={() => setCommsTab('comms')}
@@ -326,7 +331,14 @@ export function GameScreen() {
                 {t('tabComms')}
               </button>
             </div>
-            {commsTab === 'rail' ? railInner : comms}
+            <div
+              id="comms-tabpanel"
+              className="comms-tabpanel"
+              role="tabpanel"
+              aria-labelledby={commsTab === 'rail' ? 'comms-tab-rail' : 'comms-tab-comms'}
+            >
+              {commsTab === 'rail' ? railInner : comms}
+            </div>
           </aside>
           {showHandStrip && commsTab === 'rail' && (
             <div className="game-hand-strip">{handSection}</div>
@@ -359,7 +371,11 @@ export function GameScreen() {
       )}
       {phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={leave} />}
       <Toast message={notice} variant="toast-notice" />
-      <Toast message={rejection ? t('actionRejected') : null} />
+      <Toast
+        message={
+          rejection && !isChatRejectionKey(rejection.messageKey) ? t('actionRejected') : null
+        }
+      />
       <AnimationLayer />
     </div>
   );
