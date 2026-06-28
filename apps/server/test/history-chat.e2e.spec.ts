@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { taiwanBoard, CONTENT_HASH, type GameConfig } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
-import { CardColor, RejectionCode, type ServerEnvelope } from '@trm/proto';
+import { RejectionCode, type ServerEnvelope } from '@trm/proto';
 import { GameRegistry } from '../src/game/game-registry';
 import { GameHub } from '../src/ws/hub';
 import { makeDevTicket } from '../src/ws/ticket';
@@ -70,24 +70,31 @@ describe('history + chat over the hub', () => {
     f2.length = 0;
 
     await hub.receive('c1', encodeClient(2, { case: 'chat', value: { text: '  hi there  ' } }));
-    const chat1 = f1.find((f) => f.event.case === 'chat')?.event.value as { text: string } | undefined;
-    const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as { text: string } | undefined;
+    const chat1 = f1.find((f) => f.event.case === 'chat')?.event.value as
+      | { text: string }
+      | undefined;
+    const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as
+      | { text: string }
+      | undefined;
     expect(chat1?.text).toBe('hi there'); // trimmed
     expect(chat2?.text).toBe('hi there'); // both members receive it
 
     // Over-length → MALFORMED rejection, nothing broadcast.
     f2.length = 0;
     await hub.receive('c1', encodeClient(3, { case: 'chat', value: { text: 'x'.repeat(2049) } }));
-    const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as { code: number } | undefined;
+    const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
+      | { code: number }
+      | undefined;
     expect(rej?.code).toBe(RejectionCode.MALFORMED);
     expect(f2.find((f) => f.event.case === 'chat')).toBeUndefined();
 
     // Rate limit: 5 allowed in the window, the 6th is rejected.
-    let lastRej: number | undefined;
     for (let i = 0; i < 6; i++) {
       await hub.receive('c1', encodeClient(10 + i, { case: 'chat', value: { text: `m${i}` } }));
     }
-    lastRej = (f1.filter((f) => f.event.case === 'rejection').pop()?.event.value as { code: number }).code;
+    const lastRej = (
+      f1.filter((f) => f.event.case === 'rejection').pop()?.event.value as { code: number }
+    ).code;
     expect(lastRej).toBe(RejectionCode.RATE_LIMITED);
   });
 });

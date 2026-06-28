@@ -10,7 +10,6 @@ import type {
 } from '@trm/proto';
 import { PROTOCOL_VERSION } from '@trm/proto';
 
-
 export type ServerEvent = NonNullable<MessageInitShape<typeof ServerEnvelopeSchema>['event']>;
 
 export const welcomeFrame = (gameId: string, playerId: string, seat: number): ServerEvent => ({
