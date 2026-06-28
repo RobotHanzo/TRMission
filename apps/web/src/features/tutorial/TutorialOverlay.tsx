@@ -1,10 +1,12 @@
-// The tutorial coachmark: a non-blocking callout pinned to the bottom of the board so the learner
-// can still interact with the HUD while it guides them. It shows the current beat's narration and
-// the right control for the beat mode (Next for info, a "your turn" hint for await, an auto badge
-// for a demo), plus lesson navigation.
+// The tutorial coachmark: a polished, non-blocking callout. It renders the beat's narration, an
+// optional component specimen (the visual glossary), a progress bar, a connector caret toward the
+// spotlighted target, and the right control for the beat mode. It dodges to the top when a target
+// would sit under the bottom-anchored bubble.
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, RotateCcw, X } from 'lucide-react';
-import type { Beat } from './types';
+import type { Beat, SpecimenSpec } from './types';
+import { Specimen } from './Specimens';
+import { coachPosition, type FlatRect } from './focus';
 
 export interface TutorialOverlayProps {
   beat: Beat | null;
@@ -15,6 +17,8 @@ export interface TutorialOverlayProps {
   lessonNo: number;
   lessonCount: number;
   isLastLesson: boolean;
+  specimen?: SpecimenSpec | undefined;
+  spotRects?: FlatRect[] | undefined;
   onAdvance(): void;
   onReplay(): void;
   onPrevLesson(): void;
@@ -24,15 +28,30 @@ export interface TutorialOverlayProps {
 
 export function TutorialOverlay(props: TutorialOverlayProps) {
   const { t } = useTranslation();
-  const { beat, done, index, total, lessonNo, lessonCount, isLastLesson } = props;
+  const { beat, done, index, total, lessonNo, lessonCount, isLastLesson, specimen } = props;
+  const spotRects = props.spotRects ?? [];
 
   const body = done ? t('tutorial.lessonComplete') : beat ? t(beat.text) : '';
+  const pos =
+    typeof window !== 'undefined' ? coachPosition(spotRects, window.innerHeight) : 'bottom';
+  const progress = total > 0 ? Math.round(((index + 1) / total) * 100) : 0;
+
+  // Caret horizontal position: aim at the first target's centre (clamped within the bubble width).
+  const caretLeft = spotRects[0] ? spotRects[0].x + spotRects[0].w / 2 : null;
 
   return (
-    <div className="tut-coach" role="dialog" aria-label={t('tutorial.title')}>
+    <div className="tut-coach" data-pos={pos} role="dialog" aria-label={t('tutorial.title')}>
+      {caretLeft !== null && (
+        <span
+          className="tut-coach-caret"
+          aria-hidden
+          style={{ left: `clamp(1.5rem, ${Math.round(caretLeft)}px, calc(100% - 1.5rem))` }}
+        />
+      )}
+
       <div className="tut-coach-head">
-        <span className="tut-coach-title">{t(props.lessonTitleKey)}</span>
-        <span className="tut-coach-progress">
+        <span className="tut-coach-chapter">{t(props.lessonTitleKey)}</span>
+        <span className="tut-coach-progress-text">
           {lessonNo}/{lessonCount}
         </span>
         <button
@@ -44,12 +63,18 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
         </button>
       </div>
 
-      <p className="tut-coach-body">{body}</p>
+      {!done && specimen && (
+        <div className="tut-coach-specimen" key={beat?.id}>
+          <Specimen spec={specimen} />
+        </div>
+      )}
 
-      <div className="tut-coach-dots" aria-hidden>
-        {Array.from({ length: total }, (_, i) => (
-          <span key={i} className={`tut-dot${i <= index ? ' on' : ''}`} />
-        ))}
+      <p className="tut-coach-body" key={(beat?.id ?? 'done') + ':body'}>
+        {body}
+      </p>
+
+      <div className="tut-progress" aria-hidden>
+        <div className="tut-progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="tut-coach-actions">

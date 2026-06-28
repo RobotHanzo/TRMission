@@ -22,59 +22,112 @@
   bottom: clamp(0.75rem, 3vh, 1.5rem);
   transform: translateX(-50%);
   z-index: 55;
-  width: min(34rem, calc(100vw - 1.5rem));
+  width: min(36rem, calc(100vw - 1.5rem));
   background: var(--surface, #fff);
   color: var(--text, #111);
   border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
-  border-radius: 14px;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
-  padding: 0.85rem 1rem 0.75rem;
-  animation: tut-coach-in 220ms ease-out;
+  border-radius: 16px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.34);
+  padding: 0.9rem 1.05rem 0.8rem;
+  animation: tut-coach-in 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tut-coach[data-pos='top'] {
+  bottom: auto;
+  top: clamp(0.75rem, 3vh, 1.5rem);
 }
 @keyframes tut-coach-in {
   from {
     opacity: 0;
-    transform: translate(-50%, 12px);
+    transform: translate(-50%, 14px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, 0) scale(1);
   }
 }
-
+.tut-coach-caret {
+  position: absolute;
+  bottom: -9px;
+  width: 18px;
+  height: 18px;
+  background: var(--surface, #fff);
+  border-right: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  transform: translateX(-50%) rotate(45deg);
+}
+.tut-coach[data-pos='top'] .tut-coach-caret {
+  bottom: auto;
+  top: -9px;
+  transform: translateX(-50%) rotate(225deg);
+}
 .tut-coach-head {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.4rem;
 }
-.tut-coach-title {
+.tut-coach-chapter {
   font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent, #2b6cb0) 16%, transparent);
+  color: var(--accent, #2b6cb0);
 }
-.tut-coach-progress {
+.tut-coach-progress-text {
   font-size: 0.8rem;
   opacity: 0.6;
 }
 .tut-coach-x {
   margin-left: auto;
 }
-.tut-coach-body {
-  margin: 0.25rem 0 0.6rem;
-  line-height: 1.5;
+.tut-coach-specimen {
+  display: grid;
+  place-items: center;
+  padding: 0.6rem 0.5rem;
+  margin: 0.2rem 0 0.5rem;
+  background: color-mix(in srgb, var(--text, #111) 4%, transparent);
+  border-radius: 12px;
+  animation: tut-specimen-in 320ms ease-out;
 }
-.tut-coach-dots {
-  display: flex;
-  gap: 5px;
+@keyframes tut-specimen-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tut-coach-body {
+  margin: 0.1rem 0 0.6rem;
+  line-height: 1.55;
+  animation: tut-body-in 240ms ease-out;
+}
+@keyframes tut-body-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tut-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--border, rgba(0, 0, 0, 0.14));
+  overflow: hidden;
   margin-bottom: 0.6rem;
 }
-.tut-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--border, rgba(0, 0, 0, 0.18));
-}
-.tut-dot.on {
+.tut-progress-fill {
+  height: 100%;
   background: var(--accent, #2b6cb0);
+  border-radius: 999px;
+  transition: width 360ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .tut-coach-actions {
   display: flex;
@@ -109,8 +162,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tut-coach {
+  .tut-coach,
+  .tut-coach-specimen,
+  .tut-coach-body {
     animation: none;
+  }
+  .tut-progress-fill {
+    transition: none;
   }
   .tut-yourturn {
     animation: none;
