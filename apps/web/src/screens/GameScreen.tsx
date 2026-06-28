@@ -111,6 +111,9 @@ export function GameScreen() {
 
   const socket = getSocket();
   const me = snapshot.you?.playerId ?? null;
+  // No SelfView ⇒ this connection is a spectator: read-only, no actions can fire (all action
+  // affordances below are gated on `me`/`canAct`/`canDraw`, which are falsy here).
+  const isSpectator = !snapshot.you;
   const myPub = snapshot.players.find((p) => p.id === me);
   const hand = handFromCounts(snapshot.you?.hand);
   const phase = snapshot.phase;
@@ -237,6 +240,11 @@ export function GameScreen() {
 
   return (
     <div className={`game game--${boardLayout}`}>
+      {isSpectator && (
+        <div className="spectator-banner" role="status">
+          <strong>{t('spectating')}</strong> — {t('spectatingHint')}
+        </div>
+      )}
       {boardPanel}
       {boardLayout === 'rail' ? (
         <aside className="game-rail">
