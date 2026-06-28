@@ -165,6 +165,13 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
   for (const id of state.turnOrder) {
     const p = state.players[id as string];
     if (!p || p.keptTickets.length === 0) continue;
+    // Under unlimitedStationBorrow, completion is recorded (locked) in state the moment it happens
+    // — including station-borrow completions — so read it directly. Otherwise derive own-track
+    // completion (the only kind that is monotonic without the variant).
+    if (state.ruleParams.unlimitedStationBorrow) {
+      for (const tid of p.completedTickets) completedTickets.push({ player: id, ticket: tid });
+      continue;
+    }
     const ownEdges: { a: string; b: string }[] = [];
     for (const [routeId, cell] of Object.entries(state.ownership)) {
       if ('owner' in cell && cell.owner === id) {

@@ -1,6 +1,6 @@
 import type { PlayerId, RouteId, CityId, TicketId, CardColor, TrainColor } from '@trm/shared';
 import type { Result, RuleViolation } from '@trm/shared';
-import { ok, err, violation, TRAIN_COLORS } from '@trm/shared';
+import { ok, err, violation, asTicketId, TRAIN_COLORS } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
 import { getRoute, siblingOf } from './board';
@@ -14,6 +14,8 @@ import type { CardCounts } from './hand';
 import { validateRoutePayment, validateStationPayment } from './payments';
 import { currentPlayerId, endTurn } from './turn';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
+import { borrowConnectedTicketIds } from './graph/connectivity';
+import { stationBorrowEdges } from './scoring';
 
 export interface ReduceOutput {
   readonly state: GameState;
@@ -353,12 +355,14 @@ function applyClaimRoute(
 
   if (route.isTunnel) return beginTunnel(state, player, route, payment, pay.value.playedColor);
 
-  // Normal claim: spend, apply, end turn.
+  // Normal claim: spend, apply, lock newly-completed tickets, end turn.
   let next = spendCards(state, player, pay.value.spent);
   const eff = applyClaimEffects(board, next, player, route);
   next = eff.state;
+  const lock = lockCompletedTickets(board, next);
+  next = lock.state;
   const out = endTurn(board, next, { wasPass: false });
-  return ok({ state: out.state, events: [...eff.events, ...out.events] });
+  return ok({ state: out.state, events: [...eff.events, ...lock.events, ...out.events] });
 }
 
 function beginTunnel(
@@ -463,12 +467,15 @@ function applyResolveTunnel(
   next = spendCards(next, player, totalSpent);
   const eff = applyClaimEffects(board, next, player, route);
   next = eff.state;
+  const lock = lockCompletedTickets(board, next);
+  next = lock.state;
   const out = endTurn(board, next, { wasPass: false });
   return ok({
     state: out.state,
     events: [
       { e: 'TUNNEL_RESOLVED', player, routeId: pt.routeId, committed: true, visibility: 'PUBLIC' },
       ...eff.events,
+      ...lock.events,
       ...out.events,
     ],
   });
@@ -497,10 +504,12 @@ function applyBuildStation(
   let next = spendCards(state, player, pay.value.spent);
   next = withPlayer(next, player, (pl) => ({ ...pl, stationsRemaining: pl.stationsRemaining - 1 }));
   next = { ...next, stations: [...next.stations, { playerId: player, cityId }] };
+  const lock = lockCompletedTickets(board, next);
+  next = lock.state;
   const out = endTurn(board, next, { wasPass: false });
   return ok({
     state: out.state,
-    events: [{ e: 'STATION_BUILT', player, cityId, visibility: 'PUBLIC' }, ...out.events],
+    events: [{ e: 'STATION_BUILT', player, cityId, visibility: 'PUBLIC' }, ...lock.events, ...out.events],
   });
 }
 
@@ -515,6 +524,57 @@ function applyPass(board: Board, state: GameState, player: PlayerId): ReduceResu
     state: out.state,
     events: [{ e: 'PLAYER_PASSED', player, visibility: 'PUBLIC' }, ...out.events],
   });
+}
+
+// ─────────────────────────────────────── instant ticket completion ──────────────────────────
+
+/**
+ * Under `unlimitedStationBorrow`, re-evaluate every player's kept tickets after a connectivity
+ * change and lock any newly-completed ones into `completedTickets`, emitting TICKET_COMPLETED.
+ * No-op when the variant is off. ALL players are checked because an opponent's claim into a
+ * player's station city can complete that player's ticket. The borrow graph only grows, so this
+ * is monotonic — a locked ticket never retracts, and the locked set equals the end-game total.
+ */
+function lockCompletedTickets(board: Board, state: GameState): { state: GameState; events: GameEvent[] } {
+  if (!state.ruleParams.unlimitedStationBorrow) return { state, events: [] };
+  let next = state;
+  const events: GameEvent[] = [];
+  for (const pid of state.turnOrder) {
+    const p = next.players[pid as string];
+    if (!p || p.keptTickets.length === 0) continue;
+    const already = new Set(p.completedTickets as readonly string[]);
+
+    const ownEdges: { a: string; b: string }[] = [];
+    for (const [routeId, cell] of Object.entries(next.ownership)) {
+      if ('owner' in cell && cell.owner === pid) {
+        const r = board.routeById.get(routeId);
+        if (r) ownEdges.push({ a: r.a as string, b: r.b as string });
+      }
+    }
+    const tickets = p.keptTickets
+      .map((tid) => {
+        const t = board.ticketById.get(tid as string);
+        return t ? { id: tid as string, a: t.a as string, b: t.b as string } : null;
+      })
+      .filter((x): x is { id: string; a: string; b: string } => x !== null);
+
+    const connected = borrowConnectedTicketIds({
+      ownEdges,
+      borrowEdges: stationBorrowEdges(board, next, pid),
+      tickets,
+    });
+    const newly = connected.filter((id) => !already.has(id));
+    if (newly.length > 0) {
+      const newIds = newly.map((id) => asTicketId(id));
+      next = withPlayer(next, pid, (pl) => ({
+        ...pl,
+        completedTickets: [...pl.completedTickets, ...newIds],
+      }));
+      for (const id of newIds)
+        events.push({ e: 'TICKET_COMPLETED', player: pid, ticket: id, visibility: 'PUBLIC' });
+    }
+  }
+  return { state: next, events };
 }
 
 // Whether the player has ANY legal non-pass move (used by PASS validation and legalActions).

@@ -34,6 +34,9 @@ export interface PlayerState {
   readonly pendingTicketOffer: readonly TicketId[] | null;
   /** Running board score from claimed routes (tickets/bonus added at game end). */
   readonly routePoints: number;
+  /** Tickets locked as completed mid-game (only populated under the unlimitedStationBorrow
+   *  variant). Monotonic; points are banked the moment a ticket enters this list. */
+  readonly completedTickets: readonly TicketId[];
 }
 
 export interface TurnState {

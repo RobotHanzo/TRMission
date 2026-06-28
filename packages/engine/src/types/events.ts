@@ -24,6 +24,7 @@ export type GameEvent =
   | { readonly e: 'STATION_BUILT'; readonly player: PlayerId; readonly cityId: CityId; readonly visibility: 'PUBLIC' }
   | { readonly e: 'TICKETS_OFFERED'; readonly player: PlayerId; readonly ticketIds: readonly TicketId[]; readonly visibility: Visibility }
   | { readonly e: 'TICKETS_KEPT'; readonly player: PlayerId; readonly keptCount: number; readonly visibility: 'PUBLIC' }
+  | { readonly e: 'TICKET_COMPLETED'; readonly player: PlayerId; readonly ticket: TicketId; readonly visibility: 'PUBLIC' }
   | { readonly e: 'PLAYER_PASSED'; readonly player: PlayerId; readonly visibility: 'PUBLIC' }
   | { readonly e: 'TURN_ENDED'; readonly player: PlayerId; readonly visibility: 'PUBLIC' }
   | { readonly e: 'ENDGAME_TRIGGERED'; readonly player: PlayerId; readonly finalTurnsRemaining: number; readonly visibility: 'PUBLIC' }

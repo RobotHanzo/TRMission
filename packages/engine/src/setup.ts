@@ -85,6 +85,7 @@ export function initGame(board: Board, config: GameConfig): GameState {
       keptTickets: [],
       pendingTicketOffer: offer,
       routePoints: 0,
+      completedTickets: [],
     };
   }
 

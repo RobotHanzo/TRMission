@@ -36,6 +36,7 @@ function st(opts: Opts = {}): GameState {
       keptTickets: [],
       pendingTicketOffer: null,
       routePoints: 0,
+      completedTickets: [],
     };
   });
   return {
