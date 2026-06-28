@@ -170,3 +170,38 @@
   height: 100%;
   width: 100%;
 }
+
+/* Visual glossary specimens shown inside the coachmark. */
+.tut-route-specimen {
+  width: 168px;
+  height: 40px;
+}
+.tut-route-compare {
+  display: grid;
+  gap: 0.35rem;
+}
+.tut-route-compare-row {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tut-route-compare-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+.tut-card-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.tut-station-specimen {
+  width: 56px;
+  height: 56px;
+}
+.tut-ticket-specimen {
+  width: 168px;
+  margin: 0 auto;
+}

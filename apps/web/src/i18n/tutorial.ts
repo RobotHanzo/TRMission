@@ -89,6 +89,11 @@ export const tutorialZh = {
       '最終分數 = 路線分（已即時累計）＋任務卡淨分（完成減去未完成）＋車站獎勵（每個未使用 +4）＋最長路線（+10）。',
     win: '比較總分決定勝負；平手時依序比較：完成任務卡數、使用車站數較少、是否擁有最長路線。',
   },
+  glossary: {
+    rail: '鐵路',
+    ferry: '渡輪',
+    tunnel: '隧道',
+  },
 } as const;
 
 export const tutorialEn = {
@@ -181,5 +186,10 @@ export const tutorialEn = {
     scoring:
       'Final score = route points (already tallied) + ticket net (completed minus failed) + station bonus (+4 each unused) + longest route (+10).',
     win: 'Highest total wins; ties break by most tickets completed, then fewest stations used, then holding the longest route.',
+  },
+  glossary: {
+    rail: 'Railway',
+    ferry: 'Ferry',
+    tunnel: 'Tunnel',
   },
 } as const;
