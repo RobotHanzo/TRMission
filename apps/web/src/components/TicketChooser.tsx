@@ -55,22 +55,23 @@ export function TicketChooser({
   const reduced = useReducedMotion();
 
   // A deal-out tick per offered ticket, synced to the deal-in flip — the same cue as a tunnel
-  // reveal. Keyed by the offer so unrelated snapshot updates during selection don't replay it;
-  // one immediate tick under reduced motion (the cards appear at once).
-  const dealtFor = useRef<string | null>(null);
+  // reveal. Keyed by the offer *contents* (not the array identity): during simultaneous setup
+  // selection opponents' moves push frequent new snapshots that re-create `offered` with the same
+  // ids, and re-running on those would clear the in-flight stagger timers (silencing all but the
+  // first tick). One immediate tick under reduced motion (the cards appear at once).
+  const offerKey = offered.join('|');
   useEffect(() => {
-    const key = offered.join('|');
-    if (key === '' || dealtFor.current === key) return;
-    dealtFor.current = key;
+    if (offerKey === '') return;
     if (reduced) {
       soundPlayer.play('tunnelDraw');
       return;
     }
-    const timers = offered.map((_, i) =>
+    const count = offerKey.split('|').length;
+    const timers = Array.from({ length: count }, (_, i) =>
       window.setTimeout(() => soundPlayer.play('tunnelDraw'), i * DEAL_STAGGER_MS),
     );
     return () => timers.forEach((id) => clearTimeout(id));
-  }, [offered, reduced]);
+  }, [offerKey, reduced]);
 
   const toggle = (id: string) => {
     if (locked.has(id) || confirming) return;
