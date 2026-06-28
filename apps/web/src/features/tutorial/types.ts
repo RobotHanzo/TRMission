@@ -3,11 +3,24 @@
 // narrated steps. A beat either waits for the learner to perform an action (`await`), auto-plays a
 // scripted action (`auto`, used for opponent moves and demos), or is pure narration (`info`).
 import type { Action, Board, GameConfig, GameState, PlayerSeed } from '@trm/engine';
+import type { BoardFrameTarget } from '../../game/boardView';
 
 export type Scope = 'core' | 'full';
 
-/** What to visually emphasise while a beat is showing (best-effort; board cities get a glow). */
-export type Spotlight = { kind: 'cities'; ids: string[] } | { kind: 'hud'; selector: string };
+/** What to visually emphasise while a beat is showing. The spotlight dims everything else. */
+export type Spotlight =
+  | { kind: 'cities'; ids: string[] }
+  | { kind: 'route'; ids: string[] }
+  | { kind: 'hud'; selector: string }
+  | { kind: 'board' };
+
+/** A rendered game-component specimen shown inside the coachmark (the visual glossary). */
+export type SpecimenSpec =
+  | { kind: 'routes-compare' }
+  | { kind: 'route'; variant: 'rail' | 'ferry' | 'tunnel' | 'double' }
+  | { kind: 'card-row' }
+  | { kind: 'station' }
+  | { kind: 'ticket'; id: string };
 
 /** A declarative match against the learner's action for an `await` beat. `DRAW_ANY` accepts either
  *  a blind or a face-up draw (so a "draw a card" step never traps the learner on which pile). */
@@ -22,7 +35,11 @@ export type Beat = {
   id: string;
   /** i18n key under `tutorial.*` for the coachmark narration. */
   text: string;
-  spotlight?: Spotlight;
+  spotlight?: Spotlight | undefined;
+  /** A component specimen rendered in the coachmark this beat. */
+  specimen?: SpecimenSpec | undefined;
+  /** Auto-pan the board to frame this target while the beat shows. */
+  frame?: BoardFrameTarget | undefined;
 } & (
   | { mode: 'info' }
   | { mode: 'await'; expect: ExpectSpec }
