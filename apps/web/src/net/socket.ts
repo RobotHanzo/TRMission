@@ -25,6 +25,8 @@ export interface SocketHandlers {
   onEvents?(stateVersion: number, events: GameEvent[]): void;
   onRejection?(rejection: Rejection): void;
   onChat?(playerId: string, text: string): void;
+  /** One-shot backfill of the action-log history + persisted chat on (re)connect. */
+  onHistory?(events: GameEvent[], chat: { playerId: string; text: string }[]): void;
   /** Another member's camera framing, relayed for "follow the acting player". */
   onCameraMoved?(playerId: string, view: CameraView): void;
 }
@@ -98,6 +100,12 @@ export class GameSocket {
         break;
       case 'chat':
         this.handlers.onChat?.(env.event.value.playerId, env.event.value.text);
+        break;
+      case 'history':
+        this.handlers.onHistory?.(
+          env.event.value.events,
+          env.event.value.chat.map((c) => ({ playerId: c.playerId, text: c.text })),
+        );
         break;
       case 'cameraMoved':
         if (env.event.value.view)
