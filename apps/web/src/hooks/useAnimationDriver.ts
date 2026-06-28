@@ -18,11 +18,15 @@ export function useAnimationDriver(): void {
   const lastBatch = useGame((s) => s.lastBatch);
   const pushIntent = useAnimations((s) => s.pushIntent);
   const revealMarketSlots = useAnimations((s) => s.revealMarketSlots);
+  const showEndgameWarning = useAnimations((s) => s.showEndgameWarning);
 
   const prevCompleted = useRef<Map<string, Set<string>>>(new Map());
   const seeded = useRef(false);
   const seenBatchSeq = useRef(0);
   const prevPhase = useRef<Phase | null>(null);
+  // null until the first snapshot seeds the baseline, so reconnecting into an already-triggered
+  // final round never re-pops the warning (mirrors the ticket-completion seeding above).
+  const prevEndgame = useRef<boolean | null>(null);
 
   // Event-driven intents (claim glow, draws, turn cue, market flip, score floats).
   useEffect(() => {
@@ -56,6 +60,23 @@ export function useAnimationDriver(): void {
     }
     prevCompleted.current = curr;
   }, [snapshot, pushIntent]);
+
+  // Final-round warning: fire once when `endgame.triggered` flips false→true. The trigger's
+  // turn-order index resolves to a player id so we can tell the viewer if it was their own doing.
+  useEffect(() => {
+    if (!snapshot) {
+      prevEndgame.current = null;
+      return;
+    }
+    const triggered = snapshot.endgame?.triggered ?? false;
+    const prev = prevEndgame.current;
+    prevEndgame.current = triggered;
+    if (prev === null || prev || !triggered) return; // seed baseline, or no fresh trigger
+    const eg = snapshot.endgame!;
+    const me = snapshot.you?.playerId ?? null;
+    const triggerId = snapshot.turnOrder[eg.triggerPlayerIndex];
+    showEndgameWarning(eg.finalTurnsRemaining, !!me && triggerId === me);
+  }, [snapshot, showEndgameWarning]);
 
   // When a draw resolves (phase leaves DRAWING_CARDS), reveal any market slots held face-down.
   useEffect(() => {

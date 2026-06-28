@@ -350,6 +350,82 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* ── Final-round warning popup ────────────────────────────────────────────────── */
+/* Same staging as the ticket fanfare, but an urgent red wash + a throbbing alert icon so
+   "the game is about to end" lands instantly. Skippable; auto-dismisses. */
+@keyframes anim-endgame-pop {
+  0% {
+    transform: scale(0.5) rotate(-5deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.08) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+@keyframes anim-endgame-throb {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.13);
+  }
+}
+.endgame-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at center, rgba(64, 12, 10, 0.5), rgba(20, 6, 6, 0.84));
+  backdrop-filter: blur(2px);
+  animation: anim-fanfare-in 0.3s ease-out;
+  cursor: pointer;
+}
+.endgame-panel {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 24px 36px;
+  text-align: center;
+  animation: anim-endgame-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.endgame-icon {
+  color: #ff5a4d;
+  filter: drop-shadow(0 4px 18px rgba(255, 90, 77, 0.6));
+  animation: anim-endgame-throb 0.95s ease-in-out infinite;
+}
+.endgame-icon svg {
+  width: clamp(46px, 9vw, 84px);
+  height: clamp(46px, 9vw, 84px);
+}
+.endgame-title {
+  font-size: clamp(28px, 6vw, 56px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.08em;
+  text-shadow: 0 2px 18px rgba(255, 80, 60, 0.7);
+}
+.endgame-sub {
+  font-size: clamp(15px, 2.6vw, 22px);
+  font-weight: 700;
+  color: #ffd2cc;
+}
+.endgame-note {
+  font-size: clamp(13px, 2vw, 17px);
+  color: rgba(255, 255, 255, 0.85);
+}
+.endgame-skip {
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 /* ── Reduced motion: collapse all motion to instant ──────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .route.just-claimed,
@@ -366,7 +442,10 @@
   .modal-tickets .ticket-cards > .ticket-slot,
   .ticket-cue,
   .fanfare-backdrop,
-  .fanfare-panel {
+  .fanfare-panel,
+  .endgame-backdrop,
+  .endgame-panel,
+  .endgame-icon {
     animation: none !important;
   }
   .modal-tickets .ticket-cards.is-confirming > .ticket-slot {

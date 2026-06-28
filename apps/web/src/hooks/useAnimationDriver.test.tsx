@@ -20,6 +20,19 @@ function snap(version: number, completed: { p: string; t: string }[], phase?: Ph
   });
 }
 
+function endgameSnap(version: number, triggered: boolean, triggerIndex = 1): GameSnapshot {
+  return create(GameSnapshotSchema, {
+    stateVersion: version,
+    players: [
+      { id: 'p0', seat: 0 },
+      { id: 'p1', seat: 1 },
+    ],
+    you: { playerId: 'p0' },
+    turnOrder: ['p0', 'p1'],
+    endgame: { triggered, triggerPlayerIndex: triggered ? triggerIndex : -1, finalTurnsRemaining: 2 },
+  });
+}
+
 function Harness() {
   useAnimationDriver();
   return null;
@@ -54,6 +67,28 @@ describe('useAnimationDriver', () => {
     const s = useAnimations.getState();
     expect(s.coveredMarketSlots.size).toBe(0);
     expect(s.marketFlips.has(3)).toBe(true);
+  });
+
+  it('does not warn when the first snapshot is already in the final round (reconnect)', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(endgameSnap(1, true)));
+    expect(useAnimations.getState().endgameCue).toBeNull();
+  });
+
+  it('pops the final-round warning when the endgame triggers, flagging who caused it', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(endgameSnap(1, false)));
+    expect(useAnimations.getState().endgameCue).toBeNull();
+    // p1 (not me) runs their trains down → warning fires, not attributed to me.
+    act(() => useGame.getState().applySnapshot(endgameSnap(2, true, 1)));
+    expect(useAnimations.getState().endgameCue?.triggeredByYou).toBe(false);
+  });
+
+  it('attributes the final-round trigger to me when I cause it', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(endgameSnap(1, false)));
+    act(() => useGame.getState().applySnapshot(endgameSnap(2, true, 0)));
+    expect(useAnimations.getState().endgameCue?.triggeredByYou).toBe(true);
   });
 
   it('turns an event batch into intents (RouteClaimed → glow)', () => {

@@ -136,6 +136,10 @@ const resources = {
       fanfareTitle: '任務完成',
       fanfareLong: '長途任務！',
       completedTicket: '完成任務',
+      endgameTitle: '最終回合',
+      endgameByYou: '你的列車即將用盡——由你觸發了終局！',
+      endgameByOther: '終局倒數開始——列車即將用盡！',
+      endgameNote: '每位玩家還有最後一回合',
       skip: '略過',
 
       back: '返回',
@@ -275,6 +279,10 @@ const resources = {
       fanfareTitle: 'Ticket Complete',
       fanfareLong: 'Long Haul!',
       completedTicket: 'completed a ticket',
+      endgameTitle: 'Final Round',
+      endgameByYou: 'Your trains are running out — you triggered the final round!',
+      endgameByOther: 'The final round has begun — trains are running low!',
+      endgameNote: 'Everyone takes one last turn',
       skip: 'Skip',
 
       back: 'Back',

@@ -8,6 +8,7 @@ import { SEAT_COLORS } from '../theme/colors';
 import { FlyingCard } from './FlyingCard';
 import { TicketCard } from './TicketCard';
 import { TicketFanfare } from './TicketFanfare';
+import { EndgameWarning } from './EndgameWarning';
 
 const rectOf = (selector: string): DOMRect | null =>
   document.querySelector(selector)?.getBoundingClientRect() ?? null;
@@ -147,6 +148,8 @@ export function AnimationLayer() {
   const ticketCues = useAnimations((s) => s.ticketCues);
   const fanfare = useAnimations((s) => s.fanfare);
   const dismissFanfare = useAnimations((s) => s.dismissFanfare);
+  const endgameCue = useAnimations((s) => s.endgameCue);
+  const dismissEndgameWarning = useAnimations((s) => s.dismissEndgameWarning);
   const reduced = useReducedMotion();
   if (typeof document === 'undefined') return null;
   return createPortal(
@@ -166,6 +169,14 @@ export function AnimationLayer() {
           fanfare={fanfare}
           reducedMotion={reduced}
           onDone={dismissFanfare}
+        />
+      )}
+      {endgameCue && (
+        <EndgameWarning
+          key={endgameCue.id}
+          cue={endgameCue}
+          reducedMotion={reduced}
+          onDone={dismissEndgameWarning}
         />
       )}
     </>,

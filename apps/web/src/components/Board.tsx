@@ -31,7 +31,7 @@ import {
 } from '../game/boardView';
 import { BASE_VIEW, fitTransform } from '../game/geography';
 import { Geography } from './Geography';
-import { CARD_COLOR_TOKENS, GRAY_TOKEN, SEAT_COLORS } from '../theme/colors';
+import { CARD_COLOR_TOKENS, GRAY_TOKEN, SEAT_COLORS, LIVERY_COLORS } from '../theme/colors';
 import { useUi, type Locale } from '../store/ui';
 import { useGame } from '../store/game';
 import { useAnimations } from '../store/animations';
@@ -578,6 +578,15 @@ export function Board({
           wrapperStyle={{ width: '100%', height: '100%' }}
         >
           <svg className="board" viewBox={VIEWBOX} role="img" aria-label="Taiwan railway map">
+            <defs>
+              {/* The wild "rainbow locomotive" fill for ferry locomotive pips (one per loco the
+                  crossing demands). Spectrum of the six liveries — the same rainbow as a loco card. */}
+              <linearGradient id="ferryLocoRainbow" x1="0" y1="0" x2="1" y2="1">
+                {LIVERY_COLORS.map((hex, i) => (
+                  <stop key={hex} offset={i / (LIVERY_COLORS.length - 1)} stopColor={hex} />
+                ))}
+              </linearGradient>
+            </defs>
             <Geography />
 
             {ROUTES.map((r) => {
@@ -603,6 +612,9 @@ export function Board({
                 (o ? ' owned' : '') +
                 (glowSeat !== undefined ? ' just-claimed' : '') +
                 kind;
+              // The owner's seat colour, exposed to CSS so a claimed route tints its whole roadbed
+              // (the "background") to its owner — and the glow bloom reuses the same `--seat`.
+              const seatCss = glowSeat ?? o?.ownerSeat;
               // Double-route siblings split apart by a perpendicular nudge that counter-scales with
               // the track weight (--inv-scale), so the twin tracks stay snug at any zoom.
               const groupStyle: CSSProperties = {
@@ -611,10 +623,13 @@ export function Board({
                       transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
                     }
                   : null),
-                ...(glowSeat !== undefined
-                  ? ({ '--seat': seatColor(glowSeat) } as CSSProperties)
+                ...(seatCss !== undefined
+                  ? ({ '--seat': seatColor(seatCss) } as CSSProperties)
                   : null),
               };
+              // Ferry locomotive pips: the crossing demands `ferryLocos` wild cards. Mark that many
+              // pips (a centred block of the chain) as larger rainbow dots; the rest stay plain.
+              const locoStart = Math.max(0, Math.floor((r.length - r.ferryLocos) / 2));
 
               return (
                 <g
@@ -629,19 +644,24 @@ export function Board({
                   {r.isTunnel && <path className="tunnel-track" d={g.path} />}
 
                   {isFerry ? (
-                    // Ferry: a dotted sea crossing carrying round locomotive pips, not land cars.
+                    // Ferry: a dotted sea crossing carrying round pips. The `ferryLocos` pips that
+                    // stand for the required wild cards bloom as larger rainbow dots; the others are
+                    // ordinary pips (and the whole chain takes the owner's colour once claimed).
                     <>
                       <path className="ferry-line" d={g.path} />
-                      {g.slots.map((s, i) => (
-                        <circle
-                          key={i}
-                          className="ferry-pip"
-                          cx={s.x}
-                          cy={s.y}
-                          fill={fill}
-                          opacity={carOpacity}
-                        />
-                      ))}
+                      {g.slots.map((s, i) => {
+                        const isLoco = !o && i >= locoStart && i < locoStart + r.ferryLocos;
+                        return (
+                          <circle
+                            key={i}
+                            className={isLoco ? 'ferry-pip ferry-loco' : 'ferry-pip'}
+                            cx={s.x}
+                            cy={s.y}
+                            fill={isLoco ? 'url(#ferryLocoRainbow)' : fill}
+                            opacity={carOpacity}
+                          />
+                        );
+                      })}
                     </>
                   ) : (
                     // Each car = one train-length, so the slot count reads the cost at a glance.

@@ -16,7 +16,9 @@ export interface ColorToken {
 }
 
 export const CARD_COLOR_TOKENS: Record<CardColor, ColorToken> = {
-  RED: { key: 'RED', hex: '#E4572E', ink: '#FFFFFF', nameZh: '紅', glyph: '▲' },
+  // A true signal-red (was the orange-leaning #E4572E) so red cards and red railways read
+  // unmistakably RED — and pull further clear of ORANGE in both hue and greyscale.
+  RED: { key: 'RED', hex: '#D72631', ink: '#FFFFFF', nameZh: '紅', glyph: '▲' },
   ORANGE: { key: 'ORANGE', hex: '#EE7B30', ink: '#241200', nameZh: '橙', glyph: '◆' },
   YELLOW: { key: 'YELLOW', hex: '#F2C14E', ink: '#241B00', nameZh: '黃', glyph: '●' },
   GREEN: { key: 'GREEN', hex: '#3A9D5C', ink: '#FFFFFF', nameZh: '綠', glyph: '■' },
@@ -32,14 +34,18 @@ export const CARD_COLOR_TOKENS: Record<CardColor, ColorToken> = {
 export const GRAY_TOKEN = { hex: '#B8BEC6', ink: '#1B1C1E', nameZh: '灰', glyph: '—' } as const;
 
 /**
+ * The six locomotive liveries, in spectrum order — the "rainbow" that stands for the wild
+ * LOCOMOTIVE card. Shared by the card-market wash and the SVG ferry locomotive pips.
+ */
+export const LIVERY_COLORS = (['RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE'] as const).map(
+  (c) => CARD_COLOR_TOKENS[c].hex,
+);
+
+/**
  * Rainbow wash for the wild LOCOMOTIVE card (the six liveries) — so a face-up loco in the
  * card market reads as "any colour" rather than a flat grey chip.
  */
-export const LOCOMOTIVE_GRADIENT = `linear-gradient(135deg, ${(
-  ['RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'PURPLE'] as const
-)
-  .map((c) => CARD_COLOR_TOKENS[c].hex)
-  .join(', ')})`;
+export const LOCOMOTIVE_GRADIENT = `linear-gradient(135deg, ${LIVERY_COLORS.join(', ')})`;
 
 /** Seat colours — deliberately distinct from the 8 card colours (ADR A11). */
 export const SEAT_COLORS = ['#0E8C8C', '#C0398B', '#E8A33D', '#5A6B7B', '#7CB342'] as const;

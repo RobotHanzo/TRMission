@@ -209,8 +209,13 @@
     stroke: #ddd8cc;
   }
 }
+/* A claimed route paints its roadbed (the "background" under the cars) with a wash of the owner's
+   seat colour, so the whole corridor reads as theirs at a glance; the solid seat-colour cars still
+   pop on top. `--seat` is set on the route group by the renderer; unowned routes never match this. */
 .route.owned .bed {
   stroke-width: calc(3.1px * var(--inv-scale));
+  stroke: color-mix(in srgb, var(--seat, var(--tr-surface)) 50%, var(--tr-surface));
+  opacity: 1;
 }
 /* x/width (along the path) come from the geometry as attributes; y/height (the across-track
    thickness) live here so the car counter-scales to a constant on-screen size, like a city dot. */
@@ -245,6 +250,13 @@
   stroke: #2a2520;
   stroke-width: calc(0.25px * var(--inv-scale));
   r: calc(0.7px * var(--inv-scale));
+}
+/* The wild-card pips of a ferry: bigger, rainbow (fill set inline), ringed in white so the
+   spectrum reads against the open sea. One such pip per locomotive the crossing requires. */
+.ferry-pip.ferry-loco {
+  r: calc(1.18px * var(--inv-scale));
+  stroke: #fff;
+  stroke-width: calc(0.32px * var(--inv-scale));
 }
 .hit {
   fill: none;

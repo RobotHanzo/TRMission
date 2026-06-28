@@ -47,6 +47,14 @@ export interface RouteReveal {
   seat: number;
   path: string[];
 }
+/** The one-shot "final round has begun" warning popup. */
+export interface EndgameCue {
+  id: number;
+  /** Turns left once the endgame triggered (≈ one last turn per player). */
+  finalTurns: number;
+  /** Whether the local player is the one who ran their trains down and triggered it. */
+  triggeredByYou: boolean;
+}
 
 interface AnimState {
   glowingRoutes: Map<string, number>;
@@ -61,6 +69,8 @@ interface AnimState {
   coveredMarketSlots: Set<number>;
   fanfare: Fanfare | null;
   fanfareQueue: Fanfare[];
+  /** The active final-round warning popup (null = none). */
+  endgameCue: EndgameCue | null;
   /** Longest-trail route highlight shown while reviewing the final scoreboard (null = none). */
   routeReveal: RouteReveal | null;
   pushIntent(intent: AnimIntent): void;
@@ -75,6 +85,8 @@ interface AnimState {
   /** Flip every covered slot into view (called when a draw completes). */
   revealMarketSlots(): void;
   dismissFanfare(): void;
+  showEndgameWarning(finalTurns: number, triggeredByYou: boolean): void;
+  dismissEndgameWarning(): void;
   setRouteReveal(seat: number, path: string[]): void;
   clearRouteReveal(): void;
   reset(): void;
@@ -95,6 +107,7 @@ const initial = () => ({
   coveredMarketSlots: new Set<number>(),
   fanfare: null as Fanfare | null,
   fanfareQueue: [] as Fanfare[],
+  endgameCue: null as EndgameCue | null,
   routeReveal: null as RouteReveal | null,
 });
 
@@ -215,6 +228,9 @@ export const useAnimations = create<AnimState>()((set) => ({
       const [next, ...rest] = s.fanfareQueue;
       return { fanfare: next ?? null, fanfareQueue: rest };
     }),
+  showEndgameWarning: (finalTurns, triggeredByYou) =>
+    set({ endgameCue: { id: nextId(), finalTurns, triggeredByYou } }),
+  dismissEndgameWarning: () => set({ endgameCue: null }),
   setRouteReveal: (seat, path) => set({ routeReveal: { seat, path } }),
   clearRouteReveal: () => set({ routeReveal: null }),
   reset: () => set(initial()),
