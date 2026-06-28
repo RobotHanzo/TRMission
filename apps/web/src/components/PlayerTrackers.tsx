@@ -4,6 +4,7 @@ import { Train, Building2, Trophy, Layers, Ticket, Bot } from 'lucide-react';
 import type { GameSnapshot } from '@trm/proto';
 import { SEAT_COLORS } from '../theme/colors';
 import { useAnimations } from '../store/animations';
+import { playerLiveTotal } from '../game/tickets';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
 
@@ -43,7 +44,7 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
                 <Train size={13} aria-hidden /> {p.trainCars}
               </span>
               <span title="score">
-                <Trophy size={13} aria-hidden /> {p.routePoints}
+                <Trophy size={13} aria-hidden /> {playerLiveTotal(snapshot, p.id)}
               </span>
               <span title="cards">
                 <Layers size={13} aria-hidden /> {p.handCount}
