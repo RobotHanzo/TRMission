@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ticketById } from '../game/content';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { TicketCard } from './TicketCard';
 
 interface Props {
@@ -17,9 +18,11 @@ export function KeepTicketsModal({ offered, minKeep, lockLong, onConfirm }: Prop
     ? new Set(offered.filter((id) => ticketById.get(id)?.deck === 'LONG'))
     : new Set<string>();
   const [kept, setKept] = useState<Set<string>>(() => new Set(offered)); // default: keep all
+  const [confirming, setConfirming] = useState(false);
+  const reduced = useReducedMotion();
 
   const toggle = (id: string) => {
-    if (locked.has(id)) return;
+    if (locked.has(id) || confirming) return;
     setKept((s) => {
       const n = new Set(s);
       if (n.has(id)) n.delete(id);
@@ -28,12 +31,24 @@ export function KeepTicketsModal({ offered, minKeep, lockLong, onConfirm }: Prop
     });
   };
 
+  // Whoosh the cards toward the tickets tray, then commit (instant under reduced motion).
+  const confirm = () => {
+    if (confirming) return;
+    const ids = [...kept];
+    if (reduced) {
+      onConfirm(ids);
+      return;
+    }
+    setConfirming(true);
+    window.setTimeout(() => onConfirm(ids), 480);
+  };
+
   return (
     <div className="modal-backdrop">
       <div className="modal modal-tickets" role="dialog" aria-modal="true">
         <h3>{t('chooseTickets')}</h3>
         <p className="muted">{t('keepAtLeast', { n: minKeep })}</p>
-        <div className="ticket-cards">
+        <div className={confirming ? 'ticket-cards is-confirming' : 'ticket-cards'}>
           {offered.map((id) => (
             <TicketCard
               key={id}
@@ -44,11 +59,7 @@ export function KeepTicketsModal({ offered, minKeep, lockLong, onConfirm }: Prop
             />
           ))}
         </div>
-        <button
-          className="primary"
-          disabled={kept.size < minKeep}
-          onClick={() => onConfirm([...kept])}
-        >
+        <button className="primary" disabled={kept.size < minKeep || confirming} onClick={confirm}>
           {t('keep')} ({kept.size})
         </button>
       </div>
