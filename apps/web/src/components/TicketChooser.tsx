@@ -1,11 +1,16 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { CardCounts } from '@trm/proto';
 import { ticketById } from '../game/content';
+import { useReducedMotion } from '../hooks/useReducedMotion';
+import { soundPlayer } from '../sound/player';
 import { TicketCard } from './TicketCard';
 import { PlayerHand } from './PlayerHand';
 import { TicketPanel } from './TicketPanel';
+
+// Deal-in tick cadence, kept in step with `.ticket-deal-in` in animations.css (0.12s stagger).
+const DEAL_STAGGER_MS = 120;
 
 interface Props {
   offered: string[];
@@ -44,15 +49,67 @@ export function TicketChooser({
   const [kept, setKept] = useState<Set<string>>(() => new Set(offered)); // default: keep all
   const [showHand, setShowHand] = useState(false);
   const [showTickets, setShowTickets] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [flyStyles, setFlyStyles] = useState<Map<string, CSSProperties>>(new Map());
+  const slotRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const reduced = useReducedMotion();
+
+  // A deal-out tick per offered ticket, synced to the deal-in flip — the same cue as a tunnel
+  // reveal. Keyed by the offer so unrelated snapshot updates during selection don't replay it;
+  // one immediate tick under reduced motion (the cards appear at once).
+  const dealtFor = useRef<string | null>(null);
+  useEffect(() => {
+    const key = offered.join('|');
+    if (key === '' || dealtFor.current === key) return;
+    dealtFor.current = key;
+    if (reduced) {
+      soundPlayer.play('tunnelDraw');
+      return;
+    }
+    const timers = offered.map((_, i) =>
+      window.setTimeout(() => soundPlayer.play('tunnelDraw'), i * DEAL_STAGGER_MS),
+    );
+    return () => timers.forEach((id) => clearTimeout(id));
+  }, [offered, reduced]);
 
   const toggle = (id: string) => {
-    if (locked.has(id)) return;
+    if (locked.has(id) || confirming) return;
     setKept((s) => {
       const n = new Set(s);
       if (n.has(id)) n.delete(id);
       else n.add(id);
       return n;
     });
+  };
+
+  // On Keep, kept tickets fly into the missions peek toggle and discards drop away, then we commit
+  // (instant under reduced motion). Targets are measured live so the flight lands where they are.
+  const confirm = () => {
+    if (confirming) return;
+    const ids = [...kept];
+    if (reduced) {
+      onConfirm(ids);
+      return;
+    }
+    const target =
+      document.querySelector('[data-anim="kept-target"]')?.getBoundingClientRect() ?? null;
+    const styles = new Map<string, CSSProperties>();
+    for (const id of offered) {
+      const r = slotRefs.current.get(id)?.getBoundingClientRect();
+      if (!r) continue;
+      if (kept.has(id) && target) {
+        const dx = target.left + target.width / 2 - (r.left + r.width / 2);
+        const dy = target.top + target.height / 2 - (r.top + r.height / 2);
+        styles.set(id, { transform: `translate(${dx}px, ${dy}px) scale(0.25)`, opacity: 0 });
+      } else {
+        const dy = window.innerHeight - r.top + 60;
+        styles.set(id, { transform: `translate(0, ${dy}px) rotate(7deg) scale(0.85)`, opacity: 0 });
+      }
+    }
+    setConfirming(true);
+    // Two frames so the slots paint at rest first, then transition to their targets.
+    requestAnimationFrame(() => requestAnimationFrame(() => setFlyStyles(styles)));
+    window.setTimeout(() => onConfirm(ids), 540);
   };
 
   return (
@@ -65,10 +122,18 @@ export function TicketChooser({
         {t('keepAtLeast', { n: minKeep })} · {t('ticketPreviewHint')}
       </p>
 
-      <div className="chooser-offer">
+      <div className={confirming ? 'chooser-offer is-confirming' : 'chooser-offer'}>
         {offered.map((id, i) => (
-          // `--i` staggers the draw-in flip so the offered tickets deal out one after another.
-          <div key={id} className="ticket-slot ticket-deal-in" style={{ '--i': i } as CSSProperties}>
+          // `--i` staggers the draw-in flip; on confirm the slot carries its live flight transform.
+          <div
+            key={id}
+            className="ticket-slot ticket-deal-in"
+            ref={(el) => {
+              if (el) slotRefs.current.set(id, el);
+              else slotRefs.current.delete(id);
+            }}
+            style={{ '--i': i, ...(confirming ? flyStyles.get(id) : null) } as CSSProperties}
+          >
             <TicketCard
               ticketId={id}
               selected={kept.has(id)}
@@ -81,8 +146,8 @@ export function TicketChooser({
 
       <button
         className="primary chooser-confirm"
-        disabled={kept.size < minKeep}
-        onClick={() => onConfirm([...kept])}
+        disabled={kept.size < minKeep || confirming}
+        onClick={confirm}
       >
         {t('keep')} ({kept.size})
       </button>
@@ -108,6 +173,7 @@ export function TicketChooser({
         <button
           type="button"
           className="peek-toggle"
+          data-anim="kept-target"
           aria-expanded={showTickets}
           onClick={() => setShowTickets((v) => !v)}
         >

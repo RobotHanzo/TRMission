@@ -109,10 +109,18 @@
   background: linear-gradient(150deg, var(--tr-primary, #0f4c81), #0b3a63);
   color: #fff;
 }
-/* Ticket chooser: offered missions deal out one at a time as the chooser opens. */
+/* Ticket chooser: offered missions deal out one at a time as the chooser opens. `backwards` (not
+   `both`) so the finished flip doesn't pin transform and block the commit-flight inline transform. */
 .ticket-deal-in {
-  animation: anim-card-flip-in 0.4s ease-out both;
+  animation: anim-card-flip-in 0.4s ease-out backwards;
   animation-delay: calc(var(--i, 0) * 0.12s);
+}
+/* Commit flight: on Keep, kept tickets glide into the missions toggle, discards fall away. */
+.chooser-offer.is-confirming .ticket-slot {
+  transition:
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.5s ease-out;
+  pointer-events: none;
 }
 
 /* ── Score +N float (item 5 / item 4) ────────────────────────────────────────── */
