@@ -9,6 +9,9 @@ import { GameStage } from '../../screens/GameStage';
 import { lessonsForScope } from './curriculum';
 import { useScenarioPlayer } from './useScenarioPlayer';
 import { TutorialOverlay } from './TutorialOverlay';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { useSpotlightRects } from './useSpotlightRects';
+import { TutorialSpotlight } from './TutorialSpotlight';
 import type { Lesson, Scope } from './types';
 import '../../styles/tutorial.css';
 
@@ -53,8 +56,12 @@ function TutorialRunner({
   const { t } = useTranslation();
   const player = useScenarioPlayer(lesson, useGame);
   const snapshot = useGame((s) => s.snapshot);
-  const spotlightCities =
-    player.beat?.spotlight?.kind === 'cities' ? player.beat.spotlight.ids : undefined;
+  const reduced = useReducedMotion();
+  const beat = player.beat;
+  const spotlight = beat?.spotlight;
+  const rects = useSpotlightRects(spotlight);
+  const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
+  const frameTarget = beat?.frame ?? null;
 
   if (!snapshot) return <div className="card">{t('connecting')}</div>;
 
@@ -64,22 +71,28 @@ function TutorialRunner({
       commands={player.commands}
       onLeave={onExit}
       spotlightCities={spotlightCities}
+      frameTarget={frameTarget}
       overlay={
-        <TutorialOverlay
-          beat={player.beat}
-          done={player.done}
-          index={player.index}
-          total={player.total}
-          lessonTitleKey={lesson.titleKey}
-          lessonNo={lessonNo}
-          lessonCount={lessonCount}
-          isLastLesson={isLast}
-          onAdvance={player.next}
-          onReplay={player.restart}
-          onPrevLesson={onPrevLesson}
-          onNextLesson={onNextLesson}
-          onExit={onExit}
-        />
+        <>
+          <TutorialSpotlight rects={rects} reducedMotion={reduced} />
+          <TutorialOverlay
+            beat={beat}
+            done={player.done}
+            index={player.index}
+            total={player.total}
+            lessonTitleKey={lesson.titleKey}
+            lessonNo={lessonNo}
+            lessonCount={lessonCount}
+            isLastLesson={isLast}
+            specimen={beat?.specimen}
+            spotRects={rects}
+            onAdvance={player.next}
+            onReplay={player.restart}
+            onPrevLesson={onPrevLesson}
+            onNextLesson={onNextLesson}
+            onExit={onExit}
+          />
+        </>
       }
     />
   );
