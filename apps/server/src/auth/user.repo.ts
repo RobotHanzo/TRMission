@@ -10,7 +10,7 @@ export interface UserDoc {
   _id: string;
   displayName: string;
   isGuest: boolean;
-  locale: Locale;
+  locale?: Locale; // legacy: superseded by preferences.locale; kept for pre-unification docs
   preferences?: UserPreferences; // optional for back-compat with pre-preferences docs
   email?: string;
   passwordHash?: string;
@@ -23,8 +23,13 @@ export const toPublicUser = (u: UserDoc): PublicUser => ({
   id: u._id,
   displayName: u.displayName,
   isGuest: u.isGuest,
-  locale: u.locale,
-  preferences: u.preferences ?? DEFAULT_PREFERENCES,
+  // Merge stored prefs over the defaults so docs written before a field existed still get a
+  // complete set; a legacy top-level `locale` is honoured when the prefs blob predates it.
+  preferences: {
+    ...DEFAULT_PREFERENCES,
+    ...(u.locale ? { locale: u.locale } : {}),
+    ...u.preferences,
+  },
   ...(u.email ? { email: u.email } : {}),
 });
 
@@ -54,8 +59,7 @@ export class UserRepo implements OnModuleInit {
       _id: randomUUID(),
       displayName,
       isGuest: true,
-      locale,
-      preferences: DEFAULT_PREFERENCES,
+      preferences: { ...DEFAULT_PREFERENCES, locale },
       tokenVersion: 0,
       createdAt: new Date(),
       guestExpiresAt: new Date(Date.now() + env.guestTtlMs),
@@ -74,8 +78,7 @@ export class UserRepo implements OnModuleInit {
       _id: randomUUID(),
       displayName,
       isGuest: false,
-      locale,
-      preferences: DEFAULT_PREFERENCES,
+      preferences: { ...DEFAULT_PREFERENCES, locale },
       email: email.toLowerCase(),
       passwordHash,
       tokenVersion: 0,

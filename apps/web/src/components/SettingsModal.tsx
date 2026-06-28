@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
-import type { Theme } from '../net/rest';
+import type { Theme, UserPreferences } from '../net/rest';
 import type { BoardLayout, Locale } from '../store/ui';
 
 interface Props {
@@ -55,14 +55,26 @@ export function SettingsModal({ onClose }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  // Apply immediately for snappy feedback, then sync to the account (no-op for guests).
+  // Apply immediately for snappy feedback, then sync the full set to the account (no-op for
+  // guests, who persist via localStorage only). Spreading the current values keeps every
+  // preference in the synced payload while overriding just the one the user changed.
+  const persist = (patch: Partial<UserPreferences>) =>
+    void savePreferences({ theme, colorBlind, locale, boardLayout, ...patch });
   const chooseTheme = (next: Theme) => {
     setTheme(next);
-    void savePreferences({ theme: next, colorBlind });
+    persist({ theme: next });
   };
   const chooseColorBlind = (next: boolean) => {
     setColorBlind(next);
-    void savePreferences({ theme, colorBlind: next });
+    persist({ colorBlind: next });
+  };
+  const chooseLocale = (next: Locale) => {
+    setLocale(next);
+    persist({ locale: next });
+  };
+  const chooseLayout = (next: BoardLayout) => {
+    setBoardLayout(next);
+    persist({ boardLayout: next });
   };
 
   return (
@@ -112,7 +124,7 @@ export function SettingsModal({ onClose }: Props) {
                 role="radio"
                 aria-checked={locale === value}
                 className={locale === value ? 'segment active' : 'segment'}
-                onClick={() => setLocale(value)}
+                onClick={() => chooseLocale(value)}
               >
                 <span>{label}</span>
               </button>
@@ -130,7 +142,7 @@ export function SettingsModal({ onClose }: Props) {
                 role="radio"
                 aria-checked={boardLayout === value}
                 className={boardLayout === value ? 'segment active' : 'segment'}
-                onClick={() => setBoardLayout(value)}
+                onClick={() => chooseLayout(value)}
               >
                 <Icon size={16} aria-hidden />
                 <span>{t(labelKey)}</span>

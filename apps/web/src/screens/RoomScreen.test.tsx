@@ -39,8 +39,12 @@ const ME = {
   id: 'u-me',
   displayName: 'Me',
   isGuest: true,
-  locale: 'zh-Hant' as const,
-  preferences: { theme: 'system' as const, colorBlind: false },
+  preferences: {
+    theme: 'system' as const,
+    colorBlind: false,
+    locale: 'zh-Hant' as const,
+    boardLayout: 'rail' as const,
+  },
 };
 
 const member = (userId: string, ready = false) => ({

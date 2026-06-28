@@ -2,15 +2,18 @@
 // refresh token is an httpOnly cookie sent automatically (credentials: 'include').
 // A 401 triggers one silent refresh + retry.
 export type Theme = 'system' | 'light' | 'dark';
+export type Locale = 'zh-Hant' | 'en';
+export type BoardLayout = 'rail' | 'tray';
 export interface UserPreferences {
   theme: Theme;
   colorBlind: boolean;
+  locale: Locale;
+  boardLayout: BoardLayout;
 }
 export interface PublicUser {
   id: string;
   displayName: string;
   isGuest: boolean;
-  locale: 'zh-Hant' | 'en';
   preferences: UserPreferences;
   email?: string;
 }

@@ -132,7 +132,7 @@ export class AuthController {
   @Patch('me/preferences')
   @UseGuards(AccessTokenGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Update display preferences (theme, colour-blind)' })
+  @ApiOperation({ summary: 'Update display preferences (theme, colour-blind, language, layout)' })
   @ApiBody({ schema: apiSchema(PreferencesSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(PublicUserSchema) })
   async updatePreferences(@CurrentUser() user: AuthUser, @Body() body: UpdatePreferencesDto) {

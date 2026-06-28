@@ -1,13 +1,15 @@
 import { create } from 'zustand';
-import type { Theme, UserPreferences } from '../net/rest';
+import type { Theme, Locale, BoardLayout, UserPreferences } from '../net/rest';
 import { disconnectGame } from '../net/connection';
 
+// Re-exported so feature code keeps a single import site for these display-pref types.
+//  Locale     — UI language.
+//  BoardLayout — in-game arrangement of the board vs. the deck/hand/tickets panels:
+//    'rail' — board fills the window; everything else stacks in a scrollable right rail.
+//    'tray' — board + right rail on top; the player's hand sits in a bottom strip.
+export type { Locale, BoardLayout };
+
 export type View = 'home' | 'room' | 'game';
-export type Locale = 'zh-Hant' | 'en';
-/** In-game arrangement of the board vs. the deck/hand/tickets panels.
- *  'rail' — board fills the window; everything else stacks in a scrollable right rail.
- *  'tray' — board + right rail on top; the player's hand sits in a bottom strip. */
-export type BoardLayout = 'rail' | 'tray';
 
 // --- URL routing -----------------------------------------------------------
 // The browser path is the durable source of truth for *where* the user is:
@@ -145,7 +147,6 @@ export const useUi = create<UiState>()((set) => ({
     writeLocal(COLOR_BLIND_KEY, colorBlind ? '1' : '0');
     set({ colorBlind });
   },
-  // Layout is a client-only display choice (not part of the synced account preferences).
   setBoardLayout: (boardLayout) => {
     writeLocal(BOARD_LAYOUT_KEY, boardLayout);
     set({ boardLayout });
@@ -154,6 +155,13 @@ export const useUi = create<UiState>()((set) => ({
   applyPreferences: (prefs) => {
     writeLocal(THEME_KEY, prefs.theme);
     writeLocal(COLOR_BLIND_KEY, prefs.colorBlind ? '1' : '0');
-    set({ theme: prefs.theme, colorBlind: prefs.colorBlind });
+    writeLocal(LOCALE_KEY, prefs.locale);
+    writeLocal(BOARD_LAYOUT_KEY, prefs.boardLayout);
+    set({
+      theme: prefs.theme,
+      colorBlind: prefs.colorBlind,
+      locale: prefs.locale,
+      boardLayout: prefs.boardLayout,
+    });
   },
 }));

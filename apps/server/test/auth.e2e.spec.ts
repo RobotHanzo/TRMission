@@ -95,6 +95,31 @@ describe('auth: refresh rotation + reuse detection', () => {
   });
 });
 
+describe('auth: display preferences round-trip', () => {
+  it('persists theme, colour-blind, language, and layout to the account', async () => {
+    const reg = await request(server())
+      .post('/api/v1/auth/register')
+      .send({ email: 'prefs@example.com', password: 'password123', displayName: 'Prefs' })
+      .expect(201);
+    const token = reg.body.accessToken;
+    const wanted = { theme: 'dark', colorBlind: true, locale: 'en', boardLayout: 'tray' };
+
+    const patched = await request(server())
+      .patch('/api/v1/auth/me/preferences')
+      .set('Authorization', `Bearer ${token}`)
+      .send(wanted)
+      .expect(200);
+    expect(patched.body.preferences).toEqual(wanted);
+
+    // A fresh /me (i.e. a later sign-in) must report the same stored preferences.
+    const me = await request(server())
+      .get('/api/v1/auth/me')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(me.body.preferences).toEqual(wanted);
+  });
+});
+
 describe('auth: guest → registered upgrade (keeps the same id)', () => {
   it('attaches credentials in place', async () => {
     const guest = await request(server())

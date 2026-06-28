@@ -5,11 +5,17 @@ import { createZodDto } from 'nestjs-zod';
 // and the OpenAPI body/response schemas (via apiSchema()).
 const locale = z.enum(['zh-Hant', 'en']);
 const theme = z.enum(['system', 'light', 'dark']);
+const boardLayout = z.enum(['rail', 'tray']);
 const displayName = z.string().trim().min(1).max(24);
 const password = z.string().min(8).max(200);
 const email = z.email();
 
-export const PreferencesSchema = z.object({ theme, colorBlind: z.boolean() });
+export const PreferencesSchema = z.object({
+  theme,
+  colorBlind: z.boolean(),
+  locale,
+  boardLayout,
+});
 
 export const GuestSchema = z.object({
   displayName: displayName.optional(),
@@ -29,7 +35,6 @@ export const PublicUserSchema = z.object({
   id: z.string(),
   displayName: z.string(),
   isGuest: z.boolean(),
-  locale,
   preferences: PreferencesSchema,
   email: z.string().optional(),
 });

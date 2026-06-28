@@ -88,6 +88,27 @@ describe('ui store board layout', () => {
   });
 });
 
+describe('ui store account preferences', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useUi.setState({ theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' });
+  });
+
+  it('applyPreferences adopts language and layout from the account (+ persists locally)', () => {
+    useUi.getState().applyPreferences({
+      theme: 'dark',
+      colorBlind: true,
+      locale: 'en',
+      boardLayout: 'tray',
+    });
+    const s = useUi.getState();
+    expect(s.locale).toBe('en');
+    expect(s.boardLayout).toBe('tray');
+    expect(localStorage.getItem('trm.locale')).toBe('en');
+    expect(localStorage.getItem('trm.boardLayout')).toBe('tray');
+  });
+});
+
 describe('roomCodeFromPath', () => {
   beforeEach(() => window.history.replaceState(null, '', '/'));
 
