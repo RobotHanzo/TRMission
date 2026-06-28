@@ -36,7 +36,7 @@ import {
   chatFrame,
   cameraMovedFrame,
   pongFrame,
-} from '../codec';
+} from '@trm/codec';
 
 export interface GameHubOptions {
   verifier?: TicketVerifier;

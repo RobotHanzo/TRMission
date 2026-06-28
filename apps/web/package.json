@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.12.1",
+    "@trm/codec": "workspace:*",
+    "@trm/engine": "workspace:*",
     "@trm/map-data": "workspace:*",
     "@trm/proto": "workspace:*",
     "@trm/shared": "workspace:*",

@@ -4,7 +4,7 @@
 import { create, toBinary } from '@bufbuild/protobuf';
 import { ServerEnvelopeSchema } from '@trm/proto';
 import type { PlayerId } from '@trm/shared';
-import type { ServerEvent } from '../codec/frames';
+import type { ServerEvent } from '@trm/codec';
 
 export type Sink = (bytes: Uint8Array) => void;
 
