@@ -14,7 +14,7 @@ import {
 } from '@trm/proto';
 import { asPlayerId, messageKeyFor } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
-import { taiwanBoard } from '@trm/engine';
+import { boardForContentHash } from '@trm/engine';
 import type { Board, GameConfig, GameEvent } from '@trm/engine';
 import type { GameRegistry, Match } from '../game/game-registry';
 import { GameSession, type Prepared } from '../game/game-session';
@@ -77,7 +77,8 @@ export class GameHub {
   ) {
     this.verifier = options.verifier ?? new DevTicketVerifier();
     this.store = options.store;
-    this.boardResolver = options.boardResolver ?? (() => taiwanBoard());
+    this.boardResolver =
+      options.boardResolver ?? ((config: GameConfig) => boardForContentHash(config.contentHash));
     this.metrics = options.metrics ?? NOOP_METRICS;
     this.botMoveDelayMs = options.botMoveDelayMs ?? 600;
   }

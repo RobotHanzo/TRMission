@@ -1,15 +1,22 @@
-import type { RouteColor, RouteLength } from '@trm/shared';
-import { asRouteId, asCityId } from '@trm/shared';
-import type { RouteDef } from './types';
+import type { GameContent, MapMeta, RouteDef } from '../types';
+import { buildRoute, type Row } from '../routes';
+import { CITIES } from '../cities';
+import { TICKETS } from '../tickets';
 
 /**
- * Compact route rows: [id, cityA, cityB, color, length, flag].
- * flag: '' | 'D-A'..'D-J' (double-route pair) | 'T' (tunnel) | 'F1'/'F2'/'F3' (ferry loco count).
- * A route is at most one of {double, tunnel, ferry} on this map.
+ * Frozen snapshot of map content version 2 — the content as it was *before* R77
+ * (宜蘭–蘇澳) became a length-2 tunnel. Persisted games created against v2 carry its
+ * `contentHash`; the registry uses this snapshot to rebuild the exact board they replay
+ * against, so a content change never breaks recovery of an in-flight game (ADR A6/A13).
+ *
+ * Only the route table diverged between v2 and the current map, so the v2 routes are
+ * captured here in full as an immutable literal, while `cities`/`tickets` (byte-identical
+ * across the two versions) are referenced from the live tables. The pinned hash assertion
+ * in `test/versions.spec.ts` is the tripwire: if a future edit ever changes a v2-era city
+ * or ticket, this snapshot would silently drift and that test fails — at which point the
+ * diverged table must be frozen into this file too.
  */
-export type Row = [string, string, string, RouteColor, RouteLength, string];
-
-const ROWS: readonly Row[] = [
+const V2_ROWS: readonly Row[] = [
   ['R1', 'keelung', 'ruifang', 'YELLOW', 1, ''],
   ['R2', 'keelung', 'taipei', 'BLACK', 2, ''],
   ['R3', 'ruifang', 'taipei', 'ORANGE', 1, ''],
@@ -51,7 +58,7 @@ const ROWS: readonly Row[] = [
   ['R60', 'tainan', 'pingtung', 'PURPLE', 3, ''],
   ['R61', 'pingtung', 'chaozhou', 'BLUE', 1, ''],
   ['R62', 'kaohsiung', 'chaozhou', 'GREEN', 2, ''],
-  ['R94', 'chaozhou', 'hengchun', 'ORANGE', 6, ''], // 潮州–恆春: reconnects the Hengchun cape after 枋寮 was removed
+  ['R94', 'chaozhou', 'hengchun', 'ORANGE', 6, ''],
   ['R66', 'dawu', 'zhiben', 'GREEN', 2, 'T'],
   ['R67', 'zhiben', 'taitung', 'RED', 1, ''],
   ['R69', 'hengchun', 'dawu', 'YELLOW', 3, 'T'],
@@ -62,7 +69,7 @@ const ROWS: readonly Row[] = [
   ['R74', 'yuli', 'hualien', 'PURPLE', 3, ''],
   ['R75', 'hualien', 'suao', 'BLUE', 4, 'T'],
   ['R76', 'suao', 'luodong', 'BLACK', 1, ''],
-  ['R77', 'suao', 'yilan', 'PURPLE', 2, 'T'],
+  ['R77', 'suao', 'yilan', 'PURPLE', 1, ''],
   ['R78', 'luodong', 'yilan', 'GREEN', 1, ''],
   ['R79', 'yilan', 'toucheng', 'YELLOW', 1, ''],
   ['R80', 'toucheng', 'ruifang', 'RED', 3, 'T'],
@@ -75,25 +82,23 @@ const ROWS: readonly Row[] = [
   ['R88', 'taitung', 'greenisland', 'GRAY', 2, 'F1'],
   ['R89', 'taitung', 'orchidisland', 'GRAY', 3, 'F2'],
   ['R90', 'greenisland', 'orchidisland', 'GRAY', 2, 'F1'],
-  // Cross-island mountain railways — original tunnels spanning the central range so the
-  // east is reachable from several latitudes (north / central / south), not just one spine.
-  ['R91', 'taoyuan', 'yilan', 'PURPLE', 6, 'T'], // 北橫: a second northern crossing
-  ['R92', 'nantou', 'yuli', 'GRAY', 8, 'T'], // 中橫: the deep central crossing to the Rift Valley
-  ['R93', 'alishan', 'chishang', 'YELLOW', 6, 'T'], // 南橫: the southern high-mountain crossing
+  ['R91', 'taoyuan', 'yilan', 'PURPLE', 6, 'T'],
+  ['R92', 'nantou', 'yuli', 'GRAY', 8, 'T'],
+  ['R93', 'alishan', 'chishang', 'YELLOW', 6, 'T'],
 ];
 
-export function buildRoute([id, a, b, color, length, flag]: Row): RouteDef {
-  const base = {
-    id: asRouteId(id),
-    a: asCityId(a),
-    b: asCityId(b),
-    color,
-    length,
-  };
-  if (flag.startsWith('D-')) return { ...base, doubleGroup: flag.slice(2), ferryLocos: 0, isTunnel: false };
-  if (flag === 'T') return { ...base, ferryLocos: 0, isTunnel: true };
-  if (flag.startsWith('F')) return { ...base, ferryLocos: Number(flag.slice(1)), isTunnel: false };
-  return { ...base, ferryLocos: 0, isTunnel: false };
-}
+const V2_META: MapMeta = {
+  mapId: 'taiwan',
+  version: 2,
+  nameZh: '台灣本島與離島',
+  nameEn: 'Taiwan & Outlying Islands',
+};
 
-export const ROUTES: readonly RouteDef[] = ROWS.map(buildRoute);
+const V2_ROUTES: readonly RouteDef[] = V2_ROWS.map(buildRoute);
+
+export const CONTENT_V2: GameContent = {
+  meta: V2_META,
+  cities: CITIES,
+  routes: V2_ROUTES,
+  tickets: TICKETS,
+};

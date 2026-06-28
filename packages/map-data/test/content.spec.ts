@@ -15,12 +15,12 @@ describe('Taiwan map content', () => {
     expect(s.routeCount).toBe(68);
     expect(s.distinctPairCount).toBe(60); // 60 distinct pairs + 8 second-of-pair double edges
     expect(s.doublePairCount).toBe(8);
-    expect(s.tunnelCount).toBe(14);
+    expect(s.tunnelCount).toBe(15);
     expect(s.ferryCount).toBe(9);
     expect(s.ferryLocoSymbols).toBe(15);
     // Sum over ALL 68 segments. (Counting each double-route pair once gives 166, the
     // usable track in 2–3p where only one parallel is claimable.)
-    expect(s.totalTrackLength).toBe(179);
+    expect(s.totalTrackLength).toBe(180);
     expect(s.ticketCount).toBe(42);
     expect(s.longTicketCount).toBe(6);
   });
