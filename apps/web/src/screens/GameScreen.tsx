@@ -221,11 +221,15 @@ export function GameScreen() {
         onDrawBlind={() => socket?.drawBlind()}
       />
       <div className="hud-actions">
-        <button className="accent" disabled={!canAct} onClick={() => socket?.drawTickets()}>
+        <button
+          className="accent"
+          disabled={!canAct || snapshot.ticketDeckShortCount === 0}
+          onClick={() => socket?.drawTickets()}
+        >
           {t('drawTickets')}
-        </button>
-        <button disabled={!canAct} onClick={() => socket?.pass()}>
-          {t('pass')}
+          {snapshot.ticketDeckShortCount === 0
+            ? ` (${t('deckEmpty')})`
+            : ` (${snapshot.ticketDeckShortCount})`}
         </button>
       </div>
     </div>

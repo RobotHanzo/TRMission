@@ -114,6 +114,7 @@ const resources = {
 
       drawBlind: '抽牌堆',
       drawTickets: '抽任務卡',
+      deckEmpty: '已抽完',
       pass: '跳過',
       tickets: '任務卡',
       cards: '手牌',
@@ -280,6 +281,7 @@ const resources = {
 
       drawBlind: 'Draw from deck',
       drawTickets: 'Draw tickets',
+      deckEmpty: 'Out of cards',
       pass: 'Pass',
       tickets: 'Tickets',
       cards: 'Hand',
