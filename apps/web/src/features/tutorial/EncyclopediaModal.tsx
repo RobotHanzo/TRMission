@@ -68,36 +68,52 @@ export default function EncyclopediaModal({ onClose }: { onClose(): void }) {
   const { t } = useTranslation();
   const entries = useMemo(() => encyclopediaEntries(), []);
   const [idx, setIdx] = useState(0);
+  // Group entries by chapter, preserving order. (All hooks must run before any early return —
+  // Rules of Hooks; this repo has no react-hooks lint to catch a misordering.)
+  const groups = useMemo(() => {
+    const m = new Map<number, { entry: (typeof entries)[number]; i: number }[]>();
+    entries.forEach((e, i) => {
+      const arr = m.get(e.chapter) ?? [];
+      arr.push({ entry: e, i });
+      m.set(e.chapter, arr);
+    });
+    return [...m.entries()];
+  }, [entries]);
   const entry = entries[idx];
   if (!entry) return null;
 
   return (
     <div className="enc-backdrop" role="dialog" aria-label={t('tutorial.open')}>
-      <div className="enc-shell">
-        <header className="enc-head">
-          <strong className="enc-title">{t('tutorial.open')}</strong>
-          <select
-            className="enc-select"
-            value={idx}
-            onChange={(e) => setIdx(Number(e.target.value))}
-            aria-label={t('tutorial.open')}
-          >
-            {entries.map((l, i) => (
-              <option key={l.id} value={i}>
-                {t(l.titleKey)}
-              </option>
-            ))}
-          </select>
+      <div className="enc-shell enc-shell--split">
+        <aside className="enc-list">
+          <div className="enc-list-head">
+            <strong className="enc-title">{t('tutorial.open')}</strong>
+            <button className="icon-btn enc-x" onClick={onClose} aria-label={t('close')}>
+              <X size={18} />
+            </button>
+          </div>
+          {groups.map(([chapter, items]) => (
+            <div className="enc-group" key={chapter}>
+              <div className="enc-group-label">{t(`tutorial.chapters.c${chapter}`)}</div>
+              {items.map(({ entry: e, i }) => (
+                <button
+                  key={e.id}
+                  className={'enc-entry' + (i === idx ? ' is-active' : '')}
+                  onClick={() => setIdx(i)}
+                >
+                  {t(e.titleKey)}
+                </button>
+              ))}
+            </div>
+          ))}
+        </aside>
+        <div className="enc-main">
           <p className="enc-blurb">{t(entry.blurbKey)}</p>
-          <button className="icon-btn enc-x" onClick={onClose} aria-label={t('close')}>
-            <X size={18} />
-          </button>
-        </header>
-        <div className="enc-stage">
-          {/* key remounts the provider (fresh stores + scenario) when the topic changes. */}
-          <SandboxProvider key={entry.id}>
-            <EncyclopediaPlayer entry={entry} onClose={onClose} />
-          </SandboxProvider>
+          <div className="enc-stage">
+            <SandboxProvider key={entry.id}>
+              <EncyclopediaPlayer entry={entry} onClose={onClose} />
+            </SandboxProvider>
+          </div>
         </div>
       </div>
     </div>

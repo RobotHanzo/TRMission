@@ -95,6 +95,16 @@ export const tutorialZh = {
     ferry: '渡輪',
     tunnel: '隧道',
   },
+  chapters: {
+    c0: '基礎',
+    c3: '抽牌',
+    c4: '路線',
+    c5: '特殊路線',
+    c6: '車站',
+    c7: '任務卡',
+    c8: '最長路線',
+    c9: '結算',
+  },
 } as const;
 
 export const tutorialEn = {
@@ -148,7 +158,8 @@ export const tutorialEn = {
   special: {
     title: 'Special routes',
     blurb: 'Double, ferry, and tunnel routes.',
-    intro: 'Routes come in three kinds: ordinary railways, sea ferries, and mountain tunnels. Compare how they look below:',
+    intro:
+      'Routes come in three kinds: ordinary railways, sea ferries, and mountain tunnels. Compare how they look below:',
     double:
       'Double routes: two parallel lines between two cities. With 2–3 players, claiming one locks the other; with 4–5, both stay open. You can never own both of a pair.',
     ferry:
@@ -193,5 +204,15 @@ export const tutorialEn = {
     rail: 'Railway',
     ferry: 'Ferry',
     tunnel: 'Tunnel',
+  },
+  chapters: {
+    c0: 'Basics',
+    c3: 'Drawing',
+    c4: 'Routes',
+    c5: 'Special routes',
+    c6: 'Stations',
+    c7: 'Tickets',
+    c8: 'Longest trail',
+    c9: 'Endgame',
   },
 } as const;
