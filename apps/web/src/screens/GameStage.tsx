@@ -50,9 +50,17 @@ export interface GameStageProps {
   onLeave: () => void;
   /** Tutorial / encyclopedia overlay rendered above the board + HUD. */
   overlay?: ReactNode;
+  /** Cities the tutorial wants glowed this beat (merged with any ticket-endpoint highlights). */
+  spotlightCities?: string[] | undefined;
 }
 
-export function GameStage({ snapshot, commands, onLeave, overlay }: GameStageProps) {
+export function GameStage({
+  snapshot,
+  commands,
+  onLeave,
+  overlay,
+  spotlightCities,
+}: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const colorBlind = useUi((s) => s.colorBlind);
@@ -167,6 +175,12 @@ export function GameStage({ snapshot, commands, onLeave, overlay }: GameStagePro
         )
       : [];
 
+  // Merge the tutorial's spotlight cities with any ticket-endpoint glow.
+  const highlightCities =
+    spotlightCities && spotlightCities.length
+      ? new Set<string>([...(ticketEndpoints ?? []), ...spotlightCities])
+      : ticketEndpoints;
+
   const boardPanel = (
     <div className="game-board">
       <Board
@@ -176,7 +190,7 @@ export function GameStage({ snapshot, commands, onLeave, overlay }: GameStagePro
         canAct={canAct}
         onPickRoute={pickRoute}
         onPickCity={pickCity}
-        highlightCities={ticketEndpoints}
+        highlightCities={highlightCities}
       />
     </div>
   );

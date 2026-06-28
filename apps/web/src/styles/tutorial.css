@@ -1,0 +1,118 @@
+/* Tutorial coachmark + launcher. The coachmark is a non-blocking callout pinned to the bottom of
+   the board, so the learner can still click the HUD to perform `await` actions while it guides. */
+
+.tut-launcher {
+  display: grid;
+  place-items: center;
+  min-height: 60dvh;
+  padding: 2rem 1rem;
+}
+.tut-launcher-card {
+  max-width: 30rem;
+  text-align: center;
+}
+.tut-launcher-card .small {
+  font-size: 0.85rem;
+  margin: -0.25rem 0 0.5rem;
+}
+
+.tut-coach {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(0.75rem, 3vh, 1.5rem);
+  transform: translateX(-50%);
+  z-index: 55;
+  width: min(34rem, calc(100vw - 1.5rem));
+  background: var(--surface, #fff);
+  color: var(--text, #111);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+  padding: 0.85rem 1rem 0.75rem;
+  animation: tut-coach-in 220ms ease-out;
+}
+@keyframes tut-coach-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.tut-coach-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.tut-coach-title {
+  font-weight: 700;
+}
+.tut-coach-progress {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+.tut-coach-x {
+  margin-left: auto;
+}
+.tut-coach-body {
+  margin: 0.25rem 0 0.6rem;
+  line-height: 1.5;
+}
+.tut-coach-dots {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 0.6rem;
+}
+.tut-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border, rgba(0, 0, 0, 0.18));
+}
+.tut-dot.on {
+  background: var(--accent, #2b6cb0);
+}
+.tut-coach-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.tut-coach-actions .spacer {
+  flex: 1;
+}
+.tut-coach-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.tut-yourturn {
+  font-weight: 600;
+  color: var(--accent, #2b6cb0);
+  animation: tut-pulse 1.6s ease-in-out infinite;
+}
+.tut-auto {
+  opacity: 0.6;
+  font-style: italic;
+}
+@keyframes tut-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tut-coach {
+    animation: none;
+  }
+  .tut-yourturn {
+    animation: none;
+  }
+}

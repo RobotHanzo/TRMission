@@ -1,11 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { tutorialZh, tutorialEn } from './tutorial';
 
 // Traditional Chinese is primary; English is the fallback (ADR: zh-Hant first).
 // City/ticket names live in the content catalog and are resolved separately.
 const resources = {
   'zh-Hant': {
     translation: {
+      tutorial: tutorialZh,
       appName: '台鐵任務',
       tagline: '在台灣鐵道上搶占路線、完成任務卡。',
       language: '語言',
@@ -171,6 +173,7 @@ const resources = {
   },
   en: {
     translation: {
+      tutorial: tutorialEn,
       appName: 'TRMission',
       tagline: 'Claim railway routes across Taiwan and complete your mission tickets.',
       language: 'Language',

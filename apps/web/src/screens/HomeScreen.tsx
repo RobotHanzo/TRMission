@@ -55,6 +55,7 @@ export function HomeScreen() {
   const user = useSession((s) => s.user);
   const enterRoom = useUi((s) => s.enterRoom);
   const enterGame = useUi((s) => s.enterGame);
+  const enterTutorial = useUi((s) => s.enterTutorial);
 
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
@@ -117,6 +118,7 @@ export function HomeScreen() {
   return (
     <div className="stack">
       <p>{t('welcome', { name: user.displayName })}</p>
+      <button onClick={enterTutorial}>{t('tutorial.title')}</button>
       <div className="card stack">
         <button className="accent" disabled={busy} onClick={() => void create()}>
           {t('createRoom')}

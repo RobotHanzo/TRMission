@@ -9,7 +9,7 @@ import { disconnectGame } from '../net/connection';
 //    'tray' — board + right rail on top; the player's hand sits in a bottom strip.
 export type { Locale, BoardLayout };
 
-export type View = 'home' | 'room' | 'game' | 'login' | 'loginCallback';
+export type View = 'home' | 'room' | 'game' | 'tutorial' | 'login' | 'loginCallback';
 
 // --- URL routing -----------------------------------------------------------
 // The browser path is the durable source of truth for *where* the user is:
@@ -21,6 +21,7 @@ export type View = 'home' | 'room' | 'game' | 'login' | 'loginCallback';
 const ROOM_PATH = /^\/room\/([^/]+)$/;
 const LOGIN_PATH = '/login';
 const LOGIN_CALLBACK_PATH = '/login/callback';
+const TUTORIAL_PATH = '/tutorial';
 
 export const roomCodeFromPath = (): string | null => {
   const code = ROOM_PATH.exec(window.location.pathname)?.[1];
@@ -139,6 +140,8 @@ interface UiState {
   goHome(): void;
   enterRoom(code: string): void;
   enterGame(gameId: string, ticket: string): void;
+  /** Open the full-screen guided tutorial (a local sandbox; tears down any live game first). */
+  enterTutorial(): void;
   /** Send an unauthenticated visitor to /login, remembering where they were headed. */
   navigateLogin(returnTo: string): void;
   /** After any successful sign-in, resume the `?redirect=` target (default home). */
@@ -180,6 +183,11 @@ export const useUi = create<UiState>()((set, get) => ({
   },
   // The URL is already /room/:code (the room was entered first), so leave it untouched.
   enterGame: (gameId, ticket) => set({ view: 'game', gameId, ticket }),
+  enterTutorial: () => {
+    disconnectGame();
+    pushPath(TUTORIAL_PATH);
+    set({ view: 'tutorial', roomCode: null, gameId: null, ticket: null });
+  },
   navigateLogin: (returnTo) => {
     disconnectGame();
     replacePath(loginPathFor(returnTo));
@@ -201,6 +209,12 @@ export const useUi = create<UiState>()((set, get) => ({
   },
   syncFromUrl: (authed) => {
     const path = window.location.pathname;
+    // The tutorial is a self-contained local sandbox — reachable without an account.
+    if (path === TUTORIAL_PATH) {
+      disconnectGame();
+      set({ view: 'tutorial', roomCode: null, gameId: null, ticket: null });
+      return;
+    }
     // The OAuth landing page: resume the session (App's restore()) then continue; the
     // LoginCallback screen handles both the success redirect and any ?error.
     if (path === LOGIN_CALLBACK_PATH) {

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUi } from './store/ui';
 import { useSession } from './store/session';
@@ -9,6 +9,9 @@ import { GameScreen } from './screens/GameScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { LoginCallback } from './screens/LoginCallback';
 import './styles/app.css';
+
+// Lazy so @trm/engine + @trm/codec land in a separate chunk, not the main bundle.
+const TutorialScreen = lazy(() => import('./features/tutorial/TutorialScreen'));
 
 export function App() {
   const { t, i18n } = useTranslation();
@@ -60,15 +63,15 @@ export function App() {
   }, [theme]);
 
   const isLogin = view === 'login' || view === 'loginCallback';
-  const mainClass =
-    view === 'game'
-      ? 'app-main app-main--game'
-      : isLogin
-        ? 'app-main app-main--login'
-        : 'app-main';
+  const isGameLayout = view === 'game' || view === 'tutorial';
+  const mainClass = isGameLayout
+    ? 'app-main app-main--game'
+    : isLogin
+      ? 'app-main app-main--login'
+      : 'app-main';
 
   return (
-    <div className={view === 'game' ? 'app app--game' : 'app'}>
+    <div className={isGameLayout ? 'app app--game' : 'app'}>
       <AppHeader />
       <main className={mainClass}>
         {booting ? (
@@ -80,6 +83,11 @@ export function App() {
             {view === 'home' && <HomeScreen />}
             {view === 'room' && <RoomScreen />}
             {view === 'game' && <GameScreen />}
+            {view === 'tutorial' && (
+              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
+                <TutorialScreen />
+              </Suspense>
+            )}
           </>
         )}
       </main>
