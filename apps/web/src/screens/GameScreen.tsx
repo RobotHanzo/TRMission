@@ -27,6 +27,7 @@ import { KeepTicketsModal } from '../components/KeepTicketsModal';
 import { TunnelModal } from '../components/TunnelModal';
 import { ScoreBoard } from '../components/ScoreBoard';
 import '../styles/game.css';
+import '../styles/animations.css';
 
 type Claim =
   | { kind: 'route'; route: RouteDef; payments: Payment[] }
