@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Layers } from 'lucide-react';
 import { CardColor as PbCardColor, type GameSnapshot } from '@trm/proto';
 import { tokenForPb } from '../game/cards';
+import { useAnimations } from '../store/animations';
 
 interface Props {
   snapshot: GameSnapshot;
@@ -12,6 +13,8 @@ interface Props {
 
 export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Props) {
   const { t } = useTranslation();
+  const marketFlips = useAnimations((s) => s.marketFlips);
+  const clearMarketFlip = useAnimations((s) => s.clearMarketFlip);
   return (
     <div className="market">
       <button
@@ -31,11 +34,12 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
           return (
             <button
               key={slot}
-              className="market-slot"
+              className={marketFlips.has(slot) ? 'market-slot is-flipping' : 'market-slot'}
               data-anim="market-slot"
               data-slot={slot}
               disabled={!canDraw || empty}
               onClick={() => onDrawFaceUp(slot)}
+              onAnimationEnd={() => clearMarketFlip(slot)}
               style={empty ? undefined : { background: tok.hex, color: tok.ink }}
               aria-label={tok ? tok.nameZh : 'empty'}
             >

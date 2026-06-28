@@ -1,12 +1,14 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { useAnimations, type Flight } from '../store/animations';
+import { useAnimations, type Flight, type Float } from '../store/animations';
 import { useGame } from '../store/game';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { SEAT_COLORS } from '../theme/colors';
 import { FlyingCard } from './FlyingCard';
 
 const rectOf = (selector: string): DOMRect | null =>
   document.querySelector(selector)?.getBoundingClientRect() ?? null;
+const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
 
 /** One in-flight card, animated from its source (deck/market slot) to its target (hand/tracker). */
 function FlightMover({ flight }: { flight: Flight }) {
@@ -73,14 +75,42 @@ function FlightMover({ flight }: { flight: Flight }) {
   );
 }
 
-/** Fixed full-viewport overlay for travelling cards (floats, cues, fanfare are added later). */
+/** A floating "+N" rising from a player's tracker when they score. */
+function FloatMover({ float }: { float: Float }) {
+  const removeFloat = useAnimations((s) => s.removeFloat);
+  const seat = useGame((s) => s.snapshot?.players.find((p) => p.id === float.playerId)?.seat ?? 0);
+  const [style, setStyle] = useState<CSSProperties>({ display: 'none' });
+
+  useLayoutEffect(() => {
+    const r = rectOf(`[data-player-id="${float.playerId}"]`);
+    if (!r) {
+      removeFloat(float.id);
+      return;
+    }
+    setStyle({ left: r.right - 30, top: r.top + 2, '--seat': seatColor(seat) } as CSSProperties);
+    const fallback = window.setTimeout(() => removeFloat(float.id), 1300);
+    return () => clearTimeout(fallback);
+  }, [float, seat, removeFloat]);
+
+  return (
+    <div className="score-float" style={style} onAnimationEnd={() => removeFloat(float.id)}>
+      +{float.amount}
+    </div>
+  );
+}
+
+/** Fixed full-viewport overlay for travelling cards, score floats (cues/fanfare added later). */
 export function AnimationLayer() {
   const flights = useAnimations((s) => s.flights);
+  const floats = useAnimations((s) => s.floats);
   if (typeof document === 'undefined') return null;
   return createPortal(
     <>
       {flights.map((f) => (
         <FlightMover key={f.id} flight={f} />
+      ))}
+      {floats.map((f) => (
+        <FloatMover key={f.id} float={f} />
       ))}
     </>,
     document.body,
