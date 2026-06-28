@@ -56,7 +56,7 @@ Three width bands. The board is always present; the second/third regions adapt:
 |--------|--------------|--------------------------------------------------------------------------|
 | Wide   | ≥ 1200px     | `board │ rail (340px) │ comms (320px)` — log+chat both visible           |
 | Medium | 920–1200px   | `board │ [tab: Rail ⟷ Log+Chat]` — the second column is tab-switched     |
-| Narrow | < 1200px AND the existing < 920px single-column collapse | one scrolling column; the rail slot is the same tab-switched [Rail ⟷ Log+Chat] |
+| Narrow | < 920px      | one scrolling column (existing collapse); the rail slot is the same tab-switched [Rail ⟷ Log+Chat] |
 
 - **CSS (`styles/game.css`):** add `--tr-comms-w: 320px`. Extend the grid templates:
   - `.game--rail` → `grid-template-columns: minmax(0,1fr) var(--tr-rail-w) var(--tr-comms-w)` with
