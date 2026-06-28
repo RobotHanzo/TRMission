@@ -46,8 +46,15 @@ export const MapBackdrop = memo(function MapBackdrop() {
               : undefined;
           return (
             <g key={r.id as string} className={`route${kind}`} style={groupStyle}>
+              {r.isTunnel && <path className="tunnel-bg" d={g.path} />}
               <path className="bed" d={g.path} />
-              {r.isTunnel && <path className="tunnel-track" d={g.path} />}
+              {r.isTunnel && g.ties?.map((t, i) => (
+                <rect
+                  key={i}
+                  className="tunnel-tie"
+                  transform={`translate(${t.x.toFixed(2)} ${t.y.toFixed(2)}) rotate(${(t.angle + 45).toFixed(1)})`}
+                />
+              ))}
               {isFerry ? (
                 <>
                   <path className="ferry-line" d={g.path} />

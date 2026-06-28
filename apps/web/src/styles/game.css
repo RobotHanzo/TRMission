@@ -230,14 +230,27 @@
 .route.owned .slot {
   stroke-width: calc(0.42px * var(--inv-scale));
 }
-/* Tunnel: dark sleeper ties cross the full roadbed, poking past the cars and filling every gap. */
-.tunnel-track {
+/* Tunnel background: a wide, very transparent grey stroke on the railway path that just
+   covers the furthest corners of the diagonal ties (4px × sin 45° ≈ 2.83px from centre,
+   so 6px total width). Rendered before the white bed so the stack reads:
+   tunnel-bg (grey glint) → bed (white) → ties (dark) → cars. */
+.tunnel-bg {
   fill: none;
-  stroke: #3d352b; /* dark sleeper timber — fixed; the roadbed is light in both themes */
-  stroke-width: calc(5px * var(--inv-scale)); /* wider than the 2.8px bed → ties poke ~2px past each rail edge */
-  stroke-linecap: butt; /* crisp rectangular sleepers — round would turn them into lozenges */
-  stroke-dasharray: 0.28 1.09; /* thinner ties, same 1.37-unit cycle → crisper hatch, same density */
-  opacity: 0.9;
+  stroke: #b0b0b0;
+  stroke-opacity: 0.18;
+  stroke-width: calc(6px * var(--inv-scale));
+  stroke-linecap: round;
+}
+/* Tunnel: diagonal sleeper ties, each a <rect> rotated angle+45° relative to the track.
+   All four geometry props (x, y, width, height) are CSS so they counter-scale like car slots.
+   width/x control the tie's long axis (crossing the track at 45°); height/y control its thickness. */
+.tunnel-tie {
+  x: calc(-4px * var(--inv-scale));      /* centre: extends 4px each way along the tie */
+  width: calc(8px * var(--inv-scale));   /* spans bed (2.8px) + ~1.4px past each rail edge */
+  y: calc(-0.14px * var(--inv-scale));
+  height: calc(0.28px * var(--inv-scale)); /* thin: each tie reads as a crisp diagonal slat */
+  fill: #3d352b;
+  fill-opacity: 0.9;
 }
 /* Ferry: a dotted open-sea crossing under the round locomotive pips. */
 .ferry-line {

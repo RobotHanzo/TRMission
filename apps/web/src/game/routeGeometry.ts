@@ -30,6 +30,11 @@ export interface RouteGeometry {
   readonly path: string;
   /** One car per train-length, centred and oriented along the curve. */
   readonly slots: readonly Slot[];
+  /**
+   * Diagonal sleeper ties for tunnel routes — each rendered as a `<rect>` rotated `angle + 45°`
+   * relative to the track so the tie crosses at 45°. Only present when `r.isTunnel`.
+   */
+  readonly ties?: readonly Slot[];
   /** Curve midpoint — anchor for the colour-blind glyph chip. */
   readonly mid: { readonly x: number; readonly y: number };
   /**
@@ -230,10 +235,27 @@ function buildGeometry(): Map<string, RouteGeometry> {
       slots.push({ x: p.x, y: p.y, angle: (Math.atan2(tg.y, tg.x) * 180) / Math.PI, len: slotLen });
     }
 
+    // Tunnel routes get explicit tie positions so the renderer can draw each one as a <rect>
+    // rotated angle+45° — the only way to tilt ties 45° relative to the track (stroke-dasharray
+    // can only go perpendicular to the path, never diagonal).
+    let ties: Slot[] | undefined;
+    if (r.isTunnel) {
+      ties = [];
+      const TIE_SPACING = 1.1; // board units between tie centres
+      const tieCount = Math.round(arc / TIE_SPACING);
+      for (let i = 0; i < tieCount; i++) {
+        const t = (i + 0.5) / tieCount;
+        const p = qPoint(a, c, b, t);
+        const tg = qTangent(a, c, b, t);
+        ties.push({ x: p.x, y: p.y, angle: (Math.atan2(tg.y, tg.x) * 180) / Math.PI, len: 0 });
+      }
+    }
+
     const f = (v: number): string => v.toFixed(2);
     out.set(r.id as string, {
       path: `M ${f(a.x)} ${f(a.y)} Q ${f(c.x)} ${f(c.y)} ${f(b.x)} ${f(b.y)}`,
       slots,
+      ...(ties ? { ties } : {}),
       mid: qPoint(a, c, b, 0.5),
       perp,
     });

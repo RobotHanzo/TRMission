@@ -641,10 +641,18 @@ export function Board({
                   style={groupStyle}
                   onClick={claimable ? () => onPickRoute(r.id as string) : undefined}
                 >
+                  {/* Tunnel: a wide faint-grey stroke on the railway path covers the tie extent. */}
+                  {r.isTunnel && <path className="tunnel-bg" d={g.path} />}
                   {/* Paper roadbed seats the cars legibly over land and sea. */}
                   <path className="bed" d={g.path} />
-                  {/* Tunnel: a dashed sleeper track shows between the shorter cars. */}
-                  {r.isTunnel && <path className="tunnel-track" d={g.path} />}
+                  {/* Tunnel: diagonal ties, each rotated angle+45° so they cross at 45° to the track. */}
+                  {r.isTunnel && g.ties?.map((t, i) => (
+                    <rect
+                      key={i}
+                      className="tunnel-tie"
+                      transform={`translate(${t.x.toFixed(2)} ${t.y.toFixed(2)}) rotate(${(t.angle + 45).toFixed(1)})`}
+                    />
+                  ))}
 
                   {isFerry ? (
                     // Ferry: a dotted sea crossing carrying round pips. The `ferryLocos` pips that
