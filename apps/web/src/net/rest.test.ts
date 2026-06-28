@@ -32,3 +32,34 @@ describe('rest client silent refresh', () => {
     expect(refreshCount).toBe(1);
   });
 });
+
+describe('rest client: per-game settings + spectating', () => {
+  beforeEach(() => setAccessToken('AT'));
+  afterEach(() => vi.restoreAllMocks());
+
+  it('GETs the public rooms list', async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(res(200, [])));
+    vi.stubGlobal('fetch', fetchMock);
+    await api.getPublicRooms();
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/rooms/public', expect.objectContaining({ method: 'GET' }));
+  });
+
+  it('PATCHes a settings change', async () => {
+    const fetchMock = vi.fn((_path: string, _init?: RequestInit) =>
+      Promise.resolve(res(200, { code: 'ABCDEF' })),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    await api.updateRoomSettings('ABCDEF', { unlimitedStationBorrow: true });
+    const [path, init] = fetchMock.mock.calls[0]!;
+    expect(path).toBe('/api/v1/rooms/ABCDEF/settings');
+    expect(init?.method).toBe('PATCH');
+    expect(JSON.parse(init?.body as string)).toEqual({ unlimitedStationBorrow: true });
+  });
+
+  it('POSTs a spectate request', async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(res(200, { gameId: 'g', ticket: 't' })));
+    vi.stubGlobal('fetch', fetchMock);
+    await api.spectate('ABCDEF');
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/rooms/ABCDEF/spectate', expect.objectContaining({ method: 'POST' }));
+  });
+});
