@@ -1,6 +1,6 @@
 import type { PlayerId, RouteId, CityId, TicketId, CardColor, TrainColor } from '@trm/shared';
 import type { Result, RuleViolation } from '@trm/shared';
-import { ok, err, violation, TRAIN_COLORS } from '@trm/shared';
+import { ok, err, violation, asTicketId, TRAIN_COLORS } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
 import { getRoute, siblingOf } from './board';
@@ -14,6 +14,8 @@ import type { CardCounts } from './hand';
 import { validateRoutePayment, validateStationPayment } from './payments';
 import { currentPlayerId, endTurn } from './turn';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
+import { borrowConnectedTicketIds } from './graph/connectivity';
+import { stationBorrowEdges } from './scoring';
 
 export interface ReduceOutput {
   readonly state: GameState;
@@ -26,7 +28,10 @@ export function reduce(board: Board, state: GameState, action: Action): ReduceRe
   const res = dispatch(board, state, action);
   if (!res.ok) return res;
   // Every applied action advances the audit cursor.
-  return ok({ state: { ...res.value.state, actionSeq: state.actionSeq + 1 }, events: res.value.events });
+  return ok({
+    state: { ...res.value.state, actionSeq: state.actionSeq + 1 },
+    events: res.value.events,
+  });
 }
 
 function dispatch(board: Board, state: GameState, action: Action): ReduceResult {
@@ -34,12 +39,14 @@ function dispatch(board: Board, state: GameState, action: Action): ReduceResult 
   if (phase === 'GAME_OVER') return err(violation('GAME_OVER', 'game is over'));
 
   if (phase === 'SETUP_TICKETS') {
-    if (action.t !== 'KEEP_INITIAL_TICKETS') return err(violation('WRONG_PHASE', 'awaiting initial tickets'));
+    if (action.t !== 'KEEP_INITIAL_TICKETS')
+      return err(violation('WRONG_PHASE', 'awaiting initial tickets'));
     return applyKeepInitial(board, state, action.player, action.keep);
   }
 
   // In-game phases: must be the active player.
-  if (action.player !== currentPlayerId(state)) return err(violation('NOT_YOUR_TURN', 'not your turn'));
+  if (action.player !== currentPlayerId(state))
+    return err(violation('NOT_YOUR_TURN', 'not your turn'));
 
   switch (phase) {
     case 'AWAIT_ACTION':
@@ -61,10 +68,12 @@ function dispatch(board: Board, state: GameState, action: Action): ReduceResult 
       }
     case 'DRAWING_CARDS':
       if (action.t === 'DRAW_BLIND') return applyDrawBlind(board, state, action.player);
-      if (action.t === 'DRAW_FACEUP') return applyDrawFaceup(board, state, action.player, action.slot);
+      if (action.t === 'DRAW_FACEUP')
+        return applyDrawFaceup(board, state, action.player, action.slot);
       return err(violation('WRONG_PHASE', 'must finish drawing'));
     case 'TICKET_SELECTION':
-      if (action.t === 'KEEP_TICKETS') return applyKeepTickets(board, state, action.player, action.keep);
+      if (action.t === 'KEEP_TICKETS')
+        return applyKeepTickets(board, state, action.player, action.keep);
       return err(violation('WRONG_PHASE', 'must select tickets'));
     case 'TUNNEL_PENDING':
       if (action.t === 'RESOLVE_TUNNEL')
@@ -88,12 +97,15 @@ function validateKeep(
   const offerSet = new Set(offer as readonly string[]);
   const seen = new Set<string>();
   for (const id of keep) {
-    if (!offerSet.has(id as string)) return violation('TICKET_INVALID_SELECTION', 'kept a ticket not offered');
-    if (seen.has(id as string)) return violation('TICKET_INVALID_SELECTION', 'duplicate kept ticket');
+    if (!offerSet.has(id as string))
+      return violation('TICKET_INVALID_SELECTION', 'kept a ticket not offered');
+    if (seen.has(id as string))
+      return violation('TICKET_INVALID_SELECTION', 'duplicate kept ticket');
     if (!board.ticketById.has(id as string)) return violation('UNKNOWN_TICKET', 'unknown ticket');
     seen.add(id as string);
   }
-  if (keep.length < minKeep) return violation('TICKET_KEEP_TOO_FEW', `keep at least ${minKeep}`, { min: minKeep });
+  if (keep.length < minKeep)
+    return violation('TICKET_KEEP_TOO_FEW', `keep at least ${minKeep}`, { min: minKeep });
   if (mustKeepLong) {
     for (const id of offer) {
       if (board.ticketById.get(id as string)?.deck === 'LONG' && !seen.has(id as string))
@@ -134,7 +146,12 @@ function applyKeepInitial(
   const v = validateKeep(board, p.pendingTicketOffer, keep, state.ruleParams.minKeepInitial, true);
   if (v) return err(v);
 
-  const { ticketDeckLong, ticketDeckShort } = returnTickets(board, state, p.pendingTicketOffer, keep);
+  const { ticketDeckLong, ticketDeckShort } = returnTickets(
+    board,
+    state,
+    p.pendingTicketOffer,
+    keep,
+  );
   let next: GameState = {
     ...withPlayer(state, player, (pl) => ({
       ...pl,
@@ -150,7 +167,9 @@ function applyKeepInitial(
   ];
 
   // When every player has resolved their initial offer, the game begins.
-  const allResolved = state.turnOrder.every((id) => next.players[id as string]?.pendingTicketOffer === null);
+  const allResolved = state.turnOrder.every(
+    (id) => next.players[id as string]?.pendingTicketOffer === null,
+  );
   if (allResolved) {
     next = { ...next, turn: { orderIndex: 0, phase: 'AWAIT_ACTION', cardsDrawnThisTurn: 0 } };
     events.push({
@@ -175,7 +194,7 @@ function applyKeepTickets(
   if (v) return err(v);
   const offer = p.pendingTicketOffer as readonly TicketId[];
   const { ticketDeckLong, ticketDeckShort } = returnTickets(board, state, offer, keep);
-  const next: GameState = {
+  let next: GameState = {
     ...withPlayer(state, player, (pl) => ({
       ...pl,
       keptTickets: [...pl.keptTickets, ...keep],
@@ -184,15 +203,23 @@ function applyKeepTickets(
     ticketDeckLong,
     ticketDeckShort,
   };
+  // A freshly-kept ticket may already be satisfied by the player's existing network — lock it now.
+  const lock = lockCompletedTickets(board, next);
+  next = lock.state;
   const out = endTurn(board, next, { wasPass: false });
   return ok({
     state: out.state,
-    events: [{ e: 'TICKETS_KEPT', player, keptCount: keep.length, visibility: 'PUBLIC' }, ...out.events],
+    events: [
+      { e: 'TICKETS_KEPT', player, keptCount: keep.length, visibility: 'PUBLIC' },
+      ...lock.events,
+      ...out.events,
+    ],
   });
 }
 
 function applyDrawTickets(board: Board, state: GameState, player: PlayerId): ReduceResult {
-  if (state.ticketDeckShort.length === 0) return err(violation('NOTHING_TO_DRAW', 'ticket deck empty'));
+  if (state.ticketDeckShort.length === 0)
+    return err(violation('NOTHING_TO_DRAW', 'ticket deck empty'));
   const count = Math.min(state.ruleParams.ticketDrawCount, state.ticketDeckShort.length);
   const short = [...state.ticketDeckShort];
   const offered: TicketId[] = [];
@@ -229,6 +256,11 @@ function applyDrawBlind(board: Board, state: GameState, player: PlayerId): Reduc
   events.push({ e: 'CARD_DRAWN_BLIND', player, card: d.card, visibility: { private: player } });
 
   if (isFirst) {
+    if (d.card === 'LOCOMOTIVE' && !state.ruleParams.secondDrawAfterBlindRainbow) {
+      // Variant default: a blind rainbow consumes the whole draw — end the turn now.
+      const out = endTurn(board, next, { wasPass: false });
+      return ok({ state: out.state, events: [...events, ...out.events] });
+    }
     next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 1 } };
     return ok({ state: next, events });
   }
@@ -236,15 +268,24 @@ function applyDrawBlind(board: Board, state: GameState, player: PlayerId): Reduc
   return ok({ state: out.state, events: [...events, ...out.events] });
 }
 
-function applyDrawFaceup(board: Board, state: GameState, player: PlayerId, slot: number): ReduceResult {
-  if (slot < 0 || slot >= state.market.length) return err(violation('MARKET_SLOT_EMPTY', 'bad market slot'));
+function applyDrawFaceup(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  slot: number,
+): ReduceResult {
+  if (slot < 0 || slot >= state.market.length)
+    return err(violation('MARKET_SLOT_EMPTY', 'bad market slot'));
   const card = state.market[slot];
-  if (card === null || card === undefined) return err(violation('MARKET_SLOT_EMPTY', 'empty market slot'));
+  if (card === null || card === undefined)
+    return err(violation('MARKET_SLOT_EMPTY', 'empty market slot'));
   const isFirst = state.turn.phase === 'AWAIT_ACTION';
 
   // A face-up Locomotive may not be taken as the SECOND draw.
   if (card === 'LOCOMOTIVE' && !isFirst) {
-    return err(violation('FACEUP_LOCO_SECOND_DRAW', 'cannot take a face-up locomotive as the second draw'));
+    return err(
+      violation('FACEUP_LOCO_SECOND_DRAW', 'cannot take a face-up locomotive as the second draw'),
+    );
   }
 
   const newMarket = state.market.slice();
@@ -264,7 +305,8 @@ function applyDrawFaceup(board: Board, state: GameState, player: PlayerId, slot:
     { e: 'CARD_TAKEN_FACEUP', player, slot, card, visibility: 'PUBLIC' },
   ];
   if (refill.reshuffled) events.push({ e: 'DECK_RESHUFFLED', visibility: 'PUBLIC' });
-  if (refill.recycled) events.push({ e: 'MARKET_RECYCLED', reason: 'THREE_LOCOS', visibility: 'PUBLIC' });
+  if (refill.recycled)
+    events.push({ e: 'MARKET_RECYCLED', reason: 'THREE_LOCOS', visibility: 'PUBLIC' });
   events.push({ e: 'MARKET_REFILLED', market: refill.market, visibility: 'PUBLIC' });
 
   // Taking a face-up Locomotive (only possible on the first draw) consumes the whole draw.
@@ -326,7 +368,13 @@ function applyClaimEffects(
     trainCars: p.trainCars - route.length,
     routePoints: p.routePoints + points,
   }));
-  events.unshift({ e: 'ROUTE_CLAIMED', player, routeId: route.id, pointsAwarded: points, visibility: 'PUBLIC' });
+  events.unshift({
+    e: 'ROUTE_CLAIMED',
+    player,
+    routeId: route.id,
+    pointsAwarded: points,
+    visibility: 'PUBLIC',
+  });
   return { state: next, events };
 }
 
@@ -348,12 +396,14 @@ function applyClaimRoute(
 
   if (route.isTunnel) return beginTunnel(state, player, route, payment, pay.value.playedColor);
 
-  // Normal claim: spend, apply, end turn.
+  // Normal claim: spend, apply, lock newly-completed tickets, end turn.
   let next = spendCards(state, player, pay.value.spent);
   const eff = applyClaimEffects(board, next, player, route);
   next = eff.state;
+  const lock = lockCompletedTickets(board, next);
+  next = lock.state;
   const out = endTurn(board, next, { wasPass: false });
-  return ok({ state: out.state, events: [...eff.events, ...out.events] });
+  return ok({ state: out.state, events: [...eff.events, ...lock.events, ...out.events] });
 }
 
 function beginTunnel(
@@ -387,12 +437,26 @@ function beginTunnel(
     deck,
     discard,
     rng,
-    pendingTunnel: { playerId: player, routeId: route.id, payment, playedColor, revealed, extraRequired },
+    pendingTunnel: {
+      playerId: player,
+      routeId: route.id,
+      payment,
+      playedColor,
+      revealed,
+      extraRequired,
+    },
     turn: { ...state.turn, phase: 'TUNNEL_PENDING' },
   };
   const events: GameEvent[] = [];
   if (reshuffled) events.push({ e: 'DECK_RESHUFFLED', visibility: 'PUBLIC' });
-  events.push({ e: 'TUNNEL_REVEALED', player, routeId: route.id, revealed, extraRequired, visibility: 'PUBLIC' });
+  events.push({
+    e: 'TUNNEL_REVEALED',
+    player,
+    routeId: route.id,
+    revealed,
+    extraRequired,
+    visibility: 'PUBLIC',
+  });
   return ok({ state: next, events });
 }
 
@@ -425,7 +489,13 @@ function applyResolveTunnel(
     return ok({
       state: out.state,
       events: [
-        { e: 'TUNNEL_RESOLVED', player, routeId: pt.routeId, committed: false, visibility: 'PUBLIC' },
+        {
+          e: 'TUNNEL_RESOLVED',
+          player,
+          routeId: pt.routeId,
+          committed: false,
+          visibility: 'PUBLIC',
+        },
         ...out.events,
       ],
     });
@@ -433,9 +503,14 @@ function applyResolveTunnel(
 
   // Commit: validate the extra payment.
   const ex = extra ?? { color: null, colorCount: 0, locomotives: 0 };
-  if (ex.colorCount < 0 || ex.locomotives < 0) return err(violation('TUNNEL_BAD_EXTRA', 'negative extra'));
+  if (ex.colorCount < 0 || ex.locomotives < 0)
+    return err(violation('TUNNEL_BAD_EXTRA', 'negative extra'));
   if (ex.colorCount + ex.locomotives !== pt.extraRequired) {
-    return err(violation('TUNNEL_BAD_EXTRA', `extra must total ${pt.extraRequired}`, { need: pt.extraRequired }));
+    return err(
+      violation('TUNNEL_BAD_EXTRA', `extra must total ${pt.extraRequired}`, {
+        need: pt.extraRequired,
+      }),
+    );
   }
   if (ex.colorCount > 0) {
     if (pt.playedColor === null || ex.color !== pt.playedColor) {
@@ -451,19 +526,23 @@ function applyResolveTunnel(
   const totalSpent = { ...base };
   for (const k of Object.keys(extraSpent) as (keyof CardCounts)[]) totalSpent[k] += extraSpent[k];
   for (const k of Object.keys(totalSpent) as (keyof CardCounts)[]) {
-    if (p.hand[k] < totalSpent[k]) return err(violation('TUNNEL_EXTRA_UNPAYABLE', 'cannot pay tunnel surcharge'));
+    if (p.hand[k] < totalSpent[k])
+      return err(violation('TUNNEL_EXTRA_UNPAYABLE', 'cannot pay tunnel surcharge'));
   }
 
   let next: GameState = { ...state, discard: discardAfterReveal, pendingTunnel: null };
   next = spendCards(next, player, totalSpent);
   const eff = applyClaimEffects(board, next, player, route);
   next = eff.state;
+  const lock = lockCompletedTickets(board, next);
+  next = lock.state;
   const out = endTurn(board, next, { wasPass: false });
   return ok({
     state: out.state,
     events: [
       { e: 'TUNNEL_RESOLVED', player, routeId: pt.routeId, committed: true, visibility: 'PUBLIC' },
       ...eff.events,
+      ...lock.events,
       ...out.events,
     ],
   });
@@ -479,7 +558,8 @@ function applyBuildStation(
   payment: Payment,
 ): ReduceResult {
   if (!board.cityById.has(cityId as string)) return err(violation('UNKNOWN_CITY', 'unknown city'));
-  if (state.stations.some((s) => s.cityId === cityId)) return err(violation('STATION_CITY_TAKEN', 'city has a station'));
+  if (state.stations.some((s) => s.cityId === cityId))
+    return err(violation('STATION_CITY_TAKEN', 'city has a station'));
   const p = getPlayer(state, player);
   if (!p) return err(violation('NOT_YOUR_TURN', 'unknown player'));
   if (p.stationsRemaining <= 0) return err(violation('STATION_LIMIT', 'no stations left'));
@@ -492,10 +572,16 @@ function applyBuildStation(
   let next = spendCards(state, player, pay.value.spent);
   next = withPlayer(next, player, (pl) => ({ ...pl, stationsRemaining: pl.stationsRemaining - 1 }));
   next = { ...next, stations: [...next.stations, { playerId: player, cityId }] };
+  const lock = lockCompletedTickets(board, next);
+  next = lock.state;
   const out = endTurn(board, next, { wasPass: false });
   return ok({
     state: out.state,
-    events: [{ e: 'STATION_BUILT', player, cityId, visibility: 'PUBLIC' }, ...out.events],
+    events: [
+      { e: 'STATION_BUILT', player, cityId, visibility: 'PUBLIC' },
+      ...lock.events,
+      ...out.events,
+    ],
   });
 }
 
@@ -510,6 +596,60 @@ function applyPass(board: Board, state: GameState, player: PlayerId): ReduceResu
     state: out.state,
     events: [{ e: 'PLAYER_PASSED', player, visibility: 'PUBLIC' }, ...out.events],
   });
+}
+
+// ─────────────────────────────────────── instant ticket completion ──────────────────────────
+
+/**
+ * Under `unlimitedStationBorrow`, re-evaluate every player's kept tickets after a connectivity
+ * change and lock any newly-completed ones into `completedTickets`, emitting TICKET_COMPLETED.
+ * No-op when the variant is off. ALL players are checked because an opponent's claim into a
+ * player's station city can complete that player's ticket. The borrow graph only grows, so this
+ * is monotonic — a locked ticket never retracts, and the locked set equals the end-game total.
+ */
+function lockCompletedTickets(
+  board: Board,
+  state: GameState,
+): { state: GameState; events: GameEvent[] } {
+  if (!state.ruleParams.unlimitedStationBorrow) return { state, events: [] };
+  let next = state;
+  const events: GameEvent[] = [];
+  for (const pid of state.turnOrder) {
+    const p = next.players[pid as string];
+    if (!p || p.keptTickets.length === 0) continue;
+    const already = new Set(p.completedTickets as readonly string[]);
+
+    const ownEdges: { a: string; b: string }[] = [];
+    for (const [routeId, cell] of Object.entries(next.ownership)) {
+      if ('owner' in cell && cell.owner === pid) {
+        const r = board.routeById.get(routeId);
+        if (r) ownEdges.push({ a: r.a as string, b: r.b as string });
+      }
+    }
+    const tickets = p.keptTickets
+      .map((tid) => {
+        const t = board.ticketById.get(tid as string);
+        return t ? { id: tid as string, a: t.a as string, b: t.b as string } : null;
+      })
+      .filter((x): x is { id: string; a: string; b: string } => x !== null);
+
+    const connected = borrowConnectedTicketIds({
+      ownEdges,
+      borrowEdges: stationBorrowEdges(board, next, pid),
+      tickets,
+    });
+    const newly = connected.filter((id) => !already.has(id));
+    if (newly.length > 0) {
+      const newIds = newly.map((id) => asTicketId(id));
+      next = withPlayer(next, pid, (pl) => ({
+        ...pl,
+        completedTickets: [...pl.completedTickets, ...newIds],
+      }));
+      for (const id of newIds)
+        events.push({ e: 'TICKET_COMPLETED', player: pid, ticket: id, visibility: 'PUBLIC' });
+    }
+  }
+  return { state: next, events };
 }
 
 // Whether the player has ANY legal non-pass move (used by PASS validation and legalActions).

@@ -7,9 +7,19 @@ export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).m
 export const ReadySchema = z.object({ ready: z.boolean() });
 export const AddBotSchema = z.object({ difficulty: botDifficulty });
 
+export const GameSettingsSchema = z.object({
+  unlimitedStationBorrow: z.boolean(),
+  secondDrawAfterBlindRainbow: z.boolean(),
+  noUnfinishedTicketPenalty: z.boolean(),
+  allowSpectating: z.boolean(),
+  visibility: z.enum(['PUBLIC', 'INVITE_ONLY']),
+});
+export const UpdateSettingsSchema = GameSettingsSchema.partial();
+
 export class CreateRoomDto extends createZodDto(CreateRoomSchema) {}
 export class ReadyDto extends createZodDto(ReadySchema) {}
 export class AddBotDto extends createZodDto(AddBotSchema) {}
+export class UpdateSettingsDto extends createZodDto(UpdateSettingsSchema) {}
 
 export const RoomMemberSchema = z.object({
   userId: z.string(),
@@ -26,6 +36,7 @@ export const RoomViewSchema = z.object({
   status: z.enum(['LOBBY', 'STARTED', 'CLOSED']),
   maxPlayers: z.number(),
   members: z.array(RoomMemberSchema),
+  settings: GameSettingsSchema,
   gameId: z.string().optional(),
 });
 export const TicketResultSchema = z.object({ gameId: z.string(), ticket: z.string() });

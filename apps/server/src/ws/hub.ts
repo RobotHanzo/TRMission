@@ -53,6 +53,8 @@ export class GameHub {
   private readonly connections = new Map<string, Connection>();
   /** gameId → (playerId → that player's current connection). */
   private readonly members = new Map<string, Map<string, Connection>>();
+  /** gameId → spectator connections (seat -1): receive public snapshots/events, can never act. */
+  private readonly spectators = new Map<string, Set<Connection>>();
   private readonly verifier: TicketVerifier;
   private readonly store: GameStorePort | undefined;
   private readonly boardResolver: (config: GameConfig) => Board;
@@ -144,6 +146,7 @@ export class GameHub {
     if (conn.binding) {
       const m = this.members.get(conn.binding.gameId);
       if (m?.get(conn.binding.player as string) === conn) m.delete(conn.binding.player as string);
+      this.spectators.get(conn.binding.gameId)?.delete(conn);
     }
     this.connections.delete(id);
     this.metrics.connectionClosed();
@@ -221,6 +224,26 @@ export class GameHub {
       return;
     }
     const player = asPlayerId(binding.playerId);
+
+    // Spectator binding (seat -1): no seat, projected as a null viewer (no SelfView). Never added
+    // to `members`, so it cannot act and never receives private events.
+    if (binding.seat < 0) {
+      conn.binding = { gameId: binding.gameId, player, seat: -1 };
+      conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
+      let set = this.spectators.get(binding.gameId);
+      if (!set) {
+        set = new Set();
+        this.spectators.set(binding.gameId, set);
+      }
+      set.add(conn);
+      // The Welcome.seat field is uint32 and unused by the client for spectators (they are
+      // identified by the absent SelfView in the snapshot); send 0 to keep the binding at -1.
+      conn.send(welcomeFrame(binding.gameId, binding.playerId, 0), clientSeq);
+      this.sendProjected(conn, match, null, clientSeq);
+      this.sendCachedCamera(conn);
+      return;
+    }
+
     const inGame = match.session.turnOrder.includes(player);
     if (!inGame || match.session.seatOf(player) !== binding.seat) {
       conn.send(
@@ -297,6 +320,17 @@ export class GameHub {
           RejectionCode.UNAUTHENTICATED,
           'errors:unauthenticated',
           'not bound',
+        ),
+      );
+      return;
+    }
+    if (conn.binding.seat < 0) {
+      conn.send(
+        rejectionFrame(
+          env.clientSeq,
+          RejectionCode.NOT_IN_GAME,
+          'errors:notInGame',
+          'spectators cannot act',
         ),
       );
       return;
@@ -511,6 +545,18 @@ export class GameHub {
         .map((e) => eventToProto(e, player))
         .filter((e): e is PbGameEvent => e !== null);
       if (pbEvents.length > 0) member.send(eventsFrame(version, pbEvents));
+    }
+
+    // Spectators: a null-viewer snapshot + PUBLIC events only (private events drop to null).
+    const specs = this.spectators.get(match.session.gameId);
+    if (specs && specs.size > 0) {
+      const pubEvents = events
+        .map((e) => eventToProto(e, null))
+        .filter((e): e is PbGameEvent => e !== null);
+      for (const spec of specs) {
+        this.sendProjected(spec, match, null, 0);
+        if (pubEvents.length > 0) spec.send(eventsFrame(version, pubEvents));
+      }
     }
   }
 }

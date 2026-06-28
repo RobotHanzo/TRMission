@@ -34,7 +34,12 @@ export { reduce, hasAnyLegalMove } from './reduce';
 export type { ReduceResult, ReduceOutput } from './reduce';
 export { currentPlayerId, endTurn } from './turn';
 
-export { computeFinalScores, evaluatePlayerTickets, longestTrailRouteIdsFor } from './scoring';
+export {
+  computeFinalScores,
+  evaluatePlayerTickets,
+  longestTrailRouteIdsFor,
+  stationBorrowEdges,
+} from './scoring';
 export type { PlayerTicketDetail } from './scoring';
 export { legalActions, enumerateClaimPayments, redactFor } from './selectors';
 export { stateDigest, cloneState, replay } from './serialize';
@@ -43,7 +48,11 @@ export { checkInvariants } from './invariants';
 
 export { longestTrail, longestTrailWithPath } from './graph/longestTrail';
 export type { TrailEdge, TrailResult } from './graph/longestTrail';
-export { evaluateTickets, ownConnectedTicketIds } from './graph/connectivity';
+export {
+  evaluateTickets,
+  ownConnectedTicketIds,
+  borrowConnectedTicketIds,
+} from './graph/connectivity';
 export type { Edge, TicketGoal, TicketEvaluation, IdTicketGoal } from './graph/connectivity';
 export { UnionFind } from './graph/unionFind';
 

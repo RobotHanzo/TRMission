@@ -114,6 +114,10 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
       });
     case 'GAME_ENDED':
       return wrap({ case: 'gameEnded', value: {} });
+    case 'TICKET_COMPLETED':
+      // Cosmetic-only: completion is already conveyed authoritatively by the snapshot's
+      // `completed_tickets` list, so this engine event has no dedicated wire frame.
+      return null;
   }
 }
 

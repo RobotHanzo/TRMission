@@ -130,6 +130,11 @@ export function viewToSnapshot(
       playerId: c.player as string,
       ticketId: c.ticket as string,
     })),
+    gameSettings: {
+      unlimitedStationBorrow: view.settings.unlimitedStationBorrow,
+      secondDrawAfterBlindRainbow: view.settings.secondDrawAfterBlindRainbow,
+      noUnfinishedTicketPenalty: view.settings.noUnfinishedTicketPenalty,
+    },
     you:
       self === undefined || self.hand === null
         ? undefined

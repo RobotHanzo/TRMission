@@ -40,12 +40,21 @@ export interface RoomMember {
   isBot?: boolean;
   difficulty?: BotDifficulty;
 }
+export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
+export interface RoomSettings {
+  unlimitedStationBorrow: boolean;
+  secondDrawAfterBlindRainbow: boolean;
+  noUnfinishedTicketPenalty: boolean;
+  allowSpectating: boolean;
+  visibility: RoomVisibility;
+}
 export interface RoomView {
   code: string;
   hostId: string;
   status: 'LOBBY' | 'STARTED' | 'CLOSED';
   maxPlayers: number;
   members: RoomMember[];
+  settings: RoomSettings;
   gameId?: string;
 }
 export interface TicketResult {
@@ -162,6 +171,10 @@ export const api = {
     req<RoomView>('POST', `/rooms/${code}/kick/${encodeURIComponent(userId)}`),
   startRoom: (code: string) => req<TicketResult>('POST', `/rooms/${code}/start`),
   getTicket: (code: string) => req<TicketResult>('POST', `/rooms/${code}/ticket`),
+  getPublicRooms: () => req<RoomView[]>('GET', '/rooms/public'),
+  updateRoomSettings: (code: string, patch: Partial<RoomSettings>) =>
+    req<RoomView>('PATCH', `/rooms/${code}/settings`, patch),
+  spectate: (code: string) => req<TicketResult>('POST', `/rooms/${code}/spectate`),
 
   history: () => req<MatchSummary[]>('GET', '/history'),
 };

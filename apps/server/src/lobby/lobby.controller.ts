@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LobbyService } from './lobby.service';
 import { AccessTokenGuard } from '../auth/access-token.guard';
@@ -7,9 +7,11 @@ import {
   CreateRoomDto,
   ReadyDto,
   AddBotDto,
+  UpdateSettingsDto,
   CreateRoomSchema,
   ReadySchema,
   AddBotSchema,
+  UpdateSettingsSchema,
   RoomViewSchema,
   TicketResultSchema,
 } from './lobby.schemas';
@@ -96,6 +98,19 @@ export class LobbyController {
     return this.lobby.kick(code.toUpperCase(), user, userId);
   }
 
+  @Patch(':code/settings')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Host updates per-game settings (LOBBY only)' })
+  @ApiBody({ schema: apiSchema(UpdateSettingsSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  updateSettings(
+    @CurrentUser() user: AuthUser,
+    @Param('code') code: string,
+    @Body() body: UpdateSettingsDto,
+  ) {
+    return this.lobby.updateSettings(code.toUpperCase(), user, body);
+  }
+
   @Post(':code/start')
   @HttpCode(200)
   @ApiOperation({ summary: 'Host starts the game; returns your ws-game ticket' })
@@ -110,5 +125,15 @@ export class LobbyController {
   @ApiResponse({ status: 200, schema: apiSchema(TicketResultSchema) })
   ticket(@CurrentUser() user: AuthUser, @Param('code') code: string) {
     return this.lobby.ticket(code.toUpperCase(), user);
+  }
+
+  @Post(':code/spectate')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Mint a spectator ws-ticket for a live game (if spectating is allowed)',
+  })
+  @ApiResponse({ status: 200, schema: apiSchema(TicketResultSchema) })
+  spectate(@CurrentUser() user: AuthUser, @Param('code') code: string) {
+    return this.lobby.spectateTicket(code.toUpperCase(), user);
   }
 }
