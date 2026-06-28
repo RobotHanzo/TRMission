@@ -376,6 +376,33 @@
   stroke: var(--tr-sea);
 }
 
+/* Offered-ticket endpoints, while choosing tickets: a soft warm halo behind the marker so a
+   player can spot the cities a ticket connects and pan the board to trace its railways. Kept
+   gentle ("glow but not too much") — a low-opacity disc with a slow breathe; sized off
+   --marker-scale so it tracks the city dot as the map zooms. */
+.ticket-target-halo {
+  fill: var(--tr-ember);
+  opacity: 0.22;
+  r: calc(2.6px * var(--marker-scale));
+  pointer-events: none;
+  animation: tr-ticket-target 2.6s ease-in-out infinite;
+}
+@keyframes tr-ticket-target {
+  0%,
+  100% {
+    opacity: 0.14;
+  }
+  50% {
+    opacity: 0.32;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticket-target-halo {
+    animation: none;
+    opacity: 0.22;
+  }
+}
+
 /* ── Cartographic level-of-detail (label/badge density vs. zoom) ─────────────── */
 /* Labels reveal in tiers so the dense corridors don't all pop in at once. Islands
    always keep their label; minor stations only surface at the closest zoom.
@@ -928,8 +955,64 @@ button.ticket-card:hover {
   fill: var(--tr-surface);
 }
 
-.modal-tickets {
-  max-width: 560px;
+/* ── Ticket chooser (takes over the rail while choosing destination tickets) ──── */
+/* Rendered in the rail instead of as a backdrop modal, so the board stays visible and
+   pan/zoomable underneath for previewing routes. Looks like a tray-section panel; the rail
+   itself scrolls if the peeks are expanded. */
+.ticket-chooser {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+  padding: var(--tr-space-3) var(--tr-space-4) var(--tr-space-4);
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+}
+.chooser-hint {
+  margin: 0;
+  font-size: 0.82rem;
+}
+/* Offered tickets: two cards per row, stretched to the rail width (mirrors the missions tray). */
+.chooser-offer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--tr-space-3);
+}
+.chooser-offer .ticket-slot {
+  min-width: 0;
+}
+.chooser-offer .ticket-card {
+  width: 100%;
+}
+/* Peeks at the player's own hand / kept tickets, hidden because the chooser replaced the rail. */
+.chooser-peeks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-2);
+  border-top: 1px solid var(--tr-line);
+  padding-top: var(--tr-space-3);
+}
+.peek-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  width: 100%;
+  justify-content: flex-start;
+  background: var(--tr-surface-2);
+  border: 1px solid var(--tr-line);
+}
+.peek-label {
+  font-weight: 600;
+}
+.peek-toggle .tray-count {
+  margin-left: auto;
+}
+.peek-body {
+  padding: var(--tr-space-1) 0;
+}
+.chooser-confirm {
+  width: 100%;
 }
 
 /* Narrow screens can't afford a side rail: collapse either layout to a single column with a

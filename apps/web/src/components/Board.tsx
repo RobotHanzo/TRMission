@@ -46,6 +46,8 @@ interface BoardProps {
   canAct: boolean;
   onPickRoute(routeId: string): void;
   onPickCity(cityId: string): void;
+  /** Cities to softly highlight (the offered tickets' endpoints, while choosing tickets). */
+  highlightCities?: ReadonlySet<string> | undefined;
 }
 
 const VIEWBOX = `${BASE_VIEW.x} ${BASE_VIEW.y} ${BASE_VIEW.w} ${BASE_VIEW.h}`;
@@ -446,6 +448,7 @@ export function Board({
   canAct,
   onPickRoute,
   onPickCity,
+  highlightCities,
 }: BoardProps) {
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const stationCities = useMemo(() => {
@@ -714,8 +717,12 @@ export function Board({
               const onPick = buildable ? () => onPickCity(c.id as string) : undefined;
               const builtSeat = glowingStations.get(c.id as string);
               const justBuilt = builtSeat !== undefined;
+              const isTarget = highlightCities?.has(c.id as string) ?? false;
               return (
-                <g key={c.id as string} className={cls}>
+                <g key={c.id as string} className={isTarget ? `${cls} ticket-target` : cls}>
+                  {/* Offered-ticket endpoint: a soft halo behind the marker so the player can trace
+                      the railways a ticket needs while the chooser holds the rail. */}
+                  {isTarget && <circle className="ticket-target-halo" cx={c.x} cy={c.y} />}
                   {/* Junctions where many lines converge read as a wider slot-shaped station;
                       ordinary stops stay round. Geometry comes from CSS (so it can grow with
                       zoom via --marker-scale); the transform just plants it on the city. */}

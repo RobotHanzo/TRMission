@@ -195,56 +195,6 @@
   opacity: 0.9;
 }
 
-/* ── Ticket dialog motion (items 3 & 4) ──────────────────────────────────────── */
-/* Each offered ticket sits in a slot wrapper so it can flip in on open, then fly on confirm. */
-.modal-tickets .ticket-slot {
-  display: flex;
-  will-change: transform, opacity;
-}
-/* Open: staggered flip reveal (item 3), reusing the card-flip keyframe. */
-.modal-tickets .ticket-cards > .ticket-slot {
-  animation: anim-card-flip-in 0.45s ease-out both;
-}
-.modal-tickets .ticket-cards > .ticket-slot:nth-child(2) {
-  animation-delay: 0.09s;
-}
-.modal-tickets .ticket-cards > .ticket-slot:nth-child(3) {
-  animation-delay: 0.18s;
-}
-.modal-tickets .ticket-cards > .ticket-slot:nth-child(4) {
-  animation-delay: 0.27s;
-}
-.modal-tickets .ticket-cards > .ticket-slot:nth-child(5) {
-  animation-delay: 0.36s;
-}
-.modal-tickets .ticket-cards > .ticket-slot:nth-child(6) {
-  animation-delay: 0.45s;
-}
-/* Confirm: drop the open animation so the JS-set transform governs the fly-out (item 4). */
-.modal-tickets .ticket-cards.is-confirming > .ticket-slot {
-  animation: none;
-  transition:
-    transform 0.5s cubic-bezier(0.4, 0, 0.6, 1),
-    opacity 0.5s ease;
-}
-/* While cards fly to the tray, dissolve the dialog chrome and stop the modal clipping
-   (.modal has overflow:auto) so the flight crosses the whole view, not just the box. */
-.modal-backdrop.is-flying {
-  background: transparent;
-  pointer-events: none;
-  transition: background 0.3s ease;
-}
-.modal-tickets.is-flying {
-  overflow: visible;
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-}
-.modal-tickets.is-flying > :not(.ticket-cards) {
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
 /* ── Opponent-subtle completion cue (item 4) ─────────────────────────────────── */
 @keyframes anim-cue-pop {
   0% {
@@ -439,7 +389,6 @@
   .score-float,
   .tracker.is-turn-cue,
   .tracker.is-your-turn,
-  .modal-tickets .ticket-cards > .ticket-slot,
   .ticket-cue,
   .fanfare-backdrop,
   .fanfare-panel,
@@ -447,9 +396,6 @@
   .endgame-panel,
   .endgame-icon {
     animation: none !important;
-  }
-  .modal-tickets .ticket-cards.is-confirming > .ticket-slot {
-    transition: none !important;
   }
   .sweep-seg {
     stroke-dashoffset: 0;
