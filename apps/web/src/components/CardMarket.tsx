@@ -15,6 +15,7 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
   const { t } = useTranslation();
   const marketFlips = useAnimations((s) => s.marketFlips);
   const clearMarketFlip = useAnimations((s) => s.clearMarketFlip);
+  const coveredSlots = useAnimations((s) => s.coveredMarketSlots);
   return (
     <div className="market">
       <button
@@ -31,19 +32,26 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
         {snapshot.market.map((card, slot) => {
           const tok = tokenForPb(card);
           const empty = card === PbCardColor.UNSPECIFIED || !tok;
+          // A covered slot has a real (refilled) card underneath but stays face-down until the
+          // active draw resolves — still drawable, just not yet revealed.
+          const covered = coveredSlots.has(slot);
           return (
             <button
               key={slot}
-              className={marketFlips.has(slot) ? 'market-slot is-flipping' : 'market-slot'}
+              className={
+                'market-slot' +
+                (covered ? ' is-covered' : '') +
+                (marketFlips.has(slot) ? ' is-flipping' : '')
+              }
               data-anim="market-slot"
               data-slot={slot}
               disabled={!canDraw || empty}
               onClick={() => onDrawFaceUp(slot)}
               onAnimationEnd={() => clearMarketFlip(slot)}
-              style={empty ? undefined : { background: tok.hex, color: tok.ink }}
-              aria-label={tok ? tok.nameZh : 'empty'}
+              style={covered || empty ? undefined : { background: tok.hex, color: tok.ink }}
+              aria-label={covered ? t('drawBlind') : tok ? tok.nameZh : 'empty'}
             >
-              {tok ? tok.glyph : '·'}
+              {covered ? <Layers size={18} aria-hidden /> : tok ? tok.glyph : '·'}
             </button>
           );
         })}

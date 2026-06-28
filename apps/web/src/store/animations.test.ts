@@ -47,6 +47,16 @@ describe('animations store', () => {
     expect(useAnimations.getState().fanfare).toBeNull();
   });
 
+  it('marketCover holds a slot face-down; revealMarketSlots flips it into view', () => {
+    push({ kind: 'marketCover', slot: 2 });
+    expect(useAnimations.getState().coveredMarketSlots.has(2)).toBe(true);
+    expect(useAnimations.getState().marketFlips.has(2)).toBe(false);
+    useAnimations.getState().revealMarketSlots();
+    const s = useAnimations.getState();
+    expect(s.coveredMarketSlots.size).toBe(0);
+    expect(s.marketFlips.has(2)).toBe(true);
+  });
+
   it('opponent completion shows a subtle cue + sweep, no fanfare', () => {
     push(ticket({ isYou: false, playerId: 'p1', seat: 1 }));
     const s = useAnimations.getState();
@@ -57,10 +67,12 @@ describe('animations store', () => {
 
   it('reset clears everything', () => {
     push({ kind: 'glowRoute', routeId: 'R1', seat: 1 });
+    push({ kind: 'marketCover', slot: 0 });
     push(ticket({}));
     useAnimations.getState().reset();
     const s = useAnimations.getState();
     expect(s.glowingRoutes.size).toBe(0);
+    expect(s.coveredMarketSlots.size).toBe(0);
     expect(s.fanfare).toBeNull();
     expect(s.sweeps).toHaveLength(0);
   });

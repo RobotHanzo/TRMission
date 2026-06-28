@@ -13,6 +13,10 @@ const rectOf = (selector: string): DOMRect | null =>
   document.querySelector(selector)?.getBoundingClientRect() ?? null;
 const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
 
+// Cards travel at hand-card size (not the tiny deck/slot footprint), so the draw reads clearly.
+const CARD_W = 120;
+const CARD_H = Math.round((CARD_W * 92) / 132);
+
 /** One in-flight card, animated from its source (deck/market slot) to its target (hand/tracker). */
 function FlightMover({ flight }: { flight: Flight }) {
   const removeFlight = useAnimations((s) => s.removeFlight);
@@ -39,28 +43,31 @@ function FlightMover({ flight }: { flight: Flight }) {
       finish();
       return;
     }
+    const srcCx = src.left + src.width / 2;
+    const srcCy = src.top + src.height / 2;
+    // Fixed card size centred on the source; the card appears to grow out of the deck/slot.
     const base: CSSProperties = {
-      left: src.left,
-      top: src.top,
-      width: src.width,
-      height: src.height,
+      left: srcCx - CARD_W / 2,
+      top: srcCy - CARD_H / 2,
+      width: CARD_W,
+      height: CARD_H,
       opacity: 1,
-      transform: 'translate(0,0) scale(1)',
+      transform: 'translate(0,0) scale(0.8)',
     };
     setStyle(base);
-    const dx = dst.left + dst.width / 2 - (src.left + src.width / 2);
-    const dy = dst.top + dst.height / 2 - (src.top + src.height / 2);
+    const dx = dst.left + dst.width / 2 - srcCx;
+    const dy = dst.top + dst.height / 2 - srcCy;
     const raf = requestAnimationFrame(() =>
       requestAnimationFrame(() =>
         setStyle({
           ...base,
-          transition: 'transform 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.55s ease',
-          transform: `translate(${dx}px, ${dy}px) scale(0.45)`,
-          opacity: 0.15,
+          transition: 'transform 0.6s cubic-bezier(0.4,0,0.2,1), opacity 0.6s ease',
+          transform: `translate(${dx}px, ${dy}px) scale(1)`,
+          opacity: 0.1,
         }),
       ),
     );
-    const fallback = window.setTimeout(finish, 900);
+    const fallback = window.setTimeout(finish, 1000);
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(fallback);
@@ -69,11 +76,11 @@ function FlightMover({ flight }: { flight: Flight }) {
 
   return (
     <div
-      className={'flying-card' + (flight.color ? '' : ' is-cover')}
+      className={'flying-card' + (flight.color ? ' is-face' : ' is-cover')}
       style={style}
       onTransitionEnd={() => removeFlight(flight.id)}
     >
-      <FlyingCard color={flight.color} />
+      <FlyingCard color={flight.color} width={CARD_W} />
     </div>
   );
 }

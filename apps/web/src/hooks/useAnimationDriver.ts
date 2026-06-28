@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { GameSnapshot } from '@trm/proto';
+import { Phase, type GameSnapshot } from '@trm/proto';
 import { useGame } from '../store/game';
 import { useAnimations } from '../store/animations';
 import { intentsFromEvents } from '../game/animationModel';
@@ -17,10 +17,12 @@ export function useAnimationDriver(): void {
   const snapshot = useGame((s) => s.snapshot);
   const lastBatch = useGame((s) => s.lastBatch);
   const pushIntent = useAnimations((s) => s.pushIntent);
+  const revealMarketSlots = useAnimations((s) => s.revealMarketSlots);
 
   const prevCompleted = useRef<Map<string, Set<string>>>(new Map());
   const seeded = useRef(false);
   const seenBatchSeq = useRef(0);
+  const prevPhase = useRef<Phase | null>(null);
 
   // Event-driven intents (claim glow, draws, turn cue, market flip, score floats).
   useEffect(() => {
@@ -54,6 +56,15 @@ export function useAnimationDriver(): void {
     }
     prevCompleted.current = curr;
   }, [snapshot, pushIntent]);
+
+  // When a draw resolves (phase leaves DRAWING_CARDS), reveal any market slots held face-down.
+  useEffect(() => {
+    const phase = snapshot?.phase ?? null;
+    if (prevPhase.current === Phase.DRAWING_CARDS && phase !== Phase.DRAWING_CARDS) {
+      revealMarketSlots();
+    }
+    prevPhase.current = phase;
+  }, [snapshot, revealMarketSlots]);
 }
 
 const EMPTY: ReadonlySet<string> = new Set();

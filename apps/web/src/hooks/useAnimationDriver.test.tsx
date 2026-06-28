@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, act } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
-import { GameSnapshotSchema, type GameEvent, type GameSnapshot } from '@trm/proto';
+import { GameSnapshotSchema, Phase, type GameEvent, type GameSnapshot } from '@trm/proto';
 import { TICKETS } from '../game/content';
 import { useGame } from '../store/game';
 import { useAnimations } from '../store/animations';
@@ -10,9 +10,10 @@ import { useAnimationDriver } from './useAnimationDriver';
 const T1 = TICKETS[0]!.id as string;
 const T2 = TICKETS[1]!.id as string;
 
-function snap(version: number, completed: { p: string; t: string }[]): GameSnapshot {
+function snap(version: number, completed: { p: string; t: string }[], phase?: Phase): GameSnapshot {
   return create(GameSnapshotSchema, {
     stateVersion: version,
+    ...(phase === undefined ? {} : { phase }),
     players: [{ id: 'p0', seat: 0 }],
     you: { playerId: 'p0' },
     completedTickets: completed.map((c) => ({ playerId: c.p, ticketId: c.t })),
@@ -42,6 +43,17 @@ describe('useAnimationDriver', () => {
     act(() => useGame.getState().applySnapshot(snap(2, [{ p: 'p0', t: T1 }, { p: 'p0', t: T2 }])));
     expect(useAnimations.getState().fanfare?.ticketId).toBe(T2);
     expect(useAnimations.getState().floats.length).toBeGreaterThan(0);
+  });
+
+  it('reveals covered market slots when a draw finishes (phase leaves DRAWING_CARDS)', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(snap(1, [], Phase.DRAWING_CARDS)));
+    act(() => useAnimations.getState().pushIntent({ kind: 'marketCover', slot: 3 }));
+    expect(useAnimations.getState().coveredMarketSlots.has(3)).toBe(true);
+    act(() => useGame.getState().applySnapshot(snap(2, [], Phase.AWAIT_ACTION)));
+    const s = useAnimations.getState();
+    expect(s.coveredMarketSlots.size).toBe(0);
+    expect(s.marketFlips.has(3)).toBe(true);
   });
 
   it('turns an event batch into intents (RouteClaimed → glow)', () => {

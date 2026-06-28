@@ -1,5 +1,5 @@
 import type { CardColor } from '@trm/shared';
-import type { GameEvent, GameSnapshot } from '@trm/proto';
+import { Phase, type GameEvent, type GameSnapshot } from '@trm/proto';
 import { pbToCard } from './cards';
 
 /**
@@ -14,6 +14,7 @@ export type AnimIntent =
   | { kind: 'scoreFloat'; playerId: string; amount: number }
   | { kind: 'turnCue'; playerId: string; isYou: boolean }
   | { kind: 'marketFlip'; slot: number }
+  | { kind: 'marketCover'; slot: number }
   | {
       kind: 'ticketComplete';
       playerId: string;
@@ -61,7 +62,13 @@ export function intentsFromEvents(snapshot: GameSnapshot, events: GameEvent[]): 
           color: ev.value.playerId === me ? pbToCard(ev.value.card) : null,
           slot: ev.value.slot,
         });
-        out.push({ kind: 'marketFlip', slot: ev.value.slot });
+        // While the drawer still owes a second card (snapshot is post-action), keep the refilled
+        // slot face-down; it flips into view once the whole draw resolves. Otherwise reveal now.
+        out.push(
+          snapshot.phase === Phase.DRAWING_CARDS
+            ? { kind: 'marketCover', slot: ev.value.slot }
+            : { kind: 'marketFlip', slot: ev.value.slot },
+        );
         break;
       case 'marketRecycled':
         for (let slot = 0; slot < snapshot.market.length; slot++) out.push({ kind: 'marketFlip', slot });

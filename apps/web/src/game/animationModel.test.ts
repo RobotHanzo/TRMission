@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CardColor as Pb, type GameEvent, type GameSnapshot } from '@trm/proto';
+import { CardColor as Pb, Phase, type GameEvent, type GameSnapshot } from '@trm/proto';
 import { intentsFromEvents } from './animationModel';
 
 const snap = {
@@ -47,6 +47,15 @@ describe('intentsFromEvents', () => {
     ]);
     expect(out).toContainEqual({ kind: 'cardFly', toPlayerId: 'p1', faceUp: true, color: null, slot: 2 });
     expect(out).toContainEqual({ kind: 'marketFlip', slot: 2 });
+  });
+
+  it('mid-draw (phase DRAWING_CARDS) covers the refilled slot instead of revealing it', () => {
+    const midDraw = { ...snap, phase: Phase.DRAWING_CARDS } as unknown as GameSnapshot;
+    const out = intentsFromEvents(midDraw, [
+      event({ case: 'cardTakenFaceup', value: { playerId: 'p0', slot: 1, card: Pb.RED } as never }),
+    ]);
+    expect(out).toContainEqual({ kind: 'marketCover', slot: 1 });
+    expect(out).not.toContainEqual({ kind: 'marketFlip', slot: 1 });
   });
 
   it('TurnStarted → turnCue with isYou set for the local player', () => {
