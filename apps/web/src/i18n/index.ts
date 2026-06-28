@@ -19,6 +19,8 @@ const resources = {
       layout: '版面配置',
       layoutRail: '右側欄',
       layoutTray: '底部牌列',
+      sound: '音效',
+      volume: '音量',
       close: '關閉',
 
       guestName: '暱稱',
@@ -180,6 +182,8 @@ const resources = {
       layout: 'Layout',
       layoutRail: 'Right rail',
       layoutTray: 'Bottom tray',
+      sound: 'Sound',
+      volume: 'Volume',
       close: 'Close',
 
       guestName: 'Display name',

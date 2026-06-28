@@ -45,6 +45,10 @@ export function SettingsModal({ onClose }: Props) {
   const setTheme = useUi((s) => s.setTheme);
   const setColorBlind = useUi((s) => s.setColorBlind);
   const setBoardLayout = useUi((s) => s.setBoardLayout);
+  const soundEnabled = useUi((s) => s.soundEnabled);
+  const soundVolume = useUi((s) => s.soundVolume);
+  const setSoundEnabled = useUi((s) => s.setSoundEnabled);
+  const setSoundVolume = useUi((s) => s.setSoundVolume);
   const savePreferences = useSession((s) => s.savePreferences);
 
   useEffect(() => {
@@ -163,6 +167,32 @@ export function SettingsModal({ onClose }: Props) {
             aria-label={t('colorBlind')}
             className={colorBlind ? 'switch on' : 'switch'}
             onClick={() => chooseColorBlind(!colorBlind)}
+          >
+            <span className="switch-knob" />
+          </button>
+        </section>
+
+        <section className="setting setting-row">
+          <div>
+            <div className="setting-label">{t('sound')}</div>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={soundVolume}
+              disabled={!soundEnabled}
+              aria-label={t('volume')}
+              onChange={(e) => setSoundVolume(Number(e.target.value))}
+            />
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={soundEnabled}
+            aria-label={t('sound')}
+            className={soundEnabled ? 'switch on' : 'switch'}
+            onClick={() => setSoundEnabled(!soundEnabled)}
           >
             <span className="switch-knob" />
           </button>

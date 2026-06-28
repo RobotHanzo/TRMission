@@ -44,3 +44,33 @@ describe('SettingsModal account sync', () => {
     });
   });
 });
+
+describe('SettingsModal sound section', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    useSession.setState({ savePreferences: vi.fn() });
+    useUi.setState({
+      theme: 'system',
+      colorBlind: false,
+      locale: 'zh-Hant',
+      boardLayout: 'rail',
+      soundEnabled: true,
+      soundVolume: 0.6,
+    });
+  });
+
+  it('toggles mute and writes through to the store', () => {
+    render(<SettingsModal onClose={() => undefined} />);
+    const sw = screen.getByRole('switch', { name: /sound|音效/i });
+    expect(sw).toHaveAttribute('aria-checked', 'true');
+    fireEvent.click(sw);
+    expect(useUi.getState().soundEnabled).toBe(false);
+  });
+
+  it('changes volume via the slider', () => {
+    render(<SettingsModal onClose={() => undefined} />);
+    const slider = screen.getByRole('slider', { name: /volume|音量/i });
+    fireEvent.change(slider, { target: { value: '0.3' } });
+    expect(useUi.getState().soundVolume).toBeCloseTo(0.3);
+  });
+});
