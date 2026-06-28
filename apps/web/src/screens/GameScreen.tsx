@@ -7,7 +7,7 @@ import { useUi } from '../store/ui';
 import { useRoster } from '../store/roster';
 import { api } from '../net/rest';
 import { connectGame, getSocket } from '../net/connection';
-import { routeById } from '../game/content';
+import { routeById, ticketById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
 import { isMyTurn } from '../game/view';
 import {
@@ -27,7 +27,7 @@ import { PlayerHand } from '../components/PlayerHand';
 import { PlayerTrackers } from '../components/PlayerTrackers';
 import { TicketPanel } from '../components/TicketPanel';
 import { PaymentModal } from '../components/PaymentModal';
-import { KeepTicketsModal } from '../components/KeepTicketsModal';
+import { TicketChooser } from '../components/TicketChooser';
 import { TunnelModal } from '../components/TunnelModal';
 import { ScoreBoard } from '../components/ScoreBoard';
 import { AnimationLayer } from '../components/AnimationLayer';
@@ -173,6 +173,16 @@ export function GameScreen() {
     if (phase === Phase.SETUP_TICKETS) socket.keepInitialTickets(ids);
     else socket.keepTickets(ids);
   };
+  // While choosing tickets the chooser takes over the rail and the board stays interactive, so
+  // softly glow the endpoint cities of the offered tickets to help preview the railways they need.
+  const ticketEndpoints = needKeep
+    ? new Set(
+        (snapshot.you?.pendingOfferTicketIds ?? []).flatMap((id) => {
+          const def = ticketById.get(id);
+          return def ? [def.a as string, def.b as string] : [];
+        }),
+      )
+    : undefined;
 
   const tunnelMine = phase === Phase.TUNNEL_PENDING && snapshot.pendingTunnel?.playerId === me;
   const tunnelExtras =
@@ -193,6 +203,7 @@ export function GameScreen() {
         canAct={canAct}
         onPickRoute={pickRoute}
         onPickCity={pickCity}
+        highlightCities={ticketEndpoints}
       />
     </div>
   );
@@ -249,7 +260,22 @@ export function GameScreen() {
         </div>
       )}
       {boardPanel}
-      {boardLayout === 'rail' ? (
+      {needKeep ? (
+        // Choosing tickets takes over the rail so the board stays visible and pan/zoomable; the
+        // hand and kept missions move into the chooser's own peek toggles.
+        <aside className="game-rail">
+          <TicketChooser
+            offered={snapshot.you?.pendingOfferTicketIds ?? []}
+            minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
+            lockLong={phase === Phase.SETUP_TICKETS}
+            hand={snapshot.you?.hand}
+            handCount={myPub?.handCount ?? 0}
+            keptTicketIds={snapshot.you?.keptTicketIds ?? []}
+            completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
+            onConfirm={confirmKeep}
+          />
+        </aside>
+      ) : boardLayout === 'rail' ? (
         <aside className="game-rail">
           {trackers}
           {market}
@@ -273,14 +299,6 @@ export function GameScreen() {
           options={claim.payments}
           onPick={confirmPayment}
           onCancel={() => setClaim(null)}
-        />
-      )}
-      {needKeep && (
-        <KeepTicketsModal
-          offered={snapshot.you?.pendingOfferTicketIds ?? []}
-          minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
-          lockLong={phase === Phase.SETUP_TICKETS}
-          onConfirm={confirmKeep}
         />
       )}
       {tunnelMine && snapshot.pendingTunnel && (
