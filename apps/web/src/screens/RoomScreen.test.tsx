@@ -174,7 +174,9 @@ describe('RoomScreen game settings panel', () => {
     const toggle = await screen.findByRole('checkbox', { name: '車站無限借用路線' });
     expect(toggle).not.toBeDisabled();
     fireEvent.click(toggle);
-    expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', { unlimitedStationBorrow: true });
+    expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', {
+      unlimitedStationBorrow: true,
+    });
   });
 
   it('disables the settings controls for a non-host', async () => {

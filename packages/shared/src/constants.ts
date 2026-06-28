@@ -68,7 +68,9 @@ export const DEFAULT_RULE_PARAMS: RuleParams = Object.freeze({
 });
 
 /** Build the full deck composition as a colour-count multiset (e.g. 12 each colour + 14 loco = 110). */
-export function buildDeckComposition(params: RuleParams = DEFAULT_RULE_PARAMS): Record<CardColor, number> {
+export function buildDeckComposition(
+  params: RuleParams = DEFAULT_RULE_PARAMS,
+): Record<CardColor, number> {
   const comp = {} as Record<CardColor, number>;
   for (const c of TRAIN_COLORS) comp[c] = params.deckPerColor;
   comp.LOCOMOTIVE = params.locomotiveCount;

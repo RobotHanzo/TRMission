@@ -41,7 +41,10 @@ describe('rest client: per-game settings + spectating', () => {
     const fetchMock = vi.fn(() => Promise.resolve(res(200, [])));
     vi.stubGlobal('fetch', fetchMock);
     await api.getPublicRooms();
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/rooms/public', expect.objectContaining({ method: 'GET' }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/rooms/public',
+      expect.objectContaining({ method: 'GET' }),
+    );
   });
 
   it('PATCHes a settings change', async () => {
@@ -60,6 +63,9 @@ describe('rest client: per-game settings + spectating', () => {
     const fetchMock = vi.fn(() => Promise.resolve(res(200, { gameId: 'g', ticket: 't' })));
     vi.stubGlobal('fetch', fetchMock);
     await api.spectate('ABCDEF');
-    expect(fetchMock).toHaveBeenCalledWith('/api/v1/rooms/ABCDEF/spectate', expect.objectContaining({ method: 'POST' }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/rooms/ABCDEF/spectate',
+      expect.objectContaining({ method: 'POST' }),
+    );
   });
 });

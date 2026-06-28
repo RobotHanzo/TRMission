@@ -14,18 +14,39 @@ async function guest(displayName: string): Promise<{ token: string; id: string }
   return { token: res.body.accessToken, id: res.body.user.id };
 }
 
-async function startedRoom(patch?: object): Promise<{ code: string; gameId: string; host: { token: string; id: string } }> {
+async function startedRoom(
+  patch?: object,
+): Promise<{ code: string; gameId: string; host: { token: string; id: string } }> {
   const a = await guest('Host');
   const b = await guest('Player');
-  const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+  const room = await request(server())
+    .post('/api/v1/rooms')
+    .set(auth(a.token))
+    .send({})
+    .expect(201);
   const code: string = room.body.code;
   await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
   if (patch) {
-    await request(server()).patch(`/api/v1/rooms/${code}/settings`).set(auth(a.token)).send(patch).expect(200);
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(a.token))
+      .send(patch)
+      .expect(200);
   }
-  await request(server()).post(`/api/v1/rooms/${code}/ready`).set(auth(a.token)).send({ ready: true }).expect(200);
-  await request(server()).post(`/api/v1/rooms/${code}/ready`).set(auth(b.token)).send({ ready: true }).expect(200);
-  const started = await request(server()).post(`/api/v1/rooms/${code}/start`).set(auth(a.token)).expect(200);
+  await request(server())
+    .post(`/api/v1/rooms/${code}/ready`)
+    .set(auth(a.token))
+    .send({ ready: true })
+    .expect(200);
+  await request(server())
+    .post(`/api/v1/rooms/${code}/ready`)
+    .set(auth(b.token))
+    .send({ ready: true })
+    .expect(200);
+  const started = await request(server())
+    .post(`/api/v1/rooms/${code}/start`)
+    .set(auth(a.token))
+    .expect(200);
   return { code, gameId: started.body.gameId, host: a };
 }
 
@@ -50,7 +71,10 @@ describe('spectating', () => {
     hub.openConnection('spec1', (bytes) => frames.push(decodeServer(bytes)));
     await hub.receive(
       'spec1',
-      encodeClient(1, { case: 'hello', value: { ticket: ticketRes.body.ticket, protocolVersion: 1 } }),
+      encodeClient(1, {
+        case: 'hello',
+        value: { ticket: ticketRes.body.ticket, protocolVersion: 1 },
+      }),
     );
 
     const snap = frames.find((f) => f.event.case === 'snapshot');

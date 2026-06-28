@@ -21,7 +21,10 @@ export function makeConfig(
     id: asPlayerId(`p${i}`),
     seat: i as SeatIndex,
   }));
-  return { board, config: { seed, players, contentHash: CONTENT_HASH, ...(ruleParams ? { ruleParams } : {}) } };
+  return {
+    board,
+    config: { seed, players, contentHash: CONTENT_HASH, ...(ruleParams ? { ruleParams } : {}) },
+  };
 }
 
 function pick<T>(arr: readonly T[], rng: RngState): [T, RngState] {
@@ -37,7 +40,11 @@ function chooseAction(board: Board, state: GameState, rng: RngState): [Action, R
     const pid = state.turnOrder.find((id) => state.players[id as string]?.pendingTicketOffer);
     const offer = state.players[pid as string]?.pendingTicketOffer ?? [];
     return [
-      { t: 'KEEP_INITIAL_TICKETS', player: pid!, keep: offer.slice(0, state.ruleParams.minKeepInitial) },
+      {
+        t: 'KEEP_INITIAL_TICKETS',
+        player: pid!,
+        keep: offer.slice(0, state.ruleParams.minKeepInitial),
+      },
       rng,
     ];
   }
@@ -46,7 +53,10 @@ function chooseAction(board: Board, state: GameState, rng: RngState): [Action, R
 
   if (phase === 'TICKET_SELECTION') {
     const offer = state.players[actor as string]?.pendingTicketOffer ?? [];
-    return [{ t: 'KEEP_TICKETS', player: actor, keep: offer.slice(0, state.ruleParams.minKeepNormal) }, rng];
+    return [
+      { t: 'KEEP_TICKETS', player: actor, keep: offer.slice(0, state.ruleParams.minKeepNormal) },
+      rng,
+    ];
   }
 
   const acts = legalActions(board, state, actor);
@@ -65,17 +75,19 @@ function chooseAction(board: Board, state: GameState, rng: RngState): [Action, R
     // tunnel on its base payment but cannot pay the worst-case surcharge will reveal → abort →
     // re-claim the same tunnel forever (revealed cards recycle through the discard, so the deck
     // never empties and no one's trains drop to trigger endgame) — the game never terminates.
-    const claims = acts.filter((a): a is Action & { t: 'CLAIM_ROUTE'; routeId: RouteId; payment: Payment } => {
-      if (a.t !== 'CLAIM_ROUTE') return false;
-      const r = board.routeById.get(a.routeId as string);
-      if (!r || !r.isTunnel) return true;
-      const p = state.players[actor as string];
-      if (!p) return false;
-      const { color, colorCount, locomotives } = a.payment;
-      const remLoco = p.hand.LOCOMOTIVE - locomotives;
-      const remColor = color && colorCount > 0 ? p.hand[color] - colorCount : 0;
-      return remColor + remLoco >= state.ruleParams.tunnelRevealCount;
-    });
+    const claims = acts.filter(
+      (a): a is Action & { t: 'CLAIM_ROUTE'; routeId: RouteId; payment: Payment } => {
+        if (a.t !== 'CLAIM_ROUTE') return false;
+        const r = board.routeById.get(a.routeId as string);
+        if (!r || !r.isTunnel) return true;
+        const p = state.players[actor as string];
+        if (!p) return false;
+        const { color, colorCount, locomotives } = a.payment;
+        const remLoco = p.hand.LOCOMOTIVE - locomotives;
+        const remColor = color && colorCount > 0 ? p.hand[color] - colorCount : 0;
+        return remColor + remLoco >= state.ruleParams.tunnelRevealCount;
+      },
+    );
     if (claims.length) {
       let best = claims[0]!;
       let bestLen = board.routeById.get(best.routeId as string)?.length ?? 0;
@@ -125,13 +137,16 @@ export function playGreedyGame(
     rng = nextRng;
     const res = reduce(board, state, action);
     if (!res.ok) {
-      throw new Error(`policy produced illegal action ${action.t}: ${res.error.code} ${res.error.message}`);
+      throw new Error(
+        `policy produced illegal action ${action.t}: ${res.error.code} ${res.error.message}`,
+      );
     }
     state = res.value.state;
     log.push(action);
     if (opts.checkEachStep !== false) {
       const problems = checkInvariants(board, state);
-      if (problems.length) throw new Error(`invariant violated after ${action.t}:\n${problems.join('\n')}`);
+      if (problems.length)
+        throw new Error(`invariant violated after ${action.t}:\n${problems.join('\n')}`);
     }
     steps++;
   }

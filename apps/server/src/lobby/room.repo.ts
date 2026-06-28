@@ -192,10 +192,7 @@ export class RoomRepo implements OnModuleInit {
     return this.col
       .find({
         'settings.visibility': 'PUBLIC',
-        $or: [
-          { status: 'LOBBY' },
-          { status: 'STARTED', 'settings.allowSpectating': true },
-        ],
+        $or: [{ status: 'LOBBY' }, { status: 'STARTED', 'settings.allowSpectating': true }],
       })
       .sort({ updatedAt: -1 })
       .limit(limit)

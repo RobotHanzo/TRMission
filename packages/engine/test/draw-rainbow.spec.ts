@@ -7,14 +7,28 @@ import { initGame } from '../src/setup';
 import { reduce } from '../src/reduce';
 import { cloneState } from '../src/serialize';
 
-function configFor(ruleParams?: GameConfig['ruleParams']): { board: ReturnType<typeof taiwanBoard>; config: GameConfig } {
+function configFor(ruleParams?: GameConfig['ruleParams']): {
+  board: ReturnType<typeof taiwanBoard>;
+  config: GameConfig;
+} {
   const board = taiwanBoard();
   const players = [0, 1].map((i) => ({ id: asPlayerId(`p${i}`), seat: i as SeatIndex }));
-  return { board, config: { seed: 'rainbow', players, contentHash: CONTENT_HASH, ...(ruleParams ? { ruleParams } : {}) } };
+  return {
+    board,
+    config: {
+      seed: 'rainbow',
+      players,
+      contentHash: CONTENT_HASH,
+      ...(ruleParams ? { ruleParams } : {}),
+    },
+  };
 }
 
 /** Drive past SETUP_TICKETS so it is p0's turn in AWAIT_ACTION. */
-function toAwait(ruleParams?: GameConfig['ruleParams']): { board: ReturnType<typeof taiwanBoard>; state: GameState } {
+function toAwait(ruleParams?: GameConfig['ruleParams']): {
+  board: ReturnType<typeof taiwanBoard>;
+  state: GameState;
+} {
   const { board, config } = configFor(ruleParams);
   let state = initGame(board, config);
   while (state.turn.phase === 'SETUP_TICKETS') {

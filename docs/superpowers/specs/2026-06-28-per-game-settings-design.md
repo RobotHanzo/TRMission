@@ -11,18 +11,18 @@ starting a game. Five settings, split across two architectural planes:
 
 **Rule variants (change game logic — must stay deterministic & replayable):**
 
-| Setting | Default | Effect |
-| --- | --- | --- |
-| `unlimitedStationBorrow` | **off** | A station may borrow *all* incident opponent routes (not just one). Enabling it **also** makes ticket completion *instant + locked*: a ticket that becomes connected (via own track or station-borrow) is recorded as completed in game state and its points are banked the moment it connects. |
-| `secondDrawAfterBlindRainbow` | **off** | When **off**, drawing a rainbow (LOCOMOTIVE) as your **first** blind draw ends your draw (no second card). When **on**, you may still draw a second card. |
-| `noUnfinishedTicketPenalty` | **off** | When **on**, unfinished destination tickets score `0` instead of subtracting their value at game end. |
+| Setting                       | Default | Effect                                                                                                                                                                                                                                                                                          |
+| ----------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unlimitedStationBorrow`      | **off** | A station may borrow _all_ incident opponent routes (not just one). Enabling it **also** makes ticket completion _instant + locked_: a ticket that becomes connected (via own track or station-borrow) is recorded as completed in game state and its points are banked the moment it connects. |
+| `secondDrawAfterBlindRainbow` | **off** | When **off**, drawing a rainbow (LOCOMOTIVE) as your **first** blind draw ends your draw (no second card). When **on**, you may still draw a second card.                                                                                                                                       |
+| `noUnfinishedTicketPenalty`   | **off** | When **on**, unfinished destination tickets score `0` instead of subtracting their value at game end.                                                                                                                                                                                           |
 
 **Server / UX settings (no game-logic change):**
 
-| Setting | Default | Effect |
-| --- | --- | --- |
-| `allowSpectating` | **on** | Whether non-seated users may connect to watch the game. |
-| `roomVisibility` | **public** | `public` rooms appear in a list on the home screen; `invite-only` rooms are reachable by code only. |
+| Setting           | Default    | Effect                                                                                              |
+| ----------------- | ---------- | --------------------------------------------------------------------------------------------------- |
+| `allowSpectating` | **on**     | Whether non-seated users may connect to watch the game.                                             |
+| `roomVisibility`  | **public** | `public` rooms appear in a list on the home screen; `invite-only` rooms are reachable by code only. |
 
 **Hard constraint:** preserve the engine's reproducibility/consistency traits — pure
 deterministic `reduce`, seeded counter PRNG only, byte-identical replay verified by the
@@ -63,7 +63,7 @@ boundary: rule variants → `GameConfig.ruleParams` at game start; spectating/vi
 
 ## 3. Determinism & versioning (load-bearing)
 
-`stateDigest` is a key-sorted SHA-256 over the *entire* state including `ruleParams`. Adding
+`stateDigest` is a key-sorted SHA-256 over the _entire_ state including `ruleParams`. Adding
 keys to `ruleParams` changes the digest of **every** game — even all-default games — because
 the canonical JSON gains keys regardless of value. The lock-in feature also adds a
 `completedTickets` field to `PlayerState`, another digest change. Consequences, all expected
@@ -129,8 +129,8 @@ merely shown.
   `RESOLVE_TUNNEL` (a tunnel is a claim). It recomputes, for **every** player (not just the
   actor), the set `connected = union(own ∪ all station-borrowed opponent edges)`, and appends
   any kept ticket now connected but not already in `completedTickets`. Cross-player scope is
-  required because under unlimited borrow an opponent claiming a route incident to *my*
-  station city can complete *my* ticket.
+  required because under unlimited borrow an opponent claiming a route incident to _my_
+  station city can complete _my_ ticket.
 - **Event:** emit a public `TICKET_COMPLETED { player, ticket }` for each newly-locked ticket
   (drives animation + reveal). Completion is public information already (own-track completions
   are public today).
@@ -177,7 +177,7 @@ allowSpectating, visibility }`.
   Zod `GameSettingsSchema` (→ auto OpenAPI via `apiSchema`). Returns the updated `RoomView`
   (now including `settings`).
 - `GET /api/v1/rooms` — **unauthenticated** public list: LOBBY rooms with `visibility ===
-  'PUBLIC'` (joinable) **plus** STARTED rooms with `visibility === 'PUBLIC' && allowSpectating`
+'PUBLIC'` (joinable) **plus** STARTED rooms with `visibility === 'PUBLIC' && allowSpectating`
   (watchable). The whole `LobbyController` is currently behind `AccessTokenGuard`; this route
   needs to opt out (a `@Public()`/guard-skip or a separate small unauthenticated controller).
 - `start()` — read the three rule variants off `room.settings` and pass them as
@@ -212,7 +212,7 @@ Only the three rule-variant booleans are candidates for the wire (display purpos
 server settings stay REST-only.
 
 - `common.proto`: add `message GameSettings { bool unlimited_station_borrow = 1;
-  bool second_draw_after_blind_rainbow = 2; bool no_unfinished_ticket_penalty = 3; }` and
+bool second_draw_after_blind_rainbow = 2; bool no_unfinished_ticket_penalty = 3; }` and
   embed `GameSettings game_settings = <next tag>;` in `GameSnapshot`. (Optionally a banked
   ticket-points field per player for the live scoreboard — finalized in the plan.)
 - `codec/snapshot.ts viewToSnapshot`: project `state.ruleParams.*` → `game_settings`.

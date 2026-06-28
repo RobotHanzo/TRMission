@@ -140,10 +140,19 @@ export function RoomScreen() {
 
   const settings = room.settings;
   const settingsLocked = !isHost || room.status !== 'LOBBY';
-  const setSetting = (patch: Partial<RoomSettings>) => void guard(api.updateRoomSettings(code, patch));
+  const setSetting = (patch: Partial<RoomSettings>) =>
+    void guard(api.updateRoomSettings(code, patch));
   const RULE_TOGGLES = [
-    ['unlimitedStationBorrow', 'settingUnlimitedStationBorrow', 'settingUnlimitedStationBorrowDesc'],
-    ['secondDrawAfterBlindRainbow', 'settingSecondDrawAfterRainbow', 'settingSecondDrawAfterRainbowDesc'],
+    [
+      'unlimitedStationBorrow',
+      'settingUnlimitedStationBorrow',
+      'settingUnlimitedStationBorrowDesc',
+    ],
+    [
+      'secondDrawAfterBlindRainbow',
+      'settingSecondDrawAfterRainbow',
+      'settingSecondDrawAfterRainbowDesc',
+    ],
     ['noUnfinishedTicketPenalty', 'settingNoUnfinishedPenalty', 'settingNoUnfinishedPenaltyDesc'],
   ] as const;
 

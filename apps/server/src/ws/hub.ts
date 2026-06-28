@@ -326,7 +326,12 @@ export class GameHub {
     }
     if (conn.binding.seat < 0) {
       conn.send(
-        rejectionFrame(env.clientSeq, RejectionCode.NOT_IN_GAME, 'errors:notInGame', 'spectators cannot act'),
+        rejectionFrame(
+          env.clientSeq,
+          RejectionCode.NOT_IN_GAME,
+          'errors:notInGame',
+          'spectators cannot act',
+        ),
       );
       return;
     }

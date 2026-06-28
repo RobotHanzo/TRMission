@@ -20,7 +20,11 @@ afterAll(() => t.close());
 describe('lobby: per-game settings', () => {
   it('defaults settings on a fresh room', async () => {
     const a = await guest('Alice');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     expect(room.body.settings).toEqual({
       unlimitedStationBorrow: false,
       secondDrawAfterBlindRainbow: false,
@@ -33,7 +37,11 @@ describe('lobby: per-game settings', () => {
   it('lets only the host update settings, only while in LOBBY', async () => {
     const a = await guest('Host');
     const b = await guest('Guest');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
 
@@ -56,7 +64,11 @@ describe('lobby: per-game settings', () => {
   it('passes rule variants into the engine at start', async () => {
     const a = await guest('A');
     const b = await guest('B');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
     await request(server())
@@ -64,9 +76,20 @@ describe('lobby: per-game settings', () => {
       .set(auth(a.token))
       .send({ unlimitedStationBorrow: true, noUnfinishedTicketPenalty: true })
       .expect(200);
-    await request(server()).post(`/api/v1/rooms/${code}/ready`).set(auth(a.token)).send({ ready: true }).expect(200);
-    await request(server()).post(`/api/v1/rooms/${code}/ready`).set(auth(b.token)).send({ ready: true }).expect(200);
-    const started = await request(server()).post(`/api/v1/rooms/${code}/start`).set(auth(a.token)).expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ready`)
+      .set(auth(a.token))
+      .send({ ready: true })
+      .expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ready`)
+      .set(auth(b.token))
+      .send({ ready: true })
+      .expect(200);
+    const started = await request(server())
+      .post(`/api/v1/rooms/${code}/start`)
+      .set(auth(a.token))
+      .expect(200);
 
     const match = t.app.get(GameRegistry).get(started.body.gameId);
     expect(match).toBeTruthy();
@@ -79,8 +102,16 @@ describe('lobby: per-game settings', () => {
   it('lists public rooms unauthenticated and hides invite-only', async () => {
     const a = await guest('Pub');
     const b = await guest('Priv');
-    const pub = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
-    const priv = await request(server()).post('/api/v1/rooms').set(auth(b.token)).send({}).expect(201);
+    const pub = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const priv = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(b.token))
+      .send({})
+      .expect(201);
     await request(server())
       .patch(`/api/v1/rooms/${priv.body.code}/settings`)
       .set(auth(b.token))

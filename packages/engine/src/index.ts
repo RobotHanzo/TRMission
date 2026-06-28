@@ -48,7 +48,11 @@ export { checkInvariants } from './invariants';
 
 export { longestTrail, longestTrailWithPath } from './graph/longestTrail';
 export type { TrailEdge, TrailResult } from './graph/longestTrail';
-export { evaluateTickets, ownConnectedTicketIds, borrowConnectedTicketIds } from './graph/connectivity';
+export {
+  evaluateTickets,
+  ownConnectedTicketIds,
+  borrowConnectedTicketIds,
+} from './graph/connectivity';
 export type { Edge, TicketGoal, TicketEvaluation, IdTicketGoal } from './graph/connectivity';
 export { UnionFind } from './graph/unionFind';
 

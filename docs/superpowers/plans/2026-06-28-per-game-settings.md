@@ -24,10 +24,12 @@
 ## File Structure
 
 **Created:**
+
 - (none new in engine — additions go into existing files)
 - `apps/server/src/lobby/lobby.public.controller.ts` — unauthenticated public-rooms list endpoint.
 
 **Modified — shared/engine:**
+
 - `packages/shared/src/constants.ts` — three booleans on `RuleParams` + defaults.
 - `packages/engine/src/types/state.ts` — `PlayerState.completedTickets`; bump `ENGINE_VERSION`.
 - `packages/engine/src/types/events.ts` — `TICKET_COMPLETED` event.
@@ -39,6 +41,7 @@
 - `packages/engine/src/setup.ts` — init `completedTickets: []`.
 
 **Modified — proto/server:**
+
 - `packages/proto/proto/trmission/v1/common.proto` — `GameSettings` + `GameSnapshot.game_settings`.
 - `apps/server/src/codec/snapshot.ts` — project `game_settings`.
 - `apps/server/src/lobby/room.repo.ts` — `RoomDoc.settings`; `updateSettings`; `findPublic`.
@@ -49,6 +52,7 @@
 - `apps/server/src/ws/ticket.ts` / `connection.ts` / `hub.ts` — spectator binding (`seat = -1`), spectator set, fan-out, command rejection.
 
 **Modified — web:**
+
 - `apps/web/src/net/rest.ts` — `RoomView.settings`, `getPublicRooms`, `updateRoomSettings`, `spectate`.
 - `apps/web/src/i18n/index.ts` — keys in `zh-Hant` + `en`.
 - `apps/web/src/screens/RoomScreen.tsx` — host-only `GameSettingsPanel`.
@@ -63,10 +67,12 @@
 ### Task A1: Add the three rule-variant booleans to `RuleParams`
 
 **Files:**
+
 - Modify: `packages/shared/src/constants.ts`
 - Test: `packages/shared/test/constants.spec.ts` (create if absent)
 
 **Interfaces:**
+
 - Produces: `RuleParams.unlimitedStationBorrow: boolean`, `RuleParams.secondDrawAfterBlindRainbow: boolean`, `RuleParams.noUnfinishedTicketPenalty: boolean`; all `false` in `DEFAULT_RULE_PARAMS`.
 
 - [ ] **Step 1: Write the failing test**
@@ -92,16 +98,19 @@ Expected: FAIL (properties undefined / type error).
 - [ ] **Step 3: Implement**
 
 In `RuleParams` interface add (after `routePoints`):
+
 ```ts
-  /** Variant: a station may borrow ALL incident opponent routes (not just one), and ticket
-   *  completion is recorded + scored the moment it connects. */
-  unlimitedStationBorrow: boolean;
-  /** Variant: a rainbow (LOCOMOTIVE) as the first BLIND draw does NOT end the draw. */
-  secondDrawAfterBlindRainbow: boolean;
-  /** Variant: unfinished destination tickets score 0 instead of subtracting their value. */
-  noUnfinishedTicketPenalty: boolean;
+/** Variant: a station may borrow ALL incident opponent routes (not just one), and ticket
+ *  completion is recorded + scored the moment it connects. */
+unlimitedStationBorrow: boolean;
+/** Variant: a rainbow (LOCOMOTIVE) as the first BLIND draw does NOT end the draw. */
+secondDrawAfterBlindRainbow: boolean;
+/** Variant: unfinished destination tickets score 0 instead of subtracting their value. */
+noUnfinishedTicketPenalty: boolean;
 ```
+
 In `DEFAULT_RULE_PARAMS` add (before the closing `})`):
+
 ```ts
   unlimitedStationBorrow: false,
   secondDrawAfterBlindRainbow: false,
@@ -116,6 +125,7 @@ Expected: PASS.
 - [ ] **Step 5: Typecheck + commit**
 
 Run: `yarn workspace @trm/shared typecheck`
+
 ```bash
 git add packages/shared/src/constants.ts packages/shared/test/constants.spec.ts
 git commit -m "feat(shared): add three per-game rule-variant flags to RuleParams"
@@ -130,21 +140,27 @@ git commit -m "feat(shared): add three per-game rule-variant flags to RuleParams
 ### Task B1: `secondDrawAfterBlindRainbow`
 
 **Files:**
+
 - Modify: `packages/engine/src/reduce.ts` (`applyDrawBlind`, ~:216-237)
 - Test: `packages/engine/test/draw-rainbow.spec.ts` (create)
 
 **Interfaces:**
+
 - Consumes: `state.ruleParams.secondDrawAfterBlindRainbow`, `endTurn` (already imported).
 - Behavior: when the **first** blind draw is `LOCOMOTIVE` and the flag is `false`, the turn ends (one card taken). When `true`, the player proceeds to `DRAWING_CARDS` (may draw a second). Non-loco first draws and the face-up loco rule are unaffected.
 
 - [ ] **Step 1: Write the failing test**
 
 Build a state where it is a player's turn in `AWAIT_ACTION` with a deck whose top card is `LOCOMOTIVE`. The simplest robust approach: construct via `initGame`, advance through `KEEP_INITIAL_TICKETS` for all players, then **directly set** the deck top to `LOCOMOTIVE` using `cloneState` and overwriting `deck` (test-only). Assert:
+
 ```ts
 import { describe, it, expect } from 'vitest';
 import { reduce, cloneState } from '../src';
 // ...build `state` at AWAIT_ACTION for currentPlayer P, board = taiwanBoard()
-function withLocoTop(s) { const c = cloneState(s); return { ...c, deck: [...c.deck.slice(0, -1), 'LOCOMOTIVE'] }; }
+function withLocoTop(s) {
+  const c = cloneState(s);
+  return { ...c, deck: [...c.deck.slice(0, -1), 'LOCOMOTIVE'] };
+}
 
 it('OFF: a blind rainbow on the first draw ends the turn', () => {
   const s = withLocoTop(awaitState); // ruleParams.secondDrawAfterBlindRainbow = false (default)
@@ -178,16 +194,17 @@ Expected: FAIL (OFF case currently proceeds to `DRAWING_CARDS`).
 - [ ] **Step 3: Implement**
 
 In `applyDrawBlind`, replace the `if (isFirst) { ... }` block (currently lines ~231-234) with:
+
 ```ts
-  if (isFirst) {
-    if (d.card === 'LOCOMOTIVE' && !state.ruleParams.secondDrawAfterBlindRainbow) {
-      // Variant default: a blind rainbow consumes the whole draw — end the turn now.
-      const out = endTurn(board, next, { wasPass: false });
-      return ok({ state: out.state, events: [...events, ...out.events] });
-    }
-    next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 1 } };
-    return ok({ state: next, events });
+if (isFirst) {
+  if (d.card === 'LOCOMOTIVE' && !state.ruleParams.secondDrawAfterBlindRainbow) {
+    // Variant default: a blind rainbow consumes the whole draw — end the turn now.
+    const out = endTurn(board, next, { wasPass: false });
+    return ok({ state: out.state, events: [...events, ...out.events] });
   }
+  next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 1 } };
+  return ok({ state: next, events });
+}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -205,11 +222,13 @@ git commit -m "feat(engine): secondDrawAfterBlindRainbow variant (default: blind
 ### Task B2: `noUnfinishedTicketPenalty`
 
 **Files:**
+
 - Modify: `packages/engine/src/graph/connectivity.ts` (`evaluateTickets`, :52-111)
 - Modify: `packages/engine/src/scoring.ts` (`evaluatePlayerTickets`, :56-96 — thread the flag)
 - Test: `packages/engine/test/connectivity.spec.ts` (extend) or `ticket-penalty.spec.ts` (create)
 
 **Interfaces:**
+
 - Produces: `evaluateTickets(args)` accepts `noUnfinishedTicketPenalty?: boolean`; when true, unfinished tickets contribute `0` to `net` instead of `-value`. `completed` count unchanged.
 - Consumes (B2): `state.ruleParams.noUnfinishedTicketPenalty` in `evaluatePlayerTickets`.
 
@@ -220,8 +239,11 @@ import { evaluateTickets } from '../src/graph/connectivity';
 
 it('noUnfinishedTicketPenalty: unfinished ticket scores 0 not negative', () => {
   const args = {
-    ownEdges: [], stationCities: [], borrowCandidates: new Map(),
-    tickets: [{ a: 'X', b: 'Y', value: 10 }], vertices: ['X', 'Y'],
+    ownEdges: [],
+    stationCities: [],
+    borrowCandidates: new Map(),
+    tickets: [{ a: 'X', b: 'Y', value: 10 }],
+    vertices: ['X', 'Y'],
   };
   expect(evaluateTickets(args).net).toBe(-10);
   expect(evaluateTickets({ ...args, noUnfinishedTicketPenalty: true }).net).toBe(0);
@@ -236,6 +258,7 @@ Expected: FAIL (flag not accepted / still -10).
 - [ ] **Step 3: Implement in `evaluateTickets`**
 
 Add to the args type: `readonly noUnfinishedTicketPenalty?: boolean;`. Destructure it (default `false`). In `evaluate()` change the unfinished branch:
+
 ```ts
       } else if (!noUnfinishedTicketPenalty) {
         net -= t.value;
@@ -243,15 +266,16 @@ Add to the args type: `readonly noUnfinishedTicketPenalty?: boolean;`. Destructu
 ```
 
 In `scoring.ts evaluatePlayerTickets`, pass the flag into the `evaluateTickets({...})` call:
+
 ```ts
-  const ticketEval = evaluateTickets({
-    ownEdges: edges.map((e) => ({ a: e.u, b: e.v })),
-    stationCities,
-    borrowCandidates,
-    tickets: goals.map((g) => ({ a: g.a, b: g.b, value: g.value })),
-    vertices: cityIds,
-    noUnfinishedTicketPenalty: state.ruleParams.noUnfinishedTicketPenalty,
-  });
+const ticketEval = evaluateTickets({
+  ownEdges: edges.map((e) => ({ a: e.u, b: e.v })),
+  stationCities,
+  borrowCandidates,
+  tickets: goals.map((g) => ({ a: g.a, b: g.b, value: g.value })),
+  vertices: cityIds,
+  noUnfinishedTicketPenalty: state.ruleParams.noUnfinishedTicketPenalty,
+});
 ```
 
 - [ ] **Step 4: Run to verify it passes**
@@ -269,12 +293,14 @@ git commit -m "feat(engine): noUnfinishedTicketPenalty variant (unfinished ticke
 ### Task B3: `unlimitedStationBorrow` end-game scoring + `borrowConnectedTicketIds`
 
 **Files:**
+
 - Modify: `packages/engine/src/graph/connectivity.ts` — add `borrowConnectedTicketIds`.
 - Modify: `packages/engine/src/scoring.ts` — add `stationBorrowEdges`; branch `evaluatePlayerTickets`.
 - Modify: `packages/engine/src/index.ts` — export `borrowConnectedTicketIds`, `stationBorrowEdges`.
 - Test: `packages/engine/test/station-borrow.spec.ts` (create)
 
 **Interfaces:**
+
 - Produces:
   - `borrowConnectedTicketIds(args: { ownEdges: readonly Edge[]; borrowEdges: readonly Edge[]; tickets: readonly IdTicketGoal[]; vertices?: readonly string[] }): string[]` — ids of tickets connected by `own ∪ borrow` edges (a single monotonic union).
   - `stationBorrowEdges(board: Board, state: GameState, playerId: PlayerId): Edge[]` — all non-locked opponent edges incident to any city where `playerId` has a station (deduped).
@@ -295,7 +321,9 @@ it('borrowConnectedTicketIds unions own + borrowed edges', () => {
   expect(ids).toEqual(['t1']);
 });
 ```
+
 Add an integration test on `evaluatePlayerTickets`: build a small game where a player owns one leg of a ticket, has a station at the junction city, and an opponent owns the other leg. With `unlimitedStationBorrow=false` the single-borrow optimum still completes it (value positive); craft a case needing **two** different incident opponent edges at one station to complete **two** tickets — that scores both only when `unlimitedStationBorrow=true`:
+
 ```ts
 it('unlimited borrow lets one station complete two tickets via two opponent edges', () => {
   // stateOn: ruleParams.unlimitedStationBorrow = true, player has station at hub H,
@@ -315,6 +343,7 @@ Expected: FAIL (`borrowConnectedTicketIds` undefined; `on.completed` not greater
 - [ ] **Step 3: Implement**
 
 In `connectivity.ts` (after `ownConnectedTicketIds`):
+
 ```ts
 /**
  * Tickets connected by the player's own edges UNION all their station-borrowed edges. Under the
@@ -335,6 +364,7 @@ export function borrowConnectedTicketIds(args: {
 ```
 
 In `scoring.ts`, export a borrow-edge collector (place near `borrowCandidatesForCity`):
+
 ```ts
 /** All non-locked opponent edges incident to any city where `playerId` built a station (deduped). */
 export function stationBorrowEdges(board: Board, state: GameState, playerId: PlayerId): Edge[] {
@@ -344,7 +374,10 @@ export function stationBorrowEdges(board: Board, state: GameState, playerId: Pla
     if (s.playerId !== playerId) continue;
     for (const e of borrowCandidatesForCity(board, state, s.cityId as string, playerId)) {
       const key = e.a < e.b ? `${e.a}|${e.b}` : `${e.b}|${e.a}`;
-      if (!seen.has(key)) { seen.add(key); out.push(e); }
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(e);
+      }
     }
   }
   return out;
@@ -352,32 +385,44 @@ export function stationBorrowEdges(board: Board, state: GameState, playerId: Pla
 ```
 
 In `evaluatePlayerTickets`, after computing `edges`, `cityIds`, and `goals` (and before the existing `evaluateTickets` call), branch:
+
 ```ts
-  if (state.ruleParams.unlimitedStationBorrow) {
-    const uf = new UnionFind(cityIds);
-    for (const e of edges) uf.union(e.u, e.v);
-    for (const e of stationBorrowEdges(board, state, playerId)) uf.union(e.a, e.b);
-    let net = 0;
-    let completed = 0;
-    const completedTicketIds: TicketId[] = [];
-    for (const g of goals) {
-      if (uf.connected(g.a, g.b)) {
-        net += g.value;
-        completed += 1;
-        completedTicketIds.push(g.id);
-      } else if (!state.ruleParams.noUnfinishedTicketPenalty) {
-        net -= g.value;
-      }
+if (state.ruleParams.unlimitedStationBorrow) {
+  const uf = new UnionFind(cityIds);
+  for (const e of edges) uf.union(e.u, e.v);
+  for (const e of stationBorrowEdges(board, state, playerId)) uf.union(e.a, e.b);
+  let net = 0;
+  let completed = 0;
+  const completedTicketIds: TicketId[] = [];
+  for (const g of goals) {
+    if (uf.connected(g.a, g.b)) {
+      net += g.value;
+      completed += 1;
+      completedTicketIds.push(g.id);
+    } else if (!state.ruleParams.noUnfinishedTicketPenalty) {
+      net -= g.value;
     }
-    return { net, completed, completedTicketIds };
   }
+  return { net, completed, completedTicketIds };
+}
 ```
+
 (The existing one-borrow-per-station path remains for the `false` case, now with the penalty flag from B2.)
 
 Export both new symbols from `index.ts`:
+
 ```ts
-export { evaluateTickets, ownConnectedTicketIds, borrowConnectedTicketIds } from './graph/connectivity';
-export { computeFinalScores, evaluatePlayerTickets, longestTrailRouteIdsFor, stationBorrowEdges } from './scoring';
+export {
+  evaluateTickets,
+  ownConnectedTicketIds,
+  borrowConnectedTicketIds,
+} from './graph/connectivity';
+export {
+  computeFinalScores,
+  evaluatePlayerTickets,
+  longestTrailRouteIdsFor,
+  stationBorrowEdges,
+} from './scoring';
 ```
 
 - [ ] **Step 4: Run to verify it passes**
@@ -395,6 +440,7 @@ git commit -m "feat(engine): unlimitedStationBorrow scoring (union all station b
 ### Task B4: Instant + locked ticket completion (state + hook + event + redaction)
 
 **Files:**
+
 - Modify: `packages/engine/src/types/state.ts` — `PlayerState.completedTickets`.
 - Modify: `packages/engine/src/setup.ts` — init `completedTickets: []`.
 - Modify: `packages/engine/src/types/events.ts` — `TICKET_COMPLETED`.
@@ -403,6 +449,7 @@ git commit -m "feat(engine): unlimitedStationBorrow scoring (union all station b
 - Test: `packages/engine/test/instant-completion.spec.ts` (create)
 
 **Interfaces:**
+
 - Produces: `PlayerState.completedTickets: readonly TicketId[]` (only grows; populated only when `unlimitedStationBorrow`). New event `{ e: 'TICKET_COMPLETED'; player: PlayerId; ticket: TicketId; visibility: 'PUBLIC' }`.
 - Consumes: `borrowConnectedTicketIds`, `stationBorrowEdges` (Task B3); `withPlayer` (reducers/common).
 
@@ -416,10 +463,12 @@ it('locks a ticket the moment own track connects it (unlimited borrow on)', () =
   expect(r.ok).toBe(true);
   const p = r.value.state.players[P];
   expect(p.completedTickets).toContain(ticketAB);
-  expect(r.value.events.some((e) => e.e === 'TICKET_COMPLETED' && e.ticket === ticketAB)).toBe(true);
+  expect(r.value.events.some((e) => e.e === 'TICKET_COMPLETED' && e.ticket === ticketAB)).toBe(
+    true,
+  );
 });
 
-it("locks a borrow-completed ticket when an OPPONENT claims the borrowed leg", () => {
+it('locks a borrow-completed ticket when an OPPONENT claims the borrowed leg', () => {
   // P has a station at hub H and owns start↔H; ticket start↔C needs H↔C, owned by opponent.
   // Opponent claims H↔C:
   const r = reduce(board, beforeOpponentClaim, opponentClaimsHC);
@@ -441,13 +490,16 @@ Expected: FAIL (`completedTickets` undefined; no event).
 - [ ] **Step 3: Implement state + setup + event**
 
 `types/state.ts` — in `PlayerState` add after `routePoints`:
+
 ```ts
   /** Tickets locked as completed mid-game (only populated under the unlimitedStationBorrow
    *  variant). Monotonic; points are banked the moment a ticket enters this list. */
   readonly completedTickets: readonly TicketId[];
 ```
+
 `setup.ts` — in the player object literal add `completedTickets: [],`.
 `types/events.ts` — add to the `GameEvent` union:
+
 ```ts
   | { readonly e: 'TICKET_COMPLETED'; readonly player: PlayerId; readonly ticket: TicketId; readonly visibility: 'PUBLIC' }
 ```
@@ -455,15 +507,18 @@ Expected: FAIL (`completedTickets` undefined; no event).
 - [ ] **Step 4: Implement the lock-in helper + hooks in `reduce.ts`**
 
 Add imports at the top of `reduce.ts`:
+
 ```ts
 import type { TicketId } from '@trm/shared';
 import { asTicketId } from '@trm/shared';
 import { borrowConnectedTicketIds } from './graph/connectivity';
 import { stationBorrowEdges } from './scoring';
 ```
+
 (Confirm `asTicketId` exists in `@trm/shared/ids`; if the brand helper has a different name, use that.)
 
 Add the helper (near the bottom, before `hasAnyLegalMove`):
+
 ```ts
 /**
  * Under `unlimitedStationBorrow`, re-evaluate every player's kept tickets after a connectivity
@@ -471,7 +526,10 @@ Add the helper (near the bottom, before `hasAnyLegalMove`):
  * No-op when the variant is off. All players are checked because an opponent's claim into a
  * player's station city can complete that player's ticket. Monotonic → never retracts.
  */
-function lockCompletedTickets(board: Board, state: GameState): { state: GameState; events: GameEvent[] } {
+function lockCompletedTickets(
+  board: Board,
+  state: GameState,
+): { state: GameState; events: GameEvent[] } {
   if (!state.ruleParams.unlimitedStationBorrow) return { state, events: [] };
   let next = state;
   const events: GameEvent[] = [];
@@ -517,74 +575,82 @@ function lockCompletedTickets(board: Board, state: GameState): { state: GameStat
 Hook it into the three connectivity-changing handlers, **after the ownership/station mutation and before `endTurn`**:
 
 `applyClaimRoute` (normal claim branch):
+
 ```ts
-  let next = spendCards(state, player, pay.value.spent);
-  const eff = applyClaimEffects(board, next, player, route);
-  next = eff.state;
-  const lock = lockCompletedTickets(board, next);
-  next = lock.state;
-  const out = endTurn(board, next, { wasPass: false });
-  return ok({ state: out.state, events: [...eff.events, ...lock.events, ...out.events] });
+let next = spendCards(state, player, pay.value.spent);
+const eff = applyClaimEffects(board, next, player, route);
+next = eff.state;
+const lock = lockCompletedTickets(board, next);
+next = lock.state;
+const out = endTurn(board, next, { wasPass: false });
+return ok({ state: out.state, events: [...eff.events, ...lock.events, ...out.events] });
 ```
 
 `applyResolveTunnel` (commit branch, the part after `eff`):
+
 ```ts
-  next = eff.state;
-  const lock = lockCompletedTickets(board, next);
-  next = lock.state;
-  const out = endTurn(board, next, { wasPass: false });
-  return ok({
-    state: out.state,
-    events: [
-      { e: 'TUNNEL_RESOLVED', player, routeId: pt.routeId, committed: true, visibility: 'PUBLIC' },
-      ...eff.events,
-      ...lock.events,
-      ...out.events,
-    ],
-  });
+next = eff.state;
+const lock = lockCompletedTickets(board, next);
+next = lock.state;
+const out = endTurn(board, next, { wasPass: false });
+return ok({
+  state: out.state,
+  events: [
+    { e: 'TUNNEL_RESOLVED', player, routeId: pt.routeId, committed: true, visibility: 'PUBLIC' },
+    ...eff.events,
+    ...lock.events,
+    ...out.events,
+  ],
+});
 ```
 
 `applyBuildStation`:
+
 ```ts
-  next = { ...next, stations: [...next.stations, { playerId: player, cityId }] };
-  const lock = lockCompletedTickets(board, next);
-  next = lock.state;
-  const out = endTurn(board, next, { wasPass: false });
-  return ok({
-    state: out.state,
-    events: [{ e: 'STATION_BUILT', player, cityId, visibility: 'PUBLIC' }, ...lock.events, ...out.events],
-  });
+next = { ...next, stations: [...next.stations, { playerId: player, cityId }] };
+const lock = lockCompletedTickets(board, next);
+next = lock.state;
+const out = endTurn(board, next, { wasPass: false });
+return ok({
+  state: out.state,
+  events: [
+    { e: 'STATION_BUILT', player, cityId, visibility: 'PUBLIC' },
+    ...lock.events,
+    ...out.events,
+  ],
+});
 ```
 
 - [ ] **Step 5: Implement `redactFor` completion source (`selectors.ts`)**
 
 Replace the per-player loop that builds `completedTickets` (~:165-185) so it reads the locked set under the variant:
+
 ```ts
-  for (const id of state.turnOrder) {
-    const p = state.players[id as string];
-    if (!p || p.keptTickets.length === 0) continue;
-    if (state.ruleParams.unlimitedStationBorrow) {
-      for (const tid of p.completedTickets) completedTickets.push({ player: id, ticket: tid });
-      continue;
-    }
-    const ownEdges: { a: string; b: string }[] = [];
-    for (const [routeId, cell] of Object.entries(state.ownership)) {
-      if ('owner' in cell && cell.owner === id) {
-        const r = board.routeById.get(routeId);
-        if (r) ownEdges.push({ a: r.a as string, b: r.b as string });
-      }
-    }
-    const tickets = p.keptTickets
-      .map((tid) => {
-        const t = board.ticketById.get(tid as string);
-        return t ? { id: tid as string, a: t.a as string, b: t.b as string } : null;
-      })
-      .filter((x): x is { id: string; a: string; b: string } => x !== null);
-    const done = new Set(ownConnectedTicketIds({ ownEdges, tickets }));
-    for (const tid of p.keptTickets) {
-      if (done.has(tid as string)) completedTickets.push({ player: id, ticket: tid });
+for (const id of state.turnOrder) {
+  const p = state.players[id as string];
+  if (!p || p.keptTickets.length === 0) continue;
+  if (state.ruleParams.unlimitedStationBorrow) {
+    for (const tid of p.completedTickets) completedTickets.push({ player: id, ticket: tid });
+    continue;
+  }
+  const ownEdges: { a: string; b: string }[] = [];
+  for (const [routeId, cell] of Object.entries(state.ownership)) {
+    if ('owner' in cell && cell.owner === id) {
+      const r = board.routeById.get(routeId);
+      if (r) ownEdges.push({ a: r.a as string, b: r.b as string });
     }
   }
+  const tickets = p.keptTickets
+    .map((tid) => {
+      const t = board.ticketById.get(tid as string);
+      return t ? { id: tid as string, a: t.a as string, b: t.b as string } : null;
+    })
+    .filter((x): x is { id: string; a: string; b: string } => x !== null);
+  const done = new Set(ownConnectedTicketIds({ ownEdges, tickets }));
+  for (const tid of p.keptTickets) {
+    if (done.has(tid as string)) completedTickets.push({ player: id, ticket: tid });
+  }
+}
 ```
 
 - [ ] **Step 6: Run the test to verify it passes**
@@ -602,10 +668,12 @@ git commit -m "feat(engine): instant locked ticket completion under unlimitedSta
 ### Task B5: Version bump, invariant cross-check, golden regeneration
 
 **Files:**
+
 - Modify: `packages/engine/src/types/state.ts` — `ENGINE_VERSION = 2`.
 - Test: `packages/engine/test/variants-determinism.spec.ts` (create); regenerate existing golden digests.
 
 **Interfaces:**
+
 - Produces: `ENGINE_VERSION === 2`. All existing golden-replay digests updated to the new canonical values.
 
 - [ ] **Step 1: Write the invariant cross-check test**
@@ -616,11 +684,13 @@ it('locked completion set equals a fresh end-game evaluation (monotonicity invar
   for (const pid of finalState.turnOrder) {
     const p = finalState.players[pid];
     // fresh union-of-all-borrows completion:
-    const fresh = new Set(borrowConnectedTicketIds({
-      ownEdges: ownEdgesOf(finalState, pid),
-      borrowEdges: stationBorrowEdges(board, finalState, pid),
-      tickets: keptGoals(finalState, pid),
-    }));
+    const fresh = new Set(
+      borrowConnectedTicketIds({
+        ownEdges: ownEdgesOf(finalState, pid),
+        borrowEdges: stationBorrowEdges(board, finalState, pid),
+        tickets: keptGoals(finalState, pid),
+      }),
+    );
     expect(new Set(p.completedTickets)).toEqual(fresh);
   }
 });
@@ -631,7 +701,7 @@ it('replays byte-identically under each variant', () => {
     { secondDrawAfterBlindRainbow: true },
     { noUnfinishedTicketPenalty: true },
   ]) {
-    const live = playScript(ruleParams);          // apply actions one by one
+    const live = playScript(ruleParams); // apply actions one by one
     const replayed = replay(board, configWith(ruleParams), live.actions);
     expect(stateDigest(replayed.state)).toBe(stateDigest(live.state));
   }
@@ -657,6 +727,7 @@ Expected: PASS (all specs, including the regenerated goldens, the property/invar
 - [ ] **Step 5: Lint + typecheck + commit**
 
 Run: `yarn workspace @trm/engine lint && yarn workspace @trm/engine typecheck`
+
 ```bash
 git add packages/engine
 git commit -m "feat(engine): bump ENGINE_VERSION to 2; regenerate golden digests for rule variants"
@@ -669,16 +740,19 @@ git commit -m "feat(engine): bump ENGINE_VERSION to 2; regenerate golden digests
 ### Task C1: `GameSettings` message on the snapshot
 
 **Files:**
+
 - Modify: `packages/proto/proto/trmission/v1/common.proto`
 - Modify: `apps/server/src/codec/snapshot.ts`
 - Test: `packages/proto/test/*` (round-trip), `apps/server/test/*` (snapshot codec) — extend existing.
 
 **Interfaces:**
+
 - Produces: `message GameSettings { bool unlimited_station_borrow = 1; bool second_draw_after_blind_rainbow = 2; bool no_unfinished_ticket_penalty = 3; }`, field `GameSettings game_settings = 21;` on `GameSnapshot`. `viewToSnapshot` reads `view.ruleParams` — so `RedactedView` must expose the three booleans.
 
 - [ ] **Step 1: Expose the flags on `RedactedView`**
 
 In `packages/engine/src/types/view.ts` add to `RedactedView`:
+
 ```ts
   readonly settings: {
     readonly unlimitedStationBorrow: boolean;
@@ -686,7 +760,9 @@ In `packages/engine/src/types/view.ts` add to `RedactedView`:
     readonly noUnfinishedTicketPenalty: boolean;
   };
 ```
+
 In `selectors.ts redactFor` return object add:
+
 ```ts
     settings: {
       unlimitedStationBorrow: state.ruleParams.unlimitedStationBorrow,
@@ -694,6 +770,7 @@ In `selectors.ts redactFor` return object add:
       noUnfinishedTicketPenalty: state.ruleParams.noUnfinishedTicketPenalty,
     },
 ```
+
 Commit this engine change with the codec task or separately.
 
 - [ ] **Step 2: Write the failing proto round-trip test**
@@ -703,6 +780,7 @@ In the proto test suite, create a `GameSettings` and assert binary round-trip pr
 - [ ] **Step 3: Edit `.proto` + regenerate**
 
 In `common.proto` add the message (near `GameSnapshot`) and the field inside `GameSnapshot` (next free tag is `21`):
+
 ```proto
 message GameSettings {
   bool unlimited_station_borrow = 1;
@@ -710,11 +788,13 @@ message GameSettings {
   bool no_unfinished_ticket_penalty = 3;
 }
 ```
+
 ```proto
   // Active rule variants for this game (display only; the engine has already baked
   // their consequences into this snapshot). Present for players and spectators alike.
   GameSettings game_settings = 21;
 ```
+
 Run: `yarn workspace @trm/proto generate`
 Run: `yarn workspace @trm/proto test`
 Expected: PASS.
@@ -722,6 +802,7 @@ Expected: PASS.
 - [ ] **Step 4: Project it in `snapshot.ts`**
 
 In `viewToSnapshot`'s `create(GameSnapshotSchema, { ... })` add:
+
 ```ts
     gameSettings: {
       unlimitedStationBorrow: view.settings.unlimitedStationBorrow,
@@ -734,6 +815,7 @@ In `viewToSnapshot`'s `create(GameSnapshotSchema, { ... })` add:
 
 Run: `yarn workspace @trm/server test --run snapshot` (or the codec spec name)
 Expected: PASS.
+
 ```bash
 git add packages/proto/proto packages/engine/src/types/view.ts packages/engine/src/selectors.ts apps/server/src/codec/snapshot.ts packages/proto/test apps/server/test
 git commit -m "feat(proto): surface active GameSettings on the game snapshot"
@@ -746,11 +828,14 @@ git commit -m "feat(proto): surface active GameSettings on the game snapshot"
 ### Task D1: `RoomDoc.settings` + repo `updateSettings` + `findPublic`
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts`
 - Test: `apps/server/test/room.repo.spec.ts` (create or extend; uses mongodb-memory-server like existing lobby tests)
 
 **Interfaces:**
+
 - Produces:
+
 ```ts
 export interface RoomSettings {
   unlimitedStationBorrow: boolean;
@@ -761,7 +846,8 @@ export interface RoomSettings {
 }
 export const DEFAULT_ROOM_SETTINGS: RoomSettings; // all variants false, allowSpectating true, visibility 'PUBLIC'
 ```
-  `RoomDoc.settings: RoomSettings`. `RoomRepo.updateSettings(code, hostId, patch: Partial<RoomSettings>): Promise<RoomDoc | 'not_found' | 'forbidden' | 'started'>`. `RoomRepo.findPublic(): Promise<RoomDoc[]>` (PUBLIC rooms in LOBBY, plus STARTED rooms with `allowSpectating`, newest first).
+
+`RoomDoc.settings: RoomSettings`. `RoomRepo.updateSettings(code, hostId, patch: Partial<RoomSettings>): Promise<RoomDoc | 'not_found' | 'forbidden' | 'started'>`. `RoomRepo.findPublic(): Promise<RoomDoc[]>` (PUBLIC rooms in LOBBY, plus STARTED rooms with `allowSpectating`, newest first).
 
 - [ ] **Step 1: Write failing tests**
 
@@ -769,17 +855,24 @@ export const DEFAULT_ROOM_SETTINGS: RoomSettings; // all variants false, allowSp
 it('create() defaults settings to all-off variants, spectating on, public', async () => {
   const r = await repo.create(host, 5);
   expect(r.settings).toEqual({
-    unlimitedStationBorrow: false, secondDrawAfterBlindRainbow: false,
-    noUnfinishedTicketPenalty: false, allowSpectating: true, visibility: 'PUBLIC',
+    unlimitedStationBorrow: false,
+    secondDrawAfterBlindRainbow: false,
+    noUnfinishedTicketPenalty: false,
+    allowSpectating: true,
+    visibility: 'PUBLIC',
   });
 });
 it('updateSettings is host-only and LOBBY-only', async () => {
   const r = await repo.create(host, 5);
-  expect(await repo.updateSettings(r._id, 'someone-else', { allowSpectating: false })).toBe('forbidden');
+  expect(await repo.updateSettings(r._id, 'someone-else', { allowSpectating: false })).toBe(
+    'forbidden',
+  );
   const ok = await repo.updateSettings(r._id, host.userId, { visibility: 'INVITE_ONLY' });
   expect((ok as RoomDoc).settings.visibility).toBe('INVITE_ONLY');
 });
-it('findPublic returns PUBLIC lobby rooms and hides INVITE_ONLY', async () => { /* ... */ });
+it('findPublic returns PUBLIC lobby rooms and hides INVITE_ONLY', async () => {
+  /* ... */
+});
 ```
 
 - [ ] **Step 2: Run to verify it fails**
@@ -790,6 +883,7 @@ Expected: FAIL.
 - [ ] **Step 3: Implement**
 
 Add the `RoomSettings`/`DEFAULT_ROOM_SETTINGS` exports. Add `settings: RoomSettings;` to `RoomDoc`. In `create()` set `settings: { ...DEFAULT_ROOM_SETTINGS }`. Add:
+
 ```ts
 async updateSettings(
   code: string, hostId: string, patch: Partial<RoomSettings>,
@@ -811,10 +905,13 @@ async findPublic(): Promise<RoomDoc[]> {
   }).sort({ updatedAt: -1 }).limit(50).toArray();
 }
 ```
+
 Widen the index in `onModuleInit`:
+
 ```ts
 await this.col.createIndex({ 'settings.visibility': 1, status: 1, updatedAt: -1 });
 ```
+
 Note: existing rooms created before this change lack `settings`; guard reads with `room.settings ?? DEFAULT_ROOM_SETTINGS` where consumed. (Pre-launch, acceptable; documented.)
 
 - [ ] **Step 4: Run to verify it passes**
@@ -832,10 +929,12 @@ git commit -m "feat(server): RoomDoc.settings, host-only updateSettings, findPub
 ### Task D2: Settings DTO + `RoomView.settings` + PATCH endpoint + service
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/lobby.schemas.ts`, `lobby.service.ts`, `lobby.controller.ts`
 - Test: `apps/server/test/lobby.e2e.spec.ts` (extend) / `lobby.service.spec.ts`
 
 **Interfaces:**
+
 - Produces: `GameSettingsSchema` (Zod) → `UpdateSettingsDto`; `RoomViewSchema.settings`; `RoomView.settings`; `LobbyService.updateSettings(code, user, patch): Promise<RoomView>`; controller `PATCH /api/v1/rooms/:code/settings`.
 
 - [ ] **Step 1: Write a failing e2e/service test**
@@ -855,6 +954,7 @@ Expected: FAIL.
 - [ ] **Step 3: Implement schema + DTO**
 
 In `lobby.schemas.ts`:
+
 ```ts
 export const GameSettingsSchema = z.object({
   unlimitedStationBorrow: z.boolean(),
@@ -866,11 +966,13 @@ export const GameSettingsSchema = z.object({
 export const UpdateSettingsSchema = GameSettingsSchema.partial();
 export class UpdateSettingsDto extends createZodDto(UpdateSettingsSchema) {}
 ```
+
 Add `settings: GameSettingsSchema` to `RoomViewSchema`.
 
 - [ ] **Step 4: Implement service + `toView`**
 
 In `lobby.service.ts`: extend `RoomView` with `settings: RoomSettings`; in `toView` include `settings: r.settings ?? DEFAULT_ROOM_SETTINGS`. Add:
+
 ```ts
 async updateSettings(code: string, user: AuthUser, patch: Partial<RoomSettings>): Promise<RoomView> {
   const r = await this.rooms.updateSettings(code, user.userId, patch);
@@ -884,6 +986,7 @@ async updateSettings(code: string, user: AuthUser, patch: Partial<RoomSettings>)
 - [ ] **Step 5: Implement controller route**
 
 In `lobby.controller.ts` (import `Patch`, `UpdateSettingsDto`, `UpdateSettingsSchema`):
+
 ```ts
 @Patch(':code/settings')
 @HttpCode(200)
@@ -899,6 +1002,7 @@ updateSettings(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body
 
 Run: `yarn workspace @trm/server test --run lobby`
 Expected: PASS.
+
 ```bash
 git add apps/server/src/lobby/lobby.schemas.ts apps/server/src/lobby/lobby.service.ts apps/server/src/lobby/lobby.controller.ts apps/server/test
 git commit -m "feat(server): PATCH /rooms/:code/settings + settings on RoomView"
@@ -907,10 +1011,12 @@ git commit -m "feat(server): PATCH /rooms/:code/settings + settings on RoomView"
 ### Task D3: `start()` passes rule variants into the engine
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/lobby.service.ts` (`start`, :122-147)
 - Test: `apps/server/test/lobby.*` — assert the created match's `ruleParams` reflect the room settings.
 
 **Interfaces:**
+
 - Consumes: `room.settings`. Produces: `GameConfig.ruleParams` carrying the three rule variants.
 
 - [ ] **Step 1: Write the failing test**
@@ -925,10 +1031,13 @@ Expected: FAIL.
 - [ ] **Step 3: Implement**
 
 In `start()`, build `ruleParams` from `room.settings` and include it in the config:
+
 ```ts
 const s = room.settings ?? DEFAULT_ROOM_SETTINGS;
 const config: GameConfig = {
-  seed, players, contentHash: CONTENT_HASH,
+  seed,
+  players,
+  contentHash: CONTENT_HASH,
   ruleParams: {
     unlimitedStationBorrow: s.unlimitedStationBorrow,
     secondDrawAfterBlindRainbow: s.secondDrawAfterBlindRainbow,
@@ -941,6 +1050,7 @@ const config: GameConfig = {
 
 Run: `yarn workspace @trm/server test --run lobby`
 Expected: PASS.
+
 ```bash
 git add apps/server/src/lobby/lobby.service.ts apps/server/test
 git commit -m "feat(server): pass per-game rule variants into the engine at game start"
@@ -949,11 +1059,13 @@ git commit -m "feat(server): pass per-game rule variants into the engine at game
 ### Task D4: Public-rooms list endpoint (unauthenticated)
 
 **Files:**
+
 - Create: `apps/server/src/lobby/lobby.public.controller.ts`
 - Modify: `apps/server/src/lobby/lobby.service.ts` (`listPublic`), `lobby.module.ts`, `lobby.schemas.ts`
 - Test: `apps/server/test/lobby.e2e.spec.ts` — list returns PUBLIC rooms with no auth header.
 
 **Interfaces:**
+
 - Produces: `LobbyService.listPublic(): Promise<RoomView[]>`; `GET /api/v1/rooms/public` (no `AccessTokenGuard`).
 
 (Use a dedicated path `/rooms/public` on a separate controller WITHOUT the guard, to avoid colliding with the guarded `GET /rooms/:code` and to keep the unauthenticated surface explicit.)
@@ -975,6 +1087,7 @@ Expected: FAIL.
 - [ ] **Step 3: Implement service method**
 
 In `lobby.service.ts`:
+
 ```ts
 async listPublic(): Promise<RoomView[]> {
   return (await this.rooms.findPublic()).map(toView);
@@ -984,6 +1097,7 @@ async listPublic(): Promise<RoomView[]> {
 - [ ] **Step 4: Implement the unauthenticated controller**
 
 `lobby.public.controller.ts`:
+
 ```ts
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -1005,12 +1119,14 @@ export class LobbyPublicController {
   }
 }
 ```
+
 Register `LobbyPublicController` in `lobby.module.ts` `controllers: [...]`. Ensure no global guard blocks it (the guard is controller-scoped via `@UseGuards` on `LobbyController`, so a separate controller without it is open — verify there is no app-level `APP_GUARD`; if there is, add the project's `@Public()` decorator instead).
 
 - [ ] **Step 5: Run to verify it passes + commit**
 
 Run: `yarn workspace @trm/server test --run lobby`
 Expected: PASS.
+
 ```bash
 git add apps/server/src/lobby/lobby.public.controller.ts apps/server/src/lobby/lobby.service.ts apps/server/src/lobby/lobby.module.ts apps/server/test
 git commit -m "feat(server): unauthenticated GET /rooms/public list"
@@ -1019,18 +1135,22 @@ git commit -m "feat(server): unauthenticated GET /rooms/public list"
 ### Task D5: Spectator path (ticket, gate, hub binding, fan-out, command rejection)
 
 **Files:**
+
 - Modify: `apps/server/src/ws/ticket.ts` (allow `seat: -1` — already numeric, but assert sentinel is preserved), `apps/server/src/ws/connection.ts` (binding stays as-is; `seat: -1` = spectator), `apps/server/src/ws/hub.ts` (spectator set, `onHello`, `broadcast`, `onGameCommand`).
 - Modify: `apps/server/src/lobby/lobby.service.ts` (`spectateTicket`), `lobby.controller.ts` (`POST /:code/spectate`).
 - Test: `apps/server/test/wire-game.e2e.spec.ts` (spectator gets snapshots, no secrets, cannot command), `lobby` (spectate gated).
 
 **Interfaces:**
+
 - Produces: `LobbyService.spectateTicket(code, user): Promise<TicketResult>` (rejects when `!settings.allowSpectating` or no started game; mints a ws-ticket with `seat: -1` and `playerId` = the caller's id, or a synthetic `spectator:<uuid>` for anonymous). Hub admits `seat < 0` as a spectator: receives projected (`viewer=null`) snapshots + PUBLIC events; any game command → `NOT_IN_GAME`.
 
 - [ ] **Step 1: Write failing tests**
 
 ```ts
 // lobby: spectate gated
-it('spectate returns a ticket when allowSpectating, 403 when off', async () => { /* ... */ });
+it('spectate returns a ticket when allowSpectating, 403 when off', async () => {
+  /* ... */
+});
 
 // hub/wire: spectator receives a snapshot with no `you`, and cannot send commands
 it('a spectator connection gets snapshots but no SelfView and cannot act', async () => {
@@ -1047,6 +1167,7 @@ Expected: FAIL.
 - [ ] **Step 3: Implement the spectate service + endpoint**
 
 In `lobby.service.ts`:
+
 ```ts
 async spectateTicket(code: string, user: AuthUser): Promise<TicketResult> {
   const room = await this.require(code);
@@ -1059,7 +1180,9 @@ async spectateTicket(code: string, user: AuthUser): Promise<TicketResult> {
   };
 }
 ```
+
 Controller (`lobby.controller.ts`):
+
 ```ts
 @Post(':code/spectate')
 @HttpCode(200)
@@ -1069,6 +1192,7 @@ spectate(@CurrentUser() user: AuthUser, @Param('code') code: string) {
   return this.lobby.spectateTicket(code.toUpperCase(), user);
 }
 ```
+
 (Spectators must be authenticated — guests count. The guarded controller is fine since guests get an access token. Anonymous-without-guest is out of scope; the home "Watch" flow ensures a guest session first.)
 
 - [ ] **Step 4: Implement the hub spectator path**
@@ -1076,50 +1200,65 @@ spectate(@CurrentUser() user: AuthUser, @Param('code') code: string) {
 In `hub.ts`, add a spectator registry field: `private readonly spectators = new Map<string, Set<Connection>>();`
 
 In `onHello`, branch BEFORE the seat-membership check:
+
 ```ts
-    const player = asPlayerId(binding.playerId);
-    if (binding.seat < 0) {
-      // Spectator binding: no seat, view as `null`. Never added to `members`.
-      conn.binding = { gameId: binding.gameId, player, seat: -1 };
-      conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
-      let set = this.spectators.get(binding.gameId);
-      if (!set) { set = new Set(); this.spectators.set(binding.gameId, set); }
-      set.add(conn);
-      conn.send(welcomeFrame(binding.gameId, binding.playerId, -1), clientSeq);
-      this.sendProjected(conn, match, null, clientSeq);
-      return;
-    }
-    const inGame = match.session.turnOrder.includes(player);
-    // ...existing seat check unchanged
+const player = asPlayerId(binding.playerId);
+if (binding.seat < 0) {
+  // Spectator binding: no seat, view as `null`. Never added to `members`.
+  conn.binding = { gameId: binding.gameId, player, seat: -1 };
+  conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
+  let set = this.spectators.get(binding.gameId);
+  if (!set) {
+    set = new Set();
+    this.spectators.set(binding.gameId, set);
+  }
+  set.add(conn);
+  conn.send(welcomeFrame(binding.gameId, binding.playerId, -1), clientSeq);
+  this.sendProjected(conn, match, null, clientSeq);
+  return;
+}
+const inGame = match.session.turnOrder.includes(player);
+// ...existing seat check unchanged
 ```
 
 In `onGameCommand`, after the `conn.binding` null-check, reject spectators:
+
 ```ts
-    if (conn.binding.seat < 0) {
-      conn.send(rejectionFrame(env.clientSeq, RejectionCode.NOT_IN_GAME, 'errors:notInGame', 'spectators cannot act'));
-      return;
-    }
+if (conn.binding.seat < 0) {
+  conn.send(
+    rejectionFrame(
+      env.clientSeq,
+      RejectionCode.NOT_IN_GAME,
+      'errors:notInGame',
+      'spectators cannot act',
+    ),
+  );
+  return;
+}
 ```
 
 In `broadcast`, after the members loop, fan out to spectators (PUBLIC events only, `viewer=null`):
+
 ```ts
-    const specs = this.spectators.get(match.session.gameId);
-    if (specs) {
-      const pubEvents = events
-        .map((e) => eventToProto(e, null))
-        .filter((e): e is PbGameEvent => e !== null);
-      for (const spec of specs) {
-        this.sendProjected(spec, match, null, 0);
-        if (pubEvents.length > 0) spec.send(eventsFrame(version, pubEvents));
-      }
-    }
+const specs = this.spectators.get(match.session.gameId);
+if (specs) {
+  const pubEvents = events
+    .map((e) => eventToProto(e, null))
+    .filter((e): e is PbGameEvent => e !== null);
+  for (const spec of specs) {
+    this.sendProjected(spec, match, null, 0);
+    if (pubEvents.length > 0) spec.send(eventsFrame(version, pubEvents));
+  }
+}
 ```
+
 Confirm `eventToProto(e, null)` drops `{ private }`-visibility events (it should, since a null viewer never matches `private`). If its signature is `(e, viewer: PlayerId)`, widen it to `PlayerId | null` and treat `null` as "public only".
 
 In `closeConnection`, also remove from spectators:
+
 ```ts
-    const sset = this.spectators.get(conn.binding.gameId);
-    sset?.delete(conn);
+const sset = this.spectators.get(conn.binding.gameId);
+sset?.delete(conn);
 ```
 
 - [ ] **Step 5: Run to verify it passes**
@@ -1141,10 +1280,12 @@ git commit -m "feat(server): full spectator path (ticket gate, hub binding, fan-
 ### Task E1: REST client additions
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Test: `apps/web/src/net/rest.test.ts` (extend)
 
 **Interfaces:**
+
 - Produces: `RoomSettings` type; `RoomView.settings: RoomSettings`; `api.getPublicRooms(): Promise<RoomView[]>`; `api.updateRoomSettings(code, patch: Partial<RoomSettings>): Promise<RoomView>`; `api.spectate(code): Promise<TicketResult>`.
 
 - [ ] **Step 1: Write the failing test** (mock `fetch`, assert the right method/path/body for each new call).
@@ -1162,7 +1303,9 @@ export interface RoomSettings {
   visibility: 'PUBLIC' | 'INVITE_ONLY';
 }
 ```
+
 Add `settings: RoomSettings;` to `RoomView`. In `api`:
+
 ```ts
   getPublicRooms: () => req<RoomView[]>('GET', '/rooms/public'),
   updateRoomSettings: (code: string, patch: Partial<RoomSettings>) =>
@@ -1173,6 +1316,7 @@ Add `settings: RoomSettings;` to `RoomView`. In `api`:
 - [ ] **Step 4: Run to verify it passes + commit**
 
 Run: `yarn workspace @trm/web test --run rest`
+
 ```bash
 git add apps/web/src/net/rest.ts apps/web/src/net/rest.test.ts
 git commit -m "feat(web): REST client for room settings, public list, spectate"
@@ -1181,14 +1325,17 @@ git commit -m "feat(web): REST client for room settings, public list, spectate"
 ### Task E2: i18n keys (zh-Hant + en)
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Produces: keys used by E3/E4/E5. Add the SAME keys to both `zh-Hant` and `en` blocks.
 
 - [ ] **Step 1: Implement (no test; verified by usage in later tasks)**
 
 Add to both locale blocks (zh-Hant values shown; provide natural en equivalents):
+
 ```ts
       gameSettings: '遊戲設定',
       settingUnlimitedStationBorrow: '車站無限借用路線',
@@ -1211,6 +1358,7 @@ Add to both locale blocks (zh-Hant values shown; provide natural en equivalents)
 - [ ] **Step 2: Typecheck + commit**
 
 Run: `yarn workspace @trm/web typecheck`
+
 ```bash
 git add apps/web/src/i18n/index.ts
 git commit -m "feat(web): i18n keys for per-game settings, public rooms, spectating"
@@ -1219,17 +1367,23 @@ git commit -m "feat(web): i18n keys for per-game settings, public rooms, spectat
 ### Task E3: Host-only Game Settings panel in the lobby
 
 **Files:**
+
 - Modify: `apps/web/src/screens/RoomScreen.tsx`
 - Test: `apps/web/src/screens/RoomScreen.test.tsx` (extend)
 
 **Interfaces:**
+
 - Consumes: `api.updateRoomSettings`, `room.settings`, `isHost`. Renders toggles for the 3 variants + spectating, a segmented control for visibility. Read-only for non-hosts; the whole panel is disabled when `room.status !== 'LOBBY'`.
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-it('host sees enabled settings controls; non-host sees them disabled', () => { /* render with room.hostId === user.id and !== */ });
-it('toggling a setting calls updateRoomSettings', () => { /* click → api.updateRoomSettings called with patch */ });
+it('host sees enabled settings controls; non-host sees them disabled', () => {
+  /* render with room.hostId === user.id and !== */
+});
+it('toggling a setting calls updateRoomSettings', () => {
+  /* click → api.updateRoomSettings called with patch */
+});
 ```
 
 - [ ] **Step 2: Run to verify it fails** — `yarn workspace @trm/web test --run RoomScreen`
@@ -1237,36 +1391,67 @@ it('toggling a setting calls updateRoomSettings', () => { /* click → api.updat
 - [ ] **Step 3: Implement**
 
 Add a `setSetting` helper near the other guards in `RoomScreen`:
+
 ```ts
-const setSetting = (patch: Partial<RoomSettings>) => void guard(api.updateRoomSettings(code, patch));
+const setSetting = (patch: Partial<RoomSettings>) =>
+  void guard(api.updateRoomSettings(code, patch));
 const settings = room.settings;
 const settingsLocked = !isHost || room.status !== 'LOBBY';
 ```
+
 Render a panel between the member list and the bot controls:
+
 ```tsx
 <fieldset className="card stack" disabled={settingsLocked}>
   <legend>{t('gameSettings')}</legend>
-  {([
-    ['unlimitedStationBorrow', 'settingUnlimitedStationBorrow', 'settingUnlimitedStationBorrowDesc'],
-    ['secondDrawAfterBlindRainbow', 'settingSecondDrawAfterRainbow', 'settingSecondDrawAfterRainbowDesc'],
-    ['noUnfinishedTicketPenalty', 'settingNoUnfinishedPenalty', 'settingNoUnfinishedPenaltyDesc'],
-  ] as const).map(([key, label, desc]) => (
+  {(
+    [
+      [
+        'unlimitedStationBorrow',
+        'settingUnlimitedStationBorrow',
+        'settingUnlimitedStationBorrowDesc',
+      ],
+      [
+        'secondDrawAfterBlindRainbow',
+        'settingSecondDrawAfterRainbow',
+        'settingSecondDrawAfterRainbowDesc',
+      ],
+      ['noUnfinishedTicketPenalty', 'settingNoUnfinishedPenalty', 'settingNoUnfinishedPenaltyDesc'],
+    ] as const
+  ).map(([key, label, desc]) => (
     <label key={key} className="row between">
-      <span><strong>{t(label)}</strong><br /><span className="muted">{t(desc)}</span></span>
-      <input type="checkbox" checked={settings[key]} onChange={(e) => setSetting({ [key]: e.target.checked })} />
+      <span>
+        <strong>{t(label)}</strong>
+        <br />
+        <span className="muted">{t(desc)}</span>
+      </span>
+      <input
+        type="checkbox"
+        checked={settings[key]}
+        onChange={(e) => setSetting({ [key]: e.target.checked })}
+      />
     </label>
   ))}
   <label className="row between">
-    <span><strong>{t('allowSpectating')}</strong></span>
-    <input type="checkbox" checked={settings.allowSpectating}
-      onChange={(e) => setSetting({ allowSpectating: e.target.checked })} />
+    <span>
+      <strong>{t('allowSpectating')}</strong>
+    </span>
+    <input
+      type="checkbox"
+      checked={settings.allowSpectating}
+      onChange={(e) => setSetting({ allowSpectating: e.target.checked })}
+    />
   </label>
   <div className="row between">
     <strong>{t('roomVisibility')}</strong>
     <div className="row">
       {(['PUBLIC', 'INVITE_ONLY'] as const).map((v) => (
-        <button key={v} className={settings.visibility === v ? 'primary' : ''}
-          onClick={() => setSetting({ visibility: v })} disabled={settingsLocked}>
+        <button
+          key={v}
+          className={settings.visibility === v ? 'primary' : ''}
+          onClick={() => setSetting({ visibility: v })}
+          disabled={settingsLocked}
+        >
           {t(`visibility_${v}`)}
         </button>
       ))}
@@ -1274,11 +1459,13 @@ Render a panel between the member list and the bot controls:
   </div>
 </fieldset>
 ```
+
 Import `RoomSettings` from `../net/rest`.
 
 - [ ] **Step 4: Run to verify it passes + commit**
 
 Run: `yarn workspace @trm/web test --run RoomScreen`
+
 ```bash
 git add apps/web/src/screens/RoomScreen.tsx apps/web/src/screens/RoomScreen.test.tsx
 git commit -m "feat(web): host-only game settings panel in the lobby"
@@ -1287,10 +1474,12 @@ git commit -m "feat(web): host-only game settings panel in the lobby"
 ### Task E4: Public-rooms list on the home screen
 
 **Files:**
+
 - Modify: `apps/web/src/screens/HomeScreen.tsx`
 - Test: `apps/web/src/screens/HomeScreen.test.tsx` (extend)
 
 **Interfaces:**
+
 - Consumes: `api.getPublicRooms`, `api.spectate`, `enterRoom`, `connectGame`, `enterGame`. Renders a list; each LOBBY room → Join; each STARTED room → Watch.
 
 - [ ] **Step 1: Write the failing test** — mock `api.getPublicRooms` to return one LOBBY + one STARTED room; assert a Join and a Watch control render; clicking Watch calls `api.spectate`.
@@ -1300,14 +1489,22 @@ git commit -m "feat(web): host-only game settings panel in the lobby"
 - [ ] **Step 3: Implement**
 
 Add state + effect:
+
 ```tsx
 const [publicRooms, setPublicRooms] = useState<RoomView[]>([]);
 useEffect(() => {
   let active = true;
-  const load = () => api.getPublicRooms().then((r) => active && setPublicRooms(r)).catch(() => {});
+  const load = () =>
+    api
+      .getPublicRooms()
+      .then((r) => active && setPublicRooms(r))
+      .catch(() => {});
   void load();
   const id = setInterval(load, 5000);
-  return () => { active = false; clearInterval(id); };
+  return () => {
+    active = false;
+    clearInterval(id);
+  };
 }, []);
 const watch = async (code: string) => {
   const tk = await api.spectate(code);
@@ -1315,26 +1512,34 @@ const watch = async (code: string) => {
   enterGame(tk.gameId, tk.ticket); // spectator: snapshot will have no `you`
 };
 ```
+
 Render after the create/join card:
+
 ```tsx
 <div className="card stack">
   <h3>{t('publicRooms')}</h3>
   {publicRooms.length === 0 && <p className="muted">{t('noPublicRooms')}</p>}
   {publicRooms.map((r) => (
     <div key={r.code} className="row between">
-      <span><code>{r.code}</code> · {r.members.length}/{r.maxPlayers}</span>
-      {r.status === 'LOBBY'
-        ? <button onClick={() => enterRoom(r.code)}>{t('joinRoom')}</button>
-        : <button onClick={() => void watch(r.code)}>{t('watch')}</button>}
+      <span>
+        <code>{r.code}</code> · {r.members.length}/{r.maxPlayers}
+      </span>
+      {r.status === 'LOBBY' ? (
+        <button onClick={() => enterRoom(r.code)}>{t('joinRoom')}</button>
+      ) : (
+        <button onClick={() => void watch(r.code)}>{t('watch')}</button>
+      )}
     </div>
   ))}
 </div>
 ```
+
 Import `connectGame` from `../net/connection`, `enterGame` from `useUi`, `RoomView` from `../net/rest`.
 
 - [ ] **Step 4: Run to verify it passes + commit**
 
 Run: `yarn workspace @trm/web test --run HomeScreen`
+
 ```bash
 git add apps/web/src/screens/HomeScreen.tsx apps/web/src/screens/HomeScreen.test.tsx
 git commit -m "feat(web): public rooms list with Join/Watch on the home screen"
@@ -1343,10 +1548,12 @@ git commit -m "feat(web): public rooms list with Join/Watch on the home screen"
 ### Task E5: Spectator read-only game view + banked ticket points
 
 **Files:**
+
 - Modify: `apps/web/src/screens/GameScreen.tsx`
 - Test: `apps/web/src/screens/*` (extend if a GameScreen test exists; else add a focused render test)
 
 **Interfaces:**
+
 - Consumes: `snapshot.you` (undefined ⇒ spectator), `snapshot.completedTickets`, content ticket values. Renders a "spectating" banner and hides action affordances when `you` is undefined; shows running score = `routePoints + Σ(completed ticket values)`.
 
 - [ ] **Step 1: Write the failing test** — render `GameScreen` with a snapshot whose `you` is undefined; assert the spectating banner renders and no action buttons (e.g. claim/draw) are present.
@@ -1356,28 +1563,42 @@ git commit -m "feat(web): public rooms list with Join/Watch on the home screen"
 - [ ] **Step 3: Implement**
 
 Add near the top of the component body (after `snapshot` is read):
+
 ```tsx
 const isSpectator = !snapshot.you;
 ```
+
 Render the banner (e.g., above the board):
+
 ```tsx
-{isSpectator && <div className="banner muted">{t('spectating')} — {t('spectatingHint')}</div>}
+{
+  isSpectator && (
+    <div className="banner muted">
+      {t('spectating')} — {t('spectatingHint')}
+    </div>
+  );
+}
 ```
+
 Guard action affordances: most already key off `me` (which is `null` for spectators) and current-turn checks. Verify each interactive control (claim, draw, build, ticket-keep) is additionally gated by `!isSpectator`; add `disabled={isSpectator}` / early-returns where a control could otherwise fire. (Read the component and audit each `onClick` that dispatches a command.)
 
 Banked ticket points (decision §10.2 — derive client-side; no proto change): compute per player from `snapshot.completedTickets` and the content ticket values, and display `routePoints + banked` as the running score wherever the scoreboard/tracker shows a player's points:
+
 ```tsx
 import { ticketById } from '../game/content'; // or the existing content accessor
-const bankedFor = (playerId: string) => snapshot.completedTickets
-  .filter((c) => c.playerId === playerId)
-  .reduce((sum, c) => sum + (ticketById(c.ticketId)?.value ?? 0), 0);
+const bankedFor = (playerId: string) =>
+  snapshot.completedTickets
+    .filter((c) => c.playerId === playerId)
+    .reduce((sum, c) => sum + (ticketById(c.ticketId)?.value ?? 0), 0);
 // displayed score = player.routePoints + bankedFor(player.id)
 ```
+
 (Adjust to the real content accessor name in `apps/web/src/game/content.ts`.)
 
 - [ ] **Step 4: Run to verify it passes + commit**
 
 Run: `yarn workspace @trm/web test --run GameScreen`
+
 ```bash
 git add apps/web/src/screens/GameScreen.tsx apps/web/src/screens
 git commit -m "feat(web): spectator read-only game view + live banked ticket points"
@@ -1399,6 +1620,7 @@ yarn lint
 yarn test
 yarn format:check
 ```
+
 Expected: all PASS. (`yarn build` runs proto codegen first per the turbo graph.)
 
 - [ ] **Step 2: Fix any failures, re-run, then final commit if needed**

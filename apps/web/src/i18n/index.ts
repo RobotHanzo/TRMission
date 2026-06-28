@@ -50,7 +50,8 @@ const resources = {
 
       gameSettings: '遊戲設定',
       settingUnlimitedStationBorrow: '車站無限借用路線',
-      settingUnlimitedStationBorrowDesc: '每個車站可借用所有相鄰的對手路線；任務於連通當下即時鎖定計分。',
+      settingUnlimitedStationBorrowDesc:
+        '每個車站可借用所有相鄰的對手路線；任務於連通當下即時鎖定計分。',
       settingSecondDrawAfterRainbow: '盲抽彩虹後可再抽一張',
       settingSecondDrawAfterRainbowDesc: '關閉時，第一張盲抽到彩虹（火車頭）即結束抽牌。',
       settingNoUnfinishedPenalty: '未完成任務不扣分',

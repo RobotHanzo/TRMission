@@ -12,7 +12,15 @@ import { emptyHand } from '../src/hand';
 function cfg(ruleParams?: GameConfig['ruleParams']): { board: Board; config: GameConfig } {
   const board = taiwanBoard();
   const players = [0, 1].map((i) => ({ id: asPlayerId(`p${i}`), seat: i as SeatIndex }));
-  return { board, config: { seed: 'lock', players, contentHash: CONTENT_HASH, ...(ruleParams ? { ruleParams } : {}) } };
+  return {
+    board,
+    config: {
+      seed: 'lock',
+      players,
+      contentHash: CONTENT_HASH,
+      ...(ruleParams ? { ruleParams } : {}),
+    },
+  };
 }
 
 const allLoco = (length: number) => ({ color: null, colorCount: 0, locomotives: length });
@@ -51,7 +59,11 @@ function findBorrow(board: Board) {
   return null;
 }
 
-function readyState(s0: GameState, overrides: Partial<Record<string, Partial<PlayerState>>>, ownership = {}): GameState {
+function readyState(
+  s0: GameState,
+  overrides: Partial<Record<string, Partial<PlayerState>>>,
+  ownership = {},
+): GameState {
   const players: Record<string, PlayerState> = {};
   for (const [id, p] of Object.entries(s0.players)) {
     players[id] = { ...p, pendingTicketOffer: null, ...(overrides[id] ?? {}) };
@@ -75,16 +87,23 @@ describe('instant locked ticket completion (unlimitedStationBorrow on)', () => {
       p0: { hand: locoHand(), keptTickets: [t.id] },
     });
 
-    const res = reduce(board, state, { t: 'CLAIM_ROUTE', player: me, routeId: r.id, payment: allLoco(r.length) });
+    const res = reduce(board, state, {
+      t: 'CLAIM_ROUTE',
+      player: me,
+      routeId: r.id,
+      payment: allLoco(r.length),
+    });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
     expect(res.value.state.players['p0']!.completedTickets).toContain(t.id);
     expect(
-      res.value.events.some((e) => e.e === 'TICKET_COMPLETED' && e.ticket === t.id && e.player === me),
+      res.value.events.some(
+        (e) => e.e === 'TICKET_COMPLETED' && e.ticket === t.id && e.player === me,
+      ),
     ).toBe(true);
   });
 
-  it("locks a borrow-completed ticket when an OPPONENT claims the borrowed leg", () => {
+  it('locks a borrow-completed ticket when an OPPONENT claims the borrowed leg', () => {
     const { board, config } = cfg({ unlimitedStationBorrow: true });
     const found = findBorrow(board);
     expect(found).not.toBeNull();
@@ -109,12 +128,19 @@ describe('instant locked ticket completion (unlimitedStationBorrow on)', () => {
     // Before the opponent's claim, T is not yet complete (m–T.b is unowned).
     expect(state.players['p0']!.completedTickets).toEqual([]);
 
-    const res = reduce(board, state, { t: 'CLAIM_ROUTE', player: opp, routeId: r2.id, payment: allLoco(r2.length) });
+    const res = reduce(board, state, {
+      t: 'CLAIM_ROUTE',
+      player: opp,
+      routeId: r2.id,
+      payment: allLoco(r2.length),
+    });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
     expect(res.value.state.players['p0']!.completedTickets).toContain(t.id);
     expect(
-      res.value.events.some((e) => e.e === 'TICKET_COMPLETED' && e.ticket === t.id && e.player === me),
+      res.value.events.some(
+        (e) => e.e === 'TICKET_COMPLETED' && e.ticket === t.id && e.player === me,
+      ),
     ).toBe(true);
   });
 
@@ -125,7 +151,12 @@ describe('instant locked ticket completion (unlimitedStationBorrow on)', () => {
     const state = readyState(initGame(board, config), {
       p0: { hand: locoHand(), keptTickets: [t.id] },
     });
-    const res = reduce(board, state, { t: 'CLAIM_ROUTE', player: me, routeId: r.id, payment: allLoco(r.length) });
+    const res = reduce(board, state, {
+      t: 'CLAIM_ROUTE',
+      player: me,
+      routeId: r.id,
+      payment: allLoco(r.length),
+    });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
     expect(res.value.state.players['p0']!.completedTickets).toEqual([]);

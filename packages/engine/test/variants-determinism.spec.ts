@@ -24,7 +24,9 @@ describe('rule-variant determinism & version', () => {
   });
 
   it('replays byte-identically under each variant', () => {
-    const variants: { ruleParams: NonNullable<Parameters<typeof playGreedyGame>[2]>['ruleParams'] }[] = [
+    const variants: {
+      ruleParams: NonNullable<Parameters<typeof playGreedyGame>[2]>['ruleParams'];
+    }[] = [
       { ruleParams: { unlimitedStationBorrow: true } },
       { ruleParams: { secondDrawAfterBlindRainbow: true } },
       { ruleParams: { noUnfinishedTicketPenalty: true } },
@@ -37,7 +39,9 @@ describe('rule-variant determinism & version', () => {
   });
 
   it('locked completion set equals a fresh end-game evaluation (monotonicity invariant)', () => {
-    const r = playGreedyGame(4, 'borrow-monotone', { ruleParams: { unlimitedStationBorrow: true } });
+    const r = playGreedyGame(4, 'borrow-monotone', {
+      ruleParams: { unlimitedStationBorrow: true },
+    });
     expect(r.finalState.turn.phase).toBe('GAME_OVER');
     let sawCompletion = false;
     for (const pid of r.finalState.turnOrder) {
