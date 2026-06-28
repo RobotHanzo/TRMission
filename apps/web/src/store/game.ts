@@ -14,10 +14,18 @@ export interface ActingCamera {
   view: ViewDescriptor;
 }
 
+/** The most recent event batch, with a monotonic `seq` so animation consumers fire once per batch. */
+export interface EventBatch {
+  seq: number;
+  events: GameEvent[];
+}
+
 interface GameState {
   snapshot: GameSnapshot | null;
   status: SocketStatus;
   recentEvents: GameEvent[];
+  /** Latest delivered batch (animation hint channel); null until the first batch / after reset. */
+  lastBatch: EventBatch | null;
   rejection: RejectionInfo | null;
   /** Latest camera framing broadcast by a member; consumed by "follow the acting player". */
   actingCamera: ActingCamera | null;
@@ -33,6 +41,7 @@ export const useGame = create<GameState>()((set) => ({
   snapshot: null,
   status: 'closed',
   recentEvents: [],
+  lastBatch: null,
   rejection: null,
   actingCamera: null,
   // Snapshot is authoritative; ignore any that arrives out of order (older version).
@@ -45,7 +54,10 @@ export const useGame = create<GameState>()((set) => ({
       return turnChanged ? { snapshot, actingCamera: null } : { snapshot };
     }),
   applyEvents: (_v, events) =>
-    set((s) => ({ recentEvents: [...s.recentEvents, ...events].slice(-50) })),
+    set((s) => ({
+      recentEvents: [...s.recentEvents, ...events].slice(-50),
+      lastBatch: { seq: (s.lastBatch?.seq ?? 0) + 1, events },
+    })),
   // Keep only the framing of whoever is acting right now; ignore relays from anyone else.
   applyCameraMoved: (playerId, view) =>
     set((s) =>
@@ -55,5 +67,12 @@ export const useGame = create<GameState>()((set) => ({
     ),
   setStatus: (status) => set({ status }),
   setRejection: (rejection) => set({ rejection }),
-  reset: () => set({ snapshot: null, recentEvents: [], rejection: null, actingCamera: null }),
+  reset: () =>
+    set({
+      snapshot: null,
+      recentEvents: [],
+      lastBatch: null,
+      rejection: null,
+      actingCamera: null,
+    }),
 }));
