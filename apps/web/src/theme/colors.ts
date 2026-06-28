@@ -19,7 +19,7 @@ export const CARD_COLOR_TOKENS: Record<CardColor, ColorToken> = {
   // A true signal-red (was the orange-leaning #E4572E) so red cards and red railways read
   // unmistakably RED — and pull further clear of ORANGE in both hue and greyscale.
   RED: { key: 'RED', hex: '#D72631', ink: '#FFFFFF', nameZh: '紅', glyph: '▲' },
-  ORANGE: { key: 'ORANGE', hex: '#EE7B30', ink: '#241200', nameZh: '橙', glyph: '◆' },
+  ORANGE: { key: 'ORANGE', hex: '#EE7B30', ink: '#241300', nameZh: '橙', glyph: '◆' },
   YELLOW: { key: 'YELLOW', hex: '#F2C14E', ink: '#241B00', nameZh: '黃', glyph: '●' },
   GREEN: { key: 'GREEN', hex: '#3A9D5C', ink: '#FFFFFF', nameZh: '綠', glyph: '■' },
   BLUE: { key: 'BLUE', hex: '#0F5FA6', ink: '#FFFFFF', nameZh: '藍', glyph: '✚' },

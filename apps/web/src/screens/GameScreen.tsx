@@ -53,7 +53,7 @@ export function GameScreen() {
   const boardLayout = useUi((s) => s.boardLayout);
   const goHome = useUi((s) => s.goHome);
 
-  const wide = useMediaQuery('(min-width: 1200px)');
+  const wide = useMediaQuery('(min-width: 1300px)');
   const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
 
   const snapshot = useGame((s) => s.snapshot);

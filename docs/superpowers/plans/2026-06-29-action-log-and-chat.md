@@ -1612,7 +1612,7 @@ git commit -m "Web: ChatPanel with client-side length + rate guards"
 
 **Interfaces:**
 - Consumes: `LogPanel`, `ChatPanel`, `useMediaQuery`.
-- Produces: `<CommsPanel chatDisabled: boolean />` (log over chat); `useMediaQuery(query): boolean`; GameScreen renders the comms region (third column ≥1200px, else a `[Rail | Log+Chat]` tab in the rail slot).
+- Produces: `<CommsPanel chatDisabled: boolean />` (log over chat); `useMediaQuery(query): boolean`; GameScreen renders the comms region (third column ≥1300px, else a `[Rail | Log+Chat]` tab in the rail slot).
 
 - [ ] **Step 1: Create `useMediaQuery.ts`.** Create `apps/web/src/hooks/useMediaQuery.ts`:
 
@@ -1667,7 +1667,7 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 3b. Add hooks state inside the component (after `const goHome = useUi(...)`, near line 51):
 
 ```ts
-  const wide = useMediaQuery('(min-width: 1200px)');
+  const wide = useMediaQuery('(min-width: 1300px)');
   const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
 ```
 
@@ -1791,9 +1791,9 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 4b. Add the three-column templates + comms styles. Insert after the `.game-hand-strip` rule (around line 59):
 
 ```css
-/* ≥1200px: a third column for the log+chat sits beside the rail. Below this width the
+/* ≥1300px: a third column for the log+chat sits beside the rail. Below this width the
    comms content shares the rail slot behind a [Rail | Log+Chat] tab (rendered in JSX). */
-@media (min-width: 1200px) {
+@media (min-width: 1300px) {
   .game--rail {
     grid-template-columns: minmax(0, 1fr) var(--tr-rail-w) var(--tr-comms-w);
     grid-template-areas: 'board rail comms';
@@ -1985,7 +1985,7 @@ Verify against a game with bots:
 - The log fills with seat-coloured lines; route/station/tunnel-commit are highlighted; endgame + game-over read as alerts; market refills/reshuffles are absent.
 - Send chat; both members see it. Paste >2048 chars → blocked by the input; fire 6 messages fast → the 6th shows the rate hint.
 - Reconnect mid-game (kill the web tab, reopen): the log **and** chat backfill fully with **no** replayed fly-card animations or sounds.
-- Resize across 1200px and 920px: three columns → `[Rail | Log+Chat]` tabs → single scrolling column.
+- Resize across 1300px and 920px: three columns → `[Rail | Log+Chat]` tabs → single scrolling column.
 - Open as a spectator: the log shows public actions; the chat input is disabled.
 
 - [ ] **Step 3: Final commit (if any manual-fix tweaks were needed).**

@@ -58,9 +58,9 @@
   grid-area: hand;
   min-width: 0;
 }
-/* ≥1200px: a third column for the log+chat sits beside the rail. Below this width the
+/* ≥1300px: a third column for the log+chat sits beside the rail. Below this width the
    comms content shares the rail slot behind a [Rail | Log+Chat] tab (rendered in JSX). */
-@media (min-width: 1200px) {
+@media (min-width: 1300px) {
   .game--rail {
     grid-template-columns: minmax(0, 1fr) var(--tr-rail-w) var(--tr-comms-w);
     grid-template-areas: 'board rail comms';
