@@ -6,6 +6,7 @@ import { useGame } from '../store/game';
 import { useUi } from '../store/ui';
 import { connectGame, getSocket } from '../net/connection';
 import { routeById } from '../game/content';
+import { completedByPlayer } from '../game/tickets';
 import { isMyTurn } from '../game/view';
 import {
   handFromCounts,
@@ -199,7 +200,10 @@ export function GameScreen() {
         <h4>{t('tickets')}</h4>
         <span className="tray-count">{snapshot.you?.keptTicketIds.length ?? 0}</span>
       </div>
-      <TicketPanel ticketIds={snapshot.you?.keptTicketIds ?? []} />
+      <TicketPanel
+        ticketIds={snapshot.you?.keptTicketIds ?? []}
+        completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
+      />
     </section>
   );
 

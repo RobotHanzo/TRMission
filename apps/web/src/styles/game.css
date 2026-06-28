@@ -747,6 +747,40 @@ button.ticket-card:hover {
   font-weight: 900;
 }
 
+/* Completed mission: grey the card body out and stamp a checkmark medallion over it. */
+.ticket-card.is-completed {
+  position: relative;
+}
+.ticket-card.is-completed .ticket-map,
+.ticket-card.is-completed .ticket-foot {
+  filter: grayscale(0.85);
+  opacity: 0.5;
+}
+.ticket-done {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+.ticket-done::after {
+  content: '✓';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--tr-ok);
+  border: 2px solid var(--tr-surface);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 900;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
 /* perforation notches where the stub tears off */
 .ticket-foot {
   position: relative;

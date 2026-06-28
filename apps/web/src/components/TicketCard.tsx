@@ -10,6 +10,8 @@ interface Props {
   onToggle?: (id: string) => void;
   /** Prevents toggling (for mandatory long tickets during initial selection). */
   disabled?: boolean;
+  /** Greys the card out and stamps a completion checkmark (finished mission). */
+  completed?: boolean;
 }
 
 /**
@@ -17,7 +19,7 @@ interface Props {
  * cities over the Taiwan board, a perforated ticket stub with the city pair, and
  * the point value. Long routes wear an EMU-blue livery, short routes a warm one.
  */
-export function TicketCard({ ticketId, selected, onToggle, disabled }: Props) {
+export function TicketCard({ ticketId, selected, onToggle, disabled, completed }: Props) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const def = ticketById.get(ticketId);
@@ -26,7 +28,9 @@ export function TicketCard({ ticketId, selected, onToggle, disabled }: Props) {
 
   const tone = label.long ? 'long' : 'short';
   const selectable = onToggle !== undefined;
-  const aria = `${label.a} – ${label.b}, ${label.value} ${t('points')}`;
+  const aria = `${label.a} – ${label.b}, ${label.value} ${t('points')}${
+    completed ? `, ${t('completed')}` : ''
+  }`;
 
   const body = (
     <>
@@ -43,6 +47,7 @@ export function TicketCard({ ticketId, selected, onToggle, disabled }: Props) {
         </span>
         <span className="ticket-value">{label.value}</span>
       </div>
+      {completed && <span className="ticket-done" aria-hidden />}
     </>
   );
 
@@ -61,7 +66,11 @@ export function TicketCard({ ticketId, selected, onToggle, disabled }: Props) {
     );
   }
   return (
-    <div className={`ticket-card tone-${tone}`} role="img" aria-label={aria}>
+    <div
+      className={`ticket-card tone-${tone}${completed ? ' is-completed' : ''}`}
+      role="img"
+      aria-label={aria}
+    >
       {body}
     </div>
   );
