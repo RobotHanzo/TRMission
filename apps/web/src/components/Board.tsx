@@ -648,19 +648,30 @@ export function Board({
 
                   {isFerry ? (
                     // Ferry: a dotted sea crossing carrying round pips. The `ferryLocos` pips that
-                    // stand for the required wild cards bloom as larger rainbow dots; the others are
-                    // ordinary pips (and the whole chain takes the owner's colour once claimed).
+                    // stand for the required wild cards are rainbow rectangles (oriented along the
+                    // crossing); the others are ordinary round pips (and the whole chain takes the
+                    // owner's colour once claimed).
                     <>
                       <path className="ferry-line" d={g.path} />
                       {g.slots.map((s, i) => {
                         const isLoco = !o && i >= locoStart && i < locoStart + r.ferryLocos;
-                        return (
+                        return isLoco ? (
+                          <rect
+                            key={i}
+                            className="slot ferry-loco"
+                            x={-s.len / 2}
+                            width={s.len}
+                            fill="url(#ferryLocoRainbow)"
+                            opacity={carOpacity}
+                            transform={`translate(${s.x.toFixed(2)} ${s.y.toFixed(2)}) rotate(${s.angle.toFixed(1)})`}
+                          />
+                        ) : (
                           <circle
                             key={i}
-                            className={isLoco ? 'ferry-pip ferry-loco' : 'ferry-pip'}
+                            className="ferry-pip"
                             cx={s.x}
                             cy={s.y}
-                            fill={isLoco ? 'url(#ferryLocoRainbow)' : fill}
+                            fill={fill}
                             opacity={carOpacity}
                           />
                         );

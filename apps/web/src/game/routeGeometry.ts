@@ -71,6 +71,9 @@ const BOW_OVERRIDE: Record<string, number> = {
   // it because Penghu is an island. Curve it south-west through the open strait, clear of Penghu.
   // (The Kaohsiung–Penghu ferry has no intruder, so it stays straight on its own.)
   R85: -5,
+  // Taipei–Yilan tunnel: the auto-bow would arc it away from Toucheng, but the Xuehe Tunnel runs
+  // straight through the mountains — force it to zero so it draws as a direct line.
+  R18: 0,
 };
 
 /** Cap on a single car's length so long routes read as many cars, not few long bars. */

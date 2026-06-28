@@ -251,12 +251,11 @@
   stroke-width: calc(0.25px * var(--inv-scale));
   r: calc(0.7px * var(--inv-scale));
 }
-/* The wild-card pips of a ferry: bigger, rainbow (fill set inline), ringed in white so the
-   spectrum reads against the open sea. One such pip per locomotive the crossing requires. */
-.ferry-pip.ferry-loco {
-  r: calc(1.18px * var(--inv-scale));
+/* The wild-card rects of a ferry: rainbow-filled slots ringed in white so the spectrum reads
+   against the open sea. One per locomotive the crossing requires. */
+.slot.ferry-loco {
   stroke: #fff;
-  stroke-width: calc(0.32px * var(--inv-scale));
+  stroke-width: calc(0.5px * var(--inv-scale));
 }
 .hit {
   fill: none;

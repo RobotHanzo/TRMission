@@ -31,7 +31,7 @@ export const CARD_COLOR_TOKENS: Record<CardColor, ColorToken> = {
 };
 
 /** Gray routes (any single colour). */
-export const GRAY_TOKEN = { hex: '#B8BEC6', ink: '#1B1C1E', nameZh: '灰', glyph: '—' } as const;
+export const GRAY_TOKEN = { hex: '#8A8E96', ink: '#1B1C1E', nameZh: '灰', glyph: '—' } as const;
 
 /**
  * The six locomotive liveries, in spectrum order — the "rainbow" that stands for the wild
