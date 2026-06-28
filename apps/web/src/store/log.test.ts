@@ -18,11 +18,13 @@ describe('useLog', () => {
     expect(e[1]?.playerId).toBe('p2');
   });
 
-  it('applies history only when empty (history precedes live)', () => {
+  it('replaces entries on each history backfill (transient reconnect re-fills)', () => {
     useLog.getState().ingestHistory([turn('p1'), turn('p2')]);
     expect(useLog.getState().entries).toHaveLength(2);
-    useLog.getState().ingestHistory([turn('p3')]); // ignored — already populated
-    expect(useLog.getState().entries).toHaveLength(2);
+    useLog.getState().ingestHistory([turn('p3')]); // a reconnect re-sends the full history
+    const e = useLog.getState().entries;
+    expect(e).toHaveLength(1);
+    expect(e[0]?.playerId).toBe('p3');
   });
 
   it('reset clears entries', () => {

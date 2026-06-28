@@ -12,9 +12,14 @@ describe('useChat', () => {
     expect(m[0]?.id).not.toBe(m[1]?.id);
   });
 
-  it('applies history only when empty', () => {
+  it('replaces messages on each history backfill (transient reconnect re-fills)', () => {
     useChat.getState().ingestHistory([{ playerId: 'p1', text: 'a' }]);
-    useChat.getState().ingestHistory([{ playerId: 'p1', text: 'b' }]);
-    expect(useChat.getState().messages).toHaveLength(1);
+    useChat.getState().ingestHistory([
+      { playerId: 'p1', text: 'b' },
+      { playerId: 'p2', text: 'c' },
+    ]);
+    const m = useChat.getState().messages;
+    expect(m).toHaveLength(2);
+    expect(m[0]?.text).toBe('b');
   });
 });

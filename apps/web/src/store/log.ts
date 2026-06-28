@@ -24,10 +24,11 @@ export const useLog = create<LogState>()((set) => ({
       for (const d of datas) entries.push({ id: id++, ...d });
       return { entries: entries.slice(-CAP), nextId: id };
     }),
-  // History is a one-shot backfill delivered before live events; ignore if already filled.
+  // History is the server's COMPLETE backfill, re-sent on every (re)connect and always
+  // delivered before any live event on that connection. Replace the store with it so a
+  // transient reconnect re-fills the disconnect-window gap; live events then append.
   ingestHistory: (events) =>
-    set((s) => {
-      if (s.entries.length > 0) return s;
+    set(() => {
       const entries = entriesFromEvents(events).map((d, i) => ({ id: i + 1, ...d }));
       return { entries: entries.slice(-CAP), nextId: entries.length + 1 };
     }),

@@ -24,9 +24,10 @@ export const useChat = create<ChatState>()((set) => ({
       messages: [...s.messages, { id: s.nextId, ...msg }].slice(-CAP),
       nextId: s.nextId + 1,
     })),
+  // The server re-sends the complete chat log on every (re)connect (before live messages);
+  // replace so a transient reconnect re-fills the gap. Live messages then append.
   ingestHistory: (msgs) =>
-    set((s) => {
-      if (s.messages.length > 0) return s;
+    set(() => {
       const messages = msgs.map((m, i) => ({ id: i + 1, ...m }));
       return { messages: messages.slice(-CAP), nextId: messages.length + 1 };
     }),
