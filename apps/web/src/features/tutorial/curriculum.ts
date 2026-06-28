@@ -39,7 +39,12 @@ export const LESSONS: Lesson[] = [
     beats: [
       { id: 'goal', text: 'tutorial.welcome.goal', mode: 'info' },
       { id: 'map', text: 'tutorial.welcome.map', mode: 'info', spotlight: { kind: 'board' } },
-      { id: 'score', text: 'tutorial.welcome.score', mode: 'info', spotlight: { kind: 'hud', selector: '.player-trackers' } },
+      {
+        id: 'score',
+        text: 'tutorial.welcome.score',
+        mode: 'info',
+        spotlight: { kind: 'hud', selector: '.player-trackers' },
+      },
       {
         id: 'draft',
         text: 'tutorial.welcome.draft',
@@ -122,7 +127,12 @@ export const LESSONS: Lesson[] = [
     viewer: P0 as string,
     setup: skipDraft,
     beats: [
-      { id: 'intro', text: 'tutorial.special.intro', mode: 'info', specimen: { kind: 'routes-compare' } },
+      {
+        id: 'intro',
+        text: 'tutorial.special.intro',
+        mode: 'info',
+        specimen: { kind: 'routes-compare' },
+      },
       {
         id: 'double',
         text: 'tutorial.special.double',
@@ -178,7 +188,12 @@ export const LESSONS: Lesson[] = [
     viewer: P0 as string,
     setup: skipDraft,
     beats: [
-      { id: 'complete', text: 'tutorial.tickets.complete', mode: 'info', specimen: { kind: 'ticket', id: 'S1' } },
+      {
+        id: 'complete',
+        text: 'tutorial.tickets.complete',
+        mode: 'info',
+        specimen: { kind: 'ticket', id: 'S1' },
+      },
       { id: 'penalty', text: 'tutorial.tickets.penalty', mode: 'info' },
       { id: 'more', text: 'tutorial.tickets.more', mode: 'info' },
       { id: 'forced', text: 'tutorial.tickets.forced', mode: 'info' },
@@ -210,7 +225,12 @@ export const LESSONS: Lesson[] = [
     setup: skipDraft,
     beats: [
       { id: 'trigger', text: 'tutorial.endgame.trigger', mode: 'info' },
-      { id: 'scoring', text: 'tutorial.endgame.scoring', mode: 'info', spotlight: { kind: 'hud', selector: '.player-trackers' } },
+      {
+        id: 'scoring',
+        text: 'tutorial.endgame.scoring',
+        mode: 'info',
+        spotlight: { kind: 'hud', selector: '.player-trackers' },
+      },
       { id: 'win', text: 'tutorial.endgame.win', mode: 'info' },
     ],
   },
