@@ -14,7 +14,12 @@ import { CITIES, ROUTES, cityById, cityName } from '../game/content';
 import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
 import { zoomBucket, cityTier } from '../game/lod';
-import { transformToView, viewToTransform, type BoardTransform } from '../game/boardView';
+import {
+  transformToView,
+  viewToTransform,
+  boardProjection,
+  type BoardTransform,
+} from '../game/boardView';
 import {
   BASE_VIEW,
   ISLANDS,
@@ -154,6 +159,10 @@ const disengageFollow = (): void => {
   if (ui.followActing) ui.setFollowActing(false);
 };
 
+/** The live board→pixel projection read off the rendered <svg.board> within this viewport. */
+const viewportProjection = (viewportEl: HTMLDivElement | null) =>
+  boardProjection(viewportEl?.querySelector<SVGSVGElement>('svg.board'));
+
 /** Board coordinate (+ a stable key) of the most recent spatial action in the event tail. */
 function latestActionPoi(
   events: readonly GameEvent[],
@@ -214,8 +223,9 @@ function CameraSync({
       const socket = getSocket();
       const w = viewportRef.current?.clientWidth ?? 0;
       const h = viewportRef.current?.clientHeight ?? 0;
-      if (!socket || w <= 0 || h <= 0) return;
-      const view = transformToView(liveRef.current, w, h);
+      const proj = viewportProjection(viewportRef.current);
+      if (!socket || !proj || w <= 0 || h <= 0) return;
+      const view = transformToView(liveRef.current, proj, w, h);
       if (
         last &&
         Math.abs(last.cx - view.cx) < 0.05 &&
@@ -237,8 +247,9 @@ function CameraSync({
     if (!actingCamera || actingCamera.playerId !== current) return;
     const w = viewportRef.current?.clientWidth ?? 0;
     const h = viewportRef.current?.clientHeight ?? 0;
-    if (w <= 0 || h <= 0) return;
-    const t = viewToTransform(actingCamera.view, w, h);
+    const proj = viewportProjection(viewportRef.current);
+    if (!proj || w <= 0 || h <= 0) return;
+    const t = viewToTransform(actingCamera.view, proj, w, h);
     setTransform(t.positionX, t.positionY, t.scale, 150, 'easeOut');
   }, [followActing, myTurn, currentIsBot, current, actingCamera, setTransform, viewportRef]);
 
@@ -251,11 +262,12 @@ function CameraSync({
     }
     const poi = latestActionPoi(recentEvents);
     if (!poi || poi.key === lastPoiKey.current) return;
-    lastPoiKey.current = poi.key;
     const w = viewportRef.current?.clientWidth ?? 0;
     const h = viewportRef.current?.clientHeight ?? 0;
-    if (w <= 0 || h <= 0) return;
-    const t = viewToTransform({ cx: poi.x, cy: poi.y, span: BOT_FOLLOW_SPAN }, w, h);
+    const proj = viewportProjection(viewportRef.current);
+    if (!proj || w <= 0 || h <= 0) return;
+    lastPoiKey.current = poi.key;
+    const t = viewToTransform({ cx: poi.x, cy: poi.y, span: BOT_FOLLOW_SPAN }, proj, w, h);
     setTransform(t.positionX, t.positionY, t.scale, 600, 'easeOut');
   }, [followActing, myTurn, currentIsBot, recentEvents, setTransform, viewportRef]);
 
@@ -371,17 +383,23 @@ export function Board({
 
   useEffect(() => {
     if (glowingRoutes.size === 0) return;
-    const timers = [...glowingRoutes.keys()].map((id) => window.setTimeout(() => clearGlowRoute(id), 1300));
+    const timers = [...glowingRoutes.keys()].map((id) =>
+      window.setTimeout(() => clearGlowRoute(id), 1300),
+    );
     return () => timers.forEach(clearTimeout);
   }, [glowingRoutes, clearGlowRoute]);
   useEffect(() => {
     if (glowingStations.size === 0) return;
-    const timers = [...glowingStations.keys()].map((id) => window.setTimeout(() => clearGlowStation(id), 1100));
+    const timers = [...glowingStations.keys()].map((id) =>
+      window.setTimeout(() => clearGlowStation(id), 1100),
+    );
     return () => timers.forEach(clearTimeout);
   }, [glowingStations, clearGlowStation]);
   useEffect(() => {
     if (sweeps.length === 0) return;
-    const timers = sweeps.map((sw) => window.setTimeout(() => removeSweep(sw.id), sw.path.length * 320 + 900));
+    const timers = sweeps.map((sw) =>
+      window.setTimeout(() => removeSweep(sw.id), sw.path.length * 320 + 900),
+    );
     return () => timers.forEach(clearTimeout);
   }, [sweeps, removeSweep]);
 
@@ -453,7 +471,9 @@ export function Board({
                       transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
                     }
                   : null),
-                ...(glowSeat !== undefined ? ({ '--seat': seatColor(glowSeat) } as CSSProperties) : null),
+                ...(glowSeat !== undefined
+                  ? ({ '--seat': seatColor(glowSeat) } as CSSProperties)
+                  : null),
               };
 
               return (

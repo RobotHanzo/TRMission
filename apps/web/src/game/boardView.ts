@@ -5,10 +5,14 @@
 // any window — so a viewer on a 4K monitor following a friend on a laptop sees the
 // same place, not a pixel-for-pixel copy of a differently-sized viewport.
 //
-// Geometry mirrors `homeScale`: the board <svg> uses the default `xMidYMid meet`
-// preserveAspectRatio, so at rzpp scale 1 one board unit is `k = min(W/BASE_VIEW.w,
-// H/BASE_VIEW.h)` content pixels and the board is letter-boxed (centred) inside W×H.
-import { BASE_VIEW, MIN_SCALE, MAX_SCALE } from './geography';
+// The board↔pixel mapping is NOT modelled from the viewport. react-zoom-pan-pinch sizes
+// its content box to `fit-content` (the board <svg>'s own intrinsic box, not the W×H
+// viewport), so a letterbox computed from the viewport is wrong — it round-trips with
+// itself but maps a TRUE board coordinate (e.g. a bot's action POI) to the wrong place,
+// off the map. Instead we read the live board <svg> `getCTM()` — the viewBox→content-pixel
+// affine, which excludes the rzpp CSS transform and so is invariant to zoom/pan — and
+// project through that. Same "measure the real geometry" tack `frameHome` takes.
+import { MIN_SCALE, MAX_SCALE } from './geography';
 
 /** react-zoom-pan-pinch transform state (a subset of its `ReactZoomPanPinchState`). */
 export interface BoardTransform {
@@ -30,31 +34,47 @@ export interface ViewDescriptor {
   span: number;
 }
 
+/**
+ * The board→content-pixel affine, read from the board <svg>'s `getCTM()`. Uniform scale,
+ * no rotation, so a content pixel is `k·board + (e,f)`. `k` is content-pixels per board
+ * unit at rzpp scale 1 (constant — `getCTM` ignores the CSS zoom on the content div).
+ */
+export interface BoardProjection {
+  k: number;
+  e: number;
+  f: number;
+}
+
 const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
 
-/** Board-units → content-pixels factor at scale 1, plus the letter-box offsets. */
-function metrics(wrapperW: number, wrapperH: number) {
-  const k = Math.min(wrapperW / BASE_VIEW.w, wrapperH / BASE_VIEW.h) || 1;
-  const offX = (wrapperW - BASE_VIEW.w * k) / 2;
-  const offY = (wrapperH - BASE_VIEW.h * k) / 2;
-  return { k, offX, offY };
+/**
+ * Build the projection from the live board <svg> (its `getCTM`), or null when the element
+ * isn't laid out yet / `getCTM` is unavailable (e.g. jsdom). Callers skip the camera move
+ * on null rather than projecting through a bogus identity.
+ */
+export function boardProjection(svg: SVGSVGElement | null | undefined): BoardProjection | null {
+  if (!svg || typeof svg.getCTM !== 'function') return null;
+  const m = svg.getCTM();
+  if (!m || !m.a) return null;
+  return { k: m.a, e: m.e, f: m.f };
 }
 
 /** This client's current transform → the board-space descriptor to broadcast. */
 export function transformToView(
   t: BoardTransform,
+  proj: BoardProjection,
   wrapperW: number,
   wrapperH: number,
 ): ViewDescriptor {
-  const { k, offX, offY } = metrics(wrapperW, wrapperH);
   const s = t.scale || 1;
+  const k = proj.k || 1;
   // Invert screen = position + content*scale to recover the content-pixel under the
-  // viewport centre, then map that back into board units.
+  // viewport centre, then map that back into board units through the inverse CTM.
   const contentXc = (wrapperW / 2 - t.positionX) / s;
   const contentYc = (wrapperH / 2 - t.positionY) / s;
   return {
-    cx: BASE_VIEW.x + (contentXc - offX) / k,
-    cy: BASE_VIEW.y + (contentYc - offY) / k,
+    cx: (contentXc - proj.e) / k,
+    cy: (contentYc - proj.f) / k,
     span: wrapperW / (k * s),
   };
 }
@@ -62,15 +82,16 @@ export function transformToView(
 /** A received descriptor → the transform THIS viewer must apply to match the framing. */
 export function viewToTransform(
   view: ViewDescriptor,
+  proj: BoardProjection,
   wrapperW: number,
   wrapperH: number,
 ): BoardTransform {
-  const { k, offX, offY } = metrics(wrapperW, wrapperH);
+  const k = proj.k || 1;
   // span = W/(k*s) ⇒ s = W/(span*k); clamp to the board's pan/zoom bounds.
-  const span = view.span > 0 ? view.span : BASE_VIEW.w;
+  const span = view.span > 0 ? view.span : wrapperW / k;
   const scale = clamp(wrapperW / (span * k), MIN_SCALE, MAX_SCALE);
-  const contentXc = offX + (view.cx - BASE_VIEW.x) * k;
-  const contentYc = offY + (view.cy - BASE_VIEW.y) * k;
+  const contentXc = proj.e + view.cx * k;
+  const contentYc = proj.f + view.cy * k;
   return {
     positionX: wrapperW / 2 - contentXc * scale,
     positionY: wrapperH / 2 - contentYc * scale,
