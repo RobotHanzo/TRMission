@@ -47,6 +47,22 @@ export interface GameSnapshotDoc {
   ts: Date;
 }
 
+/** A persisted chat line. Chat is non-authoritative (outside the engine/digest). */
+export interface GameChatDoc {
+  gameId: string;
+  seq: number;
+  playerId: string;
+  text: string;
+  ts: Date;
+}
+
+/** In-memory chat line (the hub keeps these per game and replays them on connect). */
+export interface ChatEntry {
+  playerId: string;
+  text: string;
+  ts: number;
+}
+
 /** Everything needed to rebuild a live game: base snapshot (or null) + the events after it. */
 export interface RecoveryData {
   config: GameConfig;
@@ -85,6 +101,8 @@ export interface GameStorePort {
   /** At game over: mark COMPLETED and archive a match-history record. */
   recordCompletion(gameId: string, finalState: GameState): Promise<void>;
   loadForRecovery(gameId: string): Promise<RecoveryData | null>;
+  appendChat(gameId: string, seq: number, playerId: string, text: string): Promise<void>;
+  loadChat(gameId: string): Promise<ChatEntry[]>;
 }
 
 export function configToStored(c: GameConfig): StoredConfig {
