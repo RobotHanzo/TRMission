@@ -360,11 +360,16 @@ export function GameStage({
           onCancel={() => setClaim(null)}
         />
       )}
-      {tunnelMine && snapshot.pendingTunnel && (
+      {/* The tunnel reveal is public, so everyone watches the draw + surcharge. Only the
+          claimant gets the interactive payment options (their hand stays secret); spectators
+          see a read-only colour-only surcharge combination instead. */}
+      {phase === Phase.TUNNEL_PENDING && snapshot.pendingTunnel && (
         <TunnelModal
           revealed={snapshot.pendingTunnel.revealed}
           extraRequired={snapshot.pendingTunnel.extraRequired}
+          playedColor={snapshot.pendingTunnel.playedColor}
           options={tunnelExtras}
+          spectator={!tunnelMine}
           onCommit={(p) => {
             commands?.resolveTunnel(true, paymentToProto(p));
             setTunnelBase(null);

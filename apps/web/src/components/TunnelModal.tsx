@@ -12,6 +12,10 @@ interface Props {
   revealed: PbCardColor[];
   extraRequired: number;
   options: Payment[];
+  /** The colour the surcharge must be matched in (UNSPECIFIED for an all-locomotive claim). */
+  playedColor?: PbCardColor;
+  /** A non-claimant viewer: watches the reveal, but sees only a read-only surcharge combination. */
+  spectator?: boolean;
   onCommit(p: Payment): void;
   onAbort(): void;
 }
@@ -31,7 +35,15 @@ const describe = (p: Payment): string => {
   return parts.join(' + ');
 };
 
-export function TunnelModal({ revealed, extraRequired, options, onCommit, onAbort }: Props) {
+export function TunnelModal({
+  revealed,
+  extraRequired,
+  options,
+  playedColor,
+  spectator = false,
+  onCommit,
+  onAbort,
+}: Props) {
   const { t } = useTranslation();
   const reduced = useReducedMotion();
   // Hold the surcharge result + payment choices back until every card has flipped in, so the
@@ -87,7 +99,33 @@ export function TunnelModal({ revealed, extraRequired, options, onCommit, onAbor
             );
           })}
         </div>
-        {showResult && (
+        {showResult && spectator && (
+          <div className="tunnel-result">
+            <p className="tunnel-surcharge">
+              {extraRequired === 0 ? t('tunnelNoExtra') : t('payExtra', { n: extraRequired })}
+            </p>
+            {extraRequired > 0 &&
+              (() => {
+                // The surcharge as a single colour-only combination: N cards of the played
+                // colour (locomotives if the base claim played no colour). Read-only — it leaks
+                // nothing about the claimant's hand, unlike the per-hand spend options.
+                const surchargeColor = pbToCard(playedColor ?? 0) ?? 'LOCOMOTIVE';
+                return (
+                  <ul className="payment-options card-options">
+                    <li>
+                      <div
+                        className="payment-card payment-card--readonly"
+                        aria-label={`${CARD_COLOR_TOKENS[surchargeColor].nameZh} ×${extraRequired}`}
+                      >
+                        <TrainCarCard color={surchargeColor} count={extraRequired} size={CARD_SIZE} />
+                      </div>
+                    </li>
+                  </ul>
+                );
+              })()}
+          </div>
+        )}
+        {showResult && !spectator && (
           <div className="tunnel-result">
             {options.length === 0 ? (
               // Can't afford the surcharge — there's nothing to pay, so skip the payment screen

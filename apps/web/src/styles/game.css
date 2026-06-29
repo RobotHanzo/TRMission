@@ -1266,6 +1266,15 @@ button.ticket-card:hover {
   outline: 2px solid var(--tr-blue);
   outline-offset: 2px;
 }
+/* Spectator surcharge: a non-interactive colour-only combination — no hover lift / pointer. */
+.card-options .payment-card--readonly {
+  cursor: default;
+}
+.card-options .payment-card--readonly:hover {
+  transform: none;
+  border-color: var(--tr-line);
+  box-shadow: none;
+}
 /* Shrink the card chips to match the smaller modal cards. */
 .payment-card .train-card-glyph {
   width: 17px;

@@ -147,11 +147,16 @@ message Endgame {
 }
 
 // A tunnel awaiting its claimant's continue/abort decision — public information.
+// The surcharge resolution is open in the physical game (the claimant's played colour is
+// declared, everyone counts the matching reveals), so `played_color` is safe to publish:
+// it lets every viewer render the colour-only surcharge combination without exposing the
+// claimant's hand. UNSPECIFIED when the base claim was all-locomotive (no colour played).
 message TunnelReveal {
   string player_id = 1;
   string route_id = 2;
   repeated CardColor revealed = 3;
   uint32 extra_required = 4;
+  CardColor played_color = 5;
 }
 
 // Opponent / public view of a player. COUNTS ONLY — by construction this message

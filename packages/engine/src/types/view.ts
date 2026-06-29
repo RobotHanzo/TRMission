@@ -52,12 +52,17 @@ export interface RedactedView {
   readonly stations: readonly StationPlacement[];
   readonly endgame: Endgame;
 
-  /** Tunnel reveal is public information. */
+  /**
+   * Tunnel reveal is public information. `playedColor` is the single non-loco colour the
+   * claimant played (null for an all-locomotive base claim) — the colour the surcharge must
+   * be matched in; published so every viewer can render the surcharge combination.
+   */
   readonly pendingTunnel: {
     readonly player: PlayerId;
     readonly routeId: RouteId;
     readonly revealed: readonly CardColor[];
     readonly extraRequired: number;
+    readonly playedColor: CardColor | null;
   } | null;
 
   readonly players: readonly RedactedPlayer[];

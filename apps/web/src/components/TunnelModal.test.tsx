@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { CardColor } from '@trm/proto';
 import '../i18n';
 import { TunnelModal } from './TunnelModal';
@@ -31,5 +31,43 @@ describe('TunnelModal cues', () => {
     );
     expect(play).toHaveBeenCalledWith('tunnelPayment');
     expect(play).not.toHaveBeenCalledWith('tunnelSuccess');
+  });
+});
+
+describe('TunnelModal spectator view', () => {
+  it('shows a read-only colour-only surcharge combination with no action buttons', () => {
+    const { container } = render(
+      <TunnelModal
+        revealed={revealed}
+        extraRequired={2}
+        playedColor={CardColor.BLUE}
+        options={[]}
+        spectator
+        onCommit={() => {}}
+        onAbort={() => {}}
+      />,
+    );
+    // The single colour-only combination (藍 ×2), rendered read-only — not a clickable option.
+    const combo = container.querySelector('.payment-card--readonly');
+    expect(combo).not.toBeNull();
+    expect(combo?.getAttribute('aria-label')).toBe('藍 ×2');
+    // Spectators can't act on someone else's tunnel: no commit/abort buttons.
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('shows no combination when the tunnel needs no surcharge', () => {
+    const { container } = render(
+      <TunnelModal
+        revealed={revealed}
+        extraRequired={0}
+        playedColor={CardColor.BLUE}
+        options={[]}
+        spectator
+        onCommit={() => {}}
+        onAbort={() => {}}
+      />,
+    );
+    expect(container.querySelector('.payment-card--readonly')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
   });
 });

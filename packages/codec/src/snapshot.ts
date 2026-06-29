@@ -122,6 +122,7 @@ export function viewToSnapshot(
             routeId: view.pendingTunnel.routeId as string,
             revealed: view.pendingTunnel.revealed.map((c) => cardOrNullToPb(c as CardColor)),
             extraRequired: view.pendingTunnel.extraRequired,
+            playedColor: cardOrNullToPb(view.pendingTunnel.playedColor as CardColor | null),
           },
     players: view.players.map(publicPlayer),
     // Finished tickets, public for all players (own-track completion). Kept off the

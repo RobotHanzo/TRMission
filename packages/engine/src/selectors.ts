@@ -246,6 +246,7 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
           routeId: state.pendingTunnel.routeId,
           revealed: [...state.pendingTunnel.revealed],
           extraRequired: state.pendingTunnel.extraRequired,
+          playedColor: state.pendingTunnel.playedColor,
         }
       : null,
     players,
