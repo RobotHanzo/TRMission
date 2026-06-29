@@ -23,7 +23,8 @@ export type SpecimenSpec =
   | { kind: 'station' }
   | { kind: 'station-cost' }
   | { kind: 'score-table' }
-  | { kind: 'ticket'; id: string };
+  | { kind: 'ticket'; id: string }
+  | { kind: 'claim-cost' };
 
 /** A declarative match against the learner's action for an `await` beat. `DRAW_ANY` accepts either
  *  a blind or a face-up draw (so a "draw a card" step never traps the learner on which pile). */

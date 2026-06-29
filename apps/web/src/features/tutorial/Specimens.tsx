@@ -9,7 +9,7 @@ import { TicketCard } from '../../components/TicketCard';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { useUi } from '../../store/ui';
 import { cityName } from '../../game/content';
-import { SEAT_COLORS } from '../../theme/colors';
+import { SEAT_COLORS, CARD_COLOR_TOKENS } from '../../theme/colors';
 import type { SpecimenSpec } from './types';
 
 const CARD_W = 56;
@@ -178,17 +178,20 @@ export function StationSpecimen() {
 /** One station-payment card whose colour cross-fades through the palette (a station is paid in a
  *  single colour, so all the cards in the cost table cycle together). Two stacked layers give the
  *  gradual fade; `idx` (shared by every card) drives the remount that re-triggers it. */
-function CyclingCard({ idx, size }: { idx: number; size: number }) {
+function CyclingCard({ idx, size, count }: { idx: number; size: number; count?: number }) {
   const len = STATION_PALETTE.length;
   const cur = STATION_PALETTE[((idx % len) + len) % len]!;
   const prev = STATION_PALETTE[(((idx - 1) % len) + len) % len]!;
+  // Spread `count` only when present: TrainCarCard's `count?` rejects an explicit `undefined`
+  // under exactOptionalPropertyTypes.
+  const countProp = count !== undefined ? { count } : {};
   return (
     <span className="tut-cost-card">
       <span className="tut-cost-card-layer is-prev" key={`p${idx}`}>
-        <TrainCarCard color={prev} size={size} showGlyph={false} />
+        <TrainCarCard color={prev} size={size} showGlyph={false} {...countProp} />
       </span>
       <span className="tut-cost-card-layer is-cur" key={`c${idx}`}>
-        <TrainCarCard color={cur} size={size} showGlyph={false} />
+        <TrainCarCard color={cur} size={size} showGlyph={false} {...countProp} />
       </span>
     </span>
   );
@@ -244,6 +247,91 @@ export function ScoreTableSpecimen() {
   );
 }
 
+/** A mini straight railway of `len` car-slots in `fill`, drawn with the live board classes —
+ *  the same slot/bed geometry as RouteSpecimen so it can never drift from the board's look. */
+function ClaimTrack({ len, fill }: { len: number; fill: string }) {
+  const slotW = 18;
+  const gap = 4;
+  const totalW = len * slotW + (len - 1) * gap;
+  const pad = 10;
+  const w = totalW + pad * 2;
+  const h = 28;
+  const y = h / 2;
+  const x0 = pad;
+  const slots = Array.from({ length: len }, (_, i) => x0 + i * (slotW + gap) + slotW / 2);
+  const path = `M ${x0 - 6} ${y} L ${x0 + totalW + 6} ${y}`;
+  const scale = 22 / h;
+  return (
+    <svg
+      className="tut-claim-track"
+      viewBox={`0 0 ${w} ${h}`}
+      width={w * scale}
+      height={h * scale}
+      style={{ ['--inv-scale' as string]: '1' }}
+      role="img"
+      aria-hidden
+    >
+      <g className="route">
+        <path className="bed" d={path} />
+        {slots.map((cx, i) => (
+          <rect
+            key={i}
+            className="slot"
+            x={-slotW / 2}
+            width={slotW}
+            fill={fill}
+            transform={`translate(${cx} ${y})`}
+          />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/** Each row of this discriminated list is one railway → its payment. */
+type ClaimRow = { kind: 'color'; color: CardColor; len: number } | { kind: 'gray'; len: number };
+const CLAIM_ROWS: ClaimRow[] = [
+  { kind: 'color', color: 'RED', len: 2 },
+  { kind: 'color', color: 'BLUE', len: 4 },
+  { kind: 'gray', len: 3 },
+];
+const CLAIM_CARD_W = 44;
+/** Neutral grey for a GRAY (any-colour) route's track. */
+const GRAY_TRACK = '#9aa0a6';
+
+/** The claim-cost reference: varying-length railways each pointing to the single card + count that
+ *  pays for them. Colored routes → a static matching-colour card ("same colour as the route"); the
+ *  gray route → the colour-cycling card (reused from the station chapter) meaning "any colour". */
+export function ClaimCostSpecimen() {
+  const reduced = useReducedMotion();
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => setIdx((i) => i + 1), 1500);
+    return () => clearInterval(id);
+  }, [reduced]);
+  return (
+    <div className="tut-claim-cost" data-testid="tut-specimen">
+      {CLAIM_ROWS.map((row, i) => (
+        <div className="tut-claim-cost-row" key={i}>
+          <ClaimTrack
+            len={row.len}
+            fill={row.kind === 'gray' ? GRAY_TRACK : CARD_COLOR_TOKENS[row.color].hex}
+          />
+          <span className="tut-claim-cost-arrow" aria-hidden>
+            →
+          </span>
+          {row.kind === 'gray' ? (
+            <CyclingCard idx={idx} size={CLAIM_CARD_W} count={row.len} />
+          ) : (
+            <TrainCarCard color={row.color} count={row.len} size={CLAIM_CARD_W} showGlyph={false} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function TicketSpecimen({ id }: { id: string }) {
   return (
     <div className="tut-ticket-specimen" data-testid="tut-specimen">
@@ -268,6 +356,8 @@ export function Specimen({ spec }: { spec: SpecimenSpec }) {
       return <StationCostSpecimen />;
     case 'score-table':
       return <ScoreTableSpecimen />;
+    case 'claim-cost':
+      return <ClaimCostSpecimen />;
     case 'ticket':
       return <TicketSpecimen id={spec.id} />;
   }
