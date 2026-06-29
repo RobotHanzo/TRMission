@@ -13,6 +13,7 @@ import { emptyHand } from './hand';
 import type { CardCounts } from './hand';
 import { validateRoutePayment, validateStationPayment } from './payments';
 import { currentPlayerId, endTurn } from './turn';
+import { offerTickets } from './tickets';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
 import { borrowConnectedTicketIds } from './graph/connectivity';
 import { stationBorrowEdges } from './scoring';
@@ -56,7 +57,7 @@ function dispatch(board: Board, state: GameState, action: Action): ReduceResult 
         case 'DRAW_FACEUP':
           return applyDrawFaceup(board, state, action.player, action.slot);
         case 'DRAW_TICKETS':
-          return applyDrawTickets(board, state, action.player);
+          return applyDrawTickets(state, action.player);
         case 'CLAIM_ROUTE':
           return applyClaimRoute(board, state, action.player, action.routeId, action.payment);
         case 'BUILD_STATION':
@@ -217,25 +218,11 @@ function applyKeepTickets(
   });
 }
 
-function applyDrawTickets(board: Board, state: GameState, player: PlayerId): ReduceResult {
-  if (state.ticketDeckShort.length === 0)
-    return err(violation('NOTHING_TO_DRAW', 'ticket deck empty'));
-  const count = Math.min(state.ruleParams.ticketDrawCount, state.ticketDeckShort.length);
-  const short = [...state.ticketDeckShort];
-  const offered: TicketId[] = [];
-  for (let i = 0; i < count; i++) {
-    const t = short.pop();
-    if (t) offered.push(t);
-  }
-  const next: GameState = {
-    ...withPlayer(state, player, (pl) => ({ ...pl, pendingTicketOffer: offered })),
-    ticketDeckShort: short,
-    turn: { ...state.turn, phase: 'TICKET_SELECTION' },
-  };
-  return ok({
-    state: next,
-    events: [{ e: 'TICKETS_OFFERED', player, ticketIds: offered, visibility: { private: player } }],
-  });
+function applyDrawTickets(state: GameState, player: PlayerId): ReduceResult {
+  // Shared with the forced re-draw (rule 7.5); here an empty short deck is an explicit error.
+  const offer = offerTickets(state, player);
+  if (!offer) return err(violation('NOTHING_TO_DRAW', 'ticket deck empty'));
+  return ok(offer);
 }
 
 // ─────────────────────────────────────────────── drawing cards ──────────────────────────────

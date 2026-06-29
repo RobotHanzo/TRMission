@@ -1951,6 +1951,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@trm/codec@workspace:*, @trm/codec@workspace:packages/codec":
+  version: 0.0.0-use.local
+  resolution: "@trm/codec@workspace:packages/codec"
+  dependencies:
+    "@bufbuild/protobuf": "npm:^2.12.1"
+    "@trm/engine": "workspace:*"
+    "@trm/proto": "workspace:*"
+    "@trm/shared": "workspace:*"
+    typescript: "npm:^5.7.3"
+    vitest: "npm:^2.1.8"
+  languageName: unknown
+  linkType: soft
+
 "@trm/engine@workspace:*, @trm/engine@workspace:packages/engine":
   version: 0.0.0-use.local
   resolution: "@trm/engine@workspace:packages/engine"
@@ -2000,6 +2013,7 @@ __metadata:
     "@node-rs/argon2": "npm:^2.0.2"
     "@swc-node/register": "npm:^1.10.9"
     "@swc/core": "npm:^1.15.43"
+    "@trm/codec": "workspace:*"
     "@trm/engine": "workspace:*"
     "@trm/map-data": "workspace:*"
     "@trm/proto": "workspace:*"
@@ -2044,6 +2058,8 @@ __metadata:
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.1.0"
+    "@trm/codec": "workspace:*"
+    "@trm/engine": "workspace:*"
     "@trm/map-data": "workspace:*"
     "@trm/proto": "workspace:*"
     "@trm/shared": "workspace:*"

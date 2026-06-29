@@ -3,7 +3,7 @@ import { initGame, redactFor, taiwanBoard, CONTENT_HASH } from '@trm/engine';
 import type { Action, GameConfig, GameEvent } from '@trm/engine';
 import { asPlayerId, asTicketId, asCityId, asRouteId } from '@trm/shared';
 import { CardColor, Phase } from '@trm/proto';
-import { viewToSnapshot, commandToAction, eventToProto } from '../src/codec';
+import { viewToSnapshot, commandToAction, eventToProto } from '@trm/codec';
 import { actionToCommand, encodeClient, decodeClient } from './helpers';
 
 const p1 = asPlayerId('p1');

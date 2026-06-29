@@ -3,6 +3,7 @@ import type { Board } from './board';
 import type { GameState } from './types/state';
 import type { GameEvent } from './types/events';
 import { computeFinalScores } from './scoring';
+import { offerTickets, allKeptTicketsOwnConnected } from './tickets';
 
 export function currentPlayerId(state: GameState): PlayerId {
   return state.turnOrder[state.turn.orderIndex] as PlayerId;
@@ -55,17 +56,25 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
   }
 
   const nextIdx = (curIdx + 1) % n;
+  const nextPlayer = state.turnOrder[nextIdx] as PlayerId;
   const next: GameState = {
     ...state,
     consecutivePasses,
     endgame,
     turn: { orderIndex: nextIdx, phase: 'AWAIT_ACTION', cardsDrawnThisTurn: 0 },
   };
-  events.push({
-    e: 'TURN_STARTED',
-    player: state.turnOrder[nextIdx] as PlayerId,
-    orderIndex: nextIdx,
-    visibility: 'PUBLIC',
-  });
+  events.push({ e: 'TURN_STARTED', player: nextPlayer, orderIndex: nextIdx, visibility: 'PUBLIC' });
+
+  // Rule 7.5 — forced ticket re-draw: a player who has already connected every kept ticket by their
+  // own track has no objective left, so their turn opens straight into a fresh ticket draw instead
+  // of AWAIT_ACTION. Skipped (a normal turn) when the short ticket deck is exhausted — an impossible
+  // draw can't be forced.
+  if (allKeptTicketsOwnConnected(board, next, nextPlayer)) {
+    const forced = offerTickets(next, nextPlayer);
+    if (forced) {
+      events.push(...forced.events);
+      return { state: forced.state, events };
+    }
+  }
   return { state: next, events };
 }

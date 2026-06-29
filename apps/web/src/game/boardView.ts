@@ -14,6 +14,12 @@
 // project through that. Same "measure the real geometry" tack `frameHome` takes.
 import { MIN_SCALE, MAX_SCALE } from './geography';
 
+/** A board auto-pan target: a set of route ids or city ids to frame. */
+export interface BoardFrameTarget {
+  kind: 'route' | 'cities';
+  ids: string[];
+}
+
 /** react-zoom-pan-pinch transform state (a subset of its `ReactZoomPanPinchState`). */
 export interface BoardTransform {
   /** Horizontal pan in screen pixels (rzpp `positionX`). */

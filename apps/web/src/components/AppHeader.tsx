@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrainFront, Settings, LogOut, User } from 'lucide-react';
+import { TrainFront, Settings, LogOut, User, BookOpen } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import { useGame } from '../store/game';
@@ -13,6 +13,7 @@ export function AppHeader() {
   const view = useUi((s) => s.view);
   const goHome = useUi((s) => s.goHome);
   const navigateLogin = useUi((s) => s.navigateLogin);
+  const openEncyclopedia = useUi((s) => s.setEncyclopediaOpen);
   const user = useSession((s) => s.user);
   const logout = useSession((s) => s.logout);
   const snapshot = useGame((s) => s.snapshot);
@@ -71,6 +72,15 @@ export function AppHeader() {
             )}{' '}
             {user.displayName}
           </span>
+        )}
+        {view !== 'login' && view !== 'loginCallback' && (
+          <button
+            onClick={() => openEncyclopedia(true)}
+            aria-label={t('tutorial.open')}
+            title={t('tutorial.open')}
+          >
+            <BookOpen size={16} aria-hidden />
+          </button>
         )}
         <button
           onClick={() => setSettingsOpen(true)}

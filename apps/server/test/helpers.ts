@@ -10,7 +10,7 @@ import {
 import { legalActions } from '@trm/engine';
 import type { Action, Payment, Board, GameState } from '@trm/engine';
 import type { PlayerId } from '@trm/shared';
-import { cardOrNullToPb } from '../src/codec';
+import { cardOrNullToPb } from '@trm/codec';
 
 type Command = NonNullable<MessageInitShape<typeof ClientEnvelopeSchema>['command']>;
 

@@ -4,7 +4,7 @@ import { CardColor as PbCardColor, type GameSnapshot } from '@trm/proto';
 import { tokenForPb } from '../game/cards';
 import { handFromCounts, handTotal } from '../game/payments';
 import { LOCOMOTIVE_GRADIENT } from '../theme/colors';
-import { useAnimations } from '../store/animations';
+import { useAnimationsStore } from '../store/animations';
 
 interface Props {
   snapshot: GameSnapshot;
@@ -15,9 +15,9 @@ interface Props {
 
 export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Props) {
   const { t } = useTranslation();
-  const marketFlips = useAnimations((s) => s.marketFlips);
-  const clearMarketFlip = useAnimations((s) => s.clearMarketFlip);
-  const coveredSlots = useAnimations((s) => s.coveredMarketSlots);
+  const marketFlips = useAnimationsStore((s) => s.marketFlips);
+  const clearMarketFlip = useAnimationsStore((s) => s.clearMarketFlip);
+  const coveredSlots = useAnimationsStore((s) => s.coveredMarketSlots);
   // A blind draw is legal while ANY card remains in the draw pool: an empty deck reshuffles the
   // discard back in. Gating on deckCount alone hard-locks a player late-game (deck spent, discard
   // full of claimed cards) — fatally so mid-draw, where DRAWING_CARDS has no PASS escape.

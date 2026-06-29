@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Phase } from '@trm/proto';
-import { useGame } from '../store/game';
+import { useGameStore, useGameStoreApi } from '../store/game';
 import { useUi } from '../store/ui';
 import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
@@ -16,8 +16,9 @@ const EMPTY: ReadonlySet<string> = new Set();
  * stale win-horn or mission flourish.
  */
 export function useSoundDriver(): void {
-  const snapshot = useGame((s) => s.snapshot);
-  const lastBatch = useGame((s) => s.lastBatch);
+  const gameStore = useGameStoreApi();
+  const snapshot = useGameStore((s) => s.snapshot);
+  const lastBatch = useGameStore((s) => s.lastBatch);
 
   const seenBatchSeq = useRef(0);
   const prevPhase = useRef<Phase | null>(null);
@@ -47,12 +48,12 @@ export function useSoundDriver(): void {
   useEffect(() => {
     if (!lastBatch || lastBatch.seq === seenBatchSeq.current) return;
     seenBatchSeq.current = lastBatch.seq;
-    const snap = useGame.getState().snapshot;
+    const snap = gameStore.getState().snapshot;
     if (!snap) return;
     for (const { cue, isSelf } of cuesFromEvents(snap, lastBatch.events)) {
       soundPlayer.play(cue, isSelf ? 1 : OPPONENT_GAIN);
     }
-  }, [lastBatch]);
+  }, [lastBatch, gameStore]);
 
   // Snapshot diffs: game-over (once) + self mission completion.
   useEffect(() => {

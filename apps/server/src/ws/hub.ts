@@ -37,7 +37,7 @@ import {
   historyReplayFrame,
   cameraMovedFrame,
   pongFrame,
-} from '../codec';
+} from '@trm/codec';
 import type { ChatEntry } from '../persistence/types';
 
 export interface GameHubOptions {
