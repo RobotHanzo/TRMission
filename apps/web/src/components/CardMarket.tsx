@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Layers } from 'lucide-react';
 import { CardColor as PbCardColor, type GameSnapshot } from '@trm/proto';
 import { tokenForPb } from '../game/cards';
+import { handFromCounts, handTotal } from '../game/payments';
 import { LOCOMOTIVE_GRADIENT } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 
@@ -17,12 +18,16 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
   const marketFlips = useAnimationsStore((s) => s.marketFlips);
   const clearMarketFlip = useAnimationsStore((s) => s.clearMarketFlip);
   const coveredSlots = useAnimationsStore((s) => s.coveredMarketSlots);
+  // A blind draw is legal while ANY card remains in the draw pool: an empty deck reshuffles the
+  // discard back in. Gating on deckCount alone hard-locks a player late-game (deck spent, discard
+  // full of claimed cards) — fatally so mid-draw, where DRAWING_CARDS has no PASS escape.
+  const drawPool = snapshot.deckCount + handTotal(handFromCounts(snapshot.discard));
   return (
     <div className="market">
       <button
         className="deck"
         data-anim="deck"
-        disabled={!canDraw || snapshot.deckCount === 0}
+        disabled={!canDraw || drawPool === 0}
         onClick={onDrawBlind}
         title={t('drawBlind')}
       >

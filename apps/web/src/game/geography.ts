@@ -50,35 +50,42 @@ export function fitTransform(
 }
 
 /**
- * Main-island coastline, clockwise from the Tamsui river mouth. Points are smoothed
- * into a natural curve by `smoothClosedPath`; every land city sits inside this hull.
+ * Main-island coastline, clockwise from the Tamsui river mouth. The vertices are an equal-scale
+ * geographic projection of the real coast into the same 0–100 board as the cities (north-up,
+ * Taiwan's natural ~12° lean), so the silhouette reads as the actual island: a NE Sandiao/Su'ao
+ * corner as the easternmost point, a bulging western plain, and a tapering Hengchun peninsula in
+ * the south. Points are smoothed into a natural curve by `smoothClosedPath`; every land city sits
+ * inside this hull.
  */
 const TAIWAN_OUTLINE: readonly (readonly [number, number])[] = [
-  [49, 6], // Tamsui (NW corner)
-  [54, 3.5],
-  [61, 4],
-  [66, 6], // Keelung (NE corner)
-  [68, 11],
-  [68.5, 17], // Sandiao cape
-  [66.8, 26], // Yilan plain
-  [69, 35], // Su'ao
-  [72, 45], // Hualien — easternmost bulge
-  [71.5, 54],
-  [68, 63], // east coast running SSW
-  [63, 72],
-  [58, 80], // Taitung coast
-  [53, 86],
-  [49.5, 90], // Eluanbi — the southern cape (pointed)
-  [45, 85],
-  [42, 77], // Fangliao
-  [36, 68], // Kaohsiung
-  [31, 60], // Tainan
-  [29, 52], // Chiayi / Budai (west bulge)
-  [28.5, 44], // Changhua / Lukang — widest west point
-  [31, 35],
-  [35, 27], // Hsinchu coast
-  [40, 18],
-  [44, 11], // back toward the NW corner
+  [56.7, 10], // Tamsui river mouth (NW)
+  [62.1, 5.9], // Cape Fugui — northernmost point
+  [64.8, 7.3],
+  [67.9, 9.3], // Keelung headland
+  [71.8, 11.3],
+  [73.6, 14.2], // Cape Sandiao — the NE, easternmost corner
+  [71.3, 20.1], // Yilan plain (a gentle bay)
+  [72.9, 25.5], // Su'ao headland
+  [68.4, 35.8], // east coast, off Hualien
+  [66.2, 43.1],
+  [63.9, 52.9], // east coast running SSW
+  [61.2, 62.7],
+  [57.2, 69.6], // Taitung coast
+  [51.1, 77.4], // SE toward Dawu
+  [48.9, 82.8], // east side of the Hengchun peninsula
+  [46.4, 89.2], // Eluanbi — the southern cape (pointed)
+  [40.6, 84.8], // Hengchun peninsula, west side
+  [38.8, 76.9], // Fangliao
+  [36.1, 73.7],
+  [32.1, 72], // Kaohsiung coast
+  [29.4, 62.7], // Tainan coast (west bulge)
+  [29.4, 52.9], // Budai — the westernmost point
+  [32.5, 40.2], // Changhua coast
+  [35.6, 35.3], // Lukang
+  [38.8, 30.4], // Taichung coast
+  [42.4, 25.5], // Miaoli coast
+  [46, 18.1], // Hsinchu coast
+  [50.9, 12.2], // back toward the NW corner
 ];
 
 /**
@@ -88,31 +95,29 @@ const TAIWAN_OUTLINE: readonly (readonly [number, number])[] = [
  * high-value ones). Drawn subtly, behind the rail network.
  */
 const CENTRAL_RANGE: readonly (readonly [number, number])[] = [
-  [50, 19],
-  [55, 24],
-  [58, 33],
-  [59, 45],
-  [57.5, 57],
-  [54, 67],
-  [50.5, 75],
-  [48.5, 70],
-  [47.5, 58],
-  [47, 46],
-  [47.5, 34],
-  [48.5, 25],
+  [57.2, 33.8],
+  [54.9, 43.6],
+  [52.7, 53.4],
+  [51.3, 63.2],
+  [50, 72],
+  [46.9, 69.6],
+  [45.5, 60.3],
+  [46.4, 50],
+  [47.8, 40.2],
+  [51.3, 33.8],
 ];
 
 /** Outlying islands as small blobs (centre + radius in board units). The city marker sits on top. */
 export const ISLANDS: readonly { cx: number; cy: number; r: number }[] = [
-  { cx: 20, cy: 56, r: 1.6 }, // Penghu (drawn as a small cluster below)
-  { cx: 22.4, cy: 54.6, r: 0.9 },
-  { cx: 18, cy: 58.2, r: 0.8 },
-  { cx: 5, cy: 48, r: 1.5 }, // Kinmen
-  { cx: 22, cy: 10, r: 1.1 }, // Matsu
-  { cx: 23.6, cy: 8.4, r: 0.7 },
-  { cx: 31, cy: 69, r: 1.0 }, // Liuqiu
-  { cx: 70, cy: 78, r: 1.0 }, // Green Island
-  { cx: 73, cy: 88, r: 1.2 }, // Orchid Island
+  { cx: 16, cy: 50, r: 1.5 }, // Penghu (drawn as a small cluster)
+  { cx: 18.3, cy: 48.7, r: 0.85 },
+  { cx: 14.1, cy: 51.6, r: 0.8 },
+  { cx: 4, cy: 33, r: 1.5 }, // Kinmen
+  { cx: 24, cy: 7, r: 1.0 }, // Matsu
+  { cx: 25.7, cy: 5.5, r: 0.7 },
+  { cx: 33, cy: 78, r: 1.0 }, // Liuqiu
+  { cx: 65, cy: 70, r: 1.0 }, // Green Island
+  { cx: 68, cy: 85, r: 1.2 }, // Orchid Island
 ];
 
 /** A faint cartographic grid for the "real map" feel — kept very quiet behind the land. */
