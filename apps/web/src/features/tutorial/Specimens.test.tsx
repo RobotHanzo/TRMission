@@ -11,6 +11,7 @@ const specs: SpecimenSpec[] = [
   { kind: 'route', variant: 'double' },
   { kind: 'card-row' },
   { kind: 'station' },
+  { kind: 'score-table' },
   { kind: 'ticket', id: 'T1' },
 ];
 

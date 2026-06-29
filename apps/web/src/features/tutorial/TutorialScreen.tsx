@@ -62,6 +62,9 @@ function TutorialRunner({
   const rects = useSpotlightRects(spotlight);
   const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
   const frameTarget = beat?.frame ?? null;
+  // On an `await` beat, gate the HUD to the action the lesson is waiting for (so e.g. the draw-
+  // tickets button is disabled while we ask the learner to draw a train card — no dead ends).
+  const actionGate = beat && beat.mode === 'await' ? beat.expect : null;
   // Only a whole-board overview (or a beat with no spotlight at all) should dim the entire stage;
   // a beat that names a target must never dim everything while its rect resolves.
   const dimAll = !spotlight || spotlight.kind === 'board';
@@ -75,6 +78,7 @@ function TutorialRunner({
       onLeave={onExit}
       spotlightCities={spotlightCities}
       frameTarget={frameTarget}
+      actionGate={actionGate}
       overlay={
         <>
           <TutorialSpotlight rects={rects} reducedMotion={reduced} dimAll={dimAll} />

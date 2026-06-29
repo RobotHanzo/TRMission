@@ -38,18 +38,19 @@ export const LESSONS: Lesson[] = [
     viewer: P0 as string,
     beats: [
       { id: 'goal', text: 'tutorial.welcome.goal', mode: 'info' },
-      { id: 'map', text: 'tutorial.welcome.map', mode: 'info', spotlight: { kind: 'board' } },
       {
-        id: 'score',
-        text: 'tutorial.welcome.score',
+        id: 'map',
+        text: 'tutorial.welcome.map',
         mode: 'info',
-        spotlight: { kind: 'hud', selector: '.trackers' },
+        spotlight: { kind: 'hud', selector: '.board-viewport' },
       },
+      { id: 'score', text: 'tutorial.welcome.score', mode: 'info' },
       {
         id: 'draft',
         text: 'tutorial.welcome.draft',
         mode: 'await',
         expect: { t: 'KEEP_INITIAL_TICKETS' },
+        spotlight: { kind: 'hud', selector: '.ticket-chooser' },
       },
       {
         id: 'botdraft',
@@ -57,7 +58,6 @@ export const LESSONS: Lesson[] = [
         mode: 'auto',
         action: (s) => keepAll(s, P1),
       },
-      { id: 'ready', text: 'tutorial.welcome.ready', mode: 'info' },
     ],
   },
   {
@@ -79,8 +79,19 @@ export const LESSONS: Lesson[] = [
         spotlight: { kind: 'hud', selector: '.market' },
         specimen: { kind: 'card-row' },
       },
-      { id: 'do', text: 'tutorial.draw.do', mode: 'await', expect: { t: 'DRAW_ANY' } },
-      { id: 'second', text: 'tutorial.draw.second', mode: 'info' },
+      {
+        id: 'do',
+        text: 'tutorial.draw.do',
+        mode: 'await',
+        expect: { t: 'DRAW_ANY' },
+        spotlight: { kind: 'hud', selector: '.market' },
+      },
+      {
+        id: 'second',
+        text: 'tutorial.draw.second',
+        mode: 'info',
+        spotlight: { kind: 'hud', selector: '.market' },
+      },
       { id: 'loco', text: 'tutorial.draw.loco', mode: 'info', specimen: { kind: 'loco-card' } },
     ],
   },
@@ -112,7 +123,12 @@ export const LESSONS: Lesson[] = [
         },
       },
       { id: 'scored', text: 'tutorial.claim.scored', mode: 'info' },
-      { id: 'table', text: 'tutorial.claim.table', mode: 'info' },
+      {
+        id: 'table',
+        text: 'tutorial.claim.table',
+        mode: 'info',
+        specimen: { kind: 'score-table' },
+      },
     ],
   },
   {

@@ -35,6 +35,25 @@
   bottom: auto;
   top: clamp(0.75rem, 3vh, 1.5rem);
 }
+/* Side-docked: when the target fills the viewport height (the whole map, the ticket chooser) the
+   coach can't be dodged vertically, so it docks to the roomier side, vertically centred, and points
+   sideways at the lit element. */
+.tut-coach[data-pos='left'],
+.tut-coach[data-pos='right'] {
+  top: 50%;
+  bottom: auto;
+  width: min(24rem, calc(100vw - 1.5rem));
+  transform: translateY(-50%);
+  animation: tut-coach-in-side 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.tut-coach[data-pos='left'] {
+  left: clamp(0.75rem, 2vw, 1.5rem);
+  right: auto;
+}
+.tut-coach[data-pos='right'] {
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  left: auto;
+}
 @keyframes tut-coach-in {
   from {
     opacity: 0;
@@ -45,20 +64,44 @@
     transform: translate(-50%, 0) scale(1);
   }
 }
+@keyframes tut-coach-in-side {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+/* The caret rides the edge of the coach FACING the spotlight target and points at it. */
 .tut-coach-caret {
   position: absolute;
-  bottom: -9px;
   width: 18px;
   height: 18px;
   background: var(--surface, #fff);
   border-right: 1px solid var(--border, rgba(0, 0, 0, 0.12));
   border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
-  transform: translateX(-50%) rotate(45deg);
 }
-.tut-coach[data-pos='top'] .tut-coach-caret {
-  bottom: auto;
+/* Bottom-anchored coach → target sits above → caret on the TOP edge, tip up. */
+.tut-coach[data-pos='bottom'] .tut-coach-caret {
   top: -9px;
   transform: translateX(-50%) rotate(225deg);
+}
+/* Top-anchored coach → target below → caret on the BOTTOM edge, tip down. */
+.tut-coach[data-pos='top'] .tut-coach-caret {
+  bottom: -9px;
+  transform: translateX(-50%) rotate(45deg);
+}
+/* Right-docked coach → target to the left → caret on the LEFT edge, tip left. */
+.tut-coach[data-pos='right'] .tut-coach-caret {
+  left: -9px;
+  transform: translateY(-50%) rotate(135deg);
+}
+/* Left-docked coach → target to the right → caret on the RIGHT edge, tip right. */
+.tut-coach[data-pos='left'] .tut-coach-caret {
+  right: -9px;
+  transform: translateY(-50%) rotate(315deg);
 }
 .tut-coach-head {
   display: flex;
@@ -191,7 +234,9 @@
   display: flex;
   flex-direction: column;
   width: min(1080px, 100%);
-  height: min(780px, 100%);
+  /* Fit the modal to its content (a fixed-height demo stage + short blurb), capped so it never
+     exceeds the viewport — on a short viewport the list/main panes scroll within the cap. */
+  max-height: min(780px, 100%);
   min-height: 0;
   background: var(--surface, #fff);
   color: var(--text, #111);
@@ -396,6 +441,43 @@
 .tut-ticket-specimen {
   width: 168px;
   margin: 0 auto;
+}
+/* The route-length → points reference card: a row per length (that many cars + the points pill). */
+.tut-score-table {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.32rem 1rem;
+  align-items: center;
+  min-width: 11rem;
+}
+.tut-score-row {
+  display: contents;
+}
+.tut-score-cars {
+  display: inline-flex;
+  gap: 3px;
+}
+.tut-score-car {
+  width: 12px;
+  height: 9px;
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent, #2b6cb0) 80%, #fff) 0%,
+    var(--accent, #2b6cb0) 100%
+  );
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.16);
+}
+.tut-score-pts {
+  justify-self: end;
+  min-width: 1.7rem;
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent, #2b6cb0) 16%, transparent);
+  color: var(--accent, #2b6cb0);
 }
 
 /* Focus scrim: dims the stage, lit hole + ring around the spotlighted element. Non-blocking. */

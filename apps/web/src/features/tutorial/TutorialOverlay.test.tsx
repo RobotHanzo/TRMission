@@ -47,4 +47,18 @@ describe('TutorialOverlay', () => {
     );
     expect(container.querySelector('.tut-coach')?.getAttribute('data-pos')).toBe('top');
   });
+
+  it('docks to the side (away from the target) for a full-height spotlight', () => {
+    // A target filling the viewport height on the left (the whole map) can't be dodged up/down, so
+    // the coach docks to the right and points back at it.
+    const beat: Beat = { id: 'b', text: 'tutorial.welcome.map', mode: 'info' };
+    const { container } = render(
+      <TutorialOverlay
+        {...baseProps}
+        beat={beat}
+        spotRects={[{ x: 0, y: 0, w: 200, h: window.innerHeight }]}
+      />,
+    );
+    expect(container.querySelector('.tut-coach')?.getAttribute('data-pos')).toBe('right');
+  });
 });

@@ -31,7 +31,6 @@ export const tutorialZh = {
     draft:
       '開局先選任務卡。系統發給你 1 張長程 + 3 張短程，至少保留 2 張（長程卡必須全部保留）。在右側選好後確認。',
     botdraft: '對手也選好了任務卡。',
-    ready: '準備就緒——輪到你行動了。每回合只能做一個動作。',
   },
   draw: {
     title: '抽火車牌',
@@ -140,7 +139,6 @@ export const tutorialEn = {
     draft:
       "First, choose mission tickets. You're dealt 1 long + 3 short; keep at least 2 (all long tickets must be kept). Pick on the right and confirm.",
     botdraft: 'Your opponent has chosen their tickets too.',
-    ready: "Ready — it's your turn. You may take exactly one action per turn.",
   },
   draw: {
     title: 'Drawing cards',

@@ -1,7 +1,7 @@
 // The visual glossary: standalone renders of real game components for the coachmark. Each reuses
 // the exact board/card classes so it looks identical to the live game and can never drift.
 import { useTranslation } from 'react-i18next';
-import { TRAIN_COLORS, type CardColor } from '@trm/shared';
+import { TRAIN_COLORS, type CardColor, SCORING_TABLE } from '@trm/shared';
 import { TrainCarCard } from '../../components/TrainCarCard';
 import { TicketCard } from '../../components/TicketCard';
 import type { SpecimenSpec } from './types';
@@ -140,6 +140,30 @@ export function StationSpecimen() {
   );
 }
 
+/**
+ * The route-length → points reference, drawn as a compact card (a row per length: that many train
+ * cars, then the points it scores). Reads the live SCORING_TABLE so it can never drift from the rules.
+ */
+export function ScoreTableSpecimen() {
+  const rows = (Object.entries(SCORING_TABLE) as [string, number][])
+    .map(([len, pts]) => [Number(len), pts] as const)
+    .sort((a, b) => a[0] - b[0]);
+  return (
+    <div className="tut-score-table" data-testid="tut-specimen">
+      {rows.map(([len, pts]) => (
+        <div className="tut-score-row" key={len}>
+          <span className="tut-score-cars" aria-hidden>
+            {Array.from({ length: len }, (_, i) => (
+              <span className="tut-score-car" key={i} />
+            ))}
+          </span>
+          <span className="tut-score-pts">{pts}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function TicketSpecimen({ id }: { id: string }) {
   return (
     <div className="tut-ticket-specimen" data-testid="tut-specimen">
@@ -160,6 +184,8 @@ export function Specimen({ spec }: { spec: SpecimenSpec }) {
       return <LocoCardSpecimen />;
     case 'station':
       return <StationSpecimen />;
+    case 'score-table':
+      return <ScoreTableSpecimen />;
     case 'ticket':
       return <TicketSpecimen id={spec.id} />;
   }

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronRight, RotateCcw, X } from 'lucide-react';
 import type { Beat, SpecimenSpec } from './types';
 import { Specimen } from './Specimens';
-import { coachPosition, type FlatRect } from './focus';
+import { coachPosition, spotlightCentre, type FlatRect } from './focus';
 
 export interface TutorialOverlayProps {
   beat: Beat | null;
@@ -34,28 +34,36 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
 
   const body = done ? t('tutorial.lessonComplete') : beat ? t(beat.text) : '';
   const pos =
-    typeof window !== 'undefined' ? coachPosition(spotRects, window.innerHeight) : 'bottom';
+    typeof window !== 'undefined'
+      ? coachPosition(spotRects, window.innerWidth, window.innerHeight)
+      : 'bottom';
+  const sideDocked = pos === 'left' || pos === 'right';
   const progress = total > 0 ? Math.round(((index + 1) / total) * 100) : 0;
 
-  // Caret horizontal position: coach-relative, aimed at the first target's centre.
+  // The caret rides the edge of the coach that faces the spotlight target and points at it: for a
+  // top/bottom coach that means a horizontal offset along the facing edge; for a side-docked coach,
+  // a vertical offset. Coach-relative so it survives any window size.
   const coachRef = useRef<HTMLDivElement>(null);
-  const [caretLeft, setCaretLeft] = useState<number | null>(null);
+  const [caretOffset, setCaretOffset] = useState<{ axis: 'x' | 'y'; px: number } | null>(null);
   useLayoutEffect(() => {
-    const target = spotRects[0];
+    const centre = spotlightCentre(spotRects);
     const coach = coachRef.current;
-    if (!target || !coach) {
-      setCaretLeft(null);
+    if (!centre || !coach) {
+      setCaretOffset(null);
       return;
     }
     const cr = coach.getBoundingClientRect();
     if (cr.width === 0) {
-      setCaretLeft(null); // no layout (jsdom) — skip the caret
+      setCaretOffset(null); // no layout (jsdom) — skip the caret
       return;
     }
-    const targetCx = target.x + target.w / 2;
-    const pad = 24; // ~1.5rem bubble padding
-    setCaretLeft(Math.max(pad, Math.min(cr.width - pad, targetCx - cr.left)));
-  }, [spotRects]);
+    const pad = 24; // ~1.5rem bubble padding, keeps the caret off the rounded corners
+    if (sideDocked) {
+      setCaretOffset({ axis: 'y', px: Math.max(pad, Math.min(cr.height - pad, centre.y - cr.top)) });
+    } else {
+      setCaretOffset({ axis: 'x', px: Math.max(pad, Math.min(cr.width - pad, centre.x - cr.left)) });
+    }
+  }, [spotRects, sideDocked]);
 
   return (
     <div
@@ -65,8 +73,12 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
       role="dialog"
       aria-label={t('tutorial.title')}
     >
-      {caretLeft !== null && (
-        <span className="tut-coach-caret" aria-hidden style={{ left: `${caretLeft}px` }} />
+      {caretOffset !== null && (
+        <span
+          className="tut-coach-caret"
+          aria-hidden
+          style={caretOffset.axis === 'x' ? { left: `${caretOffset.px}px` } : { top: `${caretOffset.px}px` }}
+        />
       )}
 
       <div className="tut-coach-head">

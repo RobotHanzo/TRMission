@@ -33,7 +33,12 @@ function performAwait(cmd: SandboxSocket, expect: ExpectSpec, viewer: string): v
     case 'DRAW_BLIND':
       return cmd.drawBlind();
     case 'DRAW_FACEUP':
-      return cmd.drawFaceUp(Math.max(0, state.market.findIndex((c) => c !== null)));
+      return cmd.drawFaceUp(
+        Math.max(
+          0,
+          state.market.findIndex((c) => c !== null),
+        ),
+      );
     case 'DRAW_TICKETS':
       return cmd.drawTickets();
     case 'PASS':
