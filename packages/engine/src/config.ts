@@ -18,8 +18,9 @@ export interface GameConfig {
   readonly contentHash: string;
 }
 
-/** Player counts of 2–3 use the "only one of each double-route" variant (SINGLE_ONLY). */
+/** Player counts of 2–3 use the "only one of each double-route" variant (SINGLE_ONLY) when
+ *  `doubleRouteSingleFor23` is enabled. With the flag off all games use BOTH. */
 export type DoubleRouteVariant = 'SINGLE_ONLY' | 'BOTH';
 
-export const variantForPlayerCount = (n: number): DoubleRouteVariant =>
-  n <= 3 ? 'SINGLE_ONLY' : 'BOTH';
+export const variantForPlayerCount = (n: number, singleFor23: boolean): DoubleRouteVariant =>
+  n <= 3 && singleFor23 ? 'SINGLE_ONLY' : 'BOTH';

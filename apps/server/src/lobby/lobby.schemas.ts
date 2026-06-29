@@ -11,6 +11,7 @@ export const GameSettingsSchema = z.object({
   unlimitedStationBorrow: z.boolean(),
   secondDrawAfterBlindRainbow: z.boolean(),
   noUnfinishedTicketPenalty: z.boolean(),
+  doubleRouteSingleFor23: z.boolean(),
   allowSpectating: z.boolean(),
   visibility: z.enum(['PUBLIC', 'INVITE_ONLY']),
 });

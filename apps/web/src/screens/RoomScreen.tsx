@@ -9,11 +9,14 @@ import {
   type RoomView,
   type RoomMember,
   type RoomSettings,
+  type RoomVisibility,
   type BotDifficulty,
 } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { SEAT_COLORS } from '../theme/colors';
 import { Toast } from '../components/Toast';
+import { Switch } from '../components/ui/Switch';
+import { Segmented } from '../components/ui/Segmented';
 
 const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
 
@@ -154,6 +157,11 @@ export function RoomScreen() {
       'settingSecondDrawAfterRainbowDesc',
     ],
     ['noUnfinishedTicketPenalty', 'settingNoUnfinishedPenalty', 'settingNoUnfinishedPenaltyDesc'],
+    [
+      'doubleRouteSingleFor23',
+      'settingDoubleRouteSingleFor23',
+      'settingDoubleRouteSingleFor23Desc',
+    ],
   ] as const;
 
   const toggleReady = () => void guard(api.setReady(code, !me?.ready));
@@ -239,46 +247,40 @@ export function RoomScreen() {
       <fieldset className="card stack game-settings" disabled={settingsLocked}>
         <legend>{t('gameSettings')}</legend>
         {RULE_TOGGLES.map(([key, label, desc]) => (
-          <label key={key} className="row between setting-row">
+          <div key={key} className="row between setting-row">
             <span>
               <strong>{t(label)}</strong>
               <br />
               <span className="muted">{t(desc)}</span>
             </span>
-            <input
-              type="checkbox"
-              aria-label={t(label)}
+            <Switch
               checked={settings[key]}
-              onChange={(e) => setSetting({ [key]: e.target.checked } as Partial<RoomSettings>)}
+              onChange={(next) => setSetting({ [key]: next } as Partial<RoomSettings>)}
+              label={t(label)}
             />
-          </label>
+          </div>
         ))}
-        <label className="row between setting-row">
+        <div className="row between setting-row">
           <span>
             <strong>{t('allowSpectating')}</strong>
           </span>
-          <input
-            type="checkbox"
-            aria-label={t('allowSpectating')}
+          <Switch
             checked={settings.allowSpectating}
-            onChange={(e) => setSetting({ allowSpectating: e.target.checked })}
+            onChange={(next) => setSetting({ allowSpectating: next })}
+            label={t('allowSpectating')}
           />
-        </label>
+        </div>
         <div className="row between setting-row">
           <strong>{t('roomVisibility')}</strong>
-          <div className="row">
-            {(['PUBLIC', 'INVITE_ONLY'] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                className={settings.visibility === v ? 'primary' : ''}
-                onClick={() => setSetting({ visibility: v })}
-                disabled={settingsLocked}
-              >
-                {t(`visibility_${v}`)}
-              </button>
-            ))}
-          </div>
+          <Segmented<RoomVisibility>
+            options={[
+              { value: 'PUBLIC', label: t('visibility_PUBLIC') },
+              { value: 'INVITE_ONLY', label: t('visibility_INVITE_ONLY') },
+            ]}
+            value={settings.visibility}
+            onChange={(v) => setSetting({ visibility: v })}
+            ariaLabel={t('roomVisibility')}
+          />
         </div>
       </fieldset>
 

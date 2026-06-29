@@ -166,6 +166,7 @@ export class LobbyService {
         unlimitedStationBorrow: s.unlimitedStationBorrow,
         secondDrawAfterBlindRainbow: s.secondDrawAfterBlindRainbow,
         noUnfinishedTicketPenalty: s.noUnfinishedTicketPenalty,
+        doubleRouteSingleFor23: s.doubleRouteSingleFor23,
       },
     };
     const bots: BotProfile[] = room.members

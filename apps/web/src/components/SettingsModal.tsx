@@ -14,6 +14,8 @@ import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import type { Theme, UserPreferences } from '../net/rest';
 import type { BoardLayout, Locale } from '../store/ui';
+import { Switch } from './ui/Switch';
+import { Segmented } from './ui/Segmented';
 
 interface Props {
   onClose(): void;
@@ -101,58 +103,40 @@ export function SettingsModal({ onClose }: Props) {
 
         <section className="setting">
           <div className="setting-label">{t('appearance')}</div>
-          <div className="segmented" role="radiogroup" aria-label={t('appearance')}>
-            {THEME_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                aria-checked={theme === value}
-                className={theme === value ? 'segment active' : 'segment'}
-                onClick={() => chooseTheme(value)}
-              >
-                <Icon size={16} aria-hidden />
-                <span>{t(labelKey)}</span>
-              </button>
-            ))}
-          </div>
+          <Segmented
+            options={THEME_OPTIONS.map(({ value, icon, labelKey }) => ({
+              value,
+              label: t(labelKey),
+              icon,
+            }))}
+            value={theme}
+            onChange={chooseTheme}
+            ariaLabel={t('appearance')}
+          />
         </section>
 
         <section className="setting">
           <div className="setting-label">{t('language')}</div>
-          <div className="segmented" role="radiogroup" aria-label={t('language')}>
-            {LOCALE_OPTIONS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                aria-checked={locale === value}
-                className={locale === value ? 'segment active' : 'segment'}
-                onClick={() => chooseLocale(value)}
-              >
-                <span>{label}</span>
-              </button>
-            ))}
-          </div>
+          <Segmented
+            options={LOCALE_OPTIONS.map(({ value, label }) => ({ value, label }))}
+            value={locale}
+            onChange={chooseLocale}
+            ariaLabel={t('language')}
+          />
         </section>
 
         <section className="setting">
           <div className="setting-label">{t('layout')}</div>
-          <div className="segmented" role="radiogroup" aria-label={t('layout')}>
-            {LAYOUT_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                aria-checked={boardLayout === value}
-                className={boardLayout === value ? 'segment active' : 'segment'}
-                onClick={() => chooseLayout(value)}
-              >
-                <Icon size={16} aria-hidden />
-                <span>{t(labelKey)}</span>
-              </button>
-            ))}
-          </div>
+          <Segmented
+            options={LAYOUT_OPTIONS.map(({ value, icon, labelKey }) => ({
+              value,
+              label: t(labelKey),
+              icon,
+            }))}
+            value={boardLayout}
+            onChange={chooseLayout}
+            ariaLabel={t('layout')}
+          />
         </section>
 
         <section className="setting setting-row">
@@ -160,16 +144,11 @@ export function SettingsModal({ onClose }: Props) {
             <div className="setting-label">{t('colorBlind')}</div>
             <div className="muted setting-desc">{t('colorBlindDesc')}</div>
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={colorBlind}
-            aria-label={t('colorBlind')}
-            className={colorBlind ? 'switch on' : 'switch'}
-            onClick={() => chooseColorBlind(!colorBlind)}
-          >
-            <span className="switch-knob" />
-          </button>
+          <Switch
+            checked={colorBlind}
+            onChange={chooseColorBlind}
+            label={t('colorBlind')}
+          />
         </section>
 
         <section className="setting setting-row">
@@ -186,16 +165,11 @@ export function SettingsModal({ onClose }: Props) {
               onChange={(e) => setSoundVolume(Number(e.target.value))}
             />
           </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={soundEnabled}
-            aria-label={t('sound')}
-            className={soundEnabled ? 'switch on' : 'switch'}
-            onClick={() => setSoundEnabled(!soundEnabled)}
-          >
-            <span className="switch-knob" />
-          </button>
+          <Switch
+            checked={soundEnabled}
+            onChange={setSoundEnabled}
+            label={t('sound')}
+          />
         </section>
       </div>
     </div>

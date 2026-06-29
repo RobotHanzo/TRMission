@@ -45,6 +45,7 @@ export interface RoomSettings {
   unlimitedStationBorrow: boolean;
   secondDrawAfterBlindRainbow: boolean;
   noUnfinishedTicketPenalty: boolean;
+  doubleRouteSingleFor23: boolean;
   allowSpectating: boolean;
   visibility: RoomVisibility;
 }

@@ -26,11 +26,12 @@ describe('lobby: per-game settings', () => {
       .send({})
       .expect(201);
     expect(room.body.settings).toEqual({
-      unlimitedStationBorrow: false,
+      unlimitedStationBorrow: true,
       secondDrawAfterBlindRainbow: false,
       noUnfinishedTicketPenalty: false,
+      doubleRouteSingleFor23: true,
       allowSpectating: true,
-      visibility: 'PUBLIC',
+      visibility: 'INVITE_ONLY',
     });
   });
 
@@ -97,6 +98,7 @@ describe('lobby: per-game settings', () => {
     expect(rp.unlimitedStationBorrow).toBe(true);
     expect(rp.noUnfinishedTicketPenalty).toBe(true);
     expect(rp.secondDrawAfterBlindRainbow).toBe(false);
+    expect(rp.doubleRouteSingleFor23).toBe(true); // default is true; not patched so stays true
   });
 
   it('lists public rooms unauthenticated and hides invite-only', async () => {
@@ -107,16 +109,18 @@ describe('lobby: per-game settings', () => {
       .set(auth(a.token))
       .send({})
       .expect(201);
+    // Explicitly make this room public (default is now INVITE_ONLY).
+    await request(server())
+      .patch(`/api/v1/rooms/${pub.body.code}/settings`)
+      .set(auth(a.token))
+      .send({ visibility: 'PUBLIC' })
+      .expect(200);
     const priv = await request(server())
       .post('/api/v1/rooms')
       .set(auth(b.token))
       .send({})
       .expect(201);
-    await request(server())
-      .patch(`/api/v1/rooms/${priv.body.code}/settings`)
-      .set(auth(b.token))
-      .send({ visibility: 'INVITE_ONLY' })
-      .expect(200);
+    // priv is already INVITE_ONLY by default — no patch needed.
 
     // No Authorization header — the public list is open.
     const list = await request(server()).get('/api/v1/rooms/public').expect(200);

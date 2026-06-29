@@ -58,6 +58,9 @@ const resources = {
       settingSecondDrawAfterRainbowDesc: '關閉時，第一張盲抽到彩虹（火車頭）即結束抽牌。',
       settingNoUnfinishedPenalty: '未完成任務不扣分',
       settingNoUnfinishedPenaltyDesc: '開啟時，未完成的任務卡計 0 分而非扣分。',
+      settingDoubleRouteSingleFor23: '2–3 人限用單線平行路線',
+      settingDoubleRouteSingleFor23Desc:
+        '開啟時，2–3 人遊戲中每對平行路線只能佔用其中一條；關閉可讓雙方各佔一條。',
       allowSpectating: '允許觀戰',
       roomVisibility: '房間可見度',
       visibility_PUBLIC: '公開',
@@ -254,6 +257,9 @@ const resources = {
       settingNoUnfinishedPenalty: 'No penalty for unfinished tickets',
       settingNoUnfinishedPenaltyDesc:
         'When on, unfinished destination tickets score 0 instead of subtracting their value.',
+      settingDoubleRouteSingleFor23: 'Single-track parallel routes for 2–3 players',
+      settingDoubleRouteSingleFor23Desc:
+        'When on, only one of each pair of parallel routes can be claimed in a 2–3 player game; turn off to allow both to be claimed.',
       allowSpectating: 'Allow spectating',
       roomVisibility: 'Room visibility',
       visibility_PUBLIC: 'Public',

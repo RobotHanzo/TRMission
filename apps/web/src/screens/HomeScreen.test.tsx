@@ -33,6 +33,7 @@ const settings = {
   unlimitedStationBorrow: false,
   secondDrawAfterBlindRainbow: false,
   noUnfinishedTicketPenalty: false,
+  doubleRouteSingleFor23: true,
   allowSpectating: true,
   visibility: 'PUBLIC' as const,
 };

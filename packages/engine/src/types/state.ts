@@ -122,4 +122,4 @@ export interface GameState {
 }
 
 export const SCHEMA_VERSION = 1;
-export const ENGINE_VERSION = 2;
+export const ENGINE_VERSION = 3;

@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 2 (bumped for the ruleParams + completedTickets state additions)', () => {
-    expect(ENGINE_VERSION).toBe(2);
+  it('is engine version 3 (bumped for the doubleRouteSingleFor23 ruleParam addition)', () => {
+    expect(ENGINE_VERSION).toBe(3);
   });
 
   it('replays byte-identically under each variant', () => {
@@ -30,6 +30,7 @@ describe('rule-variant determinism & version', () => {
       { ruleParams: { unlimitedStationBorrow: true } },
       { ruleParams: { secondDrawAfterBlindRainbow: true } },
       { ruleParams: { noUnfinishedTicketPenalty: true } },
+      { ruleParams: { doubleRouteSingleFor23: false } },
     ];
     for (const v of variants) {
       const r = playGreedyGame(3, 'variant-seed', { ruleParams: v.ruleParams });
