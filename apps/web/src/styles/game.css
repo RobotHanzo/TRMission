@@ -71,6 +71,18 @@
       'board rail comms'
       'hand  hand hand';
   }
+  /* The tutorial/encyclopedia sandbox has no comms panel — keep the two-column layout at wide
+     widths too, so the board fills the space instead of leaving an empty comms column. */
+  .game--sandbox.game--rail {
+    grid-template-columns: minmax(0, 1fr) var(--tr-rail-w);
+    grid-template-areas: 'board rail';
+  }
+  .game--sandbox.game--tray {
+    grid-template-columns: minmax(0, 1fr) var(--tr-rail-w);
+    grid-template-areas:
+      'board rail'
+      'hand  hand';
+  }
 }
 .game-comms {
   grid-area: comms;

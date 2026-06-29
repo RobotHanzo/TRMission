@@ -44,6 +44,7 @@ function TutorialRunner({
   onPrevLesson,
   onNextLesson,
   onExit,
+  onCreateGame,
 }: {
   lesson: Lesson;
   lessonNo: number;
@@ -52,6 +53,7 @@ function TutorialRunner({
   onPrevLesson(): void;
   onNextLesson(): void;
   onExit(): void;
+  onCreateGame(): void;
 }) {
   const { t } = useTranslation();
   const player = useScenarioPlayer(lesson, useGame);
@@ -62,6 +64,9 @@ function TutorialRunner({
   const rects = useSpotlightRects(spotlight);
   const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
   const frameTarget = beat?.frame ?? null;
+  // On an `await` beat, gate the HUD to the action the lesson is waiting for (so e.g. the draw-
+  // tickets button is disabled while we ask the learner to draw a train card — no dead ends).
+  const actionGate = beat && beat.mode === 'await' ? beat.expect : null;
   // Only a whole-board overview (or a beat with no spotlight at all) should dim the entire stage;
   // a beat that names a target must never dim everything while its rect resolves.
   const dimAll = !spotlight || spotlight.kind === 'board';
@@ -75,6 +80,7 @@ function TutorialRunner({
       onLeave={onExit}
       spotlightCities={spotlightCities}
       frameTarget={frameTarget}
+      actionGate={actionGate}
       overlay={
         <>
           <TutorialSpotlight rects={rects} reducedMotion={reduced} dimAll={dimAll} />
@@ -94,6 +100,7 @@ function TutorialRunner({
             onPrevLesson={onPrevLesson}
             onNextLesson={onNextLesson}
             onExit={onExit}
+            onCreateGame={onCreateGame}
           />
         </>
       }
@@ -103,6 +110,9 @@ function TutorialRunner({
 
 export default function TutorialScreen() {
   const exit = useUi((s) => s.goHome);
+  // The finale CTA leaves the tutorial for home and spotlights the create-game button there (rather
+  // than minting a room from inside the tutorial).
+  const createGame = useUi((s) => s.requestCreateGame);
   const [scope, setScope] = useState<Scope | null>(null);
   const [lessonIdx, setLessonIdx] = useState(0);
   const lessons = useMemo(() => (scope ? lessonsForScope(scope) : []), [scope]);
@@ -132,6 +142,7 @@ export default function TutorialScreen() {
       onPrevLesson={() => setLessonIdx((i) => Math.max(0, i - 1))}
       onNextLesson={() => setLessonIdx((i) => Math.min(lessons.length - 1, i + 1))}
       onExit={exit}
+      onCreateGame={createGame}
     />
   );
 }

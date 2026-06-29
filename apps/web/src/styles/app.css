@@ -422,3 +422,25 @@
 .switch.on .switch-knob {
   transform: translateX(18px);
 }
+
+/* A one-shot attention pulse, e.g. the create-game button after the tutorial finale guides the
+   learner here. The ring fades in/out a few times, then the focus is cleared (removing the class). */
+.tut-focus-pulse {
+  animation: tut-focus-pulse 1.1s ease-in-out 3;
+}
+@keyframes tut-focus-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--tr-blue, #2b6cb0) 55%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--tr-blue, #2b6cb0) 0%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tut-focus-pulse {
+    animation: none;
+    outline: 2px solid var(--tr-blue, #2b6cb0);
+    outline-offset: 2px;
+  }
+}

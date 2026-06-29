@@ -25,6 +25,7 @@ import { enumerateTunnelExtra } from '../game/tunnel';
 import { isChatRejectionKey } from '../game/chatErrors';
 import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../game/boardView';
+import type { ExpectSpec } from '../features/tutorial/types';
 import { Board } from '../components/Board';
 import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
@@ -60,6 +61,9 @@ export interface GameStageProps {
   sandbox?: boolean | undefined;
   /** Tutorial auto-pan target (sandbox only); live game leaves this undefined. */
   frameTarget?: BoardFrameTarget | null | undefined;
+  /** Tutorial only: the current `await` beat's expected action. When set, affordances that don't
+   *  match it are disabled, so a stray click can't change phase and strand the lesson. */
+  actionGate?: ExpectSpec | null | undefined;
 }
 
 export function GameStage({
@@ -70,6 +74,7 @@ export function GameStage({
   spotlightCities,
   sandbox,
   frameTarget,
+  actionGate,
 }: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -117,6 +122,18 @@ export function GameStage({
   const myTurn = isMyTurn(snapshot);
   const canAct = myTurn && phase === Phase.AWAIT_ACTION;
   const canDraw = myTurn && (phase === Phase.AWAIT_ACTION || phase === Phase.DRAWING_CARDS);
+
+  // Tutorial action gate: when an `await` beat names the action it wants, disable the affordances
+  // that don't match it (e.g. draw-tickets or claiming while the lesson asks for a train-card draw),
+  // so a stray click can't change phase and dead-end the lesson. No gate (live game) ⇒ all enabled.
+  const gate = actionGate ?? null;
+  const allowDraw =
+    !gate || gate.t === 'DRAW_ANY' || gate.t === 'DRAW_BLIND' || gate.t === 'DRAW_FACEUP';
+  const allowTickets = !gate || gate.t === 'DRAW_TICKETS';
+  const allowClaim = !gate || gate.t === 'CLAIM_ROUTE';
+  const allowStation = !gate || gate.t === 'BUILD_STATION';
+  const boardCanAct = canAct && (allowClaim || allowStation);
+  const marketCanDraw = canDraw && allowDraw;
 
   const pickRoute = (routeId: string) => {
     const route = routeById.get(routeId);
@@ -200,7 +217,7 @@ export function GameStage({
         snapshot={snapshot}
         locale={locale}
         colorBlind={colorBlind}
-        canAct={canAct}
+        canAct={boardCanAct}
         onPickRoute={pickRoute}
         onPickCity={pickCity}
         highlightCities={highlightCities}
@@ -218,14 +235,15 @@ export function GameStage({
     <div className="hud-block">
       <CardMarket
         snapshot={snapshot}
-        canDraw={canDraw}
+        canDraw={marketCanDraw}
         onDrawFaceUp={(slot) => commands?.drawFaceUp(slot)}
         onDrawBlind={() => commands?.drawBlind()}
       />
       <div className="hud-actions">
         <button
           className="accent"
-          disabled={!canAct || snapshot.ticketDeckShortCount === 0}
+          data-anim="draw-tickets"
+          disabled={!canAct || snapshot.ticketDeckShortCount === 0 || !allowTickets}
           onClick={() => commands?.drawTickets()}
         >
           {t('drawTickets')}
@@ -291,7 +309,7 @@ export function GameStage({
   const comms = sandbox ? null : <CommsPanel chatDisabled={isSpectator} />;
 
   return (
-    <div className={`game game--${boardLayout}`}>
+    <div className={`game game--${boardLayout}${sandbox ? ' game--sandbox' : ''}`}>
       {isSpectator && (
         <div className="spectator-banner" role="status">
           <strong>{t('spectating')}</strong> — {t('spectatingHint')}

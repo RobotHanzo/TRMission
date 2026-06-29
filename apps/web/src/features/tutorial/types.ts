@@ -21,6 +21,8 @@ export type SpecimenSpec =
   | { kind: 'card-row' }
   | { kind: 'loco-card' }
   | { kind: 'station' }
+  | { kind: 'station-cost' }
+  | { kind: 'score-table' }
   | { kind: 'ticket'; id: string };
 
 /** A declarative match against the learner's action for an `await` beat. `DRAW_ANY` accepts either

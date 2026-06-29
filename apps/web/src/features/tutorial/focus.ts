@@ -9,10 +9,13 @@ import type { Spotlight } from './types';
 export const HUD_SPOTLIGHT_SELECTORS = [
   '.market',
   '.trackers',
+  '.board-viewport',
+  '.ticket-chooser',
   '[data-anim="deck"]',
   '[data-anim="market-slot"]',
   '[data-anim="hand"]',
   '[data-anim="tickets"]',
+  '[data-anim="draw-tickets"]',
 ] as const;
 
 export function isAllowedHudSelector(sel: string): boolean {
@@ -41,18 +44,47 @@ export interface FlatRect {
   h: number;
 }
 
-/**
- * Where to anchor the bottom coachmark so it never covers the spotlighted element. If a target
- * sits in the lower band of the viewport, flip the coachmark to the top.
- */
-export function coachPosition(rects: FlatRect[], vh: number): 'bottom' | 'top' {
-  const lowBand = vh * 0.62;
+export type CoachPos = 'bottom' | 'top' | 'left' | 'right';
+
+/** The union (bounding box) of a set of rects, or null when empty. */
+function unionRect(rects: FlatRect[]): FlatRect | null {
+  if (rects.length === 0) return null;
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
   for (const r of rects) {
-    const overlapsBottom = r.y + r.h > lowBand;
-    // Any spotlight target sitting in the lower band of the viewport would be covered by the
-    // bottom-anchored coachmark, so flip the coachmark to the top. (Vertical band only — the
-    // authored bottom targets are horizontally central, so a horizontal check isn't needed.)
-    if (overlapsBottom) return 'top';
+    minX = Math.min(minX, r.x);
+    minY = Math.min(minY, r.y);
+    maxX = Math.max(maxX, r.x + r.w);
+    maxY = Math.max(maxY, r.y + r.h);
   }
-  return 'bottom';
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+}
+
+/**
+ * Where to anchor the coachmark so it never covers the spotlighted element — and so its caret
+ * points TOWARD that element. A target that fills most of the viewport height (the whole board, the
+ * ticket chooser) can't be cleared by moving up or down, so the coach docks to the side opposite the
+ * target's horizontal centre. Otherwise the coach anchors on the vertical half opposite the target,
+ * so the caret on its facing edge points at the target.
+ */
+export function coachPosition(rects: FlatRect[], vw: number, vh: number): CoachPos {
+  const u = unionRect(rects);
+  if (!u) return 'bottom';
+  // A tall target (most of the height) can't be dodged vertically — dock to the roomier side.
+  if (u.h > vh * 0.6) return u.x + u.w / 2 < vw / 2 ? 'right' : 'left';
+  // Otherwise anchor opposite the target's vertical centre (caret then points back at it).
+  return u.y + u.h / 2 < vh / 2 ? 'bottom' : 'top';
+}
+
+/** Centre of the union of a beat's spotlight rects, used to aim the coachmark caret. */
+export function spotlightCentre(rects: FlatRect[]): { x: number; y: number } | null {
+  const u = unionRect(rects);
+  return u ? { x: u.x + u.w / 2, y: u.y + u.h / 2 } : null;
+}
+
+/** Bounding box of a beat's spotlight rects, used to dock the coachmark beside the lit target. */
+export function spotlightBounds(rects: FlatRect[]): FlatRect | null {
+  return unionRect(rects);
 }
