@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MongoClient, type Db } from 'mongodb';
-import { taiwanBoard, CONTENT_HASH } from '@trm/engine';
+import { taiwanBoard, CONTENT_HASH, boardForContentHash } from '@trm/engine';
+import { CONTENT_REGISTRY } from '@trm/map-data';
 import type { GameConfig, PlayerSeed } from '@trm/engine';
 import { asPlayerId, type PlayerId } from '@trm/shared';
 import type { ServerEnvelope } from '@trm/proto';
@@ -182,6 +183,34 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
         prep.prepared.state,
       ),
     ).rejects.toThrow();
+  });
+
+  it('recovers an in-flight game against its archived content version, not the current map', async () => {
+    // A game persisted under the previous map version (v2, before R77 became a tunnel) must
+    // replay against the v2 board — the content registry resolves the board from the game's
+    // stored contentHash, so a content change never breaks an in-flight game's recovery.
+    const v2Hash = [...CONTENT_REGISTRY.keys()].find((h) => h !== CONTENT_HASH)!;
+    expect(v2Hash).toBeDefined();
+    const v2Board = boardForContentHash(v2Hash);
+    const config: GameConfig = { seed: 'v2-recover', players: twoPlayers, contentHash: v2Hash };
+
+    const live = new GameSession('gv2', v2Board, config);
+    await store.createGame('gv2', config, live.raw(), live.digest());
+    await driveDirect(live, 'gv2', 30);
+
+    // A fresh hub with the default (registry-backed) resolver rehydrates the game.
+    const hub = new GameHub(new GameRegistry(), { store });
+    const match = await hub.recoverMatch('gv2');
+    expect(match).not.toBeNull();
+
+    // It resolved the archived v2 board: R77 is still the pre-change length-1 plain segment.
+    expect(match!.session.board.routeById.get('R77')).toMatchObject({
+      length: 1,
+      isTunnel: false,
+    });
+    // And recovery reproduced the exact live state.
+    expect(match!.session.digest()).toBe(live.digest());
+    expect(match!.session.stateVersion).toBe(live.stateVersion);
   });
 
   it('recovers on reconnect: a fresh hub rehydrates the game from the store on hello', async () => {

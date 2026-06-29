@@ -57,4 +57,4 @@ export type { Edge, TicketGoal, TicketEvaluation, IdTicketGoal } from './graph/c
 export { UnionFind } from './graph/unionFind';
 
 // Re-export the canonical content + helpers for convenience.
-export { TAIWAN_CONTENT, CONTENT_HASH, taiwanBoard } from './taiwan';
+export { TAIWAN_CONTENT, CONTENT_HASH, taiwanBoard, boardForContentHash } from './taiwan';
