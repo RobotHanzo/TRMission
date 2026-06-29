@@ -14,6 +14,7 @@ const specs: SpecimenSpec[] = [
   { kind: 'station-cost' },
   { kind: 'score-table' },
   { kind: 'ticket', id: 'T1' },
+  { kind: 'claim-cost' },
 ];
 
 describe('Specimen', () => {
@@ -27,6 +28,15 @@ describe('Specimen', () => {
   it('the card row shows all eight liveries plus the locomotive', () => {
     const { container } = render(<Specimen spec={{ kind: 'card-row' }} />);
     expect(container.querySelectorAll('.train-card').length).toBe(9);
+  });
+
+  it('the claim-cost specimen shows three rows costing ×2, ×4, ×3', () => {
+    const { container } = render(<Specimen spec={{ kind: 'claim-cost' }} />);
+    expect(container.querySelectorAll('.tut-claim-cost-row').length).toBe(3);
+    const text = container.textContent ?? '';
+    expect(text).toContain('×2');
+    expect(text).toContain('×4');
+    expect(text).toContain('×3');
   });
 
   it('the ferry route draws its loco pips and the tunnel draws ties', () => {

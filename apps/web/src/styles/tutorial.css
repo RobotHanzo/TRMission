@@ -574,6 +574,27 @@
     animation: none;
   }
 }
+
+/* Claim-cost reference: a row per railway → the single card (with ×N) that pays for it. */
+.tut-claim-cost {
+  display: grid;
+  gap: 0.55rem;
+}
+.tut-claim-cost-row {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: start;
+}
+.tut-claim-track {
+  display: block;
+}
+.tut-claim-cost-arrow {
+  font-size: 1.1rem;
+  font-weight: 700;
+  opacity: 0.7;
+}
 .tut-ticket-specimen {
   width: 168px;
   margin: 0 auto;

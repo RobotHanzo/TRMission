@@ -108,7 +108,7 @@ export const LESSONS: Lesson[] = [
     viewer: P0 as string,
     setup: skipDraft,
     beats: [
-      { id: 'intro', text: 'tutorial.claim.intro', mode: 'info' },
+      { id: 'intro', text: 'tutorial.claim.intro', mode: 'info', specimen: { kind: 'claim-cost' } },
       {
         id: 'demo',
         text: 'tutorial.claim.demo',
