@@ -175,20 +175,23 @@
   }
 }
 
-/* In-game encyclopedia: a full-screen overlay above the live game; its board runs on an isolated
-   sandbox store so the live game underneath is never disturbed. */
+/* In-game rules encyclopedia: a centred modal above the live game. Read-first — a topic rail, then
+   the topic's title + blurb, then a calm self-contained board demo (NO dim scrim, NO floating
+   coachmark). Its board runs on an isolated sandbox store so the live game underneath is undisturbed. */
 .enc-backdrop {
   position: fixed;
   inset: 0;
   z-index: 70;
   background: rgba(0, 0, 0, 0.55);
   display: grid;
-  place-items: stretch;
+  place-items: center;
   padding: clamp(0.5rem, 2vh, 1.25rem);
 }
 .enc-shell {
   display: flex;
   flex-direction: column;
+  width: min(1080px, 100%);
+  height: min(780px, 100%);
   min-height: 0;
   background: var(--surface, #fff);
   color: var(--text, #111);
@@ -196,10 +199,25 @@
   overflow: hidden;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
 }
-.enc-shell--split {
-  display: grid;
-  grid-template-columns: minmax(11rem, 15rem) 1fr;
+.enc-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+}
+.enc-title {
+  font-size: 1.05rem;
+}
+.enc-topbar .enc-x {
+  margin-left: auto;
+}
+.enc-body {
+  flex: 1;
   min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(9rem, 13rem) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
 }
 .enc-list {
   display: flex;
@@ -208,14 +226,6 @@
   padding: 0.6rem;
   border-right: 1px solid var(--border, rgba(0, 0, 0, 0.12));
   overflow-y: auto;
-}
-.enc-list-head {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.35rem;
-}
-.enc-list-head .enc-x {
-  margin-left: auto;
 }
 .enc-group {
   margin-bottom: 0.5rem;
@@ -249,19 +259,97 @@
 .enc-main {
   display: flex;
   flex-direction: column;
+  gap: 0.6rem;
   min-height: 0;
   min-width: 0;
+  padding: 0.9rem 1.1rem 1rem;
+  overflow-y: auto;
 }
-.enc-main .enc-blurb {
+.enc-entry-title {
   margin: 0;
-  padding: 0.6rem 0.85rem;
-  font-size: 0.85rem;
-  opacity: 0.8;
-  border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  font-size: 1.2rem;
 }
-@media (max-width: 640px) {
-  .enc-shell--split {
-    grid-template-columns: 1fr;
+.enc-blurb {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  opacity: 0.9;
+}
+/* The calm demo clip: a bounded board stage + an in-panel caption bar (the read-first replacement
+   for the full-screen tutorial's viewport-fixed coachmark + dim scrim). */
+.enc-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.enc-demo-stage {
+  position: relative;
+  height: clamp(240px, 44vh, 420px);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--tr-bg, #f6f7f9);
+}
+/* Make the reused full-screen game layout fill the demo stage instead of the viewport, with a
+   slimmer rail so the board still reads well in the narrower modal. */
+.enc-demo-stage .game {
+  height: 100%;
+  width: 100%;
+  --tr-rail-w: 260px;
+}
+.enc-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent, #2b6cb0) 5%, var(--surface, #fff));
+}
+.enc-caption-specimen {
+  display: flex;
+  justify-content: center;
+}
+.enc-caption-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  min-height: 2.7em; /* steady height so the controls don't jump between beats */
+}
+.enc-caption-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text, #111) 10%, transparent);
+  overflow: hidden;
+}
+.enc-caption-fill {
+  height: 100%;
+  background: var(--accent, #2b6cb0);
+  border-radius: 999px;
+  transition: width 280ms ease;
+}
+.enc-caption-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.enc-caption-controls .spacer {
+  flex: 1;
+}
+.enc-step {
+  font-size: 0.78rem;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+.enc-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+@media (max-width: 680px) {
+  .enc-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
   }
   .enc-list {
     flex-direction: row;
@@ -269,30 +357,6 @@
     border-right: none;
     border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
   }
-}
-.enc-title {
-  font-size: 1.05rem;
-}
-.enc-blurb {
-  margin: 0;
-  flex: 1 1 14rem;
-  min-width: 8rem;
-  font-size: 0.85rem;
-  opacity: 0.75;
-}
-.enc-x {
-  margin-left: auto;
-}
-.enc-stage {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-/* Make the reused full-screen game layout fill the modal stage instead of the viewport. */
-.enc-stage .game {
-  height: 100%;
-  width: 100%;
 }
 
 /* Visual glossary specimens shown inside the coachmark. */
@@ -319,6 +383,10 @@
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  justify-content: center;
+}
+.tut-loco-card {
+  display: flex;
   justify-content: center;
 }
 .tut-station-specimen {

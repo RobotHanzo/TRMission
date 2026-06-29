@@ -19,10 +19,17 @@ describe('TutorialSpotlight', () => {
     expect(document.querySelectorAll('mask rect[fill="black"]').length).toBe(2);
   });
 
-  it('renders a global dim with no cutouts when there are no targets', () => {
-    render(<TutorialSpotlight rects={[]} reducedMotion={false} />);
+  it('renders a global dim with no cutouts when dimAll and there are no targets', () => {
+    render(<TutorialSpotlight rects={[]} reducedMotion={false} dimAll />);
     expect(document.querySelector('.tut-spotlight')).toBeTruthy();
+    expect(document.querySelector('.tut-spotlight.is-global')).toBeTruthy();
     expect(document.querySelectorAll('.tut-spotlight-ring').length).toBe(0);
+  });
+
+  it('renders nothing when a target was intended but no rect resolved (never dim the subject)', () => {
+    // dimAll defaults to false: an unresolved/missed selector must not blanket-dim the taught element.
+    render(<TutorialSpotlight rects={[]} reducedMotion={false} />);
+    expect(document.querySelector('.tut-spotlight')).toBeNull();
   });
 
   it('does not pulse under reduced motion', () => {

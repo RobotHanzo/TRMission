@@ -15,9 +15,15 @@ function viewport(): { w: number; h: number } {
 export function TutorialSpotlight({
   rects,
   reducedMotion,
+  dimAll = false,
 }: {
   rects: FlatRect[];
   reducedMotion: boolean;
+  /** Dim the whole stage when there are no cutouts. TRUE only when the beat intends no specific
+   *  target (a whole-board overview, or a beat with no spotlight). When a beat DOES name a target
+   *  but it hasn't resolved yet (or its selector missed), this stays false so we render nothing —
+   *  dimming everything would hide the very element being taught. */
+  dimAll?: boolean;
 }) {
   const maskId = `tut-spot-mask-${useId().replace(/:/g, '')}`;
   const [vp, setVp] = useState(viewport);
@@ -31,6 +37,8 @@ export function TutorialSpotlight({
   if (typeof document === 'undefined') return null;
   const { w, h } = vp;
   const hasHoles = rects.length > 0;
+  // No cutouts and no intent to dim the whole stage ⇒ render nothing (never dim the taught element).
+  if (!hasHoles && !dimAll) return null;
 
   return createPortal(
     <div className={'tut-spotlight' + (hasHoles ? '' : ' is-global')} aria-hidden>

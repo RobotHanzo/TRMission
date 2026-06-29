@@ -62,6 +62,9 @@ function TutorialRunner({
   const rects = useSpotlightRects(spotlight);
   const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
   const frameTarget = beat?.frame ?? null;
+  // Only a whole-board overview (or a beat with no spotlight at all) should dim the entire stage;
+  // a beat that names a target must never dim everything while its rect resolves.
+  const dimAll = !spotlight || spotlight.kind === 'board';
 
   if (!snapshot) return <div className="card">{t('connecting')}</div>;
 
@@ -74,7 +77,7 @@ function TutorialRunner({
       frameTarget={frameTarget}
       overlay={
         <>
-          <TutorialSpotlight rects={rects} reducedMotion={reduced} />
+          <TutorialSpotlight rects={rects} reducedMotion={reduced} dimAll={dimAll} />
           <TutorialOverlay
             beat={beat}
             done={player.done}

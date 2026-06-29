@@ -1,15 +1,18 @@
 // Pure helpers shared by the spotlight overlay, the coachmark, and the scenario-rot test.
 import type { Spotlight } from './types';
 
-/** HUD spotlight selectors the tutorial is allowed to target (validated by scenarios.test.ts). */
+/** HUD spotlight selectors the tutorial is allowed to target. Every entry MUST resolve to a real
+ *  element in the live HUD — a selector that matches nothing leaves the spotlight with no cutout,
+ *  which degrades to a whole-screen dim that hides the very element being taught. (The DOM roots:
+ *  `.market` = CardMarket, `.trackers` = PlayerTrackers, the `data-anim` hooks live on the deck
+ *  button, face-up slots, hand, and missions tray.) Validated by scenarios.test.ts. */
 export const HUD_SPOTLIGHT_SELECTORS = [
-  '.deck-area',
+  '.market',
+  '.trackers',
   '[data-anim="deck"]',
   '[data-anim="market-slot"]',
   '[data-anim="hand"]',
   '[data-anim="tickets"]',
-  '.card-market',
-  '.player-trackers',
 ] as const;
 
 export function isAllowedHudSelector(sel: string): boolean {
