@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, UserMinus, X } from 'lucide-react';
+import { Bot, Globe, Lock, UserMinus, X } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import {
@@ -274,8 +274,8 @@ export function RoomScreen() {
           <strong>{t('roomVisibility')}</strong>
           <Segmented<RoomVisibility>
             options={[
-              { value: 'PUBLIC', label: t('visibility_PUBLIC') },
-              { value: 'INVITE_ONLY', label: t('visibility_INVITE_ONLY') },
+              { value: 'PUBLIC', label: t('visibility_PUBLIC'), icon: Globe },
+              { value: 'INVITE_ONLY', label: t('visibility_INVITE_ONLY'), icon: Lock },
             ]}
             value={settings.visibility}
             onChange={(v) => setSetting({ visibility: v })}
