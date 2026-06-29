@@ -23,6 +23,9 @@ interface Props {
   /** The player's already-kept missions (peekable while choosing). */
   keptTicketIds: string[];
   completedIds?: ReadonlySet<string> | undefined;
+  /** Tutorial gate: when true, the offer is previewable but committing is disabled until a beat
+   *  explicitly asks the learner to keep (so they can't draft ahead of the prompt). */
+  confirmDisabled?: boolean | undefined;
   onConfirm(ids: string[]): void;
 }
 
@@ -40,6 +43,7 @@ export function TicketChooser({
   handCount,
   keptTicketIds,
   completedIds,
+  confirmDisabled,
   onConfirm,
 }: Props) {
   const { t } = useTranslation();
@@ -86,7 +90,7 @@ export function TicketChooser({
   // On Keep, kept tickets fly into the missions peek toggle and discards drop away, then we commit
   // (instant under reduced motion). Targets are measured live so the flight lands where they are.
   const confirm = () => {
-    if (confirming) return;
+    if (confirming || confirmDisabled) return;
     const ids = [...kept];
     if (reduced) {
       onConfirm(ids);
@@ -147,7 +151,7 @@ export function TicketChooser({
 
       <button
         className="primary chooser-confirm"
-        disabled={kept.size < minKeep || confirming}
+        disabled={kept.size < minKeep || confirming || confirmDisabled}
         onClick={confirm}
       >
         {t('keep')} ({kept.size})
@@ -161,7 +165,11 @@ export function TicketChooser({
           aria-expanded={showHand}
           onClick={() => setShowHand((v) => !v)}
         >
-          {showHand ? <ChevronDown size={15} aria-hidden /> : <ChevronRight size={15} aria-hidden />}
+          {showHand ? (
+            <ChevronDown size={15} aria-hidden />
+          ) : (
+            <ChevronRight size={15} aria-hidden />
+          )}
           <span className="peek-label">{t('cards')}</span>
           <span className="tray-count">{handCount}</span>
         </button>

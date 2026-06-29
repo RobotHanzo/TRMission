@@ -25,7 +25,7 @@ import { enumerateTunnelExtra } from '../game/tunnel';
 import { isChatRejectionKey } from '../game/chatErrors';
 import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../game/boardView';
-import type { ExpectSpec } from '../features/tutorial/types';
+import { gateFlags, type ActionGate } from '../features/tutorial/types';
 import { Board } from '../components/Board';
 import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
@@ -61,9 +61,10 @@ export interface GameStageProps {
   sandbox?: boolean | undefined;
   /** Tutorial auto-pan target (sandbox only); live game leaves this undefined. */
   frameTarget?: BoardFrameTarget | null | undefined;
-  /** Tutorial only: the current `await` beat's expected action. When set, affordances that don't
-   *  match it are disabled, so a stray click can't change phase and strand the lesson. */
-  actionGate?: ExpectSpec | null | undefined;
+  /** Tutorial only: the current beat's interaction gate. An `await` beat's expected action keeps
+   *  only the matching affordance live; a `'locked'` gate (narration / scripted / done) disables
+   *  every affordance, so a stray click can't change phase and strand the lesson. */
+  actionGate?: ActionGate | null | undefined;
 }
 
 export function GameStage({
@@ -123,17 +124,12 @@ export function GameStage({
   const canAct = myTurn && phase === Phase.AWAIT_ACTION;
   const canDraw = myTurn && (phase === Phase.AWAIT_ACTION || phase === Phase.DRAWING_CARDS);
 
-  // Tutorial action gate: when an `await` beat names the action it wants, disable the affordances
-  // that don't match it (e.g. draw-tickets or claiming while the lesson asks for a train-card draw),
-  // so a stray click can't change phase and dead-end the lesson. No gate (live game) ⇒ all enabled.
-  const gate = actionGate ?? null;
-  const allowDraw =
-    !gate || gate.t === 'DRAW_ANY' || gate.t === 'DRAW_BLIND' || gate.t === 'DRAW_FACEUP';
-  const allowTickets = !gate || gate.t === 'DRAW_TICKETS';
-  const allowClaim = !gate || gate.t === 'CLAIM_ROUTE';
-  const allowStation = !gate || gate.t === 'BUILD_STATION';
-  const boardCanAct = canAct && (allowClaim || allowStation);
-  const marketCanDraw = canDraw && allowDraw;
+  // Tutorial action gate: an `await` beat keeps only its expected affordance live; a `'locked'` gate
+  // (narration / scripted / done) disables them all — so a stray click can't change phase and
+  // dead-end the lesson. No gate (live game) ⇒ every affordance enabled.
+  const allow = gateFlags(actionGate);
+  const boardCanAct = canAct && (allow.claim || allow.station);
+  const marketCanDraw = canDraw && allow.draw;
 
   const pickRoute = (routeId: string) => {
     const route = routeById.get(routeId);
@@ -243,7 +239,7 @@ export function GameStage({
         <button
           className="accent"
           data-anim="draw-tickets"
-          disabled={!canAct || snapshot.ticketDeckShortCount === 0 || !allowTickets}
+          disabled={!canAct || snapshot.ticketDeckShortCount === 0 || !allow.tickets}
           onClick={() => commands?.drawTickets()}
         >
           {t('drawTickets')}
@@ -288,6 +284,7 @@ export function GameStage({
       handCount={myPub?.handCount ?? 0}
       keptTicketIds={snapshot.you?.keptTicketIds ?? []}
       completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
+      confirmDisabled={!allow.keep}
       onConfirm={confirmKeep}
     />
   ) : boardLayout === 'rail' ? (

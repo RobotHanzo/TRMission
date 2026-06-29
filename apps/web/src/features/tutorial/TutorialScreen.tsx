@@ -12,7 +12,7 @@ import { TutorialOverlay } from './TutorialOverlay';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { useSpotlightRects } from './useSpotlightRects';
 import { TutorialSpotlight } from './TutorialSpotlight';
-import type { Lesson, Scope } from './types';
+import type { ActionGate, Lesson, Scope } from './types';
 import '../../styles/tutorial.css';
 
 function TutorialLauncher({ onPick, onExit }: { onPick(scope: Scope): void; onExit(): void }) {
@@ -64,9 +64,11 @@ function TutorialRunner({
   const rects = useSpotlightRects(spotlight);
   const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
   const frameTarget = beat?.frame ?? null;
-  // On an `await` beat, gate the HUD to the action the lesson is waiting for (so e.g. the draw-
-  // tickets button is disabled while we ask the learner to draw a train card — no dead ends).
-  const actionGate = beat && beat.mode === 'await' ? beat.expect : null;
+  // Gate the HUD to the action the current beat is waiting for. On an `await` beat only the expected
+  // affordance is live (so e.g. the draw-tickets button is disabled while we ask for a train-card
+  // draw); on any narration / scripted beat — and once the lesson is done — the whole HUD is locked,
+  // so the learner can't act ahead of the prompt and strand a later step (no dead ends).
+  const actionGate: ActionGate = beat && beat.mode === 'await' ? beat.expect : 'locked';
   // Only a whole-board overview (or a beat with no spotlight at all) should dim the entire stage;
   // a beat that names a target must never dim everything while its rect resolves.
   const dimAll = !spotlight || spotlight.kind === 'board';

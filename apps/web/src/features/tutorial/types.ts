@@ -74,6 +74,48 @@ export interface Lesson {
   beats: Beat[];
 }
 
+/** The HUD interaction gate for the tutorial. An `await` beat exposes exactly the affordance it
+ *  waits for; a narration (`info`) or scripted (`auto`) beat — and the finished `done` state —
+ *  locks the HUD entirely (`'locked'`), so a stray click can't consume the learner's turn and
+ *  strand a later step. A live game passes no gate (`undefined`) → every affordance stays live. */
+export type ActionGate = ExpectSpec | 'locked';
+
+/** Which learner affordances stay interactive under a gate. */
+export interface GateFlags {
+  draw: boolean;
+  tickets: boolean;
+  claim: boolean;
+  station: boolean;
+  keep: boolean;
+  tunnel: boolean;
+}
+
+/** Resolve a beat's gate (or `undefined`/`null` for a live game) to per-affordance interactivity. */
+export function gateFlags(gate: ActionGate | null | undefined): GateFlags {
+  if (gate == null) {
+    return { draw: true, tickets: true, claim: true, station: true, keep: true, tunnel: true };
+  }
+  if (gate === 'locked') {
+    return {
+      draw: false,
+      tickets: false,
+      claim: false,
+      station: false,
+      keep: false,
+      tunnel: false,
+    };
+  }
+  const t = gate.t;
+  return {
+    draw: t === 'DRAW_ANY' || t === 'DRAW_BLIND' || t === 'DRAW_FACEUP',
+    tickets: t === 'DRAW_TICKETS',
+    claim: t === 'CLAIM_ROUTE',
+    station: t === 'BUILD_STATION',
+    keep: t === 'KEEP_TICKETS' || t === 'KEEP_INITIAL_TICKETS',
+    tunnel: t === 'RESOLVE_TUNNEL',
+  };
+}
+
 export function expectMatches(expect: ExpectSpec, action: Action): boolean {
   if (expect.t === 'DRAW_ANY') return action.t === 'DRAW_BLIND' || action.t === 'DRAW_FACEUP';
   if (action.t !== expect.t) return false;
