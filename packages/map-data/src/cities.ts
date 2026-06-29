@@ -17,15 +17,20 @@ const c = (
  *  Coordinates are an equal-scale geographic projection of each station's real lon/lat into the
  *  0–100 board (x: 0=west…100=east, y: 0=north…100=south), north-up, so the network registers
  *  against the Taiwan silhouette drawn in apps/web `geography.ts`. The six outlying islands keep
- *  their true bearing but have their (large) open-sea gaps compressed to stay on the board. */
+ *  their true bearing but have their (large) open-sea gaps compressed to stay on the board.
+ *
+ *  Exception: the dense northern knot (the Taipei basin, the Keelung corner, and the Yilan plain)
+ *  is fanned out slightly from its true projection so the station labels stop colliding at the home
+ *  zoom — these cities are genuinely only a few km apart. The relative bearings are preserved; only
+ *  the local spacing is exaggerated. Every dot still sits inside the coastline. */
 export const CITIES: readonly CityDef[] = [
-  c('keelung', '基隆', 'Keelung', 66.6, 10.5, 'North'),
-  c('ruifang', '瑞芳', 'Ruifang', 68.2, 11, 'North'),
-  c('taipei', '臺北', 'Taipei', 62.6, 12.5, 'North'),
-  c('tamsui', '淡水', 'Tamsui', 59.9, 9.5, 'North'),
-  c('banqiao', '板橋', 'Banqiao', 60.3, 13.5, 'North'),
-  c('taoyuan', '桃園', 'Taoyuan', 56.7, 13.9, 'North'),
-  c('zhongli', '中壢', 'Zhongli', 54.9, 14.9, 'North'),
+  c('keelung', '基隆', 'Keelung', 65.6, 9.8, 'North'),
+  c('ruifang', '瑞芳', 'Ruifang', 70.2, 12.2, 'North'),
+  c('taipei', '臺北', 'Taipei', 62.8, 12.8, 'North'),
+  c('tamsui', '淡水', 'Tamsui', 57.6, 9.8, 'North'),
+  c('banqiao', '板橋', 'Banqiao', 60.2, 16, 'North'),
+  c('taoyuan', '桃園', 'Taoyuan', 56.8, 13.6, 'North'),
+  c('zhongli', '中壢', 'Zhongli', 53, 16.2, 'North'),
   c('hsinchu', '新竹', 'Hsinchu', 49.3, 18.6, 'Northwest'),
   c('zhunan', '竹南', 'Zhunan', 47.1, 21.3, 'Northwest'),
   c('miaoli', '苗栗', 'Miaoli', 46, 24.2, 'Northwest'),
@@ -48,10 +53,10 @@ export const CITIES: readonly CityDef[] = [
   c('chishang', '池上', 'Chishang', 54.7, 59.8, 'East-Rift'),
   c('yuli', '玉里', 'Yuli', 57.2, 54.6, 'East-Rift'),
   c('hualien', '花蓮', 'Hualien', 63.5, 38.7, 'East-Rift'),
-  c('suao', '蘇澳', "Su'ao", 69.1, 23.7, 'Northeast'),
-  c('luodong', '羅東', 'Luodong', 67.3, 21.5, 'Northeast'),
-  c('yilan', '宜蘭', 'Yilan', 66.8, 19.6, 'Northeast'),
-  c('toucheng', '頭城', 'Toucheng', 68.4, 17.1, 'Northeast'),
+  c('suao', '蘇澳', "Su'ao", 71, 24.4, 'Northeast'),
+  c('luodong', '羅東', 'Luodong', 69.2, 22, 'Northeast'),
+  c('yilan', '宜蘭', 'Yilan', 66.4, 19.4, 'Northeast'),
+  c('toucheng', '頭城', 'Toucheng', 69.4, 16.6, 'Northeast'),
   c('penghu', '澎湖', 'Penghu', 16, 50, 'Islands', true),
   c('kinmen', '金門', 'Kinmen', 4, 33, 'Islands', true),
   c('matsu', '馬祖', 'Matsu', 24, 7, 'Islands', true),
