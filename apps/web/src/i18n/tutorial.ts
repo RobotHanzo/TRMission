@@ -21,6 +21,9 @@ export const tutorialZh = {
   watching: '示範中…',
   lessonComplete: '這一課完成了！',
   open: '規則百科',
+  createGame: '建立第一場遊戲',
+  finalTitle: '教學完成！',
+  finalBody: '你已經學會台鐵任務的所有規則。建立你的第一場遊戲，開始與好友或機器人對戰吧！',
 
   welcome: {
     title: '歡迎',
@@ -62,9 +65,14 @@ export const tutorialZh = {
   stations: {
     title: '車站',
     blurb: '蓋車站可在結算時借用對手路線完成任務。',
-    what: '在城市蓋車站，結算時可「借用」該城一條對手的路線來幫忙連通任務卡。每座城市只能有一個車站。',
-    cost: '蓋車站要支付「同一種顏色」的牌：第 1 座 1 張、第 2 座 2 張、第 3 座 3 張（火車頭萬用）。',
+    what: '在城市蓋車站，結算時可「借用」該城所有對手的路線來幫忙連通任務卡。每座城市只能有一個車站。',
+    cost: '蓋車站要支付「同一種顏色」的牌：第 1 座 1 張、第 2 座 2 張、第 3 座 3 張（火車頭萬用）。下面的牌會輪流變換顏色，提醒你同一座車站的牌必須同色。',
     bonus: '每個「沒用到」的車站在結算時值 +4 分，所以蓋車站等於放棄這個獎勵——需要時才蓋。',
+    specimenName: '台北',
+    specimenBuilt: '已蓋車站',
+    cost1: '第 1 座 ＝ 1 張',
+    cost2: '第 2 座 ＝ 2 張',
+    cost3: '第 3 座 ＝ 3 張',
   },
   tickets: {
     title: '任務卡',
@@ -128,6 +136,10 @@ export const tutorialEn = {
   watching: 'Watch…',
   lessonComplete: 'Lesson complete!',
   open: 'Encyclopedia',
+  createGame: 'Create your first game',
+  finalTitle: 'Tutorial complete!',
+  finalBody:
+    "You've learned all the rules of TRMission. Create your first game and start playing against friends or bots!",
 
   welcome: {
     title: 'Welcome',
@@ -171,11 +183,16 @@ export const tutorialEn = {
   },
   stations: {
     title: 'Stations',
-    blurb: 'Build a station to borrow a rival route at game end.',
-    what: "Build a station in a city to 'borrow' one rival route there at game end to help connect a ticket. One station per city.",
-    cost: 'A station is paid in a single colour: 1 card for your first, 2 for the second, 3 for the third (locomotives wild).',
+    blurb: 'Build a station to borrow rival routes at game end.',
+    what: "Build a station in a city to 'borrow' the rival routes there at game end to help connect a ticket. One station per city.",
+    cost: 'A station is paid in a single colour: 1 card for your first, 2 for the second, 3 for the third (locomotives wild). The cards below shift colour to remind you a station must be one matching colour.',
     bonus:
       'Each unused station is worth +4 at game end — so building one gives up that bonus. Build only when it saves a ticket.',
+    specimenName: 'Taipei',
+    specimenBuilt: 'Station built',
+    cost1: '1st = 1 card',
+    cost2: '2nd = 2 cards',
+    cost3: '3rd = 3 cards',
   },
   tickets: {
     title: 'Mission tickets',

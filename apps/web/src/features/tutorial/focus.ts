@@ -15,6 +15,7 @@ export const HUD_SPOTLIGHT_SELECTORS = [
   '[data-anim="market-slot"]',
   '[data-anim="hand"]',
   '[data-anim="tickets"]',
+  '[data-anim="draw-tickets"]',
 ] as const;
 
 export function isAllowedHudSelector(sel: string): boolean {
@@ -81,4 +82,9 @@ export function coachPosition(rects: FlatRect[], vw: number, vh: number): CoachP
 export function spotlightCentre(rects: FlatRect[]): { x: number; y: number } | null {
   const u = unionRect(rects);
   return u ? { x: u.x + u.w / 2, y: u.y + u.h / 2 } : null;
+}
+
+/** Bounding box of a beat's spotlight rects, used to dock the coachmark beside the lit target. */
+export function spotlightBounds(rects: FlatRect[]): FlatRect | null {
+  return unionRect(rects);
 }

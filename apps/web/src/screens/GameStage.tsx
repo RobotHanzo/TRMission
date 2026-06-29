@@ -242,6 +242,7 @@ export function GameStage({
       <div className="hud-actions">
         <button
           className="accent"
+          data-anim="draw-tickets"
           disabled={!canAct || snapshot.ticketDeckShortCount === 0 || !allowTickets}
           onClick={() => commands?.drawTickets()}
         >

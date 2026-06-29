@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUi } from '../../store/ui';
 import { useGame } from '../../store/game';
+import { api } from '../../net/rest';
 import { GameStage } from '../../screens/GameStage';
 import { lessonsForScope } from './curriculum';
 import { useScenarioPlayer } from './useScenarioPlayer';
@@ -44,6 +45,7 @@ function TutorialRunner({
   onPrevLesson,
   onNextLesson,
   onExit,
+  onCreateGame,
 }: {
   lesson: Lesson;
   lessonNo: number;
@@ -52,6 +54,7 @@ function TutorialRunner({
   onPrevLesson(): void;
   onNextLesson(): void;
   onExit(): void;
+  onCreateGame(): void;
 }) {
   const { t } = useTranslation();
   const player = useScenarioPlayer(lesson, useGame);
@@ -98,6 +101,7 @@ function TutorialRunner({
             onPrevLesson={onPrevLesson}
             onNextLesson={onNextLesson}
             onExit={onExit}
+            onCreateGame={onCreateGame}
           />
         </>
       }
@@ -107,9 +111,18 @@ function TutorialRunner({
 
 export default function TutorialScreen() {
   const exit = useUi((s) => s.goHome);
+  const enterRoom = useUi((s) => s.enterRoom);
   const [scope, setScope] = useState<Scope | null>(null);
   const [lessonIdx, setLessonIdx] = useState(0);
   const lessons = useMemo(() => (scope ? lessonsForScope(scope) : []), [scope]);
+
+  // The finale CTA: spin up the learner's first real room, falling back home if the call fails.
+  const createGame = () => {
+    void api
+      .createRoom()
+      .then((room) => enterRoom(room.code))
+      .catch(() => exit());
+  };
 
   if (!scope) {
     return (
@@ -136,6 +149,7 @@ export default function TutorialScreen() {
       onPrevLesson={() => setLessonIdx((i) => Math.max(0, i - 1))}
       onNextLesson={() => setLessonIdx((i) => Math.min(lessons.length - 1, i + 1))}
       onExit={exit}
+      onCreateGame={createGame}
     />
   );
 }

@@ -2,12 +2,13 @@
 // optional component specimen (the visual glossary), a progress bar, a connector caret toward the
 // spotlighted target, and the right control for the beat mode. It dodges to the top when a target
 // would sit under the bottom-anchored bubble.
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronRight, RotateCcw, X } from 'lucide-react';
+import { ChevronRight, PartyPopper, RotateCcw, X } from 'lucide-react';
 import type { Beat, SpecimenSpec } from './types';
 import { Specimen } from './Specimens';
-import { coachPosition, spotlightCentre, type FlatRect } from './focus';
+import { coachPosition, spotlightBounds, spotlightCentre, type FlatRect } from './focus';
+import { useConfetti } from '../../hooks/useConfetti';
 
 export interface TutorialOverlayProps {
   beat: Beat | null;
@@ -25,6 +26,8 @@ export interface TutorialOverlayProps {
   onPrevLesson(): void;
   onNextLesson(): void;
   onExit(): void;
+  /** Invoked by the finale CTA to take the learner straight into creating their first game. */
+  onCreateGame?: (() => void) | undefined;
 }
 
 export function TutorialOverlay(props: TutorialOverlayProps) {
@@ -32,13 +35,40 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
   const { beat, done, index, total, lessonNo, lessonCount, isLastLesson, specimen } = props;
   const spotRects = props.spotRects ?? [];
 
-  const body = done ? t('tutorial.lessonComplete') : beat ? t(beat.text) : '';
+  // The very end of the tutorial (last lesson complete) gets a celebratory finale + confetti.
+  const finished = done && isLastLesson;
+  useConfetti(finished);
+
+  const body = finished
+    ? t('tutorial.finalBody')
+    : done
+      ? t('tutorial.lessonComplete')
+      : beat
+        ? t(beat.text)
+        : '';
   const pos =
     typeof window !== 'undefined'
       ? coachPosition(spotRects, window.innerWidth, window.innerHeight)
       : 'bottom';
   const sideDocked = pos === 'left' || pos === 'right';
   const progress = total > 0 ? Math.round(((index + 1) / total) * 100) : 0;
+
+  // A side-docked coach sits ADJACENT to its (tall) target rather than at the far screen edge, so it
+  // reads as attached to what it highlights — the map or the ticket chooser — clamped on-screen.
+  const dockStyle: CSSProperties | undefined = (() => {
+    const bounds = spotlightBounds(spotRects);
+    if (!sideDocked || !bounds || typeof window === 'undefined') return undefined;
+    const vw = window.innerWidth;
+    const gap = 16;
+    const coachW = Math.min(22 * 16, vw - 24);
+    const maxStart = Math.max(gap, vw - coachW - gap);
+    if (pos === 'right') {
+      const left = Math.max(gap, Math.min(bounds.x + bounds.w + gap, maxStart));
+      return { left: `${Math.round(left)}px`, right: 'auto' };
+    }
+    const right = Math.max(gap, Math.min(vw - bounds.x + gap, maxStart));
+    return { right: `${Math.round(right)}px`, left: 'auto' };
+  })();
 
   // The caret rides the edge of the coach that faces the spotlight target and points at it: for a
   // top/bottom coach that means a horizontal offset along the facing edge; for a side-docked coach,
@@ -68,8 +98,9 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
   return (
     <div
       ref={coachRef}
-      className="tut-coach"
+      className={finished ? 'tut-coach tut-coach--finale' : 'tut-coach'}
       data-pos={pos}
+      style={dockStyle}
       role="dialog"
       aria-label={t('tutorial.title')}
     >
@@ -95,6 +126,13 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
         </button>
       </div>
 
+      {finished && (
+        <div className="tut-finale-badge" aria-hidden>
+          <PartyPopper size={34} />
+        </div>
+      )}
+      {finished && <h3 className="tut-finale-title">{t('tutorial.finalTitle')}</h3>}
+
       {!done && specimen && (
         <div className="tut-coach-specimen" key={beat?.id}>
           <Specimen spec={specimen} />
@@ -117,8 +155,8 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
         {lessonNo > 1 && <button onClick={props.onPrevLesson}>{t('tutorial.prevLesson')}</button>}
         {done ? (
           isLastLesson ? (
-            <button className="accent" onClick={props.onExit}>
-              {t('tutorial.finish')}
+            <button className="accent" onClick={props.onCreateGame ?? props.onExit}>
+              {t('tutorial.createGame')}
             </button>
           ) : (
             <button className="accent" onClick={props.onNextLesson}>

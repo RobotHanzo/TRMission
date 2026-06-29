@@ -1,12 +1,17 @@
 // The visual glossary: standalone renders of real game components for the coachmark. Each reuses
 // the exact board/card classes so it looks identical to the live game and can never drift.
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Check } from 'lucide-react';
 import { TRAIN_COLORS, type CardColor, SCORING_TABLE } from '@trm/shared';
 import { TrainCarCard } from '../../components/TrainCarCard';
 import { TicketCard } from '../../components/TicketCard';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 import type { SpecimenSpec } from './types';
 
 const CARD_W = 56;
+/** Every usable train colour the game actually has (8) plus the wild rainbow locomotive. */
+const STATION_PALETTE = [...TRAIN_COLORS, 'LOCOMOTIVE'] as CardColor[];
 
 /** A short straight route drawn with the live board classes on a tiny fixed viewBox. */
 export function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'double' }) {
@@ -125,18 +130,68 @@ export function LocoCardSpecimen() {
   );
 }
 
+/** A built station shown the way it reads on the board: a city marker with a seat-coloured station
+ *  on it, the city's name, and a "built" badge so its claimed state is unmistakable. */
 export function StationSpecimen() {
+  const { t } = useTranslation();
   return (
-    <svg
-      className="tut-station-specimen"
-      viewBox="0 0 48 48"
-      data-testid="tut-specimen"
-      style={{ ['--marker-scale' as string]: '1' }}
-      role="img"
-    >
-      <circle className="city-dot" cx={24} cy={24} r={4} />
-      <circle className="station" cx={24} cy={24} style={{ fill: '#2b6cb0' }} />
-    </svg>
+    <div className="tut-station-card" data-testid="tut-specimen">
+      <svg className="tut-station-marker" viewBox="0 0 48 48" role="img" aria-hidden>
+        <circle className="tut-station-city" cx={24} cy={24} r={10} />
+        <circle className="tut-station-built-dot" cx={24} cy={24} r={6} />
+      </svg>
+      <div className="tut-station-meta">
+        <span className="tut-station-name">{t('tutorial.stations.specimenName')}</span>
+        <span className="tut-station-built">
+          <Check size={13} /> {t('tutorial.stations.specimenBuilt')}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** One station-payment card whose colour cross-fades through the palette (a station is paid in a
+ *  single colour, so all the cards in the cost table cycle together). Two stacked layers give the
+ *  gradual fade; `idx` (shared by every card) drives the remount that re-triggers it. */
+function CyclingCard({ idx, size }: { idx: number; size: number }) {
+  const len = STATION_PALETTE.length;
+  const cur = STATION_PALETTE[((idx % len) + len) % len]!;
+  const prev = STATION_PALETTE[(((idx - 1) % len) + len) % len]!;
+  return (
+    <span className="tut-cost-card">
+      <span className="tut-cost-card-layer is-prev" key={`p${idx}`}>
+        <TrainCarCard color={prev} size={size} showGlyph={false} />
+      </span>
+      <span className="tut-cost-card-layer is-cur" key={`c${idx}`}>
+        <TrainCarCard color={cur} size={size} showGlyph={false} />
+      </span>
+    </span>
+  );
+}
+
+/** The station-cost reference: row 1 = 1 card, row 2 = 2, row 3 = 3 — all of one (cycling) colour. */
+export function StationCostSpecimen() {
+  const { t } = useTranslation();
+  const reduced = useReducedMotion();
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (reduced) return;
+    const id = setInterval(() => setIdx((i) => i + 1), 1500);
+    return () => clearInterval(id);
+  }, [reduced]);
+  return (
+    <div className="tut-cost-table" data-testid="tut-specimen">
+      {[1, 2, 3].map((n) => (
+        <div className="tut-cost-row" key={n}>
+          <span className="tut-cost-label">{t(`tutorial.stations.cost${n}`)}</span>
+          <span className="tut-cost-cards">
+            {Array.from({ length: n }, (_, i) => (
+              <CyclingCard key={i} idx={idx} size={30} />
+            ))}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -184,6 +239,8 @@ export function Specimen({ spec }: { spec: SpecimenSpec }) {
       return <LocoCardSpecimen />;
     case 'station':
       return <StationSpecimen />;
+    case 'station-cost':
+      return <StationCostSpecimen />;
     case 'score-table':
       return <ScoreTableSpecimen />;
     case 'ticket':

@@ -188,7 +188,12 @@ export const LESSONS: Lesson[] = [
     setup: skipDraft,
     beats: [
       { id: 'what', text: 'tutorial.stations.what', mode: 'info', specimen: { kind: 'station' } },
-      { id: 'cost', text: 'tutorial.stations.cost', mode: 'info', specimen: { kind: 'station' } },
+      {
+        id: 'cost',
+        text: 'tutorial.stations.cost',
+        mode: 'info',
+        specimen: { kind: 'station-cost' },
+      },
       { id: 'bonus', text: 'tutorial.stations.bonus', mode: 'info' },
     ],
   },
@@ -211,7 +216,12 @@ export const LESSONS: Lesson[] = [
         specimen: { kind: 'ticket', id: 'S1' },
       },
       { id: 'penalty', text: 'tutorial.tickets.penalty', mode: 'info' },
-      { id: 'more', text: 'tutorial.tickets.more', mode: 'info' },
+      {
+        id: 'more',
+        text: 'tutorial.tickets.more',
+        mode: 'info',
+        spotlight: { kind: 'hud', selector: '[data-anim="draw-tickets"]' },
+      },
       { id: 'forced', text: 'tutorial.tickets.forced', mode: 'info' },
     ],
   },

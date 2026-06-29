@@ -21,6 +21,7 @@ export type SpecimenSpec =
   | { kind: 'card-row' }
   | { kind: 'loco-card' }
   | { kind: 'station' }
+  | { kind: 'station-cost' }
   | { kind: 'score-table' }
   | { kind: 'ticket'; id: string };
 

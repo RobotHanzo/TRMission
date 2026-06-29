@@ -34,6 +34,7 @@ describe('isAllowedHudSelector', () => {
     expect(isAllowedHudSelector('.trackers')).toBe(true);
     expect(isAllowedHudSelector('.board-viewport')).toBe(true);
     expect(isAllowedHudSelector('.ticket-chooser')).toBe(true);
+    expect(isAllowedHudSelector('[data-anim="draw-tickets"]')).toBe(true);
     expect(isAllowedHudSelector('.deck-area')).toBe(false); // phantom selector, no longer allowed
     expect(isAllowedHudSelector('.evil-selector')).toBe(false);
   });
