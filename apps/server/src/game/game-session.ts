@@ -129,6 +129,24 @@ export class GameSession {
     return s;
   }
 
+  /**
+   * Re-derive the full cosmetic event history by replaying every applied action from
+   * genesis through a throwaway state. Pure: it never touches the live `this.state`.
+   * Used to backfill the client action log on (re)connect (events are deterministic, so
+   * nothing extra needs to be persisted).
+   */
+  history(): GameEvent[] {
+    let state = initGame(this.board, this.config);
+    const out: GameEvent[] = [];
+    for (const action of this.appliedActions) {
+      const res = reduce(this.board, state, action);
+      if (!res.ok) break; // appliedActions are all legal; defensive
+      out.push(...res.value.events);
+      state = res.value.state;
+    }
+    return out;
+  }
+
   /** Per-viewer projection (the ONLY thing that should ever reach the wire). */
   project(viewer: PlayerId | null): RedactedView {
     return redactFor(this.board, this.state, viewer);

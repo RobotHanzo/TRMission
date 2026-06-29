@@ -122,6 +122,7 @@ export interface GameState {
 }
 
 export const SCHEMA_VERSION = 1;
-// v3: rule 7.5 — a player with every kept ticket already own-connected is forced to draw new
-// tickets at the start of their turn (turn opens in TICKET_SELECTION instead of AWAIT_ACTION).
-export const ENGINE_VERSION = 3;
+// v4: two independent v3 bumps merged — main's `doubleRouteSingleFor23` ruleParam, plus rule 7.5
+// forced ticket re-draw (a player with every kept ticket already own-connected is forced to draw
+// new tickets at the start of their turn — the turn opens in TICKET_SELECTION, not AWAIT_ACTION).
+export const ENGINE_VERSION = 4;

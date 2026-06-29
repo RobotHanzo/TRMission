@@ -67,6 +67,7 @@ const baseRoom = () => ({
     unlimitedStationBorrow: false,
     secondDrawAfterBlindRainbow: false,
     noUnfinishedTicketPenalty: false,
+    doubleRouteSingleFor23: true,
     allowSpectating: true,
     visibility: 'PUBLIC' as 'PUBLIC' | 'INVITE_ONLY',
   },
@@ -171,7 +172,7 @@ describe('RoomScreen game settings panel', () => {
       room({ hostId: 'u-me', members: [member('u-me')] }),
     );
     render(<RoomScreen />);
-    const toggle = await screen.findByRole('checkbox', { name: '車站無限借用路線' });
+    const toggle = await screen.findByRole('switch', { name: '車站無限借用路線' });
     expect(toggle).not.toBeDisabled();
     fireEvent.click(toggle);
     expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', {
@@ -182,8 +183,33 @@ describe('RoomScreen game settings panel', () => {
   it('disables the settings controls for a non-host', async () => {
     mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
     render(<RoomScreen />);
-    const toggle = await screen.findByRole('checkbox', { name: '車站無限借用路線' });
+    const toggle = await screen.findByRole('switch', { name: '車站無限借用路線' });
     expect(toggle).toBeDisabled();
+  });
+
+  it('lets the host toggle the new doubleRouteSingleFor23 setting', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    mocked.updateRoomSettings.mockResolvedValue(
+      room({ hostId: 'u-me', members: [member('u-me')] }),
+    );
+    render(<RoomScreen />);
+    const toggle = await screen.findByRole('switch', { name: '2–3 人限用單線平行路線' });
+    expect(toggle).toHaveAttribute('aria-checked', 'true'); // default is on
+    fireEvent.click(toggle);
+    expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', {
+      doubleRouteSingleFor23: false,
+    });
+  });
+
+  it('lets the host change room visibility via the segmented control', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    mocked.updateRoomSettings.mockResolvedValue(
+      room({ hostId: 'u-me', members: [member('u-me')] }),
+    );
+    render(<RoomScreen />);
+    const inviteOnly = await screen.findByRole('radio', { name: '僅限邀請' });
+    fireEvent.click(inviteOnly);
+    expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', { visibility: 'INVITE_ONLY' });
   });
 });
 

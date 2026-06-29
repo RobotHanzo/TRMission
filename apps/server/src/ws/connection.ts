@@ -18,6 +18,8 @@ export class Connection {
   private serverSeq = 0;
   lastClientSeq = 0;
   binding: ConnectionBinding | null = null;
+  /** Wall-clock timestamps of recent chat sends, for the per-connection rate limit. */
+  chatTimes: number[] = [];
 
   constructor(
     readonly id: string,

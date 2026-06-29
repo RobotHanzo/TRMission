@@ -340,7 +340,10 @@ function applyClaimEffects(
   const events: GameEvent[] = [];
   let next = setOwnership(state, route.id as string, { owner: player });
 
-  const variant = variantForPlayerCount(state.turnOrder.length);
+  const variant = variantForPlayerCount(
+    state.turnOrder.length,
+    state.ruleParams.doubleRouteSingleFor23,
+  );
   if (variant === 'SINGLE_ONLY') {
     const sib = siblingOf(board, route.id);
     if (sib && !next.ownership[sib as string]) {

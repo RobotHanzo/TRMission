@@ -34,9 +34,11 @@ import {
   eventsFrame,
   rejectionFrame,
   chatFrame,
+  historyReplayFrame,
   cameraMovedFrame,
   pongFrame,
 } from '@trm/codec';
+import type { ChatEntry } from '../persistence/types';
 
 export interface GameHubOptions {
   verifier?: TicketVerifier;
@@ -48,6 +50,10 @@ export interface GameHubOptions {
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+
+const CHAT_MAX_LEN = 2048;
+const CHAT_RATE_MAX = 5;
+const CHAT_RATE_WINDOW_MS = 5000;
 
 export class GameHub {
   private readonly connections = new Map<string, Connection>();
@@ -70,6 +76,8 @@ export class GameHub {
    * Ephemeral and cosmetic — never persisted; the client filters it by current player.
    */
   private readonly lastCamera = new Map<string, { playerId: string; view: CameraView }>();
+  /** gameId → ordered chat lines (replayed in HistoryReplay; persisted via the store). */
+  private readonly chatLog = new Map<string, ChatEntry[]>();
 
   constructor(
     private readonly registry: GameRegistry,
@@ -89,6 +97,7 @@ export class GameHub {
     bots: readonly BotProfile[] = [],
   ): Promise<Match> {
     this.members.set(gameId, new Map());
+    this.chatLog.set(gameId, []);
     const match = this.registry.create(gameId, board, config);
     if (bots.length > 0) this.bots.set(gameId, new Map(bots.map((b) => [b.playerId, b])));
     if (this.store) {
@@ -120,6 +129,13 @@ export class GameHub {
     );
     const match = this.registry.adopt(gameId, session);
     if (!this.members.has(gameId)) this.members.set(gameId, new Map());
+    if (this.store && !this.chatLog.has(gameId)) {
+      try {
+        this.chatLog.set(gameId, await this.store.loadChat(gameId));
+      } catch {
+        this.chatLog.set(gameId, []); // non-fatal: chat is cosmetic
+      }
+    }
     if (data.bots && data.bots.length > 0 && !this.bots.has(gameId)) {
       this.bots.set(
         gameId,
@@ -176,7 +192,7 @@ export class GameHub {
         this.onResync(conn);
         return;
       case 'chat':
-        this.onChat(conn, cmd.value.text);
+        await this.onChat(conn, env.clientSeq, cmd.value.text);
         return;
       case 'cameraUpdate':
         this.onCameraUpdate(conn, cmd.value.view);
@@ -240,6 +256,7 @@ export class GameHub {
       // identified by the absent SelfView in the snapshot); send 0 to keep the binding at -1.
       conn.send(welcomeFrame(binding.gameId, binding.playerId, 0), clientSeq);
       this.sendProjected(conn, match, null, clientSeq);
+      this.sendHistory(conn, match, null);
       this.sendCachedCamera(conn);
       return;
     }
@@ -263,6 +280,7 @@ export class GameHub {
 
     conn.send(welcomeFrame(binding.gameId, binding.playerId, binding.seat), clientSeq);
     this.sendSnapshot(conn, match);
+    this.sendHistory(conn, match, player);
     this.sendCachedCamera(conn);
   }
 
@@ -280,12 +298,48 @@ export class GameHub {
     }
   }
 
-  private onChat(conn: Connection, text: string): void {
-    if (!conn.binding) return;
-    const members = this.members.get(conn.binding.gameId);
+  private async onChat(conn: Connection, clientSeq: number, raw: string): Promise<void> {
+    if (!conn.binding || conn.binding.seat < 0) return; // unbound or spectator → no chat
+    const text = raw.trim();
+    if (text.length === 0) return; // ignore empty
+    if (text.length > CHAT_MAX_LEN) {
+      conn.send(
+        rejectionFrame(clientSeq, RejectionCode.MALFORMED, 'errors:chatTooLong', 'chat too long'),
+      );
+      return;
+    }
+    const now = Date.now();
+    conn.chatTimes = conn.chatTimes.filter((ts) => now - ts < CHAT_RATE_WINDOW_MS);
+    if (conn.chatTimes.length >= CHAT_RATE_MAX) {
+      conn.send(
+        rejectionFrame(
+          clientSeq,
+          RejectionCode.RATE_LIMITED,
+          'errors:chatRateLimited',
+          'chat rate limited',
+        ),
+      );
+      return;
+    }
+    conn.chatTimes.push(now);
+
+    const gameId = conn.binding.gameId;
+    const playerId = conn.binding.player as string;
+    const log = this.chatLog.get(gameId) ?? [];
+    const seq = log.length;
+    log.push({ playerId, text, ts: now });
+    this.chatLog.set(gameId, log);
+    if (this.store) {
+      try {
+        await this.store.appendChat(gameId, seq, playerId, text);
+      } catch {
+        // non-fatal: in-memory log still serves this session's backfill
+      }
+    }
+
+    const members = this.members.get(gameId);
     if (!members) return;
-    for (const member of members.values())
-      member.send(chatFrame(conn.binding.player as string, text));
+    for (const member of members.values()) member.send(chatFrame(playerId, text));
   }
 
   /**
@@ -525,6 +579,16 @@ export class GameHub {
 
   private sendSnapshot(conn: Connection, match: Match, ackClientSeq = 0): void {
     this.sendProjected(conn, match, conn.binding?.player ?? null, ackClientSeq);
+  }
+
+  /** One-shot backfill: the redacted event history + (for members) the chat log. */
+  private sendHistory(conn: Connection, match: Match, viewer: PlayerId | null): void {
+    const events = match.session
+      .history()
+      .map((e) => eventToProto(e, viewer))
+      .filter((e): e is PbGameEvent => e !== null);
+    const chat = viewer === null ? [] : (this.chatLog.get(match.session.gameId) ?? []);
+    conn.send(historyReplayFrame(events, chat, match.session.stateVersion));
   }
 
   private broadcast(

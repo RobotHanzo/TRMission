@@ -134,6 +134,7 @@ export function viewToSnapshot(
       unlimitedStationBorrow: view.settings.unlimitedStationBorrow,
       secondDrawAfterBlindRainbow: view.settings.secondDrawAfterBlindRainbow,
       noUnfinishedTicketPenalty: view.settings.noUnfinishedTicketPenalty,
+      doubleRouteSingleFor23: view.settings.doubleRouteSingleFor23,
     },
     you:
       self === undefined || self.hand === null

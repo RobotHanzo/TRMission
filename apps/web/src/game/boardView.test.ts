@@ -16,7 +16,7 @@ const projFor = (k: number, e = 0, f = 0): BoardProjection => ({ k, e, f });
 
 describe('boardView — local transform ⇄ board-space view descriptor', () => {
   it('round-trips a transform back to itself (no information lost)', () => {
-    const W = 1200;
+    const W = 1300;
     const H = 760;
     const proj = projFor(9.3, 40, -12);
     const t: BoardTransform = { positionX: -240, positionY: -130, scale: 2.4 };
@@ -33,8 +33,8 @@ describe('boardView — local transform ⇄ board-space view descriptor', () => 
     // then re-deriving the descriptor must be the identity on every client.
     const view = { cx: 40, cy: 52, span: 28 };
     const clients = [
-      { W: 1200, H: 760, proj: projFor(9.0, 30, -10) },
-      { W: 800, H: 1200, proj: projFor(8.1, 5, 60) }, // portrait, different content box
+      { W: 1300, H: 760, proj: projFor(9.0, 30, -10) },
+      { W: 800, H: 1300, proj: projFor(8.1, 5, 60) }, // portrait, different content box
       { W: 1920, H: 1080, proj: projFor(11.4, 120, 0) },
     ];
     for (const { W, H, proj } of clients) {
@@ -58,7 +58,7 @@ describe('boardView — local transform ⇄ board-space view descriptor', () => 
   });
 
   it('clamps reconstructed scale to the board pan/zoom bounds', () => {
-    const W = 1200;
+    const W = 1300;
     const H = 760;
     const proj = projFor(9.3);
     // An absurdly tiny span would demand a scale far past maxScale — it must clamp.

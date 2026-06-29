@@ -156,6 +156,22 @@ message ChatBroadcast {
   string text = 2;
 }
 
+// One persisted chat line, replayed in a HistoryReplay on (re)connect.
+message ChatEntry {
+  string player_id = 1;
+  string text = 2;
+  int64 ts = 3;
+}
+
+// Sent once after the snapshot on (re)connect: the full game history, redacted
+// per-recipient. The client routes this to the log/chat ONLY — never to the
+// animation/sound channel — so a reconnect does not replay the whole game.
+message HistoryReplay {
+  repeated GameEvent events = 1; // log-only; same redaction as live events
+  repeated ChatEntry chat = 2;   // empty for spectators (members-only chat)
+  uint32 state_version = 3;
+}
+
 // Ephemeral, non-authoritative: another member's current camera framing, relayed so
 // this viewer can "follow" the acting player. Cosmetic only — not part of the
 // authoritative snapshot, and carries no hidden information (just board coordinates).
@@ -181,5 +197,6 @@ message ServerEnvelope {
     ChatBroadcast chat = 7;
     Pong pong = 8;
     CameraMoved camera_moved = 9;
+    HistoryReplay history = 10;
   }
 }

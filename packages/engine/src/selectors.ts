@@ -255,6 +255,7 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
       unlimitedStationBorrow: state.ruleParams.unlimitedStationBorrow,
       secondDrawAfterBlindRainbow: state.ruleParams.secondDrawAfterBlindRainbow,
       noUnfinishedTicketPenalty: state.ruleParams.noUnfinishedTicketPenalty,
+      doubleRouteSingleFor23: state.ruleParams.doubleRouteSingleFor23,
     },
   };
 }

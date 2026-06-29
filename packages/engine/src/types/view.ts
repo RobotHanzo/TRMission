@@ -68,6 +68,7 @@ export interface RedactedView {
     readonly unlimitedStationBorrow: boolean;
     readonly secondDrawAfterBlindRainbow: boolean;
     readonly noUnfinishedTicketPenalty: boolean;
+    readonly doubleRouteSingleFor23: boolean;
   };
 
   /**

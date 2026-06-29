@@ -27,6 +27,7 @@ interface Opts {
   phase?: Phase;
   orderIndex?: number;
   pendingTunnel?: PendingTunnel | null;
+  ruleParams?: typeof DEFAULT_RULE_PARAMS;
 }
 
 function st(opts: Opts = {}): GameState {
@@ -51,7 +52,7 @@ function st(opts: Opts = {}): GameState {
     engineVersion: 1,
     contentHash: 'test',
     rng: makeRng('rules'),
-    ruleParams: DEFAULT_RULE_PARAMS,
+    ruleParams: opts.ruleParams ?? DEFAULT_RULE_PARAMS,
     turnOrder,
     players,
     turn: {
@@ -129,6 +130,35 @@ describe('double routes', () => {
     expect(res.ok).toBe(false);
     if (res.ok) return;
     expect(res.error.code).toBe('DOUBLE_ROUTE_OWN_BOTH');
+  });
+
+  it('does NOT lock the sibling in a 2-player game when doubleRouteSingleFor23 is off', () => {
+    // Same pair as the first test (R6/R7), but with the rule variant disabled.
+    const state = st({
+      numPlayers: 2,
+      hands: { p0: { WHITE: 1 }, p1: { RED: 1 } },
+      ruleParams: { ...DEFAULT_RULE_PARAMS, doubleRouteSingleFor23: false },
+    });
+    const r1 = apply(state, {
+      t: 'CLAIM_ROUTE',
+      player: p0,
+      routeId: asRouteId('R6'),
+      payment: { color: 'WHITE', colorCount: 1, locomotives: 0 },
+    });
+    expect(r1.ok).toBe(true);
+    if (!r1.ok) return;
+    // Sibling should remain open (not locked).
+    expect(r1.value.state.ownership['R7']).toBeUndefined();
+    // p1 can now claim the parallel route.
+    const r2 = apply(r1.value.state, {
+      t: 'CLAIM_ROUTE',
+      player: p1,
+      routeId: asRouteId('R7'),
+      payment: { color: 'RED', colorCount: 1, locomotives: 0 },
+    });
+    expect(r2.ok).toBe(true);
+    if (!r2.ok) return;
+    expect(r2.value.state.ownership['R7']).toEqual({ owner: p1 });
   });
 });
 

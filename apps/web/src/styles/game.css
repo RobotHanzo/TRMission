@@ -9,6 +9,7 @@
   display: grid;
   gap: var(--tr-space-3);
   --tr-rail-w: 340px;
+  --tr-comms-w: 320px;
 }
 .game--rail {
   grid-template-columns: minmax(0, 1fr) var(--tr-rail-w);
@@ -56,6 +57,157 @@
 .game-hand-strip {
   grid-area: hand;
   min-width: 0;
+}
+/* ≥1300px: a third column for the log+chat sits beside the rail. Below this width the
+   comms content shares the rail slot behind a [Rail | Log+Chat] tab (rendered in JSX). */
+@media (min-width: 1300px) {
+  .game--rail {
+    grid-template-columns: minmax(0, 1fr) var(--tr-rail-w) var(--tr-comms-w);
+    grid-template-areas: 'board rail comms';
+  }
+  .game--tray {
+    grid-template-columns: minmax(0, 1fr) var(--tr-rail-w) var(--tr-comms-w);
+    grid-template-areas:
+      'board rail comms'
+      'hand  hand hand';
+  }
+}
+.game-comms {
+  grid-area: comms;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+.comms {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  overflow: hidden;
+}
+.comms .log-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--tr-space-3) var(--tr-space-3) 0;
+}
+.log-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tr-line) transparent;
+}
+.log-empty,
+.chat-empty {
+  color: var(--tr-ink-soft);
+  font-size: 0.85em;
+  padding: var(--tr-space-2);
+}
+.log-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--tr-space-2);
+  padding: 3px var(--tr-space-2);
+  border-radius: var(--tr-radius-sm);
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+.log-line .log-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  align-self: center;
+}
+.log-line .log-text {
+  min-width: 0;
+}
+.log-chip {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  align-self: center;
+}
+/* Important actions stand out; alerts (endgame / game over) read as a warm warning. */
+.log-line.log-highlight {
+  background: color-mix(in srgb, var(--tr-ink) 5%, transparent);
+  font-weight: 600;
+}
+.log-line.log-alert {
+  background: color-mix(in srgb, var(--tr-ember) 12%, transparent);
+  font-weight: 700;
+}
+.chat-panel {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  max-height: 45%;
+  border-top: 1px solid var(--tr-line);
+  padding: var(--tr-space-2) var(--tr-space-3) var(--tr-space-3);
+  gap: var(--tr-space-2);
+}
+.chat-messages {
+  flex: 1;
+  min-height: 4rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tr-line) transparent;
+}
+.chat-msg {
+  font-size: 0.82rem;
+  line-height: 1.3;
+  word-break: break-word;
+}
+.chat-msg .chat-author {
+  font-weight: 700;
+  margin-right: 6px;
+}
+.chat-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--tr-ember);
+}
+.chat-input {
+  display: flex;
+  gap: var(--tr-space-2);
+}
+.chat-input input {
+  flex: 1;
+  min-width: 0;
+}
+/* The [Rail | Log+Chat] tab bar, shown only below the three-column breakpoint. */
+.comms-tabs {
+  display: flex;
+  gap: var(--tr-space-2);
+  margin-bottom: var(--tr-space-3);
+}
+.comms-tabs button {
+  flex: 1;
+  background: var(--tr-surface-2);
+  border: 1px solid var(--tr-line);
+}
+.comms-tabs button.active {
+  background: var(--tr-ember);
+  border-color: var(--tr-ember);
+  color: #fff;
+}
+/* The tabpanel wrapper is a11y-only; `display: contents` keeps the rail/comms layout intact. */
+.comms-tabpanel {
+  display: contents;
 }
 /* ── Map viewport (pan/zoom via react-zoom-pan-pinch) ───────────────────────── */
 .board-viewport {
@@ -245,8 +397,8 @@
    All four geometry props (x, y, width, height) are CSS so they counter-scale like car slots.
    width/x control the tie's long axis (crossing the track at 45°); height/y control its thickness. */
 .tunnel-tie {
-  x: calc(-4px * var(--inv-scale));      /* centre: extends 4px each way along the tie */
-  width: calc(8px * var(--inv-scale));   /* spans bed (2.8px) + ~1.4px past each rail edge */
+  x: calc(-4px * var(--inv-scale)); /* centre: extends 4px each way along the tie */
+  width: calc(8px * var(--inv-scale)); /* spans bed (2.8px) + ~1.4px past each rail edge */
   y: calc(-0.14px * var(--inv-scale));
   height: calc(0.28px * var(--inv-scale)); /* thin: each tie reads as a crisp diagonal slat */
   fill: #3d352b;

@@ -22,6 +22,7 @@ import {
   type Payment,
 } from '../game/payments';
 import { enumerateTunnelExtra } from '../game/tunnel';
+import { isChatRejectionKey } from '../game/chatErrors';
 import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../game/boardView';
 import { Board } from '../components/Board';
@@ -35,8 +36,10 @@ import { TunnelModal } from '../components/TunnelModal';
 import { ScoreBoard } from '../components/ScoreBoard';
 import { AnimationLayer } from '../components/AnimationLayer';
 import { Toast } from '../components/Toast';
+import { CommsPanel } from '../components/CommsPanel';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import { useSoundDriver } from '../hooks/useSoundDriver';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import '../styles/game.css';
 import '../styles/animations.css';
 
@@ -86,6 +89,9 @@ export function GameStage({
   const [tunnelBase, setTunnelBase] = useState<Payment | null>(null);
   // Client-side nudge (e.g. "not enough cards") shown when a click can't open a modal.
   const [notice, setNotice] = useState<string | null>(null);
+  // Live game: a wide viewport shows comms as its own column; a narrow one tabs between rail↔comms.
+  const wide = useMediaQuery('(min-width: 1300px)');
+  const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
 
   const version = snapshot.stateVersion;
   useEffect(() => {
@@ -252,6 +258,38 @@ export function GameStage({
     </section>
   );
 
+  // The rail's inner content: the ticket chooser while drafting, else trackers/market/(hand)/missions.
+  const railInner = needKeep ? (
+    // Choosing tickets takes over the rail so the board stays visible and pan/zoomable; the hand
+    // and kept missions move into the chooser's own peek toggles.
+    <TicketChooser
+      offered={snapshot.you?.pendingOfferTicketIds ?? []}
+      minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
+      lockLong={phase === Phase.SETUP_TICKETS}
+      hand={snapshot.you?.hand}
+      handCount={myPub?.handCount ?? 0}
+      keptTicketIds={snapshot.you?.keptTicketIds ?? []}
+      completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
+      onConfirm={confirmKeep}
+    />
+  ) : boardLayout === 'rail' ? (
+    <>
+      {trackers}
+      {market}
+      {handSection}
+      {ticketsSection}
+    </>
+  ) : (
+    <>
+      {trackers}
+      {market}
+      {ticketsSection}
+    </>
+  );
+  const showHandStrip = !needKeep && boardLayout === 'tray';
+  // Chat/comms is a live-multiplayer feature; the tutorial/encyclopedia sandbox has none.
+  const comms = sandbox ? null : <CommsPanel chatDisabled={isSpectator} />;
+
   return (
     <div className={`game game--${boardLayout}`}>
       {isSpectator && (
@@ -260,36 +298,57 @@ export function GameStage({
         </div>
       )}
       {boardPanel}
-      {needKeep ? (
-        // Choosing tickets takes over the rail so the board stays visible and pan/zoomable; the
-        // hand and kept missions move into the chooser's own peek toggles.
-        <aside className="game-rail">
-          <TicketChooser
-            offered={snapshot.you?.pendingOfferTicketIds ?? []}
-            minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
-            lockLong={phase === Phase.SETUP_TICKETS}
-            hand={snapshot.you?.hand}
-            handCount={myPub?.handCount ?? 0}
-            keptTicketIds={snapshot.you?.keptTicketIds ?? []}
-            completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
-            onConfirm={confirmKeep}
-          />
-        </aside>
-      ) : boardLayout === 'rail' ? (
-        <aside className="game-rail">
-          {trackers}
-          {market}
-          {handSection}
-          {ticketsSection}
-        </aside>
+      {sandbox ? (
+        // Sandbox (tutorial/encyclopedia): no comms — the plain rail (+ hand strip in tray mode).
+        <>
+          <aside className="game-rail">{railInner}</aside>
+          {showHandStrip && <div className="game-hand-strip">{handSection}</div>}
+        </>
+      ) : wide ? (
+        <>
+          <aside className="game-rail">{railInner}</aside>
+          {showHandStrip && <div className="game-hand-strip">{handSection}</div>}
+          <aside className="game-comms">{comms}</aside>
+        </>
       ) : (
         <>
           <aside className="game-rail">
-            {trackers}
-            {market}
-            {ticketsSection}
+            <div className="comms-tabs" role="tablist" aria-label={t('commsTabsLabel')}>
+              <button
+                type="button"
+                role="tab"
+                id="comms-tab-rail"
+                aria-controls="comms-tabpanel"
+                aria-selected={commsTab === 'rail'}
+                className={commsTab === 'rail' ? 'active' : ''}
+                onClick={() => setCommsTab('rail')}
+              >
+                {t('tabRail')}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="comms-tab-comms"
+                aria-controls="comms-tabpanel"
+                aria-selected={commsTab === 'comms'}
+                className={commsTab === 'comms' ? 'active' : ''}
+                onClick={() => setCommsTab('comms')}
+              >
+                {t('tabComms')}
+              </button>
+            </div>
+            <div
+              id="comms-tabpanel"
+              className="comms-tabpanel"
+              role="tabpanel"
+              aria-labelledby={commsTab === 'rail' ? 'comms-tab-rail' : 'comms-tab-comms'}
+            >
+              {commsTab === 'rail' ? railInner : comms}
+            </div>
           </aside>
-          <div className="game-hand-strip">{handSection}</div>
+          {showHandStrip && commsTab === 'rail' && (
+            <div className="game-hand-strip">{handSection}</div>
+          )}
         </>
       )}
 
@@ -318,7 +377,11 @@ export function GameStage({
       )}
       {phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={onLeave} />}
       <Toast message={notice} variant="toast-notice" />
-      <Toast message={rejection ? t('actionRejected') : null} />
+      <Toast
+        message={
+          rejection && !isChatRejectionKey(rejection.messageKey) ? t('actionRejected') : null
+        }
+      />
       <AnimationLayer />
       {overlay}
     </div>

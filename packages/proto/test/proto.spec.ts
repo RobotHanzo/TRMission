@@ -155,4 +155,24 @@ describe('@trm/proto wire round-trip', () => {
     // Empty market slot encodes as UNSPECIFIED.
     expect(back.market[1]).toBe(CardColor.UNSPECIFIED);
   });
+
+  it('round-trips a HistoryReplay envelope with chat entries', () => {
+    const env = create(ServerEnvelopeSchema, {
+      serverSeq: 3,
+      event: {
+        case: 'history',
+        value: {
+          stateVersion: 12,
+          events: [],
+          chat: [{ playerId: 'p2', text: 'hello', ts: 1719600000000n }],
+        },
+      },
+    });
+    const back = fromBinary(ServerEnvelopeSchema, toBinary(ServerEnvelopeSchema, env));
+    expect(back.event.case).toBe('history');
+    if (back.event.case !== 'history') throw new Error('wrong case');
+    expect(back.event.value.stateVersion).toBe(12);
+    expect(back.event.value.chat[0]?.text).toBe('hello');
+    expect(back.event.value.chat[0]?.ts).toBe(1719600000000n);
+  });
 });

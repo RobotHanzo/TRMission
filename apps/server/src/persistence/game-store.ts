@@ -16,6 +16,8 @@ import {
   type GameEventDoc,
   type GameSnapshotDoc,
   type MatchHistoryDoc,
+  type GameChatDoc,
+  type ChatEntry,
 } from './types';
 
 /** Write a full checkpoint snapshot every N actions (also at game over). */
@@ -28,6 +30,9 @@ export async function ensureIndexes(db: Db): Promise<void> {
   await db
     .collection<GameSnapshotDoc>('gameSnapshots')
     .createIndex({ gameId: 1, seq: 1 }, { unique: true });
+  await db
+    .collection<GameChatDoc>('gameChats')
+    .createIndex({ gameId: 1, seq: 1 }, { unique: true });
   await db.collection<GameDoc>('games').createIndex({ status: 1, updatedAt: -1 });
   await db
     .collection<MatchHistoryDoc>('matchHistory')
@@ -39,12 +44,14 @@ export class MongoGameStore implements GameStorePort {
   private readonly events: Collection<GameEventDoc>;
   private readonly snapshots: Collection<GameSnapshotDoc>;
   private readonly history: Collection<MatchHistoryDoc>;
+  private readonly chats: Collection<GameChatDoc>;
 
   constructor(db: Db) {
     this.games = db.collection<GameDoc>('games');
     this.events = db.collection<GameEventDoc>('gameEvents');
     this.snapshots = db.collection<GameSnapshotDoc>('gameSnapshots');
     this.history = db.collection<MatchHistoryDoc>('matchHistory');
+    this.chats = db.collection<GameChatDoc>('gameChats');
   }
 
   async createGame(
@@ -122,6 +129,18 @@ export class MongoGameStore implements GameStorePort {
       },
       { upsert: true, writeConcern: { w: 'majority' } },
     );
+  }
+
+  async appendChat(gameId: string, seq: number, playerId: string, text: string): Promise<void> {
+    await this.chats.insertOne(
+      { gameId, seq, playerId, text, ts: new Date() },
+      { writeConcern: { w: 'majority' } },
+    );
+  }
+
+  async loadChat(gameId: string): Promise<ChatEntry[]> {
+    const docs = await this.chats.find({ gameId }).sort({ seq: 1 }).toArray();
+    return docs.map((d) => ({ playerId: d.playerId, text: d.text, ts: d.ts.getTime() }));
   }
 
   async loadForRecovery(gameId: string): Promise<RecoveryData | null> {

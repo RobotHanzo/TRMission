@@ -41,6 +41,10 @@ export interface RuleParams {
   secondDrawAfterBlindRainbow: boolean;
   /** Variant: unfinished destination tickets score 0 instead of subtracting their value. */
   noUnfinishedTicketPenalty: boolean;
+  /** Variant: when there are ≤3 players, only one of each pair of parallel routes may be
+   *  claimed (the other is locked once the first is taken). Set to false to allow both routes
+   *  to be claimed even in a 2–3 player game. */
+  doubleRouteSingleFor23: boolean;
 }
 
 export const DEFAULT_RULE_PARAMS: RuleParams = Object.freeze({
@@ -65,6 +69,7 @@ export const DEFAULT_RULE_PARAMS: RuleParams = Object.freeze({
   unlimitedStationBorrow: false,
   secondDrawAfterBlindRainbow: false,
   noUnfinishedTicketPenalty: false,
+  doubleRouteSingleFor23: true,
 });
 
 /** Build the full deck composition as a colour-count multiset (e.g. 12 each colour + 14 loco = 110). */
