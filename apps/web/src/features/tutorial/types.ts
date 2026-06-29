@@ -19,6 +19,7 @@ export type SpecimenSpec =
   | { kind: 'routes-compare' }
   | { kind: 'route'; variant: 'rail' | 'ferry' | 'tunnel' | 'double' }
   | { kind: 'card-row' }
+  | { kind: 'loco-card' }
   | { kind: 'station' }
   | { kind: 'ticket'; id: string };
 

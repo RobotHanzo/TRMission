@@ -117,6 +117,14 @@ export function CardRowSpecimen() {
   );
 }
 
+export function LocoCardSpecimen() {
+  return (
+    <div className="tut-loco-card" data-testid="tut-specimen">
+      <TrainCarCard color="LOCOMOTIVE" size={96} showGlyph />
+    </div>
+  );
+}
+
 export function StationSpecimen() {
   return (
     <svg
@@ -148,6 +156,8 @@ export function Specimen({ spec }: { spec: SpecimenSpec }) {
       return <RouteSpecimen variant={spec.variant} />;
     case 'card-row':
       return <CardRowSpecimen />;
+    case 'loco-card':
+      return <LocoCardSpecimen />;
     case 'station':
       return <StationSpecimen />;
     case 'ticket':

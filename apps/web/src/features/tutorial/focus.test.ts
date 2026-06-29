@@ -17,7 +17,7 @@ describe('selectorsForSpotlight', () => {
     expect(selectorsForSpotlight({ kind: 'route', ids: ['R18'] })).toEqual(['[data-route-id="R18"]']);
   });
   it('passes a hud selector through', () => {
-    expect(selectorsForSpotlight({ kind: 'hud', selector: '.deck-area' })).toEqual(['.deck-area']);
+    expect(selectorsForSpotlight({ kind: 'hud', selector: '.market' })).toEqual(['.market']);
   });
   it('returns nothing for a whole-board spotlight or undefined', () => {
     expect(selectorsForSpotlight({ kind: 'board' })).toEqual([]);
@@ -28,7 +28,9 @@ describe('selectorsForSpotlight', () => {
 describe('isAllowedHudSelector', () => {
   it('accepts allow-listed selectors and rejects others', () => {
     expect(isAllowedHudSelector(HUD_SPOTLIGHT_SELECTORS[0]!)).toBe(true);
-    expect(isAllowedHudSelector('.deck-area')).toBe(true);
+    expect(isAllowedHudSelector('.market')).toBe(true);
+    expect(isAllowedHudSelector('.trackers')).toBe(true);
+    expect(isAllowedHudSelector('.deck-area')).toBe(false); // phantom selector, no longer allowed
     expect(isAllowedHudSelector('.evil-selector')).toBe(false);
   });
 });
