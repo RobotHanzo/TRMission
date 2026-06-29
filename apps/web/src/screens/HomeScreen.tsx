@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
@@ -56,11 +56,25 @@ export function HomeScreen() {
   const enterRoom = useUi((s) => s.enterRoom);
   const enterGame = useUi((s) => s.enterGame);
   const enterTutorial = useUi((s) => s.enterTutorial);
+  const homeFocus = useUi((s) => s.homeFocus);
+  const clearHomeFocus = useUi((s) => s.clearHomeFocus);
 
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [publicRooms, setPublicRooms] = useState<RoomView[]>([]);
+  const createBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Consume a one-shot focus request (e.g. arriving from the tutorial finale): bring the create-game
+  // button into view, focus it, and let the pulse highlight clear once the request is dropped.
+  useEffect(() => {
+    if (homeFocus !== 'create') return;
+    const btn = createBtnRef.current;
+    if (btn) {
+      btn.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      btn.focus();
+    }
+  }, [homeFocus]);
 
   // Poll the public-rooms list (refreshes as rooms open/start/close).
   useEffect(() => {
@@ -120,7 +134,16 @@ export function HomeScreen() {
       <p>{t('welcome', { name: user.displayName })}</p>
       <button onClick={enterTutorial}>{t('tutorial.title')}</button>
       <div className="card stack">
-        <button className="accent" disabled={busy} onClick={() => void create()}>
+        <button
+          ref={createBtnRef}
+          className={homeFocus === 'create' ? 'accent tut-focus-pulse' : 'accent'}
+          disabled={busy}
+          onClick={() => {
+            clearHomeFocus();
+            void create();
+          }}
+          onBlur={() => homeFocus === 'create' && clearHomeFocus()}
+        >
           {t('createRoom')}
         </button>
         <div className="row">

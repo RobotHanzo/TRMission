@@ -7,6 +7,9 @@ import { TRAIN_COLORS, type CardColor, SCORING_TABLE } from '@trm/shared';
 import { TrainCarCard } from '../../components/TrainCarCard';
 import { TicketCard } from '../../components/TicketCard';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { useUi } from '../../store/ui';
+import { cityName } from '../../game/content';
+import { SEAT_COLORS } from '../../theme/colors';
 import type { SpecimenSpec } from './types';
 
 const CARD_W = 56;
@@ -130,22 +133,44 @@ export function LocoCardSpecimen() {
   );
 }
 
-/** A built station shown the way it reads on the board: a city marker with a seat-coloured station
- *  on it, the city's name, and a "built" badge so its claimed state is unmistakable. */
+/** Stations shown the way they read on the board: a row of city markers, each with its name below
+ *  the circle. One carries a seat-coloured station + a "built" badge; the others sit empty, so the
+ *  difference between a city with and without a station is unmistakable. */
 export function StationSpecimen() {
   const { t } = useTranslation();
+  const locale = useUi((s) => s.locale);
+  const builtFill = SEAT_COLORS[0];
+  const cities: Array<{ id: string; built: boolean }> = [
+    { id: 'taipei', built: true },
+    { id: 'hsinchu', built: false },
+    { id: 'zhunan', built: false },
+  ];
   return (
-    <div className="tut-station-card" data-testid="tut-specimen">
-      <svg className="tut-station-marker" viewBox="0 0 48 48" role="img" aria-hidden>
-        <circle className="tut-station-city" cx={24} cy={24} r={10} />
-        <circle className="tut-station-built-dot" cx={24} cy={24} r={6} />
-      </svg>
-      <div className="tut-station-meta">
-        <span className="tut-station-name">{t('tutorial.stations.specimenName')}</span>
-        <span className="tut-station-built">
-          <Check size={13} /> {t('tutorial.stations.specimenBuilt')}
-        </span>
-      </div>
+    <div className="tut-station-row" data-testid="tut-specimen">
+      {cities.map(({ id, built }) => (
+        <div className={built ? 'tut-station-chip is-built' : 'tut-station-chip'} key={id}>
+          <svg className="tut-station-marker" viewBox="0 0 40 40" role="img" aria-hidden>
+            <circle className="tut-station-city" cx={20} cy={20} r={9} />
+            {built && (
+              <circle
+                className="tut-station-built-dot"
+                cx={20}
+                cy={20}
+                r={5.5}
+                style={{ fill: builtFill }}
+              />
+            )}
+          </svg>
+          <span className="tut-station-name">{cityName(id, locale)}</span>
+          {built ? (
+            <span className="tut-station-built">
+              <Check size={11} /> {t('tutorial.stations.specimenBuilt')}
+            </span>
+          ) : (
+            <span className="tut-station-empty">{t('tutorial.stations.specimenEmpty')}</span>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

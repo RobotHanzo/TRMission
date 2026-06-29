@@ -89,7 +89,8 @@ export const LESSONS: Lesson[] = [
       {
         id: 'second',
         text: 'tutorial.draw.second',
-        mode: 'info',
+        mode: 'await',
+        expect: { t: 'DRAW_ANY' },
         spotlight: { kind: 'hud', selector: '.market' },
       },
       { id: 'loco', text: 'tutorial.draw.loco', mode: 'info', specimen: { kind: 'loco-card' } },

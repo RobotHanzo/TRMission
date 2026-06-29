@@ -139,11 +139,18 @@ interface UiState {
   followActing: boolean;
   /** The in-game rules encyclopedia overlay (a local sandbox; never touches the live game). */
   encyclopediaOpen: boolean;
+  /** A one-shot request to draw the eye to a control on the home screen (e.g. after the tutorial
+   *  finale, spotlight the "create game" button instead of handing the learner a separate one). */
+  homeFocus: 'create' | null;
   goHome(): void;
   enterRoom(code: string): void;
   enterGame(gameId: string, ticket: string): void;
   /** Open the full-screen guided tutorial (a local sandbox; tears down any live game first). */
   enterTutorial(): void;
+  /** Leave the tutorial for home and spotlight the create-game button there. */
+  requestCreateGame(): void;
+  /** Clear a pending home-screen focus request (called once the home screen has consumed it). */
+  clearHomeFocus(): void;
   /** Send an unauthenticated visitor to /login, remembering where they were headed. */
   navigateLogin(returnTo: string): void;
   /** After any successful sign-in, resume the `?redirect=` target (default home). */
@@ -176,11 +183,17 @@ export const useUi = create<UiState>()((set, get) => ({
   soundVolume: readSoundVolume(),
   followActing: false,
   encyclopediaOpen: false,
+  homeFocus: null,
   goHome: () => {
     disconnectGame();
     pushPath('/');
     set({ view: 'home', roomCode: null, gameId: null, ticket: null });
   },
+  requestCreateGame: () => {
+    get().goHome();
+    set({ homeFocus: 'create' });
+  },
+  clearHomeFocus: () => set({ homeFocus: null }),
   enterRoom: (code) => {
     pushPath(`/room/${code}`);
     set({ view: 'room', roomCode: code });

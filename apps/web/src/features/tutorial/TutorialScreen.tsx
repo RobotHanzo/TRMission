@@ -5,7 +5,6 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUi } from '../../store/ui';
 import { useGame } from '../../store/game';
-import { api } from '../../net/rest';
 import { GameStage } from '../../screens/GameStage';
 import { lessonsForScope } from './curriculum';
 import { useScenarioPlayer } from './useScenarioPlayer';
@@ -111,18 +110,12 @@ function TutorialRunner({
 
 export default function TutorialScreen() {
   const exit = useUi((s) => s.goHome);
-  const enterRoom = useUi((s) => s.enterRoom);
+  // The finale CTA leaves the tutorial for home and spotlights the create-game button there (rather
+  // than minting a room from inside the tutorial).
+  const createGame = useUi((s) => s.requestCreateGame);
   const [scope, setScope] = useState<Scope | null>(null);
   const [lessonIdx, setLessonIdx] = useState(0);
   const lessons = useMemo(() => (scope ? lessonsForScope(scope) : []), [scope]);
-
-  // The finale CTA: spin up the learner's first real room, falling back home if the call fails.
-  const createGame = () => {
-    void api
-      .createRoom()
-      .then((room) => enterRoom(room.code))
-      .catch(() => exit());
-  };
 
   if (!scope) {
     return (

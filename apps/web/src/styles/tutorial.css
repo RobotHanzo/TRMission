@@ -478,15 +478,24 @@
   display: flex;
   justify-content: center;
 }
-/* A built station: a board-style marker beside its city name + a "built" badge. */
-.tut-station-card {
+/* Stations on the board: a row of city markers, each with its name below the circle (like the live
+   board). One is built (seat-coloured station) and carries a badge; the rest sit empty. */
+.tut-station-row {
   display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.tut-station-chip {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.7rem;
+  gap: 0.3rem;
+  width: 4.5rem;
 }
 .tut-station-marker {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   flex: none;
 }
 .tut-station-city {
@@ -495,31 +504,30 @@
   stroke-width: 2;
 }
 .tut-station-built-dot {
-  fill: var(--accent, #2b6cb0);
   stroke: var(--surface, #fff);
   stroke-width: 2;
   paint-order: stroke fill;
 }
-.tut-station-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  align-items: flex-start;
-}
 .tut-station-name {
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
 }
 .tut-station-built {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.78rem;
+  gap: 0.2rem;
+  font-size: 0.68rem;
   font-weight: 600;
-  padding: 0.1rem 0.5rem;
+  padding: 0.05rem 0.4rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent, #2b6cb0) 16%, transparent);
   color: var(--accent, #2b6cb0);
+}
+.tut-station-empty {
+  font-size: 0.68rem;
+  font-weight: 500;
+  opacity: 0.55;
 }
 
 /* The station-cost reference: a row per station (1/2/3 cards) whose colour cross-fades to show the
