@@ -28,6 +28,13 @@
   display: flex;
   gap: var(--tr-space-2);
 }
+.leave-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  color: var(--tr-danger);
+  border-color: var(--tr-danger);
+}
 /* In-game, the header carries the game status (connection + whose turn) centred between the
    brand and the action buttons. Absent on other screens, where the bar stays brand ↔ actions. */
 .header-status {

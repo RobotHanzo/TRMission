@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrainFront, Settings, LogOut, User, BookOpen } from 'lucide-react';
+import { TrainFront, Settings, LogOut, DoorOpen, User, BookOpen } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import { useGame } from '../store/game';
@@ -89,12 +89,17 @@ export function AppHeader() {
         >
           <Settings size={16} aria-hidden />
         </button>
-        {user && (
+        {user && !inGame && (
           <button onClick={onLogout} aria-label={t('logout')} title={t('logout')}>
             <LogOut size={16} aria-hidden />
           </button>
         )}
-        {inGame && <button onClick={goHome}>{t('leave')}</button>}
+        {inGame && (
+          <button className="leave-btn" onClick={goHome}>
+            <DoorOpen size={16} aria-hidden />
+            {t('leave')}
+          </button>
+        )}
       </div>
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </header>
