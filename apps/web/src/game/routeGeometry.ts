@@ -69,9 +69,11 @@ const BOW_OVERRIDE: Record<string, number> = {
   // Taoyuan–Hsinchu: the auto-bow leans south-east over the Zhongli junction; bend it the other
   // way (north-west, toward the coast) instead.
   R14: 4,
-  // Hengchun–Taitung: the auto-bow arcs it south-east toward the coast; bend it the other way
-  // (north-west, inland past Dawu) instead.
-  R70: -3.5,
+  // Hengchun–Taitung: bending inland (north-west, past Dawu) swings the curve within 0.2 units of
+  // Zhiben — nearly drawing through that station even though it isn't an endpoint. A full flip
+  // toward the coast clears both, but the coastline here hugs close, so keep the bow modest —
+  // any more and the curve pokes out over open water.
+  R70: 1,
   // Kaohsiung–Kinmen ferry: the straight crossing runs right over Penghu — and the auto-bow skips
   // it because Penghu is an island. Curve it south-west through the open strait, clear of Penghu.
   // (The Kaohsiung–Penghu ferry has no intruder, so it stays straight on its own.)
@@ -79,6 +81,15 @@ const BOW_OVERRIDE: Record<string, number> = {
   // Taipei–Yilan tunnel: the auto-bow would arc it away from Toucheng, but the Xuehe Tunnel runs
   // straight through the mountains — force it to zero so it draws as a direct line.
   R18: 0,
+  // Taoyuan–Yilan tunnel (北橫): Banqiao sits almost exactly on the straight chord, so the auto-bow
+  // swings hard north to dodge it — straight through the Taipei hub, crossing Ruifang–Taipei,
+  // both Taipei–Banqiao tracks, and the Taipei–Yilan tunnel. Flip it south instead, clear of Taipei.
+  R91: 4,
+  // Nantou–Yuli tunnel (中橫): the auto-bow swings west to dodge Sun Moon Lake and ends up running
+  // almost on top of the Nantou–Alishan route for most of its length. The Central Cross-Island
+  // Highway runs fairly direct through the mountains anyway — force it straight, which clears both
+  // Sun Moon Lake and Nantou–Alishan.
+  R92: 0,
 };
 
 /** Cap on a single car's length so long routes read as many cars, not few long bars. */

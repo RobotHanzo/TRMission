@@ -67,10 +67,16 @@ describe('route geometry', () => {
     expect(geom('R17').mid.x).toBeLessThan(chordMid('R17').x - 1);
     // Taoyuan–Hsinchu bends north-west (opposite the auto-bow), off the Zhongli junction.
     expect(geom('R14').mid.x).toBeLessThan(chordMid('R14').x - 1);
-    // Hengchun–Taitung bends north-west (opposite the auto-bow), inland past Dawu.
-    expect(geom('R70').mid.x).toBeLessThan(chordMid('R70').x - 1);
+    // Hengchun–Taitung bends south-east (opposite the inland auto-bow), clear of Zhiben — a
+    // modest bow, since the coastline hugs close here.
+    expect(geom('R70').mid.x).toBeGreaterThan(chordMid('R70').x + 0.5);
     // Kaohsiung–Kinmen ferry curves south-west through the strait, clear of Penghu island.
     expect(geom('R85').mid.y).toBeGreaterThan(chordMid('R85').y + 2);
+    // Taoyuan–Yilan bends south (opposite the auto-bow), clear of the Taipei hub cluster.
+    expect(geom('R91').mid.y).toBeGreaterThan(chordMid('R91').y + 1);
+    // Nantou–Yuli is forced straight, clear of both Sun Moon Lake and Nantou–Alishan.
+    expect(geom('R92').mid.x).toBeCloseTo(chordMid('R92').x);
+    expect(geom('R92').mid.y).toBeCloseTo(chordMid('R92').y);
   });
 
   it('nudges double-route siblings to opposite sides of their shared chord', () => {
