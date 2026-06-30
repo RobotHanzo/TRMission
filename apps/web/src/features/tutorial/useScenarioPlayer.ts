@@ -12,6 +12,9 @@ import { expectMatches, type Beat, type Lesson } from './types';
 
 type GameStore = typeof useGame;
 
+/** Perform an `await` beat's expected move during a manual seek (the encyclopedia has no learner). */
+export type PerformAwait = (cmd: SandboxSocket, beat: Beat) => void;
+
 export interface ScenarioPlayer {
   beat: Beat | null;
   index: number;
@@ -22,9 +25,20 @@ export interface ScenarioPlayer {
   next(): void;
   /** Rebuild the lesson from the start. */
   restart(): void;
+  /** Jump to beat `target`, rebuilding the sandbox and replaying every earlier beat so the board
+   *  state matches. `performAwait` satisfies any `await` beats encountered during the replay. */
+  seek(target: number, performAwait?: PerformAwait): void;
 }
 
-export function useScenarioPlayer(lesson: Lesson, store: GameStore): ScenarioPlayer {
+/**
+ * @param autoplay When false, `auto` beats no longer self-advance on their timer — used by the
+ *   encyclopedia so a paused demo (and manual stepping) holds its frame instead of rolling on.
+ */
+export function useScenarioPlayer(
+  lesson: Lesson,
+  store: GameStore,
+  autoplay = true,
+): ScenarioPlayer {
   const [index, setIndex] = useState(0);
   const [, setBuilt] = useState(0);
   const idxRef = useRef(0);
@@ -32,9 +46,13 @@ export function useScenarioPlayer(lesson: Lesson, store: GameStore): ScenarioPla
   const sandboxRef = useRef<SandboxSocket | null>(null);
   const boardRef = useRef<Board | null>(null);
   const [nonce, setNonce] = useState(0);
+  // While true, the sandbox's onAction hook does NOT auto-advance — so a seek can replay `await`
+  // beats synchronously without each replayed move bumping the index out from under us.
+  const seekingRef = useRef(false);
 
-  // Build (or rebuild) the sandbox for this lesson.
-  useEffect(() => {
+  // Construct a fresh sandbox for this lesson (reset the store, apply the silent setup), store it in
+  // the refs, and return it. Shared by the build effect, `restart`, and `seek`.
+  const buildSandbox = useCallback((): SandboxSocket => {
     const board = taiwanBoard();
     boardRef.current = board;
     const viewer = asPlayerId(lesson.viewer);
@@ -50,6 +68,7 @@ export function useScenarioPlayer(lesson: Lesson, store: GameStore): ScenarioPla
       applyEvents: (v, e) => store.getState().applyEvents(v, e),
       setRejection: (r) => store.getState().setRejection(r),
       onAction: (action) => {
+        if (seekingRef.current) return;
         const b = lesson.beats[idxRef.current];
         if (
           b &&
@@ -63,16 +82,24 @@ export function useScenarioPlayer(lesson: Lesson, store: GameStore): ScenarioPla
     });
     if (lesson.setup) for (const a of lesson.setup(sandbox.getState(), board)) sandbox.auto(a);
     sandboxRef.current = sandbox;
+    return sandbox;
+  }, [lesson, store]);
+
+  // Build (or rebuild) the sandbox for this lesson.
+  useEffect(() => {
+    buildSandbox();
     setIndex(0);
     setBuilt((n) => n + 1);
     return () => {
       sandboxRef.current = null;
       store.getState().reset();
     };
-  }, [lesson, store, nonce]);
+  }, [buildSandbox, store, nonce]);
 
-  // Run an `auto` beat: fire its scripted action then advance.
+  // Run an `auto` beat: fire its scripted action then advance. Suppressed while paused (autoplay
+  // off) so the encyclopedia can hold a frame; the guided tutorial always autoplays.
   useEffect(() => {
+    if (!autoplay) return;
     const sandbox = sandboxRef.current;
     const board = boardRef.current;
     const b = lesson.beats[index];
@@ -84,7 +111,7 @@ export function useScenarioPlayer(lesson: Lesson, store: GameStore): ScenarioPla
       setIndex((i) => (i === index ? i + 1 : i));
     }, b.delayMs ?? 900);
     return () => clearTimeout(id);
-  }, [index, lesson.beats]);
+  }, [index, lesson.beats, autoplay]);
 
   const next = useCallback(() => {
     const b = lesson.beats[idxRef.current];
@@ -92,6 +119,30 @@ export function useScenarioPlayer(lesson: Lesson, store: GameStore): ScenarioPla
   }, [lesson.beats]);
 
   const restart = useCallback(() => setNonce((n) => n + 1), []);
+
+  const seek = useCallback(
+    (target: number, performAwait?: PerformAwait) => {
+      const clamped = Math.max(0, Math.min(lesson.beats.length, target));
+      seekingRef.current = true;
+      const sandbox = buildSandbox();
+      const board = boardRef.current;
+      for (let i = 0; board && i < clamped; i++) {
+        const b = lesson.beats[i];
+        if (!b) break;
+        if (b.mode === 'auto') {
+          sandbox.auto(
+            typeof b.action === 'function' ? b.action(sandbox.getState(), board) : b.action,
+          );
+        } else if (b.mode === 'await') {
+          performAwait?.(sandbox, b);
+        }
+      }
+      seekingRef.current = false;
+      setIndex(clamped);
+      setBuilt((n) => n + 1);
+    },
+    [lesson, buildSandbox],
+  );
 
   return {
     beat: lesson.beats[index] ?? null,
@@ -101,5 +152,6 @@ export function useScenarioPlayer(lesson: Lesson, store: GameStore): ScenarioPla
     commands: sandboxRef.current,
     next,
     restart,
+    seek,
   };
 }

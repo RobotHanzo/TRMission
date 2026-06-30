@@ -6,90 +6,96 @@ import { Check } from 'lucide-react';
 import { TRAIN_COLORS, type CardColor, SCORING_TABLE } from '@trm/shared';
 import { TrainCarCard } from '../../components/TrainCarCard';
 import { TicketCard } from '../../components/TicketCard';
+import { RouteShape, FerryLocoGradientDef } from '../../components/RouteShape';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { useUi } from '../../store/ui';
 import { cityName } from '../../game/content';
-import { SEAT_COLORS, CARD_COLOR_TOKENS } from '../../theme/colors';
+import { straightRouteGeometry, STRAIGHT_PITCH } from '../../game/routeGeometry';
+import { SEAT_COLORS, CARD_COLOR_TOKENS, GRAY_TOKEN } from '../../theme/colors';
 import type { SpecimenSpec } from './types';
 
 const CARD_W = 56;
 /** Every usable train colour the game actually has (8) plus the wild rainbow locomotive. */
 const STATION_PALETTE = [...TRAIN_COLORS, 'LOCOMOTIVE'] as CardColor[];
 
-/** A short straight route drawn with the live board classes on a tiny fixed viewBox. */
-export function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'double' }) {
-  // Geometry: a horizontal track of `count` car-slots across a 120x28 viewBox.
-  const count = variant === 'tunnel' ? 4 : variant === 'ferry' ? 3 : variant === 'double' ? 2 : 3;
-  const slotW = 18;
-  const gap = 4;
-  const totalW = count * slotW + (count - 1) * gap;
-  const x0 = (120 - totalW) / 2;
-  const y = 14;
-  const slots = Array.from({ length: count }, (_, i) => x0 + i * (slotW + gap) + slotW / 2);
-  const path = `M ${x0 - 6} ${y} L ${x0 + totalW + 6} ${y}`;
-  const fill = variant === 'double' ? '#d33a2c' : '#4f7cc0';
-  const locoMid = Math.floor(count / 2);
+// Board-faithful specimen geometry. The route is built by the SAME `straightRouteGeometry` +
+// `RouteShape` the live map uses, and `--inv-scale` is pinned to the map's default track weight, so
+// the cars, roadbed, ties and pips all come out at their REAL on-board proportions and can't drift
+// from the map. A fixed viewBox (sized for the widest 4-car tunnel) keeps every variant's cars the
+// same size; the CSS just scales the whole SVG up.
+const SPEC_INV = 0.55; // the board's ~1/zoom default weight (a touch firm so it stays crisp when small)
+const SPEC_W = 13; // viewBox width — fits the 4-car tunnel with lead-in
+const SPEC_H = 4.2; // viewBox height — fits the tunnel glow and the twin double-track
+const SPEC_CY = SPEC_H / 2;
+// Half the gap between a double route's two parallel tracks — the same 1.35-board-unit perp nudge the
+// board applies (counter-scaled), so the twin tracks sit as snug here as on the map.
+const SPEC_DOUBLE_GAP = 1.35 * SPEC_INV;
 
-  const Track = ({ dy = 0, muted = false }: { dy?: number; muted?: boolean }) => (
-    <g
-      className={'route' + (variant === 'tunnel' ? ' tunnel' : variant === 'ferry' ? ' ferry' : '')}
-      transform={`translate(0 ${dy})`}
-      opacity={muted ? 0.4 : 1}
-    >
-      {variant === 'tunnel' && <path className="tunnel-bg" d={path} />}
-      <path className="bed" d={path} />
-      {variant === 'tunnel' &&
-        slots.map((cx, i) => (
-          <rect key={i} className="tunnel-tie" transform={`translate(${cx} ${y}) rotate(45)`} />
-        ))}
-      {variant === 'ferry' ? (
-        <>
-          <path className="ferry-line" d={path} />
-          {slots.map((cx, i) =>
-            i === locoMid ? (
-              <rect
-                key={i}
-                className="slot ferry-loco"
-                x={-slotW / 2}
-                width={slotW}
-                fill="#888"
-                transform={`translate(${cx} ${y})`}
-              />
-            ) : (
-              <circle key={i} className="ferry-pip" cx={cx} cy={y} fill={fill} />
-            ),
-          )}
-        </>
-      ) : (
-        slots.map((cx, i) => (
-          <rect
-            key={i}
-            className="slot"
-            x={-slotW / 2}
-            width={slotW}
-            fill={muted ? '#9aa0a6' : fill}
-            transform={`translate(${cx} ${y})`}
-          />
-        ))
-      )}
+/** One straight specimen track centred at `cy`, drawn through the shared board `RouteShape`. */
+function SpecTrack({
+  variant,
+  cy,
+  fill,
+  count,
+}: {
+  variant: 'rail' | 'ferry' | 'tunnel';
+  cy: number;
+  fill: string;
+  count: number;
+}) {
+  const isTunnel = variant === 'tunnel';
+  const isFerry = variant === 'ferry';
+  const cls = 'route' + (isTunnel ? ' tunnel' : isFerry ? ' ferry' : '');
+  return (
+    <g className={cls}>
+      <RouteShape
+        geometry={straightRouteGeometry(count, isTunnel, SPEC_W / 2, cy)}
+        isTunnel={isTunnel}
+        isFerry={isFerry}
+        ferryLocos={isFerry ? 1 : 0}
+        length={count}
+        fill={fill}
+      />
     </g>
   );
+}
 
+/** A short straight route drawn with the live board components. A `double` renders as the board's
+ *  twin track: two full parallel routes in DIFFERENT liveries (never one faded out), sitting snug. A
+ *  ferry's pips are the neutral grey of a GRAY route — exactly as the map paints an unclaimed ferry. */
+export function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'double' }) {
+  const count = variant === 'tunnel' ? 4 : 3;
   return (
     <svg
       className="tut-route-specimen"
-      viewBox="0 0 120 28"
+      viewBox={`0 0 ${SPEC_W} ${SPEC_H}`}
       data-testid="tut-specimen"
-      style={{ ['--inv-scale' as string]: '1' }}
+      style={{ ['--inv-scale' as string]: String(SPEC_INV) }}
       role="img"
     >
+      {variant === 'ferry' && <FerryLocoGradientDef />}
       {variant === 'double' ? (
         <>
-          <Track dy={-5} />
-          <Track dy={5} muted />
+          <SpecTrack
+            variant="rail"
+            cy={SPEC_CY - SPEC_DOUBLE_GAP}
+            fill={CARD_COLOR_TOKENS.ORANGE.hex}
+            count={count}
+          />
+          <SpecTrack
+            variant="rail"
+            cy={SPEC_CY + SPEC_DOUBLE_GAP}
+            fill={CARD_COLOR_TOKENS.BLUE.hex}
+            count={count}
+          />
         </>
       ) : (
-        <Track />
+        <SpecTrack
+          variant={variant}
+          cy={SPEC_CY}
+          fill={variant === 'ferry' ? GRAY_TOKEN.hex : CARD_COLOR_TOKENS.BLUE.hex}
+          count={count}
+        />
       )}
     </svg>
   );
@@ -178,7 +184,17 @@ export function StationSpecimen() {
 /** One station-payment card whose colour cross-fades through the palette (a station is paid in a
  *  single colour, so all the cards in the cost table cycle together). Two stacked layers give the
  *  gradual fade; `idx` (shared by every card) drives the remount that re-triggers it. */
-function CyclingCard({ idx, size, count }: { idx: number; size: number; count?: number }) {
+function CyclingCard({
+  idx,
+  size,
+  count,
+  showCount = true,
+}: {
+  idx: number;
+  size: number;
+  count?: number;
+  showCount?: boolean;
+}) {
   const len = STATION_PALETTE.length;
   const cur = STATION_PALETTE[((idx % len) + len) % len]!;
   const prev = STATION_PALETTE[(((idx - 1) % len) + len) % len]!;
@@ -188,10 +204,22 @@ function CyclingCard({ idx, size, count }: { idx: number; size: number; count?: 
   return (
     <span className="tut-cost-card">
       <span className="tut-cost-card-layer is-prev" key={`p${idx}`}>
-        <TrainCarCard color={prev} size={size} showGlyph={false} {...countProp} />
+        <TrainCarCard
+          color={prev}
+          size={size}
+          showGlyph={false}
+          showCount={showCount}
+          {...countProp}
+        />
       </span>
       <span className="tut-cost-card-layer is-cur" key={`c${idx}`}>
-        <TrainCarCard color={cur} size={size} showGlyph={false} {...countProp} />
+        <TrainCarCard
+          color={cur}
+          size={size}
+          showGlyph={false}
+          showCount={showCount}
+          {...countProp}
+        />
       </span>
     </span>
   );
@@ -247,42 +275,34 @@ export function ScoreTableSpecimen() {
   );
 }
 
-/** A mini straight railway of `len` car-slots in `fill`, drawn with the live board classes —
- *  the same slot/bed geometry as RouteSpecimen so it can never drift from the board's look. */
+/** A mini straight railway of `len` car-slots in `fill`, drawn with the live board components —
+ *  reusing the map's board-faithful geometry so the cars match the map (and the route chapter).
+ *  Display px/board-unit is fixed so every row's cars are the same size; longer routes are simply
+ *  wider. */
+const CLAIM_TRACK_PX = 14; // display px per board unit
 function ClaimTrack({ len, fill }: { len: number; fill: string }) {
-  const slotW = 18;
-  const gap = 4;
-  const totalW = len * slotW + (len - 1) * gap;
-  const pad = 10;
-  const w = totalW + pad * 2;
-  const h = 28;
-  const y = h / 2;
-  const x0 = pad;
-  const slots = Array.from({ length: len }, (_, i) => x0 + i * (slotW + gap) + slotW / 2);
-  const path = `M ${x0 - 6} ${y} L ${x0 + totalW + 6} ${y}`;
-  const scale = 22 / h;
+  const pad = 0.9;
+  const w = len * STRAIGHT_PITCH + pad * 2;
+  const h = 3;
   return (
     <svg
       className="tut-claim-track"
-      viewBox={`0 0 ${w} ${h}`}
-      width={w * scale}
-      height={h * scale}
-      style={{ ['--inv-scale' as string]: '1' }}
+      viewBox={`0 0 ${w.toFixed(2)} ${h}`}
+      width={w * CLAIM_TRACK_PX}
+      height={h * CLAIM_TRACK_PX}
+      style={{ ['--inv-scale' as string]: String(SPEC_INV) }}
       role="img"
       aria-hidden
     >
       <g className="route">
-        <path className="bed" d={path} />
-        {slots.map((cx, i) => (
-          <rect
-            key={i}
-            className="slot"
-            x={-slotW / 2}
-            width={slotW}
-            fill={fill}
-            transform={`translate(${cx} ${y})`}
-          />
-        ))}
+        <RouteShape
+          geometry={straightRouteGeometry(len, false, w / 2, h / 2)}
+          isTunnel={false}
+          isFerry={false}
+          ferryLocos={0}
+          length={len}
+          fill={fill}
+        />
       </g>
     </svg>
   );
@@ -299,9 +319,11 @@ const CLAIM_CARD_W = 44;
 /** Neutral grey for a GRAY (any-colour) route's track. */
 const GRAY_TRACK = '#9aa0a6';
 
-/** The claim-cost reference: varying-length railways each pointing to the single card + count that
- *  pays for them. Colored routes → a static matching-colour card ("same colour as the route"); the
- *  gray route → the colour-cycling card (reused from the station chapter) meaning "any colour". */
+/** The claim-cost reference: varying-length railways each pointing to the single card that pays for
+ *  them. Colored routes → a static matching-colour card ("same colour as the route"); the gray route
+ *  → the colour-cycling card (reused from the station chapter) meaning "any colour". The card keeps
+ *  its stacked-deck look (so it reads as "several cards"), but the exact ×N count is printed BESIDE
+ *  the card rather than over it, so the amount stays legible. */
 export function ClaimCostSpecimen() {
   const reduced = useReducedMotion();
   const [idx, setIdx] = useState(0);
@@ -322,10 +344,17 @@ export function ClaimCostSpecimen() {
             →
           </span>
           {row.kind === 'gray' ? (
-            <CyclingCard idx={idx} size={CLAIM_CARD_W} count={row.len} />
+            <CyclingCard idx={idx} size={CLAIM_CARD_W} count={row.len} showCount={false} />
           ) : (
-            <TrainCarCard color={row.color} count={row.len} size={CLAIM_CARD_W} showGlyph={false} />
+            <TrainCarCard
+              color={row.color}
+              count={row.len}
+              size={CLAIM_CARD_W}
+              showGlyph={false}
+              showCount={false}
+            />
           )}
+          <span className="tut-claim-cost-count">×{row.len}</span>
         </div>
       ))}
     </div>

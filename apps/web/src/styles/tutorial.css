@@ -1,6 +1,21 @@
 /* Tutorial coachmark + launcher. The coachmark is a non-blocking callout pinned to the bottom of
    the board, so the learner can still click the HUD to perform `await` actions while it guides. */
 
+/* Theme bridge. This stylesheet was authored against generic --surface/--text/--border/--accent
+   tokens that were never actually defined, so they fell back to hard light values (#fff/#111/…) and
+   ignored dark mode entirely. Alias them to the real app theme tokens (which switch on data-theme)
+   on each root container, so the whole tutorial/encyclopedia subtree adapts to light AND dark. */
+.tut-launcher,
+.tut-coach,
+.tut-spotlight,
+.enc-backdrop {
+  --surface: var(--tr-surface);
+  --text: var(--tr-ink);
+  --border: var(--tr-line);
+  --accent: var(--tr-accent);
+  --tr-bg: var(--tr-paper);
+}
+
 .tut-launcher {
   display: grid;
   place-items: center;
@@ -445,8 +460,8 @@
 /* Visual glossary specimens shown inside the coachmark. The special-routes legend is shown larger so
    the ferry loco-slots and tunnel ties read clearly. */
 .tut-route-specimen {
-  width: 232px;
-  height: 54px;
+  width: 264px;
+  height: 86px;
 }
 .tut-route-compare {
   display: grid;
@@ -466,7 +481,7 @@
 }
 .tut-route-compare .tut-route-specimen {
   width: 100%;
-  height: 50px;
+  height: 62px;
 }
 .tut-card-row {
   display: flex;
@@ -582,7 +597,7 @@
 }
 .tut-claim-cost-row {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto auto auto auto;
   align-items: center;
   gap: 0.5rem;
   justify-content: start;
@@ -594,6 +609,13 @@
   font-size: 1.1rem;
   font-weight: 700;
   opacity: 0.7;
+}
+/* The pay-count printed beside the card (not over it), so the amount stays legible. */
+.tut-claim-cost-count {
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
 }
 .tut-ticket-specimen {
   width: 168px;

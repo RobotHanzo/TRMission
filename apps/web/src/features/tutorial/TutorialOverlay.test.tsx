@@ -48,6 +48,44 @@ describe('TutorialOverlay', () => {
     expect(container.querySelector('.tut-coach')?.getAttribute('data-pos')).toBe('top');
   });
 
+  it('the final beat of a non-last lesson advances straight to the next lesson (no "complete" step)', () => {
+    let next = 0;
+    const beat: Beat = { id: 'last', text: 'tutorial.draw.loco', mode: 'info' };
+    const { getByText, queryByText } = render(
+      <TutorialOverlay
+        {...baseProps}
+        beat={beat}
+        index={3}
+        total={4}
+        isLastLesson={false}
+        onNextLesson={() => {
+          next += 1;
+        }}
+        spotRects={[]}
+      />,
+    );
+    // The last beat's CTA is "next lesson", and the plain "next" advance is gone.
+    expect(queryByText('tutorial.next')).toBeNull();
+    getByText('tutorial.nextLesson').click();
+    expect(next).toBe(1);
+  });
+
+  it('a finished non-last lesson shows no "lesson complete" copy — only the next-lesson CTA', () => {
+    const { getByText, queryByText } = render(
+      <TutorialOverlay
+        {...baseProps}
+        beat={null}
+        done={true}
+        index={4}
+        total={4}
+        isLastLesson={false}
+        spotRects={[]}
+      />,
+    );
+    expect(queryByText('tutorial.lessonComplete')).toBeNull();
+    expect(getByText('tutorial.nextLesson')).toBeTruthy();
+  });
+
   it('shows the celebratory finale + create-game CTA when the last lesson completes', () => {
     let created = 0;
     const { container, getByText } = render(

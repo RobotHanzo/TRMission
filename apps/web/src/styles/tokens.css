@@ -2,6 +2,7 @@
 :root {
   --tr-blue: #0f5fa6; /* EMU blue (primary) */
   --tr-ember: #ee6b1f; /* express ember (accent) */
+  --tr-accent: #2b6cb0; /* tutorial/encyclopedia accent (chips, progress, rings) */
 
   --tr-paper: #f6f1e7; /* warm paper background */
   --tr-surface: #fffdf8;
@@ -46,6 +47,7 @@
   --tr-ink: #ececec;
   --tr-ink-soft: #a8adb3;
   --tr-line: #3a3e43;
+  --tr-accent: #5b9bd5; /* brighter so chips/progress stay legible on dark surfaces */
 
   --tr-sea: #15222b;
   --tr-sea-line: rgba(150, 190, 215, 0.17);
@@ -64,6 +66,7 @@
     --tr-ink: #ececec;
     --tr-ink-soft: #a8adb3;
     --tr-line: #3a3e43;
+    --tr-accent: #5b9bd5;
 
     --tr-sea: #15222b;
     --tr-sea-line: rgba(150, 190, 215, 0.17);

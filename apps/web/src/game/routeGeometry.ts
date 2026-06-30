@@ -87,6 +87,8 @@ const SLOT_MAX_LEN = 2.6;
 const SLOT_FILL = 0.86;
 /** Tunnels use shorter cars so the dashed track shows between them. */
 const SLOT_FILL_TUNNEL = 0.62;
+/** Board units between a tunnel's diagonal sleeper ties. */
+const TIE_SPACING = 1.1;
 
 /** How a route deviates from its straight chord. */
 interface RouteOffset {
@@ -110,7 +112,9 @@ function computeOffsets(): Map<string, RouteOffset> {
       groups.set(r.doubleGroup, [...(groups.get(r.doubleGroup) ?? []), r.id as string]);
   for (const ids of groups.values()) {
     ids.sort();
-    ids.forEach((id, i) => out.set(id, { gap: (i - (ids.length - 1) / 2) * 2 * DOUBLE_GAP, bow: 0 }));
+    ids.forEach((id, i) =>
+      out.set(id, { gap: (i - (ids.length - 1) / 2) * 2 * DOUBLE_GAP, bow: 0 }),
+    );
   }
 
   for (const r of ROUTES) {
@@ -143,7 +147,10 @@ function computeOffsets(): Map<string, RouteOffset> {
       const signed = -Math.sign(side || 1) * (INTRUSION_DIST - dist);
       if (Math.abs(signed) > Math.abs(best)) best = signed;
     }
-    out.set(r.id as string, { gap: 0, bow: Math.max(-MAX_BOW, Math.min(MAX_BOW, best * BOW_GAIN)) });
+    out.set(r.id as string, {
+      gap: 0,
+      bow: Math.max(-MAX_BOW, Math.min(MAX_BOW, best * BOW_GAIN)),
+    });
   }
 
   // Hand-tuned outward bows win over the automatic one, keeping any double-gap intact.
@@ -166,7 +173,8 @@ function computeHubs(): Set<string> {
   }
   const hubs = new Set<string>();
   for (const c of CITIES)
-    if (!c.isIsland && (degree.get(c.id as string) ?? 0) >= HUB_MIN_DEGREE) hubs.add(c.id as string);
+    if (!c.isIsland && (degree.get(c.id as string) ?? 0) >= HUB_MIN_DEGREE)
+      hubs.add(c.id as string);
   return hubs;
 }
 
@@ -193,8 +201,69 @@ const qTangent = (
   t: number,
 ): { x: number; y: number } => {
   const u = 1 - t;
-  return { x: 2 * u * (c.x - a.x) + 2 * t * (b.x - c.x), y: 2 * u * (c.y - a.y) + 2 * t * (b.y - c.y) };
+  return {
+    x: 2 * u * (c.x - a.x) + 2 * t * (b.x - c.x),
+    y: 2 * u * (c.y - a.y) + 2 * t * (b.y - c.y),
+  };
 };
+
+/**
+ * The path, car slots, and (for tunnels) diagonal ties for one quadratic-Bézier route running from
+ * `a` through control point `c` to `b` and carrying `length` cars. This is the single source of a
+ * route's on-board geometry — shared by the live map (every authored route) and by the standalone
+ * specimen routes in the tutorial/encyclopedia, so a specimen's roadbed, cars and ties are produced
+ * by exactly the same math as the board and can never drift from it.
+ */
+function curveShape(
+  a: { x: number; y: number },
+  c: { x: number; y: number },
+  b: { x: number; y: number },
+  length: number,
+  isTunnel: boolean,
+): { path: string; slots: Slot[]; ties?: Slot[]; mid: { x: number; y: number } } {
+  // Arc length by sampling, to space the cars evenly.
+  let arc = 0;
+  let prev: { x: number; y: number } = a;
+  for (let i = 1; i <= 24; i++) {
+    const p = qPoint(a, c, b, i / 24);
+    arc += Math.hypot(p.x - prev.x, p.y - prev.y);
+    prev = p;
+  }
+  const spacing = arc / length;
+  const fillFrac = isTunnel ? SLOT_FILL_TUNNEL : SLOT_FILL;
+  const slotLen = Math.min(spacing * fillFrac, SLOT_MAX_LEN);
+
+  const slots: Slot[] = [];
+  for (let i = 0; i < length; i++) {
+    const t = (i + 0.5) / length;
+    const p = qPoint(a, c, b, t);
+    const tg = qTangent(a, c, b, t);
+    slots.push({ x: p.x, y: p.y, angle: (Math.atan2(tg.y, tg.x) * 180) / Math.PI, len: slotLen });
+  }
+
+  // Tunnel routes get explicit tie positions so the renderer can draw each one as a <rect>
+  // rotated angle+45° — the only way to tilt ties 45° relative to the track (stroke-dasharray
+  // can only go perpendicular to the path, never diagonal).
+  let ties: Slot[] | undefined;
+  if (isTunnel) {
+    ties = [];
+    const tieCount = Math.round(arc / TIE_SPACING);
+    for (let i = 0; i < tieCount; i++) {
+      const t = (i + 0.5) / tieCount;
+      const p = qPoint(a, c, b, t);
+      const tg = qTangent(a, c, b, t);
+      ties.push({ x: p.x, y: p.y, angle: (Math.atan2(tg.y, tg.x) * 180) / Math.PI, len: 0 });
+    }
+  }
+
+  const f = (v: number): string => v.toFixed(2);
+  return {
+    path: `M ${f(a.x)} ${f(a.y)} Q ${f(c.x)} ${f(c.y)} ${f(b.x)} ${f(b.y)}`,
+    slots,
+    ...(ties ? { ties } : {}),
+    mid: qPoint(a, c, b, 0.5),
+  };
+}
 
 function buildGeometry(): Map<string, RouteGeometry> {
   const offsets = computeOffsets();
@@ -214,53 +283,31 @@ function buildGeometry(): Map<string, RouteGeometry> {
     // Control point chosen so the curve's apex deviates from the chord by exactly `bow`.
     const c = { x: mid.x + nx * 2 * bow, y: mid.y + ny * 2 * bow };
     const perp = gap ? { x: nx * gap, y: ny * gap } : { x: 0, y: 0 };
-
-    // Arc length by sampling, to space the cars evenly.
-    let arc = 0;
-    let prev: { x: number; y: number } = a;
-    for (let i = 1; i <= 24; i++) {
-      const p = qPoint(a, c, b, i / 24);
-      arc += Math.hypot(p.x - prev.x, p.y - prev.y);
-      prev = p;
-    }
-    const spacing = arc / r.length;
-    const fill = r.isTunnel ? SLOT_FILL_TUNNEL : SLOT_FILL;
-    const slotLen = Math.min(spacing * fill, SLOT_MAX_LEN);
-
-    const slots: Slot[] = [];
-    for (let i = 0; i < r.length; i++) {
-      const t = (i + 0.5) / r.length;
-      const p = qPoint(a, c, b, t);
-      const tg = qTangent(a, c, b, t);
-      slots.push({ x: p.x, y: p.y, angle: (Math.atan2(tg.y, tg.x) * 180) / Math.PI, len: slotLen });
-    }
-
-    // Tunnel routes get explicit tie positions so the renderer can draw each one as a <rect>
-    // rotated angle+45° — the only way to tilt ties 45° relative to the track (stroke-dasharray
-    // can only go perpendicular to the path, never diagonal).
-    let ties: Slot[] | undefined;
-    if (r.isTunnel) {
-      ties = [];
-      const TIE_SPACING = 1.1; // board units between tie centres
-      const tieCount = Math.round(arc / TIE_SPACING);
-      for (let i = 0; i < tieCount; i++) {
-        const t = (i + 0.5) / tieCount;
-        const p = qPoint(a, c, b, t);
-        const tg = qTangent(a, c, b, t);
-        ties.push({ x: p.x, y: p.y, angle: (Math.atan2(tg.y, tg.x) * 180) / Math.PI, len: 0 });
-      }
-    }
-
-    const f = (v: number): string => v.toFixed(2);
-    out.set(r.id as string, {
-      path: `M ${f(a.x)} ${f(a.y)} Q ${f(c.x)} ${f(c.y)} ${f(b.x)} ${f(b.y)}`,
-      slots,
-      ...(ties ? { ties } : {}),
-      mid: qPoint(a, c, b, 0.5),
-      perp,
-    });
+    out.set(r.id as string, { ...curveShape(a, c, b, r.length, !!r.isTunnel), perp });
   }
   return out;
+}
+
+/** Per-car spacing (board units) for a standalone straight specimen route — a car plus its gap. */
+export const STRAIGHT_PITCH = 2.56;
+
+/**
+ * Geometry for a standalone STRAIGHT route with no map context — a horizontal chain of `length`
+ * cars centred at `(cx, cy)`, spanning `length * STRAIGHT_PITCH` board units. The tutorial and
+ * encyclopedia specimens build their routes through here so their cars, roadbed and ties come out
+ * of the very same {@link curveShape} math as the live board (rendered with the shared RouteShape).
+ */
+export function straightRouteGeometry(
+  length: number,
+  isTunnel: boolean,
+  cx: number,
+  cy: number,
+): RouteGeometry {
+  const half = (length * STRAIGHT_PITCH) / 2;
+  const a = { x: cx - half, y: cy };
+  const c = { x: cx, y: cy };
+  const b = { x: cx + half, y: cy };
+  return { ...curveShape(a, c, b, length, isTunnel), perp: { x: 0, y: 0 } };
 }
 
 /** Precomputed once — the content graph is static, so geometry never changes at runtime. */

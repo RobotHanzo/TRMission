@@ -39,13 +39,11 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
   const finished = done && isLastLesson;
   useConfetti(finished);
 
-  const body = finished
-    ? t('tutorial.finalBody')
-    : done
-      ? t('tutorial.lessonComplete')
-      : beat
-        ? t(beat.text)
-        : '';
+  // No per-lesson "lesson complete" card: a finished lesson rolls straight into the next one (its
+  // final-beat button below becomes "next lesson"). Only the whole-tutorial finale gets its own body.
+  const body = finished ? t('tutorial.finalBody') : !done && beat ? t(beat.text) : '';
+  // The last beat of a non-final lesson hands off directly to the next lesson.
+  const isLastBeat = total > 0 && index === total - 1;
   const pos =
     typeof window !== 'undefined'
       ? coachPosition(spotRects, window.innerWidth, window.innerHeight)
@@ -89,9 +87,15 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
     }
     const pad = 24; // ~1.5rem bubble padding, keeps the caret off the rounded corners
     if (sideDocked) {
-      setCaretOffset({ axis: 'y', px: Math.max(pad, Math.min(cr.height - pad, centre.y - cr.top)) });
+      setCaretOffset({
+        axis: 'y',
+        px: Math.max(pad, Math.min(cr.height - pad, centre.y - cr.top)),
+      });
     } else {
-      setCaretOffset({ axis: 'x', px: Math.max(pad, Math.min(cr.width - pad, centre.x - cr.left)) });
+      setCaretOffset({
+        axis: 'x',
+        px: Math.max(pad, Math.min(cr.width - pad, centre.x - cr.left)),
+      });
     }
   }, [spotRects, sideDocked]);
 
@@ -108,7 +112,11 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
         <span
           className="tut-coach-caret"
           aria-hidden
-          style={caretOffset.axis === 'x' ? { left: `${caretOffset.px}px` } : { top: `${caretOffset.px}px` }}
+          style={
+            caretOffset.axis === 'x'
+              ? { left: `${caretOffset.px}px` }
+              : { top: `${caretOffset.px}px` }
+          }
         />
       )}
 
@@ -164,9 +172,15 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
             </button>
           )
         ) : beat?.mode === 'info' ? (
-          <button className="accent" onClick={props.onAdvance}>
-            {t('tutorial.next')} <ChevronRight size={14} />
-          </button>
+          isLastBeat && !isLastLesson ? (
+            <button className="accent" onClick={props.onNextLesson}>
+              {t('tutorial.nextLesson')} <ChevronRight size={14} />
+            </button>
+          ) : (
+            <button className="accent" onClick={props.onAdvance}>
+              {t('tutorial.next')} <ChevronRight size={14} />
+            </button>
+          )
         ) : beat?.mode === 'await' ? (
           <span className="tut-yourturn">{t('tutorial.yourTurn')}</span>
         ) : (

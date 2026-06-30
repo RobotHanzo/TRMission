@@ -4,24 +4,25 @@
 // bar. Unlike the full-screen tutorial it has NO dim scrim and NO floating coachmark — the demo is a
 // quiet clip contained entirely inside the modal. It runs on its OWN isolated sandbox stores (via
 // SandboxProvider), so the live game underneath keeps running untouched.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pause, Play, RotateCcw, X } from 'lucide-react';
+import { Pause, Play, RotateCcw, SkipBack, SkipForward, X } from 'lucide-react';
 import { useGameStore, useGameStoreApi } from '../../store/game';
 import { SandboxProvider } from '../../store/sandboxProvider';
 import { GameStage } from '../../screens/GameStage';
 import { Specimen } from './Specimens';
 import { encyclopediaEntries } from './curriculum';
-import { useScenarioPlayer, type ScenarioPlayer } from './useScenarioPlayer';
+import { useScenarioPlayer, type PerformAwait, type ScenarioPlayer } from './useScenarioPlayer';
 import type { ExpectSpec, Lesson } from './types';
 import type { SandboxSocket } from '../../net/sandboxSocket';
 import '../../styles/tutorial.css';
 
 // Calm auto-advance pacing for the read-first demo (ms). `info` beats linger long enough to read
-// the caption; `await` beats are auto-performed after a short pause; the finished clip loops back.
-const INFO_MS = 2600;
-const AWAIT_MS = 1100;
-const LOOP_PAUSE_MS = 2400;
+// the caption unhurried; `await` beats are auto-performed after a short pause; the finished clip
+// loops back. (The viewer can also pause and step through beats with the back/forward controls.)
+const INFO_MS = 4200;
+const AWAIT_MS = 1600;
+const LOOP_PAUSE_MS = 3400;
 
 /** Perform an `await` beat on the viewer's behalf (the encyclopedia demo has no learner). Only the
  *  mechanisms an encyclopedia entry actually scripts are handled; a CLAIM/STATION/TUNNEL demo should
@@ -55,19 +56,32 @@ function performAwait(cmd: SandboxSocket, expect: ExpectSpec, viewer: string): v
 function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
   const { t } = useTranslation();
   const store = useGameStoreApi(); // the isolated store provided by SandboxProvider
-  const player = useScenarioPlayer(entry, store);
+  const [playing, setPlaying] = useState(true);
+  // Paused → `auto` beats hold their frame too (so stepping/pausing freezes the whole demo).
+  const player = useScenarioPlayer(entry, store, playing);
   const snapshot = useGameStore((s) => s.snapshot);
   const beat = player.beat;
   const spotlight = beat?.spotlight;
   // No dim scrim here; a gentle on-board city glow is the only emphasis a calm clip needs.
   const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
   const frameTarget = beat?.frame ?? null;
-
-  const [playing, setPlaying] = useState(true);
   // A stable ref so the single timer effect always acts on the latest player API without having to
   // re-subscribe (and re-time) on every parent render.
   const playerRef = useRef<ScenarioPlayer>(player);
   playerRef.current = player;
+
+  // Replays an `await` beat for the viewer when a manual seek lands past it.
+  const performAwaitBeat = useCallback<PerformAwait>(
+    (cmd, b) => {
+      if (b.mode === 'await') performAwait(cmd, b.expect, entry.viewer);
+    },
+    [entry.viewer],
+  );
+  // Step controls: pause, then rebuild-and-replay to the neighbouring beat.
+  const stepTo = (target: number): void => {
+    setPlaying(false);
+    playerRef.current.seek(target, performAwaitBeat);
+  };
 
   // The one calm driver. While playing: an `info` beat waits a readable moment then advances; an
   // `await` beat is performed for the viewer; an `auto` beat is already advanced inside the scenario
@@ -96,7 +110,10 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
 
   if (!snapshot) return <div className="card">{t('connecting')}</div>;
 
-  const caption = player.done ? t('tutorial.lessonComplete') : beat ? t(beat.text) : '';
+  // When the clip momentarily finishes before looping, hold the last beat's caption + specimen
+  // rather than flashing an empty panel (there is no "lesson complete" card here).
+  const shownBeat = beat ?? entry.beats[entry.beats.length - 1] ?? null;
+  const caption = shownBeat ? t(shownBeat.text) : '';
   const stepNo = Math.min(player.index + 1, player.total);
 
   return (
@@ -112,12 +129,12 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
         />
       </div>
       <div className="enc-caption">
-        {!player.done && beat?.specimen && (
-          <div className="enc-caption-specimen" key={beat.id}>
-            <Specimen spec={beat.specimen} />
+        {shownBeat?.specimen && (
+          <div className="enc-caption-specimen" key={shownBeat.id}>
+            <Specimen spec={shownBeat.specimen} />
           </div>
         )}
-        <p className="enc-caption-text" key={(beat?.id ?? 'done') + ':cap'}>
+        <p className="enc-caption-text" key={(shownBeat?.id ?? 'cap') + ':cap'}>
           {caption}
         </p>
         <div className="enc-caption-bar" aria-hidden>
@@ -127,10 +144,17 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
           />
         </div>
         <div className="enc-caption-controls">
-          <span className="enc-step">
-            {player.done ? t('tutorial.lessonComplete') : `${stepNo} / ${player.total}`}
-          </span>
+          <span className="enc-step">{`${stepNo} / ${player.total}`}</span>
           <div className="spacer" />
+          <button
+            className="icon-btn"
+            onClick={() => stepTo(player.index - 1)}
+            disabled={player.index <= 0}
+            aria-label={t('tutorial.prevStep')}
+            title={t('tutorial.prevStep')}
+          >
+            <SkipBack size={16} aria-hidden />
+          </button>
           <button
             className="icon-btn"
             onClick={() => setPlaying((v) => !v)}
@@ -138,6 +162,15 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
             title={playing ? t('tutorial.pause') : t('tutorial.play')}
           >
             {playing ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}
+          </button>
+          <button
+            className="icon-btn"
+            onClick={() => stepTo(player.index + 1)}
+            disabled={player.index >= player.total - 1}
+            aria-label={t('tutorial.nextStep')}
+            title={t('tutorial.nextStep')}
+          >
+            <SkipForward size={16} aria-hidden />
           </button>
           <button
             className="link enc-replay"

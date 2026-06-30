@@ -11,6 +11,9 @@ interface Props {
   count?: number;
   /** Show the colour-blind glyph chip. */
   showGlyph?: boolean;
+  /** Show the "×N" count chip. Off lets a caller keep the stacked-deck look but label the count
+   *  elsewhere (the tutorial claim-cost specimen prints it beside the card instead of over it). */
+  showCount?: boolean;
   /** Override the card width (px); height follows the fixed aspect ratio. */
   size?: number;
 }
@@ -26,7 +29,7 @@ const WILD_WASH = `linear-gradient(150deg, ${TRAIN_COLORS.slice(0, 6)
   .map((c) => rgba(CARD_COLOR_TOKENS[c].hex, 0.2))
   .join(', ')})`;
 
-export function TrainCarCard({ color, count, showGlyph = true, size }: Props) {
+export function TrainCarCard({ color, count, showGlyph = true, showCount = true, size }: Props) {
   const tok = CARD_COLOR_TOKENS[color];
   const isLoco = color === 'LOCOMOTIVE';
   // The stacked-deck shadow should read as the real count: 2 → one card behind,
@@ -56,11 +59,15 @@ export function TrainCarCard({ color, count, showGlyph = true, size }: Props) {
       <TrainCarArt color={color} />
       {isLoco && <span className="train-card-gloss" aria-hidden />}
       {showGlyph && (
-        <span className="train-card-glyph" style={{ background: tok.hex, color: tok.ink }} aria-hidden>
+        <span
+          className="train-card-glyph"
+          style={{ background: tok.hex, color: tok.ink }}
+          aria-hidden
+        >
           {tok.glyph}
         </span>
       )}
-      {count !== undefined && <span className="train-card-count">×{count}</span>}
+      {count !== undefined && showCount && <span className="train-card-count">×{count}</span>}
     </div>
   );
 }
