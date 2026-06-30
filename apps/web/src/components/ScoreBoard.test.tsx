@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema, Phase } from '@trm/proto';
@@ -96,5 +96,23 @@ describe('ScoreBoard', () => {
     fireEvent.click(screen.getByLabelText('在地圖上查看'));
     expect(useAnimations.getState().routeReveal).toEqual({ seat: 0, path: longestRoutes });
     expect(screen.getByText('返回計分板')).toBeInTheDocument();
+  });
+
+  it('dismisses the scoreboard to inspect the map, then returns to it', () => {
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+    fireEvent.click(screen.getByText('查看地圖'));
+    // The scoreboard dialog is gone; only the floating inspect bar remains.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByText('正在查看地圖')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('返回計分板'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('leaves directly from the inspect-map bar without reopening the scoreboard', () => {
+    const onLeave = vi.fn();
+    render(<ScoreBoard snapshot={snap} onLeave={onLeave} />);
+    fireEvent.click(screen.getByText('查看地圖'));
+    fireEvent.click(screen.getByText('離開遊戲'));
+    expect(onLeave).toHaveBeenCalledTimes(1);
   });
 });

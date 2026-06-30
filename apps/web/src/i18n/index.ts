@@ -159,6 +159,9 @@ const resources = {
       viewOnMap: '在地圖上查看',
       backToScores: '返回計分板',
       longestRouteOf: '{{name}} 的最長路線',
+      inspectMap: '查看地圖',
+      inspectingMap: '正在查看地圖',
+      leaveGame: '離開遊戲',
 
       fanfareTitle: '任務完成',
       fanfareLong: '長途任務！',
@@ -359,6 +362,9 @@ const resources = {
       viewOnMap: 'View on map',
       backToScores: 'Back to scores',
       longestRouteOf: "{{name}}'s longest route",
+      inspectMap: 'Inspect map',
+      inspectingMap: 'Viewing the map',
+      leaveGame: 'Leave game',
 
       fanfareTitle: 'Ticket Complete',
       fanfareLong: 'Long Haul!',

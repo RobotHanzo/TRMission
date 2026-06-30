@@ -38,8 +38,9 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
 
   const [ticketModal, setTicketModal] = useState<TicketModal | null>(null);
   const [viewingMap, setViewingMap] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState(false);
 
-  useConfetti(!viewingMap);
+  useConfetti(!viewingMap && !dismissed);
 
   // Always drop any lingering map highlight when the scoreboard unmounts (e.g. leaving the game).
   useEffect(() => () => clearRouteReveal(), [clearRouteReveal]);
@@ -79,6 +80,24 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
           <button className="primary" onClick={backToScores}>
             {t('backToScores')}
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Inspect-map mode: the player dismissed the scoreboard to pan/zoom the final board freely.
+  // A small floating bar offers to reopen the scoreboard or leave the game directly.
+  if (dismissed) {
+    return (
+      <div className="scoreboard-review">
+        <div className="review-bar">
+          <span className="review-caption">
+            <MapIcon size={15} aria-hidden /> {t('inspectingMap')}
+          </span>
+          <button className="primary" onClick={() => setDismissed(false)}>
+            {t('backToScores')}
+          </button>
+          <button onClick={onLeave}>{t('leaveGame')}</button>
         </div>
       </div>
     );
@@ -185,9 +204,14 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
             </tbody>
           </table>
         </div>
-        <button className="primary" onClick={onLeave}>
-          {t('back')}
-        </button>
+        <div className="scoreboard-actions">
+          <button onClick={() => setDismissed(true)}>
+            <MapIcon size={14} aria-hidden /> {t('inspectMap')}
+          </button>
+          <button className="primary" onClick={onLeave}>
+            {t('leaveGame')}
+          </button>
+        </div>
       </div>
 
       {ticketModal && modalPlayer && (

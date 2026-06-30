@@ -1372,6 +1372,16 @@ button.ticket-card:hover {
 .scoreboard tr.winner {
   background: color-mix(in srgb, var(--tr-ember) 12%, transparent);
 }
+.scoreboard-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--tr-space-3);
+}
+.scoreboard-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .cell-value {
   display: inline-flex;
   align-items: center;
