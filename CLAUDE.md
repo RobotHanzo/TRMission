@@ -36,6 +36,16 @@ yarn workspace @trm/web dev            # app on :5173 (proxies /api + /ws → :3
 After editing a `.proto`, regenerate (`yarn workspace @trm/proto generate`) — `src/gen/**` is
 gitignored and a drift between it and the `.proto` is a CI failure.
 
+## Git workflow
+
+- **Commit automatically once your work is done and validated** (relevant build/typecheck/lint/test
+  commands pass), unless the user says otherwise for that task. Don't wait to be asked — land
+  validated work in a commit by default.
+- **Multiple agents may be working in this worktree at the same time.** Before committing, check
+  `git status`/`git diff` and stage only the files your own session actually changed. Never use
+  `git add -A`/`git add .` here — it can sweep up another session's in-progress or unrelated
+  changes into your commit.
+
 ## Monorepo layout & build order
 
 ```
