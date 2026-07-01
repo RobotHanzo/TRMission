@@ -24,6 +24,7 @@ import type { GameStorePort } from '../persistence/types';
 import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
 import { chooseBotAction } from '../bots/policy';
 import type { BotProfile } from '../bots/types';
+import { botStepDelayMs } from './bot-pacing';
 import {
   rejectionToPb,
   viewToSnapshot,
@@ -506,7 +507,9 @@ export class GameHub {
         if (!match || match.session.phase === 'GAME_OVER') break;
         const profile = this.nextActableBot(match, bots);
         if (!profile) break; // nothing for a bot to do → waiting on a human
-        if (this.botMoveDelayMs > 0) await sleep(this.botMoveDelayMs);
+        const revealedCount = match.session.raw().pendingTunnel?.revealed.length ?? 0;
+        const delay = botStepDelayMs(match.session.phase, revealedCount, this.botMoveDelayMs);
+        if (delay > 0) await sleep(delay);
 
         let moved = false;
         await match.queue.run(async () => {
