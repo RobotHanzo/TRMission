@@ -217,7 +217,7 @@ export const useUi = create<UiState>()((set, get) => ({
   clearHomeFocus: () => set({ homeFocus: null }),
   enterRoom: (code) => {
     pushPath(`/room/${code}`);
-    set({ view: 'room', roomCode: code });
+    set({ view: 'room', roomCode: code, replayGameId: null });
   },
   // The URL is already /room/:code (the room was entered first), so leave it untouched.
   enterGame: (gameId, ticket) => set({ view: 'game', gameId, ticket }),
@@ -249,7 +249,7 @@ export const useUi = create<UiState>()((set, get) => ({
       // PUSH /room/:code on top of it, trapping the back button into re-entering the room.
       const room = decodeURIComponent(code).toUpperCase();
       replacePath(`/room/${room}`);
-      set({ view: 'room', roomCode: room });
+      set({ view: 'room', roomCode: room, replayGameId: null });
       return;
     }
     if (target === HISTORY_PATH) {
@@ -328,7 +328,7 @@ export const useUi = create<UiState>()((set, get) => ({
     const code = roomCodeFromPath();
     if (code) {
       if (authed) {
-        set({ view: 'room', roomCode: code });
+        set({ view: 'room', roomCode: code, replayGameId: null });
         return;
       }
       get().navigateLogin(`/room/${code}`);

@@ -130,6 +130,28 @@ describe('ui store routing', () => {
     useUi.getState().goHome();
     expect(useUi.getState().replayGameId).toBeNull();
   });
+
+  it('enterRoom clears a stale replayGameId', () => {
+    useUi.getState().enterReplay('game-9');
+    useUi.getState().enterRoom('ABCD');
+    expect(useUi.getState().replayGameId).toBeNull();
+  });
+
+  it('syncFromUrl(authed) on /room/:code clears a stale replayGameId (browser Back from a replay)', () => {
+    useUi.getState().enterReplay('game-9');
+    window.history.replaceState(null, '', '/room/ABCD');
+    useUi.getState().syncFromUrl(true);
+    expect(useUi.getState().view).toBe('room');
+    expect(useUi.getState().replayGameId).toBeNull();
+  });
+
+  it('navigateAfterAuth resuming a room target clears a stale replayGameId', () => {
+    useUi.getState().enterReplay('game-9');
+    window.history.replaceState(null, '', '/login?redirect=%2Froom%2FWXYZ');
+    useUi.getState().navigateAfterAuth();
+    expect(useUi.getState().view).toBe('room');
+    expect(useUi.getState().replayGameId).toBeNull();
+  });
 });
 
 describe('ui store board layout', () => {
