@@ -93,20 +93,27 @@ auto-pan, matching live behavior).
 
 All in `apps/web`:
 
-1. `src/game/boardView.ts` — add `instant?: boolean` to `BoardFrameTarget`.
-2. `src/components/Board.tsx` — `SpotlightFramer`'s duration expression only.
+1. `src/game/boardView.ts` — add `instant?: boolean` to `BoardFrameTarget`, plus a small pure
+   `frameDurationMs(target, reducedMotion)` helper so the duration decision is unit-testable without
+   the pan/zoom library or a real `<svg>` `getCTM()` (unavailable in jsdom).
+2. `src/components/Board.tsx` — `SpotlightFramer` calls `frameDurationMs` instead of inlining the
+   duration expression; no other change.
 3. `src/features/replay/useReplayPlayer.ts` — add `animate` to `ReplayControls` and set it in `next()`
    / `applyTo()`.
-4. `src/screens/ReplayScreen.tsx` — in `ReplayStage`: derive `frameTarget` from `actions[step - 1]` and
-   `followActing`; pass it to `GameStage`; set `followActing = true` on mount.
-5. **Tests:**
-   - `src/components/Board.test.tsx` — no existing `SpotlightFramer` coverage today; add a case
-     rendering `Board` with a `frameTarget` that has `instant: true` and asserting the resulting
-     transform has a 0ms duration (vs. 600ms without it).
+4. `src/features/replay/frameTarget.ts` (new) — `frameTargetForAction(action, instant)`, the pure
+   action→`BoardFrameTarget` mapping, factored out so it's unit-testable independent of React/DOM.
+5. `src/screens/ReplayScreen.tsx` — in `ReplayStage`: derive `frameTarget` from `actions[step - 1]` via
+   `frameTargetForAction`, gated on `followActing`; pass it to `GameStage`; set `followActing = true` on
+   mount.
+6. **Tests:**
+   - `src/game/boardView.test.ts` — `frameDurationMs`'s four cases (instant/reduced-motion × true/false).
+   - `src/features/replay/frameTarget.test.ts` — the action→`frameTarget` mapping (route/city/null cases).
    - `src/features/replay/useReplayPlayer.test.ts` — `animate` is `true` after `next()`, `false` after
      `seek()`, `prev()`, and `setViewer()`.
-   - `src/screens/ReplayScreen.test.tsx` — the action→`frameTarget` mapping (route/city/null cases) and
-     the follow-defaults-on-mount behavior.
+   - `src/screens/ReplayScreen.test.tsx` — the follow-defaults-on-mount behavior. (`Board.test.tsx` gets
+     no new case: jsdom's `<svg>` has no real `getCTM()`, so `SpotlightFramer`'s `setTransform` call is
+     never reached end-to-end there — Task 2 in the implementation plan is a regression-only change,
+     verified by the existing tutorial/encyclopedia suites plus the two unit-tested pure functions above.)
 
 ## Out of scope
 
