@@ -211,9 +211,6 @@ describe('GET /api/v1/history/:gameId/replay', () => {
       winners: [],
       completedAt: now,
     });
-    await request(server())
-      .get('/api/v1/history/live-1/replay')
-      .set(auth(host.token))
-      .expect(404);
+    await request(server()).get('/api/v1/history/live-1/replay').set(auth(host.token)).expect(404);
   });
 });
