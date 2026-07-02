@@ -27,6 +27,7 @@ import {
   viewToTransform,
   boardProjection,
   visibleFraction,
+  frameDurationMs,
   type BoardTransform,
 } from '../game/boardView';
 import { BASE_VIEW, fitTransform } from '../game/geography';
@@ -406,8 +407,8 @@ function SpotlightFramer({
     if (!proj || w <= 0 || h <= 0) return;
     const span = Math.min(100, Math.max(22, Math.max(maxX - minX, maxY - minY) + 16));
     const t = viewToTransform({ cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, span }, proj, w, h);
-    setTransform(t.positionX, t.positionY, t.scale, reduced ? 0 : 600, 'easeOut');
-  }, [key, reduced]);
+    setTransform(t.positionX, t.positionY, t.scale, frameDurationMs(target, reduced), 'easeOut');
+  }, [key, target, reduced]);
   return null;
 }
 
