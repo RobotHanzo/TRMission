@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { GameModule } from './game/game.module';
 import { LobbyModule } from './lobby/lobby.module';
 import { HistoryModule } from './history/history.module';
+import { MapsModule } from './maps/maps.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { HealthController } from './health/health.controller';
 import { DocsController } from './openapi/docs.controller';
@@ -21,6 +22,7 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 240 }]),
     DatabaseModule,
     AuthModule,
+    MapsModule,
     GameModule,
     LobbyModule,
     HistoryModule,

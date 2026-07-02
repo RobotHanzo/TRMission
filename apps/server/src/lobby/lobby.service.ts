@@ -8,6 +8,7 @@ import { randomUUID } from 'node:crypto';
 import { buildBoard } from '@trm/engine';
 import type { Board, GameConfig, PlayerSeed } from '@trm/engine';
 import { officialMapById } from '@trm/map-data';
+import type { MapRules } from '@trm/map-data';
 import { asPlayerId, type SeatIndex } from '@trm/shared';
 import {
   RoomRepo,
@@ -22,6 +23,7 @@ import { GameHub } from '../ws/hub';
 import { TokenService } from '../auth/token.service';
 import type { AuthUser } from '../auth/auth.types';
 import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '../bots/types';
+import { MapsService } from '../maps/maps.service';
 
 export interface RoomView {
   code: string;
@@ -46,17 +48,6 @@ function mapNameFor(selector: MapSelector): { zh: string; en: string } | undefin
   return official ? { zh: official.content.meta.nameZh, en: official.content.meta.nameEn } : undefined;
 }
 
-/** Resolve a map selector into the board + contentHash a game should start with.
- *  Throws BadRequestException on an unknown official map or an as-yet-unsupported custom map. */
-function resolveMap(selector: MapSelector): { board: Board; contentHash: string } {
-  if (selector.source === 'official') {
-    const official = officialMapById(selector.mapId);
-    if (!official) throw new BadRequestException(`unknown official map: ${selector.mapId}`);
-    return { board: buildBoard(official.content), contentHash: official.hash };
-  }
-  throw new BadRequestException('custom maps are not yet supported');
-}
-
 const toView = (r: RoomDoc): RoomView => {
   const settings = { ...DEFAULT_ROOM_SETTINGS, ...r.settings };
   const mapName = mapNameFor(settings.map);
@@ -78,7 +69,39 @@ export class LobbyService {
     private readonly rooms: RoomRepo,
     private readonly hub: GameHub,
     private readonly tokens: TokenService,
+    private readonly maps: MapsService,
   ) {}
+
+  /** Validate a selector is usable (existence + ownership for custom), without fully resolving
+   *  it — cheap enough to run on every settings PATCH. Full playability is checked at start. */
+  private async assertMapSelectable(selector: MapSelector, callerUserId: string): Promise<void> {
+    if (selector.source === 'official') {
+      if (!officialMapById(selector.mapId)) {
+        throw new BadRequestException(`unknown official map: ${selector.mapId}`);
+      }
+      return;
+    }
+    await this.maps.requireOwned(selector.customMapId, callerUserId);
+  }
+
+  /** Resolve a selector into the board/content/rules to actually start a game with. */
+  private async resolveMapForStart(
+    selector: MapSelector,
+    callerUserId: string,
+    maxPlayers: number,
+  ): Promise<{ board: Board; contentHash: string; mapRules: MapRules }> {
+    if (selector.source === 'official') {
+      const official = officialMapById(selector.mapId);
+      if (!official) throw new BadRequestException(`unknown official map: ${selector.mapId}`);
+      return {
+        board: buildBoard(official.content),
+        contentHash: official.hash,
+        mapRules: official.content.rules ?? {},
+      };
+    }
+    const map = await this.maps.requireOwned(selector.customMapId, callerUserId);
+    return this.maps.resolveForStart(map, maxPlayers);
+  }
 
   async create(user: AuthUser, maxPlayers = 5): Promise<RoomView> {
     const host: RoomMember = {
@@ -156,7 +179,7 @@ export class LobbyService {
 
   /** Host updates the per-game settings while the room is still in LOBBY. */
   async updateSettings(code: string, user: AuthUser, patch: RoomSettingsPatch): Promise<RoomView> {
-    if (patch.map) resolveMap(patch.map); // throws BadRequestException on an invalid selector
+    if (patch.map) await this.assertMapSelectable(patch.map, user.userId);
     const r = await this.rooms.updateSettings(code, user.userId, patch);
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'started') throw new BadRequestException('game already started');
@@ -185,12 +208,17 @@ export class LobbyService {
       .sort((a, b) => a.seat - b.seat)
       .map((m) => ({ id: asPlayerId(m.userId), seat: m.seat as SeatIndex }));
     const s = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
-    const { board, contentHash } = resolveMap(s.map);
+    const { board, contentHash, mapRules } = await this.resolveMapForStart(
+      s.map,
+      user.userId,
+      room.maxPlayers,
+    );
     const config: GameConfig = {
       seed,
       players,
       contentHash,
       ruleParams: {
+        ...mapRules,
         unlimitedStationBorrow: s.unlimitedStationBorrow,
         secondDrawAfterBlindRainbow: s.secondDrawAfterBlindRainbow,
         noUnfinishedTicketPenalty: s.noUnfinishedTicketPenalty,

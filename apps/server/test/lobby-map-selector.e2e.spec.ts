@@ -61,7 +61,7 @@ describe('lobby: map selector', () => {
       .expect(400);
   });
 
-  it('rejects a custom map selector before the maps module exists', async () => {
+  it('rejects a custom map selector pointing at a nonexistent/unowned map (404)', async () => {
     const a = await guest('Host3');
     const room = await request(server())
       .post('/api/v1/rooms')
@@ -73,7 +73,7 @@ describe('lobby: map selector', () => {
       .patch(`/api/v1/rooms/${code}/settings`)
       .set(auth(a.token))
       .send({ map: { source: 'custom', customMapId: 'abc123' } })
-      .expect(400);
+      .expect(404);
   });
 
   it('resolves the selected official map into the started game config', async () => {
