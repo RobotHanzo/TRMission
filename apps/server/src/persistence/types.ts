@@ -27,6 +27,8 @@ export interface GameDoc {
   currentSeq: number;
   /** Bot players in this game (so the driver resumes them after crash recovery). */
   bots?: BotProfile[];
+  /** userIds who ever spectated (never seated players); grants history/replay access. */
+  spectators?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -80,6 +82,10 @@ export interface MatchHistoryDoc {
   contentHash: string;
   finalScores: FinalScoreboard;
   winners: string[];
+  /** Spectator userIds copied from the game doc at completion (absent on legacy docs). */
+  spectators?: string[];
+  /** ENGINE_VERSION the game ran on, for replayability flags (absent on legacy docs). */
+  engineVersion?: number;
   completedAt: Date;
 }
 
@@ -100,6 +106,8 @@ export interface GameStorePort {
   ): Promise<void>;
   /** At game over: mark COMPLETED and archive a match-history record. */
   recordCompletion(gameId: string, finalState: GameState): Promise<void>;
+  /** Record that a user spectated this game (idempotent; no-op for unknown games). */
+  addSpectator(gameId: string, userId: string): Promise<void>;
   loadForRecovery(gameId: string): Promise<RecoveryData | null>;
   appendChat(gameId: string, seq: number, playerId: string, text: string): Promise<void>;
   loadChat(gameId: string): Promise<ChatEntry[]>;

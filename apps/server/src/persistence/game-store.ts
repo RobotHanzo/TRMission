@@ -37,6 +37,9 @@ export async function ensureIndexes(db: Db): Promise<void> {
   await db
     .collection<MatchHistoryDoc>('matchHistory')
     .createIndex({ 'players.userId': 1, completedAt: -1 });
+  await db
+    .collection<MatchHistoryDoc>('matchHistory')
+    .createIndex({ spectators: 1, completedAt: -1 });
 }
 
 export class MongoGameStore implements GameStorePort {
@@ -124,10 +127,22 @@ export class MongoGameStore implements GameStorePort {
           contentHash: game.contentHash,
           finalScores: scores,
           winners: (scores.ranking[0] ?? []).map((id) => id as string),
+          // A seated member can also mint a spectate ticket — their role stays "player".
+          spectators: (game.spectators ?? []).filter(
+            (id) => !game.config.players.some((p) => p.id === id),
+          ),
+          engineVersion: game.engineVersion,
           completedAt: now,
         },
       },
       { upsert: true, writeConcern: { w: 'majority' } },
+    );
+  }
+
+  async addSpectator(gameId: string, userId: string): Promise<void> {
+    await this.games.updateOne(
+      { _id: gameId },
+      { $addToSet: { spectators: userId }, $set: { updatedAt: new Date() } },
     );
   }
 
