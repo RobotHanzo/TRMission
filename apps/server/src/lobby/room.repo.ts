@@ -7,8 +7,13 @@ import type { BotDifficulty } from '../bots/types';
 export type RoomStatus = 'LOBBY' | 'STARTED' | 'CLOSED';
 export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
 
-/** Host-configured per-game settings. Rule variants flow into the engine at start; spectating &
- *  visibility are control-plane only. */
+/** Which map a room's game will be played on. 'custom' is validated/resolved by MapsService. */
+export type MapSelector =
+  | { source: 'official'; mapId: string }
+  | { source: 'custom'; customMapId: string };
+
+/** Host-configured per-game settings. Rule variants flow into the engine at start; spectating,
+ *  visibility, and the map selection are control-plane only. */
 export interface RoomSettings {
   unlimitedStationBorrow: boolean;
   secondDrawAfterBlindRainbow: boolean;
@@ -16,6 +21,7 @@ export interface RoomSettings {
   doubleRouteSingleFor23: boolean;
   allowSpectating: boolean;
   visibility: RoomVisibility;
+  map: MapSelector;
 }
 
 export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
@@ -25,6 +31,7 @@ export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   doubleRouteSingleFor23: true,
   allowSpectating: true,
   visibility: 'INVITE_ONLY',
+  map: { source: 'official', mapId: 'taiwan' },
 };
 
 export interface RoomMember {

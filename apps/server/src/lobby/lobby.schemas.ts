@@ -7,6 +7,11 @@ export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).m
 export const ReadySchema = z.object({ ready: z.boolean() });
 export const AddBotSchema = z.object({ difficulty: botDifficulty });
 
+export const MapSelectorSchema = z.discriminatedUnion('source', [
+  z.object({ source: z.literal('official'), mapId: z.string().min(1) }),
+  z.object({ source: z.literal('custom'), customMapId: z.string().min(1) }),
+]);
+
 export const GameSettingsSchema = z.object({
   unlimitedStationBorrow: z.boolean(),
   secondDrawAfterBlindRainbow: z.boolean(),
@@ -14,6 +19,7 @@ export const GameSettingsSchema = z.object({
   doubleRouteSingleFor23: z.boolean(),
   allowSpectating: z.boolean(),
   visibility: z.enum(['PUBLIC', 'INVITE_ONLY']),
+  map: MapSelectorSchema,
 });
 export const UpdateSettingsSchema = GameSettingsSchema.partial();
 
@@ -39,5 +45,7 @@ export const RoomViewSchema = z.object({
   members: z.array(RoomMemberSchema),
   settings: GameSettingsSchema,
   gameId: z.string().optional(),
+  /** Resolved display name for settings.map, when known (e.g. an official map). */
+  mapName: z.object({ zh: z.string(), en: z.string() }).optional(),
 });
 export const TicketResultSchema = z.object({ gameId: z.string(), ticket: z.string() });

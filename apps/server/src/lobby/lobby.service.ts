@@ -5,12 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { taiwanBoard, CONTENT_HASH } from '@trm/engine';
-import type { GameConfig, PlayerSeed } from '@trm/engine';
+import { buildBoard } from '@trm/engine';
+import type { Board, GameConfig, PlayerSeed } from '@trm/engine';
+import { officialMapById } from '@trm/map-data';
 import { asPlayerId, type SeatIndex } from '@trm/shared';
 import {
   RoomRepo,
   DEFAULT_ROOM_SETTINGS,
+  type MapSelector,
   type RoomDoc,
   type RoomMember,
   type RoomSettings,
@@ -29,6 +31,7 @@ export interface RoomView {
   members: RoomMember[];
   settings: RoomSettings;
   gameId?: string;
+  mapName?: { zh: string; en: string };
 }
 
 export interface TicketResult {
@@ -36,15 +39,38 @@ export interface TicketResult {
   ticket: string;
 }
 
-const toView = (r: RoomDoc): RoomView => ({
-  code: r._id,
-  hostId: r.hostId,
-  status: r.status,
-  maxPlayers: r.maxPlayers,
-  members: r.members,
-  settings: { ...DEFAULT_ROOM_SETTINGS, ...r.settings },
-  ...(r.gameId ? { gameId: r.gameId } : {}),
-});
+/** Display name for a map selector, when resolvable (official maps only, for now). */
+function mapNameFor(selector: MapSelector): { zh: string; en: string } | undefined {
+  if (selector.source !== 'official') return undefined;
+  const official = officialMapById(selector.mapId);
+  return official ? { zh: official.content.meta.nameZh, en: official.content.meta.nameEn } : undefined;
+}
+
+/** Resolve a map selector into the board + contentHash a game should start with.
+ *  Throws BadRequestException on an unknown official map or an as-yet-unsupported custom map. */
+function resolveMap(selector: MapSelector): { board: Board; contentHash: string } {
+  if (selector.source === 'official') {
+    const official = officialMapById(selector.mapId);
+    if (!official) throw new BadRequestException(`unknown official map: ${selector.mapId}`);
+    return { board: buildBoard(official.content), contentHash: official.hash };
+  }
+  throw new BadRequestException('custom maps are not yet supported');
+}
+
+const toView = (r: RoomDoc): RoomView => {
+  const settings = { ...DEFAULT_ROOM_SETTINGS, ...r.settings };
+  const mapName = mapNameFor(settings.map);
+  return {
+    code: r._id,
+    hostId: r.hostId,
+    status: r.status,
+    maxPlayers: r.maxPlayers,
+    members: r.members,
+    settings,
+    ...(r.gameId ? { gameId: r.gameId } : {}),
+    ...(mapName ? { mapName } : {}),
+  };
+};
 
 @Injectable()
 export class LobbyService {
@@ -130,6 +156,7 @@ export class LobbyService {
 
   /** Host updates the per-game settings while the room is still in LOBBY. */
   async updateSettings(code: string, user: AuthUser, patch: RoomSettingsPatch): Promise<RoomView> {
+    if (patch.map) resolveMap(patch.map); // throws BadRequestException on an invalid selector
     const r = await this.rooms.updateSettings(code, user.userId, patch);
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'started') throw new BadRequestException('game already started');
@@ -158,10 +185,11 @@ export class LobbyService {
       .sort((a, b) => a.seat - b.seat)
       .map((m) => ({ id: asPlayerId(m.userId), seat: m.seat as SeatIndex }));
     const s = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+    const { board, contentHash } = resolveMap(s.map);
     const config: GameConfig = {
       seed,
       players,
-      contentHash: CONTENT_HASH,
+      contentHash,
       ruleParams: {
         unlimitedStationBorrow: s.unlimitedStationBorrow,
         secondDrawAfterBlindRainbow: s.secondDrawAfterBlindRainbow,
@@ -176,7 +204,7 @@ export class LobbyService {
     if (!(await this.rooms.markStarted(code, user.userId, gameId, seed))) {
       throw new BadRequestException('could not start (already started?)');
     }
-    await this.hub.createMatch(gameId, taiwanBoard(), config, bots);
+    await this.hub.createMatch(gameId, board, config, bots);
     return { gameId, ticket: this.ticketFor(gameId, user.userId, this.seatOf(room, user.userId)) };
   }
 
