@@ -40,7 +40,13 @@ describe('contextual log store', () => {
     const iso = createLogStore();
     iso.setState({
       entries: [
-        { id: 1, kind: 'gameStarted', playerId: null, data: {}, importance: 'normal' } as unknown as LogEntry,
+        {
+          id: 1,
+          kind: 'gameStarted',
+          playerId: null,
+          data: {},
+          importance: 'normal',
+        } as unknown as LogEntry,
       ],
       nextId: 2,
     });
