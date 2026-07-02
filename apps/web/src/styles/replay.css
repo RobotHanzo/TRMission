@@ -1,0 +1,101 @@
+.replay {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template:
+    'stage rail' minmax(0, 1fr)
+    'controls rail' auto / minmax(0, 1fr) 340px;
+  gap: var(--tr-space-3);
+}
+.replay-stage {
+  grid-area: stage;
+  position: relative;
+  min-height: 0;
+  display: flex;
+}
+.replay-rail {
+  grid-area: rail;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+  min-height: 0;
+}
+/* LogPanel is normally styled as a child of `.comms` (game.css); here it sits directly in the
+   replay rail, so give it the same card chrome + internal scroll. */
+.replay-rail .log-panel {
+  flex: 1;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+  padding: var(--tr-space-3) var(--tr-space-3) 0;
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  overflow: hidden;
+}
+.replay-controls {
+  grid-area: controls;
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-3);
+  padding: var(--tr-space-2) var(--tr-space-3);
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+}
+.replay-scrubber {
+  flex: 1;
+  min-width: 120px;
+}
+.replay-step {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--tr-ink-soft);
+}
+.replay-error {
+  max-width: 420px;
+  margin: var(--tr-space-8) auto;
+  display: grid;
+  gap: var(--tr-space-3);
+  justify-items: start;
+}
+.perspective-switcher {
+  display: grid;
+  gap: var(--tr-space-2);
+  flex: none;
+}
+.perspective-label {
+  font-size: 0.85em;
+  color: var(--tr-ink-soft);
+}
+.perspective-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tr-space-2);
+}
+.perspective-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tr-space-1);
+  padding: 3px var(--tr-space-3);
+  border-radius: 999px;
+}
+.perspective-pill.is-active {
+  outline: 2px solid var(--tr-accent);
+  outline-offset: 1px;
+}
+.perspective-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+@media (max-width: 900px) {
+  .replay {
+    grid-template:
+      'stage' minmax(0, 1fr)
+      'controls' auto
+      'rail' minmax(160px, 32vh) / minmax(0, 1fr);
+  }
+}
