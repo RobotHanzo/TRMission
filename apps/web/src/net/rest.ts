@@ -134,7 +134,7 @@ export interface TicketDraft {
 }
 export interface MapGeographyDraft {
   baseView: { x: number; y: number; w: number; h: number };
-  land: [number, number][][];
+  land: readonly (readonly (readonly [number, number])[])[];
   crop: { lonMin: number; lonMax: number; latMin: number; latMax: number };
 }
 export interface MapRulesDraft {

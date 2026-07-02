@@ -15,6 +15,9 @@ import './styles/app.css';
 const TutorialScreen = lazy(() => import('./features/tutorial/TutorialScreen'));
 const EncyclopediaModal = lazy(() => import('./features/tutorial/EncyclopediaModal'));
 const ReplayScreen = lazy(() => import('./screens/ReplayScreen'));
+// The map builder (world data + zod-shaped editor state) is its own chunk too.
+const MapsScreen = lazy(() => import('./features/builder/MapsScreen'));
+const MapEditorScreen = lazy(() => import('./features/builder/editor/EditorScreen'));
 
 export function App() {
   const { t, i18n } = useTranslation();
@@ -68,7 +71,8 @@ export function App() {
   }, [theme]);
 
   const isLogin = view === 'login' || view === 'loginCallback';
-  const isGameLayout = view === 'game' || view === 'tutorial' || view === 'replay';
+  const isGameLayout =
+    view === 'game' || view === 'tutorial' || view === 'replay' || view === 'mapEditor';
   const mainClass = isGameLayout
     ? 'app-main app-main--game'
     : isLogin
@@ -88,6 +92,16 @@ export function App() {
             {view === 'home' && <HomeScreen />}
             {view === 'room' && <RoomScreen />}
             {view === 'history' && <HistoryScreen />}
+            {view === 'maps' && (
+              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
+                <MapsScreen />
+              </Suspense>
+            )}
+            {view === 'mapEditor' && (
+              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
+                <MapEditorScreen />
+              </Suspense>
+            )}
             {view === 'replay' && (
               <Suspense fallback={<div className="card">{t('connecting')}</div>}>
                 <ReplayScreen />
