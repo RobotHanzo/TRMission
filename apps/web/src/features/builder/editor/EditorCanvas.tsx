@@ -65,7 +65,13 @@ export function EditorCanvas({
       <TransformWrapper minScale={0.5} maxScale={12} initialScale={1} centerOnInit wheel={{ step: 0.0022 }}>
         <ZoomVar targetRef={zoomVarRef} />
         <CanvasControls />
-        <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+        {/* contentStyle overrides the library's default `width/height: fit-content` on the inner
+            content div — without it the SVG's own 100%/100% resolves against an indefinite parent
+            and falls back to its tiny intrinsic size instead of filling (and tracking) the viewport. */}
+        <TransformComponent
+          wrapperStyle={{ width: '100%', height: '100%' }}
+          contentStyle={{ width: '100%', height: '100%' }}
+        >
           <svg
             ref={svgRef}
             className="board editor-canvas"

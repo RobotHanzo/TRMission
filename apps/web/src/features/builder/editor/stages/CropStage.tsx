@@ -165,7 +165,14 @@ export function CropStage() {
           >
             <ZoomVar targetRef={zoomVarRef} />
             <CanvasControls />
-            <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+            {/* contentStyle overrides the library's default `width/height: fit-content` on the
+                inner content div — without it the SVG's own 100%/100% resolves against an
+                indefinite parent and falls back to its tiny intrinsic size, so the world map
+                never actually fills (or grows with) the viewport. */}
+            <TransformComponent
+              wrapperStyle={{ width: '100%', height: '100%' }}
+              contentStyle={{ width: '100%', height: '100%' }}
+            >
               <svg
                 ref={svgRef}
                 className="board editor-world"
