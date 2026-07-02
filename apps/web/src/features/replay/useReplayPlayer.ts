@@ -24,6 +24,9 @@ export interface ReplayControls {
   viewer: PlayerId | null;
   atEnd: boolean;
   error: boolean;
+  /** True right after an animated forward step(); false after any silent rebuild (seek/prev/
+   *  setViewer/initial mount) — the glide-vs-snap signal for the replay camera-follow. */
+  animate: boolean;
   setViewer(viewer: PlayerId | null): void;
   play(): void;
   pause(): void;
@@ -44,6 +47,7 @@ export function useReplayPlayer(
   const [playing, setPlaying] = useState(false);
   const [viewer, setViewerState] = useState<PlayerId | null>(initialViewer);
   const [error, setError] = useState(false);
+  const [animate, setAnimate] = useState(false);
 
   const stepRef = useRef(0);
   const viewerRef = useRef(viewer);
@@ -124,6 +128,7 @@ export function useReplayPlayer(
         project(state, v);
         stepRef.current = clamped;
         setStep(clamped);
+        setAnimate(false);
       } catch {
         setError(true);
         setPlaying(false);
@@ -158,6 +163,7 @@ export function useReplayPlayer(
       }
       stepRef.current = n;
       setStep(n);
+      setAnimate(true);
     } catch {
       setError(true);
       setPlaying(false);
@@ -231,6 +237,7 @@ export function useReplayPlayer(
     viewer,
     atEnd: step >= actions.length,
     error,
+    animate,
     setViewer,
     play,
     pause,

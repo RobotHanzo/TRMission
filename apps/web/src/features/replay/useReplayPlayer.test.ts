@@ -106,4 +106,22 @@ describe('useReplayPlayer', () => {
     expect(game.getState().lastBatch).toBeNull();
     expect(batchesBefore).toBeGreaterThan(0);
   });
+
+  it('animate is true after next(), false again after any silent rebuild', () => {
+    const actions = scriptActions(10);
+    const { hook } = setup(actions, asPlayerId('p1'));
+    expect(hook.result.current.animate).toBe(false); // genesis: silent
+    act(() => hook.result.current.next());
+    expect(hook.result.current.animate).toBe(true); // forward step: animated
+    act(() => hook.result.current.seek(0));
+    expect(hook.result.current.animate).toBe(false); // seek: silent
+    act(() => hook.result.current.next());
+    expect(hook.result.current.animate).toBe(true);
+    act(() => hook.result.current.prev());
+    expect(hook.result.current.animate).toBe(false); // prev: silent
+    act(() => hook.result.current.next());
+    expect(hook.result.current.animate).toBe(true);
+    act(() => hook.result.current.setViewer(asPlayerId('p2')));
+    expect(hook.result.current.animate).toBe(false); // perspective switch: silent
+  });
 });
