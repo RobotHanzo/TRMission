@@ -13,7 +13,10 @@ import type { Board, GameConfig, GameState, PlayerSeed } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
 import { MongoGameStore, ensureIndexes } from '../src/persistence/game-store';
 import type { GameDoc, MatchHistoryDoc } from '../src/persistence/types';
-import { pickAction } from './helpers';
+import { pickAction, encodeClient } from './helpers';
+import { GameHub } from '../src/ws/hub';
+import { GameRegistry } from '../src/game/game-registry';
+import { makeDevTicket } from '../src/ws/ticket';
 
 let mongod: MongoMemoryServer;
 let client: MongoClient;
@@ -93,5 +96,43 @@ describe('spectator persistence', () => {
   it('creates the spectator history index', async () => {
     const indexes = await db.collection('matchHistory').indexes();
     expect(indexes.some((i) => i.key.spectators === 1 && i.key.completedAt === -1)).toBe(true);
+  });
+});
+
+describe('hub spectator recording', () => {
+  it('persists a spectator hello, but never a seated player', async () => {
+    const board = taiwanBoard();
+    const hub = new GameHub(new GameRegistry(), { store, botMoveDelayMs: 0 });
+    const config: GameConfig = { seed: 'spect-3', players, contentHash: CONTENT_HASH };
+    await hub.createMatch('gs3', board, config);
+
+    hub.openConnection('w1', () => {});
+    await hub.receive(
+      'w1',
+      encodeClient(1, {
+        case: 'hello',
+        value: {
+          ticket: makeDevTicket({ gameId: 'gs3', playerId: 'watcher', seat: -1 }),
+          protocolVersion: 1,
+        },
+      }),
+    );
+    // A seated player binding as a spectator must NOT be recorded.
+    hub.openConnection('w2', () => {});
+    await hub.receive(
+      'w2',
+      encodeClient(1, {
+        case: 'hello',
+        value: {
+          ticket: makeDevTicket({ gameId: 'gs3', playerId: 'u1', seat: -1 }),
+          protocolVersion: 1,
+        },
+      }),
+    );
+
+    // The persist is fire-and-forget off the hello path — give it a tick to settle.
+    await new Promise((r) => setTimeout(r, 25));
+    const doc = await db.collection<GameDoc>('games').findOne({ _id: 'gs3' });
+    expect(doc?.spectators ?? []).toEqual(['watcher']);
   });
 });

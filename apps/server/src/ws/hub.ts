@@ -254,6 +254,12 @@ export class GameHub {
         this.spectators.set(binding.gameId, set);
       }
       set.add(conn);
+      // Persist who spectated — grants post-game history/replay access. Never for seated
+      // players (a member can mint a spectate ticket; their role stays "player").
+      // Fire-and-forget: a store hiccup must not break the hello path (same posture as chat).
+      if (this.store && !match.session.turnOrder.includes(player)) {
+        void this.store.addSpectator(binding.gameId, binding.playerId).catch(() => {});
+      }
       // The Welcome.seat field is uint32 and unused by the client for spectators (they are
       // identified by the absent SelfView in the snapshot); send 0 to keep the binding at -1.
       conn.send(welcomeFrame(binding.gameId, binding.playerId, 0), clientSeq);
