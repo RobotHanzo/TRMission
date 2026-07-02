@@ -36,6 +36,11 @@ work). Per inbound game command:
 persist between them; `apply` = prepare+commit; `restore` rebuilds from a snapshot + action tail,
 **verifying each digest** (recovery aborts on divergence). `project(viewer)` = the engine's `redactFor`.
 
+`GameHubOptions.boardResolver(contentHash)` is `Board | Promise<Board>` — recovery `await`s it.
+`game.module.ts`'s factory checks the static official-map registry first (sync, no I/O), then falls
+back to `MapContentRepo.find(hash)` → `buildBoard` for custom maps. An unresolvable hash **throws**;
+recovery never silently falls back to Taiwan.
+
 ### The codec seam
 
 `src/codec/` is the only place engine types ⇄ proto types: `enums`, `snapshot` (`viewToSnapshot`),
@@ -62,7 +67,10 @@ transactions — every write for a game is serialized by its command queue. Spec
 completion. `GET /history/:gameId[/replay]` is membership-gated (players + spectators, 404
 otherwise); the `/replay` endpoint ships a **COMPLETED** game's full action log to that authorized
 viewer — the one sanctioned exception to "hidden info never leaves the server", hard-gated on
-`status: 'COMPLETED'` in `HistoryRepo.loadReplay`.
+`status: 'COMPLETED'` in `HistoryRepo.loadReplay`. A list entry's `isReplayable` batches its
+content-hash lookups (official registry ∪ one `mapContents` query for the unresolved hashes) rather
+than checking one game at a time — a custom map's draft being deleted never makes its past games
+disappear from history, only unreplayable would, and it never is (see `src/maps/` below).
 
 ## Auth, lobby, bots
 
@@ -82,8 +90,23 @@ viewer — the one sanctioned exception to "hidden info never leaves the server"
   the SPA's origin. A logged-in guest's id is read from the refresh cookie at `/oauth/:p/start`
   (`SessionRepo.peekUserId`, no rotation) and carried in the signed `state`, because the callback
   arrives cross-site without the cookie.
-- `src/lobby/` — rooms lifecycle with atomic seat CAS; `start` builds the `GameConfig`, calls
-  `hub.createMatch`, and hands back a ws-ticket. Bot add/remove are host-only.
+- `src/lobby/` — rooms lifecycle with atomic seat CAS; `RoomSettings.map` selects
+  `{source:'official', mapId}` or `{source:'custom', customMapId}` (default: official Taiwan).
+  `start` resolves the selector via `MapsService.resolveForStart` (validates a custom draft, hashes
+  it, and publishes to `mapContents` before the game exists), builds the `GameConfig` — including
+  `ruleParams: {...mapRules, ...roomVariantFlags}`, a disjoint merge since the map's curated
+  `RULE_BOUNDS` keys never overlap the variant-flag booleans — calls `hub.createMatch`, and hands back
+  a ws-ticket. Bot add/remove are host-only.
+- `src/maps/` — CRUD + sharing for user-authored maps, registered users only
+  (`RegisteredUserGuard`, 403 for guests). `customMaps` is a mutable per-owner draft (may be
+  invalid mid-edit); `mapContents` is an **immutable, append-only** `{contentHash → GameContent}`
+  store, insert-if-absent, written only at game start and **never garbage-collected** — a draft can
+  be edited or deleted after a game starts, but that game (and its replay) keeps resolving against
+  the exact content it was published with. Share/clone go through an 8-char share code
+  (`mintShareCode`/`peekByCode`/`cloneByCode`); peek/clone responses are shaped to never leak
+  `ownerId` or another user's map list. `GET /content/:hash` is a plain `AccessTokenGuard` route
+  (any authenticated viewer, including guests, may fetch content by its hash — the hash itself is
+  the unguessable capability) with `Cache-Control: private, immutable`.
 - `src/bots/` — a bot is an **ordinary seated player driven server-side**; the engine never knows.
   `policy.ts` ranks moves from the engine's own `legalActions` (so a bot can never make an illegal
   move) with difficulty-tuned heuristics; the choice is a deterministic function of `state + botId`.

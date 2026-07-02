@@ -2,18 +2,28 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-`@trm/map-data` is the **single authored source of truth** for the game's content (ADR A13): the
-46-city Taiwan graph, 90 route segments, and 46 destination tickets. Everything else (engine board,
+`@trm/map-data` is the **single authored source of truth** for official content (ADR A13) — the
+bundled Taiwan map is a 39-city graph, 68 route segments, and 42 destination tickets — and is also
+the shared library backing **user-authored custom maps** (validation, mission auto-generation). Both
+draw on the same `GameContent` shape, `hashContent`, and `validate()`. Everything else (engine board,
 client catalog, Mongo seed) is derived from it. Commands: `yarn workspace @trm/map-data test` /
 `… typecheck` / `… lint`.
 
 ## Structure & invariants
 
-- `cities.ts` / `routes.ts` / `tickets.ts` — the authored tables. `index.ts` assembles them into
-  `TAIWAN_CONTENT` and derives `CONTENT_HASH` (the shared digest of the content).
+- `cities.ts` / `routes.ts` / `tickets.ts` — the authored tables for the bundled Taiwan map.
+  `index.ts` assembles them into `TAIWAN_CONTENT`, derives `CONTENT_HASH`, and exports
+  `OFFICIAL_MAPS` / `officialMapById()` — the registry of maps that ship with the game (Taiwan is
+  `OFFICIAL_MAPS[0]`; add future official maps here, each with its own authored tables and hash).
 - `validate.ts` — `validate()` enforces the structural invariants the engine relies on: connected
   graph, no unreachable node, ferry/locomotive/length rules, ticket endpoints exist, no length-5/7
-  routes. **Run the tests after any content edit** — they assert these.
+  routes. **Run the tests after any content edit** — they assert these. `validateGeography()` and
+  `validateForPlay()` (below) additionally cover custom-map content that never goes through this file.
+- `graph.ts` — `shortestDistances()`: all-pairs Dijkstra over the route graph (min length per city
+  pair), used by mission auto-generation.
+- `generate.ts` — `generateTickets()`: deterministic mission auto-generation (seeded via
+  `@trm/shared`'s counter PRNG — same seed always produces the same ticket list) plus `RULE_BOUNDS`,
+  the min/max clamp for every tunable in `MapRules`.
 
 ## The critical gotcha: CONTENT_HASH and the version registry
 
@@ -42,3 +52,21 @@ are unaffected by content edits regardless of the registry.
   web board — keep them in that normalized space.
 - Route flags carry mechanics: `doubleGroup` (A–J pairs), `ferryLocos > 0` (gray ferry, N locomotives
   required), `isTunnel`. The engine reads these directly, so they must match the intended rule.
+
+## Extending `GameContent` without breaking old hashes
+
+`GameContent` carries two **optional** fields beyond the core cities/routes/tickets/meta used by
+custom maps: `geography?: MapGeography` (the cropped world backdrop — projected land rings +
+`baseView` + source crop bounds) and `rules?: MapRules` (a curated, bounded subset of `RuleParams`;
+keys and bounds live in `RULE_BOUNDS`). `hashContent` folds both in **spread-if-defined** — a content
+object with `geography`/`rules` omitted hashes byte-identically to one that never had those fields at
+all, because the shared digest (`packages/shared/src/digest.ts`) is a key-sorted `JSON.stringify`
+that drops `undefined` keys. This is why adding these fields didn't require a new archived version:
+the pinned Taiwan hash in `test/versions.spec.ts` held. `test/hash-extension.spec.ts` is the
+regression gate — it re-hashes content with/without these fields and asserts equality when absent.
+
+**Rule when adding another optional field to `GameContent`:** spread it in conditionally
+(`...(x !== undefined ? { x } : {})`), never assign it as an explicit key that can be `undefined`
+(`exactOptionalPropertyTypes` also rejects that at the type level), and add a case to
+`hash-extension.spec.ts` proving old content still hashes unchanged. Only bump `MAP_META.version` /
+freeze an archive when a **required** field changes or an authored table's content changes.
