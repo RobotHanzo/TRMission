@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { taiwanBoard } from '@trm/engine';
+import { taiwanBoard, replay, stateDigest } from '@trm/engine';
 import type { Board } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
 import { createTestApp, type TestApp } from './app';
 import { GameHub } from '../src/ws/hub';
 import { GameRegistry } from '../src/game/game-registry';
+import { storedToConfig, type GameDoc, type MatchHistoryDoc } from '../src/persistence/types';
 import { actionToCommand, encodeClient, pickAction } from './helpers';
 
 let t: TestApp;
@@ -152,5 +153,67 @@ describe('GET /api/v1/history/:gameId', () => {
     await request(server()).get(`/api/v1/history/${gameId}`).set(auth(watcher.token)).expect(200);
     await request(server()).get(`/api/v1/history/${gameId}`).set(auth(outsider.token)).expect(404);
     await request(server()).get(`/api/v1/history/${gameId}`).expect(401);
+  });
+});
+
+describe('GET /api/v1/history/:gameId/replay', () => {
+  it('returns config + the full ordered action log; a pure replay reproduces finalDigest', async () => {
+    const res = await request(server())
+      .get(`/api/v1/history/${gameId}/replay`)
+      .set(auth(host.token))
+      .expect(200);
+    expect(res.body.gameId).toBe(gameId);
+    expect(res.body.engineVersion).toBeTypeOf('number');
+    expect(res.body.schemaVersion).toBeTypeOf('number');
+    expect(res.body.actions.length).toBeGreaterThan(0);
+    expect(res.body.finalDigest).toBeTypeOf('string');
+    const names = res.body.players.map((p: { displayName?: string }) => p.displayName);
+    expect(names).toContain('Host');
+
+    // Determinism seal: replaying the returned log reproduces the persisted final digest.
+    const rep = replay(board, storedToConfig(res.body.config), res.body.actions);
+    expect(rep.state.turn.phase).toBe('GAME_OVER');
+    expect(stateDigest(rep.state)).toBe(res.body.finalDigest);
+  });
+
+  it('is allowed for spectators; 404 for non-members', async () => {
+    await request(server())
+      .get(`/api/v1/history/${gameId}/replay`)
+      .set(auth(watcher.token))
+      .expect(200);
+    await request(server())
+      .get(`/api/v1/history/${gameId}/replay`)
+      .set(auth(outsider.token))
+      .expect(404);
+  });
+
+  it('404 while a game is LIVE, even if an archive row exists (belt-and-braces)', async () => {
+    const now = new Date();
+    await t.db.collection<GameDoc>('games').insertOne({
+      _id: 'live-1',
+      seed: 's',
+      config: { seed: 's', players: [{ id: host.id, seat: 0 }], contentHash: 'x' },
+      engineVersion: 1,
+      contentHash: 'x',
+      schemaVersion: 1,
+      status: 'LIVE',
+      currentSeq: 0,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await t.db.collection<MatchHistoryDoc>('matchHistory').insertOne({
+      _id: 'live-1',
+      players: [{ userId: host.id, seat: 0 }],
+      turnOrder: [host.id],
+      seed: 's',
+      contentHash: 'x',
+      finalScores: { players: [], ranking: [] },
+      winners: [],
+      completedAt: now,
+    });
+    await request(server())
+      .get('/api/v1/history/live-1/replay')
+      .set(auth(host.token))
+      .expect(404);
   });
 });
