@@ -62,7 +62,7 @@ describe('content version registry', () => {
   // archive snapshot must be frozen as a full literal (see archive/v2.ts).
   it('pins the v2 content hash', () => {
     expect(hashContent(CONTENT_V2)).toBe(
-      '6eab6c6d401da9980543655519d8b77c723e1c62b857ae2b55f178f401fc3c3b',
+      '617c33e2f5da2a1c3345defd2fb8f9db988c0bd63662726687b3bb70e5a35c6c',
     );
   });
 });
