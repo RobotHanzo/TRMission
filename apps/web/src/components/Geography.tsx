@@ -1,4 +1,66 @@
-import { BASE_VIEW, ISLANDS, GRATICULE, TAIWAN_LAND_PATH, CENTRAL_RANGE_PATH } from '../game/geography';
+import type { MapGeography } from '@trm/map-data';
+import {
+  BASE_VIEW,
+  ISLANDS,
+  GRATICULE,
+  TAIWAN_LAND_PATH,
+  CENTRAL_RANGE_PATH,
+  smoothClosedPath,
+  type View,
+} from '../game/geography';
+import { ACTIVE_GEOGRAPHY } from '../game/catalog';
+
+/** Renders the active map's cartography: the hand-authored Taiwan coast for official Taiwan (or
+ *  any content without its own geography), else a custom map's cropped-world land silhouette. */
+export function GeographyLayer() {
+  return ACTIVE_GEOGRAPHY ? <CustomGeography geography={ACTIVE_GEOGRAPHY} /> : <Geography />;
+}
+
+/** A simple grid at a fixed step, sized to the map's own viewBox (custom maps have no hand-tuned
+ *  graticule the way Taiwan does). */
+function graticuleFor(view: View): { xs: number[]; ys: number[] } {
+  const step = 20;
+  const xs: number[] = [];
+  for (let x = Math.ceil(view.x / step) * step; x < view.x + view.w; x += step) xs.push(x);
+  const ys: number[] = [];
+  for (let y = Math.ceil(view.y / step) * step; y < view.y + view.h; y += step) ys.push(y);
+  return { xs, ys };
+}
+
+/** A custom map's cropped-world land silhouette: one smoothed path per ring, no relief/islands/
+ *  compass (those are hand-tuned Taiwan decorations with no generic equivalent). */
+export function CustomGeography({ geography }: { geography: MapGeography }) {
+  const { baseView, land } = geography;
+  const { xs, ys } = graticuleFor(baseView);
+  return (
+    <g className="geo" pointerEvents="none">
+      <rect
+        className="sea"
+        x={baseView.x - 40}
+        y={baseView.y - 40}
+        width={baseView.w + 80}
+        height={baseView.h + 80}
+      />
+      <g className="graticule">
+        {ys.map((y) => (
+          <line key={`gy${y}`} x1={baseView.x - 6} y1={y} x2={baseView.x + baseView.w + 6} y2={y} />
+        ))}
+        {xs.map((x) => (
+          <line key={`gx${x}`} x1={x} y1={baseView.y - 4} x2={x} y2={baseView.y + baseView.h + 4} />
+        ))}
+      </g>
+      {land.map((ring, i) => {
+        const d = smoothClosedPath(ring);
+        return (
+          <g key={i}>
+            <path className="land-surf" d={d} />
+            <path className="land" d={d} />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
 
 /**
  * Static cartography: sea, graticule, coastline, central-range relief, islands, compass. Shared by
