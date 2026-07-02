@@ -30,8 +30,9 @@ import {
   frameDurationMs,
   type BoardTransform,
 } from '../game/boardView';
-import { BASE_VIEW, fitTransform } from '../game/geography';
-import { Geography } from './Geography';
+import { fitTransform } from '../game/geography';
+import { ACTIVE_BASE_VIEW } from '../game/catalog';
+import { GeographyLayer } from './Geography';
 import { RouteShape, FerryLocoGradientDef } from './RouteShape';
 import { CARD_COLOR_TOKENS, GRAY_TOKEN, SEAT_COLORS } from '../theme/colors';
 import { useUi, type Locale } from '../store/ui';
@@ -57,8 +58,6 @@ interface BoardProps {
   /** Tutorial auto-pan: frame these routes/cities. Null/undefined leaves the camera alone. */
   frameTarget?: BoardFrameTarget | null | undefined;
 }
-
-const VIEWBOX = `${BASE_VIEW.x} ${BASE_VIEW.y} ${BASE_VIEW.w} ${BASE_VIEW.h}`;
 
 const colorOf = (rc: RouteColor): string =>
   rc === 'GRAY' ? GRAY_TOKEN.hex : CARD_COLOR_TOKENS[rc].hex;
@@ -507,6 +506,7 @@ export function Board({
   sandbox,
   frameTarget,
 }: BoardProps) {
+  const viewBox = `${ACTIVE_BASE_VIEW.x} ${ACTIVE_BASE_VIEW.y} ${ACTIVE_BASE_VIEW.w} ${ACTIVE_BASE_VIEW.h}`;
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const stationCities = useMemo(() => {
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
@@ -638,9 +638,9 @@ export function Board({
           contentClass="board-content"
           wrapperStyle={{ width: '100%', height: '100%' }}
         >
-          <svg className="board" viewBox={VIEWBOX} role="img" aria-label="Taiwan railway map">
+          <svg className="board" viewBox={viewBox} role="img" aria-label="Taiwan railway map">
             <FerryLocoGradientDef />
-            <Geography />
+            <GeographyLayer />
 
             {ROUTES.map((r) => {
               const g = ROUTE_GEOMETRY.get(r.id as string);

@@ -46,16 +46,43 @@ The game flow: lobby `start`/`ticket` (REST) → `connectGame(ticket)` → socke
 
 ## Rendering & content
 
-- `components/Board.tsx` — one fluid SVG (viewBox) drawing all routes/cities from the content
-  catalog; city coordinates come from `@trm/map-data` normalized x/y. Self-developed graphics only —
-  **no copied artwork**; Lucide icons are UI chrome only. The static cartography is factored into
-  `components/Geography.tsx`, shared with `components/MapBackdrop.tsx` — a non-interactive,
-  base-colour render of the board used as the blurred backdrop on `LoginScreen` (it pins
-  `--inv-scale` since there's no in-game `.board-viewport` to set it live).
+- The client is **not** hardcoded to Taiwan: `game/catalog.ts` builds a `ContentCatalog` (content +
+  id maps + geometry + display names) from whatever `GameContent` the active game/replay/editor is
+  using, and `game/contentCache.ts` resolves a `contentHash` to one — bundled official maps resolve
+  synchronously, anything else (a custom map) fetches `GET /api/v1/maps/content/:hash` and caches by
+  hash (never a single "current content" singleton, so a stale in-flight fetch for a hash you've
+  since navigated away from can't clobber the active catalog). `useActiveContent(hash)` is the hook
+  screens gate rendering on; `GameScreen`/`ReplayScreen` show a loading veil until it's `'ready'`.
+- `components/Board.tsx` — one fluid SVG (`viewBox` from the active catalog's `baseView`, not a
+  constant) drawing all routes/cities from the content catalog; city coordinates come from the
+  catalog's normalized x/y. Self-developed graphics only — **no copied artwork**; Lucide icons are UI
+  chrome only. `components/Geography.tsx` exports `GeographyLayer`, which switches between the
+  built-in Taiwan coastline and `CustomGeography` (a custom map's cropped-and-projected land rings,
+  stored on `content.geography`, smoothed with the same Catmull-Rom rendering as the bundled map) —
+  also used by `components/MapBackdrop.tsx`, the blurred non-interactive backdrop on `LoginScreen`
+  (pins `--inv-scale` since there's no live `.board-viewport` there).
 - `theme/colors.ts` — the 8 card colours (each with a colour-blind glyph) and `SEAT_COLORS` (abstract
   seat indices coloured here, distinct from card colours). Respect the colour-blind setting.
 - `i18n/index.ts` — react-i18next, zh-Hant primary + en fallback. UI strings live here; **city/ticket
-  names are content** and resolve from the catalog by id (`game/content.ts`), not from these tables.
+  names are content** and resolve from the active catalog by id, not from these tables.
+
+## Custom map builder (`features/builder/`, lazy-loaded)
+
+Registered-users-only (guests can play a custom map, not author one) authoring UI at `/maps` (list +
+clone-by-code) and `/maps/:id/edit` (staged editor: Crop → Stops → Routes → Missions → Rules →
+Share). Its own zustand store (`editor/store.ts`) with undo and debounced autosave; a single SVG
+canvas (`editor/EditorCanvas.tsx`, react-zoom-pan-pinch + the existing `boardView.ts` pixel→board
+projection) shared across stages; a live `ValidationPanel` runs `@trm/map-data`'s
+`validate`/`validateGeography`/`validateForPlay` client-side as you edit (map-data ships TS source,
+so it's directly importable — no server round-trip needed to see errors). World cropping
+(`geo/world.ts`, `geo/projection.ts` — equirectangular scaled by `cos(midLat)` — `geo/clip.ts`
+Sutherland–Hodgman, `geo/simplify.ts` Douglas–Peucker) runs entirely client-side against a bundled
+Natural Earth 1:110m land dataset (`geo/worldData.ts`, public domain); the result is rounded to 2 dp
+**before** it's ever hashed, so re-publishing an untouched draft produces the same `contentHash`.
+Mission auto-generation calls `@trm/map-data`'s `generateTickets` directly (seeded — same seed always
+reproduces the same list, so "reroll" is just bumping the seed). This entire feature is one lazy
+route chunk (`App.tsx`) — it must never inflate the main bundle; re-check chunk sizes after touching
+anything under `features/builder/`.
 - `game/` — view-only helpers (payment enumeration via the engine's `previewScore`/selectors, tunnel,
   cards, seat mapping). These mirror the server for optimistic preview but the server is authority.
 - `features/replay/` + `screens/ReplayScreen.tsx` — client-side replay of finished games: fetches

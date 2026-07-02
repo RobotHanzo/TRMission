@@ -1,7 +1,7 @@
-import { ROUTE_LENGTHS, TRAIN_COLORS } from '@trm/shared';
-import type { RouteColor } from '@trm/shared';
-import type { GameContent, RouteDef } from './types';
-import { isFerry } from './types';
+import { ROUTE_LENGTHS, TRAIN_COLORS, DEFAULT_RULE_PARAMS } from '@trm/shared';
+import type { RouteColor, RuleParams } from '@trm/shared';
+import type { GameContent, RouteDef, MapGeography, MapRules } from './types';
+import { isFerry, MAP_RULE_KEYS } from './types';
 
 export interface ContentStats {
   cityCount: number;
@@ -156,4 +156,147 @@ export function assertValidContent(content: GameContent): void {
   if (!ok) {
     throw new Error(`Invalid map content:\n - ${errors.join('\n - ')}`);
   }
+}
+
+const MAX_GEOGRAPHY_RINGS = 400;
+const MAX_GEOGRAPHY_VERTICES = 15000;
+const GEOGRAPHY_COORD_MIN = -50;
+const GEOGRAPHY_COORD_MAX = 150;
+
+/** Validate a custom map's presentation cartography (bounds a builder draft can't exceed). */
+export function validateGeography(geo: MapGeography): string[] {
+  const errors: string[] = [];
+  const { baseView, land, crop } = geo;
+
+  if (
+    !Number.isFinite(baseView.x) ||
+    !Number.isFinite(baseView.y) ||
+    !(baseView.w > 0) ||
+    !(baseView.h > 0)
+  ) {
+    errors.push('baseView must have finite x/y and positive width/height');
+  }
+
+  if (land.length > MAX_GEOGRAPHY_RINGS) {
+    errors.push(`too many land rings: ${land.length} exceeds the maximum of ${MAX_GEOGRAPHY_RINGS}`);
+  }
+
+  let totalVertices = 0;
+  land.forEach((ring, i) => {
+    totalVertices += ring.length;
+    if (ring.length < 3) {
+      errors.push(`land ring ${i} has fewer than 3 vertices`);
+      return;
+    }
+    for (const [x, y] of ring) {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) {
+        errors.push(`land ring ${i} has a non-finite coordinate`);
+        break;
+      }
+      if (
+        x < GEOGRAPHY_COORD_MIN ||
+        x > GEOGRAPHY_COORD_MAX ||
+        y < GEOGRAPHY_COORD_MIN ||
+        y > GEOGRAPHY_COORD_MAX
+      ) {
+        errors.push(`land ring ${i} has a coordinate outside the allowed board range`);
+        break;
+      }
+    }
+  });
+
+  if (totalVertices > MAX_GEOGRAPHY_VERTICES) {
+    errors.push(`total land vertices ${totalVertices} exceeds the maximum of ${MAX_GEOGRAPHY_VERTICES}`);
+  }
+
+  if (crop.lonMin >= crop.lonMax || crop.latMin >= crop.latMax) {
+    errors.push('crop bbox must have lonMin < lonMax and latMin < latMax');
+  }
+
+  return errors;
+}
+
+export interface RuleBound {
+  readonly min: number;
+  readonly max: number;
+}
+
+/** Builder-form / server-schema bounds for the curated map rule keys, one source of truth. */
+export const RULE_BOUNDS: Readonly<Record<(typeof MAP_RULE_KEYS)[number], RuleBound>> = {
+  trainCarsStart: { min: 15, max: 90 },
+  stationsPerPlayer: { min: 0, max: 5 },
+  longestPathBonus: { min: 0, max: 30 },
+  stationBonus: { min: 0, max: 10 },
+  initialLongOffer: { min: 0, max: 2 },
+  initialShortOffer: { min: 1, max: 4 },
+  ticketDrawCount: { min: 1, max: 5 },
+};
+
+export interface PlayValidationResult {
+  errors: string[];
+  warnings: string[];
+}
+
+/**
+ * Validate that content + rules can actually be played (deck sufficiency, rule bounds), on top
+ * of validateContent's structural checks. `rulesOverride` wins over `content.rules`, which wins
+ * over the engine defaults — the same precedence the room/start seam applies.
+ */
+export function validateForPlay(
+  content: GameContent,
+  rulesOverride: MapRules = {},
+  maxPlayers = 5,
+): PlayValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const rules: MapRules = { ...content.rules, ...rulesOverride };
+
+  for (const key of MAP_RULE_KEYS) {
+    const value = rules[key];
+    if (value === undefined) continue;
+    const bound = RULE_BOUNDS[key];
+    if (value < bound.min || value > bound.max) {
+      errors.push(`${key}: ${value} is outside the allowed range [${bound.min}, ${bound.max}]`);
+    }
+  }
+
+  const resolved = <K extends (typeof MAP_RULE_KEYS)[number]>(key: K): RuleParams[K] =>
+    rules[key] ?? DEFAULT_RULE_PARAMS[key];
+
+  const initialLongOffer = resolved('initialLongOffer');
+  const initialShortOffer = resolved('initialShortOffer');
+  const ticketDrawCount = resolved('ticketDrawCount');
+  const trainCarsStart = resolved('trainCarsStart');
+  const { minKeepInitial } = DEFAULT_RULE_PARAMS;
+
+  if (initialLongOffer + initialShortOffer < minKeepInitial) {
+    errors.push(
+      `initial ticket offer (${initialLongOffer} LONG + ${initialShortOffer} SHORT) cannot satisfy the minimum keep of ${minKeepInitial}`,
+    );
+  }
+
+  const longCount = content.tickets.filter((t) => t.deck === 'LONG').length;
+  const shortCount = content.tickets.filter((t) => t.deck === 'SHORT').length;
+  const neededLong = maxPlayers * initialLongOffer;
+  const neededShort = maxPlayers * initialShortOffer + ticketDrawCount;
+
+  if (longCount < neededLong) {
+    errors.push(
+      `LONG ticket deck has ${longCount} but at least ${neededLong} are needed for ${maxPlayers} players`,
+    );
+  }
+  if (shortCount < neededShort) {
+    errors.push(
+      `SHORT ticket deck has ${shortCount} but at least ${neededShort} are needed for ${maxPlayers} players`,
+    );
+  }
+
+  const totalTrackLength = content.routes.reduce((sum, r) => sum + r.length, 0);
+  if (totalTrackLength < trainCarsStart) {
+    warnings.push(
+      `total track length (${totalTrackLength}) is less than trainCarsStart (${trainCarsStart}) — trains may never run out`,
+    );
+  }
+
+  return { errors, warnings };
 }

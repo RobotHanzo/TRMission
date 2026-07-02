@@ -1,7 +1,8 @@
 // Optional dev-only helper: seed a 2-player demo game on boot (TRM_DEV_GAME=1) and
 // return signed ws-game tickets so you can connect two ws clients and play manually.
-import { taiwanBoard, CONTENT_HASH } from '@trm/engine';
+import { buildBoard } from '@trm/engine';
 import type { GameConfig, PlayerSeed } from '@trm/engine';
+import { OFFICIAL_MAPS } from '@trm/map-data';
 import { asPlayerId } from '@trm/shared';
 import type { GameHub } from './ws/hub';
 import type { TokenService } from './auth/token.service';
@@ -15,8 +16,10 @@ export async function seedDevGame(
     { id: asPlayerId('p1'), seat: 0 },
     { id: asPlayerId('p2'), seat: 1 },
   ];
-  const config: GameConfig = { seed: 'dev-seed-1', players, contentHash: CONTENT_HASH };
-  await hub.createMatch(gameId, taiwanBoard(), config);
+  const officialMap = OFFICIAL_MAPS[0];
+  if (!officialMap) throw new Error('no official maps registered');
+  const config: GameConfig = { seed: 'dev-seed-1', players, contentHash: officialMap.hash };
+  await hub.createMatch(gameId, buildBoard(officialMap.content), config);
 
   const ticketMap: Record<string, string> = {};
   for (const p of players) {

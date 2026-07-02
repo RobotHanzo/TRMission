@@ -1,7 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
-import { ENGINE_VERSION, CONTENT_HASH } from '@trm/engine';
+import { ENGINE_VERSION } from '@trm/engine';
+import { OFFICIAL_MAPS } from '@trm/map-data';
 import { PROTOCOL_VERSION } from '@trm/proto';
 
 // Liveness + build/version metadata. Documented so the generated OpenAPI has at least
@@ -22,7 +23,7 @@ export class HealthController {
     return {
       engineVersion: ENGINE_VERSION,
       protocolVersion: PROTOCOL_VERSION,
-      contentHash: CONTENT_HASH,
+      contentHash: OFFICIAL_MAPS[0]?.hash ?? '',
     };
   }
 }

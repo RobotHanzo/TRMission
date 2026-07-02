@@ -1,0 +1,14 @@
+import { Module } from '@nestjs/common';
+import { MapsController } from './maps.controller';
+import { MapsService } from './maps.service';
+import { CustomMapRepo } from './custom-map.repo';
+import { MapContentRepo } from './map-content.repo';
+import { AuthModule } from '../auth/auth.module';
+
+@Module({
+  imports: [AuthModule],
+  controllers: [MapsController],
+  providers: [MapsService, CustomMapRepo, MapContentRepo],
+  exports: [MapsService, MapContentRepo],
+})
+export class MapsModule {}

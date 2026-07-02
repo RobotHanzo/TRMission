@@ -213,6 +213,27 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
     expect(match!.session.stateVersion).toBe(live.stateVersion);
   });
 
+  it('awaits an async boardResolver on recovery (custom-map content lookups are DB round-trips)', async () => {
+    const config: GameConfig = { seed: 'async-resolver', players: twoPlayers, contentHash: CONTENT_HASH };
+    const live = new GameSession('gasync', board, config);
+    await store.createGame('gasync', config, live.raw(), live.digest());
+    await driveDirect(live, 'gasync', 10);
+
+    let resolved = false;
+    const hub = new GameHub(new GameRegistry(), {
+      store,
+      boardResolver: async (cfg) => {
+        await new Promise((r) => setTimeout(r, 5));
+        resolved = true;
+        return boardForContentHash(cfg.contentHash);
+      },
+    });
+    const match = await hub.recoverMatch('gasync');
+    expect(resolved).toBe(true);
+    expect(match).not.toBeNull();
+    expect(match!.session.digest()).toBe(live.digest());
+  });
+
   it('recovers on reconnect: a fresh hub rehydrates the game from the store on hello', async () => {
     const config = configFor('persist-wire');
     const hub1 = new GameHub(new GameRegistry(), { store });

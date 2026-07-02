@@ -41,6 +41,9 @@ export interface RoomMember {
   difficulty?: BotDifficulty;
 }
 export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
+export type MapSelector =
+  | { source: 'official'; mapId: string }
+  | { source: 'custom'; customMapId: string };
 export interface RoomSettings {
   unlimitedStationBorrow: boolean;
   secondDrawAfterBlindRainbow: boolean;
@@ -48,6 +51,7 @@ export interface RoomSettings {
   doubleRouteSingleFor23: boolean;
   allowSpectating: boolean;
   visibility: RoomVisibility;
+  map: MapSelector;
 }
 export interface RoomView {
   code: string;
@@ -57,6 +61,7 @@ export interface RoomView {
   members: RoomMember[];
   settings: RoomSettings;
   gameId?: string;
+  mapName?: { zh: string; en: string };
 }
 export interface TicketResult {
   gameId: string;
@@ -98,6 +103,80 @@ export interface ReplayPayload {
   winners: string[];
   completedAt: string;
   finalDigest?: string;
+}
+
+// --- custom maps (builder + shared/cloned + published content by hash) ---
+export interface CityDraft {
+  id: string;
+  nameZh: string;
+  nameEn: string;
+  x: number;
+  y: number;
+  region: string;
+  isIsland: boolean;
+}
+export interface RouteDraft {
+  id: string;
+  a: string;
+  b: string;
+  color: string;
+  length: number;
+  doubleGroup?: string;
+  ferryLocos: number;
+  isTunnel: boolean;
+}
+export interface TicketDraft {
+  id: string;
+  a: string;
+  b: string;
+  value: number;
+  deck: 'LONG' | 'SHORT';
+}
+export interface MapGeographyDraft {
+  baseView: { x: number; y: number; w: number; h: number };
+  land: readonly (readonly (readonly [number, number])[])[];
+  crop: { lonMin: number; lonMax: number; latMin: number; latMax: number };
+}
+export interface MapRulesDraft {
+  trainCarsStart?: number;
+  stationsPerPlayer?: number;
+  longestPathBonus?: number;
+  stationBonus?: number;
+  initialLongOffer?: number;
+  initialShortOffer?: number;
+  ticketDrawCount?: number;
+}
+export interface MapDraft {
+  cities: CityDraft[];
+  routes: RouteDraft[];
+  tickets: TicketDraft[];
+  geography?: MapGeographyDraft;
+  rules?: MapRulesDraft;
+}
+export interface MapSummary {
+  id: string;
+  nameZh: string;
+  nameEn: string;
+  revision: number;
+  shareCode?: string;
+  updatedAt: string;
+}
+export interface MapDetail extends MapSummary {
+  ownerId: string;
+  draft: MapDraft;
+}
+export interface SharedMapView {
+  nameZh: string;
+  nameEn: string;
+  draft: MapDraft;
+}
+export interface MapContentDto {
+  meta: { mapId: string; version: number; nameZh: string; nameEn: string };
+  cities: CityDraft[];
+  routes: RouteDraft[];
+  tickets: TicketDraft[];
+  geography?: MapGeographyDraft;
+  rules?: MapRulesDraft;
 }
 
 export class ApiError extends Error {
@@ -211,4 +290,19 @@ export const api = {
   history: () => req<MatchSummary[]>('GET', '/history'),
   replay: (gameId: string) =>
     req<ReplayPayload>('GET', `/history/${encodeURIComponent(gameId)}/replay`),
+
+  listMaps: () => req<MapSummary[]>('GET', '/maps'),
+  createMap: (nameZh: string, nameEn: string) =>
+    req<MapDetail>('POST', '/maps', { nameZh, nameEn }),
+  getMap: (id: string) => req<MapDetail>('GET', `/maps/${encodeURIComponent(id)}`),
+  updateMap: (id: string, patch: { nameZh?: string; nameEn?: string; draft?: MapDraft }) =>
+    req<MapDetail>('PUT', `/maps/${encodeURIComponent(id)}`, patch),
+  deleteMap: (id: string) => req<void>('DELETE', `/maps/${encodeURIComponent(id)}`),
+  shareMap: (id: string) => req<{ shareCode: string }>('POST', `/maps/${encodeURIComponent(id)}/share`),
+  unshareMap: (id: string) => req<void>('DELETE', `/maps/${encodeURIComponent(id)}/share`),
+  peekSharedMap: (code: string) =>
+    req<SharedMapView>('GET', `/maps/shared/${encodeURIComponent(code)}`),
+  cloneSharedMap: (code: string) =>
+    req<MapDetail>('POST', `/maps/shared/${encodeURIComponent(code)}/clone`),
+  mapContent: (hash: string) => req<MapContentDto>('GET', `/maps/content/${encodeURIComponent(hash)}`),
 };

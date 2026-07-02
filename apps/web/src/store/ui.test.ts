@@ -118,6 +118,48 @@ describe('ui store routing', () => {
     expect(useUi.getState().replayGameId).toBe('game-9');
   });
 
+  it('enterMaps pushes /maps and sets the view', () => {
+    useUi.getState().enterMaps();
+    expect(useUi.getState().view).toBe('maps');
+    expect(path()).toBe('/maps');
+    expect(disconnectGame).toHaveBeenCalled();
+  });
+
+  it('enterMapEditor pushes /maps/:id/edit and records the map id', () => {
+    useUi.getState().enterMapEditor('map-1');
+    expect(useUi.getState().view).toBe('mapEditor');
+    expect(useUi.getState().editingMapId).toBe('map-1');
+    expect(path()).toBe('/maps/map-1/edit');
+  });
+
+  it('syncFromUrl(authed) on /maps restores the maps view', () => {
+    window.history.replaceState(null, '', '/maps');
+    useUi.getState().syncFromUrl(true);
+    expect(useUi.getState().view).toBe('maps');
+  });
+
+  it('syncFromUrl(not authed) on /maps gates to /login remembering the target', () => {
+    window.history.replaceState(null, '', '/maps');
+    useUi.getState().syncFromUrl(false);
+    expect(useUi.getState().view).toBe('login');
+    expect(window.location.pathname + window.location.search).toBe('/login?redirect=%2Fmaps');
+  });
+
+  it('syncFromUrl(authed) on /maps/:id/edit restores the editor view with the map id', () => {
+    window.history.replaceState(null, '', '/maps/map-9/edit');
+    useUi.getState().syncFromUrl(true);
+    expect(useUi.getState().view).toBe('mapEditor');
+    expect(useUi.getState().editingMapId).toBe('map-9');
+  });
+
+  it('navigateAfterAuth resumes a ?redirect= map-editor target', () => {
+    window.history.replaceState(null, '', '/login?redirect=%2Fmaps%2Fmap-9%2Fedit');
+    useUi.getState().navigateAfterAuth();
+    expect(useUi.getState().view).toBe('mapEditor');
+    expect(useUi.getState().editingMapId).toBe('map-9');
+    expect(path()).toBe('/maps/map-9/edit');
+  });
+
   it('syncFromUrl(not authed) on /history gates to /login remembering the target', () => {
     window.history.replaceState(null, '', '/history');
     useUi.getState().syncFromUrl(false);

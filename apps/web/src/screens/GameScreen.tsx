@@ -5,6 +5,7 @@ import { useUi } from '../store/ui';
 import { useRoster } from '../store/roster';
 import { api } from '../net/rest';
 import { connectGame, getSocket } from '../net/connection';
+import { useActiveContent } from '../game/useActiveContent';
 import { GameStage } from './GameStage';
 
 /**
@@ -19,6 +20,7 @@ export function GameScreen() {
 
   const snapshot = useGame((s) => s.snapshot);
   const setRoster = useRoster((s) => s.setMembers);
+  const contentStatus = useActiveContent(snapshot?.contentHash);
 
   useEffect(() => {
     if (ticket && !getSocket()) connectGame(ticket);
@@ -41,10 +43,17 @@ export function GameScreen() {
 
   const leave = () => goHome(); // goHome tears down the socket
 
-  if (!snapshot) {
+  if (!snapshot || contentStatus === 'loading') {
     return (
       <div className="card">
         {t('connecting')} · <button onClick={leave}>{t('back')}</button>
+      </div>
+    );
+  }
+  if (contentStatus === 'error') {
+    return (
+      <div className="card">
+        {t('history.unknownMap')} · <button onClick={leave}>{t('back')}</button>
       </div>
     );
   }

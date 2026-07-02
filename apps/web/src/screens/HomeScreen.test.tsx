@@ -36,6 +36,7 @@ const settings = {
   doubleRouteSingleFor23: true,
   allowSpectating: true,
   visibility: 'PUBLIC' as const,
+  map: { source: 'official' as const, mapId: 'taiwan' },
 };
 const pubRoom = (code: string, status: RoomView['status'], gameId?: string): RoomView => ({
   code,

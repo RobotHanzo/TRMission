@@ -6,6 +6,7 @@ import { MONGO_DB } from '../db/tokens';
 import type { GameDoc, GameEventDoc, MatchHistoryDoc, StoredConfig } from '../persistence/types';
 import type { UserDoc } from '../auth/user.repo';
 import type { BotProfile } from '../bots/types';
+import type { MapContentDoc } from '../maps/maps.types';
 
 export interface HistoryPlayer {
   userId: string;
@@ -32,29 +33,50 @@ export interface ReplayData {
   finalDigest?: string;
 }
 
-/** Replayable = same engine major + a board we can still build for that content hash. */
-const isReplayable = (engineVersion: number | undefined, contentHash: string): boolean => {
-  if (engineVersion !== ENGINE_VERSION) return false;
-  try {
-    boardForContentHash(contentHash);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
 @Injectable()
 export class HistoryRepo {
   private readonly col: Collection<MatchHistoryDoc>;
   private readonly games: Collection<GameDoc>;
   private readonly events: Collection<GameEventDoc>;
   private readonly users: Collection<UserDoc>;
+  private readonly mapContents: Collection<MapContentDoc>;
 
   constructor(@Inject(MONGO_DB) db: Db) {
     this.col = db.collection<MatchHistoryDoc>('matchHistory');
     this.games = db.collection<GameDoc>('games');
     this.events = db.collection<GameEventDoc>('gameEvents');
     this.users = db.collection<UserDoc>('users');
+    this.mapContents = db.collection<MapContentDoc>('mapContents');
+  }
+
+  /**
+   * Replayable = same engine major + a board we can still build for that content hash. The
+   * static registry (official maps) resolves synchronously; a custom-map hash falls back to a
+   * single batched `mapContents` lookup so listing N rows costs at most one extra query, not N.
+   */
+  private async replayableFlags(
+    rows: { contentHash: string; engineVersion: number | undefined }[],
+  ): Promise<boolean[]> {
+    const staticFlags: (boolean | undefined)[] = rows.map((r) => {
+      if (r.engineVersion !== ENGINE_VERSION) return false;
+      try {
+        boardForContentHash(r.contentHash);
+        return true;
+      } catch {
+        return undefined; // not in the static registry — check mapContents below
+      }
+    });
+    const unresolved = [
+      ...new Set(rows.filter((_, i) => staticFlags[i] === undefined).map((r) => r.contentHash)),
+    ];
+    let known = new Set<string>();
+    if (unresolved.length > 0) {
+      const docs = await this.mapContents
+        .find({ _id: { $in: unresolved } }, { projection: { _id: 1 } })
+        .toArray();
+      known = new Set(docs.map((d) => d._id));
+    }
+    return rows.map((r, i) => staticFlags[i] ?? known.has(r.contentHash));
   }
 
   /** Display names for userIds (bots and TTL-expired guests simply don't match). */
@@ -85,8 +107,11 @@ export class HistoryRepo {
       for (const g of games) versions.set(g._id, g.engineVersion);
     }
     const names = await this.displayNames(docs.flatMap((d) => d.players.map((p) => p.userId)));
+    const flags = await this.replayableFlags(
+      docs.map((d) => ({ contentHash: d.contentHash, engineVersion: d.engineVersion ?? versions.get(d._id) })),
+    );
 
-    return docs.map((d) => ({
+    return docs.map((d, i) => ({
       gameId: d._id,
       players: d.players.map((p) => {
         const displayName = names.get(p.userId);
@@ -102,7 +127,7 @@ export class HistoryRepo {
         ? ('player' as const)
         : ('spectator' as const),
       finalScores: d.finalScores,
-      replayable: isReplayable(d.engineVersion ?? versions.get(d._id), d.contentHash),
+      replayable: flags[i] ?? false,
     }));
   }
 

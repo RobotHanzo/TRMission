@@ -1,0 +1,178 @@
+/* Custom map builder: maps list + editor. Reuses the .card/.stack/.row primitives from
+   app.css/game.css — this file only adds the builder-specific layout and canvas chrome. */
+
+.maps-screen .card {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.maps-row {
+  padding: var(--tr-space-2) 0;
+  border-top: 1px solid var(--tr-line);
+}
+.maps-row:first-of-type {
+  border-top: none;
+}
+
+.editor-screen {
+  height: 100%;
+  padding: var(--tr-space-3);
+}
+.editor-name-input {
+  font-weight: 600;
+  min-width: 8em;
+}
+.editor-save-indicator {
+  font-size: 0.85em;
+}
+
+.editor-body {
+  display: flex;
+  gap: var(--tr-space-3);
+  flex: 1;
+  min-height: 0;
+}
+.editor-stage-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-1);
+  width: 8em;
+  flex-shrink: 0;
+}
+.editor-stage-btn {
+  text-align: left;
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border-radius: var(--tr-radius-sm);
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+}
+.editor-stage-btn.active {
+  background: var(--tr-blue);
+  color: #fff;
+  border-color: var(--tr-blue);
+}
+.editor-stage-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.editor-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.editor-stage-layout {
+  display: flex;
+  gap: var(--tr-space-3);
+  height: 100%;
+}
+.editor-stage-layout--table {
+  display: block;
+}
+.editor-canvas-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  overflow: hidden;
+  background: var(--tr-sea);
+}
+.editor-inspector {
+  width: 20em;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+.editor-hint {
+  position: absolute;
+  bottom: var(--tr-space-2);
+  left: var(--tr-space-2);
+  right: var(--tr-space-2);
+  margin: 0;
+  font-size: 0.85em;
+  background: var(--tr-surface);
+  padding: var(--tr-space-1) var(--tr-space-2);
+  border-radius: var(--tr-radius-sm);
+  width: fit-content;
+}
+
+.editor-canvas,
+.editor-world {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+.editor-city {
+  cursor: pointer;
+}
+.editor-city-label {
+  font-size: 2.4px;
+  fill: var(--tr-ink);
+  paint-order: stroke;
+  stroke: var(--tr-surface);
+  stroke-width: 0.4px;
+  pointer-events: none;
+}
+.editor-route {
+  cursor: pointer;
+}
+
+.editor-world-sea {
+  fill: var(--tr-sea);
+}
+.editor-world-land {
+  fill: var(--tr-land);
+  stroke: var(--tr-coast);
+  stroke-width: 0.3;
+}
+.editor-crop-rect {
+  fill: rgba(238, 107, 31, 0.15);
+  stroke: var(--tr-ember);
+  stroke-width: 0.6;
+}
+.editor-crop-preview-svg {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  background: var(--tr-sea);
+}
+
+.editor-ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.editor-ticket-table th,
+.editor-ticket-table td {
+  padding: var(--tr-space-1) var(--tr-space-2);
+  text-align: left;
+  border-bottom: 1px solid var(--tr-line);
+}
+
+.editor-generate-preview ul {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: 0.9em;
+  color: var(--tr-ink-soft);
+}
+
+.validation-panel {
+  font-size: 0.9em;
+}
+.validation-ok {
+  color: var(--tr-ok);
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+}
+.validation-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tr-space-2);
+}
+.validation-error {
+  color: var(--tr-danger);
+}
+.validation-warning {
+  color: var(--tr-ember);
+}

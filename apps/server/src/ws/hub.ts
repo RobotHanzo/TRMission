@@ -44,7 +44,8 @@ import type { ChatEntry } from '../persistence/types';
 export interface GameHubOptions {
   verifier?: TicketVerifier;
   store?: GameStorePort;
-  boardResolver?: (config: GameConfig) => Board;
+  /** May be async — custom-map recovery resolves content from Mongo, not just the static registry. */
+  boardResolver?: (config: GameConfig) => Board | Promise<Board>;
   metrics?: MetricsHooks;
   /** Pause between consecutive bot moves so humans can follow the action (0 in tests). */
   botMoveDelayMs?: number;
@@ -64,7 +65,7 @@ export class GameHub {
   private readonly spectators = new Map<string, Set<Connection>>();
   private readonly verifier: TicketVerifier;
   private readonly store: GameStorePort | undefined;
-  private readonly boardResolver: (config: GameConfig) => Board;
+  private readonly boardResolver: (config: GameConfig) => Board | Promise<Board>;
   private readonly metrics: MetricsHooks;
   private readonly botMoveDelayMs: number;
   /** gameId → (botPlayerId → profile). */
@@ -121,7 +122,7 @@ export class GameHub {
     if (!this.store) return null;
     const data = await this.store.loadForRecovery(gameId);
     if (!data) return null;
-    const board = this.boardResolver(data.config);
+    const board = await this.boardResolver(data.config);
     const session = GameSession.restore(
       gameId,
       board,

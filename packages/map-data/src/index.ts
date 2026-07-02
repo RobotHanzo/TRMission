@@ -10,6 +10,8 @@ export * from './cities';
 export * from './routes';
 export * from './tickets';
 export * from './validate';
+export * from './graph';
+export * from './generate';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',
@@ -37,6 +39,10 @@ export function hashContent(content: GameContent): string {
     cities: content.cities,
     routes: content.routes,
     tickets: content.tickets,
+    // Spread-if-defined: content minted before geography/rules existed must keep hashing
+    // identically (packages/map-data/test/versions.spec.ts pins this byte-for-byte).
+    ...(content.geography !== undefined ? { geography: content.geography } : {}),
+    ...(content.rules !== undefined ? { rules: content.rules } : {}),
   });
 }
 
@@ -57,4 +63,19 @@ export const CONTENT_REGISTRY: ReadonlyMap<string, GameContent> = new Map(
 /** Resolve the exact content a game was created against, or undefined if its version is unknown. */
 export function resolveContentByHash(hash: string): GameContent | undefined {
   return CONTENT_REGISTRY.get(hash);
+}
+
+export interface OfficialMap {
+  readonly mapId: string;
+  readonly content: GameContent;
+  readonly hash: string;
+}
+
+/** Every map shipped by TRMission itself (as opposed to a user-authored custom map). */
+export const OFFICIAL_MAPS: readonly OfficialMap[] = [
+  { mapId: MAP_META.mapId, content: TAIWAN_CONTENT, hash: CONTENT_HASH },
+];
+
+export function officialMapById(mapId: string): OfficialMap | undefined {
+  return OFFICIAL_MAPS.find((m) => m.mapId === mapId);
 }

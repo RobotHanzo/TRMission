@@ -189,8 +189,8 @@ function computeHubs(): Set<string> {
   return hubs;
 }
 
-/** Precomputed set of hub city ids (the content graph is static). */
-export const HUB_CITIES: ReadonlySet<string> = computeHubs();
+/** Set of hub city ids for the active content — rebuilt by rebuildRouteGeometry() on a map swap. */
+export let HUB_CITIES: ReadonlySet<string> = computeHubs();
 
 const qPoint = (
   a: { x: number; y: number },
@@ -321,5 +321,13 @@ export function straightRouteGeometry(
   return { ...curveShape(a, c, b, length, isTunnel), perp: { x: 0, y: 0 } };
 }
 
-/** Precomputed once — the content graph is static, so geometry never changes at runtime. */
-export const ROUTE_GEOMETRY: Map<string, RouteGeometry> = buildGeometry();
+/** Geometry for the active content. Precomputed once for the default (Taiwan); rebuilt whenever
+ *  game/catalog.ts swaps the active map (rebuildRouteGeometry() re-reads CITIES/ROUTES/cityById,
+ *  which by then already point at the new content — see content.ts's applyContentTables). */
+export let ROUTE_GEOMETRY: Map<string, RouteGeometry> = buildGeometry();
+
+/** Recompute HUB_CITIES/ROUTE_GEOMETRY from the current CITIES/ROUTES/cityById in content.ts. */
+export function rebuildRouteGeometry(): void {
+  HUB_CITIES = computeHubs();
+  ROUTE_GEOMETRY = buildGeometry();
+}

@@ -32,6 +32,7 @@ describe('lobby: per-game settings', () => {
       doubleRouteSingleFor23: true,
       allowSpectating: true,
       visibility: 'INVITE_ONLY',
+      map: { source: 'official', mapId: 'taiwan' },
     });
   });
 

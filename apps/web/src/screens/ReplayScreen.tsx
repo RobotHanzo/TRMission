@@ -5,10 +5,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
-import { boardForContentHash, ENGINE_VERSION, SCHEMA_VERSION } from '@trm/engine';
+import { buildBoard, ENGINE_VERSION, SCHEMA_VERSION } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
 import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
 import { api, type ReplayPayload, type ReplayPlayerMeta } from '../net/rest';
+import { resolveContent } from '../game/contentCache';
+import { setActiveContent, resetToDefaultContent } from '../game/catalog';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { useRoster } from '../store/roster';
@@ -42,7 +44,7 @@ export default function ReplayScreen() {
     setLoad({ kind: 'loading' });
     api
       .replay(gameId)
-      .then((payload) => {
+      .then(async (payload) => {
         if (cancelled) return;
         // The client's OWN engine must match the stored game — the server's `replayable`
         // flag is advisory; this is the authoritative check.
@@ -52,7 +54,12 @@ export default function ReplayScreen() {
         }
         let board: Board;
         try {
-          board = boardForContentHash(payload.config.contentHash);
+          // resolveContent covers both official maps (bundled, synchronous) and custom maps
+          // (fetched from /maps/content/:hash) — buildBoard works for either uniformly.
+          const content = await resolveContent(payload.config.contentHash);
+          if (cancelled) return;
+          board = buildBoard(content);
+          setActiveContent(content);
         } catch {
           setLoad({ kind: 'error', msgKey: 'history.unknownMap' });
           return;
@@ -80,6 +87,10 @@ export default function ReplayScreen() {
       cancelled = true;
     };
   }, [gameId]);
+
+  // Leaving replay (any exit path) must never leave a custom map's catalog active for the next
+  // screen — tutorial/history/home all assume the default (Taiwan) catalog.
+  useEffect(() => () => resetToDefaultContent(), []);
 
   // Roster names for trackers/scoreboard/log — same channel a live game fills from the lobby.
   useEffect(() => {

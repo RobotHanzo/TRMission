@@ -1,10 +1,11 @@
 // The full-screen tutorial route. The learner first picks a scope (Full vs Quickstart); then each
 // lesson runs a local sandbox game driven through the GLOBAL game store (there is no live game on
 // this route), reusing the real GameStage with a coachmark overlay on top.
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUi } from '../../store/ui';
 import { useGame } from '../../store/game';
+import { resetToDefaultContent } from '../../game/catalog';
 import { GameStage } from '../../screens/GameStage';
 import { lessonsForScope } from './curriculum';
 import { useScenarioPlayer } from './useScenarioPlayer';
@@ -118,6 +119,11 @@ export default function TutorialScreen() {
   const [scope, setScope] = useState<Scope | null>(null);
   const [lessonIdx, setLessonIdx] = useState(0);
   const lessons = useMemo(() => (scope ? lessonsForScope(scope) : []), [scope]);
+  // Tutorial always teaches on the Taiwan map — defensive in case the previous screen (a
+  // custom-map replay) left a different catalog active.
+  useEffect(() => {
+    resetToDefaultContent();
+  }, []);
 
   if (!scope) {
     return (

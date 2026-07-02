@@ -4,7 +4,7 @@ import '../i18n';
 import { RoomScreen } from './RoomScreen';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
-import { api, ApiError } from '../net/rest';
+import { api, ApiError, type MapSelector } from '../net/rest';
 
 // RoomScreen drives the lobby over REST + opens the game socket on start; stub both so the
 // component can be exercised without a backend or a real WebSocket.
@@ -32,6 +32,7 @@ vi.mock('../net/rest', () => {
       kickPlayer: vi.fn(),
       startRoom: vi.fn(),
       updateRoomSettings: vi.fn(),
+      listMaps: vi.fn(() => Promise.resolve([])),
     },
   };
 });
@@ -70,8 +71,10 @@ const baseRoom = () => ({
     doubleRouteSingleFor23: true,
     allowSpectating: true,
     visibility: 'PUBLIC' as 'PUBLIC' | 'INVITE_ONLY',
+    map: { source: 'official', mapId: 'taiwan' } as MapSelector,
   },
   gameId: undefined as string | undefined,
+  mapName: undefined as { zh: string; en: string } | undefined,
 });
 
 const mocked = api as unknown as {
@@ -210,6 +213,55 @@ describe('RoomScreen game settings panel', () => {
     const inviteOnly = await screen.findByRole('radio', { name: '僅限邀請' });
     fireEvent.click(inviteOnly);
     expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', { visibility: 'INVITE_ONLY' });
+  });
+});
+
+describe('RoomScreen map picker', () => {
+  it('shows the resolved official map name to a non-host', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        members: [member('host'), member('u-me')],
+        mapName: { zh: '台灣本島與離島', en: 'Taiwan & Outlying Islands' },
+      }),
+    );
+    render(<RoomScreen />);
+    expect(await screen.findByText('台灣本島與離島')).toBeInTheDocument();
+  });
+
+  it('lets the host switch to a custom map from their own list', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    mocked.updateRoomSettings.mockResolvedValue(
+      room({
+        hostId: 'u-me',
+        members: [member('u-me')],
+        settings: { ...baseRoom().settings, map: { source: 'custom', customMapId: 'm1' } },
+      }),
+    );
+    (api.listMaps as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { id: 'm1', nameZh: '我的地圖', nameEn: 'My Map', revision: 1, updatedAt: '2026-01-01' },
+    ]);
+    render(<RoomScreen />);
+    const customBtn = await screen.findByRole('radio', { name: '自訂' });
+    fireEvent.click(customBtn);
+    await waitFor(() =>
+      expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', {
+        map: { source: 'custom', customMapId: 'm1' },
+      }),
+    );
+  });
+
+  it('offers to create a map when the room is set to custom but the host has none to pick', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        hostId: 'u-me',
+        members: [member('u-me')],
+        settings: { ...baseRoom().settings, map: { source: 'custom', customMapId: 'gone' } },
+      }),
+    );
+    (api.listMaps as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+    render(<RoomScreen />);
+    expect(await screen.findByRole('button', { name: /建立自訂地圖/ })).toBeInTheDocument();
+    expect(mocked.updateRoomSettings).not.toHaveBeenCalled();
   });
 });
 
