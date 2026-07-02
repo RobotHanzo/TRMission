@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { api, type CityDraft, type MapDetail, type MapDraft, type MapRulesDraft, type RouteDraft, type TicketDraft } from '../../../net/rest';
 
-export type Stage = 'crop' | 'stops' | 'routes' | 'missions' | 'rules' | 'share';
-export const STAGES: readonly Stage[] = ['crop', 'stops', 'routes', 'missions', 'rules', 'share'];
+export type Stage = 'crop' | 'trim' | 'stops' | 'routes' | 'missions' | 'rules' | 'share';
+export const STAGES: readonly Stage[] = ['crop', 'trim', 'stops', 'routes', 'missions', 'rules', 'share'];
 
 export type Selection =
   | { kind: 'city'; id: string }
@@ -26,6 +26,7 @@ interface EditorState {
   saving: boolean;
   saveError: string | null;
   undoStack: MapDraft[];
+  redoStack: MapDraft[];
 
   load(mapId: string): Promise<void>;
   setStage(stage: Stage): void;
@@ -47,9 +48,11 @@ interface EditorState {
   replaceTickets(tickets: TicketDraft[]): void;
 
   setGeography(geography: NonNullable<MapDraft['geography']>): void;
+  removeGeographyRings(indices: readonly number[]): void;
   setRules(rules: MapRulesDraft): void;
 
   undo(): void;
+  redo(): void;
   save(): Promise<void>;
   mintShare(): Promise<string>;
   revokeShare(): Promise<void>;
@@ -59,7 +62,9 @@ const UNDO_CAP = 50;
 
 function mutate(get: () => EditorState, set: (p: Partial<EditorState>) => void, next: MapDraft): void {
   const stack = [...get().undoStack, get().draft].slice(-UNDO_CAP);
-  set({ draft: next, dirty: true, undoStack: stack });
+  // A fresh edit abandons whatever redo branch was pending — redoing past it would resurrect a
+  // draft that no longer follows from the current one.
+  set({ draft: next, dirty: true, undoStack: stack, redoStack: [] });
 }
 
 export const useEditorStore = create<EditorState>()((set, get) => ({
@@ -76,9 +81,10 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
   saving: false,
   saveError: null,
   undoStack: [],
+  redoStack: [],
 
   load: async (mapId) => {
-    set({ mapId, loadState: 'loading', selection: null, undoStack: [] });
+    set({ mapId, loadState: 'loading', selection: null, undoStack: [], redoStack: [] });
     try {
       const detail: MapDetail = await api.getMap(mapId);
       set({
@@ -184,16 +190,41 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     const { draft } = get();
     mutate(get, set, { ...draft, geography });
   },
+  removeGeographyRings: (indices) => {
+    const { draft } = get();
+    if (!draft.geography || indices.length === 0) return;
+    const drop = new Set(indices);
+    mutate(get, set, {
+      ...draft,
+      geography: { ...draft.geography, land: draft.geography.land.filter((_, i) => !drop.has(i)) },
+    });
+  },
   setRules: (rules) => {
     const { draft } = get();
     mutate(get, set, { ...draft, rules });
   },
 
   undo: () => {
-    const { undoStack } = get();
+    const { undoStack, redoStack, draft } = get();
     const prev = undoStack[undoStack.length - 1];
     if (!prev) return;
-    set({ draft: prev, undoStack: undoStack.slice(0, -1), dirty: true });
+    set({
+      draft: prev,
+      undoStack: undoStack.slice(0, -1),
+      redoStack: [...redoStack, draft].slice(-UNDO_CAP),
+      dirty: true,
+    });
+  },
+  redo: () => {
+    const { undoStack, redoStack, draft } = get();
+    const next = redoStack[redoStack.length - 1];
+    if (!next) return;
+    set({
+      draft: next,
+      redoStack: redoStack.slice(0, -1),
+      undoStack: [...undoStack, draft].slice(-UNDO_CAP),
+      dirty: true,
+    });
   },
 
   save: async () => {

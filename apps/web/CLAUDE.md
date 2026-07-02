@@ -69,8 +69,10 @@ The game flow: lobby `start`/`ticket` (REST) → `connectGame(ticket)` → socke
 ## Custom map builder (`features/builder/`, lazy-loaded)
 
 Registered-users-only (guests can play a custom map, not author one) authoring UI at `/maps` (list +
-clone-by-code) and `/maps/:id/edit` (staged editor: Crop → Stops → Routes → Missions → Rules →
-Share). Its own zustand store (`editor/store.ts`) with undo and debounced autosave; a single SVG
+clone-by-code) and `/maps/:id/edit` (staged editor: Crop → Trim → Stops → Routes → Missions → Rules →
+Share; Trim lets you click individual land rings — e.g. a stray outlying island — to delete them
+from the crop without re-drawing the whole bounding box). Its own zustand store (`editor/store.ts`)
+with undo and debounced autosave; a single SVG
 canvas (`editor/EditorCanvas.tsx`, react-zoom-pan-pinch + the existing `boardView.ts` pixel→board
 projection) shared across stages; a live `ValidationPanel` runs `@trm/map-data`'s
 `validate`/`validateGeography`/`validateForPlay` client-side as you edit (map-data ships TS source,

@@ -143,7 +143,7 @@ export function CropStage() {
   const confirm = () => {
     if (!result) return;
     setGeography(result.geography);
-    setStage('stops');
+    setStage('trim');
   };
 
   const hint = committed ? t('builder.cropAdjustHint') : t('builder.cropDrawHint');

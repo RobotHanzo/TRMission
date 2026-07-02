@@ -242,6 +242,25 @@
 .editor-route {
   cursor: pointer;
 }
+.editor-trim {
+  cursor: default;
+}
+.land-ring {
+  cursor: pointer;
+}
+.land-ring--selected .land {
+  stroke: var(--tr-ember);
+  stroke-width: calc(0.9px * var(--inv-scale, 1));
+  fill: color-mix(in srgb, var(--tr-ember) 32%, var(--tr-land));
+}
+
+.trim-history {
+  gap: var(--tr-space-2);
+}
+.trim-shortcut-hint {
+  font-family: var(--tr-font-mono);
+  font-size: 0.85em;
+}
 
 /* Selection/highlight rings on the real live-board markers (city-dot/city-hub/.bed — see
    RouteShape.tsx + game.css), so the editor's picked route/city reads as an accent on top of

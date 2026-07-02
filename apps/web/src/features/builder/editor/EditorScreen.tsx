@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Crop, MapPin, Route, Ticket, SlidersHorizontal, Share2, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, Crop, Eraser, MapPin, Route, Ticket, SlidersHorizontal, Share2, type LucideIcon } from 'lucide-react';
 import { useUi } from '../../../store/ui';
 import { useEditorStore, STAGES, type Stage } from './store';
 import { ValidationPanel } from './ValidationPanel';
 import { CropStage } from './stages/CropStage';
+import { TrimStage } from './stages/TrimStage';
 import { StopsStage } from './stages/StopsStage';
 import { RoutesStage } from './stages/RoutesStage';
 import { MissionsStage } from './stages/MissionsStage';
@@ -16,6 +17,7 @@ const AUTOSAVE_DELAY_MS = 2000;
 
 const STAGE_LABEL_KEY: Record<Stage, string> = {
   crop: 'builder.stageCrop',
+  trim: 'builder.stageTrim',
   stops: 'builder.stageStops',
   routes: 'builder.stageRoutes',
   missions: 'builder.stageMissions',
@@ -25,6 +27,7 @@ const STAGE_LABEL_KEY: Record<Stage, string> = {
 
 const STAGE_ICON: Record<Stage, LucideIcon> = {
   crop: Crop,
+  trim: Eraser,
   stops: MapPin,
   routes: Route,
   missions: Ticket,
@@ -147,6 +150,7 @@ export default function EditorScreen() {
         </nav>
         <div className="editor-main">
           {stage === 'crop' && <CropStage />}
+          {stage === 'trim' && hasGeography && <TrimStage />}
           {stage === 'stops' && hasGeography && <StopsStage />}
           {stage === 'routes' && hasGeography && <RoutesStage />}
           {stage === 'missions' && hasGeography && <MissionsStage />}

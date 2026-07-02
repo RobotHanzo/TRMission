@@ -27,13 +27,22 @@ function graticuleFor(view: View): { xs: number[]; ys: number[] } {
   return { xs, ys };
 }
 
+export interface CustomGeographyProps {
+  geography: MapGeography;
+  /** Land ring indices to visually highlight (the fine-tune/trim stage's selection). */
+  selectedRings?: ReadonlySet<number>;
+  /** Making land rings clickable is opt-in — only the fine-tune/trim stage needs it, so the live
+   *  board/backdrop keep passing pointer events straight through to whatever's beneath them. */
+  onRingClick?: (index: number) => void;
+}
+
 /** A custom map's cropped-world land silhouette: one smoothed path per ring, no relief/islands/
  *  compass (those are hand-tuned Taiwan decorations with no generic equivalent). */
-export function CustomGeography({ geography }: { geography: MapGeography }) {
+export function CustomGeography({ geography, selectedRings, onRingClick }: CustomGeographyProps) {
   const { baseView, land } = geography;
   const { xs, ys } = graticuleFor(baseView);
   return (
-    <g className="geo" pointerEvents="none">
+    <g className="geo" pointerEvents={onRingClick ? 'auto' : 'none'}>
       <rect
         className="sea"
         x={baseView.x - 40}
@@ -51,8 +60,20 @@ export function CustomGeography({ geography }: { geography: MapGeography }) {
       </g>
       {land.map((ring, i) => {
         const d = smoothClosedPath(ring);
+        const selected = selectedRings?.has(i);
         return (
-          <g key={i}>
+          <g
+            key={i}
+            className={onRingClick ? `land-ring${selected ? ' land-ring--selected' : ''}` : undefined}
+            onClick={
+              onRingClick
+                ? (e) => {
+                    e.stopPropagation();
+                    onRingClick(i);
+                  }
+                : undefined
+            }
+          >
             <path className="land-surf" d={d} />
             <path className="land" d={d} />
           </g>

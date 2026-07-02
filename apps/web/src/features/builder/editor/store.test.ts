@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useEditorStore } from './store';
 import { api } from '../../../net/rest';
 import type * as Rest from '../../../net/rest';
-import type { CityDraft, RouteDraft, TicketDraft } from '../../../net/rest';
+import type { CityDraft, MapGeographyDraft, RouteDraft, TicketDraft } from '../../../net/rest';
 
 vi.mock('../../../net/rest', async () => {
   const actual = await vi.importActual<typeof Rest>('../../../net/rest');
@@ -38,6 +38,12 @@ const route = (id: string, a: string, b: string, over: Partial<RouteDraft> = {})
   ...over,
 });
 const ticket = (id: string, a: string, b: string): TicketDraft => ({ id, a, b, value: 2, deck: 'SHORT' });
+const ring = (...pts: [number, number][]) => pts;
+const geography = (land: (readonly [number, number])[][]): MapGeographyDraft => ({
+  baseView: { x: 0, y: 0, w: 100, h: 100 },
+  land,
+  crop: { lonMin: 0, lonMax: 1, latMin: 0, latMax: 1 },
+});
 
 describe('editor store', () => {
   beforeEach(() => {
@@ -55,6 +61,7 @@ describe('editor store', () => {
       saving: false,
       saveError: null,
       undoStack: [],
+      redoStack: [],
     });
     vi.clearAllMocks();
   });
@@ -117,6 +124,56 @@ describe('editor store', () => {
     expect(useEditorStore.getState().draft.cities).toHaveLength(1);
     s.undo();
     expect(useEditorStore.getState().draft.cities).toHaveLength(0);
+  });
+
+  it('redo replays an undone edit', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2'));
+    s.undo();
+    expect(useEditorStore.getState().draft.cities).toHaveLength(1);
+
+    s.redo();
+    expect(useEditorStore.getState().draft.cities).toHaveLength(2);
+    s.redo();
+    expect(useEditorStore.getState().draft.cities).toHaveLength(2); // nothing left to redo
+  });
+
+  it('a new edit clears the redo branch', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2'));
+    s.undo();
+    s.placeCity(city('c3'));
+    expect(useEditorStore.getState().redoStack).toHaveLength(0);
+    s.redo();
+    expect(useEditorStore.getState().draft.cities.map((c) => c.id)).toEqual(['c1', 'c3']);
+  });
+
+  it('removeGeographyRings drops only the given land ring indices', () => {
+    const s = useEditorStore.getState();
+    const rings = [
+      ring([0, 0], [1, 0], [1, 1]),
+      ring([10, 10], [11, 10], [11, 11]),
+      ring([20, 20], [21, 20], [21, 21]),
+    ];
+    s.setGeography(geography(rings));
+
+    s.removeGeographyRings([0, 2]);
+
+    const land = useEditorStore.getState().draft.geography?.land;
+    expect(land).toEqual([rings[1]]);
+  });
+
+  it('removeGeographyRings is a no-op with no geography or no indices', () => {
+    const s = useEditorStore.getState();
+    s.removeGeographyRings([0]);
+    expect(useEditorStore.getState().draft.geography).toBeUndefined();
+
+    s.setGeography(geography([ring([0, 0], [1, 0], [1, 1])]));
+    const before = useEditorStore.getState().undoStack.length;
+    s.removeGeographyRings([]);
+    expect(useEditorStore.getState().undoStack.length).toBe(before);
   });
 
   it('replaceTickets swaps the whole ticket deck at once (auto-generate apply)', () => {
