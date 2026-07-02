@@ -26,22 +26,35 @@ export function TrimStage() {
 
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set());
 
-  // Ctrl/Cmd+Z and Ctrl/Cmd+Y — only wired up while this stage is mounted, matching the
-  // undo/redo buttons' own scope (see the JSX below, which shows the shortcuts next to them).
+  // Ctrl/Cmd+Z, Ctrl/Cmd+Y, and Delete — only wired up while this stage is mounted, matching the
+  // undo/redo/delete buttons' own scope (see the JSX below, which shows the shortcuts next to them).
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey)) return;
-      if (e.key === 'z' || e.key === 'Z') {
+      // Don't hijack Delete while the user is editing a text field (e.g. the map's name inputs
+      // in the header, which stay mounted regardless of stage).
+      const target = e.target;
+      if (target instanceof HTMLElement && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' || e.key === 'Z') {
+          e.preventDefault();
+          undo();
+        } else if (e.key === 'y' || e.key === 'Y') {
+          e.preventDefault();
+          redo();
+        }
+        return;
+      }
+      if (e.key === 'Delete' && selected.size > 0) {
         e.preventDefault();
-        undo();
-      } else if (e.key === 'y' || e.key === 'Y') {
-        e.preventDefault();
-        redo();
+        removeGeographyRings([...selected]);
+        setSelected(new Set());
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [undo, redo]);
+  }, [undo, redo, selected, removeGeographyRings]);
 
   const geography = draft.geography;
   const view = geography?.baseView ?? { x: 0, y: 0, w: 100, h: 100 };
@@ -106,9 +119,12 @@ export function TrimStage() {
         {selected.size > 0 ? (
           <>
             <p className="muted">{t('builder.trimSelectedCount', { n: selected.size })}</p>
-            <button className="danger" onClick={deleteSelected}>
-              <Eraser size={14} aria-hidden /> {t('builder.trimDelete')}
-            </button>
+            <div className="row">
+              <button className="danger" onClick={deleteSelected}>
+                <Eraser size={14} aria-hidden /> {t('builder.trimDelete')}
+              </button>
+              <span className="muted trim-shortcut-hint">Delete</span>
+            </div>
           </>
         ) : (
           <p className="muted">{t('builder.trimEmptyHint')}</p>

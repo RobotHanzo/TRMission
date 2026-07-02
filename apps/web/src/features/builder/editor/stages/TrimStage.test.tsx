@@ -118,4 +118,37 @@ describe('TrimStage', () => {
     fireEvent.keyDown(window, { key: 'y', ctrlKey: true });
     expect(useEditorStore.getState().draft.geography?.land).toHaveLength(1);
   });
+
+  it('the Delete key deletes the current selection, and its hint is shown next to the button', () => {
+    const { container } = render(<TrimStage />);
+    const rings = container.querySelectorAll('.land-ring');
+    fireEvent.click(rings[0]!);
+    expect(screen.getByText('Delete')).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Delete' });
+
+    expect(useEditorStore.getState().draft.geography?.land).toEqual([twoRings[1]]);
+    expect(screen.queryByText('已選取')).toBeNull();
+  });
+
+  it('the Delete key is a no-op when nothing is selected', () => {
+    render(<TrimStage />);
+    fireEvent.keyDown(window, { key: 'Delete' });
+    expect(useEditorStore.getState().draft.geography?.land).toHaveLength(2);
+  });
+
+  it('the Delete key does not fire while typing in a text field', () => {
+    const { container } = render(
+      <div>
+        <input aria-label="name" />
+        <TrimStage />
+      </div>,
+    );
+    const rings = container.querySelectorAll('.land-ring');
+    fireEvent.click(rings[0]!);
+
+    fireEvent.keyDown(screen.getByLabelText('name'), { key: 'Delete' });
+
+    expect(useEditorStore.getState().draft.geography?.land).toHaveLength(2);
+  });
 });
