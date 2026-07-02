@@ -9,7 +9,7 @@ import {
   CONTENT_HASH,
   ENGINE_VERSION,
 } from '@trm/engine';
-import type { Action, Board, GameConfig, GameState, PlayerSeed } from '@trm/engine';
+import type { Board, GameConfig, GameState, PlayerSeed } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
 import { MongoGameStore, ensureIndexes } from '../src/persistence/game-store';
 import type { GameDoc, MatchHistoryDoc } from '../src/persistence/types';
