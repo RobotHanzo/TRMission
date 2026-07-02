@@ -53,6 +53,10 @@ const resources = {
       difficulty_HARD: '困難',
 
       gameSettings: '遊戲設定',
+      mapLabel: '地圖',
+      mapOfficial: '官方',
+      mapCustom: '自訂',
+      mapCreateOne: '建立自訂地圖',
       settingUnlimitedStationBorrow: '車站無限借用路線',
       settingUnlimitedStationBorrowDesc:
         '每個車站可借用所有相鄰的對手路線；任務於連通當下即時鎖定計分。',
@@ -269,6 +273,10 @@ const resources = {
       difficulty_HARD: 'Hard',
 
       gameSettings: 'Game settings',
+      mapLabel: 'Map',
+      mapOfficial: 'Official',
+      mapCustom: 'Custom',
+      mapCreateOne: 'Create a custom map',
       settingUnlimitedStationBorrow: 'Unlimited station borrowing',
       settingUnlimitedStationBorrowDesc:
         'Each station may borrow every adjacent opponent route; tickets lock in and score the moment they connect.',

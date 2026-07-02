@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Globe, Lock, UserMinus, X } from 'lucide-react';
+import { Bot, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
+import { OFFICIAL_MAPS } from '@trm/map-data';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import {
@@ -10,6 +11,8 @@ import {
   type RoomMember,
   type RoomSettings,
   type RoomVisibility,
+  type MapSelector,
+  type MapSummary,
   type BotDifficulty,
 } from '../net/rest';
 import { connectGame } from '../net/connection';
@@ -17,21 +20,54 @@ import { SEAT_COLORS } from '../theme/colors';
 import { Toast } from '../components/Toast';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
+import type { Locale } from '../store/ui';
 
 const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
+
+/** Best-effort display name for the room's selected map. The server resolves this for official
+ *  maps (`mapName`); for a custom map it falls back to the viewer's own map list, which only
+ *  resolves for the host (a member who doesn't own the map sees a placeholder — the game itself
+ *  still renders the correct content once started, this only affects the lobby's label). */
+function mapDisplayName(
+  selector: MapSelector,
+  myMaps: MapSummary[] | null,
+  mapName: { zh: string; en: string } | undefined,
+  locale: Locale,
+): string {
+  if (mapName) return locale === 'en' ? mapName.en : mapName.zh;
+  if (selector.source === 'official') {
+    const m = OFFICIAL_MAPS.find((x) => x.mapId === selector.mapId);
+    return m ? (locale === 'en' ? m.content.meta.nameEn : m.content.meta.nameZh) : selector.mapId;
+  }
+  const m = myMaps?.find((x) => x.id === selector.customMapId);
+  return m ? (locale === 'en' ? m.nameEn : m.nameZh) : '…';
+}
 
 export function RoomScreen() {
   const { t } = useTranslation();
   const code = useUi((s) => s.roomCode) ?? '';
   const enterGame = useUi((s) => s.enterGame);
   const goHome = useUi((s) => s.goHome);
+  const enterMaps = useUi((s) => s.enterMaps);
+  const locale = useUi((s) => s.locale);
   const user = useSession((s) => s.user);
 
   const [room, setRoom] = useState<RoomView | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [kicked, setKicked] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // The host's own custom maps, for the picker's "custom" dropdown — fetched once, lazily,
+  // only for whoever can actually change the setting.
+  useEffect(() => {
+    if (!user) return;
+    api
+      .listMaps()
+      .then(setMyMaps)
+      .catch(() => setMyMaps([]));
+  }, [user]);
 
   const flashToast = (msg: string) => {
     setToast(msg);
@@ -246,6 +282,64 @@ export function RoomScreen() {
 
       <fieldset className="card stack game-settings" disabled={settingsLocked}>
         <legend>{t('gameSettings')}</legend>
+        <div className="row between setting-row">
+          <strong>{t('mapLabel')}</strong>
+          {isHost ? (
+            <div className="row">
+              <Segmented<'official' | 'custom'>
+                options={[
+                  { value: 'official', label: t('mapOfficial') },
+                  { value: 'custom', label: t('mapCustom') },
+                ]}
+                value={settings.map.source}
+                onChange={(src) => {
+                  if (src === 'official') {
+                    const first = OFFICIAL_MAPS[0];
+                    if (first) setSetting({ map: { source: 'official', mapId: first.mapId } });
+                  } else if (myMaps && myMaps.length > 0) {
+                    setSetting({ map: { source: 'custom', customMapId: myMaps[0]!.id } });
+                  } else {
+                    enterMaps();
+                  }
+                }}
+                ariaLabel={t('mapLabel')}
+              />
+              {settings.map.source === 'official' ? (
+                <select
+                  aria-label={t('mapOfficial')}
+                  value={settings.map.mapId}
+                  onChange={(e) => setSetting({ map: { source: 'official', mapId: e.target.value } })}
+                >
+                  {OFFICIAL_MAPS.map((m) => (
+                    <option key={m.mapId} value={m.mapId}>
+                      {locale === 'en' ? m.content.meta.nameEn : m.content.meta.nameZh}
+                    </option>
+                  ))}
+                </select>
+              ) : myMaps && myMaps.length > 0 ? (
+                <select
+                  aria-label={t('mapCustom')}
+                  value={settings.map.customMapId}
+                  onChange={(e) =>
+                    setSetting({ map: { source: 'custom', customMapId: e.target.value } })
+                  }
+                >
+                  {myMaps.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {locale === 'en' ? m.nameEn : m.nameZh}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <button onClick={enterMaps}>
+                  <MapIcon size={14} aria-hidden /> {t('mapCreateOne')}
+                </button>
+              )}
+            </div>
+          ) : (
+            <span>{mapDisplayName(settings.map, myMaps, room.mapName, locale)}</span>
+          )}
+        </div>
         {RULE_TOGGLES.map(([key, label, desc]) => (
           <div key={key} className="row between setting-row">
             <span>

@@ -17,7 +17,9 @@ export type View =
   | 'login'
   | 'loginCallback'
   | 'history'
-  | 'replay';
+  | 'replay'
+  | 'maps'
+  | 'mapEditor';
 
 // --- URL routing -----------------------------------------------------------
 // The browser path is the durable source of truth for *where* the user is:
@@ -32,6 +34,8 @@ const LOGIN_CALLBACK_PATH = '/login/callback';
 const TUTORIAL_PATH = '/tutorial';
 const HISTORY_PATH = '/history';
 const REPLAY_PATH = /^\/replay\/([^/]+)$/;
+const MAPS_PATH = '/maps';
+const MAP_EDITOR_PATH = /^\/maps\/([^/]+)\/edit$/;
 
 export const roomCodeFromPath = (): string | null => {
   const code = ROOM_PATH.exec(window.location.pathname)?.[1];
@@ -40,6 +44,11 @@ export const roomCodeFromPath = (): string | null => {
 
 export const replayIdFromPath = (): string | null => {
   const id = REPLAY_PATH.exec(window.location.pathname)?.[1];
+  return id ? decodeURIComponent(id) : null;
+};
+
+export const mapEditorIdFromPath = (): string | null => {
+  const id = MAP_EDITOR_PATH.exec(window.location.pathname)?.[1];
   return id ? decodeURIComponent(id) : null;
 };
 
@@ -144,6 +153,8 @@ interface UiState {
   gameId: string | null;
   ticket: string | null;
   replayGameId: string | null;
+  /** The custom map id being edited on /maps/:id/edit. */
+  editingMapId: string | null;
   locale: Locale;
   theme: Theme;
   colorBlind: boolean;
@@ -167,6 +178,10 @@ interface UiState {
   enterHistory(): void;
   /** Open the replay player for one finished game. */
   enterReplay(gameId: string): void;
+  /** Open the custom-map list/builder screen. */
+  enterMaps(): void;
+  /** Open the editor for one custom map. */
+  enterMapEditor(mapId: string): void;
   /** Leave the tutorial for home and spotlight the create-game button there. */
   requestCreateGame(): void;
   /** Clear a pending home-screen focus request (called once the home screen has consumed it). */
@@ -195,6 +210,7 @@ export const useUi = create<UiState>()((set, get) => ({
   gameId: null,
   ticket: null,
   replayGameId: null,
+  editingMapId: null,
   // Seed display prefs from localStorage so guests (and the pre-/auth/me window) persist them.
   locale: readLocale(),
   theme: readTheme(),
@@ -236,6 +252,16 @@ export const useUi = create<UiState>()((set, get) => ({
     pushPath(`/replay/${encodeURIComponent(gameId)}`);
     set({ view: 'replay', replayGameId: gameId, roomCode: null, gameId: null, ticket: null });
   },
+  enterMaps: () => {
+    disconnectGame();
+    pushPath(MAPS_PATH);
+    set({ view: 'maps', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  },
+  enterMapEditor: (mapId) => {
+    disconnectGame();
+    pushPath(`/maps/${encodeURIComponent(mapId)}/edit`);
+    set({ view: 'mapEditor', editingMapId: mapId, roomCode: null, gameId: null, ticket: null });
+  },
   navigateLogin: (returnTo) => {
     disconnectGame();
     replacePath(loginPathFor(returnTo));
@@ -262,6 +288,18 @@ export const useUi = create<UiState>()((set, get) => ({
       const id = decodeURIComponent(replayId);
       replacePath(`/replay/${encodeURIComponent(id)}`);
       set({ view: 'replay', replayGameId: id, roomCode: null, gameId: null, ticket: null });
+      return;
+    }
+    if (target === MAPS_PATH) {
+      replacePath(MAPS_PATH);
+      set({ view: 'maps', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    const editingMapId = MAP_EDITOR_PATH.exec(target)?.[1];
+    if (editingMapId) {
+      const id = decodeURIComponent(editingMapId);
+      replacePath(`/maps/${encodeURIComponent(id)}/edit`);
+      set({ view: 'mapEditor', editingMapId: id, roomCode: null, gameId: null, ticket: null });
       return;
     }
     replacePath('/');
@@ -322,6 +360,28 @@ export const useUi = create<UiState>()((set, get) => ({
         gameId: null,
         ticket: null,
       });
+      return;
+    }
+    // The custom-map builder is account-scoped too (authoring requires a registered account,
+    // but the screen itself just needs a signed-in session to list/fetch — the server enforces
+    // the registered-only check on authoring routes).
+    if (path === MAPS_PATH) {
+      if (!authed) {
+        get().navigateLogin(MAPS_PATH);
+        return;
+      }
+      disconnectGame();
+      set({ view: 'maps', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    const editingMapId = mapEditorIdFromPath();
+    if (editingMapId) {
+      if (!authed) {
+        get().navigateLogin(`/maps/${encodeURIComponent(editingMapId)}/edit`);
+        return;
+      }
+      disconnectGame();
+      set({ view: 'mapEditor', editingMapId, roomCode: null, gameId: null, ticket: null });
       return;
     }
     // Entering a room needs an authenticated session; otherwise gate to /login and remember it.
