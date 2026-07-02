@@ -1,0 +1,52 @@
+.history-screen .card {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-3);
+  padding: var(--tr-space-3) 0;
+  border-top: 1px solid var(--tr-line);
+}
+.history-row:first-of-type {
+  border-top: none;
+}
+.history-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+}
+.history-date {
+  font-size: 0.85em;
+  color: var(--tr-ink-soft);
+}
+.history-role {
+  font-size: 0.75em;
+  width: fit-content;
+  padding: 1px var(--tr-space-2);
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  color: var(--tr-ink-soft);
+}
+.history-players {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tr-space-1) var(--tr-space-2);
+}
+.history-player.is-winner {
+  font-weight: 700;
+}
+.history-player.is-winner::after {
+  content: ' ★';
+}
+.history-empty,
+.history-error {
+  color: var(--tr-ink-soft);
+  padding: var(--tr-space-2) 0;
+}
+.history-error {
+  color: var(--tr-danger);
+}
