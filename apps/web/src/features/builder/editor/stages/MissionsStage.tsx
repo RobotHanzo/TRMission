@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Dices, Trash2, Wand2 } from 'lucide-react';
 import { generateTickets } from '@trm/map-data';
 import { Segmented } from '../../../../components/ui/Segmented';
+import { Dropdown, type DropdownOption } from '../../../../components/ui/Dropdown';
 import { useEditorStore } from '../store';
 import { draftToContent } from '../contentAdapter';
-import type { TicketDraft } from '../../../../net/rest';
+import type { CityDraft, TicketDraft } from '../../../../net/rest';
 
 /** generateTickets returns branded TicketDef[]; the editor's draft (and the wire) use plain
  *  strings — this is the one place that boundary is crossed, right after generation. */
@@ -36,6 +37,10 @@ export function MissionsStage() {
 
   const rows = draft.tickets.filter((tk) => tk.deck === deck);
   const cityName = (id: string): string => draft.cities.find((c) => c.id === id)?.nameZh ?? id;
+  const cityOptions: DropdownOption<string>[] = draft.cities.map((c: CityDraft) => ({
+    value: c.id,
+    label: c.nameZh,
+  }));
 
   const addRow = () => {
     if (!a || !b || a === b) return;
@@ -84,25 +89,29 @@ export function MissionsStage() {
               </tr>
             ))}
             <tr>
-              <td>
-                <select value={a} onChange={(e) => setA(e.target.value)}>
-                  <option value="" />
-                  {draft.cities.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nameZh}
-                    </option>
-                  ))}
-                </select>
+              <td className="editor-ticket-cell">
+                <Dropdown<string>
+                  options={cityOptions}
+                  value={a}
+                  onChange={setA}
+                  ariaLabel={t('builder.from')}
+                  placeholder={t('builder.selectCity')}
+                  searchable
+                  searchPlaceholder={t('builder.searchCities')}
+                  emptyLabel={t('builder.noCitiesFound')}
+                />
               </td>
-              <td>
-                <select value={b} onChange={(e) => setB(e.target.value)}>
-                  <option value="" />
-                  {draft.cities.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nameZh}
-                    </option>
-                  ))}
-                </select>
+              <td className="editor-ticket-cell">
+                <Dropdown<string>
+                  options={cityOptions}
+                  value={b}
+                  onChange={setB}
+                  ariaLabel={t('builder.to')}
+                  placeholder={t('builder.selectCity')}
+                  searchable
+                  searchPlaceholder={t('builder.searchCities')}
+                  emptyLabel={t('builder.noCitiesFound')}
+                />
               </td>
               <td>
                 <input

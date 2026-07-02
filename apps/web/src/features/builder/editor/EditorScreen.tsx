@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Crop, MapPin, Route, Ticket, SlidersHorizontal, Share2, type LucideIcon } from 'lucide-react';
 import { useUi } from '../../../store/ui';
 import { useEditorStore, STAGES, type Stage } from './store';
 import { ValidationPanel } from './ValidationPanel';
@@ -21,6 +21,15 @@ const STAGE_LABEL_KEY: Record<Stage, string> = {
   missions: 'builder.stageMissions',
   rules: 'builder.stageRules',
   share: 'builder.stageShare',
+};
+
+const STAGE_ICON: Record<Stage, LucideIcon> = {
+  crop: Crop,
+  stops: MapPin,
+  routes: Route,
+  missions: Ticket,
+  rules: SlidersHorizontal,
+  share: Share2,
 };
 
 export default function EditorScreen() {
@@ -68,44 +77,73 @@ export default function EditorScreen() {
   }
 
   const hasGeography = !!draft.geography;
+  const stageIndex = STAGES.indexOf(stage);
 
   return (
     <div className="editor-screen stack">
-      <div className="row between">
+      <header className="editor-header row between">
         <div className="row">
           <button className="icon-btn" onClick={enterMaps} aria-label={t('back')} title={t('back')}>
             <ArrowLeft size={16} aria-hidden />
           </button>
-          <input
-            className="editor-name-input"
-            value={nameZh}
-            onChange={(e) => setName(e.target.value, nameEn)}
-            aria-label={t('builder.nameZh')}
-          />
-          <input
-            className="editor-name-input"
-            value={nameEn}
-            onChange={(e) => setName(nameZh, e.target.value)}
-            aria-label={t('builder.nameEn')}
-          />
+          <div className="editor-name-group">
+            <input
+              className="editor-name-input"
+              value={nameZh}
+              onChange={(e) => setName(e.target.value, nameEn)}
+              aria-label={t('builder.nameZh')}
+              placeholder={t('builder.nameZh')}
+            />
+            <input
+              className="editor-name-input editor-name-input--en"
+              value={nameEn}
+              onChange={(e) => setName(nameZh, e.target.value)}
+              aria-label={t('builder.nameEn')}
+              placeholder={t('builder.nameEn')}
+            />
+          </div>
         </div>
-        <span className="muted editor-save-indicator">
-          {saving ? t('builder.saving') : saveError ? t('builder.saveFailed') : dirty ? t('builder.unsaved') : t('builder.saved')}
-        </span>
-      </div>
+        <div className="row">
+          <ValidationPanel />
+          <span
+            className={
+              saving
+                ? 'editor-save-indicator saving'
+                : saveError
+                  ? 'editor-save-indicator error'
+                  : dirty
+                    ? 'editor-save-indicator unsaved'
+                    : 'editor-save-indicator saved'
+            }
+          >
+            {saving ? t('builder.saving') : saveError ? t('builder.saveFailed') : dirty ? t('builder.unsaved') : t('builder.saved')}
+          </span>
+        </div>
+      </header>
 
       <div className="editor-body">
         <nav className="editor-stage-rail" aria-label={t('builder.stages')}>
-          {STAGES.map((s) => (
-            <button
-              key={s}
-              className={s === stage ? 'editor-stage-btn active' : 'editor-stage-btn'}
-              disabled={s !== 'crop' && !hasGeography}
-              onClick={() => setStage(s)}
-            >
-              {t(STAGE_LABEL_KEY[s])}
-            </button>
-          ))}
+          <div className="editor-stage-line" aria-hidden />
+          {STAGES.map((s, i) => {
+            const Icon = STAGE_ICON[s];
+            const locked = s !== 'crop' && !hasGeography;
+            const state = s === stage ? 'current' : i < stageIndex ? 'visited' : locked ? 'locked' : 'upcoming';
+            return (
+              <button
+                key={s}
+                type="button"
+                className={`editor-stage-btn editor-stage-btn--${state}`}
+                disabled={locked}
+                aria-current={s === stage ? 'step' : undefined}
+                onClick={() => setStage(s)}
+              >
+                <span className="editor-stage-dot">
+                  <Icon size={13} aria-hidden />
+                </span>
+                <span className="editor-stage-label">{t(STAGE_LABEL_KEY[s])}</span>
+              </button>
+            );
+          })}
         </nav>
         <div className="editor-main">
           {stage === 'crop' && <CropStage />}
@@ -116,7 +154,6 @@ export default function EditorScreen() {
           {stage === 'share' && hasGeography && <ShareStage />}
         </div>
       </div>
-      <ValidationPanel />
     </div>
   );
 }

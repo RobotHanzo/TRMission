@@ -289,6 +289,107 @@
   box-shadow: var(--tr-shadow);
 }
 
+/* ── Dropdown (self-drawn <select> replacement) ───────────────────────────────
+   A paper-card popover: hairline-divided option rows on the app's surface colour,
+   so it reads as part of the timetable UI rather than an OS-native control. */
+.dropdown {
+  position: relative;
+  width: 100%;
+}
+.dropdown-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tr-space-2);
+  text-align: left;
+}
+.dropdown-trigger-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dropdown-chevron {
+  flex-shrink: 0;
+  color: var(--tr-ink-soft);
+  transition: transform 0.15s ease;
+}
+.dropdown.open .dropdown-chevron {
+  transform: rotate(180deg);
+}
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  overflow: hidden;
+}
+.dropdown-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border-bottom: 1px solid var(--tr-line);
+  color: var(--tr-ink-soft);
+  flex-shrink: 0;
+}
+.dropdown-search input {
+  flex: 1;
+  border: none;
+  padding: 2px 0;
+  background: transparent;
+}
+.dropdown-search input:focus {
+  outline: none;
+}
+.dropdown-list {
+  max-height: 15em;
+  overflow-y: auto;
+  padding: 4px;
+}
+.dropdown-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: var(--tr-space-2);
+  border-radius: var(--tr-radius-sm);
+}
+.dropdown-option:hover:not(:disabled) {
+  filter: none;
+  background: var(--tr-surface-2);
+}
+.dropdown-option.selected {
+  background: color-mix(in srgb, var(--tr-blue) 14%, var(--tr-surface));
+  font-weight: 600;
+}
+.dropdown-empty {
+  padding: var(--tr-space-3);
+  text-align: center;
+  font-size: 0.9em;
+}
+.color-option {
+  gap: var(--tr-space-2);
+}
+.color-swatch {
+  width: 1em;
+  height: 1em;
+  border-radius: 3px;
+  border: 1px solid var(--tr-line);
+  flex-shrink: 0;
+}
+
 /* ── Login screen (full-bleed blurred map backdrop + centered card) ─────────── */
 .app-main--login {
   max-width: 100%;

@@ -57,7 +57,7 @@ export function fitTransform(
  * the south. Points are smoothed into a natural curve by `smoothClosedPath`; every land city sits
  * inside this hull.
  */
-const TAIWAN_OUTLINE: readonly (readonly [number, number])[] = [
+export const TAIWAN_OUTLINE: readonly (readonly [number, number])[] = [
   [56.7, 10], // Tamsui river mouth (NW)
   [62.1, 5.9], // Cape Fugui — northernmost point
   [64.8, 7.3],

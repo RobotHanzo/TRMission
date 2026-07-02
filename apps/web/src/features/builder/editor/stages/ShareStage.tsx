@@ -41,44 +41,50 @@ export function ShareStage() {
   return (
     <div className="editor-stage-layout editor-stage-layout--table">
       <div className="card stack">
-        <h3>{t('builder.readiness')}</h3>
-        {ready ? (
-          <p className="row">
-            <CheckCircle2 size={16} aria-hidden /> {t('builder.readyToPlay')}
-          </p>
-        ) : (
-          <div className="stack">
-            {errors.map((e, i) => (
-              <p key={i} className="row error">
-                <XCircle size={14} aria-hidden /> {e}
-              </p>
-            ))}
-          </div>
-        )}
-
-        <h3>{t('builder.shareTitle')}</h3>
-        {shareCode ? (
-          <div className="stack">
-            <div className="row">
-              <code className="room-code">{shareCode}</code>
-              <button onClick={() => copy(shareCode)}>
-                <Copy size={14} aria-hidden /> {t('copyCode')}
-              </button>
-              {shareLink && <button onClick={() => copy(shareLink)}>{t('copyLink')}</button>}
+        <section className="stack editor-share-section">
+          <h3>{t('builder.readiness')}</h3>
+          {ready ? (
+            <p className="row">
+              <CheckCircle2 size={16} aria-hidden /> {t('builder.readyToPlay')}
+            </p>
+          ) : (
+            <div className="stack">
+              {errors.map((e, i) => (
+                <p key={i} className="row error">
+                  <XCircle size={14} aria-hidden /> {e}
+                </p>
+              ))}
             </div>
-            <button className="danger" onClick={() => void revokeShare()}>
-              {t('builder.revokeShare')}
-            </button>
-          </div>
-        ) : (
-          <button onClick={() => void mintShare()}>{t('builder.mintShare')}</button>
-        )}
+          )}
+        </section>
 
-        <h3>{t('builder.playTitle')}</h3>
-        <button className="primary" disabled={!ready || busy} onClick={() => void createRoomWithMap()}>
-          {t('builder.createRoomWithMap')}
-        </button>
-        {err && <p className="error">{err}</p>}
+        <section className="stack editor-share-section">
+          <h3>{t('builder.shareTitle')}</h3>
+          {shareCode ? (
+            <div className="stack">
+              <div className="row">
+                <code className="room-code">{shareCode}</code>
+                <button onClick={() => copy(shareCode)}>
+                  <Copy size={14} aria-hidden /> {t('copyCode')}
+                </button>
+                {shareLink && <button onClick={() => copy(shareLink)}>{t('copyLink')}</button>}
+              </div>
+              <button className="danger" onClick={() => void revokeShare()}>
+                {t('builder.revokeShare')}
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => void mintShare()}>{t('builder.mintShare')}</button>
+          )}
+        </section>
+
+        <section className="stack editor-share-section">
+          <h3>{t('builder.playTitle')}</h3>
+          <button className="primary" disabled={!ready || busy} onClick={() => void createRoomWithMap()}>
+            {t('builder.createRoomWithMap')}
+          </button>
+          {err && <p className="error">{err}</p>}
+        </section>
       </div>
     </div>
   );

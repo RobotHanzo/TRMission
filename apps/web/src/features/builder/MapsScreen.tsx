@@ -7,6 +7,7 @@ import '../../styles/builder.css';
 
 export default function MapsScreen() {
   const { t } = useTranslation();
+  const locale = useUi((s) => s.locale);
   const enterMapEditor = useUi((s) => s.enterMapEditor);
   const [maps, setMaps] = useState<MapSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,9 +78,14 @@ export default function MapsScreen() {
         {maps && maps.length === 0 && <p className="muted">{t('builder.noMaps')}</p>}
         {maps?.map((m) => (
           <div key={m.id} className="row between maps-row">
-            <span>
-              {m.nameZh} <span className="muted">({m.nameEn})</span>
-            </span>
+            <div className="maps-row-name">
+              <span>
+                {m.nameZh} <span className="muted">({m.nameEn})</span>
+              </span>
+              <span className="muted maps-row-updated">
+                {t('builder.updatedAt', { date: new Date(m.updatedAt).toLocaleDateString(locale) })}
+              </span>
+            </div>
             <div className="row">
               <button onClick={() => enterMapEditor(m.id)}>
                 <Edit3 size={14} aria-hidden /> {t('builder.editMap')}

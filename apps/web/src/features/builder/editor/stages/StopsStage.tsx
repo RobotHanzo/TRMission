@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react';
+import { Switch } from '../../../../components/ui/Switch';
 import { EditorCanvas } from '../EditorCanvas';
 import { useEditorStore } from '../store';
 
@@ -54,35 +55,35 @@ export function StopsStage() {
         {selected ? (
           <>
             <h3>{t('builder.editStop')}</h3>
-            <label>
-              {t('builder.nameZh')}
+            <label className="field">
+              <span className="field-label">{t('builder.nameZh')}</span>
               <input
                 value={selected.nameZh}
                 onChange={(e) => updateCity(selected.id, { nameZh: e.target.value })}
               />
             </label>
-            <label>
-              {t('builder.nameEn')}
+            <label className="field">
+              <span className="field-label">{t('builder.nameEn')}</span>
               <input
                 value={selected.nameEn}
                 onChange={(e) => updateCity(selected.id, { nameEn: e.target.value })}
               />
             </label>
-            <label>
-              {t('builder.region')}
+            <label className="field">
+              <span className="field-label">{t('builder.region')}</span>
               <input
                 value={selected.region}
                 onChange={(e) => updateCity(selected.id, { region: e.target.value })}
               />
             </label>
-            <label className="row">
-              <input
-                type="checkbox"
+            <div className="row between setting-row">
+              <span className="field-label">{t('builder.isIsland')}</span>
+              <Switch
                 checked={selected.isIsland}
-                onChange={(e) => updateCity(selected.id, { isIsland: e.target.checked })}
+                onChange={(v) => updateCity(selected.id, { isIsland: v })}
+                label={t('builder.isIsland')}
               />
-              {t('builder.isIsland')}
-            </label>
+            </div>
             {confirmDelete ? (
               <div className="stack">
                 <p className="muted">

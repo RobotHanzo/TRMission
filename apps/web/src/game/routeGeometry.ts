@@ -1,4 +1,22 @@
-import { CITIES, ROUTES, cityById } from './content';
+import { CITIES, ROUTES } from './content';
+
+/** The minimal city/route shape the geometry math needs — satisfied by both the live content's
+ *  branded `CityDef`/`RouteDef` and the map builder's plain-string `CityDraft`/`RouteDraft`, so
+ *  the same curve/bow/hub logic serves the live board and the editor's independent draft state. */
+export interface GeometryCity {
+  readonly id: string;
+  readonly x: number;
+  readonly y: number;
+  readonly isIsland?: boolean;
+}
+export interface GeometryRoute {
+  readonly id: string;
+  readonly a: string;
+  readonly b: string;
+  readonly length: number;
+  readonly isTunnel?: boolean;
+  readonly doubleGroup?: string;
+}
 
 /**
  * Route cartography: every route is drawn as a gentle curve carrying a chain of discrete
@@ -114,13 +132,16 @@ interface RouteOffset {
  * endpoints but take equal-and-opposite perpendicular gaps (applied counter-scaled at render, so
  * the pair stays snug); every other route bows away from the nearest city its chord would cross.
  */
-function computeOffsets(): Map<string, RouteOffset> {
+function computeOffsetsFor(
+  cities: readonly GeometryCity[],
+  routes: readonly GeometryRoute[],
+): Map<string, RouteOffset> {
   const out = new Map<string, RouteOffset>();
+  const cityByIdLocal = new Map(cities.map((c) => [c.id, c]));
 
   const groups = new Map<string, string[]>();
-  for (const r of ROUTES)
-    if (r.doubleGroup)
-      groups.set(r.doubleGroup, [...(groups.get(r.doubleGroup) ?? []), r.id as string]);
+  for (const r of routes)
+    if (r.doubleGroup) groups.set(r.doubleGroup, [...(groups.get(r.doubleGroup) ?? []), r.id]);
   for (const ids of groups.values()) {
     ids.sort();
     ids.forEach((id, i) =>
@@ -128,12 +149,12 @@ function computeOffsets(): Map<string, RouteOffset> {
     );
   }
 
-  for (const r of ROUTES) {
-    if (out.has(r.id as string)) continue;
-    const a = cityById.get(r.a as string);
-    const b = cityById.get(r.b as string);
+  for (const r of routes) {
+    if (out.has(r.id)) continue;
+    const a = cityByIdLocal.get(r.a);
+    const b = cityByIdLocal.get(r.b);
     if (!a || !b) {
-      out.set(r.id as string, { gap: 0, bow: 0 });
+      out.set(r.id, { gap: 0, bow: 0 });
       continue;
     }
     const abx = b.x - a.x;
@@ -143,7 +164,7 @@ function computeOffsets(): Map<string, RouteOffset> {
     const nx = -aby / len; // unit normal to the chord
     const ny = abx / len;
     let best = 0;
-    for (const c of CITIES) {
+    for (const c of cities) {
       if (c.id === r.a || c.id === r.b || c.isIsland) continue;
       const t = ((c.x - a.x) * abx + (c.y - a.y) * aby) / len2;
       if (t < 0.15 || t > 0.85) continue; // only cities genuinely between the endpoints
@@ -158,13 +179,14 @@ function computeOffsets(): Map<string, RouteOffset> {
       const signed = -Math.sign(side || 1) * (INTRUSION_DIST - dist);
       if (Math.abs(signed) > Math.abs(best)) best = signed;
     }
-    out.set(r.id as string, {
+    out.set(r.id, {
       gap: 0,
       bow: Math.max(-MAX_BOW, Math.min(MAX_BOW, best * BOW_GAIN)),
     });
   }
 
-  // Hand-tuned outward bows win over the automatic one, keeping any double-gap intact.
+  // Hand-tuned outward bows win over the automatic one, keeping any double-gap intact. These are
+  // official-Taiwan route ids; a custom map's generated ids never collide with them.
   for (const [id, bow] of Object.entries(BOW_OVERRIDE)) {
     const o = out.get(id);
     if (o) out.set(id, { gap: o.gap, bow });
@@ -176,21 +198,22 @@ function computeOffsets(): Map<string, RouteOffset> {
 export const HUB_MIN_DEGREE = 4;
 
 /** Cities where enough routes converge to warrant the larger slot-shaped station marker. */
-function computeHubs(): Set<string> {
+function computeHubsFor(
+  cities: readonly GeometryCity[],
+  routes: readonly GeometryRoute[],
+): Set<string> {
   const degree = new Map<string, number>();
-  for (const r of ROUTES) {
-    degree.set(r.a as string, (degree.get(r.a as string) ?? 0) + 1);
-    degree.set(r.b as string, (degree.get(r.b as string) ?? 0) + 1);
+  for (const r of routes) {
+    degree.set(r.a, (degree.get(r.a) ?? 0) + 1);
+    degree.set(r.b, (degree.get(r.b) ?? 0) + 1);
   }
   const hubs = new Set<string>();
-  for (const c of CITIES)
-    if (!c.isIsland && (degree.get(c.id as string) ?? 0) >= HUB_MIN_DEGREE)
-      hubs.add(c.id as string);
+  for (const c of cities) if (!c.isIsland && (degree.get(c.id) ?? 0) >= HUB_MIN_DEGREE) hubs.add(c.id);
   return hubs;
 }
 
 /** Set of hub city ids for the active content — rebuilt by rebuildRouteGeometry() on a map swap. */
-export let HUB_CITIES: ReadonlySet<string> = computeHubs();
+export let HUB_CITIES: ReadonlySet<string> = computeHubsFor(CITIES, ROUTES);
 
 const qPoint = (
   a: { x: number; y: number },
@@ -276,17 +299,21 @@ function curveShape(
   };
 }
 
-function buildGeometry(): Map<string, RouteGeometry> {
-  const offsets = computeOffsets();
+function buildGeometryFor(
+  cities: readonly GeometryCity[],
+  routes: readonly GeometryRoute[],
+): Map<string, RouteGeometry> {
+  const cityByIdLocal = new Map(cities.map((c) => [c.id, c]));
+  const offsets = computeOffsetsFor(cities, routes);
   const out = new Map<string, RouteGeometry>();
-  for (const r of ROUTES) {
-    const a = cityById.get(r.a as string);
-    const b = cityById.get(r.b as string);
+  for (const r of routes) {
+    const a = cityByIdLocal.get(r.a);
+    const b = cityByIdLocal.get(r.b);
     if (!a || !b) continue;
     const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
     const nx = -(b.y - a.y) / len;
     const ny = (b.x - a.x) / len;
-    const { gap, bow } = offsets.get(r.id as string) ?? { gap: 0, bow: 0 };
+    const { gap, bow } = offsets.get(r.id) ?? { gap: 0, bow: 0 };
     // Every route keeps its endpoints on the two city centres. A bypass bows its apex around an
     // intruding town; a double pair instead carries a perpendicular `perp` nudge applied (counter-
     // scaled) at render time, so its twin tracks separate without ever leaving their stations.
@@ -294,9 +321,21 @@ function buildGeometry(): Map<string, RouteGeometry> {
     // Control point chosen so the curve's apex deviates from the chord by exactly `bow`.
     const c = { x: mid.x + nx * 2 * bow, y: mid.y + ny * 2 * bow };
     const perp = gap ? { x: nx * gap, y: ny * gap } : { x: 0, y: 0 };
-    out.set(r.id as string, { ...curveShape(a, c, b, r.length, !!r.isTunnel), perp });
+    out.set(r.id, { ...curveShape(a, c, b, r.length, !!r.isTunnel), perp });
   }
   return out;
+}
+
+/**
+ * Curved-route geometry (+ hub set) for an arbitrary city/route list — the map builder's own
+ * escape hatch into this module's curve/bow/hub math, independent of the live board's CITIES/
+ * ROUTES singleton (its draft is WIP/possibly-invalid content, never the active game's content).
+ */
+export function buildRouteGeometryFor(
+  cities: readonly GeometryCity[],
+  routes: readonly GeometryRoute[],
+): { geometry: Map<string, RouteGeometry>; hubs: ReadonlySet<string> } {
+  return { geometry: buildGeometryFor(cities, routes), hubs: computeHubsFor(cities, routes) };
 }
 
 /** Per-car spacing (board units) for a standalone straight specimen route — a car plus its gap. */
@@ -324,10 +363,10 @@ export function straightRouteGeometry(
 /** Geometry for the active content. Precomputed once for the default (Taiwan); rebuilt whenever
  *  game/catalog.ts swaps the active map (rebuildRouteGeometry() re-reads CITIES/ROUTES/cityById,
  *  which by then already point at the new content — see content.ts's applyContentTables). */
-export let ROUTE_GEOMETRY: Map<string, RouteGeometry> = buildGeometry();
+export let ROUTE_GEOMETRY: Map<string, RouteGeometry> = buildGeometryFor(CITIES, ROUTES);
 
 /** Recompute HUB_CITIES/ROUTE_GEOMETRY from the current CITIES/ROUTES/cityById in content.ts. */
 export function rebuildRouteGeometry(): void {
-  HUB_CITIES = computeHubs();
-  ROUTE_GEOMETRY = buildGeometry();
+  HUB_CITIES = computeHubsFor(CITIES, ROUTES);
+  ROUTE_GEOMETRY = buildGeometryFor(CITIES, ROUTES);
 }

@@ -4,6 +4,9 @@ import { Trash2 } from 'lucide-react';
 import { TRAIN_COLORS, ROUTE_LENGTHS } from '@trm/shared';
 import type { RouteColor, RouteLength } from '@trm/shared';
 import { CARD_COLOR_TOKENS, GRAY_TOKEN } from '../../../../theme/colors';
+import { Dropdown, type DropdownOption } from '../../../../components/ui/Dropdown';
+import { Segmented } from '../../../../components/ui/Segmented';
+import { Switch } from '../../../../components/ui/Switch';
 import { EditorCanvas } from '../EditorCanvas';
 import { useEditorStore } from '../store';
 import type { RouteDraft } from '../../../../net/rest';
@@ -151,44 +154,48 @@ function RouteForm({
     return 'A';
   };
 
+  const colorOptions: DropdownOption<RouteColor>[] = ROUTE_COLORS.map((c) => {
+    const token = c === 'GRAY' ? GRAY_TOKEN : CARD_COLOR_TOKENS[c];
+    return {
+      value: c,
+      label: token.nameZh,
+      render: (
+        <span className="row color-option">
+          <span className="color-swatch" style={{ background: token.hex }} aria-hidden />
+          {token.nameZh}
+        </span>
+      ),
+    };
+  });
+
   return (
     <>
       <h3>{title}</h3>
-      <label>
-        {t('builder.routeLength')}
-        <select value={length} onChange={(e) => setLength(Number(e.target.value) as RouteLength)}>
-          {ROUTE_LENGTHS.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        {t('builder.routeColor')}
-        <select
-          value={color}
-          onChange={(e) => setColor(e.target.value as RouteColor)}
-          disabled={isFerry}
-        >
-          {ROUTE_COLORS.map((c) => (
-            <option key={c} value={c}>
-              {c === 'GRAY' ? GRAY_TOKEN.nameZh : CARD_COLOR_TOKENS[c].nameZh}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="row">
-        <input
-          type="checkbox"
-          checked={isTunnel}
-          disabled={isFerry}
-          onChange={(e) => setIsTunnel(e.target.checked)}
+      <label className="field">
+        <span className="field-label">{t('builder.routeLength')}</span>
+        <Segmented<string>
+          options={ROUTE_LENGTHS.map((n) => ({ value: String(n), label: String(n) }))}
+          value={String(length)}
+          onChange={(v) => setLength(Number(v) as RouteLength)}
+          ariaLabel={t('builder.routeLength')}
         />
-        {t('builder.isTunnel')}
       </label>
-      <label>
-        {t('builder.ferryLocos')}
+      <label className="field">
+        <span className="field-label">{t('builder.routeColor')}</span>
+        <Dropdown<RouteColor>
+          options={colorOptions}
+          value={color}
+          onChange={setColor}
+          ariaLabel={t('builder.routeColor')}
+          disabled={isFerry}
+        />
+      </label>
+      <div className="row between setting-row">
+        <span className="field-label">{t('builder.isTunnel')}</span>
+        <Switch checked={isTunnel} disabled={isFerry} onChange={setIsTunnel} label={t('builder.isTunnel')} />
+      </div>
+      <label className="field">
+        <span className="field-label">{t('builder.ferryLocos')}</span>
         <input
           type="number"
           min={0}
@@ -205,10 +212,10 @@ function RouteForm({
         />
       </label>
       {!hideDouble && (
-        <label className="row">
-          <input type="checkbox" checked={makeDouble} onChange={(e) => setMakeDouble(e.target.checked)} />
-          {t('builder.makeDouble')}
-        </label>
+        <div className="row between setting-row">
+          <span className="field-label">{t('builder.makeDouble')}</span>
+          <Switch checked={makeDouble} onChange={setMakeDouble} label={t('builder.makeDouble')} />
+        </div>
       )}
       <div className="row">
         <button

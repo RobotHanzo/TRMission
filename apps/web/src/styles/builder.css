@@ -1,57 +1,168 @@
 /* Custom map builder: maps list + editor. Reuses the .card/.stack/.row primitives from
    app.css/game.css — this file only adds the builder-specific layout and canvas chrome. */
 
-.maps-screen .card {
+.maps-screen {
   max-width: 720px;
   margin: 0 auto;
+  width: 100%;
 }
 .maps-row {
-  padding: var(--tr-space-2) 0;
+  padding: var(--tr-space-3) 0;
   border-top: 1px solid var(--tr-line);
 }
 .maps-row:first-of-type {
   border-top: none;
 }
+.maps-row-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.maps-row-updated {
+  font-size: 0.8em;
+}
 
+/* ── Field label — a small caption above an input/dropdown/segmented control ────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-1);
+}
+.field-label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--tr-ink-soft);
+}
+
+/* ── Editor screen shell ──────────────────────────────────────────────────────────────── */
 .editor-screen {
   height: 100%;
   padding: var(--tr-space-3);
+}
+.editor-header {
+  flex-wrap: wrap;
+  gap: var(--tr-space-3);
+}
+.editor-name-group {
+  display: flex;
+  gap: var(--tr-space-2);
 }
 .editor-name-input {
   font-weight: 600;
   min-width: 8em;
 }
+.editor-name-input--en {
+  font-weight: 400;
+  color: var(--tr-ink-soft);
+}
 .editor-save-indicator {
   font-size: 0.85em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.editor-save-indicator::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.editor-save-indicator.saved {
+  color: var(--tr-ok);
+}
+.editor-save-indicator.unsaved {
+  color: var(--tr-ink-soft);
+}
+.editor-save-indicator.saving {
+  color: var(--tr-accent);
+}
+.editor-save-indicator.error {
+  color: var(--tr-danger);
 }
 
 .editor-body {
   display: flex;
-  gap: var(--tr-space-3);
+  gap: var(--tr-space-4);
   flex: 1;
   min-height: 0;
 }
+
+/* ── Stage rail: a railway line diagram — the six editing stages ARE a real sequence, so the
+   rail is drawn as a line of stations rather than a generic tab list. ─────────────────────── */
 .editor-stage-rail {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--tr-space-1);
-  width: 8em;
+  width: 10em;
   flex-shrink: 0;
 }
-.editor-stage-btn {
-  text-align: left;
-  padding: var(--tr-space-2) var(--tr-space-3);
-  border-radius: var(--tr-radius-sm);
-  background: var(--tr-surface);
-  border: 1px solid var(--tr-line);
+.editor-stage-line {
+  position: absolute;
+  left: 19px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: var(--tr-line);
 }
-.editor-stage-btn.active {
-  background: var(--tr-blue);
-  color: #fff;
+.editor-stage-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  text-align: left;
+  padding: var(--tr-space-2) var(--tr-space-2);
+  border: none;
+  background: transparent;
+  border-radius: var(--tr-radius-sm);
+}
+.editor-stage-btn:hover:not(:disabled) {
+  filter: none;
+  background: var(--tr-surface-2);
+}
+.editor-stage-dot {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tr-surface);
+  border: 2px solid var(--tr-line);
+  color: var(--tr-ink-soft);
+}
+.editor-stage-label {
+  font-size: 0.92em;
+  color: var(--tr-ink-soft);
+}
+.editor-stage-btn--visited .editor-stage-dot {
   border-color: var(--tr-blue);
+  color: var(--tr-blue);
+  background: color-mix(in srgb, var(--tr-blue) 10%, var(--tr-surface));
+}
+.editor-stage-btn--visited .editor-stage-label {
+  color: var(--tr-ink);
+}
+.editor-stage-btn--current .editor-stage-dot {
+  border-color: var(--tr-ember);
+  background: var(--tr-ember);
+  color: #fff;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tr-ember) 18%, transparent);
+}
+.editor-stage-btn--current .editor-stage-label {
+  color: var(--tr-ink);
+  font-weight: 600;
+}
+.editor-stage-btn--locked .editor-stage-dot {
+  opacity: 0.5;
+}
+.editor-stage-btn--locked .editor-stage-label {
+  opacity: 0.5;
 }
 .editor-stage-btn:disabled {
-  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -59,6 +170,10 @@
   flex: 1;
   min-width: 0;
   min-height: 0;
+  /* Canvas-stage layouts (crop/stops/routes) fill exactly 100% and never need this; table-layout
+     stages (missions/rules/share) size to their content, which can outgrow the available height —
+     this is their only scroll container, so it must scroll rather than silently clip/overflow. */
+  overflow-y: auto;
 }
 .editor-stage-layout {
   display: flex;
@@ -67,6 +182,7 @@
 }
 .editor-stage-layout--table {
   display: block;
+  height: auto;
 }
 .editor-canvas-wrap {
   flex: 1;
@@ -77,8 +193,13 @@
   overflow: hidden;
   background: var(--tr-sea);
 }
+.editor-canvas-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
 .editor-inspector {
-  width: 20em;
+  width: 21em;
   flex-shrink: 0;
   overflow-y: auto;
 }
@@ -93,6 +214,11 @@
   padding: var(--tr-space-1) var(--tr-space-2);
   border-radius: var(--tr-radius-sm);
   width: fit-content;
+  box-shadow: var(--tr-shadow);
+  pointer-events: none;
+}
+.editor-hint--warning {
+  bottom: calc(var(--tr-space-2) + 2.2em);
 }
 
 .editor-canvas,
@@ -100,21 +226,40 @@
   width: 100%;
   height: 100%;
   display: block;
+  touch-action: none;
+}
+.editor-canvas {
+  cursor: crosshair;
+}
+.editor-world {
+  /* Left-click always draws/adjusts the crop box here; panning is the middle mouse button
+     (unlike the live board's left-drag pan), so crosshair — not grab — is the resting cursor. */
   cursor: crosshair;
 }
 .editor-city {
   cursor: pointer;
 }
-.editor-city-label {
-  font-size: 2.4px;
-  fill: var(--tr-ink);
-  paint-order: stroke;
-  stroke: var(--tr-surface);
-  stroke-width: 0.4px;
-  pointer-events: none;
-}
 .editor-route {
   cursor: pointer;
+}
+
+/* Selection/highlight rings on the real live-board markers (city-dot/city-hub/.bed — see
+   RouteShape.tsx + game.css), so the editor's picked route/city reads as an accent on top of
+   the exact in-game cartography rather than a separate bespoke style. */
+.route.editor-route--selected .bed {
+  stroke: var(--tr-ember);
+  stroke-width: calc(3.6px * var(--inv-scale, 1));
+}
+.city.editor-city--selected .city-dot,
+.city.editor-city--selected .city-hub {
+  stroke: var(--tr-ember);
+  stroke-width: calc(0.7px * var(--marker-scale, 1));
+}
+.city.editor-city--highlighted .city-dot,
+.city.editor-city--highlighted .city-hub {
+  stroke: var(--tr-ember);
+  stroke-width: calc(0.6px * var(--marker-scale, 1));
+  fill: color-mix(in srgb, var(--tr-ember) 25%, var(--tr-surface));
 }
 
 .editor-world-sea {
@@ -123,12 +268,38 @@
 .editor-world-land {
   fill: var(--tr-land);
   stroke: var(--tr-coast);
-  stroke-width: 0.3;
+  stroke-width: calc(0.35px * var(--inv-scale, 1));
 }
+.editor-world-graticule line {
+  stroke: var(--tr-sea-line);
+  stroke-width: calc(0.4px * var(--inv-scale, 1));
+  stroke-dasharray: calc(1px * var(--inv-scale, 1)) calc(2px * var(--inv-scale, 1));
+}
+
+/* ── Crop selection rectangle + resize handles ──────────────────────────────────────────── */
 .editor-crop-rect {
   fill: rgba(238, 107, 31, 0.15);
   stroke: var(--tr-ember);
-  stroke-width: 0.6;
+  stroke-width: calc(0.8px * var(--inv-scale, 1));
+  cursor: move;
+}
+.editor-crop-handle {
+  width: calc(6px * var(--inv-scale, 1));
+  height: calc(6px * var(--inv-scale, 1));
+  fill: var(--tr-ember);
+  stroke: #fff;
+  stroke-width: calc(1.2px * var(--inv-scale, 1));
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translate(-50%, -50%);
+}
+.editor-crop-handle-nw,
+.editor-crop-handle-se {
+  cursor: nwse-resize;
+}
+.editor-crop-handle-ne,
+.editor-crop-handle-sw {
+  cursor: nesw-resize;
 }
 .editor-crop-preview-svg {
   width: 100%;
@@ -138,6 +309,7 @@
   background: var(--tr-sea);
 }
 
+/* ── Missions table ──────────────────────────────────────────────────────────────────────── */
 .editor-ticket-table {
   width: 100%;
   border-collapse: collapse;
@@ -148,6 +320,9 @@
   text-align: left;
   border-bottom: 1px solid var(--tr-line);
 }
+.editor-ticket-cell {
+  min-width: 11em;
+}
 
 .editor-generate-preview ul {
   margin: 0;
@@ -156,14 +331,58 @@
   color: var(--tr-ink-soft);
 }
 
+/* ── Share stage: readiness / share / play read as distinct timetable sections ─────────── */
+.editor-share-section + .editor-share-section {
+  padding-top: var(--tr-space-3);
+  border-top: 1px solid var(--tr-line);
+}
+
+/* A header chip (next to the save indicator) that drops a details popover — matching .dropdown's
+   popover pattern — instead of a full-width bar that eats canvas height. */
 .validation-panel {
-  font-size: 0.9em;
+  position: relative;
+  font-size: 0.85em;
 }
 .validation-ok {
   color: var(--tr-ok);
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+.validation-toggle {
+  display: flex;
+  align-items: center;
   gap: var(--tr-space-2);
+  padding: var(--tr-space-1) var(--tr-space-2);
+}
+.validation-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+}
+.validation-chevron {
+  flex-shrink: 0;
+  color: var(--tr-ink-soft);
+  transition: transform 0.15s ease;
+}
+.validation-chevron.collapsed {
+  transform: rotate(180deg);
+}
+.validation-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 40;
+  width: max-content;
+  max-width: min(28em, 90vw);
+  max-height: 20em;
+  overflow-y: auto;
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  padding: var(--tr-space-3);
 }
 .validation-row {
   display: flex;

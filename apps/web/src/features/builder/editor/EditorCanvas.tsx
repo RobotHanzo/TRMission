@@ -1,24 +1,20 @@
-import { useRef } from 'react';
+import { useMemo, useRef, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import type { CityDraft, RouteDraft } from '../../../net/rest';
 import { CARD_COLOR_TOKENS, GRAY_TOKEN } from '../../../theme/colors';
 import { CustomGeography } from '../../../components/Geography';
+import { RouteShape, FerryLocoGradientDef } from '../../../components/RouteShape';
+import { buildRouteGeometryFor } from '../../../game/routeGeometry';
 import { clientToBoardPoint } from './canvasProjection';
+import { CanvasControls } from './CanvasControls';
+import { ZoomVar } from './ZoomVar';
 import { useEditorStore } from './store';
+import '../../../styles/game.css';
 
 const DEFAULT_VIEW = { x: 0, y: 0, w: 100, h: 100 };
-const DOUBLE_GAP = 1.2;
 
 const colorOf = (c: string): string =>
   c === 'GRAY' ? GRAY_TOKEN.hex : (CARD_COLOR_TOKENS[c as keyof typeof CARD_COLOR_TOKENS]?.hex ?? '#888');
-
-function offsetFor(route: RouteDraft, all: readonly RouteDraft[]): { nx: number; ny: number; gap: number } {
-  if (!route.doubleGroup) return { nx: 0, ny: 0, gap: 0 };
-  const siblings = all.filter((r) => r.doubleGroup === route.doubleGroup).map((r) => r.id).sort();
-  const idx = siblings.indexOf(route.id);
-  const gap = (idx - (siblings.length - 1) / 2) * DOUBLE_GAP;
-  return { nx: 0, ny: 0, gap };
-}
 
 export interface EditorCanvasProps {
   /** Empty-canvas / land click, in board units — placing a new city, or a no-op if the stage
@@ -32,9 +28,11 @@ export interface EditorCanvasProps {
 
 /**
  * The shared SVG workspace for the Stops/Routes stages: pan/zoom (matching the live board's
- * feel), the crop's land silhouette as a backdrop when present, and simple straight-line
- * cities/routes — the builder trades the live board's curve/bow polish for a canvas that is
- * cheap to reason about and independent of the live-game rendering singleton (game/catalog.ts).
+ * feel) and the exact live-board cartography — `RouteShape`'s curved roadbed/cars/tunnel-ties/
+ * ferry-pips and the `city-dot`/`city-hub`/`city-label` markers, driven by the same
+ * `game/routeGeometry.ts` curve/bow/hub math (via `buildRouteGeometryFor`, its draft-content
+ * escape hatch) — so an authored map previews exactly as it will play, independent of the
+ * live-game rendering singleton (game/catalog.ts).
  */
 export function EditorCanvas({
   onBackgroundClick,
@@ -42,12 +40,18 @@ export function EditorCanvas({
   onRouteClick,
   highlightCities,
 }: EditorCanvasProps) {
+  const { t } = useTranslation();
   const draft = useEditorStore((s) => s.draft);
   const selection = useEditorStore((s) => s.selection);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const zoomVarRef = useRef<HTMLDivElement | null>(null);
   const view = draft.geography?.baseView ?? DEFAULT_VIEW;
   const viewBox = `${view.x} ${view.y} ${view.w} ${view.h}`;
-  const cityById = new Map(draft.cities.map((c) => [c.id, c]));
+
+  const { geometry, hubs } = useMemo(
+    () => buildRouteGeometryFor(draft.cities, draft.routes),
+    [draft.cities, draft.routes],
+  );
 
   const handleBackgroundClick = (e: React.MouseEvent<SVGSVGElement>) => {
     if (!onBackgroundClick || !svgRef.current) return;
@@ -57,78 +61,90 @@ export function EditorCanvas({
   };
 
   return (
-    <TransformWrapper minScale={0.5} maxScale={10} initialScale={1} centerOnInit wheel={{ step: 0.15 }}>
-      <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-        <svg
-          ref={svgRef}
-          className="board editor-canvas"
-          viewBox={viewBox}
-          role="img"
-          aria-label="editor canvas"
-          onClick={handleBackgroundClick}
-        >
-          {draft.geography && <CustomGeography geography={draft.geography} />}
-          <g className="routes">
+    <div className="editor-canvas-inner" ref={zoomVarRef}>
+      <TransformWrapper minScale={0.5} maxScale={12} initialScale={1} centerOnInit wheel={{ step: 0.0022 }}>
+        <ZoomVar targetRef={zoomVarRef} />
+        <CanvasControls />
+        <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+          <svg
+            ref={svgRef}
+            className="board editor-canvas"
+            viewBox={viewBox}
+            role="img"
+            aria-label={t('builder.canvasLabel')}
+            onClick={handleBackgroundClick}
+          >
+            <FerryLocoGradientDef />
+            {draft.geography && <CustomGeography geography={draft.geography} />}
             {draft.routes.map((r) => {
-              const a = cityById.get(r.a);
-              const b = cityById.get(r.b);
-              if (!a || !b) return null;
-              const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-              const nx = -(b.y - a.y) / len;
-              const ny = (b.x - a.x) / len;
-              const { gap } = offsetFor(r, draft.routes);
-              const ox = nx * gap;
-              const oy = ny * gap;
+              const g = geometry.get(r.id);
+              if (!g) return null;
+              const isFerry = r.ferryLocos > 0;
               const selected = selection?.kind === 'route' && selection.id === r.id;
+              const cls =
+                'route editor-route' +
+                (r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '') +
+                (selected ? ' editor-route--selected' : '');
+              const style: CSSProperties = g.perp.x || g.perp.y
+                ? {
+                    transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
+                  }
+                : {};
               return (
-                <line
+                <g
                   key={r.id}
-                  x1={a.x + ox}
-                  y1={a.y + oy}
-                  x2={b.x + ox}
-                  y2={b.y + oy}
-                  stroke={colorOf(r.color)}
-                  strokeWidth={selected ? 1.6 : 1}
-                  strokeDasharray={r.isTunnel ? '0.6,0.6' : r.ferryLocos > 0 ? '0.3,0.9' : undefined}
-                  strokeLinecap="round"
-                  className="editor-route"
+                  className={cls}
+                  style={style}
                   onClick={(e) => {
                     e.stopPropagation();
                     onRouteClick?.(r.id);
                   }}
-                />
+                >
+                  <RouteShape
+                    geometry={g}
+                    isTunnel={r.isTunnel}
+                    isFerry={isFerry}
+                    ferryLocos={r.ferryLocos}
+                    length={r.length}
+                    fill={colorOf(r.color)}
+                  />
+                  <path className="hit" d={g.path} />
+                </g>
               );
             })}
-          </g>
-          <g className="cities">
-            {draft.cities.map((c: CityDraft) => {
+            {draft.cities.map((c) => {
+              const isHub = hubs.has(c.id);
               const selected = selection?.kind === 'city' && selection.id === c.id;
               const highlighted = highlightCities?.has(c.id);
+              const cls =
+                'city editor-city' +
+                (c.isIsland ? ' island' : '') +
+                (isHub ? ' hub' : '') +
+                (selected ? ' editor-city--selected' : '') +
+                (highlighted ? ' editor-city--highlighted' : '');
               return (
                 <g
                   key={c.id}
-                  transform={`translate(${c.x},${c.y})`}
-                  className="editor-city"
+                  className={cls}
                   onClick={(e) => {
                     e.stopPropagation();
                     onCityClick?.(c.id);
                   }}
                 >
-                  <circle
-                    r={selected ? 1.6 : highlighted ? 1.4 : 1.1}
-                    fill={c.isIsland ? '#0f5fa6' : '#2b2d31'}
-                    stroke={selected ? '#e07a1f' : highlighted ? '#e07a1f' : '#fff'}
-                    strokeWidth={selected || highlighted ? 0.4 : 0.2}
-                  />
-                  <text y={-1.8} textAnchor="middle" className="editor-city-label">
+                  {isHub ? (
+                    <rect className="city-hub" transform={`translate(${c.x} ${c.y})`} />
+                  ) : (
+                    <circle className="city-dot" cx={c.x} cy={c.y} />
+                  )}
+                  <text className="city-label" x={c.x} y={c.y}>
                     {c.nameZh}
                   </text>
                 </g>
               );
             })}
-          </g>
-        </svg>
-      </TransformComponent>
-    </TransformWrapper>
+          </svg>
+        </TransformComponent>
+      </TransformWrapper>
+    </div>
   );
 }
