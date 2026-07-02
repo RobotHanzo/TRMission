@@ -1,0 +1,1 @@
+{"nodes": [{"id": "packages_proto_buf_config", "label": "buf.yaml (buf module + lint/breaking config)", "file_type": "concept", "source_file": "packages/proto/buf.yaml", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [], "hyperedges": []}

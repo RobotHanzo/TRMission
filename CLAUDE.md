@@ -123,3 +123,13 @@ email = same account across providers + password): `GOOGLE_CLIENT_ID`/`GOOGLE_CL
 web redirect; **must be the same origin that serves the SPA** so the Strict refresh cookie survives
 the callback), `OAUTH_STATE_TTL_MS` (signed-state + nonce-cookie lifetime, ms). OAuth carries the
 provider avatar URL onto the account for display.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
