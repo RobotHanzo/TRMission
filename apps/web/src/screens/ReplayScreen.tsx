@@ -19,6 +19,7 @@ import { GameStage } from './GameStage';
 import { LogPanel } from '../components/LogPanel';
 import { useReplayPlayer } from '../features/replay/useReplayPlayer';
 import { PerspectiveSwitcher } from '../features/replay/PerspectiveSwitcher';
+import { frameTargetForAction } from '../features/replay/frameTarget';
 import '../styles/replay.css';
 
 type LoadState =
@@ -149,6 +150,17 @@ function ReplayStage({
   const stores = useMemo(() => ({ game: gameStore, log: logStore }), [gameStore, logStore]);
   const player = useReplayPlayer(board, config, actions, initialViewer, stores, finalDigest);
   const snapshot = useGameStore((s) => s.snapshot);
+  const followActing = useUi((s) => s.followActing);
+  const setFollowActing = useUi((s) => s.setFollowActing);
+
+  // Replay is meant to be watched — default auto-follow on regardless of whatever live play left
+  // the shared toggle at. The eye icon (rendered by MapControls, sandbox or not) still turns it off.
+  useEffect(() => {
+    setFollowActing(true);
+  }, [setFollowActing]);
+
+  const currentAction = player.step > 0 ? (actions[player.step - 1] ?? null) : null;
+  const frameTarget = followActing ? frameTargetForAction(currentAction, !player.animate) : null;
 
   if (player.error) {
     return (
@@ -163,7 +175,13 @@ function ReplayStage({
   return (
     <div className="replay">
       <div className="replay-stage">
-        <GameStage snapshot={snapshot} commands={null} sandbox onLeave={onLeave} />
+        <GameStage
+          snapshot={snapshot}
+          commands={null}
+          sandbox
+          frameTarget={frameTarget}
+          onLeave={onLeave}
+        />
       </div>
       <aside className="replay-rail">
         <PerspectiveSwitcher players={players} viewer={player.viewer} onChange={player.setViewer} />

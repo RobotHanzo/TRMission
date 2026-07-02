@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import '../i18n';
+import { ENGINE_VERSION, SCHEMA_VERSION, CONTENT_HASH } from '@trm/engine';
 import ReplayScreen from './ReplayScreen';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
@@ -12,6 +13,7 @@ vi.mock('../net/rest', () => ({
   setAccessToken: vi.fn(),
   api: { replay: vi.fn() },
 }));
+vi.mock('../hooks/useAnimationDriver', () => ({ useAnimationDriver: vi.fn() }));
 
 const mocked = api as unknown as { replay: ReturnType<typeof vi.fn> };
 
@@ -53,5 +55,39 @@ describe('ReplayScreen guard rails', () => {
     mocked.replay.mockRejectedValue(new Error('boom'));
     render(<ReplayScreen />);
     expect(await screen.findByText('無法載入對局')).toBeInTheDocument();
+  });
+});
+
+describe('ReplayScreen camera-follow default', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useSession.setState({ user: { ...signedIn } });
+    useUi.setState({ view: 'replay', replayGameId: 'g1', followActing: false });
+    window.history.replaceState(null, '', '/replay/g1');
+  });
+
+  it('defaults follow-acting on once a replay finishes loading', async () => {
+    mocked.replay.mockResolvedValue(
+      payload({
+        engineVersion: ENGINE_VERSION,
+        schemaVersion: SCHEMA_VERSION,
+        config: {
+          seed: 's1',
+          players: [
+            { id: 'u1', seat: 0 },
+            { id: 'u2', seat: 1 },
+          ],
+          contentHash: CONTENT_HASH,
+        },
+        actions: [],
+        players: [
+          { userId: 'u1', seat: 0, displayName: 'Tester' },
+          { userId: 'u2', seat: 1, displayName: 'Other' },
+        ],
+      }),
+    );
+    render(<ReplayScreen />);
+    await screen.findByRole('slider');
+    expect(useUi.getState().followActing).toBe(true);
   });
 });
