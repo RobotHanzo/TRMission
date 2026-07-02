@@ -4,7 +4,7 @@ import { CheckCircle2, Copy, XCircle } from 'lucide-react';
 import { api } from '../../../../net/rest';
 import { useUi } from '../../../../store/ui';
 import { useEditorStore } from '../store';
-import { useReadiness } from '../ValidationPanel';
+import { useReadiness, useIssueText } from '../ValidationPanel';
 
 export function ShareStage() {
   const { t } = useTranslation();
@@ -14,6 +14,7 @@ export function ShareStage() {
   const revokeShare = useEditorStore((s) => s.revokeShare);
   const enterRoom = useUi((s) => s.enterRoom);
   const { errors } = useReadiness();
+  const issueText = useIssueText();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const ready = errors.length === 0;
@@ -51,7 +52,7 @@ export function ShareStage() {
             <div className="stack">
               {errors.map((e, i) => (
                 <p key={i} className="row error">
-                  <XCircle size={14} aria-hidden /> {e}
+                  <XCircle size={14} aria-hidden /> {issueText(e)}
                 </p>
               ))}
             </div>

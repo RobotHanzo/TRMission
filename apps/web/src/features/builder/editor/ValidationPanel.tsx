@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CheckCircle2, ChevronUp, XCircle } from 'lucide-react';
-import { validateContent, validateGeography, validateForPlay } from '@trm/map-data';
+import { validateContent, validateGeographyIssues, validateForPlayIssues, type ValidationIssue } from '@trm/map-data';
 import { useEditorStore } from './store';
 import { draftToContent } from './contentAdapter';
 
 export interface Readiness {
-  errors: string[];
-  warnings: string[];
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
 }
 
 export function useReadiness(): Readiness {
@@ -17,13 +17,22 @@ export function useReadiness(): Readiness {
   return useMemo(() => {
     const content = draftToContent(draft, { nameZh, nameEn });
     const structural = validateContent(content);
-    const geoErrors = content.geography ? validateGeography(content.geography) : [];
-    const play = validateForPlay(content, content.rules ?? {});
+    const geoIssues = content.geography ? validateGeographyIssues(content.geography) : [];
+    const play = validateForPlayIssues(content, content.rules ?? {});
     return {
-      errors: [...structural.errors, ...geoErrors, ...play.errors],
+      errors: [...structural.issues, ...geoIssues, ...play.errors],
       warnings: [...play.warnings],
     };
   }, [draft, nameZh, nameEn]);
+}
+
+/** Renders a `ValidationIssue` via its code as an i18next key under `builder.validation.*`,
+ *  interpolating its params — the single place these codes turn into user-facing text (also
+ *  matches the wording `formatIssue` in @trm/map-data produces for the server's error message,
+ *  translated instead of hardcoded English). */
+export function useIssueText(): (issue: ValidationIssue) => string {
+  const { t } = useTranslation();
+  return (issue) => t(`builder.validation.${issue.code}`, issue.params);
 }
 
 /** A compact status chip for the editor header, next to the save indicator: a summary pill that
@@ -32,6 +41,7 @@ export function useReadiness(): Readiness {
 export function ValidationPanel() {
   const { t } = useTranslation();
   const { errors, warnings } = useReadiness();
+  const issueText = useIssueText();
   const [expanded, setExpanded] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -85,12 +95,12 @@ export function ValidationPanel() {
         <div className="stack validation-list">
           {errors.map((e, i) => (
             <div key={`e${i}`} className="validation-row validation-error">
-              <XCircle size={14} aria-hidden /> <span>{e}</span>
+              <XCircle size={14} aria-hidden /> <span>{issueText(e)}</span>
             </div>
           ))}
           {warnings.map((w, i) => (
             <div key={`w${i}`} className="validation-row validation-warning">
-              <AlertTriangle size={14} aria-hidden /> <span>{w}</span>
+              <AlertTriangle size={14} aria-hidden /> <span>{issueText(w)}</span>
             </div>
           ))}
         </div>

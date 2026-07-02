@@ -17,9 +17,88 @@ export interface ContentStats {
   longTicketCount: number;
 }
 
+/**
+ * A locale-agnostic validation finding: a stable `code` plus the values needed to render it,
+ * for a client to translate (see apps/web's ValidationPanel). `formatIssue` below is the
+ * canonical English rendering — every other consumer of the `string[]` APIs (the server's
+ * `BadRequestException` message, this package's own tests) goes through it, so the wording
+ * here IS the wording everywhere else; keep them in sync by construction, not by hand.
+ */
+export interface ValidationIssue {
+  code: string;
+  params: Record<string, string | number>;
+}
+
+export function formatIssue(issue: ValidationIssue): string {
+  const p = issue.params;
+  switch (issue.code) {
+    case 'duplicateCityId':
+      return 'duplicate city id(s) present';
+    case 'duplicateRouteId':
+      return `duplicate route id ${p.routeId}`;
+    case 'unknownCityA':
+      return `${p.routeId}: unknown city A ${p.cityId}`;
+    case 'unknownCityB':
+      return `${p.routeId}: unknown city B ${p.cityId}`;
+    case 'selfLoop':
+      return `${p.routeId}: self-loop`;
+    case 'invalidLength':
+      return `${p.routeId}: invalid length ${p.length} (only 1,2,3,4,6,8 allowed)`;
+    case 'ferryMustBeGray':
+      return `${p.routeId}: ferry must be GRAY, got ${p.color}`;
+    case 'ferryLocosExceedLength':
+      return `${p.routeId}: ferryLocos ${p.ferryLocos} exceeds length ${p.length}`;
+    case 'ferryAndTunnel':
+      return `${p.routeId}: route cannot be both ferry and tunnel`;
+    case 'doubleGroupWrongCount':
+      return `double group ${p.group}: expected exactly 2 routes, got ${p.count}`;
+    case 'doubleGroupDifferentPairs':
+      return `double group ${p.group}: the two routes connect different city pairs`;
+    case 'doubleGroupLengthMismatch':
+      return `double group ${p.group}: parallel routes must have equal length`;
+    case 'ticketUnknownCityA':
+      return `ticket ${p.ticketId}: unknown city A ${p.cityId}`;
+    case 'ticketUnknownCityB':
+      return `ticket ${p.ticketId}: unknown city B ${p.cityId}`;
+    case 'ticketEndpointsIdentical':
+      return `ticket ${p.ticketId}: endpoints identical`;
+    case 'ticketValueNotPositive':
+      return `ticket ${p.ticketId}: value must be positive`;
+    case 'graphNotConnected':
+      return `graph is not connected: ${p.components} components`;
+    case 'baseViewInvalid':
+      return 'baseView must have finite x/y and positive width/height';
+    case 'tooManyLandRings':
+      return `too many land rings: ${p.count} exceeds the maximum of ${p.max}`;
+    case 'landRingTooFewVertices':
+      return `land ring ${p.index} has fewer than 3 vertices`;
+    case 'landRingNonFiniteCoordinate':
+      return `land ring ${p.index} has a non-finite coordinate`;
+    case 'landRingCoordinateOutOfRange':
+      return `land ring ${p.index} has a coordinate outside the allowed board range`;
+    case 'tooManyVertices':
+      return `total land vertices ${p.count} exceeds the maximum of ${p.max}`;
+    case 'cropBboxInvalid':
+      return 'crop bbox must have lonMin < lonMax and latMin < latMax';
+    case 'ruleOutOfRange':
+      return `${p.key}: ${p.value} is outside the allowed range [${p.min}, ${p.max}]`;
+    case 'initialOfferBelowMinKeep':
+      return `initial ticket offer (${p.long} LONG + ${p.short} SHORT) cannot satisfy the minimum keep of ${p.minKeep}`;
+    case 'longDeckTooSmall':
+      return `LONG ticket deck has ${p.count} but at least ${p.needed} are needed for ${p.maxPlayers} players`;
+    case 'shortDeckTooSmall':
+      return `SHORT ticket deck has ${p.count} but at least ${p.needed} are needed for ${p.maxPlayers} players`;
+    case 'trackTooShort':
+      return `total track length (${p.total}) is less than trainCarsStart (${p.trainCarsStart}) — trains may never run out`;
+    default:
+      return issue.code;
+  }
+}
+
 export interface ValidationResult {
   ok: boolean;
   errors: string[];
+  issues: ValidationIssue[];
   stats: ContentStats;
 }
 
@@ -27,11 +106,14 @@ const pairKey = (a: string, b: string): string => (a < b ? `${a}|${b}` : `${b}|$
 
 /** Validate authored content against every structural game invariant; also compute stats. */
 export function validateContent(content: GameContent): ValidationResult {
-  const errors: string[] = [];
+  const issues: ValidationIssue[] = [];
+  const push = (code: string, params: Record<string, string | number> = {}): void => {
+    issues.push({ code, params });
+  };
   const { cities, routes, tickets } = content;
 
   const cityIds = new Set(cities.map((c) => c.id as string));
-  if (cityIds.size !== cities.length) errors.push('duplicate city id(s) present');
+  if (cityIds.size !== cities.length) push('duplicateCityId');
 
   // --- routes ---
   const routeIds = new Set<string>();
@@ -47,21 +129,23 @@ export function validateContent(content: GameContent): ValidationResult {
 
   for (const r of routes) {
     const rid = r.id as string;
-    if (routeIds.has(rid)) errors.push(`duplicate route id ${rid}`);
+    if (routeIds.has(rid)) push('duplicateRouteId', { routeId: rid });
     routeIds.add(rid);
 
-    if (!cityIds.has(r.a as string)) errors.push(`${rid}: unknown city A ${r.a}`);
-    if (!cityIds.has(r.b as string)) errors.push(`${rid}: unknown city B ${r.b}`);
-    if ((r.a as string) === (r.b as string)) errors.push(`${rid}: self-loop`);
+    if (!cityIds.has(r.a as string)) push('unknownCityA', { routeId: rid, cityId: r.a as string });
+    if (!cityIds.has(r.b as string)) push('unknownCityB', { routeId: rid, cityId: r.b as string });
+    if ((r.a as string) === (r.b as string)) push('selfLoop', { routeId: rid });
 
     if (!(ROUTE_LENGTHS as readonly number[]).includes(r.length)) {
-      errors.push(`${rid}: invalid length ${r.length} (only 1,2,3,4,6,8 allowed)`);
+      push('invalidLength', { routeId: rid, length: r.length });
     }
 
     if (isFerry(r)) {
-      if (r.color !== 'GRAY') errors.push(`${rid}: ferry must be GRAY, got ${r.color}`);
-      if (r.ferryLocos > r.length) errors.push(`${rid}: ferryLocos ${r.ferryLocos} exceeds length ${r.length}`);
-      if (r.isTunnel) errors.push(`${rid}: route cannot be both ferry and tunnel`);
+      if (r.color !== 'GRAY') push('ferryMustBeGray', { routeId: rid, color: r.color });
+      if (r.ferryLocos > r.length) {
+        push('ferryLocosExceedLength', { routeId: rid, ferryLocos: r.ferryLocos, length: r.length });
+      }
+      if (r.isTunnel) push('ferryAndTunnel', { routeId: rid });
       ferryCount++;
       ferryLocoSymbols += r.ferryLocos;
     }
@@ -81,25 +165,25 @@ export function validateContent(content: GameContent): ValidationResult {
   // --- double-route pairs ---
   for (const [group, members] of doubleGroups) {
     if (members.length !== 2) {
-      errors.push(`double group ${group}: expected exactly 2 routes, got ${members.length}`);
+      push('doubleGroupWrongCount', { group, count: members.length });
       continue;
     }
     const [m0, m1] = members as [RouteDef, RouteDef];
     if (pairKey(m0.a as string, m0.b as string) !== pairKey(m1.a as string, m1.b as string)) {
-      errors.push(`double group ${group}: the two routes connect different city pairs`);
+      push('doubleGroupDifferentPairs', { group });
     }
     if (m0.length !== m1.length) {
-      errors.push(`double group ${group}: parallel routes must have equal length`);
+      push('doubleGroupLengthMismatch', { group });
     }
   }
 
   // --- tickets ---
   for (const t of tickets) {
     const tid = t.id as string;
-    if (!cityIds.has(t.a as string)) errors.push(`ticket ${tid}: unknown city A ${t.a}`);
-    if (!cityIds.has(t.b as string)) errors.push(`ticket ${tid}: unknown city B ${t.b}`);
-    if ((t.a as string) === (t.b as string)) errors.push(`ticket ${tid}: endpoints identical`);
-    if (t.value <= 0) errors.push(`ticket ${tid}: value must be positive`);
+    if (!cityIds.has(t.a as string)) push('ticketUnknownCityA', { ticketId: tid, cityId: t.a as string });
+    if (!cityIds.has(t.b as string)) push('ticketUnknownCityB', { ticketId: tid, cityId: t.b as string });
+    if ((t.a as string) === (t.b as string)) push('ticketEndpointsIdentical', { ticketId: tid });
+    if (t.value <= 0) push('ticketValueNotPositive', { ticketId: tid });
   }
 
   // --- connectivity (union-find over all routes; every city reachable) ---
@@ -128,7 +212,7 @@ export function validateContent(content: GameContent): ValidationResult {
   const roots = new Set<string>();
   for (const id of cityIds) roots.add(find(id));
   if (roots.size !== 1) {
-    errors.push(`graph is not connected: ${roots.size} components`);
+    push('graphNotConnected', { components: roots.size });
   }
 
   const longTicketCount = tickets.filter((t) => t.deck === 'LONG').length;
@@ -147,7 +231,7 @@ export function validateContent(content: GameContent): ValidationResult {
     longTicketCount,
   };
 
-  return { ok: errors.length === 0, errors, stats };
+  return { ok: issues.length === 0, errors: issues.map(formatIssue), issues, stats };
 }
 
 /** Throwing variant for build-time / seed-time guards. */
@@ -163,9 +247,12 @@ const MAX_GEOGRAPHY_VERTICES = 15000;
 const GEOGRAPHY_COORD_MIN = -50;
 const GEOGRAPHY_COORD_MAX = 150;
 
-/** Validate a custom map's presentation cartography (bounds a builder draft can't exceed). */
-export function validateGeography(geo: MapGeography): string[] {
-  const errors: string[] = [];
+/** Structured variant of {@link validateGeography} — see {@link ValidationIssue}. */
+export function validateGeographyIssues(geo: MapGeography): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const push = (code: string, params: Record<string, string | number> = {}): void => {
+    issues.push({ code, params });
+  };
   const { baseView, land, crop } = geo;
 
   if (
@@ -174,23 +261,23 @@ export function validateGeography(geo: MapGeography): string[] {
     !(baseView.w > 0) ||
     !(baseView.h > 0)
   ) {
-    errors.push('baseView must have finite x/y and positive width/height');
+    push('baseViewInvalid');
   }
 
   if (land.length > MAX_GEOGRAPHY_RINGS) {
-    errors.push(`too many land rings: ${land.length} exceeds the maximum of ${MAX_GEOGRAPHY_RINGS}`);
+    push('tooManyLandRings', { count: land.length, max: MAX_GEOGRAPHY_RINGS });
   }
 
   let totalVertices = 0;
   land.forEach((ring, i) => {
     totalVertices += ring.length;
     if (ring.length < 3) {
-      errors.push(`land ring ${i} has fewer than 3 vertices`);
+      push('landRingTooFewVertices', { index: i });
       return;
     }
     for (const [x, y] of ring) {
       if (!Number.isFinite(x) || !Number.isFinite(y)) {
-        errors.push(`land ring ${i} has a non-finite coordinate`);
+        push('landRingNonFiniteCoordinate', { index: i });
         break;
       }
       if (
@@ -199,21 +286,26 @@ export function validateGeography(geo: MapGeography): string[] {
         y < GEOGRAPHY_COORD_MIN ||
         y > GEOGRAPHY_COORD_MAX
       ) {
-        errors.push(`land ring ${i} has a coordinate outside the allowed board range`);
+        push('landRingCoordinateOutOfRange', { index: i });
         break;
       }
     }
   });
 
   if (totalVertices > MAX_GEOGRAPHY_VERTICES) {
-    errors.push(`total land vertices ${totalVertices} exceeds the maximum of ${MAX_GEOGRAPHY_VERTICES}`);
+    push('tooManyVertices', { count: totalVertices, max: MAX_GEOGRAPHY_VERTICES });
   }
 
   if (crop.lonMin >= crop.lonMax || crop.latMin >= crop.latMax) {
-    errors.push('crop bbox must have lonMin < lonMax and latMin < latMax');
+    push('cropBboxInvalid');
   }
 
-  return errors;
+  return issues;
+}
+
+/** Validate a custom map's presentation cartography (bounds a builder draft can't exceed). */
+export function validateGeography(geo: MapGeography): string[] {
+  return validateGeographyIssues(geo).map(formatIssue);
 }
 
 export interface RuleBound {
@@ -237,18 +329,24 @@ export interface PlayValidationResult {
   warnings: string[];
 }
 
+export interface PlayValidationIssues {
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
+}
+
 /**
- * Validate that content + rules can actually be played (deck sufficiency, rule bounds), on top
- * of validateContent's structural checks. `rulesOverride` wins over `content.rules`, which wins
+ * Structured variant of {@link validateForPlay} — see {@link ValidationIssue}. Validates that
+ * content + rules can actually be played (deck sufficiency, rule bounds), on top of
+ * validateContent's structural checks. `rulesOverride` wins over `content.rules`, which wins
  * over the engine defaults — the same precedence the room/start seam applies.
  */
-export function validateForPlay(
+export function validateForPlayIssues(
   content: GameContent,
   rulesOverride: MapRules = {},
   maxPlayers = 5,
-): PlayValidationResult {
-  const errors: string[] = [];
-  const warnings: string[] = [];
+): PlayValidationIssues {
+  const errors: ValidationIssue[] = [];
+  const warnings: ValidationIssue[] = [];
   const rules: MapRules = { ...content.rules, ...rulesOverride };
 
   for (const key of MAP_RULE_KEYS) {
@@ -256,7 +354,7 @@ export function validateForPlay(
     if (value === undefined) continue;
     const bound = RULE_BOUNDS[key];
     if (value < bound.min || value > bound.max) {
-      errors.push(`${key}: ${value} is outside the allowed range [${bound.min}, ${bound.max}]`);
+      errors.push({ code: 'ruleOutOfRange', params: { key, value, min: bound.min, max: bound.max } });
     }
   }
 
@@ -270,9 +368,10 @@ export function validateForPlay(
   const { minKeepInitial } = DEFAULT_RULE_PARAMS;
 
   if (initialLongOffer + initialShortOffer < minKeepInitial) {
-    errors.push(
-      `initial ticket offer (${initialLongOffer} LONG + ${initialShortOffer} SHORT) cannot satisfy the minimum keep of ${minKeepInitial}`,
-    );
+    errors.push({
+      code: 'initialOfferBelowMinKeep',
+      params: { long: initialLongOffer, short: initialShortOffer, minKeep: minKeepInitial },
+    });
   }
 
   const longCount = content.tickets.filter((t) => t.deck === 'LONG').length;
@@ -281,22 +380,36 @@ export function validateForPlay(
   const neededShort = maxPlayers * initialShortOffer + ticketDrawCount;
 
   if (longCount < neededLong) {
-    errors.push(
-      `LONG ticket deck has ${longCount} but at least ${neededLong} are needed for ${maxPlayers} players`,
-    );
+    errors.push({
+      code: 'longDeckTooSmall',
+      params: { count: longCount, needed: neededLong, maxPlayers },
+    });
   }
   if (shortCount < neededShort) {
-    errors.push(
-      `SHORT ticket deck has ${shortCount} but at least ${neededShort} are needed for ${maxPlayers} players`,
-    );
+    errors.push({
+      code: 'shortDeckTooSmall',
+      params: { count: shortCount, needed: neededShort, maxPlayers },
+    });
   }
 
   const totalTrackLength = content.routes.reduce((sum, r) => sum + r.length, 0);
   if (totalTrackLength < trainCarsStart) {
-    warnings.push(
-      `total track length (${totalTrackLength}) is less than trainCarsStart (${trainCarsStart}) — trains may never run out`,
-    );
+    warnings.push({ code: 'trackTooShort', params: { total: totalTrackLength, trainCarsStart } });
   }
 
   return { errors, warnings };
+}
+
+/**
+ * Validate that content + rules can actually be played (deck sufficiency, rule bounds), on top
+ * of validateContent's structural checks. `rulesOverride` wins over `content.rules`, which wins
+ * over the engine defaults — the same precedence the room/start seam applies.
+ */
+export function validateForPlay(
+  content: GameContent,
+  rulesOverride: MapRules = {},
+  maxPlayers = 5,
+): PlayValidationResult {
+  const { errors, warnings } = validateForPlayIssues(content, rulesOverride, maxPlayers);
+  return { errors: errors.map(formatIssue), warnings: warnings.map(formatIssue) };
 }
