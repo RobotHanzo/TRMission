@@ -9,7 +9,15 @@ import { disconnectGame } from '../net/connection';
 //    'tray' — board + right rail on top; the player's hand sits in a bottom strip.
 export type { Locale, BoardLayout };
 
-export type View = 'home' | 'room' | 'game' | 'tutorial' | 'login' | 'loginCallback';
+export type View =
+  | 'home'
+  | 'room'
+  | 'game'
+  | 'tutorial'
+  | 'login'
+  | 'loginCallback'
+  | 'history'
+  | 'replay';
 
 // --- URL routing -----------------------------------------------------------
 // The browser path is the durable source of truth for *where* the user is:
@@ -22,10 +30,17 @@ const ROOM_PATH = /^\/room\/([^/]+)$/;
 const LOGIN_PATH = '/login';
 const LOGIN_CALLBACK_PATH = '/login/callback';
 const TUTORIAL_PATH = '/tutorial';
+const HISTORY_PATH = '/history';
+const REPLAY_PATH = /^\/replay\/([^/]+)$/;
 
 export const roomCodeFromPath = (): string | null => {
   const code = ROOM_PATH.exec(window.location.pathname)?.[1];
   return code ? decodeURIComponent(code).toUpperCase() : null;
+};
+
+export const replayIdFromPath = (): string | null => {
+  const id = REPLAY_PATH.exec(window.location.pathname)?.[1];
+  return id ? decodeURIComponent(id) : null;
 };
 
 // Keep a post-login target same-origin (mirrors the server's `safeRedirect`) so the redirect
@@ -128,6 +143,7 @@ interface UiState {
   roomCode: string | null;
   gameId: string | null;
   ticket: string | null;
+  replayGameId: string | null;
   locale: Locale;
   theme: Theme;
   colorBlind: boolean;
@@ -147,6 +163,10 @@ interface UiState {
   enterGame(gameId: string, ticket: string): void;
   /** Open the full-screen guided tutorial (a local sandbox; tears down any live game first). */
   enterTutorial(): void;
+  /** Open the game-history screen (finished games the user played or spectated). */
+  enterHistory(): void;
+  /** Open the replay player for one finished game. */
+  enterReplay(gameId: string): void;
   /** Leave the tutorial for home and spotlight the create-game button there. */
   requestCreateGame(): void;
   /** Clear a pending home-screen focus request (called once the home screen has consumed it). */
@@ -174,6 +194,7 @@ export const useUi = create<UiState>()((set, get) => ({
   roomCode: null,
   gameId: null,
   ticket: null,
+  replayGameId: null,
   // Seed display prefs from localStorage so guests (and the pre-/auth/me window) persist them.
   locale: readLocale(),
   theme: readTheme(),
@@ -187,7 +208,7 @@ export const useUi = create<UiState>()((set, get) => ({
   goHome: () => {
     disconnectGame();
     pushPath('/');
-    set({ view: 'home', roomCode: null, gameId: null, ticket: null });
+    set({ view: 'home', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
   requestCreateGame: () => {
     get().goHome();
@@ -203,12 +224,22 @@ export const useUi = create<UiState>()((set, get) => ({
   enterTutorial: () => {
     disconnectGame();
     pushPath(TUTORIAL_PATH);
-    set({ view: 'tutorial', roomCode: null, gameId: null, ticket: null });
+    set({ view: 'tutorial', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  },
+  enterHistory: () => {
+    disconnectGame();
+    pushPath(HISTORY_PATH);
+    set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  },
+  enterReplay: (gameId) => {
+    disconnectGame();
+    pushPath(`/replay/${encodeURIComponent(gameId)}`);
+    set({ view: 'replay', replayGameId: gameId, roomCode: null, gameId: null, ticket: null });
   },
   navigateLogin: (returnTo) => {
     disconnectGame();
     replacePath(loginPathFor(returnTo));
-    set({ view: 'login', roomCode: null, gameId: null, ticket: null });
+    set({ view: 'login', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
   navigateAfterAuth: () => {
     const target = readRedirectParam();
@@ -221,22 +252,40 @@ export const useUi = create<UiState>()((set, get) => ({
       set({ view: 'room', roomCode: room });
       return;
     }
+    if (target === HISTORY_PATH) {
+      replacePath(HISTORY_PATH);
+      set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    const replayId = REPLAY_PATH.exec(target)?.[1];
+    if (replayId) {
+      const id = decodeURIComponent(replayId);
+      replacePath(`/replay/${encodeURIComponent(id)}`);
+      set({ view: 'replay', replayGameId: id, roomCode: null, gameId: null, ticket: null });
+      return;
+    }
     replacePath('/');
-    set({ view: 'home', roomCode: null, gameId: null, ticket: null });
+    set({ view: 'home', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
   syncFromUrl: (authed) => {
     const path = window.location.pathname;
     // The tutorial is a self-contained local sandbox — reachable without an account.
     if (path === TUTORIAL_PATH) {
       disconnectGame();
-      set({ view: 'tutorial', roomCode: null, gameId: null, ticket: null });
+      set({ view: 'tutorial', roomCode: null, gameId: null, ticket: null, replayGameId: null });
       return;
     }
     // The OAuth landing page: resume the session (App's restore()) then continue; the
     // LoginCallback screen handles both the success redirect and any ?error.
     if (path === LOGIN_CALLBACK_PATH) {
       disconnectGame();
-      set({ view: 'loginCallback', roomCode: null, gameId: null, ticket: null });
+      set({
+        view: 'loginCallback',
+        roomCode: null,
+        gameId: null,
+        ticket: null,
+        replayGameId: null,
+      });
       return;
     }
     // Already signed in but sitting on /login → bounce straight to the intended target.
@@ -246,7 +295,33 @@ export const useUi = create<UiState>()((set, get) => ({
         return;
       }
       disconnectGame();
-      set({ view: 'login', roomCode: null, gameId: null, ticket: null });
+      set({ view: 'login', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    // History + replay are account-scoped — gate unauthenticated visitors like rooms.
+    if (path === HISTORY_PATH) {
+      if (!authed) {
+        get().navigateLogin(HISTORY_PATH);
+        return;
+      }
+      disconnectGame();
+      set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    const replayId = replayIdFromPath();
+    if (replayId) {
+      if (!authed) {
+        get().navigateLogin(`/replay/${encodeURIComponent(replayId)}`);
+        return;
+      }
+      disconnectGame();
+      set({
+        view: 'replay',
+        replayGameId: replayId,
+        roomCode: null,
+        gameId: null,
+        ticket: null,
+      });
       return;
     }
     // Entering a room needs an authenticated session; otherwise gate to /login and remember it.
@@ -262,7 +337,7 @@ export const useUi = create<UiState>()((set, get) => ({
     // Home (or any unknown path) → home when authed, else the login gate.
     if (authed) {
       disconnectGame();
-      set({ view: 'home', roomCode: null, gameId: null, ticket: null });
+      set({ view: 'home', roomCode: null, gameId: null, ticket: null, replayGameId: null });
       return;
     }
     get().navigateLogin('/');

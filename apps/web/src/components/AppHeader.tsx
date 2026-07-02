@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrainFront, Settings, LogOut, DoorOpen, User, BookOpen } from 'lucide-react';
+import { TrainFront, Settings, LogOut, DoorOpen, User, BookOpen, History } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import { useGame } from '../store/game';
@@ -12,6 +12,7 @@ export function AppHeader() {
   const { t } = useTranslation();
   const view = useUi((s) => s.view);
   const goHome = useUi((s) => s.goHome);
+  const enterHistory = useUi((s) => s.enterHistory);
   const navigateLogin = useUi((s) => s.navigateLogin);
   const openEncyclopedia = useUi((s) => s.setEncyclopediaOpen);
   const user = useSession((s) => s.user);
@@ -72,6 +73,11 @@ export function AppHeader() {
             )}{' '}
             {user.displayName}
           </span>
+        )}
+        {user && view !== 'login' && view !== 'loginCallback' && !inGame && (
+          <button onClick={enterHistory} aria-label={t('history.title')} title={t('history.title')}>
+            <History size={16} aria-hidden />
+          </button>
         )}
         {view !== 'login' && view !== 'loginCallback' && (
           <button

@@ -59,7 +59,9 @@ describe('ui store routing', () => {
     expect(useUi.getState().view).toBe('login');
     expect(useUi.getState().roomCode).toBeNull();
     // The intended room is carried in ?redirect= so any sign-in resumes the join.
-    expect(window.location.pathname + window.location.search).toBe('/login?redirect=%2Froom%2FABCD');
+    expect(window.location.pathname + window.location.search).toBe(
+      '/login?redirect=%2Froom%2FABCD',
+    );
   });
 
   it('syncFromUrl(not authed) on / gates to /login', () => {
@@ -93,6 +95,40 @@ describe('ui store routing', () => {
     useUi.getState().navigateAfterAuth();
     expect(useUi.getState().view).toBe('home');
     expect(path()).toBe('/');
+  });
+
+  it('enterHistory pushes /history, sets the view, and disconnects any live game', () => {
+    useUi.getState().enterHistory();
+    expect(useUi.getState().view).toBe('history');
+    expect(path()).toBe('/history');
+    expect(disconnectGame).toHaveBeenCalled();
+  });
+
+  it('enterReplay pushes /replay/:id and records the game id', () => {
+    useUi.getState().enterReplay('game-9');
+    expect(useUi.getState().view).toBe('replay');
+    expect(useUi.getState().replayGameId).toBe('game-9');
+    expect(path()).toBe('/replay/game-9');
+  });
+
+  it('syncFromUrl(authed) on /replay/:id restores the replay view', () => {
+    window.history.replaceState(null, '', '/replay/game-9');
+    useUi.getState().syncFromUrl(true);
+    expect(useUi.getState().view).toBe('replay');
+    expect(useUi.getState().replayGameId).toBe('game-9');
+  });
+
+  it('syncFromUrl(not authed) on /history gates to /login remembering the target', () => {
+    window.history.replaceState(null, '', '/history');
+    useUi.getState().syncFromUrl(false);
+    expect(useUi.getState().view).toBe('login');
+    expect(window.location.pathname + window.location.search).toBe('/login?redirect=%2Fhistory');
+  });
+
+  it('goHome clears a replay id', () => {
+    useUi.getState().enterReplay('game-9');
+    useUi.getState().goHome();
+    expect(useUi.getState().replayGameId).toBeNull();
   });
 });
 

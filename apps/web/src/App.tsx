@@ -8,11 +8,13 @@ import { RoomScreen } from './screens/RoomScreen';
 import { GameScreen } from './screens/GameScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { LoginCallback } from './screens/LoginCallback';
+import { HistoryScreen } from './screens/HistoryScreen';
 import './styles/app.css';
 
 // Lazy so @trm/engine + @trm/codec land in a separate chunk, not the main bundle.
 const TutorialScreen = lazy(() => import('./features/tutorial/TutorialScreen'));
 const EncyclopediaModal = lazy(() => import('./features/tutorial/EncyclopediaModal'));
+const ReplayScreen = lazy(() => import('./screens/ReplayScreen'));
 
 export function App() {
   const { t, i18n } = useTranslation();
@@ -66,7 +68,7 @@ export function App() {
   }, [theme]);
 
   const isLogin = view === 'login' || view === 'loginCallback';
-  const isGameLayout = view === 'game' || view === 'tutorial';
+  const isGameLayout = view === 'game' || view === 'tutorial' || view === 'replay';
   const mainClass = isGameLayout
     ? 'app-main app-main--game'
     : isLogin
@@ -85,6 +87,12 @@ export function App() {
             {view === 'loginCallback' && <LoginCallback />}
             {view === 'home' && <HomeScreen />}
             {view === 'room' && <RoomScreen />}
+            {view === 'history' && <HistoryScreen />}
+            {view === 'replay' && (
+              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
+                <ReplayScreen />
+              </Suspense>
+            )}
             {view === 'game' && <GameScreen />}
             {view === 'tutorial' && (
               <Suspense fallback={<div className="card">{t('connecting')}</div>}>

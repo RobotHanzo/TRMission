@@ -62,11 +62,42 @@ export interface TicketResult {
   gameId: string;
   ticket: string;
 }
+export interface HistoryPlayer {
+  userId: string;
+  seat: number;
+  displayName?: string;
+}
 export interface MatchSummary {
-  _id: string;
-  players: { userId: string; seat: number }[];
+  gameId: string;
+  players: HistoryPlayer[];
   winners: string[];
   completedAt: string;
+  role: 'player' | 'spectator';
+  finalScores: unknown;
+  replayable: boolean;
+}
+export interface ReplayPlayerMeta extends HistoryPlayer {
+  isBot?: boolean;
+  difficulty?: BotDifficulty;
+}
+/** actions stay `unknown[]` here so the eager bundle never imports @trm/engine types;
+ *  the lazy replay feature narrows them to engine `Action[]`. */
+export interface ReplayPayload {
+  gameId: string;
+  config: {
+    seed: string | number;
+    players: { id: string; seat: number }[];
+    contentHash: string;
+    ruleParams?: Record<string, unknown>;
+    shuffleTurnOrder?: boolean;
+  };
+  engineVersion: number;
+  schemaVersion: number;
+  actions: unknown[];
+  players: ReplayPlayerMeta[];
+  winners: string[];
+  completedAt: string;
+  finalDigest?: string;
 }
 
 export class ApiError extends Error {
@@ -178,4 +209,6 @@ export const api = {
   spectate: (code: string) => req<TicketResult>('POST', `/rooms/${code}/spectate`),
 
   history: () => req<MatchSummary[]>('GET', '/history'),
+  replay: (gameId: string) =>
+    req<ReplayPayload>('GET', `/history/${encodeURIComponent(gameId)}/replay`),
 };
