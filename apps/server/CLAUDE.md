@@ -57,7 +57,12 @@ and asserts no secrets appear — keep it passing.
 snapshot, one `gameEvents` doc per action carrying the resulting `stateDigest`, periodic full
 `gameSnapshots`, and a `matchHistory` archive on completion. The unique `(gameId, seq)` index is the
 durable double-apply guard. Recovery = latest snapshot + replay tail, digest-verified. No multi-doc
-transactions — every write for a game is serialized by its command queue.
+transactions — every write for a game is serialized by its command queue. Spectator userIds are
+`$addToSet` onto the game doc at ws bind and copied (minus seated players) into `matchHistory` at
+completion. `GET /history/:gameId[/replay]` is membership-gated (players + spectators, 404
+otherwise); the `/replay` endpoint ships a **COMPLETED** game's full action log to that authorized
+viewer — the one sanctioned exception to "hidden info never leaves the server", hard-gated on
+`status: 'COMPLETED'` in `HistoryRepo.loadReplay`.
 
 ## Auth, lobby, bots
 

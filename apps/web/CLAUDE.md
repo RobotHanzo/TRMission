@@ -25,8 +25,9 @@ that can disagree with the server.
   `restore()` which the app calls on mount to resume a session from the httpOnly refresh cookie
   (works for guests and registered users alike). The in-memory access token is restored via the
   401→refresh path; `booting` gates first render.
-- `store/ui.ts` — view routing (`home`/`room`/`game`/`login`/`loginCallback` ⇄ `/`, `/room/:code`,
-  `/login`, `/login/callback`), locale, colour-blind toggle. Login is its own route: `syncFromUrl`
+- `store/ui.ts` — view routing (`home`/`room`/`game`/`login`/`loginCallback`/`history`/`replay` ⇄
+  `/`, `/room/:code`, `/login`, `/login/callback`, `/history`, `/replay/:gameId`), locale,
+  colour-blind toggle. Login is its own route: `syncFromUrl`
   gates unauthenticated visitors to `/login?redirect=<original>` and `navigateAfterAuth()` resumes
   that target on success (replaces the old implicit "keep the URL + resume" effect). OAuth lands on
   `/login/callback`, where the refresh cookie set by the server callback drives the normal
@@ -57,6 +58,12 @@ The game flow: lobby `start`/`ticket` (REST) → `connectGame(ticket)` → socke
   names are content** and resolve from the catalog by id (`game/content.ts`), not from these tables.
 - `game/` — view-only helpers (payment enumeration via the engine's `previewScore`/selectors, tunnel,
   cards, seat mapping). These mirror the server for optimistic preview but the server is authority.
+- `features/replay/` + `screens/ReplayScreen.tsx` — client-side replay of finished games: fetches
+  `/history/:id/replay` (config + action log), runs the real engine locally and projects through
+  `redactFor(viewer)`/`viewToSnapshot` into isolated sandbox stores (`SandboxProvider`, which also
+  isolates the log store), rendered by the standard `GameStage sandbox`. Perspective switching
+  re-projects the same step for another seat; seeks rebuild silently (no animations), forward
+  steps animate.
 
 ## Player identity
 
