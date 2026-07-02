@@ -4,8 +4,10 @@ import {
   viewToTransform,
   boardProjection,
   visibleFraction,
+  frameDurationMs,
   type BoardTransform,
   type BoardProjection,
+  type BoardFrameTarget,
 } from './boardView';
 
 const close = (a: number, b: number, eps = 1e-6): boolean => Math.abs(a - b) <= eps;
@@ -124,5 +126,29 @@ describe('visibleFraction — how much of a railway is on screen', () => {
 
   it('is 0 for an empty point set', () => {
     expect(visibleFraction([], centred, proj, W, H)).toBe(0);
+  });
+});
+
+describe('frameDurationMs — glide vs snap duration for an auto-pan target', () => {
+  const target = (instant?: boolean): BoardFrameTarget => ({
+    kind: 'cities',
+    ids: ['taipei'],
+    ...(instant !== undefined ? { instant } : {}),
+  });
+
+  it('glides (600ms) by default, motion allowed', () => {
+    expect(frameDurationMs(target(), false)).toBe(600);
+  });
+
+  it('glides (600ms) when instant is explicitly false, motion allowed', () => {
+    expect(frameDurationMs(target(false), false)).toBe(600);
+  });
+
+  it('snaps (0ms) when instant is true, even with motion allowed', () => {
+    expect(frameDurationMs(target(true), false)).toBe(0);
+  });
+
+  it('snaps (0ms) under reduced motion, even when instant is false', () => {
+    expect(frameDurationMs(target(false), true)).toBe(0);
   });
 });
