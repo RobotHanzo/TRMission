@@ -181,7 +181,7 @@ describe('lobby → game → history (end to end)', () => {
     }
 
     const list = await request(server()).get('/api/v1/history').set(auth(a.token)).expect(200);
-    expect(list.body.some((g: { _id: string }) => g._id === gameId)).toBe(true);
+    expect(list.body.some((g: { gameId: string }) => g.gameId === gameId)).toBe(true);
 
     const detail = await request(server())
       .get(`/api/v1/history/${gameId}`)
