@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { create } from '@bufbuild/protobuf';
 import { GameEventSchema } from '@trm/proto';
-import { useLog } from './log';
+import type { LogEntry } from '../game/logModel';
+import { useLog, createLogStore } from './log';
 
 const turn = (playerId: string) =>
   create(GameEventSchema, { event: { case: 'turnStarted', value: { playerId, orderIndex: 0 } } });
@@ -31,5 +32,19 @@ describe('useLog', () => {
     useLog.getState().ingestLive([turn('p1')]);
     useLog.getState().reset();
     expect(useLog.getState().entries).toEqual([]);
+  });
+});
+
+describe('contextual log store', () => {
+  it('createLogStore returns an isolated instance (singleton untouched)', () => {
+    const iso = createLogStore();
+    iso.setState({
+      entries: [
+        { id: 1, kind: 'gameStarted', playerId: null, data: {}, importance: 'normal' } as unknown as LogEntry,
+      ],
+      nextId: 2,
+    });
+    expect(iso.getState().entries).toHaveLength(1);
+    expect(useLog.getState().entries).toHaveLength(0);
   });
 });

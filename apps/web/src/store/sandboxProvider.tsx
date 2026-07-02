@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { createGameStore, GameStoreProvider } from './game';
 import { createAnimationsStore, AnimationsStoreProvider } from './animations';
+import { createLogStore, LogStoreProvider } from './log';
 
 /**
  * Wraps its subtree in FRESH, isolated game + animation stores. The in-game encyclopedia mounts the
@@ -11,9 +12,12 @@ import { createAnimationsStore, AnimationsStoreProvider } from './animations';
 export function SandboxProvider({ children }: { children: ReactNode }) {
   const [gameStore] = useState(() => createGameStore());
   const [animStore] = useState(() => createAnimationsStore());
+  const [logStore] = useState(() => createLogStore());
   return (
     <GameStoreProvider value={gameStore}>
-      <AnimationsStoreProvider value={animStore}>{children}</AnimationsStoreProvider>
+      <AnimationsStoreProvider value={animStore}>
+        <LogStoreProvider value={logStore}>{children}</LogStoreProvider>
+      </AnimationsStoreProvider>
     </GameStoreProvider>
   );
 }

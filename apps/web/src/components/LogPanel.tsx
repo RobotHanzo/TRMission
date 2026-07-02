@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { GameSnapshot } from '@trm/proto';
-import { useLog } from '../store/log';
-import { useGame } from '../store/game';
+import { useLogStore } from '../store/log';
+import { useGameStore } from '../store/game';
 import { useUi } from '../store/ui';
 import { usePlayerName } from '../game/playerName';
 import { SEAT_COLORS, CARD_COLOR_TOKENS } from '../theme/colors';
@@ -17,8 +17,8 @@ const seatOf = (snapshot: GameSnapshot | null, playerId: string | null): number 
 
 export function LogPanel() {
   const { t } = useTranslation();
-  const entries = useLog((s) => s.entries);
-  const snapshot = useGame((s) => s.snapshot);
+  const entries = useLogStore((s) => s.entries);
+  const snapshot = useGameStore((s) => s.snapshot);
   const locale = useUi((s) => s.locale);
   const nameOf = usePlayerName();
   const me = snapshot?.you?.playerId ?? null;
