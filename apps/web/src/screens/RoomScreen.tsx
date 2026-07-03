@@ -18,6 +18,8 @@ import {
 import { connectGame } from '../net/connection';
 import { SEAT_COLORS } from '../theme/colors';
 import { Toast } from '../components/Toast';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
 import type { Locale } from '../store/ui';
@@ -58,6 +60,12 @@ export function RoomScreen() {
   const [toast, setToast] = useState<string | null>(null);
   const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const {
+    open: leaveOpen,
+    request: requestLeave,
+    confirm: confirmLeave,
+    cancel: cancelLeave,
+  } = useConfirmAction();
 
   // The host's own custom maps, for the picker's "custom" dropdown — fetched once, lazily,
   // only for whoever can actually change the setting.
@@ -398,7 +406,7 @@ export function RoomScreen() {
             {t('start')}
           </button>
         )}
-        <button onClick={() => void leave()}>{t('leave')}</button>
+        <button onClick={() => requestLeave(() => void leave())}>{t('leave')}</button>
       </div>
 
       <p className="muted">
@@ -424,6 +432,14 @@ export function RoomScreen() {
             </div>
           </div>
         </div>
+      )}
+      {leaveOpen && (
+        <ConfirmDialog
+          title={t('leaveConfirmTitle')}
+          message={t('leaveConfirmBody')}
+          onConfirm={confirmLeave}
+          onCancel={cancelLeave}
+        />
       )}
     </div>
   );

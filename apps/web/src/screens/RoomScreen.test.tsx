@@ -305,3 +305,29 @@ describe('RoomScreen kick', () => {
     }
   });
 });
+
+describe('RoomScreen leave confirmation', () => {
+  it('shows a confirmation dialog before leaving, and only leaves once confirmed', async () => {
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    (api.leaveRoom as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+    render(<RoomScreen />);
+    const leaveBtn = await screen.findByRole('button', { name: '離開房間' });
+    fireEvent.click(leaveBtn);
+    expect(api.leaveRoom).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+    await waitFor(() => expect(api.leaveRoom).toHaveBeenCalledWith('ABCD'));
+    expect(useUi.getState().view).toBe('home');
+  });
+
+  it('cancels without leaving when the dialog is dismissed', async () => {
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    render(<RoomScreen />);
+    const leaveBtn = await screen.findByRole('button', { name: '離開房間' });
+    fireEvent.click(leaveBtn);
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(api.leaveRoom).not.toHaveBeenCalled();
+    expect(useUi.getState().view).toBe('room');
+  });
+});
