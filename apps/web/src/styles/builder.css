@@ -426,10 +426,12 @@
     min-width: 0;
   }
 
-  /* Editor: the page scrolls (the ≤920px shell already relaxed .app-main--game), the stage rail
-     becomes a horizontal station strip across the top, and the inspector stacks below the canvas
-     instead of sitting beside it. */
+  /* Editor: a fixed-viewport layout — .editor-main stays the scroll container (as on desktop),
+     because the pan-gesture-eating canvas makes a scrolling page untouchable. The stage rail
+     becomes a horizontal station strip and the inspector stacks below the canvas. */
   .editor-screen {
+    flex: 1;
+    min-height: 0;
     height: auto;
   }
   .editor-body {
@@ -457,17 +459,16 @@
   .editor-stage-label {
     font-size: 0.72em;
   }
-  .editor-main {
-    overflow: visible;
-  }
   .editor-stage-layout {
     flex-direction: column;
     height: auto;
   }
+  /* Short enough that a slice of the inspector always peeks below — that's the swipeable area
+     that scrolls .editor-main (swiping on the canvas itself pans the map instead). */
   .editor-canvas-wrap {
     flex: none;
-    height: 55dvh;
-    min-height: 280px;
+    height: 46dvh;
+    min-height: 240px;
   }
   .editor-inspector {
     width: 100%;

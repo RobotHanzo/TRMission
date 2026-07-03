@@ -100,17 +100,35 @@
   }
 }
 
-/* ── Phone tier — keep in sync with PHONE_QUERY (hooks/useMediaQuery.ts) ────── */
+/* ── Phone tier — keep in sync with PHONE_QUERY (hooks/useMediaQuery.ts). The replay becomes a
+   fixed-viewport layout like the live game: the stage scrolls internally and the transport bar
+   floats at the bottom. A scrolling page would trap the user — the board's touch-action:none
+   eats pan gestures, so swiping on it never scrolls the page. ── */
 @media (max-width: 700px) {
   .replay {
+    min-height: 0;
     gap: var(--tr-space-2);
+    grid-template:
+      'stage' minmax(0, 1fr)
+      'rail' minmax(0, 28dvh)
+      'controls' auto / minmax(0, 1fr);
   }
-  /* The page scrolls on phones; keep the transport controls reachable while browsing. */
+  /* The embedded sandbox stage (board + its stacked panels) scrolls internally; swipe below the
+     board to reach the viewed seat's hand/market/missions. */
+  .replay-stage {
+    display: block;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .replay-stage .game-board {
+    min-height: 42vh; /* relax the ≤920px 60vh floor so rail + controls stay on screen */
+  }
+  .replay-rail {
+    min-height: 0;
+    overflow-y: auto;
+  }
   .replay-controls {
     flex-wrap: wrap;
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
   }
   /* The scrubber gets its own full-width row under the step buttons. */
   .replay-scrubber {

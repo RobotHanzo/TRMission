@@ -1555,12 +1555,14 @@ button.ticket-card:hover {
 }
 
 /* ── Phone tier (≤700px): the board fills the screen and a tabbed dock sits at the bottom.
-   Live games only (.game--dock, set in GameStage) — the tutorial/encyclopedia sandbox keeps the
-   ≤920px stacked column above so coachmark/caption anchors stay mounted. This block must come
-   AFTER the ≤920px block (equal specificity, later wins). Keep in sync with PHONE_QUERY. ── */
+   This block must come AFTER the ≤920px block (equal specificity, later wins). Keep in sync
+   with PHONE_QUERY. ── */
 @media (max-width: 700px) {
-  /* Re-assert the fixed-viewport shell the ≤920px block relaxed — live games only. */
-  .app-main--live.app-main--game {
+  /* Re-assert the fixed-viewport shell the ≤920px block relaxed — for EVERY game-layout view
+     (live game, tutorial, replay, map editor). On a phone these views scroll internally
+     (dock panel / replay stage / editor main); a scrolling page would trap the user, because
+     the board's and editor canvas's touch-action:none eat every pan gesture. */
+  .app-main--game {
     overflow: hidden;
     display: flex;
     padding: var(--tr-space-2);
