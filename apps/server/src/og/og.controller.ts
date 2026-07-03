@@ -25,8 +25,12 @@ export class OgController {
   @Get('page')
   @Header('Content-Type', 'text/html; charset=utf-8')
   @Header('Cache-Control', CACHE)
-  async page(@Query('path') path: string | undefined, @Req() req: Request): Promise<string> {
-    return this.og.pageHtml(await this.og.pageMeta(path), baseUrl(req));
+  async page(
+    @Query('path') path: string | undefined,
+    @Query('code') code: string | undefined,
+    @Req() req: Request,
+  ): Promise<string> {
+    return this.og.pageHtml(await this.og.pageMeta(path, code), baseUrl(req));
   }
 
   @Get('site.png')
@@ -48,5 +52,12 @@ export class OgController {
   @Header('Cache-Control', CACHE)
   async replay(@Param('gameId') gameId: string): Promise<StreamableFile> {
     return new StreamableFile(await this.og.replayPng(gameId));
+  }
+
+  @Get('map/:code.png')
+  @Header('Content-Type', 'image/png')
+  @Header('Cache-Control', CACHE)
+  async map(@Param('code') code: string): Promise<StreamableFile> {
+    return new StreamableFile(await this.og.mapPng(code));
   }
 }

@@ -174,6 +174,119 @@ describe('replay cards respect replay visibility', () => {
   });
 });
 
+describe('shared-map cards', () => {
+  let shareCode: string;
+  let authorToken: string;
+  let mapId: string;
+
+  beforeAll(async () => {
+    // Map authoring needs a REGISTERED user (guests are 403 on /maps).
+    const reg = await request(server())
+      .post('/api/v1/auth/register')
+      .send({ email: 'author@example.tw', password: 'hunter2hunter2', displayName: '地圖作者' })
+      .expect(201);
+    authorToken = reg.body.accessToken;
+
+    const created = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(authorToken))
+      .send({ nameZh: '幻想群島', nameEn: 'Fantasy Isles' })
+      .expect(201);
+    mapId = created.body.id;
+
+    // A small draft exercising all three railway kinds + an island + geography.
+    const city = (id: string, x: number, y: number, isIsland = false) => ({
+      id,
+      nameZh: id,
+      nameEn: id,
+      x,
+      y,
+      region: '',
+      isIsland,
+    });
+    await request(server())
+      .put(`/api/v1/maps/${mapId}`)
+      .set(auth(authorToken))
+      .send({
+        draft: {
+          cities: [
+            city('c1', 20, 30),
+            city('c2', 60, 25),
+            city('c3', 45, 70),
+            city('c4', 85, 75, true),
+          ],
+          routes: [
+            { id: 'r1', a: 'c1', b: 'c2', color: 'RED', length: 3, ferryLocos: 0, isTunnel: false },
+            { id: 'r2', a: 'c2', b: 'c3', color: 'GRAY', length: 3, ferryLocos: 0, isTunnel: true },
+            {
+              id: 'r3',
+              a: 'c3',
+              b: 'c4',
+              color: 'GRAY',
+              length: 4,
+              ferryLocos: 1,
+              isTunnel: false,
+            },
+          ],
+          tickets: [],
+          geography: {
+            baseView: { x: 0, y: 0, w: 100, h: 100 },
+            land: [
+              [
+                [10, 40],
+                [40, 10],
+                [75, 20],
+                [70, 80],
+                [30, 85],
+              ],
+            ],
+            crop: { lonMin: 0, lonMax: 10, latMin: 0, latMax: 10 },
+          },
+        },
+      })
+      .expect(200);
+
+    const share = await request(server())
+      .post(`/api/v1/maps/${mapId}/share`)
+      .set(auth(authorToken));
+    shareCode = share.body.shareCode;
+    expect(typeof shareCode).toBe('string');
+  }, 30_000);
+
+  it('renders a dedicated map card for a valid share code, anonymously', async () => {
+    const res = await request(server()).get(`/api/v1/og/map/${shareCode}.png`).expect(200);
+    expect(res.headers['content-type']).toContain('image/png');
+    expect(expectPng(res.body).equals(sitePng)).toBe(false);
+  });
+
+  it('meta for /maps?code=… carries the map name, stats, and the map card image', async () => {
+    const res = await request(server())
+      .get(`/api/v1/og/page?path=/maps&code=${shareCode}`)
+      .expect(200);
+    expect(res.text).toContain('幻想群島');
+    expect(res.text).toContain('4 個車站');
+    expect(res.text).toContain(`/api/v1/og/map/${shareCode}.png`);
+    expect(res.text).toContain(`0;url=/maps?code=${shareCode}`);
+  });
+
+  it('unknown or revoked codes degrade to the generic card and site meta', async () => {
+    const badPng = await request(server()).get('/api/v1/og/map/NOPE1234.png').expect(200);
+    expect(expectPng(badPng.body).equals(sitePng)).toBe(true);
+    const badPage = await request(server())
+      .get('/api/v1/og/page?path=/maps&code=NOPE1234')
+      .expect(200);
+    expect(badPage.text).not.toContain('幻想群島');
+    expect(badPage.text).toContain('/api/v1/og/site.png');
+
+    await request(server())
+      .delete(`/api/v1/maps/${mapId}/share`)
+      .set(auth(authorToken))
+      .expect(204);
+    const revoked = await request(server()).get(`/api/v1/og/map/${shareCode}.png`).expect(200);
+    expect(expectPng(revoked.body).equals(sitePng)).toBe(true);
+  });
+});
+
 describe('card-svg text helpers', () => {
   it('escapes XML metacharacters', () => {
     expect(escapeXml(`<b>&"'`)).toBe('&lt;b&gt;&amp;&quot;&apos;');

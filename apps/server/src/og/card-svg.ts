@@ -3,6 +3,7 @@
 // Text is XML-escaped here; rasterisation happens in OgService via resvg.
 /* eslint no-irregular-whitespace: ["error", { "skipStrings": true, "skipTemplates": true }] --
    the card copy deliberately uses U+3000 ideographic spaces for CJK typography */
+import { ferryLocoGradientDef, mapPanelSvg, type RenderableMap } from './map-svg';
 
 export const CARD_W = 1200;
 export const CARD_H = 630;
@@ -173,6 +174,34 @@ ${kicker(`邀請你加入遊戲 · ${statusText}`)}
 ${text(72 + codeW / 2, 338, 96, BLUE, code, { anchor: 'middle', spacing: 14 })}
 ${text(72, 440, 30, INK, escapeXml(detailBits.join('　·　')))}
 ${seatDots}
+`);
+}
+
+export interface MapCardData {
+  nameZh: string;
+  nameEn: string;
+  code: string;
+  map: RenderableMap;
+}
+
+/**
+ * A shared custom map's card: name + stats on the left, and on the right a live snapshot of
+ * the map itself rendered with the exact in-game cartography (stations shown, no labels).
+ */
+export function mapCardSvg(d: MapCardData): string {
+  const panel = { x: 620, y: 112, w: 508, h: 470, r: 18 };
+  const cityCount = d.map.cities.length;
+  const routeCount = d.map.routes.length;
+  return frame(`
+<defs>${ferryLocoGradientDef()}</defs>
+${text(72, 204, 27, INK_SOFT, escapeXml('分享地圖 · SHARED MAP'), { spacing: 2 })}
+${text(72, 300, 52, INK, escapeXml(fitText(d.nameZh, 52, 500)))}
+${text(72, 356, 32, INK_SOFT, escapeXml(fitText(d.nameEn, 32, 500)))}
+${text(72, 430, 28, INK, escapeXml(`${cityCount} 個車站　·　${routeCount} 條路線`))}
+<rect x="72" y="470" width="${Math.max(estimateWidth(`代碼 ${d.code}`, 28) + 48, 200).toFixed(0)}" height="56" rx="12" fill="${SURFACE_2}" stroke="${LINE}" stroke-width="2"/>
+${text(96, 507, 28, BLUE, escapeXml(`代碼 ${d.code.toUpperCase()}`), { spacing: 3 })}
+${mapPanelSvg(d.map, panel, 'mapClip')}
+<rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="${panel.r}" fill="none" stroke="${LINE}" stroke-width="2.5"/>
 `);
 }
 

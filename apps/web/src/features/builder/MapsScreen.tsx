@@ -27,6 +27,26 @@ export default function MapsScreen() {
   };
   useEffect(refresh, []);
 
+  // A shared link (/maps?code=XXXXXXXX — what ShareStage copies) lands with the code
+  // prefilled and previewed, so the recipient only has to press clone.
+  useEffect(() => {
+    let fromUrl = '';
+    try {
+      fromUrl = new URLSearchParams(window.location.search).get('code')?.trim() ?? '';
+    } catch {
+      return;
+    }
+    if (!fromUrl) return;
+    setCode(fromUrl);
+    api
+      .peekSharedMap(fromUrl)
+      .then(setPeek)
+      .catch((e) =>
+        setPeekError(e instanceof ApiError ? t('builder.shareCodeNotFound') : String(e)),
+      );
+    // Runs once on mount: the query param is the initial navigation payload, not live state.
+  }, []);
+
   const create = async () => {
     if (!newNameZh.trim() || !newNameEn.trim()) return;
     setCreating(true);
@@ -90,7 +110,11 @@ export default function MapsScreen() {
               <button onClick={() => enterMapEditor(m.id)}>
                 <Edit3 size={14} aria-hidden /> {t('builder.editMap')}
               </button>
-              <button className="danger icon-btn" onClick={() => void remove(m.id)} aria-label={t('delete')}>
+              <button
+                className="danger icon-btn"
+                onClick={() => void remove(m.id)}
+                aria-label={t('delete')}
+              >
                 <Trash2 size={14} aria-hidden />
               </button>
             </div>
@@ -130,7 +154,10 @@ export default function MapsScreen() {
               {peek.nameZh} <span className="muted">({peek.nameEn})</span>
             </p>
             <p className="muted">
-              {t('builder.peekSummary', { cities: peek.draft.cities.length, routes: peek.draft.routes.length })}
+              {t('builder.peekSummary', {
+                cities: peek.draft.cities.length,
+                routes: peek.draft.routes.length,
+              })}
             </p>
             <button className="primary" disabled={cloning} onClick={() => void doClone()}>
               {t('builder.cloneMap')}

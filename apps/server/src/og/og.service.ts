@@ -11,11 +11,13 @@ import { resolveContentByHash } from '@trm/map-data';
 import { MONGO_DB } from '../db/tokens';
 import { LobbyService } from '../lobby/lobby.service';
 import { HistoryRepo } from '../history/history.repo';
+import { MapsService } from '../maps/maps.service';
 import type { MapContentDoc } from '../maps/maps.types';
 import {
   CARD_H,
   CARD_W,
   escapeXml,
+  mapCardSvg,
   replayCardSvg,
   roomCardSvg,
   siteCardSvg,
@@ -37,6 +39,7 @@ export interface PageMeta {
 
 const ROOM_PATH = /^\/room\/([A-Za-z0-9-]{1,24})$/;
 const REPLAY_PATH = /^\/replay\/([A-Za-z0-9_.:-]{1,64})$/;
+const SHARE_CODE = /^[A-Za-z0-9]{1,16}$/;
 
 @Injectable()
 export class OgService {
@@ -47,6 +50,7 @@ export class OgService {
     @Inject(MONGO_DB) db: Db,
     private readonly lobby: LobbyService,
     private readonly history: HistoryRepo,
+    private readonly maps: MapsService,
   ) {
     this.mapContents = db.collection<MapContentDoc>('mapContents');
   }
@@ -86,8 +90,23 @@ export class OgService {
     return this.renderPng(replayCardSvg(replay));
   }
 
-  /** Meta head data for a bot-routed page path; anything unrecognised gets the site meta. */
-  async pageMeta(rawPath: string | undefined): Promise<PageMeta> {
+  async mapPng(code: string): Promise<Buffer> {
+    const shared = await this.sharedMapOrNull(code);
+    if (!shared) return this.sitePng();
+    return this.renderPng(
+      mapCardSvg({
+        nameZh: shared.nameZh,
+        nameEn: shared.nameEn,
+        code,
+        map: shared.draft,
+      }),
+    );
+  }
+
+  /** Meta head data for a bot-routed page path; anything unrecognised gets the site meta.
+   *  `shareCode` is the `?code=` of a shared-map link (/maps?code=…) — nginx and the Vite dev
+   *  plugin forward it alongside the rewritten `path`. */
+  async pageMeta(rawPath: string | undefined, shareCode?: string): Promise<PageMeta> {
     const path = typeof rawPath === 'string' && /^\/(?!\/)/.test(rawPath) ? rawPath : '/';
     const site: PageMeta = {
       title: SITE_TITLE,
@@ -109,6 +128,19 @@ export class OgService {
           `${view.members.length}/${view.maxPlayers} 位玩家${mapBit}. Join the game at room code ${view.code}.`,
         imagePath: `/api/v1/og/room/${encodeURIComponent(view.code)}.png`,
         path,
+      };
+    }
+
+    if (path === '/maps' && shareCode && SHARE_CODE.test(shareCode)) {
+      const shared = await this.sharedMapOrNull(shareCode);
+      if (!shared) return { ...site, path: '/' };
+      return {
+        title: `分享地圖 ${shared.nameZh} · ${SITE_TITLE}`,
+        description:
+          `${shared.nameZh} ${shared.nameEn} — ${shared.draft.cities.length} 個車站、` +
+          `${shared.draft.routes.length} 條路線。Clone this custom TRMission map with code ${shareCode.toUpperCase()}.`,
+        imagePath: `/api/v1/og/map/${encodeURIComponent(shareCode)}.png`,
+        path: `/maps?code=${encodeURIComponent(shareCode)}`,
       };
     }
 
@@ -163,6 +195,17 @@ export class OgService {
       return await this.lobby.get(code.toUpperCase());
     } catch (e) {
       if (!(e instanceof NotFoundException)) this.log.warn(`room card lookup failed: ${e}`);
+      return null;
+    }
+  }
+
+  /** A shared map by its code, or null (revoked/unknown → the generic card, like rooms). */
+  private async sharedMapOrNull(code: string) {
+    if (!SHARE_CODE.test(code)) return null;
+    try {
+      return await this.maps.peekByCode(code);
+    } catch (e) {
+      if (!(e instanceof NotFoundException)) this.log.warn(`map card lookup failed: ${e}`);
       return null;
     }
   }
