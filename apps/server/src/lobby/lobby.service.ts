@@ -21,6 +21,7 @@ import {
 } from './room.repo';
 import { GameHub } from '../ws/hub';
 import { TokenService } from '../auth/token.service';
+import { UserRepo } from '../auth/user.repo';
 import type { AuthUser } from '../auth/auth.types';
 import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '../bots/types';
 import { MapsService } from '../maps/maps.service';
@@ -72,7 +73,18 @@ export class LobbyService {
     private readonly hub: GameHub,
     private readonly tokens: TokenService,
     private readonly maps: MapsService,
+    private readonly users: UserRepo,
   ) {}
+
+  /**
+   * Ban chokepoint for the ws-ticket paths (start / ticket / spectate): a banned user's
+   * live 15-min access token must not be redeemable for game access. These routes are
+   * human-paced, so the extra point read is negligible.
+   */
+  private async assertNotDisabled(userId: string): Promise<void> {
+    const doc = await this.users.findById(userId);
+    if (doc?.disabledAt) throw new ForbiddenException('account disabled');
+  }
 
   /** Validate a selector is usable (existence + ownership for custom), without fully resolving
    *  it — cheap enough to run on every settings PATCH. Full playability is checked at start. */
@@ -201,6 +213,7 @@ export class LobbyService {
 
   /** Host starts the game: create the authoritative match, mark the room STARTED, hand back a ticket. */
   async start(code: string, user: AuthUser): Promise<TicketResult> {
+    await this.assertNotDisabled(user.userId);
     const room = await this.require(code);
     if (room.hostId !== user.userId) throw new ForbiddenException('only the host can start');
     if (room.status !== 'LOBBY') throw new BadRequestException('game already started');
@@ -245,6 +258,7 @@ export class LobbyService {
 
   /** Mint a spectator ws-ticket (seat -1) for a started room, if it allows spectating. */
   async spectateTicket(code: string, user: AuthUser): Promise<TicketResult> {
+    await this.assertNotDisabled(user.userId);
     const room = await this.require(code);
     const s = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
     if (!s.allowSpectating) throw new ForbiddenException('spectating is disabled for this room');
@@ -257,6 +271,7 @@ export class LobbyService {
 
   /** Mint a ws-game ticket for the current member of a started room (initial + reconnect). */
   async ticket(code: string, user: AuthUser): Promise<TicketResult> {
+    await this.assertNotDisabled(user.userId);
     const room = await this.require(code);
     if (!room.gameId) throw new BadRequestException('game has not started');
     const seat = this.seatOf(room, user.userId);

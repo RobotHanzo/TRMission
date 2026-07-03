@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { hash, verify } from '@node-rs/argon2';
 import { UserRepo, toPublicUser, type UserDoc } from './user.repo';
 import { SessionRepo } from './session.repo';
@@ -14,6 +19,9 @@ export class AuthService {
   ) {}
 
   private async issue(user: UserDoc): Promise<IssuedAuth> {
+    // The single session-mint chokepoint (guest/register/login/upgrade/OAuth): a banned
+    // account can never obtain a new session through any entry method.
+    if (user.disabledAt) throw new ForbiddenException('account disabled');
     const refreshToken = await this.sessions.create(user._id);
     return { user: toPublicUser(user), accessToken: this.tokens.signAccess(user), refreshToken };
   }
@@ -71,6 +79,9 @@ export class AuthService {
     }
     const user = await this.users.findById(outcome.userId);
     if (!user) throw new UnauthorizedException('user not found');
+    // Belt-and-braces on top of ban-time revokeAllForUser: a family minted in a race
+    // with the ban still can't be rotated into a fresh access token.
+    if (user.disabledAt) throw new UnauthorizedException('account disabled');
     return { accessToken: this.tokens.signAccess(user), refreshToken: outcome.token };
   }
 

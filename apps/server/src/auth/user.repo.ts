@@ -163,6 +163,34 @@ export class UserRepo implements OnModuleInit {
   }
 
   /**
+   * Ban an account (dashboard moderation). Also bumps tokenVersion — not verified on
+   * requests today, but free future-proofing if per-request checks are ever added.
+   * Session revocation is the caller's job (DashboardUsersService).
+   */
+  setDisabled(userId: string, by: string, reason?: string): Promise<UserDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: userId },
+      {
+        $set: {
+          disabledAt: new Date(),
+          disabledBy: by,
+          ...(reason ? { disabledReason: reason } : {}),
+        },
+        $inc: { tokenVersion: 1 },
+      },
+      { returnDocument: 'after' },
+    );
+  }
+
+  clearDisabled(userId: string): Promise<UserDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: userId },
+      { $unset: { disabledAt: '', disabledBy: '', disabledReason: '' } },
+      { returnDocument: 'after' },
+    );
+  }
+
+  /**
    * Dashboard listing: newest first with a (createdAt, _id) composite cursor for stable
    * pagination. `filter` narrows by account kind; `disabled` matches banned accounts.
    */

@@ -38,6 +38,11 @@ export const RoomsListQuerySchema = z.object({
 });
 export const AuditListQuerySchema = z.object({ limit, cursor });
 
+export const ModerationReasonSchema = z.object({
+  reason: z.string().trim().max(500).optional(),
+});
+export class ModerationReasonDto extends createZodDto(ModerationReasonSchema) {}
+
 export class UsersListQueryDto extends createZodDto(UsersListQuerySchema) {}
 export class GamesListQueryDto extends createZodDto(GamesListQuerySchema) {}
 export class RoomsListQueryDto extends createZodDto(RoomsListQuerySchema) {}

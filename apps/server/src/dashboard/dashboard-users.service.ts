@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import type { AuthUser } from '../auth/auth.types';
 import { UserRepo, type UserDoc } from '../auth/user.repo';
 import { SessionRepo } from '../auth/session.repo';
 import { RoomRepo } from '../lobby/room.repo';
 import { HistoryRepo } from '../history/history.repo';
 import { DashboardAccountRepo } from './dashboard-account.repo';
+import { AuditService } from './audit.service';
 import { decodeCursor, encodeCursor } from './cursor';
 
 /**
@@ -29,6 +36,7 @@ export class DashboardUsersService {
     private readonly rooms: RoomRepo,
     private readonly history: HistoryRepo,
     private readonly accounts: DashboardAccountRepo,
+    private readonly audit: AuditService,
   ) {}
 
   async list(query: {
@@ -69,5 +77,36 @@ export class DashboardUsersService {
       history,
       isMaintainer: account !== null,
     };
+  }
+
+  /**
+   * Ban: set the disabled marker, then revoke every refresh family — new sessions,
+   * refreshes, and ws-game tickets are refused immediately. Already-minted access
+   * tokens stay valid for up to 15 minutes on read-only REST (documented window).
+   */
+  async disable(actor: AuthUser, userId: string, reason?: string) {
+    if (userId === actor.userId) throw new ForbiddenException('you cannot ban yourself');
+    const target = await this.users.findById(userId);
+    if (!target) throw new NotFoundException('user not found');
+    if (await this.accounts.findById(userId)) {
+      throw new ConflictException('target holds dashboard access — revoke it first');
+    }
+    await this.users.setDisabled(userId, actor.userId, reason);
+    await this.sessions.revokeAllForUser(userId);
+    await this.audit.log(
+      actor,
+      'user.ban',
+      { type: 'user', id: userId },
+      reason ? { reason } : {},
+    );
+    return this.detail(userId);
+  }
+
+  async enable(actor: AuthUser, userId: string) {
+    const target = await this.users.findById(userId);
+    if (!target) throw new NotFoundException('user not found');
+    await this.users.clearDisabled(userId);
+    await this.audit.log(actor, 'user.unban', { type: 'user', id: userId });
+    return this.detail(userId);
   }
 }
