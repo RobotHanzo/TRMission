@@ -4,7 +4,15 @@
 // tie sizes, pip radii) mirrors apps/web/src/styles/game.css at base zoom (--inv-scale and
 // --marker-scale both 1) in the light theme, so the card reads exactly like the in-game
 // map. Stations (city markers) are drawn; name labels deliberately are not.
-import { buildRouteGeometryFor, smoothClosedPath } from '@trm/map-data';
+import {
+  buildRouteGeometryFor,
+  smoothClosedPath,
+  TAIWAN_BASE_VIEW,
+  TAIWAN_LAND_PATH,
+  TAIWAN_CENTRAL_RANGE_PATH,
+  TAIWAN_ISLANDS,
+  TAIWAN_GRATICULE,
+} from '@trm/map-data';
 import type { MapGeography } from '@trm/map-data';
 
 /** The subset of a map draft the renderer needs (matches CustomMapDoc.draft / MapDraft). */
@@ -57,28 +65,38 @@ export function ferryLocoGradientDef(): string {
   return `<linearGradient id="ferryLocoRainbow" x1="0" y1="0" x2="1" y2="1">${stops}</linearGradient>`;
 }
 
-/** Cartography: quiet graticule + smoothed land rings (Geography.tsx's CustomGeography).
- *  The sea itself is painted by {@link mapPanelSvg} as a panel-sized rect BELOW the scaled
- *  group — a flat fill reads identically, and it keeps every coordinate modest (a huge
- *  transformed rect under a rounded clip trips a resvg geometry panic). */
-function geographyLayer(
+const RELIEF = '#d9c9a1';
+
+/** The quiet cartographic grid: the same hand-picked lines as the real board
+ *  (Geography.tsx's `GRATICULE`) for official Taiwan; a fixed 20-unit step for a custom
+ *  draft (its authored `land` rings carry no hand-tuned graticule of their own). */
+function graticuleLayer(
   view: { x: number; y: number; w: number; h: number },
-  geography?: MapGeography,
+  official: boolean,
 ): string {
+  const xs: number[] = official ? [...TAIWAN_GRATICULE.xs] : [];
+  const ys: number[] = official ? [...TAIWAN_GRATICULE.ys] : [];
+  if (!official) {
+    const step = 20;
+    for (let y = Math.ceil(view.y / step) * step; y < view.y + view.h; y += step) ys.push(y);
+    for (let x = Math.ceil(view.x / step) * step; x < view.x + view.w; x += step) xs.push(x);
+  }
+  const lines = [
+    ...ys.map(
+      (y) =>
+        `<line x1="${f(view.x - 6)}" y1="${f(y)}" x2="${f(view.x + view.w + 6)}" y2="${f(y)}"/>`,
+    ),
+    ...xs.map(
+      (x) =>
+        `<line x1="${f(x)}" y1="${f(view.y - 4)}" x2="${f(x)}" y2="${f(view.y + view.h + 4)}"/>`,
+    ),
+  ];
+  return `<g stroke="${SEA_LINE}" stroke-width="0.32" stroke-dasharray="0.9 1.7">${lines.join('')}</g>`;
+}
+
+/** Smoothed land rings for a custom map's authored geography (Geography.tsx's CustomGeography). */
+function customLandLayer(geography?: MapGeography): string {
   const parts: string[] = [];
-  const step = 20;
-  const grid: string[] = [];
-  for (let y = Math.ceil(view.y / step) * step; y < view.y + view.h; y += step)
-    grid.push(
-      `<line x1="${f(view.x - 6)}" y1="${f(y)}" x2="${f(view.x + view.w + 6)}" y2="${f(y)}"/>`,
-    );
-  for (let x = Math.ceil(view.x / step) * step; x < view.x + view.w; x += step)
-    grid.push(
-      `<line x1="${f(x)}" y1="${f(view.y - 4)}" x2="${f(x)}" y2="${f(view.y + view.h + 4)}"/>`,
-    );
-  parts.push(
-    `<g stroke="${SEA_LINE}" stroke-width="0.32" stroke-dasharray="0.9 1.7">${grid.join('')}</g>`,
-  );
   for (const ring of geography?.land ?? []) {
     const d = smoothClosedPath(ring);
     if (!d) continue;
@@ -89,6 +107,37 @@ function geographyLayer(
     );
   }
   return parts.join('\n');
+}
+
+/** The hand-authored official Taiwan coastline + central-range relief + outlying islands,
+ *  drawn with the exact recipe Geography.tsx's `Geography()` uses. Custom drafts never reach
+ *  this — they draw their own authored rings via {@link customLandLayer}. */
+function officialTaiwanLandLayer(): string {
+  const islands = TAIWAN_ISLANDS.map(
+    (b) =>
+      `<circle cx="${f(b.cx)}" cy="${f(b.cy)}" r="${f(b.r)}" fill="${LAND}" stroke="${COAST}" stroke-width="0.4"/>`,
+  ).join('');
+  return `<path d="${TAIWAN_LAND_PATH}" fill="none" stroke="${SEA}" stroke-width="2.4" opacity="0.6"/>
+<path d="${TAIWAN_LAND_PATH}" fill="${LAND}" stroke="${COAST}" stroke-width="0.45" stroke-linejoin="round"/>
+<path d="${TAIWAN_CENTRAL_RANGE_PATH}" fill="${RELIEF}" opacity="0.55"/>
+<path d="${TAIWAN_CENTRAL_RANGE_PATH}" fill="none" stroke="${COAST}" stroke-width="0.3" stroke-dasharray="0.5 0.9" opacity="0.55"/>
+<g>${islands}</g>`;
+}
+
+/** Cartography: quiet graticule + land (a custom draft's authored rings, or the official
+ *  Taiwan coastline/relief/islands). The sea itself is painted by {@link mapPanelSvg} as a
+ *  panel-sized rect BELOW the scaled group — a flat fill reads identically, and it keeps
+ *  every coordinate modest (a huge transformed rect under a rounded clip trips a resvg
+ *  geometry panic). */
+function geographyLayer(
+  view: { x: number; y: number; w: number; h: number },
+  official: boolean,
+  geography?: MapGeography,
+): string {
+  return [
+    graticuleLayer(view, official),
+    official ? officialTaiwanLandLayer() : customLandLayer(geography),
+  ].join('\n');
 }
 
 /** One route: RouteShape's exact stack — tunnel glow → roadbed → ties / ferry pips / cars. */
@@ -161,7 +210,11 @@ function cityLayer(map: RenderableMap): string {
 }
 
 /** Fallback view for a draft with no geography: the cities' bounding box plus margin. */
-function viewFor(map: RenderableMap): { x: number; y: number; w: number; h: number } {
+function viewFor(
+  map: RenderableMap,
+  official: boolean,
+): { x: number; y: number; w: number; h: number } {
+  if (official) return TAIWAN_BASE_VIEW;
   if (map.geography) return map.geography.baseView;
   const xs = map.cities.map((c) => c.x);
   const ys = map.cities.map((c) => c.y);
@@ -176,13 +229,16 @@ function viewFor(map: RenderableMap): { x: number; y: number; w: number; h: numb
  * The complete map snapshot as SVG markup, scaled-to-cover and clipped into the given panel
  * rectangle (card px). Returns markup to drop inside the card's `<svg>`; the caller draws
  * any panel border on top. Requires {@link ferryLocoGradientDef} in the card's `<defs>`.
+ * `official` draws the hand-authored Taiwan coastline/relief/islands instead of the map's
+ * own `geography` — set it for the bundled official Taiwan content, never for a custom draft.
  */
 export function mapPanelSvg(
   map: RenderableMap,
   panel: { x: number; y: number; w: number; h: number; r: number },
   clipId: string,
+  official = false,
 ): string {
-  const view = viewFor(map);
+  const view = viewFor(map, official);
   // Contain: the whole authored view stays visible (a preview should show the entire map);
   // the slack axis fills with open sea rather than letterboxing, since the sea has no edge.
   const scale = Math.min(panel.w / view.w, panel.h / view.h);
@@ -192,7 +248,7 @@ export function mapPanelSvg(
 <g clip-path="url(#${clipId})">
 <rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" fill="${SEA}"/>
 <g transform="translate(${f(tx)} ${f(ty)}) scale(${f(scale)})">
-${geographyLayer(view, map.geography)}
+${geographyLayer(view, official, map.geography)}
 ${routeLayer(map)}
 ${cityLayer(map)}
 </g>

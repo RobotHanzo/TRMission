@@ -13,6 +13,7 @@ export * from './validate';
 export * from './graph';
 export * from './generate';
 export * from './geometry';
+export * from './taiwan-geography';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',

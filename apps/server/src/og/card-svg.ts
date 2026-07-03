@@ -180,27 +180,33 @@ ${seatDots}
 export interface MapCardData {
   nameZh: string;
   nameEn: string;
+  /** A share code (custom map) or an official map id — shown as the chip under the stats. */
   code: string;
   map: RenderableMap;
+  /** Draw the hand-authored Taiwan coastline/relief/islands instead of `map.geography` — set
+   *  for the bundled official map, never for a user-authored custom map. */
+  official?: boolean;
 }
 
 /**
- * A shared custom map's card: name + stats on the left, and on the right a live snapshot of
- * the map itself rendered with the exact in-game cartography (stations shown, no labels).
+ * A map's card: name + stats on the left, and on the right a live snapshot of the map itself
+ * rendered with the exact in-game cartography (stations shown, no labels). Used both for a
+ * shared custom map's link (by share code) and for the bundled official map.
  */
 export function mapCardSvg(d: MapCardData): string {
   const panel = { x: 620, y: 112, w: 508, h: 470, r: 18 };
   const cityCount = d.map.cities.length;
   const routeCount = d.map.routes.length;
+  const kickerText = d.official ? '官方地圖 · OFFICIAL MAP' : '分享地圖 · SHARED MAP';
   return frame(`
 <defs>${ferryLocoGradientDef()}</defs>
-${text(72, 204, 27, INK_SOFT, escapeXml('分享地圖 · SHARED MAP'), { spacing: 2 })}
+${text(72, 204, 27, INK_SOFT, escapeXml(kickerText), { spacing: 2 })}
 ${text(72, 300, 52, INK, escapeXml(fitText(d.nameZh, 52, 500)))}
 ${text(72, 356, 32, INK_SOFT, escapeXml(fitText(d.nameEn, 32, 500)))}
 ${text(72, 430, 28, INK, escapeXml(`${cityCount} 個車站　·　${routeCount} 條路線`))}
 <rect x="72" y="470" width="${Math.max(estimateWidth(`代碼 ${d.code}`, 28) + 48, 200).toFixed(0)}" height="56" rx="12" fill="${SURFACE_2}" stroke="${LINE}" stroke-width="2"/>
 ${text(96, 507, 28, BLUE, escapeXml(`代碼 ${d.code.toUpperCase()}`), { spacing: 3 })}
-${mapPanelSvg(d.map, panel, 'mapClip')}
+${mapPanelSvg(d.map, panel, 'mapClip', d.official)}
 <rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="${panel.r}" fill="none" stroke="${LINE}" stroke-width="2.5"/>
 `);
 }
