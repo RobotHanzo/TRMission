@@ -1,15 +1,20 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { apiSchema } from '../openapi/openapi';
 import { AccessTokenGuard } from '../auth/access-token.guard';
+import { CurrentUser } from '../auth/current-user.decorator';
+import type { AuthUser } from '../auth/auth.types';
 import { DashboardGuard } from './dashboard.guard';
 import { RequirePermission } from './require-permission.decorator';
 import { DashboardGamesService } from './dashboard-games.service';
 import {
   DashboardGameDetailSchema,
+  DashboardRoomRowSchema,
   GameLogSchema,
   GamesListQueryDto,
   GamesListSchema,
+  ModerationReasonDto,
+  ModerationReasonSchema,
   RoomsListQueryDto,
   RoomsListSchema,
 } from './dashboard.schemas';
@@ -59,11 +64,46 @@ export class DashboardGamesController {
     return this.games.gameReplay(gameId);
   }
 
+  @Post('games/:gameId/terminate')
+  @HttpCode(200)
+  @RequirePermission('games.terminate')
+  @ApiOperation({
+    summary: 'Force-terminate a stuck LIVE game',
+    description:
+      'Marks the game TERMINATED (never replayable, no history archive), evicts it from ' +
+      'the hub, notifies connected players/spectators, and closes its room.',
+  })
+  @ApiBody({ schema: apiSchema(ModerationReasonSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(DashboardGameDetailSchema) })
+  terminate(
+    @Param('gameId') gameId: string,
+    @CurrentUser() actor: AuthUser,
+    @Body() body: ModerationReasonDto,
+  ) {
+    return this.games.terminate(actor, gameId, body.reason);
+  }
+
   @Get('rooms')
   @RequirePermission('rooms.read')
   @ApiOperation({ summary: 'List rooms by status, most recently active first' })
   @ApiResponse({ status: 200, schema: apiSchema(RoomsListSchema) })
   listRooms(@Query() query: RoomsListQueryDto) {
     return this.games.listRooms(query);
+  }
+
+  @Post('rooms/:code/close')
+  @HttpCode(200)
+  @RequirePermission('rooms.close')
+  @ApiOperation({
+    summary: 'Force-close a LOBBY room (409 if STARTED — terminate its game instead)',
+  })
+  @ApiBody({ schema: apiSchema(ModerationReasonSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(DashboardRoomRowSchema) })
+  closeRoom(
+    @Param('code') code: string,
+    @CurrentUser() actor: AuthUser,
+    @Body() body: ModerationReasonDto,
+  ) {
+    return this.games.closeRoom(actor, code, body.reason);
   }
 }

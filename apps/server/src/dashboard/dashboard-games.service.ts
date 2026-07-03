@@ -1,10 +1,13 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { Db, Collection } from 'mongodb';
 import { MONGO_DB } from '../db/tokens';
+import { GameHub } from '../ws/hub';
 import { GameRegistry } from '../game/game-registry';
 import { RoomRepo, type RoomDoc } from '../lobby/room.repo';
 import { HistoryRepo } from '../history/history.repo';
+import type { AuthUser } from '../auth/auth.types';
 import type { GameChatDoc, GameDoc, GameEventDoc } from '../persistence/types';
+import { AuditService } from './audit.service';
 import { decodeCursor, encodeCursor } from './cursor';
 
 const toGameRow = (g: GameDoc, inMemory: boolean) => ({
@@ -50,8 +53,10 @@ export class DashboardGamesService {
   constructor(
     @Inject(MONGO_DB) db: Db,
     private readonly registry: GameRegistry,
+    private readonly hub: GameHub,
     private readonly rooms: RoomRepo,
     private readonly history: HistoryRepo,
+    private readonly audit: AuditService,
   ) {
     this.games = db.collection<GameDoc>('games');
     this.events = db.collection<GameEventDoc>('gameEvents');
@@ -114,7 +119,74 @@ export class DashboardGamesService {
       spectators: game.spectators ?? [],
       ...(room ? { roomCode: room._id } : {}),
       chat: chat.map((c) => ({ playerId: c.playerId, text: c.text, ts: c.ts.toISOString() })),
+      ...(game.terminatedAt
+        ? {
+            terminated: {
+              at: game.terminatedAt.toISOString(),
+              by: game.terminatedBy ?? 'unknown',
+              ...(game.terminatedReason ? { reason: game.terminatedReason } : {}),
+            },
+          }
+        : {}),
     };
+  }
+
+  /**
+   * Force-terminate a stuck LIVE game. Order matters: the DB flips first (so a
+   * reconnect racing the eviction hits loadForRecovery's TERMINATED filter and cannot
+   * resurrect the match), then the hub evicts + notifies, then the room closes. An
+   * in-flight command may still append to the event log during step 1→2 — harmless:
+   * the log stays digest-consistent and nothing reads it as live afterwards.
+   */
+  async terminate(actor: AuthUser, gameId: string, reason?: string) {
+    const now = new Date();
+    const res = await this.games.updateOne(
+      { _id: gameId, status: 'LIVE' },
+      {
+        $set: {
+          status: 'TERMINATED',
+          terminatedAt: now,
+          terminatedBy: actor.userId,
+          ...(reason ? { terminatedReason: reason } : {}),
+          updatedAt: now,
+        },
+      },
+    );
+    if (res.matchedCount === 0) {
+      const game = await this.games.findOne({ _id: gameId });
+      if (!game) throw new NotFoundException('game not found');
+      throw new ConflictException(`game is ${game.status}, not LIVE`);
+    }
+    await this.hub.evictMatch(gameId, 'terminated by a moderator');
+    await this.rooms.closeByGameId(gameId);
+    await this.audit.log(
+      actor,
+      'game.terminate',
+      { type: 'game', id: gameId },
+      reason ? { reason } : {},
+    );
+    return this.gameDetail(gameId);
+  }
+
+  /** Force-close a LOBBY room. A STARTED room follows its game — terminate that instead. */
+  async closeRoom(actor: AuthUser, code: string, reason?: string) {
+    const room = await this.rooms.get(code);
+    if (!room) throw new NotFoundException('room not found');
+    if (room.status === 'CLOSED') throw new ConflictException('room is already closed');
+    if (room.status === 'STARTED') {
+      throw new ConflictException('room has a started game — terminate the game instead');
+    }
+    if (!(await this.rooms.closeLobby(code))) {
+      throw new ConflictException('room is no longer in LOBBY');
+    }
+    await this.audit.log(
+      actor,
+      'room.close',
+      { type: 'room', id: code },
+      reason ? { reason } : {},
+    );
+    const updated = await this.rooms.get(code);
+    return toRoomRow(updated ?? room);
   }
 
   /** Full ordered action log — COMPLETED games only (same hard rule as replay). */

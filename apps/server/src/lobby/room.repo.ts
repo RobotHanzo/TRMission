@@ -98,6 +98,23 @@ export class RoomRepo implements OnModuleInit {
     return this.col.findOne({ gameId });
   }
 
+  /** Maintainer force-close of a lobby. CAS on LOBBY so a concurrent start wins cleanly. */
+  async closeLobby(code: string): Promise<boolean> {
+    const res = await this.col.updateOne(
+      { _id: code, status: 'LOBBY' },
+      { $set: { status: 'CLOSED', updatedAt: new Date() } },
+    );
+    return res.modifiedCount === 1;
+  }
+
+  /** Close the room of a terminated game (members list is kept for the record). */
+  async closeByGameId(gameId: string): Promise<void> {
+    await this.col.updateOne(
+      { gameId, status: 'STARTED' },
+      { $set: { status: 'CLOSED', updatedAt: new Date() } },
+    );
+  }
+
   /** Dashboard listing: newest first with a (updatedAt, _id) composite cursor. */
   listPage(
     status: RoomStatus | 'all',

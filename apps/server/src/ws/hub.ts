@@ -152,6 +152,31 @@ export class GameHub {
     return match;
   }
 
+  /**
+   * Evict a match from memory and tell connected clients (maintainer termination).
+   * The DB status flip is the CALLER's responsibility and must happen BEFORE this
+   * call — loadForRecovery refuses TERMINATED games, so a reconnect racing the
+   * eviction cannot resurrect the match. Safe no-op when the game isn't resident.
+   */
+  async evictMatch(gameId: string, message: string): Promise<void> {
+    const match = this.registry.get(gameId);
+    if (match) {
+      // Drain: serialize behind any in-flight command so we never evict mid-apply.
+      await match.queue.run(async () => {});
+    }
+    const note = rejectionFrame(0, RejectionCode.NOT_IN_GAME, 'errors:gameTerminated', message);
+    for (const conn of this.members.get(gameId)?.values() ?? []) conn.send(note);
+    for (const conn of this.spectators.get(gameId) ?? []) conn.send(note);
+    this.members.delete(gameId);
+    this.spectators.delete(gameId);
+    this.bots.delete(gameId);
+    this.chatLog.delete(gameId);
+    this.lastCamera.delete(gameId);
+    // After removal the bot driver's next registry.get() misses and its loop exits;
+    // stragglers' commands take the existing NOT_IN_GAME path.
+    this.registry.remove(gameId);
+  }
+
   openConnection(id: string, sink: Sink): Connection {
     const conn = new Connection(id, sink);
     this.connections.set(id, conn);

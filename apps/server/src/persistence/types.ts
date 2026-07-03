@@ -23,8 +23,12 @@ export interface GameDoc {
   engineVersion: number;
   contentHash: string;
   schemaVersion: number;
-  status: 'LIVE' | 'COMPLETED';
+  /** TERMINATED = force-closed by a maintainer; never archived, never replayable. */
+  status: 'LIVE' | 'COMPLETED' | 'TERMINATED';
   currentSeq: number;
+  terminatedAt?: Date;
+  terminatedBy?: string; // maintainer userId
+  terminatedReason?: string;
   /** Bot players in this game (so the driver resumes them after crash recovery). */
   bots?: BotProfile[];
   /** userIds who ever spectated (never seated players); grants history/replay access. */

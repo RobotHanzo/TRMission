@@ -110,11 +110,19 @@ export class MongoGameStore implements GameStorePort {
 
   async recordCompletion(gameId: string, finalState: GameState): Promise<void> {
     const now = new Date();
-    await this.games.updateOne({ _id: gameId }, { $set: { status: 'COMPLETED', updatedAt: now } });
+    // CAS on LIVE: a bot move racing a maintainer termination to GAME_OVER must not
+    // overwrite TERMINATED → COMPLETED. (A recovery replay of an already-COMPLETED
+    // game also matches 0 here — that's fine, the archive below stays idempotent.)
+    await this.games.updateOne(
+      { _id: gameId, status: 'LIVE' },
+      { $set: { status: 'COMPLETED', updatedAt: now } },
+    );
 
     const game = await this.games.findOne({ _id: gameId });
     const scores = finalState.finalScores;
     if (!game || !scores) return;
+    // A terminated game is dead: no history archive, whatever a racing command computed.
+    if (game.status === 'TERMINATED') return;
 
     // Idempotent archive (game over only fires once, but recovery could replay it).
     await this.history.updateOne(
@@ -159,7 +167,9 @@ export class MongoGameStore implements GameStorePort {
   }
 
   async loadForRecovery(gameId: string): Promise<RecoveryData | null> {
-    const game = await this.games.findOne({ _id: gameId });
+    // $ne rather than status:'LIVE': COMPLETED games still rehydrate (final-state viewing),
+    // but a TERMINATED game must never be resurrected by a member's reconnect.
+    const game = await this.games.findOne({ _id: gameId, status: { $ne: 'TERMINATED' } });
     if (!game) return null;
 
     const snap = await this.snapshots.find({ gameId }).sort({ seq: -1 }).limit(1).next();
