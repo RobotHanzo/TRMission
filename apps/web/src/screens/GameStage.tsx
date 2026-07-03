@@ -101,10 +101,25 @@ export function GameStage({
   // Live game: a wide viewport shows comms as its own column; a narrow one tabs between rail↔comms.
   const wide = useMediaQuery('(min-width: 1300px)');
   const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
-  // Phone (live games only): the rail becomes a tabbed bottom dock under a full-bleed board. The
-  // sandbox keeps the stacked-column layout so tutorial/encyclopedia anchors stay mounted.
+  // Phone: the rail becomes a tabbed bottom dock under a full-bleed board. The sandbox
+  // (encyclopedia demo, replay) keeps the stacked-column layout so its caption/log anchors stay
+  // mounted; the tutorial is NOT a sandbox and runs the dock — see the actionGate effect below.
   const phone = useMediaQuery(PHONE_QUERY) && !sandbox;
   const [dockTab, setDockTab] = useState<DockTab>('hand');
+  // Tutorial on phone: a beat awaiting a market action must surface the Draw tab — its target
+  // would otherwise sit inside an unselected (unmounted) dock panel and the learner would stall.
+  useEffect(() => {
+    if (!phone || !actionGate || actionGate === 'locked') return;
+    const expect = actionGate.t;
+    if (
+      expect === 'DRAW_ANY' ||
+      expect === 'DRAW_BLIND' ||
+      expect === 'DRAW_FACEUP' ||
+      expect === 'DRAW_TICKETS'
+    ) {
+      setDockTab('draw');
+    }
+  }, [phone, actionGate]);
 
   const version = snapshot.stateVersion;
   useEffect(() => {

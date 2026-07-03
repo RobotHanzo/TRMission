@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrainFront, Settings, LogOut, DoorOpen, User, BookOpen, History, Map as MapIcon } from 'lucide-react';
+import { TrainFront, Settings, LogOut, DoorOpen, User, BookOpen, History, Map as MapIcon, Menu } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import { useGame } from '../store/game';
 import { turnStatus } from '../game/view';
 import { usePlayerName } from '../game/playerName';
+import { PHONE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { SettingsModal } from './SettingsModal';
 
 export function AppHeader() {
@@ -23,6 +24,26 @@ export function AppHeader() {
   const nameOf = usePlayerName();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  // Phone: the actions collapse into a hamburger menu (desktop keeps the icon-button row).
+  const phone = useMediaQuery(PHONE_QUERY);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (e: PointerEvent): void => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [menuOpen]);
+
   const onLogout = () => {
     void logout();
     navigateLogin('/'); // home requires auth, so land back on the login screen
@@ -32,6 +53,27 @@ export function AppHeader() {
   // carries the "leave" action, so there is a single top bar rather than two stacked rows.
   const inGame = view === 'game' && !!snapshot;
   const turn = snapshot ? turnStatus(snapshot) : null;
+  const onAuthScreen = view === 'login' || view === 'loginCallback';
+
+  // One menu action per header affordance; closing before acting keeps the menu from
+  // lingering over whatever screen the action navigates to.
+  const menuAct = (act: () => void) => () => {
+    setMenuOpen(false);
+    act();
+  };
+
+  const avatar = user?.avatarUrl ? (
+    <img
+      className="user-avatar"
+      src={user.avatarUrl}
+      alt=""
+      width={16}
+      height={16}
+      referrerPolicy="no-referrer"
+    />
+  ) : (
+    <User size={14} aria-hidden />
+  );
 
   return (
     <header className="app-header">
@@ -58,59 +100,116 @@ export function AppHeader() {
       )}
 
       <div className="header-actions">
-        {user && (
-          <span className="user-chip" title={user.isGuest ? t('guest') : (user.email ?? '')}>
-            {user.avatarUrl ? (
-              <img
-                className="user-avatar"
-                src={user.avatarUrl}
-                alt=""
-                width={16}
-                height={16}
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <User size={14} aria-hidden />
-            )}{' '}
-            <span className="user-chip-name">{user.displayName}</span>
-          </span>
-        )}
-        {user && view !== 'login' && view !== 'loginCallback' && !inGame && (
-          <button onClick={enterHistory} aria-label={t('history.title')} title={t('history.title')}>
-            <History size={16} aria-hidden />
-          </button>
-        )}
-        {user && view !== 'login' && view !== 'loginCallback' && !inGame && (
-          <button onClick={enterMaps} aria-label={t('builder.myMaps')} title={t('builder.myMaps')}>
-            <MapIcon size={16} aria-hidden />
-          </button>
-        )}
-        {view !== 'login' && view !== 'loginCallback' && (
-          <button
-            onClick={() => openEncyclopedia(true)}
-            aria-label={t('tutorial.open')}
-            title={t('tutorial.open')}
-          >
-            <BookOpen size={16} aria-hidden />
-          </button>
-        )}
-        <button
-          onClick={() => setSettingsOpen(true)}
-          aria-label={t('settings')}
-          title={t('settings')}
-        >
-          <Settings size={16} aria-hidden />
-        </button>
-        {user && !inGame && (
-          <button onClick={onLogout} aria-label={t('logout')} title={t('logout')}>
-            <LogOut size={16} aria-hidden />
-          </button>
-        )}
-        {inGame && (
-          <button className="leave-btn" onClick={goHome}>
-            <DoorOpen size={16} aria-hidden />
-            {t('leave')}
-          </button>
+        {phone ? (
+          <div className="header-menu-wrap" ref={menuRef}>
+            <button
+              className="icon-btn"
+              aria-label={t('menu')}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              <Menu size={16} aria-hidden />
+            </button>
+            {menuOpen && (
+              <div className="header-menu" role="menu" aria-label={t('menu')}>
+                {user && (
+                  <div className="header-menu-user" title={user.isGuest ? t('guest') : (user.email ?? '')}>
+                    {avatar} {user.displayName}
+                  </div>
+                )}
+                {user && !onAuthScreen && !inGame && (
+                  <button className="header-menu-item" role="menuitem" onClick={menuAct(enterHistory)}>
+                    <History size={16} aria-hidden /> {t('history.title')}
+                  </button>
+                )}
+                {user && !onAuthScreen && !inGame && (
+                  <button className="header-menu-item" role="menuitem" onClick={menuAct(enterMaps)}>
+                    <MapIcon size={16} aria-hidden /> {t('builder.myMaps')}
+                  </button>
+                )}
+                {!onAuthScreen && (
+                  <button
+                    className="header-menu-item"
+                    role="menuitem"
+                    onClick={menuAct(() => openEncyclopedia(true))}
+                  >
+                    <BookOpen size={16} aria-hidden /> {t('tutorial.open')}
+                  </button>
+                )}
+                <button
+                  className="header-menu-item"
+                  role="menuitem"
+                  onClick={menuAct(() => setSettingsOpen(true))}
+                >
+                  <Settings size={16} aria-hidden /> {t('settings')}
+                </button>
+                {user && !inGame && (
+                  <button
+                    className="header-menu-item header-menu-item--danger"
+                    role="menuitem"
+                    onClick={menuAct(onLogout)}
+                  >
+                    <LogOut size={16} aria-hidden /> {t('logout')}
+                  </button>
+                )}
+                {inGame && (
+                  <button
+                    className="header-menu-item header-menu-item--danger"
+                    role="menuitem"
+                    onClick={menuAct(goHome)}
+                  >
+                    <DoorOpen size={16} aria-hidden /> {t('leave')}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {user && (
+              <span className="user-chip" title={user.isGuest ? t('guest') : (user.email ?? '')}>
+                {avatar} <span className="user-chip-name">{user.displayName}</span>
+              </span>
+            )}
+            {user && !onAuthScreen && !inGame && (
+              <button onClick={enterHistory} aria-label={t('history.title')} title={t('history.title')}>
+                <History size={16} aria-hidden />
+              </button>
+            )}
+            {user && !onAuthScreen && !inGame && (
+              <button onClick={enterMaps} aria-label={t('builder.myMaps')} title={t('builder.myMaps')}>
+                <MapIcon size={16} aria-hidden />
+              </button>
+            )}
+            {!onAuthScreen && (
+              <button
+                onClick={() => openEncyclopedia(true)}
+                aria-label={t('tutorial.open')}
+                title={t('tutorial.open')}
+              >
+                <BookOpen size={16} aria-hidden />
+              </button>
+            )}
+            <button
+              onClick={() => setSettingsOpen(true)}
+              aria-label={t('settings')}
+              title={t('settings')}
+            >
+              <Settings size={16} aria-hidden />
+            </button>
+            {user && !inGame && (
+              <button onClick={onLogout} aria-label={t('logout')} title={t('logout')}>
+                <LogOut size={16} aria-hidden />
+              </button>
+            )}
+            {inGame && (
+              <button className="leave-btn" onClick={goHome}>
+                <DoorOpen size={16} aria-hidden />
+                {t('leave')}
+              </button>
+            )}
+          </>
         )}
       </div>
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}

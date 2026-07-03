@@ -170,6 +170,55 @@
   flex-wrap: wrap;
 }
 
+/* ── Phone header hamburger menu (only rendered at the phone tier — see AppHeader) ── */
+.header-menu-wrap {
+  position: relative;
+}
+.header-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 45;
+  min-width: 12.5em;
+  display: flex;
+  flex-direction: column;
+  padding: var(--tr-space-1);
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+}
+.header-menu-user {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-2) var(--tr-space-3);
+  font-size: 0.9em;
+  color: var(--tr-ink-soft);
+  border-bottom: 1px solid var(--tr-line);
+  margin-bottom: var(--tr-space-1);
+  overflow-wrap: anywhere;
+}
+.header-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border-radius: var(--tr-radius-sm);
+  white-space: nowrap;
+}
+.header-menu-item:hover:not(:disabled) {
+  filter: none;
+  background: var(--tr-surface-2);
+}
+.header-menu-item--danger {
+  color: var(--tr-danger);
+}
+
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -569,17 +618,38 @@
     padding: var(--tr-space-2) var(--tr-space-3);
     gap: var(--tr-space-2);
   }
-  .header-actions {
-    flex-wrap: wrap;
-    justify-content: flex-end;
+  /* The brand never breaks mid-word; the actions collapse into the hamburger menu (AppHeader). */
+  .brand {
+    flex: none;
+    white-space: nowrap;
   }
-  /* Avatar/icon-only chip; the full name stays discoverable via the chip's title. */
-  .user-chip-name {
-    display: none;
+  /* Inside generic rows, inputs shrink-and-grow and buttons keep their label on one line —
+     otherwise a squeezed button stacks its CJK label vertically (e.g. Home's join row). */
+  .row > input {
+    flex: 1 1 8em;
+    min-width: 0;
+  }
+  .row > button {
+    white-space: nowrap;
+  }
+  /* In-game the connection + turn status gets its own full-width second header row — squeezed
+     between brand and actions it would either vanish or (centred flex overflow) spill over them. */
+  .app-header {
+    flex-wrap: wrap;
+  }
+  .header-status {
+    order: 3;
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    overflow: hidden;
   }
   .turn-label {
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .conn {
+    white-space: nowrap;
   }
   .app-main {
     padding: var(--tr-space-4) var(--tr-space-3);

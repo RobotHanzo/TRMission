@@ -229,6 +229,7 @@ const resources = {
       dockTabsLabel: '遊戲面板切換',
       dockDraw: '抽牌',
       dockPlayers: '玩家',
+      menu: '選單',
       builder: {
         myMaps: '我的地圖',
         noMaps: '尚無自訂地圖',
@@ -592,6 +593,7 @@ const resources = {
       dockTabsLabel: 'Game panels',
       dockDraw: 'Draw',
       dockPlayers: 'Players',
+      menu: 'Menu',
       builder: {
         myMaps: 'My maps',
         noMaps: 'No custom maps yet',

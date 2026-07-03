@@ -473,11 +473,19 @@
     width: 100%;
     overflow: visible;
   }
-  .editor-name-group {
+  /* Back button + both name inputs share one row: zero-basis inputs let the nested flex rows
+     shrink below their intrinsic width instead of pushing the English input off-screen. */
+  .editor-header > .row {
     flex: 1 1 100%;
+    min-width: 0;
+  }
+  .editor-name-group {
+    flex: 1 1 auto;
+    min-width: 0;
   }
   .editor-name-input {
     min-width: 0;
-    flex: 1 1 6em;
+    width: 0;
+    flex: 1 1 0;
   }
 }
