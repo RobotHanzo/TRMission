@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useUi } from './store/ui';
 import { useSession } from './store/session';
 import { AppHeader } from './components/AppHeader';
+import { useLeaveWarning } from './hooks/useLeaveWarning';
 import { HomeScreen } from './screens/HomeScreen';
 import { RoomScreen } from './screens/RoomScreen';
 import { GameScreen } from './screens/GameScreen';
@@ -31,6 +32,8 @@ export function App() {
   const user = useSession((s) => s.user);
   const booting = useSession((s) => s.booting);
   const restore = useSession((s) => s.restore);
+
+  useLeaveWarning();
 
   useEffect(() => {
     void restore();
