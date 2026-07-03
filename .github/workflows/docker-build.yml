@@ -9,10 +9,6 @@ on:
       - 'yarn.lock'
       - '.github/workflows/docker-build.yml'
 
-concurrency:
-  group: docker-${{ matrix.image }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   packages: write
@@ -20,6 +16,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: docker-${{ matrix.image }}-${{ github.ref }}
+      cancel-in-progress: true
     strategy:
       matrix:
         include:
