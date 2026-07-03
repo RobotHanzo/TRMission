@@ -225,6 +225,8 @@
   flex-direction: column;
   gap: var(--tr-space-3);
   max-height: 90vh;
+  /* dvh tracks the *visible* viewport on mobile (URL bar collapse); vh above is the fallback. */
+  max-height: 90dvh;
   overflow: auto;
 }
 
@@ -550,5 +552,13 @@
     animation: none;
     outline: 2px solid var(--tr-blue, #2b6cb0);
     outline-offset: 2px;
+  }
+}
+
+/* Touch-primary devices get comfortable tap targets; desktop keeps the 32px icon convention. */
+@media (pointer: coarse) {
+  .icon-btn {
+    min-width: 40px;
+    min-height: 40px;
   }
 }

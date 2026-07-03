@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 
+/** The phone tier. CSS twins live in each feature's stylesheet as
+ *  `@media (max-width: 700px)` blocks — keep them in sync with this value. */
+export const PHONE_QUERY = '(max-width: 700px)';
+
 /** Reactive matchMedia. Returns false where matchMedia is unavailable (jsdom/SSR). */
 export function useMediaQuery(query: string): boolean {
   const read = (): boolean =>

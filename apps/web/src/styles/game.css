@@ -1538,3 +1538,18 @@ button.ticket-card:hover {
   font-size: 0.9rem;
   text-align: center;
 }
+
+/* Touch-primary devices get comfortable tap targets; desktop keeps the 32px icon convention. */
+@media (pointer: coarse) {
+  .map-controls button {
+    width: 40px;
+    height: 40px;
+  }
+  .comms-tabs button {
+    min-height: 40px;
+  }
+  .icon-button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+}
