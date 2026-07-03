@@ -715,8 +715,8 @@
     "semantic_hash": "eeb50803691db434d84c910b344f36b0"
   },
   "apps/web/src/game/geography.ts": {
-    "mtime": 1783008085.7644918,
-    "ast_hash": "9ac4f2c87327019d9ea7a46f74575593",
+    "mtime": 1783067709.734303,
+    "ast_hash": "7b81383462de8e0118bd2e2b362a4e0a",
     "semantic_hash": ""
   },
   "apps/web/src/game/lod.test.ts": {
@@ -760,8 +760,8 @@
     "semantic_hash": "ac61197eb751128e9a1c4e5b57989f6b"
   },
   "apps/web/src/game/routeGeometry.ts": {
-    "mtime": 1783014537.5596297,
-    "ast_hash": "7a4e5510f619f06dd4da588b157db357",
+    "mtime": 1783065739.5403006,
+    "ast_hash": "289a20e4214095495d8ab0dbd0156644",
     "semantic_hash": ""
   },
   "apps/web/src/game/tickets.test.ts": {
@@ -1075,9 +1075,9 @@
     "semantic_hash": "4d8b2d27c4888c41e205461ecc501b04"
   },
   "apps/web/vite.config.ts": {
-    "mtime": 1782649106.9977381,
-    "ast_hash": "d79228334e577289b2a8ce04989162fa",
-    "semantic_hash": "d79228334e577289b2a8ce04989162fa"
+    "mtime": 1783066763.8978682,
+    "ast_hash": "7cd603c6756756d18c54708b0db1dfaf",
+    "semantic_hash": ""
   },
   "apps/web/vitest.setup.ts": {
     "mtime": 1782636858.3679543,
@@ -1350,9 +1350,9 @@
     "semantic_hash": "31db7fda21269147fa70534e57dcc089"
   },
   "packages/map-data/src/index.ts": {
-    "mtime": 1783005450.253026,
-    "ast_hash": "8f5af2d903e9d3499313caf8b2c4086d",
-    "semantic_hash": "8f5af2d903e9d3499313caf8b2c4086d"
+    "mtime": 1783067665.37834,
+    "ast_hash": "1bc37abf7bca3d4c4be2785e840869ae",
+    "semantic_hash": ""
   },
   "packages/map-data/src/routes.ts": {
     "mtime": 1782775148.967949,
@@ -1625,8 +1625,8 @@
     "semantic_hash": ""
   },
   "apps/web/index.html": {
-    "mtime": 1783048926.2765436,
-    "ast_hash": "68efd3af93d17180aea4eda62353b09f",
+    "mtime": 1783051193.212931,
+    "ast_hash": "43621a52d96f0b37c57ac7632e8b9faa",
     "semantic_hash": ""
   },
   "apps/web/public/sounds/CREDITS.md": {
@@ -1940,8 +1940,8 @@
     "semantic_hash": "525fe077634bf7ffe4c3ef8159fce832"
   },
   "apps/web/src/features/builder/MapsScreen.tsx": {
-    "mtime": 1783012901.8480723,
-    "ast_hash": "53e6f7e80efe34894797e93099d66d54",
+    "mtime": 1783066792.6182258,
+    "ast_hash": "69e155ce451e28d2956fcc910c56abda",
     "semantic_hash": ""
   },
   "apps/web/src/features/builder/editor/EditorCanvas.tsx": {
@@ -2180,28 +2180,28 @@
     "semantic_hash": ""
   },
   "apps/server/src/og/card-svg.ts": {
-    "mtime": 1783049106.4425106,
-    "ast_hash": "0b20187e0f320f8c89736a924c936064",
+    "mtime": 1783067835.7650754,
+    "ast_hash": "c7378274ed4be241552453dc8ddb5a2a",
     "semantic_hash": ""
   },
   "apps/server/src/og/og.controller.ts": {
-    "mtime": 1783048471.7214415,
-    "ast_hash": "fe007f0aaa68a74053f28c551bc6b591",
+    "mtime": 1783065929.17198,
+    "ast_hash": "6decd2ffab155d2d7ad1858421118ce4",
     "semantic_hash": ""
   },
   "apps/server/src/og/og.module.ts": {
-    "mtime": 1783048474.0804722,
-    "ast_hash": "eefacdfdba6cfe216add90833147a19f",
+    "mtime": 1783065933.2471437,
+    "ast_hash": "1d2524671a5e8863505e673193b66a68",
     "semantic_hash": ""
   },
   "apps/server/src/og/og.service.ts": {
-    "mtime": 1783048979.0210452,
-    "ast_hash": "f918b3cbcdf5cb40dfcc191c128ebf79",
+    "mtime": 1783065922.4155903,
+    "ast_hash": "9530b07eac636ede42c9f0d1d4a58759",
     "semantic_hash": ""
   },
   "apps/server/test/og.e2e.spec.ts": {
-    "mtime": 1783048979.2324524,
-    "ast_hash": "77d400c300d19b76525b9103bd2f52e3",
+    "mtime": 1783066764.059626,
+    "ast_hash": "f01875d1a2848e121b2a2273f7a2c123",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-03-leave-confirmation.md": {
@@ -2247,6 +2247,21 @@
   "apps/web/src/hooks/useLeaveWarning.ts": {
     "mtime": 1783049247.2216284,
     "ast_hash": "a2d7087277e0a274a10054368ab9252f",
+    "semantic_hash": ""
+  },
+  "apps/server/src/og/map-svg.ts": {
+    "mtime": 1783067923.8295443,
+    "ast_hash": "01ad8561fde5c6f3ae65ffb68ad25695",
+    "semantic_hash": ""
+  },
+  "packages/map-data/src/geometry.ts": {
+    "mtime": 1783065684.3899238,
+    "ast_hash": "7e67a71f24e384282684101fb98b1bc0",
+    "semantic_hash": ""
+  },
+  "packages/map-data/src/taiwan-geography.ts": {
+    "mtime": 1783067661.074751,
+    "ast_hash": "ec9de72d07e534fc86689abea585f882",
     "semantic_hash": ""
   }
 }
