@@ -13,7 +13,7 @@ import {
   TAIWAN_ISLANDS,
   TAIWAN_GRATICULE,
 } from '@trm/map-data';
-import type { MapGeography } from '@trm/map-data';
+import type { MapGeography, RouteGeometry } from '@trm/map-data';
 
 /** The subset of a map draft the renderer needs (matches CustomMapDoc.draft / MapDraft). */
 export interface RenderableMap {
@@ -140,11 +140,83 @@ function geographyLayer(
   ].join('\n');
 }
 
+// The thumbnail is small enough (~500px) that a dense junction — a real hub, or a custom
+// draft's cluster of short hops — draws as an illegible smear of overlapping ties and dots.
+// Only the OG card thins itself out this way; the live board (where every station and route
+// must stay reachable/clickable) never drops anything.
+/** Minimum on-screen gap (px) between two kept station markers. */
+const MIN_STATION_GAP_PX = 26;
+/** Minimum on-screen gap (px) between two kept route midpoints. */
+const MIN_ROUTE_GAP_PX = 20;
+/** Routes at or under this length are "small" — the only ones eligible to be dropped, and
+ *  only when their midpoint is crowded by an already-kept route. */
+const SMALL_ROUTE_MAX_LENGTH = 2;
+
+/**
+ * Longest-first greedy thinning: every route over {@link SMALL_ROUTE_MAX_LENGTH} always
+ * renders. A short route only drops when its midpoint falls within `gap` (board units) of an
+ * already-kept one — a lone short spur out in open country still shows; a cluster of short
+ * hops packed into a junction thins down to a legible few. A double-route pair's siblings
+ * share the same un-bowed midpoint, so a small pair simplifies to a single visible track.
+ */
+function declutterRoutes(
+  routes: RenderableMap['routes'],
+  geometry: Map<string, RouteGeometry>,
+  gap: number,
+): Set<string> {
+  const ranked = [...routes].sort((a, b) => b.length - a.length);
+  const kept: { x: number; y: number }[] = [];
+  const ids = new Set<string>();
+  for (const r of ranked) {
+    const g = geometry.get(r.id);
+    if (!g) continue;
+    const crowded = kept.some((k) => Math.hypot(k.x - g.mid.x, k.y - g.mid.y) < gap);
+    if (r.length <= SMALL_ROUTE_MAX_LENGTH && crowded) continue;
+    kept.push(g.mid);
+    ids.add(r.id);
+  }
+  return ids;
+}
+
+/**
+ * A hub always renders (it's drawn larger precisely because it matters); an ordinary station
+ * drops only when it falls within `gap` (board units) of an already-kept marker, so a dense
+ * junction thins down while an isolated town always still shows.
+ */
+function declutterCities(
+  cities: RenderableMap['cities'],
+  hubs: ReadonlySet<string>,
+  gap: number,
+): Set<string> {
+  const ranked = [...cities].sort((a, b) => {
+    const ah = hubs.has(a.id);
+    const bh = hubs.has(b.id);
+    if (ah !== bh) return ah ? -1 : 1; // hubs first
+    const ai = !!a.isIsland;
+    const bi = !!b.isIsland;
+    if (ai !== bi) return ai ? -1 : 1; // then islands
+    return 0;
+  });
+  const kept: { x: number; y: number }[] = [];
+  const ids = new Set<string>();
+  for (const c of ranked) {
+    const crowded = kept.some((k) => Math.hypot(k.x - c.x, k.y - c.y) < gap);
+    if (!hubs.has(c.id) && crowded) continue; // hubs are exempt from the spacing filter
+    kept.push({ x: c.x, y: c.y });
+    ids.add(c.id);
+  }
+  return ids;
+}
+
 /** One route: RouteShape's exact stack — tunnel glow → roadbed → ties / ferry pips / cars. */
-function routeLayer(map: RenderableMap): string {
-  const { geometry } = buildRouteGeometryFor(map.cities, map.routes);
+function routeLayer(
+  map: RenderableMap,
+  geometry: Map<string, RouteGeometry>,
+  keep: ReadonlySet<string>,
+): string {
   const out: string[] = [];
   for (const r of map.routes) {
+    if (!keep.has(r.id)) continue;
     const g = geometry.get(r.id);
     if (!g) continue;
     const fill = ROUTE_COLORS[r.color] ?? ROUTE_COLORS.GRAY!;
@@ -153,7 +225,7 @@ function routeLayer(map: RenderableMap): string {
 
     if (r.isTunnel)
       parts.push(
-        `<path d="${g.path}" fill="none" stroke="#b0b0b0" stroke-opacity="0.18" stroke-width="6" stroke-linecap="round"/>`,
+        `<path d="${g.path}" fill="none" stroke="#b0b0b0" stroke-opacity="0.18" stroke-width="2.4" stroke-linecap="round"/>`,
       );
     // Paper roadbed seats the cars legibly over land and sea.
     parts.push(
@@ -162,7 +234,7 @@ function routeLayer(map: RenderableMap): string {
     if (r.isTunnel)
       for (const t of g.ties ?? [])
         parts.push(
-          `<rect x="-4" y="-0.14" width="8" height="0.28" fill="#3d352b" fill-opacity="0.9" transform="translate(${f(t.x)} ${f(t.y)}) rotate(${(t.angle + 45).toFixed(1)})"/>`,
+          `<rect x="-1.8" y="-0.14" width="3.6" height="0.28" fill="#3d352b" fill-opacity="0.9" transform="translate(${f(t.x)} ${f(t.y)}) rotate(${(t.angle + 45).toFixed(1)})"/>`,
         );
 
     if (isFerry) {
@@ -197,9 +269,13 @@ function routeLayer(map: RenderableMap): string {
 }
 
 /** Stations only — round city dots (islands ringed blue) and slot-shaped hubs. No labels. */
-function cityLayer(map: RenderableMap): string {
-  const { hubs } = buildRouteGeometryFor(map.cities, map.routes);
+function cityLayer(
+  map: RenderableMap,
+  hubs: ReadonlySet<string>,
+  keep: ReadonlySet<string>,
+): string {
   return map.cities
+    .filter((c) => keep.has(c.id))
     .map((c) => {
       if (hubs.has(c.id))
         return `<rect x="-1.25" y="-0.8" width="2.5" height="1.6" rx="0.8" fill="${SURFACE}" stroke="${INK}" stroke-width="0.4" transform="translate(${f(c.x)} ${f(c.y)})"/>`;
@@ -244,13 +320,18 @@ export function mapPanelSvg(
   const scale = Math.min(panel.w / view.w, panel.h / view.h);
   const tx = panel.x + panel.w / 2 - (view.x + view.w / 2) * scale;
   const ty = panel.y + panel.h / 2 - (view.y + view.h / 2) * scale;
+
+  const { geometry, hubs } = buildRouteGeometryFor(map.cities, map.routes);
+  const keepRoutes = declutterRoutes(map.routes, geometry, MIN_ROUTE_GAP_PX / scale);
+  const keepCities = declutterCities(map.cities, hubs, MIN_STATION_GAP_PX / scale);
+
   return `<clipPath id="${clipId}"><rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="${panel.r}"/></clipPath>
 <g clip-path="url(#${clipId})">
 <rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" fill="${SEA}"/>
 <g transform="translate(${f(tx)} ${f(ty)}) scale(${f(scale)})">
 ${geographyLayer(view, official, map.geography)}
-${routeLayer(map)}
-${cityLayer(map)}
+${routeLayer(map, geometry, keepRoutes)}
+${cityLayer(map, hubs, keepCities)}
 </g>
 </g>`;
 }
