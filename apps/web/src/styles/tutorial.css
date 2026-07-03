@@ -455,6 +455,26 @@
     border-right: none;
     border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
   }
+  /* The embedded demo GameStage collapses to game.css's ≤920px stacked column here; size the
+     board + rail for the modal (instead of the pinned 260px side rail) and let the stage grow.
+     The two-class selectors outrank game.css's single-class ≤920px rules. */
+  .enc-demo-stage {
+    height: auto;
+  }
+  .enc-demo-stage .game {
+    height: auto;
+  }
+  .enc-demo-stage .game-board {
+    min-height: 200px;
+    height: 34vh;
+  }
+  .enc-demo-stage .board-viewport {
+    min-height: 200px;
+  }
+  .enc-demo-stage .game-rail {
+    max-height: 240px;
+    overflow-y: auto;
+  }
 }
 
 /* Visual glossary specimens shown inside the coachmark. The special-routes legend is shown larger so
