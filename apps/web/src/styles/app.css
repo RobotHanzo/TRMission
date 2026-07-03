@@ -23,6 +23,10 @@
   align-items: center;
   gap: var(--tr-space-2);
   color: var(--tr-blue);
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
 }
 .header-actions {
   display: flex;

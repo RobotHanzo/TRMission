@@ -5,6 +5,9 @@ import { AppHeader } from './AppHeader';
 import { PHONE_QUERY } from '../hooks/useMediaQuery';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
+import { useGame } from '../store/game';
+import { create } from '@bufbuild/protobuf';
+import { GameSnapshotSchema, Phase } from '@trm/proto';
 
 // jsdom has no matchMedia; pretend to be a phone — PHONE_QUERY matches, everything else doesn't.
 const phoneMatchMedia = (query: string): MediaQueryList =>
@@ -65,5 +68,38 @@ describe('AppHeader phone hamburger menu', () => {
     expect(screen.queryByRole('menu')).toBeNull();
     expect(screen.getByRole('heading', { name: /設定/ })).toBeInTheDocument();
     vi.unstubAllGlobals();
+  });
+});
+
+const gameSnap = () =>
+  create(GameSnapshotSchema, {
+    stateVersion: 1,
+    phase: Phase.AWAIT_ACTION,
+    currentPlayerId: 'p0',
+    turnOrder: ['p0', 'p1'],
+    players: [
+      { id: 'p0', seat: 0, trainCars: 45, stationsRemaining: 3 },
+      { id: 'p1', seat: 1, trainCars: 45, stationsRemaining: 3 },
+    ],
+  });
+
+describe('AppHeader phone leave confirmation', () => {
+  afterEach(() => {
+    useGame.setState({ snapshot: null });
+    useUi.setState({ view: 'home' });
+    vi.unstubAllGlobals();
+  });
+
+  it('confirms before leaving an active game from the hamburger menu', () => {
+    vi.stubGlobal('matchMedia', phoneMatchMedia);
+    useUi.setState({ view: 'game' });
+    useGame.setState({ snapshot: gameSnap() });
+    render(<AppHeader />);
+    fireEvent.click(screen.getByRole('button', { name: '選單' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: '離開房間' }));
+    expect(useUi.getState().view).toBe('game'); // unchanged until confirmed
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+    expect(useUi.getState().view).toBe('home');
   });
 });

@@ -8,6 +8,8 @@ import { turnStatus } from '../game/view';
 import { usePlayerName } from '../game/playerName';
 import { PHONE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { SettingsModal } from './SettingsModal';
+import { ConfirmDialog } from './ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 
 export function AppHeader() {
   const { t } = useTranslation();
@@ -55,6 +57,19 @@ export function AppHeader() {
   const turn = snapshot ? turnStatus(snapshot) : null;
   const onAuthScreen = view === 'login' || view === 'loginCallback';
 
+  const {
+    open: leaveOpen,
+    request: requestLeave,
+    confirm: confirmLeave,
+    cancel: cancelLeave,
+  } = useConfirmAction();
+  // Leaving the lobby or an active game abandons your seat, so confirm first; from any other
+  // screen there's nothing to lose, so the brand just navigates home.
+  const onBrandClick = () => {
+    if (view === 'room' || inGame) requestLeave(goHome);
+    else goHome();
+  };
+
   // One menu action per header affordance; closing before acting keeps the menu from
   // lingering over whatever screen the action navigates to.
   const menuAct = (act: () => void) => () => {
@@ -77,10 +92,10 @@ export function AppHeader() {
 
   return (
     <header className="app-header">
-      <div className="brand">
+      <button type="button" className="brand" onClick={onBrandClick}>
         <TrainFront size={22} aria-hidden />
         <strong>{t('appName')}</strong>
-      </div>
+      </button>
 
       {inGame && turn && (
         <div className="header-status">
@@ -157,7 +172,7 @@ export function AppHeader() {
                   <button
                     className="header-menu-item header-menu-item--danger"
                     role="menuitem"
-                    onClick={menuAct(goHome)}
+                    onClick={menuAct(() => requestLeave(goHome))}
                   >
                     <DoorOpen size={16} aria-hidden /> {t('leave')}
                   </button>
@@ -204,7 +219,7 @@ export function AppHeader() {
               </button>
             )}
             {inGame && (
-              <button className="leave-btn" onClick={goHome}>
+              <button className="leave-btn" onClick={() => requestLeave(goHome)}>
                 <DoorOpen size={16} aria-hidden />
                 {t('leave')}
               </button>
@@ -213,6 +228,14 @@ export function AppHeader() {
         )}
       </div>
       {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+      {leaveOpen && (
+        <ConfirmDialog
+          title={t('leaveConfirmTitle')}
+          message={t('leaveConfirmBody')}
+          onConfirm={confirmLeave}
+          onCancel={cancelLeave}
+        />
+      )}
     </header>
   );
 }
