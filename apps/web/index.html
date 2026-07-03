@@ -4,8 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>台鐵任務 TRMission</title>
-    <!-- Static fallback meta. Crawlers hitting /, /room/* or /replay/* are routed by nginx to
-         the server's OG renderer (per-link titles + card images); everything else reads these. -->
+    <!-- Static fallback meta. Recognized link-preview crawlers hitting /, /room/* or /replay/*
+         are routed (by nginx in prod, a Vite dev-server plugin in dev) to the server's OG
+         renderer instead, which serves a per-link title/description and a purpose-built card
+         image — richer than what's here. Everything else (including a plain browser's "view
+         source", which never matches the crawler UA allowlist) reads these static tags, so
+         og:image is root-relative rather than omitted: it can't be an absolute URL at build
+         time (the deploy origin isn't known), but browsers and most real crawlers resolve a
+         root-relative image URL against the page origin fine. -->
     <meta
       name="description"
       content="台灣鐵道路線競逐桌遊 — 鋪設路線、連接城市、完成任務。A railway board game set in Taiwan: claim routes, link cities, complete missions."
@@ -17,6 +23,9 @@
       property="og:description"
       content="台灣鐵道路線競逐桌遊 — 鋪設路線、連接城市、完成任務。A railway board game set in Taiwan: claim routes, link cities, complete missions."
     />
+    <meta property="og:image" content="/api/v1/og/site.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <script>
       // Resolve the saved theme before first paint to avoid a light/dark flash.
