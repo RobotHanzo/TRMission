@@ -29,6 +29,21 @@ const resources = {
       playAsGuest: '以訪客身分遊玩',
       welcome: '歡迎，{{name}}',
 
+      home: {
+        welcomeBack: '歡迎回來，{{name}}',
+        activeRoomEyebrow: '還在等你 · 進行中的房間',
+        rejoin: '回到房間 {{code}}',
+        join: '加入',
+        roomsCount: '{{n}} 間',
+        playersCount: '{{n}} / {{max}} 人',
+        statusLobby: '大廳',
+        statusPlaying: '遊戲中',
+        encyclopediaDesc: '隨時查閱規則',
+        tutorialTitle: '重新查看教學',
+        tutorialDesc: '5 分鐘互動教學',
+        guestNotice: '訪客身分遊玩中 — 建立帳號可保留遊戲紀錄。',
+      },
+
       signIn: '登入',
       signUp: '註冊',
       email: '電子郵件',
@@ -359,10 +374,12 @@ const resources = {
           tooManyVertices: '陸地頂點總數 {{count}} 超過上限 {{max}}',
           cropBboxInvalid: '裁切範圍需符合經度最小值 < 最大值、緯度最小值 < 最大值',
           ruleOutOfRange: '{{key}}：數值 {{value}} 超出允許範圍 [{{min}}, {{max}}]',
-          initialOfferBelowMinKeep: '起始任務卡供應（{{long}} 長途 + {{short}} 短途）無法滿足最少保留 {{minKeep}} 張的要求',
+          initialOfferBelowMinKeep:
+            '起始任務卡供應（{{long}} 長途 + {{short}} 短途）無法滿足最少保留 {{minKeep}} 張的要求',
           longDeckTooSmall: '長途任務卡剩 {{count}} 張，{{maxPlayers}} 人局至少需要 {{needed}} 張',
           shortDeckTooSmall: '短途任務卡剩 {{count}} 張，{{maxPlayers}} 人局至少需要 {{needed}} 張',
-          trackTooShort: '路線總長度（{{total}}）小於起始火車數（{{trainCarsStart}}）—— 火車可能永遠不會用完',
+          trackTooShort:
+            '路線總長度（{{total}}）小於起始火車數（{{trainCarsStart}}）—— 火車可能永遠不會用完',
         },
       },
     },
@@ -390,6 +407,21 @@ const resources = {
       guestName: 'Display name',
       playAsGuest: 'Play as guest',
       welcome: 'Welcome, {{name}}',
+
+      home: {
+        welcomeBack: 'Welcome back, {{name}}',
+        activeRoomEyebrow: 'Waiting for you · room in progress',
+        rejoin: 'Return to room {{code}}',
+        join: 'Join',
+        roomsCount: '{{n}} open',
+        playersCount: '{{n}} / {{max}} players',
+        statusLobby: 'Lobby',
+        statusPlaying: 'Playing',
+        encyclopediaDesc: 'Look up any rule, any time',
+        tutorialTitle: 'Revisit the tutorial',
+        tutorialDesc: 'A 5-minute interactive walkthrough',
+        guestNotice: "You're playing as a guest — create an account to keep your match history.",
+      },
 
       signIn: 'Sign in',
       signUp: 'Sign up',
@@ -637,7 +669,8 @@ const resources = {
         cropConfirm: 'Confirm crop and continue',
         cropRedo: 'Redraw region',
         trimWorld: 'Map fine-tuning canvas',
-        trimHint: 'Click a land area (e.g. an outlying island) to select it — multiple allowed; click empty space to clear',
+        trimHint:
+          'Click a land area (e.g. an outlying island) to select it — multiple allowed; click empty space to clear',
         trimEmptyHint: "Click any landmass to select and delete it, e.g. an island you don't need",
         trimSelectedCount: '{{n}} area(s) selected',
         trimDelete: 'Delete selected',
@@ -651,7 +684,8 @@ const resources = {
         isIsland: 'Island',
         deleteStop: 'Delete stop',
         confirmDelete: 'Confirm delete',
-        confirmDeleteStop: 'This will also remove {{routes}} route(s) and {{tickets}} ticket(s). Delete anyway?',
+        confirmDeleteStop:
+          'This will also remove {{routes}} route(s) and {{tickets}} ticket(s). Delete anyway?',
         routesHintFirst: 'Click a first stop',
         routesHintSecond: 'Click a second stop to create a route',
         routesEmptyHint: 'Click two stops to create a route, or click an existing route to edit it',
@@ -707,28 +741,37 @@ const resources = {
           selfLoop: '{{routeId}}: start and end stop are the same',
           invalidLength: '{{routeId}}: invalid length {{length}} (only 1, 2, 3, 4, 6, 8 allowed)',
           ferryMustBeGray: '{{routeId}}: a ferry route must be grey, got {{color}}',
-          ferryLocosExceedLength: '{{routeId}}: required locomotives {{ferryLocos}} exceeds length {{length}}',
+          ferryLocosExceedLength:
+            '{{routeId}}: required locomotives {{ferryLocos}} exceeds length {{length}}',
           ferryAndTunnel: '{{routeId}}: a route cannot be both a ferry and a tunnel',
           doubleGroupWrongCount: 'Double group {{group}}: expected exactly 2 routes, got {{count}}',
-          doubleGroupDifferentPairs: 'Double group {{group}}: the two routes connect different stop pairs',
-          doubleGroupLengthMismatch: 'Double group {{group}}: parallel routes must have equal length',
+          doubleGroupDifferentPairs:
+            'Double group {{group}}: the two routes connect different stop pairs',
+          doubleGroupLengthMismatch:
+            'Double group {{group}}: parallel routes must have equal length',
           ticketUnknownCityA: 'Ticket {{ticketId}}: unknown start stop {{cityId}}',
           ticketUnknownCityB: 'Ticket {{ticketId}}: unknown end stop {{cityId}}',
           ticketEndpointsIdentical: 'Ticket {{ticketId}}: start and end stop are the same',
           ticketValueNotPositive: 'Ticket {{ticketId}}: value must be positive',
-          graphNotConnected: 'The stop network is not fully connected: {{components}} separate groups',
+          graphNotConnected:
+            'The stop network is not fully connected: {{components}} separate groups',
           baseViewInvalid: 'The base view needs finite x/y and a positive width/height',
           tooManyLandRings: 'Too many land shapes: {{count}} exceeds the maximum of {{max}}',
           landRingTooFewVertices: 'Land shape {{index}} has fewer than 3 points',
           landRingNonFiniteCoordinate: 'Land shape {{index}} has an invalid coordinate',
-          landRingCoordinateOutOfRange: 'Land shape {{index}} has a coordinate outside the allowed map range',
+          landRingCoordinateOutOfRange:
+            'Land shape {{index}} has a coordinate outside the allowed map range',
           tooManyVertices: 'Total land points {{count}} exceeds the maximum of {{max}}',
           cropBboxInvalid: 'The crop region needs lonMin < lonMax and latMin < latMax',
           ruleOutOfRange: '{{key}}: {{value}} is outside the allowed range [{{min}}, {{max}}]',
-          initialOfferBelowMinKeep: 'The starting ticket offer ({{long}} long + {{short}} short) cannot satisfy the minimum keep of {{minKeep}}',
-          longDeckTooSmall: 'The long ticket deck has {{count}}, but at least {{needed}} are needed for {{maxPlayers}} players',
-          shortDeckTooSmall: 'The short ticket deck has {{count}}, but at least {{needed}} are needed for {{maxPlayers}} players',
-          trackTooShort: 'Total track length ({{total}}) is less than the starting train count ({{trainCarsStart}}) — trains may never run out',
+          initialOfferBelowMinKeep:
+            'The starting ticket offer ({{long}} long + {{short}} short) cannot satisfy the minimum keep of {{minKeep}}',
+          longDeckTooSmall:
+            'The long ticket deck has {{count}}, but at least {{needed}} are needed for {{maxPlayers}} players',
+          shortDeckTooSmall:
+            'The short ticket deck has {{count}}, but at least {{needed}} are needed for {{maxPlayers}} players',
+          trackTooShort:
+            'Total track length ({{total}}) is less than the starting train count ({{trainCarsStart}}) — trains may never run out',
         },
       },
     },

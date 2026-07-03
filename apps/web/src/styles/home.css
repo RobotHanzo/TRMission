@@ -1,0 +1,329 @@
+/* ── Home screen: EMU-blue rail hero + public-rooms list + sidebar ──
+   Hero surfaces are brand blue in both themes (fixed light-blue text tints);
+   everything below the band uses the theme tokens. */
+
+.app-main.app-main--home {
+  max-width: min(980px, 100%);
+}
+
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-6);
+}
+
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--tr-blue);
+  border-radius: var(--tr-radius-lg);
+  padding: 40px 40px 32px;
+  box-shadow: var(--tr-shadow);
+}
+/* Decorative dashed rail lines drifting behind the hero copy. */
+.home-hero-rails {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.16;
+  pointer-events: none;
+}
+.home-hero-rails path {
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+  stroke-dasharray: 2 14;
+  stroke-linecap: round;
+}
+.home-hero-rails circle {
+  fill: #fff;
+}
+
+.home-hero-top {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--tr-space-8);
+  flex-wrap: wrap;
+}
+.home-hero-eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: #cfe0f0;
+}
+.home-hero-code {
+  font-family: var(--tr-font-mono);
+  letter-spacing: 1px;
+  color: #fff;
+}
+.home-hero-title {
+  margin: 0 0 10px;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
+}
+.home-hero-tagline {
+  margin: 0;
+  max-width: 460px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #dce9f4;
+}
+button.home-rejoin {
+  padding: 12px 18px;
+  background: #fff;
+  border-color: #fff;
+  color: var(--tr-blue);
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.home-hero-actions {
+  position: relative;
+  display: flex;
+  gap: var(--tr-space-3);
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+button.home-create {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  padding: 13px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+}
+.home-join {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  background: var(--tr-surface);
+  border-radius: 8px;
+  padding: 4px 4px 4px 14px;
+}
+.home-join:focus-within {
+  outline: 3px solid var(--tr-ember);
+  outline-offset: 2px;
+}
+.home-join-icon {
+  color: var(--tr-ink-soft);
+  flex: none;
+}
+.home-join input {
+  border: none;
+  background: transparent;
+  font-family: var(--tr-font-mono);
+  font-size: 14px;
+  letter-spacing: 1px;
+  width: 7.5em;
+  padding: var(--tr-space-2) 0;
+}
+/* The pill carries the focus ring (:focus-within above) so the bare input can drop its own. */
+.home-join input:focus-visible {
+  outline: none;
+}
+.home-join button {
+  background: var(--tr-surface-2);
+  border-color: transparent;
+  font-weight: 600;
+  font-size: 14px;
+  padding: var(--tr-space-2) var(--tr-space-4);
+}
+/* Join/create failures render inside the blue band — the token danger red would vanish here. */
+.home-hero-error {
+  position: relative;
+  margin: 12px 0 0;
+  color: #ffd9cf;
+  font-size: 13.5px;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.home-rooms {
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: 12px;
+  box-shadow: var(--tr-shadow);
+  overflow: hidden;
+}
+.home-rooms-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--tr-space-4) 20px;
+  border-bottom: 1px solid var(--tr-line);
+}
+.home-rooms-head strong {
+  font-size: 14.5px;
+}
+.home-rooms-head .muted {
+  font-size: 12.5px;
+}
+.home-rooms-empty {
+  margin: 0;
+  padding: var(--tr-space-4) 20px;
+  font-size: 13.5px;
+}
+.home-room-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tr-space-3);
+  padding: 13px 20px;
+}
+.home-room-row + .home-room-row {
+  border-top: 1px solid var(--tr-surface-2);
+}
+.home-room-info {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-3);
+  min-width: 0;
+  flex-wrap: wrap;
+}
+.home-room-info .room-code {
+  font-size: 1em;
+}
+.home-room-info .muted {
+  font-size: 13px;
+}
+.home-pill {
+  font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tr-surface-2);
+  color: var(--tr-ink-soft);
+  white-space: nowrap;
+}
+.home-pill--lobby {
+  background: color-mix(in srgb, var(--tr-ok) 20%, transparent);
+  color: var(--tr-ok);
+}
+.home-room-row > button {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  flex: none;
+}
+button.home-watch {
+  background: var(--tr-surface-2);
+  border-color: transparent;
+  color: var(--tr-ink-soft);
+}
+
+.home-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+button.home-side-card {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-3);
+  text-align: start;
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: 12px;
+  padding: var(--tr-space-4) 18px;
+}
+.home-side-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--tr-blue) 10%, var(--tr-surface));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tr-blue);
+  flex: none;
+}
+.home-side-icon--accent {
+  color: var(--tr-accent);
+}
+.home-side-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.home-side-text strong {
+  font-size: 13.5px;
+  color: var(--tr-ink);
+}
+.home-side-text span:last-child {
+  font-size: 12.5px;
+  color: var(--tr-ink-soft);
+}
+.home-side-chevron {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  color: var(--tr-ink-soft);
+  flex: none;
+}
+
+.home-guest-card {
+  background: var(--tr-surface-2);
+  border-radius: 12px;
+  padding: var(--tr-space-4) 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.home-guest-card > p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--tr-ink-soft);
+  line-height: 1.5;
+}
+.home-guest-link {
+  align-self: flex-start;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* Phone tier (matches PHONE_QUERY in hooks/useMediaQuery.ts). */
+@media (max-width: 700px) {
+  .home-hero {
+    padding: 24px 20px;
+    border-radius: var(--tr-radius);
+  }
+  .home-hero-title {
+    font-size: 26px;
+  }
+  button.home-rejoin {
+    width: 100%;
+  }
+  .home-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  button.home-create {
+    justify-content: center;
+  }
+  .home-join input {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+}

@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '../i18n';
 import { HomeScreen } from './HomeScreen';
 import { useSession } from '../store/session';
+import { useUi } from '../store/ui';
 import { api, type RoomView } from '../net/rest';
 
 vi.mock('../net/connection', () => ({ connectGame: vi.fn() }));
@@ -13,12 +14,14 @@ vi.mock('../net/rest', () => ({
     createRoom: vi.fn(),
     joinRoom: vi.fn(),
     getPublicRooms: vi.fn(() => Promise.resolve([])),
+    getMyRooms: vi.fn(() => Promise.resolve([])),
     spectate: vi.fn(() => Promise.resolve({ gameId: 'g', ticket: 't' })),
   },
 }));
 
 const mocked = api as unknown as {
   getPublicRooms: ReturnType<typeof vi.fn>;
+  getMyRooms: ReturnType<typeof vi.fn>;
   spectate: ReturnType<typeof vi.fn>;
 };
 
@@ -52,6 +55,7 @@ describe('HomeScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocked.getPublicRooms.mockResolvedValue([]);
+    mocked.getMyRooms.mockResolvedValue([]);
     useSession.setState({ user: { ...signedIn } });
   });
   afterEach(() => vi.restoreAllMocks());
@@ -59,6 +63,7 @@ describe('HomeScreen', () => {
   it('renders the lobby for a signed-in user', () => {
     render(<HomeScreen />);
     expect(screen.getByRole('button', { name: '建立房間' })).toBeInTheDocument();
+    expect(screen.getByText('歡迎回來，Tester')).toBeInTheDocument();
   });
 
   it('renders nothing while signed out (the router redirects to /login)', () => {
@@ -74,9 +79,30 @@ describe('HomeScreen', () => {
     ]);
     render(<HomeScreen />);
     await screen.findByText('LOBBYY');
-    expect(screen.getAllByRole('button', { name: '加入房間' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: '加入' }).length).toBeGreaterThan(0);
     const watch = await screen.findByRole('button', { name: '觀戰' });
     fireEvent.click(watch);
     await waitFor(() => expect(mocked.spectate).toHaveBeenCalledWith('LIVEEE'));
+  });
+
+  it('shows a rejoin banner for the most recent active room and re-enters it', async () => {
+    mocked.getMyRooms.mockResolvedValue([pubRoom('MYROOM', 'STARTED', 'g2')]);
+    const original = useUi.getState().enterRoom;
+    const enterRoom = vi.fn();
+    useUi.setState({ enterRoom });
+    try {
+      render(<HomeScreen />);
+      const rejoin = await screen.findByRole('button', { name: /回到房間 MYROOM/ });
+      fireEvent.click(rejoin);
+      expect(enterRoom).toHaveBeenCalledWith('MYROOM');
+    } finally {
+      useUi.setState({ enterRoom: original });
+    }
+  });
+
+  it('shows no rejoin banner without an active room', async () => {
+    render(<HomeScreen />);
+    await waitFor(() => expect(mocked.getMyRooms).toHaveBeenCalled());
+    expect(screen.queryByRole('button', { name: /回到房間/ })).not.toBeInTheDocument();
   });
 });

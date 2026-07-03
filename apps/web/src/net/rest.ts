@@ -283,6 +283,8 @@ export const api = {
   startRoom: (code: string) => req<TicketResult>('POST', `/rooms/${code}/start`),
   getTicket: (code: string) => req<TicketResult>('POST', `/rooms/${code}/ticket`),
   getPublicRooms: () => req<RoomView[]>('GET', '/rooms/public'),
+  /** Rooms the signed-in user is currently seated in (lobby or live game) — the rejoin banner. */
+  getMyRooms: () => req<RoomView[]>('GET', '/rooms/mine'),
   updateRoomSettings: (code: string, patch: Partial<RoomSettings>) =>
     req<RoomView>('PATCH', `/rooms/${code}/settings`, patch),
   spectate: (code: string) => req<TicketResult>('POST', `/rooms/${code}/spectate`),
@@ -298,11 +300,13 @@ export const api = {
   updateMap: (id: string, patch: { nameZh?: string; nameEn?: string; draft?: MapDraft }) =>
     req<MapDetail>('PUT', `/maps/${encodeURIComponent(id)}`, patch),
   deleteMap: (id: string) => req<void>('DELETE', `/maps/${encodeURIComponent(id)}`),
-  shareMap: (id: string) => req<{ shareCode: string }>('POST', `/maps/${encodeURIComponent(id)}/share`),
+  shareMap: (id: string) =>
+    req<{ shareCode: string }>('POST', `/maps/${encodeURIComponent(id)}/share`),
   unshareMap: (id: string) => req<void>('DELETE', `/maps/${encodeURIComponent(id)}/share`),
   peekSharedMap: (code: string) =>
     req<SharedMapView>('GET', `/maps/shared/${encodeURIComponent(code)}`),
   cloneSharedMap: (code: string) =>
     req<MapDetail>('POST', `/maps/shared/${encodeURIComponent(code)}/clone`),
-  mapContent: (hash: string) => req<MapContentDto>('GET', `/maps/content/${encodeURIComponent(hash)}`),
+  mapContent: (hash: string) =>
+    req<MapContentDto>('GET', `/maps/content/${encodeURIComponent(hash)}`),
 };

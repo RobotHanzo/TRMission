@@ -45,7 +45,9 @@ export interface TicketResult {
 function mapNameFor(selector: MapSelector): { zh: string; en: string } | undefined {
   if (selector.source !== 'official') return undefined;
   const official = officialMapById(selector.mapId);
-  return official ? { zh: official.content.meta.nameZh, en: official.content.meta.nameEn } : undefined;
+  return official
+    ? { zh: official.content.meta.nameZh, en: official.content.meta.nameEn }
+    : undefined;
 }
 
 const toView = (r: RoomDoc): RoomView => {
@@ -190,6 +192,11 @@ export class LobbyService {
   /** Public rooms for the home screen (no auth required). */
   async listPublic(): Promise<RoomView[]> {
     return (await this.rooms.findPublic()).map(toView);
+  }
+
+  /** The caller's active rooms (lobby or live game) — powers the home screen's rejoin banner. */
+  async listMine(user: AuthUser): Promise<RoomView[]> {
+    return (await this.rooms.findActiveByMember(user.userId)).map(toView);
   }
 
   /** Host starts the game: create the authoritative match, mark the room STARTED, hand back a ticket. */

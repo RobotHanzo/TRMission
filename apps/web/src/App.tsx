@@ -10,6 +10,7 @@ import { LoginScreen } from './screens/LoginScreen';
 import { LoginCallback } from './screens/LoginCallback';
 import { HistoryScreen } from './screens/HistoryScreen';
 import './styles/app.css';
+import './styles/home.css';
 
 // Lazy so @trm/engine + @trm/codec land in a separate chunk, not the main bundle.
 const TutorialScreen = lazy(() => import('./features/tutorial/TutorialScreen'));
@@ -77,7 +78,9 @@ export function App() {
     ? 'app-main app-main--game'
     : isLogin
       ? 'app-main app-main--login'
-      : 'app-main';
+      : view === 'home'
+        ? 'app-main app-main--home' // the hero + two-column grid needs more than the reading column
+        : 'app-main';
 
   return (
     <div className={isGameLayout ? 'app app--game' : 'app'}>

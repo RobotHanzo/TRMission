@@ -85,6 +85,7 @@ export class RoomRepo implements OnModuleInit {
   async onModuleInit(): Promise<void> {
     await this.col.createIndex({ status: 1, updatedAt: -1 });
     await this.col.createIndex({ 'settings.visibility': 1, status: 1, updatedAt: -1 });
+    await this.col.createIndex({ 'members.userId': 1, status: 1, updatedAt: -1 });
   }
 
   get(code: string): Promise<RoomDoc | null> {
@@ -205,6 +206,22 @@ export class RoomRepo implements OnModuleInit {
       })
       .sort({ updatedAt: -1 })
       .limit(limit)
+      .toArray();
+  }
+
+  /** Rooms this user is currently seated in: their LOBBY rooms, plus STARTED rooms whose game
+   *  is still LIVE (a room whose game finished is history, not something to return to).
+   *  Newest first — the first entry is the natural "rejoin" target. */
+  async findActiveByMember(userId: string, limit = 10): Promise<RoomDoc[]> {
+    return this.col
+      .aggregate<RoomDoc>([
+        { $match: { status: { $in: ['LOBBY', 'STARTED'] }, 'members.userId': userId } },
+        { $lookup: { from: 'games', localField: 'gameId', foreignField: '_id', as: 'game' } },
+        { $match: { $or: [{ status: 'LOBBY' }, { 'game.status': 'LIVE' }] } },
+        { $project: { game: 0 } },
+        { $sort: { updatedAt: -1 } },
+        { $limit: limit },
+      ])
       .toArray();
   }
 

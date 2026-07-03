@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { z } from 'zod';
 import { LobbyService } from './lobby.service';
 import { AccessTokenGuard } from '../auth/access-token.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -31,6 +32,14 @@ export class LobbyController {
   @ApiResponse({ status: 201, schema: apiSchema(RoomViewSchema) })
   create(@CurrentUser() user: AuthUser, @Body() body: CreateRoomDto) {
     return this.lobby.create(user, body.maxPlayers ?? 5);
+  }
+
+  // Declared before ':code' so the literal path is matched here, not captured as a room code.
+  @Get('mine')
+  @ApiOperation({ summary: 'List your active rooms (lobbies + live games you can rejoin)' })
+  @ApiResponse({ status: 200, schema: apiSchema(z.array(RoomViewSchema)) })
+  mine(@CurrentUser() user: AuthUser) {
+    return this.lobby.listMine(user);
   }
 
   @Get(':code')
