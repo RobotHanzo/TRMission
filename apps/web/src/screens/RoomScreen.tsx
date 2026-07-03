@@ -316,7 +316,9 @@ export function RoomScreen() {
                 <select
                   aria-label={t('mapOfficial')}
                   value={settings.map.mapId}
-                  onChange={(e) => setSetting({ map: { source: 'official', mapId: e.target.value } })}
+                  onChange={(e) =>
+                    setSetting({ map: { source: 'official', mapId: e.target.value } })
+                  }
                 >
                   {OFFICIAL_MAPS.map((m) => (
                     <option key={m.mapId} value={m.mapId}>

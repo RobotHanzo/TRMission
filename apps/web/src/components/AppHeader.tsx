@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrainFront, Settings, LogOut, DoorOpen, User, BookOpen, History, Map as MapIcon, Menu } from 'lucide-react';
+import {
+  TrainFront,
+  Settings,
+  LogOut,
+  DoorOpen,
+  User,
+  BookOpen,
+  History,
+  Map as MapIcon,
+  Menu,
+} from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import { useGame } from '../store/game';
@@ -129,12 +139,19 @@ export function AppHeader() {
             {menuOpen && (
               <div className="header-menu" role="menu" aria-label={t('menu')}>
                 {user && (
-                  <div className="header-menu-user" title={user.isGuest ? t('guest') : (user.email ?? '')}>
+                  <div
+                    className="header-menu-user"
+                    title={user.isGuest ? t('guest') : (user.email ?? '')}
+                  >
                     {avatar} {user.displayName}
                   </div>
                 )}
                 {user && !onAuthScreen && !inGame && (
-                  <button className="header-menu-item" role="menuitem" onClick={menuAct(enterHistory)}>
+                  <button
+                    className="header-menu-item"
+                    role="menuitem"
+                    onClick={menuAct(enterHistory)}
+                  >
                     <History size={16} aria-hidden /> {t('history.title')}
                   </button>
                 )}
@@ -188,12 +205,20 @@ export function AppHeader() {
               </span>
             )}
             {user && !onAuthScreen && !inGame && (
-              <button onClick={enterHistory} aria-label={t('history.title')} title={t('history.title')}>
+              <button
+                onClick={enterHistory}
+                aria-label={t('history.title')}
+                title={t('history.title')}
+              >
                 <History size={16} aria-hidden />
               </button>
             )}
             {user && !onAuthScreen && !inGame && (
-              <button onClick={enterMaps} aria-label={t('builder.myMaps')} title={t('builder.myMaps')}>
+              <button
+                onClick={enterMaps}
+                aria-label={t('builder.myMaps')}
+                title={t('builder.myMaps')}
+              >
                 <MapIcon size={16} aria-hidden />
               </button>
             )}

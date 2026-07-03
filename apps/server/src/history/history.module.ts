@@ -7,5 +7,6 @@ import { AuthModule } from '../auth/auth.module';
   imports: [AuthModule],
   controllers: [HistoryController],
   providers: [HistoryRepo],
+  exports: [HistoryRepo],
 })
 export class HistoryModule {}

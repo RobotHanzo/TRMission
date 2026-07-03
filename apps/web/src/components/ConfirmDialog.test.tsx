@@ -8,7 +8,12 @@ describe('ConfirmDialog', () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
     render(
-      <ConfirmDialog title="離開？" message="確定要離開嗎？" onConfirm={onConfirm} onCancel={onCancel} />,
+      <ConfirmDialog
+        title="離開？"
+        message="確定要離開嗎？"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
     );
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('離開？')).toBeInTheDocument();
@@ -22,7 +27,12 @@ describe('ConfirmDialog', () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
     const { container } = render(
-      <ConfirmDialog title="離開？" message="確定要離開嗎？" onConfirm={onConfirm} onCancel={onCancel} />,
+      <ConfirmDialog
+        title="離開？"
+        message="確定要離開嗎？"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
     );
     fireEvent.click(screen.getByRole('button', { name: '取消' }));
     expect(onCancel).toHaveBeenCalledTimes(1);

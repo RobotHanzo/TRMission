@@ -11,6 +11,11 @@ RUN yarn workspace @trm/proto generate
 FROM node:24-slim AS run
 WORKDIR /app
 RUN corepack enable
+# CJK + latin fonts for the dynamically rendered social-preview cards (resvg loads
+# system fonts; without a TC face the zh-Hant card text would render as tofu boxes).
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-core \
+  && rm -rf /var/lib/apt/lists/*
 COPY --from=deps /app /app
 ENV NODE_ENV=production
 ENV PORT=3001
