@@ -72,7 +72,7 @@ export function AppHeader() {
             ) : (
               <User size={14} aria-hidden />
             )}{' '}
-            {user.displayName}
+            <span className="user-chip-name">{user.displayName}</span>
           </span>
         )}
         {user && view !== 'login' && view !== 'loginCallback' && !inGame && (

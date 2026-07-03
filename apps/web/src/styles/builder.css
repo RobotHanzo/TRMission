@@ -414,3 +414,15 @@
 .validation-warning {
   color: var(--tr-ember);
 }
+
+/* ── Phone tier — keep in sync with PHONE_QUERY (hooks/useMediaQuery.ts) ────── */
+@media (max-width: 700px) {
+  /* Maps list: the create row (two name inputs + button) and row actions wrap. */
+  .maps-screen .row {
+    flex-wrap: wrap;
+  }
+  .maps-screen .row > input {
+    flex: 1 1 10em;
+    min-width: 0;
+  }
+}

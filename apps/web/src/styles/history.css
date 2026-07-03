@@ -50,3 +50,21 @@
 .history-error {
   color: var(--tr-danger);
 }
+
+/* ── Phone tier — keep in sync with PHONE_QUERY (hooks/useMediaQuery.ts) ────── */
+@media (max-width: 700px) {
+  .history-row {
+    flex-wrap: wrap;
+  }
+  .history-meta {
+    min-width: 0;
+  }
+  /* Players get their own full-width line under the meta + replay button. */
+  .history-players {
+    flex: 1 1 100%;
+    order: 3;
+  }
+  .history-row > button {
+    margin-left: auto;
+  }
+}

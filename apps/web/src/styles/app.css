@@ -562,3 +562,44 @@
     min-height: 40px;
   }
 }
+
+/* ── Phone tier — keep in sync with PHONE_QUERY (hooks/useMediaQuery.ts) ────── */
+@media (max-width: 700px) {
+  .app-header {
+    padding: var(--tr-space-2) var(--tr-space-3);
+    gap: var(--tr-space-2);
+  }
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  /* Avatar/icon-only chip; the full name stays discoverable via the chip's title. */
+  .user-chip-name {
+    display: none;
+  }
+  .turn-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .app-main {
+    padding: var(--tr-space-4) var(--tr-space-3);
+  }
+
+  /* Room + Settings: setting rows wrap; the map picker stacks its controls full-width. */
+  .setting-row {
+    flex-wrap: wrap;
+    row-gap: var(--tr-space-2);
+  }
+  .setting-row > .row {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .setting-row select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .member-list li {
+    flex-wrap: wrap;
+  }
+}
