@@ -197,6 +197,34 @@ export const RoomsListSchema = z.object({
   nextCursor: z.string().nullable(),
 });
 
+// ---- maintainers --------------------------------------------------------------------
+
+export const MaintainerPutSchema = z.object({
+  role: DashboardRoleSchema,
+  extraPermissions: z.array(DashboardPermissionSchema).max(32).optional(),
+  deniedPermissions: z.array(DashboardPermissionSchema).max(32).optional(),
+});
+export class MaintainerPutDto extends createZodDto(MaintainerPutSchema) {}
+
+export const MaintainerRowSchema = z.object({
+  userId: z.string(),
+  role: DashboardRoleSchema,
+  extraPermissions: z.array(DashboardPermissionSchema),
+  deniedPermissions: z.array(DashboardPermissionSchema),
+  permissions: z.array(DashboardPermissionSchema),
+  grantedBy: z.string(),
+  grantedAt: z.string(),
+  updatedAt: z.string(),
+  /** True when the underlying user no longer exists (e.g. a TTL-expired guest). */
+  dangling: z.boolean(),
+  displayName: z.string().optional(),
+  email: z.string().optional(),
+});
+
+export const MaintainersListSchema = z.object({
+  maintainers: z.array(MaintainerRowSchema),
+});
+
 // ---- audit --------------------------------------------------------------------------
 
 export const AuditEntrySchema = z.object({
