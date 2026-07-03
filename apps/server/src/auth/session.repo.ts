@@ -102,6 +102,15 @@ export class SessionRepo implements OnModuleInit {
     await this.col.updateMany({ userId, revoked: { $ne: true } }, { $set: { revoked: true } });
   }
 
+  /** Live (unrevoked, unexpired) refresh families for a user — dashboard user detail. */
+  countActiveForUser(userId: string): Promise<number> {
+    return this.col.countDocuments({
+      userId,
+      revoked: { $ne: true },
+      expiresAt: { $gt: new Date() },
+    });
+  }
+
   /**
    * Resolve the owning user from a refresh token WITHOUT rotating it. Used by the OAuth `start`
    * route: a top-level navigation cannot send a Bearer header, so a logged-in guest is identified

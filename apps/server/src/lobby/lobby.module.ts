@@ -12,6 +12,6 @@ import { MapsModule } from '../maps/maps.module';
   // Public controller first so `GET /rooms/public` is not captured by the guarded `/rooms/:code`.
   controllers: [LobbyPublicController, LobbyController],
   providers: [LobbyService, RoomRepo],
-  exports: [LobbyService],
+  exports: [LobbyService, RoomRepo],
 })
 export class LobbyModule {}

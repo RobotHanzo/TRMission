@@ -22,6 +22,10 @@ export interface UserDoc {
   tokenVersion: number;
   createdAt: Date;
   guestExpiresAt?: Date; // TTL-expired for abandoned guests
+  /** Set while the account is banned from the maintainer dashboard (absent = active). */
+  disabledAt?: Date;
+  disabledBy?: string; // maintainer userId
+  disabledReason?: string;
 }
 
 export const toPublicUser = (u: UserDoc): PublicUser => ({
@@ -50,6 +54,7 @@ export class UserRepo implements OnModuleInit {
   async onModuleInit(): Promise<void> {
     await this.col.createIndex({ email: 1 }, { unique: true, sparse: true });
     await this.col.createIndex({ guestExpiresAt: 1 }, { expireAfterSeconds: 0 });
+    await this.col.createIndex({ createdAt: -1 }); // dashboard user listing/new-signup counts
   }
 
   findById(id: string): Promise<UserDoc | null> {
@@ -155,6 +160,54 @@ export class UserRepo implements OnModuleInit {
       { $set: { [`oauth.${provider}`]: sub, ...(avatarUrl ? { avatarUrl } : {}) } },
       { returnDocument: 'after' },
     );
+  }
+
+  /**
+   * Dashboard listing: newest first with a (createdAt, _id) composite cursor for stable
+   * pagination. `filter` narrows by account kind; `disabled` matches banned accounts.
+   */
+  listPage(
+    filter: 'all' | 'guests' | 'registered' | 'disabled',
+    limit: number,
+    cursor: { t: Date; id: string } | null,
+  ): Promise<UserDoc[]> {
+    const kind =
+      filter === 'guests'
+        ? { isGuest: true }
+        : filter === 'registered'
+          ? { isGuest: false }
+          : filter === 'disabled'
+            ? { disabledAt: { $exists: true } }
+            : {};
+    const page = cursor
+      ? {
+          $or: [
+            { createdAt: { $lt: cursor.t } },
+            { createdAt: cursor.t, _id: { $lt: cursor.id } },
+          ],
+        }
+      : {};
+    return this.col
+      .find({ ...kind, ...page })
+      .sort({ createdAt: -1, _id: -1 })
+      .limit(limit)
+      .toArray();
+  }
+
+  /**
+   * Dashboard search: exact id, or case-insensitive PREFIX match on email/displayName.
+   * The query is regex-escaped (unescaped user input = ReDoS / filter bypass). The
+   * anchored email prefix rides the email index; displayName is a bounded scan —
+   * acceptable at this product's scale.
+   */
+  search(q: string, limit: number): Promise<UserDoc[]> {
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const prefix = new RegExp(`^${escaped}`, 'i');
+    return this.col
+      .find({ $or: [{ _id: q }, { email: prefix }, { displayName: prefix }] })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .toArray();
   }
 
   /** Create a passwordless registered user from a verified OAuth profile. */

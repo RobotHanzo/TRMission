@@ -24,7 +24,8 @@ import { OAUTH_HTTP, FetchOauthHttp } from './oauth.http';
     OauthService,
     { provide: OAUTH_HTTP, useClass: FetchOauthHttp },
   ],
-  // Exported so the lobby can sign ws-game tickets and guard its routes.
-  exports: [TokenService, AccessTokenGuard, UserRepo],
+  // Exported so the lobby can sign ws-game tickets and guard its routes; SessionRepo
+  // for the dashboard's per-user session counts + ban-time revocation.
+  exports: [TokenService, AccessTokenGuard, UserRepo, SessionRepo],
 })
 export class AuthModule {}

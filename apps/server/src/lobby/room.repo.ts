@@ -86,10 +86,37 @@ export class RoomRepo implements OnModuleInit {
     await this.col.createIndex({ status: 1, updatedAt: -1 });
     await this.col.createIndex({ 'settings.visibility': 1, status: 1, updatedAt: -1 });
     await this.col.createIndex({ 'members.userId': 1, status: 1, updatedAt: -1 });
+    await this.col.createIndex({ gameId: 1 }, { sparse: true }); // dashboard game→room lookup
   }
 
   get(code: string): Promise<RoomDoc | null> {
     return this.col.findOne({ _id: code });
+  }
+
+  /** The room a game was started from (dashboard game detail / termination cleanup). */
+  findByGameId(gameId: string): Promise<RoomDoc | null> {
+    return this.col.findOne({ gameId });
+  }
+
+  /** Dashboard listing: newest first with a (updatedAt, _id) composite cursor. */
+  listPage(
+    status: RoomStatus | 'all',
+    limit: number,
+    cursor: { t: Date; id: string } | null,
+  ): Promise<RoomDoc[]> {
+    const page = cursor
+      ? {
+          $or: [
+            { updatedAt: { $lt: cursor.t } },
+            { updatedAt: cursor.t, _id: { $lt: cursor.id } },
+          ],
+        }
+      : {};
+    return this.col
+      .find({ ...(status === 'all' ? {} : { status }), ...page })
+      .sort({ updatedAt: -1, _id: -1 })
+      .limit(limit)
+      .toArray();
   }
 
   async create(host: RoomMember, maxPlayers: number): Promise<RoomDoc> {
