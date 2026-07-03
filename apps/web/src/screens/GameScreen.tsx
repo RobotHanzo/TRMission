@@ -7,6 +7,8 @@ import { api } from '../net/rest';
 import { connectGame, getSocket } from '../net/connection';
 import { useActiveContent } from '../game/useActiveContent';
 import { GameStage } from './GameStage';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useConfirmAction } from '../hooks/useConfirmAction';
 
 /**
  * Live-game shell: owns the socket connect + roster fetch, then delegates the board + HUD to the
@@ -41,7 +43,19 @@ export function GameScreen() {
     };
   }, [roomCode, setRoster]);
 
-  const leave = () => goHome(); // goHome tears down the socket
+  const {
+    open: leaveOpen,
+    request: requestLeave,
+    confirm: confirmLeave,
+    cancel: cancelLeave,
+  } = useConfirmAction();
+
+  // goHome tears down the socket. Nothing is at stake before the first snapshot arrives, so only
+  // confirm once there's an actual game (live play, or the post-game-over ScoreBoard) to abandon.
+  const leave = () => {
+    if (snapshot) requestLeave(goHome);
+    else goHome();
+  };
 
   if (!snapshot || contentStatus === 'loading') {
     return (
@@ -58,5 +72,17 @@ export function GameScreen() {
     );
   }
 
-  return <GameStage snapshot={snapshot} commands={getSocket()} onLeave={leave} />;
+  return (
+    <>
+      <GameStage snapshot={snapshot} commands={getSocket()} onLeave={leave} />
+      {leaveOpen && (
+        <ConfirmDialog
+          title={t('leaveConfirmTitle')}
+          message={t('leaveConfirmBody')}
+          onConfirm={confirmLeave}
+          onCancel={cancelLeave}
+        />
+      )}
+    </>
+  );
 }
