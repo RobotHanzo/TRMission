@@ -261,8 +261,8 @@ const resources = {
         validationWarningCount: '{{n}} 個警告',
         canvasLabel: '地圖編輯畫布',
         cropWorld: '世界地圖',
-        cropDrawHint: '在地圖上拖曳以框選要裁切的區域（滾輪縮放、滑鼠中鍵拖曳可平移）',
-        cropAdjustHint: '拖曳角落調整範圍、拖曳框內移動位置（滑鼠中鍵拖曳可平移地圖）',
+        cropDrawHint: '在地圖上拖曳以框選要裁切的區域（滾輪或雙指縮放、中鍵或雙指拖曳可平移）',
+        cropAdjustHint: '拖曳角落調整範圍、拖曳框內移動位置（中鍵或雙指拖曳可平移地圖）',
         cropLatWarning: '緯度範圍過大，投影會失真',
         cropPreview: '裁切預覽',
         cropEmptyHint: '拖曳選取一個區域以預覽',
@@ -624,8 +624,10 @@ const resources = {
         validationWarningCount: '{{n}} warning(s)',
         canvasLabel: 'Map editor canvas',
         cropWorld: 'World map',
-        cropDrawHint: 'Drag on the map to mark the region to crop (scroll to zoom, middle-drag to pan)',
-        cropAdjustHint: 'Drag a corner to resize, or drag inside the box to move it (middle-drag to pan)',
+        cropDrawHint:
+          'Drag on the map to mark the region to crop (scroll or pinch to zoom, middle-drag or two-finger drag to pan)',
+        cropAdjustHint:
+          'Drag a corner to resize, or drag inside the box to move it (middle-drag or two-finger drag to pan)',
         cropLatWarning: 'Latitude span is large — the projection will distort',
         cropPreview: 'Crop preview',
         cropEmptyHint: 'Drag to select a region to preview it',

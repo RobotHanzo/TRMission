@@ -425,4 +425,59 @@
     flex: 1 1 10em;
     min-width: 0;
   }
+
+  /* Editor: the page scrolls (the ≤920px shell already relaxed .app-main--game), the stage rail
+     becomes a horizontal station strip across the top, and the inspector stacks below the canvas
+     instead of sitting beside it. */
+  .editor-screen {
+    height: auto;
+  }
+  .editor-body {
+    flex-direction: column;
+  }
+  .editor-stage-rail {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .editor-stage-line {
+    left: 20px;
+    right: 20px;
+    top: 18px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+  .editor-stage-btn {
+    flex: 1 0 auto;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--tr-space-1);
+  }
+  .editor-stage-label {
+    font-size: 0.72em;
+  }
+  .editor-main {
+    overflow: visible;
+  }
+  .editor-stage-layout {
+    flex-direction: column;
+    height: auto;
+  }
+  .editor-canvas-wrap {
+    flex: none;
+    height: 55dvh;
+    min-height: 280px;
+  }
+  .editor-inspector {
+    width: 100%;
+    overflow: visible;
+  }
+  .editor-name-group {
+    flex: 1 1 100%;
+  }
+  .editor-name-input {
+    min-width: 0;
+    flex: 1 1 6em;
+  }
 }
