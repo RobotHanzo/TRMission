@@ -1,12 +1,55 @@
 import { defineConfig } from 'vitest/config';
+import type { Connect, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
 // Dev proxies REST + WebSocket to the NestJS server so the app is same-origin.
 // Override VITE_SERVER_HOST when the server runs in a Docker sibling container.
 const serverHost = process.env.VITE_SERVER_HOST ?? 'localhost';
 
+// Mirrors apps/web/nginx.conf's bot map: link-preview crawlers hitting /, /room/*, or
+// /replay/* get the server's OG meta page instead of the SPA shell, in dev too (so a
+// shared dev link — e.g. the trmission.robothanzo.dev tunnel — still unfurls).
+const OG_BOT_UA =
+  /facebookexternalhit|facebot|twitterbot|slackbot|discordbot|telegrambot|whatsapp|linkedinbot|pinterestbot|redditbot|skypeuripreview|embedly|iframely|line\/|kakaotalk/i;
+const OG_PATH = /^\/(?:$|room\/|replay\/)/;
+
+function ogPreviewPlugin(): Plugin {
+  return {
+    name: 'trm-og-preview',
+    apply: 'serve',
+    configureServer(server) {
+      // Registered here (not returned) so it runs BEFORE Vite's internal SPA-fallback
+      // middleware — otherwise every bot request would already have been served index.html.
+      const middleware: Connect.NextHandleFunction = (req, res, next) => {
+        const ua = req.headers['user-agent'] ?? '';
+        const pathname = (req.url ?? '/').split('?')[0]!;
+        if (req.method !== 'GET' || !OG_BOT_UA.test(ua) || !OG_PATH.test(pathname)) {
+          next();
+          return;
+        }
+        const forwardedHost =
+          (req.headers['x-forwarded-host'] as string | undefined) ?? req.headers.host ?? '';
+        const forwardedProto = (req.headers['x-forwarded-proto'] as string | undefined) ?? 'http';
+        fetch(`http://${serverHost}:3001/api/v1/og/page?path=${encodeURIComponent(pathname)}`, {
+          headers: { 'x-forwarded-host': forwardedHost, 'x-forwarded-proto': forwardedProto },
+        })
+          .then(async (upstream) => {
+            res.statusCode = upstream.status;
+            res.setHeader(
+              'content-type',
+              upstream.headers.get('content-type') ?? 'text/html; charset=utf-8',
+            );
+            res.end(await upstream.text());
+          })
+          .catch(() => next());
+      };
+      server.middlewares.use(middleware);
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), ogPreviewPlugin()],
   server: {
     port: 5173,
     host: true,

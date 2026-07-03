@@ -33,7 +33,7 @@ export function escapeXml(s: string): string {
 /** Approximate rendered width in px: CJK ≈ 1em, everything else ≈ 0.55em. */
 export function estimateWidth(s: string, fontSize: number): number {
   let w = 0;
-  for (const ch of s) w += /[⺀-鿿豈-﫿＀-￯]/.test(ch) ? 1 : 0.55;
+  for (const ch of s) w += /[⺀-鿿豈-﫿＀-￯]/.test(ch) ? 1 : 0.55;
   return w * fontSize;
 }
 
@@ -46,6 +46,31 @@ export function fitText(s: string, fontSize: number, maxPx: number): string {
     out += ch;
   }
   return `${out}…`;
+}
+
+/**
+ * A card text node. Whatever system font resvg resolves for `FONT_STACK` here (Regular
+ * only, in some environments — a bare `font-weight` request then silently collapses back
+ * to Regular with no visible change), the glyphs are additionally stroked in their own
+ * fill colour so every card reads clearly at social-platform thumbnail scale regardless
+ * of which weights the installed font actually ships. `content` must already be escaped.
+ */
+function text(
+  x: number,
+  y: number,
+  size: number,
+  fill: string,
+  content: string,
+  opts: { anchor?: 'middle' | 'end'; spacing?: number } = {},
+): string {
+  const anchor = opts.anchor ? ` text-anchor="${opts.anchor}"` : '';
+  const spacing = opts.spacing ? ` letter-spacing="${opts.spacing}"` : '';
+  const strokeWidth = Math.max(0.6, size * 0.035);
+  return (
+    `<text x="${x}" y="${y}" font-size="${size}" font-weight="700"${anchor}${spacing} ` +
+    `fill="${fill}" stroke="${fill}" stroke-width="${strokeWidth}" stroke-linejoin="round" ` +
+    `paint-order="stroke">${content}</text>`
+  );
 }
 
 /** Diagonal strings of rounded "train car" slots — the background motif. */
@@ -90,24 +115,24 @@ ${routeRibbons()}
 <rect y="${CARD_H - 12}" width="${CARD_W}" height="12" fill="${BLUE}"/>
 <g font-family="${FONT_STACK}">
 ${trainGlyph(72, 60)}
-<text x="156" y="94" font-size="36" font-weight="700" fill="${BLUE}">台鐵任務 TRMission</text>
+${text(156, 94, 36, BLUE, '台鐵任務 TRMission')}
 ${inner}
 </g>
 </svg>`;
 }
 
-function kicker(text: string): string {
-  return `<text x="72" y="204" font-size="27" letter-spacing="2" fill="${INK_SOFT}">${escapeXml(text)}</text>`;
+function kicker(label: string): string {
+  return text(72, 204, 27, INK_SOFT, escapeXml(label), { spacing: 2 });
 }
 
 /** The generic brand card — the homepage unfurl and the nondisclosing fallback. */
 export function siteCardSvg(): string {
   return frame(`
 ${kicker('台灣鐵道路線競逐桌遊 · A RAILWAY BOARD GAME SET IN TAIWAN')}
-<text x="72" y="330" font-size="84" font-weight="700" fill="${INK}">台鐵任務</text>
-<text x="72" y="408" font-size="46" font-weight="600" fill="${INK_SOFT}">TRMission</text>
-<text x="72" y="500" font-size="30" fill="${INK}">鋪設路線・連接城市・完成任務</text>
-<text x="72" y="546" font-size="26" fill="${INK_SOFT}">Claim routes, link cities, complete missions — with friends or bots.</text>
+${text(72, 330, 84, INK, '台鐵任務')}
+${text(72, 408, 46, INK_SOFT, 'TRMission')}
+${text(72, 500, 30, INK, '鋪設路線・連接城市・完成任務')}
+${text(72, 546, 26, INK_SOFT, 'Claim routes, link cities, complete missions — with friends or bots.')}
 `);
 }
 
@@ -145,8 +170,8 @@ export function roomCardSvg(d: RoomCardData): string {
   return frame(`
 ${kicker(`邀請你加入遊戲 · ${statusText}`)}
 <rect x="72" y="240" width="${codeW}" height="140" rx="20" fill="${SURFACE_2}" stroke="${LINE}" stroke-width="2"/>
-<text x="${72 + codeW / 2}" y="338" font-size="96" font-weight="700" letter-spacing="14" text-anchor="middle" fill="${BLUE}">${code}</text>
-<text x="72" y="440" font-size="30" fill="${INK}">${escapeXml(detailBits.join('　·　'))}</text>
+${text(72 + codeW / 2, 338, 96, BLUE, code, { anchor: 'middle', spacing: 14 })}
+${text(72, 440, 30, INK, escapeXml(detailBits.join('　·　')))}
 ${seatDots}
 `);
 }
@@ -173,19 +198,17 @@ export function replayCardSvg(d: ReplayCardData): string {
       const y = 330 + i * 52;
       const color = SEAT_COLORS[p.seat % SEAT_COLORS.length];
       const name = escapeXml(fitText(p.name, 32, 520));
-      const star = p.winner
-        ? `<text x="700" y="${y + 11}" font-size="30" fill="${BLUE}">★</text>`
-        : '';
+      const star = p.winner ? text(700, y + 11, 30, BLUE, '★') : '';
       return `<circle cx="92" cy="${y}" r="14" fill="${color}"/>
-<text x="122" y="${y + 11}" font-size="32" font-weight="${p.winner ? 700 : 400}" fill="${INK}">${name}</text>
-<text x="670" y="${y + 11}" font-size="32" font-weight="700" text-anchor="end" fill="${p.winner ? BLUE : INK_SOFT}">${p.score}</text>
+${text(122, y + 11, 32, INK, name)}
+${text(670, y + 11, 32, p.winner ? BLUE : INK_SOFT, String(p.score), { anchor: 'end' })}
 ${star}`;
     })
     .join('\n');
 
   return frame(`
 ${kicker(`對局重播 · GAME REPLAY　—　${date}`)}
-<text x="72" y="278" font-size="54" font-weight="700" fill="${INK}">${escapeXml(fitText(title, 54, 1050))}</text>
+${text(72, 278, 54, INK, escapeXml(fitText(title, 54, 1050)))}
 ${rows}
 `);
 }
