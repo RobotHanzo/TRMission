@@ -50,4 +50,14 @@ export const env = {
    * nonce cookie is given this exact maxAge, so the cookie never out-/under-lives the state it guards.
    */
   oauthStateTtlMs: Number(process.env.OAUTH_STATE_TTL_MS ?? 10 * 60 * 1000),
+
+  /**
+   * Maintainer-dashboard bootstrap: comma-separated emails granted the `owner` dashboard role at
+   * boot (registered, non-guest accounts only). Authoritative on every boot — re-asserts owner if
+   * one was accidentally demoted. An email registered after boot is picked up on the next restart.
+   */
+  dashboardOwnerEmails: (process.env.DASHBOARD_OWNER_EMAILS ?? '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean),
 } as const;

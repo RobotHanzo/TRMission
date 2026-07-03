@@ -11,6 +11,7 @@ import { OpenApiHolder } from '../src/openapi/openapi.holder';
 import { buildOpenApiDocument } from '../src/openapi/openapi';
 import { AuthConfig, type AuthConfigOverrides } from '../src/auth/auth-config';
 import { OAUTH_HTTP, type OauthHttp, type OauthProfile } from '../src/auth/oauth.http';
+import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
 
 export interface TestApp {
   app: INestApplication;
@@ -23,6 +24,8 @@ export interface TestAppOptions {
   authConfig?: AuthConfigOverrides;
   /** Stub the network seam so OAuth e2e never leaves the process. */
   oauthHttp?: OauthHttp;
+  /** Override DashboardConfig (owner-email bootstrap) without touching env. */
+  dashboardConfig?: DashboardConfigOverrides;
 }
 
 export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp> {
@@ -36,6 +39,10 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
     .useValue(db);
   if (opts.authConfig) builder = builder.overrideProvider(AuthConfig).useValue(new AuthConfig(opts.authConfig));
   if (opts.oauthHttp) builder = builder.overrideProvider(OAUTH_HTTP).useValue(opts.oauthHttp);
+  if (opts.dashboardConfig)
+    builder = builder
+      .overrideProvider(DashboardConfig)
+      .useValue(new DashboardConfig(opts.dashboardConfig));
 
   const moduleRef = await builder.compile();
 
