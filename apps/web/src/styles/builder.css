@@ -329,6 +329,11 @@
 }
 
 /* ── Missions table ──────────────────────────────────────────────────────────────────────── */
+/* The table's two city dropdowns give it an intrinsic width wider than a phone; the wrapper
+   pans sideways (same pattern as .scoreboard-scroll) instead of overflowing the screen. */
+.editor-table-scroll {
+  overflow-x: auto;
+}
 .editor-ticket-table {
   width: 100%;
   border-collapse: collapse;

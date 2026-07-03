@@ -21,7 +21,8 @@ function ticketsToDraft(tickets: ReturnType<typeof generateTickets>): TicketDraf
 }
 
 let nextTicketCounter = 0;
-const newTicketId = (): string => `t${Date.now().toString(36)}${(nextTicketCounter++).toString(36)}`;
+const newTicketId = (): string =>
+  `t${Date.now().toString(36)}${(nextTicketCounter++).toString(36)}`;
 
 export function MissionsStage() {
   const { t } = useTranslation();
@@ -66,68 +67,77 @@ export function MissionsStage() {
             <Wand2 size={14} aria-hidden /> {t('builder.autoGenerate')}
           </button>
         </div>
-        <table className="editor-ticket-table">
-          <thead>
-            <tr>
-              <th>{t('builder.from')}</th>
-              <th>{t('builder.to')}</th>
-              <th>{t('builder.value')}</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((tk) => (
-              <tr key={tk.id}>
-                <td>{cityName(tk.a)}</td>
-                <td>{cityName(tk.b)}</td>
-                <td>{tk.value}</td>
+        {/* Two searchable city dropdowns per row make the table intrinsically wider than a
+            phone; like .scoreboard-scroll, it pans sideways inside the card instead of
+            bleeding off-screen. */}
+        <div className="editor-table-scroll">
+          <table className="editor-ticket-table">
+            <thead>
+              <tr>
+                <th>{t('builder.from')}</th>
+                <th>{t('builder.to')}</th>
+                <th>{t('builder.value')}</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((tk) => (
+                <tr key={tk.id}>
+                  <td>{cityName(tk.a)}</td>
+                  <td>{cityName(tk.b)}</td>
+                  <td>{tk.value}</td>
+                  <td>
+                    <button
+                      className="icon-btn"
+                      onClick={() => removeTicket(tk.id)}
+                      aria-label={t('builder.deleteTicket')}
+                    >
+                      <Trash2 size={14} aria-hidden />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td className="editor-ticket-cell">
+                  <Dropdown<string>
+                    options={cityOptions}
+                    value={a}
+                    onChange={setA}
+                    ariaLabel={t('builder.from')}
+                    placeholder={t('builder.selectCity')}
+                    searchable
+                    searchPlaceholder={t('builder.searchCities')}
+                    emptyLabel={t('builder.noCitiesFound')}
+                  />
+                </td>
+                <td className="editor-ticket-cell">
+                  <Dropdown<string>
+                    options={cityOptions}
+                    value={b}
+                    onChange={setB}
+                    ariaLabel={t('builder.to')}
+                    placeholder={t('builder.selectCity')}
+                    searchable
+                    searchPlaceholder={t('builder.searchCities')}
+                    emptyLabel={t('builder.noCitiesFound')}
+                  />
+                </td>
                 <td>
-                  <button className="icon-btn" onClick={() => removeTicket(tk.id)} aria-label={t('builder.deleteTicket')}>
-                    <Trash2 size={14} aria-hidden />
-                  </button>
+                  <input
+                    type="number"
+                    min={1}
+                    style={{ width: '4em' }}
+                    value={value}
+                    onChange={(e) => setValue(Math.max(1, Number(e.target.value) || 1))}
+                  />
+                </td>
+                <td>
+                  <button onClick={addRow}>{t('builder.addTicket')}</button>
                 </td>
               </tr>
-            ))}
-            <tr>
-              <td className="editor-ticket-cell">
-                <Dropdown<string>
-                  options={cityOptions}
-                  value={a}
-                  onChange={setA}
-                  ariaLabel={t('builder.from')}
-                  placeholder={t('builder.selectCity')}
-                  searchable
-                  searchPlaceholder={t('builder.searchCities')}
-                  emptyLabel={t('builder.noCitiesFound')}
-                />
-              </td>
-              <td className="editor-ticket-cell">
-                <Dropdown<string>
-                  options={cityOptions}
-                  value={b}
-                  onChange={setB}
-                  ariaLabel={t('builder.to')}
-                  placeholder={t('builder.selectCity')}
-                  searchable
-                  searchPlaceholder={t('builder.searchCities')}
-                  emptyLabel={t('builder.noCitiesFound')}
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  min={1}
-                  style={{ width: '4em' }}
-                  value={value}
-                  onChange={(e) => setValue(Math.max(1, Number(e.target.value) || 1))}
-                />
-              </td>
-              <td>
-                <button onClick={addRow}>{t('builder.addTicket')}</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
       {genOpen && (
         <GenerateModal
@@ -181,7 +191,12 @@ function GenerateModal({
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal stack" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal stack"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3>{t('builder.autoGenerate')}</h3>
         <label>
           {t('builder.longCount')}
@@ -223,7 +238,11 @@ function GenerateModal({
           </div>
         )}
         <div className="row">
-          <button className="primary" disabled={!preview} onClick={() => preview && onApply(preview)}>
+          <button
+            className="primary"
+            disabled={!preview}
+            onClick={() => preview && onApply(preview)}
+          >
             {t('builder.applyReplaceAll')}
           </button>
           <button onClick={onClose}>{t('cancel')}</button>
