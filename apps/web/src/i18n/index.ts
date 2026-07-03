@@ -226,6 +226,9 @@ const resources = {
       tabRail: '遊戲面板',
       tabComms: '紀錄 · 聊天',
       commsTabsLabel: '面板切換',
+      dockTabsLabel: '遊戲面板切換',
+      dockDraw: '抽牌',
+      dockPlayers: '玩家',
       builder: {
         myMaps: '我的地圖',
         noMaps: '尚無自訂地圖',
@@ -586,6 +589,9 @@ const resources = {
       tabRail: 'Game',
       tabComms: 'Log & chat',
       commsTabsLabel: 'Panel tabs',
+      dockTabsLabel: 'Game panels',
+      dockDraw: 'Draw',
+      dockPlayers: 'Players',
       builder: {
         myMaps: 'My maps',
         noMaps: 'No custom maps yet',

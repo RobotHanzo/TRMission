@@ -40,13 +40,16 @@ import { Toast } from '../components/Toast';
 import { CommsPanel } from '../components/CommsPanel';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import { useSoundDriver } from '../hooks/useSoundDriver';
-import { useMediaQuery } from '../hooks/useMediaQuery';
+import { PHONE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import '../styles/game.css';
 import '../styles/animations.css';
 
 type Claim =
   | { kind: 'route'; route: RouteDef; payments: Payment[] }
   | { kind: 'station'; cityId: string; payments: Payment[] };
+
+/** Phone bottom-dock panels: the rail's sections plus the log/chat, one visible at a time. */
+type DockTab = 'hand' | 'draw' | 'missions' | 'players' | 'comms';
 
 export interface GameStageProps {
   snapshot: GameSnapshot;
@@ -98,6 +101,10 @@ export function GameStage({
   // Live game: a wide viewport shows comms as its own column; a narrow one tabs between rail↔comms.
   const wide = useMediaQuery('(min-width: 1300px)');
   const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
+  // Phone (live games only): the rail becomes a tabbed bottom dock under a full-bleed board. The
+  // sandbox keeps the stacked-column layout so tutorial/encyclopedia anchors stay mounted.
+  const phone = useMediaQuery(PHONE_QUERY) && !sandbox;
+  const [dockTab, setDockTab] = useState<DockTab>('hand');
 
   const version = snapshot.stateVersion;
   useEffect(() => {
@@ -306,14 +313,69 @@ export function GameStage({
   const comms = sandbox ? null : <CommsPanel chatDisabled={isSpectator} />;
 
   return (
-    <div className={`game game--${boardLayout}${sandbox ? ' game--sandbox' : ''}`}>
+    <div
+      className={`game ${phone ? 'game--dock' : `game--${boardLayout}`}${sandbox ? ' game--sandbox' : ''}`}
+    >
       {isSpectator && (
         <div className="spectator-banner" role="status">
           <strong>{t('spectating')}</strong> — {t('spectatingHint')}
         </div>
       )}
       {boardPanel}
-      {sandbox ? (
+      {phone ? (
+        // Phone: a bottom dock replaces rail/tray/comms wholesale — the persisted boardLayout
+        // pref is deliberately ignored here, since a tabbed dock is the only layout that keeps
+        // the (very vertical) board visible while a panel is open.
+        <div className={`game-dock${needKeep ? ' game-dock--chooser' : ''}`}>
+          {needKeep ? (
+            <div className="dock-panel">{railInner}</div>
+          ) : (
+            <>
+              <div className="dock-tabs" role="tablist" aria-label={t('dockTabsLabel')}>
+                {(
+                  [
+                    ['hand', t('cards'), myPub?.handCount ?? 0],
+                    ['draw', t('dockDraw'), null],
+                    ['missions', t('tickets'), snapshot.you?.keptTicketIds.length ?? 0],
+                    ['players', t('dockPlayers'), null],
+                    ['comms', t('tabComms'), null],
+                  ] as const
+                ).map(([key, label, count]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    role="tab"
+                    id={`dock-tab-${key}`}
+                    aria-controls="dock-tabpanel"
+                    aria-selected={dockTab === key}
+                    className={dockTab === key ? 'active' : ''}
+                    onClick={() => setDockTab(key)}
+                  >
+                    {label}
+                    {count !== null && <span className="tray-count">{count}</span>}
+                  </button>
+                ))}
+              </div>
+              <div
+                id="dock-tabpanel"
+                className="dock-panel"
+                role="tabpanel"
+                aria-labelledby={`dock-tab-${dockTab}`}
+              >
+                {dockTab === 'hand'
+                  ? handSection
+                  : dockTab === 'draw'
+                    ? market
+                    : dockTab === 'missions'
+                      ? ticketsSection
+                      : dockTab === 'players'
+                        ? trackers
+                        : comms}
+              </div>
+            </>
+          )}
+        </div>
+      ) : sandbox ? (
         // Sandbox (tutorial/encyclopedia): no comms — the plain rail (+ hand strip in tray mode).
         <>
           <aside className="game-rail">{railInner}</aside>

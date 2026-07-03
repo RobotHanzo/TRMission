@@ -483,14 +483,17 @@ function MapControls({ targetRef }: { targetRef: RefObject<HTMLDivElement | null
       >
         <LocateFixed size={15} aria-hidden />
       </button>
-      <button
-        type="button"
-        aria-label={t(isFullscreen ? 'exitFullscreen' : 'fullscreen')}
-        aria-pressed={isFullscreen}
-        onClick={toggleFullscreen}
-      >
-        {isFullscreen ? <Minimize size={15} aria-hidden /> : <Maximize size={15} aria-hidden />}
-      </button>
+      {/* iPhone Safari has no element Fullscreen API — don't render a dead button there. */}
+      {document.fullscreenEnabled && (
+        <button
+          type="button"
+          aria-label={t(isFullscreen ? 'exitFullscreen' : 'fullscreen')}
+          aria-pressed={isFullscreen}
+          onClick={toggleFullscreen}
+        >
+          {isFullscreen ? <Minimize size={15} aria-hidden /> : <Maximize size={15} aria-hidden />}
+        </button>
+      )}
     </div>
   );
 }

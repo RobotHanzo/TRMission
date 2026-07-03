@@ -73,8 +73,10 @@ export function App() {
   const isLogin = view === 'login' || view === 'loginCallback';
   const isGameLayout =
     view === 'game' || view === 'tutorial' || view === 'replay' || view === 'mapEditor';
+  // Live games additionally get the phone-tier fixed-viewport shell (game.css); the other
+  // game-layout views (tutorial/replay/mapEditor) must keep page scroll on phones instead.
   const mainClass = isGameLayout
-    ? 'app-main app-main--game'
+    ? `app-main app-main--game${view === 'game' ? ' app-main--live' : ''}`
     : isLogin
       ? 'app-main app-main--login'
       : 'app-main';

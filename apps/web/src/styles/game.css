@@ -1553,3 +1553,102 @@ button.ticket-card:hover {
     min-height: 40px;
   }
 }
+
+/* ── Phone tier (≤700px): the board fills the screen and a tabbed dock sits at the bottom.
+   Live games only (.game--dock, set in GameStage) — the tutorial/encyclopedia sandbox keeps the
+   ≤920px stacked column above so coachmark/caption anchors stay mounted. This block must come
+   AFTER the ≤920px block (equal specificity, later wins). Keep in sync with PHONE_QUERY. ── */
+@media (max-width: 700px) {
+  /* Re-assert the fixed-viewport shell the ≤920px block relaxed — live games only. */
+  .app-main--live.app-main--game {
+    overflow: hidden;
+    display: flex;
+    padding: var(--tr-space-2);
+  }
+  .game--dock {
+    display: grid;
+    gap: var(--tr-space-2);
+    --tr-dock-h: min(34dvh, 300px);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'banner'
+      'board'
+      'dock'; /* empty banner row collapses to 0 */
+  }
+  .game--dock .spectator-banner {
+    grid-area: banner;
+  }
+  .game--dock .game-board {
+    min-height: 0;
+  }
+  .game--dock .board-viewport {
+    min-height: 200px; /* relax the desktop 360px floor */
+  }
+  .game-dock {
+    grid-area: dock;
+    display: flex;
+    flex-direction: column;
+    gap: var(--tr-space-1);
+    min-height: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .dock-tabs {
+    display: flex;
+    gap: var(--tr-space-1);
+  }
+  .dock-tabs button {
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    padding: var(--tr-space-1);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    background: var(--tr-surface-2);
+    border: 1px solid var(--tr-line);
+  }
+  .dock-tabs button.active {
+    background: var(--tr-ember);
+    border-color: var(--tr-ember);
+    color: #fff;
+  }
+  .dock-panel {
+    height: var(--tr-dock-h);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--tr-space-2);
+  }
+  /* Ticket drafting takes the whole dock (no tabs) and may grow taller — the board must stay
+     pannable above so the offered missions' endpoint glow is inspectable. */
+  .game-dock--chooser {
+    --tr-dock-h: min(55dvh, 480px);
+  }
+  .game-dock--chooser .dock-panel {
+    height: auto;
+    max-height: var(--tr-dock-h);
+  }
+  /* Hand keeps full-size cards; sideways thumb-scroll instead of wrapping. */
+  .dock-panel .hand {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--tr-space-1);
+  }
+  /* Toasts clear the dock instead of covering the tab bar (fixed-position, but they render
+     inside .game so they inherit --tr-dock-h). */
+  .game--dock .toast {
+    bottom: calc(var(--tr-dock-h, 0px) + 72px);
+  }
+  .game--dock .toast.toast-notice {
+    bottom: calc(var(--tr-dock-h, 0px) + 120px);
+  }
+  /* Multi-card payment rows overflow a 360px-wide modal — let them wrap. */
+  .card-options .payment-card {
+    flex-wrap: wrap;
+  }
+}
