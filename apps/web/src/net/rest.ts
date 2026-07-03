@@ -85,6 +85,8 @@ export interface ReplayPlayerMeta extends HistoryPlayer {
   isBot?: boolean;
   difficulty?: BotDifficulty;
 }
+/** Who may fetch a replay: participants only, or anyone holding the link. */
+export type ReplayVisibility = 'private' | 'link';
 /** actions stay `unknown[]` here so the eager bundle never imports @trm/engine types;
  *  the lazy replay feature narrows them to engine `Action[]`. */
 export interface ReplayPayload {
@@ -103,6 +105,9 @@ export interface ReplayPayload {
   winners: string[];
   completedAt: string;
   finalDigest?: string;
+  visibility: ReplayVisibility;
+  /** True when the signed-in viewer is a seated player of this game. */
+  canConfigureVisibility: boolean;
 }
 
 // --- custom maps (builder + shared/cloned + published content by hash) ---
@@ -292,6 +297,12 @@ export const api = {
   history: () => req<MatchSummary[]>('GET', '/history'),
   replay: (gameId: string) =>
     req<ReplayPayload>('GET', `/history/${encodeURIComponent(gameId)}/replay`),
+  setReplayVisibility: (gameId: string, visibility: ReplayVisibility) =>
+    req<{ visibility: ReplayVisibility }>(
+      'PATCH',
+      `/history/${encodeURIComponent(gameId)}/visibility`,
+      { visibility },
+    ),
 
   listMaps: () => req<MapSummary[]>('GET', '/maps'),
   createMap: (nameZh: string, nameEn: string) =>

@@ -1,6 +1,11 @@
 // Zod is the single source for validation + OpenAPI (ADR A3). These schemas document the
-// history/replay responses; they are not request pipes.
+// history/replay responses; SetVisibilitySchema additionally validates the PATCH body.
 import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
+
+export const ReplayVisibilitySchema = z.enum(['private', 'link']);
+export const SetVisibilitySchema = z.object({ visibility: ReplayVisibilitySchema });
+export class SetVisibilityDto extends createZodDto(SetVisibilitySchema) {}
 
 export const HistoryPlayerSchema = z.object({
   userId: z.string(),
@@ -40,4 +45,7 @@ export const ReplayPayloadSchema = z.object({
   winners: z.array(z.string()),
   completedAt: z.string(),
   finalDigest: z.string().optional(),
+  visibility: ReplayVisibilitySchema,
+  /** True when the viewer is a seated player of this game (bots/spectators/anonymous: false). */
+  canConfigureVisibility: z.boolean(),
 });

@@ -118,6 +118,14 @@ describe('ui store routing', () => {
     expect(useUi.getState().replayGameId).toBe('game-9');
   });
 
+  it('syncFromUrl(not authed) on /replay/:id is NOT gated — view-by-link replays', () => {
+    window.history.replaceState(null, '', '/replay/game-9');
+    useUi.getState().syncFromUrl(false);
+    expect(useUi.getState().view).toBe('replay');
+    expect(useUi.getState().replayGameId).toBe('game-9');
+    expect(path()).toBe('/replay/game-9');
+  });
+
   it('enterMaps pushes /maps and sets the view', () => {
     useUi.getState().enterMaps();
     expect(useUi.getState().view).toBe('maps');

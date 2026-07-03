@@ -73,6 +73,9 @@ export interface RecoveryData {
   bots: BotProfile[];
 }
 
+/** Who may fetch a finished game's replay: members only, or anyone holding the link. */
+export type ReplayVisibility = 'private' | 'link';
+
 /** Denormalised archive of a finished game, for history listing + leaderboards. */
 export interface MatchHistoryDoc {
   _id: string; // gameId
@@ -86,6 +89,8 @@ export interface MatchHistoryDoc {
   spectators?: string[];
   /** ENGINE_VERSION the game ran on, for replayability flags (absent on legacy docs). */
   engineVersion?: number;
+  /** Seated players may flip this; absent = 'private' (the pre-feature behaviour). */
+  replayVisibility?: ReplayVisibility;
   completedAt: Date;
 }
 

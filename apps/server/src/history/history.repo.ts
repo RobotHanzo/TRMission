@@ -3,7 +3,13 @@ import type { Collection, Db } from 'mongodb';
 import { ENGINE_VERSION, boardForContentHash } from '@trm/engine';
 import type { Action } from '@trm/engine';
 import { MONGO_DB } from '../db/tokens';
-import type { GameDoc, GameEventDoc, MatchHistoryDoc, StoredConfig } from '../persistence/types';
+import type {
+  GameDoc,
+  GameEventDoc,
+  MatchHistoryDoc,
+  ReplayVisibility,
+  StoredConfig,
+} from '../persistence/types';
 import type { UserDoc } from '../auth/user.repo';
 import type { BotProfile } from '../bots/types';
 import type { MapContentDoc } from '../maps/maps.types';
@@ -108,7 +114,10 @@ export class HistoryRepo {
     }
     const names = await this.displayNames(docs.flatMap((d) => d.players.map((p) => p.userId)));
     const flags = await this.replayableFlags(
-      docs.map((d) => ({ contentHash: d.contentHash, engineVersion: d.engineVersion ?? versions.get(d._id) })),
+      docs.map((d) => ({
+        contentHash: d.contentHash,
+        engineVersion: d.engineVersion ?? versions.get(d._id),
+      })),
     );
 
     return docs.map((d, i) => ({
@@ -137,6 +146,27 @@ export class HistoryRepo {
       _id: gameId,
       $or: [{ 'players.userId': userId }, { spectators: userId }],
     });
+  }
+
+  /** The archive doc with no membership filter — the caller decides access (replay visibility). */
+  get(gameId: string): Promise<MatchHistoryDoc | null> {
+    return this.col.findOne({ _id: gameId });
+  }
+
+  /**
+   * Flip a replay between private and view-by-link. The filter carries the authorization:
+   * only a SEATED player of that game matches (spectators/outsiders → no match → 404 upstream).
+   */
+  async setVisibility(
+    gameId: string,
+    userId: string,
+    visibility: ReplayVisibility,
+  ): Promise<boolean> {
+    const res = await this.col.updateOne(
+      { _id: gameId, 'players.userId': userId },
+      { $set: { replayVisibility: visibility } },
+    );
+    return res.matchedCount > 0;
   }
 
   /**

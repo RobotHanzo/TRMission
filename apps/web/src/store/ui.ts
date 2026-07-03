@@ -346,12 +346,10 @@ export const useUi = create<UiState>()((set, get) => ({
       set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
       return;
     }
+    // Replays are NOT auth-gated: a view-by-link replay is watchable while signed out
+    // (the server still 404s private ones; the screen then offers the sign-in path).
     const replayId = replayIdFromPath();
     if (replayId) {
-      if (!authed) {
-        get().navigateLogin(`/replay/${encodeURIComponent(replayId)}`);
-        return;
-      }
       disconnectGame();
       set({
         view: 'replay',

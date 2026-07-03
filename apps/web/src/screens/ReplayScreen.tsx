@@ -8,7 +8,7 @@ import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
 import { buildBoard, ENGINE_VERSION, SCHEMA_VERSION } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
 import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
-import { api, type ReplayPayload, type ReplayPlayerMeta } from '../net/rest';
+import { api, type ReplayPayload, type ReplayPlayerMeta, type ReplayVisibility } from '../net/rest';
 import { resolveContent } from '../game/contentCache';
 import { setActiveContent, resetToDefaultContent } from '../game/catalog';
 import { useSession } from '../store/session';
@@ -21,6 +21,7 @@ import { GameStage } from './GameStage';
 import { LogPanel } from '../components/LogPanel';
 import { useReplayPlayer } from '../features/replay/useReplayPlayer';
 import { PerspectiveSwitcher } from '../features/replay/PerspectiveSwitcher';
+import { ReplayShare } from '../features/replay/ReplayShare';
 import { frameTargetForAction } from '../features/replay/frameTarget';
 import '../styles/replay.css';
 
@@ -33,6 +34,7 @@ export default function ReplayScreen() {
   const { t } = useTranslation();
   const gameId = useUi((s) => s.replayGameId);
   const enterHistory = useUi((s) => s.enterHistory);
+  const navigateLogin = useUi((s) => s.navigateLogin);
   const user = useSession((s) => s.user);
   const setMembers = useRoster((s) => s.setMembers);
   const clearRoster = useRoster((s) => s.clear);
@@ -112,6 +114,19 @@ export default function ReplayScreen() {
   if (!gameId) return null;
   if (load.kind === 'loading') return <div className="card">{t('connecting')}</div>;
   if (load.kind === 'error') {
+    // Signed-out visitors most often land here because the replay is private (or their
+    // session expired) — offer the sign-in path back to this replay instead of a history
+    // link they could not open anyway.
+    if (!user) {
+      return (
+        <div className="card replay-error">
+          <p>{t('history.signInToView')}</p>
+          <button onClick={() => navigateLogin(`/replay/${encodeURIComponent(gameId)}`)}>
+            {t('history.signIn')}
+          </button>
+        </div>
+      );
+    }
     return (
       <div className="card replay-error">
         <p>{t(load.msgKey)}</p>
@@ -132,6 +147,11 @@ export default function ReplayScreen() {
         players={load.payload.players}
         finalDigest={load.payload.finalDigest}
         initialViewer={initialViewer}
+        share={{
+          gameId,
+          visibility: load.payload.visibility,
+          canConfigure: load.payload.canConfigureVisibility,
+        }}
         onLeave={enterHistory}
       />
     </SandboxProvider>
@@ -145,6 +165,7 @@ function ReplayStage({
   players,
   finalDigest,
   initialViewer,
+  share,
   onLeave,
 }: {
   board: Board;
@@ -153,6 +174,7 @@ function ReplayStage({
   players: ReplayPlayerMeta[];
   finalDigest: string | undefined;
   initialViewer: ReturnType<typeof asPlayerId> | null;
+  share: { gameId: string; visibility: ReplayVisibility; canConfigure: boolean };
   onLeave: () => void;
 }) {
   const { t } = useTranslation();
@@ -196,6 +218,11 @@ function ReplayStage({
       </div>
       <aside className="replay-rail">
         <PerspectiveSwitcher players={players} viewer={player.viewer} onChange={player.setViewer} />
+        <ReplayShare
+          gameId={share.gameId}
+          visibility={share.visibility}
+          canConfigure={share.canConfigure}
+        />
         <LogPanel />
       </aside>
       <div className="replay-controls">
