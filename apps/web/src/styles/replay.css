@@ -99,3 +99,25 @@
       'rail' minmax(160px, 32vh) / minmax(0, 1fr);
   }
 }
+
+/* ── Phone tier — keep in sync with PHONE_QUERY (hooks/useMediaQuery.ts) ────── */
+@media (max-width: 700px) {
+  .replay {
+    gap: var(--tr-space-2);
+  }
+  /* The page scrolls on phones; keep the transport controls reachable while browsing. */
+  .replay-controls {
+    flex-wrap: wrap;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+  /* The scrubber gets its own full-width row under the step buttons. */
+  .replay-scrubber {
+    flex: 1 1 100%;
+    order: 9;
+  }
+  .replay-step {
+    margin-left: auto;
+  }
+}
