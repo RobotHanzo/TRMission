@@ -2080,6 +2080,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@trm/admin@workspace:apps/admin":
+  version: 0.0.0-use.local
+  resolution: "@trm/admin@workspace:apps/admin"
+  dependencies:
+    "@testing-library/dom": "npm:^10.4.0"
+    "@testing-library/jest-dom": "npm:^6.6.3"
+    "@testing-library/react": "npm:^16.1.0"
+    "@trm/shared": "workspace:*"
+    "@types/react": "npm:^19.0.0"
+    "@types/react-dom": "npm:^19.0.0"
+    "@vitejs/plugin-react": "npm:^4.3.4"
+    i18next: "npm:^24.2.0"
+    jsdom: "npm:^25.0.1"
+    lucide-react: "npm:^0.468.0"
+    react: "npm:^19.2.0"
+    react-dom: "npm:^19.2.0"
+    react-i18next: "npm:^15.4.0"
+    typescript: "npm:^5.7.3"
+    vite: "npm:^5.4.11"
+    vitest: "npm:^2.1.8"
+    zustand: "npm:^5.0.2"
+  languageName: unknown
+  linkType: soft
+
 "@trm/codec@workspace:*, @trm/codec@workspace:packages/codec":
   version: 0.0.0-use.local
   resolution: "@trm/codec@workspace:packages/codec"

@@ -1,0 +1,64 @@
+/*
+ * TRMission 行控中心 (Operations Control Center) design tokens.
+ *
+ * A neutral graphite dispatcher console — dark is the primary theme. The railway
+ * shows up in the STATUS LANGUAGE (signal aspects: clear/caution/stop, always
+ * paired with a text label) and in the NUMERALS (IBM Plex Mono tabular figures,
+ * the instrument-readout voice), not as a theme costume. The accent is the
+ * product family's EMU blue, brightened for dark surfaces.
+ */
+:root,
+:root[data-theme='dark'] {
+  --oc-bg: #0f1215;
+  --oc-surface: #16191d;
+  --oc-surface-2: #1c2126;
+  --oc-line: #262c33;
+  --oc-ink: #e7eaed;
+  --oc-ink-soft: #9aa3ad;
+  --oc-accent: #4f9ddf;
+  --oc-accent-ink: #0f1215; /* text on accent-filled controls */
+  --oc-signal-clear: #35c07d;
+  --oc-signal-caution: #e3a63b;
+  --oc-signal-stop: #e05252;
+  /* Subtle tints for row/badge backgrounds derived from the signals. */
+  --oc-signal-clear-bg: rgba(53, 192, 125, 0.12);
+  --oc-signal-caution-bg: rgba(227, 166, 59, 0.12);
+  --oc-signal-stop-bg: rgba(224, 82, 82, 0.12);
+  --oc-accent-bg: rgba(79, 157, 223, 0.14);
+
+  --oc-radius: 8px;
+  --oc-radius-sm: 5px;
+  --oc-space-1: 4px;
+  --oc-space-2: 8px;
+  --oc-space-3: 12px;
+  --oc-space-4: 16px;
+  --oc-space-6: 24px;
+  --oc-space-8: 32px;
+
+  /* Elevation in dark = lighter surface + hairline; no shadows. */
+  --oc-shadow: none;
+
+  --oc-font: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  --oc-font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+}
+
+:root[data-theme='light'] {
+  --oc-bg: #f6f7f8;
+  --oc-surface: #ffffff;
+  --oc-surface-2: #eff1f3;
+  --oc-line: #e3e6e9;
+  --oc-ink: #16191d;
+  --oc-ink-soft: #5c646d;
+  --oc-accent: #0f5fa6;
+  --oc-accent-ink: #ffffff;
+  --oc-signal-clear: #1e8e5a;
+  --oc-signal-caution: #b07514;
+  --oc-signal-stop: #bc3535;
+  --oc-signal-clear-bg: rgba(30, 142, 90, 0.1);
+  --oc-signal-caution-bg: rgba(176, 117, 20, 0.1);
+  --oc-signal-stop-bg: rgba(188, 53, 53, 0.1);
+  --oc-accent-bg: rgba(15, 95, 166, 0.1);
+
+  /* Light theme may use one soft shadow level for raised panels. */
+  --oc-shadow: 0 1px 2px rgba(22, 25, 29, 0.06), 0 4px 12px rgba(22, 25, 29, 0.06);
+}
