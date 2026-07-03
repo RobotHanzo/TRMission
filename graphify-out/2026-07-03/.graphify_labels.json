@@ -422,9 +422,5 @@
   "420": "MissionsStage.tsx",
   "421": "frameTarget.test.ts",
   "422": "ConfirmDialog.tsx",
-  "423": "errors.ts",
-  "424": "HomeScreen.test.tsx",
-  "425": "digest.ts",
-  "426": "lobby-spectate.e2e.spec.ts",
-  "427": "usePlayerName"
+  "423": "errors.ts"
 }

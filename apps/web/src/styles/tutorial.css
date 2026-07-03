@@ -395,6 +395,13 @@
   width: 100%;
   --tr-rail-w: 260px;
 }
+/* game.css gives the board a 360px min-height, sized for the full-screen game view. The demo
+   stage is much shorter than that — and shorter still in the tray layout, which also has to fit
+   the bottom hand row in the same fixed height — so let the map shrink to whatever the grid
+   actually gives it instead of overflowing past the stage into the rail/hand row beneath it. */
+.enc-demo-stage .board-viewport {
+  min-height: 200px;
+}
 .enc-caption {
   display: flex;
   flex-direction: column;
@@ -494,9 +501,6 @@
   .enc-demo-stage .game-board {
     min-height: 200px;
     height: 34vh;
-  }
-  .enc-demo-stage .board-viewport {
-    min-height: 200px;
   }
   .enc-demo-stage .game-rail {
     max-height: 240px;
