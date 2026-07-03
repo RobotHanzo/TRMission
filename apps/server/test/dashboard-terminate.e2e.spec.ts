@@ -11,10 +11,7 @@ const server = () => t.app.getHttpServer();
 const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 
 async function guest(displayName: string) {
-  const res = await request(server())
-    .post('/api/v1/auth/guest')
-    .send({ displayName })
-    .expect(201);
+  const res = await request(server()).post('/api/v1/auth/guest').send({ displayName }).expect(201);
   return { userId: res.body.user.id as string, token: res.body.accessToken as string };
 }
 
@@ -69,7 +66,10 @@ describe('force-terminate', () => {
       .expect(200);
     const gameId: string = started.body.gameId;
     const memberTicket = (
-      await request(server()).post(`/api/v1/rooms/${code}/ticket`).set(auth(member.token)).expect(200)
+      await request(server())
+        .post(`/api/v1/rooms/${code}/ticket`)
+        .set(auth(member.token))
+        .expect(200)
     ).body.ticket;
     const watchTicket = (
       await request(server())
@@ -80,13 +80,20 @@ describe('force-terminate', () => {
 
     // Bind host + member + spectator over real protobuf bytes.
     const hub = t.app.get(GameHub);
-    const frames = { host: [] as ServerEnvelope[], member: [] as ServerEnvelope[], watch: [] as ServerEnvelope[] };
+    const frames = {
+      host: [] as ServerEnvelope[],
+      member: [] as ServerEnvelope[],
+      watch: [] as ServerEnvelope[],
+    };
     hub.openConnection('c-host', (b) => frames.host.push(decodeServer(b)));
     hub.openConnection('c-member', (b) => frames.member.push(decodeServer(b)));
     hub.openConnection('c-watch', (b) => frames.watch.push(decodeServer(b)));
     await hub.receive(
       'c-host',
-      encodeClient(1, { case: 'hello', value: { ticket: started.body.ticket, protocolVersion: 1 } }),
+      encodeClient(1, {
+        case: 'hello',
+        value: { ticket: started.body.ticket, protocolVersion: 1 },
+      }),
     );
     await hub.receive(
       'c-member',
@@ -206,8 +213,15 @@ describe('force-close room', () => {
     // A STARTED room → 409 pointing at game termination.
     const h2 = await guest('H2');
     const m2 = await guest('M2');
-    const r2 = await request(server()).post('/api/v1/rooms').set(auth(h2.token)).send({}).expect(201);
-    await request(server()).post(`/api/v1/rooms/${r2.body.code}/join`).set(auth(m2.token)).expect(200);
+    const r2 = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(h2.token))
+      .send({})
+      .expect(201);
+    await request(server())
+      .post(`/api/v1/rooms/${r2.body.code}/join`)
+      .set(auth(m2.token))
+      .expect(200);
     for (const u of [h2, m2]) {
       await request(server())
         .post(`/api/v1/rooms/${r2.body.code}/ready`)
@@ -215,7 +229,10 @@ describe('force-close room', () => {
         .send({ ready: true })
         .expect(200);
     }
-    await request(server()).post(`/api/v1/rooms/${r2.body.code}/start`).set(auth(h2.token)).expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${r2.body.code}/start`)
+      .set(auth(h2.token))
+      .expect(200);
     await request(server())
       .post(`/api/v1/dashboard/rooms/${r2.body.code}/close`)
       .set(auth(moderator.token))

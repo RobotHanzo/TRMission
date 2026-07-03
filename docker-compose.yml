@@ -94,6 +94,9 @@ services:
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
       OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE:-http://localhost:8080}
+      # Maintainer dashboard: comma-separated emails granted the owner role at boot
+      # (accounts must already be registered; served at /admin/ by the web container).
+      DASHBOARD_OWNER_EMAILS: ${DASHBOARD_OWNER_EMAILS:-}
     depends_on:
       mongo:
         condition: service_healthy

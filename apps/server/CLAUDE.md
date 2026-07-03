@@ -114,6 +114,36 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   human, and bot moves are logged actions, so replay/recovery are unaffected. The roster is persisted
   on the game doc and resumes after recovery. `TRM_BOT_DELAY_MS` paces moves (0 in tests).
 
+## Maintainer dashboard (`src/dashboard/`)
+
+REST for `apps/admin` under `api/v1/dashboard`. Access control is a **separate collection**,
+`dashboardAccounts` (`_id = users._id`, role + `extraPermissions`/`deniedPermissions`), never a
+flag on `UserDoc`; the role→permission taxonomy lives in `@trm/shared` (`effectivePermissions`)
+so server guard and admin UI can't drift. `DashboardGuard` runs after `AccessTokenGuard` and reads
+the collection **per request** (revocation is instant; nothing is embedded in tokens): guest or
+no record → 404 (nondisclosing), missing `@RequirePermission(...)` permission → 403.
+`DASHBOARD_OWNER_EMAILS` seeds owners at boot (idempotent, self-healing, audited). Every mutation
+appends to `dashboardAudit` via `AuditService` — that repo exposes only `append`/`list` (append-only
+by surface; a spec pins it).
+
+Rules that bite here:
+
+- **Hidden info**: a LIVE game's detail redacts `seed` (seed + contentHash = deck order = every
+  hand) and never exposes state or the action log; log/replay endpoints stay hard-gated on
+  `status: 'COMPLETED'` (the gate lives only in `HistoryRepo.loadReplay` — the dashboard bypasses
+  *membership*, never the gate).
+- **Ban** (`users.ban`): sets `disabledAt` + revokes all refresh families; enforcement chokepoints
+  are `AuthService.issue()`/`refresh()` and the lobby's three ws-ticket paths. `AccessTokenGuard`
+  is deliberately untouched — already-issued access tokens keep read-only REST for ≤15min
+  (documented on the endpoint).
+- **Terminate** (`games.terminate`): DB CAS `LIVE→TERMINATED` **first**, then `hub.evictMatch`
+  (drains the match queue, notifies sockets with `errors:gameTerminated`, clears registries), then
+  the room closes. `loadForRecovery` refuses TERMINATED (reconnects can't resurrect) and
+  `recordCompletion` CASes on LIVE (a racing bot game-over can't overwrite). Terminated games are
+  never archived or replayable.
+- **Lockout protections**: self-modification of your own maintainer record is always 403; the last
+  owner can't be demoted/revoked (409); maintainers can't be banned until their access is revoked.
+
 `src/main.ts` wires helmet (CSP off so Scalar's CDN loads — tighten in prod), cookie-parser, CORS
 allowlist, attaches the ws server, and builds the OpenAPI doc from the live app (Scalar at `/docs`,
 JSON at `/api/openapi.json`). Validation + OpenAPI schemas come from **one zod source** via

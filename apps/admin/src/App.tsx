@@ -114,9 +114,7 @@ export default function App() {
         {session.user && (
           <span className="oc-chip">
             {session.user.displayName}
-            {session.role && (
-              <span className="oc-role-badge">{t(ROLE_KEY[session.role])}</span>
-            )}
+            {session.role && <span className="oc-role-badge">{t(ROLE_KEY[session.role])}</span>}
           </span>
         )}
         <button

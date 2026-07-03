@@ -16,10 +16,7 @@ async function registered(email: string, displayName: string) {
 }
 
 async function guest(displayName: string) {
-  const res = await request(server())
-    .post('/api/v1/auth/guest')
-    .send({ displayName })
-    .expect(201);
+  const res = await request(server()).post('/api/v1/auth/guest').send({ displayName }).expect(201);
   return { userId: res.body.user.id as string, token: res.body.accessToken as string };
 }
 
@@ -56,7 +53,10 @@ beforeAll(async () => {
     .send({})
     .expect(201);
   roomCode = room.body.code;
-  await request(server()).post(`/api/v1/rooms/${roomCode}/join`).set(auth(member.token)).expect(200);
+  await request(server())
+    .post(`/api/v1/rooms/${roomCode}/join`)
+    .set(auth(member.token))
+    .expect(200);
   for (const u of [host, member]) {
     await request(server())
       .post(`/api/v1/rooms/${roomCode}/ready`)
@@ -134,10 +134,7 @@ describe('overview', () => {
   });
 
   it('403s a viewer on a permission they lack (audit.read) but not on overview', async () => {
-    await request(server())
-      .get('/api/v1/dashboard/overview')
-      .set(auth(viewer.token))
-      .expect(200);
+    await request(server()).get('/api/v1/dashboard/overview').set(auth(viewer.token)).expect(200);
     await request(server()).get('/api/v1/dashboard/audit').set(auth(viewer.token)).expect(403);
     await request(server()).get('/api/v1/dashboard/audit').set(auth(admin.token)).expect(200);
   });

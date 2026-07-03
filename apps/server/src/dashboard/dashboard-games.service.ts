@@ -67,13 +67,11 @@ export class DashboardGamesService {
     const cursor = decodeCursor(query.cursor);
     const page = cursor
       ? {
-          $or: [
-            { updatedAt: { $lt: cursor.t } },
-            { updatedAt: cursor.t, _id: { $lt: cursor.id } },
-          ],
+          $or: [{ updatedAt: { $lt: cursor.t } }, { updatedAt: cursor.t, _id: { $lt: cursor.id } }],
         }
       : {};
-    const filter = query.status === 'all' ? page : { status: query.status as GameDoc['status'], ...page };
+    const filter =
+      query.status === 'all' ? page : { status: query.status as GameDoc['status'], ...page };
     const docs = await this.games
       .find(filter)
       .sort({ updatedAt: -1, _id: -1 })
@@ -179,12 +177,7 @@ export class DashboardGamesService {
     if (!(await this.rooms.closeLobby(code))) {
       throw new ConflictException('room is no longer in LOBBY');
     }
-    await this.audit.log(
-      actor,
-      'room.close',
-      { type: 'room', id: code },
-      reason ? { reason } : {},
-    );
+    await this.audit.log(actor, 'room.close', { type: 'room', id: code }, reason ? { reason } : {});
     const updated = await this.rooms.get(code);
     return toRoomRow(updated ?? room);
   }

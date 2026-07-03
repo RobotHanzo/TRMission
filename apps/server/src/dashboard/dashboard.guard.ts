@@ -7,11 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
-import {
-  effectivePermissions,
-  type DashboardPermission,
-  type DashboardRole,
-} from '@trm/shared';
+import { effectivePermissions, type DashboardPermission, type DashboardRole } from '@trm/shared';
 import type { AuthUser } from '../auth/auth.types';
 import { DashboardAccountRepo } from './dashboard-account.repo';
 import { DASHBOARD_PERMISSION_KEY } from './require-permission.decorator';

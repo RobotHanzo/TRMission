@@ -30,6 +30,7 @@ yarn workspace @trm/proto generate     # regenerate src/gen/ from .proto (buf)
 docker compose up -d mongo             # Mongo on :27017
 yarn workspace @trm/server dev         # REST + ws on :3001, Scalar docs at /docs
 yarn workspace @trm/web dev            # app on :5173 (proxies /api + /ws → :3001)
+yarn workspace @trm/admin dev          # maintainer dashboard on :5174/admin/ (proxies /api → :3001)
 ```
 
 `turbo test`/`typecheck` depend on `^build` + `build`, so `@trm/proto` codegen always runs first.
@@ -49,15 +50,19 @@ gitignored and a drift between it and the `.proto` is a CI failure.
 ## Monorepo layout & build order
 
 ```
-packages/proto  → shared → map-data → engine → apps/{server,web}
+packages/proto  → shared → map-data → engine → apps/{server,web,admin}
 ```
 
 - `@trm/shared` — enums, scoring/rule constants, **seeded counter PRNG**, ids, error taxonomy, digest.
 - `@trm/map-data` — the authored Taiwan content (cities/routes/tickets) + `validate()` + `CONTENT_HASH`.
 - `@trm/engine` — the **pure deterministic reducer** (rules, scoring, longest-trail, connectivity).
 - `@trm/proto` — protobuf-es wire protocol (the engine⇄wire contract).
-- `apps/server` — NestJS: WebSocket gateway + REST (auth/lobby/history) + Mongo + OpenAPI + bots.
+- `apps/server` — NestJS: WebSocket gateway + REST (auth/lobby/history/dashboard) + Mongo + OpenAPI + bots.
 - `apps/web` — React + Vite + TS: SVG board, realtime client, i18n, zustand.
+- `apps/admin` — the maintainer dashboard (REST-only React app, deployed same-origin under
+  `/admin/`). Dashboard access lives in the `dashboardAccounts` collection (role + per-account
+  permission overrides referencing `users._id`); the permission taxonomy is in `@trm/shared`.
+  A LIVE game's hidden info (state, action log, even the seed) never reaches this surface.
 
 Internal packages export **TS source** (no per-lib build step) except `proto` (codegen). Each area
 has its own `CLAUDE.md` with the local architecture — read it before working there.
@@ -112,7 +117,9 @@ These mirror the ADRs in the development plan; treat them as binding.
 `PORT`, `MONGO_URL`, `MONGO_DB`, `JWT_SECRET` (set in prod), `CORS_ORIGINS` (comma list),
 `COOKIE_SECURE`, `TRM_PERSISTENCE` (`0` = in-memory, no auth/lobby), `TRM_DEV_GAME` (`1` = seed a
 demo game on boot), `TRM_BOT_DELAY_MS` (pause between bot moves; `0` in tests),
-`JWT_ACCESS_TTL`, `WS_TICKET_TTL`, `REFRESH_TTL_MS`, `GUEST_TTL_MS`.
+`JWT_ACCESS_TTL`, `WS_TICKET_TTL`, `REFRESH_TTL_MS`, `GUEST_TTL_MS`,
+`DASHBOARD_OWNER_EMAILS` (comma list of registered emails granted the `owner` dashboard role at
+every boot; other maintainers are managed from the dashboard itself).
 
 **Auth methods** (each independently switchable; the web reads `GET /auth/config`, the server
 enforces): `AUTH_PASSWORD_LOGIN_ENABLED` (`0` disables email/password login+register+upgrade),

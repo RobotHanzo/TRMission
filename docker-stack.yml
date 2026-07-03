@@ -38,6 +38,8 @@ services:
       MONGO_DB: trmission
       JWT_SECRET: ${JWT_SECRET}            # set in Portainer env vars
       CORS_ORIGINS: http://localhost:8080
+      # Maintainer dashboard owners (comma-separated registered emails; served at /admin/).
+      DASHBOARD_OWNER_EMAILS: ${DASHBOARD_OWNER_EMAILS:-}
     ports:
       - "3001:3001"
     deploy:

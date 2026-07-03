@@ -93,12 +93,7 @@ export class DashboardUsersService {
     }
     await this.users.setDisabled(userId, actor.userId, reason);
     await this.sessions.revokeAllForUser(userId);
-    await this.audit.log(
-      actor,
-      'user.ban',
-      { type: 'user', id: userId },
-      reason ? { reason } : {},
-    );
+    await this.audit.log(actor, 'user.ban', { type: 'user', id: userId }, reason ? { reason } : {});
     return this.detail(userId);
   }
 

@@ -45,9 +45,7 @@ export class DashboardAuditRepo implements OnModuleInit {
     await this.col.createIndex({ at: -1 });
   }
 
-  async append(
-    entry: Omit<AuditEntryDoc, '_id' | 'at'>,
-  ): Promise<AuditEntryDoc> {
+  async append(entry: Omit<AuditEntryDoc, '_id' | 'at'>): Promise<AuditEntryDoc> {
     const doc: AuditEntryDoc = { _id: new ObjectId(), at: new Date(), ...entry };
     await this.col.insertOne(doc);
     return doc;

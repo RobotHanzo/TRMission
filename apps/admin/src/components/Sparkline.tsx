@@ -14,7 +14,10 @@ export function Sparkline({ values, width = 240 }: { values: number[]; width?: n
   const span = max - min || 1;
   const step = (width - pad * 2) / (values.length - 1);
   const points = values
-    .map((v, i) => `${(pad + i * step).toFixed(1)},${(h - pad - ((v - min) / span) * (h - pad * 2)).toFixed(1)}`)
+    .map(
+      (v, i) =>
+        `${(pad + i * step).toFixed(1)},${(h - pad - ((v - min) / span) * (h - pad * 2)).toFixed(1)}`,
+    )
     .join(' ');
   return (
     <svg className="oc-spark" viewBox={`0 0 ${width} ${h}`} preserveAspectRatio="none" aria-hidden>

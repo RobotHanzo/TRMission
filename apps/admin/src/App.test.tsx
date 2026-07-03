@@ -32,7 +32,12 @@ const OVERVIEW = {
     residentMemoryBytes: 100_000_000,
     commandApplyAvgMs: 1.5,
   },
-  versions: { engineVersion: 1, protocolVersion: 1, contentHash: 'abcdef1234567890', uptimeSeconds: 3600 },
+  versions: {
+    engineVersion: 1,
+    protocolVersion: 1,
+    contentHash: 'abcdef1234567890',
+    uptimeSeconds: 3600,
+  },
 };
 
 function primeSession(permissions: string[], role = 'viewer') {

@@ -16,7 +16,11 @@ const TAB_KEY: Record<(typeof TABS)[number], string> = {
 };
 
 const statusKey = (s: string): string =>
-  s === 'LOBBY' ? 'rooms.statusLobby' : s === 'STARTED' ? 'rooms.statusStarted' : 'rooms.statusClosed';
+  s === 'LOBBY'
+    ? 'rooms.statusLobby'
+    : s === 'STARTED'
+      ? 'rooms.statusStarted'
+      : 'rooms.statusClosed';
 
 export function RoomsView() {
   const { t } = useTranslation();

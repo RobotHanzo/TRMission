@@ -63,7 +63,10 @@ function Editor({
   };
 
   return (
-    <Drawer title={`${t('maintainers.editorTitle')} · ${row.displayName ?? shortId(row.userId)}`} onClose={onClose}>
+    <Drawer
+      title={`${t('maintainers.editorTitle')} · ${row.displayName ?? shortId(row.userId)}`}
+      onClose={onClose}
+    >
       <section>
         <h3>{t('maintainers.colRole')}</h3>
         <div className="oc-tabs" role="radiogroup">
@@ -235,7 +238,9 @@ export function MaintainersView() {
         )}
       </div>
 
-      {editing && <Editor row={editing} onSaved={() => void load()} onClose={() => setEditing(null)} />}
+      {editing && (
+        <Editor row={editing} onSaved={() => void load()} onClose={() => setEditing(null)} />
+      )}
       {revoking && (
         <ConfirmDialog
           title={t('maintainers.revokeConfirmTitle')}

@@ -150,7 +150,11 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   {t('users.enable')}
                 </button>
               ) : (
-                <button className="oc-btn danger" disabled={busy} onClick={() => setConfirming(true)}>
+                <button
+                  className="oc-btn danger"
+                  disabled={busy}
+                  onClick={() => setConfirming(true)}
+                >
                   {t('users.disable')}
                 </button>
               )}

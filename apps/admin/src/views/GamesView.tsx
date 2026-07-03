@@ -17,7 +17,11 @@ const TAB_KEY: Record<(typeof TABS)[number], string> = {
 };
 
 const statusKey = (s: string): string =>
-  s === 'LIVE' ? 'games.statusLive' : s === 'COMPLETED' ? 'games.statusCompleted' : 'games.statusTerminated';
+  s === 'LIVE'
+    ? 'games.statusLive'
+    : s === 'COMPLETED'
+      ? 'games.statusCompleted'
+      : 'games.statusTerminated';
 
 function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
@@ -70,7 +74,10 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             <div className="oc-kv">
               <span className="k">{t('games.colStatus')}</span>
               <span className="v">
-                <SignalBadge aspect={aspectForStatus(detail.status)} label={t(statusKey(detail.status))} />
+                <SignalBadge
+                  aspect={aspectForStatus(detail.status)}
+                  label={t(statusKey(detail.status))}
+                />
                 {detail.inMemory ? ` · ${t('games.inMemory')}` : ''}
               </span>
             </div>
@@ -93,7 +100,9 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             <div className="oc-kv">
               <span className="k">{t('games.seed')}</span>
               <span className="v">
-                {detail.seed !== undefined ? String(detail.seed) : (
+                {detail.seed !== undefined ? (
+                  String(detail.seed)
+                ) : (
                   <span className="oc-muted">{t('games.seedHidden')}</span>
                 )}
               </span>
@@ -271,7 +280,11 @@ export function GamesView() {
           </thead>
           <tbody>
             {rows.map((g) => (
-              <tr key={g.gameId} className="clickable" onClick={() => openDetail('games', g.gameId)}>
+              <tr
+                key={g.gameId}
+                className="clickable"
+                onClick={() => openDetail('games', g.gameId)}
+              >
                 <td className="oc-mono">{shortId(g.gameId)}</td>
                 <td>
                   <SignalBadge aspect={aspectForStatus(g.status)} label={t(statusKey(g.status))} />

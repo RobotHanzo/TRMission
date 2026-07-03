@@ -62,7 +62,10 @@ describe('ban enforcement', () => {
     }
     await request(server()).post(`/api/v1/rooms/${code}/start`).set(auth(victim.token)).expect(200);
     // Sanity: ticket works pre-ban.
-    await request(server()).post(`/api/v1/rooms/${code}/ticket`).set(auth(victim.token)).expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ticket`)
+      .set(auth(victim.token))
+      .expect(200);
 
     // Ban.
     const banned = await request(server())
@@ -78,13 +81,13 @@ describe('ban enforcement', () => {
       .post('/api/v1/auth/login')
       .send({ email: 'victim@example.com', password: 'password123' })
       .expect(403);
-    await request(server())
-      .post('/api/v1/auth/refresh')
-      .set('Cookie', victim.cookie)
-      .expect(401);
+    await request(server()).post('/api/v1/auth/refresh').set('Cookie', victim.cookie).expect(401);
 
     // ws-game ticket refused for the banned member.
-    await request(server()).post(`/api/v1/rooms/${code}/ticket`).set(auth(victim.token)).expect(403);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ticket`)
+      .set(auth(victim.token))
+      .expect(403);
     await request(server())
       .post(`/api/v1/rooms/${code}/spectate`)
       .set(auth(victim.token))
