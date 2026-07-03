@@ -265,6 +265,8 @@
   "263": "per-game command queue (apps/server/src/game/command-queue.ts)",
   "264": "game.module.ts board resolver factory",
   "265": "GameSession.prepare (pure)",
+  "266": "RouteShape.tsx",
+  "267": "bot-pacing.ts",
   "286": "apps/web/CLAUDE.md",
   "287": "future/mission-complete-levelup.mp3 (reserved for future event system)",
   "288": "Mixkit Free Sound Effects License",

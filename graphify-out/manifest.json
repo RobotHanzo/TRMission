@@ -2543,5 +2543,15 @@
     "mtime": 1783106315.8305728,
     "ast_hash": "f03bac2d9d2ebe5e2195a2e3bfadc0e3",
     "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-04-docker-build-push-workflow-design.md": {
+    "mtime": 1783112323.032929,
+    "ast_hash": "1e0e86c1811a702d7d06cdac3d0775a7",
+    "semantic_hash": ""
+  },
+  ".github/workflows/docker-build.yml": {
+    "mtime": 1783112523.1226332,
+    "ast_hash": "56b8741ea065e9bd7deffceebdf5dd46",
+    "semantic_hash": ""
   }
 }
