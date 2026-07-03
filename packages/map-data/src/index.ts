@@ -12,6 +12,7 @@ export * from './tickets';
 export * from './validate';
 export * from './graph';
 export * from './generate';
+export * from './geometry';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',

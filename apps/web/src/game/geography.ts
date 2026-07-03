@@ -126,30 +126,11 @@ export const GRATICULE = {
   ys: [10, 30, 50, 70, 90] as const,
 };
 
-/**
- * Catmull–Rom → cubic Bézier over a closed loop of points, yielding an organic
- * coastline without hand-tuned control points.
- */
-export function smoothClosedPath(pts: readonly (readonly [number, number])[]): string {
-  const n = pts.length;
-  if (n < 3) return '';
-  const at = (i: number): readonly [number, number] => pts[((i % n) + n) % n]!;
-  const f = (v: number): string => v.toFixed(2);
-  const start = at(0);
-  let d = `M ${f(start[0])} ${f(start[1])}`;
-  for (let i = 0; i < n; i++) {
-    const p0 = at(i - 1);
-    const p1 = at(i);
-    const p2 = at(i + 1);
-    const p3 = at(i + 2);
-    const c1x = p1[0] + (p2[0] - p0[0]) / 6;
-    const c1y = p1[1] + (p2[1] - p0[1]) / 6;
-    const c2x = p2[0] - (p3[0] - p1[0]) / 6;
-    const c2y = p2[1] - (p3[1] - p1[1]) / 6;
-    d += ` C ${f(c1x)} ${f(c1y)}, ${f(c2x)} ${f(c2y)}, ${f(p2[0])} ${f(p2[1])}`;
-  }
-  return `${d} Z`;
-}
+// Catmull–Rom coastline smoothing — moved to @trm/map-data so the server's shared-map
+// social card draws land rings with exactly the same curve as the board; re-exported here
+// so existing web imports keep working.
+export { smoothClosedPath } from '@trm/map-data';
+import { smoothClosedPath } from '@trm/map-data';
 
 export const TAIWAN_LAND_PATH = smoothClosedPath(TAIWAN_OUTLINE);
 export const CENTRAL_RANGE_PATH = smoothClosedPath(CENTRAL_RANGE);
