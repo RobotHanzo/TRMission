@@ -34,3 +34,12 @@ if (!win.matchMedia) {
     dispatchEvent: (): boolean => false,
   })) as unknown as typeof window.matchMedia;
 }
+
+// jsdom implements no Pointer Events capture API; CropDrawStage's rectangle-drag calls
+// setPointerCapture on pointerdown. Stub it globally so pointer-event-driven canvas tests don't
+// throw "target.setPointerCapture is not a function".
+if (!('setPointerCapture' in Element.prototype)) {
+  Element.prototype.setPointerCapture = (): void => {};
+  Element.prototype.releasePointerCapture = (): void => {};
+  Element.prototype.hasPointerCapture = (): boolean => false;
+}
