@@ -76,6 +76,40 @@ describe('MapScene', () => {
     expect(container.querySelectorAll('.claimable').length).toBe(0);
   });
 
+  it('event-style hooks: claim filter, data attributes, per-element overlays', () => {
+    const { container } = render(
+      <MapScene
+        {...base}
+        canAct
+        onRouteClick={() => {}}
+        claimFilter={(r) => r.id !== 'r1'}
+        routeData={(r) => ({ 'data-closed': r.id === 'r1' ? 'true' : undefined })}
+        cityData={(c) => ({ 'data-hotspot': c.id === 'a' ? '2' : undefined })}
+        renderRouteOverlay={(r, g) =>
+          r.id === 'r1' ? <circle className="evt-badge-bg" cx={g.mid.x} cy={g.mid.y} /> : null
+        }
+        renderCityOverlay={(c) =>
+          c.id === 'a' ? <circle className="evt-charter-chip" cx={c.x} cy={c.y} /> : null
+        }
+      />,
+    );
+    expect(container.querySelector('[data-route-id="r1"]')!.classList.contains('claimable')).toBe(
+      false,
+    );
+    expect(container.querySelector('[data-route-id="r2"]')!.classList.contains('claimable')).toBe(
+      true,
+    );
+    expect(container.querySelector('[data-route-id="r1"]')!.getAttribute('data-closed')).toBe(
+      'true',
+    );
+    expect(container.querySelector('[data-route-id="r2"]')!.hasAttribute('data-closed')).toBe(
+      false,
+    );
+    expect(container.querySelector('[data-city-id="a"]')!.getAttribute('data-hotspot')).toBe('2');
+    expect(container.querySelector('[data-route-id="r1"] .evt-badge-bg')).toBeTruthy();
+    expect(container.querySelector('[data-city-id="a"] .evt-charter-chip')).toBeTruthy();
+  });
+
   it('stations, glow seats, and ticket-target halos render like the board', () => {
     const { container } = render(
       <MapScene

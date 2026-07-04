@@ -91,6 +91,21 @@ export interface MapSceneProps<C extends SceneCity, R extends SceneRoute> {
    *  <title>) or the whole group incl. label (the editor). Default 'marker'. */
   cityHitArea?: 'marker' | 'group' | undefined;
 
+  /* ── per-element extension points (the board's random-events dressing) ── */
+  /** Extra claimability predicate ANDed into the usual canAct/unowned gate (e.g. a
+   *  typhoon-closed route can't be claimed even while unowned). */
+  claimFilter?: ((route: R) => boolean) | undefined;
+  /** Extra data-* attributes spread onto a route group (e.g. data-closed). */
+  routeData?: ((route: R) => Record<`data-${string}`, string | undefined>) | undefined;
+  /** Extra data-* attributes spread onto a city group (e.g. data-hotspot). */
+  cityData?: ((city: C) => Record<`data-${string}`, string | undefined>) | undefined;
+  /** Extra content rendered inside a route's group, after the colour-blind badge
+   *  (the board's typhoon / reopen-bonus chips). */
+  renderRouteOverlay?: ((route: R, geometry: RouteGeometry) => ReactNode) | undefined;
+  /** Extra content rendered inside a city's group, after the station ring and before the
+   *  label (the board's charter chip / hotspot badge). */
+  renderCityOverlay?: ((city: C) => ReactNode) | undefined;
+
   /* ── interaction ── */
   onRouteClick?: ((routeId: string) => void) | undefined;
   onCityClick?: ((cityId: string) => void) | undefined;
@@ -130,6 +145,11 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
   cityClass,
   alwaysHitRoutes,
   cityHitArea,
+  claimFilter,
+  routeData,
+  cityData,
+  renderRouteOverlay,
+  renderCityOverlay,
   onRouteClick,
   onCityClick,
   svgRef,
@@ -166,7 +186,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         if (!g) return null;
 
         const o = owned?.get(r.id);
-        const claimable = !!canAct && !o && !!onRouteClick;
+        const claimable = !!canAct && !o && !!onRouteClick && (claimFilter ? claimFilter(r) : true);
         const clickable = claimable || (!!alwaysHitRoutes && !!onRouteClick);
         // Unclaimed → route colour; claimed → owner's seat colour; locked → muted grey.
         const fill =
@@ -179,7 +199,8 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         const isFerry = (r.ferryLocos ?? 0) > 0;
         const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
         const glowSeat = glowingRoutes?.get(r.id);
-        const extra = routeClass ? ` ${routeClass(r)}` : '';
+        const routeHook = routeClass?.(r);
+        const extra = routeHook ? ` ${routeHook}` : '';
         const cls =
           'route' +
           (claimable ? ' claimable' : '') +
@@ -212,6 +233,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
             key={r.id}
             className={cls}
             data-route-id={r.id}
+            {...routeData?.(r)}
             style={groupStyle}
             onClick={clickable ? pick : undefined}
           >
@@ -241,6 +263,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
                 </text>
               </g>
             )}
+            {renderRouteOverlay?.(r, g)}
           </g>
         );
       })}
@@ -254,7 +277,8 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         // [data-zoom] rules in game.css); islands always keep their label.
         const tier = cityTier?.(c.id);
         const isTarget = highlightCities?.has(c.id) ?? false;
-        const extra = cityClass ? ` ${cityClass(c)}` : '';
+        const cityHook = cityClass?.(c);
+        const extra = cityHook ? ` ${cityHook}` : '';
         const cls =
           'city' +
           (c.isIsland ? ' island' : '') +
@@ -275,7 +299,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         const builtSeat = glowingStations?.get(c.id);
         const justBuilt = builtSeat !== undefined;
         return (
-          <g key={c.id} data-city-id={c.id} className={cls} onClick={onGroup}>
+          <g key={c.id} data-city-id={c.id} {...cityData?.(c)} className={cls} onClick={onGroup}>
             {/* Offered-ticket endpoint: a soft halo behind the marker so the player can trace
                 the railways a ticket needs while the chooser holds the rail. */}
             {isTarget && <circle className="ticket-target-halo" cx={c.x} cy={c.y} />}
@@ -324,6 +348,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
                 style={{ '--seat': seatColor(builtSeat) } as CSSProperties}
               />
             )}
+            {renderCityOverlay?.(c)}
             {cityLabel && (
               <text className="city-label" x={c.x} y={c.y}>
                 {cityLabel(c)}
