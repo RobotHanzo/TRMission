@@ -16,6 +16,10 @@ async function registered(email: string, displayName: string): Promise<{ token: 
     .post('/api/v1/auth/register')
     .send({ email, password: 'password123', displayName })
     .expect(201);
+  // Map authoring is feature-gated; this suite exercises the authoring flows themselves.
+  await t.db
+    .collection('users')
+    .updateOne({ _id: res.body.user.id } as never, { $set: { features: ['mapBuilder'] } });
   return { token: res.body.accessToken, id: res.body.user.id };
 }
 
@@ -134,13 +138,13 @@ describe('maps: guests cannot author', () => {
     await request(server()).delete(`/api/v1/maps/${id}`).set(auth(g.token)).expect(403);
     await request(server()).post(`/api/v1/maps/${id}/share`).set(auth(g.token)).expect(403);
 
-    // A guest CAN read a map they were given a share code for (peek is not authoring)…
+    // The strict mapBuilder gate covers the whole share flow: a guest (who can never hold
+    // features) can neither peek a share code nor clone it.
     const shared = await request(server()).post(`/api/v1/maps/${id}/share`).set(auth(a.token)).expect(200);
     await request(server())
       .get(`/api/v1/maps/shared/${shared.body.shareCode}`)
       .set(auth(g.token))
-      .expect(200);
-    // …but cloning creates an owned document, which is authoring.
+      .expect(403);
     await request(server())
       .post(`/api/v1/maps/shared/${shared.body.shareCode}/clone`)
       .set(auth(g.token))

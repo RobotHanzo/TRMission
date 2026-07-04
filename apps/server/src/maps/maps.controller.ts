@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -17,7 +16,6 @@ import {
   CreateMapDto,
   CreateMapSchema,
   draftFromDto,
-  MapContentResponseSchema,
   MapDetailSchema,
   MapSummarySchema,
   ShareResultSchema,
@@ -27,13 +25,19 @@ import {
 } from './maps.schemas';
 import { apiSchema } from '../openapi/openapi';
 import { AccessTokenGuard } from '../auth/access-token.guard';
+import { FeatureGuard } from '../auth/feature.guard';
+import { RequireFeature } from '../auth/require-feature.decorator';
 import { RegisteredUserGuard } from '../auth/registered-user.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthUser } from '../auth/auth.types';
 
+// Map authoring/sharing is a per-account gated feature (strict gate: list, author, share,
+// peek, and clone all require it). Only published-content resolution is exempt — that
+// route lives on MapsContentController.
 @ApiTags('maps')
 @ApiBearerAuth('access-token')
-@UseGuards(AccessTokenGuard)
+@UseGuards(AccessTokenGuard, FeatureGuard)
+@RequireFeature('mapBuilder')
 @Controller('api/v1/maps')
 export class MapsController {
   constructor(private readonly maps: MapsService) {}
@@ -112,14 +116,5 @@ export class MapsController {
   @ApiResponse({ status: 201, schema: apiSchema(MapDetailSchema) })
   clone(@Param('code') code: string, @CurrentUser() user: AuthUser) {
     return this.maps.cloneByCode(code, user.userId);
-  }
-
-  @Get('content/:hash')
-  @ApiOperation({ summary: 'Fetch published, immutable map content by contentHash' })
-  @ApiResponse({ status: 200, schema: apiSchema(MapContentResponseSchema) })
-  async content(@Param('hash') hash: string) {
-    const doc = await this.maps.getContentByHash(hash);
-    if (!doc) throw new NotFoundException('unknown content hash');
-    return doc.content;
   }
 }

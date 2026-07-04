@@ -36,3 +36,37 @@ describe('PublicUser.features', () => {
     expect(after.body.features).toEqual(['mapBuilder']);
   });
 });
+
+describe('maps routes require mapBuilder', () => {
+  it('403 FEATURE_DISABLED without the feature; works with it; content/:hash stays open', async () => {
+    const a = await registered('feat-maps@example.com', 'FeatMaps');
+
+    const denied = await request(server()).get('/api/v1/maps').set(auth(a.token)).expect(403);
+    expect(denied.body.code).toBe('FEATURE_DISABLED');
+    await request(server())
+      .post('/api/v1/maps')
+      .set(auth(a.token))
+      .send({ nameZh: '圖', nameEn: 'Map' })
+      .expect(403);
+    await request(server()).get('/api/v1/maps/shared/ABCD1234').set(auth(a.token)).expect(403);
+
+    await grant(t.db, a.id, ['mapBuilder']);
+    await request(server()).get('/api/v1/maps').set(auth(a.token)).expect(200);
+    const created = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(a.token))
+      .send({ nameZh: '圖', nameEn: 'Map' })
+      .expect(201);
+    expect(created.body.id).toBeTruthy();
+
+    // content/:hash is NOT feature-gated — any authenticated user (even a guest) may resolve it.
+    const g = await request(server())
+      .post('/api/v1/auth/guest')
+      .send({ displayName: 'Guest' })
+      .expect(201);
+    await request(server())
+      .get('/api/v1/maps/content/no-such-hash')
+      .set(auth(g.body.accessToken))
+      .expect(404); // 404 (unknown hash), NOT 403 — proves the route is reachable
+  });
+});
