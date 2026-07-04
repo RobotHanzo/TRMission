@@ -7,6 +7,7 @@ const zhHant = {
   nav: {
     overview: '總覽',
     users: '使用者',
+    features: '功能開通',
     games: '對局',
     rooms: '房間',
     maintainers: '維護者',
@@ -233,6 +234,7 @@ const en: typeof zhHant = {
   nav: {
     overview: 'Overview',
     users: 'Users',
+    features: 'Feature access',
     games: 'Games',
     rooms: 'Rooms',
     maintainers: 'Maintainers',
