@@ -371,6 +371,17 @@
   padding: 2px 0;
   cursor: pointer;
 }
+.crop-stage-shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-2);
+  height: 100%;
+  min-height: 0;
+}
+.crop-stage-body {
+  flex: 1;
+  min-height: 0;
+}
 
 /* ── Missions table ──────────────────────────────────────────────────────────────────────── */
 /* The table's two city dropdowns give it an intrinsic width wider than a phone; the wrapper
