@@ -2,12 +2,12 @@
 // experience renders for BOTH a live server game (commands = GameSocket) and the local tutorial /
 // encyclopedia sandbox (commands = SandboxSocket). It is a pure function of the passed `snapshot`
 // plus the global display prefs; an optional `overlay` slot carries the tutorial coachmark/spotlight.
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
 import type { RoomMember } from '../net/rest';
-import { useGameStore } from '../store/game';
+import { useGameStore, type RejectionInfo } from '../store/game';
 import { useUi } from '../store/ui';
 import { routeById, ticketById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
@@ -39,7 +39,7 @@ import { TicketChooser } from '../components/TicketChooser';
 import { TunnelModal } from '../components/TunnelModal';
 import { ScoreBoard } from '../components/ScoreBoard';
 import { AnimationLayer } from '../components/AnimationLayer';
-import { Toast } from '../components/Toast';
+import { useAnimationsStore } from '../store/animations';
 import { CommsPanel } from '../components/CommsPanel';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import { useSoundDriver } from '../hooks/useSoundDriver';
@@ -109,8 +109,11 @@ export function GameStage({
   // The base payment committed to a pending tunnel claim. Its cards stay in hand until the tunnel
   // resolves, so the surcharge must be enumerated against the hand minus this.
   const [tunnelBase, setTunnelBase] = useState<Payment | null>(null);
-  // Client-side nudge (e.g. "not enough cards") shown when a click can't open a modal.
-  const [notice, setNotice] = useState<string | null>(null);
+  const pushNotification = useAnimationsStore((s) => s.pushNotification);
+  // Tracks the last rejection object already turned into a chip, so the push effect below can
+  // list its true dependencies (rejection, pushNotification, t) without re-pushing the same
+  // rejection when pushNotification/t merely change identity (e.g. a locale switch).
+  const pushedRejectionRef = useRef<RejectionInfo | null>(null);
   // Live game: a wide viewport shows comms as its own column; a narrow one tabs between rail↔comms.
   const wide = useMediaQuery('(min-width: 1300px)');
   const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
@@ -144,10 +147,14 @@ export function GameStage({
     return () => clearTimeout(id);
   }, [rejection, setRejection]);
   useEffect(() => {
-    if (!notice) return;
-    const id = setTimeout(() => setNotice(null), 3500);
-    return () => clearTimeout(id);
-  }, [notice]);
+    if (!rejection || rejection === pushedRejectionRef.current) return;
+    pushedRejectionRef.current = rejection;
+    if (isChatRejectionKey(rejection.messageKey)) return;
+    pushNotification({
+      variant: 'error',
+      text: t(eventRejectionHintKey(rejection.messageKey) ?? 'actionRejected'),
+    });
+  }, [rejection, pushNotification, t]);
 
   const me = snapshot.you?.playerId ?? null;
   // No SelfView ⇒ this connection is a spectator: read-only (all affordances gate on me/canAct/canDraw).
@@ -179,16 +186,18 @@ export function GameStage({
       return;
     }
     const s = routeShortfall(hand, route, extra);
-    setNotice(
-      s.kind === 'locos'
-        ? t('insufficientLocos', { need: s.need, have: s.have })
-        : t('insufficientCards', { need: s.need, have: s.have }),
-    );
+    pushNotification({
+      variant: 'notice',
+      text:
+        s.kind === 'locos'
+          ? t('insufficientLocos', { need: s.need, have: s.have })
+          : t('insufficientCards', { need: s.need, have: s.have }),
+    });
   };
   const pickCity = (cityId: string) => {
     const remaining = myPub?.stationsRemaining ?? 0;
     if (remaining <= 0) {
-      setNotice(t('noStationsLeft'));
+      pushNotification({ variant: 'notice', text: t('noStationsLeft') });
       return;
     }
     const cost = 3 - remaining + 1;
@@ -199,7 +208,10 @@ export function GameStage({
       return;
     }
     const s = stationShortfall(hand, cost);
-    setNotice(t('insufficientCards', { need: s.need, have: s.have }));
+    pushNotification({
+      variant: 'notice',
+      text: t('insufficientCards', { need: s.need, have: s.have }),
+    });
   };
   const confirmPayment = (p: Payment) => {
     if (!commands || !claim) return;
@@ -507,14 +519,6 @@ export function GameStage({
           onPlayAgain={onPlayAgain}
         />
       )}
-      <Toast message={notice} variant="toast-notice" />
-      <Toast
-        message={
-          rejection && !isChatRejectionKey(rejection.messageKey)
-            ? t(eventRejectionHintKey(rejection.messageKey) ?? 'actionRejected')
-            : null
-        }
-      />
       <AnimationLayer />
       {overlay}
     </div>
