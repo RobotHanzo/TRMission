@@ -1,10 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useUi, roomCodeFromPath } from './ui';
 import { disconnectGame } from '../net/connection';
+import { goToAdmin } from '../lib/adminApp';
 
 // The store tears down the live game socket on navigation home; stub that collaborator
 // so these unit tests assert the call without a real WebSocket.
 vi.mock('../net/connection', () => ({ disconnectGame: vi.fn() }));
+vi.mock('../lib/adminApp', () => ({
+  isAdminTarget: (t: string) => t === '/admin' || t.startsWith('/admin/'),
+  goToAdmin: vi.fn(),
+}));
 
 const path = () => window.location.pathname;
 
@@ -95,6 +100,12 @@ describe('ui store routing', () => {
     useUi.getState().navigateAfterAuth();
     expect(useUi.getState().view).toBe('home');
     expect(path()).toBe('/');
+  });
+
+  it('navigateAfterAuth hard-redirects an admin-bound target instead of resuming it as an SPA view', () => {
+    window.history.replaceState(null, '', '/login?redirect=%2Fadmin%2Fusers%2F42');
+    useUi.getState().navigateAfterAuth();
+    expect(goToAdmin).toHaveBeenCalledWith('/admin/users/42');
   });
 
   it('enterHistory pushes /history, sets the view, and disconnects any live game', () => {

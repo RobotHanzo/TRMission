@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Theme, Locale, BoardLayout, UserPreferences } from '../net/rest';
 import { disconnectGame } from '../net/connection';
+import { isAdminTarget, goToAdmin } from '../lib/adminApp';
 
 // Re-exported so feature code keeps a single import site for these display-pref types.
 //  Locale     — UI language.
@@ -269,6 +270,10 @@ export const useUi = create<UiState>()((set, get) => ({
   },
   navigateAfterAuth: () => {
     const target = readRedirectParam();
+    if (isAdminTarget(target)) {
+      goToAdmin(target);
+      return;
+    }
     const code = ROOM_PATH.exec(target)?.[1];
     if (code) {
       // Replace (not push) the /login (or /login/callback) entry — routing through enterRoom would
