@@ -6,6 +6,7 @@ import '../i18n';
 import { GameScreen } from './GameScreen';
 import { useGame } from '../store/game';
 import { useUi } from '../store/ui';
+import { api } from '../net/rest';
 
 vi.mock('../net/connection', () => ({
   connectGame: vi.fn(),
@@ -15,7 +16,11 @@ vi.mock('../net/connection', () => ({
 vi.mock('../net/rest', () => ({
   setOnTokenChange: vi.fn(),
   setAccessToken: vi.fn(),
-  api: { getRoom: vi.fn(() => Promise.resolve({ members: [] })) },
+  api: {
+    getRoom: vi.fn(() => Promise.resolve({ members: [] })),
+    voteRematch: vi.fn(() => Promise.resolve({ members: [] })),
+    rematch: vi.fn(() => Promise.resolve({ members: [] })),
+  },
 }));
 vi.mock('../hooks/useAnimationDriver', () => ({ useAnimationDriver: vi.fn() }));
 
@@ -132,5 +137,121 @@ describe('GameScreen session replaced', () => {
     expect(screen.getByRole('alertdialog')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '返回首頁' }));
     expect(useUi.getState().view).toBe('home');
+  });
+});
+
+// A live (non-spectator, non-game-over) snapshot, for isolating the phase gate.
+const liveSnap = () =>
+  create(GameSnapshotSchema, {
+    stateVersion: 1,
+    phase: Phase.AWAIT_ACTION,
+    currentPlayerId: 'p0',
+    turnOrder: ['p0', 'p1'],
+    players: [
+      { id: 'p0', seat: 0, trainCars: 45, stationsRemaining: 3 },
+      { id: 'p1', seat: 1, trainCars: 45, stationsRemaining: 3 },
+    ],
+    you: { playerId: 'p0' },
+  });
+
+// A finished game seen by a spectator (no `you`) — must never be auto-joined into a reset lobby.
+const gameOverSpectatorSnap = () =>
+  create(GameSnapshotSchema, {
+    stateVersion: 1,
+    phase: Phase.GAME_OVER,
+    players: [
+      { id: 'p0', seat: 0, routePoints: 10 },
+      { id: 'p1', seat: 1, routePoints: 5 },
+    ],
+    finalScores: {
+      players: [
+        {
+          playerId: 'p0',
+          routePoints: 10,
+          ticketNet: 0,
+          ticketsCompleted: 0,
+          stationsUsed: 0,
+          unusedStations: 3,
+          stationBonus: 0,
+          longestTrailLength: 0,
+          longestBonus: 0,
+          total: 10,
+          keptTicketIds: [],
+          completedTicketIds: [],
+          longestTrailRouteIds: [],
+        },
+        {
+          playerId: 'p1',
+          routePoints: 5,
+          ticketNet: 0,
+          ticketsCompleted: 0,
+          stationsUsed: 0,
+          unusedStations: 3,
+          stationBonus: 0,
+          longestTrailLength: 0,
+          longestBonus: 0,
+          total: 5,
+          keptTicketIds: [],
+          completedTicketIds: [],
+          longestTrailRouteIds: [],
+        },
+      ],
+      ranking: [{ playerIds: ['p0'] }, { playerIds: ['p1'] }],
+    },
+  });
+
+describe('GameScreen rematch redirect', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('polls the room after game-over and enters the room once it resets to LOBBY', async () => {
+    vi.useFakeTimers();
+    try {
+      useUi.setState({ view: 'game', ticket: 'tkt', roomCode: 'ABCD', gameId: 'g1' });
+      useGame.setState({ snapshot: gameOverSnap(), rejection: null });
+      let status: 'STARTED' | 'LOBBY' = 'STARTED';
+      vi.mocked(api.getRoom).mockImplementation(() =>
+        Promise.resolve({ hostId: 'p0', status, members: [] } as never),
+      );
+      render(<GameScreen />);
+      await vi.advanceTimersByTimeAsync(100); // settle the initial fetches
+      expect(useUi.getState().view).toBe('game');
+      status = 'LOBBY'; // the host has rematched
+      await vi.advanceTimersByTimeAsync(2000); // next poll tick observes it
+      expect(useUi.getState().view).toBe('room');
+      expect(useUi.getState().roomCode).toBe('ABCD');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not run the rematch poll while the game is still live', async () => {
+    vi.useFakeTimers();
+    try {
+      useUi.setState({ view: 'game', ticket: 'tkt', roomCode: 'ABCD', gameId: 'g1' });
+      useGame.setState({ snapshot: liveSnap(), rejection: null });
+      vi.mocked(api.getRoom).mockClear();
+      vi.mocked(api.getRoom).mockResolvedValue({ hostId: 'p0', status: 'LOBBY', members: [] } as never);
+      render(<GameScreen />);
+      await vi.advanceTimersByTimeAsync(5000);
+      // Only the pre-existing one-shot roster effect fires — the game-over poll never starts.
+      expect(vi.mocked(api.getRoom)).toHaveBeenCalledTimes(1);
+      expect(useUi.getState().view).toBe('game');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not redirect a spectator watching a finished game', async () => {
+    vi.useFakeTimers();
+    try {
+      useUi.setState({ view: 'game', ticket: 'tkt', roomCode: 'ABCD', gameId: 'g1' });
+      useGame.setState({ snapshot: gameOverSpectatorSnap(), rejection: null });
+      vi.mocked(api.getRoom).mockResolvedValue({ hostId: 'p0', status: 'LOBBY', members: [] } as never);
+      render(<GameScreen />);
+      await vi.advanceTimersByTimeAsync(4000);
+      expect(useUi.getState().view).toBe('game');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
