@@ -13,7 +13,7 @@ import {
   type GameEvent as PbGameEvent,
   type CameraView,
 } from '@trm/proto';
-import { asPlayerId, messageKeyFor } from '@trm/shared';
+import { asPlayerId, messageKeyFor, SESSION_REPLACED_CLOSE_CODE } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
 import { boardForContentHash } from '@trm/engine';
 import type { Action, Board, GameConfig, GameEvent } from '@trm/engine';
@@ -340,6 +340,19 @@ export class GameHub {
         ),
       );
       return;
+    }
+
+    const prev = this.members.get(binding.gameId)?.get(binding.playerId);
+    if (prev && prev !== conn) {
+      prev.send(
+        rejectionFrame(
+          0,
+          RejectionCode.SESSION_REPLACED,
+          'errors:sessionReplaced',
+          'connected elsewhere',
+        ),
+      );
+      prev.terminate(SESSION_REPLACED_CLOSE_CODE, 'session_replaced');
     }
 
     conn.binding = { gameId: binding.gameId, player, seat: binding.seat };
