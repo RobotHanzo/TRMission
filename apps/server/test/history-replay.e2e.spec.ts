@@ -114,6 +114,15 @@ beforeAll(async () => {
   }
   // Let the fire-and-forget spectator write + completion archive settle.
   await new Promise((r) => setTimeout(r, 50));
+
+  // Replay browsing is feature-gated; grant it so the member-access tests keep exercising
+  // the granted path (direct db writes work on guests — only the dashboard API refuses
+  // them). The gate matrix itself is tested in the last describe below.
+  await t.db
+    .collection('users')
+    .updateMany({ _id: { $in: [host.id, member.id, watcher.id] } } as never, {
+      $set: { features: ['replayReview'] },
+    });
 }, 180_000);
 afterAll(() => t.close());
 
@@ -212,5 +221,66 @@ describe('GET /api/v1/history/:gameId/replay', () => {
       completedAt: now,
     });
     await request(server()).get('/api/v1/history/live-1/replay').set(auth(host.token)).expect(404);
+  });
+});
+
+describe('replay browsing requires replayReview', () => {
+  const setFeatures = (userId: string, features: string[]) =>
+    t.db.collection('users').updateOne({ _id: userId } as never, { $set: { features } });
+
+  it('member without the feature: list/scoreboard OK, replay + visibility 403; link path stays open', async () => {
+    await setFeatures(member.id, []);
+
+    // History list + scoreboard stay open (spec: only the replay payload is gated).
+    await request(server()).get('/api/v1/history').set(auth(member.token)).expect(200);
+    await request(server()).get(`/api/v1/history/${gameId}`).set(auth(member.token)).expect(200);
+
+    const denied = await request(server())
+      .get(`/api/v1/history/${gameId}/replay`)
+      .set(auth(member.token))
+      .expect(403);
+    expect(denied.body.code).toBe('FEATURE_DISABLED');
+
+    // Sharing management is gated too.
+    await request(server())
+      .patch(`/api/v1/history/${gameId}/visibility`)
+      .set(auth(member.token))
+      .send({ visibility: 'link' })
+      .expect(403);
+
+    // Granted member: replay works and canConfigureVisibility is true.
+    await setFeatures(member.id, ['replayReview']);
+    const ok = await request(server())
+      .get(`/api/v1/history/${gameId}/replay`)
+      .set(auth(member.token))
+      .expect(200);
+    expect(ok.body.canConfigureVisibility).toBe(true);
+
+    // Flip to link, revoke the feature: the member (and an anonymous visitor) can still
+    // view via the link path; canConfigureVisibility drops to false.
+    await request(server())
+      .patch(`/api/v1/history/${gameId}/visibility`)
+      .set(auth(member.token))
+      .send({ visibility: 'link' })
+      .expect(200);
+    await setFeatures(member.id, []);
+    const viaLink = await request(server())
+      .get(`/api/v1/history/${gameId}/replay`)
+      .set(auth(member.token))
+      .expect(200);
+    expect(viaLink.body.canConfigureVisibility).toBe(false);
+    await request(server()).get(`/api/v1/history/${gameId}/replay`).expect(200); // anonymous
+
+    // True outsider on a PRIVATE replay still gets the nondisclosing 404.
+    await setFeatures(member.id, ['replayReview']);
+    await request(server())
+      .patch(`/api/v1/history/${gameId}/visibility`)
+      .set(auth(member.token))
+      .send({ visibility: 'private' })
+      .expect(200);
+    await request(server())
+      .get(`/api/v1/history/${gameId}/replay`)
+      .set(auth(outsider.token))
+      .expect(404);
   });
 });

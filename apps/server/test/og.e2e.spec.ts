@@ -37,6 +37,12 @@ beforeAll(async () => {
   t = await createTestApp();
   host = await guest('站長小明');
   rival = await guest('Rival');
+  // Visibility management is part of the replayReview feature (rival flips it below).
+  await t.db
+    .collection('users')
+    .updateMany({ _id: { $in: [host.id, rival.id] } } as never, {
+      $set: { features: ['replayReview'] },
+    });
 
   const room = await request(server())
     .post('/api/v1/rooms')
@@ -180,12 +186,15 @@ describe('shared-map cards', () => {
   let mapId: string;
 
   beforeAll(async () => {
-    // Map authoring needs a REGISTERED user (guests are 403 on /maps).
+    // Map authoring needs a REGISTERED user with the mapBuilder feature.
     const reg = await request(server())
       .post('/api/v1/auth/register')
       .send({ email: 'author@example.tw', password: 'hunter2hunter2', displayName: '地圖作者' })
       .expect(201);
     authorToken = reg.body.accessToken;
+    await t.db
+      .collection('users')
+      .updateOne({ _id: reg.body.user.id } as never, { $set: { features: ['mapBuilder'] } });
 
     const created = await request(server())
       .post('/api/v1/maps')

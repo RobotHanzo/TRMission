@@ -21,13 +21,18 @@ import { apiSchema } from '../openapi/openapi';
 import { AccessTokenGuard } from '../auth/access-token.guard';
 import { OptionalAccessTokenGuard } from '../auth/optional-access-token.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { UserRepo } from '../auth/user.repo';
+import { featureDisabled } from '../auth/feature.guard';
 import type { AuthUser } from '../auth/auth.types';
 
 @ApiTags('history')
 @ApiBearerAuth('access-token')
 @Controller('api/v1/history')
 export class HistoryController {
-  constructor(private readonly repo: HistoryRepo) {}
+  constructor(
+    private readonly repo: HistoryRepo,
+    private readonly users: UserRepo,
+  ) {}
 
   @Get()
   @UseGuards(AccessTokenGuard)
@@ -50,7 +55,9 @@ export class HistoryController {
   @Patch(':gameId/visibility')
   @HttpCode(200)
   @UseGuards(AccessTokenGuard)
-  @ApiOperation({ summary: "Set a finished game's replay visibility (seated players only)" })
+  @ApiOperation({
+    summary: "Set a finished game's replay visibility (seated players with replayReview only)",
+  })
   @ApiBody({ schema: apiSchema(SetVisibilitySchema) })
   @ApiResponse({ status: 200, schema: apiSchema(SetVisibilitySchema) })
   async setVisibility(
@@ -58,8 +65,17 @@ export class HistoryController {
     @CurrentUser() user: AuthUser,
     @Body() body: SetVisibilityDto,
   ) {
-    // The repo filter doubles as the authorization check (seated player), so a spectator,
-    // outsider, or unknown game all take the same nondisclosing 404.
+    // Seatedness first, feature second: a spectator, outsider, or unknown game keeps the
+    // nondisclosing 404 (a feature-403 must never become an existence oracle); only a
+    // proven seated player without the replayReview feature gets the disclosed 403.
+    const doc = await this.repo.get(gameId);
+    if (!doc || !doc.players.some((p) => p.userId === user.userId)) {
+      throw new NotFoundException('game not found');
+    }
+    if (!(await this.users.hasFeature(user.userId, 'replayReview'))) {
+      throw featureDisabled('replayReview');
+    }
+    // The repo filter re-checks seatedness atomically with the write.
     const ok = await this.repo.setVisibility(gameId, user.userId, body.visibility);
     if (!ok) throw new NotFoundException('game not found');
     return { visibility: body.visibility };
@@ -68,19 +84,28 @@ export class HistoryController {
   @Get(':gameId/replay')
   @UseGuards(OptionalAccessTokenGuard)
   @ApiOperation({
-    summary: 'Replay payload (config + action log) — members, or anyone when view-by-link',
+    summary:
+      'Replay payload (config + action log) — members with the replayReview feature, ' +
+      'or anyone when view-by-link',
   })
   @ApiResponse({ status: 200, schema: apiSchema(ReplayPayloadSchema) })
   async replay(@Param('gameId') gameId: string, @CurrentUser() user: AuthUser | undefined) {
-    // Membership (player/spectator) always grants access; otherwise the archive's visibility
-    // decides — 'link' admits anyone holding the URL (including anonymous visitors), while
-    // 'private' (or a legacy doc with no flag) 404s without revealing the game exists.
+    // Membership (player/spectator) grants access only WITH the replayReview feature;
+    // otherwise the archive's visibility decides — 'link' admits anyone holding the URL
+    // (anonymous visitors included, features irrelevant), while 'private' (or a legacy doc
+    // with no flag) 404s without revealing the game exists. A member without the feature
+    // gets a disclosed 403 instead: their own history already shows the game exists.
     const doc = await this.repo.get(gameId);
     if (!doc) throw new NotFoundException('game not found');
     const isPlayer = !!user && doc.players.some((p) => p.userId === user.userId);
     const isMember = isPlayer || (!!user && (doc.spectators ?? []).includes(user.userId));
     const visibility = doc.replayVisibility === 'link' ? 'link' : 'private';
-    if (!isMember && visibility !== 'link') throw new NotFoundException('game not found');
+    const canReview =
+      isMember && user ? await this.users.hasFeature(user.userId, 'replayReview') : false;
+    if (!canReview && visibility !== 'link') {
+      if (!isMember) throw new NotFoundException('game not found');
+      throw featureDisabled('replayReview');
+    }
 
     // The repo additionally hard-gates on status=COMPLETED — a live game's action log encodes
     // hidden information and must never leave the server.
@@ -107,7 +132,7 @@ export class HistoryController {
       completedAt: doc.completedAt.toISOString(),
       ...(data.finalDigest ? { finalDigest: data.finalDigest } : {}),
       visibility,
-      canConfigureVisibility: isPlayer,
+      canConfigureVisibility: isPlayer && canReview,
     };
   }
 }

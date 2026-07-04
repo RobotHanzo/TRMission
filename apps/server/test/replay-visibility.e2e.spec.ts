@@ -30,6 +30,15 @@ beforeAll(async () => {
   watcher = await guest('Watcher');
   outsider = await guest('Outsider');
 
+  // Member replay access + visibility management require the replayReview feature; grant
+  // it so this suite keeps testing the visibility rules themselves (the feature-gate matrix
+  // lives in history-replay.e2e.spec.ts).
+  await t.db
+    .collection('users')
+    .updateMany({ _id: { $in: [playerA.id, playerB.id, watcher.id] } } as never, {
+      $set: { features: ['replayReview'] },
+    });
+
   const now = new Date();
   await t.db.collection<GameDoc>('games').insertOne({
     _id: gameId,
