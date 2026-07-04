@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { create, type MessageInitShape } from '@bufbuild/protobuf';
 import { GameSnapshotSchema, Phase } from '@trm/proto';
 import '../i18n';
@@ -91,5 +91,110 @@ describe('EventsPanel', () => {
     useGame.setState({ snapshot: snapshot() });
     render(<EventsPanel />);
     expect(screen.queryByTestId('events-panel')).toBeNull();
+  });
+
+  it("opens the description modal from an active event's info button", () => {
+    useGame.setState({
+      snapshot: snapshot({
+        mode: 'intense',
+        roundIndex: 2,
+        active: [
+          { id: 'ev1', kind: 'TYPHOON_LANDFALL', routeIds: ['r1', 'r2'], endsAfterRound: 4 },
+        ],
+      }),
+    });
+    render(<EventsPanel />);
+
+    fireEvent.click(screen.getByLabelText('查看'));
+
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('颱風登陸')).toBeInTheDocument();
+    expect(
+      within(dialog).getByText('封閉部分路線；恢復通車後首位鋪設者可得 +2 分'),
+    ).toBeInTheDocument();
+  });
+
+  it("opens the description modal from a charter row's info button", () => {
+    useGame.setState({
+      snapshot: snapshot({
+        mode: 'light',
+        roundIndex: 1,
+        charters: [
+          {
+            id: 'c1',
+            cityA: 'taipei',
+            cityB: 'kaohsiung',
+            points: 12,
+            expiresAfterRound: 6,
+            wonByPlayerId: '',
+          },
+        ],
+      }),
+    });
+    render(<EventsPanel />);
+
+    fireEvent.click(screen.getByLabelText('查看'));
+
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('觀光專開列車')).toBeInTheDocument();
+    expect(within(dialog).getByText('以自己的路網連接指定兩座城市即可得分')).toBeInTheDocument();
+  });
+
+  it("opens the description modal from the forecast row's info button", () => {
+    useGame.setState({
+      snapshot: snapshot({
+        mode: 'moderate',
+        roundIndex: 3,
+        forecast: { id: 'f1', kind: 'SKY_LANTERN', startRound: 3, durationRounds: 2 },
+      }),
+    });
+    render(<EventsPanel />);
+
+    fireEvent.click(screen.getByLabelText('查看'));
+
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('天燈之夜')).toBeInTheDocument();
+    expect(within(dialog).getByText('指定路線分數加倍，但佔領需多付一張車廂卡')).toBeInTheDocument();
+  });
+
+  it('closes the description modal via the close button, backdrop click, and Escape', () => {
+    useGame.setState({
+      snapshot: snapshot({
+        mode: 'intense',
+        roundIndex: 2,
+        active: [
+          { id: 'ev1', kind: 'TYPHOON_LANDFALL', routeIds: ['r1', 'r2'], endsAfterRound: 4 },
+        ],
+      }),
+    });
+    const { container } = render(<EventsPanel />);
+
+    fireEvent.click(screen.getByLabelText('查看'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('關閉'));
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getByLabelText('查看'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(container.querySelector('.modal-backdrop')!);
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getByLabelText('查看'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('does not show an info button on the free-station banner row', () => {
+    useGame.setState({
+      snapshot: snapshot({
+        mode: 'intense',
+        roundIndex: 1,
+        freeStationAvailable: true,
+      }),
+    });
+    render(<EventsPanel />);
+    const freeRow = screen.getByText('本輪首座車站免費').closest('.event-row') as HTMLElement;
+    expect(within(freeRow).queryByLabelText('查看')).toBeNull();
   });
 });
