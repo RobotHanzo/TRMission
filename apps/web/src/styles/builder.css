@@ -335,6 +335,7 @@
 .editor-crop-preview-svg {
   width: 100%;
   aspect-ratio: 1;
+  flex-shrink: 0;
   border: 1px solid var(--tr-line);
   border-radius: var(--tr-radius-sm);
   background: var(--tr-sea);
