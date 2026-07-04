@@ -56,16 +56,24 @@ The game flow: lobby `start`/`ticket` (REST) → `connectGame(ticket)` → socke
   hash (never a single "current content" singleton, so a stale in-flight fetch for a hash you've
   since navigated away from can't clobber the active catalog). `useActiveContent(hash)` is the hook
   screens gate rendering on; `GameScreen`/`ReplayScreen` show a loading veil until it's `'ready'`.
-- `components/Board.tsx` — one fluid SVG (`viewBox` from the active catalog's `baseView`, not a
-  constant) drawing all routes/cities from the content catalog; city coordinates come from the
-  catalog's normalized x/y. Self-developed graphics only — **no copied artwork**; Lucide icons are UI
-  chrome only. `components/Geography.tsx` exports `GeographyLayer`, which switches between the
-  built-in Taiwan coastline and `CustomGeography` (a custom map's cropped-and-projected land rings,
-  stored on `content.geography`, smoothed with the same Catmull-Rom rendering as the bundled map) —
-  also used by `components/MapBackdrop.tsx`, the blurred non-interactive backdrop on `LoginScreen`
-  (pins `--inv-scale` since there's no live `.board-viewport` there).
+- `components/MapScene.tsx` — **the single map-scene component** (geography, railway network, city
+  markers), purely presentational: content, game state, labels, class hooks, hit areas, and
+  per-element event overlays all arrive as props. Every map surface renders THROUGH it —
+  `components/Board.tsx` (which keeps only game orchestration: pan/zoom, camera follow, glow
+  timers, controls; `viewBox` from the active catalog's `baseView`), the blurred login
+  `components/MapBackdrop.tsx` (labels/interaction off, pinned `--inv-scale`), and the builder's
+  `EditorCanvas` — so no surface can drift from the in-game map. Its dimension tokens come from
+  `@trm/map-data`'s `mapCssVars()` (pinned as `--m-*` vars on the scene root; `game.css` resolves
+  them — no dimension literal lives in CSS). Self-developed graphics only — **no copied artwork**;
+  Lucide icons are UI chrome only. `components/Geography.tsx` exports `GeographyLayer`, which
+  switches between the built-in Taiwan coastline and `CustomGeography` (a custom map's
+  cropped-and-projected land rings, stored on `content.geography`, smoothed with the same
+  Catmull-Rom rendering as the bundled map).
 - `theme/colors.ts` — the 8 card colours (each with a colour-blind glyph) and `SEAT_COLORS` (abstract
-  seat indices coloured here, distinct from card colours). Respect the colour-blind setting.
+  seat indices coloured here, distinct from card colours). The hexes are canonical in
+  `@trm/map-data`'s render tokens (shared with the server's OG card); `theme/tokens-parity.test.ts`
+  gates `tokens.css`'s `--tr-*` cartography palette against the same module. Respect the
+  colour-blind setting.
 - `i18n/index.ts` — react-i18next, zh-Hant primary + en fallback. UI strings live here; **city/ticket
   names are content** and resolve from the active catalog by id, not from these tables.
 

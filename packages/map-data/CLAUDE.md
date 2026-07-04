@@ -24,6 +24,11 @@ client catalog, Mongo seed) is derived from it. Commands: `yarn workspace @trm/m
 - `generate.ts` — `generateTickets()`: deterministic mission auto-generation (seeded via
   `@trm/shared`'s counter PRNG — same seed always produces the same ticket list) plus `RULE_BOUNDS`,
   the min/max clamp for every tunable in `MapRules`.
+- `render-tokens.ts` — the shared cartography render tokens: `MAP_PALETTE_LIGHT/DARK`, `MAP_INKS`,
+  `ROUTE_COLOR_HEX`/`LIVERY_COLORS`, `MAP_DIMS`, and `mapCssVars()` (the `--m-*` custom-property
+  map the web board CSS resolves). Consumed by the web's `MapScene`/`game.css`/`theme/colors.ts`
+  and the server's OG map card so none can drift. Pure data — **never** part of `hashContent`, so
+  editing a token never bumps `CONTENT_HASH`.
 
 ## The critical gotcha: CONTENT_HASH and the version registry
 
