@@ -22,4 +22,12 @@ describe('useChat', () => {
     expect(m).toHaveLength(2);
     expect(m[0]?.text).toBe('b');
   });
+
+  it('tracks the last live message but ignores history backfill', () => {
+    expect(useChat.getState().lastLive).toBeNull();
+    useChat.getState().ingestHistory([{ playerId: 'p1', text: 'a' }]);
+    expect(useChat.getState().lastLive).toBeNull();
+    useChat.getState().ingest({ playerId: 'p2', text: 'hi' });
+    expect(useChat.getState().lastLive).toEqual({ id: 2, playerId: 'p2', text: 'hi' });
+  });
 });

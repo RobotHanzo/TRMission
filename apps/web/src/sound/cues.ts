@@ -8,7 +8,9 @@ export type Cue =
   | 'gameOverWin'
   | 'gameOverNormal'
   | 'stationBuilt'
-  | 'railwayBuilt';
+  | 'railwayBuilt'
+  | 'eventStart'
+  | 'chatMessage';
 
 export interface CueDef {
   /** Path under Vite's public/ root (served at this URL). */
@@ -30,6 +32,8 @@ export const CUES: Record<Cue, CueDef> = {
   gameOverNormal: { src: '/sounds/game-over-normal.mp3', gain: 0.9, throttleMs: 1000 },
   stationBuilt: { src: '/sounds/station-built.mp3', gain: 0.9, throttleMs: 70 },
   railwayBuilt: { src: '/sounds/railway-built.mp3', gain: 0.9, throttleMs: 70 },
+  eventStart: { src: '/sounds/event-start.mp3', gain: 1.0, throttleMs: 300 },
+  chatMessage: { src: '/sounds/chat-message.mp3', gain: 0.7, throttleMs: 200 },
 };
 
 /** Gain multiplier for a cue triggered by an opponent's action (vs the local player's). */

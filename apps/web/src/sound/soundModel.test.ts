@@ -27,6 +27,14 @@ describe('cuesFromEvents', () => {
       { cue: 'railwayBuilt', isSelf: true },
     ]);
   });
+
+  it('maps a started random event to the eventStart cue at full gain', () => {
+    const s = snap({});
+    const hits = cuesFromEvents(s, [
+      ev('randomEventStarted', { info: { kind: 'TYPHOON_LANDFALL' } }),
+    ]);
+    expect(hits).toEqual([{ cue: 'eventStart', isSelf: true }]);
+  });
 });
 
 describe('gameOverCue', () => {

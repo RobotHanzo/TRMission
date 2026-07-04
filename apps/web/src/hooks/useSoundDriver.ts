@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Phase } from '@trm/proto';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useUi } from '../store/ui';
+import { useChat } from '../store/chat';
 import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
 import { cuesFromEvents, gameOverCue } from '../sound/soundModel';
@@ -22,8 +23,10 @@ export function useSoundDriver(sandbox?: boolean): void {
   const gameStore = useGameStoreApi();
   const snapshot = useGameStore((s) => s.snapshot);
   const lastBatch = useGameStore((s) => s.lastBatch);
+  const lastLiveChat = useChat((s) => s.lastLive);
 
   const seenBatchSeq = useRef(0);
+  const seenChatId = useRef(0);
   const prevPhase = useRef<Phase | null>(null);
   const prevSelfCompleted = useRef<ReadonlySet<string> | null>(null);
 
@@ -58,6 +61,14 @@ export function useSoundDriver(sandbox?: boolean): void {
       soundPlayer.play(cue, isSelf ? 1 : OPPONENT_GAIN);
     }
   }, [lastBatch, gameStore, sandbox]);
+
+  // New chat messages (never fires for a reconnect's history backfill — see store/chat.ts).
+  useEffect(() => {
+    if (!lastLiveChat || lastLiveChat.id === seenChatId.current) return;
+    seenChatId.current = lastLiveChat.id;
+    const me = gameStore.getState().snapshot?.you?.playerId ?? null;
+    soundPlayer.play('chatMessage', lastLiveChat.playerId === me ? 1 : OPPONENT_GAIN);
+  }, [lastLiveChat, gameStore]);
 
   // Snapshot diffs: game-over (once) + self mission completion.
   useEffect(() => {

@@ -20,7 +20,8 @@ reproducible from the original Mixkit download).
 | `game-over-normal.mp3` | Game over — you didn't win | Orchestral violin jingle | 2280 | — |
 | `station-built.mp3` | Station built | Metal hammer hit | 833 | ✅ trim + ×3 + pitch-down/bass (heavier) |
 | `railway-built.mp3` | Railway claimed | Wood hard hit | 2182 | ✅ trim + ×3 |
-| `future/mission-complete-levelup.mp3` | _reserved_ — future event system | Game level completed | 2059 | — |
+| `event-start.mp3` | Random event start banner | Game level completed | 2059 | — |
+| `chat-message.mp3` | Chat message received | Message pop alert | 2354 | — |
 
 Direct asset URLs follow the pattern
 `https://assets.mixkit.co/active_storage/sfx/<id>/<id>.wav` (full) or `<id>-preview.mp3` (the
@@ -31,8 +32,9 @@ web-sized mp3 shipped here). e.g. card-draw = <https://assets.mixkit.co/active_s
 - **`tunnel-draw.mp3`** intentionally reuses the *card-placement* timbre (distinct from `card-draw`):
   the tunnel reveal fires it **once per revealed card (3×)**, synced to the card-flip stagger in
   `TunnelModal`, rather than playing a single long whoosh.
-- **`future/mission-complete-levelup.mp3`** (Mixkit "Game level completed", 2059) is kept for a
-  planned event system; it is not wired up yet.
+- **`event-start.mp3`** (Mixkit "Game level completed", 2059) was previously kept in reserve
+  (`future/mission-complete-levelup.mp3`) for the random-event system; now wired to the
+  `randomEventStarted` event.
 
 ## Edit recipes (ffmpeg)
 

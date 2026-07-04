@@ -5,6 +5,7 @@ import { render, act } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema, Phase, type GameEvent, type GameSnapshot } from '@trm/proto';
 import { useGame } from '../store/game';
+import { useChat } from '../store/chat';
 import { useSoundDriver } from './useSoundDriver';
 
 const { play } = vi.hoisted(() => ({ play: vi.fn() }));
@@ -43,6 +44,7 @@ function Harness({ sandbox }: { sandbox?: boolean } = {}) {
 beforeEach(() => {
   play.mockClear();
   useGame.getState().reset();
+  useChat.getState().reset();
 });
 
 describe('useSoundDriver', () => {
@@ -90,5 +92,36 @@ describe('useSoundDriver', () => {
     const ev: GameEvent = { event: { case: 'turnStarted', value: { playerId: 'p0' } } } as GameEvent;
     act(() => useGame.getState().applyEvents(2, [ev]));
     expect(play).not.toHaveBeenCalledWith('yourTurn', expect.anything());
+  });
+
+  it('plays eventStart at full gain when a random event starts', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(snap(1, {})));
+    const ev: GameEvent = {
+      event: { case: 'randomEventStarted', value: { info: { kind: 'TYPHOON_LANDFALL' } } },
+    } as unknown as GameEvent;
+    act(() => useGame.getState().applyEvents(2, [ev]));
+    expect(play).toHaveBeenCalledWith('eventStart', 1);
+  });
+
+  it('plays chatMessage for an incoming message (opponent attenuated)', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(snap(1, {})));
+    act(() => useChat.getState().ingest({ playerId: 'p1', text: 'hi' }));
+    expect(play).toHaveBeenCalledWith('chatMessage', 0.5);
+  });
+
+  it('plays chatMessage at full gain for my own message', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(snap(1, {})));
+    act(() => useChat.getState().ingest({ playerId: 'p0', text: 'hi' }));
+    expect(play).toHaveBeenCalledWith('chatMessage', 1);
+  });
+
+  it('does not replay chatMessage from a reconnect history backfill', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(snap(1, {})));
+    act(() => useChat.getState().ingestHistory([{ playerId: 'p1', text: 'old' }]));
+    expect(play).not.toHaveBeenCalledWith('chatMessage', expect.anything());
   });
 });

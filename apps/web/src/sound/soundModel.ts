@@ -27,6 +27,10 @@ export function cuesFromEvents(snapshot: GameSnapshot, events: GameEvent[]): Cue
       case 'routeClaimed':
         out.push({ cue: 'railwayBuilt', isSelf: ev.value.playerId === me });
         break;
+      case 'randomEventStarted':
+        // Global announcement, not attributable to a player — always full gain.
+        out.push({ cue: 'eventStart', isSelf: true });
+        break;
       default:
         break;
     }

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { CUES, ALL_CUES, OPPONENT_GAIN, type Cue } from './cues';
 
 describe('cue catalog', () => {
-  it('defines all 10 cues with /sounds/*.mp3 sources and sane gains', () => {
+  it('defines all 12 cues with /sounds/*.mp3 sources and sane gains', () => {
     const expected: Cue[] = [
       'cardDraw',
       'yourTurn',
@@ -14,6 +14,8 @@ describe('cue catalog', () => {
       'gameOverNormal',
       'stationBuilt',
       'railwayBuilt',
+      'eventStart',
+      'chatMessage',
     ];
     expect([...ALL_CUES].sort()).toEqual([...expected].sort());
     for (const cue of expected) {
