@@ -21,7 +21,7 @@ mirrors it and ignores any snapshot with an older `stateVersion`. There is no cl
 that can disagree with the server.
 
 - `store/game.ts` — the authoritative mirror (`snapshot`, recent events, socket status, rejection).
-- `store/session.ts` — auth: `playAsGuest` / `login` / `register` / `upgrade` / `logout`, plus
+- `store/session.ts` — auth: `playAsGuest` / `login` / `register` / `upgrade` / `loginWithGoogleCredential` / `logout`, plus
   `restore()` which the app calls on mount to resume a session from the httpOnly refresh cookie
   (works for guests and registered users alike). The in-memory access token is restored via the
   401→refresh path; `booting` gates first render.
@@ -40,6 +40,9 @@ that can disagree with the server.
 - `net/socket.ts` — the protobuf WS client (`GameSocket`): `create`/`toBinary`/`fromBinary` from
   protobuf-es, heartbeat, backoff reconnect, `ClientHello` handshake with the ws-game ticket.
 - `net/connection.ts` — bridges the socket to the game store.
+- `net/google.ts` — loads Google Identity Services (GSI) once per page; `LoginScreen` uses it to
+  render Google's own sign-in button + fire One Tap, falling back to the legacy redirect button if
+  the script fails to load.
 
 The game flow: lobby `start`/`ticket` (REST) → `connectGame(ticket)` → socket sends `ClientHello`
 → server replies with a snapshot. Reconnect re-fetches a ticket and resyncs on a fresh snapshot.
