@@ -1,9 +1,9 @@
 // A faithful SVG snapshot of a custom map for its shared-link social card. The geometry
 // comes from @trm/map-data's shared curve/bow/hub math — the very functions the live board
-// renders from — and every visual constant below (colours, stroke widths, car thickness,
-// tie sizes, pip radii) mirrors apps/web/src/styles/game.css at base zoom (--inv-scale and
-// --marker-scale both 1) in the light theme, so the card reads exactly like the in-game
-// map. Stations (city markers) are drawn; name labels deliberately are not.
+// renders from — and every visual constant is the shared render token the board CSS itself
+// resolves (at base zoom: --inv-scale and --marker-scale both 1, light theme), so the card
+// reads exactly like the in-game map and CANNOT drift from it. Stations (city markers) are
+// drawn; name labels deliberately are not.
 import {
   buildRouteGeometryFor,
   smoothClosedPath,
@@ -12,6 +12,11 @@ import {
   TAIWAN_CENTRAL_RANGE_PATH,
   TAIWAN_ISLANDS,
   TAIWAN_GRATICULE,
+  MAP_PALETTE_LIGHT,
+  MAP_INKS,
+  MAP_DIMS,
+  ROUTE_COLOR_HEX,
+  LIVERY_COLORS,
 } from '@trm/map-data';
 import type { MapGeography, RouteGeometry } from '@trm/map-data';
 
@@ -31,29 +36,16 @@ export interface RenderableMap {
   geography?: MapGeography | undefined;
 }
 
-// Light-theme cartography tokens (apps/web/src/styles/tokens.css).
-const SEA = '#d6e4ec';
-const SEA_LINE = 'rgba(31, 90, 130, 0.2)';
-const LAND = '#efe6cf';
-const COAST = '#b9a47b';
-const SURFACE = '#fffdf8';
-const INK = '#1f2328';
-const BLUE = '#0f5fa6';
+// The shared cartography tokens (light theme) and board dimensions at base zoom.
+const P = MAP_PALETTE_LIGHT;
+const D = MAP_DIMS;
 
-// The 8 train colours + gray (theme/colors.ts CARD_COLOR_TOKENS / GRAY_TOKEN).
-const ROUTE_COLORS: Record<string, string> = {
-  RED: '#D72631',
-  ORANGE: '#EE7B30',
-  YELLOW: '#F2C14E',
-  GREEN: '#3A9D5C',
-  BLUE: '#0F5FA6',
-  PURPLE: '#7B4DA6',
-  BLACK: '#2B2D31',
-  WHITE: '#E8EAED',
-  GRAY: '#8A8E96',
-};
-/** The six locomotive liveries in spectrum order — the ferry wild-pip rainbow. */
-const LIVERY_COLORS = ['#D72631', '#EE7B30', '#F2C14E', '#3A9D5C', '#0F5FA6', '#7B4DA6'];
+// Thumbnail-only derivations (the card's ~500px scale, where the board's full-size tunnel
+// dressing smears): ties at 45% length, the tunnel glint at 40% width. These are the ONLY
+// visual values that differ from the live board, and both are explicit factors on the
+// shared token rather than free-standing numbers.
+const OG_TIE_SCALE = 0.45;
+const OG_TUNNEL_BG_SCALE = 0.4;
 
 const f = (v: number): string => v.toFixed(2);
 
@@ -64,8 +56,6 @@ export function ferryLocoGradientDef(): string {
   ).join('');
   return `<linearGradient id="ferryLocoRainbow" x1="0" y1="0" x2="1" y2="1">${stops}</linearGradient>`;
 }
-
-const RELIEF = '#d9c9a1';
 
 /** The quiet cartographic grid: the same hand-picked lines as the real board
  *  (Geography.tsx's `GRATICULE`) for official Taiwan; a fixed 20-unit step for a custom
@@ -91,7 +81,7 @@ function graticuleLayer(
         `<line x1="${f(x)}" y1="${f(view.y - 4)}" x2="${f(x)}" y2="${f(view.y + view.h + 4)}"/>`,
     ),
   ];
-  return `<g stroke="${SEA_LINE}" stroke-width="0.32" stroke-dasharray="0.9 1.7">${lines.join('')}</g>`;
+  return `<g stroke="${P.seaLine}" stroke-width="${D.graticuleW}" stroke-dasharray="${D.graticuleDashA} ${D.graticuleDashB}">${lines.join('')}</g>`;
 }
 
 /** Smoothed land rings for a custom map's authored geography (Geography.tsx's CustomGeography). */
@@ -101,9 +91,11 @@ function customLandLayer(geography?: MapGeography): string {
     const d = smoothClosedPath(ring);
     if (!d) continue;
     // land-surf (a soft sea-coloured halo) under the land fill, like the board.
-    parts.push(`<path d="${d}" fill="none" stroke="${SEA}" stroke-width="2.4" opacity="0.6"/>`);
     parts.push(
-      `<path d="${d}" fill="${LAND}" stroke="${COAST}" stroke-width="0.45" stroke-linejoin="round"/>`,
+      `<path d="${d}" fill="none" stroke="${P.sea}" stroke-width="${D.landSurfW}" opacity="${D.landSurfOpacity}"/>`,
+    );
+    parts.push(
+      `<path d="${d}" fill="${P.land}" stroke="${P.coast}" stroke-width="${D.landStrokeW}" stroke-linejoin="round"/>`,
     );
   }
   return parts.join('\n');
@@ -115,12 +107,12 @@ function customLandLayer(geography?: MapGeography): string {
 function officialTaiwanLandLayer(): string {
   const islands = TAIWAN_ISLANDS.map(
     (b) =>
-      `<circle cx="${f(b.cx)}" cy="${f(b.cy)}" r="${f(b.r)}" fill="${LAND}" stroke="${COAST}" stroke-width="0.4"/>`,
+      `<circle cx="${f(b.cx)}" cy="${f(b.cy)}" r="${f(b.r)}" fill="${P.land}" stroke="${P.coast}" stroke-width="${D.geoIslandStrokeW}"/>`,
   ).join('');
-  return `<path d="${TAIWAN_LAND_PATH}" fill="none" stroke="${SEA}" stroke-width="2.4" opacity="0.6"/>
-<path d="${TAIWAN_LAND_PATH}" fill="${LAND}" stroke="${COAST}" stroke-width="0.45" stroke-linejoin="round"/>
-<path d="${TAIWAN_CENTRAL_RANGE_PATH}" fill="${RELIEF}" opacity="0.55"/>
-<path d="${TAIWAN_CENTRAL_RANGE_PATH}" fill="none" stroke="${COAST}" stroke-width="0.3" stroke-dasharray="0.5 0.9" opacity="0.55"/>
+  return `<path d="${TAIWAN_LAND_PATH}" fill="none" stroke="${P.sea}" stroke-width="${D.landSurfW}" opacity="${D.landSurfOpacity}"/>
+<path d="${TAIWAN_LAND_PATH}" fill="${P.land}" stroke="${P.coast}" stroke-width="${D.landStrokeW}" stroke-linejoin="round"/>
+<path d="${TAIWAN_CENTRAL_RANGE_PATH}" fill="${P.relief}" opacity="${D.reliefOpacity}"/>
+<path d="${TAIWAN_CENTRAL_RANGE_PATH}" fill="none" stroke="${P.coast}" stroke-width="${D.reliefRidgeW}" stroke-dasharray="${D.reliefRidgeDash}" opacity="${D.reliefOpacity}"/>
 <g>${islands}</g>`;
 }
 
@@ -219,42 +211,42 @@ function routeLayer(
     if (!keep.has(r.id)) continue;
     const g = geometry.get(r.id);
     if (!g) continue;
-    const fill = ROUTE_COLORS[r.color] ?? ROUTE_COLORS.GRAY!;
+    const fill = ROUTE_COLOR_HEX[r.color as keyof typeof ROUTE_COLOR_HEX] ?? ROUTE_COLOR_HEX.GRAY;
     const isFerry = r.ferryLocos > 0;
     const parts: string[] = [];
 
     if (r.isTunnel)
       parts.push(
-        `<path d="${g.path}" fill="none" stroke="#b0b0b0" stroke-opacity="0.18" stroke-width="2.4" stroke-linecap="round"/>`,
+        `<path d="${g.path}" fill="none" stroke="${MAP_INKS.tunnelBg}" stroke-opacity="${MAP_INKS.tunnelBgOpacity}" stroke-width="${f(D.tunnelBgW * OG_TUNNEL_BG_SCALE)}" stroke-linecap="round"/>`,
       );
     // Paper roadbed seats the cars legibly over land and sea.
     parts.push(
-      `<path d="${g.path}" fill="none" stroke="${SURFACE}" stroke-width="2.8" stroke-linecap="round" opacity="0.95"/>`,
+      `<path d="${g.path}" fill="none" stroke="${P.surface}" stroke-width="${D.bedW}" stroke-linecap="round" opacity="${D.bedOpacity}"/>`,
     );
     if (r.isTunnel)
       for (const t of g.ties ?? [])
         parts.push(
-          `<rect x="-1.8" y="-0.14" width="3.6" height="0.28" fill="#3d352b" fill-opacity="0.9" transform="translate(${f(t.x)} ${f(t.y)}) rotate(${(t.angle + 45).toFixed(1)})"/>`,
+          `<rect x="${f((-D.tieW * OG_TIE_SCALE) / 2)}" y="${f(-D.tieH / 2)}" width="${f(D.tieW * OG_TIE_SCALE)}" height="${f(D.tieH)}" fill="${MAP_INKS.tie}" fill-opacity="${MAP_INKS.tieOpacity}" transform="translate(${f(t.x)} ${f(t.y)}) rotate(${(t.angle + 45).toFixed(1)})"/>`,
         );
 
     if (isFerry) {
       // Dotted sea crossing; the required-wild pips are a centred block of rainbow rects.
       parts.push(
-        `<path d="${g.path}" fill="none" stroke="#9aa0a6" stroke-width="0.5" stroke-linecap="round" stroke-dasharray="0.1 2.55"/>`,
+        `<path d="${g.path}" fill="none" stroke="${MAP_INKS.ferryLine}" stroke-width="${D.ferryLineW}" stroke-linecap="round" stroke-dasharray="${D.ferryDash}"/>`,
       );
       const locoStart = Math.max(0, Math.floor((r.length - r.ferryLocos) / 2));
       g.slots.forEach((s, i) => {
         const isLoco = i >= locoStart && i < locoStart + r.ferryLocos;
         parts.push(
           isLoco
-            ? `<rect x="${f(-s.len / 2)}" y="-0.72" width="${f(s.len)}" height="1.44" rx="0.42" fill="url(#ferryLocoRainbow)" stroke="#fff" stroke-width="0.5" transform="translate(${f(s.x)} ${f(s.y)}) rotate(${s.angle.toFixed(1)})"/>`
-            : `<circle cx="${f(s.x)}" cy="${f(s.y)}" r="0.7" fill="${fill}" stroke="#2a2520" stroke-width="0.25"/>`,
+            ? `<rect x="${f(-s.len / 2)}" y="${f(-D.slotH / 2)}" width="${f(s.len)}" height="${f(D.slotH)}" rx="${D.slotRx}" fill="url(#ferryLocoRainbow)" stroke="${MAP_INKS.ferryLocoEdge}" stroke-width="${D.ferryLocoStrokeW}" transform="translate(${f(s.x)} ${f(s.y)}) rotate(${s.angle.toFixed(1)})"/>`
+            : `<circle cx="${f(s.x)}" cy="${f(s.y)}" r="${D.ferryPipR}" fill="${fill}" stroke="${MAP_INKS.carEdge}" stroke-width="${D.ferryPipStrokeW}"/>`,
         );
       });
     } else {
       for (const s of g.slots)
         parts.push(
-          `<rect x="${f(-s.len / 2)}" y="-0.72" width="${f(s.len)}" height="1.44" rx="0.42" fill="${fill}" stroke="#2a2520" stroke-width="0.3" stroke-linejoin="round" transform="translate(${f(s.x)} ${f(s.y)}) rotate(${s.angle.toFixed(1)})"/>`,
+          `<rect x="${f(-s.len / 2)}" y="${f(-D.slotH / 2)}" width="${f(s.len)}" height="${f(D.slotH)}" rx="${D.slotRx}" fill="${fill}" stroke="${MAP_INKS.carEdge}" stroke-width="${D.slotStrokeW}" stroke-linejoin="round" transform="translate(${f(s.x)} ${f(s.y)}) rotate(${s.angle.toFixed(1)})"/>`,
         );
     }
 
@@ -278,9 +270,9 @@ function cityLayer(
     .filter((c) => keep.has(c.id))
     .map((c) => {
       if (hubs.has(c.id))
-        return `<rect x="-1.25" y="-0.8" width="2.5" height="1.6" rx="0.8" fill="${SURFACE}" stroke="${INK}" stroke-width="0.4" transform="translate(${f(c.x)} ${f(c.y)})"/>`;
+        return `<rect x="${f(-D.hubW / 2)}" y="${f(-D.hubH / 2)}" width="${D.hubW}" height="${D.hubH}" rx="${D.hubRx}" fill="${P.surface}" stroke="${P.ink}" stroke-width="${D.cityStrokeW}" transform="translate(${f(c.x)} ${f(c.y)})"/>`;
       const island = !!c.isIsland;
-      return `<circle cx="${f(c.x)}" cy="${f(c.y)}" r="${island ? 1.4 : 1.15}" fill="${SURFACE}" stroke="${island ? BLUE : INK}" stroke-width="0.4"/>`;
+      return `<circle cx="${f(c.x)}" cy="${f(c.y)}" r="${island ? D.islandR : D.cityR}" fill="${P.surface}" stroke="${island ? P.blue : P.ink}" stroke-width="${D.cityStrokeW}"/>`;
     })
     .join('\n');
 }
@@ -327,7 +319,7 @@ export function mapPanelSvg(
 
   return `<clipPath id="${clipId}"><rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="${panel.r}"/></clipPath>
 <g clip-path="url(#${clipId})">
-<rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" fill="${SEA}"/>
+<rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" fill="${P.sea}"/>
 <g transform="translate(${f(tx)} ${f(ty)}) scale(${f(scale)})">
 ${geographyLayer(view, official, map.geography)}
 ${routeLayer(map, geometry, keepRoutes)}
