@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
+import type { EventsMode } from '@trm/shared';
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
 import {
@@ -60,6 +61,9 @@ export function RoomScreen() {
   const [kicked, setKicked] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
+  // Server feature flag: the events intensity picker is shown ONLY when this is true. A missing
+  // field or a fetch error is treated as disabled (the picker stays hidden).
+  const [eventsFlag, setEventsFlag] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const {
     open: leaveOpen,
@@ -78,6 +82,22 @@ export function RoomScreen() {
       .then(setMyMaps)
       .catch(() => setMyMaps([]));
   }, [user, canBuild]);
+
+  // Fetch the lobby feature-flag once on mount; any failure leaves the picker hidden.
+  useEffect(() => {
+    let active = true;
+    api
+      .getRoomsConfig()
+      .then((c) => {
+        if (active) setEventsFlag(c.randomEventsEnabled);
+      })
+      .catch(() => {
+        if (active) setEventsFlag(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const flashToast = (msg: string) => {
     setToast(msg);
@@ -370,6 +390,26 @@ export function RoomScreen() {
             />
           </div>
         ))}
+        {eventsFlag && (
+          <div className="row between setting-row">
+            <span>
+              <strong>{t('settingRandomEvents')}</strong>
+              <br />
+              <span className="muted">{t('settingRandomEventsDesc')}</span>
+            </span>
+            <Segmented<EventsMode>
+              options={[
+                { value: 'off', label: t('eventsMode_off') },
+                { value: 'light', label: t('eventsMode_light') },
+                { value: 'moderate', label: t('eventsMode_moderate') },
+                { value: 'intense', label: t('eventsMode_intense') },
+              ]}
+              value={settings.eventsMode}
+              onChange={(v) => setSetting({ eventsMode: v })}
+              ariaLabel={t('settingRandomEvents')}
+            />
+          </div>
+        )}
         <div className="row between setting-row">
           <span>
             <strong>{t('allowSpectating')}</strong>

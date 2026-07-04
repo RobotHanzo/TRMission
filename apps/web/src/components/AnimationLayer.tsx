@@ -9,6 +9,7 @@ import { FlyingCard } from './FlyingCard';
 import { TicketCard } from './TicketCard';
 import { TicketFanfare } from './TicketFanfare';
 import { EndgameWarning } from './EndgameWarning';
+import { EventBanner, EventToasts } from './EventBanner';
 
 const rectOf = (selector: string): DOMRect | null =>
   document.querySelector(selector)?.getBoundingClientRect() ?? null;
@@ -152,6 +153,8 @@ export function AnimationLayer() {
   const dismissFanfare = useAnimationsStore((s) => s.dismissFanfare);
   const endgameCue = useAnimationsStore((s) => s.endgameCue);
   const dismissEndgameWarning = useAnimationsStore((s) => s.dismissEndgameWarning);
+  const eventBanner = useAnimationsStore((s) => s.eventBanner);
+  const dismissEventBanner = useAnimationsStore((s) => s.dismissEventBanner);
   const reduced = useReducedMotion();
   if (typeof document === 'undefined') return null;
   return createPortal(
@@ -181,6 +184,15 @@ export function AnimationLayer() {
           onDone={dismissEndgameWarning}
         />
       )}
+      {eventBanner && (
+        <EventBanner
+          key={eventBanner.id}
+          cue={eventBanner}
+          reducedMotion={reduced}
+          onDone={dismissEventBanner}
+        />
+      )}
+      <EventToasts />
     </>,
     document.body,
   );

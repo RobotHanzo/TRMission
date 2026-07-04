@@ -34,6 +34,7 @@ vi.mock('../net/rest', () => {
       startRoom: vi.fn(),
       updateRoomSettings: vi.fn(),
       listMaps: vi.fn(() => Promise.resolve([])),
+      getRoomsConfig: vi.fn(() => Promise.resolve({ randomEventsEnabled: false })),
     },
   };
 });
@@ -74,6 +75,7 @@ const baseRoom = () => ({
     allowSpectating: true,
     visibility: 'PUBLIC' as 'PUBLIC' | 'INVITE_ONLY',
     map: { source: 'official', mapId: 'taiwan' } as MapSelector,
+    eventsMode: 'off' as 'off' | 'light' | 'moderate' | 'intense',
   },
   gameId: undefined as string | undefined,
   mapName: undefined as { zh: string; en: string } | undefined,
@@ -215,6 +217,43 @@ describe('RoomScreen game settings panel', () => {
     const inviteOnly = await screen.findByRole('radio', { name: '僅限邀請' });
     fireEvent.click(inviteOnly);
     expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', { visibility: 'INVITE_ONLY' });
+  });
+});
+
+describe('RoomScreen random-events picker', () => {
+  it('hides the intensity picker when the server flag is off', async () => {
+    (api.getRoomsConfig as ReturnType<typeof vi.fn>).mockResolvedValue({
+      randomEventsEnabled: false,
+    });
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    render(<RoomScreen />);
+    await screen.findByText('遊戲設定'); // settings fieldset is on screen
+    expect(screen.queryByRole('radio', { name: '強烈' })).toBeNull();
+  });
+
+  it('shows an editable picker for the host when the flag is on, patching eventsMode', async () => {
+    (api.getRoomsConfig as ReturnType<typeof vi.fn>).mockResolvedValue({
+      randomEventsEnabled: true,
+    });
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    mocked.updateRoomSettings.mockResolvedValue(
+      room({ hostId: 'u-me', members: [member('u-me')] }),
+    );
+    render(<RoomScreen />);
+    const intense = await screen.findByRole('radio', { name: '強烈' });
+    expect(intense).not.toBeDisabled();
+    fireEvent.click(intense);
+    expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', { eventsMode: 'intense' });
+  });
+
+  it('shows the picker read-only (disabled) to a non-host when the flag is on', async () => {
+    (api.getRoomsConfig as ReturnType<typeof vi.fn>).mockResolvedValue({
+      randomEventsEnabled: true,
+    });
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    render(<RoomScreen />);
+    const intense = await screen.findByRole('radio', { name: '強烈' });
+    expect(intense).toBeDisabled();
   });
 });
 

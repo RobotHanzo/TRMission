@@ -43,4 +43,50 @@ describe('entriesFromEvents', () => {
     expect(out[0]).toMatchObject({ kind: 'tookFaceup', data: { color: 'BLUE' } });
     expect(out[1]).toMatchObject({ kind: 'drewBlind', data: {} });
   });
+
+  it('maps the announce/start/end random-event frames with the right importance', () => {
+    const out = entriesFromEvents([
+      ev({ case: 'randomEventAnnounced', value: { info: { id: 'e1', kind: 'SKY_LANTERN' } } }),
+      ev({ case: 'randomEventStarted', value: { info: { id: 'e2', kind: 'TYPHOON_LANDFALL' } } }),
+      ev({ case: 'randomEventEnded', value: { id: 'e2', kind: 'TYPHOON_LANDFALL' } }),
+    ]);
+    expect(out).toEqual([
+      {
+        kind: 'eventAnnounced',
+        playerId: null,
+        data: { eventKind: 'SKY_LANTERN' },
+        importance: 'alert',
+      },
+      {
+        kind: 'eventStarted',
+        playerId: null,
+        data: { eventKind: 'TYPHOON_LANDFALL' },
+        importance: 'alert',
+      },
+      {
+        kind: 'eventEnded',
+        playerId: null,
+        data: { eventKind: 'TYPHOON_LANDFALL' },
+        importance: 'normal',
+      },
+    ]);
+  });
+
+  it.each(['HOTSPOT', 'REOPEN', 'STAMP', 'CHARTER', 'FREE_STATION'] as const)(
+    'maps an EVENT_BONUS (%s) to a highlighted entry carrying its reason + params',
+    (reason) => {
+      const [entry] = entriesFromEvents([
+        ev({
+          case: 'randomEventBonus',
+          value: { kind: 'X', reason, playerId: 'p1', points: 2, routeId: 'R1', cityId: 'C1' },
+        }),
+      ]);
+      expect(entry).toEqual({
+        kind: 'eventBonus',
+        playerId: 'p1',
+        data: { reason, points: 2, cityId: 'C1', routeId: 'R1' },
+        importance: 'highlight',
+      });
+    },
+  );
 });

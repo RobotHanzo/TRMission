@@ -19,6 +19,12 @@ import { Plus, Minus, LocateFixed, Maximize, Minimize, Eye, EyeOff } from 'lucid
 import type { GameSnapshot, GameEvent } from '@trm/proto';
 import type { RouteColor } from '@trm/shared';
 import { CITIES, ROUTES, cityById, routeById, cityName } from '../game/content';
+import {
+  closedRouteIds,
+  reopenBonusRouteIds,
+  skyLanternRouteIds,
+  hotspotLevels,
+} from '../game/events';
 import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
 import { zoomBucket, cityTier } from '../game/lod';
@@ -515,6 +521,22 @@ export function Board({
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
     return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
   }, [snapshot]);
+  // Random-events overlays — all derived purely from the authoritative `random_events` projection.
+  const closedRoutes = useMemo(() => closedRouteIds(snapshot.randomEvents), [snapshot]);
+  const reopenRoutes = useMemo(() => reopenBonusRouteIds(snapshot.randomEvents), [snapshot]);
+  const skyRoutes = useMemo(() => skyLanternRouteIds(snapshot.randomEvents), [snapshot]);
+  const hotspots = useMemo(() => hotspotLevels(snapshot.randomEvents), [snapshot]);
+  const charterCities = useMemo(() => {
+    const set = new Set<string>();
+    const rev = snapshot.randomEvents;
+    if (rev)
+      for (const c of rev.charters)
+        if (c.wonByPlayerId === '') {
+          set.add(c.cityA);
+          set.add(c.cityB);
+        }
+    return set;
+  }, [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // Transient claim/station glow + the ticket-completion path sweep (cleared on a timer).
@@ -650,7 +672,12 @@ export function Board({
               if (!g) return null;
 
               const o = owned.get(r.id as string);
-              const claimable = canAct && !o;
+              const isClosed = closedRoutes.has(r.id as string);
+              const isReopen = reopenRoutes.has(r.id as string);
+              const isSky = skyRoutes.has(r.id as string);
+              // A typhoon-closed route can't be claimed (the server rejects it), so it's not
+              // clickable here either — the overlay signals why.
+              const claimable = canAct && !o && !isClosed;
               // Unclaimed → route colour; claimed → owner's seat colour; locked → muted grey.
               const fill =
                 o?.ownerSeat !== undefined
@@ -667,6 +694,9 @@ export function Board({
                 (claimable ? ' claimable' : '') +
                 (o ? ' owned' : '') +
                 (glowSeat !== undefined ? ' just-claimed' : '') +
+                (isClosed ? ' evt-closed' : '') +
+                (isSky ? ' evt-sky' : '') +
+                (isReopen ? ' evt-reopen' : '') +
                 kind;
               // The owner's seat colour, exposed to CSS so a claimed route tints its whole roadbed
               // (the "background") to its owner — and the glow bloom reuses the same `--seat`.
@@ -689,6 +719,9 @@ export function Board({
                   key={r.id as string}
                   className={cls}
                   data-route-id={r.id as string}
+                  data-closed={isClosed ? 'true' : undefined}
+                  data-sky={isSky ? 'true' : undefined}
+                  data-reopen={isReopen ? 'true' : undefined}
                   style={groupStyle}
                   onClick={claimable ? () => onPickRoute(r.id as string) : undefined}
                 >
@@ -718,6 +751,24 @@ export function Board({
                       </text>
                     </g>
                   )}
+                  {/* Typhoon closure: a swirl glyph over a desaturated route (see CSS .route.evt-closed). */}
+                  {isClosed && (
+                    <g className="evt-typhoon" pointerEvents="none" aria-hidden>
+                      <circle className="evt-badge-bg" cx={g.mid.x} cy={g.mid.y} />
+                      <text className="evt-typhoon-glyph" x={g.mid.x} y={g.mid.y}>
+                        🌀
+                      </text>
+                    </g>
+                  )}
+                  {/* Reopened route: a subtle +2 first-claim bonus chip. */}
+                  {isReopen && !o && (
+                    <g className="evt-chip evt-reopen-chip" pointerEvents="none" aria-hidden>
+                      <circle cx={g.mid.x} cy={g.mid.y} />
+                      <text x={g.mid.x} y={g.mid.y}>
+                        +2
+                      </text>
+                    </g>
+                  )}
                 </g>
               );
             })}
@@ -739,10 +790,14 @@ export function Board({
               const builtSeat = glowingStations.get(c.id as string);
               const justBuilt = builtSeat !== undefined;
               const isTarget = highlightCities?.has(c.id as string) ?? false;
+              const hotspot = hotspots.get(c.id as string);
+              const isCharterCity = charterCities.has(c.id as string);
               return (
                 <g
                   key={c.id as string}
                   data-city-id={c.id as string}
+                  data-hotspot={hotspot !== undefined ? String(hotspot) : undefined}
+                  data-charter={isCharterCity ? 'true' : undefined}
                   className={isTarget ? `${cls} ticket-target` : cls}
                 >
                   {/* Offered-ticket endpoint: a soft halo behind the marker so the player can trace
@@ -792,6 +847,25 @@ export function Board({
                       r={0.5}
                       style={{ '--seat': seatColor(builtSeat) } as CSSProperties}
                     />
+                  )}
+                  {/* Charter endpoint: a small contract chip behind the marker. */}
+                  {isCharterCity && (
+                    <circle
+                      className="evt-charter-chip"
+                      cx={c.x}
+                      cy={c.y}
+                      pointerEvents="none"
+                      aria-hidden
+                    />
+                  )}
+                  {/* Viral hotspot: a +1/+2 badge above the station. */}
+                  {hotspot !== undefined && (
+                    <g className="evt-hotspot" pointerEvents="none" aria-hidden>
+                      <circle className="evt-badge-bg" cx={c.x + 2.2} cy={c.y - 2.2} />
+                      <text className="evt-hotspot-text" x={c.x + 2.2} y={c.y - 2.2}>
+                        +{hotspot}
+                      </text>
+                    </g>
                   )}
                   <text className="city-label" x={c.x} y={c.y}>
                     {cityName(c.id as string, locale)}

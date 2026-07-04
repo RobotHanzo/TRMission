@@ -389,6 +389,51 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
+/* ── Random-event START banner: prominent, skippable, reduced-motion aware ─────── */
+.event-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at center, rgba(20, 40, 70, 0.42), rgba(10, 16, 26, 0.8));
+  backdrop-filter: blur(2px);
+  animation: anim-fanfare-in 0.3s ease-out;
+  cursor: pointer;
+}
+.event-banner-panel {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 22px 40px;
+  text-align: center;
+  animation: anim-endgame-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.event-eyebrow {
+  font-size: clamp(12px, 2vw, 16px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffd28a;
+}
+.event-banner-title {
+  font-size: clamp(26px, 5.4vw, 50px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 18px rgba(120, 170, 240, 0.6);
+}
+.event-banner-desc {
+  font-size: clamp(14px, 2.4vw, 20px);
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 32ch;
+}
+.event-skip {
+  margin-top: 4px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 /* ── Reduced motion: collapse all motion to instant ──────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .route.just-claimed,
@@ -408,7 +453,9 @@
   .fanfare-panel,
   .endgame-backdrop,
   .endgame-panel,
-  .endgame-icon {
+  .endgame-icon,
+  .event-backdrop,
+  .event-banner-panel {
     animation: none !important;
   }
   .sweep-seg {

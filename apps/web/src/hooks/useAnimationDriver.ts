@@ -20,6 +20,8 @@ export function useAnimationDriver(): void {
   const pushIntent = useAnimationsStore((s) => s.pushIntent);
   const revealMarketSlots = useAnimationsStore((s) => s.revealMarketSlots);
   const showEndgameWarning = useAnimationsStore((s) => s.showEndgameWarning);
+  const showEventBanner = useAnimationsStore((s) => s.showEventBanner);
+  const pushEventToast = useAnimationsStore((s) => s.pushEventToast);
 
   const prevCompleted = useRef<Map<string, Set<string>>>(new Map());
   const seeded = useRef(false);
@@ -29,14 +31,41 @@ export function useAnimationDriver(): void {
   // final round never re-pops the warning (mirrors the ticket-completion seeding above).
   const prevEndgame = useRef<boolean | null>(null);
 
-  // Event-driven intents (claim glow, draws, turn cue, market flip, score floats).
+  // Event-driven intents (claim glow, draws, turn cue, market flip, score floats) + random-event
+  // cues (start banner, forecast + bonus toasts). Both ride the live batch only — a reconnect's
+  // history backfill goes to the log store, never here, so nothing replays on resync.
   useEffect(() => {
     if (!lastBatch || lastBatch.seq === seenBatchSeq.current) return;
     seenBatchSeq.current = lastBatch.seq;
     const snap = gameStore.getState().snapshot;
     if (!snap) return;
     for (const intent of intentsFromEvents(snap, lastBatch.events)) pushIntent(intent);
-  }, [lastBatch, pushIntent, gameStore]);
+    for (const e of lastBatch.events) {
+      const ev = e.event;
+      if (ev.case === 'randomEventStarted') {
+        if (ev.value.info) showEventBanner(ev.value.info.kind);
+      } else if (ev.case === 'randomEventAnnounced') {
+        if (ev.value.info)
+          pushEventToast({
+            variant: 'announced',
+            kind: ev.value.info.kind,
+            reason: '',
+            points: 0,
+            cityId: '',
+            routeId: '',
+          });
+      } else if (ev.case === 'randomEventBonus') {
+        pushEventToast({
+          variant: 'bonus',
+          kind: ev.value.kind,
+          reason: ev.value.reason,
+          points: ev.value.points,
+          cityId: ev.value.cityId,
+          routeId: ev.value.routeId,
+        });
+      }
+    }
+  }, [lastBatch, pushIntent, gameStore, showEventBanner, pushEventToast]);
 
   // Ticket completion via snapshot diff (authoritative `completedTickets`).
   useEffect(() => {

@@ -1654,3 +1654,162 @@ button.ticket-card:hover {
     flex-wrap: wrap;
   }
 }
+
+/* ─── Random-events board overlays (M6) ──────────────────────────────────────────
+   All markers counter-scale with --inv-scale so they stay a roughly constant on-screen
+   size as the map zooms, exactly like the colour-blind glyph badges. */
+.route.evt-closed .bed,
+.route.evt-closed .slot {
+  filter: grayscale(0.85);
+  opacity: 0.5;
+}
+.evt-badge-bg {
+  fill: var(--tr-surface);
+  stroke: var(--tr-ink-soft);
+  stroke-width: calc(0.22px * var(--inv-scale));
+  r: calc(2.1px * var(--inv-scale));
+}
+.evt-typhoon-glyph {
+  font-size: calc(3px * var(--inv-scale));
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+/* Sky-lantern featured routes: a warm amber glow on the roadbed. */
+.route.evt-sky .bed {
+  filter: drop-shadow(0 0 calc(1.4px * var(--inv-scale)) rgba(240, 165, 40, 0.95));
+}
+/* Reopened-route +2 first-claim chip. */
+.evt-reopen-chip circle {
+  fill: var(--tr-ok);
+  r: calc(2.1px * var(--inv-scale));
+}
+.evt-reopen-chip text {
+  fill: #fff;
+  font-size: calc(2.4px * var(--inv-scale));
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+/* Viral-hotspot +N badge. */
+.evt-hotspot .evt-badge-bg {
+  fill: #e08a1e;
+  stroke: #fff;
+  r: calc(1.8px * var(--inv-scale));
+}
+.evt-hotspot-text {
+  fill: #fff;
+  font-size: calc(2.2px * var(--inv-scale));
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+/* Charter endpoint chip: a dashed ring hugging the marker. */
+.evt-charter-chip {
+  fill: none;
+  stroke: var(--tr-blue);
+  stroke-width: calc(0.4px * var(--inv-scale));
+  stroke-dasharray: calc(0.9px * var(--inv-scale)) calc(0.7px * var(--inv-scale));
+  r: calc(2.6px * var(--marker-scale));
+}
+/* Keep dense route markers out of the two most zoomed-out tiers (mirror the CB-badge rule). */
+.board-viewport[data-zoom='far'] .evt-typhoon,
+.board-viewport[data-zoom='far'] .evt-reopen-chip,
+.board-viewport[data-zoom='far'] .evt-hotspot,
+.board-viewport[data-zoom='regional'] .evt-hotspot {
+  display: none;
+}
+
+/* ─── Events side-rail panel ──────────────────────────────────────────────────── */
+.events-panel .tray-head {
+  display: flex;
+  align-items: center;
+}
+.events-panel .events-chip {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tr-accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.events-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-1);
+  margin-top: var(--tr-space-2);
+}
+.event-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: var(--tr-radius-sm);
+  background: var(--tr-surface-2);
+  font-size: 13px;
+}
+.event-row .event-name {
+  font-weight: 700;
+}
+.event-row .event-summary,
+.event-row .event-rounds,
+.event-row .event-note,
+.event-row .event-won {
+  color: var(--tr-ink-soft);
+  font-size: 12px;
+}
+.event-row .event-rounds {
+  margin-left: auto;
+}
+.event-free {
+  background: rgba(58, 157, 92, 0.16);
+  color: var(--tr-ok);
+  font-weight: 600;
+}
+.event-forecast {
+  opacity: 0.74;
+  border: 1px dashed var(--tr-ink-soft);
+  background: transparent;
+}
+.event-forecast .event-label {
+  font-weight: 700;
+  color: var(--tr-accent);
+}
+
+/* ─── Event toasts (forecast announcements + claim bonuses) ────────────────────── */
+.event-toast-stack {
+  position: fixed;
+  top: var(--tr-space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--tr-space-2);
+  z-index: 61;
+  pointer-events: none;
+}
+.event-toast {
+  padding: var(--tr-space-2) var(--tr-space-4);
+  border-radius: 999px;
+  background: var(--tr-ink);
+  color: var(--tr-surface);
+  box-shadow: var(--tr-shadow);
+  font-size: 13px;
+  font-weight: 600;
+  animation: tr-toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.event-toast--announced {
+  background: var(--tr-accent);
+  color: #fff;
+}
+.event-toast--bonus {
+  background: var(--tr-ok);
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .event-toast {
+    animation: none;
+  }
+}

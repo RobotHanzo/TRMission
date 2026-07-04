@@ -43,13 +43,16 @@ export function handAfterPayment(hand: Hand, payment: Payment): Hand {
 
 /**
  * Every legal payment for a route, given the hand — mirrors the engine's selector so
- * the UI only ever offers payments the server will accept.
+ * the UI only ever offers payments the server will accept. `extraCards` is the sky-lantern
+ * surcharge (0 or 1): the player pays `route.length + extraCards` cards (same colour rules) but
+ * still places only `route.length` cars — exactly as `validateRoutePayment` enforces server-side.
  */
-export function enumerateRoutePayments(hand: Hand, route: RouteDef): Payment[] {
+export function enumerateRoutePayments(hand: Hand, route: RouteDef, extraCards = 0): Payment[] {
   const out: Payment[] = [];
-  for (let loco = route.ferryLocos; loco <= route.length; loco++) {
+  const required = route.length + extraCards;
+  for (let loco = route.ferryLocos; loco <= required; loco++) {
     if (hand.LOCOMOTIVE < loco) continue;
-    const colorCount = route.length - loco;
+    const colorCount = required - loco;
     if (colorCount === 0) {
       out.push({ color: null, colorCount: 0, locomotives: loco });
       continue;
@@ -78,14 +81,14 @@ export interface Shortfall {
  * meaningful when that returns no payment. Locomotives are wild, so `have` for a colour
  * shortfall is the best single colour plus every locomotive.
  */
-export function routeShortfall(hand: Hand, route: RouteDef): Shortfall {
+export function routeShortfall(hand: Hand, route: RouteDef, extraCards = 0): Shortfall {
   const locoHave = hand.LOCOMOTIVE;
   if (route.ferryLocos > locoHave) {
     return { kind: 'locos', need: route.ferryLocos, have: locoHave };
   }
   const bestColor =
     route.color === 'GRAY' ? Math.max(...TRAIN_COLORS.map((c) => hand[c])) : hand[route.color];
-  return { kind: 'cards', need: route.length, have: bestColor + locoHave };
+  return { kind: 'cards', need: route.length + extraCards, have: bestColor + locoHave };
 }
 
 /** Why a station can't be built with this hand. Mirrors `enumerateStationPayments`. */
@@ -94,9 +97,14 @@ export function stationShortfall(hand: Hand, cost: number): Shortfall {
   return { kind: 'cards', need: cost, have: bestColor + hand.LOCOMOTIVE };
 }
 
-/** Station cost = (#stations already built) + 1, paid in one colour (locos wild). */
-export function enumerateStationPayments(hand: Hand, cost: number): Payment[] {
+/**
+ * Station cost = (#stations already built) + 1, paid in one colour (locos wild). When `freeStation`
+ * is set (an active railway-gala window) a zero-card payment is offered first — the engine accepts
+ * an empty payment ONLY while that flag is up, so the option must never appear otherwise.
+ */
+export function enumerateStationPayments(hand: Hand, cost: number, freeStation = false): Payment[] {
   const out: Payment[] = [];
+  if (freeStation) out.push({ color: null, colorCount: 0, locomotives: 0 });
   for (let loco = 0; loco <= cost; loco++) {
     if (hand.LOCOMOTIVE < loco) continue;
     const colorCount = cost - loco;
