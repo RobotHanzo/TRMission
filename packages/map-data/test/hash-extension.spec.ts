@@ -44,4 +44,14 @@ describe('hashContent extension', () => {
     const withRules: GameContent = { ...TAIWAN_CONTENT, rules: { trainCarsStart: 30 } };
     expect(hashContent(withGeo)).not.toBe(hashContent(withRules));
   });
+
+  it('a route bow changes the hash; content without one hashes exactly as before', () => {
+    const withBow: GameContent = {
+      ...TAIWAN_CONTENT,
+      routes: TAIWAN_CONTENT.routes.map((r, i) => (i === 0 ? { ...r, bow: 3 } : r)),
+    };
+    expect(hashContent(withBow)).not.toBe(PINNED_V3_HASH);
+    // The type extension alone must not move any pre-existing hash.
+    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_V3_HASH);
+  });
 });
