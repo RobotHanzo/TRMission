@@ -68,10 +68,16 @@ The game flow: lobby `start`/`ticket` (REST) → `connectGame(ticket)` → socke
 
 ## Custom map builder (`features/builder/`, lazy-loaded)
 
-Registered-users-only (guests can play a custom map, not author one) authoring UI at `/maps` (list +
-clone-by-code) and `/maps/:id/edit` (staged editor: Crop → Trim → Stops → Routes → Missions → Rules →
-Share; Trim lets you click individual land rings — e.g. a stray outlying island — to delete them
-from the crop without re-drawing the whole bounding box). Its own zustand store (`editor/store.ts`)
+Feature-gated: authoring requires the per-account **`mapBuilder`** feature (granted from the
+maintainer dashboard; carried on `PublicUser.features`, checked via `useHasFeature` from
+`store/session.ts`). Without it the AppHeader entries hide, `/maps`+`/maps/:id/edit` redirect home
+(App.tsx effect — cosmetic; the server 403s regardless), and the room-settings custom-map option
+disappears; guests can still *play* a custom-map game. The authoring UI lives at `/maps` (list +
+clone-by-code) and `/maps/:id/edit` (staged editor: Crop → Trim → Stops → Routes → Curves →
+Missions → Rules → Share; Trim lets you click individual land rings — e.g. a stray outlying island —
+to delete them from the crop without re-drawing the whole bounding box; Curves tunes each route's
+optional `bow` — the signed curve-apex deviation the shared geometry renders — via a draggable apex
+handle + slider, with double pairs always bowing together). Its own zustand store (`editor/store.ts`)
 with undo and debounced autosave; a single SVG
 canvas (`editor/EditorCanvas.tsx`, react-zoom-pan-pinch + the existing `boardView.ts` pixel→board
 projection) shared across stages; a live `ValidationPanel` runs `@trm/map-data`'s
@@ -87,7 +93,10 @@ route chunk (`App.tsx`) — it must never inflate the main bundle; re-check chun
 anything under `features/builder/`.
 - `game/` — view-only helpers (payment enumeration via the engine's `previewScore`/selectors, tunnel,
   cards, seat mapping). These mirror the server for optimistic preview but the server is authority.
-- `features/replay/` + `screens/ReplayScreen.tsx` — client-side replay of finished games: fetches
+- `features/replay/` + `screens/ReplayScreen.tsx` — client-side replay of finished games. Browsing
+  your own replays needs the **`replayReview`** feature (HistoryScreen hides the watch button
+  without it; a member's 403 renders `history.replayDisabled`), but `/replay/:gameId` stays
+  reachable — `link`-visibility replays load for anyone holding the URL. Fetches
   `/history/:id/replay` (config + action log), runs the real engine locally and projects through
   `redactFor(viewer)`/`viewToSnapshot` into isolated sandbox stores (`SandboxProvider`, which also
   isolates the log store), rendered by the standard `GameStage sandbox`. Perspective switching
