@@ -7,6 +7,7 @@ export type AdminView =
   | 'login'
   | 'overview'
   | 'users'
+  | 'features'
   | 'games'
   | 'rooms'
   | 'maintainers'
@@ -24,7 +25,7 @@ export function parsePath(pathname: string): { view: AdminView; param: string | 
   let p = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
   if (!p.startsWith('/')) p = `/${p}`;
   if (p === '/login') return { view: 'login', param: null };
-  const m = /^\/(users|games|rooms|maintainers|audit)(?:\/([^/]+))?\/?$/.exec(p);
+  const m = /^\/(users|features|games|rooms|maintainers|audit)(?:\/([^/]+))?\/?$/.exec(p);
   if (m) return { view: m[1] as AdminView, param: m[2] ? decodeURIComponent(m[2]) : null };
   return { view: 'overview', param: null };
 }

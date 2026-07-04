@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Sun,
   Swords,
+  ToggleRight,
   TrainFront,
   Users,
 } from 'lucide-react';
@@ -20,6 +21,7 @@ import { LoginView } from './views/LoginView';
 import { DeniedView } from './views/DeniedView';
 import { OverviewView } from './views/OverviewView';
 import { UsersView } from './views/UsersView';
+import { FeaturesView } from './views/FeaturesView';
 import { GamesView } from './views/GamesView';
 import { RoomsView } from './views/RoomsView';
 import { MaintainersView } from './views/MaintainersView';
@@ -28,6 +30,7 @@ import { AuditView } from './views/AuditView';
 const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof Users }[] = [
   { view: 'overview', permission: 'overview.read', icon: Activity },
   { view: 'users', permission: 'users.read', icon: Users },
+  { view: 'features', permission: 'users.features', icon: ToggleRight },
   { view: 'games', permission: 'games.read', icon: Swords },
   { view: 'rooms', permission: 'rooms.read', icon: DoorOpen },
   { view: 'maintainers', permission: 'maintainers.read', icon: ShieldCheck },
@@ -45,6 +48,8 @@ function ActiveView({ view }: { view: AdminView }) {
   switch (view) {
     case 'users':
       return <UsersView />;
+    case 'features':
+      return <FeaturesView />;
     case 'games':
       return <GamesView />;
     case 'rooms':
