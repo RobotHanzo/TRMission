@@ -429,6 +429,7 @@
   "427": ".updateSettings",
   "428": ".addBot",
   "429": ".ready",
+  "432": "CurveHandle",
   "434": ".kick",
   "439": "compilerOptions",
   "447": "vite.config.ts",

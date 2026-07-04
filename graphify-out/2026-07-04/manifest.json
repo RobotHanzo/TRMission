@@ -255,13 +255,13 @@
     "semantic_hash": ""
   },
   "apps/server/test/app.ts": {
-    "mtime": 1783143743.2337883,
-    "ast_hash": "5d4b40ddcdc3a4a4f8d9f2749ae92cc0",
+    "mtime": 1783160404.46545,
+    "ast_hash": "fefba27f2944b4abd1b526d096af054f",
     "semantic_hash": ""
   },
   "apps/server/test/auth.e2e.spec.ts": {
-    "mtime": 1783143778.3654387,
-    "ast_hash": "58d258a11fb11574b0cc077cf688aed6",
+    "mtime": 1783160404.468476,
+    "ast_hash": "3f899161a0375fb2f4035c6621586013",
     "semantic_hash": ""
   },
   "apps/server/test/bot-pacing.spec.ts": {
@@ -925,7 +925,7 @@
     "semantic_hash": ""
   },
   "apps/web/src/screens/LoginScreen.tsx": {
-    "mtime": 1783159999.2706792,
+    "mtime": 1783160404.4738197,
     "ast_hash": "dd3715d37b6e9ed94dc1b08bf0f9a12f",
     "semantic_hash": ""
   },
@@ -2770,7 +2770,7 @@
     "semantic_hash": ""
   },
   "apps/web/src/net/google.ts": {
-    "mtime": 1783159906.2885242,
+    "mtime": 1783160404.4706447,
     "ast_hash": "547366114ca423428e08e49b2d39aa13",
     "semantic_hash": ""
   },

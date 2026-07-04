@@ -2858,5 +2858,10 @@
     "mtime": 1783160064.263908,
     "ast_hash": "4f47738faf60137dac8578c0f2c73226",
     "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-04-map-builder-country-select.md": {
+    "mtime": 1783179033.6160479,
+    "ast_hash": "79c5e18c32363f217bb2a5142f961872",
+    "semantic_hash": ""
   }
 }
