@@ -312,6 +312,18 @@
   transform-origin: center;
   transform: translate(-50%, -50%);
 }
+
+/* ── Curves stage: draggable apex handle ────────────────────────────────────────────────── */
+.curve-handle {
+  r: calc(1.3px * var(--inv-scale, 1));
+  fill: var(--tr-ember);
+  stroke: #fff;
+  stroke-width: calc(0.35px * var(--inv-scale, 1));
+  cursor: grab;
+}
+.curve-handle:active {
+  cursor: grabbing;
+}
 .editor-crop-handle-nw,
 .editor-crop-handle-se {
   cursor: nwse-resize;

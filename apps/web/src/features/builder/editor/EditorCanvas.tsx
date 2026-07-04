@@ -1,11 +1,14 @@
 import { useMemo, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { BOW_LIMIT } from '@trm/map-data';
 import { CARD_COLOR_TOKENS, GRAY_TOKEN } from '../../../theme/colors';
 import { CustomGeography } from '../../../components/Geography';
 import { RouteShape, FerryLocoGradientDef } from '../../../components/RouteShape';
 import { buildRouteGeometryFor } from '../../../game/routeGeometry';
+import type { RouteDraft } from '../../../net/rest';
 import { clientToBoardPoint } from './canvasProjection';
+import { bowFromPoint } from './curveMath';
 import { CanvasControls } from './CanvasControls';
 import { ZoomVar } from './ZoomVar';
 import { useEditorStore } from './store';
@@ -16,6 +19,14 @@ const DEFAULT_VIEW = { x: 0, y: 0, w: 100, h: 100 };
 const colorOf = (c: string): string =>
   c === 'GRAY' ? GRAY_TOKEN.hex : (CARD_COLOR_TOKENS[c as keyof typeof CARD_COLOR_TOKENS]?.hex ?? '#888');
 
+export interface CurveHandle {
+  routeId: string;
+  /** Live preview value while dragging/sliding; null when idle (render the stored/auto bow). */
+  bow: number | null;
+  onDrag(bow: number): void;
+  onCommit(bow: number): void;
+}
+
 export interface EditorCanvasProps {
   /** Empty-canvas / land click, in board units — placing a new city, or a no-op if the stage
    *  doesn't handle placement (e.g. the Missions stage never renders this canvas at all). */
@@ -24,6 +35,8 @@ export interface EditorCanvasProps {
   onRouteClick?: (id: string) => void;
   /** City ids to visually highlight (e.g. the two endpoints picked mid-route-creation). */
   highlightCities?: ReadonlySet<string>;
+  /** Curves-stage apex handle: rendered for this route, draggable along the chord normal. */
+  curveHandle?: CurveHandle;
 }
 
 /**
@@ -39,6 +52,7 @@ export function EditorCanvas({
   onCityClick,
   onRouteClick,
   highlightCities,
+  curveHandle,
 }: EditorCanvasProps) {
   const { t } = useTranslation();
   const draft = useEditorStore((s) => s.draft);
@@ -48,10 +62,45 @@ export function EditorCanvas({
   const view = draft.geography?.baseView ?? DEFAULT_VIEW;
   const viewBox = `${view.x} ${view.y} ${view.w} ${view.h}`;
 
+  const routesForGeometry = useMemo(() => {
+    if (!curveHandle || curveHandle.bow === null) return draft.routes;
+    const target = draft.routes.find((r) => r.id === curveHandle.routeId);
+    if (!target) return draft.routes;
+    const inPair = (r: RouteDraft): boolean =>
+      r.id === target.id || (!!target.doubleGroup && r.doubleGroup === target.doubleGroup);
+    // Ephemeral drag/slide preview: the pair bows together, exactly as setRouteBow will commit.
+    return draft.routes.map((r) => (inPair(r) ? { ...r, bow: curveHandle.bow! } : r));
+  }, [draft.routes, curveHandle]);
+
   const { geometry, hubs } = useMemo(
-    () => buildRouteGeometryFor(draft.cities, draft.routes),
-    [draft.cities, draft.routes],
+    () => buildRouteGeometryFor(draft.cities, routesForGeometry),
+    [draft.cities, routesForGeometry],
   );
+
+  const onHandlePointerDown = (e: React.PointerEvent<SVGCircleElement>) => {
+    if (!curveHandle || !svgRef.current) return;
+    const route = draft.routes.find((r) => r.id === curveHandle.routeId);
+    const a = route && draft.cities.find((c) => c.id === route.a);
+    const b = route && draft.cities.find((c) => c.id === route.b);
+    if (!route || !a || !b) return;
+    e.stopPropagation();
+    e.preventDefault();
+    const svg = svgRef.current;
+    let last = curveHandle.bow ?? bowFromPoint(a, b, geometry.get(route.id)?.mid ?? a);
+    const move = (ev: PointerEvent) => {
+      const p = clientToBoardPoint(svg, ev.clientX, ev.clientY);
+      if (!p) return;
+      last = Math.max(-BOW_LIMIT, Math.min(BOW_LIMIT, bowFromPoint(a, b, p)));
+      curveHandle.onDrag(last);
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      curveHandle.onCommit(last);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
 
   const handleBackgroundClick = (e: React.MouseEvent<SVGSVGElement>) => {
     if (!onBackgroundClick || !svgRef.current) return;
@@ -62,7 +111,14 @@ export function EditorCanvas({
 
   return (
     <div className="editor-canvas-inner" ref={zoomVarRef}>
-      <TransformWrapper minScale={0.5} maxScale={12} initialScale={1} centerOnInit wheel={{ step: 0.0022 }}>
+      <TransformWrapper
+        minScale={0.5}
+        maxScale={12}
+        initialScale={1}
+        centerOnInit
+        wheel={{ step: 0.0022 }}
+        panning={{ excluded: ['curve-handle'] }}
+      >
         <ZoomVar targetRef={zoomVarRef} />
         <CanvasControls />
         {/* contentStyle overrides the library's default `width/height: fit-content` on the inner
@@ -148,6 +204,15 @@ export function EditorCanvas({
                 </g>
               );
             })}
+            {curveHandle && geometry.get(curveHandle.routeId) && (
+              <circle
+                className="curve-handle"
+                cx={geometry.get(curveHandle.routeId)!.mid.x}
+                cy={geometry.get(curveHandle.routeId)!.mid.y}
+                onPointerDown={onHandlePointerDown}
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
           </svg>
         </TransformComponent>
       </TransformWrapper>
