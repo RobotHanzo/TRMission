@@ -5,7 +5,6 @@ describe('admin router path mapping', () => {
   it('parses base and view paths under /admin', () => {
     expect(parsePath('/admin/')).toEqual({ view: 'overview', param: null });
     expect(parsePath('/admin')).toEqual({ view: 'overview', param: null });
-    expect(parsePath('/admin/login')).toEqual({ view: 'login', param: null });
     expect(parsePath('/admin/users')).toEqual({ view: 'users', param: null });
     expect(parsePath('/admin/users/u-123')).toEqual({ view: 'users', param: 'u-123' });
     expect(parsePath('/admin/games/g%2F1')).toEqual({ view: 'games', param: 'g/1' });
@@ -13,9 +12,10 @@ describe('admin router path mapping', () => {
     expect(parsePath('/admin/audit')).toEqual({ view: 'audit', param: null });
   });
 
-  it('unknown paths fall back to overview', () => {
+  it('unknown paths (including the retired /admin/login) fall back to overview', () => {
     expect(parsePath('/admin/nope')).toEqual({ view: 'overview', param: null });
     expect(parsePath('/somewhere/else')).toEqual({ view: 'overview', param: null });
+    expect(parsePath('/admin/login')).toEqual({ view: 'overview', param: null });
   });
 
   it('pathFor round-trips through parsePath', () => {

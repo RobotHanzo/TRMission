@@ -80,7 +80,7 @@ export default function App() {
   if (session.phase === 'denied') return <DeniedView />;
 
   const visibleNav = NAV.filter((n) => session.permissions.has(n.permission));
-  const view = ui.view === 'login' ? 'overview' : ui.view;
+  const view = ui.view;
 
   return (
     <div className="oc-shell">

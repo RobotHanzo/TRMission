@@ -4,7 +4,6 @@ import { create } from 'zustand';
 import i18n from '../i18n';
 
 export type AdminView =
-  | 'login'
   | 'overview'
   | 'users'
   | 'features'
@@ -24,7 +23,6 @@ const LOCALE_KEY = 'trm.admin.locale';
 export function parsePath(pathname: string): { view: AdminView; param: string | null } {
   let p = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
   if (!p.startsWith('/')) p = `/${p}`;
-  if (p === '/login') return { view: 'login', param: null };
   const m = /^\/(users|features|games|rooms|maintainers|audit)(?:\/([^/]+))?\/?$/.exec(p);
   if (m) return { view: m[1] as AdminView, param: m[2] ? decodeURIComponent(m[2]) : null };
   return { view: 'overview', param: null };
@@ -38,9 +36,6 @@ export function pathFor(view: AdminView, param?: string | null): string {
 
 const pushPath = (path: string): void => {
   if (window.location.pathname !== path) window.history.pushState(null, '', path);
-};
-const replacePath = (path: string): void => {
-  if (window.location.pathname !== path) window.history.replaceState(null, '', path);
 };
 
 const readTheme = (): AdminTheme => {
@@ -123,17 +118,3 @@ export const useUi = create<UiState>()((set, get) => ({
     set({ locale });
   },
 }));
-
-/** Auth-gate redirect: unauthenticated visitors land on /admin/login (replace, not push). */
-export const gateToLogin = (): void => {
-  replacePath(pathFor('login'));
-  useUi.setState({ view: 'login', param: null });
-};
-
-/** After login/restore: leave /login for the overview. */
-export const leaveLogin = (): void => {
-  if (useUi.getState().view === 'login') {
-    replacePath(pathFor('overview'));
-    useUi.setState({ view: 'overview', param: null });
-  }
-};
