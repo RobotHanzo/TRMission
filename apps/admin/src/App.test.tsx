@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import App from './App';
 import { useSession } from './store/session';
 import { useUi } from './store/ui';
+import { goToMainLogin } from './lib/mainApp';
+
+vi.mock('./lib/mainApp', () => ({ goToMainLogin: vi.fn(), mainLoginUrl: vi.fn() }));
 
 type Route = { status: number; body: unknown };
 
@@ -52,6 +55,7 @@ function primeSession(permissions: string[], role = 'viewer') {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
   window.history.replaceState(null, '', '/admin/');
   useUi.setState({ view: 'overview', param: null });
   useSession.setState({
@@ -59,8 +63,6 @@ beforeEach(() => {
     user: null,
     role: null,
     permissions: new Set(),
-    loading: false,
-    error: null,
   });
 });
 
@@ -105,5 +107,17 @@ describe('permission-gated shell', () => {
     render(<App />);
     expect(await screen.findByText('此帳號沒有後台權限')).toBeInTheDocument();
     expect(screen.getByText('登出')).toBeInTheDocument();
+  });
+
+  it('an unauthenticated visitor sees the redirecting placeholder, not a login form', async () => {
+    stubFetch({
+      '/auth/me': { status: 401, body: { message: 'missing bearer token' } },
+      '/auth/refresh': { status: 401, body: { message: 'no refresh token' } },
+    });
+    window.history.replaceState(null, '', '/admin/users/42');
+    render(<App />);
+    await waitFor(() => expect(goToMainLogin).toHaveBeenCalledWith('/admin/users/42'));
+    expect(screen.getByText('載入中…')).toBeInTheDocument();
+    expect(screen.queryByText('登入')).not.toBeInTheDocument();
   });
 });

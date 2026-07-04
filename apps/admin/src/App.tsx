@@ -17,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import type { DashboardPermission } from '@trm/shared';
 import { useSession } from './store/session';
 import { useUi, type AdminView } from './store/ui';
-import { LoginView } from './views/LoginView';
 import { DeniedView } from './views/DeniedView';
 import { OverviewView } from './views/OverviewView';
 import { UsersView } from './views/UsersView';
@@ -75,10 +74,9 @@ export default function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  if (session.phase === 'booting') {
+  if (session.phase === 'booting' || session.phase === 'unauthenticated') {
     return <div className="oc-gate oc-muted">{t('common.loading')}</div>;
   }
-  if (session.phase === 'unauthenticated') return <LoginView />;
   if (session.phase === 'denied') return <DeniedView />;
 
   const visibleNav = NAV.filter((n) => session.permissions.has(n.permission));
