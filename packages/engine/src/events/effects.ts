@@ -1,9 +1,11 @@
-import type { RouteId } from '@trm/shared';
+import type { RouteId, CityId, PlayerId } from '@trm/shared';
 import type { GameState } from '../types/state';
 import type { RandomEventKind } from '../types/events-state';
+import type { Board } from '../board';
+import type { Edge } from '../graph/connectivity';
 
 /**
- * Pure rule-effect queries for the random-events feature (M2).
+ * Pure rule-effect queries for the random-events feature (M2 restrictive + M3 positive events).
  *
  * Every helper is TOTAL for `state.events === undefined` (feature off) and returns the no-event
  * answer, so off-mode behaviour is byte-identical. None of these mutate state except
@@ -98,4 +100,64 @@ export function takeReopenBonus(
   if (!ev || !ev.reopenBonus.includes(routeId)) return { state, bonus: 0 };
   const reopenBonus = ev.reopenBonus.filter((r) => r !== routeId);
   return { state: { ...state, events: { ...ev, reopenBonus } }, bonus: 2 };
+}
+
+// ─────────────────────────────────── positive-event queries (M3) ────────────────────────────────
+
+/** Is a viral-hotspot marker present on `cityId`? Returns its level (0 = none, 1, or 2). */
+export function hotspotLevel(state: GameState, cityId: CityId): number {
+  return state.events?.hotspots[cityId as string] ?? 0;
+}
+
+/** Is a stamp-rally window currently active (new-city claim bonuses in effect)? */
+export function stampRallyActive(state: GameState): boolean {
+  return hasActiveKind(state, 'STAMP_RALLY');
+}
+
+/** Is a railway-gala zero-cost-station window currently open? */
+export function freeStationAvailable(state: GameState): boolean {
+  return state.events?.freeStation !== undefined;
+}
+
+/**
+ * Consume the gala free-station window game-wide (first-come). Returns a fresh state with the
+ * `freeStation` key removed ENTIRELY (never set to `undefined`, keeping clone/digest clean). A
+ * no-op — same reference — when the window is not open.
+ */
+export function consumeFreeStation(state: GameState): GameState {
+  const ev = state.events;
+  if (!ev || ev.freeStation === undefined) return state;
+  const { freeStation: _omit, ...rest } = ev;
+  return { ...state, events: rest };
+}
+
+/** The endpoint-city pairs of every route `player` currently owns (their OWN network edges). */
+export function playerOwnEdges(board: Board, state: GameState, player: PlayerId): Edge[] {
+  const edges: Edge[] = [];
+  for (const [routeId, cell] of Object.entries(state.ownership)) {
+    if ('owner' in cell && cell.owner === player) {
+      const r = board.routeById.get(routeId);
+      if (r) edges.push({ a: r.a as string, b: r.b as string });
+    }
+  }
+  return edges;
+}
+
+/** The set of city ids touched by `player`'s owned routes (endpoints of their own network). */
+export function playerNetworkCities(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+): Set<string> {
+  const cities = new Set<string>();
+  for (const [routeId, cell] of Object.entries(state.ownership)) {
+    if ('owner' in cell && cell.owner === player) {
+      const r = board.routeById.get(routeId);
+      if (r) {
+        cities.add(r.a as string);
+        cities.add(r.b as string);
+      }
+    }
+  }
+  return cities;
 }

@@ -34,6 +34,18 @@ export function ownConnectedTicketIds(args: {
 }
 
 /**
+ * Are cities `a` and `b` connected using ONLY the supplied edges (no station borrowing)? Pure
+ * union-find over `edges`; the single primitive behind the random-events charter award, where a
+ * player's own claimed edges must join the two charter endpoints. Reuses {@link UnionFind} rather
+ * than duplicating the union-find logic.
+ */
+export function citiesConnected(edges: readonly Edge[], a: string, b: string): boolean {
+  const uf = new UnionFind([a, b]);
+  for (const e of edges) uf.union(e.a, e.b);
+  return uf.connected(a, b);
+}
+
+/**
  * Tickets connected by the player's own edges UNION all their station-borrowed edges. Under the
  * `unlimitedStationBorrow` variant every station borrows ALL its incident opponent edges, so the
  * borrow graph only grows — this union is monotonic and is the basis for instant, locked completion.

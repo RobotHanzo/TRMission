@@ -8,7 +8,7 @@ import type { RedactedView, RedactedPlayer, RedactedFinalScoreboard } from './ty
 import { reduce, hasAnyLegalMove } from './reduce';
 import { currentPlayerId } from './turn';
 import { getPlayer } from './reducers/common';
-import { skyLanternSurcharge } from './events/effects';
+import { skyLanternSurcharge, freeStationAvailable } from './events/effects';
 import { ownConnectedTicketIds } from './graph/connectivity';
 import { evaluatePlayerTickets, longestTrailRouteIdsFor } from './scoring';
 import type { TicketId } from '@trm/shared';
@@ -104,9 +104,15 @@ export function legalActions(board: Board, state: GameState, player: PlayerId): 
     }
     const built = state.ruleParams.stationsPerPlayer - p.stationsRemaining;
     const stationPayments = enumeratePayments(p.hand, built + 1, { ferryLocos: 0, specific: null });
+    // Railway-gala free-station: offer the empty (zero-card) payment alongside the paid options
+    // exactly while the flag is up. reduce filters it, so an off-mode game is byte-identical.
+    const emptyPayment: Payment = { color: null, colorCount: 0, locomotives: 0 };
+    const allStationPayments = freeStationAvailable(state)
+      ? [emptyPayment, ...stationPayments]
+      : stationPayments;
     for (const city of board.cityIds) {
       if (state.stations.some((s) => s.cityId === city)) continue;
-      for (const payment of stationPayments)
+      for (const payment of allStationPayments)
         candidates.push({ t: 'BUILD_STATION', player, cityId: city, payment });
     }
     candidates.push({ t: 'PASS', player });

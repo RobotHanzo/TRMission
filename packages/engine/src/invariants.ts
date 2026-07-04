@@ -85,6 +85,13 @@ export function checkInvariants(board: Board, state: GameState): string[] {
     for (const act of ev.active) {
       if (!scheduleIds.has(act.id)) problems.push(`active event id not in schedule: ${act.id}`);
     }
+    // Every charter is either unclaimed (wonBy null) or won by a real player.
+    const playerIds = new Set(state.turnOrder.map((id) => id as string));
+    for (const c of ev.charters) {
+      if (c.wonBy !== null && !playerIds.has(c.wonBy as string)) {
+        problems.push(`charter ${c.id} wonBy is not a valid player: ${c.wonBy as string}`);
+      }
+    }
     for (let i = 1; i < ev.schedule.length; i++) {
       const prev = ev.schedule[i - 1]!;
       const curr = ev.schedule[i]!;

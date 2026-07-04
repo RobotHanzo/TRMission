@@ -6,6 +6,7 @@ import type { Board } from './board';
 import { getRoute, siblingOf } from './board';
 import { variantForPlayerCount } from './config';
 import type { GameState } from './types/state';
+import type { CharterContract } from './types/events-state';
 import type { Action, Payment } from './types/actions';
 import type { GameEvent } from './types/events';
 import { drawOne, refillMarket } from './deck';
@@ -15,7 +16,7 @@ import { validateRoutePayment, validateStationPayment } from './payments';
 import { currentPlayerId, endTurn } from './turn';
 import { offerTickets } from './tickets';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
-import { borrowConnectedTicketIds } from './graph/connectivity';
+import { borrowConnectedTicketIds, citiesConnected } from './graph/connectivity';
 import { stationBorrowEdges } from './scoring';
 import {
   isRouteClosed,
@@ -27,6 +28,12 @@ import {
   tunnelRevealExtra,
   dayOffExtraDraw,
   takeReopenBonus,
+  hotspotLevel,
+  stampRallyActive,
+  freeStationAvailable,
+  consumeFreeStation,
+  playerOwnEdges,
+  playerNetworkCities,
 } from './events/effects';
 
 export interface ReduceOutput {
@@ -373,6 +380,12 @@ function applyClaimEffects(
   player: PlayerId,
   route: RouteDef,
 ): { state: GameState; events: GameEvent[] } {
+  // Stamp-rally counts cities NEW to the claimer's network, so snapshot it BEFORE the claim (from
+  // pre-claim ownership). Null when no stamp-rally window is active (off mode / feature absent).
+  const preClaimCities = stampRallyActive(state)
+    ? playerNetworkCities(board, state, player)
+    : null;
+
   let next = setOwnership(state, route.id as string, { owner: player });
 
   // Sibling lock is emitted AFTER the claim/bonus events; buffer it here.
@@ -409,8 +422,11 @@ function applyClaimEffects(
     },
   ];
 
-  // Typhoon reopen +2: the FIRST claimer of a reopened route banks a one-off itemized bonus. A
-  // second claimer of the reopened double-route sibling finds it already consumed and earns nothing.
+  // Event bonuses ride separate itemized EVENT_BONUS events AFTER ROUTE_CLAIMED, in a fixed,
+  // deterministic order: REOPEN → HOTSPOT → STAMP → CHARTER. Every one banks into routePoints.
+
+  // (1) REOPEN — typhoon +2 to the FIRST claimer of a reopened route (one-off, consumed here). A
+  // second claimer of the reopened double-route sibling finds it already gone and earns nothing.
   const rb = takeReopenBonus(next, route.id);
   next = rb.state;
   if (rb.bonus > 0) {
@@ -424,6 +440,72 @@ function applyClaimEffects(
       routeId: route.id,
       visibility: 'PUBLIC',
     });
+  }
+
+  // Both endpoint-driven bonuses iterate the route's endpoints sorted by cityId (deterministic).
+  const endpoints = [route.a as string, route.b as string].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+
+  // (2) HOTSPOT — +level for each endpoint city carrying a viral-hotspot marker.
+  for (const cityId of endpoints) {
+    const level = hotspotLevel(next, cityId as CityId);
+    if (level > 0) {
+      next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + level }));
+      events.push({
+        e: 'EVENT_BONUS',
+        kind: 'VIRAL_HOTSPOT',
+        reason: 'HOTSPOT',
+        player,
+        points: level,
+        cityId: cityId as CityId,
+        visibility: 'PUBLIC',
+      });
+    }
+  }
+
+  // (3) STAMP — +1 for each endpoint city NEW to the claimer's network while a stamp rally runs.
+  // A parallel double-route sibling adds no new city (both endpoints already owned) ⇒ no bonus.
+  if (preClaimCities) {
+    for (const cityId of endpoints) {
+      if (!preClaimCities.has(cityId)) {
+        next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + 1 }));
+        events.push({
+          e: 'EVENT_BONUS',
+          kind: 'STAMP_RALLY',
+          reason: 'STAMP',
+          player,
+          points: 1,
+          cityId: cityId as CityId,
+          visibility: 'PUBLIC',
+        });
+      }
+    }
+  }
+
+  // (4) CHARTER — every open, un-won charter whose endpoints the claimer's OWN network now joins
+  // (no station borrowing). One claim can win several; award each in charters-array order.
+  const evc = next.events;
+  if (evc && evc.charters.length > 0) {
+    const ownEdges = playerOwnEdges(board, next, player);
+    const updated: CharterContract[] = [];
+    let anyWon = false;
+    for (const c of evc.charters) {
+      if (c.wonBy === null && citiesConnected(ownEdges, c.a as string, c.b as string)) {
+        anyWon = true;
+        next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + c.points }));
+        events.push({
+          e: 'EVENT_BONUS',
+          kind: 'CHARTER_SPECIAL',
+          reason: 'CHARTER',
+          player,
+          points: c.points,
+          visibility: 'PUBLIC',
+        });
+        updated.push({ ...c, wonBy: player });
+      } else {
+        updated.push(c);
+      }
+    }
+    if (anyWon) next = { ...next, events: { ...evc, charters: updated } };
   }
 
   events.push(...lockedEvents);
@@ -631,12 +713,34 @@ function applyBuildStation(
   if (!p) return err(violation('NOT_YOUR_TURN', 'unknown player'));
   if (p.stationsRemaining <= 0) return err(violation('STATION_LIMIT', 'no stations left'));
 
-  const built = state.ruleParams.stationsPerPlayer - p.stationsRemaining;
-  const cost = built + 1;
-  const pay = validateStationPayment(cost, payment, p);
-  if (!pay.ok) return pay;
+  // Railway-gala zero-cost station: while the flag is up, the EMPTY payment (zero cards) builds a
+  // station for free and consumes the flag game-wide (first-come). The normal PAID station stays
+  // legal and does NOT consume the flag — the player's choice of payment decides. A non-empty
+  // payment (or an empty one with the flag down) falls through to normal cost validation, which
+  // rejects the empty payment because a station always costs ≥ 1 card.
+  const isEmptyPayment = payment.colorCount === 0 && payment.locomotives === 0;
+  const useFreeStation = freeStationAvailable(state) && isEmptyPayment;
 
-  let next = spendCards(state, player, pay.value.spent);
+  const buildEvents: GameEvent[] = [{ e: 'STATION_BUILT', player, cityId, visibility: 'PUBLIC' }];
+  let next: GameState;
+  if (useFreeStation) {
+    next = consumeFreeStation(state);
+    buildEvents.push({
+      e: 'EVENT_BONUS',
+      kind: 'RAILWAY_GALA',
+      reason: 'FREE_STATION',
+      player,
+      points: 0,
+      visibility: 'PUBLIC',
+    });
+  } else {
+    const built = state.ruleParams.stationsPerPlayer - p.stationsRemaining;
+    const cost = built + 1;
+    const pay = validateStationPayment(cost, payment, p);
+    if (!pay.ok) return pay;
+    next = spendCards(state, player, pay.value.spent);
+  }
+
   next = withPlayer(next, player, (pl) => ({ ...pl, stationsRemaining: pl.stationsRemaining - 1 }));
   next = { ...next, stations: [...next.stations, { playerId: player, cityId }] };
   const lock = lockCompletedTickets(board, next);
@@ -644,11 +748,7 @@ function applyBuildStation(
   const out = endTurn(board, next, { wasPass: false });
   return ok({
     state: out.state,
-    events: [
-      { e: 'STATION_BUILT', player, cityId, visibility: 'PUBLIC' },
-      ...lock.events,
-      ...out.events,
-    ],
+    events: [...buildEvents, ...lock.events, ...out.events],
   });
 }
 
@@ -735,6 +835,9 @@ export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId
     p.stationsRemaining > 0 &&
     state.stations.length < board.cityIds.length
   ) {
+    // Gala free-station: buildable with zero cards while the flag is up (mirror of the empty-payment
+    // branch in applyBuildStation). Day-off suspension above already wins over the flag.
+    if (freeStationAvailable(state)) return true;
     const built = state.ruleParams.stationsPerPlayer - p.stationsRemaining;
     const cost = built + 1;
     if (canAffordCount(p.hand, cost)) return true;

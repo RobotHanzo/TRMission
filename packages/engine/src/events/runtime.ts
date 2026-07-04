@@ -9,7 +9,9 @@ import type {
   EventScheduleEntry,
 } from '../types/events-state';
 import { drawOne } from '../deck';
-import { addCardToHand } from '../reducers/common';
+import { addCardToHand, withPlayer } from '../reducers/common';
+import { playerOwnEdges } from './effects';
+import { citiesConnected } from '../graph/connectivity';
 
 /**
  * Round tick for the random-events feature. Runs ONCE per round boundary (an `endTurn` order wrap),
@@ -23,7 +25,8 @@ import { addCardToHand } from '../reducers/common';
  *   a. END      — expire actives / charters / the free-station window; typhoon routes still unclaimed
  *                 at expiry roll into `reopenBonus`. Emits EVENT_ENDED per ended active.
  *   b. START    — begin every schedule entry whose startRound === roundIndex, applying its instant
- *                 state transition (gala blind draws, hotspot bump, charter open, active window).
+ *                 state transition (gala blind draws + free-station flag, hotspot bump, charter open
+ *                 with its at-open award check, active window).
  *                 A surprise (non-telegraphed) entry is suppressed if the game is in quiet-endgame.
  *                 Emits EVENT_STARTED (+ any gala draw events) per started entry.
  *   c. ANNOUNCE — telegraph the next entry one round early (startRound === roundIndex + 1). Suppressed
@@ -129,14 +132,43 @@ export function tickRound(
       }
     } else if (entry.kind === 'CHARTER_SPECIAL') {
       if (entry.charter) {
-        openCharters.push({
+        const contract: CharterContract = {
           id: entry.id,
           a: entry.charter.a,
           b: entry.charter.b,
           points: entry.charter.points,
           expiresAfterRound: roundIndex + entry.durationRounds - 1,
           wonBy: null,
-        });
+        };
+        // At-open award: the FIRST player in turn order whose OWN network already connects a↔b
+        // (no station borrowing) wins the charter immediately — emitted right after its
+        // EVENT_STARTED. Ties break to the earlier seat (turn-order iteration).
+        let winner: PlayerId | null = null;
+        for (const pid of next.turnOrder) {
+          const edges = playerOwnEdges(board, next, pid as PlayerId);
+          if (citiesConnected(edges, contract.a as string, contract.b as string)) {
+            winner = pid as PlayerId;
+            break;
+          }
+        }
+        if (winner !== null) {
+          const wonBy = winner;
+          next = withPlayer(next, wonBy, (p) => ({
+            ...p,
+            routePoints: p.routePoints + contract.points,
+          }));
+          openCharters.push({ ...contract, wonBy });
+          events.push({
+            e: 'EVENT_BONUS',
+            kind: 'CHARTER_SPECIAL',
+            reason: 'CHARTER',
+            player: wonBy,
+            points: contract.points,
+            visibility: 'PUBLIC',
+          });
+        } else {
+          openCharters.push(contract);
+        }
       }
     }
 
@@ -152,9 +184,12 @@ export function tickRound(
       });
     }
 
-    // Gala flags a one-round zero-cost-station window (the RULE lands in M3; here only the flag).
+    // Gala flags a zero-cost-station window for EXACTLY its own round (the claim RULE lives in
+    // reduce.ts). `untilRound: roundIndex` matches the gala ActiveEvent's `endsAfterRound`
+    // (= roundIndex for a 1-round duration); the END-phase drop rule (`untilRound < roundIndex`)
+    // then clears it at the next boundary.
     if (entry.kind === 'RAILWAY_GALA') {
-      ev = { ...ev, freeStation: { untilRound: roundIndex + 1 } };
+      ev = { ...ev, freeStation: { untilRound: roundIndex } };
     }
 
     nextIdx++;

@@ -39,6 +39,12 @@ export {
   tunnelRevealExtra,
   dayOffExtraDraw,
   takeReopenBonus,
+  hotspotLevel,
+  stampRallyActive,
+  freeStationAvailable,
+  consumeFreeStation,
+  playerOwnEdges,
+  playerNetworkCities,
 } from './events/effects';
 
 export type { Action, ActionType, Payment } from './types/actions';
@@ -73,6 +79,7 @@ export {
   evaluateTickets,
   ownConnectedTicketIds,
   borrowConnectedTicketIds,
+  citiesConnected,
 } from './graph/connectivity';
 export type { Edge, TicketGoal, TicketEvaluation, IdTicketGoal } from './graph/connectivity';
 export { UnionFind } from './graph/unionFind';

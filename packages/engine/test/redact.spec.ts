@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { asPlayerId } from '@trm/shared';
+import { asPlayerId, asCityId, asRouteId } from '@trm/shared';
+import type { PlayerId } from '@trm/shared';
 import { makeConfig, playGreedyGame, taiwanBoard } from './helpers';
 import { initGame } from '../src/setup';
 import { reduce } from '../src/reduce';
 import { redactFor } from '../src/selectors';
 import type { GameState } from '../src/types/state';
 import type { OwnerCell } from '../src/types/state';
+import type { EventsState, EventScheduleEntry } from '../src/types/events-state';
 
 /** Resolve every player's initial ticket offer (keep the minimum) → AWAIT_ACTION. */
 function afterSetup(numPlayers: number, seed: string): GameState {
@@ -155,3 +157,95 @@ describe('redactFor — hidden information', () => {
 function opp_hand(p: { hand: unknown }): unknown {
   return p.hand;
 }
+
+describe('redactFor — random events projection', () => {
+  // Distinctive ids that must NEVER appear in any projection while the entry is still in the future.
+  const SECRET = {
+    id: 'evSecretFuture',
+    route: asRouteId('SECRET_ROUTE_X'),
+    city: asCityId('SECRET_CITY_C'),
+    charterA: asCityId('SECRET_CITY_A'),
+    charterB: asCityId('SECRET_CITY_B'),
+  };
+
+  function baseState(seed: string): { state: GameState; live: { closed: string; hot: string; a: string; b: string } } {
+    const board = taiwanBoard();
+    const state = afterSetup(2, seed);
+    const closed = board.content.routes[0]!.id as string; // unclaimed after setup
+    const hot = board.cityIds[0] as string;
+    const a = board.cityIds[1] as string;
+    const b = board.cityIds[2] as string;
+    return { state, live: { closed, hot, a, b } };
+  }
+
+  it('never leaks a future unannounced entry (id, routeIds, cityId, charter cities) to any seat', () => {
+    const board = taiwanBoard();
+    const { state, live } = baseState('redact-events-future');
+    // Future surprise entry: far off, not telegraphed → nothing about it may be projected. It carries
+    // every hidden field (routeIds, cityId, charter) so the leak test is exhaustive.
+    const future: EventScheduleEntry = {
+      id: SECRET.id,
+      kind: 'CHARTER_SPECIAL',
+      startRound: 5,
+      durationRounds: 3,
+      telegraphed: false,
+      routeIds: [SECRET.route],
+      cityId: SECRET.city,
+      charter: { a: SECRET.charterA, b: SECRET.charterB, points: 20 },
+    };
+    const events: EventsState = {
+      mode: 'light',
+      roundIndex: 1,
+      nextIdx: 0,
+      schedule: [future],
+      suppressed: [],
+      active: [{ id: 'evTy', kind: 'TYPHOON_LANDFALL', endsAfterRound: 99, routeIds: [asRouteId(live.closed)] }],
+      hotspots: { [live.hot]: 2 },
+      charters: [{ id: 'evCh', a: asCityId(live.a), b: asCityId(live.b), points: 8, expiresAfterRound: 99, wonBy: null }],
+      reopenBonus: [],
+    };
+    const withEv: GameState = { ...state, events };
+
+    for (const viewer of [asPlayerId('p0'), asPlayerId('p1'), null] as (PlayerId | null)[]) {
+      const view = redactFor(board, withEv, viewer);
+      const json = JSON.stringify(view);
+      for (const secret of [SECRET.id, SECRET.route as string, SECRET.city as string, SECRET.charterA as string, SECRET.charterB as string]) {
+        expect(json.includes(secret)).toBe(false);
+      }
+      expect(view.events).toBeDefined();
+      expect(view.events!.forecast).toBeNull(); // unannounced future ⇒ no forecast
+      // Live effects DO surface once active.
+      expect(view.events!.hotspots.some((h) => (h.cityId as string) === live.hot)).toBe(true);
+      expect(view.events!.charters.some((c) => c.id === 'evCh')).toBe(true);
+      expect(view.events!.closedRouteIds.map((r) => r as string)).toContain(live.closed);
+    }
+  });
+
+  it('projects the forecast exactly when the next entry is telegraphed and starts next round', () => {
+    const board = taiwanBoard();
+    const { state } = baseState('redact-events-forecast');
+    const telegraphed: EventScheduleEntry = {
+      id: 'evNext',
+      kind: 'TYPHOON_DAY_OFF',
+      startRound: 2,
+      durationRounds: 1,
+      telegraphed: true,
+    };
+    const events: EventsState = {
+      mode: 'light',
+      roundIndex: 1, // startRound 2 === roundIndex + 1 → announced window
+      nextIdx: 0,
+      schedule: [telegraphed],
+      suppressed: [],
+      active: [],
+      hotspots: {},
+      charters: [],
+      reopenBonus: [],
+    };
+    const view = redactFor(board, { ...state, events }, asPlayerId('p0'));
+    expect(view.events!.forecast).not.toBeNull();
+    expect(view.events!.forecast!.id).toBe('evNext');
+    // A spectator sees the identical block.
+    expect(redactFor(board, { ...state, events }, null).events).toEqual(view.events);
+  });
+});

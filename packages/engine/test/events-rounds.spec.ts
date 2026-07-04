@@ -127,8 +127,8 @@ describe('events runtime — round ticking', () => {
     expect(totalHands(s)).toBe(handsBefore + 3);
     expect(s.deck.length).toBe(deckBefore - 3); // deep deck, no reshuffle
     expect(checkInvariants(board, s)).toEqual([]);
-    // Gala flags a one-round free-station window.
-    expect(s.events!.freeStation).toEqual({ untilRound: 3 });
+    // Gala flags a free-station window for EXACTLY its own round (startRound 2 → untilRound 2).
+    expect(s.events!.freeStation).toEqual({ untilRound: 2 });
     expect(redactFor(board, s, asPlayerId('p0')).events!.freeStationAvailable).toBe(true);
   });
 
