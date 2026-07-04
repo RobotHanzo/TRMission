@@ -98,11 +98,15 @@ export function LoginScreen() {
           use_fedcm_for_prompt: true,
         });
         if (googleButtonRef.current) {
+          // Match the Discord button's width: it stretches to fill the stack (flex column,
+          // default align-items: stretch), but GSI's own button needs an explicit pixel width.
+          const stackWidth = googleButtonRef.current.parentElement?.getBoundingClientRect().width;
           accounts.renderButton(googleButtonRef.current, {
             theme: 'outline',
             size: 'large',
             text: 'continue_with',
             locale: googleLocale(i18n.language),
+            ...(stackWidth ? { width: Math.round(Math.min(400, Math.max(200, stackWidth))) } : {}),
           });
         }
         accounts.prompt();

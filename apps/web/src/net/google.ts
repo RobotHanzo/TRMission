@@ -14,6 +14,8 @@ interface GoogleButtonOptions {
   size?: 'large' | 'medium' | 'small';
   text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin';
   locale?: string;
+  /** Pixel width; GSI clamps this to its own [200, 400] range. */
+  width?: number;
 }
 export interface GoogleAccountsId {
   initialize(config: GoogleIdConfiguration): void;
