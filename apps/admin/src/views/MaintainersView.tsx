@@ -9,6 +9,7 @@ import {
 import { api, type MaintainerRow } from '../net/rest';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
+import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Drawer } from '../components/Drawer';
 import { fmtDateTime, shortId } from '../lib/fmt';
@@ -130,7 +131,7 @@ export function MaintainersView() {
   >(null);
   const [revoking, setRevoking] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [addId, setAddId] = useState('');
+  const [picking, setPicking] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -162,20 +163,7 @@ export function MaintainersView() {
 
       {canWrite && (
         <div className="oc-toolbar">
-          <input
-            placeholder={t('maintainers.addPrompt')}
-            value={addId}
-            onChange={(e) => setAddId(e.target.value)}
-            style={{ minWidth: 280 }}
-          />
-          <button
-            className="oc-btn primary"
-            disabled={!addId.trim()}
-            onClick={() => {
-              setEditing({ userId: addId.trim() });
-              setAddId('');
-            }}
-          >
+          <button className="oc-btn primary" onClick={() => setPicking(true)}>
             {t('maintainers.add')}
           </button>
         </div>
@@ -238,6 +226,17 @@ export function MaintainersView() {
         )}
       </div>
 
+      {picking && (
+        <AccountSelectorModal
+          title={t('maintainers.addTitle')}
+          excludeIds={rows.map((m) => m.userId)}
+          onSelect={(u) => {
+            setPicking(false);
+            setEditing({ userId: u.id, displayName: u.displayName });
+          }}
+          onClose={() => setPicking(false)}
+        />
+      )}
       {editing && (
         <Editor row={editing} onSaved={() => void load()} onClose={() => setEditing(null)} />
       )}

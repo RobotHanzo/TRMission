@@ -6,6 +6,7 @@ import { useUi } from '../store/ui';
 import { SignalBadge } from '../components/SignalBadge';
 import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { FeatureToggles } from '../components/FeatureToggles';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
 const FILTERS: UserFilter[] = ['all', 'guests', 'registered', 'disabled'];
@@ -20,6 +21,7 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const canBan = useSession((s) => s.hasPermission('users.ban'));
+  const canFeatures = useSession((s) => s.hasPermission('users.features'));
   const [detail, setDetail] = useState<UserDetail | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -142,6 +144,18 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 </div>
               ))}
           </section>
+
+          {canFeatures && !detail.isGuest && (
+            <section>
+              <h3>{t('features.title')}</h3>
+              <FeatureToggles
+                key={detail.features.join(',')}
+                userId={detail.id}
+                initial={detail.features}
+                onSaved={setDetail}
+              />
+            </section>
+          )}
 
           {canBan && !detail.isMaintainer && (
             <section>
