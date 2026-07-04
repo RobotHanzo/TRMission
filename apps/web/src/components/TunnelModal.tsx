@@ -4,6 +4,7 @@ import type { CardColor as PbCardColor } from '@trm/proto';
 import { CARD_COLOR_TOKENS } from '../theme/colors';
 import { pbToCard } from '../game/cards';
 import type { Payment } from '../game/payments';
+import { tunnelRevealMs } from '../game/tunnel';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { TrainCarCard } from './TrainCarCard';
 import { soundPlayer } from '../sound/player';
@@ -22,9 +23,8 @@ interface Props {
 
 // Match the route-claim / station-build payment modal's card size.
 const CARD_SIZE = 104;
-// Reveal timing, kept in step with `.tunnel-reveal-card` in animations.css (0.5s stagger, 0.6s flip).
+// Card-placement tick per revealed tunnel card, synced to the flip stagger.
 const REVEAL_STAGGER_MS = 500;
-const REVEAL_FLIP_MS = 600;
 
 /** Describes a spend option for assistive tech, e.g. "藍 ×2 + 彩虹車頭 ×1". */
 const describe = (p: Payment): string => {
@@ -58,7 +58,7 @@ export function TunnelModal({
       return;
     }
     setShowResult(false);
-    const ms = Math.max(0, revealed.length - 1) * REVEAL_STAGGER_MS + REVEAL_FLIP_MS + 120;
+    const ms = tunnelRevealMs(revealed.length, reduced);
     const timer = window.setTimeout(() => setShowResult(true), ms);
     return () => clearTimeout(timer);
   }, [revealed, reduced]);

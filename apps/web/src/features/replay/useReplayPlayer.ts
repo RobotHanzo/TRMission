@@ -9,11 +9,13 @@ import type { Action, Board, GameConfig, GameState, GameEvent } from '@trm/engin
 import type { PlayerId } from '@trm/shared';
 import { viewToSnapshot, eventToProto } from '@trm/codec';
 import type { GameEvent as PbGameEvent } from '@trm/proto';
+import { tunnelRevealMs } from '../../game/tunnel';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 import type { GameStoreApi } from '../../store/game';
 import type { LogStoreApi } from '../../store/log';
 
 /** Auto-play cadence (ms per action) — near the tutorial's calm 900 ms beat. */
-const STEP_MS = 1100;
+export const STEP_MS = 1100;
 /** State checkpoints every N actions so seeks rebuild from nearby, not genesis. */
 const CHECKPOINT_EVERY = 32;
 
@@ -52,6 +54,11 @@ export function useReplayPlayer(
   const stepRef = useRef(0);
   const viewerRef = useRef(viewer);
   viewerRef.current = viewer;
+  const reducedMotion = useReducedMotion();
+  // Delay before the AUTOPLAY tick following the current step. Normally STEP_MS, but a step that
+  // opens a tunnel reveal (TUNNEL_PENDING) extends this so the dialog's card-flip + surcharge
+  // reveal finishes on screen before the next tick applies RESOLVE_TUNNEL and closes it.
+  const nextDelay = useRef(STEP_MS);
   // Lazily-built caches: raw events emitted by action i, and periodic state checkpoints.
   // Both are viewer-agnostic (redaction happens at projection time).
   const eventsCache = useRef<GameEvent[][]>([]);
@@ -129,6 +136,7 @@ export function useReplayPlayer(
         stepRef.current = clamped;
         setStep(clamped);
         setAnimate(false);
+        nextDelay.current = STEP_MS;
       } catch {
         setError(true);
         setPlaying(false);
@@ -161,6 +169,15 @@ export function useReplayPlayer(
         stores.game.getState().applyEvents(state.actionSeq, pb);
         stores.log.getState().ingestLive(pb);
       }
+      // A tunnel reveal just opened (TunnelModal will mount) — hold the AUTOPLAY tick that would
+      // otherwise apply RESOLVE_TUNNEL next until the card-flip + surcharge reveal has had time
+      // to play out, so the dialog isn't yanked away mid-animation.
+      const tunnelRevealed = r.value.events.find(
+        (e): e is Extract<GameEvent, { e: 'TUNNEL_REVEALED' }> => e.e === 'TUNNEL_REVEALED',
+      );
+      nextDelay.current = tunnelRevealed
+        ? tunnelRevealMs(tunnelRevealed.revealed.length, reducedMotion) + STEP_MS
+        : STEP_MS;
       stepRef.current = n;
       setStep(n);
       setAnimate(true);
@@ -168,7 +185,7 @@ export function useReplayPlayer(
       setError(true);
       setPlaying(false);
     }
-  }, [actions, board, stateAtCached, project, redactEvents, stores]);
+  }, [actions, board, stateAtCached, project, redactEvents, stores, reducedMotion]);
 
   const seek = useCallback(
     (target: number) => {
@@ -214,7 +231,7 @@ export function useReplayPlayer(
       setPlaying(false);
       return;
     }
-    const id = setTimeout(next, STEP_MS);
+    const id = setTimeout(next, nextDelay.current);
     return () => clearTimeout(id);
   }, [playing, step, error, actions.length, next]);
 

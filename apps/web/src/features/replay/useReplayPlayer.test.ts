@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import {
   taiwanBoard,
@@ -14,7 +14,7 @@ import { viewToSnapshot } from '@trm/codec';
 import { asPlayerId, type PlayerId } from '@trm/shared';
 import { createGameStore } from '../../store/game';
 import { createLogStore } from '../../store/log';
-import { useReplayPlayer } from './useReplayPlayer';
+import { useReplayPlayer, STEP_MS } from './useReplayPlayer';
 
 const players: PlayerSeed[] = [
   { id: asPlayerId('p1'), seat: 0 },
@@ -41,6 +41,47 @@ function scriptActions(count: number): Action[] {
     out.push(action);
   }
   return out;
+}
+
+/**
+ * Greedy-drive the engine until a tunnel claim is legal, take it, then resolve it — returns the
+ * log ending right after the RESOLVE_TUNNEL action, so `actions.length - 1` is that resolve step
+ * and `actions.length - 2` is the CLAIM_ROUTE that opened the TUNNEL_PENDING reveal.
+ */
+function scriptActionsThroughTunnel(maxActions: number): Action[] {
+  const board = taiwanBoard();
+  let state = initGame(board, config);
+  const out: Action[] = [];
+  while (out.length < maxActions && state.turn.phase !== 'GAME_OVER') {
+    const phase = state.turn.phase;
+    let action: Action;
+    if (phase === 'SETUP_TICKETS') {
+      const actor = players
+        .map((p) => p.id)
+        .find((p) => (state.players[p as string]?.pendingTicketOffer?.length ?? 0) > 0)!;
+      action = legalActions(board, state, actor)[0]!;
+    } else {
+      const actor = state.turnOrder[state.turn.orderIndex]!;
+      const acts = legalActions(board, state, actor);
+      if (phase === 'TUNNEL_PENDING') {
+        action = acts.find((a) => a.t === 'RESOLVE_TUNNEL')!;
+      } else if (phase === 'AWAIT_ACTION') {
+        const tunnelClaim = acts.find(
+          (a) => a.t === 'CLAIM_ROUTE' && board.routeById.get(a.routeId as string)?.isTunnel,
+        );
+        action = tunnelClaim ?? acts[0]!;
+      } else {
+        action = acts[0]!;
+      }
+    }
+    const r = reduce(board, state, action);
+    if (!r.ok) throw new Error(`scripted action rejected (${phase}): ${r.error.code}`);
+    const wasResolvingTunnel = phase === 'TUNNEL_PENDING';
+    state = r.value.state;
+    out.push(action);
+    if (wasResolvingTunnel) return out;
+  }
+  throw new Error('scripted game never reached a tunnel claim');
 }
 
 function setup(actions: Action[], viewer: PlayerId | null) {
@@ -123,5 +164,30 @@ describe('useReplayPlayer', () => {
     expect(hook.result.current.animate).toBe(true);
     act(() => hook.result.current.setViewer(asPlayerId('p2')));
     expect(hook.result.current.animate).toBe(false); // perspective switch: silent
+  });
+
+  it('autoplay holds on a tunnel reveal instead of closing the dialog after one plain STEP_MS tick', () => {
+    const actions = scriptActionsThroughTunnel(500);
+    const resolveStep = actions.length - 1;
+    const revealStep = actions.length - 2;
+    const { hook } = setup(actions, null);
+
+    vi.useFakeTimers();
+    try {
+      act(() => hook.result.current.seek(revealStep));
+      act(() => hook.result.current.play());
+      // First tick applies the CLAIM_ROUTE that opens the tunnel reveal.
+      act(() => void vi.advanceTimersByTime(STEP_MS));
+      expect(hook.result.current.step).toBe(revealStep + 1);
+      // A single plain STEP_MS beat is not enough time to also show the reveal + result —
+      // autoplay must NOT have applied RESOLVE_TUNNEL (which would close the dialog) yet.
+      act(() => void vi.advanceTimersByTime(STEP_MS));
+      expect(hook.result.current.step).toBe(revealStep + 1);
+      // Comfortably past the full reveal + dwell, the resolve step lands.
+      act(() => void vi.advanceTimersByTime(3000));
+      expect(hook.result.current.step).toBe(resolveStep + 1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
