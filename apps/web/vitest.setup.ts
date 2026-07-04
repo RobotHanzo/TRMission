@@ -43,3 +43,18 @@ if (!('setPointerCapture' in Element.prototype)) {
   Element.prototype.releasePointerCapture = (): void => {};
   Element.prototype.hasPointerCapture = (): boolean => false;
 }
+
+// jsdom also has no PointerEvent constructor at all (not just missing capture methods) — without
+// it, fireEvent.pointerDown/pointerMove/pointerUp silently fail to carry clientX/clientY/button
+// through to React's handlers. Polyfill it as a thin MouseEvent subclass (jsdom does implement
+// MouseEvent) so pointer-drag interactions (e.g. CropDrawStage's crop rectangle) are testable.
+if (typeof globalThis.PointerEvent === 'undefined') {
+  class PointerEventPolyfill extends MouseEvent {
+    pointerId: number;
+    constructor(type: string, params: PointerEventInit = {}) {
+      super(type, params);
+      this.pointerId = params.pointerId ?? 0;
+    }
+  }
+  globalThis.PointerEvent = PointerEventPolyfill as unknown as typeof PointerEvent;
+}
