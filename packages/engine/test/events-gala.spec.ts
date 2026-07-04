@@ -61,7 +61,12 @@ describe('events — railway gala free station', () => {
     if (!res.ok) return;
     const ks = res.value.events.map((e) => e.e);
     expect(ks.indexOf('STATION_BUILT')).toBeLessThan(ks.indexOf('EVENT_BONUS'));
-    expect(galaBonus(res.value.events)).toMatchObject({ reason: 'FREE_STATION', player: p0, points: 0 });
+    expect(galaBonus(res.value.events)).toMatchObject({
+      reason: 'FREE_STATION',
+      player: p0,
+      cityId: city,
+      points: 0,
+    });
     expect(res.value.state.events!.freeStation).toBeUndefined(); // consumed
     expect(res.value.state.players['p0']!.stationsRemaining).toBe(stationsBefore - 1);
     expect(handTotal(res.value.state, p0)).toBe(handBefore); // no cards spent

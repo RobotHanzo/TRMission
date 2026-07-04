@@ -730,6 +730,7 @@ function applyBuildStation(
       kind: 'RAILWAY_GALA',
       reason: 'FREE_STATION',
       player,
+      cityId,
       points: 0,
       visibility: 'PUBLIC',
     });

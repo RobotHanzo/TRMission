@@ -241,7 +241,7 @@ const resources = {
         SKY_LANTERN: { name: '天燈之夜', desc: '指定路線分數加倍，但佔領需多付一張車廂卡' },
         AFTERSHOCK: { name: '餘震特報', desc: '隧道試掘多亮一張牌；放棄時可補抽一張' },
         RAILWAY_GALA: { name: '鐵路節慶典', desc: '全體玩家抽牌，本輪首座車站免費興建' },
-        STAMP_RALLY: { name: '鐵道集章週', desc: '本輪每連接一座新車站可 +1 分' },
+        STAMP_RALLY: { name: '鐵道集章週', desc: '活動期間每連接一座新車站可 +1 分' },
       },
       errors: {
         routeClosedByEvent: '此路線因颱風暫時封閉',
@@ -735,7 +735,7 @@ const resources = {
         },
         STAMP_RALLY: {
           name: 'Stamp Rally Week',
-          desc: 'Score +1 for each new city you connect this round',
+          desc: 'Score +1 for each new city you connect during the rally',
         },
       },
       errors: {

@@ -370,13 +370,14 @@ describe('@trm/codec eventToProto — random events (M4)', () => {
     expect(v.points).toBe(10);
   });
 
-  it('round-trips EVENT_BONUS reason FREE_STATION (neither routeId nor cityId, zero points)', () => {
+  it('round-trips EVENT_BONUS reason FREE_STATION (cityId, no routeId, zero points)', () => {
     const ev: GameEvent = {
       e: 'EVENT_BONUS',
       kind: 'RAILWAY_GALA',
       reason: 'FREE_STATION',
       player: p1,
       points: 0,
+      cityId: asCityId('KAOHSIUNG'),
       visibility: 'PUBLIC',
     };
     const decoded = roundTrip(ev);
@@ -384,7 +385,7 @@ describe('@trm/codec eventToProto — random events (M4)', () => {
     const v = decoded.event.value;
     expect(v.reason).toBe('FREE_STATION');
     expect(v.routeId).toBe('');
-    expect(v.cityId).toBe('');
+    expect(v.cityId).toBe('KAOHSIUNG');
     expect(v.points).toBe(0);
   });
 });

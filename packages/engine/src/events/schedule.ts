@@ -89,6 +89,10 @@ export function generateSchedule(
   {
     const [n, next] = nextInt(cur, 2);
     cur = next;
+    // Floor of 2: a round-2 first start has no round-1 tick, so it never gets an EVENT_ANNOUNCED
+    // frame — but it's still telegraphed via the snapshot forecast, which redactFor exposes from
+    // genesis, so round-2 starts are visible to clients from turn one. Intentional; see the design
+    // spec (docs/superpowers/specs/2026-07-04-random-events-design.md).
     startRound = Math.max(2, tuning.firstStartBase + n);
   }
 
