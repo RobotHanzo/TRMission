@@ -14,6 +14,7 @@ export * from './graph';
 export * from './generate';
 export * from './geometry';
 export * from './taiwan-geography';
+export * from './render-tokens';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',
