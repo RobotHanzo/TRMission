@@ -233,7 +233,10 @@ const resources = {
         affectedRoutes: '{{n}} 條路線',
         TYPHOON_LANDFALL: { name: '颱風登陸', desc: '封閉部分路線；恢復通車後首位鋪設者可得 +2 分' },
         TYPHOON_DAY_OFF: { name: '颱風假', desc: '本輪不可佔領路線，但每回合可多抽一張車廂卡' },
-        VIRAL_HOTSPOT: { name: '爆紅打卡站', desc: '該車站成為熱點：每次連接可 +1 分，建站更便宜' },
+        VIRAL_HOTSPOT: {
+          name: '爆紅打卡站',
+          desc: '該車站永久獲得打卡標記；每次連接依標記等級得 +1 分，最高疊加至 2 級',
+        },
         CHARTER_SPECIAL: { name: '觀光專開列車', desc: '以自己的路網連接指定兩座城市即可得分' },
         SKY_LANTERN: { name: '天燈之夜', desc: '指定路線分數加倍，但佔領需多付一張車廂卡' },
         AFTERSHOCK: { name: '餘震特報', desc: '隧道試掘多亮一張牌；放棄時可補抽一張' },
@@ -712,7 +715,7 @@ const resources = {
         },
         VIRAL_HOTSPOT: {
           name: 'Viral Hotspot',
-          desc: 'A station goes viral: +1 per connection and cheaper stations',
+          desc: 'A station permanently gains a marker; every claim touching it scores +1 per marker level, stacking up to level 2',
         },
         CHARTER_SPECIAL: {
           name: 'Charter Special',
