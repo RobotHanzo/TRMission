@@ -26,3 +26,30 @@ describe('session store: logout', () => {
     expect(useSession.getState().accessToken).toBeNull();
   });
 });
+
+describe('session store: loginWithGoogleCredential', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('applies the returned user on success', async () => {
+    vi.spyOn(api, 'googleCredential').mockResolvedValue({
+      user: { ...user },
+      accessToken: 'tok',
+    });
+    useSession.setState({ user: null, accessToken: null, error: null });
+
+    await useSession.getState().loginWithGoogleCredential('fake-jwt');
+
+    expect(useSession.getState().user).toEqual(user);
+    expect(useSession.getState().error).toBeNull();
+  });
+
+  it('sets an error message on failure', async () => {
+    vi.spyOn(api, 'googleCredential').mockRejectedValue(new Error('invalid_credential'));
+    useSession.setState({ user: null, accessToken: null, error: null });
+
+    await useSession.getState().loginWithGoogleCredential('bad-jwt');
+
+    expect(useSession.getState().user).toBeNull();
+    expect(useSession.getState().error).toBe('invalid_credential');
+  });
+});

@@ -14,6 +14,7 @@ interface SessionState {
   restore(): Promise<void>;
   playAsGuest(name?: string): Promise<void>;
   login(email: string, password: string): Promise<void>;
+  loginWithGoogleCredential(credential: string): Promise<void>;
   register(email: string, password: string, displayName: string): Promise<void>;
   upgrade(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
@@ -62,6 +63,7 @@ export const useSession = create<SessionState>()((set, get) => {
     },
     playAsGuest: (name) => run(() => api.guest(name?.trim() || undefined)),
     login: (email, password) => run(() => api.login(email.trim(), password)),
+    loginWithGoogleCredential: (credential) => run(() => api.googleCredential(credential)),
     register: (email, password, displayName) =>
       run(() => api.register(email.trim(), password, displayName.trim())),
     upgrade: (email, password) => run(() => api.upgrade(email.trim(), password)),

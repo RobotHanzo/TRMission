@@ -271,6 +271,8 @@ export const api = {
     req<AuthResult>('POST', '/auth/guest', { displayName }).then(captureToken),
   login: (email: string, password: string) =>
     req<AuthResult>('POST', '/auth/login', { email, password }).then(captureToken),
+  googleCredential: (credential: string) =>
+    req<AuthResult>('POST', '/auth/oauth/google/credential', { credential }).then(captureToken),
   register: (email: string, password: string, displayName: string) =>
     req<AuthResult>('POST', '/auth/register', { email, password, displayName }).then(captureToken),
   upgrade: (email: string, password: string) =>
