@@ -1,16 +1,16 @@
-# Graph Report - TRMission  (2026-07-04)
+# Graph Report - random-events  (2026-07-04)
 
 ## Corpus Check
-- 536 files · ~363,750 words
+- 549 files · ~375,987 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3903 nodes · 7681 edges · 430 communities (184 shown, 246 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 98 edges (avg confidence: 0.72)
+- 4053 nodes · 7727 edges · 446 communities (196 shown, 250 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 102 edges (avg confidence: 0.72)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6fcf1b89`
+- Built from commit: `8cf6e1e4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -431,38 +431,51 @@
 - [[_COMMUNITY_dashboard-maintainers.e2e.spec.ts|dashboard-maintainers.e2e.spec.ts]]
 - [[_COMMUNITY_lobby-map-selector.e2e.spec.ts|lobby-map-selector.e2e.spec.ts]]
 - [[_COMMUNITY_lobby-settings.e2e.spec.ts|lobby-settings.e2e.spec.ts]]
-- [[_COMMUNITY_ScenarioPlayer|ScenarioPlayer]]
+- [[_COMMUNITY_StopsStage.tsx|StopsStage.tsx]]
 - [[_COMMUNITY_CurveHandle|CurveHandle]]
-- [[_COMMUNITY_ReplayControls|ReplayControls]]
+- [[_COMMUNITY_ConfirmDialog.tsx|ConfirmDialog.tsx]]
 - [[_COMMUNITY_view.ts|view.ts]]
-- [[_COMMUNITY_bots-5p.e2e.spec.ts|bots-5p.e2e.spec.ts]]
+- [[_COMMUNITY_LoginScreen.tsx|LoginScreen.tsx]]
+- [[_COMMUNITY_errors.ts|errors.ts]]
 - [[_COMMUNITY_replay-visibility.e2e.spec.ts|replay-visibility.e2e.spec.ts]]
+- [[_COMMUNITY_result.ts|result.ts]]
+- [[_COMMUNITY_.rematch|.rematch]]
+- [[_COMMUNITY_.updateSettings|.updateSettings]]
+- [[_COMMUNITY_ScenarioPlayer|ScenarioPlayer]]
+- [[_COMMUNITY_.removeBot|.removeBot]]
+- [[_COMMUNITY_bot-pacing.ts|bot-pacing.ts]]
 - [[_COMMUNITY_.kick|.kick]]
+- [[_COMMUNITY_BoardProps|BoardProps]]
+- [[_COMMUNITY_draw-pool-exhausted.spec.ts|draw-pool-exhausted.spec.ts]]
 - [[_COMMUNITY_compilerOptions|compilerOptions]]
+- [[_COMMUNITY_ScenarioPlayer|ScenarioPlayer]]
+- [[_COMMUNITY_codec.spec.ts|codec.spec.ts]]
+- [[_COMMUNITY_redact.spec.ts|redact.spec.ts]]
+- [[_COMMUNITY_bot-pacing.ts|bot-pacing.ts]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `T` - 60 edges
+1. `T` - 59 edges
 2. `GameHub` - 49 edges
-3. `PlayerId` - 47 edges
+3. `reduce()` - 41 edges
 4. `AuthUser` - 41 edges
-5. `GameState` - 41 edges
-6. `Board` - 40 edges
-7. `useUi` - 39 edges
-8. `CardColor` - 39 edges
-9. `asPlayerId()` - 35 edges
-10. `GameConfig` - 34 edges
+5. `useUi` - 39 edges
+6. `Board` - 34 edges
+7. `GameState` - 32 edges
+8. `LobbyService` - 32 edges
+9. `asPlayerId()` - 32 edges
+10. `UserRepo` - 31 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `curveShape()` --calls--> `f()`  [INFERRED]
   packages/map-data/src/geometry.ts → apps/server/src/og/map-svg.ts
-- `Props` --references--> `CardColor`  [EXTRACTED]
-  apps/web/src/components/CardSwatch.tsx → packages/shared/src/enums.ts
+- `CustomGeographyProps` --references--> `MapGeography`  [EXTRACTED]
+  apps/web/src/components/Geography.tsx → packages/map-data/src/types.ts
 - `Props` --references--> `CardColor`  [EXTRACTED]
   apps/web/src/components/TrainCarCard.tsx → packages/shared/src/enums.ts
-- `ColorToken` --references--> `CardColor`  [EXTRACTED]
-  apps/web/src/theme/colors.ts → packages/shared/src/enums.ts
-- `sha256Hex()` --calls--> `toHex()`  [INFERRED]
-  packages/shared/src/digest.ts → apps/web/src/theme/shade.ts
+- `CropResult` --references--> `MapGeography`  [EXTRACTED]
+  apps/web/src/features/builder/geo/world.ts → packages/map-data/src/types.ts
+- `geom()` --references--> `RouteGeometry`  [EXTRACTED]
+  apps/web/src/game/routeGeometry.test.ts → packages/map-data/src/geometry.ts
 
 ## Import Cycles
 - None detected.
@@ -481,59 +494,55 @@
 - **Tutorial focus + visual glossary system** — docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialspotlight, docs_superpowers_specs_2026_06_29_tutorial_ui_design_usespotlightrects, docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens, docs_superpowers_specs_2026_06_29_tutorial_ui_design_spotlightframer, docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialoverlay_redesign [INFERRED 0.90]
 - **Replay Camera-Follow Data-Flow Mechanism** — apps_web_src_game_boardview_boardframetarget, apps_web_src_components_board_spotlightframer, apps_web_src_features_replay_usereplayplayer_animate, apps_web_src_features_replay_frametarget_frametargetforaction, apps_web_src_screens_replayscreen_replaystage, apps_web_src_store_ui_followacting [EXTRACTED 1.00]
 
-## Communities (430 total, 246 thin omitted)
+## Communities (446 total, 250 thin omitted)
 
 ### Community 0 - "Command Queue & Game Registry"
-Cohesion: 0.20
-Nodes (12): handHas(), spentFrom(), validateRoutePayment(), validateStationPayment(), ERROR_CATALOG, ErrorMeta, RuleViolation, RuleViolationCode (+4 more)
+Cohesion: 0.18
+Nodes (17): checkInvariants(), replay(), ReplayResult, stateDigest(), initGame(), TurnOutcome, EventsState, GameState (+9 more)
 
 ### Community 1 - "Bot Adoption & Game Session Apply"
-Cohesion: 0.28
-Nodes (9): Drawer(), FeatureToggles(), api, UserDetail, UserFilter, UserRow, FeaturesView(), FILTER_KEY (+1 more)
+Cohesion: 0.13
+Nodes (19): AccountSelectorModal(), Props, mocked, ConfirmDialog(), Props, Drawer(), FeatureToggles(), shortId() (+11 more)
 
 ### Community 2 - "Vitest/Vite Config & Board Scenarios"
-Cohesion: 0.13
-Nodes (16): config, makeSandbox(), p0, p1, GameConfig, cloneState(), taiwanBoard(), configFor() (+8 more)
+Cohesion: 0.09
+Nodes (14): featureDisabled(), FeatureGuard, RequireFeature(), HistoryController, HistoryRepo, HistoryPlayerSchema, MatchSummarySchema, ReplayPayloadSchema (+6 more)
 
 ### Community 3 - "Contextual Log Store (Task 5)"
 Cohesion: 0.13
 Nodes (13): LogPanel(), entriesFromEvents(), Importance, LogDatum, LogEntry, LogKind, createLogStore(), creator() (+5 more)
 
 ### Community 5 - "Route/Station Payment Validation"
-Cohesion: 0.29
-Nodes (7): checkInvariants(), chooseAction(), makeConfig(), pick(), playGreedyGame(), PlayResult, afterSetup()
+Cohesion: 0.11
+Nodes (11): AuthService, IssuedAuth, Locale, PublicUser, UserPreferences, toPublicUser(), UserDoc, UserRepo (+3 more)
 
 ### Community 6 - "Maps Screen & Content REST Client"
-Cohesion: 0.12
-Nodes (27): scriptActions(), buildDeck(), countLocos(), discardToArray(), drawOne, refillMarket(), RefillResult, Reshuffled (+19 more)
+Cohesion: 0.19
+Nodes (14): Props, ColorToken, countLocos(), discardToArray(), drawOne, refillMarket(), RefillResult, Reshuffled (+6 more)
 
 ### Community 7 - "Tutorial Curriculum & Encyclopedia Lessons"
-Cohesion: 0.06
-Nodes (22): AuthService, IssuedAuth, Locale, PublicUser, UserPreferences, AuthSessionDoc, decode(), encode() (+14 more)
+Cohesion: 0.14
+Nodes (10): decode(), encode(), newSecret(), RefreshOutcome, SessionRepo, sha256(), env, bootstrap() (+2 more)
 
 ### Community 8 - "Replay Camera Sync & Spotlight Framer"
-Cohesion: 0.09
-Nodes (26): Board(), BoardProps, CameraSync(), frameHome(), MapControls(), RevealFramer(), RouteGlowGate(), SpotlightFramer() (+18 more)
+Cohesion: 0.10
+Nodes (21): Board(), BoardProps, CameraSync(), frameHome(), MapControls(), RevealFramer(), RouteGlowGate(), SpotlightFramer() (+13 more)
 
 ### Community 9 - "Card Market UI"
-Cohesion: 0.15
-Nodes (18): push(), isFerry(), MAP_RULE_KEYS, assertValidContent(), ContentStats, formatIssue(), pairKey(), PlayValidationIssues (+10 more)
+Cohesion: 0.10
+Nodes (24): push(), isFerry(), MAP_RULE_KEYS, MapGeography, assertValidContent(), ContentStats, formatIssue(), pairKey() (+16 more)
 
 ### Community 10 - "Server Bootstrap & Zod Validation (ADR A3)"
 Cohesion: 0.07
 Nodes (32): asProvider(), AuthController, randomGuestName(), AccessResultSchema, AuthConfigSchema, AuthResultSchema, boardLayout, displayName (+24 more)
 
 ### Community 11 - "Codec Spec & Replay Player Hook"
-Cohesion: 0.12
-Nodes (36): Ctx, ConnectionBinding, Sink, getPlayer(), combinations(), enumerateClaimPayments(), enumeratePayments(), enumerateTunnelExtra() (+28 more)
+Cohesion: 0.18
+Nodes (17): playerOwnEdges(), isQuietEndgame(), stripFreeStation(), tickRound(), borrowConnectedTicketIds(), citiesConnected(), Edge, evaluateTickets() (+9 more)
 
 ### Community 12 - "Web Package Manifest"
 Cohesion: 0.05
 Nodes (40): dependencies, @bufbuild/protobuf, canvas-confetti, i18next, immer, lucide-react, react, react-dom (+32 more)
-
-### Community 13 - "Bot Pacing & Ticket Connectivity"
-Cohesion: 0.11
-Nodes (11): featureDisabled(), FeatureGuard, HistoryController, HistoryRepo, HistoryPlayerSchema, MatchSummarySchema, ReplayPayloadSchema, ReplayPlayerSchema (+3 more)
 
 ### Community 14 - "Custom Map Repository"
 Cohesion: 0.12
@@ -541,15 +550,15 @@ Nodes (12): AuthConfig, AuthConfigOverrides, makeProvider(), OAUTH_PROVIDERS, Oa
 
 ### Community 15 - "Map Builder Editor Screen & Stages"
 Cohesion: 0.10
-Nodes (6): DashboardController, DashboardService, MetricsController, MetricsService, ObservabilityModule, single()
+Nodes (24): seedDevGame(), makeBoardResolver(), config, players, scriptActions(), setup(), useReplayPlayer(), makeSandbox() (+16 more)
 
 ### Community 16 - "Root Package Manifest & Tooling"
 Cohesion: 0.05
 Nodes (37): description, devDependencies, eslint, @eslint/js, prettier, turbo, @types/node, typescript (+29 more)
 
 ### Community 17 - "Auth Controller Endpoints"
-Cohesion: 0.13
-Nodes (14): FlightMover(), { play }, revealed, TunnelModal(), ClaimCostSpecimen(), StationCostSpecimen(), intentsFromEvents(), seatOf() (+6 more)
+Cohesion: 0.22
+Nodes (8): FlyingCard(), PaymentModal(), PlayerHand(), TrainCarArt(), Props, TrainCarCard(), handFromCounts(), rgba()
 
 ### Community 18 - "Engine Selectors & Tunnel Combinations"
 Cohesion: 0.20
@@ -564,44 +573,40 @@ Cohesion: 0.07
 Nodes (29): File Structure, Global Constraints, Per-Game Settings Implementation Plan, Phase A — Shared foundation, Phase B — Engine rule variants, Phase C — Proto + codec (display of active variants), Phase D — Server (rooms, settings, public list, spectating), Phase E — Web (settings panel, public list, spectator UI) (+21 more)
 
 ### Community 21 - "Auth Service"
-Cohesion: 0.07
-Nodes (29): Props, FlyingCard(), PaymentModal(), FerryLocoGradientDef(), RouteShape(), Carriage(), Locomotive(), TrainCarArt() (+21 more)
+Cohesion: 0.36
+Nodes (9): Carriage(), Locomotive(), luminance(), mix(), parse(), Rgb, shade(), tint() (+1 more)
 
 ### Community 22 - "Card & Route Shape Art Components"
 Cohesion: 0.07
-Nodes (34): ApplyResult, GameSession, Prepared, PrepareResult, keepAll(), LESSONS, P0, P1 (+26 more)
+Nodes (20): Ctx, ApplyResult, GameSession, Prepared, PrepareResult, ConnectionBinding, Sink, config (+12 more)
 
 ### Community 23 - "Sound Driver Hook & Cues"
 Cohesion: 0.12
-Nodes (11): EMPTY, ALL_CUES, Cue, CueDef, CUES, createSoundPlayer(), Opts, SoundPlayer (+3 more)
+Nodes (10): ALL_CUES, Cue, CueDef, CUES, createSoundPlayer(), Opts, SoundPlayer, CueHit (+2 more)
 
 ### Community 24 - "Animation Layer & Endgame Warning"
 Cohesion: 0.14
-Nodes (23): App(), EncyclopediaModal, MapEditorScreen, MapsScreen, ReplayScreen, TutorialScreen, AppHeader(), SettingsModal() (+15 more)
+Nodes (21): App(), EncyclopediaModal, MapEditorScreen, MapsScreen, ReplayScreen, TutorialScreen, AppHeader(), SettingsModal() (+13 more)
 
 ### Community 25 - "Deck & Hand Management"
 Cohesion: 0.06
-Nodes (50): AuthUser, BoardLayout, DEFAULT_PREFERENCES, JwtPayload, OauthStatePayload, Theme, WsTicketPayload, CurrentUser (+42 more)
+Nodes (49): BoardLayout, DEFAULT_PREFERENCES, JwtPayload, OauthStatePayload, Theme, WsTicketPayload, CurrentUser, DashboardController (+41 more)
 
 ### Community 27 - "OAuth Provider Config"
-Cohesion: 0.20
-Nodes (7): ScoreBoard(), done, failed, longestRoutes, snap, TicketModal, ticketSplit()
-
-### Community 28 - "Ticket Card, Chooser & Fanfare UI"
-Cohesion: 0.12
-Nodes (16): CanvasControls(), clientToBoardPoint(), CurveHandle, DEFAULT_VIEW, EditorCanvasProps, CropRect, CropStage(), DragPoints (+8 more)
+Cohesion: 0.07
+Nodes (20): AppModule, AuditEntryDoc, AuditTarget, DashboardAuditAction, DashboardAuditRepo, AuditService, DashboardAccountDoc, DashboardAccountPatch (+12 more)
 
 ### Community 29 - "Map Editor State Store"
-Cohesion: 0.07
-Nodes (5): EditorState, CityDraft, MapGeographyDraft, RouteDraft, TicketDraft
+Cohesion: 0.06
+Nodes (7): draftToContent(), EditorState, CityDraft, MapDraft, MapGeographyDraft, RouteDraft, TicketDraft
 
 ### Community 30 - "Replay Task 9 & Content Catalog Cache"
-Cohesion: 0.11
-Nodes (21): Props, TicketCard(), Props, TicketChooser(), Props, A, B, C (+13 more)
+Cohesion: 0.10
+Nodes (21): allPairsHops(), buildRegionTouching(), Category, CATEGORY_KINDS, CATEGORY_OF, CATEGORY_ORDER, cmpStr(), DURATIONS (+13 more)
 
 ### Community 31 - "Maps Controller & Registered-User Guard"
-Cohesion: 0.09
-Nodes (23): RegisteredUserGuard, RequireFeature(), CityDraftSchema, compactRules(), CreateMapDto, CreateMapSchema, draftFromDto(), idString (+15 more)
+Cohesion: 0.12
+Nodes (20): RegisteredUserGuard, CityDraftSchema, compactRules(), CreateMapDto, CreateMapSchema, draftFromDto(), idString, MapDetailSchema (+12 more)
 
 ### Community 32 - "Chat & Comms Panel"
 Cohesion: 0.17
@@ -612,12 +617,12 @@ Cohesion: 0.09
 Nodes (21): 1. Shared taxonomy (`packages/shared`), 2. Server enforcement (`apps/server`), 3. Web UI gating (`apps/web`) — cosmetic; server is authority, 4. Admin dashboard (`apps/admin`), 5. Testing & docs, `AccountSelectorModal` (new shared component), Dashboard API (all behind `@RequirePermission('users.features')`), Decisions (settled with the user) (+13 more)
 
 ### Community 35 - "Metrics Hooks & Controller"
-Cohesion: 0.16
-Nodes (10): coachPosition(), FlatRect, Specimen(), specs, baseProps, TutorialOverlay(), TutorialOverlayProps, Beat (+2 more)
+Cohesion: 0.10
+Nodes (19): encyclopediaEntries(), EncyclopediaModal(), EncyclopediaPlayer(), TutorialRunner(), PerformAwait, useScenarioPlayer(), ViewDescriptor, ActingCamera (+11 more)
 
 ### Community 37 - "Auth E2E Test Harness"
-Cohesion: 0.07
-Nodes (19): CustomMapRepo, newShareCode(), isDuplicateKey(), MapContentRepo, MapsContentController, MapsController, MapDetail, MapsService (+11 more)
+Cohesion: 0.12
+Nodes (13): CustomMapRepo, newShareCode(), MapDetail, MapsService, MapSummary, SharedMapView, toDetail(), toSummary() (+5 more)
 
 ### Community 38 - "Maps Service (resolve/assemble content)"
 Cohesion: 0.13
@@ -628,12 +633,12 @@ Cohesion: 0.08
 Nodes (25): dependencies, @bufbuild/protobuf, cookie-parser, google-auth-library, helmet, mongodb, @nestjs/common, @nestjs/core (+17 more)
 
 ### Community 41 - "App/Game/Health/Lobby Modules"
-Cohesion: 0.14
-Nodes (7): SessionPhase, SessionState, Route, useSession, DeniedView(), MaintainersView(), RoomsView()
+Cohesion: 0.17
+Nodes (3): SessionPhase, SessionState, Route
 
 ### Community 42 - "Lobby Service (map selection/settings)"
-Cohesion: 0.08
-Nodes (20): LAYOUT_OPTIONS, LOCALE_OPTIONS, Props, THEME_OPTIONS, Dropdown(), DropdownOption, Props, Option (+12 more)
+Cohesion: 0.09
+Nodes (21): LAYOUT_OPTIONS, LOCALE_OPTIONS, Props, THEME_OPTIONS, Toast(), Dropdown(), DropdownOption, Props (+13 more)
 
 ### Community 43 - "UI Path Routing Helpers"
 Cohesion: 0.12
@@ -644,12 +649,12 @@ Cohesion: 0.09
 Nodes (22): compilerOptions, declaration, declarationMap, esModuleInterop, exactOptionalPropertyTypes, forceConsistentCasingInFileNames, isolatedModules, lib (+14 more)
 
 ### Community 45 - "OAuth Service Implementation"
-Cohesion: 0.09
-Nodes (29): config, p1, p2, decodeClient(), config, players, setup(), useReplayPlayer() (+21 more)
+Cohesion: 0.15
+Nodes (11): Command, commandToAction(), protoPayment(), CARD_TO_PB, PB_TO_CARD, pbToTrainColorOrNull(), PHASE_TO_PB, REJECTION_TO_PB (+3 more)
 
 ### Community 46 - "Lobby Bot Management"
-Cohesion: 0.13
-Nodes (17): latestActionPoi(), RouteShapeProps, bowFromPoint(), cityById, HUB_CITIES, geom(), BOW_OVERRIDE, buildGeometryFor() (+9 more)
+Cohesion: 0.15
+Nodes (15): bowFromPoint(), cityById, HUB_CITIES, rebuildRouteGeometry(), geom(), BOW_OVERRIDE, buildGeometryFor(), buildRouteGeometryFor() (+7 more)
 
 ### Community 47 - "Train Car Art & Shade Utils"
 Cohesion: 0.25
@@ -660,28 +665,20 @@ Cohesion: 0.15
 Nodes (12): 1. Shared cartography tokens — `packages/map-data/src/render-tokens.ts` (new), 2. `MapScene` — the single map component (`apps/web/src/components/MapScene.tsx`), 3. Consumers become thin, 4. OG card consumes tokens, Decisions (user-approved), Design, Error handling, Goal (+4 more)
 
 ### Community 50 - "Game Commands Wire Type"
-Cohesion: 0.14
-Nodes (15): encyclopediaEntries(), EncyclopediaModal(), EncyclopediaPlayer(), PerformAwait, Harness(), { play }, useSoundDriver(), ReplayStage() (+7 more)
-
-### Community 52 - "Lobby Controllers & Schemas"
-Cohesion: 0.08
-Nodes (3): mapNameFor(), toView(), RoomRepo
-
-### Community 53 - "Polygon Clipping Utils"
-Cohesion: 0.10
-Nodes (8): BOARD_LAYOUTS, LOCALES, loginPathFor(), readRedirectParam(), roomCodeFromPath(), safePath(), THEMES, View
+Cohesion: 0.16
+Nodes (20): p0, dayOffState(), p0, activeEvent(), afterSetup(), colorPayment(), drainPools(), emptyEvents() (+12 more)
 
 ### Community 54 - "Game Socket Client Commands"
-Cohesion: 0.15
-Nodes (15): ConfirmDialog(), Props, aspectForStatus(), SignalAspect, SignalBadge(), GameDetail, GameLogEntry, GameRow (+7 more)
+Cohesion: 0.14
+Nodes (20): aspectForStatus(), SignalAspect, SignalBadge(), fmtDateTime(), GameDetail, GameLogEntry, GameRow, useSession (+12 more)
 
 ### Community 55 - "Map-Data Package Manifest (ADR A13)"
 Cohesion: 0.12
 Nodes (16): default, dependencies, @trm/shared, devDependencies, typescript, vitest, exports, name (+8 more)
 
 ### Community 56 - "Session Store & User Preferences"
-Cohesion: 0.21
-Nodes (3): baseUrl(), OgController, OgService
+Cohesion: 0.11
+Nodes (23): escapeXml(), estimateWidth(), fitText(), frame(), kicker(), MapCardData, mapCardSvg(), ReplayCardData (+15 more)
 
 ### Community 57 - "WS Connection Binding & Frames"
 Cohesion: 0.07
@@ -691,25 +688,21 @@ Nodes (26): For /graphify add and --watch, For /graphify query, For the commit h
 Cohesion: 0.06
 Nodes (31): dependencies, i18next, lucide-react, react, react-dom, react-i18next, @trm/shared, zustand (+23 more)
 
-### Community 60 - "Route Preview & Geography Fit"
-Cohesion: 0.38
-Nodes (3): AuthMode, LoginScreen(), oauthStartUrl()
-
 ### Community 61 - "Settings Modal"
 Cohesion: 0.17
 Nodes (11): Context (what exists), D1 — Serve crawler meta via nginx UA routing → server-rendered meta page, D2 — Dynamic PNG cards: hand-authored SVG → `@resvg/resvg-js`, D3 — Replay visibility: `replayVisibility` on `matchHistory`, seated players configure, D4 — Web: `/replay/:id` becomes visitable while signed out, Decisions, Error handling, Goals (+3 more)
 
 ### Community 62 - "Map Projection (crop/project/unproject)"
-Cohesion: 0.13
-Nodes (16): Props, PlayerHand(), Props, enumerateRoutePayments(), enumerateStationPayments(), Hand, handAfterPayment(), handFromCounts() (+8 more)
+Cohesion: 0.14
+Nodes (15): Props, Props, enumerateRoutePayments(), enumerateStationPayments(), Hand, handAfterPayment(), handTotal(), Payment (+7 more)
 
 ### Community 63 - "Auth Session Repo"
 Cohesion: 0.22
 Nodes (8): Global Constraints, Room Rematch Implementation Plan, Task 1: Rematch vote — data model, repo, service, endpoint, Task 2: Host rematch action — reset a finished room back to LOBBY, Task 3: Web REST client — rematch endpoints, Task 4: ScoreBoard — vote toggle + host "Play Again" button, Task 5: GameScreen — poll for rematch, auto-redirect to the reset room, Task 6: Full verification
 
 ### Community 64 - "Animation State Store"
-Cohesion: 0.09
-Nodes (33): botStepDelayMs(), getRoute(), getTicket(), incidentRoutes(), siblingOf(), DoubleRouteVariant, variantForPlayerCount(), borrowConnectedTicketIds() (+25 more)
+Cohesion: 0.15
+Nodes (16): longestInComponent(), longestTrail(), longestTrailWithPath(), TrailEdge, TrailResult, UnionFind, borrowCandidatesForCity(), byId() (+8 more)
 
 ### Community 66 - "Server Test/Build Dev Dependencies"
 Cohesion: 0.13
@@ -720,16 +713,16 @@ Cohesion: 0.10
 Nodes (20): default, dependencies, @trm/map-data, @trm/shared, devDependencies, fast-check, typescript, vitest (+12 more)
 
 ### Community 68 - "types.ts"
-Cohesion: 0.22
-Nodes (14): c(), CITIES, CITY_IDS, Candidate, generateTickets(), GenerateTicketsOptions, pairKey(), buildAdjacency() (+6 more)
+Cohesion: 0.15
+Nodes (20): GameEventType, ActiveEvent, CharterContract, RandomEventKind, Visibility, Endgame, OwnerCell, PendingTunnel (+12 more)
 
 ### Community 69 - "Lobby Controller Endpoints"
 Cohesion: 0.12
 Nodes (15): Backend, Data model (`apps/server/src/lobby/room.repo.ts`), Edge cases, Endpoints (`lobby.controller.ts`, `lobby.schemas.ts`), Frontend, `GameScreen.tsx` — polling the room during game-over, Goal, `LobbyService` (+7 more)
 
 ### Community 70 - "Sandbox Socket (local practice mode)"
-Cohesion: 0.13
-Nodes (15): RoomView, TicketResult, AddBotResult, DEFAULT_ROOM_SETTINGS, JoinResult, KickResult, MapSelector, RemoveBotResult (+7 more)
+Cohesion: 0.20
+Nodes (13): RoomView, TicketResult, AddBotResult, DEFAULT_ROOM_SETTINGS, JoinResult, KickResult, RemoveBotResult, RoomDoc (+5 more)
 
 ### Community 71 - "Map Editor Canvas & Crop Stage"
 Cohesion: 0.08
@@ -752,8 +745,8 @@ Cohesion: 0.18
 Nodes (7): FakeGoogleIdTokenVerifier, FakeOauthHttp, OAUTH_TEST_CONFIG, refreshCookie(), TestAppOptions, registered(), server()
 
 ### Community 77 - "OpenAPI Docs Controller"
-Cohesion: 0.20
-Nodes (11): ADMIN_PERMISSIONS, DASHBOARD_PERMISSIONS, DASHBOARD_ROLES, effectivePermissions(), isDashboardPermission(), isDashboardRole(), MODERATOR_PERMISSIONS, ROLE_PERMISSIONS (+3 more)
+Cohesion: 0.07
+Nodes (33): keepAll(), LESSONS, lessonsForScope(), P0, P1, players, skipDraft(), CoachPos (+25 more)
 
 ### Community 78 - "ReplayControls"
 Cohesion: 0.18
@@ -772,8 +765,8 @@ Cohesion: 0.22
 Nodes (8): compilerOptions, emitDecoratorMetadata, experimentalDecorators, noEmit, rootDir, types, extends, include
 
 ### Community 84 - "lod.ts"
-Cohesion: 0.24
-Nodes (19): escapeXml(), estimateWidth(), fitText(), frame(), kicker(), MapCardData, mapCardSvg(), ReplayCardData (+11 more)
+Cohesion: 0.11
+Nodes (18): config, p1, p2, routeById, ticketById, completedByPlayer(), pathForTicket(), playerLiveTotal() (+10 more)
 
 ### Community 85 - "WS Socket Handlers Dispatch"
 Cohesion: 0.20
@@ -781,15 +774,15 @@ Nodes (9): `beforeunload` guard, Components, Edge cases, Goal, Implementation su
 
 ### Community 86 - "Docker Compose/Stack Services"
 Cohesion: 0.13
-Nodes (23): CustomGeography(), Geography(), GeographyLayer(), graticuleFor(), MapBackdrop, STATIC_BOARD_STYLE, networkPath(), Props (+15 more)
+Nodes (22): CustomGeography(), CustomGeographyProps, Geography(), graticuleFor(), MapBackdrop, STATIC_BOARD_STYLE, networkPath(), Props (+14 more)
 
 ### Community 87 - "In-Game Animations Design"
 Cohesion: 0.10
 Nodes (19): Animation event bus, `<AnimationLayer/>` (fixed viewport portal), Architecture, Backend changes (security-preserving), Commit hygiene, Decisions (load-bearing), `game/animationModel.ts` (pure), `game/tickets.ts` (pure) (+11 more)
 
 ### Community 88 - "hub.ts"
-Cohesion: 0.04
-Nodes (26): BotProfile, DashboardGamesController, DashboardGamesService, toRoomRow(), GamesListQueryDto, RoomsListQueryDto, HistoryPlayer, MatchSummary (+18 more)
+Cohesion: 0.06
+Nodes (24): BotProfile, DashboardGamesService, DatabaseModule, connectMongo(), HistoryPlayer, MatchSummary, ReplayData, ensureIndexes() (+16 more)
 
 ### Community 89 - "Proto Package Scripts"
 Cohesion: 0.09
@@ -845,7 +838,7 @@ Nodes (5): Sparkline(), fmtBytes(), fmtUptime(), Overview, OverviewView()
 
 ### Community 105 - "LobbyService"
 Cohesion: 0.12
-Nodes (22): CONTENT_V2, V2_META, V2_ROUTES, V2_ROWS, CONTENT_REGISTRY, hashContent(), MAP_META, OfficialMap (+14 more)
+Nodes (20): CONTENT_V2, V2_META, V2_ROUTES, V2_ROWS, CITIES, GeometryCity, GeometryRoute, CONTENT_REGISTRY (+12 more)
 
 ### Community 110 - "Engine Package Dependencies"
 Cohesion: 0.12
@@ -873,7 +866,7 @@ Nodes (14): `apps/server/CLAUDE.md` — "Persistence & recovery" section, `apps/
 
 ### Community 116 - "contentCache.ts"
 Cohesion: 0.13
-Nodes (18): contentFromDto(), route(), GeometryCity, GeometryRoute, buildRoute(), toTicket(), LENGTH_CYCLE, ringCities() (+10 more)
+Nodes (16): c(), CITY_IDS, Candidate, GenerateTicketsOptions, buildAdjacency(), shortestDistances(), CityDef, RouteDef (+8 more)
 
 ### Community 118 - "Map-Data Package Scripts"
 Cohesion: 0.14
@@ -881,7 +874,7 @@ Nodes (13): Global Constraints, Self-Review, Task 10: Full verification + browse
 
 ### Community 119 - "Egress Guard & Redacted Snapshot Metric"
 Cohesion: 0.08
-Nodes (33): clipEdge(), clipRingsToBBox(), clipRingToBBox(), InsideTest, Intersect, Point, Ring, bbox (+25 more)
+Nodes (34): clipEdge(), clipRingsToBBox(), clipRingToBBox(), InsideTest, Intersect, Point, Ring, bbox (+26 more)
 
 ### Community 122 - "types.ts"
 Cohesion: 0.20
@@ -904,12 +897,12 @@ Cohesion: 0.15
 Nodes (12): File Structure, Global Constraints, Self-Review, Sound Effects Implementation Plan, Task 1: Cue catalog, Task 2: Pure sound model, Task 3: UI store sound prefs, Task 4: Web-Audio player (+4 more)
 
 ### Community 145 - "frameTarget.test.ts"
-Cohesion: 0.11
-Nodes (17): ChatPanel(), chatSpy, ViewDescriptor, chatRejectionHintKey(), connectGame(), disconnectGame(), getSocket(), ChatMessage (+9 more)
+Cohesion: 0.13
+Nodes (15): ChatPanel(), chatSpy, PlayerTrackers(), PerspectiveSwitcher(), chatRejectionHintKey(), usePlayerName(), connectGame(), disconnectGame() (+7 more)
 
 ### Community 159 - "HomeScreen.test.tsx"
-Cohesion: 0.12
-Nodes (9): ConfirmDialog(), ConfirmDialogProps, resources, HomeScreen(), mocked, settings, signedIn, WelcomeScreen() (+1 more)
+Cohesion: 0.11
+Nodes (11): ConfirmDialog(), ConfirmDialogProps, StopsStage(), baseCities, resources, HomeScreen(), mocked, settings (+3 more)
 
 ### Community 160 - "MapContentRepo"
 Cohesion: 0.20
@@ -1027,9 +1020,17 @@ Nodes (3): For git commit hook, For native CLAUDE.md integration, graphify refer
 Cohesion: 0.50
 Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphify reference: incremental update and cluster-only
 
+### Community 253 - "ADR A3: validation + OpenAPI schemas come from one zod source (nestjs-zod)"
+Cohesion: 0.26
+Nodes (14): cityLayer(), customLandLayer(), declutterCities(), declutterRoutes(), f(), geographyLayer(), graticuleLayer(), LIVERY_COLORS (+6 more)
+
 ### Community 256 - "DashboardAuditRepo"
 Cohesion: 0.08
-Nodes (25): AppModule, AuthModule, env, DashboardBootstrap, DashboardConfig, DashboardConfigOverrides, DashboardModule, DatabaseModule (+17 more)
+Nodes (15): AuthModule, AuthSessionDoc, DashboardModule, MetricJson, GameModule, HealthController, HistoryModule, LobbyModule (+7 more)
+
+### Community 257 - "OAUTH_HTTP network seam (faked in e2e)"
+Cohesion: 0.09
+Nodes (6): AuthUser, UserFeaturesPutDto, DashboardUsersController, DashboardUsersService, toRow(), MapsController
 
 ### Community 259 - "Global Constraints"
 Cohesion: 0.14
@@ -1040,12 +1041,12 @@ Cohesion: 0.53
 Nodes (5): auth(), registered(), server(), smallDraft, startCustomMapRoom()
 
 ### Community 262 - "MetricsHooks"
-Cohesion: 0.17
-Nodes (3): MetricsHooks, NOOP_METRICS, players
+Cohesion: 0.13
+Nodes (22): bundled, cache, contentFromDto(), inflight, route(), MapContentDto, buildRoute(), LONG_TICKETS (+14 more)
 
 ### Community 263 - "contentAdapter.ts"
-Cohesion: 0.23
-Nodes (9): CustomGeographyProps, CropResult, resetToDefaultContent(), setActiveContent(), applyContentTables(), rebuildRouteGeometry(), ActiveContentStatus, useActiveContent() (+1 more)
+Cohesion: 0.19
+Nodes (11): combinations(), enumerateClaimPayments(), enumeratePayments(), enumerateTunnelExtra(), Hand, legalActions(), projectEvents(), EMPTY_PAYMENT (+3 more)
 
 ### Community 264 - "lobby-spectate.e2e.spec.ts"
 Cohesion: 0.80
@@ -1055,17 +1056,17 @@ Nodes (4): auth(), guest(), server(), startedRoom()
 Cohesion: 0.47
 Nodes (4): guest(), registered(), server(), tinyDraft
 
+### Community 266 - "HomeScreen.test.tsx"
+Cohesion: 0.13
+Nodes (13): Props, TicketCard(), Props, Props, seatColor(), TicketFanfare(), Props, A (+5 more)
+
 ### Community 267 - "App.test.tsx"
 Cohesion: 0.50
 Nodes (4): OVERVIEW, primeSession(), Route, stubFetch()
 
 ### Community 268 - "tickets.ts"
-Cohesion: 0.16
-Nodes (25): applyBuildStation(), applyClaimEffects(), applyClaimRoute(), applyDrawBlind(), applyDrawFaceup(), applyDrawTickets(), applyKeepInitial(), applyKeepTickets() (+17 more)
-
-### Community 270 - "map-svg.ts"
-Cohesion: 0.26
-Nodes (14): cityLayer(), customLandLayer(), declutterCities(), declutterRoutes(), f(), geographyLayer(), graticuleLayer(), LIVERY_COLORS (+6 more)
+Cohesion: 0.14
+Nodes (38): claimsSuspended(), closedRouteIds(), consumeFreeStation(), dayOffExtraDraw(), EMPTY_SET, freeStationAvailable(), hasActiveKind(), hotspotLevel() (+30 more)
 
 ### Community 271 - "lobby-mine.e2e.spec.ts"
 Cohesion: 0.70
@@ -1074,6 +1075,10 @@ Nodes (4): auth(), guest(), mine(), server()
 ### Community 272 - "GameStorePort"
 Cohesion: 0.18
 Nodes (4): Claim, DockTab, GameStage(), GameStageProps
+
+### Community 273 - "SandboxSocket"
+Cohesion: 0.10
+Nodes (8): BOARD_LAYOUTS, LOCALES, loginPathFor(), readRedirectParam(), roomCodeFromPath(), safePath(), THEMES, View
 
 ### Community 274 - "TunnelModal.tsx"
 Cohesion: 0.17
@@ -1084,36 +1089,36 @@ Cohesion: 0.18
 Nodes (18): buildContext(), chooseBotAction(), connectedByOwned(), emptyHand(), keepValue(), Knobs, rngFor(), routeUsable() (+10 more)
 
 ### Community 276 - "lobby-bots.e2e.spec.ts"
-Cohesion: 0.16
-Nodes (3): GameHub, sleep(), Wired
+Cohesion: 0.07
+Nodes (10): MetricsHooks, NOOP_METRICS, GameHub, sleep(), tick(), waitForGameOver(), players, guest() (+2 more)
 
 ### Community 277 - "enums.ts"
-Cohesion: 0.20
-Nodes (5): DEFAULT_RULE_PARAMS, SCORING_TABLE, LOCOMOTIVE, ROUTE_LENGTHS, TRAIN_COLORS
+Cohesion: 0.09
+Nodes (20): latestActionPoi(), FerryLocoGradientDef(), RouteShape(), RouteShapeProps, clientToBoardPoint(), CurveHandle, DEFAULT_VIEW, EditorCanvasProps (+12 more)
 
 ### Community 278 - "replay-visibility.e2e.spec.ts"
-Cohesion: 0.09
-Nodes (10): AuditEntryDoc, AuditTarget, DashboardAuditAction, DashboardAuditRepo, AuditService, DashboardAccountRepo, DashboardMaintainersController, DashboardMaintainersService (+2 more)
+Cohesion: 0.23
+Nodes (10): ADMIN_PERMISSIONS, DASHBOARD_PERMISSIONS, DASHBOARD_ROLES, isDashboardPermission(), isDashboardRole(), MODERATOR_PERMISSIONS, ROLE_PERMISSIONS, VIEWER_PERMISSIONS (+2 more)
 
 ### Community 279 - "RoomRepo"
-Cohesion: 0.29
-Nodes (7): lessonsForScope(), TutorialLauncher(), TutorialRunner(), TutorialScreen(), Spotlight, useScenarioPlayer(), useSpotlightRects()
+Cohesion: 0.23
+Nodes (4): isDuplicateKey(), MapContentRepo, MapsContentController, MapContentDoc
 
 ### Community 280 - "Global Constraints"
 Cohesion: 0.18
 Nodes (10): Admin Login Redirect Implementation Plan, Global Constraints, Self-Review Notes, Task 1: `apps/web` — hard-redirect `/admin` targets from `navigateAfterAuth`, Task 2: `apps/admin` — add the main-app login helper, Task 3: `apps/admin` — wire `session.ts` to redirect instead of gating locally, Task 4: `apps/admin` — remove `LoginView` and update `App`, Task 5: `apps/admin` — remove the now-dead router login plumbing (+2 more)
 
 ### Community 281 - "focus.ts"
-Cohesion: 0.36
-Nodes (7): CoachPos, HUD_SPOTLIGHT_SELECTORS, isAllowedHudSelector(), selectorsForSpotlight(), spotlightBounds(), spotlightCentre(), unionRect()
+Cohesion: 0.18
+Nodes (9): { play }, revealed, TunnelModal(), intentsFromEvents(), seatOf(), snap, PB_TO_CARD, pbToCard() (+1 more)
 
-### Community 282 - "room.repo.ts"
-Cohesion: 0.23
-Nodes (11): fmtDateTime(), shortId(), AuditEntry, MaintainerRow, useUi, AuditView(), GamesView(), Editor() (+3 more)
+### Community 283 - "LobbyService"
+Cohesion: 0.20
+Nodes (7): ScoreBoard(), done, failed, longestRoutes, snap, TicketModal, ticketSplit()
 
 ### Community 284 - "game-registry.ts"
-Cohesion: 0.08
-Nodes (40): CommandQueue, GameRegistry, Match, ensureIndexes(), BotMoveOutcome, makeDevTicket(), tick(), waitForGameOver() (+32 more)
+Cohesion: 0.06
+Nodes (39): CommandQueue, GameRegistry, Match, BotMoveOutcome, makeDevTicket(), tick(), waitForGameOver(), actionToCommand() (+31 more)
 
 ### Community 285 - "UnionFind"
 Cohesion: 0.17
@@ -1124,8 +1129,8 @@ Cohesion: 0.20
 Nodes (9): Global Constraints, Single Connection Per Seat Implementation Plan, Task 1: Shared WS close-code constant, Task 2: Server forced-close capability, Task 3: Proto `SESSION_REPLACED` code + kick-on-Hello logic, Task 4: Client `GameSocket` — recognize the forced close, Task 5: Client store wiring — `sessionReplaced` flag, Task 6: Dialog UI + i18n (+1 more)
 
 ### Community 295 - "contentCache.ts"
-Cohesion: 0.25
-Nodes (5): bundled, cache, inflight, resolveContent(), MapContentDto
+Cohesion: 0.40
+Nodes (3): fixture, fixturePath, OffModeFixture
 
 ### Community 296 - "Global Constraints"
 Cohesion: 0.22
@@ -1135,21 +1140,41 @@ Nodes (8): Global Constraints, Google One Tap + rendered sign-in button Implemen
 Cohesion: 0.25
 Nodes (7): Decision (settled with the user), Flow, Goal, Implementation footprint, Map builder: move a station without delete/re-add ("Stops" stage), Out of scope, Testing
 
+### Community 298 - "BoardProps"
+Cohesion: 0.31
+Nodes (6): resetToDefaultContent(), setActiveContent(), applyContentTables(), View, ActiveContentStatus, useActiveContent()
+
+### Community 300 - "UnionFind"
+Cohesion: 0.20
+Nodes (8): flagUp(), emptyEvents(), withEvents(), findChain(), findTriangle(), p0, simpleRoutes(), stampActive()
+
 ### Community 301 - "jwt-ticket.ts"
-Cohesion: 0.28
+Cohesion: 0.31
 Nodes (4): JwtTicketVerifier, DevTicketVerifier, TicketBinding, TicketVerifier
 
 ### Community 302 - "AccountSelectorModal.tsx"
-Cohesion: 0.40
-Nodes (3): AccountSelectorModal(), Props, mocked
+Cohesion: 0.22
+Nodes (12): EventOneof, eventToProto(), wrap(), activeEventToInfo(), announcedToInfo(), charterToPb(), endsAfterRound(), EventsBlock (+4 more)
+
+### Community 303 - "LobbyPublicController"
+Cohesion: 0.28
+Nodes (5): findChain(), findTriangle(), p0, p1, simpleRoutes()
+
+### Community 304 - "dashboard-terminate.e2e.spec.ts"
+Cohesion: 0.67
+Nodes (5): CityTier, MAJOR_CITIES, SECONDARY_CITIES, TERTIARY_CITIES, ZoomBucket
 
 ### Community 305 - "frameTarget.test.ts"
-Cohesion: 0.50
-Nodes (3): frameTargetForAction(), payment, player
+Cohesion: 0.10
+Nodes (18): runLesson(), synthAwait(), expectMatches(), ExpectSpec, Lesson, GameStore, CommandInit, SandboxPorts (+10 more)
 
 ### Community 306 - "HistoryScreen.test.tsx"
 Cohesion: 0.07
-Nodes (38): Toast(), PerspectiveSwitcher(), ReplayShare(), usePlayerName(), api, ApiError, AuthConfig, AuthResult (+30 more)
+Nodes (35): MapsScreen(), ReplayShare(), resolveContent(), api, ApiError, AuthConfig, AuthResult, BoardLayout (+27 more)
+
+### Community 307 - "lod.ts"
+Cohesion: 0.40
+Nodes (4): Global Constraints, Move Station (map builder "Stops" stage) Implementation Plan, Self-Review, Task 1: Move Station button, move mode, and tests
 
 ### Community 392 - "dashboard-read.e2e.spec.ts"
 Cohesion: 0.47
@@ -1168,8 +1193,8 @@ Cohesion: 0.44
 Nodes (7): canonicalize(), digest(), K, rotr(), sha256Hex(), stableStringify(), utf8Bytes()
 
 ### Community 416 - "HomeScreen.test.tsx"
-Cohesion: 0.14
-Nodes (11): ApiError, AuditPage, DashboardMe, GamePlayer, GamesPage, PublicUser, raw(), req() (+3 more)
+Cohesion: 0.12
+Nodes (14): ApiError, AuditEntry, AuditPage, DashboardMe, GamePlayer, GamesPage, PublicUser, raw() (+6 more)
 
 ### Community 418 - "lobby-map-selector.e2e.spec.ts"
 Cohesion: 0.40
@@ -1180,40 +1205,64 @@ Cohesion: 0.40
 Nodes (3): createTestApp(), guest(), server()
 
 ### Community 421 - "CurveHandle"
-Cohesion: 0.11
-Nodes (25): EditorCanvas(), EditorScreen(), STAGE_ICON, STAGE_LABEL_KEY, CurvesStage(), routes, newRouteId(), RoutesStage() (+17 more)
+Cohesion: 0.09
+Nodes (37): T, CanvasControls(), EditorCanvas(), EditorScreen(), STAGE_ICON, STAGE_LABEL_KEY, CropRect, CropStage() (+29 more)
+
+### Community 422 - "ConfirmDialog.tsx"
+Cohesion: 0.60
+Nodes (5): handHas(), PaymentPlan, spentFrom(), validateRoutePayment(), validateStationPayment()
 
 ### Community 423 - "view.ts"
 Cohesion: 0.38
 Nodes (5): isMyTurn(), OwnershipInfo, ownershipMap(), seatByPlayer(), TurnStatus
 
+### Community 424 - "LoginScreen.tsx"
+Cohesion: 0.38
+Nodes (3): AuthMode, LoginScreen(), oauthStartUrl()
+
+### Community 425 - "errors.ts"
+Cohesion: 0.27
+Nodes (11): buildDeck(), generateTickets(), pairKey(), hashSeed(), makeRng(), mix32(), nextInt(), nextU32() (+3 more)
+
+### Community 432 - "bot-pacing.ts"
+Cohesion: 0.29
+Nodes (5): frameTargetForAction(), payment, player, ActionType, Payment
+
 ### Community 434 - ".kick"
 Cohesion: 0.08
-Nodes (27): AnimationLayer(), CARD_H, FloatMover(), TicketCueView(), EndgameWarning(), Props, PlayerTrackers(), Props (+19 more)
+Nodes (28): AnimationLayer(), CARD_H, FlightMover(), FloatMover(), TicketCueView(), EndgameWarning(), Props, TicketChooser() (+20 more)
+
+### Community 437 - "BoardProps"
+Cohesion: 0.29
+Nodes (4): DEFAULT_RULE_PARAMS, EventsMode, RuleParams, SCORING_TABLE
 
 ### Community 439 - "compilerOptions"
 Cohesion: 0.20
 Nodes (9): compilerOptions, jsx, lib, noEmit, resolveJsonModule, rootDir, types, extends (+1 more)
 
+### Community 441 - "codec.spec.ts"
+Cohesion: 0.50
+Nodes (3): config, p1, p2
+
 ## Knowledge Gaps
-- **1368 isolated node(s):** `Goal`, `Decision (settled with the user)`, `Flow`, `Implementation footprint`, `Testing` (+1363 more)
+- **1417 isolated node(s):** `p1`, `p2`, `config`, `EventOneof`, `EventsBlock` (+1412 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **246 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **250 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `createTestApp()` connect `lobby-settings.e2e.spec.ts` to `dashboard-maintainers.e2e.spec.ts`, `lobby-map-selector.e2e.spec.ts`, `dashboard-read.e2e.spec.ts`, `lobby-spectate.e2e.spec.ts`, `maps.e2e.spec.ts`, `replay-visibility.e2e.spec.ts`, `Lobby Service Getters`, `lobby-mine.e2e.spec.ts`, `dashboard-terminate.e2e.spec.ts`, `createTestApp`, `TestApp`, `Server Package Scripts`, `game-registry.ts`, `dashboard-auth.e2e.spec.ts`, `feature-gating.e2e.spec.ts`?**
+- **Why does `reduce()` connect `frameTarget.test.ts` to `Command Queue & Game Registry`, `StopsStage.tsx`, `types.ts`, `contentAdapter.ts`, `Codec Spec & Replay Player Hook`, `tickets.ts`, `.rematch`, `UnionFind`, `Map Builder Editor Screen & Stages`, `LobbyPublicController`, `Game Commands Wire Type`, `Card & Route Shape Art Components`, `redact.spec.ts`, `game-registry.ts`?**
+  _High betweenness centrality (0.034) - this node is a cross-community bridge._
+- **Why does `LobbyService` connect `Ticket Card, Chooser & Fanfare UI` to `DashboardAuditRepo`, `Sandbox Socket (local practice mode)`, `UI Path Routing Helpers`, `Bot Pacing & Ticket Connectivity`, `map-svg.ts`, `ScenarioPlayer`, `.updateSettings`, `fitTransform`, `Lobby Controllers & Schemas`, `Polygon Clipping Utils`, `.ready`, `Session Store & User Preferences`?**
+  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+- **Why does `GameHub` connect `lobby-bots.e2e.spec.ts` to `DashboardAuditRepo`, `Vitest/Vite Config & Board Scenarios`, `Sandbox Socket (local practice mode)`, `Tutorial Curriculum & Encyclopedia Lessons`, `lobby-spectate.e2e.spec.ts`, `TutorialSpotlight.tsx`, `Bot Pacing & Ticket Connectivity`, `Map Builder Editor Screen & Stages`, `Polygon Clipping Utils`, `draw-pool-exhausted.spec.ts`, `hub.ts`, `game-registry.ts`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._
-- **Why does `EditorState` connect `Map Editor State Store` to `Lobby Service (map selection/settings)`, `CurveHandle`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
-- **Why does `test` connect `Server Package Scripts` to `lobby-settings.e2e.spec.ts`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Are the 59 inferred relationships involving `T` (e.g. with `ConfirmDialog()` and `Drawer()`) actually correct?**
-  _`T` has 59 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Goal`, `Decision (settled with the user)`, `Flow` to the rest of the system?**
-  _1404 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Are the 58 inferred relationships involving `T` (e.g. with `ConfirmDialog()` and `Drawer()`) actually correct?**
+  _`T` has 58 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `p1`, `p2`, `config` to the rest of the system?**
+  _1453 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Bot Adoption & Game Session Apply` be split into smaller, more focused modules?**
+  _Cohesion score 0.12962962962962962 - nodes in this community are weakly interconnected._
 - **Should `Vitest/Vite Config & Board Scenarios` be split into smaller, more focused modules?**
-  _Cohesion score 0.12612612612612611 - nodes in this community are weakly interconnected._
-- **Should `Contextual Log Store (Task 5)` be split into smaller, more focused modules?**
-  _Cohesion score 0.1282051282051282 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09009009009009009 - nodes in this community are weakly interconnected._
