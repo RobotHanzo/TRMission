@@ -225,7 +225,7 @@ message GameSettings {
   string events_mode = 5; // "off" | "light" | "moderate" | "intense"
 }
 
-// A permanent viral-hotspot marker: `level` is 1 or 2 (station-cost discount tiers).
+// A permanent viral-hotspot marker: each `level` adds +1 point to all route claims touching this city.
 message HotspotMarker {
   string city_id = 1;
   uint32 level = 2;
