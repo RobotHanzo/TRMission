@@ -67,7 +67,11 @@ transactions — every write for a game is serialized by its command queue. Spec
 completion. `GET /history/:gameId[/replay]` is membership-gated (players + spectators, 404
 otherwise); the `/replay` endpoint ships a **COMPLETED** game's full action log to that authorized
 viewer — the one sanctioned exception to "hidden info never leaves the server", hard-gated on
-`status: 'COMPLETED'` in `HistoryRepo.loadReplay`. A list entry's `isReplayable` batches its
+`status: 'COMPLETED'` in `HistoryRepo.loadReplay`. The member path additionally requires the
+viewer's **`replayReview` feature** (403 `FEATURE_DISABLED` for a member without it; a `link`
+visibility replay stays viewable by anyone holding the URL, anonymous included), and
+`PATCH :gameId/visibility` checks seatedness *before* the feature so outsiders keep the
+nondisclosing 404. A list entry's `isReplayable` batches its
 content-hash lookups (official registry ∪ one `mapContents` query for the unresolved hashes) rather
 than checking one game at a time — a custom map's draft being deleted never makes its past games
 disappear from history, only unreplayable would, and it never is (see `src/maps/` below).
@@ -96,17 +100,23 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   it, and publishes to `mapContents` before the game exists), builds the `GameConfig` — including
   `ruleParams: {...mapRules, ...roomVariantFlags}`, a disjoint merge since the map's curated
   `RULE_BOUNDS` keys never overlap the variant-flag booleans — calls `hub.createMatch`, and hands back
-  a ws-ticket. Bot add/remove are host-only.
-- `src/maps/` — CRUD + sharing for user-authored maps, registered users only
-  (`RegisteredUserGuard`, 403 for guests). `customMaps` is a mutable per-owner draft (may be
+  a ws-ticket. Bot add/remove are host-only. Selecting a `{source:'custom'}` map (settings PATCH)
+  and resolving it at `start` both require the **host** to hold the `mapBuilder` feature — the
+  start-time check is authoritative, so a revoke between select and start still blocks.
+- `src/maps/` — CRUD + sharing for user-authored maps, gated on the per-account **`mapBuilder`
+  feature** (`FeatureGuard` → 403 `FEATURE_DISABLED`; the strict gate covers list/author/share/
+  peek/clone, and `RegisteredUserGuard` still excludes guests from mutations). Features live on
+  `UserDoc.features` (taxonomy in `@trm/shared/features`), granted from the dashboard, and are
+  read per request — never token claims. `customMaps` is a mutable per-owner draft (may be
   invalid mid-edit); `mapContents` is an **immutable, append-only** `{contentHash → GameContent}`
   store, insert-if-absent, written only at game start and **never garbage-collected** — a draft can
   be edited or deleted after a game starts, but that game (and its replay) keeps resolving against
   the exact content it was published with. Share/clone go through an 8-char share code
   (`mintShareCode`/`peekByCode`/`cloneByCode`); peek/clone responses are shaped to never leak
-  `ownerId` or another user's map list. `GET /content/:hash` is a plain `AccessTokenGuard` route
-  (any authenticated viewer, including guests, may fetch content by its hash — the hash itself is
-  the unguessable capability) with `Cache-Control: private, immutable`.
+  `ownerId` or another user's map list. `GET /content/:hash` lives on `MapsContentController`
+  OUTSIDE the feature gate — a plain `AccessTokenGuard` route (any authenticated viewer, including
+  guests, may fetch content by its hash — the hash itself is the unguessable capability); gating it
+  would break live custom-map games and replays for other players.
 - `src/bots/` — a bot is an **ordinary seated player driven server-side**; the engine never knows.
   `policy.ts` ranks moves from the engine's own `legalActions` (so a bot can never make an illegal
   move) with difficulty-tuned heuristics; the choice is a deterministic function of `state + botId`.
@@ -136,6 +146,10 @@ Rules that bite here:
   are `AuthService.issue()`/`refresh()` and the lobby's three ws-ticket paths. `AccessTokenGuard`
   is deliberately untouched — already-issued access tokens keep read-only REST for ≤15min
   (documented on the endpoint).
+- **Feature grants** (`users.features`, admin+): `PUT /dashboard/users/:id/features` replaces a
+  registered account's `UserDoc.features` set (guests → 400) and `GET /dashboard/users/features`
+  lists granted accounts; audited as `user.features` with before/after. Grants/revokes apply on
+  the target's very next request (per-request reads, like the ban posture).
 - **Terminate** (`games.terminate`): DB CAS `LIVE→TERMINATED` **first**, then `hub.evictMatch`
   (drains the match queue, notifies sockets with `errors:gameTerminated`, clears registries), then
   the room closes. `loadForRecovery` refuses TERMINATED (reconnects can't resurrect) and
