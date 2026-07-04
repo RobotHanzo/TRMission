@@ -16,14 +16,6 @@ const zhHant = {
     theme: '切換主題',
     language: '切換語言',
   },
-  login: {
-    title: '維運後台登入',
-    email: '電子郵件',
-    password: '密碼',
-    submit: '登入',
-    oauthHint: '使用 Google / Discord 帳號?請先在主站登入,再回到此頁重新整理。',
-    openMain: '前往主站登入',
-  },
   denied: {
     title: '此帳號沒有後台權限',
     body: '登入本身有效(同時也是遊戲登入),但這個帳號不在維護者名單中。請聯絡擁有者授權。',
@@ -249,14 +241,6 @@ const en: typeof zhHant = {
     collapse: 'Collapse menu',
     theme: 'Toggle theme',
     language: 'Switch language',
-  },
-  login: {
-    title: 'Maintainer sign-in',
-    email: 'Email',
-    password: 'Password',
-    submit: 'Sign in',
-    oauthHint: 'Using Google / Discord? Sign in on the main app first, then reload this page.',
-    openMain: 'Open the main app',
   },
   denied: {
     title: 'This account has no dashboard access',

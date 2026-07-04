@@ -11,11 +11,6 @@ export interface PublicUser {
   email?: string;
   avatarUrl?: string;
 }
-export interface AuthResult {
-  user: PublicUser;
-  accessToken: string;
-}
-
 export interface DashboardMe {
   userId: string;
   displayName: string;
@@ -225,16 +220,10 @@ const qs = (params: Record<string, string | undefined>): string => {
   return s ? `?${s}` : '';
 };
 
-function captureToken(r: AuthResult): AuthResult {
-  setAccessToken(r.accessToken);
-  onToken?.(r.accessToken);
-  return r;
-}
-
 export const api = {
-  // Existing auth endpoints (shared with the game app; same cookie).
-  login: (email: string, password: string) =>
-    req<AuthResult>('POST', '/auth/login', { email, password }).then(captureToken),
+  // Existing auth endpoints (shared with the game app; same cookie). Admin never signs
+  // in directly — it only restores a session via the shared refresh cookie (api.me()'s
+  // 401→refresh path) or clears one (logout).
   me: () => req<PublicUser>('GET', '/auth/me'),
   logout: () => req<void>('POST', '/auth/logout').then(() => setAccessToken(null)),
 

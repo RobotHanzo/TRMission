@@ -696,28 +696,6 @@ table.oc-table {
   padding: var(--oc-space-8) var(--oc-space-6);
 }
 
-.oc-gate-card .oc-brand {
-  padding: 0;
-  margin-bottom: var(--oc-space-6);
-}
-
-.oc-gate-card form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--oc-space-3);
-}
-
-.oc-gate-card .error {
-  color: var(--oc-signal-stop);
-  font-size: 12px;
-}
-
-.oc-gate-card .alt {
-  margin-top: var(--oc-space-4);
-  font-size: 12px;
-  color: var(--oc-ink-soft);
-}
-
 /* ---- misc ------------------------------------------------------------------------------ */
 
 .oc-empty {
