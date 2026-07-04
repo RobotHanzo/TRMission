@@ -1495,8 +1495,8 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/progress.md": {
-    "mtime": 1783182882.0003836,
-    "ast_hash": "68182b66974069df6e2ef94c0f7f9ce1",
+    "mtime": 1783184697.698584,
+    "ast_hash": "2fc38946d62f2fde24096fb6ba668b56",
     "semantic_hash": ""
   },
   ".yarnrc.yml": {
@@ -2925,8 +2925,8 @@
     "semantic_hash": ""
   },
   ".superpowers/sdd/task-m7-report.md": {
-    "mtime": 1783184012.8289535,
-    "ast_hash": "b80f04c70e242ddd065215b9b2256110",
+    "mtime": 1783184663.1445625,
+    "ast_hash": "e4451995331e3a12442c8a5c9d935bce",
     "semantic_hash": ""
   }
 }
