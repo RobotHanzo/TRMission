@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { BOW_LIMIT } from '@trm/map-data';
 import { api, type CityDraft, type MapDetail, type MapDraft, type MapRulesDraft, type RouteDraft, type TicketDraft } from '../../../net/rest';
 
 export type Stage = 'crop' | 'trim' | 'stops' | 'routes' | 'missions' | 'rules' | 'share';
@@ -41,6 +42,10 @@ interface EditorState {
   addRoute(route: RouteDraft): void;
   updateRoute(id: string, patch: Partial<RouteDraft>): void;
   removeRoute(id: string): void;
+  /** Set (clamped ±BOW_LIMIT, 0.1-rounded) or clear (undefined) a route's curvature override.
+   *  A double pair's siblings are always patched together so the twin track bows as one. */
+  setRouteBow(id: string, bow: number | undefined): void;
+  clearAllRouteBows(): void;
 
   addTicket(ticket: TicketDraft): void;
   updateTicket(id: string, patch: Partial<TicketDraft>): void;
@@ -164,6 +169,42 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         }),
     });
     if (get().selection?.kind === 'route' && get().selection?.id === id) set({ selection: null });
+  },
+  setRouteBow: (id, bow) => {
+    const { draft } = get();
+    const target = draft.routes.find((r) => r.id === id);
+    if (!target) return;
+    // 0.1 granularity keeps drafts (and thus content hashes) stable across drag jitter;
+    // `|| 0` normalises -0 away. bow: 0 is meaningful — it forces a straight route.
+    const rounded =
+      bow === undefined
+        ? undefined
+        : Math.round(Math.max(-BOW_LIMIT, Math.min(BOW_LIMIT, bow)) * 10) / 10 || 0;
+    const inPair = (r: RouteDraft): boolean =>
+      r.id === id || (!!target.doubleGroup && r.doubleGroup === target.doubleGroup);
+    mutate(get, set, {
+      ...draft,
+      routes: draft.routes.map((r) => {
+        if (!inPair(r)) return r;
+        if (rounded === undefined) {
+          const { bow: _drop, ...rest } = r;
+          return rest;
+        }
+        return { ...r, bow: rounded };
+      }),
+    });
+  },
+  clearAllRouteBows: () => {
+    const { draft } = get();
+    if (!draft.routes.some((r) => r.bow !== undefined)) return;
+    mutate(get, set, {
+      ...draft,
+      routes: draft.routes.map((r) => {
+        if (r.bow === undefined) return r;
+        const { bow: _drop, ...rest } = r;
+        return rest;
+      }),
+    });
   },
 
   addTicket: (ticket) => {

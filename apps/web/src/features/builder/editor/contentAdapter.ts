@@ -19,6 +19,7 @@ export function draftToContent(draft: MapDraft, meta: { nameZh: string; nameEn: 
       ferryLocos: r.ferryLocos,
       isTunnel: r.isTunnel,
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
+      ...(r.bow !== undefined ? { bow: r.bow } : {}),
     })),
     tickets: draft.tickets.map((t) => ({ ...t, id: asTicketId(t.id), a: asCityId(t.a), b: asCityId(t.b) })),
     ...(draft.geography !== undefined ? { geography: draft.geography } : {}),

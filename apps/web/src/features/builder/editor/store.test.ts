@@ -207,4 +207,83 @@ describe('editor store', () => {
     expect(useEditorStore.getState().dirty).toBe(true);
     expect(useEditorStore.getState().saveError).toBe('nope');
   });
+
+  describe('setRouteBow', () => {
+    it('sets a 0.1-rounded, clamped bow on the route and marks dirty', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2'));
+
+      s.setRouteBow('r1', 3.14159);
+      expect(useEditorStore.getState().draft.routes[0]!.bow).toBe(3.1);
+      expect(useEditorStore.getState().dirty).toBe(true);
+
+      s.setRouteBow('r1', 99);
+      expect(useEditorStore.getState().draft.routes[0]!.bow).toBe(12);
+
+      s.setRouteBow('r1', -0.04);
+      expect(Object.is(useEditorStore.getState().draft.routes[0]!.bow, 0)).toBe(true);
+    });
+
+    it('applies the bow to both siblings of a double pair', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('r3', 'c1', 'c2'));
+
+      s.setRouteBow('r1', 2);
+
+      const routes = useEditorStore.getState().draft.routes;
+      expect(routes.find((r) => r.id === 'r1')!.bow).toBe(2);
+      expect(routes.find((r) => r.id === 'r2')!.bow).toBe(2);
+      expect(routes.find((r) => r.id === 'r3')!.bow).toBeUndefined();
+    });
+
+    it('undefined removes the key entirely (both siblings), as one undo entry', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.setRouteBow('r1', 2);
+
+      s.setRouteBow('r2', undefined);
+
+      for (const r of useEditorStore.getState().draft.routes) {
+        expect(Object.keys(r)).not.toContain('bow');
+      }
+      s.undo();
+      expect(useEditorStore.getState().draft.routes[0]!.bow).toBe(2);
+    });
+
+    it('is a no-op for an unknown route id', () => {
+      const before = useEditorStore.getState().undoStack.length;
+      useEditorStore.getState().setRouteBow('nope', 3);
+      expect(useEditorStore.getState().undoStack.length).toBe(before);
+    });
+  });
+
+  describe('clearAllRouteBows', () => {
+    it('strips every bow in one undo step, and is a no-op when none are set', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2'));
+      s.addRoute(route('r2', 'c1', 'c2'));
+      s.setRouteBow('r1', 1);
+      s.setRouteBow('r2', -2);
+      const undoBefore = useEditorStore.getState().undoStack.length;
+
+      s.clearAllRouteBows();
+
+      expect(useEditorStore.getState().draft.routes.every((r) => r.bow === undefined)).toBe(true);
+      expect(useEditorStore.getState().undoStack.length).toBe(undoBefore + 1);
+
+      s.clearAllRouteBows(); // nothing left to clear
+      expect(useEditorStore.getState().undoStack.length).toBe(undoBefore + 1);
+    });
+  });
 });

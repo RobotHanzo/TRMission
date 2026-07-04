@@ -23,6 +23,7 @@ function contentFromDto(dto: MapContentDto): GameContent {
       ferryLocos: r.ferryLocos,
       isTunnel: r.isTunnel,
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
+      ...(r.bow !== undefined ? { bow: r.bow } : {}),
     })),
     tickets: dto.tickets.map((t) => ({ ...t, id: asTicketId(t.id), a: asCityId(t.a), b: asCityId(t.b) })),
     ...(dto.geography !== undefined ? { geography: dto.geography } : {}),

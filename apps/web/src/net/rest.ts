@@ -129,6 +129,8 @@ export interface RouteDraft {
   doubleGroup?: string;
   ferryLocos: number;
   isTunnel: boolean;
+  /** Signed curve-apex deviation override (board units); absent = automatic bow. */
+  bow?: number;
 }
 export interface TicketDraft {
   id: string;
