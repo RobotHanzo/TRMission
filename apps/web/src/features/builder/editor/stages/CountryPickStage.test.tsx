@@ -59,11 +59,12 @@ describe('CountryPickStage', () => {
 
   it('warns when the combined selection spans an unreasonably wide longitude range', () => {
     const { container } = render(<CountryPickStage />);
-    // Canada (North America) + Russia (Europe/Asia border) — union bbox spans well over 120°
-    // of longitude (Russia's own Natural Earth polygon already spans the full -180..180 due to
-    // the antimeridian, so this also covers that pre-existing, accepted limitation).
-    fireEvent.click(container.querySelector('[data-country-id="CAN"]')!);
-    fireEvent.click(container.querySelector('[data-country-id="RUS"]')!);
+    // Taiwan (~120-122°E) + Brazil (~-74 to -34°W) — neither country's own polygon spans
+    // anywhere near 120° of longitude individually, so the ~156° union span genuinely comes
+    // from combining two separate, far-apart countries (this is the same pairing the design
+    // spec uses as its "distant selection" example).
+    fireEvent.click(container.querySelector('[data-country-id="TWN"]')!);
+    fireEvent.click(container.querySelector('[data-country-id="BRA"]')!);
     expect(screen.getByText('經度範圍過大，投影會失真')).toBeInTheDocument();
   });
 });

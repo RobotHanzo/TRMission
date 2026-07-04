@@ -52,9 +52,11 @@ describe('countriesToGeography', () => {
   it('excludes a neighbour that falls inside the union bbox but was not selected', () => {
     const picked = countriesToGeography(['FRA', 'DEU']);
     expect(picked).not.toBeNull();
-    // France + Germany's combined bounding box also fully contains Belgium, the Netherlands,
-    // Luxembourg, and Switzerland — a rectangular crop over that same box would pick all of them
-    // up too, so it must produce strictly more land rings than the two-country selection.
+    // France + Germany's combined bounding box spans far wider than Western Europe: France's own
+    // WORLD_COUNTRIES entry includes a French Guiana ring (lon ≈ -54°), which stretches the union
+    // bbox to transatlantic scale. A rectangular crop over that same box therefore also picks up
+    // unrelated West African coastline, Atlantic islands, and South American coastline that the
+    // two-country selection correctly excludes — so it must produce strictly more land rings.
     const bboxCrop = cropToGeography(picked!.geography.crop);
     expect(bboxCrop).not.toBeNull();
     expect(bboxCrop!.geography.land.length).toBeGreaterThan(picked!.geography.land.length);
