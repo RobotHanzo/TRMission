@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSession } from '../store/session';
 import { useUi, readRedirectParam } from '../store/ui';
 import { api, type AuthConfig, type OauthProvider } from '../net/rest';
 import { MapBackdrop } from '../components/MapBackdrop';
+import { loadGoogleIdentityServices, googleLocale } from '../net/google';
 
 type AuthMode = 'guest' | 'login' | 'register';
 
@@ -41,7 +42,7 @@ const DiscordIcon = () => (
 );
 
 export function LoginScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const loading = useSession((s) => s.loading);
   const error = useSession((s) => s.error);
   const clearError = useSession((s) => s.clearError);
@@ -49,6 +50,7 @@ export function LoginScreen() {
   const playAsGuest = useSession((s) => s.playAsGuest);
   const login = useSession((s) => s.login);
   const register = useSession((s) => s.register);
+  const loginWithGoogleCredential = useSession((s) => s.loginWithGoogleCredential);
   const navigateAfterAuth = useUi((s) => s.navigateAfterAuth);
 
   const [config, setConfig] = useState<AuthConfig | null>(null);
@@ -56,6 +58,8 @@ export function LoginScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [googleWidget, setGoogleWidget] = useState<'pending' | 'ready' | 'failed'>('pending');
+  const googleButtonRef = useRef<HTMLDivElement>(null);
 
   // Resume the intended destination the moment a sign-in lands (guest/password here; OAuth via the
   // callback screen). This effect only runs while the login screen is mounted, i.e. while signed out.
@@ -78,6 +82,39 @@ export function LoginScreen() {
       live = false;
     };
   }, []);
+
+  // Load Google Identity Services once we know the client id, render its own button, and fire
+  // One Tap. Falls back to the legacy redirect anchor if the script can't load (blocked, offline).
+  useEffect(() => {
+    const clientId = config?.googleClientId;
+    if (!config?.providers.google || !clientId) return;
+    let live = true;
+    void loadGoogleIdentityServices()
+      .then((accounts) => {
+        if (!live) return;
+        accounts.initialize({
+          client_id: clientId,
+          callback: (resp) => void loginWithGoogleCredential(resp.credential),
+          use_fedcm_for_prompt: true,
+        });
+        if (googleButtonRef.current) {
+          accounts.renderButton(googleButtonRef.current, {
+            theme: 'outline',
+            size: 'large',
+            text: 'continue_with',
+            locale: googleLocale(i18n.language),
+          });
+        }
+        accounts.prompt();
+        setGoogleWidget('ready');
+      })
+      .catch(() => {
+        if (live) setGoogleWidget('failed');
+      });
+    return () => {
+      live = false;
+    };
+  }, [config?.providers.google, config?.googleClientId, i18n.language, loginWithGoogleCredential]);
 
   const pick = (m: AuthMode) => {
     clearError();
@@ -176,10 +213,20 @@ export function LoginScreen() {
             {modes.length > 0 && <div className="oauth-divider">{t('orContinueWith')}</div>}
             <div className="stack">
               {config!.providers.google && (
-                <a className="oauth-btn oauth-google" href={oauthStartUrl('google')}>
-                  <GoogleIcon />
-                  {t('continueWithGoogle')}
-                </a>
+                <>
+                  <div
+                    className="oauth-google-btn"
+                    data-testid="google-signin-button"
+                    ref={googleButtonRef}
+                    hidden={googleWidget !== 'ready'}
+                  />
+                  {googleWidget !== 'ready' && (
+                    <a className="oauth-btn oauth-google" href={oauthStartUrl('google')}>
+                      <GoogleIcon />
+                      {t('continueWithGoogle')}
+                    </a>
+                  )}
+                </>
               )}
               {config!.providers.discord && (
                 <a className="oauth-btn oauth-discord" href={oauthStartUrl('discord')}>

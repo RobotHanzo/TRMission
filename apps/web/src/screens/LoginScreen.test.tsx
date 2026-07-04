@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '../i18n';
 import { LoginScreen } from './LoginScreen';
 import { api } from '../net/rest';
 import { useSession } from '../store/session';
+import { loadGoogleIdentityServices } from '../net/google';
+
+vi.mock('../net/google', () => ({
+  loadGoogleIdentityServices: vi.fn(),
+  googleLocale: () => 'en',
+}));
 
 describe('LoginScreen', () => {
   beforeEach(() => useSession.setState({ user: null, error: null, loading: false }));
@@ -62,5 +68,42 @@ describe('LoginScreen', () => {
     render(<LoginScreen />);
 
     expect(await screen.findByText('目前沒有可用的登入方式，請稍後再試。')).toBeInTheDocument();
+  });
+
+  it("renders Google's rendered button and fires One Tap once GSI loads", async () => {
+    window.history.replaceState(null, '', '/login');
+    const accounts = { initialize: vi.fn(), prompt: vi.fn(), renderButton: vi.fn() };
+    vi.mocked(loadGoogleIdentityServices).mockResolvedValue(accounts);
+    vi.spyOn(api, 'config').mockResolvedValue({
+      passwordLogin: false,
+      guest: false,
+      providers: { google: true, discord: false },
+      googleClientId: 'test-client-id',
+    });
+    render(<LoginScreen />);
+
+    await waitFor(() => expect(accounts.prompt).toHaveBeenCalled());
+    expect(accounts.initialize).toHaveBeenCalledWith(
+      expect.objectContaining({ client_id: 'test-client-id' }),
+    );
+    expect(accounts.renderButton).toHaveBeenCalled();
+    expect(screen.getByTestId('google-signin-button')).toBeVisible();
+    expect(screen.queryByRole('link', { name: '使用 Google 繼續' })).not.toBeInTheDocument();
+  });
+
+  it('falls back to the legacy redirect button when GSI fails to load', async () => {
+    window.history.replaceState(null, '', '/login');
+    vi.mocked(loadGoogleIdentityServices).mockRejectedValue(new Error('blocked'));
+    vi.spyOn(api, 'config').mockResolvedValue({
+      passwordLogin: false,
+      guest: false,
+      providers: { google: true, discord: false },
+      googleClientId: 'test-client-id',
+    });
+    render(<LoginScreen />);
+
+    const link = await screen.findByRole('link', { name: '使用 Google 繼續' });
+    expect(link).toHaveAttribute('href', '/api/v1/auth/oauth/google/start?redirect=%2F');
+    expect(screen.getByTestId('google-signin-button')).not.toBeVisible();
   });
 });

@@ -546,6 +546,10 @@
   border-color: #dadce0;
   color: #3c4043;
 }
+.oauth-google-btn {
+  display: flex;
+  justify-content: center;
+}
 .oauth-discord {
   background: #5865f2;
   border-color: #5865f2;
