@@ -21,7 +21,7 @@ export function useAnimationDriver(): void {
   const revealMarketSlots = useAnimationsStore((s) => s.revealMarketSlots);
   const showEndgameWarning = useAnimationsStore((s) => s.showEndgameWarning);
   const showEventBanner = useAnimationsStore((s) => s.showEventBanner);
-  const pushEventToast = useAnimationsStore((s) => s.pushEventToast);
+  const pushNotification = useAnimationsStore((s) => s.pushNotification);
 
   const prevCompleted = useRef<Map<string, Set<string>>>(new Map());
   const seeded = useRef(false);
@@ -46,7 +46,7 @@ export function useAnimationDriver(): void {
         if (ev.value.info) showEventBanner(ev.value.info.kind);
       } else if (ev.case === 'randomEventAnnounced') {
         if (ev.value.info)
-          pushEventToast({
+          pushNotification({
             variant: 'announced',
             kind: ev.value.info.kind,
             reason: '',
@@ -55,7 +55,7 @@ export function useAnimationDriver(): void {
             routeId: '',
           });
       } else if (ev.case === 'randomEventBonus') {
-        pushEventToast({
+        pushNotification({
           variant: 'bonus',
           kind: ev.value.kind,
           reason: ev.value.reason,
@@ -65,7 +65,7 @@ export function useAnimationDriver(): void {
         });
       }
     }
-  }, [lastBatch, pushIntent, gameStore, showEventBanner, pushEventToast]);
+  }, [lastBatch, pushIntent, gameStore, showEventBanner, pushNotification]);
 
   // Ticket completion via snapshot diff (authoritative `completedTickets`).
   useEffect(() => {

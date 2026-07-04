@@ -62,18 +62,40 @@ export interface EventBannerCue {
   id: number;
   kind: string;
 }
-/** A lightweight event toast (forecast announcement or a claim bonus). Data-only — the copy +
- *  city/route names resolve at render, so late roster / locale changes apply. */
-export interface EventToastCue {
-  id: number;
-  variant: 'announced' | 'bonus';
-  kind: string;
-  /** EVENT_BONUS reason ("HOTSPOT"|"REOPEN"|"STAMP"|"CHARTER"|"FREE_STATION"); "" for announcements. */
-  reason: string;
-  points: number;
-  cityId: string;
-  routeId: string;
-}
+/** Distributes Omit over a union so each member keeps only its own fields, instead of collapsing
+ *  to the union's common keys (the built-in Omit is not distributive). */
+type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
+
+/** A single transient notification chip. Three shapes: an event announcement or a claim bonus
+ *  (each its own member — a single literal `variant` per member is what lets TypeScript narrow
+ *  the union cleanly by discriminant, unlike a shared `'announced' | 'bonus'` field would) whose
+ *  copy + city/route names resolve at render (so late roster/locale changes apply), or a plain
+ *  system message whose text is already fully resolved by the caller. */
+export type NotificationCue =
+  | {
+      id: number;
+      variant: 'announced';
+      kind: string;
+      reason: string;
+      points: number;
+      cityId: string;
+      routeId: string;
+    }
+  | {
+      id: number;
+      variant: 'bonus';
+      kind: string;
+      /** EVENT_BONUS reason ("HOTSPOT"|"REOPEN"|"STAMP"|"CHARTER"|"FREE_STATION"). */
+      reason: string;
+      points: number;
+      cityId: string;
+      routeId: string;
+    }
+  | {
+      id: number;
+      variant: 'error' | 'notice' | 'success';
+      text: string;
+    };
 
 interface AnimState {
   glowingRoutes: Map<string, number>;
@@ -92,8 +114,9 @@ interface AnimState {
   endgameCue: EndgameCue | null;
   /** The active random-event START banner (null = none). */
   eventBanner: EventBannerCue | null;
-  /** Live random-event toasts (forecast announcements + claim bonuses); each self-expires. */
-  eventToasts: EventToastCue[];
+  /** Live notification chips (system messages + random-event announcements/bonuses); each
+   *  self-expires. */
+  notifications: NotificationCue[];
   /** Longest-trail route highlight shown while reviewing the final scoreboard (null = none). */
   routeReveal: RouteReveal | null;
   pushIntent(intent: AnimIntent): void;
@@ -112,8 +135,8 @@ interface AnimState {
   dismissEndgameWarning(): void;
   showEventBanner(kind: string): void;
   dismissEventBanner(): void;
-  pushEventToast(cue: Omit<EventToastCue, 'id'>): void;
-  removeEventToast(id: number): void;
+  pushNotification(cue: DistributiveOmit<NotificationCue, 'id'>): void;
+  removeNotification(id: number): void;
   setRouteReveal(seat: number, path: string[]): void;
   clearRouteReveal(): void;
   reset(): void;
@@ -136,7 +159,7 @@ const initial = () => ({
   fanfareQueue: [] as Fanfare[],
   endgameCue: null as EndgameCue | null,
   eventBanner: null as EventBannerCue | null,
-  eventToasts: [] as EventToastCue[],
+  notifications: [] as NotificationCue[],
   routeReveal: null as RouteReveal | null,
 });
 
@@ -262,10 +285,12 @@ const creator: StateCreator<AnimState> = (set) => ({
   dismissEndgameWarning: () => set({ endgameCue: null }),
   showEventBanner: (kind) => set({ eventBanner: { id: nextId(), kind } }),
   dismissEventBanner: () => set({ eventBanner: null }),
-  pushEventToast: (cue) =>
-    set((s) => ({ eventToasts: [...s.eventToasts, { id: nextId(), ...cue }] })),
-  removeEventToast: (id) =>
-    set((s) => ({ eventToasts: s.eventToasts.filter((c) => c.id !== id) })),
+  pushNotification: (cue) =>
+    set((s) => ({
+      notifications: [...s.notifications, { id: nextId(), ...cue } as NotificationCue],
+    })),
+  removeNotification: (id) =>
+    set((s) => ({ notifications: s.notifications.filter((c) => c.id !== id) })),
   setRouteReveal: (seat, path) => set({ routeReveal: { seat, path } }),
   clearRouteReveal: () => set({ routeReveal: null }),
   reset: () => set(initial()),

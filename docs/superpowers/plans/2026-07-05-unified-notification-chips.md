@@ -105,15 +105,26 @@ In `apps/web/src/store/animations.ts`, replace the `EventToastCue` interface (cu
  *  to the union's common keys (the built-in Omit is not distributive). */
 type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
 
-/** A single transient notification chip. Two shapes: an event cue (forecast announcement or a
- *  claim bonus) whose copy + city/route names resolve at render (so late roster/locale changes
- *  apply), or a plain system message whose text is already fully resolved by the caller. */
+/** A single transient notification chip. Three shapes: an event announcement or a claim bonus
+ *  (each its own member — a single literal `variant` per member is what lets TypeScript narrow
+ *  the union cleanly by discriminant, unlike a shared `'announced' | 'bonus'` field would) whose
+ *  copy + city/route names resolve at render (so late roster/locale changes apply), or a plain
+ *  system message whose text is already fully resolved by the caller. */
 export type NotificationCue =
   | {
       id: number;
-      variant: 'announced' | 'bonus';
+      variant: 'announced';
       kind: string;
-      /** EVENT_BONUS reason ("HOTSPOT"|"REOPEN"|"STAMP"|"CHARTER"|"FREE_STATION"); "" for announcements. */
+      reason: string;
+      points: number;
+      cityId: string;
+      routeId: string;
+    }
+  | {
+      id: number;
+      variant: 'bonus';
+      kind: string;
+      /** EVENT_BONUS reason ("HOTSPOT"|"REOPEN"|"STAMP"|"CHARTER"|"FREE_STATION"). */
       reason: string;
       points: number;
       cityId: string;
@@ -125,6 +136,13 @@ export type NotificationCue =
       text: string;
     };
 ```
+
+> **Note (found during implementation):** the original draft used a single member with
+> `variant: 'announced' | 'bonus'`. TypeScript could not narrow that member away in the
+> `NotificationChip` render's ternary (`cue.text` in the final branch errored: "Property 'text'
+> does not exist"), because discriminated-union narrowing needs one literal per member to fully
+> eliminate a member by negation across a chain of equality checks. Splitting `announced`/`bonus`
+> into two members (shown above) fixes it with no behavior change.
 
 Then, in the `AnimState` interface, replace:
 

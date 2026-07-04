@@ -76,4 +76,26 @@ describe('animations store', () => {
     expect(s.fanfare).toBeNull();
     expect(s.sweeps).toHaveLength(0);
   });
+
+  it('pushNotification adds an event cue; removeNotification removes it by id', () => {
+    useAnimations.getState().pushNotification({
+      variant: 'bonus',
+      kind: 'STAMP_RALLY',
+      reason: 'STAMP',
+      points: 1,
+      cityId: 'taipei',
+      routeId: '',
+    });
+    const cue = useAnimations.getState().notifications[0]!;
+    expect(cue.variant).toBe('bonus');
+    useAnimations.getState().removeNotification(cue.id);
+    expect(useAnimations.getState().notifications).toHaveLength(0);
+  });
+
+  it('pushNotification adds a plain system cue carrying pre-resolved text', () => {
+    useAnimations.getState().pushNotification({ variant: 'success', text: '已複製' });
+    const cue = useAnimations.getState().notifications[0]!;
+    expect(cue.variant).toBe('success');
+    expect(cue).toMatchObject({ text: '已複製' });
+  });
 });

@@ -9,7 +9,8 @@ import { FlyingCard } from './FlyingCard';
 import { TicketCard } from './TicketCard';
 import { TicketFanfare } from './TicketFanfare';
 import { EndgameWarning } from './EndgameWarning';
-import { EventBanner, EventToasts } from './EventBanner';
+import { EventBanner } from './EventBanner';
+import { NotificationStack } from './NotificationStack';
 
 const rectOf = (selector: string): DOMRect | null =>
   document.querySelector(selector)?.getBoundingClientRect() ?? null;
@@ -192,7 +193,7 @@ export function AnimationLayer() {
           onDone={dismissEventBanner}
         />
       )}
-      <EventToasts />
+      <NotificationStack />
     </>,
     document.body,
   );

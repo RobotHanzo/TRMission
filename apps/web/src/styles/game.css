@@ -1778,8 +1778,8 @@ button.ticket-card:hover {
   color: var(--tr-accent);
 }
 
-/* ─── Event toasts (forecast announcements + claim bonuses) ────────────────────── */
-.event-toast-stack {
+/* ─── Notification chips (system messages + event announcements/bonuses) ───────── */
+.notification-stack {
   position: fixed;
   top: var(--tr-space-6);
   left: 50%;
@@ -1791,7 +1791,7 @@ button.ticket-card:hover {
   z-index: 61;
   pointer-events: none;
 }
-.event-toast {
+.notification-chip {
   padding: var(--tr-space-2) var(--tr-space-4);
   border-radius: 999px;
   background: var(--tr-ink);
@@ -1801,16 +1801,55 @@ button.ticket-card:hover {
   font-weight: 600;
   animation: tr-toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.event-toast--announced {
+/* Reverse of the entrance, held on its end frame (forwards) until the chip unmounts. */
+.notification-chip.notification-chip--exit {
+  animation: tr-toast-out 200ms ease-in forwards;
+}
+/* Plain vertical slide — every chip is a flex child of .notification-stack, which handles
+   horizontal centering, so (unlike the old bottom-fixed .toast) no translateX(-50%) is needed. */
+@keyframes tr-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes tr-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+}
+.notification-chip--error {
+  background: var(--tr-danger);
+  color: #fff;
+}
+.notification-chip--notice {
+  background: var(--tr-blue);
+  color: #fff;
+}
+.notification-chip--success {
+  background: var(--tr-ok);
+  color: #fff;
+}
+.notification-chip--announced {
   background: var(--tr-accent);
   color: #fff;
 }
-.event-toast--bonus {
+.notification-chip--bonus {
   background: var(--tr-ok);
   color: #fff;
 }
 @media (prefers-reduced-motion: reduce) {
-  .event-toast {
+  .notification-chip,
+  .notification-chip.notification-chip--exit {
     animation: none;
   }
 }
