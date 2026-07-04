@@ -4,7 +4,9 @@
 //
 // The current protocol version. Bump on any breaking wire change; `ClientHello`
 // and `Welcome` carry it so peers can reject incompatible builds.
-export const PROTOCOL_VERSION = 2;
+// v3: random-events wire shape — GameSettings.events_mode, GameSnapshot.random_events, and the
+// four RandomEvent* GameEvent oneof cases (M4).
+export const PROTOCOL_VERSION = 3;
 
 export * from './gen/trmission/v1/common_pb';
 export * from './gen/trmission/v1/client_pb';

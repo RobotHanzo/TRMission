@@ -222,6 +222,53 @@ message GameSettings {
   bool second_draw_after_blind_rainbow = 2;
   bool no_unfinished_ticket_penalty = 3;
   bool double_route_single_for23 = 4;
+  string events_mode = 5; // "off" | "light" | "moderate" | "intense"
+}
+
+// A permanent viral-hotspot marker: `level` is 1 or 2 (station-cost discount tiers).
+message HotspotMarker {
+  string city_id = 1;
+  uint32 level = 2;
+}
+
+// An open (or already-won) charter mission between two cities, live until its expiry round.
+message CharterContract {
+  string id = 1;
+  string city_a = 2;
+  string city_b = 3;
+  uint32 points = 4;
+  uint32 expires_after_round = 5;
+  string won_by_player_id = 6; // "" = open
+}
+
+// Generic random-event payload shared by forecast entries, active entries, and event frames
+// (forward-compatible with future event kinds via the string `kind` — no per-kind messages).
+message RandomEventInfo {
+  string id = 1;
+  string kind = 2;
+  uint32 start_round = 3;
+  uint32 duration_rounds = 4;
+  uint32 ends_after_round = 5;  // 0 when N/A (forecast/instant)
+  repeated string route_ids = 6;
+  string region = 7;
+  string city_id = 8;
+  CharterContract charter = 9;  // unset unless CHARTER_SPECIAL
+}
+
+// Random-events projection (absent from GameSnapshot when the feature is off). Mirrors the
+// engine's RedactedView.events — viewer-independent (spectators see the same block). The hidden
+// schedule/nextIdx/suppressed never appear here; only currently-live effects plus a one-round
+// forecast of the next telegraphed entry.
+message RandomEventsState {
+  string mode = 1; // "light" | "moderate" | "intense"
+  uint32 round_index = 2;
+  repeated RandomEventInfo active = 3;
+  RandomEventInfo forecast = 4;              // unset when nothing announced
+  repeated HotspotMarker hotspots = 5;
+  repeated CharterContract charters = 6;
+  repeated string reopen_bonus_route_ids = 7;
+  repeated string closed_route_ids = 8;
+  bool free_station_available = 9;
 }
 
 // Per-viewer authoritative projection of the whole game (maps from the engine's
@@ -255,4 +302,7 @@ message GameSnapshot {
 
   // Active rule variants for this game (display only).
   GameSettings game_settings = 21;
+
+  // Random-events projection (unset when the feature is off).
+  RandomEventsState random_events = 22;
 }

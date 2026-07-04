@@ -8,6 +8,7 @@ import { GameEventSchema, type GameEvent as PbGameEvent } from '@trm/proto';
 import type { PlayerId } from '@trm/shared';
 import type { GameEvent } from '@trm/engine';
 import { cardToPb, cardOrNullToPb } from './enums';
+import { announcedToInfo, startedToInfo } from './random-events';
 
 /** Returns null when this recipient must not receive the event at all. */
 export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameEvent | null {
@@ -119,13 +120,25 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
       // `completed_tickets` list, so this engine event has no dedicated wire frame.
       return null;
     case 'EVENT_ANNOUNCED':
+      // All four random-events engine events are PUBLIC — the feature carries no per-recipient
+      // hidden info (unlike ticket offers / blind draws above).
+      return wrap({ case: 'randomEventAnnounced', value: { info: announcedToInfo(ev) } });
     case 'EVENT_STARTED':
+      return wrap({ case: 'randomEventStarted', value: { info: startedToInfo(ev) } });
     case 'EVENT_ENDED':
+      return wrap({ case: 'randomEventEnded', value: { id: ev.id, kind: ev.kind } });
     case 'EVENT_BONUS':
-      // Random-events engine events (M1). Their authoritative state already rides the snapshot's
-      // `events` projection; dedicated animated wire frames are a later milestone (M2/M3), so
-      // there is no proto GameEvent oneof case for them yet.
-      return null;
+      return wrap({
+        case: 'randomEventBonus',
+        value: {
+          kind: ev.kind,
+          reason: ev.reason,
+          playerId: ev.player as string,
+          points: ev.points,
+          routeId: (ev.routeId as string | undefined) ?? '',
+          cityId: (ev.cityId as string | undefined) ?? '',
+        },
+      });
   }
 }
 
