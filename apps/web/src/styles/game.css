@@ -301,36 +301,37 @@
 .graticule line {
   stroke: var(--tr-sea-line);
   /* Counter-scaled so the grid holds a constant, gently-visible weight at every zoom. */
-  stroke-width: calc(0.32px * var(--inv-scale));
-  stroke-dasharray: calc(0.9px * var(--inv-scale)) calc(1.7px * var(--inv-scale));
+  stroke-width: calc(var(--m-grat-w) * 1px * var(--inv-scale));
+  stroke-dasharray: calc(var(--m-grat-dash-a) * 1px * var(--inv-scale))
+    calc(var(--m-grat-dash-b) * 1px * var(--inv-scale));
 }
 .land-surf {
   fill: none;
   stroke: var(--tr-sea);
-  stroke-width: 2.4;
-  opacity: 0.6;
+  stroke-width: calc(var(--m-land-surf-w) * 1px);
+  opacity: var(--m-land-surf-o);
 }
 .land {
   fill: var(--tr-land);
   stroke: var(--tr-coast);
-  stroke-width: 0.45;
+  stroke-width: calc(var(--m-land-stroke-w) * 1px);
   stroke-linejoin: round;
 }
 .relief {
   fill: var(--tr-relief);
-  opacity: 0.55;
+  opacity: var(--m-relief-o);
 }
 .relief-ridge {
   fill: none;
   stroke: var(--tr-coast);
-  stroke-width: 0.3;
-  stroke-dasharray: 0.5 0.9;
-  opacity: 0.55;
+  stroke-width: calc(var(--m-relief-ridge-w) * 1px);
+  stroke-dasharray: var(--m-relief-ridge-dash);
+  opacity: var(--m-relief-o);
 }
 .islands circle {
   fill: var(--tr-land);
   stroke: var(--tr-coast);
-  stroke-width: 0.4;
+  stroke-width: calc(var(--m-geo-island-w) * 1px);
 }
 .compass circle {
   fill: var(--tr-surface);
@@ -361,9 +362,9 @@
 .bed {
   fill: none;
   stroke: var(--tr-surface);
-  stroke-width: calc(2.8px * var(--inv-scale));
+  stroke-width: calc(var(--m-bed-w) * 1px * var(--inv-scale));
   stroke-linecap: round;
-  opacity: 0.95;
+  opacity: var(--m-bed-o);
 }
 [data-theme='dark'] .bed {
   stroke: #ddd8cc;
@@ -377,22 +378,22 @@
    seat colour, so the whole corridor reads as theirs at a glance; the solid seat-colour cars still
    pop on top. `--seat` is set on the route group by the renderer; unowned routes never match this. */
 .route.owned .bed {
-  stroke-width: calc(3.1px * var(--inv-scale));
+  stroke-width: calc(var(--m-bed-owned-w) * 1px * var(--inv-scale));
   stroke: color-mix(in srgb, var(--seat, var(--tr-surface)) 50%, var(--tr-surface));
   opacity: 1;
 }
 /* x/width (along the path) come from the geometry as attributes; y/height (the across-track
    thickness) live here so the car counter-scales to a constant on-screen size, like a city dot. */
 .slot {
-  y: calc(-0.72px * var(--inv-scale));
-  height: calc(1.44px * var(--inv-scale));
-  rx: calc(0.42px * var(--inv-scale));
-  stroke: #2a2520;
-  stroke-width: calc(0.3px * var(--inv-scale));
+  y: calc(var(--m-slot-h) / -2 * 1px * var(--inv-scale));
+  height: calc(var(--m-slot-h) * 1px * var(--inv-scale));
+  rx: calc(var(--m-slot-rx) * 1px * var(--inv-scale));
+  stroke: var(--m-car-edge);
+  stroke-width: calc(var(--m-slot-stroke-w) * 1px * var(--inv-scale));
   stroke-linejoin: round;
 }
 .route.owned .slot {
-  stroke-width: calc(0.42px * var(--inv-scale));
+  stroke-width: calc(var(--m-slot-owned-stroke-w) * 1px * var(--inv-scale));
 }
 /* Tunnel background: a wide, very transparent grey stroke on the railway path that just
    covers the furthest corners of the diagonal ties (4px × sin 45° ≈ 2.83px from centre,
@@ -400,46 +401,46 @@
    tunnel-bg (grey glint) → bed (white) → ties (dark) → cars. */
 .tunnel-bg {
   fill: none;
-  stroke: #b0b0b0;
-  stroke-opacity: 0.18;
-  stroke-width: calc(6px * var(--inv-scale));
+  stroke: var(--m-tunnel-bg-ink);
+  stroke-opacity: var(--m-tunnel-bg-o);
+  stroke-width: calc(var(--m-tunnel-bg-w) * 1px * var(--inv-scale));
   stroke-linecap: round;
 }
 /* Tunnel: diagonal sleeper ties, each a <rect> rotated angle+45° relative to the track.
    All four geometry props (x, y, width, height) are CSS so they counter-scale like car slots.
    width/x control the tie's long axis (crossing the track at 45°); height/y control its thickness. */
 .tunnel-tie {
-  x: calc(-4px * var(--inv-scale)); /* centre: extends 4px each way along the tie */
-  width: calc(8px * var(--inv-scale)); /* spans bed (2.8px) + ~1.4px past each rail edge */
-  y: calc(-0.14px * var(--inv-scale));
-  height: calc(0.28px * var(--inv-scale)); /* thin: each tie reads as a crisp diagonal slat */
-  fill: #3d352b;
-  fill-opacity: 0.9;
+  x: calc(var(--m-tie-w) / -2 * 1px * var(--inv-scale)); /* centred: extends tie-w/2 each way */
+  width: calc(var(--m-tie-w) * 1px * var(--inv-scale)); /* spans bed + a little past each rail edge */
+  y: calc(var(--m-tie-h) / -2 * 1px * var(--inv-scale));
+  height: calc(var(--m-tie-h) * 1px * var(--inv-scale)); /* thin: each tie reads as a crisp diagonal slat */
+  fill: var(--m-tie-ink);
+  fill-opacity: var(--m-tie-o);
 }
 /* Ferry: a dotted open-sea crossing under the round locomotive pips. */
 .ferry-line {
   fill: none;
-  stroke: #9aa0a6;
-  stroke-width: calc(0.5px * var(--inv-scale));
+  stroke: var(--m-ferry-line-ink);
+  stroke-width: calc(var(--m-ferry-line-w) * 1px * var(--inv-scale));
   stroke-linecap: round;
-  stroke-dasharray: 0.1 2.55;
+  stroke-dasharray: var(--m-ferry-dash);
 }
 .ferry-pip {
-  stroke: #2a2520;
-  stroke-width: calc(0.25px * var(--inv-scale));
-  r: calc(0.7px * var(--inv-scale));
+  stroke: var(--m-car-edge);
+  stroke-width: calc(var(--m-ferry-pip-stroke-w) * 1px * var(--inv-scale));
+  r: calc(var(--m-ferry-pip-r) * 1px * var(--inv-scale));
 }
 /* The wild-card rects of a ferry: rainbow-filled slots ringed in white so the spectrum reads
    against the open sea. One per locomotive the crossing requires. */
 .slot.ferry-loco {
-  stroke: #fff;
-  stroke-width: calc(0.5px * var(--inv-scale));
+  stroke: var(--m-ferry-loco-edge);
+  stroke-width: calc(var(--m-ferry-loco-stroke-w) * 1px * var(--inv-scale));
 }
 .hit {
   fill: none;
   stroke: transparent;
   stroke-linecap: round;
-  stroke-width: calc(4.2px * var(--inv-scale));
+  stroke-width: calc(var(--m-hit-w) * 1px * var(--inv-scale));
 }
 .route.claimable {
   cursor: pointer;
@@ -458,8 +459,8 @@
 .glyph-badge circle {
   fill: var(--tr-surface);
   stroke: var(--tr-ink-soft);
-  stroke-width: calc(0.22px * var(--inv-scale));
-  r: calc(1.6px * var(--inv-scale));
+  stroke-width: calc(var(--m-glyph-stroke-w) * 1px * var(--inv-scale));
+  r: calc(var(--m-glyph-r) * 1px * var(--inv-scale));
 }
 .glyph-badge text {
   fill: var(--tr-ink);
@@ -475,12 +476,12 @@
 .city-dot {
   fill: var(--tr-surface);
   stroke: var(--tr-ink);
-  stroke-width: calc(0.4px * var(--marker-scale));
-  r: calc(1.15px * var(--marker-scale));
+  stroke-width: calc(var(--m-city-stroke-w) * 1px * var(--marker-scale));
+  r: calc(var(--m-city-r) * 1px * var(--marker-scale));
 }
 .city.island .city-dot {
   stroke: var(--tr-blue);
-  r: calc(1.4px * var(--marker-scale));
+  r: calc(var(--m-island-r) * 1px * var(--marker-scale));
 }
 .city-dot.buildable {
   cursor: pointer;
@@ -491,14 +492,14 @@
 /* Hub junctions: a wider slot-shaped station, centred on the city via the element's transform.
    Geometry lives here so it counter-grows with --marker-scale like the round dots. */
 .city-hub {
-  x: calc(-1.25px * var(--marker-scale));
-  y: calc(-0.8px * var(--marker-scale));
-  width: calc(2.5px * var(--marker-scale));
-  height: calc(1.6px * var(--marker-scale));
-  rx: calc(0.8px * var(--marker-scale));
+  x: calc(var(--m-hub-w) / -2 * 1px * var(--marker-scale));
+  y: calc(var(--m-hub-h) / -2 * 1px * var(--marker-scale));
+  width: calc(var(--m-hub-w) * 1px * var(--marker-scale));
+  height: calc(var(--m-hub-h) * 1px * var(--marker-scale));
+  rx: calc(var(--m-hub-rx) * 1px * var(--marker-scale));
   fill: var(--tr-surface);
   stroke: var(--tr-ink);
-  stroke-width: calc(0.4px * var(--marker-scale));
+  stroke-width: calc(var(--m-city-stroke-w) * 1px * var(--marker-scale));
 }
 .city-hub.buildable {
   cursor: pointer;

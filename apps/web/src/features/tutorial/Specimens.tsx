@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import { TRAIN_COLORS, type CardColor, SCORING_TABLE } from '@trm/shared';
+import { mapCssVars } from '@trm/map-data';
 import { TrainCarCard } from '../../components/TrainCarCard';
 import { TicketCard } from '../../components/TicketCard';
 import { RouteShape, FerryLocoGradientDef } from '../../components/RouteShape';
@@ -70,7 +71,7 @@ export function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel
       className="tut-route-specimen"
       viewBox={`0 0 ${SPEC_W} ${SPEC_H}`}
       data-testid="tut-specimen"
-      style={{ ['--inv-scale' as string]: String(SPEC_INV) }}
+      style={{ ...mapCssVars(), ['--inv-scale' as string]: String(SPEC_INV) }}
       role="img"
     >
       {variant === 'ferry' && <FerryLocoGradientDef />}
@@ -290,7 +291,7 @@ function ClaimTrack({ len, fill }: { len: number; fill: string }) {
       viewBox={`0 0 ${w.toFixed(2)} ${h}`}
       width={w * CLAIM_TRACK_PX}
       height={h * CLAIM_TRACK_PX}
-      style={{ ['--inv-scale' as string]: String(SPEC_INV) }}
+      style={{ ...mapCssVars(), ['--inv-scale' as string]: String(SPEC_INV) }}
       role="img"
       aria-hidden
     >
