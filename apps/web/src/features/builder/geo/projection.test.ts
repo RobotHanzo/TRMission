@@ -13,6 +13,11 @@ describe('isValidCrop', () => {
     expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: -85, latMax: 10 })).toBe(false);
     expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: 0, latMax: 85 })).toBe(false);
   });
+
+  it('accepts real-world high-latitude country extents (Greenland reaches 83.65°N)', () => {
+    expect(isValidCrop({ lonMin: -73.3, lonMax: -12.21, latMin: 60.04, latMax: 83.65 })).toBe(true);
+    expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: 0, latMax: 84 })).toBe(true);
+  });
 });
 
 describe('buildProjection', () => {
