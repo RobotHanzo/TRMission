@@ -19,6 +19,9 @@ export interface GeometryRoute {
   readonly length: number;
   readonly isTunnel?: boolean;
   readonly doubleGroup?: string;
+  /** Signed curve-apex deviation override (board units, along the chord normal (-dy, dx)/len);
+   *  absent ⇒ the automatic bow. See RouteDef.bow. */
+  readonly bow?: number;
 }
 
 /**
@@ -76,6 +79,13 @@ const BOW_GAIN = 0.72;
 const MAX_BOW = 4.6;
 
 /**
+ * Clamp for an AUTHORED per-route `bow` (the map builder's Curves stage; also the server's
+ * schema bound and the builder slider range). Deliberately wider than MAX_BOW — hand-tuned
+ * bows may exceed the auto clamp, just as BOW_OVERRIDE's do.
+ */
+export const BOW_LIMIT = 12;
+
+/**
  * Hand-tuned outward bows (board units, signed along the chord normal) for routes whose straight
  * or auto-bowed path would cut across other content. Each value arcs the route into open space;
  * it replaces the auto-bow and is NOT clamped by MAX_BOW, and it composes with the double-gap so a
@@ -124,7 +134,7 @@ const SLOT_FILL_TUNNEL = 0.62;
 const TIE_SPACING = 1.1;
 
 /** How a route deviates from its straight chord. */
-interface RouteOffset {
+export interface RouteOffset {
   /** Signed half-gap (board units) separating a double-pair's two parallel tracks; 0 otherwise. */
   readonly gap: number;
   /** Perpendicular bow of the curve's apex — a single route arcing around an intruding town. */
@@ -135,8 +145,10 @@ interface RouteOffset {
  * Per-route deviation from the straight chord. A double-route pair's siblings keep their shared
  * endpoints but take equal-and-opposite perpendicular gaps (applied counter-scaled at render, so
  * the pair stays snug); every other route bows away from the nearest city its chord would cross.
+ * Exported so the map builder's Curves stage can show the "auto" value a route would get
+ * without its authored override.
  */
-function computeOffsetsFor(
+export function computeRouteOffsetsFor(
   cities: readonly GeometryCity[],
   routes: readonly GeometryRoute[],
 ): Map<string, RouteOffset> {
@@ -193,6 +205,14 @@ function computeOffsetsFor(
   for (const [id, bow] of Object.entries(BOW_OVERRIDE)) {
     const o = out.get(id);
     if (o) out.set(id, { gap: o.gap, bow });
+  }
+
+  // An authored per-route bow — the custom-map equivalent of BOW_OVERRIDE — wins over both the
+  // auto-bow and the override table, keeping any double-gap intact so a pair bows together.
+  for (const r of routes) {
+    if (r.bow === undefined) continue;
+    const o = out.get(r.id);
+    if (o) out.set(r.id, { gap: o.gap, bow: r.bow });
   }
   return out;
 }
@@ -304,7 +324,7 @@ function buildGeometryFor(
   routes: readonly GeometryRoute[],
 ): Map<string, RouteGeometry> {
   const cityByIdLocal = new Map(cities.map((c) => [c.id, c]));
-  const offsets = computeOffsetsFor(cities, routes);
+  const offsets = computeRouteOffsetsFor(cities, routes);
   const out = new Map<string, RouteGeometry>();
   for (const r of routes) {
     const a = cityByIdLocal.get(r.a);

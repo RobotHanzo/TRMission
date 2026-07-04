@@ -22,6 +22,12 @@ export interface RouteDef {
   /** >0 ⇒ ferry: this many LOCOMOTIVE symbols required (gray routes only). */
   readonly ferryLocos: number;
   readonly isTunnel: boolean;
+  /**
+   * Signed curve-apex deviation from the straight chord (board units, along the chord's unit
+   * normal (-dy, dx)/len for a→b). Absent ⇒ the automatic bow (arc away from intruding cities).
+   * Authored by the map builder's Curves stage; render-only — the engine ignores it.
+   */
+  readonly bow?: number;
 }
 
 export interface TicketDef {
