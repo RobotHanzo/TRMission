@@ -29,6 +29,17 @@ export type {
 } from './types/events-state';
 export { generateSchedule } from './events/schedule';
 export { tickRound, isQuietEndgame } from './events/runtime';
+export {
+  closedRouteIds,
+  isRouteClosed,
+  claimsSuspended,
+  stationsSuspended,
+  skyLanternSurcharge,
+  skyLanternDoubles,
+  tunnelRevealExtra,
+  dayOffExtraDraw,
+  takeReopenBonus,
+} from './events/effects';
 
 export type { Action, ActionType, Payment } from './types/actions';
 export type { GameEvent, GameEventType, Visibility } from './types/events';

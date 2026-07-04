@@ -17,6 +17,17 @@ import { offerTickets } from './tickets';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
 import { borrowConnectedTicketIds } from './graph/connectivity';
 import { stationBorrowEdges } from './scoring';
+import {
+  isRouteClosed,
+  closedRouteIds,
+  claimsSuspended,
+  stationsSuspended,
+  skyLanternSurcharge,
+  skyLanternDoubles,
+  tunnelRevealExtra,
+  dayOffExtraDraw,
+  takeReopenBonus,
+} from './events/effects';
 
 export interface ReduceOutput {
   readonly state: GameState;
@@ -248,24 +259,23 @@ function applyDrawBlind(board: Board, state: GameState, player: PlayerId): Reduc
   next = addCardToHand(next, player, d.card);
   events.push({ e: 'CARD_DRAWN_BLIND', player, card: d.card, visibility: { private: player } });
 
-  if (isFirst) {
-    if (d.card === 'LOCOMOTIVE' && !state.ruleParams.secondDrawAfterBlindRainbow) {
-      // Variant default: a blind rainbow consumes the whole draw — end the turn now.
-      const out = endTurn(board, next, { wasPass: false });
-      return ok({ state: out.state, events: [...events, ...out.events] });
-    }
-    if (!hasSecondDrawAvailable(next)) {
-      // Deck, discard, and market are all exhausted/unusable: a second draw is provably
-      // impossible, and DRAWING_CARDS has no PASS escape — end the turn now rather than
-      // stranding the player on a forced draw they can never make.
-      const out = endTurn(board, next, { wasPass: false });
-      return ok({ state: out.state, events: [...events, ...out.events] });
-    }
-    next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 1 } };
-    return ok({ state: next, events });
+  // Draw-limit: 2 picks per turn, +1 while a typhoon day off is active. A blind rainbow still
+  // consumes the whole draw on the FIRST pick (variant default), independent of the day-off extra.
+  const drawn = (isFirst ? 0 : state.turn.cardsDrawnThisTurn) + 1;
+  const limit = 2 + dayOffExtraDraw(state);
+
+  if (isFirst && d.card === 'LOCOMOTIVE' && !state.ruleParams.secondDrawAfterBlindRainbow) {
+    const out = endTurn(board, next, { wasPass: false });
+    return ok({ state: out.state, events: [...events, ...out.events] });
   }
-  const out = endTurn(board, next, { wasPass: false });
-  return ok({ state: out.state, events: [...events, ...out.events] });
+  if (drawn >= limit || !hasSecondDrawAvailable(next)) {
+    // Limit reached, or deck+discard+market are exhausted/unusable so a further pick is provably
+    // impossible (DRAWING_CARDS has no PASS escape) — end the turn now.
+    const out = endTurn(board, next, { wasPass: false });
+    return ok({ state: out.state, events: [...events, ...out.events] });
+  }
+  next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: drawn } };
+  return ok({ state: next, events });
 }
 
 function applyDrawFaceup(
@@ -309,19 +319,23 @@ function applyDrawFaceup(
     events.push({ e: 'MARKET_RECYCLED', reason: 'THREE_LOCOS', visibility: 'PUBLIC' });
   events.push({ e: 'MARKET_REFILLED', market: refill.market, visibility: 'PUBLIC' });
 
-  // Taking a face-up Locomotive (only possible on the first draw) consumes the whole draw.
-  if (card === 'LOCOMOTIVE' || !isFirst) {
+  // Draw-limit: 2 picks per turn, +1 while a typhoon day off is active.
+  const drawn = (isFirst ? 0 : state.turn.cardsDrawnThisTurn) + 1;
+  const limit = 2 + dayOffExtraDraw(state);
+
+  // Taking a face-up Locomotive (only possible on the first pick — the guard above rejects it later)
+  // consumes the whole draw.
+  if (card === 'LOCOMOTIVE') {
     const out = endTurn(board, next, { wasPass: false });
     return ok({ state: out.state, events: [...events, ...out.events] });
   }
-  if (!hasSecondDrawAvailable(next)) {
-    // Deck, discard, and market are all exhausted/unusable: a second draw is provably
-    // impossible, and DRAWING_CARDS has no PASS escape — end the turn now rather than
-    // stranding the player on a forced draw they can never make.
+  if (drawn >= limit || !hasSecondDrawAvailable(next)) {
+    // Limit reached, or deck+discard+market are exhausted/unusable so a further pick is provably
+    // impossible (DRAWING_CARDS has no PASS escape) — end the turn now.
     const out = endTurn(board, next, { wasPass: false });
     return ok({ state: out.state, events: [...events, ...out.events] });
   }
-  next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 1 } };
+  next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: drawn } };
   return ok({ state: next, events });
 }
 
@@ -340,6 +354,8 @@ function claimPreconditions(
     if ('locked' in cell) return err(violation('ROUTE_LOCKED', 'route is locked'));
     return err(violation('ROUTE_TAKEN', 'route already claimed'));
   }
+  if (isRouteClosed(state, routeId))
+    return err(violation('ROUTE_CLOSED_BY_EVENT', 'route closed by a typhoon landfall'));
   const sib = siblingOf(board, routeId);
   if (sib) {
     const sibCell = state.ownership[sib as string];
@@ -357,9 +373,10 @@ function applyClaimEffects(
   player: PlayerId,
   route: RouteDef,
 ): { state: GameState; events: GameEvent[] } {
-  const events: GameEvent[] = [];
   let next = setOwnership(state, route.id as string, { owner: player });
 
+  // Sibling lock is emitted AFTER the claim/bonus events; buffer it here.
+  const lockedEvents: GameEvent[] = [];
   const variant = variantForPlayerCount(
     state.turnOrder.length,
     state.ruleParams.doubleRouteSingleFor23,
@@ -368,23 +385,48 @@ function applyClaimEffects(
     const sib = siblingOf(board, route.id);
     if (sib && !next.ownership[sib as string]) {
       next = setOwnership(next, sib as string, { locked: true });
-      events.push({ e: 'DOUBLE_ROUTE_LOCKED', routeId: sib, visibility: 'PUBLIC' });
+      lockedEvents.push({ e: 'DOUBLE_ROUTE_LOCKED', routeId: sib, visibility: 'PUBLIC' });
     }
   }
 
-  const points = state.ruleParams.routePoints[route.length] ?? 0;
+  // Sky-lantern doubles the route's board points at claim time (reflected in pointsAwarded); off
+  // mode / non-surcharged routes keep today's value byte-identically.
+  const basePoints = state.ruleParams.routePoints[route.length] ?? 0;
+  const points = skyLanternDoubles(next, route.id) ? basePoints * 2 : basePoints;
   next = withPlayer(next, player, (p) => ({
     ...p,
     trainCars: p.trainCars - route.length,
     routePoints: p.routePoints + points,
   }));
-  events.unshift({
-    e: 'ROUTE_CLAIMED',
-    player,
-    routeId: route.id,
-    pointsAwarded: points,
-    visibility: 'PUBLIC',
-  });
+
+  const events: GameEvent[] = [
+    {
+      e: 'ROUTE_CLAIMED',
+      player,
+      routeId: route.id,
+      pointsAwarded: points,
+      visibility: 'PUBLIC',
+    },
+  ];
+
+  // Typhoon reopen +2: the FIRST claimer of a reopened route banks a one-off itemized bonus. A
+  // second claimer of the reopened double-route sibling finds it already consumed and earns nothing.
+  const rb = takeReopenBonus(next, route.id);
+  next = rb.state;
+  if (rb.bonus > 0) {
+    next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + rb.bonus }));
+    events.push({
+      e: 'EVENT_BONUS',
+      kind: 'TYPHOON_LANDFALL',
+      reason: 'REOPEN',
+      player,
+      points: rb.bonus,
+      routeId: route.id,
+      visibility: 'PUBLIC',
+    });
+  }
+
+  events.push(...lockedEvents);
   return { state: next, events };
 }
 
@@ -395,13 +437,16 @@ function applyClaimRoute(
   routeId: RouteId,
   payment: Payment,
 ): ReduceResult {
+  if (claimsSuspended(state))
+    return err(violation('EVENT_CLAIMS_SUSPENDED', 'route claims suspended by a typhoon day off'));
   const pre = claimPreconditions(board, state, player, routeId);
   if (!pre.ok) return pre;
   const route = pre.value;
   const p = getPlayer(state, player);
   if (!p) return err(violation('NOT_YOUR_TURN', 'unknown player'));
 
-  const pay = validateRoutePayment(route, payment, p);
+  const extraCards = skyLanternSurcharge(state, routeId);
+  const pay = validateRoutePayment(route, payment, p, extraCards);
   if (!pay.ok) return pay;
 
   if (route.isTunnel) return beginTunnel(state, player, route, payment, pay.value.playedColor);
@@ -424,12 +469,15 @@ function beginTunnel(
   playedColor: TrainColor | null,
 ): ReduceResult {
   // Reveal top up-to-N cards (reshuffling if needed). Base cards stay in hand (abort is free).
+  // An active aftershock adds one extra reveal. Sky-lantern's base surcharge is already baked into
+  // `payment` (validated as length+1), so the pendingTunnel needs no extra bookkeeping for it.
+  const revealCount = state.ruleParams.tunnelRevealCount + tunnelRevealExtra(state);
   const revealed: CardColor[] = [];
   let deck = state.deck;
   let discard = state.discard;
   let rng = state.rng;
   let reshuffled = false;
-  for (let i = 0; i < state.ruleParams.tunnelRevealCount; i++) {
+  for (let i = 0; i < revealCount; i++) {
     const d = drawOne(deck, discard, rng);
     if (d.card === null) break;
     deck = d.deck;
@@ -494,21 +542,28 @@ function applyResolveTunnel(
   for (const c of pt.revealed) discardAfterReveal[c] += 1;
 
   if (!commit) {
-    const cleared: GameState = { ...state, discard: discardAfterReveal, pendingTunnel: null };
-    const out = endTurn(board, cleared, { wasPass: false });
-    return ok({
-      state: out.state,
-      events: [
-        {
-          e: 'TUNNEL_RESOLVED',
+    let cleared: GameState = { ...state, discard: discardAfterReveal, pendingTunnel: null };
+    const abortEvents: GameEvent[] = [
+      { e: 'TUNNEL_RESOLVED', player, routeId: pt.routeId, committed: false, visibility: 'PUBLIC' },
+    ];
+    // Aftershock consolation: an aborting player draws one blind card (a real draw from the shared
+    // deck helper). Silently skipped when deck + discard are both empty.
+    if (tunnelRevealExtra(state) > 0) {
+      const d = drawOne(cleared.deck, cleared.discard, cleared.rng);
+      if (d.card !== null) {
+        if (d.reshuffled) abortEvents.push({ e: 'DECK_RESHUFFLED', visibility: 'PUBLIC' });
+        cleared = { ...cleared, deck: d.deck, discard: d.discard, rng: d.rng };
+        cleared = addCardToHand(cleared, player, d.card);
+        abortEvents.push({
+          e: 'CARD_DRAWN_BLIND',
           player,
-          routeId: pt.routeId,
-          committed: false,
-          visibility: 'PUBLIC',
-        },
-        ...out.events,
-      ],
-    });
+          card: d.card,
+          visibility: { private: player },
+        });
+      }
+    }
+    const out = endTurn(board, cleared, { wasPass: false });
+    return ok({ state: out.state, events: [...abortEvents, ...out.events] });
   }
 
   // Commit: validate the extra payment.
@@ -567,6 +622,8 @@ function applyBuildStation(
   cityId: CityId,
   payment: Payment,
 ): ReduceResult {
+  if (stationsSuspended(state))
+    return err(violation('EVENT_STATIONS_SUSPENDED', 'station builds suspended by a typhoon day off'));
   if (!board.cityById.has(cityId as string)) return err(violation('UNKNOWN_CITY', 'unknown city'));
   if (state.stations.some((s) => s.cityId === cityId))
     return err(violation('STATION_CITY_TAKEN', 'city has a station'));
@@ -672,22 +729,31 @@ export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId
   if (state.market.some((c) => c !== null)) return true;
   // Draw tickets.
   if (state.ticketDeckShort.length > 0) return true;
-  // Build a station.
-  if (p.stationsRemaining > 0 && state.stations.length < board.cityIds.length) {
+  // Build a station — suspended entirely during a typhoon day off (mirror of applyBuildStation).
+  if (
+    !stationsSuspended(state) &&
+    p.stationsRemaining > 0 &&
+    state.stations.length < board.cityIds.length
+  ) {
     const built = state.ruleParams.stationsPerPlayer - p.stationsRemaining;
     const cost = built + 1;
     if (canAffordCount(p.hand, cost)) return true;
   }
-  // Claim a route.
-  for (const route of board.content.routes) {
-    if (state.ownership[route.id as string]) continue;
-    const sib = siblingOf(board, route.id);
-    if (sib) {
-      const sc = state.ownership[sib as string];
-      if (sc && 'owner' in sc && sc.owner === player) continue;
+  // Claim a route — suspended entirely during a day off; otherwise skip closed routes and price
+  // sky-lantern routes at length + surcharge (exact mirror of the applyClaimRoute gates).
+  if (!claimsSuspended(state)) {
+    const closed = closedRouteIds(state);
+    for (const route of board.content.routes) {
+      if (state.ownership[route.id as string]) continue;
+      if (closed.has(route.id as string)) continue;
+      const sib = siblingOf(board, route.id);
+      if (sib) {
+        const sc = state.ownership[sib as string];
+        if (sc && 'owner' in sc && sc.owner === player) continue;
+      }
+      if (p.trainCars < route.length) continue;
+      if (canAffordRoute(p.hand, route, skyLanternSurcharge(state, route.id))) return true;
     }
-    if (p.trainCars < route.length) continue;
-    if (canAffordRoute(p.hand, route)) return true;
   }
   return false;
 }
@@ -706,8 +772,14 @@ function canAffordCount(hand: Readonly<Record<CardColor, number>>, count: number
   return false;
 }
 
-function canAffordRoute(hand: Readonly<Record<CardColor, number>>, route: RouteDef): boolean {
-  const L = route.length;
+function canAffordRoute(
+  hand: Readonly<Record<CardColor, number>>,
+  route: RouteDef,
+  extraCards = 0,
+): boolean {
+  // Sky-lantern surcharge adds cards, not trains: the caller already checked `trainCars` against
+  // the BASE length, so here we only inflate the CARD requirement.
+  const L = route.length + extraCards;
   const F = route.ferryLocos;
   if (hand.LOCOMOTIVE < F) return false;
   if (hand.LOCOMOTIVE >= L) return true; // all-locomotive payment

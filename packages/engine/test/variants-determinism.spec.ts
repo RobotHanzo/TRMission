@@ -31,6 +31,7 @@ describe('rule-variant determinism & version', () => {
       { ruleParams: { secondDrawAfterBlindRainbow: true } },
       { ruleParams: { noUnfinishedTicketPenalty: true } },
       { ruleParams: { doubleRouteSingleFor23: false } },
+      { ruleParams: { eventsMode: 'intense' } },
     ];
     for (const v of variants) {
       const r = playGreedyGame(3, 'variant-seed', { ruleParams: v.ruleParams });

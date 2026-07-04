@@ -69,8 +69,9 @@ export function checkInvariants(board: Board, state: GameState): string[] {
     cities.add(s.cityId as string);
   }
 
-  // 5. Random-events structural invariants (only when the feature is on). No closure rule exists
-  //    yet (M1), so route-level closure consistency is not enforceable here.
+  // 5. Random-events structural invariants (only when the feature is on). Route closure is a claim
+  //    gate (see reduce.ts), not a stored flag, so there is nothing route-level to reconcile here;
+  //    a reopen-bonus route is always still unclaimed (consumed by the claim that awards it).
   const ev = state.events;
   if (ev) {
     if (ev.roundIndex < 1) problems.push(`events roundIndex < 1: ${ev.roundIndex}`);

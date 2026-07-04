@@ -8,6 +8,7 @@ import type { RedactedView, RedactedPlayer, RedactedFinalScoreboard } from './ty
 import { reduce, hasAnyLegalMove } from './reduce';
 import { currentPlayerId } from './turn';
 import { getPlayer } from './reducers/common';
+import { skyLanternSurcharge } from './events/effects';
 import { ownConnectedTicketIds } from './graph/connectivity';
 import { evaluatePlayerTickets, longestTrailRouteIdsFor } from './scoring';
 import type { TicketId } from '@trm/shared';
@@ -23,8 +24,11 @@ export function enumerateClaimPayments(
 ): Payment[] {
   const p = getPlayer(state, player);
   if (!p) return [];
+  // Trains are measured by the BASE length; a sky-lantern surcharge only inflates the card count so
+  // legalActions still offers the (surcharged) claim (mirror of validateRoutePayment's extraCards).
   if (p.trainCars < route.length) return [];
-  return enumeratePayments(p.hand, route.length, {
+  const extraCards = skyLanternSurcharge(state, route.id);
+  return enumeratePayments(p.hand, route.length + extraCards, {
     ferryLocos: route.ferryLocos,
     specific: route.color === 'GRAY' ? null : route.color,
   });
