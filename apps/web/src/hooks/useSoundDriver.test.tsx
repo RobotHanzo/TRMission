@@ -35,8 +35,8 @@ function snap(
   });
 }
 
-function Harness() {
-  useSoundDriver();
+function Harness({ sandbox }: { sandbox?: boolean } = {}) {
+  useSoundDriver(sandbox);
   return null;
 }
 
@@ -74,5 +74,21 @@ describe('useSoundDriver', () => {
     act(() => useGame.getState().applySnapshot(snap(1, {})));
     act(() => useGame.getState().applySnapshot(snap(2, { completed: [{ p: 'p0', t: 't1' }] })));
     expect(play).toHaveBeenCalledWith('missionComplete');
+  });
+
+  it('plays yourTurn on a turnStarted event for me', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(snap(1, {})));
+    const ev: GameEvent = { event: { case: 'turnStarted', value: { playerId: 'p0' } } } as GameEvent;
+    act(() => useGame.getState().applyEvents(2, [ev]));
+    expect(play).toHaveBeenCalledWith('yourTurn', 1);
+  });
+
+  it('suppresses yourTurn in sandbox mode (encyclopedia/replay loops)', () => {
+    render(<Harness sandbox />);
+    act(() => useGame.getState().applySnapshot(snap(1, {})));
+    const ev: GameEvent = { event: { case: 'turnStarted', value: { playerId: 'p0' } } } as GameEvent;
+    act(() => useGame.getState().applyEvents(2, [ev]));
+    expect(play).not.toHaveBeenCalledWith('yourTurn', expect.anything());
   });
 });

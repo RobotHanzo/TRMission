@@ -103,7 +103,7 @@ export function GameStage({
 
   // Translate events + snapshot diffs into animations (claim glow, draws, fanfare, …) and sounds.
   useAnimationDriver();
-  useSoundDriver();
+  useSoundDriver(sandbox);
 
   const [claim, setClaim] = useState<Claim | null>(null);
   // The base payment committed to a pending tunnel claim. Its cards stay in hand until the tunnel

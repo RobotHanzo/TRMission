@@ -14,8 +14,11 @@ const EMPTY: ReadonlySet<string> = new Set();
  * event stream and from snapshot diffs (game-over once on transition; mission-complete on a new
  * own-track completion). The first snapshot only seeds refs, so reconnect/resume never replays a
  * stale win-horn or mission flourish.
+ *
+ * @param sandbox Encyclopedia/replay sandboxes script a fake "viewer" turn on every looped beat;
+ *   without this the yourTurn chime would fire on every loop of a demo nobody is actually playing.
  */
-export function useSoundDriver(): void {
+export function useSoundDriver(sandbox?: boolean): void {
   const gameStore = useGameStoreApi();
   const snapshot = useGameStore((s) => s.snapshot);
   const lastBatch = useGameStore((s) => s.lastBatch);
@@ -51,9 +54,10 @@ export function useSoundDriver(): void {
     const snap = gameStore.getState().snapshot;
     if (!snap) return;
     for (const { cue, isSelf } of cuesFromEvents(snap, lastBatch.events)) {
+      if (sandbox && cue === 'yourTurn') continue;
       soundPlayer.play(cue, isSelf ? 1 : OPPONENT_GAIN);
     }
-  }, [lastBatch, gameStore]);
+  }, [lastBatch, gameStore, sandbox]);
 
   // Snapshot diffs: game-over (once) + self mission completion.
   useEffect(() => {
