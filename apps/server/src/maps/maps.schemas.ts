@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { ROUTE_LENGTHS, TRAIN_COLORS, asCityId, asRouteId, asTicketId } from '@trm/shared';
 import type { RouteLength } from '@trm/shared';
-import { RULE_BOUNDS } from '@trm/map-data';
+import { BOW_LIMIT, RULE_BOUNDS } from '@trm/map-data';
 import type { MapRules } from '@trm/map-data';
 import type { MapDraft } from './maps.types';
 
@@ -36,6 +36,7 @@ export const RouteDraftSchema = z.object({
   doubleGroup: z.string().min(1).max(4).optional(),
   ferryLocos: z.number().int().min(0).max(8),
   isTunnel: z.boolean(),
+  bow: z.number().finite().min(-BOW_LIMIT).max(BOW_LIMIT).optional(),
 });
 
 export const TicketDraftSchema = z.object({
@@ -144,6 +145,7 @@ export function draftFromDto(dto: z.infer<typeof MapDraftSchema>): MapDraft {
       ferryLocos: r.ferryLocos,
       isTunnel: r.isTunnel,
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
+      ...(r.bow !== undefined ? { bow: r.bow } : {}),
     })),
     tickets: dto.tickets.map((t) => ({ ...t, id: asTicketId(t.id), a: asCityId(t.a), b: asCityId(t.b) })),
     ...(dto.geography !== undefined ? { geography: dto.geography } : {}),

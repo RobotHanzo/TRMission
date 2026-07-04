@@ -207,3 +207,34 @@ describe('maps: share + clone', () => {
       .expect(404);
   });
 });
+
+describe('maps: route bow', () => {
+  it('accepts and round-trips an in-range route bow', async () => {
+    const a = await registered('mapbow1@example.com', 'Bow1');
+    const created = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(a.token))
+      .send({ nameZh: '彎', nameEn: 'Bow' })
+      .expect(201);
+    const id: string = created.body.id;
+
+    const draft = { ...tinyDraft, routes: [{ ...tinyDraft.routes[0]!, bow: -3.5 }] };
+    await request(server()).put(`/api/v1/maps/${id}`).set(auth(a.token)).send({ draft }).expect(200);
+
+    const got = await request(server()).get(`/api/v1/maps/${id}`).set(auth(a.token)).expect(200);
+    expect(got.body.draft.routes[0].bow).toBe(-3.5);
+  });
+
+  it('rejects a bow outside the shared limit (schema bound)', async () => {
+    const a = await registered('mapbow2@example.com', 'Bow2');
+    const created = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(a.token))
+      .send({ nameZh: '彎', nameEn: 'Bow' })
+      .expect(201);
+    const id: string = created.body.id;
+
+    const draft = { ...tinyDraft, routes: [{ ...tinyDraft.routes[0]!, bow: 12.5 }] };
+    await request(server()).put(`/api/v1/maps/${id}`).set(auth(a.token)).send({ draft }).expect(400);
+  });
+});
