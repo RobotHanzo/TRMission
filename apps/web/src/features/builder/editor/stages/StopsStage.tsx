@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Trash2 } from 'lucide-react';
+import { Move, Trash2 } from 'lucide-react';
 import { Switch } from '../../../../components/ui/Switch';
 import { EditorCanvas } from '../EditorCanvas';
 import { useEditorStore } from '../store';
@@ -16,10 +16,27 @@ export function StopsStage() {
   const placeCity = useEditorStore((s) => s.placeCity);
   const updateCity = useEditorStore((s) => s.updateCity);
   const removeCity = useEditorStore((s) => s.removeCity);
+  const moveCity = useEditorStore((s) => s.moveCity);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
 
   const selected =
     selection?.kind === 'city' ? draft.cities.find((c) => c.id === selection.id) : undefined;
+
+  // Leaving the selection (deselect, pick a different station, or delete it) always cancels an
+  // in-flight move — there's no "moving station" once it's no longer the selected one.
+  useEffect(() => {
+    setIsMoving(false);
+  }, [selected?.id]);
+
+  useEffect(() => {
+    if (!isMoving) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMoving(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isMoving]);
 
   const incidentRoutes = selected
     ? draft.routes.filter((r) => r.a === selected.id || r.b === selected.id).length
@@ -33,6 +50,13 @@ export function StopsStage() {
       <div className="editor-canvas-wrap">
         <EditorCanvas
           onBackgroundClick={(pt) => {
+            const x = Math.round(pt.x * 10) / 10;
+            const y = Math.round(pt.y * 10) / 10;
+            if (isMoving && selected) {
+              moveCity(selected.id, x, y);
+              setIsMoving(false);
+              return;
+            }
             const id = newCityId();
             placeCity({
               id,
@@ -40,8 +64,8 @@ export function StopsStage() {
               // current locale — the user renames it via the inspector immediately after.
               nameZh: '新車站',
               nameEn: 'New Stop',
-              x: Math.round(pt.x * 10) / 10,
-              y: Math.round(pt.y * 10) / 10,
+              x,
+              y,
               region: '',
               isIsland: false,
             });
@@ -49,7 +73,11 @@ export function StopsStage() {
           }}
           onCityClick={(id) => select({ kind: 'city', id })}
         />
-        <p className="muted editor-hint">{t('builder.stopsHint')}</p>
+        <p className="muted editor-hint">
+          {isMoving && selected
+            ? t('builder.moveStopHint', { name: selected.nameZh })
+            : t('builder.stopsHint')}
+        </p>
       </div>
       <aside className="card stack editor-inspector">
         {selected ? (
@@ -84,6 +112,9 @@ export function StopsStage() {
                 label={t('builder.isIsland')}
               />
             </div>
+            <button type="button" onClick={() => setIsMoving((v) => !v)}>
+              <Move size={14} aria-hidden /> {isMoving ? t('builder.cancelMove') : t('builder.moveStop')}
+            </button>
             {confirmDelete ? (
               <div className="stack">
                 <p className="muted">
