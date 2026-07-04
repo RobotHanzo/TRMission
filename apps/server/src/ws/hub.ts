@@ -5,6 +5,7 @@
 // protobuf without a socket. Persistence is optional (Step A ran without it); when a
 // store is present, actions are durable-before-visible and games recover on reconnect.
 import { fromBinary } from '@bufbuild/protobuf';
+import { Logger } from '@nestjs/common';
 import {
   ClientEnvelopeSchema,
   RejectionCode,
@@ -15,7 +16,7 @@ import {
 import { asPlayerId, messageKeyFor } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
 import { boardForContentHash } from '@trm/engine';
-import type { Board, GameConfig, GameEvent } from '@trm/engine';
+import type { Action, Board, GameConfig, GameEvent } from '@trm/engine';
 import type { GameRegistry, Match } from '../game/game-registry';
 import { GameSession, type Prepared } from '../game/game-session';
 import { Connection, type Sink } from './connection';
@@ -49,6 +50,12 @@ export interface GameHubOptions {
   metrics?: MetricsHooks;
   /** Pause between consecutive bot moves so humans can follow the action (0 in tests). */
   botMoveDelayMs?: number;
+  /** In-process retries for a transient bot-move persist failure before a delayed re-drive (default 3). */
+  botPersistRetries?: number;
+  /** Delay between in-process persist retries, ms (default 500; 0 in tests). */
+  botPersistRetryDelayMs?: number;
+  /** Delay before re-driving a game whose persist kept failing, ms (default 15s; small in tests). */
+  botDriverRescheduleMs?: number;
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
@@ -57,7 +64,14 @@ const CHAT_MAX_LEN = 2048;
 const CHAT_RATE_MAX = 5;
 const CHAT_RATE_WINDOW_MS = 5000;
 
+const DEFAULT_BOT_PERSIST_RETRIES = 3;
+const DEFAULT_BOT_PERSIST_RETRY_DELAY_MS = 500;
+const DEFAULT_BOT_DRIVER_RESCHEDULE_MS = 15_000;
+
+type BotMoveOutcome = 'moved' | 'noLegalAction' | 'persistFailed';
+
 export class GameHub {
+  private readonly log = new Logger('bots');
   private readonly connections = new Map<string, Connection>();
   /** gameId → (playerId → that player's current connection). */
   private readonly members = new Map<string, Map<string, Connection>>();
@@ -68,6 +82,9 @@ export class GameHub {
   private readonly boardResolver: (config: GameConfig) => Board | Promise<Board>;
   private readonly metrics: MetricsHooks;
   private readonly botMoveDelayMs: number;
+  private readonly botPersistRetries: number;
+  private readonly botPersistRetryDelayMs: number;
+  private readonly botDriverRescheduleMs: number;
   /** gameId → (botPlayerId → profile). */
   private readonly bots = new Map<string, Map<string, BotProfile>>();
   /** gameIds with an in-flight bot driver loop (prevents overlapping drivers). */
@@ -91,6 +108,9 @@ export class GameHub {
       options.boardResolver ?? ((config: GameConfig) => boardForContentHash(config.contentHash));
     this.metrics = options.metrics ?? NOOP_METRICS;
     this.botMoveDelayMs = options.botMoveDelayMs ?? 600;
+    this.botPersistRetries = options.botPersistRetries ?? DEFAULT_BOT_PERSIST_RETRIES;
+    this.botPersistRetryDelayMs = options.botPersistRetryDelayMs ?? DEFAULT_BOT_PERSIST_RETRY_DELAY_MS;
+    this.botDriverRescheduleMs = options.botDriverRescheduleMs ?? DEFAULT_BOT_DRIVER_RESCHEDULE_MS;
   }
 
   async createMatch(
@@ -528,6 +548,15 @@ export class GameHub {
    * Drive every bot that can currently act, one move at a time through the match queue
    * (so bot moves interleave safely with human commands), until the turn returns to a
    * human or the game ends. Re-entrancy is guarded so only one driver runs per game.
+   *
+   * Once it's a bot's turn, nothing else will ever prompt that bot again — a human can't
+   * act out of turn, and nothing but a human command (or recovery) re-invokes this driver.
+   * So a bot turn that can't make progress must be handled here, not left to "try again
+   * later": a transient persist failure gets a few in-process retries and then a delayed
+   * re-drive (self-heals once the store recovers); a policy that finds no legal action at
+   * all falls back to PASS directly against the reducer (`botMove`) before giving up, since
+   * PASS is guaranteed legal whenever no other move is (rule A15). Either failure mode is
+   * metered via `botDriverStalled` — it should never fire outside of injected-failure tests.
    */
   private async driveBots(gameId: string): Promise<void> {
     const bots = this.bots.get(gameId);
@@ -543,15 +572,29 @@ export class GameHub {
         const delay = botStepDelayMs(match.session.phase, revealedCount, this.botMoveDelayMs);
         if (delay > 0) await sleep(delay);
 
-        let moved = false;
-        await match.queue.run(async () => {
-          moved = await this.botMove(match, profile);
-        });
-        if (!moved) break;
+        let outcome: BotMoveOutcome;
+        for (let attempt = 0; ; attempt++) {
+          outcome = await match.queue.run(() => this.botMove(match, profile));
+          if (outcome !== 'persistFailed' || attempt >= this.botPersistRetries) break;
+          await sleep(this.botPersistRetryDelayMs);
+        }
+        if (outcome === 'moved') continue;
+        if (outcome === 'persistFailed') {
+          this.log.error(
+            `persist kept failing for bot ${profile.playerId} in game ${gameId} after ${this.botPersistRetries + 1} attempts; rescheduling driver`,
+          );
+          this.metrics.botDriverStalled('persist_failed');
+          this.scheduleBotDriverRetry(gameId);
+        }
+        break; // 'noLegalAction' (even PASS failed), or persist retries exhausted.
       }
     } finally {
       this.driving.delete(gameId);
     }
+  }
+
+  private scheduleBotDriverRetry(gameId: string): void {
+    setTimeout(() => void this.driveBots(gameId), this.botDriverRescheduleMs);
   }
 
   /** The first bot with a move available right now (turn owner, or a pending offer/tunnel). */
@@ -575,24 +618,45 @@ export class GameHub {
     return undefined;
   }
 
-  /** Choose + apply one move for `profile`. Returns false if there was nothing valid to do. */
-  private async botMove(match: Match, profile: BotProfile): Promise<boolean> {
-    const action = chooseBotAction(
-      match.session.board,
-      match.session.raw(),
-      asPlayerId(profile.playerId),
-      profile.difficulty,
-    );
-    if (!action) return false;
-    const prep = match.session.prepare(action);
-    if (!prep.ok) return false; // defensive: the policy only ever returns legal actions
+  /** Choose + apply one move for `profile`. */
+  private async botMove(match: Match, profile: BotProfile): Promise<BotMoveOutcome> {
+    const botId = asPlayerId(profile.playerId);
+    const chosen = chooseBotAction(match.session.board, match.session.raw(), botId, profile.difficulty);
+    const chosenPrep = chosen ? match.session.prepare(chosen) : null;
+
+    let action: Action;
+    let prep: Prepared;
+    if (chosen && chosenPrep?.ok) {
+      action = chosen;
+      prep = chosenPrep.prepared;
+    } else {
+      // The policy (or its chosen action) failed — this should be unreachable, since
+      // `legalActions` guarantees PASS is legal whenever no other move is. Try PASS directly
+      // against the reducer rather than freezing the match on an assumption that turned out
+      // to be wrong.
+      const passAction: Action = { t: 'PASS', player: botId };
+      const passPrep = match.session.prepare(passAction);
+      if (!passPrep.ok) {
+        this.log.error(
+          `bot ${profile.playerId} has no legal action (including PASS) in game ${match.session.gameId} phase ${match.session.phase}`,
+        );
+        this.metrics.botDriverStalled('no_legal_action');
+        return 'noLegalAction';
+      }
+      this.log.warn(
+        `bot ${profile.playerId} policy returned no usable action in game ${match.session.gameId}; falling back to PASS`,
+      );
+      action = passAction;
+      prep = passPrep.prepared;
+    }
+
     this.metrics.commandReceived();
     const startedAt = performance.now();
-    const applied = await this.applyPrepared(match, action, prep.prepared);
-    if (!applied.ok) return false; // persist failure — retry on the next driver pass
-    this.broadcast(match, prep.prepared.events, null, 0);
+    const applied = await this.applyPrepared(match, action, prep);
+    if (!applied.ok) return 'persistFailed';
+    this.broadcast(match, prep.events, null, 0);
     this.metrics.commandApplied((performance.now() - startedAt) / 1000);
-    return true;
+    return 'moved';
   }
 
   // ── fan-out ──────────────────────────────────────────────────────────────

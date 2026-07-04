@@ -12,6 +12,7 @@ export class MetricsService implements MetricsHooks {
   private readonly applyDuration: Histogram;
   private readonly connections: Gauge;
   private readonly leaks: Counter;
+  private readonly botStalls: Counter<'reason'>;
 
   constructor() {
     collectDefaultMetrics({ register: this.registry });
@@ -42,6 +43,12 @@ export class MetricsService implements MetricsHooks {
       help: 'Hidden-info egress blocked',
       registers: [this.registry],
     });
+    this.botStalls = new Counter({
+      name: 'trm_bot_driver_stalled_total',
+      help: 'Bot driver made no progress on a bot turn (should stay 0)',
+      labelNames: ['reason'],
+      registers: [this.registry],
+    });
   }
 
   commandReceived(): void {
@@ -61,6 +68,9 @@ export class MetricsService implements MetricsHooks {
   }
   leakBlocked(): void {
     this.leaks.inc();
+  }
+  botDriverStalled(reason: 'no_legal_action' | 'persist_failed'): void {
+    this.botStalls.inc({ reason });
   }
 
   metrics(): Promise<string> {

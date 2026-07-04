@@ -25,6 +25,7 @@ function counters() {
     leakBlocked() {
       c.leaks += 1;
     },
+    botDriverStalled() {},
   };
   return { c, metrics };
 }

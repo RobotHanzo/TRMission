@@ -123,7 +123,13 @@ export interface PlayResult {
 export function playGreedyGame(
   numPlayers: number,
   seed: string | number,
-  opts: { checkEachStep?: boolean; maxSteps?: number; ruleParams?: GameConfig['ruleParams'] } = {},
+  opts: {
+    checkEachStep?: boolean;
+    maxSteps?: number;
+    ruleParams?: GameConfig['ruleParams'];
+    /** Inspection hook run before each action is chosen (e.g. an assertion on `state`). */
+    onStep?: (board: Board, state: GameState) => void;
+  } = {},
 ): PlayResult {
   const { board, config } = makeConfig(numPlayers, seed, opts.ruleParams);
   let state = initGame(board, config);
@@ -133,6 +139,7 @@ export function playGreedyGame(
   let steps = 0;
 
   while (state.turn.phase !== 'GAME_OVER' && steps < maxSteps) {
+    opts.onStep?.(board, state);
     const [action, nextRng] = chooseAction(board, state, rng);
     rng = nextRng;
     const res = reduce(board, state, action);

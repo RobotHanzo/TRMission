@@ -8,6 +8,13 @@ export interface MetricsHooks {
   connectionClosed(): void;
   /** Incremented if the egress guard ever catches a snapshot addressed to the wrong player. */
   leakBlocked(): void;
+  /**
+   * Incremented when the bot driver can't make progress on a bot's turn: either the policy (plus
+   * the PASS fallback) found no legal action at all, or a write-ahead persist kept failing. Should
+   * stay at 0 — an increase means a match may be stuck waiting on a turn nothing will ever prompt
+   * again (see `GameHub.driveBots`).
+   */
+  botDriverStalled(reason: 'no_legal_action' | 'persist_failed'): void;
 }
 
 export const NOOP_METRICS: MetricsHooks = {
@@ -17,4 +24,5 @@ export const NOOP_METRICS: MetricsHooks = {
   connectionOpened() {},
   connectionClosed() {},
   leakBlocked() {},
+  botDriverStalled() {},
 };
