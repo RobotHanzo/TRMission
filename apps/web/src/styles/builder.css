@@ -340,6 +340,38 @@
   background: var(--tr-sea);
 }
 
+/* ── Country-pick mode (Crop stage's second on-ramp) ────────────────────────────────────── */
+.editor-country {
+  fill: var(--tr-land);
+  stroke: var(--tr-coast);
+  stroke-width: calc(0.35px * var(--inv-scale, 1));
+  cursor: pointer;
+}
+.editor-country--selected {
+  fill: color-mix(in srgb, var(--tr-ember) 45%, var(--tr-land));
+  stroke: var(--tr-ember);
+  stroke-width: calc(0.7px * var(--inv-scale, 1));
+}
+.editor-country-pick {
+  /* Country paths carry their own pointer cursor; no rectangle-drawing crosshair here. */
+  cursor: default;
+}
+.country-list-search {
+  width: 100%;
+}
+.country-list-continent {
+  margin: var(--tr-space-2) 0 var(--tr-space-1);
+  font-size: 0.85em;
+  color: var(--tr-ink-soft);
+}
+.country-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-1);
+  padding: 2px 0;
+  cursor: pointer;
+}
+
 /* ── Missions table ──────────────────────────────────────────────────────────────────────── */
 /* The table's two city dropdowns give it an intrinsic width wider than a phone; the wrapper
    pans sideways (same pattern as .scoreboard-scroll) instead of overflowing the screen. */
