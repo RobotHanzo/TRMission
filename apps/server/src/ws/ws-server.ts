@@ -14,9 +14,13 @@ export function attachWsServer(
 
   wss.on('connection', (socket: WebSocket) => {
     const id = randomUUID();
-    hub.openConnection(id, (bytes) => {
-      if (socket.readyState === socket.OPEN) socket.send(bytes);
-    });
+    hub.openConnection(
+      id,
+      (bytes) => {
+        if (socket.readyState === socket.OPEN) socket.send(bytes);
+      },
+      (code, reason) => socket.close(code, reason),
+    );
 
     socket.on('message', (data: RawData) => {
       void hub.receive(id, toUint8(data));

@@ -19,7 +19,7 @@ import { boardForContentHash } from '@trm/engine';
 import type { Action, Board, GameConfig, GameEvent } from '@trm/engine';
 import type { GameRegistry, Match } from '../game/game-registry';
 import { GameSession, type Prepared } from '../game/game-session';
-import { Connection, type Sink } from './connection';
+import { Connection, type CloseFn, type Sink } from './connection';
 import { DevTicketVerifier, type TicketVerifier } from './ticket';
 import type { GameStorePort } from '../persistence/types';
 import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
@@ -211,8 +211,8 @@ export class GameHub {
     return status === 'COMPLETED';
   }
 
-  openConnection(id: string, sink: Sink): Connection {
-    const conn = new Connection(id, sink);
+  openConnection(id: string, sink: Sink, closeFn?: CloseFn): Connection {
+    const conn = new Connection(id, sink, closeFn);
     this.connections.set(id, conn);
     this.metrics.connectionOpened();
     return conn;
