@@ -32,11 +32,13 @@ import {
   RegisterDto,
   UpgradeDto,
   LoginDto,
+  GoogleCredentialDto,
   UpdatePreferencesDto,
   GuestSchema,
   RegisterSchema,
   UpgradeSchema,
   LoginSchema,
+  GoogleCredentialSchema,
   PreferencesSchema,
   AuthResultSchema,
   AccessResultSchema,
@@ -145,6 +147,21 @@ export class AuthController {
   async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
     if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
     return this.finish(res, await this.auth.login(body.email, body.password));
+  }
+
+  @Post('oauth/google/credential')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Sign in via a Google One Tap / rendered-button ID token' })
+  @ApiBody({ schema: apiSchema(GoogleCredentialSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(AuthResultSchema) })
+  async googleCredential(
+    @Body() body: GoogleCredentialDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    if (!this.authConfig.provider('google')) throw new ForbiddenException('google sign-in disabled');
+    const guestUserId = await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
+    return this.finish(res, await this.oauth.handleCredential(body.credential, guestUserId));
   }
 
   @Post('refresh')

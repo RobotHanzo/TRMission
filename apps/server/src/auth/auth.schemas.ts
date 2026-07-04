@@ -24,11 +24,13 @@ export const GuestSchema = z.object({
 export const RegisterSchema = z.object({ email, password, displayName, locale: locale.optional() });
 export const UpgradeSchema = z.object({ email, password });
 export const LoginSchema = z.object({ email, password });
+export const GoogleCredentialSchema = z.object({ credential: z.string().min(1) });
 
 export class GuestDto extends createZodDto(GuestSchema) {}
 export class RegisterDto extends createZodDto(RegisterSchema) {}
 export class UpgradeDto extends createZodDto(UpgradeSchema) {}
 export class LoginDto extends createZodDto(LoginSchema) {}
+export class GoogleCredentialDto extends createZodDto(GoogleCredentialSchema) {}
 export class UpdatePreferencesDto extends createZodDto(PreferencesSchema) {}
 
 export const PublicUserSchema = z.object({

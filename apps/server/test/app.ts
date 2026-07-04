@@ -11,6 +11,10 @@ import { OpenApiHolder } from '../src/openapi/openapi.holder';
 import { buildOpenApiDocument } from '../src/openapi/openapi';
 import { AuthConfig, type AuthConfigOverrides } from '../src/auth/auth-config';
 import { OAUTH_HTTP, type OauthHttp, type OauthProfile } from '../src/auth/oauth.http';
+import {
+  GOOGLE_ID_TOKEN_VERIFIER,
+  type GoogleIdTokenVerifier,
+} from '../src/auth/google-id-token.verifier';
 import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
 
 export interface TestApp {
@@ -24,6 +28,8 @@ export interface TestAppOptions {
   authConfig?: AuthConfigOverrides;
   /** Stub the network seam so OAuth e2e never leaves the process. */
   oauthHttp?: OauthHttp;
+  /** Stub Google ID-token verification (One Tap / rendered-button credential flow). */
+  googleVerifier?: GoogleIdTokenVerifier;
   /** Override DashboardConfig (owner-email bootstrap) without touching env. */
   dashboardConfig?: DashboardConfigOverrides;
 }
@@ -39,6 +45,8 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
     .useValue(db);
   if (opts.authConfig) builder = builder.overrideProvider(AuthConfig).useValue(new AuthConfig(opts.authConfig));
   if (opts.oauthHttp) builder = builder.overrideProvider(OAUTH_HTTP).useValue(opts.oauthHttp);
+  if (opts.googleVerifier)
+    builder = builder.overrideProvider(GOOGLE_ID_TOKEN_VERIFIER).useValue(opts.googleVerifier);
   if (opts.dashboardConfig)
     builder = builder
       .overrideProvider(DashboardConfig)
@@ -68,6 +76,16 @@ export class FakeOauthHttp implements OauthHttp {
   fail = false;
   async getProfile(): Promise<OauthProfile> {
     if (this.fail || !this.profile) throw new Error('fake oauth exchange failed');
+    return this.profile;
+  }
+}
+
+/** A controllable stand-in for Google ID-token verification: set `profile`, or `fail` to throw. */
+export class FakeGoogleIdTokenVerifier implements GoogleIdTokenVerifier {
+  profile: OauthProfile | null = null;
+  fail = false;
+  async verify(): Promise<OauthProfile> {
+    if (this.fail || !this.profile) throw new Error('fake google verify failed');
     return this.profile;
   }
 }

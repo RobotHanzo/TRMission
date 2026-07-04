@@ -4,6 +4,7 @@ import {
   createTestApp,
   refreshCookie,
   FakeOauthHttp,
+  FakeGoogleIdTokenVerifier,
   OAUTH_TEST_CONFIG,
   type TestApp,
 } from './app';
@@ -378,5 +379,116 @@ describe('auth: OAuth (Google + Discord, bound by email)', () => {
       .expect(302);
     expect(cb.headers.location).toContain('error=invalid_state');
     expect(refreshCookie(cb)).toBe('');
+  });
+});
+
+describe('auth: Google credential sign-in (One Tap / rendered button)', () => {
+  let o: TestApp;
+  let verifier: FakeGoogleIdTokenVerifier;
+  const oServer = () => o.app.getHttpServer();
+
+  beforeAll(async () => {
+    verifier = new FakeGoogleIdTokenVerifier();
+    o = await createTestApp({ authConfig: OAUTH_TEST_CONFIG, googleVerifier: verifier });
+  }, 60_000);
+  afterAll(() => o.close());
+
+  it('creates an account from a verified credential', async () => {
+    verifier.profile = {
+      sub: 'g-cred-1',
+      email: 'crednew@example.com',
+      emailVerified: true,
+      displayName: 'CredNew',
+      avatarUrl: 'https://example.com/a/crednew.png',
+    };
+    verifier.fail = false;
+    const res = await request(oServer())
+      .post('/api/v1/auth/oauth/google/credential')
+      .send({ credential: 'fake-jwt' })
+      .expect(200);
+    expect(res.body.user.email).toBe('crednew@example.com');
+    expect(res.body.user.isGuest).toBe(false);
+    expect(res.body.accessToken).toBeTruthy();
+    expect(refreshCookie(res)).toContain('trm_refresh=');
+  });
+
+  it('auto-links a credential sign-in to an existing account with the same verified email', async () => {
+    const reg = await request(oServer())
+      .post('/api/v1/auth/register')
+      .send({ email: 'credlink@example.com', password: 'password123', displayName: 'CredLinker' })
+      .expect(201);
+    verifier.profile = {
+      sub: 'g-cred-2',
+      email: 'credlink@example.com',
+      emailVerified: true,
+      displayName: 'CredLinker-Google',
+      avatarUrl: null,
+    };
+    const res = await request(oServer())
+      .post('/api/v1/auth/oauth/google/credential')
+      .send({ credential: 'fake-jwt' })
+      .expect(200);
+    expect(res.body.user.id).toBe(reg.body.user.id);
+  });
+
+  it('upgrades a signed-in guest in place', async () => {
+    const guest = await request(oServer())
+      .post('/api/v1/auth/guest')
+      .send({ displayName: 'CredGuest' })
+      .expect(201);
+    verifier.profile = {
+      sub: 'g-cred-3',
+      email: 'credguest@example.com',
+      emailVerified: true,
+      displayName: 'CredGuest',
+      avatarUrl: null,
+    };
+    const res = await request(oServer())
+      .post('/api/v1/auth/oauth/google/credential')
+      .set('Cookie', refreshCookie(guest))
+      .send({ credential: 'fake-jwt' })
+      .expect(200);
+    expect(res.body.user.id).toBe(guest.body.user.id);
+    expect(res.body.user.isGuest).toBe(false);
+    expect(res.body.user.email).toBe('credguest@example.com');
+  });
+
+  it('rejects an unverified email with 401 (no session issued)', async () => {
+    verifier.profile = {
+      sub: 'g-cred-4',
+      email: 'credunverified@example.com',
+      emailVerified: false,
+      displayName: 'CredUnverified',
+      avatarUrl: null,
+    };
+    const res = await request(oServer())
+      .post('/api/v1/auth/oauth/google/credential')
+      .send({ credential: 'fake-jwt' })
+      .expect(401);
+    expect(refreshCookie(res)).toBe('');
+  });
+
+  it('rejects a token the verifier cannot validate with 401', async () => {
+    verifier.fail = true;
+    await request(oServer())
+      .post('/api/v1/auth/oauth/google/credential')
+      .send({ credential: 'garbage' })
+      .expect(401);
+  });
+
+  it('validates the request body via the zod pipe', async () => {
+    await request(oServer())
+      .post('/api/v1/auth/oauth/google/credential')
+      .send({})
+      .expect(400);
+  });
+
+  it('rejects with 403 when the provider is not configured', async () => {
+    const d = await createTestApp({ googleVerifier: new FakeGoogleIdTokenVerifier() });
+    await request(d.app.getHttpServer())
+      .post('/api/v1/auth/oauth/google/credential')
+      .send({ credential: 'fake-jwt' })
+      .expect(403);
+    await d.close();
   });
 });

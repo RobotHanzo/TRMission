@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { createHash, randomBytes } from 'node:crypto';
 import { AuthConfig, type OauthProvider } from './auth-config';
 import { TokenService } from './token.service';
@@ -6,6 +6,10 @@ import { AuthService } from './auth.service';
 import { UserRepo, type UserDoc } from './user.repo';
 import { SessionRepo } from './session.repo';
 import { OAUTH_HTTP, type OauthHttp } from './oauth.http';
+import {
+  GOOGLE_ID_TOKEN_VERIFIER,
+  type GoogleIdTokenVerifier,
+} from './google-id-token.verifier';
 import type { IssuedAuth, Locale } from './auth.types';
 
 const base64url = (b: Buffer): string => b.toString('base64url');
@@ -56,6 +60,7 @@ export class OauthService {
     private readonly users: UserRepo,
     private readonly sessions: SessionRepo,
     @Inject(OAUTH_HTTP) private readonly http: OauthHttp,
+    @Inject(GOOGLE_ID_TOKEN_VERIFIER) private readonly verifier: GoogleIdTokenVerifier,
   ) {}
 
   /**
@@ -161,6 +166,40 @@ export class OauthService {
     } catch {
       return { ok: false, error: 'server_error', redirect };
     }
+  }
+
+  /**
+   * Verify a Google Identity Services credential (One Tap / rendered-button ID token) and resolve
+   * the account through the same logic `handleCallback` uses. Unlike that redirect flow, failures
+   * here are ordinary REST errors (this is a JSON call, not a top-level navigation that must always
+   * land somewhere) — no redirect/error-query-param plumbing needed.
+   */
+  async handleCredential(
+    idToken: string,
+    guestUserId: string | undefined,
+  ): Promise<IssuedAuth> {
+    const cfg = this.authConfig.provider('google');
+    if (!cfg) throw new UnauthorizedException('provider_disabled');
+
+    let profile;
+    try {
+      profile = await this.verifier.verify(idToken, cfg.clientId);
+    } catch {
+      throw new UnauthorizedException('invalid_credential');
+    }
+    if (!profile.email || !profile.emailVerified || !profile.sub) {
+      throw new UnauthorizedException('email_unverified');
+    }
+
+    const user = await this.resolveAccount(
+      'google',
+      profile.email,
+      profile.sub,
+      profile.displayName,
+      profile.avatarUrl,
+      guestUserId,
+    );
+    return this.auth.issueFor(user);
   }
 
   private async resolveAccount(
