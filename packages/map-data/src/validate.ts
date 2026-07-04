@@ -2,6 +2,7 @@ import { ROUTE_LENGTHS, TRAIN_COLORS, DEFAULT_RULE_PARAMS } from '@trm/shared';
 import type { RouteColor, RuleParams } from '@trm/shared';
 import type { GameContent, RouteDef, MapGeography, MapRules } from './types';
 import { isFerry, MAP_RULE_KEYS } from './types';
+import { BOW_LIMIT } from './geometry';
 
 export interface ContentStats {
   cityCount: number;
@@ -50,6 +51,8 @@ export function formatIssue(issue: ValidationIssue): string {
       return `${p.routeId}: ferryLocos ${p.ferryLocos} exceeds length ${p.length}`;
     case 'ferryAndTunnel':
       return `${p.routeId}: route cannot be both ferry and tunnel`;
+    case 'bowOutOfRange':
+      return `${p.routeId}: bow ${p.bow} is outside the allowed range [-${p.limit}, ${p.limit}]`;
     case 'doubleGroupWrongCount':
       return `double group ${p.group}: expected exactly 2 routes, got ${p.count}`;
     case 'doubleGroupDifferentPairs':
@@ -150,6 +153,10 @@ export function validateContent(content: GameContent): ValidationResult {
       ferryLocoSymbols += r.ferryLocos;
     }
     if (r.isTunnel) tunnelCount++;
+
+    if (r.bow !== undefined && (!Number.isFinite(r.bow) || Math.abs(r.bow) > BOW_LIMIT)) {
+      push('bowOutOfRange', { routeId: rid, bow: r.bow, limit: BOW_LIMIT });
+    }
 
     colorBalance[r.color] = (colorBalance[r.color] ?? 0) + 1;
     totalTrackLength += r.length;

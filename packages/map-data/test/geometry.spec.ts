@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { buildRouteGeometryFor, computeRouteOffsetsFor, BOW_LIMIT } from '../src/index';
-import type { GeometryCity, GeometryRoute } from '../src/index';
+import { buildRouteGeometryFor, computeRouteOffsetsFor, validateContent, BOW_LIMIT } from '../src/index';
+import type { GameContent, GeometryCity, GeometryRoute } from '../src/index';
+import { testContent } from './fixtures';
 
 // Horizontal chord a→b with one intruding town just south of it. Chord normal is (0, 1),
 // so a positive bow moves the apex south (larger y), negative north.
@@ -55,5 +56,28 @@ describe('explicit route bow', () => {
     expect(offsets.get('r2')!.bow).toBe(3);
     expect(offsets.get('r1')!.gap).not.toBe(0);
     expect(offsets.get('r1')!.gap).toBe(-offsets.get('r2')!.gap);
+  });
+});
+
+describe('validateContent: bow bounds', () => {
+  const withFirstRouteBow = (bow: number): GameContent => {
+    const base = testContent();
+    return { ...base, routes: base.routes.map((r, i) => (i === 0 ? { ...r, bow } : r)) };
+  };
+
+  it('accepts an in-range bow', () => {
+    expect(validateContent(withFirstRouteBow(4)).ok).toBe(true);
+    expect(validateContent(withFirstRouteBow(-BOW_LIMIT)).ok).toBe(true);
+  });
+
+  it('rejects an out-of-range bow with a stable issue code', () => {
+    const res = validateContent(withFirstRouteBow(BOW_LIMIT + 0.1));
+    expect(res.ok).toBe(false);
+    expect(res.issues.some((i) => i.code === 'bowOutOfRange')).toBe(true);
+  });
+
+  it('rejects a non-finite bow', () => {
+    expect(validateContent(withFirstRouteBow(Number.NaN)).ok).toBe(false);
+    expect(validateContent(withFirstRouteBow(Number.POSITIVE_INFINITY)).ok).toBe(false);
   });
 });
