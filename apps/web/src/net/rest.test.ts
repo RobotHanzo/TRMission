@@ -68,4 +68,26 @@ describe('rest client: per-game settings + spectating', () => {
       expect.objectContaining({ method: 'POST' }),
     );
   });
+
+  it('POSTs a rematch vote', async () => {
+    const fetchMock = vi.fn((_path: string, _init?: RequestInit) =>
+      Promise.resolve(res(200, { code: 'ABCDEF', members: [] })),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    await api.voteRematch('ABCDEF', true);
+    const [path, init] = fetchMock.mock.calls[0]!;
+    expect(path).toBe('/api/v1/rooms/ABCDEF/rematch-vote');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({ wantsRematch: true });
+  });
+
+  it('POSTs a rematch request', async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(res(200, { code: 'ABCDEF', members: [] })));
+    vi.stubGlobal('fetch', fetchMock);
+    await api.rematch('ABCDEF');
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/rooms/ABCDEF/rematch',
+      expect.objectContaining({ method: 'POST' }),
+    );
+  });
 });

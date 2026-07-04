@@ -44,6 +44,7 @@ export interface RoomMember {
   ready: boolean;
   isBot?: boolean;
   difficulty?: BotDifficulty;
+  wantsRematch?: boolean;
 }
 export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
 export type MapSelector =
@@ -302,6 +303,9 @@ export const api = {
   updateRoomSettings: (code: string, patch: Partial<RoomSettings>) =>
     req<RoomView>('PATCH', `/rooms/${code}/settings`, patch),
   spectate: (code: string) => req<TicketResult>('POST', `/rooms/${code}/spectate`),
+  voteRematch: (code: string, wantsRematch: boolean) =>
+    req<RoomView>('POST', `/rooms/${code}/rematch-vote`, { wantsRematch }),
+  rematch: (code: string) => req<RoomView>('POST', `/rooms/${code}/rematch`),
 
   history: () => req<MatchSummary[]>('GET', '/history'),
   replay: (gameId: string) =>
