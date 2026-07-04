@@ -17,7 +17,9 @@ import '../../../styles/game.css';
 const DEFAULT_VIEW = { x: 0, y: 0, w: 100, h: 100 };
 
 const colorOf = (c: string): string =>
-  c === 'GRAY' ? GRAY_TOKEN.hex : (CARD_COLOR_TOKENS[c as keyof typeof CARD_COLOR_TOKENS]?.hex ?? '#888');
+  c === 'GRAY'
+    ? GRAY_TOKEN.hex
+    : (CARD_COLOR_TOKENS[c as keyof typeof CARD_COLOR_TOKENS]?.hex ?? '#888');
 
 export interface CurveHandle {
   routeId: string;
@@ -147,11 +149,12 @@ export function EditorCanvas({
                 'route editor-route' +
                 (r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '') +
                 (selected ? ' editor-route--selected' : '');
-              const style: CSSProperties = g.perp.x || g.perp.y
-                ? {
-                    transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
-                  }
-                : {};
+              const style: CSSProperties =
+                g.perp.x || g.perp.y
+                  ? {
+                      transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
+                    }
+                  : {};
               return (
                 <g
                   key={r.id}

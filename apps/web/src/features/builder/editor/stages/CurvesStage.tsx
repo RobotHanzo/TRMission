@@ -64,7 +64,12 @@ export function CurvesStage() {
       <aside className="card stack editor-inspector">
         {selectedRoute ? (
           <>
-            <h3>{t('builder.editCurve', { a: cityName(selectedRoute.a), b: cityName(selectedRoute.b) })}</h3>
+            <h3>
+              {t('builder.editCurve', {
+                a: cityName(selectedRoute.a),
+                b: cityName(selectedRoute.b),
+              })}
+            </h3>
             <label className="field">
               <span className="field-label">{t('builder.curveBow')}</span>
               <input

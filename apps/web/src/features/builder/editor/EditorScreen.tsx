@@ -1,6 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Crop, Eraser, MapPin, Route, Spline, Ticket, SlidersHorizontal, Share2, type LucideIcon } from 'lucide-react';
+import {
+  ArrowLeft,
+  Crop,
+  Eraser,
+  MapPin,
+  Route,
+  Spline,
+  Ticket,
+  SlidersHorizontal,
+  Share2,
+  type LucideIcon,
+} from 'lucide-react';
 import { useUi } from '../../../store/ui';
 import { useEditorStore, STAGES, type Stage } from './store';
 import { ValidationPanel } from './ValidationPanel';
@@ -122,7 +133,13 @@ export default function EditorScreen() {
                     : 'editor-save-indicator saved'
             }
           >
-            {saving ? t('builder.saving') : saveError ? t('builder.saveFailed') : dirty ? t('builder.unsaved') : t('builder.saved')}
+            {saving
+              ? t('builder.saving')
+              : saveError
+                ? t('builder.saveFailed')
+                : dirty
+                  ? t('builder.unsaved')
+                  : t('builder.saved')}
           </span>
         </div>
       </header>
@@ -133,7 +150,8 @@ export default function EditorScreen() {
           {STAGES.map((s, i) => {
             const Icon = STAGE_ICON[s];
             const locked = s !== 'crop' && !hasGeography;
-            const state = s === stage ? 'current' : i < stageIndex ? 'visited' : locked ? 'locked' : 'upcoming';
+            const state =
+              s === stage ? 'current' : i < stageIndex ? 'visited' : locked ? 'locked' : 'upcoming';
             return (
               <button
                 key={s}

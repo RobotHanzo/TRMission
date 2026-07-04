@@ -11,7 +11,10 @@ async function guest(displayName: string): Promise<{ token: string; id: string }
   return { token: res.body.accessToken, id: res.body.user.id };
 }
 
-async function registered(email: string, displayName: string): Promise<{ token: string; id: string }> {
+async function registered(
+  email: string,
+  displayName: string,
+): Promise<{ token: string; id: string }> {
   const res = await request(server())
     .post('/api/v1/auth/register')
     .send({ email, password: 'password123', displayName })
@@ -140,7 +143,10 @@ describe('maps: guests cannot author', () => {
 
     // The strict mapBuilder gate covers the whole share flow: a guest (who can never hold
     // features) can neither peek a share code nor clone it.
-    const shared = await request(server()).post(`/api/v1/maps/${id}/share`).set(auth(a.token)).expect(200);
+    const shared = await request(server())
+      .post(`/api/v1/maps/${id}/share`)
+      .set(auth(a.token))
+      .expect(200);
     await request(server())
       .get(`/api/v1/maps/shared/${shared.body.shareCode}`)
       .set(auth(g.token))
@@ -168,7 +174,10 @@ describe('maps: share + clone', () => {
       .send({ draft: tinyDraft })
       .expect(200);
 
-    const share = await request(server()).post(`/api/v1/maps/${id}/share`).set(auth(a.token)).expect(200);
+    const share = await request(server())
+      .post(`/api/v1/maps/${id}/share`)
+      .set(auth(a.token))
+      .expect(200);
     const code: string = share.body.shareCode;
     expect(code).toBeTruthy();
 
@@ -219,7 +228,11 @@ describe('maps: route bow', () => {
     const id: string = created.body.id;
 
     const draft = { ...tinyDraft, routes: [{ ...tinyDraft.routes[0]!, bow: -3.5 }] };
-    await request(server()).put(`/api/v1/maps/${id}`).set(auth(a.token)).send({ draft }).expect(200);
+    await request(server())
+      .put(`/api/v1/maps/${id}`)
+      .set(auth(a.token))
+      .send({ draft })
+      .expect(200);
 
     const got = await request(server()).get(`/api/v1/maps/${id}`).set(auth(a.token)).expect(200);
     expect(got.body.draft.routes[0].bow).toBe(-3.5);
@@ -235,6 +248,10 @@ describe('maps: route bow', () => {
     const id: string = created.body.id;
 
     const draft = { ...tinyDraft, routes: [{ ...tinyDraft.routes[0]!, bow: 12.5 }] };
-    await request(server()).put(`/api/v1/maps/${id}`).set(auth(a.token)).send({ draft }).expect(400);
+    await request(server())
+      .put(`/api/v1/maps/${id}`)
+      .set(auth(a.token))
+      .send({ draft })
+      .expect(400);
   });
 });

@@ -47,7 +47,12 @@ export interface MapMeta {
 
 /** Presentation-only cartography for a custom map's crop of the world. Ignored by the engine. */
 export interface MapGeography {
-  readonly baseView: { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
+  readonly baseView: {
+    readonly x: number;
+    readonly y: number;
+    readonly w: number;
+    readonly h: number;
+  };
   /** Land rings in 0-100 board space, coordinates rounded to 2 decimals before hashing/storage. */
   readonly land: readonly (readonly (readonly [number, number])[])[];
   /** Crop provenance (lon/lat bbox) — supports re-editing and graticule rendering. */

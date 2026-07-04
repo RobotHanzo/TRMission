@@ -6,7 +6,10 @@ import type { MapDraft } from '../../../net/rest';
 /** The wire/editor shape carries plain strings; GameContent (and validateContent/validateForPlay/
  *  generateTickets) use branded ids. The editor never trusts these values into the engine — this
  *  is purely for client-side validation/preview, with the server re-validating at start time. */
-export function draftToContent(draft: MapDraft, meta: { nameZh: string; nameEn: string }): GameContent {
+export function draftToContent(
+  draft: MapDraft,
+  meta: { nameZh: string; nameEn: string },
+): GameContent {
   return {
     meta: { mapId: 'draft', version: 0, nameZh: meta.nameZh, nameEn: meta.nameEn },
     cities: draft.cities.map((c) => ({ ...c, id: asCityId(c.id) })),
@@ -21,7 +24,12 @@ export function draftToContent(draft: MapDraft, meta: { nameZh: string; nameEn: 
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
       ...(r.bow !== undefined ? { bow: r.bow } : {}),
     })),
-    tickets: draft.tickets.map((t) => ({ ...t, id: asTicketId(t.id), a: asCityId(t.a), b: asCityId(t.b) })),
+    tickets: draft.tickets.map((t) => ({
+      ...t,
+      id: asTicketId(t.id),
+      a: asCityId(t.a),
+      b: asCityId(t.b),
+    })),
     ...(draft.geography !== undefined ? { geography: draft.geography } : {}),
     ...(draft.rules !== undefined ? { rules: draft.rules } : {}),
   };

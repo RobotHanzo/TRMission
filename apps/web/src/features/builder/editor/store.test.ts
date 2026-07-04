@@ -37,7 +37,13 @@ const route = (id: string, a: string, b: string, over: Partial<RouteDraft> = {})
   isTunnel: false,
   ...over,
 });
-const ticket = (id: string, a: string, b: string): TicketDraft => ({ id, a, b, value: 2, deck: 'SHORT' });
+const ticket = (id: string, a: string, b: string): TicketDraft => ({
+  id,
+  a,
+  b,
+  value: 2,
+  deck: 'SHORT',
+});
 const ring = (...pts: [number, number][]) => pts;
 const geography = (land: (readonly [number, number])[][]): MapGeographyDraft => ({
   baseView: { x: 0, y: 0, w: 100, h: 100 },
@@ -195,7 +201,10 @@ describe('editor store', () => {
     });
     useEditorStore.setState({ mapId: 'm1', dirty: true });
     await useEditorStore.getState().save();
-    expect(api.updateMap).toHaveBeenCalledWith('m1', expect.objectContaining({ nameZh: '', nameEn: '' }));
+    expect(api.updateMap).toHaveBeenCalledWith(
+      'm1',
+      expect.objectContaining({ nameZh: '', nameEn: '' }),
+    );
     expect(useEditorStore.getState().dirty).toBe(false);
     expect(useEditorStore.getState().revision).toBe(3);
   });

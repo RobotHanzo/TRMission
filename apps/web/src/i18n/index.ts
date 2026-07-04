@@ -785,7 +785,8 @@ const resources = {
           ferryLocosExceedLength:
             '{{routeId}}: required locomotives {{ferryLocos}} exceeds length {{length}}',
           ferryAndTunnel: '{{routeId}}: a route cannot be both a ferry and a tunnel',
-          bowOutOfRange: '{{routeId}}: bow {{bow}} is outside the allowed range [-{{limit}}, {{limit}}]',
+          bowOutOfRange:
+            '{{routeId}}: bow {{bow}} is outside the allowed range [-{{limit}}, {{limit}}]',
           doubleGroupWrongCount: 'Double group {{group}}: expected exactly 2 routes, got {{count}}',
           doubleGroupDifferentPairs:
             'Double group {{group}}: the two routes connect different stop pairs',

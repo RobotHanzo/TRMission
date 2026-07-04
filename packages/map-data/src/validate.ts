@@ -146,7 +146,11 @@ export function validateContent(content: GameContent): ValidationResult {
     if (isFerry(r)) {
       if (r.color !== 'GRAY') push('ferryMustBeGray', { routeId: rid, color: r.color });
       if (r.ferryLocos > r.length) {
-        push('ferryLocosExceedLength', { routeId: rid, ferryLocos: r.ferryLocos, length: r.length });
+        push('ferryLocosExceedLength', {
+          routeId: rid,
+          ferryLocos: r.ferryLocos,
+          length: r.length,
+        });
       }
       if (r.isTunnel) push('ferryAndTunnel', { routeId: rid });
       ferryCount++;
@@ -187,8 +191,10 @@ export function validateContent(content: GameContent): ValidationResult {
   // --- tickets ---
   for (const t of tickets) {
     const tid = t.id as string;
-    if (!cityIds.has(t.a as string)) push('ticketUnknownCityA', { ticketId: tid, cityId: t.a as string });
-    if (!cityIds.has(t.b as string)) push('ticketUnknownCityB', { ticketId: tid, cityId: t.b as string });
+    if (!cityIds.has(t.a as string))
+      push('ticketUnknownCityA', { ticketId: tid, cityId: t.a as string });
+    if (!cityIds.has(t.b as string))
+      push('ticketUnknownCityB', { ticketId: tid, cityId: t.b as string });
     if ((t.a as string) === (t.b as string)) push('ticketEndpointsIdentical', { ticketId: tid });
     if (t.value <= 0) push('ticketValueNotPositive', { ticketId: tid });
   }
@@ -214,7 +220,8 @@ export function validateContent(content: GameContent): ValidationResult {
     if (ra !== rb) parent.set(ra, rb);
   };
   for (const r of routes) {
-    if (cityIds.has(r.a as string) && cityIds.has(r.b as string)) union(r.a as string, r.b as string);
+    if (cityIds.has(r.a as string) && cityIds.has(r.b as string))
+      union(r.a as string, r.b as string);
   }
   const roots = new Set<string>();
   for (const id of cityIds) roots.add(find(id));
@@ -361,7 +368,10 @@ export function validateForPlayIssues(
     if (value === undefined) continue;
     const bound = RULE_BOUNDS[key];
     if (value < bound.min || value > bound.max) {
-      errors.push({ code: 'ruleOutOfRange', params: { key, value, min: bound.min, max: bound.max } });
+      errors.push({
+        code: 'ruleOutOfRange',
+        params: { key, value, min: bound.min, max: bound.max },
+      });
     }
   }
 

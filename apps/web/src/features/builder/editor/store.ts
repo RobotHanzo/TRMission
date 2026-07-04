@@ -1,9 +1,34 @@
 import { create } from 'zustand';
 import { BOW_LIMIT } from '@trm/map-data';
-import { api, type CityDraft, type MapDetail, type MapDraft, type MapRulesDraft, type RouteDraft, type TicketDraft } from '../../../net/rest';
+import {
+  api,
+  type CityDraft,
+  type MapDetail,
+  type MapDraft,
+  type MapRulesDraft,
+  type RouteDraft,
+  type TicketDraft,
+} from '../../../net/rest';
 
-export type Stage = 'crop' | 'trim' | 'stops' | 'routes' | 'curves' | 'missions' | 'rules' | 'share';
-export const STAGES: readonly Stage[] = ['crop', 'trim', 'stops', 'routes', 'curves', 'missions', 'rules', 'share'];
+export type Stage =
+  | 'crop'
+  | 'trim'
+  | 'stops'
+  | 'routes'
+  | 'curves'
+  | 'missions'
+  | 'rules'
+  | 'share';
+export const STAGES: readonly Stage[] = [
+  'crop',
+  'trim',
+  'stops',
+  'routes',
+  'curves',
+  'missions',
+  'rules',
+  'share',
+];
 
 export type Selection =
   | { kind: 'city'; id: string }
@@ -65,7 +90,11 @@ interface EditorState {
 
 const UNDO_CAP = 50;
 
-function mutate(get: () => EditorState, set: (p: Partial<EditorState>) => void, next: MapDraft): void {
+function mutate(
+  get: () => EditorState,
+  set: (p: Partial<EditorState>) => void,
+  next: MapDraft,
+): void {
   const stack = [...get().undoStack, get().draft].slice(-UNDO_CAP);
   // A fresh edit abandons whatever redo branch was pending — redoing past it would resurrect a
   // draft that no longer follows from the current one.

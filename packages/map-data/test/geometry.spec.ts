@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { buildRouteGeometryFor, computeRouteOffsetsFor, validateContent, BOW_LIMIT } from '../src/index';
+import {
+  buildRouteGeometryFor,
+  computeRouteOffsetsFor,
+  validateContent,
+  BOW_LIMIT,
+} from '../src/index';
 import type { GameContent, GeometryCity, GeometryRoute } from '../src/index';
 import { testContent } from './fixtures';
 

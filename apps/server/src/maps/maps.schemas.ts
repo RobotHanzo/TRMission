@@ -15,7 +15,8 @@ const MAX_GEOGRAPHY_RINGS = 400;
 
 const idString = z.string().min(1).max(40);
 const name60 = z.string().min(1).max(60);
-const isRouteLength = (n: number): n is RouteLength => (ROUTE_LENGTHS as readonly number[]).includes(n);
+const isRouteLength = (n: number): n is RouteLength =>
+  (ROUTE_LENGTHS as readonly number[]).includes(n);
 
 export const CityDraftSchema = z.object({
   id: idString,
@@ -147,7 +148,12 @@ export function draftFromDto(dto: z.infer<typeof MapDraftSchema>): MapDraft {
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
       ...(r.bow !== undefined ? { bow: r.bow } : {}),
     })),
-    tickets: dto.tickets.map((t) => ({ ...t, id: asTicketId(t.id), a: asCityId(t.a), b: asCityId(t.b) })),
+    tickets: dto.tickets.map((t) => ({
+      ...t,
+      id: asTicketId(t.id),
+      a: asCityId(t.a),
+      b: asCityId(t.b),
+    })),
     ...(dto.geography !== undefined ? { geography: dto.geography } : {}),
     ...(dto.rules !== undefined ? { rules: compactRules(dto.rules) } : {}),
   };
