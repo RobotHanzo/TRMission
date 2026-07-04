@@ -17,7 +17,6 @@ import {
 } from 'react-zoom-pan-pinch';
 import { Plus, Minus, LocateFixed, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
 import type { GameSnapshot, GameEvent } from '@trm/proto';
-import type { RouteColor } from '@trm/shared';
 import { CITIES, ROUTES, cityById, routeById, cityName } from '../game/content';
 import {
   closedRouteIds,
@@ -37,18 +36,15 @@ import {
   type BoardTransform,
 } from '../game/boardView';
 import { fitTransform } from '../game/geography';
-import { ACTIVE_BASE_VIEW } from '../game/catalog';
-import { GeographyLayer } from './Geography';
-import { RouteShape, FerryLocoGradientDef } from './RouteShape';
-import { CARD_COLOR_TOKENS, GRAY_TOKEN, SEAT_COLORS } from '../theme/colors';
+import { ACTIVE_BASE_VIEW, ACTIVE_GEOGRAPHY } from '../game/catalog';
+import { MapScene } from './MapScene';
+import { seatColor } from '../theme/colors';
 import { useUi, type Locale } from '../store/ui';
 import { useGame, useGameStore } from '../store/game';
 import { useAnimationsStore } from '../store/animations';
 import { getSocket } from '../net/connection';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import type { BoardFrameTarget } from '../game/boardView';
-
-const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
 
 interface BoardProps {
   snapshot: GameSnapshot;
@@ -64,11 +60,6 @@ interface BoardProps {
   /** Tutorial auto-pan: frame these routes/cities. Null/undefined leaves the camera alone. */
   frameTarget?: BoardFrameTarget | null | undefined;
 }
-
-const colorOf = (rc: RouteColor): string =>
-  rc === 'GRAY' ? GRAY_TOKEN.hex : CARD_COLOR_TOKENS[rc].hex;
-const glyphOf = (rc: RouteColor): string =>
-  rc === 'GRAY' ? GRAY_TOKEN.glyph : CARD_COLOR_TOKENS[rc].glyph;
 
 /**
  * Reflects the live zoom onto the viewport: `data-zoom` drives label/badge level-of-detail.
@@ -515,7 +506,6 @@ export function Board({
   sandbox,
   frameTarget,
 }: BoardProps) {
-  const viewBox = `${ACTIVE_BASE_VIEW.x} ${ACTIVE_BASE_VIEW.y} ${ACTIVE_BASE_VIEW.w} ${ACTIVE_BASE_VIEW.h}`;
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const stationCities = useMemo(() => {
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
@@ -663,193 +653,75 @@ export function Board({
           contentClass="board-content"
           wrapperStyle={{ width: '100%', height: '100%' }}
         >
-          <svg className="board" viewBox={viewBox} role="img" aria-label="Taiwan railway map">
-            <FerryLocoGradientDef />
-            <GeographyLayer />
-
-            {ROUTES.map((r) => {
-              const g = ROUTE_GEOMETRY.get(r.id as string);
-              if (!g) return null;
-
-              const o = owned.get(r.id as string);
-              const isClosed = closedRoutes.has(r.id as string);
-              const isReopen = reopenRoutes.has(r.id as string);
-              const isSky = skyRoutes.has(r.id as string);
-              // A typhoon-closed route can't be claimed (the server rejects it), so it's not
-              // clickable here either — the overlay signals why.
-              const claimable = canAct && !o && !isClosed;
-              // Unclaimed → route colour; claimed → owner's seat colour; locked → muted grey.
-              const fill =
-                o?.ownerSeat !== undefined
-                  ? (SEAT_COLORS[o.ownerSeat % 5] ?? '#888')
-                  : o?.locked
-                    ? '#9aa0a6'
-                    : colorOf(r.color);
-              const carOpacity = o?.locked ? 0.45 : 1;
-              const isFerry = r.ferryLocos > 0;
-              const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
-              const glowSeat = startedGlowRoutes.get(r.id as string);
-              const cls =
-                'route' +
-                (claimable ? ' claimable' : '') +
-                (o ? ' owned' : '') +
-                (glowSeat !== undefined ? ' just-claimed' : '') +
-                (isClosed ? ' evt-closed' : '') +
-                (isSky ? ' evt-sky' : '') +
-                (isReopen ? ' evt-reopen' : '') +
-                kind;
-              // The owner's seat colour, exposed to CSS so a claimed route tints its whole roadbed
-              // (the "background") to its owner — and the glow bloom reuses the same `--seat`.
-              const seatCss = glowSeat ?? o?.ownerSeat;
-              // Double-route siblings split apart by a perpendicular nudge that counter-scales with
-              // the track weight (--inv-scale), so the twin tracks stay snug at any zoom.
-              const groupStyle: CSSProperties = {
-                ...(g.perp.x || g.perp.y
-                  ? {
-                      transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
-                    }
-                  : null),
-                ...(seatCss !== undefined
-                  ? ({ '--seat': seatColor(seatCss) } as CSSProperties)
-                  : null),
-              };
-
-              return (
-                <g
-                  key={r.id as string}
-                  className={cls}
-                  data-route-id={r.id as string}
-                  data-closed={isClosed ? 'true' : undefined}
-                  data-sky={isSky ? 'true' : undefined}
-                  data-reopen={isReopen ? 'true' : undefined}
-                  style={groupStyle}
-                  onClick={claimable ? () => onPickRoute(r.id as string) : undefined}
-                >
-                  <RouteShape
-                    geometry={g}
-                    isTunnel={r.isTunnel}
-                    isFerry={isFerry}
-                    // Unclaimed ferries show their required-loco block; once owned, every pip takes
-                    // the owner's colour (no rainbow), so the highlight count drops to zero.
-                    ferryLocos={o ? 0 : r.ferryLocos}
-                    length={r.length}
-                    fill={fill}
-                    carOpacity={carOpacity}
-                  />
-
-                  {claimable && (
-                    <path className="hit" d={g.path}>
-                      <title>{`${cityName(r.a as string, locale)}–${cityName(r.b as string, locale)} · ${r.length}`}</title>
-                    </path>
-                  )}
-                  {/* Colour-blind aid: a glyph chip naming the colour you pay (length is the car count). */}
-                  {colorBlind && !o && (
-                    <g className="glyph-badge">
-                      <circle cx={g.mid.x} cy={g.mid.y} />
-                      <text x={g.mid.x} y={g.mid.y}>
-                        {glyphOf(r.color)}
-                      </text>
-                    </g>
-                  )}
-                  {/* Typhoon closure: a swirl glyph over a desaturated route (see CSS .route.evt-closed). */}
-                  {isClosed && (
-                    <g className="evt-typhoon" pointerEvents="none" aria-hidden>
-                      <circle className="evt-badge-bg" cx={g.mid.x} cy={g.mid.y} />
-                      <text className="evt-typhoon-glyph" x={g.mid.x} y={g.mid.y}>
-                        🌀
-                      </text>
-                    </g>
-                  )}
-                  {/* Reopened route: a subtle +2 first-claim bonus chip. */}
-                  {isReopen && !o && (
-                    <g className="evt-chip evt-reopen-chip" pointerEvents="none" aria-hidden>
-                      <circle cx={g.mid.x} cy={g.mid.y} />
-                      <text x={g.mid.x} y={g.mid.y}>
-                        +2
-                      </text>
-                    </g>
-                  )}
-                </g>
-              );
+          <MapScene
+            cities={CITIES}
+            routes={ROUTES}
+            geometry={ROUTE_GEOMETRY}
+            hubs={HUB_CITIES}
+            geography={ACTIVE_GEOGRAPHY ?? undefined}
+            view={ACTIVE_BASE_VIEW}
+            owned={owned}
+            stations={stationCities}
+            glowingRoutes={startedGlowRoutes}
+            glowingStations={glowingStations}
+            highlightCities={highlightCities}
+            canAct={canAct}
+            colorBlind={colorBlind}
+            cityLabel={(c) => cityName(c.id, locale)}
+            cityTier={cityTier}
+            routeTitle={(r) => `${cityName(r.a, locale)}–${cityName(r.b, locale)} · ${r.length}`}
+            // A typhoon-closed route can't be claimed (the server rejects it), so it's not
+            // clickable here either — the overlay signals why.
+            claimFilter={(r) => !closedRoutes.has(r.id)}
+            routeClass={(r) =>
+              [
+                closedRoutes.has(r.id) ? 'evt-closed' : '',
+                skyRoutes.has(r.id) ? 'evt-sky' : '',
+                reopenRoutes.has(r.id) ? 'evt-reopen' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')
+            }
+            routeData={(r) => ({
+              'data-closed': closedRoutes.has(r.id) ? 'true' : undefined,
+              'data-sky': skyRoutes.has(r.id) ? 'true' : undefined,
+              'data-reopen': reopenRoutes.has(r.id) ? 'true' : undefined,
             })}
-
-            {CITIES.map((c) => {
-              const stationSeat = stationCities.get(c.id as string);
-              const hasStation = stationSeat !== undefined;
-              const buildable = canAct && !hasStation;
-              const isHub = HUB_CITIES.has(c.id as string);
-              // Tier drives the cartographic label level-of-detail (see game/lod.ts + the
-              // [data-zoom] rules in game.css); islands always keep their label.
-              const tier = cityTier(c.id as string);
-              const cls =
-                'city' +
-                (c.isIsland ? ' island' : '') +
-                (isHub ? ' hub' : '') +
-                (tier !== 'minor' ? ` ${tier}` : '');
-              const onPick = buildable ? () => onPickCity(c.id as string) : undefined;
-              const builtSeat = glowingStations.get(c.id as string);
-              const justBuilt = builtSeat !== undefined;
-              const isTarget = highlightCities?.has(c.id as string) ?? false;
-              const hotspot = hotspots.get(c.id as string);
-              const isCharterCity = charterCities.has(c.id as string);
+            cityData={(c) => {
+              const hotspot = hotspots.get(c.id);
+              return {
+                'data-hotspot': hotspot !== undefined ? String(hotspot) : undefined,
+                'data-charter': charterCities.has(c.id) ? 'true' : undefined,
+              };
+            }}
+            renderRouteOverlay={(r, g) => (
+              <>
+                {/* Typhoon closure: a swirl glyph over a desaturated route (see CSS .route.evt-closed). */}
+                {closedRoutes.has(r.id) && (
+                  <g className="evt-typhoon" pointerEvents="none" aria-hidden>
+                    <circle className="evt-badge-bg" cx={g.mid.x} cy={g.mid.y} />
+                    <text className="evt-typhoon-glyph" x={g.mid.x} y={g.mid.y}>
+                      🌀
+                    </text>
+                  </g>
+                )}
+                {/* Reopened route: a subtle +2 first-claim bonus chip. */}
+                {reopenRoutes.has(r.id) && !owned.get(r.id) && (
+                  <g className="evt-chip evt-reopen-chip" pointerEvents="none" aria-hidden>
+                    <circle cx={g.mid.x} cy={g.mid.y} />
+                    <text x={g.mid.x} y={g.mid.y}>
+                      +2
+                    </text>
+                  </g>
+                )}
+              </>
+            )}
+            renderCityOverlay={(c) => {
+              const hotspot = hotspots.get(c.id);
               return (
-                <g
-                  key={c.id as string}
-                  data-city-id={c.id as string}
-                  data-hotspot={hotspot !== undefined ? String(hotspot) : undefined}
-                  data-charter={isCharterCity ? 'true' : undefined}
-                  className={isTarget ? `${cls} ticket-target` : cls}
-                >
-                  {/* Offered-ticket endpoint: a soft halo behind the marker so the player can trace
-                      the railways a ticket needs while the chooser holds the rail. */}
-                  {isTarget && <circle className="ticket-target-halo" cx={c.x} cy={c.y} />}
-                  {/* Junctions where many lines converge read as a wider slot-shaped station;
-                      ordinary stops stay round. Geometry comes from CSS (so it can grow with
-                      zoom via --marker-scale); the transform just plants it on the city. */}
-                  {isHub ? (
-                    <rect
-                      className={buildable ? 'city-hub buildable' : 'city-hub'}
-                      transform={`translate(${c.x} ${c.y})`}
-                      onClick={onPick}
-                    >
-                      <title>{cityName(c.id as string, locale)}</title>
-                    </rect>
-                  ) : (
-                    <circle
-                      className={buildable ? 'city-dot buildable' : 'city-dot'}
-                      cx={c.x}
-                      cy={c.y}
-                      onClick={onPick}
-                    >
-                      <title>{cityName(c.id as string, locale)}</title>
-                    </circle>
-                  )}
-                  {hasStation &&
-                    (isHub ? (
-                      <rect
-                        className={justBuilt ? 'station-hub just-built' : 'station-hub'}
-                        transform={`translate(${c.x} ${c.y})`}
-                        style={{ fill: seatColor(stationSeat!) }}
-                      />
-                    ) : (
-                      <circle
-                        className={justBuilt ? 'station just-built' : 'station'}
-                        cx={c.x}
-                        cy={c.y}
-                        style={{ fill: seatColor(stationSeat!) }}
-                      />
-                    ))}
-                  {justBuilt && (
-                    <circle
-                      className="station-ring"
-                      cx={c.x}
-                      cy={c.y}
-                      r={0.5}
-                      style={{ '--seat': seatColor(builtSeat) } as CSSProperties}
-                    />
-                  )}
+                <>
                   {/* Charter endpoint: a small contract chip behind the marker. */}
-                  {isCharterCity && (
+                  {charterCities.has(c.id) && (
                     <circle
                       className="evt-charter-chip"
                       cx={c.x}
@@ -867,13 +739,13 @@ export function Board({
                       </text>
                     </g>
                   )}
-                  <text className="city-label" x={c.x} y={c.y}>
-                    {cityName(c.id as string, locale)}
-                  </text>
-                </g>
+                </>
               );
-            })}
-
+            }}
+            onRouteClick={onPickRoute}
+            onCityClick={onPickCity}
+            ariaLabel="Taiwan railway map"
+          >
             {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path. */}
             {sweeps.map((sw) => (
               <g key={sw.id} className="sweep-layer" pointerEvents="none">
@@ -918,7 +790,7 @@ export function Board({
                 })}
               </g>
             )}
-          </svg>
+          </MapScene>
         </TransformComponent>
       </TransformWrapper>
     </div>
