@@ -1,6 +1,7 @@
 import type { MapGeography } from '@trm/map-data';
 import { WORLD_LAND } from './worldData';
 import { isCrudeTaiwanRing, taiwanRings } from './taiwan';
+import { WORLD_COUNTRIES, type CountryLand } from './worldCountries';
 import { buildProjection, isValidCrop, type CropBBox } from './projection';
 import { clipRingsToBBox, type Ring } from './clip';
 import { simplifyToFit } from './simplify';
@@ -32,12 +33,11 @@ function startToleranceFor(crop: CropBBox): number {
   return Math.max(0.002, Math.min(0.05, avgSpan / 500));
 }
 
-/** Full crop pipeline: clip the world to the bbox, simplify to fit the engine's caps
- *  (validateGeography's limits), then project into board space. Null on an invalid crop. */
-export function cropToGeography(crop: CropBBox): CropResult | null {
-  if (!isValidCrop(crop)) return null;
-  const clipped = clipRingsToBBox(WORLD_LAND_DETAILED, crop);
-  const { rings: simplified, droppedRings } = simplifyToFit(clipped, {
+/** Shared tail for both cropToGeography and countriesToGeography: simplify to fit the engine's
+ *  caps, then project into board space. `crop` is stored on the result as cartography provenance
+ *  regardless of whether it came from a drawn rectangle or a selected-countries union bbox. */
+function finalizeGeography(rings: readonly Ring[], crop: CropBBox): CropResult {
+  const { rings: simplified, droppedRings } = simplifyToFit(rings, {
     startTolerance: startToleranceFor(crop),
     maxVertices: 8000,
     maxRings: 200,
@@ -45,4 +45,50 @@ export function cropToGeography(crop: CropBBox): CropResult | null {
   const { baseView, project } = buildProjection(crop);
   const land = simplified.map((ring) => ring.map(([lon, lat]) => project(lon, lat)));
   return { geography: { baseView, land, crop }, droppedRings };
+}
+
+/** Full crop pipeline: clip the world to the bbox, simplify to fit the engine's caps
+ *  (validateGeography's limits), then project into board space. Null on an invalid crop. */
+export function cropToGeography(crop: CropBBox): CropResult | null {
+  if (!isValidCrop(crop)) return null;
+  const clipped = clipRingsToBBox(WORLD_LAND_DETAILED, crop);
+  return finalizeGeography(clipped, crop);
+}
+
+/** Taiwan gets the same detailed-silhouette splice here that WORLD_LAND_DETAILED applies for crop
+ *  mode — worldCountries.ts's own 'TWN' entry only carries Natural Earth's crude admin-0 ring. */
+function ringsForCountry(country: CountryLand): readonly Ring[] {
+  return country.id === 'TWN' ? taiwanRings() : country.rings;
+}
+
+/** The lon/lat bounding box of a set of rings, or null for an empty input. */
+function boundsOfRings(rings: readonly Ring[]): CropBBox | null {
+  let lonMin = Infinity;
+  let lonMax = -Infinity;
+  let latMin = Infinity;
+  let latMax = -Infinity;
+  for (const ring of rings) {
+    for (const [lon, lat] of ring) {
+      if (lon < lonMin) lonMin = lon;
+      if (lon > lonMax) lonMax = lon;
+      if (lat < latMin) latMin = lat;
+      if (lat > latMax) latMax = lat;
+    }
+  }
+  if (!Number.isFinite(lonMin)) return null;
+  return { lonMin, lonMax, latMin, latMax };
+}
+
+/**
+ * Turn a set of selected country ids into a MapGeography, mirroring cropToGeography but sourcing
+ * rings directly from the selected countries — never clipping against WORLD_LAND — so picking
+ * "France" can't drag in Belgium just because it falls inside the union bounding box. Null for an
+ * empty/all-unmatched selection, or one whose union bbox isValidCrop still rejects.
+ */
+export function countriesToGeography(ids: readonly string[]): CropResult | null {
+  const idSet = new Set(ids);
+  const rings = WORLD_COUNTRIES.filter((c) => idSet.has(c.id)).flatMap(ringsForCountry);
+  const bbox = boundsOfRings(rings);
+  if (!bbox || !isValidCrop(bbox)) return null;
+  return finalizeGeography(rings, bbox);
 }
