@@ -19,6 +19,10 @@ async function registered(email: string, displayName: string): Promise<{ token: 
     .post('/api/v1/auth/register')
     .send({ email, password: 'password123', displayName })
     .expect(201);
+  // Authoring + hosting custom maps is feature-gated; this suite exercises those flows.
+  await t.db
+    .collection('users')
+    .updateOne({ _id: res.body.user.id } as never, { $set: { features: ['mapBuilder'] } });
   return { token: res.body.accessToken, id: res.body.user.id };
 }
 

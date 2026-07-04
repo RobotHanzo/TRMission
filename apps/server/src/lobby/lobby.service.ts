@@ -22,6 +22,7 @@ import {
 import { GameHub } from '../ws/hub';
 import { TokenService } from '../auth/token.service';
 import { UserRepo } from '../auth/user.repo';
+import { featureDisabled } from '../auth/feature.guard';
 import type { AuthUser } from '../auth/auth.types';
 import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '../bots/types';
 import { MapsService } from '../maps/maps.service';
@@ -86,6 +87,14 @@ export class LobbyService {
     if (doc?.disabledAt) throw new ForbiddenException('account disabled');
   }
 
+  /** Hosting/selecting a custom map is part of the mapBuilder feature (strict gate). */
+  private async assertCustomMapAllowed(selector: MapSelector, userId: string): Promise<void> {
+    if (selector.source !== 'custom') return;
+    if (!(await this.users.hasFeature(userId, 'mapBuilder'))) {
+      throw featureDisabled('mapBuilder');
+    }
+  }
+
   /** Validate a selector is usable (existence + ownership for custom), without fully resolving
    *  it — cheap enough to run on every settings PATCH. Full playability is checked at start. */
   private async assertMapSelectable(selector: MapSelector, callerUserId: string): Promise<void> {
@@ -95,6 +104,7 @@ export class LobbyService {
       }
       return;
     }
+    await this.assertCustomMapAllowed(selector, callerUserId);
     await this.maps.requireOwned(selector.customMapId, callerUserId);
   }
 
@@ -113,6 +123,7 @@ export class LobbyService {
         mapRules: official.content.rules ?? {},
       };
     }
+    await this.assertCustomMapAllowed(selector, callerUserId);
     const map = await this.maps.requireOwned(selector.customMapId, callerUserId);
     return this.maps.resolveForStart(map, maxPlayers);
   }

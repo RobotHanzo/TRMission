@@ -63,6 +63,10 @@ describe('lobby: map selector', () => {
 
   it('rejects a custom map selector pointing at a nonexistent/unowned map (404)', async () => {
     const a = await guest('Host3');
+    // Grant the feature so the gate doesn't mask the ownership 404 this test is about.
+    await t.db
+      .collection('users')
+      .updateOne({ _id: a.id } as never, { $set: { features: ['mapBuilder'] } });
     const room = await request(server())
       .post('/api/v1/rooms')
       .set(auth(a.token))
@@ -74,6 +78,22 @@ describe('lobby: map selector', () => {
       .set(auth(a.token))
       .send({ map: { source: 'custom', customMapId: 'abc123' } })
       .expect(404);
+  });
+
+  it('rejects a custom map selector outright when the host lacks the mapBuilder feature (403)', async () => {
+    const a = await guest('Host3b');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    const res = await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(a.token))
+      .send({ map: { source: 'custom', customMapId: 'abc123' } })
+      .expect(403);
+    expect(res.body.code).toBe('FEATURE_DISABLED');
   });
 
   it('resolves the selected official map into the started game config', async () => {
