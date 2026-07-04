@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useSession } from './session';
+import { goToMainLogin } from '../lib/mainApp';
+
+vi.mock('../lib/mainApp', () => ({ goToMainLogin: vi.fn() }));
 
 type Route = { status: number; body: unknown };
 
@@ -22,13 +25,13 @@ const gameUser = (isGuest: boolean) => ({
 });
 
 beforeEach(() => {
+  vi.clearAllMocks();
+  window.history.replaceState(null, '', '/admin/');
   useSession.setState({
     phase: 'booting',
     user: null,
     role: null,
     permissions: new Set(),
-    loading: false,
-    error: null,
   });
 });
 
@@ -69,12 +72,22 @@ describe('session gate', () => {
     expect(s.hasPermission('users.ban')).toBe(false);
   });
 
-  it('no session at all → unauthenticated', async () => {
+  it('no session at all → unauthenticated, redirected to the main app login with the current admin path', async () => {
     stubFetch({
       '/auth/me': { status: 401, body: { message: 'missing bearer token' } },
       '/auth/refresh': { status: 401, body: { message: 'no refresh token' } },
     });
+    window.history.replaceState(null, '', '/admin/users/42');
     await useSession.getState().restore();
     expect(useSession.getState().phase).toBe('unauthenticated');
+    expect(goToMainLogin).toHaveBeenCalledWith('/admin/users/42');
+  });
+
+  it('logging out also redirects to the main app login, remembering the current admin path', async () => {
+    stubFetch({ '/auth/logout': { status: 204, body: {} } });
+    window.history.replaceState(null, '', '/admin/games');
+    await useSession.getState().logout();
+    expect(useSession.getState().phase).toBe('unauthenticated');
+    expect(goToMainLogin).toHaveBeenCalledWith('/admin/games');
   });
 });
