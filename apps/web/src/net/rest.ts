@@ -31,6 +31,7 @@ export interface AuthConfig {
   passwordLogin: boolean;
   guest: boolean;
   providers: { google: boolean; discord: boolean };
+  googleClientId?: string;
 }
 export type OauthProvider = 'google' | 'discord';
 export type BotDifficulty = 'EASY' | 'MEDIUM' | 'HARD';

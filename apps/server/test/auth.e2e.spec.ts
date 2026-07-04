@@ -238,6 +238,11 @@ describe('auth: OAuth (Google + Discord, bound by email)', () => {
     expect(res.body.providers).toEqual({ google: true, discord: true });
   });
 
+  it('exposes googleClientId alongside the boolean flag', async () => {
+    const res = await request(oServer()).get('/api/v1/auth/config').expect(200);
+    expect(res.body.googleClientId).toBe('gid');
+  });
+
   it('start issues the nonce cookie and redirects to the provider with state + PKCE', async () => {
     const start = await request(oServer())
       .get('/api/v1/auth/oauth/google/start')

@@ -102,11 +102,13 @@ export class AuthConfig {
     passwordLogin: boolean;
     guest: boolean;
     providers: { google: boolean; discord: boolean };
+    googleClientId?: string;
   } {
     return {
       passwordLogin: this.passwordLogin,
       guest: this.guest,
       providers: { google: !!this.providers.google, discord: !!this.providers.discord },
+      ...(this.providers.google ? { googleClientId: this.providers.google.clientId } : {}),
     };
   }
 }
