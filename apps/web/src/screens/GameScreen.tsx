@@ -25,6 +25,7 @@ export function GameScreen() {
   const user = useSession((s) => s.user);
 
   const snapshot = useGame((s) => s.snapshot);
+  const sessionReplaced = useGame((s) => s.sessionReplaced);
   const setRoster = useRoster((s) => s.setMembers);
   const contentStatus = useActiveContent(snapshot?.contentHash);
   const [room, setRoom] = useState<RoomView | null>(null);
@@ -124,6 +125,30 @@ export function GameScreen() {
       // e.g. a race with another rematch call — the button stays put for a retry
     }
   };
+
+  // Another connection took over this seat — the socket is already closed and will not
+  // reconnect. This takes priority over the connecting/error/board states below, since none of
+  // them are recoverable once the seat has been claimed elsewhere.
+  if (sessionReplaced) {
+    return (
+      <div className="modal-backdrop">
+        <div
+          className="modal stack"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="session-replaced-title"
+        >
+          <h3 id="session-replaced-title">{t('sessionReplacedTitle')}</h3>
+          <p>{t('sessionReplacedBody')}</p>
+          <div className="row">
+            <button className="primary" onClick={goHome}>
+              {t('sessionReplacedAck')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!snapshot || contentStatus === 'loading') {
     return (

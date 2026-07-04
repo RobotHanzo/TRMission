@@ -125,6 +125,21 @@ describe('GameScreen leave confirmation', () => {
   });
 });
 
+describe('GameScreen session replaced', () => {
+  beforeEach(() => {
+    useUi.setState({ view: 'game', ticket: 'tkt', roomCode: 'ABCD', gameId: 'g1' });
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  it('shows a blocking dialog and returns home on acknowledgement', () => {
+    useGame.setState({ snapshot: null, sessionReplaced: true });
+    render(<GameScreen />);
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '返回首頁' }));
+    expect(useUi.getState().view).toBe('home');
+  });
+});
+
 // A live (non-spectator, non-game-over) snapshot, for isolating the phase gate.
 const liveSnap = () =>
   create(GameSnapshotSchema, {

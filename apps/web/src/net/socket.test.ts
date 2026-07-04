@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { create, toBinary } from '@bufbuild/protobuf';
 import { ServerEnvelopeSchema } from '@trm/proto';
+import { SESSION_REPLACED_CLOSE_CODE } from '@trm/shared';
 import { GameSocket } from './socket';
 
 function deliver(
@@ -26,5 +27,58 @@ describe('GameSocket history dispatch', () => {
     });
     expect(onHistory).toHaveBeenCalledTimes(1);
     expect(onHistory.mock.calls[0]?.[1]).toEqual([{ playerId: 'p1', text: 'hi' }]);
+  });
+});
+
+class FakeWebSocket {
+  static instances: FakeWebSocket[] = [];
+  onopen: (() => void) | null = null;
+  onclose: ((ev: CloseEvent) => void) | null = null;
+  onmessage: ((ev: MessageEvent) => void) | null = null;
+  onerror: (() => void) | null = null;
+  binaryType = '';
+  constructor(public url: string) {
+    FakeWebSocket.instances.push(this);
+  }
+  send(): void {}
+  close(): void {}
+}
+
+describe('GameSocket forced close (session replaced)', () => {
+  beforeEach(() => {
+    FakeWebSocket.instances.length = 0;
+    vi.stubGlobal('WebSocket', FakeWebSocket as unknown as typeof WebSocket);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('suppresses reconnect and fires onSessionReplaced on the dedicated close code', () => {
+    const onSessionReplaced = vi.fn();
+    const onStatus = vi.fn();
+    const socket = new GameSocket('tkt', { onSessionReplaced, onStatus }, 'ws://x');
+    socket.connect();
+    const ws = FakeWebSocket.instances[0];
+    if (!ws) throw new Error('unreachable');
+    ws.onclose?.({ code: SESSION_REPLACED_CLOSE_CODE, reason: 'session_replaced' } as CloseEvent);
+    expect(onSessionReplaced).toHaveBeenCalledTimes(1);
+    expect(onStatus).not.toHaveBeenCalledWith('reconnecting');
+  });
+
+  it('still auto-reconnects on an ordinary close code', () => {
+    vi.useFakeTimers();
+    try {
+      const onSessionReplaced = vi.fn();
+      const onStatus = vi.fn();
+      const socket = new GameSocket('tkt', { onSessionReplaced, onStatus }, 'ws://x');
+      socket.connect();
+      const ws = FakeWebSocket.instances[0];
+      if (!ws) throw new Error('unreachable');
+      ws.onclose?.({ code: 1006, reason: '' } as CloseEvent);
+      expect(onSessionReplaced).not.toHaveBeenCalled();
+      expect(onStatus).toHaveBeenCalledWith('reconnecting');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

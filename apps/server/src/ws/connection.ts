@@ -8,6 +8,9 @@ import type { ServerEvent } from '@trm/codec';
 
 export type Sink = (bytes: Uint8Array) => void;
 
+/** Force-close the underlying transport (e.g. a seat was claimed by another connection). */
+export type CloseFn = (code: number, reason: string) => void;
+
 export interface ConnectionBinding {
   readonly gameId: string;
   readonly player: PlayerId;
@@ -24,6 +27,7 @@ export class Connection {
   constructor(
     readonly id: string,
     private readonly sink: Sink,
+    private readonly closeFn?: CloseFn,
   ) {}
 
   get isBound(): boolean {
@@ -34,5 +38,10 @@ export class Connection {
     this.serverSeq += 1;
     const env = create(ServerEnvelopeSchema, { serverSeq: this.serverSeq, ackClientSeq, event });
     this.sink(toBinary(ServerEnvelopeSchema, env));
+  }
+
+  /** Force-close the transport, e.g. when another connection has taken over this seat. */
+  terminate(code: number, reason: string): void {
+    this.closeFn?.(code, reason);
   }
 }

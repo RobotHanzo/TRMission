@@ -8,3 +8,4 @@ export * from './errors';
 export * from './roomCode';
 export * from './dashboard';
 export * from './features';
+export * from './ws';

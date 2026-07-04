@@ -28,6 +28,8 @@ interface GameState {
   /** Latest delivered batch (animation hint channel); null until the first batch / after reset. */
   lastBatch: EventBatch | null;
   rejection: RejectionInfo | null;
+  /** Set when this connection was force-closed because another connection took the same seat. */
+  sessionReplaced: boolean;
   /** Latest camera framing broadcast by a member; consumed by "follow the acting player". */
   actingCamera: ActingCamera | null;
   applySnapshot(snapshot: GameSnapshot): void;
@@ -35,6 +37,7 @@ interface GameState {
   applyCameraMoved(playerId: string, view: CameraView): void;
   setStatus(status: SocketStatus): void;
   setRejection(rejection: RejectionInfo | null): void;
+  setSessionReplaced(sessionReplaced: boolean): void;
   reset(): void;
 }
 
@@ -44,6 +47,7 @@ const creator: StateCreator<GameState> = (set) => ({
   recentEvents: [],
   lastBatch: null,
   rejection: null,
+  sessionReplaced: false,
   actingCamera: null,
   // Snapshot is authoritative; ignore any that arrives out of order (older version).
   // A turn handover (current player changed) drops any stale follow-camera so the next
@@ -68,12 +72,14 @@ const creator: StateCreator<GameState> = (set) => ({
     ),
   setStatus: (status) => set({ status }),
   setRejection: (rejection) => set({ rejection }),
+  setSessionReplaced: (sessionReplaced) => set({ sessionReplaced }),
   reset: () =>
     set({
       snapshot: null,
       recentEvents: [],
       lastBatch: null,
       rejection: null,
+      sessionReplaced: false,
       actingCamera: null,
     }),
 });
