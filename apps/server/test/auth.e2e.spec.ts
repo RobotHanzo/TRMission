@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
   createTestApp,
   refreshCookie,
@@ -8,6 +9,19 @@ import {
   OAUTH_TEST_CONFIG,
   type TestApp,
 } from './app';
+
+// This file boots five separate TestApps (one per auth-config variant below), far more than any
+// other e2e spec. Each one normally spawns its own `mongod` child process, and doing that five
+// times in one file made this the heaviest spot in the whole suite — the reason it was the file
+// most likely to blow its beforeAll timeout under CI contention. Share one `mongod` across all
+// five instead (each still gets its own logical db via `dbName`) so this file pays that cost once.
+let sharedMongod: MongoMemoryServer;
+beforeAll(async () => {
+  sharedMongod = await MongoMemoryServer.create();
+}, 60_000);
+// Declared before the other root-level afterAll: afterAll hooks run in reverse declaration
+// order, so this stops the shared server only after every TestApp below has closed.
+afterAll(() => sharedMongod.stop());
 
 let t: TestApp;
 const server = () => t.app.getHttpServer();
@@ -21,7 +35,7 @@ const locationOf = (res: { headers: Record<string, unknown> }): string =>
   String(res.headers.location ?? '');
 
 beforeAll(async () => {
-  t = await createTestApp();
+  t = await createTestApp({ mongod: sharedMongod, dbName: 'trm-test-default' });
 }, 60_000);
 
 afterAll(() => t.close());
@@ -175,7 +189,11 @@ describe('auth: method gating (password + guest disabled)', () => {
   const gServer = () => g.app.getHttpServer();
 
   beforeAll(async () => {
-    g = await createTestApp({ authConfig: { passwordLogin: false, guest: false } });
+    g = await createTestApp({
+      mongod: sharedMongod,
+      dbName: 'trm-test-gating',
+      authConfig: { passwordLogin: false, guest: false },
+    });
   }, 60_000);
   afterAll(() => g.close());
 
@@ -230,7 +248,12 @@ describe('auth: OAuth (Google + Discord, bound by email)', () => {
 
   beforeAll(async () => {
     fake = new FakeOauthHttp();
-    o = await createTestApp({ authConfig: OAUTH_TEST_CONFIG, oauthHttp: fake });
+    o = await createTestApp({
+      mongod: sharedMongod,
+      dbName: 'trm-test-oauth',
+      authConfig: OAUTH_TEST_CONFIG,
+      oauthHttp: fake,
+    });
   }, 60_000);
   afterAll(() => o.close());
 
@@ -389,7 +412,12 @@ describe('auth: Google credential sign-in (One Tap / rendered button)', () => {
 
   beforeAll(async () => {
     verifier = new FakeGoogleIdTokenVerifier();
-    o = await createTestApp({ authConfig: OAUTH_TEST_CONFIG, googleVerifier: verifier });
+    o = await createTestApp({
+      mongod: sharedMongod,
+      dbName: 'trm-test-google-cred',
+      authConfig: OAUTH_TEST_CONFIG,
+      googleVerifier: verifier,
+    });
   }, 60_000);
   afterAll(() => o.close());
 
@@ -484,7 +512,11 @@ describe('auth: Google credential sign-in (One Tap / rendered button)', () => {
   });
 
   it('rejects with 403 when the provider is not configured', async () => {
-    const d = await createTestApp({ googleVerifier: new FakeGoogleIdTokenVerifier() });
+    const d = await createTestApp({
+      mongod: sharedMongod,
+      dbName: 'trm-test-unconfigured',
+      googleVerifier: new FakeGoogleIdTokenVerifier(),
+    });
     await request(d.app.getHttpServer())
       .post('/api/v1/auth/oauth/google/credential')
       .send({ credential: 'fake-jwt' })

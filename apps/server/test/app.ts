@@ -32,13 +32,23 @@ export interface TestAppOptions {
   googleVerifier?: GoogleIdTokenVerifier;
   /** Override DashboardConfig (owner-email bootstrap) without touching env. */
   dashboardConfig?: DashboardConfigOverrides;
+  /**
+   * Reuse an already-running MongoMemoryServer instead of spawning a new `mongod` process.
+   * Specs that boot several TestApps (e.g. one per auth-config variant) should share one —
+   * each spawn is a real child process, and doing that repeatedly in a single file is the
+   * heaviest thing in the e2e suite under CI contention. Pair with `dbName` for isolation.
+   */
+  mongod?: MongoMemoryServer;
+  /** Logical database name to use on a shared `mongod` (default: 'trm-test'). */
+  dbName?: string;
 }
 
 export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp> {
-  const mongod = await MongoMemoryServer.create();
+  const ownsMongod = !opts.mongod;
+  const mongod = opts.mongod ?? (await MongoMemoryServer.create());
   const client = new MongoClient(mongod.getUri());
   await client.connect();
-  const db = client.db('trm-test');
+  const db = client.db(opts.dbName ?? 'trm-test');
 
   let builder = Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(MONGO_DB)
@@ -65,7 +75,7 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
     async close() {
       await app.close();
       await client.close();
-      await mongod.stop();
+      if (ownsMongod) await mongod.stop();
     },
   };
 }
