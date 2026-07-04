@@ -642,6 +642,45 @@ table.oc-table {
   gap: var(--oc-space-2);
 }
 
+/* ---- account selector modal ------------------------------------------------------------ */
+
+.oc-account-selector input[type='search'] {
+  width: 100%;
+  margin-bottom: var(--oc-space-2);
+}
+
+.oc-account-list {
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--oc-space-3);
+}
+
+.oc-account-row {
+  display: flex;
+  align-items: center;
+  gap: var(--oc-space-2);
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--oc-radius-sm);
+}
+
+.oc-account-row:hover {
+  background: var(--oc-surface-2);
+}
+
+.oc-account-row .email {
+  margin-left: auto;
+  font-size: 11px;
+}
+
 /* ---- login / denied ------------------------------------------------------------------- */
 
 .oc-gate {

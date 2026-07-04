@@ -2,7 +2,7 @@
 // app's proven core (in-memory access token, httpOnly refresh cookie, single-flight
 // 401→refresh→retry) plus the /dashboard endpoints. Same origin as the game, so a
 // session established in either app restores in the other.
-import type { DashboardPermission, DashboardRole } from '@trm/shared';
+import type { DashboardPermission, DashboardRole, UserFeature } from '@trm/shared';
 
 export interface PublicUser {
   id: string;
@@ -52,6 +52,7 @@ export interface UserRow {
   isGuest: boolean;
   avatarUrl?: string;
   oauthProviders: string[];
+  features: UserFeature[];
   createdAt: string;
   disabledAt?: string;
 }
@@ -248,6 +249,9 @@ export const api = {
     req<UserDetail>('POST', `/dashboard/users/${encodeURIComponent(id)}/disable`, { reason }),
   enableUser: (id: string) =>
     req<UserDetail>('POST', `/dashboard/users/${encodeURIComponent(id)}/enable`, {}),
+  putUserFeatures: (id: string, features: UserFeature[]) =>
+    req<UserDetail>('PUT', `/dashboard/users/${encodeURIComponent(id)}/features`, { features }),
+  listFeaturedUsers: () => req<{ users: UserRow[] }>('GET', '/dashboard/users/features'),
 
   listGames: (opts: { status?: string; cursor?: string } = {}) =>
     req<GamesPage>('GET', `/dashboard/games${qs(opts)}`),
