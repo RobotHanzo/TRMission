@@ -12,7 +12,7 @@
     "lint": {},
     "test": {
       "dependsOn": ["^build", "build"],
-      "outputs": ["coverage/**"]
+      "outputs": ["coverage/**", "test-results/**"]
     }
   }
 }

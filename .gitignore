@@ -12,6 +12,7 @@ packages/proto/src/gen/
 # test / coverage
 coverage/
 .vitest/
+test-results/
 
 # turbo
 .turbo/
