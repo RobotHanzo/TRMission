@@ -17,6 +17,7 @@ vi.mock('../net/rest', () => ({
     getPublicRooms: vi.fn(() => Promise.resolve([])),
     getMyRooms: vi.fn(() => Promise.resolve([])),
     spectate: vi.fn(() => Promise.resolve({ gameId: 'g', ticket: 't' })),
+    history: vi.fn(() => Promise.resolve([{ role: 'player' }])),
   },
 }));
 
@@ -24,6 +25,7 @@ const mocked = api as unknown as {
   getPublicRooms: ReturnType<typeof vi.fn>;
   getMyRooms: ReturnType<typeof vi.fn>;
   spectate: ReturnType<typeof vi.fn>;
+  history: ReturnType<typeof vi.fn>;
 };
 
 const signedIn = {
@@ -58,13 +60,14 @@ describe('HomeScreen', () => {
     vi.clearAllMocks();
     mocked.getPublicRooms.mockResolvedValue([]);
     mocked.getMyRooms.mockResolvedValue([]);
+    mocked.history.mockResolvedValue([{ role: 'player' }]);
     useSession.setState({ user: { ...signedIn } });
   });
   afterEach(() => vi.restoreAllMocks());
 
-  it('renders the lobby for a signed-in user', () => {
+  it('renders the lobby for a signed-in user', async () => {
     render(<HomeScreen />);
-    expect(screen.getByRole('button', { name: '建立房間' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: '建立房間' })).toBeInTheDocument();
     expect(screen.getByText('歡迎回來，Tester')).toBeInTheDocument();
   });
 
@@ -106,5 +109,35 @@ describe('HomeScreen', () => {
     render(<HomeScreen />);
     await waitFor(() => expect(mocked.getMyRooms).toHaveBeenCalled());
     expect(screen.queryByRole('button', { name: /回到房間/ })).not.toBeInTheDocument();
+  });
+
+  it('shows the first-entry welcome screen for a brand-new account (0 completed games)', async () => {
+    mocked.history.mockResolvedValue([]);
+    const enterTutorial = vi.fn();
+    const original = useUi.getState().enterTutorial;
+    useUi.setState({ enterTutorial });
+    try {
+      render(<HomeScreen />);
+      const startTutorial = await screen.findByRole('button', { name: /開始教學/ });
+      expect(screen.queryByText('歡迎回來，Tester')).not.toBeInTheDocument();
+      fireEvent.click(startTutorial);
+      expect(enterTutorial).toHaveBeenCalled();
+    } finally {
+      useUi.setState({ enterTutorial: original });
+    }
+  });
+
+  it('a spectator-only history still counts as a new account', async () => {
+    mocked.history.mockResolvedValue([{ role: 'spectator' }]);
+    render(<HomeScreen />);
+    expect(await screen.findByRole('button', { name: /前往首頁/ })).toBeInTheDocument();
+  });
+
+  it('lets a new account continue past the welcome screen to the homepage', async () => {
+    mocked.history.mockResolvedValue([]);
+    render(<HomeScreen />);
+    const continueBtn = await screen.findByRole('button', { name: /前往首頁/ });
+    fireEvent.click(continueBtn);
+    await screen.findByText('歡迎回來，Tester');
   });
 });

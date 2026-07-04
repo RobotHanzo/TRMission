@@ -297,9 +297,108 @@ button.home-side-card {
   font-weight: 600;
 }
 
+/* ── First-entry welcome screen (0 completed games — shown instead of the homepage) ── */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--tr-space-8) var(--tr-space-4);
+}
+.welcome-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--tr-blue);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--tr-space-6);
+}
+.welcome-title {
+  margin: 0 0 var(--tr-space-3);
+  font-size: 34px;
+  font-weight: 700;
+}
+.welcome-subtitle {
+  margin: 0 0 var(--tr-space-8);
+  max-width: 480px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--tr-ink-soft);
+}
+.welcome-options {
+  display: flex;
+  gap: var(--tr-space-6);
+  width: 100%;
+  max-width: 720px;
+}
+.welcome-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--tr-space-3);
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-lg);
+  box-shadow: var(--tr-shadow);
+  padding: 28px 24px;
+}
+.welcome-option--primary {
+  border: 2px solid var(--tr-blue);
+}
+.welcome-option-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--tr-ember) 14%, var(--tr-surface));
+  color: var(--tr-ember);
+}
+.welcome-option-icon--primary {
+  background: color-mix(in srgb, var(--tr-blue) 12%, var(--tr-surface));
+  color: var(--tr-blue);
+}
+.welcome-option h3 {
+  margin: 0;
+  font-size: 20px;
+}
+.welcome-option p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--tr-ink-soft);
+}
+.welcome-option-cta {
+  margin-top: auto;
+  padding: 11px 22px;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+.welcome-footnote {
+  margin: var(--tr-space-6) 0 0;
+  font-size: 12.5px;
+}
+
 @media (max-width: 900px) {
   .home-grid {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .welcome {
+    padding: var(--tr-space-6) var(--tr-space-3);
+  }
+  .welcome-title {
+    font-size: 26px;
+  }
+  .welcome-options {
+    flex-direction: column;
   }
 }
 /* Phone tier (matches PHONE_QUERY in hooks/useMediaQuery.ts). */

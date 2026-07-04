@@ -42,6 +42,18 @@ const resources = {
         tutorialTitle: '重新查看教學',
         tutorialDesc: '5 分鐘互動教學',
         guestNotice: '訪客身分遊玩中 — 建立帳號可保留遊戲紀錄。',
+        welcome: {
+          title: '歡迎搭乘，{{name}}',
+          subtitle:
+            '在台灣鐵道上搶占路線、完成任務卡。第一次來，想先花五分鐘搞懂玩法，還是直接上車摸索？兩邊隨時可以互相切換。',
+          learnTitle: '學習玩法',
+          learnDesc: '跟著 5 分鐘互動教學，一步步認識路線、任務卡與計分方式。',
+          learnCta: '開始教學',
+          skipTitle: '直接開始',
+          skipDesc: '略過教學，直接建立房間開始遊戲，邊玩邊摸索也可以。',
+          skipCta: '前往首頁',
+          footnote: '之後仍可從右上角「規則百科」按鈕隨時重新查看教學',
+        },
       },
 
       signIn: '登入',
@@ -443,6 +455,19 @@ const resources = {
         tutorialTitle: 'Revisit the tutorial',
         tutorialDesc: 'A 5-minute interactive walkthrough',
         guestNotice: "You're playing as a guest — create an account to keep your match history.",
+        welcome: {
+          title: 'Welcome aboard, {{name}}',
+          subtitle:
+            'Claim railway routes across Taiwan and complete your mission tickets. First time here? Spend five minutes learning the ropes, or just hop on and figure it out as you go — you can switch between the two anytime.',
+          learnTitle: 'Learn to play',
+          learnDesc:
+            'Follow a 5-minute interactive tutorial to learn routes, mission tickets, and scoring step by step.',
+          learnCta: 'Start tutorial',
+          skipTitle: 'Jump right in',
+          skipDesc: "Skip the tutorial and create a room right away — you can learn as you play.",
+          skipCta: 'Go to homepage',
+          footnote: 'You can always revisit the tutorial later from the "Rules" button up top.',
+        },
       },
 
       signIn: 'Sign in',

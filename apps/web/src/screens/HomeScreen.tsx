@@ -5,6 +5,7 @@ import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { api, type RoomView } from '../net/rest';
 import { connectGame } from '../net/connection';
+import { WelcomeScreen } from './WelcomeScreen';
 
 /** The guest sidebar notice: a one-line nudge that expands into the upgrade form in place. */
 function GuestUpgradeCard() {
@@ -70,6 +71,9 @@ export function HomeScreen() {
   const [publicRooms, setPublicRooms] = useState<RoomView[]>([]);
   const [myRooms, setMyRooms] = useState<RoomView[]>([]);
   const createBtnRef = useRef<HTMLButtonElement>(null);
+  // First-entry gate: null while unknown, true for a brand-new account (0 completed games as a
+  // player) — shown instead of the homepage until the user starts the tutorial or continues past it.
+  const [showWelcome, setShowWelcome] = useState<boolean | null>(null);
 
   // Consume a one-shot focus request (e.g. arriving from the tutorial finale): bring the create-game
   // button into view, focus it, and let the pulse highlight clear once the request is dropped.
@@ -104,9 +108,36 @@ export function HomeScreen() {
     };
   }, []);
 
+  // A game only counts once finished, so an unfinished first game still gates on the welcome
+  // screen — spectated-only games don't count either.
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    api
+      .history()
+      .then((rows) => active && setShowWelcome(!rows.some((r) => r.role === 'player')))
+      .catch(() => active && setShowWelcome(false));
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
   // Unauthenticated visitors are redirected to /login by the router; render nothing during the
   // brief logout transition before the view switches.
   if (!user) return null;
+
+  // Don't flash the homepage (or its rooms-list fetch) while it's still unknown whether this is
+  // a brand-new account.
+  if (showWelcome === null) return null;
+  if (showWelcome) {
+    return (
+      <WelcomeScreen
+        name={user.displayName}
+        onStartTutorial={enterTutorial}
+        onContinue={() => setShowWelcome(false)}
+      />
+    );
+  }
 
   // Most recent first from the server — the first entry is the rejoin target.
   const activeRoom = myRooms[0];
