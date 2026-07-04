@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Collection, Db } from 'mongodb';
-import { ENGINE_VERSION, boardForContentHash } from '@trm/engine';
+import { boardForContentHash } from '@trm/engine';
 import type { Action } from '@trm/engine';
 import { MONGO_DB } from '../db/tokens';
 import type {
@@ -39,6 +39,15 @@ export interface ReplayData {
   finalDigest?: string;
 }
 
+/**
+ * Engine major versions whose persisted action logs the current server can still replay
+ * byte-identically. v5 replays a v4 log identically: v5 only ADDS the `eventsMode`/`events`
+ * genesis fields, and those are inert for a v4 game (an off/absent `eventsMode` draws zero extra
+ * RNG at genesis, so the deck/tickets/digests are unchanged). Extend this list as new engine
+ * versions land that preserve replay of older logs.
+ */
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [4, 5];
+
 @Injectable()
 export class HistoryRepo {
   private readonly col: Collection<MatchHistoryDoc>;
@@ -56,15 +65,16 @@ export class HistoryRepo {
   }
 
   /**
-   * Replayable = same engine major + a board we can still build for that content hash. The
-   * static registry (official maps) resolves synchronously; a custom-map hash falls back to a
-   * single batched `mapContents` lookup so listing N rows costs at most one extra query, not N.
+   * Replayable = a replay-compatible engine major + a board we can still build for that content
+   * hash. The static registry (official maps) resolves synchronously; a custom-map hash falls back
+   * to a single batched `mapContents` lookup so listing N rows costs at most one extra query, not N.
    */
   private async replayableFlags(
     rows: { contentHash: string; engineVersion: number | undefined }[],
   ): Promise<boolean[]> {
     const staticFlags: (boolean | undefined)[] = rows.map((r) => {
-      if (r.engineVersion !== ENGINE_VERSION) return false;
+      if (r.engineVersion === undefined || !REPLAY_COMPATIBLE_ENGINE_VERSIONS.includes(r.engineVersion))
+        return false;
       try {
         boardForContentHash(r.contentHash);
         return true;

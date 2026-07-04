@@ -24,10 +24,12 @@ import {
 } from '../game/payments';
 import { enumerateTunnelExtra } from '../game/tunnel';
 import { isChatRejectionKey } from '../game/chatErrors';
+import { skyLanternSurcharge, freeStationAvailable, eventRejectionHintKey } from '../game/events';
 import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../game/boardView';
 import { gateFlags, type ActionGate } from '../features/tutorial/types';
 import { Board } from '../components/Board';
+import { EventsPanel } from '../components/EventsPanel';
 import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
 import { PlayerTrackers } from '../components/PlayerTrackers';
@@ -164,15 +166,19 @@ export function GameStage({
   const boardCanAct = canAct && (allow.claim || allow.station);
   const marketCanDraw = canDraw && allow.draw;
 
+  // Random-events payment mirrors — derived exclusively from the snapshot so the offered options
+  // agree with the server's validation (sky-lantern +1-card surcharge; gala zero-cost station).
+  const randomEvents = snapshot.randomEvents;
   const pickRoute = (routeId: string) => {
     const route = routeById.get(routeId);
     if (!route) return;
-    const payments = enumerateRoutePayments(hand, route);
+    const extra = skyLanternSurcharge(randomEvents, routeId);
+    const payments = enumerateRoutePayments(hand, route, extra);
     if (payments.length) {
       setClaim({ kind: 'route', route, payments });
       return;
     }
-    const s = routeShortfall(hand, route);
+    const s = routeShortfall(hand, route, extra);
     setNotice(
       s.kind === 'locos'
         ? t('insufficientLocos', { need: s.need, have: s.have })
@@ -186,7 +192,8 @@ export function GameStage({
       return;
     }
     const cost = 3 - remaining + 1;
-    const payments = enumerateStationPayments(hand, cost);
+    const freeStation = freeStationAvailable(randomEvents);
+    const payments = enumerateStationPayments(hand, cost, freeStation);
     if (payments.length) {
       setClaim({ kind: 'station', cityId, payments });
       return;
@@ -322,6 +329,7 @@ export function GameStage({
     />
   ) : boardLayout === 'rail' ? (
     <>
+      <EventsPanel />
       {trackers}
       {market}
       {handSection}
@@ -329,6 +337,7 @@ export function GameStage({
     </>
   ) : (
     <>
+      <EventsPanel />
       {trackers}
       {market}
       {ticketsSection}
@@ -395,7 +404,12 @@ export function GameStage({
                     : dockTab === 'missions'
                       ? ticketsSection
                       : dockTab === 'players'
-                        ? trackers
+                        ? (
+                            <>
+                              <EventsPanel />
+                              {trackers}
+                            </>
+                          )
                         : comms}
               </div>
             </>
@@ -496,7 +510,9 @@ export function GameStage({
       <Toast message={notice} variant="toast-notice" />
       <Toast
         message={
-          rejection && !isChatRejectionKey(rejection.messageKey) ? t('actionRejected') : null
+          rejection && !isChatRejectionKey(rejection.messageKey)
+            ? t(eventRejectionHintKey(rejection.messageKey) ?? 'actionRejected')
+            : null
         }
       />
       <AnimationLayer />

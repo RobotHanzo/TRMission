@@ -10,6 +10,7 @@ import type {
   RuleParams,
 } from '@trm/shared';
 import type { Payment } from './actions';
+import type { EventsState } from './events-state';
 
 export type Phase =
   | 'SETUP_TICKETS'
@@ -119,10 +120,16 @@ export interface GameState {
 
   readonly finalScores: FinalScoreboard | null;
   readonly actionSeq: number;
+
+  /** Random-events runtime state. Absent (key omitted, not `undefined`) when the feature is off,
+   *  so an off-mode game clones/digests byte-identically to a pre-v5 game. */
+  readonly events?: EventsState;
 }
 
 export const SCHEMA_VERSION = 1;
 // v4: two independent v3 bumps merged — main's `doubleRouteSingleFor23` ruleParam, plus rule 7.5
 // forced ticket re-draw (a player with every kept ticket already own-connected is forced to draw
 // new tickets at the start of their turn — the turn opens in TICKET_SELECTION, not AWAIT_ACTION).
-export const ENGINE_VERSION = 4;
+// v5: random events — RuleParams.eventsMode + optional GameState.events; off-mode behavior
+// identical to v4.
+export const ENGINE_VERSION = 5;

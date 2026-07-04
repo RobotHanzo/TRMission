@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { toBinary } from '@bufbuild/protobuf';
 import { initGame, redactFor, taiwanBoard, CONTENT_HASH } from '@trm/engine';
-import type { Action, GameConfig, GameEvent } from '@trm/engine';
+import type { Action, GameConfig, GameEvent, GameState, EventsState, EventScheduleEntry } from '@trm/engine';
 import { asPlayerId, asTicketId, asCityId, asRouteId } from '@trm/shared';
-import { CardColor, Phase } from '@trm/proto';
+import type { PlayerId } from '@trm/shared';
+import { CardColor, Phase, GameSnapshotSchema } from '@trm/proto';
 import { viewToSnapshot, commandToAction, eventToProto } from '@trm/codec';
 import { actionToCommand, encodeClient, decodeClient } from './helpers';
 
@@ -114,5 +116,74 @@ describe('event codec — per-recipient redaction', () => {
     };
     expect(eventToProto(offered, p1)).not.toBeNull();
     expect(eventToProto(offered, p2)).toBeNull();
+  });
+});
+
+describe('viewToSnapshot — random-events wire leak test (risk #1, byte-level)', () => {
+  it('never serializes a future unannounced entry’s id/route/city/charter-city ids to wire bytes', () => {
+    const board = taiwanBoard();
+    const state = initGame(board, config);
+    // Live effects reused from the board so the block is non-trivial (active typhoon, hotspot,
+    // open charter) — these MUST still surface; only the future schedule entry must not.
+    const closed = board.content.routes[0]!.id;
+    const hot = board.cityIds[0]!;
+    const liveA = board.cityIds[1]!;
+    const liveB = board.cityIds[2]!;
+
+    const SECRET = {
+      id: 'evSecretFutureWire',
+      route: asRouteId('SECRET_WIRE_ROUTE_X'),
+      city: asCityId('SECRET_WIRE_CITY_C'),
+      charterA: asCityId('SECRET_WIRE_CITY_A'),
+      charterB: asCityId('SECRET_WIRE_CITY_B'),
+    };
+    // Far-off, non-telegraphed → nothing about it may ever be projected. It carries every hidden
+    // field (routeIds, cityId, charter) so the leak check below is exhaustive.
+    const future: EventScheduleEntry = {
+      id: SECRET.id,
+      kind: 'CHARTER_SPECIAL',
+      startRound: 5,
+      durationRounds: 3,
+      telegraphed: false,
+      routeIds: [SECRET.route],
+      cityId: SECRET.city,
+      charter: { a: SECRET.charterA, b: SECRET.charterB, points: 20 },
+    };
+    const events: EventsState = {
+      mode: 'light',
+      roundIndex: 1,
+      nextIdx: 0,
+      schedule: [future],
+      suppressed: [],
+      active: [{ id: 'evTy', kind: 'TYPHOON_LANDFALL', endsAfterRound: 99, routeIds: [closed] }],
+      hotspots: { [hot as string]: 2 },
+      charters: [{ id: 'evCh', a: liveA, b: liveB, points: 8, expiresAfterRound: 99, wonBy: null }],
+      reopenBonus: [],
+    };
+    const withEvents: GameState = { ...state, events };
+
+    for (const viewer of [p1, p2, null] as (PlayerId | null)[]) {
+      const view = redactFor(board, withEvents, viewer);
+      const snap = viewToSnapshot(view, 0, viewer);
+      const bytes = toBinary(GameSnapshotSchema, snap);
+      // latin1 is a lossless 1-byte-per-char mapping, so this is an exact byte-substring check —
+      // not a decode-to-JSON approximation.
+      const raw = Buffer.from(bytes).toString('latin1');
+      for (const secret of [
+        SECRET.id,
+        SECRET.route as string,
+        SECRET.city as string,
+        SECRET.charterA as string,
+        SECRET.charterB as string,
+      ]) {
+        expect(raw.includes(secret)).toBe(false);
+      }
+
+      // Live effects DO surface — this isn't just an empty/off projection.
+      expect(snap.randomEvents?.hotspots.some((h) => h.cityId === (hot as string))).toBe(true);
+      expect(snap.randomEvents?.charters.some((c) => c.id === 'evCh')).toBe(true);
+      expect(snap.randomEvents?.closedRouteIds).toContain(closed as string);
+      expect(snap.randomEvents?.forecast).toBeUndefined(); // unannounced future ⇒ no forecast
+    }
   });
 });

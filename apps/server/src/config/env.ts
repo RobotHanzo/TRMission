@@ -30,6 +30,14 @@ export const env = {
   /** Instant guest sessions. Set AUTH_GUEST_ENABLED=0 to disable. */
   authGuest: process.env.AUTH_GUEST_ENABLED !== '0',
 
+  /**
+   * Random-events room option. Set TRM_RANDOM_EVENTS_ENABLED=1 to enable (default OFF).
+   * NOTE the INVERTED idiom vs. the auth toggles above: this is opt-in (`=== '1'`), so a missing
+   * env var yields `false` — the option stays off (and the server rejects/downgrades it) unless a
+   * maintainer explicitly turns it on.
+   */
+  randomEvents: process.env.TRM_RANDOM_EVENTS_ENABLED === '1',
+
   // OAuth providers. A provider is "enabled" only when BOTH its id and secret are set.
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',

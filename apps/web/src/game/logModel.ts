@@ -16,7 +16,11 @@ export type LogKind =
   | 'ticketsKept'
   | 'passed'
   | 'endgame'
-  | 'gameEnded';
+  | 'gameEnded'
+  | 'eventAnnounced'
+  | 'eventStarted'
+  | 'eventEnded'
+  | 'eventBonus';
 
 export interface LogDatum {
   kind: LogKind;
@@ -120,6 +124,43 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
         break;
       case 'gameEnded':
         out.push({ kind: 'gameEnded', playerId: null, data: {}, importance: 'alert' });
+        break;
+      case 'randomEventAnnounced':
+        out.push({
+          kind: 'eventAnnounced',
+          playerId: null,
+          data: { eventKind: ev.value.info?.kind ?? '' },
+          importance: 'alert',
+        });
+        break;
+      case 'randomEventStarted':
+        out.push({
+          kind: 'eventStarted',
+          playerId: null,
+          data: { eventKind: ev.value.info?.kind ?? '' },
+          importance: 'alert',
+        });
+        break;
+      case 'randomEventEnded':
+        out.push({
+          kind: 'eventEnded',
+          playerId: null,
+          data: { eventKind: ev.value.kind },
+          importance: 'normal',
+        });
+        break;
+      case 'randomEventBonus':
+        out.push({
+          kind: 'eventBonus',
+          playerId: ev.value.playerId || null,
+          data: {
+            reason: ev.value.reason,
+            points: ev.value.points,
+            cityId: ev.value.cityId,
+            routeId: ev.value.routeId,
+          },
+          importance: 'highlight',
+        });
         break;
       default:
         break; // omit the rest

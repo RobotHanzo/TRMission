@@ -1,4 +1,5 @@
 import type { PlayerId, RouteId, CityId, TicketId, CardColor } from '@trm/shared';
+import type { RandomEventKind } from './events-state';
 
 /**
  * Events emitted by the reducer. The gateway turns these into protobuf and applies
@@ -106,6 +107,46 @@ export type GameEvent =
       readonly finalTurnsRemaining: number;
       readonly visibility: 'PUBLIC';
     }
-  | { readonly e: 'GAME_ENDED'; readonly visibility: 'PUBLIC' };
+  | { readonly e: 'GAME_ENDED'; readonly visibility: 'PUBLIC' }
+  // ─── random events (feature-gated; only emitted when GameState.events is present) ───
+  | {
+      readonly e: 'EVENT_ANNOUNCED';
+      readonly id: string;
+      readonly kind: RandomEventKind;
+      readonly startRound: number;
+      readonly durationRounds: number;
+      readonly routeIds?: readonly RouteId[];
+      readonly region?: string;
+      readonly cityId?: CityId;
+      readonly visibility: Visibility;
+    }
+  | {
+      readonly e: 'EVENT_STARTED';
+      readonly id: string;
+      readonly kind: RandomEventKind;
+      readonly startRound: number;
+      readonly durationRounds: number;
+      readonly routeIds?: readonly RouteId[];
+      readonly region?: string;
+      readonly cityId?: CityId;
+      readonly charter?: { readonly a: CityId; readonly b: CityId; readonly points: number };
+      readonly visibility: Visibility;
+    }
+  | {
+      readonly e: 'EVENT_ENDED';
+      readonly id: string;
+      readonly kind: RandomEventKind;
+      readonly visibility: Visibility;
+    }
+  | {
+      readonly e: 'EVENT_BONUS';
+      readonly kind: RandomEventKind;
+      readonly reason: 'HOTSPOT' | 'REOPEN' | 'STAMP' | 'CHARTER' | 'FREE_STATION';
+      readonly player: PlayerId;
+      readonly points: number;
+      readonly routeId?: RouteId;
+      readonly cityId?: CityId;
+      readonly visibility: Visibility;
+    };
 
 export type GameEventType = GameEvent['e'];

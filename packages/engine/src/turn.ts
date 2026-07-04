@@ -4,6 +4,7 @@ import type { GameState } from './types/state';
 import type { GameEvent } from './types/events';
 import { computeFinalScores } from './scoring';
 import { offerTickets, allKeptTicketsOwnConnected } from './tickets';
+import { tickRound } from './events/runtime';
 
 export function currentPlayerId(state: GameState): PlayerId {
   return state.turnOrder[state.turn.orderIndex] as PlayerId;
@@ -57,12 +58,29 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
 
   const nextIdx = (curIdx + 1) % n;
   const nextPlayer = state.turnOrder[nextIdx] as PlayerId;
-  const next: GameState = {
+  let next: GameState = {
     ...state,
     consecutivePasses,
     endgame,
     turn: { orderIndex: nextIdx, phase: 'AWAIT_ACTION', cardsDrawnThisTurn: 0 },
   };
+
+  // Random-events round tick. Runs ONLY when the feature is on AND the turn order just wrapped
+  // (nextIdx === 0 → a full round completed). We are past the termination early-return, so this
+  // never fires on the game-ending turn. The caller (here) owns the roundIndex increment: bump it
+  // before ticking so tickRound sees the round about to be played. Emitted order:
+  //   TURN_ENDED (already pushed), EVENT_ENDED*, EVENT_STARTED* (+gala draws), EVENT_ANNOUNCED?,
+  //   then TURN_STARTED — with rule-7.5's forced draw staying LAST, on the post-tick state.
+  if (next.events && nextIdx === 0) {
+    const bumped: GameState = {
+      ...next,
+      events: { ...next.events, roundIndex: next.events.roundIndex + 1 },
+    };
+    const tick = tickRound(board, bumped);
+    next = tick.state;
+    events.push(...tick.events);
+  }
+
   events.push({ e: 'TURN_STARTED', player: nextPlayer, orderIndex: nextIdx, visibility: 'PUBLIC' });
 
   // Rule 7.5 — forced ticket re-draw: a player who has already connected every kept ticket by their

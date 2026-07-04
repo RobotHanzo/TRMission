@@ -18,11 +18,15 @@ export const GameSettingsSchema = z.object({
   secondDrawAfterBlindRainbow: z.boolean(),
   noUnfinishedTicketPenalty: z.boolean(),
   doubleRouteSingleFor23: z.boolean(),
+  eventsMode: z.enum(['off', 'light', 'moderate', 'intense']),
   allowSpectating: z.boolean(),
   visibility: z.enum(['PUBLIC', 'INVITE_ONLY']),
   map: MapSelectorSchema,
 });
 export const UpdateSettingsSchema = GameSettingsSchema.partial();
+
+/** Server-level room configuration (which options a maintainer has enabled). */
+export const RoomConfigSchema = z.object({ randomEventsEnabled: z.boolean() });
 
 export class CreateRoomDto extends createZodDto(CreateRoomSchema) {}
 export class ReadyDto extends createZodDto(ReadySchema) {}

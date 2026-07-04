@@ -14,6 +14,9 @@ interface Props {
 // in the modal while still reading as the same rolling-stock cards as the deck.
 const CARD_SIZE = 104;
 
+/** A fully-empty payment is the gala zero-cost station (offered only while its window is up). */
+const isFree = (p: Payment): boolean => p.colorCount === 0 && p.locomotives === 0;
+
 /** Describes a spend option for assistive tech, e.g. "藍 ×2 + 彩虹車頭 ×1". */
 const describe = (p: Payment): string => {
   const parts: string[] = [];
@@ -38,10 +41,11 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
               <li key={i}>
                 <button
                   type="button"
-                  className="payment-card"
-                  aria-label={describe(p)}
+                  className={isFree(p) ? 'payment-card payment-free' : 'payment-card'}
+                  aria-label={isFree(p) ? t('events.freeStation') : describe(p)}
                   onClick={() => onPick(p)}
                 >
+                  {isFree(p) && <span className="payment-free-label">{t('events.freeStation')}</span>}
                   {p.color && p.colorCount > 0 && (
                     <TrainCarCard color={p.color} count={p.colorCount} size={CARD_SIZE} />
                   )}

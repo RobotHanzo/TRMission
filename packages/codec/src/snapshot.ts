@@ -14,6 +14,7 @@ import {
   type CardCounts,
 } from '@trm/proto';
 import { cardOrNullToPb, phaseToPb } from './enums';
+import { randomEventsToPb } from './random-events';
 
 function handToCardCounts(hand: Hand): CardCounts {
   return create(CardCountsSchema, {
@@ -136,7 +137,10 @@ export function viewToSnapshot(
       secondDrawAfterBlindRainbow: view.settings.secondDrawAfterBlindRainbow,
       noUnfinishedTicketPenalty: view.settings.noUnfinishedTicketPenalty,
       doubleRouteSingleFor23: view.settings.doubleRouteSingleFor23,
+      eventsMode: view.settings.eventsMode,
     },
+    // Random-events projection (unset when the feature is off — `view.events` is absent).
+    randomEvents: view.events === undefined ? undefined : randomEventsToPb(view.events),
     you:
       self === undefined || self.hand === null
         ? undefined

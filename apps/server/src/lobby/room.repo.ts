@@ -1,6 +1,7 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
+import type { EventsMode } from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
 import type { BotDifficulty } from '../bots/types';
 
@@ -19,6 +20,9 @@ export interface RoomSettings {
   secondDrawAfterBlindRainbow: boolean;
   noUnfinishedTicketPenalty: boolean;
   doubleRouteSingleFor23: boolean;
+  /** Random-events tier fed into the engine at start ('off' = feature absent). Gated server-side
+   *  by LobbyConfig.randomEvents — a room can only carry a non-'off' value while the flag is on. */
+  eventsMode: EventsMode;
   allowSpectating: boolean;
   visibility: RoomVisibility;
   map: MapSelector;
@@ -29,6 +33,7 @@ export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   secondDrawAfterBlindRainbow: false,
   noUnfinishedTicketPenalty: false,
   doubleRouteSingleFor23: true,
+  eventsMode: 'off',
   allowSpectating: true,
   visibility: 'INVITE_ONLY',
   map: { source: 'official', mapId: 'taiwan' },

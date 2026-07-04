@@ -56,6 +56,24 @@ export interface EndgameCue {
   /** Whether the local player is the one who ran their trains down and triggered it. */
   triggeredByYou: boolean;
 }
+/** The prominent (skippable) banner shown when a random event STARTS. Carries the raw event `kind`;
+ *  the banner component resolves the localized name/desc at render. */
+export interface EventBannerCue {
+  id: number;
+  kind: string;
+}
+/** A lightweight event toast (forecast announcement or a claim bonus). Data-only — the copy +
+ *  city/route names resolve at render, so late roster / locale changes apply. */
+export interface EventToastCue {
+  id: number;
+  variant: 'announced' | 'bonus';
+  kind: string;
+  /** EVENT_BONUS reason ("HOTSPOT"|"REOPEN"|"STAMP"|"CHARTER"|"FREE_STATION"); "" for announcements. */
+  reason: string;
+  points: number;
+  cityId: string;
+  routeId: string;
+}
 
 interface AnimState {
   glowingRoutes: Map<string, number>;
@@ -72,6 +90,10 @@ interface AnimState {
   fanfareQueue: Fanfare[];
   /** The active final-round warning popup (null = none). */
   endgameCue: EndgameCue | null;
+  /** The active random-event START banner (null = none). */
+  eventBanner: EventBannerCue | null;
+  /** Live random-event toasts (forecast announcements + claim bonuses); each self-expires. */
+  eventToasts: EventToastCue[];
   /** Longest-trail route highlight shown while reviewing the final scoreboard (null = none). */
   routeReveal: RouteReveal | null;
   pushIntent(intent: AnimIntent): void;
@@ -88,6 +110,10 @@ interface AnimState {
   dismissFanfare(): void;
   showEndgameWarning(finalTurns: number, triggeredByYou: boolean): void;
   dismissEndgameWarning(): void;
+  showEventBanner(kind: string): void;
+  dismissEventBanner(): void;
+  pushEventToast(cue: Omit<EventToastCue, 'id'>): void;
+  removeEventToast(id: number): void;
   setRouteReveal(seat: number, path: string[]): void;
   clearRouteReveal(): void;
   reset(): void;
@@ -109,6 +135,8 @@ const initial = () => ({
   fanfare: null as Fanfare | null,
   fanfareQueue: [] as Fanfare[],
   endgameCue: null as EndgameCue | null,
+  eventBanner: null as EventBannerCue | null,
+  eventToasts: [] as EventToastCue[],
   routeReveal: null as RouteReveal | null,
 });
 
@@ -232,6 +260,12 @@ const creator: StateCreator<AnimState> = (set) => ({
   showEndgameWarning: (finalTurns, triggeredByYou) =>
     set({ endgameCue: { id: nextId(), finalTurns, triggeredByYou } }),
   dismissEndgameWarning: () => set({ endgameCue: null }),
+  showEventBanner: (kind) => set({ eventBanner: { id: nextId(), kind } }),
+  dismissEventBanner: () => set({ eventBanner: null }),
+  pushEventToast: (cue) =>
+    set((s) => ({ eventToasts: [...s.eventToasts, { id: nextId(), ...cue }] })),
+  removeEventToast: (id) =>
+    set((s) => ({ eventToasts: s.eventToasts.filter((c) => c.id !== id) })),
   setRouteReveal: (seat, path) => set({ routeReveal: { seat, path } }),
   clearRouteReveal: () => set({ routeReveal: null }),
   reset: () => set(initial()),

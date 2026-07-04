@@ -44,6 +44,7 @@ const settings = {
   allowSpectating: true,
   visibility: 'PUBLIC' as const,
   map: { source: 'official' as const, mapId: 'taiwan' },
+  eventsMode: 'off' as const,
 };
 const pubRoom = (code: string, status: RoomView['status'], gameId?: string): RoomView => ({
   code,

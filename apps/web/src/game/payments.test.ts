@@ -74,6 +74,53 @@ describe('station payments', () => {
       enumerateStationPayments(h, 2).some((p) => p.color === 'RED' && p.colorCount === 2),
     ).toBe(true);
   });
+
+  it('offers a zero-card payment only while the gala free-station window is up', () => {
+    const empty = emptyHand();
+    // Flag down + no cards ⇒ nothing on offer (the server would reject an empty payment).
+    expect(enumerateStationPayments(empty, 2)).toHaveLength(0);
+    // Flag up ⇒ a leading zero-payment even with an empty hand; choosing it sends {null,0,0}.
+    const free = enumerateStationPayments(empty, 2, true);
+    expect(free[0]).toEqual({ color: null, colorCount: 0, locomotives: 0 });
+    // The zero option sits ALONGSIDE the normal paid options when the hand can also pay.
+    const h = emptyHand();
+    h.RED = 2;
+    const withCards = enumerateStationPayments(h, 2, true);
+    expect(withCards[0]).toEqual({ color: null, colorCount: 0, locomotives: 0 });
+    expect(withCards.some((p) => p.color === 'RED' && p.colorCount === 2)).toBe(true);
+  });
+});
+
+describe('sky-lantern surcharge (mirrors validateRoutePayment with extraCards = 1)', () => {
+  it('demands length + 1 cards, with locomotives able to cover the surcharge', () => {
+    const h = emptyHand();
+    h.BLUE = 4;
+    const ps = enumerateRoutePayments(h, route('BLUE', 3), 1);
+    // Surcharged size = length + 1 = 4 cards.
+    expect(ps).toContainEqual({ color: 'BLUE', colorCount: 4, locomotives: 0 });
+    // A 3-blue payment (no surcharge) must NOT be offered while the surcharge is live.
+    expect(ps.some((p) => p.colorCount + p.locomotives === 3)).toBe(false);
+  });
+
+  it('lets locomotives (wild) pay the surcharge', () => {
+    const h = emptyHand();
+    h.BLUE = 3;
+    h.LOCOMOTIVE = 1;
+    const ps = enumerateRoutePayments(h, route('BLUE', 3), 1);
+    expect(ps).toContainEqual({ color: 'BLUE', colorCount: 3, locomotives: 1 });
+  });
+
+  it('is unaffordable when the hand only covers the base length', () => {
+    const h = emptyHand();
+    h.BLUE = 3;
+    expect(enumerateRoutePayments(h, route('BLUE', 3), 1)).toHaveLength(0);
+  });
+
+  it('routeShortfall reports the inflated card need', () => {
+    const h = emptyHand();
+    h.BLUE = 3;
+    expect(routeShortfall(h, route('BLUE', 3), 1)).toEqual({ kind: 'cards', need: 4, have: 3 });
+  });
 });
 
 describe('route shortfall', () => {

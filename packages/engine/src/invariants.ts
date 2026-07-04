@@ -69,5 +69,39 @@ export function checkInvariants(board: Board, state: GameState): string[] {
     cities.add(s.cityId as string);
   }
 
+  // 5. Random-events structural invariants (only when the feature is on). Route closure is a claim
+  //    gate (see reduce.ts), not a stored flag, so there is nothing route-level to reconcile here;
+  //    a reopen-bonus route is always still unclaimed (consumed by the claim that awards it).
+  const ev = state.events;
+  if (ev) {
+    if (ev.roundIndex < 1) problems.push(`events roundIndex < 1: ${ev.roundIndex}`);
+    if (ev.nextIdx > ev.schedule.length) {
+      problems.push(`events nextIdx ${ev.nextIdx} > schedule length ${ev.schedule.length}`);
+    }
+    for (const [cityId, level] of Object.entries(ev.hotspots)) {
+      if (level !== 1 && level !== 2) problems.push(`hotspot level out of range: ${cityId} = ${level}`);
+    }
+    const scheduleIds = new Set(ev.schedule.map((e) => e.id));
+    for (const act of ev.active) {
+      if (!scheduleIds.has(act.id)) problems.push(`active event id not in schedule: ${act.id}`);
+    }
+    // Every charter is either unclaimed (wonBy null) or won by a real player.
+    const playerIds = new Set(state.turnOrder.map((id) => id as string));
+    for (const c of ev.charters) {
+      if (c.wonBy !== null && !playerIds.has(c.wonBy as string)) {
+        problems.push(`charter ${c.id} wonBy is not a valid player: ${c.wonBy as string}`);
+      }
+    }
+    for (let i = 1; i < ev.schedule.length; i++) {
+      const prev = ev.schedule[i - 1]!;
+      const curr = ev.schedule[i]!;
+      if (curr.startRound <= prev.startRound) {
+        problems.push(
+          `schedule startRounds not strictly increasing: ${prev.id}=${prev.startRound}, ${curr.id}=${curr.startRound}`,
+        );
+      }
+    }
+  }
+
   return problems;
 }

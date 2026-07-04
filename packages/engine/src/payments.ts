@@ -28,20 +28,26 @@ function handHas(player: PlayerState, spent: CardCounts): boolean {
   return true;
 }
 
-/** Validate a payment to claim `route` of the given required length. */
+/**
+ * Validate a payment to claim `route`. `extraCards` (default 0) is the sky-lantern surcharge: the
+ * player must pay `route.length + extraCards` cards (same colour rules), but still places only
+ * `route.length` trains — the surcharge is an extra card, not an extra car.
+ */
 export function validateRoutePayment(
   route: RouteDef,
   payment: Payment,
   player: PlayerState,
+  extraCards = 0,
 ): Result<PaymentPlan, RuleViolation> {
   const { color, colorCount, locomotives } = payment;
+  const requiredCards = route.length + extraCards;
   if (colorCount < 0 || locomotives < 0) {
     return err(violation('BAD_PAYMENT_LENGTH', 'negative card counts'));
   }
-  if (colorCount + locomotives !== route.length) {
+  if (colorCount + locomotives !== requiredCards) {
     return err(
-      violation('BAD_PAYMENT_LENGTH', `payment ${colorCount}+${locomotives} != length ${route.length}`, {
-        length: route.length,
+      violation('BAD_PAYMENT_LENGTH', `payment ${colorCount}+${locomotives} != length ${requiredCards}`, {
+        length: requiredCards,
       }),
     );
   }

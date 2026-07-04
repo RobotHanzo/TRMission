@@ -1,0 +1,1994 @@
+{
+  "config": {
+    "seed": "events-off-golden",
+    "players": [
+      {
+        "id": "p0",
+        "seat": 0
+      },
+      {
+        "id": "p1",
+        "seat": 1
+      },
+      {
+        "id": "p2",
+        "seat": 2
+      }
+    ],
+    "contentHash": "26ad5c18b2cd52c4ccea89de4319843b0dc46a1cdf992333fbfa0d8abe173b09"
+  },
+  "log": [
+    {
+      "t": "KEEP_INITIAL_TICKETS",
+      "player": "p0",
+      "keep": [
+        "L4",
+        "S35"
+      ]
+    },
+    {
+      "t": "KEEP_INITIAL_TICKETS",
+      "player": "p1",
+      "keep": [
+        "L1",
+        "S34"
+      ]
+    },
+    {
+      "t": "KEEP_INITIAL_TICKETS",
+      "player": "p2",
+      "keep": [
+        "L3",
+        "S31"
+      ]
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R3",
+      "payment": {
+        "color": "ORANGE",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R12",
+      "payment": {
+        "color": "BLUE",
+        "colorCount": 1,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R5",
+      "payment": {
+        "color": "WHITE",
+        "colorCount": 1,
+        "locomotives": 2
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R4",
+      "payment": {
+        "color": "BLUE",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R7",
+      "payment": {
+        "color": "RED",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R16",
+      "payment": {
+        "color": "RED",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R11",
+      "payment": {
+        "color": "PURPLE",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R58",
+      "payment": {
+        "color": "YELLOW",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R1",
+      "payment": {
+        "color": "YELLOW",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R79",
+      "payment": {
+        "color": "YELLOW",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R23",
+      "payment": {
+        "color": "ORANGE",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R19",
+      "payment": {
+        "color": "RED",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R72",
+      "payment": {
+        "color": "ORANGE",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R78",
+      "payment": {
+        "color": "GREEN",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R2",
+      "payment": {
+        "color": "BLACK",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 3
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R61",
+      "payment": {
+        "color": "BLUE",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R67",
+      "payment": {
+        "color": "RED",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R21",
+      "payment": {
+        "color": null,
+        "colorCount": 0,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R76",
+      "payment": {
+        "color": "BLACK",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 3
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R9",
+      "payment": {
+        "color": "ORANGE",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R14",
+      "payment": {
+        "color": "BLACK",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R40",
+      "payment": {
+        "color": "WHITE",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R41",
+      "payment": {
+        "color": "WHITE",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R55",
+      "payment": {
+        "color": "GREEN",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R56",
+      "payment": {
+        "color": "RED",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R73",
+      "payment": {
+        "color": "BLACK",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R17",
+      "payment": {
+        "color": "GREEN",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R38",
+      "payment": {
+        "color": "PURPLE",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R60",
+      "payment": {
+        "color": "PURPLE",
+        "colorCount": 2,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R71",
+      "payment": {
+        "color": "WHITE",
+        "colorCount": 1,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R88",
+      "payment": {
+        "color": "ORANGE",
+        "colorCount": 1,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R82",
+      "payment": {
+        "color": "YELLOW",
+        "colorCount": 2,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R62",
+      "payment": {
+        "color": "GREEN",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R74",
+      "payment": {
+        "color": "PURPLE",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R22",
+      "payment": {
+        "color": "WHITE",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R15",
+      "payment": {
+        "color": "ORANGE",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 3
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R87",
+      "payment": {
+        "color": "RED",
+        "colorCount": 2,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R20",
+      "payment": {
+        "color": "BLUE",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "RESOLVE_TUNNEL",
+      "player": "p1",
+      "commit": true,
+      "extra": {
+        "color": null,
+        "colorCount": 0,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 1
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R44",
+      "payment": {
+        "color": "RED",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "RESOLVE_TUNNEL",
+      "player": "p1",
+      "commit": true,
+      "extra": {
+        "color": "RED",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R77",
+      "payment": {
+        "color": "PURPLE",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "RESOLVE_TUNNEL",
+      "player": "p2",
+      "commit": true,
+      "extra": {
+        "color": null,
+        "colorCount": 0,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R90",
+      "payment": {
+        "color": "RED",
+        "colorCount": 1,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 1
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R70",
+      "payment": {
+        "color": "PURPLE",
+        "colorCount": 6,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R94",
+      "payment": {
+        "color": "ORANGE",
+        "colorCount": 5,
+        "locomotives": 1
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R69",
+      "payment": {
+        "color": "YELLOW",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "RESOLVE_TUNNEL",
+      "player": "p0",
+      "commit": true,
+      "extra": {
+        "color": null,
+        "colorCount": 0,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R81",
+      "payment": {
+        "color": "YELLOW",
+        "colorCount": 4,
+        "locomotives": 2
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R66",
+      "payment": {
+        "color": "GREEN",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "RESOLVE_TUNNEL",
+      "player": "p0",
+      "commit": true,
+      "extra": {
+        "color": "GREEN",
+        "colorCount": 1,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R83",
+      "payment": {
+        "color": "RED",
+        "colorCount": 2,
+        "locomotives": 2
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 4
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p2",
+      "routeId": "R18",
+      "payment": {
+        "color": "BLACK",
+        "colorCount": 4,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "RESOLVE_TUNNEL",
+      "player": "p2",
+      "commit": true,
+      "extra": {
+        "color": null,
+        "colorCount": 0,
+        "locomotives": 2
+      }
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p1"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R48",
+      "payment": {
+        "color": "BLUE",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "RESOLVE_TUNNEL",
+      "player": "p0",
+      "commit": true,
+      "extra": {
+        "color": "BLUE",
+        "colorCount": 2,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p1",
+      "routeId": "R84",
+      "payment": {
+        "color": "ORANGE",
+        "colorCount": 2,
+        "locomotives": 2
+      }
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p0"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 1
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 1
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R47",
+      "payment": {
+        "color": "WHITE",
+        "colorCount": 3,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "RESOLVE_TUNNEL",
+      "player": "p0",
+      "commit": true,
+      "extra": {
+        "color": null,
+        "colorCount": 0,
+        "locomotives": 0
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 4
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 2
+    },
+    {
+      "t": "CLAIM_ROUTE",
+      "player": "p0",
+      "routeId": "R89",
+      "payment": {
+        "color": "RED",
+        "colorCount": 1,
+        "locomotives": 2
+      }
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 2
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p1",
+      "slot": 3
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p2",
+      "slot": 0
+    },
+    {
+      "t": "DRAW_BLIND",
+      "player": "p2"
+    },
+    {
+      "t": "DRAW_FACEUP",
+      "player": "p0",
+      "slot": 3
+    }
+  ],
+  "finalState": {
+    "schemaVersion": 1,
+    "engineVersion": 4,
+    "contentHash": "26ad5c18b2cd52c4ccea89de4319843b0dc46a1cdf992333fbfa0d8abe173b09",
+    "rng": {
+      "seed": 1819545316,
+      "counter": 304
+    },
+    "ruleParams": {
+      "trainCarsStart": 45,
+      "stationsPerPlayer": 3,
+      "handStart": 4,
+      "marketSize": 5,
+      "drawCount": 2,
+      "locoRecycleThreshold": 3,
+      "tunnelRevealCount": 3,
+      "endgameTrainThreshold": 2,
+      "longestPathBonus": 10,
+      "stationBonus": 4,
+      "ticketDrawCount": 3,
+      "minKeepInitial": 2,
+      "minKeepNormal": 1,
+      "initialLongOffer": 1,
+      "initialShortOffer": 3,
+      "deckPerColor": 12,
+      "locomotiveCount": 14,
+      "routePoints": {
+        "1": 1,
+        "2": 2,
+        "3": 4,
+        "4": 7,
+        "6": 15,
+        "8": 21
+      },
+      "unlimitedStationBorrow": false,
+      "secondDrawAfterBlindRainbow": false,
+      "noUnfinishedTicketPenalty": false,
+      "doubleRouteSingleFor23": true
+    },
+    "turnOrder": [
+      "p0",
+      "p1",
+      "p2"
+    ],
+    "players": {
+      "p0": {
+        "id": "p0",
+        "seat": 0,
+        "hand": {
+          "RED": 2,
+          "ORANGE": 2,
+          "YELLOW": 4,
+          "GREEN": 2,
+          "BLUE": 0,
+          "PURPLE": 4,
+          "BLACK": 3,
+          "WHITE": 1,
+          "LOCOMOTIVE": 1
+        },
+        "trainCars": 1,
+        "stationsRemaining": 3,
+        "keptTickets": [
+          "L4",
+          "S35"
+        ],
+        "pendingTicketOffer": null,
+        "routePoints": 60,
+        "completedTickets": []
+      },
+      "p1": {
+        "id": "p1",
+        "seat": 1,
+        "hand": {
+          "RED": 1,
+          "ORANGE": 2,
+          "YELLOW": 2,
+          "GREEN": 5,
+          "BLUE": 3,
+          "PURPLE": 3,
+          "BLACK": 4,
+          "WHITE": 5,
+          "LOCOMOTIVE": 1
+        },
+        "trainCars": 5,
+        "stationsRemaining": 3,
+        "keptTickets": [
+          "L1",
+          "S34"
+        ],
+        "pendingTicketOffer": null,
+        "routePoints": 59,
+        "completedTickets": []
+      },
+      "p2": {
+        "id": "p2",
+        "seat": 2,
+        "hand": {
+          "RED": 2,
+          "ORANGE": 5,
+          "YELLOW": 4,
+          "GREEN": 2,
+          "BLUE": 4,
+          "PURPLE": 3,
+          "BLACK": 4,
+          "WHITE": 3,
+          "LOCOMOTIVE": 1
+        },
+        "trainCars": 7,
+        "stationsRemaining": 3,
+        "keptTickets": [
+          "L3",
+          "S31"
+        ],
+        "pendingTicketOffer": null,
+        "routePoints": 54,
+        "completedTickets": []
+      }
+    },
+    "turn": {
+      "orderIndex": 0,
+      "phase": "GAME_OVER",
+      "cardsDrawnThisTurn": 0
+    },
+    "deck": [
+      "LOCOMOTIVE",
+      "ORANGE",
+      "YELLOW",
+      "LOCOMOTIVE",
+      "BLACK",
+      "RED"
+    ],
+    "discard": {
+      "RED": 4,
+      "ORANGE": 2,
+      "YELLOW": 0,
+      "GREEN": 1,
+      "BLUE": 5,
+      "PURPLE": 2,
+      "BLACK": 0,
+      "WHITE": 3,
+      "LOCOMOTIVE": 9
+    },
+    "market": [
+      "RED",
+      "GREEN",
+      "RED",
+      "YELLOW",
+      "GREEN"
+    ],
+    "ticketDeckLong": [
+      "L5",
+      "L2",
+      "L6"
+    ],
+    "ticketDeckShort": [
+      "S25",
+      "S5",
+      "S40",
+      "S36",
+      "S23",
+      "S32",
+      "S16",
+      "S29",
+      "S21",
+      "S13",
+      "S6",
+      "S38",
+      "S8",
+      "S17",
+      "S15",
+      "S26",
+      "S9",
+      "S1",
+      "S28",
+      "S11",
+      "S4",
+      "S7",
+      "S2",
+      "S37",
+      "S14",
+      "S22",
+      "S27",
+      "S33",
+      "S18",
+      "S20",
+      "S12",
+      "S3",
+      "S30"
+    ],
+    "ownership": {
+      "R3": {
+        "owner": "p0"
+      },
+      "R12": {
+        "owner": "p1"
+      },
+      "R13": {
+        "locked": true
+      },
+      "R5": {
+        "owner": "p2"
+      },
+      "R4": {
+        "owner": "p0"
+      },
+      "R7": {
+        "owner": "p1"
+      },
+      "R6": {
+        "locked": true
+      },
+      "R16": {
+        "owner": "p2"
+      },
+      "R11": {
+        "owner": "p0"
+      },
+      "R10": {
+        "locked": true
+      },
+      "R58": {
+        "owner": "p1"
+      },
+      "R59": {
+        "locked": true
+      },
+      "R1": {
+        "owner": "p2"
+      },
+      "R79": {
+        "owner": "p0"
+      },
+      "R23": {
+        "owner": "p2"
+      },
+      "R24": {
+        "locked": true
+      },
+      "R19": {
+        "owner": "p1"
+      },
+      "R72": {
+        "owner": "p0"
+      },
+      "R78": {
+        "owner": "p1"
+      },
+      "R2": {
+        "owner": "p2"
+      },
+      "R61": {
+        "owner": "p0"
+      },
+      "R67": {
+        "owner": "p1"
+      },
+      "R21": {
+        "owner": "p2"
+      },
+      "R76": {
+        "owner": "p0"
+      },
+      "R9": {
+        "owner": "p0"
+      },
+      "R8": {
+        "locked": true
+      },
+      "R14": {
+        "owner": "p2"
+      },
+      "R40": {
+        "owner": "p0"
+      },
+      "R39": {
+        "locked": true
+      },
+      "R41": {
+        "owner": "p2"
+      },
+      "R55": {
+        "owner": "p1"
+      },
+      "R56": {
+        "owner": "p0"
+      },
+      "R57": {
+        "locked": true
+      },
+      "R73": {
+        "owner": "p1"
+      },
+      "R17": {
+        "owner": "p2"
+      },
+      "R38": {
+        "owner": "p0"
+      },
+      "R60": {
+        "owner": "p1"
+      },
+      "R71": {
+        "owner": "p0"
+      },
+      "R88": {
+        "owner": "p2"
+      },
+      "R82": {
+        "owner": "p1"
+      },
+      "R62": {
+        "owner": "p1"
+      },
+      "R74": {
+        "owner": "p2"
+      },
+      "R22": {
+        "owner": "p2"
+      },
+      "R15": {
+        "owner": "p0"
+      },
+      "R87": {
+        "owner": "p0"
+      },
+      "R20": {
+        "owner": "p1"
+      },
+      "R44": {
+        "owner": "p1"
+      },
+      "R77": {
+        "owner": "p2"
+      },
+      "R90": {
+        "owner": "p2"
+      },
+      "R70": {
+        "owner": "p1"
+      },
+      "R94": {
+        "owner": "p0"
+      },
+      "R69": {
+        "owner": "p0"
+      },
+      "R81": {
+        "owner": "p2"
+      },
+      "R66": {
+        "owner": "p0"
+      },
+      "R83": {
+        "owner": "p1"
+      },
+      "R18": {
+        "owner": "p2"
+      },
+      "R48": {
+        "owner": "p0"
+      },
+      "R84": {
+        "owner": "p1"
+      },
+      "R47": {
+        "owner": "p0"
+      },
+      "R89": {
+        "owner": "p0"
+      }
+    },
+    "stations": [],
+    "pendingTunnel": null,
+    "endgame": {
+      "triggered": true,
+      "triggerPlayerIndex": 0,
+      "finalTurnsRemaining": 0
+    },
+    "consecutivePasses": 0,
+    "finalScores": {
+      "players": [
+        {
+          "playerId": "p0",
+          "routePoints": 60,
+          "ticketNet": -30,
+          "ticketsCompleted": 0,
+          "stationsUsed": 0,
+          "unusedStations": 3,
+          "stationBonus": 12,
+          "longestTrailLength": 12,
+          "longestBonus": 0,
+          "total": 42
+        },
+        {
+          "playerId": "p1",
+          "routePoints": 59,
+          "ticketNet": -31,
+          "ticketsCompleted": 0,
+          "stationsUsed": 0,
+          "unusedStations": 3,
+          "stationBonus": 12,
+          "longestTrailLength": 19,
+          "longestBonus": 10,
+          "total": 50
+        },
+        {
+          "playerId": "p2",
+          "routePoints": 54,
+          "ticketNet": -34,
+          "ticketsCompleted": 0,
+          "stationsUsed": 0,
+          "unusedStations": 3,
+          "stationBonus": 12,
+          "longestTrailLength": 14,
+          "longestBonus": 0,
+          "total": 32
+        }
+      ],
+      "ranking": [
+        [
+          "p1"
+        ],
+        [
+          "p0"
+        ],
+        [
+          "p2"
+        ]
+      ]
+    },
+    "actionSeq": 254
+  },
+  "stateDigest": "2c66c844d1694c6c5cbddb20e589a28c2d17ef1a8402d1c134f3a4344c51fb5b"
+}

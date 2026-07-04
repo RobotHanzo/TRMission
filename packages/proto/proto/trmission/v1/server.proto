@@ -110,6 +110,32 @@ message EndgameTriggered {
 
 message GameEnded {}
 
+// ── Random-events frames (mirror engine EVENT_ANNOUNCED/STARTED/ENDED/BONUS). All four are
+//    PUBLIC — the events feature carries no per-recipient hidden info (unlike the ticket/hand
+//    events above). ──
+
+message RandomEventAnnounced {
+  RandomEventInfo info = 1;
+}
+
+message RandomEventStarted {
+  RandomEventInfo info = 1;
+}
+
+message RandomEventEnded {
+  string id = 1;
+  string kind = 2;
+}
+
+message RandomEventBonus {
+  string kind = 1;
+  string reason = 2;    // "HOTSPOT"|"REOPEN"|"STAMP"|"CHARTER"|"FREE_STATION"
+  string player_id = 3;
+  int32 points = 4;
+  string route_id = 5;  // "" when not applicable
+  string city_id = 6;   // "" when not applicable
+}
+
 message GameEvent {
   oneof event {
     GameStarted game_started = 1;
@@ -132,6 +158,10 @@ message GameEvent {
     TurnEnded turn_ended = 18;
     EndgameTriggered endgame_triggered = 19;
     GameEnded game_ended = 20;
+    RandomEventAnnounced random_event_announced = 21;
+    RandomEventStarted random_event_started = 22;
+    RandomEventEnded random_event_ended = 23;
+    RandomEventBonus random_event_bonus = 24;
   }
 }
 
