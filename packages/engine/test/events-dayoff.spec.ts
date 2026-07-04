@@ -107,17 +107,32 @@ describe('events — typhoon day off draw limit (3 picks)', () => {
     expect(handTotal(r3.value.state, p0)).toBe(start + 3);
   });
 
-  it('still ends the turn immediately on a FIRST-pick face-up locomotive', () => {
+  it('a FIRST-pick face-up locomotive still owes the day-off bonus card (but not a second locomotive)', () => {
     const { board, state } = dayOffState('dayoff-faceloco', {
-      market: ['LOCOMOTIVE', null, null, null, null],
+      market: ['LOCOMOTIVE', 'LOCOMOTIVE', null, null, null],
     });
     const start = handTotal(state, p0);
     const res = reduce(board, state, { t: 'DRAW_FACEUP', player: p0, slot: 0 });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
-    expect(res.value.state.turn.phase).toBe('AWAIT_ACTION');
-    expect(currentPlayerId(res.value.state)).not.toBe(p0);
+    // The locomotive forfeits the normal second draw, but the day-off's own bonus card is
+    // unaffected — the turn stays open for exactly one more pick.
+    expect(res.value.state.turn.phase).toBe('DRAWING_CARDS');
+    expect(currentPlayerId(res.value.state)).toBe(p0);
     expect(handTotal(res.value.state, p0)).toBe(start + 1);
+
+    // That bonus pick still cannot itself be a face-up locomotive (the leftover one in slot 1).
+    const stillLoco = reduce(board, res.value.state, { t: 'DRAW_FACEUP', player: p0, slot: 1 });
+    expect(stillLoco.ok).toBe(false);
+    if (!stillLoco.ok) expect(stillLoco.error.code).toBe('FACEUP_LOCO_SECOND_DRAW');
+
+    // A normal card consumes the bonus pick and ends the turn — exactly 2 cards total, not 3.
+    const final = reduce(board, res.value.state, { t: 'DRAW_BLIND', player: p0 });
+    expect(final.ok).toBe(true);
+    if (!final.ok) return;
+    expect(final.value.state.turn.phase).toBe('AWAIT_ACTION');
+    expect(currentPlayerId(final.value.state)).not.toBe(p0);
+    expect(handTotal(final.value.state, p0)).toBe(start + 2);
   });
 
   it('still rejects a face-up locomotive taken as the 2nd or 3rd pick', () => {

@@ -267,11 +267,18 @@ function applyDrawBlind(board: Board, state: GameState, player: PlayerId): Reduc
   events.push({ e: 'CARD_DRAWN_BLIND', player, card: d.card, visibility: { private: player } });
 
   // Draw-limit: 2 picks per turn, +1 while a typhoon day off is active. A blind rainbow still
-  // consumes the whole draw on the FIRST pick (variant default), independent of the day-off extra.
+  // consumes the normal BASE draw on the FIRST pick (variant default) — but the day-off's own
+  // bonus card is a separate allowance and still owed afterward.
   const drawn = (isFirst ? 0 : state.turn.cardsDrawnThisTurn) + 1;
-  const limit = 2 + dayOffExtraDraw(state);
+  const extraDraw = dayOffExtraDraw(state);
+  const limit = 2 + extraDraw;
 
   if (isFirst && d.card === 'LOCOMOTIVE' && !state.ruleParams.secondDrawAfterBlindRainbow) {
+    if (extraDraw > 0 && hasSecondDrawAvailable(next)) {
+      // Base allotment (2 picks) is spent by the locomotive; only the day-off bonus remains.
+      next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 2 } };
+      return ok({ state: next, events });
+    }
     const out = endTurn(board, next, { wasPass: false });
     return ok({ state: out.state, events: [...events, ...out.events] });
   }
@@ -328,11 +335,17 @@ function applyDrawFaceup(
 
   // Draw-limit: 2 picks per turn, +1 while a typhoon day off is active.
   const drawn = (isFirst ? 0 : state.turn.cardsDrawnThisTurn) + 1;
-  const limit = 2 + dayOffExtraDraw(state);
+  const extraDraw = dayOffExtraDraw(state);
+  const limit = 2 + extraDraw;
 
   // Taking a face-up Locomotive (only possible on the first pick — the guard above rejects it later)
-  // consumes the whole draw.
+  // consumes the base allotment (both normal picks) — but the day-off's own bonus card is a
+  // separate allowance and still owed afterward.
   if (card === 'LOCOMOTIVE') {
+    if (extraDraw > 0 && hasSecondDrawAvailable(next)) {
+      next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 2 } };
+      return ok({ state: next, events });
+    }
     const out = endTurn(board, next, { wasPass: false });
     return ok({ state: out.state, events: [...events, ...out.events] });
   }
