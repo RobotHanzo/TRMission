@@ -38,11 +38,9 @@ beforeAll(async () => {
   host = await guest('站長小明');
   rival = await guest('Rival');
   // Visibility management is part of the replayReview feature (rival flips it below).
-  await t.db
-    .collection('users')
-    .updateMany({ _id: { $in: [host.id, rival.id] } } as never, {
-      $set: { features: ['replayReview'] },
-    });
+  await t.db.collection('users').updateMany({ _id: { $in: [host.id, rival.id] } } as never, {
+    $set: { features: ['replayReview'] },
+  });
 
   const room = await request(server())
     .post('/api/v1/rooms')

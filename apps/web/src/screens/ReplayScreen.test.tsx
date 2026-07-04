@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { UserFeature } from '@trm/shared';
+import type * as RestModule from '../net/rest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '../i18n';
 import { ENGINE_VERSION, SCHEMA_VERSION, CONTENT_HASH } from '@trm/engine';
@@ -9,7 +11,7 @@ import { api, type ReplayPayload } from '../net/rest';
 
 vi.mock('../net/connection', () => ({ disconnectGame: vi.fn(), connectGame: vi.fn() }));
 vi.mock('../net/rest', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../net/rest')>()),
+  ...(await importOriginal<typeof RestModule>()),
   setOnTokenChange: vi.fn(),
   setAccessToken: vi.fn(),
   api: { replay: vi.fn(), setReplayVisibility: vi.fn() },
@@ -26,7 +28,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
-  features: ['replayReview'] as import('@trm/shared').UserFeature[],
+  features: ['replayReview'] as UserFeature[],
 } as const;
 
 const payload = (over: Partial<ReplayPayload> = {}): ReplayPayload => ({

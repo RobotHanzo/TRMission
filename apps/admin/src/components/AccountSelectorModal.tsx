@@ -29,20 +29,23 @@ export function AccountSelectorModal({
 
   useEffect(() => {
     let cancelled = false;
-    const id = setTimeout(() => {
-      setLoading(true);
-      api
-        .listUsers({ ...(q.trim() ? { q: q.trim() } : {}), filter })
-        .then((page) => {
-          if (!cancelled) setRows(page.users);
-        })
-        .catch(() => {
-          if (!cancelled) setRows([]);
-        })
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
-    }, q ? 250 : 0); // debounce typing, load immediately on open
+    const id = setTimeout(
+      () => {
+        setLoading(true);
+        api
+          .listUsers({ ...(q.trim() ? { q: q.trim() } : {}), filter })
+          .then((page) => {
+            if (!cancelled) setRows(page.users);
+          })
+          .catch(() => {
+            if (!cancelled) setRows([]);
+          })
+          .finally(() => {
+            if (!cancelled) setLoading(false);
+          });
+      },
+      q ? 250 : 0,
+    ); // debounce typing, load immediately on open
     return () => {
       cancelled = true;
       clearTimeout(id);

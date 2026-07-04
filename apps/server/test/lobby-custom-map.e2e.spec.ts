@@ -14,15 +14,19 @@ let t: TestApp;
 const server = () => t.app.getHttpServer();
 const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 
-async function registered(email: string, displayName: string): Promise<{ token: string; id: string }> {
+async function registered(
+  email: string,
+  displayName: string,
+): Promise<{ token: string; id: string }> {
   const res = await request(server())
     .post('/api/v1/auth/register')
     .send({ email, password: 'password123', displayName })
     .expect(201);
-  // Authoring + hosting custom maps is feature-gated; this suite exercises those flows.
-  await t.db
-    .collection('users')
-    .updateOne({ _id: res.body.user.id } as never, { $set: { features: ['mapBuilder'] } });
+  // Authoring/hosting custom maps AND replay browsing are feature-gated; this suite
+  // exercises the full lifecycle (author → host → play → replay), so grant both.
+  await t.db.collection('users').updateOne({ _id: res.body.user.id } as never, {
+    $set: { features: ['mapBuilder', 'replayReview'] },
+  });
   return { token: res.body.accessToken, id: res.body.user.id };
 }
 
@@ -42,8 +46,26 @@ const smallDraft = {
     { id: 'mr3', a: 'm3', b: 'm4', color: 'GRAY', length: 2, ferryLocos: 0, isTunnel: true },
     { id: 'mr4', a: 'm4', b: 'm5', color: 'GREEN', length: 1, ferryLocos: 0, isTunnel: false },
     { id: 'mr5', a: 'm5', b: 'm1', color: 'GRAY', length: 4, ferryLocos: 1, isTunnel: false },
-    { id: 'mr6', a: 'm2', b: 'm4', color: 'YELLOW', length: 3, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
-    { id: 'mr7', a: 'm2', b: 'm4', color: 'ORANGE', length: 3, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
+    {
+      id: 'mr6',
+      a: 'm2',
+      b: 'm4',
+      color: 'YELLOW',
+      length: 3,
+      ferryLocos: 0,
+      isTunnel: false,
+      doubleGroup: 'A',
+    },
+    {
+      id: 'mr7',
+      a: 'm2',
+      b: 'm4',
+      color: 'ORANGE',
+      length: 3,
+      ferryLocos: 0,
+      isTunnel: false,
+      doubleGroup: 'A',
+    },
   ],
   tickets: [
     { id: 'mt-l1', a: 'm1', b: 'm3', value: 8, deck: 'LONG' },
@@ -106,7 +128,11 @@ afterAll(() => t.close());
 describe('lobby + custom map: full lifecycle', () => {
   it('rejects starting a room on an unowned/nonexistent custom map selector', async () => {
     const a = await registered('cma1@example.com', 'A1');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     await request(server())
       .patch(`/api/v1/rooms/${room.body.code}/settings`)
       .set(auth(a.token))
@@ -192,8 +218,13 @@ describe('lobby + custom map: full lifecycle', () => {
     expect(stateDigest(rep.state)).toBe(replayRes.body.finalDigest);
 
     // The list still marks it replayable post-deletion (isReplayable falls back to mapContents).
-    const listAfter = await request(server()).get('/api/v1/history').set(auth(host.token)).expect(200);
-    expect(listAfter.body.find((g: { gameId: string }) => g.gameId === gameId).replayable).toBe(true);
+    const listAfter = await request(server())
+      .get('/api/v1/history')
+      .set(auth(host.token))
+      .expect(200);
+    expect(listAfter.body.find((g: { gameId: string }) => g.gameId === gameId).replayable).toBe(
+      true,
+    );
   });
 
   it('recovers a live custom-map game from mapContents when it is evicted from memory', async () => {
@@ -243,7 +274,10 @@ describe('lobby + custom map: full lifecycle', () => {
       if (!c) throw new Error(`unknown actor ${actor}`);
       await hub.receive(
         c.connId,
-        encodeClient(++c.seq, actionToCommand(pickAction(match.session.board, state, actor as PlayerId))),
+        encodeClient(
+          ++c.seq,
+          actionToCommand(pickAction(match.session.board, state, actor as PlayerId)),
+        ),
       );
     }
     const before = registry.get(gameId)!;

@@ -236,10 +236,7 @@ export class UserRepo implements OnModuleInit {
             : {};
     const page = cursor
       ? {
-          $or: [
-            { createdAt: { $lt: cursor.t } },
-            { createdAt: cursor.t, _id: { $lt: cursor.id } },
-          ],
+          $or: [{ createdAt: { $lt: cursor.t } }, { createdAt: cursor.t, _id: { $lt: cursor.id } }],
         }
       : {};
     return this.col

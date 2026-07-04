@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import type { UserFeature } from '@trm/shared';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '../i18n';
 import { HomeScreen } from './HomeScreen';
@@ -30,7 +31,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
-  features: [] as import('@trm/shared').UserFeature[],
+  features: [] as UserFeature[],
 } as const;
 
 const settings = {

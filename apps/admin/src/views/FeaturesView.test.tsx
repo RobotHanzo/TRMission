@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type * as RestModule from '../net/rest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '../i18n';
 import { FeaturesView } from './FeaturesView';
@@ -6,7 +7,7 @@ import { api, type UserRow } from '../net/rest';
 import { useSession } from '../store/session';
 
 vi.mock('../net/rest', async (importOriginal) => {
-  const mod = await importOriginal<typeof import('../net/rest')>();
+  const mod = await importOriginal<typeof RestModule>();
   return {
     ...mod,
     api: { ...mod.api, listFeaturedUsers: vi.fn(), listUsers: vi.fn(), putUserFeatures: vi.fn() },

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { UserFeature } from '@trm/shared';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '../i18n';
 import { RoomScreen } from './RoomScreen';
@@ -47,7 +48,7 @@ const ME = {
     locale: 'zh-Hant' as const,
     boardLayout: 'rail' as const,
   },
-  features: [] as import('@trm/shared').UserFeature[],
+  features: [] as UserFeature[],
 };
 
 const member = (userId: string, ready = false) => ({

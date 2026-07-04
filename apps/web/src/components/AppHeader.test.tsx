@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
+import type { UserFeature } from '@trm/shared';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema, Phase } from '@trm/proto';
@@ -13,7 +14,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
-  features: [] as import('@trm/shared').UserFeature[],
+  features: [] as UserFeature[],
 } as const;
 
 const gameSnap = () =>

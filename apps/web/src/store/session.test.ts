@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import type { UserFeature } from '@trm/shared';
 import { useSession } from './session';
 import { api } from '../net/rest';
 
@@ -7,7 +8,7 @@ const user = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
-  features: [] as import('@trm/shared').UserFeature[],
+  features: [] as UserFeature[],
 } as const;
 
 describe('session store: logout', () => {

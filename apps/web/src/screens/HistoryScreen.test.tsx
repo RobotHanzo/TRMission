@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { UserFeature } from '@trm/shared';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '../i18n';
 import { HistoryScreen } from './HistoryScreen';
@@ -20,7 +21,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
-  features: ['replayReview'] as import('@trm/shared').UserFeature[],
+  features: ['replayReview'] as UserFeature[],
 } as const;
 
 const row = (over: Partial<MatchSummary> = {}): MatchSummary => ({

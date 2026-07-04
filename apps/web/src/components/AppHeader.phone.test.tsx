@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import type { UserFeature } from '@trm/shared';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '../i18n';
 import { AppHeader } from './AppHeader';
@@ -27,7 +28,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
-  features: ['mapBuilder'] as import('@trm/shared').UserFeature[],
+  features: ['mapBuilder'] as UserFeature[],
 } as const;
 
 describe('AppHeader phone hamburger menu', () => {
