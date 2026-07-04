@@ -1470,65 +1470,6 @@ button.ticket-card:hover {
   font-weight: 600;
 }
 
-.toast {
-  position: fixed;
-  bottom: var(--tr-space-6);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--tr-danger);
-  color: #fff;
-  padding: var(--tr-space-2) var(--tr-space-4);
-  border-radius: 999px;
-  z-index: 60;
-  box-shadow: var(--tr-shadow);
-  /* Slide up + fade in on mount. The keyframe ends on translateX(-50%) to match the
-     resting transform so there is no jump once it finishes. The <Toast> wrapper keeps
-     the element mounted and adds .toast-exit to play tr-toast-out before it unmounts. */
-  animation: tr-toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-/* Reverse of the entrance, held on its end frame (forwards) until <Toast> unmounts. */
-.toast.toast-exit {
-  animation: tr-toast-out 200ms ease-in forwards;
-}
-@keyframes tr-toast-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 14px) scale(0.94);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
-}
-@keyframes tr-toast-out {
-  from {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, 10px) scale(0.96);
-  }
-}
-/* Informational nudge (e.g. "not enough cards"): EMU-blue, lifted clear of the red
-   rejection toast so the two never overlap if both happen to show. */
-.toast.toast-notice {
-  background: var(--tr-blue);
-  bottom: calc(var(--tr-space-6) + 48px);
-}
-/* Confirmation (e.g. "copied"): green, so it reads as a success rather than a warning. */
-.toast.toast-success {
-  background: var(--tr-ok);
-}
-/* Placed after the .toast animation rules so it wins on source order (equal specificity
-   for .toast, and matching specificity for .toast.toast-exit). */
-@media (prefers-reduced-motion: reduce) {
-  .toast,
-  .toast.toast-exit {
-    animation: none;
-  }
-}
-
 /* Spectator banner: a quiet, full-width strip telling watchers the view is read-only. */
 .spectator-banner {
   grid-column: 1 / -1;
@@ -1641,14 +1582,6 @@ button.ticket-card:hover {
     flex-wrap: nowrap;
     overflow-x: auto;
     padding-bottom: var(--tr-space-1);
-  }
-  /* Toasts clear the dock instead of covering the tab bar (fixed-position, but they render
-     inside .game so they inherit --tr-dock-h). */
-  .game--dock .toast {
-    bottom: calc(var(--tr-dock-h, 0px) + 72px);
-  }
-  .game--dock .toast.toast-notice {
-    bottom: calc(var(--tr-dock-h, 0px) + 120px);
   }
   /* Multi-card payment rows overflow a 360px-wide modal — let them wrap. */
   .card-options .payment-card {
