@@ -12,6 +12,7 @@ import {
   type CameraView,
   type PaymentSchema,
 } from '@trm/proto';
+import { SESSION_REPLACED_CLOSE_CODE } from '@trm/shared';
 
 type Command = NonNullable<MessageInitShape<typeof ClientEnvelopeSchema>['command']>;
 export type PaymentInit = MessageInitShape<typeof PaymentSchema>;
@@ -29,6 +30,8 @@ export interface SocketHandlers {
   onHistory?(events: GameEvent[], chat: { playerId: string; text: string }[]): void;
   /** Another member's camera framing, relayed for "follow the acting player". */
   onCameraMoved?(playerId: string, view: CameraView): void;
+  /** This seat was claimed by another connection; the socket will not auto-reconnect. */
+  onSessionReplaced?(): void;
 }
 
 /** A board-space camera framing (board units), the payload of a camera update. */
@@ -72,9 +75,14 @@ export class GameSocket {
       );
     };
     ws.onmessage = (ev: MessageEvent<ArrayBuffer>) => this.dispatch(new Uint8Array(ev.data));
-    ws.onclose = () => {
+    ws.onclose = (ev: CloseEvent) => {
       this.stopHeartbeat();
       if (this.closed) return;
+      if (ev.code === SESSION_REPLACED_CLOSE_CODE) {
+        this.closed = true;
+        this.handlers.onSessionReplaced?.();
+        return;
+      }
       this.handlers.onStatus?.('reconnecting');
       const delay = Math.min(30_000, 2 ** this.reconnectAttempts * 500);
       this.reconnectAttempts += 1;
