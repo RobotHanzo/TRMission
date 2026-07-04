@@ -1,6 +1,7 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
+import type { UserFeature } from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
 import { env } from '../config/env';
 import type { Locale, PublicUser, UserPreferences } from './auth.types';
@@ -26,12 +27,15 @@ export interface UserDoc {
   disabledAt?: Date;
   disabledBy?: string; // maintainer userId
   disabledReason?: string;
+  /** Dashboard-granted gated features (absent/empty = none — the default for everyone). */
+  features?: UserFeature[];
 }
 
 export const toPublicUser = (u: UserDoc): PublicUser => ({
   id: u._id,
   displayName: u.displayName,
   isGuest: u.isGuest,
+  features: u.features ?? [],
   // Merge stored prefs over the defaults so docs written before a field existed still get a
   // complete set; a legacy top-level `locale` is honoured when the prefs blob predates it.
   preferences: {
@@ -188,6 +192,29 @@ export class UserRepo implements OnModuleInit {
       { $unset: { disabledAt: '', disabledBy: '', disabledReason: '' } },
       { returnDocument: 'after' },
     );
+  }
+
+  /** Per-request feature check (projection-only point read). Used by FeatureGuard + inline gates. */
+  async hasFeature(userId: string, feature: UserFeature): Promise<boolean> {
+    const doc = await this.col.findOne({ _id: userId }, { projection: { features: 1 } });
+    return !!doc?.features?.includes(feature);
+  }
+
+  /** Replace the feature set (dashboard). Guests can never hold features — the filter refuses them. */
+  setFeatures(userId: string, features: UserFeature[]): Promise<UserDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: userId, isGuest: false },
+      features.length ? { $set: { features } } : { $unset: { features: '' } },
+      { returnDocument: 'after' },
+    );
+  }
+
+  /** Accounts holding at least one feature, newest first (dashboard Features view). */
+  listFeatured(): Promise<UserDoc[]> {
+    return this.col
+      .find({ features: { $exists: true, $ne: [] } })
+      .sort({ createdAt: -1 })
+      .toArray();
   }
 
   /**

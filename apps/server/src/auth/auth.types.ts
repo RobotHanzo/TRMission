@@ -1,3 +1,5 @@
+import type { UserFeature } from '@trm/shared';
+
 export type Locale = 'zh-Hant' | 'en';
 export type Theme = 'system' | 'light' | 'dark';
 export type BoardLayout = 'rail' | 'tray';
@@ -61,6 +63,8 @@ export interface PublicUser {
   displayName: string;
   isGuest: boolean;
   preferences: UserPreferences;
+  /** Per-account gated features (dashboard-granted). Empty for everyone by default. */
+  features: UserFeature[];
   email?: string;
   avatarUrl?: string;
 }
