@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { apiSchema } from '../openapi/openapi';
 import { AccessTokenGuard } from '../auth/access-token.guard';
@@ -9,8 +19,11 @@ import { RequirePermission } from './require-permission.decorator';
 import { DashboardUsersService } from './dashboard-users.service';
 import {
   DashboardUserDetailSchema,
+  FeaturedUsersSchema,
   ModerationReasonDto,
   ModerationReasonSchema,
+  UserFeaturesPutDto,
+  UserFeaturesPutSchema,
   UsersListQueryDto,
   UsersListSchema,
 } from './dashboard.schemas';
@@ -28,6 +41,16 @@ export class DashboardUsersController {
   @ApiResponse({ status: 200, schema: apiSchema(UsersListSchema) })
   list(@Query() query: UsersListQueryDto) {
     return this.users.list(query);
+  }
+
+  // Declared BEFORE ':id' — express matches in declaration order, so 'features' must not
+  // be captured as a user id.
+  @Get('features')
+  @RequirePermission('users.features')
+  @ApiOperation({ summary: 'Accounts holding at least one gated feature' })
+  @ApiResponse({ status: 200, schema: apiSchema(FeaturedUsersSchema) })
+  listFeatured() {
+    return this.users.listFeatured();
   }
 
   @Get(':id')
@@ -66,5 +89,24 @@ export class DashboardUsersController {
   @ApiResponse({ status: 200, schema: apiSchema(DashboardUserDetailSchema) })
   enable(@Param('id') id: string, @CurrentUser() actor: AuthUser) {
     return this.users.enable(actor, id);
+  }
+
+  @Put(':id/features')
+  @HttpCode(200)
+  @RequirePermission('users.features')
+  @ApiOperation({
+    summary: "Replace a registered account's gated features (replayReview / mapBuilder)",
+    description:
+      'Grants apply on the very next request (features are read per request, never from ' +
+      'token claims). Guests can never hold features.',
+  })
+  @ApiBody({ schema: apiSchema(UserFeaturesPutSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(DashboardUserDetailSchema) })
+  setFeatures(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthUser,
+    @Body() body: UserFeaturesPutDto,
+  ) {
+    return this.users.setFeatures(actor, id, body.features);
   }
 }

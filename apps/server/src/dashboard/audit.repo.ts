@@ -6,6 +6,7 @@ export type DashboardAuditAction =
   | 'bootstrap.grant'
   | 'user.ban'
   | 'user.unban'
+  | 'user.features'
   | 'game.terminate'
   | 'room.close'
   | 'maintainer.grant'

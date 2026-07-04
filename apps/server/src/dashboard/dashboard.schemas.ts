@@ -1,12 +1,13 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { DASHBOARD_PERMISSIONS, DASHBOARD_ROLES } from '@trm/shared';
+import { DASHBOARD_PERMISSIONS, DASHBOARD_ROLES, USER_FEATURES } from '@trm/shared';
 
 // zod is the single source for both validation (ZodValidationPipe + DTOs) and the
 // OpenAPI schemas (apiSchema()), per the auth/maps modules.
 
 export const DashboardRoleSchema = z.enum(DASHBOARD_ROLES);
 export const DashboardPermissionSchema = z.enum(DASHBOARD_PERMISSIONS);
+export const UserFeatureSchema = z.enum(USER_FEATURES);
 
 export const DashboardMeSchema = z.object({
   userId: z.string(),
@@ -92,6 +93,7 @@ export const DashboardUserRowSchema = z.object({
   isGuest: z.boolean(),
   avatarUrl: z.string().optional(),
   oauthProviders: z.array(z.string()),
+  features: z.array(UserFeatureSchema),
   createdAt: z.string(),
   disabledAt: z.string().optional(),
 });
@@ -109,6 +111,15 @@ export const DashboardUserDetailSchema = DashboardUserRowSchema.extend({
 export const UsersListSchema = z.object({
   users: z.array(DashboardUserRowSchema),
   nextCursor: z.string().nullable(),
+});
+
+export const UserFeaturesPutSchema = z.object({
+  features: z.array(UserFeatureSchema).max(USER_FEATURES.length),
+});
+export class UserFeaturesPutDto extends createZodDto(UserFeaturesPutSchema) {}
+
+export const FeaturedUsersSchema = z.object({
+  users: z.array(DashboardUserRowSchema),
 });
 
 // ---- games / rooms ------------------------------------------------------------------

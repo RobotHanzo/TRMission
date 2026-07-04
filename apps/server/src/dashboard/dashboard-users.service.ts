@@ -1,9 +1,11 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import type { UserFeature } from '@trm/shared';
 import type { AuthUser } from '../auth/auth.types';
 import { UserRepo, type UserDoc } from '../auth/user.repo';
 import { SessionRepo } from '../auth/session.repo';
@@ -24,6 +26,7 @@ const toRow = (u: UserDoc) => ({
   isGuest: u.isGuest,
   ...(u.avatarUrl ? { avatarUrl: u.avatarUrl } : {}),
   oauthProviders: Object.keys(u.oauth ?? {}),
+  features: u.features ?? [],
   createdAt: u.createdAt.toISOString(),
   ...(u.disabledAt ? { disabledAt: u.disabledAt.toISOString() } : {}),
 });
@@ -103,5 +106,27 @@ export class DashboardUsersService {
     await this.users.clearDisabled(userId);
     await this.audit.log(actor, 'user.unban', { type: 'user', id: userId });
     return this.detail(userId);
+  }
+
+  /** Replace a registered account's gated-feature set (dashboard `users.features`). */
+  async setFeatures(actor: AuthUser, userId: string, features: UserFeature[]) {
+    const target = await this.users.findById(userId);
+    if (!target) throw new NotFoundException('user not found');
+    if (target.isGuest) {
+      throw new BadRequestException('features cannot be granted to guest accounts');
+    }
+    const deduped = [...new Set(features)];
+    await this.users.setFeatures(userId, deduped);
+    await this.audit.log(
+      actor,
+      'user.features',
+      { type: 'user', id: userId },
+      { before: target.features ?? [], after: deduped },
+    );
+    return this.detail(userId);
+  }
+
+  async listFeatured() {
+    return { users: (await this.users.listFeatured()).map(toRow) };
   }
 }
