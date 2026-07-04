@@ -168,6 +168,14 @@ export class LobbyService {
     return toView(r);
   }
 
+  /** Any seated member casts (or changes) their advisory rematch vote. */
+  async voteRematch(code: string, user: AuthUser, vote: boolean): Promise<RoomView> {
+    const r = await this.rooms.setRematchVote(code, user.userId, vote);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    return toView(r);
+  }
+
   /** Host adds a computer player of the given difficulty into a free seat. */
   async addBot(code: string, user: AuthUser, difficulty: BotDifficulty): Promise<RoomView> {
     const botId = `${BOT_ID_PREFIX}${randomUUID()}`;

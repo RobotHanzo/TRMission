@@ -9,10 +9,12 @@ import {
   ReadyDto,
   AddBotDto,
   UpdateSettingsDto,
+  RematchVoteDto,
   CreateRoomSchema,
   ReadySchema,
   AddBotSchema,
   UpdateSettingsSchema,
+  RematchVoteSchema,
   RoomViewSchema,
   TicketResultSchema,
 } from './lobby.schemas';
@@ -72,6 +74,19 @@ export class LobbyController {
   @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
   ready(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: ReadyDto) {
     return this.lobby.ready(code.toUpperCase(), user, body.ready);
+  }
+
+  @Post(':code/rematch-vote')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Cast (or change) your advisory "play again" vote' })
+  @ApiBody({ schema: apiSchema(RematchVoteSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  rematchVote(
+    @CurrentUser() user: AuthUser,
+    @Param('code') code: string,
+    @Body() body: RematchVoteDto,
+  ) {
+    return this.lobby.voteRematch(code.toUpperCase(), user, body.wantsRematch);
   }
 
   @Post(':code/bots')

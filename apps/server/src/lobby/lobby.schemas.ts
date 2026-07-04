@@ -6,6 +6,7 @@ const botDifficulty = z.enum(['EASY', 'MEDIUM', 'HARD']);
 export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).max(5).optional() });
 export const ReadySchema = z.object({ ready: z.boolean() });
 export const AddBotSchema = z.object({ difficulty: botDifficulty });
+export const RematchVoteSchema = z.object({ wantsRematch: z.boolean() });
 
 export const MapSelectorSchema = z.discriminatedUnion('source', [
   z.object({ source: z.literal('official'), mapId: z.string().min(1) }),
@@ -27,6 +28,7 @@ export class CreateRoomDto extends createZodDto(CreateRoomSchema) {}
 export class ReadyDto extends createZodDto(ReadySchema) {}
 export class AddBotDto extends createZodDto(AddBotSchema) {}
 export class UpdateSettingsDto extends createZodDto(UpdateSettingsSchema) {}
+export class RematchVoteDto extends createZodDto(RematchVoteSchema) {}
 
 export const RoomMemberSchema = z.object({
   userId: z.string(),
@@ -36,6 +38,7 @@ export const RoomMemberSchema = z.object({
   ready: z.boolean(),
   isBot: z.boolean().optional(),
   difficulty: botDifficulty.optional(),
+  wantsRematch: z.boolean().optional(),
 });
 export const RoomViewSchema = z.object({
   code: z.string(),

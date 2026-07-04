@@ -43,6 +43,9 @@ export interface RoomMember {
   /** Bot members are computer-controlled; they are always ready and never connect. */
   isBot?: boolean;
   difficulty?: BotDifficulty;
+  /** Advisory "I want to play again" vote, meaningful only while status === 'STARTED'.
+   *  Reset to false whenever a game starts or a rematch resets the room to LOBBY. */
+  wantsRematch?: boolean;
 }
 
 export interface RoomDoc {
@@ -347,6 +350,22 @@ export class RoomRepo implements OnModuleInit {
     await this.col.updateOne(
       { _id: code },
       { $set: { members: remaining, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /** Any seated member (not just the host) records their advisory rematch preference. */
+  async setRematchVote(
+    code: string,
+    userId: string,
+    vote: boolean,
+  ): Promise<RoomDoc | 'not_found' | 'not_member'> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (!room.members.some((m) => m.userId === userId)) return 'not_member';
+    await this.col.updateOne(
+      { _id: code, 'members.userId': userId },
+      { $set: { 'members.$.wantsRematch': vote, updatedAt: new Date() } },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
