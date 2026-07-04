@@ -115,6 +115,10 @@ export interface GameStorePort {
   ): Promise<void>;
   /** At game over: mark COMPLETED and archive a match-history record. */
   recordCompletion(gameId: string, finalState: GameState): Promise<void>;
+  /** Current status of a game, or undefined if unknown. Used by rematch to confirm a game has
+   *  actually finished even across a server restart (the hub's in-memory registry is the fast
+   *  path; this is the durable fallback). */
+  getStatus(gameId: string): Promise<GameDoc['status'] | undefined>;
   /** Record that a user spectated this game (idempotent; no-op for unknown games). */
   addSpectator(gameId: string, userId: string): Promise<void>;
   loadForRecovery(gameId: string): Promise<RecoveryData | null>;

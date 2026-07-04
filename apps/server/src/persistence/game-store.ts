@@ -147,6 +147,11 @@ export class MongoGameStore implements GameStorePort {
     );
   }
 
+  async getStatus(gameId: string): Promise<GameDoc['status'] | undefined> {
+    const game = await this.games.findOne({ _id: gameId }, { projection: { status: 1 } });
+    return game?.status;
+  }
+
   async addSpectator(gameId: string, userId: string): Promise<void> {
     await this.games.updateOne(
       { _id: gameId },

@@ -34,6 +34,9 @@ class FlakyStore implements GameStorePort {
     }
   }
   async recordCompletion(): Promise<void> {}
+  async getStatus(): Promise<undefined> {
+    return undefined;
+  }
   async addSpectator(): Promise<void> {}
   async loadForRecovery(): Promise<null> {
     return null;

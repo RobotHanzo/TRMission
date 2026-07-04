@@ -197,6 +197,20 @@ export class GameHub {
     this.registry.remove(gameId);
   }
 
+  /**
+   * Whether a game has actually finished — checked authoritatively server-side before rematch is
+   * allowed to reset a room, never inferred from client UI state. The in-memory registry is the
+   * fast path (a completed match stays resident until evictMatch removes it, which never happens
+   * on natural completion); the store is a durable fallback for the rare case where the server
+   * restarted between game-over and the rematch call.
+   */
+  async isGameOver(gameId: string): Promise<boolean> {
+    const match = this.registry.get(gameId);
+    if (match) return match.session.phase === 'GAME_OVER';
+    const status = await this.store?.getStatus(gameId);
+    return status === 'COMPLETED';
+  }
+
   openConnection(id: string, sink: Sink): Connection {
     const conn = new Connection(id, sink);
     this.connections.set(id, conn);

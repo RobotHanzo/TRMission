@@ -369,4 +369,27 @@ export class RoomRepo implements OnModuleInit {
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
+
+  /** Host-only: flip a finished room back to LOBBY for another round. CAS on the exact gameId
+   *  being rematched so a stale/duplicate call is a clean no-op rather than clobbering a room
+   *  that's already moved on to a different game. */
+  async resetToLobby(code: string, hostId: string, expectedGameId: string): Promise<boolean> {
+    const room = await this.col.findOne({
+      _id: code,
+      hostId,
+      status: 'STARTED',
+      gameId: expectedGameId,
+    });
+    if (!room) return false;
+    const members = room.members.map((m) => ({
+      ...m,
+      ready: m.isBot === true,
+      wantsRematch: false,
+    }));
+    const res = await this.col.updateOne(
+      { _id: code, hostId, status: 'STARTED', gameId: expectedGameId },
+      { $set: { status: 'LOBBY', members, updatedAt: new Date() }, $unset: { gameId: '', seed: '' } },
+    );
+    return res.modifiedCount === 1;
+  }
 }

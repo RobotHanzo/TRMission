@@ -275,6 +275,22 @@ export class LobbyService {
     return { gameId, ticket: this.ticketFor(gameId, user.userId, this.seatOf(room, user.userId)) };
   }
 
+  /** Host-only: reset a finished game's room back to LOBBY for another round. */
+  async rematch(code: string, user: AuthUser): Promise<RoomView> {
+    const room = await this.require(code);
+    if (room.hostId !== user.userId) throw new ForbiddenException('only the host can rematch');
+    if (room.status !== 'STARTED' || !room.gameId) {
+      throw new BadRequestException('no game to rematch');
+    }
+    if (!(await this.hub.isGameOver(room.gameId))) {
+      throw new BadRequestException('game is still in progress');
+    }
+    if (!(await this.rooms.resetToLobby(code, user.userId, room.gameId))) {
+      throw new BadRequestException('could not rematch (already rematched?)');
+    }
+    return this.get(code);
+  }
+
   /** Mint a spectator ws-ticket (seat -1) for a started room, if it allows spectating. */
   async spectateTicket(code: string, user: AuthUser): Promise<TicketResult> {
     await this.assertNotDisabled(user.userId);
