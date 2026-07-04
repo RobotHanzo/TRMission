@@ -1,10 +1,8 @@
-import { useMemo, useRef, type CSSProperties } from 'react';
+import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { BOW_LIMIT } from '@trm/map-data';
-import { CARD_COLOR_TOKENS, GRAY_TOKEN } from '../../../theme/colors';
-import { CustomGeography } from '../../../components/Geography';
-import { RouteShape, FerryLocoGradientDef } from '../../../components/RouteShape';
+import { MapScene } from '../../../components/MapScene';
 import { buildRouteGeometryFor } from '../../../game/routeGeometry';
 import type { RouteDraft } from '../../../net/rest';
 import { clientToBoardPoint } from './canvasProjection';
@@ -15,11 +13,6 @@ import { useEditorStore } from './store';
 import '../../../styles/game.css';
 
 const DEFAULT_VIEW = { x: 0, y: 0, w: 100, h: 100 };
-
-const colorOf = (c: string): string =>
-  c === 'GRAY'
-    ? GRAY_TOKEN.hex
-    : (CARD_COLOR_TOKENS[c as keyof typeof CARD_COLOR_TOKENS]?.hex ?? '#888');
 
 export interface CurveHandle {
   routeId: string;
@@ -42,12 +35,11 @@ export interface EditorCanvasProps {
 }
 
 /**
- * The shared SVG workspace for the Stops/Routes stages: pan/zoom (matching the live board's
- * feel) and the exact live-board cartography — `RouteShape`'s curved roadbed/cars/tunnel-ties/
- * ferry-pips and the `city-dot`/`city-hub`/`city-label` markers, driven by the same
- * `game/routeGeometry.ts` curve/bow/hub math (via `buildRouteGeometryFor`, its draft-content
- * escape hatch) — so an authored map previews exactly as it will play, independent of the
- * live-game rendering singleton (game/catalog.ts).
+ * The shared SVG workspace for the Stops/Routes/Curves stages: pan/zoom (matching the live
+ * board's feel) around the SAME MapScene the live board renders — the editor variation is
+ * nothing but props (draft content, selection/highlight classes, always-on hit paths, zh
+ * labels) plus the curve-apex handle as an overlay child — so an authored map previews
+ * exactly as it will play, independent of the live-game rendering singleton (game/catalog.ts).
  */
 export function EditorCanvas({
   onBackgroundClick,
@@ -62,7 +54,6 @@ export function EditorCanvas({
   const svgRef = useRef<SVGSVGElement | null>(null);
   const zoomVarRef = useRef<HTMLDivElement | null>(null);
   const view = draft.geography?.baseView ?? DEFAULT_VIEW;
-  const viewBox = `${view.x} ${view.y} ${view.w} ${view.h}`;
 
   const routesForGeometry = useMemo(() => {
     if (!curveHandle || curveHandle.bow === null) return draft.routes;
@@ -130,83 +121,36 @@ export function EditorCanvas({
           wrapperStyle={{ width: '100%', height: '100%' }}
           contentStyle={{ width: '100%', height: '100%' }}
         >
-          <svg
-            ref={svgRef}
-            className="board editor-canvas"
-            viewBox={viewBox}
-            role="img"
-            aria-label={t('builder.canvasLabel')}
-            onClick={handleBackgroundClick}
+          <MapScene
+            svgRef={svgRef}
+            className="editor-canvas"
+            cities={draft.cities}
+            routes={draft.routes}
+            geometry={geometry}
+            hubs={hubs}
+            geography={draft.geography ?? null}
+            view={view}
+            ariaLabel={t('builder.canvasLabel')}
+            onSvgClick={handleBackgroundClick}
+            alwaysHitRoutes
+            cityHitArea="group"
+            cityLabel={(c) => c.nameZh}
+            routeClass={(r) =>
+              'editor-route' +
+              (selection?.kind === 'route' && selection.id === r.id
+                ? ' editor-route--selected'
+                : '')
+            }
+            cityClass={(c) =>
+              'editor-city' +
+              (selection?.kind === 'city' && selection.id === c.id
+                ? ' editor-city--selected'
+                : '') +
+              (highlightCities?.has(c.id) ? ' editor-city--highlighted' : '')
+            }
+            onRouteClick={onRouteClick}
+            onCityClick={onCityClick}
           >
-            <FerryLocoGradientDef />
-            {draft.geography && <CustomGeography geography={draft.geography} />}
-            {draft.routes.map((r) => {
-              const g = geometry.get(r.id);
-              if (!g) return null;
-              const isFerry = r.ferryLocos > 0;
-              const selected = selection?.kind === 'route' && selection.id === r.id;
-              const cls =
-                'route editor-route' +
-                (r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '') +
-                (selected ? ' editor-route--selected' : '');
-              const style: CSSProperties =
-                g.perp.x || g.perp.y
-                  ? {
-                      transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
-                    }
-                  : {};
-              return (
-                <g
-                  key={r.id}
-                  className={cls}
-                  style={style}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRouteClick?.(r.id);
-                  }}
-                >
-                  <RouteShape
-                    geometry={g}
-                    isTunnel={r.isTunnel}
-                    isFerry={isFerry}
-                    ferryLocos={r.ferryLocos}
-                    length={r.length}
-                    fill={colorOf(r.color)}
-                  />
-                  <path className="hit" d={g.path} />
-                </g>
-              );
-            })}
-            {draft.cities.map((c) => {
-              const isHub = hubs.has(c.id);
-              const selected = selection?.kind === 'city' && selection.id === c.id;
-              const highlighted = highlightCities?.has(c.id);
-              const cls =
-                'city editor-city' +
-                (c.isIsland ? ' island' : '') +
-                (isHub ? ' hub' : '') +
-                (selected ? ' editor-city--selected' : '') +
-                (highlighted ? ' editor-city--highlighted' : '');
-              return (
-                <g
-                  key={c.id}
-                  className={cls}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCityClick?.(c.id);
-                  }}
-                >
-                  {isHub ? (
-                    <rect className="city-hub" transform={`translate(${c.x} ${c.y})`} />
-                  ) : (
-                    <circle className="city-dot" cx={c.x} cy={c.y} />
-                  )}
-                  <text className="city-label" x={c.x} y={c.y}>
-                    {c.nameZh}
-                  </text>
-                </g>
-              );
-            })}
             {curveHandle && geometry.get(curveHandle.routeId) && (
               <circle
                 className="curve-handle"
@@ -216,7 +160,7 @@ export function EditorCanvas({
                 onClick={(e) => e.stopPropagation()}
               />
             )}
-          </svg>
+          </MapScene>
         </TransformComponent>
       </TransformWrapper>
     </div>
