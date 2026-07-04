@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Crop, Eraser, MapPin, Route, Ticket, SlidersHorizontal, Share2, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, Crop, Eraser, MapPin, Route, Spline, Ticket, SlidersHorizontal, Share2, type LucideIcon } from 'lucide-react';
 import { useUi } from '../../../store/ui';
 import { useEditorStore, STAGES, type Stage } from './store';
 import { ValidationPanel } from './ValidationPanel';
@@ -8,6 +8,7 @@ import { CropStage } from './stages/CropStage';
 import { TrimStage } from './stages/TrimStage';
 import { StopsStage } from './stages/StopsStage';
 import { RoutesStage } from './stages/RoutesStage';
+import { CurvesStage } from './stages/CurvesStage';
 import { MissionsStage } from './stages/MissionsStage';
 import { RulesStage } from './stages/RulesStage';
 import { ShareStage } from './stages/ShareStage';
@@ -20,6 +21,7 @@ const STAGE_LABEL_KEY: Record<Stage, string> = {
   trim: 'builder.stageTrim',
   stops: 'builder.stageStops',
   routes: 'builder.stageRoutes',
+  curves: 'builder.stageCurves',
   missions: 'builder.stageMissions',
   rules: 'builder.stageRules',
   share: 'builder.stageShare',
@@ -30,6 +32,7 @@ const STAGE_ICON: Record<Stage, LucideIcon> = {
   trim: Eraser,
   stops: MapPin,
   routes: Route,
+  curves: Spline,
   missions: Ticket,
   rules: SlidersHorizontal,
   share: Share2,
@@ -153,6 +156,7 @@ export default function EditorScreen() {
           {stage === 'trim' && hasGeography && <TrimStage />}
           {stage === 'stops' && hasGeography && <StopsStage />}
           {stage === 'routes' && hasGeography && <RoutesStage />}
+          {stage === 'curves' && hasGeography && <CurvesStage />}
           {stage === 'missions' && hasGeography && <MissionsStage />}
           {stage === 'rules' && hasGeography && <RulesStage />}
           {stage === 'share' && hasGeography && <ShareStage />}

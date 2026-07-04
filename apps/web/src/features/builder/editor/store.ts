@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { BOW_LIMIT } from '@trm/map-data';
 import { api, type CityDraft, type MapDetail, type MapDraft, type MapRulesDraft, type RouteDraft, type TicketDraft } from '../../../net/rest';
 
-export type Stage = 'crop' | 'trim' | 'stops' | 'routes' | 'missions' | 'rules' | 'share';
-export const STAGES: readonly Stage[] = ['crop', 'trim', 'stops', 'routes', 'missions', 'rules', 'share'];
+export type Stage = 'crop' | 'trim' | 'stops' | 'routes' | 'curves' | 'missions' | 'rules' | 'share';
+export const STAGES: readonly Stage[] = ['crop', 'trim', 'stops', 'routes', 'curves', 'missions', 'rules', 'share'];
 
 export type Selection =
   | { kind: 'city'; id: string }
