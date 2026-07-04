@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Layers } from 'lucide-react';
-import { CardColor as PbCardColor, type GameSnapshot } from '@trm/proto';
+import { CardColor as PbCardColor, Phase, type GameSnapshot } from '@trm/proto';
 import { tokenForPb } from '../game/cards';
 import { handFromCounts, handTotal } from '../game/payments';
 import { LOCOMOTIVE_GRADIENT } from '../theme/colors';
@@ -20,8 +20,11 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
   const coveredSlots = useAnimationsStore((s) => s.coveredMarketSlots);
   // A blind draw is legal while ANY card remains in the draw pool: an empty deck reshuffles the
   // discard back in. Gating on deckCount alone hard-locks a player late-game (deck spent, discard
-  // full of claimed cards) — fatally so mid-draw, where DRAWING_CARDS has no PASS escape.
+  // full of claimed cards). The engine guarantees DRAWING_CARDS is never entered unless a second
+  // draw is actually possible (blind pool or a non-loco face-up card), so gating on drawPool alone
+  // is safe here too — if the pool is empty mid-draw, a market slot is always the legal escape.
   const drawPool = snapshot.deckCount + handTotal(handFromCounts(snapshot.discard));
+  const isSecondDraw = snapshot.phase === Phase.DRAWING_CARDS;
   return (
     <div className="market">
       <button
@@ -53,7 +56,8 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
               }
               data-anim="market-slot"
               data-slot={slot}
-              disabled={!canDraw || empty}
+              // A face-up Locomotive may not be taken as the second draw (engine rule).
+              disabled={!canDraw || empty || (isSecondDraw && isLoco)}
               onClick={() => onDrawFaceUp(slot)}
               onAnimationEnd={() => clearMarketFlip(slot)}
               style={

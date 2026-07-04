@@ -9,7 +9,7 @@ import type { GameState } from './types/state';
 import type { Action, Payment } from './types/actions';
 import type { GameEvent } from './types/events';
 import { drawOne, refillMarket } from './deck';
-import { emptyHand } from './hand';
+import { emptyHand, totalCards } from './hand';
 import type { CardCounts } from './hand';
 import { validateRoutePayment, validateStationPayment } from './payments';
 import { currentPlayerId, endTurn } from './turn';
@@ -227,6 +227,12 @@ function applyDrawTickets(state: GameState, player: PlayerId): ReduceResult {
 
 // ─────────────────────────────────────────────── drawing cards ──────────────────────────────
 
+/** Is there any card left anywhere a second draw could take (blind pool or a non-loco face-up)? */
+function hasSecondDrawAvailable(state: GameState): boolean {
+  if (state.deck.length > 0 || totalCards(state.discard) > 0) return true;
+  return state.market.some((c) => c !== null && c !== 'LOCOMOTIVE');
+}
+
 function applyDrawBlind(board: Board, state: GameState, player: PlayerId): ReduceResult {
   const d = drawOne(state.deck, state.discard, state.rng);
   const isFirst = state.turn.phase === 'AWAIT_ACTION';
@@ -245,6 +251,13 @@ function applyDrawBlind(board: Board, state: GameState, player: PlayerId): Reduc
   if (isFirst) {
     if (d.card === 'LOCOMOTIVE' && !state.ruleParams.secondDrawAfterBlindRainbow) {
       // Variant default: a blind rainbow consumes the whole draw — end the turn now.
+      const out = endTurn(board, next, { wasPass: false });
+      return ok({ state: out.state, events: [...events, ...out.events] });
+    }
+    if (!hasSecondDrawAvailable(next)) {
+      // Deck, discard, and market are all exhausted/unusable: a second draw is provably
+      // impossible, and DRAWING_CARDS has no PASS escape — end the turn now rather than
+      // stranding the player on a forced draw they can never make.
       const out = endTurn(board, next, { wasPass: false });
       return ok({ state: out.state, events: [...events, ...out.events] });
     }
@@ -298,6 +311,13 @@ function applyDrawFaceup(
 
   // Taking a face-up Locomotive (only possible on the first draw) consumes the whole draw.
   if (card === 'LOCOMOTIVE' || !isFirst) {
+    const out = endTurn(board, next, { wasPass: false });
+    return ok({ state: out.state, events: [...events, ...out.events] });
+  }
+  if (!hasSecondDrawAvailable(next)) {
+    // Deck, discard, and market are all exhausted/unusable: a second draw is provably
+    // impossible, and DRAWING_CARDS has no PASS escape — end the turn now rather than
+    // stranding the player on a forced draw they can never make.
     const out = endTurn(board, next, { wasPass: false });
     return ok({ state: out.state, events: [...events, ...out.events] });
   }
