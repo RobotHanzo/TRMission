@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
+import type { RoomMember } from '../net/rest';
 import { useGameStore } from '../store/game';
 import { useUi } from '../store/ui';
 import { routeById, ticketById } from '../game/content';
@@ -56,6 +57,12 @@ export interface GameStageProps {
   /** The live socket or the local sandbox; null briefly while a live game (re)connects. */
   commands: GameCommands | null;
   onLeave: () => void;
+  /** Room membership + advisory rematch votes, for the post-game-over ScoreBoard. Undefined in
+   *  sandbox/tutorial/replay contexts, where there's no room to rematch. */
+  isHost?: boolean | undefined;
+  rematchMembers?: RoomMember[] | undefined;
+  onVoteRematch?: ((wantsRematch: boolean) => void) | undefined;
+  onPlayAgain?: (() => void) | undefined;
   /** Tutorial / encyclopedia overlay rendered above the board + HUD. */
   overlay?: ReactNode;
   /** Cities the tutorial wants glowed this beat (merged with any ticket-endpoint highlights). */
@@ -74,6 +81,10 @@ export function GameStage({
   snapshot,
   commands,
   onLeave,
+  isHost,
+  rematchMembers,
+  onVoteRematch,
+  onPlayAgain,
   overlay,
   spotlightCities,
   sandbox,
@@ -472,7 +483,16 @@ export function GameStage({
           }}
         />
       )}
-      {phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={onLeave} />}
+      {phase === Phase.GAME_OVER && (
+        <ScoreBoard
+          snapshot={snapshot}
+          onLeave={onLeave}
+          isHost={isHost}
+          members={rematchMembers}
+          onVote={onVoteRematch}
+          onPlayAgain={onPlayAgain}
+        />
+      )}
       <Toast message={notice} variant="toast-notice" />
       <Toast
         message={

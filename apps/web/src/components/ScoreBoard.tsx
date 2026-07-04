@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Crown, Bot, Eye, Map as MapIcon, X } from 'lucide-react';
 import type { GameSnapshot, PlayerFinal } from '@trm/proto';
+import type { RoomMember } from '../net/rest';
 import { SEAT_COLORS } from '../theme/colors';
 import { seatByPlayer } from '../game/view';
 import { usePlayerName } from '../game/playerName';
@@ -30,7 +31,21 @@ function ticketSplit(pf: PlayerFinal): {
 
 type TicketModal = { kind: 'completed' | 'failed'; playerId: string };
 
-export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLeave(): void }) {
+export function ScoreBoard({
+  snapshot,
+  onLeave,
+  isHost,
+  members,
+  onVote,
+  onPlayAgain,
+}: {
+  snapshot: GameSnapshot;
+  onLeave(): void;
+  isHost?: boolean | undefined;
+  members?: RoomMember[] | undefined;
+  onVote?: ((wantsRematch: boolean) => void) | undefined;
+  onPlayAgain?: (() => void) | undefined;
+}) {
   const { t } = useTranslation();
   const playerName = usePlayerName();
   const setRouteReveal = useAnimationsStore((s) => s.setRouteReveal);
@@ -109,6 +124,10 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
       ? ticketSplit(modalPlayer).completed
       : ticketSplit(modalPlayer).failed
     : [];
+
+  const myVote = members?.find((m) => m.userId === snapshot.you?.playerId)?.wantsRematch ?? false;
+  const humanMembers = members?.filter((m) => !m.isBot) ?? [];
+  const rematchCount = humanMembers.filter((m) => m.wantsRematch).length;
 
   return (
     <div className="modal-backdrop">
@@ -204,6 +223,25 @@ export function ScoreBoard({ snapshot, onLeave }: { snapshot: GameSnapshot; onLe
             </tbody>
           </table>
         </div>
+        {members && snapshot.you && (onVote || onPlayAgain) && (
+          <div className="row between rematch-row">
+            <span className="muted">
+              {t('rematchTally', { count: rematchCount, total: humanMembers.length })}
+            </span>
+            <div className="row">
+              {onVote && (
+                <button className={myVote ? 'success' : ''} onClick={() => onVote(!myVote)}>
+                  🔁 {t('wantRematch')}
+                </button>
+              )}
+              {isHost && onPlayAgain && (
+                <button className="primary" onClick={onPlayAgain}>
+                  {t('playAgain')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         <div className="scoreboard-actions">
           <button onClick={() => setDismissed(true)}>
             <MapIcon size={14} aria-hidden /> {t('inspectMap')}

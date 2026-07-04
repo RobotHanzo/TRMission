@@ -195,6 +195,9 @@ const resources = {
       leaveGame: '離開遊戲',
       leaveConfirmTitle: '離開？',
       leaveConfirmBody: '確定要離開嗎？',
+      playAgain: '再玩一局',
+      wantRematch: '想再玩一局',
+      rematchTally: '{{count}}/{{total}} 人想再玩一局',
 
       fanfareTitle: '任務完成',
       fanfareLong: '長途任務！',
@@ -611,6 +614,9 @@ const resources = {
       leaveGame: 'Leave game',
       leaveConfirmTitle: 'Leave?',
       leaveConfirmBody: 'Are you sure you want to leave?',
+      playAgain: 'Play Again',
+      wantRematch: 'Want a rematch',
+      rematchTally: '{{count}}/{{total}} want a rematch',
 
       fanfareTitle: 'Ticket Complete',
       fanfareLong: 'Long Haul!',

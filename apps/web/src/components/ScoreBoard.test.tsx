@@ -7,6 +7,7 @@ import i18n from '../i18n';
 import { ScoreBoard } from './ScoreBoard';
 import { useAnimations } from '../store/animations';
 import { TICKETS, ROUTES, ticketById } from '../game/content';
+import type { RoomMember } from '../net/rest';
 
 const done = TICKETS[0]!.id as string;
 const failed = TICKETS[1]!.id as string;
@@ -114,5 +115,72 @@ describe('ScoreBoard', () => {
     fireEvent.click(screen.getByText('查看地圖'));
     fireEvent.click(screen.getByText('離開遊戲'));
     expect(onLeave).toHaveBeenCalledTimes(1);
+  });
+});
+
+const member = (over: Partial<RoomMember> = {}): RoomMember => ({
+  userId: 'p0',
+  displayName: 'Host',
+  isGuest: false,
+  seat: 0,
+  ready: false,
+  ...over,
+});
+
+describe('ScoreBoard rematch', () => {
+  beforeEach(() => {
+    useAnimations.getState().reset();
+    void i18n.changeLanguage('zh-Hant');
+  });
+
+  it('lets a viewer toggle their rematch vote', () => {
+    const onVote = vi.fn();
+    const members = [member({ userId: 'p0' }), member({ userId: 'bot:1', isBot: true, ready: true })];
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} members={members} onVote={onVote} />);
+    fireEvent.click(screen.getByRole('button', { name: /想再玩一局/ }));
+    expect(onVote).toHaveBeenCalledWith(true);
+  });
+
+  it('shows the tally excluding bots', () => {
+    const members = [
+      member({ userId: 'p0', wantsRematch: true }),
+      member({ userId: 'bot:1', isBot: true, ready: true }),
+    ];
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} members={members} onVote={() => {}} />);
+    expect(screen.getByText('1/1 人想再玩一局')).toBeInTheDocument();
+  });
+
+  it('only shows Play Again to the host', () => {
+    const members = [member({ userId: 'p0' })];
+    const onPlayAgain = vi.fn();
+    const { rerender } = render(
+      <ScoreBoard
+        snapshot={snap}
+        onLeave={() => {}}
+        members={members}
+        onVote={() => {}}
+        onPlayAgain={onPlayAgain}
+        isHost={false}
+      />,
+    );
+    expect(screen.queryByRole('button', { name: '再玩一局' })).not.toBeInTheDocument();
+
+    rerender(
+      <ScoreBoard
+        snapshot={snap}
+        onLeave={() => {}}
+        members={members}
+        onVote={() => {}}
+        onPlayAgain={onPlayAgain}
+        isHost={true}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '再玩一局' }));
+    expect(onPlayAgain).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders no rematch controls when members/callbacks are not provided (sandbox/replay)', () => {
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+    expect(screen.queryByRole('button', { name: /想再玩一局/ })).not.toBeInTheDocument();
   });
 });
