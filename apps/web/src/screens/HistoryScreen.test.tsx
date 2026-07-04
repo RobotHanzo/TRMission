@@ -20,6 +20,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
+  features: ['replayReview'] as import('@trm/shared').UserFeature[],
 } as const;
 
 const row = (over: Partial<MatchSummary> = {}): MatchSummary => ({
@@ -58,6 +59,14 @@ describe('HistoryScreen', () => {
     mocked.history.mockResolvedValue([row({ replayable: false })]);
     render(<HistoryScreen />);
     expect(await screen.findByRole('button', { name: /重播/ })).toBeDisabled();
+  });
+
+  it('hides the replay button entirely without the replayReview feature', async () => {
+    useSession.setState({ user: { ...signedIn, features: [] } });
+    mocked.history.mockResolvedValue([row()]);
+    render(<HistoryScreen />);
+    expect(await screen.findByText('Rival')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /重播/ })).not.toBeInTheDocument();
   });
 
   it('marks spectated games with the spectator badge', async () => {

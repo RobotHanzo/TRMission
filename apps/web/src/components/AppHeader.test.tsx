@@ -13,6 +13,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
+  features: [] as import('@trm/shared').UserFeature[],
 } as const;
 
 const gameSnap = () =>

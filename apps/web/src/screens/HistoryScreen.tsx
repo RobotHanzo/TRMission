@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Play } from 'lucide-react';
 import { api, type MatchSummary } from '../net/rest';
-import { useSession } from '../store/session';
+import { useHasFeature, useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import '../styles/history.css';
 
 export function HistoryScreen() {
   const { t } = useTranslation();
   const user = useSession((s) => s.user);
+  const canReplay = useHasFeature('replayReview');
   const enterReplay = useUi((s) => s.enterReplay);
   const locale = useUi((s) => s.locale);
   const [rows, setRows] = useState<MatchSummary[] | null>(null);
@@ -59,13 +60,15 @@ export function HistoryScreen() {
                 </span>
               ))}
             </div>
-            <button
-              onClick={() => enterReplay(m.gameId)}
-              disabled={!m.replayable}
-              title={m.replayable ? t('history.watchReplay') : t('history.notReplayable')}
-            >
-              <Play size={14} aria-hidden /> {t('history.watchReplay')}
-            </button>
+            {canReplay && (
+              <button
+                onClick={() => enterReplay(m.gameId)}
+                disabled={!m.replayable}
+                title={m.replayable ? t('history.watchReplay') : t('history.notReplayable')}
+              >
+                <Play size={14} aria-hidden /> {t('history.watchReplay')}
+              </button>
+            )}
           </div>
         ))}
       </div>

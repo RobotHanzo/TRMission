@@ -7,6 +7,7 @@ const user = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
+  features: [] as import('@trm/shared').UserFeature[],
 } as const;
 
 describe('session store: logout', () => {

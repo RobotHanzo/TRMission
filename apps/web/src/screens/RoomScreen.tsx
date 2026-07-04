@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Bot, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import { useUi } from '../store/ui';
-import { useSession } from '../store/session';
+import { useHasFeature, useSession } from '../store/session';
 import {
   api,
   ApiError,
@@ -53,6 +53,7 @@ export function RoomScreen() {
   const enterMaps = useUi((s) => s.enterMaps);
   const locale = useUi((s) => s.locale);
   const user = useSession((s) => s.user);
+  const canBuild = useHasFeature('mapBuilder');
 
   const [room, setRoom] = useState<RoomView | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -68,14 +69,15 @@ export function RoomScreen() {
   } = useConfirmAction();
 
   // The host's own custom maps, for the picker's "custom" dropdown — fetched once, lazily,
-  // only for whoever can actually change the setting.
+  // only for whoever can actually change the setting AND holds the mapBuilder feature
+  // (the endpoint 403s without it).
   useEffect(() => {
-    if (!user) return;
+    if (!user || !canBuild) return;
     api
       .listMaps()
       .then(setMyMaps)
       .catch(() => setMyMaps([]));
-  }, [user]);
+  }, [user, canBuild]);
 
   const flashToast = (msg: string) => {
     setToast(msg);
@@ -295,10 +297,14 @@ export function RoomScreen() {
           {isHost ? (
             <div className="row">
               <Segmented<'official' | 'custom'>
-                options={[
-                  { value: 'official', label: t('mapOfficial') },
-                  { value: 'custom', label: t('mapCustom') },
-                ]}
+                options={
+                  canBuild
+                    ? [
+                        { value: 'official', label: t('mapOfficial') },
+                        { value: 'custom', label: t('mapCustom') },
+                      ]
+                    : [{ value: 'official', label: t('mapOfficial') }]
+                }
                 value={settings.map.source}
                 onChange={(src) => {
                   if (src === 'official') {

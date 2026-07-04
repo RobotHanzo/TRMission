@@ -8,7 +8,13 @@ import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
 import { buildBoard, ENGINE_VERSION, SCHEMA_VERSION } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
 import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
-import { api, type ReplayPayload, type ReplayPlayerMeta, type ReplayVisibility } from '../net/rest';
+import {
+  api,
+  ApiError,
+  type ReplayPayload,
+  type ReplayPlayerMeta,
+  type ReplayVisibility,
+} from '../net/rest';
 import { resolveContent } from '../game/contentCache';
 import { setActiveContent, resetToDefaultContent } from '../game/catalog';
 import { useSession } from '../store/session';
@@ -82,8 +88,17 @@ export default function ReplayScreen() {
         };
         setLoad({ kind: 'ready', payload, board, config, actions: payload.actions as Action[] });
       })
-      .catch(() => {
-        if (!cancelled) setLoad({ kind: 'error', msgKey: 'history.loadFailed' });
+      .catch((e: unknown) => {
+        if (!cancelled)
+          setLoad({
+            kind: 'error',
+            // 403 = the account lacks the replayReview feature (link-visibility replays
+            // still load for anyone; this is the members-only path being gated).
+            msgKey:
+              e instanceof ApiError && e.status === 403
+                ? 'history.replayDisabled'
+                : 'history.loadFailed',
+          });
       });
     return () => {
       cancelled = true;

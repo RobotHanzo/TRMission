@@ -47,6 +47,7 @@ const ME = {
     locale: 'zh-Hant' as const,
     boardLayout: 'rail' as const,
   },
+  features: [] as import('@trm/shared').UserFeature[],
 };
 
 const member = (userId: string, ready = false) => ({
@@ -229,6 +230,7 @@ describe('RoomScreen map picker', () => {
   });
 
   it('lets the host switch to a custom map from their own list', async () => {
+    useSession.setState({ user: { ...ME, features: ['mapBuilder'] }, booting: false });
     mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
     mocked.updateRoomSettings.mockResolvedValue(
       room({

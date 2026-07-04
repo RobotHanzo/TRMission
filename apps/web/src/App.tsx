@@ -1,7 +1,7 @@
 import { useEffect, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUi } from './store/ui';
-import { useSession } from './store/session';
+import { useHasFeature, useSession } from './store/session';
 import { AppHeader } from './components/AppHeader';
 import { useLeaveWarning } from './hooks/useLeaveWarning';
 import { HomeScreen } from './screens/HomeScreen';
@@ -32,8 +32,16 @@ export function App() {
   const user = useSession((s) => s.user);
   const booting = useSession((s) => s.booting);
   const restore = useSession((s) => s.restore);
+  const canBuild = useHasFeature('mapBuilder');
+  const goHome = useUi((s) => s.goHome);
 
   useLeaveWarning();
+
+  // The map builder is feature-gated: a direct /maps URL without the grant lands home.
+  // (Cosmetic only — the server 403s regardless.)
+  useEffect(() => {
+    if (!booting && user && (view === 'maps' || view === 'mapEditor') && !canBuild) goHome();
+  }, [booting, user, view, canBuild, goHome]);
 
   useEffect(() => {
     void restore();

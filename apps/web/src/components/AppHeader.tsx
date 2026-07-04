@@ -12,7 +12,7 @@ import {
   Menu,
 } from 'lucide-react';
 import { useUi } from '../store/ui';
-import { useSession } from '../store/session';
+import { useHasFeature, useSession } from '../store/session';
 import { useGame } from '../store/game';
 import { turnStatus } from '../game/view';
 import { usePlayerName } from '../game/playerName';
@@ -30,6 +30,7 @@ export function AppHeader() {
   const navigateLogin = useUi((s) => s.navigateLogin);
   const openEncyclopedia = useUi((s) => s.setEncyclopediaOpen);
   const user = useSession((s) => s.user);
+  const canBuild = useHasFeature('mapBuilder');
   const logout = useSession((s) => s.logout);
   const snapshot = useGame((s) => s.snapshot);
   const status = useGame((s) => s.status);
@@ -155,7 +156,7 @@ export function AppHeader() {
                     <History size={16} aria-hidden /> {t('history.title')}
                   </button>
                 )}
-                {user && !onAuthScreen && !inGame && (
+                {user && !onAuthScreen && !inGame && canBuild && (
                   <button className="header-menu-item" role="menuitem" onClick={menuAct(enterMaps)}>
                     <MapIcon size={16} aria-hidden /> {t('builder.myMaps')}
                   </button>
@@ -213,7 +214,7 @@ export function AppHeader() {
                 <History size={16} aria-hidden />
               </button>
             )}
-            {user && !onAuthScreen && !inGame && (
+            {user && !onAuthScreen && !inGame && canBuild && (
               <button
                 onClick={enterMaps}
                 aria-label={t('builder.myMaps')}

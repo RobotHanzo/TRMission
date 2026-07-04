@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { UserFeature } from '@trm/shared';
 import { api, setOnTokenChange, type PublicUser, type UserPreferences } from '../net/rest';
 import { useUi } from './ui';
 
@@ -83,3 +84,7 @@ export const useSession = create<SessionState>()((set, get) => {
     clearError: () => set({ error: null }),
   };
 });
+
+/** Convenience selector: does the signed-in user hold a dashboard-granted feature? */
+export const useHasFeature = (feature: UserFeature): boolean =>
+  useSession((s) => !!s.user?.features?.includes(feature));

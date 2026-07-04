@@ -27,6 +27,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
+  features: ['mapBuilder'] as import('@trm/shared').UserFeature[],
 } as const;
 
 describe('AppHeader phone hamburger menu', () => {

@@ -8,7 +8,8 @@ import { useUi } from '../store/ui';
 import { api, type ReplayPayload } from '../net/rest';
 
 vi.mock('../net/connection', () => ({ disconnectGame: vi.fn(), connectGame: vi.fn() }));
-vi.mock('../net/rest', () => ({
+vi.mock('../net/rest', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../net/rest')>()),
   setOnTokenChange: vi.fn(),
   setAccessToken: vi.fn(),
   api: { replay: vi.fn(), setReplayVisibility: vi.fn() },
@@ -25,6 +26,7 @@ const signedIn = {
   displayName: 'Tester',
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
+  features: ['replayReview'] as import('@trm/shared').UserFeature[],
 } as const;
 
 const payload = (over: Partial<ReplayPayload> = {}): ReplayPayload => ({

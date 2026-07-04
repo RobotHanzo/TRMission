@@ -1,6 +1,8 @@
 // Typed REST client for the control plane. The access token lives in memory; the
 // refresh token is an httpOnly cookie sent automatically (credentials: 'include').
 // A 401 triggers one silent refresh + retry.
+import type { UserFeature } from '@trm/shared';
+
 export type Theme = 'system' | 'light' | 'dark';
 export type Locale = 'zh-Hant' | 'en';
 export type BoardLayout = 'rail' | 'tray';
@@ -15,6 +17,8 @@ export interface PublicUser {
   displayName: string;
   isGuest: boolean;
   preferences: UserPreferences;
+  /** Per-account gated features granted from the maintainer dashboard. */
+  features: UserFeature[];
   email?: string;
   avatarUrl?: string;
 }
