@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
@@ -18,7 +18,8 @@ import {
 } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { SEAT_COLORS } from '../theme/colors';
-import { Toast } from '../components/Toast';
+import { useAnimationsStore } from '../store/animations';
+import { NotificationStack } from '../components/NotificationStack';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
@@ -59,12 +60,11 @@ export function RoomScreen() {
   const [room, setRoom] = useState<RoomView | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [kicked, setKicked] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
   // Server feature flag: the events intensity picker is shown ONLY when this is true. A missing
   // field or a fetch error is treated as disabled (the picker stays hidden).
   const [eventsFlag, setEventsFlag] = useState(false);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const pushNotification = useAnimationsStore((s) => s.pushNotification);
   const {
     open: leaveOpen,
     request: requestLeave,
@@ -98,13 +98,6 @@ export function RoomScreen() {
       active = false;
     };
   }, []);
-
-  const flashToast = (msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2000);
-  };
-  useEffect(() => () => clearTimeout(toastTimer.current), []);
 
   // Poll the room (lobby push is a later enhancement); auto-enter the game when started.
   // `active` doubles as the terminal flag: a terminal outcome clears it, and the interval
@@ -237,7 +230,7 @@ export function RoomScreen() {
   const copy = (text: string) => {
     if (!navigator.clipboard) return;
     void Promise.resolve(navigator.clipboard.writeText(text)).then(
-      () => flashToast(t('copied')),
+      () => pushNotification({ variant: 'success', text: t('copied') }),
       () => undefined,
     );
   };
@@ -461,7 +454,7 @@ export function RoomScreen() {
         {room.members.length < 2 ? t('waitingForPlayers') : !allReady ? t('waitingForReady') : ''}
       </p>
       {err && <p className="error">{err}</p>}
-      <Toast message={toast} variant="toast-success" />
+      <NotificationStack />
       {kicked && (
         <div className="modal-backdrop" onClick={goHome}>
           <div
