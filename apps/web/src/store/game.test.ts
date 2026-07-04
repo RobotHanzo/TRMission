@@ -41,3 +41,19 @@ describe('game store animation bus', () => {
     expect(useGame.getState().lastBatch).toBeNull();
   });
 });
+
+describe('game store session replaced', () => {
+  beforeEach(() => useGame.getState().reset());
+
+  it('setSessionReplaced flips the flag', () => {
+    expect(useGame.getState().sessionReplaced).toBe(false);
+    useGame.getState().setSessionReplaced(true);
+    expect(useGame.getState().sessionReplaced).toBe(true);
+  });
+
+  it('reset clears sessionReplaced', () => {
+    useGame.getState().setSessionReplaced(true);
+    useGame.getState().reset();
+    expect(useGame.getState().sessionReplaced).toBe(false);
+  });
+});

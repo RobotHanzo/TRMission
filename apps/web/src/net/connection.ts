@@ -25,6 +25,7 @@ export function connectGame(ticket: string): GameSocket {
       useChat.getState().ingestHistory(chat);
     },
     onCameraMoved: (playerId, view) => useGame.getState().applyCameraMoved(playerId, view),
+    onSessionReplaced: () => useGame.getState().setSessionReplaced(true),
   });
   socket.connect();
   return socket;
