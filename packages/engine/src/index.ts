@@ -20,6 +20,16 @@ export type {
 } from './types/state';
 export { SCHEMA_VERSION, ENGINE_VERSION } from './types/state';
 
+export type {
+  EventsState,
+  EventScheduleEntry,
+  ActiveEvent,
+  CharterContract,
+  RandomEventKind,
+} from './types/events-state';
+export { generateSchedule } from './events/schedule';
+export { tickRound, isQuietEndgame } from './events/runtime';
+
 export type { Action, ActionType, Payment } from './types/actions';
 export type { GameEvent, GameEventType, Visibility } from './types/events';
 export type {

@@ -1,5 +1,15 @@
-import type { PlayerId, RouteId, TicketId, CardColor, SeatIndex, Hand } from '@trm/shared';
+import type {
+  PlayerId,
+  RouteId,
+  CityId,
+  TicketId,
+  CardColor,
+  SeatIndex,
+  Hand,
+  EventsMode,
+} from '@trm/shared';
 import type { Phase, OwnerCell, StationPlacement, Endgame, PlayerFinal } from './state';
+import type { ActiveEvent, CharterContract, RandomEventKind } from './events-state';
 
 /**
  * A player's end-game score, enriched for display: which kept tickets are completed (gains) vs
@@ -74,6 +84,7 @@ export interface RedactedView {
     readonly secondDrawAfterBlindRainbow: boolean;
     readonly noUnfinishedTicketPenalty: boolean;
     readonly doubleRouteSingleFor23: boolean;
+    readonly eventsMode: EventsMode;
   };
 
   /**
@@ -81,4 +92,33 @@ export interface RedactedView {
    * connectivity, no station borrowing). Public to every viewer — in-progress tickets stay secret.
    */
   readonly completedTickets: readonly { readonly player: PlayerId; readonly ticket: TicketId }[];
+
+  /**
+   * Random-events projection (absent when the feature is off). The hidden schedule, `nextIdx`, and
+   * `suppressed` never appear here — only currently-live effects plus a one-round `forecast` of the
+   * next telegraphed entry (exactly its announced window). Viewer-independent (spectators see the
+   * same block).
+   */
+  readonly events?: {
+    readonly mode: Exclude<EventsMode, 'off'>;
+    readonly roundIndex: number;
+    readonly active: readonly ActiveEvent[];
+    /** The next telegraphed entry, only during its one-round announced window; else null. */
+    readonly forecast: {
+      readonly id: string;
+      readonly kind: RandomEventKind;
+      readonly startRound: number;
+      readonly durationRounds: number;
+      readonly routeIds?: readonly RouteId[];
+      readonly region?: string;
+      readonly cityId?: CityId;
+    } | null;
+    /** Permanent viral-hotspot levels, sorted by cityId. */
+    readonly hotspots: readonly { readonly cityId: CityId; readonly level: number }[];
+    readonly charters: readonly CharterContract[];
+    readonly reopenBonusRouteIds: readonly RouteId[];
+    /** Resolved: routeIds of active TYPHOON_LANDFALL events that are still unclaimed. */
+    readonly closedRouteIds: readonly RouteId[];
+    readonly freeStationAvailable: boolean;
+  };
 }

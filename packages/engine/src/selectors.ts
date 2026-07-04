@@ -1,4 +1,4 @@
-import type { PlayerId, CardColor, TrainColor } from '@trm/shared';
+import type { PlayerId, CardColor, TrainColor, CityId, RouteId } from '@trm/shared';
 import { CARD_COLORS, TRAIN_COLORS } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
@@ -158,6 +158,7 @@ function handCount(hand: Readonly<Hand>): number {
  */
 export function redactFor(board: Board, state: GameState, viewer: PlayerId | null): RedactedView {
   const gameOver = state.turn.phase === 'GAME_OVER';
+  const eventsBlock = projectEvents(state);
 
   // Finished tickets are public (own-track completion). Computed once for every player; the
   // result is viewer-independent, so the same list reaches everyone.
@@ -257,6 +258,62 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
       secondDrawAfterBlindRainbow: state.ruleParams.secondDrawAfterBlindRainbow,
       noUnfinishedTicketPenalty: state.ruleParams.noUnfinishedTicketPenalty,
       doubleRouteSingleFor23: state.ruleParams.doubleRouteSingleFor23,
+      eventsMode: state.ruleParams.eventsMode ?? 'off',
     },
+    ...(eventsBlock ? { events: eventsBlock } : {}),
+  };
+}
+
+/**
+ * Project the random-events state for the wire (viewer-independent; spectators see the same block).
+ * Returns undefined when the feature is off. The hidden schedule / `nextIdx` / `suppressed` never
+ * leak: only currently-live effects plus a one-round `forecast` of the next telegraphed entry
+ * (exactly its announced window) reach a viewer.
+ */
+function projectEvents(state: GameState): RedactedView['events'] {
+  const ev = state.events;
+  if (!ev) return undefined;
+  const roundIndex = ev.roundIndex;
+
+  const entry = ev.schedule[ev.nextIdx];
+  const forecast =
+    entry &&
+    entry.telegraphed &&
+    entry.startRound === roundIndex + 1 &&
+    !ev.suppressed.includes(entry.id)
+      ? {
+          id: entry.id,
+          kind: entry.kind,
+          startRound: entry.startRound,
+          durationRounds: entry.durationRounds,
+          ...(entry.routeIds ? { routeIds: entry.routeIds } : {}),
+          ...(entry.region !== undefined ? { region: entry.region } : {}),
+          ...(entry.cityId !== undefined ? { cityId: entry.cityId } : {}),
+        }
+      : null;
+
+  const hotspots = Object.keys(ev.hotspots)
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    .map((cityId) => ({ cityId: cityId as CityId, level: ev.hotspots[cityId] as number }));
+
+  const closedRouteIds: RouteId[] = [];
+  for (const act of ev.active) {
+    if (act.kind === 'TYPHOON_LANDFALL' && act.routeIds) {
+      for (const rid of act.routeIds) {
+        if (!state.ownership[rid as string]) closedRouteIds.push(rid);
+      }
+    }
+  }
+
+  return {
+    mode: ev.mode,
+    roundIndex,
+    active: [...ev.active],
+    forecast,
+    hotspots,
+    charters: [...ev.charters],
+    reopenBonusRouteIds: [...ev.reopenBonus],
+    closedRouteIds,
+    freeStationAvailable: ev.freeStation !== undefined,
   };
 }

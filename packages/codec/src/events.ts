@@ -118,6 +118,14 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
       // Cosmetic-only: completion is already conveyed authoritatively by the snapshot's
       // `completed_tickets` list, so this engine event has no dedicated wire frame.
       return null;
+    case 'EVENT_ANNOUNCED':
+    case 'EVENT_STARTED':
+    case 'EVENT_ENDED':
+    case 'EVENT_BONUS':
+      // Random-events engine events (M1). Their authoritative state already rides the snapshot's
+      // `events` projection; dedicated animated wire frames are a later milestone (M2/M3), so
+      // there is no proto GameEvent oneof case for them yet.
+      return null;
   }
 }
 

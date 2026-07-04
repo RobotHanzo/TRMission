@@ -7,11 +7,14 @@ import { SCHEMA_VERSION, ENGINE_VERSION } from './types/state';
 import { buildDeck, drawOne } from './deck';
 import { refillMarket } from './deck';
 import { emptyHand } from './hand';
+import { generateSchedule } from './events/schedule';
 
 /**
  * Genesis state from config + content. RNG is consumed in a FIXED order so the game replays
  * byte-identically: (1) optional turn-order shuffle, (2) deck shuffle, (3) hand deals (no RNG),
- * (4) market fill (no RNG at start), (5) long-ticket shuffle, (6) short-ticket shuffle, (7) deals.
+ * (4) market fill (no RNG at start), (5) long-ticket shuffle, (6) short-ticket shuffle, (7) deals,
+ * (8) random-event schedule. Step (8) draws ZERO when `eventsMode` is off/absent, so an off-mode
+ * genesis produces a byte-identical rng counter to a pre-events game.
  */
 export function initGame(board: Board, config: GameConfig): GameState {
   const ruleParams = { ...DEFAULT_RULE_PARAMS, ...(config.ruleParams ?? {}) };
@@ -95,12 +98,18 @@ export function initGame(board: Board, config: GameConfig): GameState {
     };
   }
 
+  // (8) Random-event schedule — appended AFTER every other draw. Returns [undefined, rng] with the
+  // rng untouched when the feature is off, so off-mode genesis stays byte-identical to a v4 game.
+  const [events, rngAfterEvents] = generateSchedule(board, ruleParams, rng);
+  rng = rngAfterEvents;
+
   return {
     schemaVersion: SCHEMA_VERSION,
     engineVersion: ENGINE_VERSION,
     contentHash: config.contentHash,
     rng,
     ruleParams,
+    ...(events ? { events } : {}),
     turnOrder,
     players,
     turn: { orderIndex: 0, phase: 'SETUP_TICKETS', cardsDrawnThisTurn: 0 },

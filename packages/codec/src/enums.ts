@@ -89,6 +89,9 @@ const REJECTION_TO_PB: Record<RuleViolationCode, PbRejectionCode> = {
   FACEUP_LOCO_SECOND_DRAW: PbRejectionCode.FACEUP_LOCO_SECOND_DRAW,
   NO_LEGAL_MOVE_REQUIRED: PbRejectionCode.NO_LEGAL_MOVE_REQUIRED,
   NOTHING_TO_DRAW: PbRejectionCode.NOTHING_TO_DRAW,
+  ROUTE_CLOSED_BY_EVENT: PbRejectionCode.ROUTE_CLOSED_BY_EVENT,
+  EVENT_CLAIMS_SUSPENDED: PbRejectionCode.EVENT_CLAIMS_SUSPENDED,
+  EVENT_STATIONS_SUSPENDED: PbRejectionCode.EVENT_STATIONS_SUSPENDED,
 };
 
 export const rejectionToPb = (code: RuleViolationCode): PbRejectionCode => REJECTION_TO_PB[code];

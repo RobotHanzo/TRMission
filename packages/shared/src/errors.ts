@@ -31,7 +31,10 @@ export type RuleViolationCode =
   | 'MARKET_SLOT_EMPTY'
   | 'FACEUP_LOCO_SECOND_DRAW'
   | 'NO_LEGAL_MOVE_REQUIRED'
-  | 'NOTHING_TO_DRAW';
+  | 'NOTHING_TO_DRAW'
+  | 'ROUTE_CLOSED_BY_EVENT'
+  | 'EVENT_CLAIMS_SUSPENDED'
+  | 'EVENT_STATIONS_SUSPENDED';
 
 export interface RuleViolation {
   readonly code: RuleViolationCode;
@@ -74,6 +77,9 @@ export const ERROR_CATALOG: Readonly<Record<RuleViolationCode, ErrorMeta>> = Obj
   FACEUP_LOCO_SECOND_DRAW: { messageKey: 'errors:faceupLocoSecondDraw' },
   NO_LEGAL_MOVE_REQUIRED: { messageKey: 'errors:noLegalMoveRequired' },
   NOTHING_TO_DRAW: { messageKey: 'errors:nothingToDraw' },
+  ROUTE_CLOSED_BY_EVENT: { messageKey: 'errors:routeClosedByEvent' },
+  EVENT_CLAIMS_SUSPENDED: { messageKey: 'errors:eventClaimsSuspended' },
+  EVENT_STATIONS_SUSPENDED: { messageKey: 'errors:eventStationsSuspended' },
 });
 
 export function violation(

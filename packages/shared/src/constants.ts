@@ -11,6 +11,13 @@ export const SCORING_TABLE: Readonly<Record<number, number>> = Object.freeze({
   8: 21,
 });
 
+/**
+ * Random-events mode. `'off'` is byte-for-byte identical to a game without the feature (no schedule
+ * is drawn, no events state exists); the other three tiers pick how many/how disruptive the seeded
+ * game events are. See `@trm/engine`'s events schedule/runtime for the mechanics.
+ */
+export type EventsMode = 'off' | 'light' | 'moderate' | 'intense';
+
 /** Tunable rule parameters. Every game stores a resolved copy in its config. */
 export interface RuleParams {
   trainCarsStart: number;
@@ -45,6 +52,10 @@ export interface RuleParams {
    *  claimed (the other is locked once the first is taken). Set to false to allow both routes
    *  to be claimed even in a 2–3 player game. */
   doubleRouteSingleFor23: boolean;
+  /** Variant: opt-in "random events" mode. `'off'` (default) is byte-identical to the feature
+   *  never existing — no schedule is drawn at genesis and no events state is carried. The other
+   *  tiers draw a seeded schedule of game events that play out at round boundaries. */
+  eventsMode: EventsMode;
 }
 
 export const DEFAULT_RULE_PARAMS: RuleParams = Object.freeze({
@@ -70,6 +81,7 @@ export const DEFAULT_RULE_PARAMS: RuleParams = Object.freeze({
   secondDrawAfterBlindRainbow: false,
   noUnfinishedTicketPenalty: false,
   doubleRouteSingleFor23: true,
+  eventsMode: 'off',
 });
 
 /** Build the full deck composition as a colour-count multiset (e.g. 12 each colour + 14 loco = 110). */
