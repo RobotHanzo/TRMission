@@ -1012,7 +1012,11 @@ describe('UsersView ban/unban toasts', () => {
         <ToastStack />
       </>,
     );
-    fireEvent.click(await screen.findByText('停權'));
+    // '停權' is also the label of the "Disabled" filter tab in the toolbar, and it renders
+    // synchronously before the drawer's async detail loads — so scope the trigger click to
+    // the drawer (named "Alice") to avoid matching the tab instead.
+    const drawer = await screen.findByRole('dialog', { name: 'Alice' });
+    fireEvent.click(within(drawer).getByText('停權'));
     // The drawer itself and the confirm dialog both have role="dialog", and the trigger
     // button shares its label ('停權') with the dialog's confirm button — so target the
     // confirm dialog specifically by its own title (aria-label) to avoid any ambiguity.
@@ -1033,7 +1037,8 @@ describe('UsersView ban/unban toasts', () => {
         <ToastStack />
       </>,
     );
-    fireEvent.click(await screen.findByText('停權'));
+    const drawer = await screen.findByRole('dialog', { name: 'Alice' });
+    fireEvent.click(within(drawer).getByText('停權'));
     const dialog = await screen.findByRole('dialog', { name: '停權此帳號?' });
     fireEvent.click(within(dialog).getByRole('button', { name: '停權' }));
     expect(await screen.findByText('boom')).toBeInTheDocument();

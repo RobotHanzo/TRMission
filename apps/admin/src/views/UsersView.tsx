@@ -7,6 +7,7 @@ import { SignalBadge } from '../components/SignalBadge';
 import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { FeatureToggles } from '../components/FeatureToggles';
+import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
 const FILTERS: UserFilter[] = ['all', 'guests', 'registered', 'disabled'];
@@ -22,6 +23,7 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const locale = useUi((s) => s.locale);
   const canBan = useSession((s) => s.hasPermission('users.ban'));
   const canFeatures = useSession((s) => s.hasPermission('users.features'));
+  const pushToast = useToast((s) => s.push);
   const [detail, setDetail] = useState<UserDetail | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -40,12 +42,16 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 
   const toggleBan = async (reason?: string) => {
     if (!detail) return;
+    const wasBanned = Boolean(detail.disabledAt);
     setBusy(true);
     try {
-      const next = detail.disabledAt
+      const next = wasBanned
         ? await api.enableUser(detail.id)
         : await api.disableUser(detail.id, reason);
       setDetail(next);
+      pushToast('success', t(wasBanned ? 'toast.userUnbanned' : 'toast.userBanned'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
     } finally {
       setBusy(false);
       setConfirming(false);
