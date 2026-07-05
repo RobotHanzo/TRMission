@@ -41,12 +41,15 @@ export interface ReplayData {
 
 /**
  * Engine major versions whose persisted action logs the current server can still replay
- * byte-identically. v5 replays a v4 log identically: v5 only ADDS the `eventsMode`/`events`
- * genesis fields, and those are inert for a v4 game (an off/absent `eventsMode` draws zero extra
- * RNG at genesis, so the deck/tickets/digests are unchanged). Extend this list as new engine
- * versions land that preserve replay of older logs.
+ * byte-identically. v5 replayed a v4 log identically (v5 only added inert genesis fields), but v6
+ * is NOT provably inert for v4/v5 games: it changes turn sequencing for any `unlimitedStationBorrow`
+ * game where a player's kept tickets completed via station-borrow only (not own track) — a replay
+ * of such a game would now diverge into a forced ticket re-draw a turn earlier than it actually
+ * happened, breaking the next logged action's phase expectation. So v6 stands alone rather than
+ * extending the allowlist. Only extend this list for a new version when the change is provably
+ * inert for the versions already listed.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [4, 5];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [6];
 
 @Injectable()
 export class HistoryRepo {

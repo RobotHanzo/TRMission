@@ -11,7 +11,7 @@ beforeAll(async () => {
 afterAll(() => t.close());
 
 describe('history: replay-compat engine-version allowlist (plan risk R1)', () => {
-  it('marks a v4-stamped game replayable and a v3-stamped game not (on a resolvable map)', async () => {
+  it('marks a v6-stamped game replayable and a v5-stamped game not (on a resolvable map)', async () => {
     const userId = 'u-compat';
     const now = Date.now();
     const base = {
@@ -23,21 +23,19 @@ describe('history: replay-compat engine-version allowlist (plan risk R1)', () =>
       winners: [] as string[],
     };
     await t.db.collection<MatchHistoryDoc>('matchHistory').insertMany([
-      { _id: 'g-v4', ...base, engineVersion: 4, completedAt: new Date(now - 1000) },
-      { _id: 'g-v3', ...base, engineVersion: 3, completedAt: new Date(now - 2000) },
+      { _id: 'g-v6', ...base, engineVersion: 6, completedAt: new Date(now - 1000) },
+      { _id: 'g-v5', ...base, engineVersion: 5, completedAt: new Date(now - 2000) },
     ]);
 
     const rows = await t.app.get(HistoryRepo).listForUser(userId);
     const byId = new Map(rows.map((r) => [r.gameId, r]));
-    // v4 is in the allowlist AND its map still builds → replayable.
-    expect(byId.get('g-v4')?.replayable).toBe(true);
-    // v3 predates the allowlist → not replayable, regardless of the map resolving.
-    expect(byId.get('g-v3')?.replayable).toBe(false);
+    // v6 is in the allowlist AND its map still builds → replayable.
+    expect(byId.get('g-v6')?.replayable).toBe(true);
+    // v5 predates the (narrowed) allowlist → not replayable, even though it used to be.
+    expect(byId.get('g-v5')?.replayable).toBe(false);
   });
 
-  it('allowlists the current + previous engine majors, but not older ones', () => {
-    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toContain(4);
-    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toContain(5);
-    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).not.toContain(3);
+  it('allowlists only the current engine major — this fix is not provably inert for older majors', () => {
+    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toEqual([6]);
   });
 });
