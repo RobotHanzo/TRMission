@@ -26,9 +26,11 @@ const toRow = (u: UserDoc) => ({
   isGuest: u.isGuest,
   ...(u.avatarUrl ? { avatarUrl: u.avatarUrl } : {}),
   oauthProviders: Object.keys(u.oauth ?? {}),
+  hasPassword: !!u.passwordHash,
   features: u.features ?? [],
   createdAt: u.createdAt.toISOString(),
   ...(u.disabledAt ? { disabledAt: u.disabledAt.toISOString() } : {}),
+  ...(u.guestExpiresAt ? { guestExpiresAt: u.guestExpiresAt.toISOString() } : {}),
 });
 
 @Injectable()

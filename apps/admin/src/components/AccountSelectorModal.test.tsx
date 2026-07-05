@@ -17,6 +17,7 @@ const row = (over: Partial<UserRow> = {}): UserRow => ({
   email: 'alice@example.com',
   isGuest: false,
   oauthProviders: [],
+  hasPassword: false,
   features: [],
   createdAt: '2026-07-01T00:00:00.000Z',
   ...over,

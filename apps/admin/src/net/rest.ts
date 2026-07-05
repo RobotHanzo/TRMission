@@ -47,9 +47,11 @@ export interface UserRow {
   isGuest: boolean;
   avatarUrl?: string;
   oauthProviders: string[];
+  hasPassword: boolean;
   features: UserFeature[];
   createdAt: string;
   disabledAt?: string;
+  guestExpiresAt?: string;
 }
 export interface UserDetail extends UserRow {
   locale?: string;

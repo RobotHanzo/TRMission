@@ -93,9 +93,11 @@ export const DashboardUserRowSchema = z.object({
   isGuest: z.boolean(),
   avatarUrl: z.string().optional(),
   oauthProviders: z.array(z.string()),
+  hasPassword: z.boolean(),
   features: z.array(UserFeatureSchema),
   createdAt: z.string(),
   disabledAt: z.string().optional(),
+  guestExpiresAt: z.string().optional(),
 });
 
 export const DashboardUserDetailSchema = DashboardUserRowSchema.extend({

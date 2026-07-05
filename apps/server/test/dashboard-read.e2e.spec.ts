@@ -190,6 +190,24 @@ describe('users', () => {
     expect(res.body.users.some((u: { id: string }) => u.id === admin.userId)).toBe(true);
   });
 
+  it('registered accounts report hasPassword; guest accounts report a pending guestExpiresAt', async () => {
+    const all = await request(server())
+      .get('/api/v1/dashboard/users')
+      .set(auth(admin.token))
+      .expect(200);
+    const adminRow = all.body.users.find((u: { id: string }) => u.id === admin.userId);
+    expect(adminRow.hasPassword).toBe(true);
+    expect(adminRow.guestExpiresAt).toBeUndefined();
+
+    const guests = await request(server())
+      .get('/api/v1/dashboard/users?filter=guests')
+      .set(auth(admin.token))
+      .expect(200);
+    const hostRow = guests.body.users.find((u: { id: string }) => u.id === host.userId);
+    expect(hostRow.hasPassword).toBe(false);
+    expect(typeof hostRow.guestExpiresAt).toBe('string');
+  });
+
   it('user detail includes sessions, active rooms, and maintainer flag', async () => {
     const res = await request(server())
       .get(`/api/v1/dashboard/users/${host.userId}`)
