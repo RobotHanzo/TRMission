@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   type OnModuleDestroy,
   type OnModuleInit,
@@ -40,6 +41,7 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
   private readonly snapshots: Collection<GameSnapshotDoc>;
   private readonly chats: Collection<GameChatDoc>;
   private readonly roomsCol: Collection<RoomDoc>;
+  private readonly logger = new Logger('purge');
   private timer: NodeJS.Timeout | undefined;
 
   constructor(
@@ -60,7 +62,9 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     if (env.purgeAutoEnabled) {
-      this.timer = setInterval(() => void this.runSweep('auto'), env.purgeIntervalMs);
+      this.timer = setInterval(() => {
+        void this.runSweep('auto').catch((e) => this.logger.error('auto-purge sweep failed', e));
+      }, env.purgeIntervalMs);
     }
   }
 
