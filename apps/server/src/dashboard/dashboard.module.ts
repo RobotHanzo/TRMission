@@ -12,6 +12,7 @@ import { DashboardService } from './dashboard.service';
 import { DashboardUsersService } from './dashboard-users.service';
 import { DashboardGamesService } from './dashboard-games.service';
 import { DashboardMaintainersService } from './dashboard-maintainers.service';
+import { PurgeService } from './purge.service';
 import { DashboardController } from './dashboard.controller';
 import { DashboardUsersController } from './dashboard-users.controller';
 import { DashboardGamesController } from './dashboard-games.controller';
@@ -42,6 +43,7 @@ import { DashboardBootstrap } from './dashboard-bootstrap';
     DashboardGamesService,
     DashboardMaintainersService,
     DashboardBootstrap,
+    PurgeService,
   ],
 })
 export class DashboardModule {}

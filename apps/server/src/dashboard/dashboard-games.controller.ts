@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { apiSchema } from '../openapi/openapi';
 import { AccessTokenGuard } from '../auth/access-token.guard';
@@ -7,6 +17,7 @@ import type { AuthUser } from '../auth/auth.types';
 import { DashboardGuard } from './dashboard.guard';
 import { RequirePermission } from './require-permission.decorator';
 import { DashboardGamesService } from './dashboard-games.service';
+import { PurgeService } from './purge.service';
 import {
   DashboardGameDetailSchema,
   DashboardRoomRowSchema,
@@ -24,7 +35,10 @@ import {
 @UseGuards(AccessTokenGuard, DashboardGuard)
 @Controller('api/v1/dashboard')
 export class DashboardGamesController {
-  constructor(private readonly games: DashboardGamesService) {}
+  constructor(
+    private readonly games: DashboardGamesService,
+    private readonly purge: PurgeService,
+  ) {}
 
   @Get('games')
   @RequirePermission('games.read')
@@ -81,6 +95,23 @@ export class DashboardGamesController {
     @Body() body: ModerationReasonDto,
   ) {
     return this.games.terminate(actor, gameId, body.reason);
+  }
+
+  @Delete('games/:gameId')
+  @HttpCode(204)
+  @RequirePermission('games.delete')
+  @ApiOperation({
+    summary: 'Hard-delete a game (admin-only)',
+    description:
+      'Terminates it first if still LIVE (same as force-terminate), then permanently removes ' +
+      'the game doc plus its action log, snapshots, and chat. matchHistory is left untouched.',
+  })
+  deleteGame(
+    @Param('gameId') gameId: string,
+    @CurrentUser() actor: AuthUser,
+    @Body() body: ModerationReasonDto,
+  ) {
+    return this.purge.deleteGame(actor, gameId, body.reason);
   }
 
   @Get('rooms')
