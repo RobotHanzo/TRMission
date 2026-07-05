@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '../i18n';
 import { MapsView } from './MapsView';
 import { useUi } from '../store/ui';
@@ -32,10 +32,20 @@ const MAP_ROW = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
+const MAP_DETAIL = {
+  ...MAP_ROW,
+  createdAt: '2026-01-01T00:00:00.000Z',
+  usageCount: 0,
+  draft: { cities: [], routes: [], tickets: [] },
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
   useUi.setState({ view: 'maps', param: null });
-  stubFetch({ '/dashboard/maps': { status: 200, body: { maps: [MAP_ROW], nextCursor: null } } });
+  stubFetch({
+    '/dashboard/maps/map-1': { status: 200, body: MAP_DETAIL },
+    '/dashboard/maps': { status: 200, body: { maps: [MAP_ROW], nextCursor: null } },
+  });
 });
 
 describe('MapsView', () => {
@@ -43,5 +53,13 @@ describe('MapsView', () => {
     render(<MapsView />);
     await waitFor(() => expect(screen.getByText('Test')).toBeInTheDocument());
     expect(screen.getByText('Alice')).toBeInTheDocument();
+  });
+
+  it('opens a drawer with preview and detail on row click', async () => {
+    render(<MapsView />);
+    await waitFor(() => expect(screen.getByText('Test')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Test'));
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument());
+    expect(screen.getByText('尚無內容')).toBeInTheDocument(); // MapPreview's empty state
   });
 });
