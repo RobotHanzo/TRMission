@@ -213,7 +213,10 @@ export class DashboardGamesService {
   /** Mint a short-lived ticket a maintainer hands off to apps/web's ticket-authorized
    *  replay route — works for COMPLETED and TERMINATED games (unlike the player-facing
    *  replay feature, which stays COMPLETED-only forever; see HistoryRepo.loadReplayForAdmin). */
-  async mintReplayTicket(actor: AuthUser, gameId: string): Promise<{ ticket: string; expiresIn: string }> {
+  async mintReplayTicket(
+    actor: AuthUser,
+    gameId: string,
+  ): Promise<{ ticket: string; expiresIn: string }> {
     const game = await this.games.findOne({ _id: gameId });
     if (!game) throw new NotFoundException('game not found');
     if (game.status !== 'COMPLETED' && game.status !== 'TERMINATED') {

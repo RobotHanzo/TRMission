@@ -49,7 +49,11 @@ beforeAll(async () => {
   // A fully COMPLETED game, driven to GAME_OVER through the hub like history-replay.e2e.spec.ts.
   const host = await guest('Host');
   const member = await guest('Member');
-  const room = await request(server()).post('/api/v1/rooms').set(auth(host.token)).send({}).expect(201);
+  const room = await request(server())
+    .post('/api/v1/rooms')
+    .set(auth(host.token))
+    .send({})
+    .expect(201);
   const code: string = room.body.code;
   await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(member.token)).expect(200);
   for (const u of [host, member]) {
@@ -59,7 +63,10 @@ beforeAll(async () => {
       .send({ ready: true })
       .expect(200);
   }
-  const started = await request(server()).post(`/api/v1/rooms/${code}/start`).set(auth(host.token)).expect(200);
+  const started = await request(server())
+    .post(`/api/v1/rooms/${code}/start`)
+    .set(auth(host.token))
+    .expect(200);
   completedGameId = started.body.gameId;
   const memberTicket: string = (
     await request(server()).post(`/api/v1/rooms/${code}/ticket`).set(auth(member.token)).expect(200)
@@ -74,12 +81,27 @@ beforeAll(async () => {
   };
   hub.openConnection('c-host', () => {});
   hub.openConnection('c-member', () => {});
-  await hub.receive('c-host', encodeClient(nextSeq(host.id), { case: 'hello', value: { ticket: started.body.ticket, protocolVersion: 1 } }));
-  await hub.receive('c-member', encodeClient(nextSeq(member.id), { case: 'hello', value: { ticket: memberTicket, protocolVersion: 1 } }));
+  await hub.receive(
+    'c-host',
+    encodeClient(nextSeq(host.id), {
+      case: 'hello',
+      value: { ticket: started.body.ticket, protocolVersion: 1 },
+    }),
+  );
+  await hub.receive(
+    'c-member',
+    encodeClient(nextSeq(member.id), {
+      case: 'hello',
+      value: { ticket: memberTicket, protocolVersion: 1 },
+    }),
+  );
 
   const match = t.app.get(GameRegistry).get(completedGameId);
   if (!match) throw new Error('match not registered');
-  const connOf = new Map([[host.id, 'c-host'], [member.id, 'c-member']]);
+  const connOf = new Map([
+    [host.id, 'c-host'],
+    [member.id, 'c-member'],
+  ]);
   let guard = 0;
   while (match.session.phase !== 'GAME_OVER') {
     if (++guard > 50_000) throw new Error('game did not terminate');
@@ -101,7 +123,11 @@ beforeAll(async () => {
   await grantDashboard(admin.id, 'admin');
   const host2 = await guest('Host2');
   const member2 = await guest('Member2');
-  const room2 = await request(server()).post('/api/v1/rooms').set(auth(host2.token)).send({}).expect(201);
+  const room2 = await request(server())
+    .post('/api/v1/rooms')
+    .set(auth(host2.token))
+    .send({})
+    .expect(201);
   const code2: string = room2.body.code;
   await request(server()).post(`/api/v1/rooms/${code2}/join`).set(auth(member2.token)).expect(200);
   for (const u of [host2, member2]) {
@@ -111,15 +137,25 @@ beforeAll(async () => {
       .send({ ready: true })
       .expect(200);
   }
-  const started2 = await request(server()).post(`/api/v1/rooms/${code2}/start`).set(auth(host2.token)).expect(200);
+  const started2 = await request(server())
+    .post(`/api/v1/rooms/${code2}/start`)
+    .set(auth(host2.token))
+    .expect(200);
   terminatedGameId = started2.body.gameId;
   hub.openConnection('c-host2', () => {});
-  await hub.receive('c-host2', encodeClient(1, { case: 'hello', value: { ticket: started2.body.ticket, protocolVersion: 1 } }));
+  await hub.receive(
+    'c-host2',
+    encodeClient(1, { case: 'hello', value: { ticket: started2.body.ticket, protocolVersion: 1 } }),
+  );
   const match2 = t.app.get(GameRegistry).get(terminatedGameId);
   if (!match2) throw new Error('match2 not registered');
   const state2 = match2.session.raw();
-  const actor2 = state2.turn.phase === 'SETUP_TICKETS' ? asPlayerId(host2.id) : match2.session.currentPlayer;
-  await hub.receive('c-host2', encodeClient(2, actionToCommand(pickAction(board, state2, actor2 as never))));
+  const actor2 =
+    state2.turn.phase === 'SETUP_TICKETS' ? asPlayerId(host2.id) : match2.session.currentPlayer;
+  await hub.receive(
+    'c-host2',
+    encodeClient(2, actionToCommand(pickAction(board, state2, actor2 as never))),
+  );
   await request(server())
     .post(`/api/v1/dashboard/games/${terminatedGameId}/terminate`)
     .set(auth(admin.token))
