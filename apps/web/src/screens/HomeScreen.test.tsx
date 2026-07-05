@@ -14,6 +14,7 @@ vi.mock('../net/rest', () => ({
   api: {
     createRoom: vi.fn(),
     joinRoom: vi.fn(),
+    getRoom: vi.fn(),
     getPublicRooms: vi.fn(() => Promise.resolve([])),
     getMyRooms: vi.fn(() => Promise.resolve([])),
     spectate: vi.fn(() => Promise.resolve({ gameId: 'g', ticket: 't' })),
@@ -24,7 +25,9 @@ vi.mock('../net/rest', () => ({
 const mocked = api as unknown as {
   getPublicRooms: ReturnType<typeof vi.fn>;
   getMyRooms: ReturnType<typeof vi.fn>;
+  getRoom: ReturnType<typeof vi.fn>;
   spectate: ReturnType<typeof vi.fn>;
+  joinRoom: ReturnType<typeof vi.fn>;
   history: ReturnType<typeof vi.fn>;
 };
 
@@ -89,6 +92,17 @@ describe('HomeScreen', () => {
     const watch = await screen.findByRole('button', { name: '觀戰' });
     fireEvent.click(watch);
     await waitFor(() => expect(mocked.spectate).toHaveBeenCalledWith('LIVEEE'));
+  });
+
+  it('spectates via the code box when the code targets a started, spectatable room', async () => {
+    mocked.getRoom.mockResolvedValue(pubRoom('LIVEEE', 'STARTED', 'g9'));
+    render(<HomeScreen />);
+    const input = await screen.findByLabelText('輸入房號');
+    fireEvent.change(input, { target: { value: 'liveee' } });
+    fireEvent.click(screen.getByRole('button', { name: '加入' }));
+    await waitFor(() => expect(mocked.getRoom).toHaveBeenCalledWith('LIVEEE'));
+    await waitFor(() => expect(mocked.spectate).toHaveBeenCalledWith('LIVEEE'));
+    expect(mocked.joinRoom).not.toHaveBeenCalled();
   });
 
   it('shows a rejoin banner for the most recent active room and re-enters it', async () => {

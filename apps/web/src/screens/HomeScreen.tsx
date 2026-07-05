@@ -167,7 +167,15 @@ export function HomeScreen() {
     setBusy(true);
     setErr(null);
     try {
-      enterRoom((await api.joinRoom(code.trim().toUpperCase())).code);
+      const target = code.trim().toUpperCase();
+      const r = await api.getRoom(target);
+      if (r.status === 'STARTED' && r.settings.allowSpectating) {
+        const tk = await api.spectate(target);
+        connectGame(tk.ticket);
+        enterGame(tk.gameId, tk.ticket);
+      } else {
+        enterRoom((await api.joinRoom(target)).code);
+      }
     } catch (e) {
       setErr((e as Error).message);
     } finally {
