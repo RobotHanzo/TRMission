@@ -21,11 +21,15 @@ export const DASHBOARD_PERMISSIONS = [
   'games.read',
   'games.readLog',
   'games.terminate',
+  'games.delete',
   'rooms.read',
   'rooms.close',
+  'rooms.delete',
   'maintainers.read',
   'maintainers.write',
   'audit.read',
+  'purge.read',
+  'purge.run',
 ] as const;
 export type DashboardPermission = (typeof DASHBOARD_PERMISSIONS)[number];
 
@@ -52,6 +56,10 @@ const ADMIN_PERMISSIONS: readonly DashboardPermission[] = [
   'users.features',
   'maintainers.read',
   'audit.read',
+  'games.delete',
+  'rooms.delete',
+  'purge.read',
+  'purge.run',
 ];
 
 /** Role → permission set. Strict escalation chain; only `owner` can manage maintainers. */

@@ -8,7 +8,10 @@ export type DashboardAuditAction =
   | 'user.unban'
   | 'user.features'
   | 'game.terminate'
+  | 'game.delete'
   | 'room.close'
+  | 'room.delete'
+  | 'purge.run'
   | 'maintainer.grant'
   | 'maintainer.update'
   | 'maintainer.revoke';
@@ -61,5 +64,12 @@ export class DashboardAuditRepo implements OnModuleInit {
   /** Test/bootstrap helper: how many entries exist for one action (cheap, unindexed is fine). */
   countByAction(action: DashboardAuditAction): Promise<number> {
     return this.col.countDocuments({ action });
+  }
+
+  /** Most recent entries for one action (the Purge view's "recent runs" list). Still a
+   *  read-only addition — append/list/countByAction/this stay the only surface; no update
+   *  or delete methods exist. */
+  listByAction(action: DashboardAuditAction, limit: number): Promise<AuditEntryDoc[]> {
+    return this.col.find({ action }).sort({ _id: -1 }).limit(limit).toArray();
   }
 }

@@ -13,6 +13,8 @@ export class MetricsService implements MetricsHooks {
   private readonly connections: Gauge;
   private readonly leaks: Counter;
   private readonly botStalls: Counter<'reason'>;
+  private readonly roomsPurged: Counter<'trigger' | 'priorStatus'>;
+  private readonly gamesPurged: Counter<'trigger' | 'priorStatus'>;
 
   constructor() {
     collectDefaultMetrics({ register: this.registry });
@@ -49,6 +51,18 @@ export class MetricsService implements MetricsHooks {
       labelNames: ['reason'],
       registers: [this.registry],
     });
+    this.roomsPurged = new Counter({
+      name: 'trm_rooms_purged_total',
+      help: 'Rooms deleted, by trigger and prior status',
+      labelNames: ['trigger', 'priorStatus'],
+      registers: [this.registry],
+    });
+    this.gamesPurged = new Counter({
+      name: 'trm_games_purged_total',
+      help: 'Games deleted, by trigger and prior status',
+      labelNames: ['trigger', 'priorStatus'],
+      registers: [this.registry],
+    });
   }
 
   commandReceived(): void {
@@ -71,6 +85,12 @@ export class MetricsService implements MetricsHooks {
   }
   botDriverStalled(reason: 'no_legal_action' | 'persist_failed'): void {
     this.botStalls.inc({ reason });
+  }
+  roomPurged(trigger: 'auto' | 'manual', priorStatus: string): void {
+    this.roomsPurged.inc({ trigger, priorStatus });
+  }
+  gamePurged(trigger: 'auto' | 'manual', priorStatus: string): void {
+    this.gamesPurged.inc({ trigger, priorStatus });
   }
 
   metrics(): Promise<string> {
