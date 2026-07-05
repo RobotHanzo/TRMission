@@ -110,6 +110,15 @@ message EndgameTriggered {
 
 message GameEnded {}
 
+// A destination ticket completed mid-game (own routes connect both endpoints, or — under
+// unlimitedStationBorrow — a station-borrowed edge does). PUBLIC: finished tickets are public by
+// design (see CompletedTicket in common.proto); the two endpoint cities/value are not carried
+// here since they're static catalog content the client already resolves by ticket_id.
+message TicketCompleted {
+  string player_id = 1;
+  string ticket_id = 2;
+}
+
 // ── Random-events frames (mirror engine EVENT_ANNOUNCED/STARTED/ENDED/BONUS). All four are
 //    PUBLIC — the events feature carries no per-recipient hidden info (unlike the ticket/hand
 //    events above). ──
@@ -162,6 +171,7 @@ message GameEvent {
     RandomEventStarted random_event_started = 22;
     RandomEventEnded random_event_ended = 23;
     RandomEventBonus random_event_bonus = 24;
+    TicketCompleted ticket_completed = 25;
   }
 }
 
