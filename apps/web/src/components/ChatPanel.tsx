@@ -92,7 +92,7 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
           ))
         )}
       </div>
-      {hint && <p className="chat-hint">{hint}</p>}
+      <p className={`chat-hint${hint ? ' chat-hint--visible' : ''}`}>{hint}</p>
       <div className="chat-presets">
         {CHAT_PRESET_IDS.map((id) => (
           <button

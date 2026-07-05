@@ -188,10 +188,19 @@
   font-weight: 700;
   margin-right: 6px;
 }
+/* Always mounted (even with no message) at a fixed line-height and hidden via `visibility`
+   rather than unmounted, so the rate-limit/rejection hint appearing doesn't reflow the
+   presets/input below it. */
 .chat-hint {
   margin: 0;
+  min-height: 1.2em;
   font-size: 0.75rem;
+  line-height: 1.2;
   color: var(--tr-ember);
+  visibility: hidden;
+}
+.chat-hint--visible {
+  visibility: visible;
 }
 .chat-presets {
   display: flex;
