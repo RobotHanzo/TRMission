@@ -13,6 +13,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@trm/map-data": "workspace:*",
     "@trm/shared": "workspace:*",
     "i18next": "^24.2.0",
     "lucide-react": "^0.468.0",

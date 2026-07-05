@@ -135,7 +135,9 @@ code,
   border-radius: var(--oc-radius-sm);
   color: var(--oc-ink-soft);
   white-space: nowrap;
-  transition: background 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
   width: 100%;
   text-align: left;
 }
@@ -204,7 +206,9 @@ code,
   height: 28px;
   border-radius: var(--oc-radius-sm);
   color: var(--oc-ink-soft);
-  transition: background 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
 }
 
 .oc-icon-btn:hover {
@@ -283,6 +287,13 @@ code,
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--oc-ink-soft);
+}
+
+.oc-info-hint {
+  display: inline-flex;
+  align-items: center;
+  color: var(--oc-ink-soft);
+  cursor: help;
 }
 
 .oc-panel {
@@ -474,7 +485,9 @@ table.oc-table {
   padding: 5px 12px;
   color: var(--oc-ink-soft);
   border-left: 1px solid var(--oc-line);
-  transition: background 150ms ease, color 150ms ease;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
 }
 
 .oc-tabs button:first-child {
@@ -497,7 +510,9 @@ table.oc-table {
   border: 1px solid var(--oc-line);
   background: var(--oc-surface);
   color: var(--oc-ink);
-  transition: background 150ms ease, border-color 150ms ease;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
 }
 
 .oc-btn:hover {
@@ -694,6 +709,30 @@ table.oc-table {
 .oc-gate-card {
   width: min(360px, 100%);
   padding: var(--oc-space-8) var(--oc-space-6);
+}
+
+/* ---- map preview ---------------------------------------------------------------------- */
+
+.oc-map-preview {
+  width: 100%;
+  max-height: 220px;
+  color: var(--oc-ink);
+}
+
+.oc-map-preview .sea {
+  fill: var(--oc-bg);
+}
+
+.oc-map-preview .graticule line {
+  stroke: var(--oc-line);
+  stroke-width: 0.15;
+}
+
+.oc-map-preview .land {
+  fill: var(--oc-surface-2);
+  stroke: var(--oc-line);
+  stroke-width: 0.3;
+  stroke-linejoin: round;
 }
 
 /* ---- misc ------------------------------------------------------------------------------ */

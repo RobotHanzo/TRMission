@@ -2087,6 +2087,7 @@ __metadata:
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.1.0"
+    "@trm/map-data": "workspace:*"
     "@trm/shared": "workspace:*"
     "@types/react": "npm:^19.0.0"
     "@types/react-dom": "npm:^19.0.0"

@@ -9,6 +9,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
 import { chatPresetKey } from '../game/chatPresets';
+import { webOrigin } from '../lib/mainApp';
 
 const TABS = ['LIVE', 'COMPLETED', 'TERMINATED', 'all'] as const;
 const TAB_KEY: Record<(typeof TABS)[number], string> = {
@@ -77,7 +78,7 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     try {
       const { ticket } = await api.mintReplayTicket(id);
       window.open(
-        `${window.location.origin}/admin-replay/${encodeURIComponent(id)}?ticket=${encodeURIComponent(ticket)}`,
+        `${webOrigin()}/admin-replay/${encodeURIComponent(id)}?ticket=${encodeURIComponent(ticket)}`,
         '_blank',
       );
     } catch (e) {

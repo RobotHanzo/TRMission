@@ -239,9 +239,12 @@ describe('GamesView view-replay button', () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
     render(<GamesView />);
     fireEvent.click(await screen.findByText('查看回放'));
+    // The URL must be built off the WEB app's origin (lib/mainApp's webOrigin), never
+    // window.location.origin — that's wherever this admin app itself is running, which
+    // would open the admin dev server's route instead of the web app's.
     await waitFor(() =>
       expect(openSpy).toHaveBeenCalledWith(
-        expect.stringContaining('/admin-replay/g1?ticket=tok'),
+        'http://localhost:5173/admin-replay/g1?ticket=tok',
         '_blank',
       ),
     );

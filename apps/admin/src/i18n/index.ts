@@ -304,6 +304,7 @@ const zhHant = {
     'games.readLog': '檢視對局紀錄',
     'games.terminate': '終止對局',
     'games.delete': '刪除對局',
+    'games.viewReplay': '檢視回放',
     'rooms.read': '檢視房間',
     'rooms.close': '關閉房間',
     'rooms.delete': '刪除房間',
@@ -312,6 +313,8 @@ const zhHant = {
     'audit.read': '檢視稽核紀錄',
     'purge.read': '檢視清理狀態',
     'purge.run': '執行閒置清理',
+    'maps.read': '檢視地圖',
+    'maps.moderate': '管理地圖',
   },
   purge: {
     title: '閒置清理',
@@ -640,6 +643,7 @@ const en: typeof zhHant = {
     'games.readLog': 'View game logs',
     'games.terminate': 'Terminate games',
     'games.delete': 'Delete games',
+    'games.viewReplay': 'View replays',
     'rooms.read': 'View rooms',
     'rooms.close': 'Close rooms',
     'rooms.delete': 'Delete rooms',
@@ -648,6 +652,8 @@ const en: typeof zhHant = {
     'audit.read': 'View audit log',
     'purge.read': 'View purge status',
     'purge.run': 'Run purge',
+    'maps.read': 'View maps',
+    'maps.moderate': 'Manage maps',
   },
   purge: {
     title: 'Inactive session purge',

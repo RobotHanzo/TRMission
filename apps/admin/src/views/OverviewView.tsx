@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api, type Overview } from '../net/rest';
 import { SignalBadge } from '../components/SignalBadge';
 import { Sparkline } from '../components/Sparkline';
-import { fmtBytes, fmtUptime } from '../lib/fmt';
+import { fmtBytes, fmtHash, fmtUptime } from '../lib/fmt';
 
 const POLL_MS = 10_000;
 const TREND_MAX = 60; // ~10 minutes of samples
@@ -170,19 +170,19 @@ export function OverviewView() {
             <div className="oc-kv">
               <span className="k">{t('overview.content')}</span>
               <span className="v" title={data.versions.contentHash}>
-                {data.versions.contentHash.slice(0, 12)}…
+                {fmtHash(data.versions.contentHash)}
               </span>
             </div>
             <div className="oc-kv">
               <span className="k">{t('overview.serverCommit')}</span>
               <span className="v" title={data.versions.commitHash}>
-                {data.versions.commitHash}
+                {fmtHash(data.versions.commitHash)}
               </span>
             </div>
             <div className="oc-kv">
               <span className="k">{t('overview.webCommit')}</span>
               <span className="v" title={webCommitHash}>
-                {webCommitHash}
+                {fmtHash(webCommitHash)}
               </span>
             </div>
             {mismatch && (

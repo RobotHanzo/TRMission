@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { DoorClosed, Info, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, type RoomRow } from '../net/rest';
 import { useSession } from '../store/session';
@@ -86,7 +87,14 @@ export function RoomsView() {
 
   return (
     <div>
-      <h1 className="oc-page-title">{t('rooms.title')}</h1>
+      <h1 className="oc-page-title">
+        {t('rooms.title')}
+        {canClose && (
+          <span className="oc-info-hint" title={t('rooms.startedHint')}>
+            <Info size={14} aria-hidden />
+          </span>
+        )}
+      </h1>
       <div className="oc-toolbar">
         <div className="oc-tabs" role="tablist">
           {TABS.map((s) => (
@@ -131,13 +139,9 @@ export function RoomsView() {
                   <td>
                     {canClose && r.status === 'LOBBY' && (
                       <button className="oc-btn danger" onClick={() => setClosing(r.code)}>
+                        <DoorClosed size={14} aria-hidden />
                         {t('rooms.close')}
                       </button>
-                    )}
-                    {canClose && r.status === 'STARTED' && (
-                      <span className="oc-muted" style={{ fontSize: 11 }}>
-                        {t('rooms.startedHint')}
-                      </span>
                     )}
                     {canDelete && (
                       <button
@@ -145,6 +149,7 @@ export function RoomsView() {
                         style={{ marginLeft: 6 }}
                         onClick={() => setDeleting(r.code)}
                       >
+                        <Trash2 size={14} aria-hidden />
                         {t('rooms.delete')}
                       </button>
                     )}

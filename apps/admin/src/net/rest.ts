@@ -3,6 +3,7 @@
 // 401→refresh→retry) plus the /dashboard endpoints. Same origin as the game, so a
 // session established in either app restores in the other.
 import type { DashboardPermission, DashboardRole, UserFeature } from '@trm/shared';
+import type { MapGeography } from '@trm/map-data';
 
 export interface PublicUser {
   id: string;
@@ -139,6 +140,7 @@ export interface MapAdminDetail extends MapAdminRow {
     cities: { id: string; x: number; y: number }[];
     routes: { a: string; b: string }[];
     tickets: unknown[];
+    geography?: MapGeography;
   };
 }
 export type MapsPage = { maps: MapAdminRow[]; nextCursor: string | null };

@@ -40,6 +40,7 @@ const OVERVIEW = {
     protocolVersion: 1,
     contentHash: 'abcdef1234567890',
     uptimeSeconds: 3600,
+    commitHash: 'dev',
   },
 };
 

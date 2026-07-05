@@ -27,3 +27,7 @@ export const fmtUptime = (seconds: number): string => {
 };
 
 export const shortId = (id: string): string => (id.length > 12 ? `${id.slice(0, 8)}…` : id);
+
+/** Truncates a long hash (commit/content) for display; short values like 'dev' pass through. */
+export const fmtHash = (hash: string, len = 12): string =>
+  hash.length > len ? `${hash.slice(0, len)}…` : hash;
