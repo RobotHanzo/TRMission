@@ -25,6 +25,7 @@ import { GamesView } from './views/GamesView';
 import { RoomsView } from './views/RoomsView';
 import { MaintainersView } from './views/MaintainersView';
 import { AuditView } from './views/AuditView';
+import { ToastStack } from './components/ToastStack';
 
 const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof Users }[] = [
   { view: 'overview', permission: 'overview.read', icon: Activity },
@@ -141,6 +142,7 @@ export default function App() {
       <main className="oc-main">
         <ActiveView view={view} />
       </main>
+      <ToastStack />
     </div>
   );
 }

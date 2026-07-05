@@ -749,3 +749,61 @@ table.oc-table {
     display: none;
   }
 }
+
+/* ---- toast stack --------------------------------------------------------------------- */
+
+.oc-toast-stack {
+  position: fixed;
+  top: var(--oc-space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--oc-space-2);
+  z-index: 61;
+  pointer-events: none;
+}
+
+.oc-toast-chip {
+  padding: var(--oc-space-2) var(--oc-space-4);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--oc-shadow);
+  color: #fff;
+  animation: oc-toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.oc-toast-chip.oc-toast-chip--exit {
+  animation: oc-toast-out 200ms ease-in forwards;
+}
+
+@keyframes oc-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes oc-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+}
+
+.oc-toast-chip--success {
+  background: var(--oc-signal-clear);
+}
+.oc-toast-chip--error {
+  background: var(--oc-signal-stop);
+}
