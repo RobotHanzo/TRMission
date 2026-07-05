@@ -179,4 +179,39 @@ describe('forced ticket re-draw (rule 7.5)', () => {
     if (!res.ok) return;
     expect(res.value.state.turn.phase).toBe('AWAIT_ACTION');
   });
+
+  it('forces a redraw when the completed ticket is locked via station-borrow only (unlimitedStationBorrow)', () => {
+    const { board, config } = cfg({ unlimitedStationBorrow: true });
+    const { t, r } = findDirect(board);
+    const r2 = findOtherSimple(board, r.id as string);
+    const p0 = asPlayerId('p0');
+    const p1 = asPlayerId('p1');
+
+    const state: GameState = {
+      ...readyState(
+        initGame(board, config),
+        { p0: { keptTickets: [t.id] }, p1: { hand: locoHand(), keptTickets: [] } },
+        { [r.id as string]: { owner: p1 } }, // p1 owns the direct route — p0 owns nothing itself
+      ),
+      stations: [{ playerId: p0, cityId: t.a as string }], // p0's station borrows p1's route
+    };
+
+    const res = reduce(board, state, {
+      t: 'CLAIM_ROUTE',
+      player: p1,
+      routeId: r2.id,
+      payment: allLoco(r2.length),
+    });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    const ns = res.value.state;
+    // The borrow-only completion gets locked as a side effect of p1's claim (lockCompletedTickets
+    // runs for every player before endTurn)...
+    expect(ns.players['p0']!.completedTickets).toContain(t.id);
+    // ...and p0's turn, which starts next, opens straight into a forced re-draw even though p0
+    // owns no track at all.
+    expect(ns.turn.phase).toBe('TICKET_SELECTION');
+    expect(currentPlayerId(ns)).toBe(p0);
+    expect(ns.players['p0']!.pendingTicketOffer).not.toBeNull();
+  });
 });

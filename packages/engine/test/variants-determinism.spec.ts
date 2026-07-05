@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 5 (random events: eventsMode + optional GameState.events)', () => {
-    expect(ENGINE_VERSION).toBe(5);
+  it('is engine version 6 (rule 7.5 also counts unlimitedStationBorrow-locked completion)', () => {
+    expect(ENGINE_VERSION).toBe(6);
   });
 
   it('replays byte-identically under each variant', () => {

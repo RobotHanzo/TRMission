@@ -37,11 +37,15 @@ export function offerTickets(
 
 /**
  * Rule 7.5 predicate: true iff `player` holds at least one kept ticket and EVERY kept ticket is
- * already connected by their own track (own-edge connectivity — knowable mid-game and monotonic, so
- * it can never disagree with the end-game scoring). Such a player has no objective left, so the turn
- * sequencer forces them to draw new tickets at the start of their turn.
+ * already complete — either connected by their own track right now (own-edge connectivity,
+ * knowable mid-game and monotonic) or already locked into `completedTickets` (the
+ * `unlimitedStationBorrow` variant's station-borrow completion, also monotonic). Checking both
+ * means this predicate is correct under either ruleset without branching on `ruleParams`: when the
+ * variant is off, `completedTickets` stays permanently empty, so this reduces to the own-connected
+ * check alone. Such a player has no objective left, so the turn sequencer forces them to draw new
+ * tickets at the start of their turn.
  */
-export function allKeptTicketsOwnConnected(
+export function allKeptTicketsCompleted(
   board: Board,
   state: GameState,
   player: PlayerId,
@@ -66,6 +70,7 @@ export function allKeptTicketsOwnConnected(
   // A kept ticket without a definition should never happen — be conservative and don't force.
   if (tickets.length !== p.keptTickets.length) return false;
 
-  const connected = new Set(ownConnectedTicketIds({ ownEdges, tickets }));
-  return tickets.every((t) => connected.has(t.id));
+  const ownConnected = new Set(ownConnectedTicketIds({ ownEdges, tickets }));
+  const completed = new Set(p.completedTickets as readonly string[]);
+  return tickets.every((t) => ownConnected.has(t.id) || completed.has(t.id));
 }

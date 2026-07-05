@@ -132,4 +132,8 @@ export const SCHEMA_VERSION = 1;
 // new tickets at the start of their turn — the turn opens in TICKET_SELECTION, not AWAIT_ACTION).
 // v5: random events — RuleParams.eventsMode + optional GameState.events; off-mode behavior
 // identical to v4.
-export const ENGINE_VERSION = 5;
+// v6: rule 7.5 also forces a re-draw when every kept ticket is locked in `completedTickets` (the
+// unlimitedStationBorrow variant's station-borrow completion), not just own-connected — closing a
+// gap where a borrow-only completion never triggered the forced re-draw. Off-variant behavior
+// (completedTickets always empty) is identical to v5.
+export const ENGINE_VERSION = 6;

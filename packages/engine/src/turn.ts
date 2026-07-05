@@ -3,7 +3,7 @@ import type { Board } from './board';
 import type { GameState } from './types/state';
 import type { GameEvent } from './types/events';
 import { computeFinalScores } from './scoring';
-import { offerTickets, allKeptTicketsOwnConnected } from './tickets';
+import { offerTickets, allKeptTicketsCompleted } from './tickets';
 import { tickRound } from './events/runtime';
 
 export function currentPlayerId(state: GameState): PlayerId {
@@ -83,11 +83,12 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
 
   events.push({ e: 'TURN_STARTED', player: nextPlayer, orderIndex: nextIdx, visibility: 'PUBLIC' });
 
-  // Rule 7.5 — forced ticket re-draw: a player who has already connected every kept ticket by their
-  // own track has no objective left, so their turn opens straight into a fresh ticket draw instead
-  // of AWAIT_ACTION. Skipped (a normal turn) when the short ticket deck is exhausted — an impossible
+  // Rule 7.5 — forced ticket re-draw: a player whose every kept ticket is already complete (own
+  // track, or — under unlimitedStationBorrow — already locked via station-borrow completion) has
+  // no objective left, so their turn opens straight into a fresh ticket draw instead of
+  // AWAIT_ACTION. Skipped (a normal turn) when the short ticket deck is exhausted — an impossible
   // draw can't be forced.
-  if (allKeptTicketsOwnConnected(board, next, nextPlayer)) {
+  if (allKeptTicketsCompleted(board, next, nextPlayer)) {
     const forced = offerTickets(next, nextPlayer);
     if (forced) {
       events.push(...forced.events);
