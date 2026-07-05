@@ -85,7 +85,11 @@ export function App() {
 
   const isLogin = view === 'login' || view === 'loginCallback';
   const isGameLayout =
-    view === 'game' || view === 'tutorial' || view === 'replay' || view === 'mapEditor';
+    view === 'game' ||
+    view === 'tutorial' ||
+    view === 'replay' ||
+    view === 'adminReplay' ||
+    view === 'mapEditor';
   const mainClass = isGameLayout
     ? 'app-main app-main--game'
     : isLogin
