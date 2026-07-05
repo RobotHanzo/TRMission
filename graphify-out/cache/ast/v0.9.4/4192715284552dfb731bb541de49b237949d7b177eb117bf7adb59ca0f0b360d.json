@@ -1,0 +1,191 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_md",
+      "label": "2026-07-03-unified-map-rendering.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_unified_map_rendering_implementation_plan",
+      "label": "Unified Map Rendering Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_1_shared_render_tokens_in_trm_map_data",
+      "label": "Task 1: Shared render tokens in `@trm/map-data`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L30"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_2_web_theme_sources_hexes_from_shared_tokens_tokens_css_parity_test",
+      "label": "Task 2: Web theme sources hexes from shared tokens + tokens.css parity test",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L322"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_3_mapscene_the_single_map_scene_component",
+      "label": "Task 3: `MapScene` \u2014 the single map scene component",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L489"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_4_board_renders_through_mapscene",
+      "label": "Task 4: Board renders through MapScene",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L974"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_5_login_backdrop_renders_through_mapscene",
+      "label": "Task 5: Login backdrop renders through MapScene",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1092"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_6_editor_canvas_renders_through_mapscene",
+      "label": "Task 6: Editor canvas renders through MapScene",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1159"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_7_game_css_dimensions_come_from_the_shared_tokens",
+      "label": "Task 7: game.css dimensions come from the shared tokens",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1301"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_8_og_map_card_draws_from_the_shared_tokens",
+      "label": "Task 8: OG map card draws from the shared tokens",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1370"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_9_full_validation_visual_verification_docs",
+      "label": "Task 9: Full validation, visual verification, docs",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1455"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_unified_map_rendering_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_unified_map_rendering_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_1_shared_render_tokens_in_trm_map_data",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_2_web_theme_sources_hexes_from_shared_tokens_tokens_css_parity_test",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L322",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_3_mapscene_the_single_map_scene_component",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L489",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_4_board_renders_through_mapscene",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L974",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_5_login_backdrop_renders_through_mapscene",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1092",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_6_editor_canvas_renders_through_mapscene",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1159",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_7_game_css_dimensions_come_from_the_shared_tokens",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1301",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_8_og_map_card_draws_from_the_shared_tokens",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1370",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_03_unified_map_rendering_task_9_full_validation_visual_verification_docs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-03-unified-map-rendering.md",
+      "source_location": "L1455",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

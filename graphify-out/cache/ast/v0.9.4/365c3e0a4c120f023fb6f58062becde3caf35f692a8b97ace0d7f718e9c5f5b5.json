@@ -1,0 +1,127 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_apps_admin_claude_md",
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_admin_claude_claude_md",
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_admin_claude_auth_session_gate",
+      "label": "Auth/session gate",
+      "file_type": "document",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L26"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_admin_claude_permission_model",
+      "label": "Permission model",
+      "file_type": "document",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L41"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_admin_claude_routing_store_ui_ts",
+      "label": "Routing (`store/ui.ts`)",
+      "file_type": "document",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L57"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_admin_claude_view_pattern",
+      "label": "View pattern",
+      "file_type": "document",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L67"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_admin_claude_i18n_design_system",
+      "label": "i18n & design system",
+      "file_type": "document",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L84"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_admin_claude_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L96"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_apps_admin_claude_md",
+      "target": "d_web_projects_trmission_apps_admin_claude_claude_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_admin_claude_claude_md",
+      "target": "d_web_projects_trmission_apps_admin_claude_auth_session_gate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_admin_claude_claude_md",
+      "target": "d_web_projects_trmission_apps_admin_claude_permission_model",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_admin_claude_claude_md",
+      "target": "d_web_projects_trmission_apps_admin_claude_routing_store_ui_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_admin_claude_claude_md",
+      "target": "d_web_projects_trmission_apps_admin_claude_view_pattern",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_admin_claude_claude_md",
+      "target": "d_web_projects_trmission_apps_admin_claude_i18n_design_system",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_admin_claude_claude_md",
+      "target": "d_web_projects_trmission_apps_admin_claude_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/admin/CLAUDE.md",
+      "source_location": "L96",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,0 +1,159 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_md",
+      "label": "2026-07-05-unified-notification-chips-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "label": "Unified Notification Chips \u2014 Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L19"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_store_generalize_store_animations_ts",
+      "label": "Store: generalize `store/animations.ts`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L26"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_component_components_notificationstack_tsx_new_delete_components_toast_tsx",
+      "label": "Component: `components/NotificationStack.tsx` (new), delete `components/Toast.tsx`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L49"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_css_styles_game_css",
+      "label": "CSS (`styles/game.css`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L67"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_call_site_migration",
+      "label": "Call-site migration",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L79"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_non_goals",
+      "label": "Non-goals",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L97"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L105"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_store_generalize_store_animations_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_component_components_notificationstack_tsx_new_delete_components_toast_tsx",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_css_styles_game_css",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_call_site_migration",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_non_goals",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L97",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_unified_notification_chips_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_unified_notification_chips_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md",
+      "source_location": "L105",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

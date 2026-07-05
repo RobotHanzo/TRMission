@@ -1,0 +1,127 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_md",
+      "label": "2026-07-05-unified-notification-chips.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_unified_notification_chips_implementation_plan",
+      "label": "Unified Notification Chips Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L19"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_task_1_generalize_the_store_slice_build_the_unified_notificationstack_component",
+      "label": "Task 1: Generalize the store slice + build the unified `NotificationStack` component",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L37"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_task_2_migrate_gamestage_tsx_off_toast_onto_the_unified_stack",
+      "label": "Task 2: Migrate `GameStage.tsx` off `<Toast>` onto the unified stack",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L674"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_task_3_migrate_roomscreen_tsx_off_toast_onto_the_unified_stack",
+      "label": "Task 3: Migrate `RoomScreen.tsx` off `<Toast>` onto the unified stack",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L891"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_task_4_delete_toast_tsx_and_the_now_unused_css",
+      "label": "Task 4: Delete `Toast.tsx` and the now-unused CSS",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L1038"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_self_review_notes",
+      "label": "Self-Review Notes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L1173"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_unified_notification_chips_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_unified_notification_chips_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_task_1_generalize_the_store_slice_build_the_unified_notificationstack_component",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_task_2_migrate_gamestage_tsx_off_toast_onto_the_unified_stack",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L674",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_task_3_migrate_roomscreen_tsx_off_toast_onto_the_unified_stack",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L891",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_task_4_delete_toast_tsx_and_the_now_unused_css",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L1038",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_unified_notification_chips_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_unified_notification_chips_self_review_notes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-unified-notification-chips.md",
+      "source_location": "L1173",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

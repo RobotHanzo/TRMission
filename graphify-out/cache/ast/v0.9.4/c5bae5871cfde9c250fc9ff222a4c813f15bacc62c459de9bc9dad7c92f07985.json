@@ -1,0 +1,127 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_md",
+      "label": "2026-07-04-move-station-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_map_builder_move_a_station_without_delete_re_add_stops_stage",
+      "label": "Map builder: move a station without delete/re-add (\"Stops\" stage)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_decision_settled_with_the_user",
+      "label": "Decision (settled with the user)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L19"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_flow",
+      "label": "Flow",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L27"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_implementation_footprint",
+      "label": "Implementation footprint",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L48"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L65"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L79"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_map_builder_move_a_station_without_delete_re_add_stops_stage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_map_builder_move_a_station_without_delete_re_add_stops_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_map_builder_move_a_station_without_delete_re_add_stops_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_decision_settled_with_the_user",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_map_builder_move_a_station_without_delete_re_add_stops_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_flow",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_map_builder_move_a_station_without_delete_re_add_stops_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_implementation_footprint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_map_builder_move_a_station_without_delete_re_add_stops_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L65",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_map_builder_move_a_station_without_delete_re_add_stops_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_move_station_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-move-station-design.md",
+      "source_location": "L79",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

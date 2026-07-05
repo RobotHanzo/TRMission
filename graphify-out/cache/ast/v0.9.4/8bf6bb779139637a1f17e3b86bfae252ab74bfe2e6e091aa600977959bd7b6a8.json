@@ -1,0 +1,191 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_md",
+      "label": "2026-07-03-social-previews-replay-visibility-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_social_previews_og_cards_replay_visibility_design",
+      "label": "Social previews (OG cards) + replay visibility \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_goals",
+      "label": "Goals",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_context_what_exists",
+      "label": "Context (what exists)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L18"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_decisions",
+      "label": "Decisions",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L29"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_d1_serve_crawler_meta_via_nginx_ua_routing_server_rendered_meta_page",
+      "label": "D1 \u2014 Serve crawler meta via nginx UA routing \u2192 server-rendered meta page",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L31"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_d2_dynamic_png_cards_hand_authored_svg_resvg_resvg_js",
+      "label": "D2 \u2014 Dynamic PNG cards: hand-authored SVG \u2192 `@resvg/resvg-js`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L50"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_d3_replay_visibility_replayvisibility_on_matchhistory_seated_players_configure",
+      "label": "D3 \u2014 Replay visibility: `replayVisibility` on `matchHistory`, seated players configure",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L72"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_d4_web_replay_id_becomes_visitable_while_signed_out",
+      "label": "D4 \u2014 Web: `/replay/:id` becomes visitable while signed out",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L86"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_error_handling",
+      "label": "Error handling",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L95"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L102"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L115"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_social_previews_og_cards_replay_visibility_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_social_previews_og_cards_replay_visibility_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_goals",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_social_previews_og_cards_replay_visibility_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_context_what_exists",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_social_previews_og_cards_replay_visibility_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_decisions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_decisions",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_d1_serve_crawler_meta_via_nginx_ua_routing_server_rendered_meta_page",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_decisions",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_d2_dynamic_png_cards_hand_authored_svg_resvg_resvg_js",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_decisions",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_d3_replay_visibility_replayvisibility_on_matchhistory_seated_players_configure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_decisions",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_d4_web_replay_id_becomes_visitable_while_signed_out",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_social_previews_og_cards_replay_visibility_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_error_handling",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_social_previews_og_cards_replay_visibility_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_social_previews_og_cards_replay_visibility_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_social_previews_replay_visibility_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-social-previews-replay-visibility-design.md",
+      "source_location": "L115",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,0 +1,143 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_claude_md",
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_claude_md",
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_commands",
+      "label": "Commands",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L12"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_git_workflow",
+      "label": "Git workflow",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L40"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_monorepo_layout_build_order",
+      "label": "Monorepo layout & build order",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L50"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_the_big_picture",
+      "label": "The big picture",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L70"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_load_bearing_decisions_these_bite_if_you_don_t_know_them",
+      "label": "Load-bearing decisions (these bite if you don't know them)",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L89"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_server_env_vars",
+      "label": "Server env vars",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L115"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_graphify",
+      "label": "graphify",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": "L134"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_claude_md",
+      "target": "d_web_projects_trmission_claude_claude_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_claude_md",
+      "target": "d_web_projects_trmission_claude_commands",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_claude_md",
+      "target": "d_web_projects_trmission_claude_git_workflow",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_claude_md",
+      "target": "d_web_projects_trmission_claude_monorepo_layout_build_order",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_claude_md",
+      "target": "d_web_projects_trmission_claude_the_big_picture",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L70",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_claude_md",
+      "target": "d_web_projects_trmission_claude_load_bearing_decisions_these_bite_if_you_don_t_know_them",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_claude_md",
+      "target": "d_web_projects_trmission_claude_server_env_vars",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_claude_md",
+      "target": "d_web_projects_trmission_claude_graphify",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "CLAUDE.md",
+      "source_location": "L134",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

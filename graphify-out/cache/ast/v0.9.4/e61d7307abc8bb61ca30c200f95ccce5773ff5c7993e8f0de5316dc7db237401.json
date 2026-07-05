@@ -1,0 +1,191 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_md",
+      "label": "2026-07-05-purge-inactive-rooms-games-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "label": "Purge Inactive Rooms/Games + Admin Delete \u2014 Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_key_findings_that_shape_this_design",
+      "label": "Key findings that shape this design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L14"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_scope",
+      "label": "Scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L40"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_thresholds_configuration",
+      "label": "Thresholds & configuration",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L53"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_core_service_purgeservice",
+      "label": "Core service: `PurgeService`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L69"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_api_permissions",
+      "label": "API & permissions",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L134"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_admin_ui",
+      "label": "Admin UI",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L171"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_metrics",
+      "label": "Metrics",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L198"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_non_goals",
+      "label": "Non-goals",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L225"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L236"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_key_findings_that_shape_this_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_thresholds_configuration",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_core_service_purgeservice",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_api_permissions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L134",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_admin_ui",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_metrics",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L198",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_non_goals",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L225",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_purge_inactive_rooms_games_admin_delete_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_purge_inactive_rooms_games_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-purge-inactive-rooms-games-design.md",
+      "source_location": "L236",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

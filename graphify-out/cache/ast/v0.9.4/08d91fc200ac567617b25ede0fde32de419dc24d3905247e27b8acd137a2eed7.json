@@ -1,0 +1,239 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_md",
+      "label": "2026-07-05-admin-toasts-and-users-table.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_admin_action_toasts_users_table_columns_implementation_plan",
+      "label": "Admin Action Toasts + Users Table Columns Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_1_usedebouncedvalue_hook",
+      "label": "Task 1: `useDebouncedValue` hook",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L24"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_2_toast_store_toaststack_component_mounted_in_app_tsx",
+      "label": "Task 2: Toast store + `ToastStack` component, mounted in `App.tsx`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L140"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_3_i18n_additions_toast_messages_new_column_badge_strings",
+      "label": "Task 3: i18n additions (toast messages + new column/badge strings)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L441"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_4_backend_expose_haspassword_and_guestexpiresat_on_dashboard_user_rows",
+      "label": "Task 4: Backend \u2014 expose `hasPassword` and `guestExpiresAt` on dashboard user rows",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L536"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_5_oauth_method_badges_oauthbadges_two_glyph_icons",
+      "label": "Task 5: OAuth method badges (`OAuthBadges` + two glyph icons)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L783"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_6_wire_toasts_into_usersview_ban_unban_fixes_the_silent_failure_bug",
+      "label": "Task 6: Wire toasts into `UsersView` ban/unban (fixes the silent-failure bug)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L939"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_7_usersview_oauth_and_expires_columns_table_drawer",
+      "label": "Task 7: `UsersView` \u2014 OAuth and Expires columns (table + drawer)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1123"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_8_switch_usersview_and_accountselectormodal_to_usedebouncedvalue",
+      "label": "Task 8: Switch `UsersView` and `AccountSelectorModal` to `useDebouncedValue`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1370"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_9_wire_toast_into_featuretoggles_save",
+      "label": "Task 9: Wire toast into `FeatureToggles` save",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1591"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_10_wire_toast_into_gamesview_terminate",
+      "label": "Task 10: Wire toast into `GamesView` terminate",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1721"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_11_wire_toast_into_roomsview_close",
+      "label": "Task 11: Wire toast into `RoomsView` close",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1866"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_12_wire_toasts_into_maintainersview_save_and_revoke",
+      "label": "Task 12: Wire toasts into `MaintainersView` save and revoke",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L2033"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_admin_action_toasts_users_table_columns_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_admin_action_toasts_users_table_columns_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_1_usedebouncedvalue_hook",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_2_toast_store_toaststack_component_mounted_in_app_tsx",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L140",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_3_i18n_additions_toast_messages_new_column_badge_strings",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L441",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_4_backend_expose_haspassword_and_guestexpiresat_on_dashboard_user_rows",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L536",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_5_oauth_method_badges_oauthbadges_two_glyph_icons",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L783",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_6_wire_toasts_into_usersview_ban_unban_fixes_the_silent_failure_bug",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L939",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_7_usersview_oauth_and_expires_columns_table_drawer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1123",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_8_switch_usersview_and_accountselectormodal_to_usedebouncedvalue",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1370",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_9_wire_toast_into_featuretoggles_save",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1591",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_10_wire_toast_into_gamesview_terminate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1721",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_11_wire_toast_into_roomsview_close",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L1866",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_admin_toasts_and_users_table_task_12_wire_toasts_into_maintainersview_save_and_revoke",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-admin-toasts-and-users-table.md",
+      "source_location": "L2033",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

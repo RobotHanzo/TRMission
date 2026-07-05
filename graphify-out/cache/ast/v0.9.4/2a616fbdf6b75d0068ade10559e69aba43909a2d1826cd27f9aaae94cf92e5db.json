@@ -1,0 +1,255 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_md",
+      "label": "2026-07-05-ticket-completion-log-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_action_log_ticket_completions_rainbow_locomotive_chip_design",
+      "label": "Action-log ticket completions + rainbow locomotive chip \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L9"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "label": "Part A \u2014 ticket-completion log line",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L19"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L21"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_engine_packages_engine",
+      "label": "Engine (`packages/engine`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L38"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_versioning",
+      "label": "Versioning",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L69"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_tests",
+      "label": "Tests",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L90"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_wire_protocol_packages_proto",
+      "label": "Wire protocol (`packages/proto`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L107"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_codec_packages_codec_src_events_ts",
+      "label": "Codec (`packages/codec/src/events.ts`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L130"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_web_apps_web",
+      "label": "Web (`apps/web`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L151"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_b_rainbow_locomotive_chip_in_the_log",
+      "label": "Part B \u2014 rainbow locomotive chip in the log",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L192"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_problem_194",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L194"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_fix",
+      "label": "Fix",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L202"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_tests_219",
+      "label": "Tests",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L219"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L224"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_action_log_ticket_completions_rainbow_locomotive_chip_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_action_log_ticket_completions_rainbow_locomotive_chip_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_action_log_ticket_completions_rainbow_locomotive_chip_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_engine_packages_engine",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_versioning",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_tests",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L90",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_wire_protocol_packages_proto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L107",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_codec_packages_codec_src_events_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_a_ticket_completion_log_line",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_web_apps_web",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L151",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_action_log_ticket_completions_rainbow_locomotive_chip_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_b_rainbow_locomotive_chip_in_the_log",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L192",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_b_rainbow_locomotive_chip_in_the_log",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_problem_194",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L194",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_b_rainbow_locomotive_chip_in_the_log",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_fix",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L202",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_part_b_rainbow_locomotive_chip_in_the_log",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_tests_219",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L219",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_action_log_ticket_completions_rainbow_locomotive_chip_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_ticket_completion_log_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-ticket-completion-log-design.md",
+      "source_location": "L224",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

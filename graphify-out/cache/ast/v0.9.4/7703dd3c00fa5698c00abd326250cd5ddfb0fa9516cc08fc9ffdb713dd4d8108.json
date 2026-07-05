@@ -1,0 +1,351 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_md",
+      "label": "2026-07-05-admin-maps-replay-versions-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "label": "Admin Panel: Custom Maps, Replay Viewer, Commit Hashes \u2014 Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_key_findings_that_shape_this_design",
+      "label": "Key findings that shape this design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L19"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_1_custom_maps_admin",
+      "label": "Feature 1: Custom Maps Admin",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L54"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_scope",
+      "label": "Scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L56"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_permissions",
+      "label": "Permissions",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L77"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_server",
+      "label": "Server",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L88"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_ui",
+      "label": "Admin UI",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L118"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_2_admin_replay_viewer",
+      "label": "Feature 2: Admin Replay Viewer",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L128"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_scope_130",
+      "label": "Scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L130"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_permissions_143",
+      "label": "Permissions",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L143"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_server_149",
+      "label": "Server",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L149"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_apps_web",
+      "label": "apps/web",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L199"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_ui_215",
+      "label": "Admin UI",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L215"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_3_commit_hash_display",
+      "label": "Feature 3: Commit Hash Display",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L231"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_build_plumbing",
+      "label": "Build plumbing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L233"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_server_246",
+      "label": "Server",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L246"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_web_admin",
+      "label": "Web/admin",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L256"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_mismatch_warning",
+      "label": "Mismatch warning",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L263"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_non_goals",
+      "label": "Non-goals",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L271"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L285"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_key_findings_that_shape_this_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_1_custom_maps_admin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_1_custom_maps_admin",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_1_custom_maps_admin",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_permissions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_1_custom_maps_admin",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_server",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_1_custom_maps_admin",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_ui",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_2_admin_replay_viewer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L128",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_2_admin_replay_viewer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_scope_130",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_2_admin_replay_viewer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_permissions_143",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L143",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_2_admin_replay_viewer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_server_149",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L149",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_2_admin_replay_viewer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_apps_web",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L199",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_2_admin_replay_viewer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_ui_215",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L215",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_3_commit_hash_display",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L231",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_3_commit_hash_display",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_build_plumbing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L233",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_3_commit_hash_display",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_server_246",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L246",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_3_commit_hash_display",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_web_admin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L256",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_feature_3_commit_hash_display",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_mismatch_warning",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L263",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_non_goals",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L271",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_admin_panel_custom_maps_replay_viewer_commit_hashes_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_admin_maps_replay_versions_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-admin-maps-replay-versions-design.md",
+      "source_location": "L285",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

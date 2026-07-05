@@ -1,0 +1,111 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_md",
+      "label": "2026-07-05-reveal-market-draw-color-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_reveal_market_face_up_draw_color_in_the_flying_card_animation_design",
+      "label": "Reveal market (face-up) draw color in the flying-card animation \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_why_this_is_correct_not_just_cosmetic",
+      "label": "Why this is correct, not just cosmetic",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L12"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_change",
+      "label": "Change",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L28"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_tests",
+      "label": "Tests",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L37"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L45"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_reveal_market_face_up_draw_color_in_the_flying_card_animation_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_reveal_market_face_up_draw_color_in_the_flying_card_animation_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_reveal_market_face_up_draw_color_in_the_flying_card_animation_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_why_this_is_correct_not_just_cosmetic",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_reveal_market_face_up_draw_color_in_the_flying_card_animation_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_change",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_reveal_market_face_up_draw_color_in_the_flying_card_animation_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_tests",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_reveal_market_face_up_draw_color_in_the_flying_card_animation_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_reveal_market_draw_color_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-reveal-market-draw-color-design.md",
+      "source_location": "L45",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

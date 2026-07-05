@@ -1,0 +1,191 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_md",
+      "label": "2026-07-04-route-curvature-tuning.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_route_curvature_tuning_curves_stage_implementation_plan",
+      "label": "Route Curvature Tuning (\"Curves\" Stage) Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_1_map_data_geometry_bow_field_bow_limit_explicit_bow_pass_exported_offsets",
+      "label": "Task 1: map-data geometry \u2014 `bow` field, `BOW_LIMIT`, explicit-bow pass, exported offsets",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L26"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_2_map_data_validation_bowoutofrange",
+      "label": "Task 2: map-data validation \u2014 `bowOutOfRange`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L173"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_3_map_data_hash_tripwire_absent_bow_never_moves_a_hash",
+      "label": "Task 3: map-data hash tripwire \u2014 absent `bow` never moves a hash",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L263"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_4_server_zod_bound_dto_seam_e2e",
+      "label": "Task 4: server \u2014 zod bound + DTO seam + e2e",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L306"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_5_web_data_plumbing_draft_type_adapters_store_actions",
+      "label": "Task 5: web data plumbing \u2014 draft type, adapters, store actions",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L403"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_6_web_i18n_curves_stage_strings_zh_hant_en",
+      "label": "Task 6: web i18n \u2014 Curves-stage strings (zh-Hant + en)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L640"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_7_web_canvas_curvemath_helper_editorcanvas_apex_handle",
+      "label": "Task 7: web canvas \u2014 `curveMath` helper + EditorCanvas apex handle",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L717"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_8_web_curvesstage_component_stage_registration",
+      "label": "Task 8: web \u2014 CurvesStage component + stage registration",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L921"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_9_full_verification",
+      "label": "Task 9: Full verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L1228"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_route_curvature_tuning_curves_stage_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_route_curvature_tuning_curves_stage_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_1_map_data_geometry_bow_field_bow_limit_explicit_bow_pass_exported_offsets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_2_map_data_validation_bowoutofrange",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L173",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_3_map_data_hash_tripwire_absent_bow_never_moves_a_hash",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L263",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_4_server_zod_bound_dto_seam_e2e",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L306",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_5_web_data_plumbing_draft_type_adapters_store_actions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L403",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_6_web_i18n_curves_stage_strings_zh_hant_en",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L640",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_7_web_canvas_curvemath_helper_editorcanvas_apex_handle",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L717",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_8_web_curvesstage_component_stage_registration",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L921",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_route_curvature_tuning_task_9_full_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-route-curvature-tuning.md",
+      "source_location": "L1228",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

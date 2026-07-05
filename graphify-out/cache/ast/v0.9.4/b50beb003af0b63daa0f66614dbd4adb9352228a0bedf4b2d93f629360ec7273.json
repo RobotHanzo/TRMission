@@ -1,0 +1,175 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_md",
+      "label": "2026-07-05-forced-ticket-redraw-completion-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_forced_ticket_re_draw_fix_completion_check_explain_it_in_the_ui",
+      "label": "Forced ticket re-draw: fix completion check + explain it in the UI",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_engine_fix",
+      "label": "Engine fix",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L24"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_versioning",
+      "label": "Versioning",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L52"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_tests",
+      "label": "Tests",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L74"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_frontend_fix_explain_the_forced_redraw",
+      "label": "Frontend fix: explain the forced redraw",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L82"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_distinguishing_signal",
+      "label": "Distinguishing signal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L89"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_implementation",
+      "label": "Implementation",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L98"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_tests_115",
+      "label": "Tests",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L115"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L121"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_forced_ticket_re_draw_fix_completion_check_explain_it_in_the_ui",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_forced_ticket_re_draw_fix_completion_check_explain_it_in_the_ui",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_forced_ticket_re_draw_fix_completion_check_explain_it_in_the_ui",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_engine_fix",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_engine_fix",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_versioning",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_engine_fix",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_tests",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_forced_ticket_re_draw_fix_completion_check_explain_it_in_the_ui",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_frontend_fix_explain_the_forced_redraw",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_frontend_fix_explain_the_forced_redraw",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_distinguishing_signal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_frontend_fix_explain_the_forced_redraw",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_implementation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_frontend_fix_explain_the_forced_redraw",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_tests_115",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_forced_ticket_re_draw_fix_completion_check_explain_it_in_the_ui",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_forced_ticket_redraw_completion_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-forced-ticket-redraw-completion-design.md",
+      "source_location": "L121",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

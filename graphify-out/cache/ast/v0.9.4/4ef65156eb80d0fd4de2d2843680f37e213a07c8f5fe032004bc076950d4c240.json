@@ -1,0 +1,159 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_md",
+      "label": "2026-07-04-single-connection-per-seat.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_single_connection_per_seat_implementation_plan",
+      "label": "Single Connection Per Seat Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L20"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_1_shared_ws_close_code_constant",
+      "label": "Task 1: Shared WS close-code constant",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L43"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_2_server_forced_close_capability",
+      "label": "Task 2: Server forced-close capability",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L107"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_3_proto_session_replaced_code_kick_on_hello_logic",
+      "label": "Task 3: Proto `SESSION_REPLACED` code + kick-on-Hello logic",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L304"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_4_client_gamesocket_recognize_the_forced_close",
+      "label": "Task 4: Client `GameSocket` \u2014 recognize the forced close",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L542"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_5_client_store_wiring_sessionreplaced_flag",
+      "label": "Task 5: Client store wiring \u2014 `sessionReplaced` flag",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L718"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_6_dialog_ui_i18n",
+      "label": "Task 6: Dialog UI + i18n",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L872"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_7_full_validation",
+      "label": "Task 7: Full validation",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L1103"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_single_connection_per_seat_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_single_connection_per_seat_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_1_shared_ws_close_code_constant",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_2_server_forced_close_capability",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L107",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_3_proto_session_replaced_code_kick_on_hello_logic",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L304",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_4_client_gamesocket_recognize_the_forced_close",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L542",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_5_client_store_wiring_sessionreplaced_flag",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L718",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_6_dialog_ui_i18n",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L872",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_single_connection_per_seat_task_7_full_validation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-single-connection-per-seat.md",
+      "source_location": "L1103",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

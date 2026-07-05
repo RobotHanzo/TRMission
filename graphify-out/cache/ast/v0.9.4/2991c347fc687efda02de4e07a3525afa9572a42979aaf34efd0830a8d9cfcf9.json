@@ -1,0 +1,216 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_md",
+      "label": "2026-07-05-preset-chat-messages-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "label": "Preset (prebuilt) chat messages \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L12"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_decisions_load_bearing",
+      "label": "Decisions (load-bearing)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L21"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_wire_proto_changes_trm_proto",
+      "label": "Wire / proto changes (`@trm/proto`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L76"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_trm_shared_changes",
+      "label": "`@trm/shared` changes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L116"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_in_game_server_changes_apps_server",
+      "label": "In-game server changes (`apps/server`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L143"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_in_game_client_changes_apps_web",
+      "label": "In-game client changes (`apps/web`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L158"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_lobby_changes_apps_server_apps_web",
+      "label": "Lobby changes (`apps/server` + `apps/web`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L171"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_admin_dashboard_changes_apps_admin",
+      "label": "Admin dashboard changes (`apps/admin`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L188"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_error_handling_edge_cases",
+      "label": "Error handling & edge cases",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L203"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_testing_verification",
+      "label": "Testing & verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L217"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L234"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_decisions_load_bearing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_wire_proto_changes_trm_proto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_trm_shared_changes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_in_game_server_changes_apps_server",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L143",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_in_game_client_changes_apps_web",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L158",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_lobby_changes_apps_server_apps_web",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_admin_dashboard_changes_apps_admin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L188",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_error_handling_edge_cases",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L203",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_testing_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L217",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_preset_prebuilt_chat_messages_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-preset-chat-messages-design.md",
+      "source_location": "L234",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

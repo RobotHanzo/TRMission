@@ -1,0 +1,159 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_md",
+      "label": "2026-07-05-events-panel-info-modal-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "label": "Events panel description modal \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_scope",
+      "label": "Scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L17"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_component_changes_src_components_eventspanel_tsx",
+      "label": "Component changes (`src/components/EventsPanel.tsx`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L29"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_no_new_i18n_strings_no_new_css_selectors",
+      "label": "No new i18n strings, no new CSS selectors",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L79"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_edge_cases",
+      "label": "Edge cases",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L90"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_implementation_surface",
+      "label": "Implementation surface",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L100"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L116"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_success_criteria",
+      "label": "Success criteria",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L123"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_component_changes_src_components_eventspanel_tsx",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_no_new_i18n_strings_no_new_css_selectors",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_edge_cases",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L90",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_implementation_surface",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_events_panel_description_modal_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_events_panel_info_modal_design_success_criteria",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-05-events-panel-info-modal-design.md",
+      "source_location": "L123",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

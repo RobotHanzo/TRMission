@@ -1,0 +1,159 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_md",
+      "label": "2026-07-04-route-curvature-tuning-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "label": "Map builder: route curvature tuning (\"Curves\" stage)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_decisions_settled_with_the_user",
+      "label": "Decisions (settled with the user)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L16"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_1_data_model_optional_bow_on_a_route",
+      "label": "1. Data model \u2014 optional `bow` on a route",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L25"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_2_geometry_packages_map_data_src_geometry_ts",
+      "label": "2. Geometry (`packages/map-data/src/geometry.ts`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L43"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_3_builder_ui_new_stage_curves",
+      "label": "3. Builder UI \u2014 new stage `curves`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L59"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_4_server_wire",
+      "label": "4. Server & wire",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L87"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_5_testing",
+      "label": "5. Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L102"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L116"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_decisions_settled_with_the_user",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_1_data_model_optional_bow_on_a_route",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_2_geometry_packages_map_data_src_geometry_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_3_builder_ui_new_stage_curves",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_4_server_wire",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_5_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_map_builder_route_curvature_tuning_curves_stage",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_route_curvature_tuning_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-route-curvature-tuning-design.md",
+      "source_location": "L116",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,0 +1,303 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_md",
+      "label": "2026-07-04-random-events-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "label": "Random Events System (\u96a8\u6a5f\u4e8b\u4ef6) \u2014 Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_decision_settled_with_the_user",
+      "label": "Decision (settled with the user)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L18"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_design_principles",
+      "label": "Design principles",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L39"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_the_8_v1_events",
+      "label": "The 8 v1 events",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L61"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "label": "Architecture as built",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L78"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_genesis_schedule_generation",
+      "label": "Genesis schedule generation",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L80"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_eventsstate_gamestate_events",
+      "label": "`EventsState` + `GameState.events`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L166"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_round_semantics_endturn_tickround",
+      "label": "Round semantics: `endTurn` \u2192 `tickRound`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L235"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_rule_enforcement_events_effects_ts_reduce_ts_gates",
+      "label": "Rule enforcement \u2014 `events/effects.ts` + `reduce.ts` gates",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L296"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_redaction",
+      "label": "Redaction",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L340"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_wire_shapes",
+      "label": "Wire shapes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L372"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_feature_flag_config_chain_revised_2026_07_05_see_decision_2",
+      "label": "Feature-flag + config chain (revised 2026-07-05 \u2014 see decision #2)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L474"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_web_surfaces",
+      "label": "Web surfaces",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L498"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_i18n",
+      "label": "i18n",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L542"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L576"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_future_catalog_documented_not_implemented",
+      "label": "Future catalog (documented, not implemented)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L631"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L654"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_decision_settled_with_the_user",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_design_principles",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_the_8_v1_events",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_genesis_schedule_generation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_eventsstate_gamestate_events",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L166",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_round_semantics_endturn_tickround",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L235",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_rule_enforcement_events_effects_ts_reduce_ts_gates",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L296",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_redaction",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L340",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_wire_shapes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L372",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_feature_flag_config_chain_revised_2026_07_05_see_decision_2",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L474",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_architecture_as_built",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_web_surfaces",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L498",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_i18n",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L542",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L576",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_future_catalog_documented_not_implemented",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L631",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_random_events_system_\u96a8\u6a5f\u4e8b\u4ef6_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_random_events_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-random-events-design.md",
+      "source_location": "L654",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
