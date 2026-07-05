@@ -81,6 +81,7 @@ export const OverviewSchema = z.object({
     protocolVersion: z.number(),
     contentHash: z.string(),
     uptimeSeconds: z.number(),
+    commitHash: z.string(),
   }),
 });
 

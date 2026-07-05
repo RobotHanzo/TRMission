@@ -4,6 +4,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { ENGINE_VERSION } from '@trm/engine';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import { PROTOCOL_VERSION } from '@trm/proto';
+import { env } from '../config/env';
 
 // Liveness + build/version metadata. Documented so the generated OpenAPI has at least
 // one tag group; auth/lobby controllers add the rest in the next increment.
@@ -18,12 +19,13 @@ export class HealthController {
   }
 
   @Get('version')
-  @ApiOperation({ summary: 'Engine / protocol / content versions' })
-  version(): { engineVersion: number; protocolVersion: number; contentHash: string } {
+  @ApiOperation({ summary: 'Engine / protocol / content / commit versions' })
+  version(): { engineVersion: number; protocolVersion: number; contentHash: string; commitHash: string } {
     return {
       engineVersion: ENGINE_VERSION,
       protocolVersion: PROTOCOL_VERSION,
       contentHash: OFFICIAL_MAPS[0]?.hash ?? '',
+      commitHash: env.gitCommit,
     };
   }
 }

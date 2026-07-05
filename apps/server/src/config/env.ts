@@ -5,6 +5,8 @@ export const env = {
   port: Number(process.env.PORT ?? 3001),
   mongoUrl: process.env.MONGO_URL ?? 'mongodb://localhost:27017',
   mongoDb: process.env.MONGO_DB ?? 'trmission',
+  /** Git commit SHA baked into the running build (CI build-arg → Docker ENV). 'dev' locally. */
+  gitCommit: process.env.GIT_COMMIT ?? 'dev',
   /** Persistence is on by default; set TRM_PERSISTENCE=0 to run purely in-memory (no auth/lobby). */
   persistence: process.env.TRM_PERSISTENCE !== '0',
   /** When set, seed a demo game on boot and log dev tickets for manual smoke play. */

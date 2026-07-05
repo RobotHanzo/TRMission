@@ -147,6 +147,7 @@ describe('overview', () => {
     expect(typeof res.body.metrics.residentMemoryBytes).toBe('number');
     expect(typeof res.body.versions.engineVersion).toBe('number');
     expect(typeof res.body.versions.uptimeSeconds).toBe('number');
+    expect(res.body.versions.commitHash).toBe('dev'); // no GIT_COMMIT set in tests
   });
 
   it('403s a viewer on a permission they lack (audit.read) but not on overview', async () => {

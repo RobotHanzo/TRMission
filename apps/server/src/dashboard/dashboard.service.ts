@@ -3,6 +3,7 @@ import type { Db } from 'mongodb';
 import { ENGINE_VERSION } from '@trm/engine';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import { PROTOCOL_VERSION } from '@trm/proto';
+import { env } from '../config/env';
 import { MONGO_DB } from '../db/tokens';
 import { GameRegistry } from '../game/game-registry';
 import { MetricsService } from '../observability/metrics.service';
@@ -99,6 +100,7 @@ export class DashboardService {
         protocolVersion: PROTOCOL_VERSION,
         contentHash: OFFICIAL_MAPS[0]?.hash ?? '',
         uptimeSeconds: Math.round(process.uptime()),
+        commitHash: env.gitCommit,
       },
     };
   }
