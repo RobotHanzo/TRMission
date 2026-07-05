@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema } from '@trm/proto';
 import { Board } from './Board';
+import { useAnimations } from '../store/animations';
 
 const snap = create(GameSnapshotSchema, {
   stateVersion: 1,
@@ -22,6 +23,8 @@ const snap = create(GameSnapshotSchema, {
 });
 
 describe('Board', () => {
+  beforeEach(() => useAnimations.getState().reset());
+
   it('renders the Taiwan map with the full route graph and localized city names', () => {
     const { container } = render(
       <Board
@@ -113,5 +116,20 @@ describe('Board', () => {
     );
     expect(container.querySelectorAll('[data-route-id]').length).toBeGreaterThan(60);
     expect(container.querySelector('[data-city-id="taipei"]')).toBeTruthy();
+  });
+
+  it('does not crash when an events-panel spotlight target is pending in the animations store', () => {
+    useAnimations.getState().setEventSpotlight({ kind: 'route', ids: ['R3'] });
+    const { container } = render(
+      <Board
+        snapshot={snap}
+        locale="zh-Hant"
+        colorBlind={false}
+        canAct={false}
+        onPickRoute={() => {}}
+        onPickCity={() => {}}
+      />,
+    );
+    expect(container.querySelectorAll('path.bed').length).toBeGreaterThan(60);
   });
 });

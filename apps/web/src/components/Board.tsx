@@ -362,8 +362,10 @@ function RevealFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement |
 }
 
 /**
- * Tutorial auto-pan: frames the board on a set of routes/cities (the current beat's `frame`). Lives
- * inside the pan/zoom context for `setTransform`; re-fits whenever the target changes, inert otherwise.
+ * Auto-pan framer: frames the board on a set of routes/cities. Driven by the tutorial/replay
+ * `frameTarget` prop when present (sandbox contexts); otherwise falls back to the live game's
+ * `eventSpotlight` store field (set from the events panel's affected-routes list). Lives inside the
+ * pan/zoom context for `setTransform`; re-fits whenever the effective target changes, inert otherwise.
  */
 function SpotlightFramer({
   viewportRef,
@@ -374,16 +376,18 @@ function SpotlightFramer({
 }) {
   const { setTransform } = useControls();
   const reduced = useReducedMotion();
-  const key = target ? `${target.kind}:${target.ids.join(',')}` : '';
+  const eventSpotlight = useAnimationsStore((s) => s.eventSpotlight);
+  const effective = target ?? eventSpotlight;
+  const key = effective ? `${effective.kind}:${effective.ids.join(',')}` : '';
   useEffect(() => {
-    if (!target || target.ids.length === 0) return;
+    if (!effective || effective.ids.length === 0) return;
     const cityIds =
-      target.kind === 'route'
-        ? target.ids.flatMap((rid) => {
+      effective.kind === 'route'
+        ? effective.ids.flatMap((rid) => {
             const r = routeById.get(rid);
             return r ? [r.a as string, r.b as string] : [];
           })
-        : target.ids;
+        : effective.ids;
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -403,8 +407,8 @@ function SpotlightFramer({
     if (!proj || w <= 0 || h <= 0) return;
     const span = Math.min(100, Math.max(22, Math.max(maxX - minX, maxY - minY) + 16));
     const t = viewToTransform({ cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, span }, proj, w, h);
-    setTransform(t.positionX, t.positionY, t.scale, frameDurationMs(target, reduced), 'easeOut');
-  }, [key, target, reduced]);
+    setTransform(t.positionX, t.positionY, t.scale, frameDurationMs(effective, reduced), 'easeOut');
+  }, [key, effective, reduced]);
   return null;
 }
 
