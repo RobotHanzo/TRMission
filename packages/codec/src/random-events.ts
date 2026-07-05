@@ -5,7 +5,11 @@
 // schedule/nextIdx/suppressed never reach this module — it only ever sees what `redactFor` already
 // decided is safe to project.
 import { create } from '@bufbuild/protobuf';
-import type { ActiveEvent, CharterContract as EngineCharterContract, RedactedView } from '@trm/engine';
+import type {
+  ActiveEvent,
+  CharterContract as EngineCharterContract,
+  RedactedView,
+} from '@trm/engine';
 import {
   CharterContractSchema,
   HotspotMarkerSchema,
@@ -75,7 +79,9 @@ export function randomEventsToPb(events: EventsBlock): PbRandomEventsState {
     roundIndex: events.roundIndex,
     active: events.active.map(activeEventToInfo),
     forecast: events.forecast === null ? undefined : forecastToInfo(events.forecast),
-    hotspots: events.hotspots.map((h) => hotspotToPb({ cityId: h.cityId as string, level: h.level })),
+    hotspots: events.hotspots.map((h) =>
+      hotspotToPb({ cityId: h.cityId as string, level: h.level }),
+    ),
     charters: events.charters.map(charterToPb),
     reopenBonusRouteIds: events.reopenBonusRouteIds.map((r) => r as string),
     closedRouteIds: events.closedRouteIds.map((r) => r as string),

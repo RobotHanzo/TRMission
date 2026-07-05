@@ -1,1 +1,143 @@
-{"nodes": [{"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_md", "label": "task-m2-brief.md", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "label": "Task M2 \u2014 Restrictive/mixed event RULES: typhoon closure + reopen bonus, typhoon day off, sky lantern, aftershock", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_where_this_fits", "label": "Where this fits", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_binding_constraints", "label": "Binding constraints", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L15"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_new_helpers_packages_engine_src_events_effects_ts_new_file_pure", "label": "New helpers \u2014 `packages/engine/src/events/effects.ts` (new file, pure)", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L28"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_rule_changes_packages_engine_src_reduce_ts_payments_ts_selectors_ts", "label": "Rule changes \u2014 `packages/engine/src/reduce.ts` (+ `payments.ts`, `selectors.ts`)", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L44"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_tests_new_files_under_packages_engine_test_plus_extensions", "label": "Tests (new files under packages/engine/test/, plus extensions)", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L84"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_verification", "label": "Verification", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L117"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_commit", "label": "Commit", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L122"}], "edges": [{"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_md", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_where_this_fits", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_binding_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L15", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_new_helpers_packages_engine_src_events_effects_ts_new_file_pure", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L28", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_rule_changes_packages_engine_src_reduce_ts_payments_ts_selectors_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L44", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_tests_new_files_under_packages_engine_test_plus_extensions", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L84", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L117", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_commit", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-brief.md", "source_location": "L122", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_md",
+      "label": "task-m2-brief.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "label": "Task M2 \u2014 Restrictive/mixed event RULES: typhoon closure + reopen bonus, typhoon day off, sky lantern, aftershock",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_where_this_fits",
+      "label": "Where this fits",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_binding_constraints",
+      "label": "Binding constraints",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_new_helpers_packages_engine_src_events_effects_ts_new_file_pure",
+      "label": "New helpers \u2014 `packages/engine/src/events/effects.ts` (new file, pure)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L28"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_rule_changes_packages_engine_src_reduce_ts_payments_ts_selectors_ts",
+      "label": "Rule changes \u2014 `packages/engine/src/reduce.ts` (+ `payments.ts`, `selectors.ts`)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L44"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_tests_new_files_under_packages_engine_test_plus_extensions",
+      "label": "Tests (new files under packages/engine/test/, plus extensions)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L84"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_verification",
+      "label": "Verification",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L117"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_commit",
+      "label": "Commit",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L122"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_md",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_where_this_fits",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_binding_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_new_helpers_packages_engine_src_events_effects_ts_new_file_pure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_rule_changes_packages_engine_src_reduce_ts_payments_ts_selectors_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_tests_new_files_under_packages_engine_test_plus_extensions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_task_m2_restrictive_mixed_event_rules_typhoon_closure_reopen_bonus_typhoon_day_off_sky_lantern_aftershock",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_brief_commit",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-brief.md",
+      "source_location": "L122",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -35,7 +35,7 @@ Three independent gaps in `apps/admin`:
   takes or filters by `ownerId`). None of the "list everyone's maps / delete any map / force-unshare
   / reassign owner" operations exist yet; all are new repo methods, additive to the existing files.
 - **A custom map's "usage" isn't tracked by its own id.** A game references content by
-  `contentHash` (`games.contentHash`), and a `customMaps._id` can have produced *several*
+  `contentHash` (`games.contentHash`), and a `customMaps._id` can have produced _several_
   `mapContents` docs over its edit history (each publish at `resolveForStart` time is
   insert-if-absent, keyed by the hash of that revision). `MapContentDoc.sourceMapId` is the only
   link back — usage count means: find all `mapContents` with that `sourceMapId`, then count `games`
@@ -78,9 +78,9 @@ behind `ConfirmDialog`):
 
 New entries in `packages/shared/src/dashboard.ts`'s `DASHBOARD_PERMISSIONS`:
 
-| Permission | Grants | Default role |
-|---|---|---|
-| `maps.read` | list, view detail, preview | `viewer` (parity with `games.read`/`rooms.read`) |
+| Permission      | Grants                          | Default role                                        |
+| --------------- | ------------------------------- | --------------------------------------------------- |
+| `maps.read`     | list, view detail, preview      | `viewer` (parity with `games.read`/`rooms.read`)    |
 | `maps.moderate` | delete, force-unshare, transfer | `admin` (parity with `games.delete`/`rooms.delete`) |
 
 Added to `VIEWER_PERMISSIONS`/`ADMIN_PERMISSIONS` respectively, same shape as the existing arrays.
@@ -101,13 +101,13 @@ New module: `apps/server/src/dashboard/dashboard-maps.controller.ts` +
 `dashboard-maps.service.ts`, same shape as `DashboardGamesController`/`Service`
 (`@UseGuards(AccessTokenGuard, DashboardGuard)`, per-route `@RequirePermission`):
 
-| Method | Path | Permission |
-|---|---|---|
-| `GET` | `/dashboard/maps` | `maps.read` |
-| `GET` | `/dashboard/maps/:id` | `maps.read` |
-| `DELETE` | `/dashboard/maps/:id` | `maps.moderate` |
-| `DELETE` | `/dashboard/maps/:id/share` | `maps.moderate` |
-| `POST` | `/dashboard/maps/:id/transfer` | `maps.moderate` |
+| Method   | Path                           | Permission      |
+| -------- | ------------------------------ | --------------- |
+| `GET`    | `/dashboard/maps`              | `maps.read`     |
+| `GET`    | `/dashboard/maps/:id`          | `maps.read`     |
+| `DELETE` | `/dashboard/maps/:id`          | `maps.moderate` |
+| `DELETE` | `/dashboard/maps/:id/share`    | `maps.moderate` |
+| `POST`   | `/dashboard/maps/:id/transfer` | `maps.moderate` |
 
 Detail response includes `usageCount` = `games.countDocuments({contentHash: {$in: hashes}})` where
 `hashes` = all `mapContents._id` with `sourceMapId === id`. Every mutating route audits via the

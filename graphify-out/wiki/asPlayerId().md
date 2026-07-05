@@ -7,6 +7,7 @@
 ## Connections by Relation
 
 ### calls
+
 - .onHello() `EXTRACTED`
 - .broadcast() `EXTRACTED`
 - .botMove() `EXTRACTED`
@@ -20,9 +21,11 @@
 - cfg() `EXTRACTED`
 
 ### contains
+
 - ids.ts `EXTRACTED`
 
 ### imports
+
 - hub.ts `EXTRACTED`
 - ReplayScreen.tsx `EXTRACTED`
 - helpers.ts `EXTRACTED`
@@ -46,4 +49,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

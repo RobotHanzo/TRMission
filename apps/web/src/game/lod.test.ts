@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  zoomBucket,
-  cityTier,
-  MAJOR_CITIES,
-  SECONDARY_CITIES,
-  TERTIARY_CITIES,
-} from './lod';
+import { zoomBucket, cityTier, MAJOR_CITIES, SECONDARY_CITIES, TERTIARY_CITIES } from './lod';
 
 describe('zoomBucket', () => {
   it('maps scale to four ascending level-of-detail buckets', () => {

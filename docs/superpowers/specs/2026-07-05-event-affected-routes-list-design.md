@@ -7,7 +7,7 @@ target a specific set of routes — a whole region's touching routes for Sky Lan
 Typhoon Landfall (`packages/engine/src/events/schedule.ts`). Today `EventsPanel.tsx`'s active/
 forecast rows only ever show a route **count** ("2 條路線" via `events.affectedRoutes`), and the
 existing info modal (landed in `2026-07-05-events-panel-info-modal-design.md`) shows only the
-event's name + rule description — a player has no way to see *which* routes are affected short of
+event's name + rule description — a player has no way to see _which_ routes are affected short of
 scanning the whole map for the amber sky-lantern glow (`.route.evt-sky`) or the typhoon glyph
 (`.route.evt-closed`).
 
@@ -55,31 +55,33 @@ render — same fallback as today's "no routes" case.
   pattern as `Board.tsx`) to drop owned/locked routes.
 - Inside the existing modal, below the `<p>{t(eventDescKey(infoKind))}</p>` description, append:
   ```tsx
-  {infoRouteIds.length > 0 && (
-    <div className="event-route-section">
-      <h4>{t('events.routeListTitle')}</h4>
-      <ul className="event-route-list">
-        {infoRouteIds.map((rid) => {
-          const r = routeById.get(rid);
-          if (!r) return null;
-          return (
-            <li key={rid}>
-              <button
-                type="button"
-                className="event-route-item"
-                onClick={() => {
-                  setEventSpotlight({ kind: 'route', ids: [rid] });
-                  setInfoKind(null);
-                }}
-              >
-                {cityName(r.a, locale)}–{cityName(r.b, locale)}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  )}
+  {
+    infoRouteIds.length > 0 && (
+      <div className="event-route-section">
+        <h4>{t('events.routeListTitle')}</h4>
+        <ul className="event-route-list">
+          {infoRouteIds.map((rid) => {
+            const r = routeById.get(rid);
+            if (!r) return null;
+            return (
+              <li key={rid}>
+                <button
+                  type="button"
+                  className="event-route-item"
+                  onClick={() => {
+                    setEventSpotlight({ kind: 'route', ids: [rid] });
+                    setInfoKind(null);
+                  }}
+                >
+                  {cityName(r.a, locale)}–{cityName(r.b, locale)}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    );
+  }
   ```
 - New imports: `routeById` (already exported from `game/content.ts`, just not currently imported
   here), `setEventSpotlight` selected off `useAnimationsStore` (new field, see below).
@@ -102,7 +104,7 @@ same shape for a one-shot pan instead of a persistent highlight:
   and uses `effective` everywhere `target` was used, keyed the same way
   (`` `${effective.kind}:${effective.ids.join(',')}` ``). No new component, no change to the
   tutorial/replay call sites — a live game never passes `frameTarget`, so `effective` is always
-  `eventSpotlight` there; a sandbox context that *does* pass `frameTarget` keeps taking priority.
+  `eventSpotlight` there; a sandbox context that _does_ pass `frameTarget` keeps taking priority.
 - No new board overlay/highlight is added for the panned-to route — the existing persistent amber
   glow (`.route.evt-sky`) / typhoon glyph (`.route.evt-closed`) is already the "this route is
   affected" visual; panning just brings it into view.
@@ -111,9 +113,9 @@ same shape for a one-shot pan instead of a persistent highlight:
 
 One new key, both locales, next to the existing `events.*` block in `src/i18n/index.ts`:
 
-| Key                     | zh-Hant      | en             |
-| ----------------------- | ------------ | -------------- |
-| `events.routeListTitle` | 受影響路線   | Affected routes |
+| Key                     | zh-Hant    | en              |
+| ----------------------- | ---------- | --------------- |
+| `events.routeListTitle` | 受影響路線 | Affected routes |
 
 Everything else (route names) resolves through `cityName`, already fed from the active content
 catalog, not a translation table.
@@ -132,7 +134,7 @@ catalog, not a translation table.
   crash.
 - **Every targeted route already claimed**: section doesn't render (empty list after filtering).
 - **Clicking a route row**: closes the modal (so the pan is actually visible) and pans; if the
-  player immediately reopens the same modal and clicks the *same* route again, the pan doesn't
+  player immediately reopens the same modal and clicks the _same_ route again, the pan doesn't
   re-fire (unchanged key) — an accepted pre-existing limitation, identical to how the tutorial's
   `SpotlightFramer` already behaves for a repeated identical target.
 - **Kind with no routes** (day-off, aftershock, hotspot, charter, gala, stamp rally): `routeIdsForKind`
@@ -141,6 +143,7 @@ catalog, not a translation table.
 ## Testing
 
 `EventsPanel.test.tsx`:
+
 - Active `SKY_LANTERN`/`TYPHOON_LANDFALL` row's modal shows the affected-routes section with the
   correct city-pair names.
 - A route already owned in the snapshot is excluded from the list.
@@ -158,7 +161,7 @@ camera tests already bail out early under jsdom's unmeasured layout, same as the
 
 - No "frame all affected routes at once" view — each row pans to just that one route.
 - No filtering/preview refinement beyond current ownership (e.g. not attempting to predict whether
-  a *forecast* Typhoon Landfall route will still be unclaimed by the time it actually starts next
+  a _forecast_ Typhoon Landfall route will still be unclaimed by the time it actually starts next
   round — the list reflects current ownership at the moment it's opened).
 - No change to the board's existing per-route overlays (glow/glyph) — reused as-is.
 

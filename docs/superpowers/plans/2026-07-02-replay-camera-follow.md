@@ -35,12 +35,14 @@ Vitest + `@testing-library/react`, `react-zoom-pan-pinch` (untouched by this pla
 ### Task 1: `instant` framing + `frameDurationMs` in `boardView.ts`
 
 **Files:**
+
 - Modify: `apps/web/src/game/boardView.ts`
 - Test: `apps/web/src/game/boardView.test.ts`
 
 **Interfaces:**
+
 - Produces: `BoardFrameTarget.instant?: boolean` (new optional field); `frameDurationMs(target:
-  BoardFrameTarget, reducedMotion: boolean): number` — returns `0` when `target.instant` or
+BoardFrameTarget, reducedMotion: boolean): number` — returns `0` when `target.instant` or
   `reducedMotion` is true, else `600`.
 
 - [ ] **Step 1: Write the failing test**
@@ -148,9 +150,11 @@ exactly what the inline expression returned before). There is no new test; the e
 encyclopedia/board suites are the regression guard.
 
 **Files:**
+
 - Modify: `apps/web/src/components/Board.tsx`
 
 **Interfaces:**
+
 - Consumes: `frameDurationMs(target, reducedMotion)` from Task 1 (`apps/web/src/game/boardView.ts`).
 
 - [ ] **Step 1: Update the import**
@@ -234,10 +238,12 @@ git commit -m "feat(web): SpotlightFramer respects frameTarget.instant"
 ### Task 3: `animate` signal on `useReplayPlayer`
 
 **Files:**
+
 - Modify: `apps/web/src/features/replay/useReplayPlayer.ts`
 - Test: `apps/web/src/features/replay/useReplayPlayer.test.ts`
 
 **Interfaces:**
+
 - Produces: `ReplayControls.animate: boolean` — `true` immediately after a `next()`-driven step,
   `false` after any `applyTo()`-driven change (`seek`, `prev`, `setViewer`, and the initial mount).
 
@@ -247,23 +253,23 @@ Add this test inside the existing `describe('useReplayPlayer', ...)` block in
 `apps/web/src/features/replay/useReplayPlayer.test.ts` (after the `prev()` test):
 
 ```ts
-  it('animate is true after next(), false again after any silent rebuild', () => {
-    const actions = scriptActions(10);
-    const { hook } = setup(actions, asPlayerId('p1'));
-    expect(hook.result.current.animate).toBe(false); // genesis: silent
-    act(() => hook.result.current.next());
-    expect(hook.result.current.animate).toBe(true); // forward step: animated
-    act(() => hook.result.current.seek(0));
-    expect(hook.result.current.animate).toBe(false); // seek: silent
-    act(() => hook.result.current.next());
-    expect(hook.result.current.animate).toBe(true);
-    act(() => hook.result.current.prev());
-    expect(hook.result.current.animate).toBe(false); // prev: silent
-    act(() => hook.result.current.next());
-    expect(hook.result.current.animate).toBe(true);
-    act(() => hook.result.current.setViewer(asPlayerId('p2')));
-    expect(hook.result.current.animate).toBe(false); // perspective switch: silent
-  });
+it('animate is true after next(), false again after any silent rebuild', () => {
+  const actions = scriptActions(10);
+  const { hook } = setup(actions, asPlayerId('p1'));
+  expect(hook.result.current.animate).toBe(false); // genesis: silent
+  act(() => hook.result.current.next());
+  expect(hook.result.current.animate).toBe(true); // forward step: animated
+  act(() => hook.result.current.seek(0));
+  expect(hook.result.current.animate).toBe(false); // seek: silent
+  act(() => hook.result.current.next());
+  expect(hook.result.current.animate).toBe(true);
+  act(() => hook.result.current.prev());
+  expect(hook.result.current.animate).toBe(false); // prev: silent
+  act(() => hook.result.current.next());
+  expect(hook.result.current.animate).toBe(true);
+  act(() => hook.result.current.setViewer(asPlayerId('p2')));
+  expect(hook.result.current.animate).toBe(false); // perspective switch: silent
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -301,7 +307,7 @@ export interface ReplayControls {
 2. Add the state, right after the existing `const [error, setError] = useState(false);`:
 
 ```ts
-  const [animate, setAnimate] = useState(false);
+const [animate, setAnimate] = useState(false);
 ```
 
 3. In `applyTo`, set it `false` alongside the existing `setStep(clamped)`:
@@ -330,21 +336,21 @@ line between them.)
 5. Add `animate` to the returned object (currently ends `next, prev, seek,`):
 
 ```ts
-  return {
-    step,
-    total: actions.length,
-    playing,
-    viewer,
-    atEnd: step >= actions.length,
-    error,
-    animate,
-    setViewer,
-    play,
-    pause,
-    next,
-    prev,
-    seek,
-  };
+return {
+  step,
+  total: actions.length,
+  playing,
+  viewer,
+  atEnd: step >= actions.length,
+  error,
+  animate,
+  setViewer,
+  play,
+  pause,
+  next,
+  prev,
+  seek,
+};
 ```
 
 - [ ] **Step 4: Run the test to verify it passes**
@@ -364,10 +370,12 @@ git commit -m "feat(web): expose animate (step vs jump) from useReplayPlayer"
 ### Task 4: `frameTargetForAction` mapping
 
 **Files:**
+
 - Create: `apps/web/src/features/replay/frameTarget.ts`
 - Test: Create `apps/web/src/features/replay/frameTarget.test.ts`
 
 **Interfaces:**
+
 - Produces: `frameTargetForAction(action: Action | null, instant: boolean): BoardFrameTarget | null`.
 - Consumes: `BoardFrameTarget` type from `apps/web/src/game/boardView.ts` (Task 1); `Action` type from
   `@trm/engine`.
@@ -470,10 +478,12 @@ git commit -m "feat(web): map replayed actions to board frame targets"
 ### Task 5: Wire `ReplayStage` — default-on follow + per-step framing
 
 **Files:**
+
 - Modify: `apps/web/src/screens/ReplayScreen.tsx`
 - Test: Modify `apps/web/src/screens/ReplayScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `player.animate` (Task 3), `frameTargetForAction` (Task 4), `useUi`'s `followActing` /
   `setFollowActing` (already exist in `apps/web/src/store/ui.ts`), `GameStage`'s existing
   `frameTarget` prop (already exists, `apps/web/src/screens/GameStage.tsx`).

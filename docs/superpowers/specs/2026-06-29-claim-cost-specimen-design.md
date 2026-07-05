@@ -30,7 +30,7 @@ gray route, length 3   ━━━       →   [↻ card   ×3]     colour-CYCLING
 
 ### Row anatomy
 
-- **Track (left):** a mini horizontal route of length *N* drawn with the live board classes
+- **Track (left):** a mini horizontal route of length _N_ drawn with the live board classes
   (`route` / `bed` / `slot`), reusing the geometry of `RouteSpecimen`'s `Track` but with a
   parametrised slot count and fill colour, so it can never drift from the board's look.
 - **Arrow:** a small `→` connector between the track and the card.

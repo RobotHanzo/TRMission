@@ -29,7 +29,7 @@
 - **creator()** (2 connections) — `apps/web/src/store/game.ts`
 - **GameStoreApi** (2 connections) — `apps/web/src/store/game.ts`
 - **chatSpy** (1 connections) — `apps/web/src/components/ChatPanel.test.tsx`
-- *... and 12 more nodes in this community*
+- _... and 12 more nodes in this community_
 
 ## Relationships
 
@@ -70,4 +70,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

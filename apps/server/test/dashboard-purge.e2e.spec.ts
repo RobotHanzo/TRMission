@@ -203,10 +203,9 @@ describe('delete room', () => {
     const { code, gameId } = await startGame('H7', 'M7');
     await t.db
       .collection('games')
-      .updateOne(
-        { _id: gameId } as never,
-        { $set: { status: 'COMPLETED', updatedAt: new Date() } },
-      );
+      .updateOne({ _id: gameId } as never, {
+        $set: { status: 'COMPLETED', updatedAt: new Date() },
+      });
 
     await request(server())
       .delete(`/api/v1/dashboard/rooms/${code}`)
@@ -229,10 +228,9 @@ describe('delete room', () => {
     const code: string = room.body.code;
     await t.db
       .collection('rooms')
-      .updateOne(
-        { _id: code } as never,
-        { $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() } },
-      );
+      .updateOne({ _id: code } as never, {
+        $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() },
+      });
 
     await request(server())
       .delete(`/api/v1/dashboard/rooms/${code}`)
@@ -259,7 +257,10 @@ describe('purge sweep + status', () => {
       .set(auth(moderator.token))
       .send({})
       .expect(403);
-    await request(server()).get('/api/v1/dashboard/purge/status').set(auth(moderator.token)).expect(403);
+    await request(server())
+      .get('/api/v1/dashboard/purge/status')
+      .set(auth(moderator.token))
+      .expect(403);
   });
 
   it('returns config + thresholds from status', async () => {
@@ -303,10 +304,9 @@ describe('purge sweep + status', () => {
       const finished = await startGame('DG-H', 'DG-M');
       await t.db
         .collection('games')
-        .updateOne(
-          { _id: finished.gameId } as never,
-          { $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) } },
-        );
+        .updateOne({ _id: finished.gameId } as never, {
+          $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) },
+        });
 
       const res = await request(server())
         .post('/api/v1/dashboard/purge/run')
@@ -317,7 +317,9 @@ describe('purge sweep + status', () => {
       expect(res.body.capped).toBe(false);
 
       // Stale LOBBY room: gone. Fresh LOBBY room: untouched.
-      expect(await t.db.collection('rooms').findOne({ _id: staleLobby.body.code } as never)).toBeNull();
+      expect(
+        await t.db.collection('rooms').findOne({ _id: staleLobby.body.code } as never),
+      ).toBeNull();
       expect(
         await t.db.collection('rooms').findOne({ _id: freshLobby.body.code } as never),
       ).not.toBeNull();
@@ -332,7 +334,9 @@ describe('purge sweep + status', () => {
 
       // Finished-long-ago room: deleted; its COMPLETED game record is left alone.
       expect(await t.db.collection('rooms').findOne({ _id: finished.code } as never)).toBeNull();
-      const finishedGame = await t.db.collection('games').findOne({ _id: finished.gameId } as never);
+      const finishedGame = await t.db
+        .collection('games')
+        .findOne({ _id: finished.gameId } as never);
       expect(finishedGame?.status).toBe('COMPLETED');
 
       // Exactly one purge.run audit entry, attributed to the admin who triggered it.
@@ -354,34 +358,30 @@ describe('purge sweep + status', () => {
     60_000,
   );
 
-  it(
-    'caps a sweep at 500 rooms per run and reports capped:true',
-    async () => {
-      const stale = new Date(Date.now() - 30 * 3_600_000);
-      const docs = Array.from({ length: 501 }, (_, i) => ({
-        _id: `CAP${i}`,
-        hostId: 'nobody',
-        status: 'LOBBY',
-        members: [],
-        maxPlayers: 5,
-        settings: {},
-        createdAt: stale,
-        updatedAt: stale,
-      }));
-      await t.db.collection('rooms').insertMany(docs as never);
+  it('caps a sweep at 500 rooms per run and reports capped:true', async () => {
+    const stale = new Date(Date.now() - 30 * 3_600_000);
+    const docs = Array.from({ length: 501 }, (_, i) => ({
+      _id: `CAP${i}`,
+      hostId: 'nobody',
+      status: 'LOBBY',
+      members: [],
+      maxPlayers: 5,
+      settings: {},
+      createdAt: stale,
+      updatedAt: stale,
+    }));
+    await t.db.collection('rooms').insertMany(docs as never);
 
-      const res = await request(server())
-        .post('/api/v1/dashboard/purge/run')
-        .set(auth(admin.token))
-        .expect(200);
-      expect(res.body.capped).toBe(true);
-      expect(res.body.roomsDeleted).toBe(500);
+    const res = await request(server())
+      .post('/api/v1/dashboard/purge/run')
+      .set(auth(admin.token))
+      .expect(200);
+    expect(res.body.capped).toBe(true);
+    expect(res.body.roomsDeleted).toBe(500);
 
-      const remaining = await t.db
-        .collection('rooms')
-        .countDocuments({ _id: { $regex: /^CAP/ } } as never);
-      expect(remaining).toBe(1);
-    },
-    30_000,
-  );
+    const remaining = await t.db
+      .collection('rooms')
+      .countDocuments({ _id: { $regex: /^CAP/ } } as never);
+    expect(remaining).toBe(1);
+  }, 30_000);
 });

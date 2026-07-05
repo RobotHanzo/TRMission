@@ -31,7 +31,17 @@ function findRoute(board: Board, pred: (r: RouteDef) => boolean): RouteDef {
 /** A generous hand + full trains so payment is never the limiting factor. */
 function wellStocked(state: GameState): GameState {
   return setPlayer(state, p0, {
-    hand: handOf({ RED: 8, ORANGE: 8, YELLOW: 8, GREEN: 8, BLUE: 8, PURPLE: 8, WHITE: 8, BLACK: 8, LOCOMOTIVE: 8 }),
+    hand: handOf({
+      RED: 8,
+      ORANGE: 8,
+      YELLOW: 8,
+      GREEN: 8,
+      BLUE: 8,
+      PURPLE: 8,
+      WHITE: 8,
+      BLACK: 8,
+      LOCOMOTIVE: 8,
+    }),
     trainCars: 45,
   });
 }
@@ -41,7 +51,10 @@ const kinds = (events: readonly GameEvent[]): string[] => events.map((e) => e.e)
 describe('events — typhoon landfall closure', () => {
   it('rejects a normal claim of a closed route with ROUTE_CLOSED_BY_EVENT', () => {
     const base = afterSetup(2, 'typhoon-normal');
-    const route = findRoute(base.board, (r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined);
+    const route = findRoute(
+      base.board,
+      (r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined,
+    );
     const state = wellStocked(
       withEvents(base.state, {
         ...emptyEvents(),
@@ -134,7 +147,10 @@ describe('events — typhoon landfall closure', () => {
 describe('events — typhoon reopen +2', () => {
   it('awards +2 (itemized EVENT_BONUS after ROUTE_CLAIMED) to the first claimer and clears the entry', () => {
     const base = afterSetup(2, 'reopen-first');
-    const route = findRoute(base.board, (r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined);
+    const route = findRoute(
+      base.board,
+      (r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined,
+    );
     const state = wellStocked(
       withEvents(base.state, { ...emptyEvents(), reopenBonus: [route.id] }),
     );

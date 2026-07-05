@@ -38,7 +38,7 @@ log+chat.
   only when `TRM_PERSISTENCE=0` (no store), matching how that mode already drops durability.
 - **Chat limits are server-authoritative.** `CHAT_MAX_LEN = 2048` characters (after trim; empty
   ignored) and a sliding-window **rate limit** of `CHAT_RATE_MAX = 5` messages per `CHAT_RATE_WINDOW_MS
-  = 5000` ms per connection. The hub uses wall-clock for the window — allowed, the determinism ban is
+= 5000` ms per connection. The hub uses wall-clock for the window — allowed, the determinism ban is
   `@trm/engine`-only. A violation returns a `Rejection` (new transport `RejectionCode.CHAT_REJECTED`)
   with `errors:chatTooLong` / `errors:chatRateLimited` → client toast. The client also sets the input
   `maxLength` so the limit is never hit in normal use.
@@ -52,11 +52,11 @@ log+chat.
 
 Three width bands. The board is always present; the second/third regions adapt:
 
-| Band   | Width        | Arrangement                                                              |
-|--------|--------------|--------------------------------------------------------------------------|
-| Wide   | ≥ 1200px     | `board │ rail (340px) │ comms (320px)` — log+chat both visible           |
-| Medium | 920–1200px   | `board │ [tab: Rail ⟷ Log+Chat]` — the second column is tab-switched     |
-| Narrow | < 920px      | one scrolling column (existing collapse); the rail slot is the same tab-switched [Rail ⟷ Log+Chat] |
+| Band   | Width      | Arrangement                                                                                        |
+| ------ | ---------- | -------------------------------------------------------------------------------------------------- |
+| Wide   | ≥ 1200px   | `board │ rail (340px) │ comms (320px)` — log+chat both visible                                     |
+| Medium | 920–1200px | `board │ [tab: Rail ⟷ Log+Chat]` — the second column is tab-switched                               |
+| Narrow | < 920px    | one scrolling column (existing collapse); the rail slot is the same tab-switched [Rail ⟷ Log+Chat] |
 
 - **CSS (`styles/game.css`):** add `--tr-comms-w: 320px`. Extend the grid templates:
   - `.game--rail` → `grid-template-columns: minmax(0,1fr) var(--tr-rail-w) var(--tr-comms-w)` with
@@ -88,9 +88,9 @@ Three width bands. The board is always present; the second/third regions adapt:
 
 ```ts
 interface LogEntry {
-  id: number;                 // monotonic, for React keys + de-dupe
-  kind: LogKind;              // 'routeClaimed' | 'stationBuilt' | 'turnStarted' | ...
-  playerId: string | null;    // actor; null for table-level events (gameEnded)
+  id: number; // monotonic, for React keys + de-dupe
+  kind: LogKind; // 'routeClaimed' | 'stationBuilt' | 'turnStarted' | ...
+  playerId: string | null; // actor; null for table-level events (gameEnded)
   data: Record<string, unknown>; // routeId, cityId, count, color?, points?, ...
   importance: 'normal' | 'highlight' | 'alert';
 }
@@ -104,24 +104,24 @@ from `game/content.ts`.
 
 ### Event vocabulary & importance
 
-| Event                         | Logged as                              | Importance |
-|-------------------------------|----------------------------------------|------------|
-| `GameStarted`                 | game started / turn order              | normal     |
-| `TurnStarted`                 | subtle "— {name}'s turn —" divider     | normal (muted) |
-| `RouteClaimed`                | {name} built {route} (+{pts})          | **highlight** (seat accent) |
-| `StationBuilt`                | {name} built a station at {city}       | **highlight** |
-| `TunnelRevealed`              | tunnel reveal at {route}               | normal     |
-| `TunnelResolved` (committed)  | {name} completed the tunnel {route}    | **highlight** |
-| `TunnelResolved` (aborted)    | {name} backed out of the tunnel        | normal     |
-| `CardDrawnBlind`              | {name} drew from the deck (self: colour shown) | normal (muted) |
-| `CardTakenFaceup`             | {name} took {colour} from the market   | normal (muted) |
-| `TicketsKept`/`InitialTicketsKept` | {name} kept {n} mission(s)        | normal     |
-| `PlayerPassed`                | {name} passed                          | normal     |
-| `EndgameTriggered`            | final round — {n} turns left           | **alert** (amber) |
-| `GameEnded`                   | game over                              | **alert**  |
+| Event                              | Logged as                                      | Importance                  |
+| ---------------------------------- | ---------------------------------------------- | --------------------------- |
+| `GameStarted`                      | game started / turn order                      | normal                      |
+| `TurnStarted`                      | subtle "— {name}'s turn —" divider             | normal (muted)              |
+| `RouteClaimed`                     | {name} built {route} (+{pts})                  | **highlight** (seat accent) |
+| `StationBuilt`                     | {name} built a station at {city}               | **highlight**               |
+| `TunnelRevealed`                   | tunnel reveal at {route}                       | normal                      |
+| `TunnelResolved` (committed)       | {name} completed the tunnel {route}            | **highlight**               |
+| `TunnelResolved` (aborted)         | {name} backed out of the tunnel                | normal                      |
+| `CardDrawnBlind`                   | {name} drew from the deck (self: colour shown) | normal (muted)              |
+| `CardTakenFaceup`                  | {name} took {colour} from the market           | normal (muted)              |
+| `TicketsKept`/`InitialTicketsKept` | {name} kept {n} mission(s)                     | normal                      |
+| `PlayerPassed`                     | {name} passed                                  | normal                      |
+| `EndgameTriggered`                 | final round — {n} turns left                   | **alert** (amber)           |
+| `GameEnded`                        | game over                                      | **alert**                   |
 
 Omitted as noise: `MarketRefilled` (fires on every face-up draw), `MarketRecycled`, `DeckReshuffled`,
-`TurnEnded`, `TicketsOffered`/`InitialTicketsOffered` (private offer — the *kept* event is enough),
+`TurnEnded`, `TicketsOffered`/`InitialTicketsOffered` (private offer — the _kept_ event is enough),
 `DoubleRouteLocked`. The log store caps at ~1000 entries (games are bounded; defensive).
 
 ## Chat
@@ -132,14 +132,14 @@ Omitted as noise: `MarketRefilled` (fires on every face-up draw), `MarketRecycle
   `ingestHistory(chat)` from `HistoryReplay`. Messages render with the sender's seat colour chip.
 - **Server enforcement (`hub.onChat`, now receiving `clientSeq`):**
   - reject (no broadcast) if `text.trim()` is empty, or `> CHAT_MAX_LEN` → `RejectionCode.CHAT_REJECTED`
-    + `errors:chatTooLong`.
+    - `errors:chatTooLong`.
   - sliding-window rate check per connection (timestamps array, `Date.now()`): if `≥ CHAT_RATE_MAX` in
     the trailing `CHAT_RATE_WINDOW_MS`, reject → `errors:chatRateLimited`.
   - otherwise: append to the store (`appendChat`, best-effort/awaited) + in-memory list, then broadcast
     `chatFrame` to members (unchanged fan-out).
 - **Persistence:** `gameChats` doc `{ gameId, seq, playerId, text, ts }`, append-only, unique
   `(gameId, seq)`; `loadChat(gameId)` returns ordered entries. The hub keeps `chatLog: Map<gameId,
-  ChatEntry[]>`, hydrated lazily on `recoverMatch`/first access.
+ChatEntry[]>`, hydrated lazily on `recoverMatch`/first access.
 
 ## Wire / proto changes (`@trm/proto`)
 

@@ -11,12 +11,12 @@ accounts system is reused; **dashboard access lives in a new, separate Mongo col
 
 ### Decisions made with the user
 
-| Decision | Choice |
-|---|---|
-| Scope (v1) | All four: Overview + live ops · User management · Game & room moderation · Maintainer admin + audit log |
+| Decision    | Choice                                                                                                         |
+| ----------- | -------------------------------------------------------------------------------------------------------------- |
+| Scope (v1)  | All four: Overview + live ops · User management · Game & room moderation · Maintainer admin + audit log        |
 | Roles model | Named roles → permission sets in code, **plus per-account `extraPermissions` / `deniedPermissions` overrides** |
-| Placement | **Separate app `apps/admin`** (`@trm/admin`), served same-origin (required by the Strict refresh cookie) |
-| Aesthetic | Light-minimal modern admin language; **dark mode is the primary theme** (both fully supported) |
+| Placement   | **Separate app `apps/admin`** (`@trm/admin`), served same-origin (required by the Strict refresh cookie)       |
+| Aesthetic   | Light-minimal modern admin language; **dark mode is the primary theme** (both fully supported)                 |
 
 ### Hard constraints (verified in exploration)
 
@@ -42,7 +42,7 @@ accounts system is reused; **dashboard access lives in a new, separate Mongo col
 **Concept: 行控中心 (Operations Control Center).** The dispatcher's desk for the game's railway
 world — calm, precise, instrument-like. It shares the product family's EMU-blue accent but drops
 the game's warm-paper playfulness for a neutral graphite console. The railway appears only in the
-*status language* and the *numerals* — not as a theme costume.
+_status language_ and the _numerals_ — not as a theme costume.
 
 ### Signature elements
 
@@ -52,22 +52,22 @@ the game's warm-paper playfulness for a neutral graphite console. The railway ap
    `prefers-reduced-motion` disables the animation.
 2. **Signal-aspect status language** — statuses use railway signal aspects, always paired with a
    text label (colour-blind safe, matching the game's accessibility care):
-   ● green *clear* = healthy/LIVE/active · ● amber *caution* = degraded/LOBBY/pending ·
-   ● red *stop* = disabled/CLOSED/TERMINATED/error (and the leak counter whenever it is > 0).
+   ● green _clear_ = healthy/LIVE/active · ● amber _caution_ = degraded/LOBBY/pending ·
+   ● red _stop_ = disabled/CLOSED/TERMINATED/error (and the leak counter whenever it is > 0).
 
 ### Design tokens (`apps/admin/src/styles/tokens.css`, prefix `--oc-`)
 
-| Token | Dark (default) | Light |
-|---|---|---|
-| `--oc-bg` | `#0f1215` | `#f6f7f8` |
-| `--oc-surface` | `#16191d` | `#ffffff` |
-| `--oc-surface-2` (raised/hover) | `#1c2126` | `#eff1f3` |
-| `--oc-line` (hairlines) | `#262c33` | `#e3e6e9` |
-| `--oc-ink` / `--oc-ink-soft` | `#e7eaed` / `#9aa3ad` | `#16191d` / `#5c646d` |
-| `--oc-accent` (EMU-blue family) | `#4f9ddf` | `#0f5fa6` |
-| `--oc-signal-clear` | `#35c07d` | `#1e8e5a` |
-| `--oc-signal-caution` | `#e3a63b` | `#b07514` |
-| `--oc-signal-stop` | `#e05252` | `#bc3535` |
+| Token                           | Dark (default)        | Light                 |
+| ------------------------------- | --------------------- | --------------------- |
+| `--oc-bg`                       | `#0f1215`             | `#f6f7f8`             |
+| `--oc-surface`                  | `#16191d`             | `#ffffff`             |
+| `--oc-surface-2` (raised/hover) | `#1c2126`             | `#eff1f3`             |
+| `--oc-line` (hairlines)         | `#262c33`             | `#e3e6e9`             |
+| `--oc-ink` / `--oc-ink-soft`    | `#e7eaed` / `#9aa3ad` | `#16191d` / `#5c646d` |
+| `--oc-accent` (EMU-blue family) | `#4f9ddf`             | `#0f5fa6`             |
+| `--oc-signal-clear`             | `#35c07d`             | `#1e8e5a`             |
+| `--oc-signal-caution`           | `#e3a63b`             | `#b07514`             |
+| `--oc-signal-stop`              | `#e05252`             | `#bc3535`             |
 
 Radius `8px` (more instrumental than the game's 10/16), 4-px spacing scale. Elevation in dark =
 lighter surface + hairline (no shadows); light theme may use one soft shadow level.
@@ -76,7 +76,7 @@ lighter surface + hairline (no shadows); light theme may use one soft shadow lev
 
 - **UI/body**: the repo's CJK stack (`'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui`)
   — zh-Hant primary, so the type system is CJK-first. **Data voice**: `'IBM Plex Mono',
-  ui-monospace` with `font-variant-numeric: tabular-nums` for every numeral, id, digest, room
+ui-monospace` with `font-variant-numeric: tabular-nums` for every numeral, id, digest, room
   code, and the board strip. Mono-as-display is the one deliberate aesthetic risk.
 - Scale: 13px table/body · 11px uppercase eyebrows, `+0.08em` tracking (timetable headers) ·
   15px section titles · 28–32px mono stat numerals.
@@ -96,7 +96,7 @@ lighter surface + hairline (no shadows); light theme may use one soft shadow lev
   and drawers, `prefers-reduced-motion` respected, responsive to ~768px (rail collapses; tables
   scroll inside their own container).
 
-*Anti-generic check*: not near-black + acid accent (neutral graphite + product-anchored blue);
+_Anti-generic check_: not near-black + acid accent (neutral graphite + product-anchored blue);
 not cream + serif (that's the game's look — the admin deliberately contrasts); no gradient-KPI
 template (the hero is a subject-grounded departures board); status colors are a railway
 signalling system; typography is CJK-first with a mono instrument voice.
@@ -144,7 +144,7 @@ count). Native-driver repo per `user.repo.ts` conventions.
 (`user.ban|user.unban|game.terminate|room.close|maintainer.grant|maintainer.update|maintainer.revoke|bootstrap.grant`),
 `target?: {type,id}`, `params?`, `at`. Index `{at:-1}`. Repo exposes **only `append` + `list`** —
 append-only enforced by surface (test asserts it). **Audit writes are explicit service calls**
-(~7 mutating endpoints; an interceptor would need per-route metadata anyway), made *after* the
+(~7 mutating endpoints; an interceptor would need per-route metadata anyway), made _after_ the
 mutation succeeds, and a failed audit write throws.
 
 **Bootstrap (decision: boot-time seeding).** Env `DASHBOARD_OWNER_EMAILS` (comma list) →
@@ -181,23 +181,23 @@ WS stays bound until disconnect; reconnect needs a fresh ticket, which is refuse
 
 ### 2.4 Endpoint surface (all zod-schema'd; global throttler untouched)
 
-| Route | Permission | Notes |
-|---|---|---|
-| `GET /dashboard/me` | (any maintainer) | `{userId, displayName, role, permissions[]}` — drives UI gating |
-| `GET /dashboard/overview` | `overview.read` | Counts: `games.countDocuments({status:'LIVE'})` **and** `GameRegistry.size` as `liveGames:{db,inMemory}`; rooms LOBBY/STARTED; users total/guests/registered/disabled/new-24h; active `authSessions`. Metrics via `MetricsService.registry.getMetricsAsJSON()` whitelist-flattened (`trm_active_connections`, `trm_commands_total`, rejections by code, `trm_security_leak_blocked_total`, memory, apply-time avg). Versions per `health.controller.ts` + uptime |
-| `GET /dashboard/users?q&filter&limit&cursor` | `users.read` | No `q`: `{createdAt:-1,_id}` cursor. With `q`: exact `_id` ∪ anchored ci-regex on email/displayName — **escape regex metachars** (`escapeRegExp` helper). Explicit projection; never `passwordHash`/oauth subs/`tokenVersion` |
-| `GET /dashboard/users/:id` | `users.read` | + `disabledBy/Reason`, locale, `activeSessions` (new `SessionRepo.countActiveForUser`), active rooms, `history` via existing `HistoryRepo.listForUser` |
-| `POST /dashboard/users/:id/disable {reason?}` / `enable` | `users.ban` | Refuses self-ban and banning anyone holding a `dashboardAccounts` doc (revoke role first). Audit |
-| `GET /dashboard/games?status&limit&cursor` | `games.read` | Existing `{status:1,updatedAt:-1}` index; row incl. `inMemory: !!registry.get(id)` |
-| `GET /dashboard/games/:id` | `games.read` | Metadata + players (names via `HistoryRepo.displayNames`) + bots + spectators + room code (new sparse `{gameId:1}` index + `findByGameId` on RoomRepo) + chat transcript. **LIVE → redact `seed`**; never state/actions |
-| `GET /dashboard/games/:id/log` | `games.readLog` | `gameEvents` ordered, **only if COMPLETED**; else 409 (inside the dashboard, be honest, not nondisclosing) |
-| `GET /dashboard/games/:id/replay` | `games.readLog` | Calls `HistoryRepo.loadReplay` directly — bypasses *membership*, never the COMPLETED gate (which stays in exactly one place) |
-| `POST /dashboard/games/:id/terminate {reason?}` | `games.terminate` | §2.5. Audit |
-| `GET /dashboard/rooms?status&limit&cursor` | `rooms.read` | Existing index; `LobbyService.toView`-shaped rows |
-| `POST /dashboard/rooms/:code/close {reason?}` | `rooms.close` | **LOBBY only** (CAS on status); STARTED-with-LIVE-game → 409 "terminate the game instead". Web lobby polls, so no push needed. Audit |
-| `GET /dashboard/maintainers` | `maintainers.read` | Joined with `users`; flags dangling (TTL-expired) accounts; shows effective permissions |
-| `PUT /dashboard/maintainers/:userId` / `DELETE` | `maintainers.write` (owner-only via role map) | Target must exist, `!isGuest`, not disabled; **self-modification 403** (covers self-demotion/lockout); **last-owner 409** via `countOwners()` (benign TOCTOU noted — no transactions in this codebase; boot seeding re-heals). Audit grant/update/revoke with old→new params |
-| `GET /dashboard/audit?limit&cursor` | `audit.read` | Reverse-chron `_id` cursor |
+| Route                                                    | Permission                                    | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /dashboard/me`                                      | (any maintainer)                              | `{userId, displayName, role, permissions[]}` — drives UI gating                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `GET /dashboard/overview`                                | `overview.read`                               | Counts: `games.countDocuments({status:'LIVE'})` **and** `GameRegistry.size` as `liveGames:{db,inMemory}`; rooms LOBBY/STARTED; users total/guests/registered/disabled/new-24h; active `authSessions`. Metrics via `MetricsService.registry.getMetricsAsJSON()` whitelist-flattened (`trm_active_connections`, `trm_commands_total`, rejections by code, `trm_security_leak_blocked_total`, memory, apply-time avg). Versions per `health.controller.ts` + uptime |
+| `GET /dashboard/users?q&filter&limit&cursor`             | `users.read`                                  | No `q`: `{createdAt:-1,_id}` cursor. With `q`: exact `_id` ∪ anchored ci-regex on email/displayName — **escape regex metachars** (`escapeRegExp` helper). Explicit projection; never `passwordHash`/oauth subs/`tokenVersion`                                                                                                                                                                                                                                    |
+| `GET /dashboard/users/:id`                               | `users.read`                                  | + `disabledBy/Reason`, locale, `activeSessions` (new `SessionRepo.countActiveForUser`), active rooms, `history` via existing `HistoryRepo.listForUser`                                                                                                                                                                                                                                                                                                           |
+| `POST /dashboard/users/:id/disable {reason?}` / `enable` | `users.ban`                                   | Refuses self-ban and banning anyone holding a `dashboardAccounts` doc (revoke role first). Audit                                                                                                                                                                                                                                                                                                                                                                 |
+| `GET /dashboard/games?status&limit&cursor`               | `games.read`                                  | Existing `{status:1,updatedAt:-1}` index; row incl. `inMemory: !!registry.get(id)`                                                                                                                                                                                                                                                                                                                                                                               |
+| `GET /dashboard/games/:id`                               | `games.read`                                  | Metadata + players (names via `HistoryRepo.displayNames`) + bots + spectators + room code (new sparse `{gameId:1}` index + `findByGameId` on RoomRepo) + chat transcript. **LIVE → redact `seed`**; never state/actions                                                                                                                                                                                                                                          |
+| `GET /dashboard/games/:id/log`                           | `games.readLog`                               | `gameEvents` ordered, **only if COMPLETED**; else 409 (inside the dashboard, be honest, not nondisclosing)                                                                                                                                                                                                                                                                                                                                                       |
+| `GET /dashboard/games/:id/replay`                        | `games.readLog`                               | Calls `HistoryRepo.loadReplay` directly — bypasses _membership_, never the COMPLETED gate (which stays in exactly one place)                                                                                                                                                                                                                                                                                                                                     |
+| `POST /dashboard/games/:id/terminate {reason?}`          | `games.terminate`                             | §2.5. Audit                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `GET /dashboard/rooms?status&limit&cursor`               | `rooms.read`                                  | Existing index; `LobbyService.toView`-shaped rows                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `POST /dashboard/rooms/:code/close {reason?}`            | `rooms.close`                                 | **LOBBY only** (CAS on status); STARTED-with-LIVE-game → 409 "terminate the game instead". Web lobby polls, so no push needed. Audit                                                                                                                                                                                                                                                                                                                             |
+| `GET /dashboard/maintainers`                             | `maintainers.read`                            | Joined with `users`; flags dangling (TTL-expired) accounts; shows effective permissions                                                                                                                                                                                                                                                                                                                                                                          |
+| `PUT /dashboard/maintainers/:userId` / `DELETE`          | `maintainers.write` (owner-only via role map) | Target must exist, `!isGuest`, not disabled; **self-modification 403** (covers self-demotion/lockout); **last-owner 409** via `countOwners()` (benign TOCTOU noted — no transactions in this codebase; boot seeding re-heals). Audit grant/update/revoke with old→new params                                                                                                                                                                                     |
+| `GET /dashboard/audit?limit&cursor`                      | `audit.read`                                  | Reverse-chron `_id` cursor                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### 2.5 Force-terminate — minimal hub touch
 
@@ -212,7 +212,7 @@ New `GameDoc.status` value **`'TERMINATED'`** (+ `terminatedAt/By/Reason?`) in
 
 Service flow: **(1)** CAS `LIVE→TERMINATED` (0 matched → 404 unknown / 409 not-live) →
 **(2)** `hub.evictMatch(gameId, msg)` → **(3)** `RoomRepo.closeByGameId` (STARTED→CLOSED) →
-**(4)** audit. DB flips *before* eviction so a racing reconnect hits the recovery filter.
+**(4)** audit. DB flips _before_ eviction so a racing reconnect hits the recovery filter.
 
 `hub.evictMatch` — the **only** `hub.ts` change, purely additive: drain via
 `match.queue.run(async () => {})` (serializes behind in-flight commands); send all members +
@@ -310,7 +310,7 @@ the `verify` skill before committing each phase.
 2. **Server foundation** (env, config, repos, decorator, guard, bootstrap, module, `/me`) →
    auth + bootstrap specs.
 3. **Read-only endpoints** (overview, users, games, log/replay, rooms, audit + new indexes) →
-   read spec. *No mutation risk yet.*
+   read spec. _No mutation risk yet._
 4. **Ban** (UserDoc fields, chokepoints, endpoints) → ban spec + full auth/lobby regression.
 5. **Terminate + room close** (status union, recovery/completion filters, `evictMatch`,
    endpoints) → terminate spec + **entire server suite**.
@@ -322,13 +322,13 @@ the `verify` skill before committing each phase.
 
 ### Risk containment
 
-| Touch | Containment |
-|---|---|
-| `ws/hub.ts` | One additive method; drains via match queue; wire e2e suite is the gate |
-| `persistence/game-store.ts` | Two one-line status-filter changes + resurrection test |
-| `auth/auth.service.ts` | One check in the single `issue()` chokepoint + one in `refresh()` |
-| `auth/access-token.guard.ts` | **Not touched** (decision — ban window documented instead) |
-| proto / codec / engine | **Not touched** (termination reuses `rejectionFrame` + a messageKey) |
+| Touch                        | Containment                                                             |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `ws/hub.ts`                  | One additive method; drains via match queue; wire e2e suite is the gate |
+| `persistence/game-store.ts`  | Two one-line status-filter changes + resurrection test                  |
+| `auth/auth.service.ts`       | One check in the single `issue()` chokepoint + one in `refresh()`       |
+| `auth/access-token.guard.ts` | **Not touched** (decision — ban window documented instead)              |
+| proto / codec / engine       | **Not touched** (termination reuses `rejectionFrame` + a messageKey)    |
 
 ### Critical files
 

@@ -67,7 +67,7 @@ describe('second draw provably impossible (deck+discard+market all exhausted/unu
 
   it('DRAW_BLIND: still allows a second draw when a non-locomotive market card remains', () => {
     const { board, state } = toAwait();
-    const market = state.market.map(() => null as ('RED' | null));
+    const market = state.market.map(() => null as 'RED' | null);
     market[0] = 'RED'; // a legal second-draw target
     const s: GameState = {
       ...cloneState(state),

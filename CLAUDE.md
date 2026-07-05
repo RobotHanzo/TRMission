@@ -123,7 +123,7 @@ every boot; other maintainers are managed from the dashboard itself).
 
 **Auth methods** (each independently switchable; the web reads `GET /auth/config`, the server
 enforces): `AUTH_PASSWORD_LOGIN_ENABLED` (`0` disables email/password login+register+upgrade),
-`AUTH_GUEST_ENABLED` (`0` disables guest sessions). **OAuth** (bound by *verified* email — same
+`AUTH_GUEST_ENABLED` (`0` disables guest sessions). **OAuth** (bound by _verified_ email — same
 email = same account across providers + password): `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`,
 `DISCORD_CLIENT_ID`/`DISCORD_CLIENT_SECRET` (a provider is enabled only when both are set),
 `OAUTH_REDIRECT_BASE` (public base URL — builds the provider `redirect_uri` and the post-callback
@@ -136,6 +136,7 @@ provider avatar URL onto the account for display.
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
 
 Rules:
+
 - For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.

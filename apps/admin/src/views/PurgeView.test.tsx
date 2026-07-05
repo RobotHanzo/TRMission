@@ -74,7 +74,10 @@ describe('PurgeView', () => {
         status: 200,
         body: { ...STATUS, recentRuns: [{ ...STATUS.recentRuns[0], roomsDeleted: 5 }] },
       },
-      '/dashboard/purge/run': { status: 200, body: { roomsDeleted: 5, gamesDeleted: 2, capped: false } },
+      '/dashboard/purge/run': {
+        status: 200,
+        body: { roomsDeleted: 5, gamesDeleted: 2, capped: false },
+      },
     });
     fireEvent.click(within(dialog).getByRole('button', { name: '立即執行清理' }));
     expect(await screen.findByText('清理已完成')).toBeInTheDocument();

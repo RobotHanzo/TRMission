@@ -29,7 +29,7 @@
 - **PlayerTicketDetail** (3 connections) — `packages/engine/src/scoring.ts`
 - **rankPlayers()** (3 connections) — `packages/engine/src/scoring.ts`
 - **getTicket()** (2 connections) — `packages/engine/src/board.ts`
-- *... and 16 more nodes in this community*
+- _... and 16 more nodes in this community_
 
 ## Relationships
 
@@ -71,4 +71,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

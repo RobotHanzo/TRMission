@@ -1,1 +1,183 @@
-{"nodes": [{"id": "_superpowers_sdd_task_3_brief", "label": "Task 3 Brief \u2014 Server: history authz fix + extended list", "file_type": "document", "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "concept_history_authz_gate", "label": "History Membership Gate (404-not-403 for players+spectators)", "file_type": "rationale", "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_src_history_history_repo", "label": "history.repo.ts (HistoryRepo: listForUser/getForUser/loadReplay/displayNames)", "file_type": "code", "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_src_history_history_controller", "label": "history.controller.ts (HistoryController: list/get/replay)", "file_type": "code", "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_src_history_history_schemas", "label": "history.schemas.ts (MatchSummarySchema, ReplayPayloadSchema, zod)", "file_type": "code", "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_test_history_replay_e2e_spec", "label": "history-replay.e2e.spec.ts", "file_type": "code", "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_3_brief", "target": "_superpowers_sdd_task_1_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_brief", "target": "_superpowers_sdd_task_2_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_brief", "target": "apps_server_src_history_history_schemas", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_brief", "target": "apps_server_src_history_history_repo", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_brief", "target": "apps_server_src_history_history_controller", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_brief", "target": "apps_server_test_history_replay_e2e_spec", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_brief", "target": "concept_history_authz_gate", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_server_src_history_history_controller", "target": "apps_server_src_history_history_repo", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_server_src_history_history_controller", "target": "apps_server_src_history_history_schemas", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "concept_replay_payload_endpoint_design", "target": "apps_server_src_history_history_repo", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}, {"source": "concept_history_authz_gate", "target": "apps_server_src_history_history_repo", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-brief.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_3_brief",
+      "label": "Task 3 Brief \u2014 Server: history authz fix + extended list",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_history_authz_gate",
+      "label": "History Membership Gate (404-not-403 for players+spectators)",
+      "file_type": "rationale",
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_src_history_history_repo",
+      "label": "history.repo.ts (HistoryRepo: listForUser/getForUser/loadReplay/displayNames)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_src_history_history_controller",
+      "label": "history.controller.ts (HistoryController: list/get/replay)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_src_history_history_schemas",
+      "label": "history.schemas.ts (MatchSummarySchema, ReplayPayloadSchema, zod)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_test_history_replay_e2e_spec",
+      "label": "history-replay.e2e.spec.ts",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_3_brief",
+      "target": "_superpowers_sdd_task_1_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_brief",
+      "target": "_superpowers_sdd_task_2_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_brief",
+      "target": "apps_server_src_history_history_schemas",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_brief",
+      "target": "apps_server_src_history_history_repo",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_brief",
+      "target": "apps_server_src_history_history_controller",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_brief",
+      "target": "apps_server_test_history_replay_e2e_spec",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_brief",
+      "target": "concept_history_authz_gate",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_server_src_history_history_controller",
+      "target": "apps_server_src_history_history_repo",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_server_src_history_history_controller",
+      "target": "apps_server_src_history_history_schemas",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_replay_payload_endpoint_design",
+      "target": "apps_server_src_history_history_repo",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_history_authz_gate",
+      "target": "apps_server_src_history_history_repo",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

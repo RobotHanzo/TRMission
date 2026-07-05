@@ -6,7 +6,8 @@ export function clientToBoardPoint(
   clientX: number,
   clientY: number,
 ): { x: number; y: number } | null {
-  if (typeof svg.createSVGPoint !== 'function' || typeof svg.getScreenCTM !== 'function') return null;
+  if (typeof svg.createSVGPoint !== 'function' || typeof svg.getScreenCTM !== 'function')
+    return null;
   const ctm = svg.getScreenCTM();
   if (!ctm) return null;
   const pt = svg.createSVGPoint();

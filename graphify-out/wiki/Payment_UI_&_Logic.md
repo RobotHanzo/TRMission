@@ -29,7 +29,7 @@
 - **isChatRejectionKey()** (3 connections) — `apps/web/src/game/chatErrors.ts`
 - **enumerateRoutePayments()** (3 connections) — `apps/web/src/game/payments.ts`
 - **enumerateStationPayments()** (3 connections) — `apps/web/src/game/payments.ts`
-- *... and 15 more nodes in this community*
+- _... and 15 more nodes in this community_
 
 ## Relationships
 
@@ -70,4 +70,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

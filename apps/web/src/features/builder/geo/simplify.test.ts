@@ -53,10 +53,7 @@ describe('simplifyToFit', () => {
     return Array.from({ length: n }, (_, i) => {
       const a = (2 * Math.PI * i) / n;
       const jitter = wobble * Math.sin(i * 7);
-      return [
-        (r + jitter) * Math.cos(a) + r,
-        (r + jitter) * Math.sin(a) + r,
-      ] as const;
+      return [(r + jitter) * Math.cos(a) + r, (r + jitter) * Math.sin(a) + r] as const;
     });
   }
 

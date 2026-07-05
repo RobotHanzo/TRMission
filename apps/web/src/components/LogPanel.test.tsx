@@ -33,7 +33,13 @@ describe('LogPanel', () => {
   it('renders a highlighted route-claimed line', () => {
     useLog.setState({
       entries: [
-        { id: 1, kind: 'routeClaimed', playerId: 'p1', data: { routeId: 'X', points: 7 }, importance: 'highlight' },
+        {
+          id: 1,
+          kind: 'routeClaimed',
+          playerId: 'p1',
+          data: { routeId: 'X', points: 7 },
+          importance: 'highlight',
+        },
       ],
       nextId: 2,
     });

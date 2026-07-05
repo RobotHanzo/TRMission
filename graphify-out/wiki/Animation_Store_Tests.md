@@ -29,7 +29,7 @@
 - **RouteReveal** (1 connections) — `apps/web/src/store/animations.ts`
 - **Sweep** (1 connections) — `apps/web/src/store/animations.ts`
 - **push()** (1 connections) — `apps/web/src/store/animations.test.ts`
-- *... and 2 more nodes in this community*
+- _... and 2 more nodes in this community_
 
 ## Relationships
 
@@ -63,4 +63,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

@@ -1,1 +1,143 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_md", "label": "2026-07-04-google-one-tap.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_google_one_tap_rendered_sign_in_button_implementation_plan", "label": "Google One Tap + rendered sign-in button Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_1_expose_googleclientid_via_get_auth_config", "label": "Task 1: Expose `googleClientId` via `GET /auth/config`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L24"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_2_google_credential_sign_in_endpoint_post_auth_oauth_google_credential", "label": "Task 2: Google credential sign-in endpoint (`POST /auth/oauth/google/credential`)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L137"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_3_web_api_client_session_store_action", "label": "Task 3: Web API client + session store action", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L539"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_4_gsi_script_loader_net_google_ts", "label": "Task 4: GSI script loader (`net/google.ts`)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L629"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_5_wire_loginscreen_to_gsi_one_tap_rendered_button_fallback", "label": "Task 5: Wire `LoginScreen` to GSI (One Tap + rendered button + fallback)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L806"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_6_update_claude_md_docs", "label": "Task 6: Update CLAUDE.md docs", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L1037"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_google_one_tap_rendered_sign_in_button_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_google_one_tap_rendered_sign_in_button_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_1_expose_googleclientid_via_get_auth_config", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L24", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_2_google_credential_sign_in_endpoint_post_auth_oauth_google_credential", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L137", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_3_web_api_client_session_store_action", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L539", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_4_gsi_script_loader_net_google_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L629", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_5_wire_loginscreen_to_gsi_one_tap_rendered_button_fallback", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L806", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_6_update_claude_md_docs", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md", "source_location": "L1037", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_md",
+      "label": "2026-07-04-google-one-tap.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_google_one_tap_rendered_sign_in_button_implementation_plan",
+      "label": "Google One Tap + rendered sign-in button Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_1_expose_googleclientid_via_get_auth_config",
+      "label": "Task 1: Expose `googleClientId` via `GET /auth/config`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L24"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_2_google_credential_sign_in_endpoint_post_auth_oauth_google_credential",
+      "label": "Task 2: Google credential sign-in endpoint (`POST /auth/oauth/google/credential`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L137"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_3_web_api_client_session_store_action",
+      "label": "Task 3: Web API client + session store action",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L539"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_4_gsi_script_loader_net_google_ts",
+      "label": "Task 4: GSI script loader (`net/google.ts`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L629"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_5_wire_loginscreen_to_gsi_one_tap_rendered_button_fallback",
+      "label": "Task 5: Wire `LoginScreen` to GSI (One Tap + rendered button + fallback)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L806"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_6_update_claude_md_docs",
+      "label": "Task 6: Update CLAUDE.md docs",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L1037"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_google_one_tap_rendered_sign_in_button_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_google_one_tap_rendered_sign_in_button_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_1_expose_googleclientid_via_get_auth_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_2_google_credential_sign_in_endpoint_post_auth_oauth_google_credential",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L137",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_3_web_api_client_session_store_action",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L539",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_4_gsi_script_loader_net_google_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L629",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_5_wire_loginscreen_to_gsi_one_tap_rendered_button_fallback",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L806",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_google_one_tap_task_6_update_claude_md_docs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-google-one-tap.md",
+      "source_location": "L1037",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

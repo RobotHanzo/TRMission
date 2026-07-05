@@ -1,1 +1,286 @@
-{"nodes": [{"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "label": "In-game Animations Design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus", "label": "Animation Event Bus (store/game.ts lastBatch)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationmodel", "label": "game/animationModel.ts (pure event\u2192intent model)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_game_tickets", "label": "game/tickets.ts (ticket completion/path/points)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver", "label": "useAnimationDriver hook", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animations_store", "label": "store/animations.ts (transient animation state)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer", "label": "AnimationLayer component", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_usereducedmotion", "label": "useReducedMotion hook", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_ticketfanfare", "label": "TicketFanfare component", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_ownconnectedticketids", "label": "ownConnectedTicketIds (engine helper)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_completedtickets_wire", "label": "RedactedView.completedTickets (public reveal of finished tickets)", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_own_track_instant_completion", "label": "Own-track instant completion invariant", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_keepticketsmodal_motion", "label": "Ticket dialog slide-up + fly-to-tray motion (KeepTicketsModal)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationmodel", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_game_tickets", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animations_store", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_usereducedmotion", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_ticketfanfare", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_ownconnectedticketids", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_completedtickets_wire", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_own_track_instant_completion", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_keepticketsmodal_motion", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "ingame_animations_pipeline", "label": "In-game animation pipeline (event bus \u2192 model \u2192 driver \u2192 store \u2192 layer)", "nodes": ["docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus", "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationmodel", "docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver", "docs_superpowers_specs_2026_06_28_ingame_animations_design_animations_store", "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer"], "relation": "form", "confidence": "INFERRED", "confidence_score": 0.9, "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md"}]}
+{
+  "nodes": [
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "label": "In-game Animations Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus",
+      "label": "Animation Event Bus (store/game.ts lastBatch)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationmodel",
+      "label": "game/animationModel.ts (pure event\u2192intent model)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_game_tickets",
+      "label": "game/tickets.ts (ticket completion/path/points)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver",
+      "label": "useAnimationDriver hook",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animations_store",
+      "label": "store/animations.ts (transient animation state)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer",
+      "label": "AnimationLayer component",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_usereducedmotion",
+      "label": "useReducedMotion hook",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_ticketfanfare",
+      "label": "TicketFanfare component",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_ownconnectedticketids",
+      "label": "ownConnectedTicketIds (engine helper)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_completedtickets_wire",
+      "label": "RedactedView.completedTickets (public reveal of finished tickets)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_own_track_instant_completion",
+      "label": "Own-track instant completion invariant",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_ingame_animations_design_keepticketsmodal_motion",
+      "label": "Ticket dialog slide-up + fly-to-tray motion (KeepTicketsModal)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationmodel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_game_tickets",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animations_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_usereducedmotion",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_ticketfanfare",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_ownconnectedticketids",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_completedtickets_wire",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_own_track_instant_completion",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_ingame_animations_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_keepticketsmodal_motion",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "ingame_animations_pipeline",
+      "label": "In-game animation pipeline (event bus \u2192 model \u2192 driver \u2192 store \u2192 layer)",
+      "nodes": [
+        "docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus",
+        "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationmodel",
+        "docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver",
+        "docs_superpowers_specs_2026_06_28_ingame_animations_design_animations_store",
+        "docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md"
+    }
+  ]
+}

@@ -1,1 +1,264 @@
-{"nodes": [{"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "label": "Action Log + Chat Panel Design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_historyreplay_frame", "label": "HistoryReplay proto frame", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatentry", "label": "ChatEntry (proto + persisted gameChats)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_gamesession_history", "label": "GameSession.history() re-derivation (mechanism A)", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logmodel", "label": "game/logModel.ts (entriesFromEvents)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_log_store", "label": "store/log.ts (useLog)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_store", "label": "store/chat.ts (useChat)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logpanel", "label": "LogPanel component", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatpanel", "label": "ChatPanel component", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_commspanel", "label": "CommsPanel component (responsive Rail\u27f7Comms tabs)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_rate_limit", "label": "Server-authoritative chat length/rate limits", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_historyreplay_frame", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatentry", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_gamesession_history", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logmodel", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_log_store", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_store", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logpanel", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatpanel", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_commspanel", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_rate_limit", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc", "target": "docs_superpowers_specs_2026_06_28_sound_effects_design_usesounddriver", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "comms_column_system", "label": "In-game comms column (log store + chat store + panels)", "nodes": ["docs_superpowers_specs_2026_06_29_action_log_and_chat_design_log_store", "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_store", "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logpanel", "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatpanel", "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_commspanel"], "relation": "participate_in", "confidence": "INFERRED", "confidence_score": 0.9, "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md"}]}
+{
+  "nodes": [
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "label": "Action Log + Chat Panel Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_historyreplay_frame",
+      "label": "HistoryReplay proto frame",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatentry",
+      "label": "ChatEntry (proto + persisted gameChats)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_gamesession_history",
+      "label": "GameSession.history() re-derivation (mechanism A)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logmodel",
+      "label": "game/logModel.ts (entriesFromEvents)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_log_store",
+      "label": "store/log.ts (useLog)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_store",
+      "label": "store/chat.ts (useChat)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logpanel",
+      "label": "LogPanel component",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatpanel",
+      "label": "ChatPanel component",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_commspanel",
+      "label": "CommsPanel component (responsive Rail\u27f7Comms tabs)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_rate_limit",
+      "label": "Server-authoritative chat length/rate limits",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_historyreplay_frame",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatentry",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_gamesession_history",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logmodel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_log_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logpanel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatpanel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_commspanel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_rate_limit",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_sound_effects_design_usesounddriver",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "comms_column_system",
+      "label": "In-game comms column (log store + chat store + panels)",
+      "nodes": [
+        "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_log_store",
+        "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat_store",
+        "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_logpanel",
+        "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chatpanel",
+        "docs_superpowers_specs_2026_06_29_action_log_and_chat_design_commspanel"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md"
+    }
+  ]
+}

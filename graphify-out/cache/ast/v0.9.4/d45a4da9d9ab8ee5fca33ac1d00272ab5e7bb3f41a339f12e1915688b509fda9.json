@@ -1,1 +1,223 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_md", "label": "2026-07-04-feature-gating.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_per_account_feature_gating_replay_review_map_building_implementation_plan", "label": "Per-Account Feature Gating (Replay Review & Map Building) Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_1_shared_taxonomy_userfeature_users_features_permission", "label": "Task 1: Shared taxonomy \u2014 `UserFeature` + `users.features` permission", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L27"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_2_server_userdoc_features_repo_helpers_featureguard_publicuser_features", "label": "Task 2: Server \u2014 `UserDoc.features`, repo helpers, `FeatureGuard`, `PublicUser.features`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L140"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_3_server_gate_all_map_authoring_routes_on_mapbuilder", "label": "Task 3: Server \u2014 gate all map-authoring routes on `mapBuilder`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L364"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_4_server_lobby_custom_map_select_host_requires_mapbuilder_on_the_host", "label": "Task 4: Server \u2014 lobby: custom-map select/host requires `mapBuilder` on the host", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L522"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_5_server_replay_browsing_sharing_requires_replayreview_link_visibility_unchanged", "label": "Task 5: Server \u2014 replay browsing/sharing requires `replayReview` (link visibility unchanged)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L678"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_6_server_dashboard_features_api_users_features", "label": "Task 6: Server \u2014 dashboard features API (`users.features`)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L847"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_7_admin_rest_client_additions_accountselectormodal", "label": "Task 7: Admin \u2014 REST client additions + `AccountSelectorModal`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1114"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_8_admin_features_view_nav_route_i18n", "label": "Task 8: Admin \u2014 Features view + nav/route + i18n", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1386"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_9_admin_userdrawer_features_section_maintainersview_uses_the_selector_modal", "label": "Task 9: Admin \u2014 UserDrawer features section + MaintainersView uses the selector modal", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1732"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_10_web_publicuser_features_hide_redirect_gated_entry_points", "label": "Task 10: Web \u2014 `PublicUser.features` + hide/redirect gated entry points", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1820"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_11_docs_full_validation_graphify", "label": "Task 11: Docs, full validation, graphify", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1985"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_per_account_feature_gating_replay_review_map_building_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_per_account_feature_gating_replay_review_map_building_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_1_shared_taxonomy_userfeature_users_features_permission", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L27", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_2_server_userdoc_features_repo_helpers_featureguard_publicuser_features", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L140", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_3_server_gate_all_map_authoring_routes_on_mapbuilder", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L364", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_4_server_lobby_custom_map_select_host_requires_mapbuilder_on_the_host", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L522", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_5_server_replay_browsing_sharing_requires_replayreview_link_visibility_unchanged", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L678", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_6_server_dashboard_features_api_users_features", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L847", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_7_admin_rest_client_additions_accountselectormodal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1114", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_8_admin_features_view_nav_route_i18n", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1386", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_9_admin_userdrawer_features_section_maintainersview_uses_the_selector_modal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1732", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_10_web_publicuser_features_hide_redirect_gated_entry_points", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1820", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_11_docs_full_validation_graphify", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md", "source_location": "L1985", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_md",
+      "label": "2026-07-04-feature-gating.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_per_account_feature_gating_replay_review_map_building_implementation_plan",
+      "label": "Per-Account Feature Gating (Replay Review & Map Building) Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_1_shared_taxonomy_userfeature_users_features_permission",
+      "label": "Task 1: Shared taxonomy \u2014 `UserFeature` + `users.features` permission",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L27"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_2_server_userdoc_features_repo_helpers_featureguard_publicuser_features",
+      "label": "Task 2: Server \u2014 `UserDoc.features`, repo helpers, `FeatureGuard`, `PublicUser.features`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L140"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_3_server_gate_all_map_authoring_routes_on_mapbuilder",
+      "label": "Task 3: Server \u2014 gate all map-authoring routes on `mapBuilder`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L364"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_4_server_lobby_custom_map_select_host_requires_mapbuilder_on_the_host",
+      "label": "Task 4: Server \u2014 lobby: custom-map select/host requires `mapBuilder` on the host",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L522"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_5_server_replay_browsing_sharing_requires_replayreview_link_visibility_unchanged",
+      "label": "Task 5: Server \u2014 replay browsing/sharing requires `replayReview` (link visibility unchanged)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L678"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_6_server_dashboard_features_api_users_features",
+      "label": "Task 6: Server \u2014 dashboard features API (`users.features`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L847"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_7_admin_rest_client_additions_accountselectormodal",
+      "label": "Task 7: Admin \u2014 REST client additions + `AccountSelectorModal`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1114"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_8_admin_features_view_nav_route_i18n",
+      "label": "Task 8: Admin \u2014 Features view + nav/route + i18n",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1386"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_9_admin_userdrawer_features_section_maintainersview_uses_the_selector_modal",
+      "label": "Task 9: Admin \u2014 UserDrawer features section + MaintainersView uses the selector modal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1732"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_10_web_publicuser_features_hide_redirect_gated_entry_points",
+      "label": "Task 10: Web \u2014 `PublicUser.features` + hide/redirect gated entry points",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1820"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_11_docs_full_validation_graphify",
+      "label": "Task 11: Docs, full validation, graphify",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1985"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_per_account_feature_gating_replay_review_map_building_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_per_account_feature_gating_replay_review_map_building_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_1_shared_taxonomy_userfeature_users_features_permission",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_2_server_userdoc_features_repo_helpers_featureguard_publicuser_features",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L140",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_3_server_gate_all_map_authoring_routes_on_mapbuilder",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L364",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_4_server_lobby_custom_map_select_host_requires_mapbuilder_on_the_host",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L522",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_5_server_replay_browsing_sharing_requires_replayreview_link_visibility_unchanged",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L678",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_6_server_dashboard_features_api_users_features",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L847",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_7_admin_rest_client_additions_accountselectormodal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1114",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_8_admin_features_view_nav_route_i18n",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1386",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_9_admin_userdrawer_features_section_maintainersview_uses_the_selector_modal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1732",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_10_web_publicuser_features_hide_redirect_gated_entry_points",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1820",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_feature_gating_task_11_docs_full_validation_graphify",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-feature-gating.md",
+      "source_location": "L1985",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

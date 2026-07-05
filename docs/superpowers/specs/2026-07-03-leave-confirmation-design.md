@@ -25,7 +25,7 @@ interface ConfirmDialogProps {
   title: string;
   message: string;
   confirmLabel?: string; // defaults to t('confirm')
-  cancelLabel?: string;  // defaults to t('cancel')
+  cancelLabel?: string; // defaults to t('cancel')
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -44,7 +44,10 @@ function useConfirmAction() {
   return {
     open: pending !== null,
     request: (action: () => void) => setPending(() => action),
-    confirm: () => { pending?.(); setPending(null); },
+    confirm: () => {
+      pending?.();
+      setPending(null);
+    },
     cancel: () => setPending(null),
   };
 }
@@ -112,7 +115,7 @@ where the in-app confirmations apply; `tutorial` (local sandbox), `replay` (read
 ## Edge cases
 
 - **Brand click during the `ScoreBoard` (game-over) screen**: `inGame` is `view === 'game' &&
-  !!snapshot`, which is still true post-game-over (the snapshot doesn't disappear when the phase
+!!snapshot`, which is still true post-game-over (the snapshot doesn't disappear when the phase
   becomes `GAME_OVER`) — so the brand click confirms there too, consistent with the `ScoreBoard`'s
   own leave button.
 - **Room-screen "kicked" modal** (`RoomScreen.tsx`'s existing `modal-backdrop` with

@@ -43,7 +43,11 @@ Instead, per player, compute the connected set using the check appropriate to th
 
 ```ts
 const connected = state.ruleParams.unlimitedStationBorrow
-  ? borrowConnectedTicketIds({ ownEdges, borrowEdges: stationBorrowEdges(board, next, pid), tickets })
+  ? borrowConnectedTicketIds({
+      ownEdges,
+      borrowEdges: stationBorrowEdges(board, next, pid),
+      tickets,
+    })
   : ownConnectedTicketIds({ ownEdges, tickets });
 ```
 
@@ -56,7 +60,7 @@ Everything else in the function (diffing against `already`, locking `newIds` int
 - End-game **scoring** (`scoring.ts` `evaluatePlayerTickets`) never reads
   `PlayerState.completedTickets` for the non-borrow branch — it re-derives completion independently
   from `state.ownership`/`state.stations` every time. So this change cannot affect final scores,
-  only *when* the client learns about a completion.
+  only _when_ the client learns about a completion.
 - `tickets.ts`'s `allKeptTicketsCompleted` (rule 7.5) already checks
   `ownConnected.has(t.id) || completed.has(t.id)`; after this change `completed` becomes a superset
   of `ownConnected` for every variant, which is still correct (no regression), just now redundant
@@ -86,13 +90,13 @@ completes), so narrow `apps/server/src/history/history.repo.ts`'s
 ### Tests
 
 - `packages/engine/test/instant-completion.spec.ts`: the existing case `'does not record
-  completion in state when the variant is off'` must flip to assert the *opposite* — that
+completion in state when the variant is off'` must flip to assert the _opposite_ — that
   `completedTickets` contains the ticket and `TICKET_COMPLETED` fires even with the variant off.
   Rename it to reflect the new behavior.
 - `packages/engine/test/variants-determinism.spec.ts`: the existing case `'records no locked
-  completion when the variant is off (default game)'` must be replaced with a monotonicity check
+completion when the variant is off (default game)'` must be replaced with a monotonicity check
   mirroring the existing borrow-variant one (`'locked completion set equals a fresh end-game
-  evaluation'`), but using `ownConnectedTicketIds` instead of `borrowConnectedTicketIds`. Update
+evaluation'`), but using `ownConnectedTicketIds` instead of `borrowConnectedTicketIds`. Update
   the `'is engine version N'` test to 7 with a comment describing this fix.
 - `packages/engine/test/off-mode-identity.spec.ts`: regenerate `golden/off-mode.json` via the
   documented temp-script procedure already in that file's header comment (this is exactly the
@@ -140,7 +144,7 @@ The engine event is already `visibility: 'PUBLIC'` (finished tickets are public 
 `ROUTE_CLAIMED`/`STATION_BUILT`.
 
 No server (`apps/server`) code changes are otherwise needed: `GameSession.history()` re-derives the
-full event stream by replaying `appliedActions` through the *current* engine on every call, so both
+full event stream by replaying `appliedActions` through the _current_ engine on every call, so both
 the live event broadcast and the `HistoryReplay` reconnect backfill pick up `TICKET_COMPLETED`
 automatically once the engine emits it and the codec stops dropping it.
 

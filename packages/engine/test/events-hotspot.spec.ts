@@ -138,7 +138,9 @@ describe('events — viral hotspot claim bonus', () => {
     if (!tunnel) throw new Error('no tunnel');
     // Drain the draw pool so the tunnel reveals nothing (extraRequired 0 → trivial commit).
     const state = wellStocked(
-      drainPools(withEvents(base.state, { ...emptyEvents(), hotspots: { [tunnel.a as string]: 1 } })),
+      drainPools(
+        withEvents(base.state, { ...emptyEvents(), hotspots: { [tunnel.a as string]: 1 } }),
+      ),
     );
     const begin = reduce(base.board, state, {
       t: 'CLAIM_ROUTE',
@@ -190,8 +192,22 @@ describe('events — viral hotspot claim bonus', () => {
     const city = route.a as string;
     // Two VIRAL_HOTSPOT schedule entries for the SAME city, in consecutive rounds.
     const sched: EventScheduleEntry[] = [
-      { id: 'ev1', kind: 'VIRAL_HOTSPOT', startRound: 2, durationRounds: 0, telegraphed: false, cityId: route.a },
-      { id: 'ev2', kind: 'VIRAL_HOTSPOT', startRound: 3, durationRounds: 0, telegraphed: false, cityId: route.a },
+      {
+        id: 'ev1',
+        kind: 'VIRAL_HOTSPOT',
+        startRound: 2,
+        durationRounds: 0,
+        telegraphed: false,
+        cityId: route.a,
+      },
+      {
+        id: 'ev2',
+        kind: 'VIRAL_HOTSPOT',
+        startRound: 3,
+        durationRounds: 0,
+        telegraphed: false,
+        cityId: route.a,
+      },
     ];
     let s: GameState = withEvents(base.state, { ...emptyEvents(), schedule: sched });
     // 4 endTurns (2p): wrap to round 2 (first bump) then round 3 (second bump, capped at 2).

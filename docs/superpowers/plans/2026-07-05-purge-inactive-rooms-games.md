@@ -10,7 +10,7 @@ confirmed and counted in metrics.
 the hard-delete mechanics — shared by two callers: the manual `DELETE` routes (used by new admin
 delete buttons) and a background sweep (an interval timer, opt-in via env, plus an on-demand admin
 "Run purge now" endpoint). A `STARTED` room's own `updatedAt` freezes the moment its game begins,
-so staleness for `STARTED` rooms is judged by the *linked game's* `updatedAt` via a `$lookup`.
+so staleness for `STARTED` rooms is judged by the _linked game's_ `updatedAt` via a `$lookup`.
 Terminal records (`CLOSED`/`COMPLETED`/`TERMINATED`) are never auto-deleted — only removable
 through the manual delete buttons.
 
@@ -28,7 +28,7 @@ vitest (`mongodb-memory-server` for server e2e, `@testing-library/react` for adm
   `env.roomLobbyPurgeHours`/`env.gameLivePurgeHours` directly. Tests get determinism by backdating
   seeded documents' `updatedAt`, not by shrinking thresholds, so the extra indirection isn't
   needed — this matches how the majority of this codebase's env-driven behavior works (only
-  `AuthConfig`/`DashboardConfig` get a wrapper class, because *their* tests genuinely need
+  `AuthConfig`/`DashboardConfig` get a wrapper class, because _their_ tests genuinely need
   different values per test case).
 - All four new permissions (`games.delete`, `rooms.delete`, `purge.read`, `purge.run`) are
   **admin-tier only** — added to `ADMIN_PERMISSIONS` in `packages/shared/src/dashboard.ts`, not
@@ -58,21 +58,23 @@ vitest (`mongodb-memory-server` for server e2e, `@testing-library/react` for adm
 ### Task 1: Shared plumbing — permissions, env vars, audit actions, metrics counters
 
 **Files:**
+
 - Modify: `packages/shared/src/dashboard.ts`
 - Modify: `apps/server/src/config/env.ts`
 - Modify: `apps/server/src/dashboard/audit.repo.ts`
 - Modify: `apps/server/src/observability/metrics.service.ts`
 
 **Interfaces:**
+
 - Produces: 4 new `DashboardPermission` values (`games.delete`, `rooms.delete`, `purge.read`,
   `purge.run`), all admin-tier. 3 new `DashboardAuditAction` values (`game.delete`, `room.delete`,
   `purge.run`). `DashboardAuditRepo.listByAction(action, limit): Promise<AuditEntryDoc[]>`. 4 new
   `env` fields (`purgeAutoEnabled: boolean`, `purgeIntervalMs: number`, `roomLobbyPurgeHours:
-  number`, `gameLivePurgeHours: number`). `MetricsService.roomPurged(trigger, priorStatus): void`
+number`, `gameLivePurgeHours: number`). `MetricsService.roomPurged(trigger, priorStatus): void`
   and `.gamePurged(trigger, priorStatus): void`.
 - Consumes: nothing new — purely additive to existing files.
 
-This task has no new *behavior* to TDD (it's typed constants + two trivial counter-increment
+This task has no new _behavior_ to TDD (it's typed constants + two trivial counter-increment
 methods) — it's verified by typecheck and the existing regression suite for the file it touches
 most meaningfully (the shared permission taxonomy).
 
@@ -346,19 +348,21 @@ git commit -m "feat(dashboard): add permissions, env vars, audit actions, and me
 ### Task 2: PurgeService — deleteGame (manual delete, any status)
 
 **Files:**
+
 - Create: `apps/server/src/dashboard/purge.service.ts`
 - Modify: `apps/server/src/dashboard/dashboard-games.controller.ts`
 - Modify: `apps/server/src/dashboard/dashboard.module.ts`
 - Test: Create `apps/server/test/dashboard-purge.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `MONGO_DB` token, `GameRegistry.get(gameId): Match | undefined`, `GameHub.evictMatch
-  (gameId, message): Promise<void>`, `RoomRepo.closeByGameId(gameId): Promise<void>`,
+(gameId, message): Promise<void>`, `RoomRepo.closeByGameId(gameId): Promise<void>`,
   `AuditService.log(actor, action, target?, params?): Promise<AuditEntryDoc>`,
   `MetricsService.gamePurged(trigger, priorStatus): void`, `GameDoc`/`GameEventDoc`/
   `GameSnapshotDoc`/`GameChatDoc` from `../persistence/types`, `AuthUser` from `../auth/auth.types`.
 - Produces: `PurgeService.deleteGame(actor: AuthUser, gameId: string, reason?: string):
-  Promise<void>` (throws `NotFoundException` if the game doesn't exist) — Task 3 adds
+Promise<void>` (throws `NotFoundException` if the game doesn't exist) — Task 3 adds
   `deleteRoom` to this same class and reuses its private `terminateIfLive` helper.
   `DELETE /api/v1/dashboard/games/:gameId` (permission `games.delete`, 204 on success).
 
@@ -409,18 +413,16 @@ async function startGame(hostName: string, memberName: string) {
 async function backdateGame(gameId: string, hoursAgo: number) {
   await t.db
     .collection('games')
-    .updateOne(
-      { _id: gameId } as never,
-      { $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) } },
-    );
+    .updateOne({ _id: gameId } as never, {
+      $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) },
+    });
 }
 async function backdateRoom(code: string, hoursAgo: number) {
   await t.db
     .collection('rooms')
-    .updateOne(
-      { _id: code } as never,
-      { $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) } },
-    );
+    .updateOne({ _id: code } as never, {
+      $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) },
+    });
 }
 
 let admin: { userId: string; token: string };
@@ -498,10 +500,9 @@ describe('delete game', () => {
     // real finished game would.
     await t.db
       .collection('games')
-      .updateOne(
-        { _id: gameId } as never,
-        { $set: { status: 'COMPLETED', updatedAt: new Date() } },
-      );
+      .updateOne({ _id: gameId } as never, {
+        $set: { status: 'COMPLETED', updatedAt: new Date() },
+      });
     expect(t.app.get(GameRegistry).get(gameId)).toBeTruthy();
 
     await request(server())
@@ -658,7 +659,17 @@ import { Body, Controller, Get, HttpCode, Param, Post, Query, UseGuards } from '
 with:
 
 ```ts
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 ```
 
 Add a new import alongside the existing ones:
@@ -771,15 +782,17 @@ git commit -m "feat(dashboard): add PurgeService.deleteGame + DELETE /dashboard/
 ### Task 3: PurgeService — deleteRoom (manual delete, any status)
 
 **Files:**
+
 - Modify: `apps/server/src/dashboard/purge.service.ts`
 - Modify: `apps/server/src/dashboard/dashboard-games.controller.ts`
 - Test: Modify `apps/server/test/dashboard-purge.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `RoomRepo.get(code): Promise<RoomDoc|null>`, `RoomRepo.closeLobby(code):
-  Promise<boolean>`, the private `terminateIfLive` from Task 2 (same class).
+Promise<boolean>`, the private `terminateIfLive` from Task 2 (same class).
 - Produces: `PurgeService.deleteRoom(actor: AuthUser, code: string, reason?: string):
-  Promise<void>` (throws `NotFoundException` if missing). `DELETE /api/v1/dashboard/rooms/:code`
+Promise<void>` (throws `NotFoundException` if missing). `DELETE /api/v1/dashboard/rooms/:code`
   (permission `rooms.delete`, 204 on success). Task 4's sweep reuses the same private
   `purgeRoomCore` this task adds.
 
@@ -846,10 +859,9 @@ describe('delete room', () => {
     const { code, gameId } = await startGame('H7', 'M7');
     await t.db
       .collection('games')
-      .updateOne(
-        { _id: gameId } as never,
-        { $set: { status: 'COMPLETED', updatedAt: new Date() } },
-      );
+      .updateOne({ _id: gameId } as never, {
+        $set: { status: 'COMPLETED', updatedAt: new Date() },
+      });
 
     await request(server())
       .delete(`/api/v1/dashboard/rooms/${code}`)
@@ -872,10 +884,9 @@ describe('delete room', () => {
     const code: string = room.body.code;
     await t.db
       .collection('rooms')
-      .updateOne(
-        { _id: code } as never,
-        { $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() } },
-      );
+      .updateOne({ _id: code } as never, {
+        $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() },
+      });
 
     await request(server())
       .delete(`/api/v1/dashboard/rooms/${code}`)
@@ -1078,6 +1089,7 @@ git commit -m "feat(dashboard): add PurgeService.deleteRoom + DELETE /dashboard/
 ### Task 4: PurgeService — runSweep + status + scheduler + DashboardPurgeController
 
 **Files:**
+
 - Modify: `apps/server/src/dashboard/purge.service.ts`
 - Modify: `apps/server/src/dashboard/dashboard.schemas.ts`
 - Create: `apps/server/src/dashboard/dashboard-purge.controller.ts`
@@ -1085,16 +1097,17 @@ git commit -m "feat(dashboard): add PurgeService.deleteRoom + DELETE /dashboard/
 - Test: Modify `apps/server/test/dashboard-purge.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `DashboardAuditRepo.listByAction` (Task 1), `env.purgeAutoEnabled` /
   `env.purgeIntervalMs` / `env.roomLobbyPurgeHours` / `env.gameLivePurgeHours` (Task 1),
   `AuditService.logSystem(action, target?, params?): Promise<AuditEntryDoc>`, the private
   `purgeGameCore`/`purgeRoomCore` from Tasks 2/3 (same class).
 - Produces: `PurgeService.runSweep(trigger: 'auto'|'manual', actor?: AuthUser):
-  Promise<{roomsDeleted: number; gamesDeleted: number; capped: boolean}>`.
+Promise<{roomsDeleted: number; gamesDeleted: number; capped: boolean}>`.
   `PurgeService.status(): Promise<{autoEnabled, intervalMs, roomLobbyPurgeHours,
-  gameLivePurgeHours, recentRuns: {at, actorName, roomsDeleted, gamesDeleted, capped}[]}>`.
+gameLivePurgeHours, recentRuns: {at, actorName, roomsDeleted, gamesDeleted, capped}[]}>`.
   `GET /api/v1/dashboard/purge/status` (permission `purge.read`), `POST
-  /api/v1/dashboard/purge/run` (permission `purge.run`). Task 5 (admin REST client) consumes both
+/api/v1/dashboard/purge/run` (permission `purge.run`). Task 5 (admin REST client) consumes both
   routes and this exact response shape.
 
 - [ ] **Step 1: Write the failing e2e tests**
@@ -1110,7 +1123,10 @@ describe('purge sweep + status', () => {
       .set(auth(moderator.token))
       .send({})
       .expect(403);
-    await request(server()).get('/api/v1/dashboard/purge/status').set(auth(moderator.token)).expect(403);
+    await request(server())
+      .get('/api/v1/dashboard/purge/status')
+      .set(auth(moderator.token))
+      .expect(403);
   });
 
   it('returns config + thresholds from status', async () => {
@@ -1154,10 +1170,9 @@ describe('purge sweep + status', () => {
       const finished = await startGame('DG-H', 'DG-M');
       await t.db
         .collection('games')
-        .updateOne(
-          { _id: finished.gameId } as never,
-          { $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) } },
-        );
+        .updateOne({ _id: finished.gameId } as never, {
+          $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) },
+        });
 
       const res = await request(server())
         .post('/api/v1/dashboard/purge/run')
@@ -1168,7 +1183,9 @@ describe('purge sweep + status', () => {
       expect(res.body.capped).toBe(false);
 
       // Stale LOBBY room: gone. Fresh LOBBY room: untouched.
-      expect(await t.db.collection('rooms').findOne({ _id: staleLobby.body.code } as never)).toBeNull();
+      expect(
+        await t.db.collection('rooms').findOne({ _id: staleLobby.body.code } as never),
+      ).toBeNull();
       expect(
         await t.db.collection('rooms').findOne({ _id: freshLobby.body.code } as never),
       ).not.toBeNull();
@@ -1183,7 +1200,9 @@ describe('purge sweep + status', () => {
 
       // Finished-long-ago room: deleted; its COMPLETED game record is left alone.
       expect(await t.db.collection('rooms').findOne({ _id: finished.code } as never)).toBeNull();
-      const finishedGame = await t.db.collection('games').findOne({ _id: finished.gameId } as never);
+      const finishedGame = await t.db
+        .collection('games')
+        .findOne({ _id: finished.gameId } as never);
       expect(finishedGame?.status).toBe('COMPLETED');
 
       // Exactly one purge.run audit entry, attributed to the admin who triggered it.
@@ -1205,36 +1224,32 @@ describe('purge sweep + status', () => {
     60_000,
   );
 
-  it(
-    'caps a sweep at 500 rooms per run and reports capped:true',
-    async () => {
-      const stale = new Date(Date.now() - 30 * 3_600_000);
-      const docs = Array.from({ length: 501 }, (_, i) => ({
-        _id: `CAP${i}`,
-        hostId: 'nobody',
-        status: 'LOBBY',
-        members: [],
-        maxPlayers: 5,
-        settings: {},
-        createdAt: stale,
-        updatedAt: stale,
-      }));
-      await t.db.collection('rooms').insertMany(docs as never);
+  it('caps a sweep at 500 rooms per run and reports capped:true', async () => {
+    const stale = new Date(Date.now() - 30 * 3_600_000);
+    const docs = Array.from({ length: 501 }, (_, i) => ({
+      _id: `CAP${i}`,
+      hostId: 'nobody',
+      status: 'LOBBY',
+      members: [],
+      maxPlayers: 5,
+      settings: {},
+      createdAt: stale,
+      updatedAt: stale,
+    }));
+    await t.db.collection('rooms').insertMany(docs as never);
 
-      const res = await request(server())
-        .post('/api/v1/dashboard/purge/run')
-        .set(auth(admin.token))
-        .expect(200);
-      expect(res.body.capped).toBe(true);
-      expect(res.body.roomsDeleted).toBe(500);
+    const res = await request(server())
+      .post('/api/v1/dashboard/purge/run')
+      .set(auth(admin.token))
+      .expect(200);
+    expect(res.body.capped).toBe(true);
+    expect(res.body.roomsDeleted).toBe(500);
 
-      const remaining = await t.db
-        .collection('rooms')
-        .countDocuments({ _id: { $regex: /^CAP/ } } as never);
-      expect(remaining).toBe(1);
-    },
-    30_000,
-  );
+    const remaining = await t.db
+      .collection('rooms')
+      .countDocuments({ _id: { $regex: /^CAP/ } } as never);
+    expect(remaining).toBe(1);
+  }, 30_000);
 });
 ```
 
@@ -1486,7 +1501,6 @@ with:
 In `apps/server/src/dashboard/dashboard.schemas.ts`, append at the end of the file:
 
 ```ts
-
 // ---- purge --------------------------------------------------------------------------
 
 export const PurgeRunResultSchema = z.object({
@@ -1618,13 +1632,15 @@ git commit -m "feat(dashboard): add purge sweep, scheduler, and GET/POST /dashbo
 ### Task 5: Admin REST client + i18n
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts`
 - Modify: `apps/admin/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Produces: `api.deleteRoom(code, reason?): Promise<void>`, `api.deleteGame(id, reason?):
-  Promise<void>`, `api.getPurgeStatus(): Promise<PurgeStatus>`, `api.runPurge():
-  Promise<PurgeRunResult>`, and the `PurgeStatus`/`PurgeRunResult` interfaces — consumed by Tasks
+Promise<void>`, `api.getPurgeStatus(): Promise<PurgeStatus>`, `api.runPurge():
+Promise<PurgeRunResult>`, and the `PurgeStatus`/`PurgeRunResult` interfaces — consumed by Tasks
   6–8. New i18n keys (listed in Step 2) — consumed by Tasks 6–8's JSX.
 
 This task adds no new behavior of its own (a REST client function is just a typed `fetch` call;
@@ -2149,12 +2165,14 @@ git commit -m "feat(admin): add REST client + i18n strings for room/game delete 
 ### Task 6: RoomsView delete button
 
 **Files:**
+
 - Modify: `apps/admin/src/views/RoomsView.tsx`
 - Modify: `apps/admin/src/views/RoomsView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `api.deleteRoom(code, reason?)` (Task 5), `useSession((s) =>
-  s.hasPermission('rooms.delete'))`, existing `ConfirmDialog`/`useToast` components.
+s.hasPermission('rooms.delete'))`, existing `ConfirmDialog`/`useToast` components.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -2311,114 +2329,122 @@ export function RoomsView() {
 Replace the `close` function block (add a `del` function right after it):
 
 ```tsx
-  const close = async (code: string, reason?: string) => {
-    setBusy(true);
-    try {
-      const updated = await api.closeRoom(code, reason);
-      setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
-      pushToast('success', t('toast.roomClosed'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setClosing(null);
-    }
-  };
+const close = async (code: string, reason?: string) => {
+  setBusy(true);
+  try {
+    const updated = await api.closeRoom(code, reason);
+    setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
+    pushToast('success', t('toast.roomClosed'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setClosing(null);
+  }
+};
 ```
 
 with:
 
 ```tsx
-  const close = async (code: string, reason?: string) => {
-    setBusy(true);
-    try {
-      const updated = await api.closeRoom(code, reason);
-      setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
-      pushToast('success', t('toast.roomClosed'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setClosing(null);
-    }
-  };
+const close = async (code: string, reason?: string) => {
+  setBusy(true);
+  try {
+    const updated = await api.closeRoom(code, reason);
+    setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
+    pushToast('success', t('toast.roomClosed'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setClosing(null);
+  }
+};
 
-  const del = async (code: string, reason?: string) => {
-    setBusy(true);
-    try {
-      await api.deleteRoom(code, reason);
-      setRows((prev) => prev.filter((r) => r.code !== code));
-      pushToast('success', t('toast.roomDeleted'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setDeleting(null);
-    }
-  };
+const del = async (code: string, reason?: string) => {
+  setBusy(true);
+  try {
+    await api.deleteRoom(code, reason);
+    setRows((prev) => prev.filter((r) => r.code !== code));
+    pushToast('success', t('toast.roomDeleted'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setDeleting(null);
+  }
+};
 ```
 
 Replace the table header's action column:
 
 ```tsx
-              <th className="num">{t('rooms.colUpdated')}</th>
-              {canClose && <th />}
+<th className="num">{t('rooms.colUpdated')}</th>;
+{
+  canClose && <th />;
+}
 ```
 
 with:
 
 ```tsx
-              <th className="num">{t('rooms.colUpdated')}</th>
-              {(canClose || canDelete) && <th />}
+<th className="num">{t('rooms.colUpdated')}</th>;
+{
+  (canClose || canDelete) && <th />;
+}
 ```
 
 Replace the row's action cell:
 
 ```tsx
-                <td className="num">{fmtDateTime(r.updatedAt, locale)}</td>
-                {canClose && (
-                  <td>
-                    {r.status === 'LOBBY' && (
-                      <button className="oc-btn danger" onClick={() => setClosing(r.code)}>
-                        {t('rooms.close')}
-                      </button>
-                    )}
-                    {r.status === 'STARTED' && (
-                      <span className="oc-muted" style={{ fontSize: 11 }}>
-                        {t('rooms.startedHint')}
-                      </span>
-                    )}
-                  </td>
-                )}
+<td className="num">{fmtDateTime(r.updatedAt, locale)}</td>;
+{
+  canClose && (
+    <td>
+      {r.status === 'LOBBY' && (
+        <button className="oc-btn danger" onClick={() => setClosing(r.code)}>
+          {t('rooms.close')}
+        </button>
+      )}
+      {r.status === 'STARTED' && (
+        <span className="oc-muted" style={{ fontSize: 11 }}>
+          {t('rooms.startedHint')}
+        </span>
+      )}
+    </td>
+  );
+}
 ```
 
 with:
 
 ```tsx
-                <td className="num">{fmtDateTime(r.updatedAt, locale)}</td>
-                {(canClose || canDelete) && (
-                  <td>
-                    {canClose && r.status === 'LOBBY' && (
-                      <button className="oc-btn danger" onClick={() => setClosing(r.code)}>
-                        {t('rooms.close')}
-                      </button>
-                    )}
-                    {canClose && r.status === 'STARTED' && (
-                      <span className="oc-muted" style={{ fontSize: 11 }}>
-                        {t('rooms.startedHint')}
-                      </span>
-                    )}
-                    {canDelete && (
-                      <button
-                        className="oc-btn danger"
-                        style={{ marginLeft: 6 }}
-                        onClick={() => setDeleting(r.code)}
-                      >
-                        {t('rooms.delete')}
-                      </button>
-                    )}
-                  </td>
-                )}
+<td className="num">{fmtDateTime(r.updatedAt, locale)}</td>;
+{
+  (canClose || canDelete) && (
+    <td>
+      {canClose && r.status === 'LOBBY' && (
+        <button className="oc-btn danger" onClick={() => setClosing(r.code)}>
+          {t('rooms.close')}
+        </button>
+      )}
+      {canClose && r.status === 'STARTED' && (
+        <span className="oc-muted" style={{ fontSize: 11 }}>
+          {t('rooms.startedHint')}
+        </span>
+      )}
+      {canDelete && (
+        <button
+          className="oc-btn danger"
+          style={{ marginLeft: 6 }}
+          onClick={() => setDeleting(r.code)}
+        >
+          {t('rooms.delete')}
+        </button>
+      )}
+    </td>
+  );
+}
 ```
 
 Replace the final `ConfirmDialog` block (add a second dialog for delete right after it, before
@@ -2500,12 +2526,14 @@ git commit -m "feat(admin): add room delete button to RoomsView"
 ### Task 7: GamesView (GameDrawer) delete button
 
 **Files:**
+
 - Modify: `apps/admin/src/views/GamesView.tsx`
 - Modify: `apps/admin/src/views/GamesView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `api.deleteGame(id, reason?)` (Task 5), `useSession((s) =>
-  s.hasPermission('games.delete'))`.
+s.hasPermission('games.delete'))`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -2682,49 +2710,49 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 Replace the `terminate` function block (add a `del` function right after it):
 
 ```tsx
-  const terminate = async (reason?: string) => {
-    setBusy(true);
-    try {
-      setDetail(await api.terminateGame(id, reason));
-      pushToast('success', t('toast.gameTerminated'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setConfirming(false);
-    }
-  };
+const terminate = async (reason?: string) => {
+  setBusy(true);
+  try {
+    setDetail(await api.terminateGame(id, reason));
+    pushToast('success', t('toast.gameTerminated'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setConfirming(false);
+  }
+};
 ```
 
 with:
 
 ```tsx
-  const terminate = async (reason?: string) => {
-    setBusy(true);
-    try {
-      setDetail(await api.terminateGame(id, reason));
-      pushToast('success', t('toast.gameTerminated'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setConfirming(false);
-    }
-  };
+const terminate = async (reason?: string) => {
+  setBusy(true);
+  try {
+    setDetail(await api.terminateGame(id, reason));
+    pushToast('success', t('toast.gameTerminated'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setConfirming(false);
+  }
+};
 
-  const del = async (reason?: string) => {
-    setBusy(true);
-    try {
-      await api.deleteGame(id, reason);
-      pushToast('success', t('toast.gameDeleted'));
-      onClose();
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setConfirmingDelete(false);
-    }
-  };
+const del = async (reason?: string) => {
+  setBusy(true);
+  try {
+    await api.deleteGame(id, reason);
+    pushToast('success', t('toast.gameDeleted'));
+    onClose();
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setConfirmingDelete(false);
+  }
+};
 ```
 
 Replace the terminate button section + its confirm dialog:
@@ -2838,6 +2866,7 @@ git commit -m "feat(admin): add game delete button to GameDrawer"
 ### Task 8: PurgeView + nav wiring
 
 **Files:**
+
 - Create: `apps/admin/src/views/PurgeView.tsx`
 - Create: `apps/admin/src/views/PurgeView.test.tsx`
 - Modify: `apps/admin/src/store/ui.ts`
@@ -2845,10 +2874,11 @@ git commit -m "feat(admin): add game delete button to GameDrawer"
 - Modify: `apps/admin/src/App.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `api.getPurgeStatus()`/`api.runPurge()` (Task 5), `useSession((s) =>
-  s.hasPermission('purge.read'|'purge.run'))`.
+s.hasPermission('purge.read'|'purge.run'))`.
 - Produces: `PurgeView` component, rendered by `App.tsx`'s `ActiveView` switch for `view ===
-  'purge'`.
+'purge'`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -2931,7 +2961,10 @@ describe('PurgeView', () => {
         status: 200,
         body: { ...STATUS, recentRuns: [{ ...STATUS.recentRuns[0], roomsDeleted: 5 }] },
       },
-      '/dashboard/purge/run': { status: 200, body: { roomsDeleted: 5, gamesDeleted: 2, capped: false } },
+      '/dashboard/purge/run': {
+        status: 200,
+        body: { roomsDeleted: 5, gamesDeleted: 2, capped: false },
+      },
     });
     fireEvent.click(within(dialog).getByRole('button', { name: '立即執行清理' }));
     expect(await screen.findByText('清理已完成')).toBeInTheDocument();
@@ -3140,13 +3173,13 @@ export type AdminView =
 and replace:
 
 ```ts
-  const m = /^\/(users|features|games|rooms|maintainers|audit)(?:\/([^/]+))?\/?$/.exec(p);
+const m = /^\/(users|features|games|rooms|maintainers|audit)(?:\/([^/]+))?\/?$/.exec(p);
 ```
 
 with:
 
 ```ts
-  const m = /^\/(users|features|games|rooms|maintainers|audit|purge)(?:\/([^/]+))?\/?$/.exec(p);
+const m = /^\/(users|features|games|rooms|maintainers|audit|purge)(?:\/([^/]+))?\/?$/.exec(p);
 ```
 
 In `apps/admin/src/App.tsx`, replace the icon import:
@@ -3285,87 +3318,87 @@ function ActiveView({ view }: { view: AdminView }) {
 In `apps/admin/src/App.test.tsx`, replace the viewer assertions:
 
 ```tsx
-  it('a viewer sees only the sections their permissions allow', async () => {
-    primeSession(['overview.read', 'users.read', 'games.read', 'rooms.read']);
-    render(<App />);
-    expect(await screen.findByText('使用者')).toBeInTheDocument(); // nav item
-    expect(screen.getByText('對局')).toBeInTheDocument();
-    expect(screen.getByText('房間')).toBeInTheDocument();
-    expect(screen.queryByText('維護者')).not.toBeInTheDocument();
-    expect(screen.queryByText('稽核')).not.toBeInTheDocument();
-  });
+it('a viewer sees only the sections their permissions allow', async () => {
+  primeSession(['overview.read', 'users.read', 'games.read', 'rooms.read']);
+  render(<App />);
+  expect(await screen.findByText('使用者')).toBeInTheDocument(); // nav item
+  expect(screen.getByText('對局')).toBeInTheDocument();
+  expect(screen.getByText('房間')).toBeInTheDocument();
+  expect(screen.queryByText('維護者')).not.toBeInTheDocument();
+  expect(screen.queryByText('稽核')).not.toBeInTheDocument();
+});
 ```
 
 with:
 
 ```tsx
-  it('a viewer sees only the sections their permissions allow', async () => {
-    primeSession(['overview.read', 'users.read', 'games.read', 'rooms.read']);
-    render(<App />);
-    expect(await screen.findByText('使用者')).toBeInTheDocument(); // nav item
-    expect(screen.getByText('對局')).toBeInTheDocument();
-    expect(screen.getByText('房間')).toBeInTheDocument();
-    expect(screen.queryByText('維護者')).not.toBeInTheDocument();
-    expect(screen.queryByText('稽核')).not.toBeInTheDocument();
-    expect(screen.queryByText('清理')).not.toBeInTheDocument();
-  });
+it('a viewer sees only the sections their permissions allow', async () => {
+  primeSession(['overview.read', 'users.read', 'games.read', 'rooms.read']);
+  render(<App />);
+  expect(await screen.findByText('使用者')).toBeInTheDocument(); // nav item
+  expect(screen.getByText('對局')).toBeInTheDocument();
+  expect(screen.getByText('房間')).toBeInTheDocument();
+  expect(screen.queryByText('維護者')).not.toBeInTheDocument();
+  expect(screen.queryByText('稽核')).not.toBeInTheDocument();
+  expect(screen.queryByText('清理')).not.toBeInTheDocument();
+});
 ```
 
 and replace the owner assertions:
 
 ```tsx
-  it('an owner sees every section', async () => {
-    primeSession(
-      [
-        'overview.read',
-        'users.read',
-        'users.ban',
-        'games.read',
-        'games.readLog',
-        'games.terminate',
-        'rooms.read',
-        'rooms.close',
-        'maintainers.read',
-        'maintainers.write',
-        'audit.read',
-      ],
-      'owner',
-    );
-    render(<App />);
-    expect(await screen.findByText('維護者')).toBeInTheDocument();
-    expect(screen.getByText('稽核')).toBeInTheDocument();
-  });
+it('an owner sees every section', async () => {
+  primeSession(
+    [
+      'overview.read',
+      'users.read',
+      'users.ban',
+      'games.read',
+      'games.readLog',
+      'games.terminate',
+      'rooms.read',
+      'rooms.close',
+      'maintainers.read',
+      'maintainers.write',
+      'audit.read',
+    ],
+    'owner',
+  );
+  render(<App />);
+  expect(await screen.findByText('維護者')).toBeInTheDocument();
+  expect(screen.getByText('稽核')).toBeInTheDocument();
+});
 ```
 
 with:
 
 ```tsx
-  it('an owner sees every section', async () => {
-    primeSession(
-      [
-        'overview.read',
-        'users.read',
-        'users.ban',
-        'games.read',
-        'games.readLog',
-        'games.terminate',
-        'games.delete',
-        'rooms.read',
-        'rooms.close',
-        'rooms.delete',
-        'maintainers.read',
-        'maintainers.write',
-        'audit.read',
-        'purge.read',
-        'purge.run',
-      ],
-      'owner',
-    );
-    render(<App />);
-    expect(await screen.findByText('維護者')).toBeInTheDocument();
-    expect(screen.getByText('稽核')).toBeInTheDocument();
-    expect(screen.getByText('清理')).toBeInTheDocument();
-  });
+it('an owner sees every section', async () => {
+  primeSession(
+    [
+      'overview.read',
+      'users.read',
+      'users.ban',
+      'games.read',
+      'games.readLog',
+      'games.terminate',
+      'games.delete',
+      'rooms.read',
+      'rooms.close',
+      'rooms.delete',
+      'maintainers.read',
+      'maintainers.write',
+      'audit.read',
+      'purge.read',
+      'purge.run',
+    ],
+    'owner',
+  );
+  render(<App />);
+  expect(await screen.findByText('維護者')).toBeInTheDocument();
+  expect(screen.getByText('稽核')).toBeInTheDocument();
+  expect(screen.getByText('清理')).toBeInTheDocument();
+});
 ```
 
 - [ ] **Step 6: Run all the new/modified tests to verify they pass**

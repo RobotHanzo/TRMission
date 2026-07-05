@@ -30,11 +30,13 @@
 ### Task 1: Shared render tokens in `@trm/map-data`
 
 **Files:**
+
 - Create: `packages/map-data/src/render-tokens.ts`
 - Modify: `packages/map-data/src/index.ts` (add one export line)
 - Test: `packages/map-data/test/render-tokens.spec.ts`
 
 **Interfaces:**
+
 - Consumes: nothing (pure data module).
 - Produces (later tasks import these from `@trm/map-data`):
   - `MAP_PALETTE_LIGHT`, `MAP_PALETTE_DARK`: `MapPalette` — `{ sea, seaLine, land, coast, relief, surface, ink, blue: string }`
@@ -312,6 +314,7 @@ Run: `yarn workspace @trm/map-data typecheck` and `yarn workspace @trm/map-data 
 git add packages/map-data/src/render-tokens.ts packages/map-data/src/index.ts packages/map-data/test/render-tokens.spec.ts
 git commit -m "feat(map-data): shared cartography render tokens"
 ```
+
 (with the trailer from Global Constraints.)
 
 ---
@@ -319,10 +322,12 @@ git commit -m "feat(map-data): shared cartography render tokens"
 ### Task 2: Web theme sources hexes from shared tokens + tokens.css parity test
 
 **Files:**
+
 - Modify: `apps/web/src/theme/colors.ts`
 - Test: `apps/web/src/theme/tokens-parity.test.ts` (create)
 
 **Interfaces:**
+
 - Consumes: `ROUTE_COLOR_HEX`, `LIVERY_COLORS`, `MAP_PALETTE_LIGHT`, `MAP_PALETTE_DARK` from `@trm/map-data` (Task 1).
 - Produces: `theme/colors.ts` keeps its existing exports (`CARD_COLOR_TOKENS`, `GRAY_TOKEN`, `LIVERY_COLORS`, `LOCOMOTIVE_GRADIENT`, `SEAT_COLORS`) **plus a new `seatColor(seat: number): string`** helper (moved here from `Board.tsx`'s local one; Tasks 3–4 use it).
 
@@ -484,10 +489,12 @@ git commit -m "refactor(web): source card colours from shared render tokens + to
 ### Task 3: `MapScene` — the single map scene component
 
 **Files:**
+
 - Create: `apps/web/src/components/MapScene.tsx`
 - Test: `apps/web/src/components/MapScene.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `mapCssVars`, `RouteGeometry`, `MapGeography` from `@trm/map-data`; `Geography`, `CustomGeography` from `./Geography`; `RouteShape`, `FerryLocoGradientDef` from `./RouteShape`; `CARD_COLOR_TOKENS`, `GRAY_TOKEN`, `seatColor` from `../theme/colors` (Task 2); `View` type from `../game/geography`.
 - Produces (Tasks 4–6 consume): `MapScene<C, R>` component, and the types `SceneCity`, `SceneRoute`, `RouteOwnership`, `MapSceneProps` — exact shapes in the code below. Prop semantics later tasks rely on:
   - `geography`: `undefined` → hand-authored Taiwan layer; `null` → no geography; `MapGeography` → custom rings.
@@ -550,9 +557,7 @@ describe('MapScene', () => {
     expect(container.querySelector('[data-route-id="r1"]')!.classList.contains('claimable')).toBe(
       true,
     );
-    expect(container.querySelector('[data-route-id="r2"]')!.classList.contains('owned')).toBe(
-      true,
-    );
+    expect(container.querySelector('[data-route-id="r2"]')!.classList.contains('owned')).toBe(true);
     expect(container.querySelectorAll('rect.slot.ferry-loco').length).toBe(0);
   });
 
@@ -969,10 +974,12 @@ git commit -m "feat(web): MapScene — the single presentational map scene"
 ### Task 4: Board renders through MapScene
 
 **Files:**
+
 - Modify: `apps/web/src/components/Board.tsx`
 - Test: existing `apps/web/src/components/Board.test.tsx` (unchanged; must pass)
 
 **Interfaces:**
+
 - Consumes: `MapScene` (Task 3), `seatColor` from theme (Task 2), `ACTIVE_GEOGRAPHY` from `../game/catalog` (new import).
 - Produces: `Board`'s public props are **unchanged** (`GameStage`, tutorial, replay keep working untouched).
 
@@ -991,75 +998,74 @@ In `apps/web/src/components/Board.tsx`:
 3. Replace the `<svg className="board" …>…</svg>` element (everything from `<svg` to `</svg>` inside `<TransformComponent>`) with:
 
 ```tsx
-          <MapScene
-            cities={CITIES}
-            routes={ROUTES}
-            geometry={ROUTE_GEOMETRY}
-            hubs={HUB_CITIES}
-            geography={ACTIVE_GEOGRAPHY ?? undefined}
-            view={ACTIVE_BASE_VIEW}
-            owned={owned}
-            stations={stationCities}
-            glowingRoutes={startedGlowRoutes}
-            glowingStations={glowingStations}
-            highlightCities={highlightCities}
-            canAct={canAct}
-            colorBlind={colorBlind}
-            cityLabel={(c) => cityName(c.id, locale)}
-            cityTier={cityTier}
-            routeTitle={(r) => `${cityName(r.a, locale)}–${cityName(r.b, locale)} · ${r.length}`}
-            onRouteClick={onPickRoute}
-            onCityClick={onPickCity}
-            ariaLabel="Taiwan railway map"
-          >
-            {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path. */}
-            {sweeps.map((sw) => (
-              <g key={sw.id} className="sweep-layer" pointerEvents="none">
-                {sw.path.map((rid, i) => {
-                  const sg = ROUTE_GEOMETRY.get(rid);
-                  if (!sg) return null;
-                  return (
-                    <path
-                      key={i}
-                      className="sweep-seg"
-                      d={sg.path}
-                      pathLength={1}
-                      style={
-                        { '--seat': seatColor(sw.seat), '--delay': `${i * 0.32}s` } as CSSProperties
-                      }
-                    />
-                  );
-                })}
-              </g>
-            ))}
+<MapScene
+  cities={CITIES}
+  routes={ROUTES}
+  geometry={ROUTE_GEOMETRY}
+  hubs={HUB_CITIES}
+  geography={ACTIVE_GEOGRAPHY ?? undefined}
+  view={ACTIVE_BASE_VIEW}
+  owned={owned}
+  stations={stationCities}
+  glowingRoutes={startedGlowRoutes}
+  glowingStations={glowingStations}
+  highlightCities={highlightCities}
+  canAct={canAct}
+  colorBlind={colorBlind}
+  cityLabel={(c) => cityName(c.id, locale)}
+  cityTier={cityTier}
+  routeTitle={(r) => `${cityName(r.a, locale)}–${cityName(r.b, locale)} · ${r.length}`}
+  onRouteClick={onPickRoute}
+  onCityClick={onPickCity}
+  ariaLabel="Taiwan railway map"
+>
+  {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path. */}
+  {sweeps.map((sw) => (
+    <g key={sw.id} className="sweep-layer" pointerEvents="none">
+      {sw.path.map((rid, i) => {
+        const sg = ROUTE_GEOMETRY.get(rid);
+        if (!sg) return null;
+        return (
+          <path
+            key={i}
+            className="sweep-seg"
+            d={sg.path}
+            pathLength={1}
+            style={{ '--seat': seatColor(sw.seat), '--delay': `${i * 0.32}s` } as CSSProperties}
+          />
+        );
+      })}
+    </g>
+  ))}
 
-            {/* Longest-trail review: a persistent seat-colour sweep along the player's longest route. */}
-            {routeReveal && (
-              <g className="sweep-layer reveal-layer" pointerEvents="none">
-                {routeReveal.path.map((rid, i) => {
-                  const sg = ROUTE_GEOMETRY.get(rid);
-                  if (!sg) return null;
-                  return (
-                    <path
-                      key={rid}
-                      className="sweep-seg"
-                      d={sg.path}
-                      pathLength={1}
-                      style={
-                        {
-                          '--seat': seatColor(routeReveal.seat),
-                          '--delay': `${i * 0.12}s`,
-                        } as CSSProperties
-                      }
-                    />
-                  );
-                })}
-              </g>
-            )}
-          </MapScene>
+  {/* Longest-trail review: a persistent seat-colour sweep along the player's longest route. */}
+  {routeReveal && (
+    <g className="sweep-layer reveal-layer" pointerEvents="none">
+      {routeReveal.path.map((rid, i) => {
+        const sg = ROUTE_GEOMETRY.get(rid);
+        if (!sg) return null;
+        return (
+          <path
+            key={rid}
+            className="sweep-seg"
+            d={sg.path}
+            pathLength={1}
+            style={
+              {
+                '--seat': seatColor(routeReveal.seat),
+                '--delay': `${i * 0.12}s`,
+              } as CSSProperties
+            }
+          />
+        );
+      })}
+    </g>
+  )}
+</MapScene>
 ```
 
 Notes:
+
 - `ACTIVE_GEOGRAPHY` is `MapGeography | null` — pass `geography={ACTIVE_GEOGRAPHY ?? undefined}` so the Taiwan layer renders when it's null (MapScene's `null` means "no geography"). **Use `?? undefined`, not the raw value.**
 - `c.id` / `r.a` / `r.b` are branded ids; they're assignable to `string`, so `cityName(c.id, locale)` compiles without casts.
 - Everything else in the file (viewport div, TransformWrapper + all headless children, glow timers, `frameHome`, `CameraSync`, `RouteGlowGate`, `SpotlightFramer`, `RevealFramer`, `MapControls`) stays exactly as it is. The `viewBox` local const at the top of `Board()` is now unused — delete it.
@@ -1086,9 +1092,11 @@ git commit -m "refactor(web): Board renders through MapScene"
 ### Task 5: Login backdrop renders through MapScene
 
 **Files:**
+
 - Modify: `apps/web/src/components/MapBackdrop.tsx`
 
 **Interfaces:**
+
 - Consumes: `MapScene` (Task 3), live content singletons (`CITIES`, `ROUTES`, `ROUTE_GEOMETRY`, `HUB_CITIES`), `BASE_VIEW`.
 - Produces: `MapBackdrop` unchanged externally (no props).
 
@@ -1151,9 +1159,11 @@ git commit -m "refactor(web): login backdrop renders through MapScene"
 ### Task 6: Editor canvas renders through MapScene
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/editor/EditorCanvas.tsx`
 
 **Interfaces:**
+
 - Consumes: `MapScene` (Task 3). `CityDraft` (has `nameZh`) and `RouteDraft` satisfy `SceneCity`/`SceneRoute` structurally; the generic component types `cityLabel`/`cityClass` callbacks as `CityDraft`.
 - Produces: `EditorCanvas` props unchanged (`onBackgroundClick`, `onCityClick`, `onRouteClick`, `highlightCities`).
 
@@ -1219,7 +1229,13 @@ export function EditorCanvas({
 
   return (
     <div className="editor-canvas-inner" ref={zoomVarRef}>
-      <TransformWrapper minScale={0.5} maxScale={12} initialScale={1} centerOnInit wheel={{ step: 0.0022 }}>
+      <TransformWrapper
+        minScale={0.5}
+        maxScale={12}
+        initialScale={1}
+        centerOnInit
+        wheel={{ step: 0.0022 }}
+      >
         <ZoomVar targetRef={zoomVarRef} />
         <CanvasControls />
         {/* contentStyle overrides the library's default `width/height: fit-content` on the inner
@@ -1245,11 +1261,15 @@ export function EditorCanvas({
             cityLabel={(c) => c.nameZh}
             routeClass={(r) =>
               'editor-route' +
-              (selection?.kind === 'route' && selection.id === r.id ? ' editor-route--selected' : '')
+              (selection?.kind === 'route' && selection.id === r.id
+                ? ' editor-route--selected'
+                : '')
             }
             cityClass={(c) =>
               'editor-city' +
-              (selection?.kind === 'city' && selection.id === c.id ? ' editor-city--selected' : '') +
+              (selection?.kind === 'city' && selection.id === c.id
+                ? ' editor-city--selected'
+                : '') +
               (highlightCities?.has(c.id) ? ' editor-city--highlighted' : '')
             }
             onRouteClick={onRouteClick}
@@ -1262,7 +1282,7 @@ export function EditorCanvas({
 }
 ```
 
-Known-harmless DOM changes vs today (class *presence* is identical, order differs; CSS is order-independent): route/city groups gain `data-route-id`/`data-city-id`; the editor previously never passed `highlightCities` into a halo — it still doesn't (highlight stays a class via `cityClass`, exactly as before).
+Known-harmless DOM changes vs today (class _presence_ is identical, order differs; CSS is order-independent): route/city groups gain `data-route-id`/`data-city-id`; the editor previously never passed `highlightCities` into a halo — it still doesn't (highlight stays a class via `cityClass`, exactly as before).
 
 - [ ] **Step 2: Verify**
 
@@ -1281,10 +1301,12 @@ git commit -m "refactor(builder): editor canvas renders through MapScene"
 ### Task 7: game.css dimensions come from the shared tokens
 
 **Files:**
+
 - Modify: `apps/web/src/styles/game.css` (the Cartography + Rail network + Cities sections, ~lines 297–520)
 - Modify: `apps/web/src/features/tutorial/Specimens.tsx` (spread `mapCssVars()` on its two standalone SVGs)
 
 **Interfaces:**
+
 - Consumes: `mapCssVars()` from `@trm/map-data` (Task 1) — already pinned on every `MapScene` root since Task 3.
 - Produces: game.css map rules read `--m-*` vars; **no dimension literal remains** in the tokenized rules.
 
@@ -1296,6 +1318,7 @@ Add to imports: `import { mapCssVars } from '@trm/map-data';`
 
 In `RouteSpecimen`, change the svg's style prop from
 `style={{ ['--inv-scale' as string]: String(SPEC_INV) }}` to:
+
 ```tsx
       style={{ ...mapCssVars(), ['--inv-scale' as string]: String(SPEC_INV) }}
 ```
@@ -1306,28 +1329,28 @@ In `ClaimTrack`, make the same change to its svg's style prop.
 
 In `apps/web/src/styles/game.css`, apply these exact replacements (each old block is current file content, verbatim):
 
-| Rule | Property changes |
-| --- | --- |
-| `.graticule line` | `stroke-width: calc(0.32px * var(--inv-scale));` → `stroke-width: calc(var(--m-grat-w) * 1px * var(--inv-scale));`<br>`stroke-dasharray: calc(0.9px * var(--inv-scale)) calc(1.7px * var(--inv-scale));` → `stroke-dasharray: calc(var(--m-grat-dash-a) * 1px * var(--inv-scale)) calc(var(--m-grat-dash-b) * 1px * var(--inv-scale));` |
-| `.land-surf` | `stroke-width: 2.4;` → `stroke-width: calc(var(--m-land-surf-w) * 1px);` · `opacity: 0.6;` → `opacity: var(--m-land-surf-o);` |
-| `.land` | `stroke-width: 0.45;` → `stroke-width: calc(var(--m-land-stroke-w) * 1px);` |
-| `.relief` | `opacity: 0.55;` → `opacity: var(--m-relief-o);` |
-| `.relief-ridge` | `stroke-width: 0.3;` → `stroke-width: calc(var(--m-relief-ridge-w) * 1px);` · `stroke-dasharray: 0.5 0.9;` → `stroke-dasharray: var(--m-relief-ridge-dash);` · `opacity: 0.55;` → `opacity: var(--m-relief-o);` |
-| `.islands circle` | `stroke-width: 0.4;` → `stroke-width: calc(var(--m-geo-island-w) * 1px);` |
-| `.bed` | `stroke-width: calc(2.8px * var(--inv-scale));` → `stroke-width: calc(var(--m-bed-w) * 1px * var(--inv-scale));` · `opacity: 0.95;` → `opacity: var(--m-bed-o);` |
-| `.route.owned .bed` | `stroke-width: calc(3.1px * var(--inv-scale));` → `stroke-width: calc(var(--m-bed-owned-w) * 1px * var(--inv-scale));` |
-| `.slot` | `y: calc(-0.72px * var(--inv-scale));` → `y: calc(var(--m-slot-h) / -2 * 1px * var(--inv-scale));` · `height: calc(1.44px * var(--inv-scale));` → `height: calc(var(--m-slot-h) * 1px * var(--inv-scale));` · `rx: calc(0.42px * var(--inv-scale));` → `rx: calc(var(--m-slot-rx) * 1px * var(--inv-scale));` · `stroke: #2a2520;` → `stroke: var(--m-car-edge);` · `stroke-width: calc(0.3px * var(--inv-scale));` → `stroke-width: calc(var(--m-slot-stroke-w) * 1px * var(--inv-scale));` |
-| `.route.owned .slot` | `stroke-width: calc(0.42px * var(--inv-scale));` → `stroke-width: calc(var(--m-slot-owned-stroke-w) * 1px * var(--inv-scale));` |
-| `.tunnel-bg` | `stroke: #b0b0b0;` → `stroke: var(--m-tunnel-bg-ink);` · `stroke-opacity: 0.18;` → `stroke-opacity: var(--m-tunnel-bg-o);` · `stroke-width: calc(6px * var(--inv-scale));` → `stroke-width: calc(var(--m-tunnel-bg-w) * 1px * var(--inv-scale));` |
-| `.tunnel-tie` | `x: calc(-4px * var(--inv-scale));` → `x: calc(var(--m-tie-w) / -2 * 1px * var(--inv-scale));` · `width: calc(8px * var(--inv-scale));` → `width: calc(var(--m-tie-w) * 1px * var(--inv-scale));` · `y: calc(-0.14px * var(--inv-scale));` → `y: calc(var(--m-tie-h) / -2 * 1px * var(--inv-scale));` · `height: calc(0.28px * var(--inv-scale));` → `height: calc(var(--m-tie-h) * 1px * var(--inv-scale));` · `fill: #3d352b;` → `fill: var(--m-tie-ink);` · `fill-opacity: 0.9;` → `fill-opacity: var(--m-tie-o);` (keep the inline comments on their lines) |
-| `.ferry-line` | `stroke: #9aa0a6;` → `stroke: var(--m-ferry-line-ink);` · `stroke-width: calc(0.5px * var(--inv-scale));` → `stroke-width: calc(var(--m-ferry-line-w) * 1px * var(--inv-scale));` · `stroke-dasharray: 0.1 2.55;` → `stroke-dasharray: var(--m-ferry-dash);` |
-| `.ferry-pip` | `stroke: #2a2520;` → `stroke: var(--m-car-edge);` · `stroke-width: calc(0.25px * var(--inv-scale));` → `stroke-width: calc(var(--m-ferry-pip-stroke-w) * 1px * var(--inv-scale));` · `r: calc(0.7px * var(--inv-scale));` → `r: calc(var(--m-ferry-pip-r) * 1px * var(--inv-scale));` |
-| `.slot.ferry-loco` | `stroke: #fff;` → `stroke: var(--m-ferry-loco-edge);` · `stroke-width: calc(0.5px * var(--inv-scale));` → `stroke-width: calc(var(--m-ferry-loco-stroke-w) * 1px * var(--inv-scale));` |
-| `.hit` | `stroke-width: calc(4.2px * var(--inv-scale));` → `stroke-width: calc(var(--m-hit-w) * 1px * var(--inv-scale));` |
-| `.glyph-badge circle` | `stroke-width: calc(0.22px * var(--inv-scale));` → `stroke-width: calc(var(--m-glyph-stroke-w) * 1px * var(--inv-scale));` · `r: calc(1.6px * var(--inv-scale));` → `r: calc(var(--m-glyph-r) * 1px * var(--inv-scale));` |
-| `.city-dot` | `stroke-width: calc(0.4px * var(--marker-scale));` → `stroke-width: calc(var(--m-city-stroke-w) * 1px * var(--marker-scale));` · `r: calc(1.15px * var(--marker-scale));` → `r: calc(var(--m-city-r) * 1px * var(--marker-scale));` |
-| `.city.island .city-dot` | `r: calc(1.4px * var(--marker-scale));` → `r: calc(var(--m-island-r) * 1px * var(--marker-scale));` |
-| `.city-hub` | `x: calc(-1.25px * var(--marker-scale));` → `x: calc(var(--m-hub-w) / -2 * 1px * var(--marker-scale));` · `y: calc(-0.8px * var(--marker-scale));` → `y: calc(var(--m-hub-h) / -2 * 1px * var(--marker-scale));` · `width: calc(2.5px * var(--marker-scale));` → `width: calc(var(--m-hub-w) * 1px * var(--marker-scale));` · `height: calc(1.6px * var(--marker-scale));` → `height: calc(var(--m-hub-h) * 1px * var(--marker-scale));` · `rx: calc(0.8px * var(--marker-scale));` → `rx: calc(var(--m-hub-rx) * 1px * var(--marker-scale));` · `stroke-width: calc(0.4px * var(--marker-scale));` → `stroke-width: calc(var(--m-city-stroke-w) * 1px * var(--marker-scale));` |
+| Rule                     | Property changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.graticule line`        | `stroke-width: calc(0.32px * var(--inv-scale));` → `stroke-width: calc(var(--m-grat-w) * 1px * var(--inv-scale));`<br>`stroke-dasharray: calc(0.9px * var(--inv-scale)) calc(1.7px * var(--inv-scale));` → `stroke-dasharray: calc(var(--m-grat-dash-a) * 1px * var(--inv-scale)) calc(var(--m-grat-dash-b) * 1px * var(--inv-scale));`                                                                                                                                                                                                                                                                                                                                         |
+| `.land-surf`             | `stroke-width: 2.4;` → `stroke-width: calc(var(--m-land-surf-w) * 1px);` · `opacity: 0.6;` → `opacity: var(--m-land-surf-o);`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `.land`                  | `stroke-width: 0.45;` → `stroke-width: calc(var(--m-land-stroke-w) * 1px);`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `.relief`                | `opacity: 0.55;` → `opacity: var(--m-relief-o);`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `.relief-ridge`          | `stroke-width: 0.3;` → `stroke-width: calc(var(--m-relief-ridge-w) * 1px);` · `stroke-dasharray: 0.5 0.9;` → `stroke-dasharray: var(--m-relief-ridge-dash);` · `opacity: 0.55;` → `opacity: var(--m-relief-o);`                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `.islands circle`        | `stroke-width: 0.4;` → `stroke-width: calc(var(--m-geo-island-w) * 1px);`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `.bed`                   | `stroke-width: calc(2.8px * var(--inv-scale));` → `stroke-width: calc(var(--m-bed-w) * 1px * var(--inv-scale));` · `opacity: 0.95;` → `opacity: var(--m-bed-o);`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `.route.owned .bed`      | `stroke-width: calc(3.1px * var(--inv-scale));` → `stroke-width: calc(var(--m-bed-owned-w) * 1px * var(--inv-scale));`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `.slot`                  | `y: calc(-0.72px * var(--inv-scale));` → `y: calc(var(--m-slot-h) / -2 * 1px * var(--inv-scale));` · `height: calc(1.44px * var(--inv-scale));` → `height: calc(var(--m-slot-h) * 1px * var(--inv-scale));` · `rx: calc(0.42px * var(--inv-scale));` → `rx: calc(var(--m-slot-rx) * 1px * var(--inv-scale));` · `stroke: #2a2520;` → `stroke: var(--m-car-edge);` · `stroke-width: calc(0.3px * var(--inv-scale));` → `stroke-width: calc(var(--m-slot-stroke-w) * 1px * var(--inv-scale));`                                                                                                                                                                                    |
+| `.route.owned .slot`     | `stroke-width: calc(0.42px * var(--inv-scale));` → `stroke-width: calc(var(--m-slot-owned-stroke-w) * 1px * var(--inv-scale));`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `.tunnel-bg`             | `stroke: #b0b0b0;` → `stroke: var(--m-tunnel-bg-ink);` · `stroke-opacity: 0.18;` → `stroke-opacity: var(--m-tunnel-bg-o);` · `stroke-width: calc(6px * var(--inv-scale));` → `stroke-width: calc(var(--m-tunnel-bg-w) * 1px * var(--inv-scale));`                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `.tunnel-tie`            | `x: calc(-4px * var(--inv-scale));` → `x: calc(var(--m-tie-w) / -2 * 1px * var(--inv-scale));` · `width: calc(8px * var(--inv-scale));` → `width: calc(var(--m-tie-w) * 1px * var(--inv-scale));` · `y: calc(-0.14px * var(--inv-scale));` → `y: calc(var(--m-tie-h) / -2 * 1px * var(--inv-scale));` · `height: calc(0.28px * var(--inv-scale));` → `height: calc(var(--m-tie-h) * 1px * var(--inv-scale));` · `fill: #3d352b;` → `fill: var(--m-tie-ink);` · `fill-opacity: 0.9;` → `fill-opacity: var(--m-tie-o);` (keep the inline comments on their lines)                                                                                                                 |
+| `.ferry-line`            | `stroke: #9aa0a6;` → `stroke: var(--m-ferry-line-ink);` · `stroke-width: calc(0.5px * var(--inv-scale));` → `stroke-width: calc(var(--m-ferry-line-w) * 1px * var(--inv-scale));` · `stroke-dasharray: 0.1 2.55;` → `stroke-dasharray: var(--m-ferry-dash);`                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `.ferry-pip`             | `stroke: #2a2520;` → `stroke: var(--m-car-edge);` · `stroke-width: calc(0.25px * var(--inv-scale));` → `stroke-width: calc(var(--m-ferry-pip-stroke-w) * 1px * var(--inv-scale));` · `r: calc(0.7px * var(--inv-scale));` → `r: calc(var(--m-ferry-pip-r) * 1px * var(--inv-scale));`                                                                                                                                                                                                                                                                                                                                                                                           |
+| `.slot.ferry-loco`       | `stroke: #fff;` → `stroke: var(--m-ferry-loco-edge);` · `stroke-width: calc(0.5px * var(--inv-scale));` → `stroke-width: calc(var(--m-ferry-loco-stroke-w) * 1px * var(--inv-scale));`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `.hit`                   | `stroke-width: calc(4.2px * var(--inv-scale));` → `stroke-width: calc(var(--m-hit-w) * 1px * var(--inv-scale));`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `.glyph-badge circle`    | `stroke-width: calc(0.22px * var(--inv-scale));` → `stroke-width: calc(var(--m-glyph-stroke-w) * 1px * var(--inv-scale));` · `r: calc(1.6px * var(--inv-scale));` → `r: calc(var(--m-glyph-r) * 1px * var(--inv-scale));`                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `.city-dot`              | `stroke-width: calc(0.4px * var(--marker-scale));` → `stroke-width: calc(var(--m-city-stroke-w) * 1px * var(--marker-scale));` · `r: calc(1.15px * var(--marker-scale));` → `r: calc(var(--m-city-r) * 1px * var(--marker-scale));`                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `.city.island .city-dot` | `r: calc(1.4px * var(--marker-scale));` → `r: calc(var(--m-island-r) * 1px * var(--marker-scale));`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `.city-hub`              | `x: calc(-1.25px * var(--marker-scale));` → `x: calc(var(--m-hub-w) / -2 * 1px * var(--marker-scale));` · `y: calc(-0.8px * var(--marker-scale));` → `y: calc(var(--m-hub-h) / -2 * 1px * var(--marker-scale));` · `width: calc(2.5px * var(--marker-scale));` → `width: calc(var(--m-hub-w) * 1px * var(--marker-scale));` · `height: calc(1.6px * var(--marker-scale));` → `height: calc(var(--m-hub-h) * 1px * var(--marker-scale));` · `rx: calc(0.8px * var(--marker-scale));` → `rx: calc(var(--m-hub-rx) * 1px * var(--marker-scale));` · `stroke-width: calc(0.4px * var(--marker-scale));` → `stroke-width: calc(var(--m-city-stroke-w) * 1px * var(--marker-scale));` |
 
 Deliberately NOT converted (web-only, no OG counterpart, out of scope per spec): `.compass*`, hover states (`.route.claimable:hover …`), `.station`/`.station-hub`/`.station-ring`, `.city-label`, sweep/glow animation rules, and the dark-theme `.bed`/city fills.
 
@@ -1347,10 +1370,12 @@ git commit -m "refactor(web): map dimensions in game.css resolve from the shared
 ### Task 8: OG map card draws from the shared tokens
 
 **Files:**
+
 - Modify: `apps/server/src/og/map-svg.ts`
 - Test: existing `apps/server/test/og.e2e.spec.ts` (unchanged; must pass)
 
 **Interfaces:**
+
 - Consumes: `MAP_PALETTE_LIGHT`, `MAP_INKS`, `MAP_DIMS`, `ROUTE_COLOR_HEX`, `LIVERY_COLORS` from `@trm/map-data` (Task 1).
 - Produces: `mapPanelSvg` / `ferryLocoGradientDef` signatures unchanged (`card-svg.ts` untouched).
 
@@ -1391,7 +1416,7 @@ const OG_TIE_SCALE = 0.45;
 const OG_TUNNEL_BG_SCALE = 0.4;
 ```
 
-2. Replace every use of the old constants (updated header comment: the visual constants now *are* the board's, not a mirror of game.css):
+2. Replace every use of the old constants (updated header comment: the visual constants now _are_ the board's, not a mirror of game.css):
    - `SEA` → `P.sea`, `SEA_LINE` → `P.seaLine`, `LAND` → `P.land`, `COAST` → `P.coast`, `SURFACE` → `P.surface`, `INK` → `P.ink`, `BLUE` → `P.blue`, `RELIEF` → `P.relief`.
    - `ROUTE_COLORS[r.color] ?? ROUTE_COLORS.GRAY!` → `ROUTE_COLOR_HEX[r.color as keyof typeof ROUTE_COLOR_HEX] ?? ROUTE_COLOR_HEX.GRAY`.
    - `ferryLocoGradientDef()` keeps its body but maps over the imported `LIVERY_COLORS`.
@@ -1430,6 +1455,7 @@ git commit -m "refactor(og): map card draws from the shared render tokens"
 ### Task 9: Full validation, visual verification, docs
 
 **Files:**
+
 - Modify: `apps/web/CLAUDE.md` (rendering bullet), `packages/map-data/CLAUDE.md` (structure bullet)
 
 - [ ] **Step 1: Full monorepo gates**
@@ -1439,6 +1465,7 @@ Run from root: `yarn typecheck`, `yarn lint`, `yarn test`, `yarn format` — all
 - [ ] **Step 2: Visual verification (the real test for Task 7's CSS switch)**
 
 Use the `verify` skill / run skill: `docker compose up -d mongo`, `yarn workspace @trm/server dev`, `yarn workspace @trm/web dev`, then with browser tooling check against pre-change appearance:
+
 1. Login screen (`/login`): the blurred backdrop shows the island + coloured network at the usual weight (Task 7's vars resolving on the MapScene root — if the network renders as hairlines or fat ribbons, a var didn't resolve).
 2. In-game board (`TRM_DEV_GAME=1` demo or a quick bot game): roadbeds, cars, tunnel ties, ferry pips/rainbow locos, city dots/hubs/labels, claim hover, colour-blind badges (toggle in settings), dark theme toggle.
 3. Tutorial (encyclopedia specimens): route/ferry/tunnel/double specimens at their usual proportions.

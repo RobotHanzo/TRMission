@@ -29,7 +29,7 @@
 - **PB_TO_CARD** (1 connections) — `apps/web/src/game/cards.ts`
 - **snap()** (1 connections) — `apps/web/src/game/tickets.test.ts`
 - **EMPTY** (1 connections) — `apps/web/src/hooks/useAnimationDriver.ts`
-- *... and 1 more nodes in this community*
+- _... and 1 more nodes in this community_
 
 ## Relationships
 
@@ -68,4 +68,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

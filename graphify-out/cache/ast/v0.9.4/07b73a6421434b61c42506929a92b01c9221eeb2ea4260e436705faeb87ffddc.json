@@ -1,1 +1,95 @@
-{"nodes": [{"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_md", "label": "task-m0-brief.md", "file_type": "document", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change", "label": "Task M0 \u2014 Off-mode golden fixture (capture BEFORE any engine change)", "file_type": "document", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_goal", "label": "Goal", "file_type": "document", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_requirements", "label": "Requirements", "file_type": "document", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_verification", "label": "Verification", "file_type": "document", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L38"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_commit", "label": "Commit", "file_type": "document", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L45"}], "edges": [{"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_md", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_requirements", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L38", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_commit", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m0-brief.md", "source_location": "L45", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_md",
+      "label": "task-m0-brief.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change",
+      "label": "Task M0 \u2014 Off-mode golden fixture (capture BEFORE any engine change)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_requirements",
+      "label": "Requirements",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_verification",
+      "label": "Verification",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L38"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_commit",
+      "label": "Commit",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L45"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_md",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_requirements",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_task_m0_off_mode_golden_fixture_capture_before_any_engine_change",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m0_brief_commit",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m0-brief.md",
+      "source_location": "L45",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

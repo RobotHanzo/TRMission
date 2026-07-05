@@ -1,1 +1,41 @@
-{"nodes": [{"id": "_claude_skills_graphify_references_hooks_post_commit_hook", "label": "graphify hook install/uninstall/status", "file_type": "concept", "source_file": ".claude/skills/graphify/references/hooks.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Auto-rebuilds the graph after every git commit by detecting changed code files via git diff HEAD~1 and re-running AST extraction; doc/image changes are ignored by the hook and need a manual --update."}, {"id": "_claude_skills_graphify_references_hooks_claude_md_integration", "label": "graphify claude install/uninstall", "file_type": "concept", "source_file": ".claude/skills/graphify/references/hooks.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Writes a ## graphify section into the project's local CLAUDE.md instructing Claude to check the graph before answering codebase questions and rebuild it after code changes, so graphify is always-on without a manual /graphify invocation."}], "edges": [{"source": "_claude_skills_graphify_references_hooks_post_commit_hook", "target": "_claude_skills_graphify_references_add_watch_watch_flag", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": ".claude/skills/graphify/references/hooks.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_claude_skills_graphify_references_hooks_post_commit_hook",
+      "label": "graphify hook install/uninstall/status",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/hooks.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Auto-rebuilds the graph after every git commit by detecting changed code files via git diff HEAD~1 and re-running AST extraction; doc/image changes are ignored by the hook and need a manual --update."
+    },
+    {
+      "id": "_claude_skills_graphify_references_hooks_claude_md_integration",
+      "label": "graphify claude install/uninstall",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/hooks.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Writes a ## graphify section into the project's local CLAUDE.md instructing Claude to check the graph before answering codebase questions and rebuild it after code changes, so graphify is always-on without a manual /graphify invocation."
+    }
+  ],
+  "edges": [
+    {
+      "source": "_claude_skills_graphify_references_hooks_post_commit_hook",
+      "target": "_claude_skills_graphify_references_add_watch_watch_flag",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": ".claude/skills/graphify/references/hooks.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

@@ -1,1 +1,30 @@
-{"nodes": [{"id": "_claude_skills_graphify_references_add_watch_add_command", "label": "/graphify add <url>", "file_type": "concept", "source_file": ".claude/skills/graphify/references/add-watch.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Fetches a URL (YouTube, Twitter/X, arXiv, PDF, image, or webpage) via graphify.ingest.ingest, saves it under ./raw, then auto-runs the --update pipeline to merge the new file into the existing graph."}, {"id": "_claude_skills_graphify_references_add_watch_watch_flag", "label": "--watch (folder watcher)", "file_type": "concept", "source_file": ".claude/skills/graphify/references/add-watch.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Background watcher (graphify.watch) that re-runs AST extraction+rebuild immediately for code-only changes, or writes a needs_update flag for docs/papers/images that require LLM semantic re-extraction; debounced so a wave of parallel agent writes doesn't trigger a rebuild per file."}], "edges": [], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_claude_skills_graphify_references_add_watch_add_command",
+      "label": "/graphify add <url>",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/add-watch.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Fetches a URL (YouTube, Twitter/X, arXiv, PDF, image, or webpage) via graphify.ingest.ingest, saves it under ./raw, then auto-runs the --update pipeline to merge the new file into the existing graph."
+    },
+    {
+      "id": "_claude_skills_graphify_references_add_watch_watch_flag",
+      "label": "--watch (folder watcher)",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/add-watch.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Background watcher (graphify.watch) that re-runs AST extraction+rebuild immediately for code-only changes, or writes a needs_update flag for docs/papers/images that require LLM semantic re-extraction; debounced so a wave of parallel agent writes doesn't trigger a rebuild per file."
+    }
+  ],
+  "edges": [],
+  "hyperedges": []
+}

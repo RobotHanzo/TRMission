@@ -18,7 +18,13 @@ beforeEach(() => play.mockClear());
 describe('TunnelModal cues', () => {
   it('plays tunnelSuccess when no surcharge is required', () => {
     render(
-      <TunnelModal revealed={revealed} extraRequired={0} options={[]} onCommit={() => {}} onAbort={() => {}} />,
+      <TunnelModal
+        revealed={revealed}
+        extraRequired={0}
+        options={[]}
+        onCommit={() => {}}
+        onAbort={() => {}}
+      />,
     );
     expect(play).toHaveBeenCalledWith('tunnelDraw');
     expect(play).toHaveBeenCalledWith('tunnelSuccess');
@@ -27,7 +33,13 @@ describe('TunnelModal cues', () => {
 
   it('plays tunnelPayment when a surcharge is required', () => {
     render(
-      <TunnelModal revealed={revealed} extraRequired={2} options={[]} onCommit={() => {}} onAbort={() => {}} />,
+      <TunnelModal
+        revealed={revealed}
+        extraRequired={2}
+        options={[]}
+        onCommit={() => {}}
+        onAbort={() => {}}
+      />,
     );
     expect(play).toHaveBeenCalledWith('tunnelPayment');
     expect(play).not.toHaveBeenCalledWith('tunnelSuccess');

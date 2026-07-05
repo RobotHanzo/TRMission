@@ -26,11 +26,13 @@
 ### Task 1: map-data geometry — `bow` field, `BOW_LIMIT`, explicit-bow pass, exported offsets
 
 **Files:**
+
 - Modify: `packages/map-data/src/types.ts` (RouteDef, ~line 14–25)
 - Modify: `packages/map-data/src/geometry.ts`
 - Create: `packages/map-data/test/geometry.spec.ts`
 
 **Interfaces:**
+
 - Consumes: existing `buildRouteGeometryFor(cities, routes)`, `GeometryRoute`, `RouteDef`.
 - Produces (later tasks rely on these exact names):
   - `RouteDef.bow?: number` and `GeometryRoute.bow?: number` (optional, board units, signed along the chord normal `n = (-dy, dx)/len` for the a→b chord).
@@ -141,13 +143,13 @@ export const BOW_LIMIT = 12;
 5. At the end of `computeRouteOffsetsFor`, after the `BOW_OVERRIDE` loop, add:
 
 ```ts
-  // An authored per-route bow — the custom-map equivalent of BOW_OVERRIDE — wins over both the
-  // auto-bow and the override table, keeping any double-gap intact so a pair bows together.
-  for (const r of routes) {
-    if (r.bow === undefined) continue;
-    const o = out.get(r.id);
-    if (o) out.set(r.id, { gap: o.gap, bow: r.bow });
-  }
+// An authored per-route bow — the custom-map equivalent of BOW_OVERRIDE — wins over both the
+// auto-bow and the override table, keeping any double-gap intact so a pair bows together.
+for (const r of routes) {
+  if (r.bow === undefined) continue;
+  const o = out.get(r.id);
+  if (o) out.set(r.id, { gap: o.gap, bow: r.bow });
+}
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -171,10 +173,12 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 2: map-data validation — `bowOutOfRange`
 
 **Files:**
+
 - Modify: `packages/map-data/src/validate.ts` (routes loop ~line 130–163; `formatIssue` switch ~line 32–96)
 - Modify: `packages/map-data/test/geometry.spec.ts` (append a describe block)
 
 **Interfaces:**
+
 - Consumes: `BOW_LIMIT` from `./geometry` (Task 1), `testContent()` from `test/fixtures.ts`.
 - Produces: `validateContent` emits issue code `bowOutOfRange` with params `{ routeId, bow, limit }`. Task 6 adds its `builder.validation.bowOutOfRange` i18n strings.
 
@@ -228,9 +232,9 @@ In `packages/map-data/src/validate.ts`:
 2. In the routes loop, after the `if (r.isTunnel) tunnelCount++;` line, add:
 
 ```ts
-    if (r.bow !== undefined && (!Number.isFinite(r.bow) || Math.abs(r.bow) > BOW_LIMIT)) {
-      push('bowOutOfRange', { routeId: rid, bow: r.bow, limit: BOW_LIMIT });
-    }
+if (r.bow !== undefined && (!Number.isFinite(r.bow) || Math.abs(r.bow) > BOW_LIMIT)) {
+  push('bowOutOfRange', { routeId: rid, bow: r.bow, limit: BOW_LIMIT });
+}
 ```
 
 3. In `formatIssue`, after the `ferryAndTunnel` case, add:
@@ -259,9 +263,11 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 3: map-data hash tripwire — absent `bow` never moves a hash
 
 **Files:**
+
 - Modify: `packages/map-data/test/hash-extension.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `TAIWAN_CONTENT`, `hashContent`, the pinned hash constant `PINNED_V3_HASH` already in the file.
 - Produces: nothing new — a regression gate.
 
@@ -270,15 +276,15 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 Append inside the existing `describe('hashContent extension', ...)`:
 
 ```ts
-  it('a route bow changes the hash; content without one hashes exactly as before', () => {
-    const withBow: GameContent = {
-      ...TAIWAN_CONTENT,
-      routes: TAIWAN_CONTENT.routes.map((r, i) => (i === 0 ? { ...r, bow: 3 } : r)),
-    };
-    expect(hashContent(withBow)).not.toBe(PINNED_V3_HASH);
-    // The type extension alone must not move any pre-existing hash.
-    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_V3_HASH);
-  });
+it('a route bow changes the hash; content without one hashes exactly as before', () => {
+  const withBow: GameContent = {
+    ...TAIWAN_CONTENT,
+    routes: TAIWAN_CONTENT.routes.map((r, i) => (i === 0 ? { ...r, bow: 3 } : r)),
+  };
+  expect(hashContent(withBow)).not.toBe(PINNED_V3_HASH);
+  // The type extension alone must not move any pre-existing hash.
+  expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_V3_HASH);
+});
 ```
 
 - [ ] **Step 2: Run to verify pass**
@@ -300,10 +306,12 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 4: server — zod bound + DTO seam + e2e
 
 **Files:**
+
 - Modify: `apps/server/src/maps/maps.schemas.ts` (`RouteDraftSchema` ~line 30–39; `draftFromDto` routes map ~line 138–147)
 - Modify: `apps/server/test/maps.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `BOW_LIMIT` from `@trm/map-data` (Task 1). The server's internal `MapDraft.routes` is `RouteDef[]` (`maps.types.ts`), so the type change from Task 1 already covers storage and `assembleContent` (which passes `draft.routes` through untouched to published content).
 - Produces: `PUT /maps/:id` accepts/round-trips `routes[].bow`; out-of-range bow → 400. `MapContentResponseSchema` reuses `RouteDraftSchema`, so `GET /maps/content/:hash` carries it with no further change.
 
@@ -323,7 +331,11 @@ describe('maps: route bow', () => {
     const id: string = created.body.id;
 
     const draft = { ...tinyDraft, routes: [{ ...tinyDraft.routes[0]!, bow: -3.5 }] };
-    await request(server()).put(`/api/v1/maps/${id}`).set(auth(a.token)).send({ draft }).expect(200);
+    await request(server())
+      .put(`/api/v1/maps/${id}`)
+      .set(auth(a.token))
+      .send({ draft })
+      .expect(200);
 
     const got = await request(server()).get(`/api/v1/maps/${id}`).set(auth(a.token)).expect(200);
     expect(got.body.draft.routes[0].bow).toBe(-3.5);
@@ -339,7 +351,11 @@ describe('maps: route bow', () => {
     const id: string = created.body.id;
 
     const draft = { ...tinyDraft, routes: [{ ...tinyDraft.routes[0]!, bow: 12.5 }] };
-    await request(server()).put(`/api/v1/maps/${id}`).set(auth(a.token)).send({ draft }).expect(400);
+    await request(server())
+      .put(`/api/v1/maps/${id}`)
+      .set(auth(a.token))
+      .send({ draft })
+      .expect(400);
   });
 });
 ```
@@ -387,6 +403,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 5: web data plumbing — draft type, adapters, store actions
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts` (`RouteDraft`, ~line 123–132)
 - Modify: `apps/web/src/features/builder/editor/contentAdapter.ts`
 - Modify: `apps/web/src/game/contentCache.ts` (`contentFromDto` routes map)
@@ -395,6 +412,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 - Modify: `apps/web/src/features/builder/editor/store.test.ts`
 
 **Interfaces:**
+
 - Consumes: `BOW_LIMIT` from `@trm/map-data` (Task 1).
 - Produces (Task 8 relies on these exact signatures):
   - `RouteDraft.bow?: number`
@@ -559,7 +577,7 @@ Expected: FAIL — `bow` type error / value undefined (the adapter drops it).
   clearAllRouteBows(): void;
 ```
 
-   - Add the implementations after `removeRoute`:
+- Add the implementations after `removeRoute`:
 
 ```ts
   setRouteBow: (id, bow) => {
@@ -600,7 +618,7 @@ Expected: FAIL — `bow` type error / value undefined (the adapter drops it).
   },
 ```
 
-   - Extend the store's rest import with the `RouteDraft` type if not already imported: `import { api, type CityDraft, type MapDetail, type MapDraft, type MapRulesDraft, type RouteDraft, type TicketDraft } from '../../../net/rest';` (already present — verify).
+- Extend the store's rest import with the `RouteDraft` type if not already imported: `import { api, type CityDraft, type MapDetail, type MapDraft, type MapRulesDraft, type RouteDraft, type TicketDraft } from '../../../net/rest';` (already present — verify).
 
 - [ ] **Step 5: Run to verify pass**
 
@@ -622,9 +640,11 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 6: web i18n — Curves-stage strings (zh-Hant + en)
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts` (zh builder block ~line 270–360 + zh `validation` block at ~line 363; en builder block ~line 660–760 + en `validation` block at ~line 760)
 
 **Interfaces:**
+
 - Produces the keys Task 8's component uses verbatim: `builder.stageCurves`, `builder.curvesHint`, `builder.curvesEmptyHint`, `builder.editCurve`, `builder.curveBow`, `builder.curveAuto`, `builder.curveReset`, `builder.curveResetAll`, `builder.validation.bowOutOfRange`.
 
 - [ ] **Step 1: Add the zh-Hant keys**
@@ -697,12 +717,14 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 7: web canvas — `curveMath` helper + EditorCanvas apex handle
 
 **Files:**
+
 - Create: `apps/web/src/features/builder/editor/curveMath.ts`
 - Create: `apps/web/src/features/builder/editor/curveMath.test.ts`
 - Modify: `apps/web/src/features/builder/editor/EditorCanvas.tsx`
 - Modify: `apps/web/src/styles/builder.css`
 
 **Interfaces:**
+
 - Consumes: `clientToBoardPoint(svg, clientX, clientY)` (`canvasProjection.ts`), `BOW_LIMIT` (Task 1), `RouteDraft.bow` (Task 5).
 - Produces (Task 8 relies on these):
   - `bowFromPoint(a: {x,y}, b: {x,y}, p: {x,y}): number` — signed bow implied by a board point (projection of `p − mid` onto the chord normal `(-dy, dx)/len`; same convention as the geometry module).
@@ -718,7 +740,7 @@ export interface CurveHandle {
 }
 ```
 
-  - While `curveHandle.bow !== null`, the canvas renders the selected route (and its double siblings) with that bow instead of the stored one; a `<circle class="curve-handle">` sits at the curve apex and is draggable.
+- While `curveHandle.bow !== null`, the canvas renders the selected route (and its double siblings) with that bow instead of the stored one; a `<circle class="curve-handle">` sits at the curve apex and is draggable.
 
 - [ ] **Step 1: Write the failing math tests**
 
@@ -799,63 +821,65 @@ import { bowFromPoint } from './curveMath';
 3. Destructure `curveHandle` in the component props, and replace the geometry memo with a preview-aware pair:
 
 ```ts
-  const routesForGeometry = useMemo(() => {
-    if (!curveHandle || curveHandle.bow === null) return draft.routes;
-    const target = draft.routes.find((r) => r.id === curveHandle.routeId);
-    if (!target) return draft.routes;
-    const inPair = (r: RouteDraft): boolean =>
-      r.id === target.id || (!!target.doubleGroup && r.doubleGroup === target.doubleGroup);
-    // Ephemeral drag/slide preview: the pair bows together, exactly as setRouteBow will commit.
-    return draft.routes.map((r) => (inPair(r) ? { ...r, bow: curveHandle.bow! } : r));
-  }, [draft.routes, curveHandle]);
+const routesForGeometry = useMemo(() => {
+  if (!curveHandle || curveHandle.bow === null) return draft.routes;
+  const target = draft.routes.find((r) => r.id === curveHandle.routeId);
+  if (!target) return draft.routes;
+  const inPair = (r: RouteDraft): boolean =>
+    r.id === target.id || (!!target.doubleGroup && r.doubleGroup === target.doubleGroup);
+  // Ephemeral drag/slide preview: the pair bows together, exactly as setRouteBow will commit.
+  return draft.routes.map((r) => (inPair(r) ? { ...r, bow: curveHandle.bow! } : r));
+}, [draft.routes, curveHandle]);
 
-  const { geometry, hubs } = useMemo(
-    () => buildRouteGeometryFor(draft.cities, routesForGeometry),
-    [draft.cities, routesForGeometry],
-  );
+const { geometry, hubs } = useMemo(
+  () => buildRouteGeometryFor(draft.cities, routesForGeometry),
+  [draft.cities, routesForGeometry],
+);
 ```
 
 4. Add the drag handler inside the component:
 
 ```ts
-  const onHandlePointerDown = (e: React.PointerEvent<SVGCircleElement>) => {
-    if (!curveHandle || !svgRef.current) return;
-    const route = draft.routes.find((r) => r.id === curveHandle.routeId);
-    const a = route && draft.cities.find((c) => c.id === route.a);
-    const b = route && draft.cities.find((c) => c.id === route.b);
-    if (!a || !b) return;
-    e.stopPropagation();
-    e.preventDefault();
-    const svg = svgRef.current;
-    let last = curveHandle.bow ?? bowFromPoint(a, b, geometry.get(route.id)?.mid ?? a);
-    const move = (ev: PointerEvent) => {
-      const p = clientToBoardPoint(svg, ev.clientX, ev.clientY);
-      if (!p) return;
-      last = Math.max(-BOW_LIMIT, Math.min(BOW_LIMIT, bowFromPoint(a, b, p)));
-      curveHandle.onDrag(last);
-    };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      curveHandle.onCommit(last);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+const onHandlePointerDown = (e: React.PointerEvent<SVGCircleElement>) => {
+  if (!curveHandle || !svgRef.current) return;
+  const route = draft.routes.find((r) => r.id === curveHandle.routeId);
+  const a = route && draft.cities.find((c) => c.id === route.a);
+  const b = route && draft.cities.find((c) => c.id === route.b);
+  if (!a || !b) return;
+  e.stopPropagation();
+  e.preventDefault();
+  const svg = svgRef.current;
+  let last = curveHandle.bow ?? bowFromPoint(a, b, geometry.get(route.id)?.mid ?? a);
+  const move = (ev: PointerEvent) => {
+    const p = clientToBoardPoint(svg, ev.clientX, ev.clientY);
+    if (!p) return;
+    last = Math.max(-BOW_LIMIT, Math.min(BOW_LIMIT, bowFromPoint(a, b, p)));
+    curveHandle.onDrag(last);
   };
+  const up = () => {
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    curveHandle.onCommit(last);
+  };
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', up);
+};
 ```
 
 5. Render the handle after the cities map (so it draws on top), just before `</svg>`:
 
 ```tsx
-            {curveHandle && geometry.get(curveHandle.routeId) && (
-              <circle
-                className="curve-handle"
-                cx={geometry.get(curveHandle.routeId)!.mid.x}
-                cy={geometry.get(curveHandle.routeId)!.mid.y}
-                onPointerDown={onHandlePointerDown}
-                onClick={(e) => e.stopPropagation()}
-              />
-            )}
+{
+  curveHandle && geometry.get(curveHandle.routeId) && (
+    <circle
+      className="curve-handle"
+      cx={geometry.get(curveHandle.routeId)!.mid.x}
+      cy={geometry.get(curveHandle.routeId)!.mid.y}
+      onPointerDown={onHandlePointerDown}
+      onClick={(e) => e.stopPropagation()}
+    />
+  );
+}
 ```
 
 6. Keep react-zoom-pan-pinch from panning while dragging: on the `<TransformWrapper ...>` add `panning={{ excluded: ['curve-handle'] }}`.
@@ -897,12 +921,14 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 8: web — CurvesStage component + stage registration
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/editor/store.ts` (`Stage` union + `STAGES`, lines 4–5)
 - Modify: `apps/web/src/features/builder/editor/EditorScreen.tsx` (label map, icon map, stage render)
 - Create: `apps/web/src/features/builder/editor/stages/CurvesStage.tsx`
 - Create: `apps/web/src/features/builder/editor/stages/CurvesStage.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `setRouteBow` / `clearAllRouteBows` (Task 5), `CurveHandle` prop on `EditorCanvas` (Task 7), `computeRouteOffsetsFor` + `BOW_LIMIT` (Task 1), i18n keys (Task 6).
 - Produces: the user-visible feature; stage id `'curves'` between `'routes'` and `'missions'`.
 
@@ -1078,7 +1104,12 @@ export function CurvesStage() {
       <aside className="card stack editor-inspector">
         {selectedRoute ? (
           <>
-            <h3>{t('builder.editCurve', { a: cityName(selectedRoute.a), b: cityName(selectedRoute.b) })}</h3>
+            <h3>
+              {t('builder.editCurve', {
+                a: cityName(selectedRoute.a),
+                b: cityName(selectedRoute.b),
+              })}
+            </h3>
             <label className="field">
               <span className="field-label">{t('builder.curveBow')}</span>
               <input
@@ -1143,8 +1174,25 @@ export function CurvesStage() {
 1. `apps/web/src/features/builder/editor/store.ts` lines 4–5:
 
 ```ts
-export type Stage = 'crop' | 'trim' | 'stops' | 'routes' | 'curves' | 'missions' | 'rules' | 'share';
-export const STAGES: readonly Stage[] = ['crop', 'trim', 'stops', 'routes', 'curves', 'missions', 'rules', 'share'];
+export type Stage =
+  | 'crop'
+  | 'trim'
+  | 'stops'
+  | 'routes'
+  | 'curves'
+  | 'missions'
+  | 'rules'
+  | 'share';
+export const STAGES: readonly Stage[] = [
+  'crop',
+  'trim',
+  'stops',
+  'routes',
+  'curves',
+  'missions',
+  'rules',
+  'share',
+];
 ```
 
 2. `apps/web/src/features/builder/editor/EditorScreen.tsx`:
@@ -1155,7 +1203,9 @@ export const STAGES: readonly Stage[] = ['crop', 'trim', 'stops', 'routes', 'cur
    - In the stage render block, after the routes line:
 
 ```tsx
-          {stage === 'curves' && hasGeography && <CurvesStage />}
+{
+  stage === 'curves' && hasGeography && <CurvesStage />;
+}
 ```
 
 - [ ] **Step 5: Run to verify pass**

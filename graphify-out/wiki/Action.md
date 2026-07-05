@@ -7,9 +7,11 @@
 ## Connections by Relation
 
 ### contains
+
 - actions.ts `EXTRACTED`
 
 ### imports
+
 - reduce.ts `EXTRACTED`
 - ReplayScreen.tsx `EXTRACTED`
 - selectors.ts `EXTRACTED`
@@ -32,9 +34,11 @@
 - evil-client.e2e.spec.ts `EXTRACTED`
 
 ### re_exports
+
 - index.ts `EXTRACTED`
 
 ### references
+
 - GameSession `EXTRACTED`
 - Lesson `EXTRACTED`
 - .restore() `EXTRACTED`
@@ -54,4 +58,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

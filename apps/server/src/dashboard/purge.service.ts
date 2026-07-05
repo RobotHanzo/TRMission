@@ -173,12 +173,7 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
       reason ?? 'deleted by a maintainer',
     );
     if (priorStatus === null) throw new NotFoundException('room not found');
-    await this.audit.log(
-      actor,
-      'room.delete',
-      { type: 'room', id: code },
-      { reason, priorStatus },
-    );
+    await this.audit.log(actor, 'room.delete', { type: 'room', id: code }, { reason, priorStatus });
     this.metrics.roomPurged('manual', priorStatus);
   }
 
@@ -205,7 +200,11 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
       .toArray();
     const lobbyCapped = staleLobby.length > SWEEP_CAP;
     for (const r of staleLobby.slice(0, SWEEP_CAP)) {
-      const prior = await this.purgeRoomCore(r._id, terminatedBy, 'auto-purge: inactive LOBBY room');
+      const prior = await this.purgeRoomCore(
+        r._id,
+        terminatedBy,
+        'auto-purge: inactive LOBBY room',
+      );
       if (prior) this.metrics.roomPurged(trigger, prior);
     }
 

@@ -29,7 +29,7 @@
 - **req()** (2 connections) — `apps/web/src/net/rest.ts`
 - **RoomSettings** (2 connections) — `apps/web/src/net/rest.ts`
 - **RoomVisibility** (2 connections) — `apps/web/src/net/rest.ts`
-- *... and 19 more nodes in this community*
+- _... and 19 more nodes in this community_
 
 ## Relationships
 
@@ -68,4 +68,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

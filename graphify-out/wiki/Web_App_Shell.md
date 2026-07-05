@@ -29,7 +29,7 @@
 - **MatchSummary** (3 connections) — `apps/web/src/net/rest.ts`
 - **UpgradePanel()** (3 connections) — `apps/web/src/screens/HomeScreen.tsx`
 - **styles/history.css** (2 connections) — `.superpowers/sdd/task-7-brief.md`
-- *... and 7 more nodes in this community*
+- _... and 7 more nodes in this community_
 
 ## Relationships
 
@@ -76,4 +76,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

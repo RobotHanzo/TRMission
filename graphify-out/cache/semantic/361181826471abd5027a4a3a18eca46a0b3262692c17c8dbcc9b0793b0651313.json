@@ -1,1 +1,114 @@
-{"nodes": [{"id": "packages_shared_claude_trm_shared", "label": "@trm/shared (cross-cutting foundation)", "file_type": "concept", "source_file": "packages/shared/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_shared_claude_rng", "label": "rng.ts: seeded integer counter PRNG (splitmix32)", "file_type": "concept", "source_file": "packages/shared/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_shared_claude_digest", "label": "digest.ts: canonical key-sorted SHA-256 digest", "file_type": "concept", "source_file": "packages/shared/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_shared_claude_enums_constants", "label": "enums.ts/constants.ts: CardColor/TrainColor, RuleParams", "file_type": "concept", "source_file": "packages/shared/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_shared_claude_errors", "label": "errors.ts: single RuleViolationCode error taxonomy", "file_type": "concept", "source_file": "packages/shared/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_shared_claude_ids", "label": "ids.ts: branded id types (PlayerId, RouteId, CityId, TicketId, SeatIndex)", "file_type": "concept", "source_file": "packages/shared/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_shared_claude_roomcode", "label": "roomCode.ts: room-code alphabet/generation", "file_type": "concept", "source_file": "packages/shared/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "packages_shared_claude_ids", "target": "packages_engine_claude_state_types", "relation": "shares_data_with", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "packages/shared/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "packages_shared_claude_enums_constants", "target": "apps_web_claude_theme_colors", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "packages/shared/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "packages_shared_claude_roomcode", "target": "apps_server_claude_lobby_module", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.75, "source_file": "packages/shared/CLAUDE.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "packages_shared_claude_trm_shared",
+      "label": "@trm/shared (cross-cutting foundation)",
+      "file_type": "concept",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_shared_claude_rng",
+      "label": "rng.ts: seeded integer counter PRNG (splitmix32)",
+      "file_type": "concept",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_shared_claude_digest",
+      "label": "digest.ts: canonical key-sorted SHA-256 digest",
+      "file_type": "concept",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_shared_claude_enums_constants",
+      "label": "enums.ts/constants.ts: CardColor/TrainColor, RuleParams",
+      "file_type": "concept",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_shared_claude_errors",
+      "label": "errors.ts: single RuleViolationCode error taxonomy",
+      "file_type": "concept",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_shared_claude_ids",
+      "label": "ids.ts: branded id types (PlayerId, RouteId, CityId, TicketId, SeatIndex)",
+      "file_type": "concept",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_shared_claude_roomcode",
+      "label": "roomCode.ts: room-code alphabet/generation",
+      "file_type": "concept",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "packages_shared_claude_ids",
+      "target": "packages_engine_claude_state_types",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "packages_shared_claude_enums_constants",
+      "target": "apps_web_claude_theme_colors",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "packages_shared_claude_roomcode",
+      "target": "apps_server_claude_lobby_module",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

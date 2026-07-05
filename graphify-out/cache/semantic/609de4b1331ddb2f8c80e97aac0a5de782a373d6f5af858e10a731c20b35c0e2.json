@@ -1,1 +1,41 @@
-{"nodes": [{"id": "_claude_skills_graphify_references_github_and_merge_clone_step", "label": "graphify clone (Step 0)", "file_type": "concept", "source_file": ".claude/skills/graphify/references/github-and-merge.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "_claude_skills_graphify_references_github_and_merge_merge_graphs", "label": "graphify merge-graphs", "file_type": "concept", "source_file": ".claude/skills/graphify/references/github-and-merge.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Merges multiple graph.json files (cross-repo clones or monorepo subfolders) into one graph; each node carries a repo attribute so results can be filtered by origin."}, {"id": "_claude_skills_graphify_references_github_and_merge_monorepo_flow", "label": "Monorepo Multi-Subfolder Flow", "file_type": "concept", "source_file": ".claude/skills/graphify/references/github-and-merge.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "The skill pipeline writes all output to graphify-out/ in the cwd, which would clobber shared output across subfolders, so each subfolder is extracted separately via the CLI (graphify-out/ lands inside the scanned path) and merged at the project root."}], "edges": [], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_claude_skills_graphify_references_github_and_merge_clone_step",
+      "label": "graphify clone (Step 0)",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/github-and-merge.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "_claude_skills_graphify_references_github_and_merge_merge_graphs",
+      "label": "graphify merge-graphs",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/github-and-merge.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Merges multiple graph.json files (cross-repo clones or monorepo subfolders) into one graph; each node carries a repo attribute so results can be filtered by origin."
+    },
+    {
+      "id": "_claude_skills_graphify_references_github_and_merge_monorepo_flow",
+      "label": "Monorepo Multi-Subfolder Flow",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/github-and-merge.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "The skill pipeline writes all output to graphify-out/ in the cwd, which would clobber shared output across subfolders, so each subfolder is extracted separately via the CLI (graphify-out/ lands inside the scanned path) and merged at the project root."
+    }
+  ],
+  "edges": [],
+  "hyperedges": []
+}

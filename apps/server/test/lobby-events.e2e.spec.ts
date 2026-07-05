@@ -10,10 +10,7 @@ const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 const srv = (app: TestApp) => app.app.getHttpServer();
 
 async function guest(app: TestApp, displayName: string): Promise<{ token: string; id: string }> {
-  const res = await request(srv(app))
-    .post('/api/v1/auth/guest')
-    .send({ displayName })
-    .expect(201);
+  const res = await request(srv(app)).post('/api/v1/auth/guest').send({ displayName }).expect(201);
   return { token: res.body.accessToken, id: res.body.user.id };
 }
 
@@ -29,7 +26,11 @@ async function readyRoom(
 ): Promise<{ code: string; host: { token: string; id: string } }> {
   const host = await guest(app, 'Host');
   const other = await guest(app, 'Guest');
-  const room = await request(srv(app)).post('/api/v1/rooms').set(auth(host.token)).send({}).expect(201);
+  const room = await request(srv(app))
+    .post('/api/v1/rooms')
+    .set(auth(host.token))
+    .send({})
+    .expect(201);
   const code: string = room.body.code;
   await request(srv(app)).post(`/api/v1/rooms/${code}/join`).set(auth(other.token)).expect(200);
   if (patch) {
@@ -56,7 +57,7 @@ function genesisSnapshot(app: TestApp, gameId: string) {
   return viewToSnapshot(match.session.project(null), match.session.stateVersion, null);
 }
 
-describe('lobby: random-events is gated by the host\'s randomEvents feature', () => {
+describe("lobby: random-events is gated by the host's randomEvents feature", () => {
   let t: TestApp;
   beforeAll(async () => {
     t = await createTestApp();
@@ -65,7 +66,11 @@ describe('lobby: random-events is gated by the host\'s randomEvents feature', ()
 
   it('rejects a settings PATCH that turns events on without the feature, but allows patching to off', async () => {
     const host = await guest(t, 'H');
-    const room = await request(srv(t)).post('/api/v1/rooms').set(auth(host.token)).send({}).expect(201);
+    const room = await request(srv(t))
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
 
     const denied = await request(srv(t))
@@ -103,7 +108,11 @@ describe('lobby: random-events is gated by the host\'s randomEvents feature', ()
   it('accepts an events PATCH once the host holds the feature, and echoes it back on the RoomView', async () => {
     const host = await guest(t, 'H2');
     await grant(t, host.id, ['randomEvents']);
-    const room = await request(srv(t)).post('/api/v1/rooms').set(auth(host.token)).send({}).expect(201);
+    const room = await request(srv(t))
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     const patched = await request(srv(t))
       .patch(`/api/v1/rooms/${code}/settings`)
@@ -117,7 +126,11 @@ describe('lobby: random-events is gated by the host\'s randomEvents feature', ()
     const host = await guest(t, 'H3');
     await grant(t, host.id, ['randomEvents']);
     const other = await guest(t, 'G3');
-    const room = await request(srv(t)).post('/api/v1/rooms').set(auth(host.token)).send({}).expect(201);
+    const room = await request(srv(t))
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     await request(srv(t)).post(`/api/v1/rooms/${code}/join`).set(auth(other.token)).expect(200);
     await request(srv(t))
@@ -147,7 +160,11 @@ describe('lobby: random-events is gated by the host\'s randomEvents feature', ()
     const host = await guest(t, 'H4');
     await grant(t, host.id, ['randomEvents']);
     const other = await guest(t, 'G4');
-    const room = await request(srv(t)).post('/api/v1/rooms').set(auth(host.token)).send({}).expect(201);
+    const room = await request(srv(t))
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
     const roomCode: string = room.body.code;
     await request(srv(t)).post(`/api/v1/rooms/${roomCode}/join`).set(auth(other.token)).expect(200);
     await request(srv(t))

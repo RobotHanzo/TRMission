@@ -15,7 +15,9 @@ const p0 = asPlayerId('p0');
 const p1 = asPlayerId('p1');
 
 const simpleRoutes = (board: Board): RouteDef[] =>
-  board.content.routes.filter((r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined);
+  board.content.routes.filter(
+    (r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined,
+  );
 
 /** Two simple routes r1=(A,M), r2=(M,C) sharing city M with distinct outer endpoints A,C. */
 function findChain(board: Board): { r1: RouteDef; r2: RouteDef; A: string; M: string; C: string } {
@@ -33,9 +35,14 @@ function findChain(board: Board): { r1: RouteDef; r2: RouteDef; A: string; M: st
 }
 
 /** A triangle of simple routes: rab=(A,B), rbc=(B,C), rac=(A,C). */
-function findTriangle(
-  board: Board,
-): { A: string; B: string; C: string; rab: RouteDef; rbc: RouteDef; rac: RouteDef } {
+function findTriangle(board: Board): {
+  A: string;
+  B: string;
+  C: string;
+  rab: RouteDef;
+  rbc: RouteDef;
+  rac: RouteDef;
+} {
   const s = simpleRoutes(board);
   const connects = (r: RouteDef, x: string, y: string) =>
     (r.a === x && r.b === y) || (r.a === y && r.b === x);
@@ -223,8 +230,22 @@ describe('events — charter special award', () => {
     const base = afterSetup(2, 'charter-double-win');
     const { A, B, C, rab, rbc } = findTriangle(base.board);
     // p0 owns A–B; claiming B–C connects both A↔C (via B) and B↔C directly.
-    const c1: CharterContract = { id: 'c1', a: A as CityId, b: C as CityId, points: 8, expiresAfterRound: 99, wonBy: null };
-    const c2: CharterContract = { id: 'c2', a: B as CityId, b: C as CityId, points: 4, expiresAfterRound: 99, wonBy: null };
+    const c1: CharterContract = {
+      id: 'c1',
+      a: A as CityId,
+      b: C as CityId,
+      points: 8,
+      expiresAfterRound: 99,
+      wonBy: null,
+    };
+    const c2: CharterContract = {
+      id: 'c2',
+      a: B as CityId,
+      b: C as CityId,
+      points: 4,
+      expiresAfterRound: 99,
+      wonBy: null,
+    };
     const state = wellStocked(
       withEvents(
         { ...base.state, ownership: { [rab.id as string]: { owner: p0 } } },

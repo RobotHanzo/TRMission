@@ -7,9 +7,11 @@
 ## Connections by Relation
 
 ### contains
+
 - enums.ts `EXTRACTED`
 
 ### imports
+
 - reduce.ts `EXTRACTED`
 - common.ts `EXTRACTED`
 - Specimens.tsx `EXTRACTED`
@@ -32,6 +34,7 @@
 - TrainCarArt.tsx `EXTRACTED`
 
 ### references
+
 - [GameState](GameState.md) `EXTRACTED`
 - RedactedView `EXTRACTED`
 - PlayerState `EXTRACTED`
@@ -48,4 +51,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

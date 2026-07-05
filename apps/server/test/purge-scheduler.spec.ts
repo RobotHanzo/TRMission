@@ -31,7 +31,10 @@ describe('PurgeService.onModuleInit auto-sweep scheduling', () => {
   const originalIntervalMs = env.purgeIntervalMs;
 
   afterEach(() => {
-    Object.assign(env, { purgeAutoEnabled: originalAutoEnabled, purgeIntervalMs: originalIntervalMs });
+    Object.assign(env, {
+      purgeAutoEnabled: originalAutoEnabled,
+      purgeIntervalMs: originalIntervalMs,
+    });
     vi.useRealTimers();
     vi.restoreAllMocks();
   });

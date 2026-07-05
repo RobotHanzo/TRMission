@@ -29,7 +29,10 @@ export function CountryList({ selected, onToggle }: CountryListProps) {
     const q = query.trim().toLowerCase();
     const matches = q
       ? WORLD_COUNTRIES.filter(
-          (c) => c.nameZh.includes(query.trim()) || c.nameEn.toLowerCase().includes(q) || c.id.toLowerCase() === q,
+          (c) =>
+            c.nameZh.includes(query.trim()) ||
+            c.nameEn.toLowerCase().includes(q) ||
+            c.id.toLowerCase() === q,
         )
       : WORLD_COUNTRIES;
     const byContinent = new Map<string, CountryLand[]>();
@@ -38,9 +41,10 @@ export function CountryList({ selected, onToggle }: CountryListProps) {
       list.push(c);
       byContinent.set(c.continent, list);
     }
-    return CONTINENT_ORDER.map((continent) => ({ continent, countries: byContinent.get(continent) ?? [] })).filter(
-      (g) => g.countries.length > 0,
-    );
+    return CONTINENT_ORDER.map((continent) => ({
+      continent,
+      countries: byContinent.get(continent) ?? [],
+    })).filter((g) => g.countries.length > 0);
   }, [query]);
 
   return (
@@ -59,7 +63,11 @@ export function CountryList({ selected, onToggle }: CountryListProps) {
             <h4 className="country-list-continent">{t(CONTINENT_KEY[continent]!)}</h4>
             {countries.map((c) => (
               <label key={c.id} className="country-list-row">
-                <input type="checkbox" checked={selected.has(c.id)} onChange={() => onToggle(c.id)} />
+                <input
+                  type="checkbox"
+                  checked={selected.has(c.id)}
+                  onChange={() => onToggle(c.id)}
+                />
                 {c.nameZh} <span className="muted">({c.nameEn})</span>
               </label>
             ))}

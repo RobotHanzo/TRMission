@@ -2,7 +2,14 @@
 // `customMaps` is a mutable, owner-private draft; `mapContents` is the immutable, hash-addressed
 // publication of a draft at start time — it must outlive the draft (a deleted/edited map must
 // never break a persisted game's recovery or replay).
-import type { CityDef, GameContent, MapGeography, MapRules, RouteDef, TicketDef } from '@trm/map-data';
+import type {
+  CityDef,
+  GameContent,
+  MapGeography,
+  MapRules,
+  RouteDef,
+  TicketDef,
+} from '@trm/map-data';
 
 export interface MapDraft {
   cities: CityDef[];

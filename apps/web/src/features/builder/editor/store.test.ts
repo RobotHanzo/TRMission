@@ -115,7 +115,9 @@ describe('editor store', () => {
     const s = useEditorStore.getState();
     s.placeCity(city('c1'));
     s.placeCity(city('c2'));
-    s.addRoute(route('r1', 'c1', 'c2', { color: 'RED', length: 3, isTunnel: false, ferryLocos: 0 }));
+    s.addRoute(
+      route('r1', 'c1', 'c2', { color: 'RED', length: 3, isTunnel: false, ferryLocos: 0 }),
+    );
 
     s.convertToDouble('r1');
 

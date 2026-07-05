@@ -6,7 +6,9 @@ import { pathForTicket, playerLiveTotal, completedByPlayer } from './tickets';
 
 const ME = 'p0';
 
-function snap(over: Partial<{ ownEverything: boolean; routePoints: number; completed: string[] }>): GameSnapshot {
+function snap(
+  over: Partial<{ ownEverything: boolean; routePoints: number; completed: string[] }>,
+): GameSnapshot {
   const ownership = over.ownEverything
     ? ROUTES.map((r) => ({
         routeId: r.id as string,

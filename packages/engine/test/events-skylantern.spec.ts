@@ -78,7 +78,10 @@ describe('events — sky lantern surcharge & doubling', () => {
     const route = plainColored(board);
     const color = payColorFor(route);
     const s = withEvents(
-      setPlayer(state, p0, { hand: handOf({ [color]: route.length, LOCOMOTIVE: 1 }), trainCars: 45 }),
+      setPlayer(state, p0, {
+        hand: handOf({ [color]: route.length, LOCOMOTIVE: 1 }),
+        trainCars: 45,
+      }),
       { ...emptyEvents(), active: [activeEvent('SKY_LANTERN', { routeIds: [route.id] })] },
     );
     const res = reduce(board, s, {
@@ -95,10 +98,10 @@ describe('events — sky lantern surcharge & doubling', () => {
     const route = plainColored(board);
     const color = payColorFor(route);
     const offers = (n: number): boolean => {
-      const s = withEvents(
-        setPlayer(state, p0, { hand: handOf({ [color]: n }), trainCars: 45 }),
-        { ...emptyEvents(), active: [activeEvent('SKY_LANTERN', { routeIds: [route.id] })] },
-      );
+      const s = withEvents(setPlayer(state, p0, { hand: handOf({ [color]: n }), trainCars: 45 }), {
+        ...emptyEvents(),
+        active: [activeEvent('SKY_LANTERN', { routeIds: [route.id] })],
+      });
       return legalActions(board, s, p0).some(
         (a) => a.t === 'CLAIM_ROUTE' && (a as { routeId: string }).routeId === (route.id as string),
       );
@@ -153,7 +156,9 @@ describe('events — sky lantern surcharge & doubling', () => {
       {
         ...emptyEvents(),
         roundIndex: 1,
-        active: [activeEvent('SKY_LANTERN', { id: 'ev1', endsAfterRound: 1, routeIds: [route.id] })],
+        active: [
+          activeEvent('SKY_LANTERN', { id: 'ev1', endsAfterRound: 1, routeIds: [route.id] }),
+        ],
       },
     );
     // Wrap into round 2 → the window expires.

@@ -159,7 +159,8 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    if (!this.authConfig.provider('google')) throw new ForbiddenException('google sign-in disabled');
+    if (!this.authConfig.provider('google'))
+      throw new ForbiddenException('google sign-in disabled');
     const guestUserId = await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
     return this.finish(res, await this.oauth.handleCredential(body.credential, guestUserId));
   }

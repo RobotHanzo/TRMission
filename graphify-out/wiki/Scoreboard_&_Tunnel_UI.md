@@ -29,7 +29,7 @@
 - **.onAbort()** (1 connections) — `apps/web/src/components/TunnelModal.tsx`
 - **{ play }** (1 connections) — `apps/web/src/components/TunnelModal.test.tsx`
 - **revealed** (1 connections) — `apps/web/src/components/TunnelModal.test.tsx`
-- *... and 3 more nodes in this community*
+- _... and 3 more nodes in this community_
 
 ## Relationships
 
@@ -64,4 +64,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

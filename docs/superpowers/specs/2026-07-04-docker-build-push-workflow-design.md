@@ -15,10 +15,10 @@ GitHub Container Registry (GHCR), so a deployable, traceable image always exists
 
 One job, matrixed over the two images so they build in parallel:
 
-| image | Dockerfile | build context | pushed as |
-|---|---|---|---|
-| server | `apps/server/Dockerfile` | repo root | `ghcr.io/robothanzo/trmission-server` |
-| web | `apps/web/Dockerfile` | repo root | `ghcr.io/robothanzo/trmission-web` (also bundles the maintainer dashboard, per the existing Dockerfile) |
+| image  | Dockerfile               | build context | pushed as                                                                                               |
+| ------ | ------------------------ | ------------- | ------------------------------------------------------------------------------------------------------- |
+| server | `apps/server/Dockerfile` | repo root     | `ghcr.io/robothanzo/trmission-server`                                                                   |
+| web    | `apps/web/Dockerfile`    | repo root     | `ghcr.io/robothanzo/trmission-web` (also bundles the maintainer dashboard, per the existing Dockerfile) |
 
 ## Registry & auth
 
@@ -28,6 +28,7 @@ GHCR (`ghcr.io`). Login via `docker/login-action` using `github.actor` and the b
 ## Tagging
 
 Via `docker/metadata-action`:
+
 - `latest`
 - `sha-<short-sha>` — immutable, traceable back to the exact commit
 

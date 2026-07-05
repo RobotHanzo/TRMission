@@ -1,1 +1,163 @@
-{"nodes": [{"id": "readme_determinism", "label": "README: Determinism Key Design Decision", "file_type": "rationale", "source_file": "README.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_hidden_information_structural", "label": "README: Hidden Information Is Structural", "file_type": "rationale", "source_file": "README.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_single_writer_per_game", "label": "README: Single-Writer Per Game", "file_type": "rationale", "source_file": "README.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_auth", "label": "README: Auth (guest, argon2id, HS256, refresh rotation)", "file_type": "concept", "source_file": "README.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_bots", "label": "README: Bots (server-driven ordinary seated players)", "file_type": "concept", "source_file": "README.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "readme_docker_profiles", "label": "README: Docker Compose Profiles (dev-server / full)", "file_type": "concept", "source_file": "README.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "readme_determinism", "target": "claude_determinism_structural", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.95, "source_file": "README.md", "source_location": null, "weight": 1.0}, {"source": "readme_hidden_information_structural", "target": "claude_hidden_information_structural", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.95, "source_file": "README.md", "source_location": null, "weight": 1.0}, {"source": "readme_single_writer_per_game", "target": "claude_single_writer_per_game", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.95, "source_file": "README.md", "source_location": null, "weight": 1.0}, {"source": "readme_auth", "target": "apps_server_claude_auth_module", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "README.md", "source_location": null, "weight": 1.0}, {"source": "readme_bots", "target": "apps_server_claude_bots_module", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.95, "source_file": "README.md", "source_location": null, "weight": 1.0}, {"source": "readme_docker_profiles", "target": "docker_compose_dev_server_service", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "README.md", "source_location": null, "weight": 1.0}, {"source": "readme_docker_profiles", "target": "docker_compose_web_dev_service", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "README.md", "source_location": null, "weight": 1.0}, {"source": "readme_docker_profiles", "target": "docker_compose_server_service", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "README.md", "source_location": null, "weight": 1.0}, {"source": "readme_docker_profiles", "target": "docker_compose_web_service", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "README.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "readme_determinism",
+      "label": "README: Determinism Key Design Decision",
+      "file_type": "rationale",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_hidden_information_structural",
+      "label": "README: Hidden Information Is Structural",
+      "file_type": "rationale",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_single_writer_per_game",
+      "label": "README: Single-Writer Per Game",
+      "file_type": "rationale",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_auth",
+      "label": "README: Auth (guest, argon2id, HS256, refresh rotation)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_bots",
+      "label": "README: Bots (server-driven ordinary seated players)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "readme_docker_profiles",
+      "label": "README: Docker Compose Profiles (dev-server / full)",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "readme_determinism",
+      "target": "claude_determinism_structural",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "readme_hidden_information_structural",
+      "target": "claude_hidden_information_structural",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "readme_single_writer_per_game",
+      "target": "claude_single_writer_per_game",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "readme_auth",
+      "target": "apps_server_claude_auth_module",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "readme_bots",
+      "target": "apps_server_claude_bots_module",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "readme_docker_profiles",
+      "target": "docker_compose_dev_server_service",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "readme_docker_profiles",
+      "target": "docker_compose_web_dev_service",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "readme_docker_profiles",
+      "target": "docker_compose_server_service",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "readme_docker_profiles",
+      "target": "docker_compose_web_service",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

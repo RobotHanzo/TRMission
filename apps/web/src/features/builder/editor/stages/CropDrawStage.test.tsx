@@ -9,7 +9,10 @@ import { useEditorStore } from '../store';
 // via a EditorCanvas mock). Stub it with an identity mapping so pointer events exercise
 // CropDrawStage's own drag logic instead of silently no-op'ing.
 vi.mock('../canvasProjection', () => ({
-  clientToBoardPoint: (_svg: unknown, clientX: number, clientY: number) => ({ x: clientX, y: clientY }),
+  clientToBoardPoint: (_svg: unknown, clientX: number, clientY: number) => ({
+    x: clientX,
+    y: clientY,
+  }),
 }));
 
 beforeEach(() => {

@@ -148,7 +148,9 @@ describe('RoomsView delete toasts', () => {
     );
     fireEvent.click(await screen.findByText('刪除房間'));
     expect(
-      await screen.findByText('此房間仍有進行中的對局,將先強制終止該對局(不會留下成績),再永久刪除房間紀錄。此操作無法復原。'),
+      await screen.findByText(
+        '此房間仍有進行中的對局,將先強制終止該對局(不會留下成績),再永久刪除房間紀錄。此操作無法復原。',
+      ),
     ).toBeInTheDocument();
   });
 });

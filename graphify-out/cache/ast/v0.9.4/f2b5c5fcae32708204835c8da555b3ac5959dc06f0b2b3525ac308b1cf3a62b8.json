@@ -1,1 +1,159 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_md", "label": "2026-07-04-map-builder-country-select-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "label": "Map builder: pick countries directly, as an alternative to manual cropping", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L6"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_decision_settled_with_the_user", "label": "Decision (settled with the user)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L15"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_data_geo_worldcountries_ts", "label": "Data: `geo/worldCountries.ts`", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L31"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_ui_structure", "label": "UI structure", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L55"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_turning_a_selection_into_geography_countriestogeography", "label": "Turning a selection into geography: `countriesToGeography`", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L86"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_i18n", "label": "i18n", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L111"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_testing", "label": "Testing", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L121"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L135"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L6", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_decision_settled_with_the_user", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L15", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_data_geo_worldcountries_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L31", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_ui_structure", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L55", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_turning_a_selection_into_geography_countriestogeography", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L86", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_i18n", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L111", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_testing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L121", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md", "source_location": "L135", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_md",
+      "label": "2026-07-04-map-builder-country-select-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "label": "Map builder: pick countries directly, as an alternative to manual cropping",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_decision_settled_with_the_user",
+      "label": "Decision (settled with the user)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_data_geo_worldcountries_ts",
+      "label": "Data: `geo/worldCountries.ts`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L31"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_ui_structure",
+      "label": "UI structure",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L55"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_turning_a_selection_into_geography_countriestogeography",
+      "label": "Turning a selection into geography: `countriesToGeography`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L86"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_i18n",
+      "label": "i18n",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L111"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L121"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L135"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_decision_settled_with_the_user",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_data_geo_worldcountries_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_ui_structure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_turning_a_selection_into_geography_countriestogeography",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_i18n",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_map_builder_pick_countries_directly_as_an_alternative_to_manual_cropping",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_map_builder_country_select_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-map-builder-country-select-design.md",
+      "source_location": "L135",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

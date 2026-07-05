@@ -7,9 +7,7 @@ import { EventsPanel } from './EventsPanel';
 import { useGame } from '../store/game';
 import { useAnimations } from '../store/animations';
 
-const snapshot = (
-  randomEvents?: MessageInitShape<typeof GameSnapshotSchema>['randomEvents'],
-) =>
+const snapshot = (randomEvents?: MessageInitShape<typeof GameSnapshotSchema>['randomEvents']) =>
   create(GameSnapshotSchema, {
     stateVersion: 1,
     phase: Phase.AWAIT_ACTION,
@@ -159,7 +157,9 @@ describe('EventsPanel', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText('天燈之夜')).toBeInTheDocument();
-    expect(within(dialog).getByText('指定路線分數加倍，但佔領需多付一張車廂卡')).toBeInTheDocument();
+    expect(
+      within(dialog).getByText('指定路線分數加倍，但佔領需多付一張車廂卡'),
+    ).toBeInTheDocument();
   });
 
   it('closes the description modal via the close button, backdrop click, and Escape', () => {

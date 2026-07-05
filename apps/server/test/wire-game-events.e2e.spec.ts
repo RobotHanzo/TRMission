@@ -1,12 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { create, toBinary } from '@bufbuild/protobuf';
-import {
-  taiwanBoard,
-  initGame,
-  CONTENT_HASH,
-  type GameConfig,
-  type PlayerSeed,
-} from '@trm/engine';
+import { taiwanBoard, initGame, CONTENT_HASH, type GameConfig, type PlayerSeed } from '@trm/engine';
 import { asPlayerId, type PlayerId, type SeatIndex } from '@trm/shared';
 import { GameSnapshotSchema, ServerEnvelopeSchema, type ServerEnvelope } from '@trm/proto';
 import { GameRegistry } from '../src/game/game-registry';
@@ -142,9 +136,15 @@ describe('random-events wire leak test (byte-level) — no future unannounced en
     const roundIndex = ev.roundIndex;
     const forecast = ev.schedule[ev.nextIdx];
     const forecastId =
-      forecast && forecast.telegraphed && forecast.startRound === roundIndex + 1 ? forecast.id : null;
-    const hidden = ev.schedule.filter((_, idx) => idx >= ev.nextIdx).filter((e) => e.id !== forecastId);
-    expect(hidden.length, 'the run stopped with a genuinely-hidden tail to check').toBeGreaterThan(0);
+      forecast && forecast.telegraphed && forecast.startRound === roundIndex + 1
+        ? forecast.id
+        : null;
+    const hidden = ev.schedule
+      .filter((_, idx) => idx >= ev.nextIdx)
+      .filter((e) => e.id !== forecastId);
+    expect(hidden.length, 'the run stopped with a genuinely-hidden tail to check').toBeGreaterThan(
+      0,
+    );
 
     const hiddenIds = hidden.map((e) => e.id);
     const hiddenMapIds = [
@@ -162,7 +162,9 @@ describe('random-events wire leak test (byte-level) — no future unannounced en
         // (1) A hidden entry's id ('evN') is distinctive and must not appear anywhere in the frame.
         const frameRaw = Buffer.from(toBinary(ServerEnvelopeSchema, env)).toString('latin1');
         for (const id of hiddenIds) {
-          expect(frameRaw.includes(id), `${r}: hidden entry id ${id} leaked in a frame`).toBe(false);
+          expect(frameRaw.includes(id), `${r}: hidden entry id ${id} leaked in a frame`).toBe(
+            false,
+          );
         }
         // (2) Hidden route/city ids must not appear inside the random_events sub-message. Re-encode a
         //     snapshot carrying ONLY that block so a legitimately-claimed route id elsewhere in the
@@ -173,9 +175,10 @@ describe('random-events wire leak test (byte-level) — no future unannounced en
           });
           const blockRaw = Buffer.from(toBinary(GameSnapshotSchema, blockOnly)).toString('latin1');
           for (const mid of hiddenMapIds) {
-            expect(blockRaw.includes(mid), `${r}: hidden map id ${mid} leaked in random_events`).toBe(
-              false,
-            );
+            expect(
+              blockRaw.includes(mid),
+              `${r}: hidden map id ${mid} leaked in random_events`,
+            ).toBe(false);
           }
         }
       }

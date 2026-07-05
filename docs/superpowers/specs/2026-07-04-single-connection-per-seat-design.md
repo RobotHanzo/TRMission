@@ -10,7 +10,7 @@ race in stale commands, with no signal to the user that anything happened.
 Enforce one live connection per (room, seat): when a second `Hello` arrives for a seat that
 already has a bound connection, terminate the older connection and show a blocking dialog on that
 tab explaining it was disconnected because another connection took over. Scope is per room/seat
-only — a player may still have two *different* rooms open in two tabs. Spectator connections
+only — a player may still have two _different_ rooms open in two tabs. Spectator connections
 (seat `-1`) are unaffected; they already allow unlimited concurrent observers by design (a `Set`,
 not a keyed map) and there's no gameplay-integrity reason to restrict them.
 
@@ -55,7 +55,9 @@ export class Connection {
 ```ts
 hub.openConnection(
   id,
-  (bytes) => { if (socket.readyState === socket.OPEN) socket.send(bytes); },
+  (bytes) => {
+    if (socket.readyState === socket.OPEN) socket.send(bytes);
+  },
   (code, reason) => socket.close(code, reason),
 );
 ```
@@ -72,7 +74,14 @@ is currently bound to that seat:
 ```ts
 const prev = this.members.get(binding.gameId)?.get(binding.playerId);
 if (prev && prev !== conn) {
-  prev.send(rejectionFrame(0, RejectionCode.SESSION_REPLACED, 'errors:sessionReplaced', 'connected elsewhere'));
+  prev.send(
+    rejectionFrame(
+      0,
+      RejectionCode.SESSION_REPLACED,
+      'errors:sessionReplaced',
+      'connected elsewhere',
+    ),
+  );
   prev.terminate(4001, 'session_replaced');
 }
 ```
@@ -155,7 +164,7 @@ same outcome as `RoomScreen`'s kicked-dialog `goHome`.
 - **Tests:**
   - Server e2e: two real connections `Hello`ing for the same seat — the older one receives the
     `SESSION_REPLACED` rejection and its socket closes with code `4001`; the newer one keeps
-    playing normally. A same-connection re-`Hello` (reconnect scenario) does *not* kick itself.
+    playing normally. A same-connection re-`Hello` (reconnect scenario) does _not_ kick itself.
   - Client: `GameSocket` test — a close with code `4001` triggers `onSessionReplaced` and does not
     schedule a reconnect; any other close code still reconnects as before.
   - Web component test — the dialog renders when the store flag is set, and its button navigates
@@ -174,7 +183,7 @@ same outcome as `RoomScreen`'s kicked-dialog `goHome`.
 - The terminated tab shows a blocking "disconnected elsewhere" dialog; acknowledging it returns to
   the lobby/home.
 - The new, surviving connection plays normally with no interruption.
-- A normal page refresh/reconnect for the *same* tab does not trigger the dialog.
+- A normal page refresh/reconnect for the _same_ tab does not trigger the dialog.
 - Opening two different rooms in two different tabs is unaffected.
 - `yarn workspace @trm/server test`, `yarn workspace @trm/web test`, `yarn lint`, and `yarn
-  typecheck` pass.
+typecheck` pass.

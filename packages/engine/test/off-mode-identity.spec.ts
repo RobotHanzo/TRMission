@@ -44,7 +44,11 @@ interface OffModeFixture {
   readonly stateDigest: string;
 }
 
-const fixturePath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'golden', 'off-mode.json');
+const fixturePath = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'golden',
+  'off-mode.json',
+);
 const fixture: OffModeFixture = JSON.parse(readFileSync(fixturePath, 'utf8'));
 
 /**

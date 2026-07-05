@@ -21,26 +21,17 @@
     {
       "t": "KEEP_INITIAL_TICKETS",
       "player": "p0",
-      "keep": [
-        "L4",
-        "S35"
-      ]
+      "keep": ["L4", "S35"]
     },
     {
       "t": "KEEP_INITIAL_TICKETS",
       "player": "p1",
-      "keep": [
-        "L1",
-        "S34"
-      ]
+      "keep": ["L1", "S34"]
     },
     {
       "t": "KEEP_INITIAL_TICKETS",
       "player": "p2",
-      "keep": [
-        "L3",
-        "S31"
-      ]
+      "keep": ["L3", "S31"]
     },
     {
       "t": "CLAIM_ROUTE",
@@ -1597,11 +1588,7 @@
       "noUnfinishedTicketPenalty": false,
       "doubleRouteSingleFor23": true
     },
-    "turnOrder": [
-      "p0",
-      "p1",
-      "p2"
-    ],
+    "turnOrder": ["p0", "p1", "p2"],
     "players": {
       "p0": {
         "id": "p0",
@@ -1619,10 +1606,7 @@
         },
         "trainCars": 1,
         "stationsRemaining": 3,
-        "keptTickets": [
-          "L4",
-          "S35"
-        ],
+        "keptTickets": ["L4", "S35"],
         "pendingTicketOffer": null,
         "routePoints": 60,
         "completedTickets": []
@@ -1643,10 +1627,7 @@
         },
         "trainCars": 5,
         "stationsRemaining": 3,
-        "keptTickets": [
-          "L1",
-          "S34"
-        ],
+        "keptTickets": ["L1", "S34"],
         "pendingTicketOffer": null,
         "routePoints": 59,
         "completedTickets": []
@@ -1667,10 +1648,7 @@
         },
         "trainCars": 7,
         "stationsRemaining": 3,
-        "keptTickets": [
-          "L3",
-          "S31"
-        ],
+        "keptTickets": ["L3", "S31"],
         "pendingTicketOffer": null,
         "routePoints": 54,
         "completedTickets": []
@@ -1681,14 +1659,7 @@
       "phase": "GAME_OVER",
       "cardsDrawnThisTurn": 0
     },
-    "deck": [
-      "LOCOMOTIVE",
-      "ORANGE",
-      "YELLOW",
-      "LOCOMOTIVE",
-      "BLACK",
-      "RED"
-    ],
+    "deck": ["LOCOMOTIVE", "ORANGE", "YELLOW", "LOCOMOTIVE", "BLACK", "RED"],
     "discard": {
       "RED": 4,
       "ORANGE": 2,
@@ -1700,18 +1671,8 @@
       "WHITE": 3,
       "LOCOMOTIVE": 9
     },
-    "market": [
-      "RED",
-      "GREEN",
-      "RED",
-      "YELLOW",
-      "GREEN"
-    ],
-    "ticketDeckLong": [
-      "L5",
-      "L2",
-      "L6"
-    ],
+    "market": ["RED", "GREEN", "RED", "YELLOW", "GREEN"],
+    "ticketDeckLong": ["L5", "L2", "L6"],
     "ticketDeckShort": [
       "S25",
       "S5",
@@ -1976,17 +1937,7 @@
           "total": 32
         }
       ],
-      "ranking": [
-        [
-          "p1"
-        ],
-        [
-          "p0"
-        ],
-        [
-          "p2"
-        ]
-      ]
+      "ranking": [["p1"], ["p0"], ["p2"]]
     },
     "actionSeq": 254
   },

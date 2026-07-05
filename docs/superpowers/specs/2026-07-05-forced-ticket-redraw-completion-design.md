@@ -24,15 +24,11 @@ Two gaps:
 ## Engine fix
 
 `packages/engine/src/tickets.ts`: rename `allKeptTicketsOwnConnected` →
-`allKeptTicketsCompleted`. A kept ticket counts as done if it is *either* own-connected right now
-*or* already present in `player.completedTickets`:
+`allKeptTicketsCompleted`. A kept ticket counts as done if it is _either_ own-connected right now
+_or_ already present in `player.completedTickets`:
 
 ```ts
-export function allKeptTicketsCompleted(
-  board: Board,
-  state: GameState,
-  player: PlayerId,
-): boolean {
+export function allKeptTicketsCompleted(board: Board, state: GameState, player: PlayerId): boolean {
   const p = state.players[player as string];
   if (!p || p.keptTickets.length === 0) return false;
 
@@ -85,10 +81,10 @@ variant-off path is byte-identical to before.
 
 ## Frontend fix: explain the forced redraw
 
-No change is needed for the ticket chooser to *appear* — `GameStage.tsx`'s `needKeep` already
+No change is needed for the ticket chooser to _appear_ — `GameStage.tsx`'s `needKeep` already
 derives from `phase === TICKET_SELECTION && pendingOfferTicketIds.length > 0`, which becomes true
 automatically once the engine fix lands. The gap is purely explanatory: nothing currently tells the
-player *why* their turn suddenly opened into the chooser instead of their normal options.
+player _why_ their turn suddenly opened into the chooser instead of their normal options.
 
 ### Distinguishing signal
 
@@ -120,12 +116,12 @@ New i18n key in `apps/web/src/i18n/index.ts`, both locale blocks, near the exist
 
 Extend `useAnimationDriver`'s existing test file: feed a batch with `[turnStarted(me),
 ticketsOffered(me)]` and assert the notification fires with the new text; feed a batch with only
-`ticketsOffered(me)` (the voluntary-draw shape) and assert it does *not* fire.
+`ticketsOffered(me)` (the voluntary-draw shape) and assert it does _not_ fire.
 
 ## Out of scope
 
 - Mid-turn forcing (completing your last ticket via `CLAIM_ROUTE` doesn't force anything until your
-  *next* turn starts) — this matches the existing rule 7.5 design (`endTurn`-only) and is not part
+  _next_ turn starts) — this matches the existing rule 7.5 design (`endTurn`-only) and is not part
   of this fix.
 - Any new "all tickets done" game-end condition — completing tickets still only ever triggers a
   re-draw, never ends the game. Unrelated to this fix.

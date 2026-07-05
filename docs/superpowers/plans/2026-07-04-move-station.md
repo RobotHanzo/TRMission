@@ -21,11 +21,13 @@
 ### Task 1: Move Station button, move mode, and tests
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts` (zh-Hant block ~line 330, en block ~line 752)
 - Modify: `apps/web/src/features/builder/editor/stages/StopsStage.tsx` (full file, 120 lines today)
 - Create: `apps/web/src/features/builder/editor/stages/StopsStage.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useEditorStore().moveCity(id: string, x: number, y: number): void` — already implemented in `editor/store.ts:166-172`, patches `draft.cities` through the existing undo/autosave `mutate()` path. `useEditorStore().draft.cities: CityDraft[]` where `CityDraft = { id: string; nameZh: string; nameEn: string; x: number; y: number; region: string; isIsland: boolean }` (`net/rest.ts`).
 - Produces: no new exports — `StopsStage` remains a default-less named export with the same `export function StopsStage()` signature `EditorScreen.tsx` already imports.
 
@@ -366,7 +368,8 @@ export function StopsStage() {
               />
             </div>
             <button type="button" onClick={() => setIsMoving((v) => !v)}>
-              <Move size={14} aria-hidden /> {isMoving ? t('builder.cancelMove') : t('builder.moveStop')}
+              <Move size={14} aria-hidden />{' '}
+              {isMoving ? t('builder.cancelMove') : t('builder.moveStop')}
             </button>
             {confirmDelete ? (
               <div className="stack">

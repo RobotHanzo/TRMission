@@ -53,6 +53,7 @@
 ### Task 1: Dependencies + CSS scaffold
 
 **Files:**
+
 - Modify: `apps/web/package.json`
 - Create: `apps/web/src/styles/animations.css`
 - Modify: `apps/web/src/screens/GameScreen.tsx` (add `import '../styles/animations.css';`)
@@ -92,10 +93,12 @@ git commit -m "Web: add canvas-confetti + animations.css scaffold"
 ### Task 2: Animation event bus (`store/game.ts`)
 
 **Files:**
+
 - Modify: `apps/web/src/store/game.ts`
 - Test: `apps/web/src/store/game.test.ts` (create)
 
 **Interfaces:**
+
 - Produces: `useGame` state gains `lastBatch: { seq: number; events: GameEvent[] } | null`. `applyEvents` increments `seq` and replaces `events` (in addition to existing `recentEvents` append).
 
 - [ ] **Step 1: Write the failing test**
@@ -109,7 +112,9 @@ describe('game store animation bus', () => {
   beforeEach(() => useGame.getState().reset());
   it('bumps lastBatch.seq on each applyEvents and carries the batch', () => {
     expect(useGame.getState().lastBatch).toBeNull();
-    useGame.getState().applyEvents(1, [{ event: { case: 'turnEnded', value: { playerId: 'a' } } } as any]);
+    useGame
+      .getState()
+      .applyEvents(1, [{ event: { case: 'turnEnded', value: { playerId: 'a' } } } as any]);
     const a = useGame.getState().lastBatch!;
     expect(a.seq).toBe(1);
     expect(a.events).toHaveLength(1);
@@ -134,16 +139,19 @@ describe('game store animation bus', () => {
 ### Task 3: `game/tickets.ts` — completion, path, live points (pure, TDD)
 
 **Files:**
+
 - Create: `apps/web/src/game/tickets.ts`
 - Test: `apps/web/src/game/tickets.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `completedTicketIds(snapshot: GameSnapshot): Set<string>` — kept tickets of `snapshot.you` whose endpoints are connected over the local player's owned routes plus ≤1 borrowed opponent edge per built station, under the assignment maximizing completions (mirrors `packages/engine/src/graph/connectivity.ts`).
   - `pathForTicket(snapshot: GameSnapshot, ticketId: string): string[]` — ordered route ids from endpoint a→b over the usable edge graph (own + the chosen borrows), or `[]` if not connected.
   - `liveTicketPoints(snapshot: GameSnapshot): number` — sum of `value` over `completedTicketIds`.
 
 **Implementation notes:**
+
 - Owned edges: from `snapshot.ownership` where `cell.case === 'ownerPlayerId'` and value === `snapshot.you.playerId`; map routeId → `routeById` → `{ a, b, routeId }`.
 - Station cities: `snapshot.stations` where `playerId === you.playerId` → `cityId`.
 - Borrow candidates per station city: routes in `ROUTES` incident to that city, owned by an opponent (ownership `ownerPlayerId` !== me) and **not** locked, excluding my own.
@@ -197,10 +205,12 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 4: `game/animationModel.ts` — events+snapshots → intents (pure, TDD)
 
 **Files:**
+
 - Create: `apps/web/src/game/animationModel.ts`
 - Test: `apps/web/src/game/animationModel.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `type AnimIntent =`
     `| { kind: 'cardFly'; toPlayerId: string; faceUp: boolean; color: CardColor | null; slot: number | null }`
@@ -224,10 +234,12 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 5: `store/animations.ts` — transient state (TDD)
 
 **Files:**
+
 - Create: `apps/web/src/store/animations.ts`
 - Test: `apps/web/src/store/animations.test.ts`
 
 **Interfaces:**
+
 - Produces `useAnimations` with: `glowingRoutes: Map<string, number>` (routeId→seat), `glowingStations: Map<string, number>`, `flights: Flight[]`, `floats: Float[]`, `turnCue: { playerId: string; isYou: boolean; id: number } | null`, `marketFlips: Set<number>`, `fanfare: Fanfare | null`, and actions `pushIntent(i: AnimIntent)`, `clearGlowRoute(id)`, `clearGlowStation(id)`, `removeFlight(id)`, `removeFloat(id)`, `dismissFanfare()`, `clearMarketFlip(slot)`, `reset()`. `Flight`/`Float`/`Fanfare` carry an auto-increment `id`.
 - `pushIntent` routes each intent kind into the right slice (e.g., `glowRoute`→set `glowingRoutes`; `ticketComplete`→set `fanfare` (queue if one active, see notes)).
 
@@ -254,14 +266,17 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 7: `useAnimationDriver` — wire bus→model→store (TDD)
 
 **Files:**
+
 - Create: `apps/web/src/hooks/useAnimationDriver.ts`
 - Test: `apps/web/src/hooks/useAnimationDriver.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useGame.lastBatch`, `useGame.snapshot`, `completedTicketIds`, `intentsFromEvents`, `ticketCompletionIntents`, `useAnimations.pushIntent`.
 - Produces: `useAnimationDriver(): void` — mounted once in GameScreen.
 
 **Behavior:**
+
 - Keep refs `prevCompleted` and `prevBatchSeq`. On mount / first snapshot: initialize `prevCompleted = completedTicketIds(snapshot)` and do **not** fire (prevents reconnect/resume from replaying).
 - On a new `lastBatch.seq`: `pushIntent` each of `intentsFromEvents(snapshot, lastBatch.events)`; then compute `curr = completedTicketIds(snapshot)`, push `ticketCompletionIntents(prevCompleted, curr, snapshot)`, set `prevCompleted = curr`.
 
@@ -274,6 +289,7 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 8: Claim & station glow on the board (item 3)
 
 **Files:**
+
 - Modify: `apps/web/src/components/Board.tsx`
 - Modify: `apps/web/src/styles/animations.css`
 
@@ -289,6 +305,7 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 9: `FlyingCard` + AnimationLayer card flights (item 1)
 
 **Files:**
+
 - Create: `apps/web/src/components/FlyingCard.tsx`
 - Create: `apps/web/src/components/AnimationLayer.tsx`
 - Modify: `apps/web/src/components/CardMarket.tsx` (anchors `data-anim="deck"`, `data-anim="market-slot" data-slot={slot}`)
@@ -310,12 +327,14 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 10: Score `+N` floats, turn cue, market flip (item 5 partial)
 
 **Files:**
+
 - Modify: `apps/web/src/components/AnimationLayer.tsx` (floats)
 - Modify: `apps/web/src/components/PlayerTrackers.tsx` (turn-cue class)
 - Modify: `apps/web/src/components/CardMarket.tsx` (flip class from `marketFlips`)
 - Modify: `apps/web/src/styles/animations.css`
 
 **Approach:**
+
 - Floats: AnimationLayer reads `floats`, anchors each to `[data-player-id="X"]` score cell, renders `+N` with `anim-float-up` + count-up (optional); `onAnimationEnd`→`removeFloat`.
 - Turn cue: PlayerTrackers applies `is-turn-cue` to the row matching `turnCue.playerId` (keyed by `turnCue.id` so it re-triggers); stronger variant `is-your-turn` when `isYou`. Self-clears via animationend or a timeout.
 - Market flip: CardMarket adds `is-flipping` to slots in `marketFlips`; `onAnimationEnd`→`clearMarketFlip(slot)`.
@@ -330,6 +349,7 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 11: Ticket dialog motion (item 2)
 
 **Files:**
+
 - Modify: `apps/web/src/components/KeepTicketsModal.tsx`
 - Modify: `apps/web/src/screens/GameScreen.tsx` (tickets tray anchor `data-anim="tickets"`)
 - Modify: `apps/web/src/styles/animations.css`
@@ -346,6 +366,7 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 12: Tunnel reveal flip (item 5)
 
 **Files:**
+
 - Modify: `apps/web/src/components/TunnelModal.tsx`
 - Modify: `apps/web/src/styles/animations.css`
 
@@ -360,6 +381,7 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 13: Ticket-completion fanfare (item 4)
 
 **Files:**
+
 - Create: `apps/web/src/components/TicketFanfare.tsx`
 - Test: `apps/web/src/components/TicketFanfare.test.tsx`
 - Modify: `apps/web/src/components/AnimationLayer.tsx` (render `fanfare`)
@@ -368,10 +390,12 @@ it('liveTicketPoints sums completed ticket values', () => {
 - Modify: `apps/web/src/styles/animations.css`
 
 **Interfaces:**
+
 - `TicketFanfare({ fanfare, reducedMotion, onDone }: { fanfare: Fanfare; reducedMotion: boolean; onDone(): void })`.
 - `Fanfare = { id: number; ticketId: string; long: boolean; seat: number; path: string[] }`.
 
 **Approach:**
+
 - Overlay: `position: fixed; inset: 0;` dim backdrop; centered enlarged `TicketCard` (reuse) + localized title (`fanfareTitle`) + value; `anim-fanfare-in`.
 - Confetti: import `canvas-confetti`; on mount fire a burst; if `long`, a larger/longer multi-burst (e.g., 2–3 staggered `confetti()` calls). Skip entirely under reduced motion.
 - Skip: click backdrop / Escape key / auto-dismiss. Hard cap: `setTimeout(onDone, reducedMotion ? 1500 : 6500)` (< 7000ms). Clear timer on unmount/skip.
@@ -389,6 +413,7 @@ it('liveTicketPoints sums completed ticket values', () => {
 ### Task 14: Instant ticket points in score display
 
 **Files:**
+
 - Modify: `apps/web/src/components/PlayerTrackers.tsx`
 
 **Approach:** For the local player's row only, show total = `routePoints + liveTicketPoints(snapshot)` (import from `game/tickets`). The `+N` float (Task 13's `scoreFloat` for the completed ticket value) provides the motion; this makes the displayed number land on the new total. Opponents keep `routePoints`.
@@ -452,6 +477,7 @@ Web Tasks 3/7/14 are revised below to consume the wire field instead of deriving
 ### Task B2: engine — own-track completion + redactFor reveal
 
 **Files:**
+
 - Modify `packages/engine/src/graph/connectivity.ts` (add `ownConnectedTicketIds`)
 - Modify `packages/engine/src/types/view.ts` (add `completedTickets` to `RedactedView`)
 - Modify `packages/engine/src/selectors.ts` (`redactFor` signature + compute)
@@ -460,6 +486,7 @@ Web Tasks 3/7/14 are revised below to consume the wire field instead of deriving
 - Test: `packages/engine/test/connectivity.spec.ts`, `packages/engine/test/redact.spec.ts`
 
 **Interfaces:**
+
 - Produces: `ownConnectedTicketIds(args: { ownEdges: readonly Edge[]; tickets: readonly { id: string; a: string; b: string }[]; vertices: readonly string[] }): string[]` — ids whose endpoints are connected by `ownEdges`.
 - `RedactedView.completedTickets: readonly { player: PlayerId; ticket: TicketId }[]`.
 - `redactFor(board: Board, state: GameState, viewer: PlayerId | null): RedactedView`.
@@ -470,8 +497,14 @@ Web Tasks 3/7/14 are revised below to consume the wire field instead of deriving
 import { ownConnectedTicketIds } from '../src/graph/connectivity';
 it('ownConnectedTicketIds: marks tickets joined by own edges', () => {
   const r = ownConnectedTicketIds({
-    ownEdges: [{ a: 'X', b: 'Y' }, { a: 'Y', b: 'Z' }],
-    tickets: [{ id: 't1', a: 'X', b: 'Z' }, { id: 't2', a: 'X', b: 'Q' }],
+    ownEdges: [
+      { a: 'X', b: 'Y' },
+      { a: 'Y', b: 'Z' },
+    ],
+    tickets: [
+      { id: 't1', a: 'X', b: 'Z' },
+      { id: 't2', a: 'X', b: 'Q' },
+    ],
     vertices: ['X', 'Y', 'Z', 'Q'],
   });
   expect(r).toEqual(['t1']);
@@ -490,6 +523,7 @@ it('ownConnectedTicketIds: marks tickets joined by own edges', () => {
 ### Task B3: server codec — map completed_tickets
 
 **Files:**
+
 - Modify `apps/server/src/game/game-session.ts` (`redactFor(this.board, this.state, viewer)`)
 - Modify `apps/server/src/codec/snapshot.ts` (map `view.completedTickets` → `completedTickets`)
 - Test: `apps/server/test/wire-game.e2e.spec.ts` (extend leak test with a benign subset assertion + comment)
@@ -503,9 +537,10 @@ it('ownConnectedTicketIds: marks tickets joined by own edges', () => {
 ### Web task revisions
 
 **Task 3 (REVISED) — `game/tickets.ts`:** drop client-side completion derivation. Implement only:
+
 - `pathForTicket(snapshot: GameSnapshot, playerId: string, ticketId: string): string[]` — BFS over the routes owned by `playerId` (from `snapshot.ownership`) between the ticket's endpoints (`ticketById`), returning ordered route ids (or `[]`).
 - `playerLiveTotal(snapshot: GameSnapshot, playerId: string): number` — that player's `routePoints` + Σ value of their entries in `snapshot.completedTickets`.
-Tests: path found / not found; live total sums revealed completed tickets.
+  Tests: path found / not found; live total sums revealed completed tickets.
 
 **Task 7 (REVISED) — `useAnimationDriver`:** detect completion by diffing `snapshot.completedTickets`
 (grouped by player) across snapshots — not via local union-find. For each newly-added `{playerId,

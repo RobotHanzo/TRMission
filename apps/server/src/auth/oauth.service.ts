@@ -6,10 +6,7 @@ import { AuthService } from './auth.service';
 import { UserRepo, type UserDoc } from './user.repo';
 import { SessionRepo } from './session.repo';
 import { OAUTH_HTTP, type OauthHttp } from './oauth.http';
-import {
-  GOOGLE_ID_TOKEN_VERIFIER,
-  type GoogleIdTokenVerifier,
-} from './google-id-token.verifier';
+import { GOOGLE_ID_TOKEN_VERIFIER, type GoogleIdTokenVerifier } from './google-id-token.verifier';
 import type { IssuedAuth, Locale } from './auth.types';
 
 const base64url = (b: Buffer): string => b.toString('base64url');
@@ -174,10 +171,7 @@ export class OauthService {
    * here are ordinary REST errors (this is a JSON call, not a top-level navigation that must always
    * land somewhere) — no redirect/error-query-param plumbing needed.
    */
-  async handleCredential(
-    idToken: string,
-    guestUserId: string | undefined,
-  ): Promise<IssuedAuth> {
+  async handleCredential(idToken: string, guestUserId: string | undefined): Promise<IssuedAuth> {
     const cfg = this.authConfig.provider('google');
     if (!cfg) throw new UnauthorizedException('provider_disabled');
 
@@ -237,7 +231,9 @@ export class OauthService {
     // (b) Same verified email already exists → auto-link the provider identity (refresh avatar).
     const existing = await this.users.findByEmail(email);
     if (existing) {
-      return (await this.users.linkOauthIdentity(existing._id, provider, sub, avatarUrl)) ?? existing;
+      return (
+        (await this.users.linkOauthIdentity(existing._id, provider, sub, avatarUrl)) ?? existing
+      );
     }
 
     // (c) Brand-new account. Guard the unique-email race (two first logins for one email).

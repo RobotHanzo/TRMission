@@ -135,7 +135,10 @@ describe('ScoreBoard rematch', () => {
 
   it('lets a viewer toggle their rematch vote', () => {
     const onVote = vi.fn();
-    const members = [member({ userId: 'p0' }), member({ userId: 'bot:1', isBot: true, ready: true })];
+    const members = [
+      member({ userId: 'p0' }),
+      member({ userId: 'bot:1', isBot: true, ready: true }),
+    ];
     render(<ScoreBoard snapshot={snap} onLeave={() => {}} members={members} onVote={onVote} />);
     fireEvent.click(screen.getByRole('button', { name: /想再玩一局/ }));
     expect(onVote).toHaveBeenCalledWith(true);

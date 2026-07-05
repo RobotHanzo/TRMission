@@ -13,7 +13,12 @@ export function CanvasControls({ onReset }: { onReset?(): void }) {
       <button type="button" aria-label={t('zoomIn')} title={t('zoomIn')} onClick={() => zoomIn()}>
         <Plus size={16} aria-hidden />
       </button>
-      <button type="button" aria-label={t('zoomOut')} title={t('zoomOut')} onClick={() => zoomOut()}>
+      <button
+        type="button"
+        aria-label={t('zoomOut')}
+        title={t('zoomOut')}
+        onClick={() => zoomOut()}
+      >
         <Minus size={16} aria-hidden />
       </button>
       <button

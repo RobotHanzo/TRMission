@@ -16,7 +16,11 @@ const TUNNEL_RESULT_READ_MS = 1000;
  * readability buffer, so the modal doesn't flicker shut on human spectators. Pacing being off
  * (`botMoveDelayMs` 0, as in tests) always wins and disables the hold too.
  */
-export function botStepDelayMs(phase: Phase, revealedCount: number, botMoveDelayMs: number): number {
+export function botStepDelayMs(
+  phase: Phase,
+  revealedCount: number,
+  botMoveDelayMs: number,
+): number {
   if (botMoveDelayMs <= 0) return botMoveDelayMs;
   if (phase !== 'TUNNEL_PENDING') return botMoveDelayMs;
   const revealMs =

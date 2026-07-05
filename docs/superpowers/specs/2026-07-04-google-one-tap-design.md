@@ -126,7 +126,7 @@ providers: { google: !!this.providers.google, discord: !!this.providers.discord 
 ```
 
 Client IDs are not secret (they're embedded in public web pages by design);
-only the client *secret* stays server-only. `AuthConfigSchema` gets
+only the client _secret_ stays server-only. `AuthConfigSchema` gets
 `googleClientId: z.string().optional()`.
 
 **Testing seam:** `test/app.ts` gets a `FakeGoogleIdTokenVerifier` next to
@@ -154,6 +154,7 @@ ad-blockers/extensions silently no-op the request instead of firing
 `onerror`) so callers can always fall back rather than hang.
 
 **`LoginScreen.tsx`** changes:
+
 - On mount (once `config.providers.google && config.googleClientId` is
   known), attempt `loadGoogleIdentityServices()`.
   - **On success:** `google.accounts.id.initialize({ client_id: config.googleClientId, callback: handleCredential, use_fedcm_for_prompt: true })`;

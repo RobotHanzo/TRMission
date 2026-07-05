@@ -98,7 +98,9 @@ export function pickAction(board: Board, state: GameState, player: PlayerId): Ac
       return lb - la || (a.routeId as string).localeCompare(b.routeId as string);
     };
     const claims = legal.filter((a): a is ClaimAction => a.t === 'CLAIM_ROUTE');
-    const nonTunnel = claims.filter((a) => board.routeById.get(a.routeId as string)?.isTunnel !== true);
+    const nonTunnel = claims.filter(
+      (a) => board.routeById.get(a.routeId as string)?.isTunnel !== true,
+    );
     if (nonTunnel.length > 0) return [...nonTunnel].sort(byLongest)[0] as Action;
     for (const t of ['DRAW_BLIND', 'DRAW_TICKETS', 'BUILD_STATION', 'PASS'] as const) {
       const hit = legal.find((a) => a.t === t);

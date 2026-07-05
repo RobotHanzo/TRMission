@@ -25,8 +25,10 @@ export function checkInvariants(board: Board, state: GameState): string[] {
   if (state.pendingTunnel) for (const c of state.pendingTunnel.revealed) totals[c] += 1;
 
   for (const c of CARD_COLORS) {
-    const expected = c === 'LOCOMOTIVE' ? state.ruleParams.locomotiveCount : state.ruleParams.deckPerColor;
-    if (totals[c] !== expected) problems.push(`card conservation: ${c} = ${totals[c]}, expected ${expected}`);
+    const expected =
+      c === 'LOCOMOTIVE' ? state.ruleParams.locomotiveCount : state.ruleParams.deckPerColor;
+    if (totals[c] !== expected)
+      problems.push(`card conservation: ${c} = ${totals[c]}, expected ${expected}`);
   }
 
   // 2. Train conservation: trainCars + Σ length of owned routes === start.
@@ -34,16 +36,20 @@ export function checkInvariants(board: Board, state: GameState): string[] {
   for (const [routeId, cell] of Object.entries(state.ownership)) {
     if ('owner' in cell) {
       const r = board.routeById.get(routeId);
-      if (r) ownedLen.set(cell.owner as string, (ownedLen.get(cell.owner as string) ?? 0) + r.length);
+      if (r)
+        ownedLen.set(cell.owner as string, (ownedLen.get(cell.owner as string) ?? 0) + r.length);
     }
   }
   for (const p of Object.values(state.players)) {
     const used = ownedLen.get(p.id as string) ?? 0;
     if (p.trainCars + used !== state.ruleParams.trainCarsStart) {
-      problems.push(`train conservation: ${p.id as string} has ${p.trainCars} + ${used} != ${state.ruleParams.trainCarsStart}`);
+      problems.push(
+        `train conservation: ${p.id as string} has ${p.trainCars} + ${used} != ${state.ruleParams.trainCarsStart}`,
+      );
     }
     if (p.trainCars < 0) problems.push(`negative trains: ${p.id as string}`);
-    for (const c of CARD_COLORS) if (p.hand[c] < 0) problems.push(`negative hand card: ${p.id as string} ${c}`);
+    for (const c of CARD_COLORS)
+      if (p.hand[c] < 0) problems.push(`negative hand card: ${p.id as string} ${c}`);
     if (p.stationsRemaining < 0 || p.stationsRemaining > state.ruleParams.stationsPerPlayer) {
       problems.push(`station count out of range: ${p.id as string}`);
     }
@@ -56,7 +62,9 @@ export function checkInvariants(board: Board, state: GameState): string[] {
       if (sib) {
         const sc = state.ownership[sib as string];
         if (sc && 'owner' in sc && sc.owner === cell.owner) {
-          problems.push(`double-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${sib as string}`);
+          problems.push(
+            `double-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${sib as string}`,
+          );
         }
       }
     }
@@ -79,7 +87,8 @@ export function checkInvariants(board: Board, state: GameState): string[] {
       problems.push(`events nextIdx ${ev.nextIdx} > schedule length ${ev.schedule.length}`);
     }
     for (const [cityId, level] of Object.entries(ev.hotspots)) {
-      if (level !== 1 && level !== 2) problems.push(`hotspot level out of range: ${cityId} = ${level}`);
+      if (level !== 1 && level !== 2)
+        problems.push(`hotspot level out of range: ${cityId} = ${level}`);
     }
     const scheduleIds = new Set(ev.schedule.map((e) => e.id));
     for (const act of ev.active) {

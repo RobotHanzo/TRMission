@@ -1,4 +1,9 @@
-import { type CanActivate, type ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  type CanActivate,
+  type ExecutionContext,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import type { AuthUser } from './auth.types';
 

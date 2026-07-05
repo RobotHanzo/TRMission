@@ -83,14 +83,20 @@ export function RoutesStage() {
               ferryLocos: 0,
               isTunnel: false,
             }}
-            existingDoubleGroups={[...new Set(draft.routes.map((r) => r.doubleGroup).filter(Boolean))] as string[]}
+            existingDoubleGroups={
+              [...new Set(draft.routes.map((r) => r.doubleGroup).filter(Boolean))] as string[]
+            }
             onCancel={() => setDraftPair(null)}
             onSubmit={(route, makeDouble) => {
               addRoute(route);
               if (makeDouble) {
                 // route.doubleGroup is already set by RouteForm whenever makeDouble is true —
                 // the spread carries it through, the sibling only needs a fresh id and colour.
-                addRoute({ ...route, id: newRouteId(), color: route.color === 'RED' ? 'BLUE' : 'RED' });
+                addRoute({
+                  ...route,
+                  id: newRouteId(),
+                  color: route.color === 'RED' ? 'BLUE' : 'RED',
+                });
               }
               setDraftPair(null);
             }}
@@ -194,7 +200,12 @@ function RouteForm({
       </label>
       <div className="row between setting-row">
         <span className="field-label">{t('builder.isTunnel')}</span>
-        <Switch checked={isTunnel} disabled={isFerry} onChange={setIsTunnel} label={t('builder.isTunnel')} />
+        <Switch
+          checked={isTunnel}
+          disabled={isFerry}
+          onChange={setIsTunnel}
+          label={t('builder.isTunnel')}
+        />
       </div>
       <label className="field">
         <span className="field-label">{t('builder.ferryLocos')}</span>

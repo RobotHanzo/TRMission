@@ -1,1 +1,207 @@
-{"nodes": [{"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_md", "label": "task-m2-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer", "label": "Task M2 report \u2014 restrictive/mixed event RULES in the engine reducer", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "label": "What changed, per file", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L9"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_events_effects_ts_new_pure", "label": "`packages/engine/src/events/effects.ts` (NEW, pure)", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_payments_ts", "label": "`packages/engine/src/payments.ts`", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L23"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_reduce_ts", "label": "`packages/engine/src/reduce.ts`", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L28"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_selectors_ts", "label": "`packages/engine/src/selectors.ts`", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L54"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_invariants_ts", "label": "`packages/engine/src/invariants.ts`", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L58"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_index_ts", "label": "`packages/engine/src/index.ts`", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L64"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_tests_new_unless_noted", "label": "Tests (NEW unless noted)", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L67"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_design_decisions_the_brief_left_open", "label": "Design decisions the brief left open", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L93"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_verification_all_green", "label": "Verification (all green)", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L114"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_concerns", "label": "Concerns", "file_type": "document", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L121"}], "edges": [{"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_md", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L9", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_events_effects_ts_new_pure", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_payments_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L23", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_reduce_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L28", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_selectors_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L54", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_invariants_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L58", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_index_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L64", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_tests_new_unless_noted", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L67", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_design_decisions_the_brief_left_open", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L93", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_verification_all_green", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L114", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m2-report.md", "source_location": "L121", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_md",
+      "label": "task-m2-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer",
+      "label": "Task M2 report \u2014 restrictive/mixed event RULES in the engine reducer",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "label": "What changed, per file",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L9"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_events_effects_ts_new_pure",
+      "label": "`packages/engine/src/events/effects.ts` (NEW, pure)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_payments_ts",
+      "label": "`packages/engine/src/payments.ts`",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L23"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_reduce_ts",
+      "label": "`packages/engine/src/reduce.ts`",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L28"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_selectors_ts",
+      "label": "`packages/engine/src/selectors.ts`",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L54"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_invariants_ts",
+      "label": "`packages/engine/src/invariants.ts`",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L58"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_index_ts",
+      "label": "`packages/engine/src/index.ts`",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L64"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_tests_new_unless_noted",
+      "label": "Tests (NEW unless noted)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L67"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_design_decisions_the_brief_left_open",
+      "label": "Design decisions the brief left open",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L93"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_verification_all_green",
+      "label": "Verification (all green)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L114"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_concerns",
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L121"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_md",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_events_effects_ts_new_pure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_payments_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_reduce_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_selectors_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_invariants_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_packages_engine_src_index_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_what_changed_per_file",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_tests_new_unless_noted",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_design_decisions_the_brief_left_open",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L93",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_verification_all_green",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L114",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_task_m2_report_restrictive_mixed_event_rules_in_the_engine_reducer",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m2_report_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m2-report.md",
+      "source_location": "L121",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

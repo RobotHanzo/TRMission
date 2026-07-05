@@ -40,7 +40,7 @@ in-flight game always replays against its original map, even after the current c
 To change the map **without breaking already-persisted games**:
 
 1. Edit the live tables (`cities.ts` / `routes.ts` / `tickets.ts`) and **bump `MAP_META.version`** —
-   content is immutable once published, so a change ships a *new* version, never a mutation in place.
+   content is immutable once published, so a change ships a _new_ version, never a mutation in place.
 2. Freeze the prior version as an immutable snapshot under `src/archive/` (see `archive/v2.ts`) and
    register it in `CONTENT_REGISTRY` (`index.ts`). The snapshot must capture every table that diverged
    as a full literal; tables that are byte-identical to the live ones may be referenced, **but** pin

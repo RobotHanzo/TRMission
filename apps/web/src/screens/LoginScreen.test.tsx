@@ -53,10 +53,7 @@ describe('LoginScreen', () => {
     render(<LoginScreen />);
 
     const link = await screen.findByRole('link', { name: '使用 Google 繼續' });
-    expect(link).toHaveAttribute(
-      'href',
-      '/api/v1/auth/oauth/google/start?redirect=%2Froom%2FABCD',
-    );
+    expect(link).toHaveAttribute('href', '/api/v1/auth/oauth/google/start?redirect=%2Froom%2FABCD');
   });
 
   it('reports when no sign-in method is available', async () => {

@@ -33,7 +33,7 @@ describe('WORLD_COUNTRIES', () => {
     }
   });
 
-  it('carries Taiwan with this game\'s own display name, not the formal Natural Earth one', () => {
+  it("carries Taiwan with this game's own display name, not the formal Natural Earth one", () => {
     const twn = WORLD_COUNTRIES.find((c) => c.id === 'TWN');
     expect(twn).toBeDefined();
     expect(twn!.nameEn).toBe('Taiwan');

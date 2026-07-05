@@ -7,7 +7,7 @@
 duplication: both apps already share one cookie jar (same nginx origin in
 prod; same-site even cross-port in dev), and `DashboardGuard` on the server
 never requires a separate admin credential — it just checks whether the
-*existing* logged-in user has a `dashboardAccounts` record. Signing in via
+_existing_ logged-in user has a `dashboardAccounts` record. Signing in via
 admin's form does nothing admin-specific; it's the same
 `POST /auth/login` the web app already exposes with a fuller UI (guest,
 register, OAuth).
@@ -42,8 +42,8 @@ In production, `apps/web/nginx.conf` serves `apps/web`'s build at `/` and
 server container — one origin, one cookie jar
 (`apps/web/Dockerfile` builds and copies both bundles into the same nginx
 image). In local dev the two Vite dev servers run on different ports
-(web `:5173`, admin `:5174`), which are different *origins* for same-origin
-XHR purposes but the same *site* for cookie scoping (site = scheme + eTLD+1,
+(web `:5173`, admin `:5174`), which are different _origins_ for same-origin
+XHR purposes but the same _site_ for cookie scoping (site = scheme + eTLD+1,
 port-independent) — so the shared `trm_refresh` cookie (`SameSite=Strict`)
 already works across both dev ports today. What doesn't work automatically
 in dev is a plain relative-path browser redirect between the two apps, since
@@ -53,13 +53,14 @@ server, not web's. That's handled with a small dev-only origin config below.
 ### `apps/admin` changes
 
 Remove:
+
 - `views/LoginView.tsx` (the email/password form) entirely.
 - `store/session.ts`'s `login`/`loading`/`error` fields — used only by
   `LoginView`, confirmed no other consumer.
 - `store/ui.ts`'s `gateToLogin`/`leaveLogin`, the `'login'` member of
   `AdminView`, and the `/admin/login` branch in `parsePath`.
 - `net/rest.ts`'s `api.login`/`AuthResult`/`captureToken` — admin never
-  performs a login itself; it only *restores* a session, and `api.me()`'s
+  performs a login itself; it only _restores_ a session, and `api.me()`'s
   existing 401→`/auth/refresh` path (using the shared refresh cookie)
   already covers that.
 - The now-orphaned `login.*` i18n keys (`email`/`password`/`submit`/
@@ -112,12 +113,13 @@ is a **hard** navigation, since `/admin` is a separate build this router
 cannot render.
 
 No other web changes are needed:
+
 - `safePath`/`readRedirectParam` already accept `/admin...` as a valid
   same-origin target.
 - `syncFromUrl` needs no `/admin` case: in prod nginx never routes `/admin`
   requests to the web bundle, and in dev the web dev server never receives
   `/admin` requests either (admin's dev server owns that path on its own
-  port). Web's router only ever sees `/admin` as a `redirect=` *value*,
+  port). Web's router only ever sees `/admin` as a `redirect=` _value_,
   never as its own current path.
 - OAuth needs no server changes: `redirect=/admin/...` already round-trips
   unchanged through `safeRedirect`, lands on `/login/callback` (always the
@@ -136,7 +138,7 @@ is invisible when already signed in.
 ### Tests to update
 
 - `apps/admin/src/store/session.test.ts` — the `'no session at all →
-  unauthenticated'` case still holds (phase becomes `unauthenticated`), but
+unauthenticated'` case still holds (phase becomes `unauthenticated`), but
   `restore()` now performs `window.location.href = ...`; the test needs to
   stub/observe that assignment rather than let jsdom attempt a real
   navigation.

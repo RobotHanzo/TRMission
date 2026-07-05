@@ -1,1 +1,313 @@
-{"nodes": [{"id": "apps_web_claude_trm_web", "label": "@trm/web (React + Vite + TS client)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_vite_pin", "label": "Vite ^5 Pin (vitest 2 compatibility)", "file_type": "rationale", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_snapshot_authoritative", "label": "Snapshot Is Authoritative (client state model)", "file_type": "rationale", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_store_game", "label": "store/game.ts (authoritative mirror)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_store_session", "label": "store/session.ts (auth: guest/login/register/upgrade/restore)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_store_ui", "label": "store/ui.ts (view routing, locale, colour-blind toggle)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_net_rest", "label": "net/rest.ts (typed REST client)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_net_socket", "label": "net/socket.ts (GameSocket protobuf WS client)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_net_connection", "label": "net/connection.ts (socket \u21c4 game store bridge)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_board_component", "label": "components/Board.tsx (fluid SVG Taiwan board)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_geography_component", "label": "components/Geography.tsx + MapBackdrop.tsx", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_theme_colors", "label": "theme/colors.ts (card colours + SEAT_COLORS)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_i18n", "label": "i18n/index.ts (react-i18next, zh-Hant primary + en)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_game_helpers", "label": "game/ view-only helpers (payment enumeration, content.ts)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_replay_feature", "label": "features/replay/ + ReplayScreen.tsx (client-side replay)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_player_identity", "label": "Player Identity (`bot:` id prefix convention)", "file_type": "concept", "source_file": "apps/web/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "apps_web_claude_store_game", "target": "apps_web_claude_net_connection", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_net_connection", "target": "apps_web_claude_net_socket", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_net_socket", "target": "apps_server_claude_game_hub", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_store_session", "target": "apps_web_claude_net_rest", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_store_ui", "target": "apps_web_claude_store_session", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_board_component", "target": "apps_web_claude_geography_component", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_board_component", "target": "packages_map_data_claude_trm_map_data", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_replay_feature", "target": "apps_server_claude_history_repo", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_replay_feature", "target": "packages_engine_claude_selectors_redactfor", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_replay_feature", "target": "packages_codec_claude_snapshot_viewtosnapshot", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_game_helpers", "target": "packages_engine_claude_scoring_setup_turn", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_player_identity", "target": "apps_server_claude_bots_module", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_claude_snapshot_authoritative", "target": "apps_web_claude_store_game", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "apps/web/CLAUDE.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "apps_web_claude_trm_web",
+      "label": "@trm/web (React + Vite + TS client)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_vite_pin",
+      "label": "Vite ^5 Pin (vitest 2 compatibility)",
+      "file_type": "rationale",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_snapshot_authoritative",
+      "label": "Snapshot Is Authoritative (client state model)",
+      "file_type": "rationale",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_store_game",
+      "label": "store/game.ts (authoritative mirror)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_store_session",
+      "label": "store/session.ts (auth: guest/login/register/upgrade/restore)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_store_ui",
+      "label": "store/ui.ts (view routing, locale, colour-blind toggle)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_net_rest",
+      "label": "net/rest.ts (typed REST client)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_net_socket",
+      "label": "net/socket.ts (GameSocket protobuf WS client)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_net_connection",
+      "label": "net/connection.ts (socket \u21c4 game store bridge)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_board_component",
+      "label": "components/Board.tsx (fluid SVG Taiwan board)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_geography_component",
+      "label": "components/Geography.tsx + MapBackdrop.tsx",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_theme_colors",
+      "label": "theme/colors.ts (card colours + SEAT_COLORS)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_i18n",
+      "label": "i18n/index.ts (react-i18next, zh-Hant primary + en)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_game_helpers",
+      "label": "game/ view-only helpers (payment enumeration, content.ts)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_replay_feature",
+      "label": "features/replay/ + ReplayScreen.tsx (client-side replay)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_player_identity",
+      "label": "Player Identity (`bot:` id prefix convention)",
+      "file_type": "concept",
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "apps_web_claude_store_game",
+      "target": "apps_web_claude_net_connection",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_net_connection",
+      "target": "apps_web_claude_net_socket",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_net_socket",
+      "target": "apps_server_claude_game_hub",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_store_session",
+      "target": "apps_web_claude_net_rest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_store_ui",
+      "target": "apps_web_claude_store_session",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_board_component",
+      "target": "apps_web_claude_geography_component",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_board_component",
+      "target": "packages_map_data_claude_trm_map_data",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_replay_feature",
+      "target": "apps_server_claude_history_repo",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_replay_feature",
+      "target": "packages_engine_claude_selectors_redactfor",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_replay_feature",
+      "target": "packages_codec_claude_snapshot_viewtosnapshot",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_game_helpers",
+      "target": "packages_engine_claude_scoring_setup_turn",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_player_identity",
+      "target": "apps_server_claude_bots_module",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_claude_snapshot_authoritative",
+      "target": "apps_web_claude_store_game",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "apps/web/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

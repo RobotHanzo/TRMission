@@ -34,7 +34,7 @@ instead, carrying its own current path as the return target. No server changes.
 - `DeniedView` (a valid main-app login without a `dashboardAccounts` record) is explicitly
   unchanged — do not touch it.
 - Multiple agents may share this worktree: before committing, check `git status`/`git
-  diff` and stage only the files this task actually touched. Never `git add -A`/`git add .`.
+diff` and stage only the files this task actually touched. Never `git add -A`/`git add .`.
 - Design reference: `docs/superpowers/specs/2026-07-04-admin-login-redirect-design.md`.
 
 ---
@@ -42,6 +42,7 @@ instead, carrying its own current path as the return target. No server changes.
 ### Task 1: `apps/web` — hard-redirect `/admin` targets from `navigateAfterAuth`
 
 **Files:**
+
 - Create: `apps/web/src/lib/adminApp.ts`
 - Create: `apps/web/src/lib/adminApp.test.ts`
 - Modify: `apps/web/src/store/ui.ts:1-4` (import), `apps/web/src/store/ui.ts:270-307`
@@ -49,6 +50,7 @@ instead, carrying its own current path as the return target. No server changes.
 - Modify: `apps/web/src/store/ui.test.ts`
 
 **Interfaces:**
+
 - Produces: `isAdminTarget(target: string): boolean`,
   `goToAdmin(target: string): void` — both exported from `apps/web/src/lib/adminApp.ts`.
   `goToAdmin` performs `window.location.href = <origin><target>` where `<origin>` is `''`
@@ -163,11 +165,11 @@ Add a new test right after the existing `'navigateAfterAuth defaults to home whe
 is no redirect target'` test (around line 98):
 
 ```ts
-  it('navigateAfterAuth hard-redirects an admin-bound target instead of resuming it as an SPA view', () => {
-    window.history.replaceState(null, '', '/login?redirect=%2Fadmin%2Fusers%2F42');
-    useUi.getState().navigateAfterAuth();
-    expect(goToAdmin).toHaveBeenCalledWith('/admin/users/42');
-  });
+it('navigateAfterAuth hard-redirects an admin-bound target instead of resuming it as an SPA view', () => {
+  window.history.replaceState(null, '', '/login?redirect=%2Fadmin%2Fusers%2F42');
+  useUi.getState().navigateAfterAuth();
+  expect(goToAdmin).toHaveBeenCalledWith('/admin/users/42');
+});
 ```
 
 - [ ] **Step 7: Run it to verify it fails**
@@ -227,10 +229,12 @@ git commit -m "feat(web): resume an admin-bound redirect with a hard navigation"
 ### Task 2: `apps/admin` — add the main-app login helper
 
 **Files:**
+
 - Create: `apps/admin/src/lib/mainApp.ts`
 - Create: `apps/admin/src/lib/mainApp.test.ts`
 
 **Interfaces:**
+
 - Produces: `mainLoginUrl(returnTo: string): string`,
   `goToMainLogin(returnTo: string): void` — both exported from
   `apps/admin/src/lib/mainApp.ts`. `goToMainLogin` performs
@@ -320,10 +324,12 @@ git commit -m "feat(admin): add main-app login redirect helper"
 ### Task 3: `apps/admin` — wire `session.ts` to redirect instead of gating locally
 
 **Files:**
+
 - Modify: `apps/admin/src/store/session.ts` (full rewrite, shown below)
 - Modify: `apps/admin/src/store/session.test.ts` (full rewrite, shown below)
 
 **Interfaces:**
+
 - Consumes: `goToMainLogin(returnTo: string): void` from Task 2
   (`apps/admin/src/lib/mainApp.ts`).
 - Produces: `SessionState` no longer has `loading`/`error`/`login` — later tasks (4) must
@@ -536,11 +542,13 @@ git commit -m "feat(admin): redirect to the main app login instead of gating loc
 ### Task 4: `apps/admin` — remove `LoginView` and update `App`
 
 **Files:**
+
 - Delete: `apps/admin/src/views/LoginView.tsx`
 - Modify: `apps/admin/src/App.tsx`
 - Modify: `apps/admin/src/App.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `SessionPhase` (`'booting' | 'unauthenticated' | 'denied' | 'ready'`) from
   Task 3; `goToMainLogin` mock from Task 2's real module for the new test.
 
@@ -620,20 +628,20 @@ import { LoginView } from './views/LoginView';
 Replace:
 
 ```tsx
-  if (session.phase === 'booting') {
-    return <div className="oc-gate oc-muted">{t('common.loading')}</div>;
-  }
-  if (session.phase === 'unauthenticated') return <LoginView />;
-  if (session.phase === 'denied') return <DeniedView />;
+if (session.phase === 'booting') {
+  return <div className="oc-gate oc-muted">{t('common.loading')}</div>;
+}
+if (session.phase === 'unauthenticated') return <LoginView />;
+if (session.phase === 'denied') return <DeniedView />;
 ```
 
 with:
 
 ```tsx
-  if (session.phase === 'booting' || session.phase === 'unauthenticated') {
-    return <div className="oc-gate oc-muted">{t('common.loading')}</div>;
-  }
-  if (session.phase === 'denied') return <DeniedView />;
+if (session.phase === 'booting' || session.phase === 'unauthenticated') {
+  return <div className="oc-gate oc-muted">{t('common.loading')}</div>;
+}
+if (session.phase === 'denied') return <DeniedView />;
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -661,10 +669,12 @@ git commit -m "feat(admin): remove the local login dialog"
 ### Task 5: `apps/admin` — remove the now-dead router login plumbing
 
 **Files:**
+
 - Modify: `apps/admin/src/store/ui.ts` (full rewrite, shown below)
 - Modify: `apps/admin/src/store/ui.test.ts`
 
 **Interfaces:**
+
 - Produces: `AdminView` no longer includes `'login'`. Confirmed by repo-wide search that
   after Tasks 3–4, nothing outside this file and its test references `gateToLogin`,
   `leaveLogin`, or the `'login'` view.
@@ -857,6 +867,7 @@ git commit -m "refactor(admin): drop the retired /admin/login route"
 ### Task 6: `apps/admin` — remove dead login code from `rest.ts`, i18n, and CSS
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts:14-17,228-232,234-239`
 - Modify: `apps/admin/src/i18n/index.ts` (the `login` block in both `zhHant` and `en`)
 - Modify: `apps/admin/src/styles/admin.css:694-720`
@@ -1051,6 +1062,6 @@ relevant earlier task to fix it before considering this plan complete.
 - **Type consistency:** `goToMainLogin(returnTo: string): void` and
   `mainLoginUrl(returnTo: string): string` (Task 2) are used with the same signature in
   Task 3 (`session.ts`) and Task 4 (`App.test.tsx`'s mock). `isAdminTarget(target:
-  string): boolean` and `goToAdmin(target: string): void` (Task 1) are used consistently
+string): boolean` and `goToAdmin(target: string): void` (Task 1) are used consistently
   within Task 1 only. `SessionPhase` and the trimmed `SessionState` (Task 3) match how
   Task 4's `App.tsx` already consumes `session.phase`.

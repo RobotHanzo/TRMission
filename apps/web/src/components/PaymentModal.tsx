@@ -45,7 +45,9 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
                   aria-label={isFree(p) ? t('events.freeStation') : describe(p)}
                   onClick={() => onPick(p)}
                 >
-                  {isFree(p) && <span className="payment-free-label">{t('events.freeStation')}</span>}
+                  {isFree(p) && (
+                    <span className="payment-free-label">{t('events.freeStation')}</span>
+                  )}
                   {p.color && p.colorCount > 0 && (
                     <TrainCarCard color={p.color} count={p.colorCount} size={CARD_SIZE} />
                   )}

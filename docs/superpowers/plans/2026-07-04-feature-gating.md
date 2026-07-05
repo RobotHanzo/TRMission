@@ -27,12 +27,14 @@
 ### Task 1: Shared taxonomy — `UserFeature` + `users.features` permission
 
 **Files:**
+
 - Create: `packages/shared/src/features.ts`
 - Modify: `packages/shared/src/index.ts`
 - Modify: `packages/shared/src/dashboard.ts`
 - Test: `packages/shared/test/features.spec.ts`
 
 **Interfaces:**
+
 - Produces: `USER_FEATURES: readonly ['replayReview', 'mapBuilder']`, `type UserFeature`, `isUserFeature(s: string): s is UserFeature`, and the new `'users.features'` member of `DashboardPermission` (in `ADMIN_PERMISSIONS`, hence admin + owner). All exported from `@trm/shared`.
 
 - [ ] **Step 1: Write the failing test**
@@ -140,6 +142,7 @@ git commit -m "feat(shared): user feature taxonomy + users.features dashboard pe
 ### Task 2: Server — `UserDoc.features`, repo helpers, `FeatureGuard`, `PublicUser.features`
 
 **Files:**
+
 - Modify: `apps/server/src/auth/user.repo.ts`
 - Modify: `apps/server/src/auth/auth.types.ts`
 - Create: `apps/server/src/auth/require-feature.decorator.ts`
@@ -148,6 +151,7 @@ git commit -m "feat(shared): user feature taxonomy + users.features dashboard pe
 - Test: `apps/server/test/feature-gating.e2e.spec.ts` (new; grows in Tasks 3–5)
 
 **Interfaces:**
+
 - Consumes: `UserFeature` from `@trm/shared` (Task 1).
 - Produces:
   - `UserDoc.features?: UserFeature[]`
@@ -364,6 +368,7 @@ git commit -m "feat(server): per-account features field, FeatureGuard, PublicUse
 ### Task 3: Server — gate all map-authoring routes on `mapBuilder`
 
 **Files:**
+
 - Create: `apps/server/src/maps/maps-content.controller.ts`
 - Modify: `apps/server/src/maps/maps.controller.ts`
 - Modify: `apps/server/src/maps/maps.module.ts`
@@ -371,6 +376,7 @@ git commit -m "feat(server): per-account features field, FeatureGuard, PublicUse
 - Test: `apps/server/test/feature-gating.e2e.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `FeatureGuard`, `RequireFeature` (Task 2); the `grant()` helper exported by `feature-gating.e2e.spec.ts`.
 - Produces: `MapsContentController` serving `GET /api/v1/maps/content/:hash` with only `AccessTokenGuard`; every other `/api/v1/maps` route 403s (`FEATURE_DISABLED`) without `mapBuilder`.
 
@@ -503,7 +509,7 @@ async function registered(
 }
 ```
 
-Note: `maps.e2e.spec.ts` also asserts guests get 403 from `RegisteredUserGuard` — those asserts still hold (FeatureGuard fires first with 403 too; if an assertion pins the *message*, update it to the `FEATURE_DISABLED` message).
+Note: `maps.e2e.spec.ts` also asserts guests get 403 from `RegisteredUserGuard` — those asserts still hold (FeatureGuard fires first with 403 too; if an assertion pins the _message_, update it to the `FEATURE_DISABLED` message).
 
 - [ ] **Step 5: Run tests to verify they pass**
 
@@ -522,12 +528,14 @@ git commit -m "feat(server): gate map authoring routes on the mapBuilder feature
 ### Task 4: Server — lobby: custom-map select/host requires `mapBuilder` on the host
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/lobby.service.ts`
 - Modify: `apps/server/test/lobby-custom-map.e2e.spec.ts`
 - Modify (if it exercises custom selectors): `apps/server/test/lobby-map-selector.e2e.spec.ts`, `apps/server/test/lobby-settings.e2e.spec.ts`
 - Test: `apps/server/test/feature-gating.e2e.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `featureDisabled` from `apps/server/src/auth/feature.guard.ts`; `UserRepo.hasFeature` (both Task 2). `LobbyService` already injects `UserRepo`.
 - Produces: `updateSettings` (custom map PATCH) and `start` (custom selector resolution) both throw the `FEATURE_DISABLED` 403 when the host lacks `mapBuilder`. Official maps unaffected.
 
@@ -648,9 +656,9 @@ In `apps/server/src/lobby/lobby.service.ts`:
 and in `resolveMapForStart`, mirror it in the custom branch (the last two lines of the method):
 
 ```ts
-    await this.assertCustomMapAllowed(selector, callerUserId);
-    const map = await this.maps.requireOwned(selector.customMapId, callerUserId);
-    return this.maps.resolveForStart(map, maxPlayers);
+await this.assertCustomMapAllowed(selector, callerUserId);
+const map = await this.maps.requireOwned(selector.customMapId, callerUserId);
+return this.maps.resolveForStart(map, maxPlayers);
 ```
 
 This makes the start-time check authoritative (a revoke between select and start still blocks) and fires before draft validation, which is what the Step-1 test asserts.
@@ -678,11 +686,13 @@ git commit -m "feat(server): custom-map select/host requires the mapBuilder feat
 ### Task 5: Server — replay browsing/sharing requires `replayReview` (link visibility unchanged)
 
 **Files:**
+
 - Modify: `apps/server/src/history/history.controller.ts`
 - Test: `apps/server/test/history-replay.e2e.spec.ts` (fixture grants + a new gate-matrix describe)
 - Modify: `apps/server/test/replay-visibility.e2e.spec.ts` (fixture grants)
 
 **Interfaces:**
+
 - Consumes: `UserRepo.hasFeature`, `featureDisabled` (Task 2). `HistoryModule` already imports `AuthModule` (which exports `UserRepo`).
 - Produces: replay access rule `(isMember && hasReplayReview) || visibility === 'link'`; member-without-feature on a private replay → 403 `FEATURE_DISABLED` (outsiders keep the nondisclosing 404); `PATCH :gameId/visibility` requires the feature; `canConfigureVisibility = isPlayer && hasReplayReview`.
 
@@ -693,12 +703,11 @@ The gate-matrix test lives in `apps/server/test/history-replay.e2e.spec.ts`, whi
 1. In its `beforeAll`, after the game completes, grant the members the feature so every PRE-EXISTING test in the file keeps passing (direct db writes work on guests — only the dashboard API refuses them):
 
 ```ts
-  await t.db
-    .collection('users')
-    .updateMany(
-      { _id: { $in: [host.id, member.id, watcher.id] } } as never,
-      { $set: { features: ['replayReview'] } },
-    );
+await t.db
+  .collection('users')
+  .updateMany({ _id: { $in: [host.id, member.id, watcher.id] } } as never, {
+    $set: { features: ['replayReview'] },
+  });
 ```
 
 2. Append a new describe at the END of the file (it revokes/re-grants `member`'s feature and restores all state before finishing, so position it last anyway):
@@ -796,26 +805,27 @@ import { featureDisabled } from '../auth/feature.guard';
 3. In `setVisibility`, before the repo call:
 
 ```ts
-    if (!(await this.users.hasFeature(user.userId, 'replayReview'))) {
-      throw featureDisabled('replayReview');
-    }
+if (!(await this.users.hasFeature(user.userId, 'replayReview'))) {
+  throw featureDisabled('replayReview');
+}
 ```
 
 4. In `replay`, replace the access block (the `isPlayer`/`isMember`/`visibility` lines through the `if (!isMember && visibility !== 'link')` throw) with:
 
 ```ts
-    const isPlayer = !!user && doc.players.some((p) => p.userId === user.userId);
-    const isMember = isPlayer || (!!user && (doc.spectators ?? []).includes(user.userId));
-    const visibility = doc.replayVisibility === 'link' ? 'link' : 'private';
-    // Membership grants access only WITH the replayReview feature; 'link' admits anyone
-    // holding the URL (anonymous included) regardless of features. A member without the
-    // feature gets a disclosed 403 (their own history already shows the game exists);
-    // outsiders keep the nondisclosing 404.
-    const canReview = isMember && user ? await this.users.hasFeature(user.userId, 'replayReview') : false;
-    if (!canReview && visibility !== 'link') {
-      if (!isMember) throw new NotFoundException('game not found');
-      throw featureDisabled('replayReview');
-    }
+const isPlayer = !!user && doc.players.some((p) => p.userId === user.userId);
+const isMember = isPlayer || (!!user && (doc.spectators ?? []).includes(user.userId));
+const visibility = doc.replayVisibility === 'link' ? 'link' : 'private';
+// Membership grants access only WITH the replayReview feature; 'link' admits anyone
+// holding the URL (anonymous included) regardless of features. A member without the
+// feature gets a disclosed 403 (their own history already shows the game exists);
+// outsiders keep the nondisclosing 404.
+const canReview =
+  isMember && user ? await this.users.hasFeature(user.userId, 'replayReview') : false;
+if (!canReview && visibility !== 'link') {
+  if (!isMember) throw new NotFoundException('game not found');
+  throw featureDisabled('replayReview');
+}
 ```
 
 5. In the returned object, change `canConfigureVisibility: isPlayer` to:
@@ -847,6 +857,7 @@ git commit -m "feat(server): replay browsing/sharing requires the replayReview f
 ### Task 6: Server — dashboard features API (`users.features`)
 
 **Files:**
+
 - Modify: `apps/server/src/dashboard/audit.repo.ts` (action union)
 - Modify: `apps/server/src/dashboard/dashboard.schemas.ts`
 - Modify: `apps/server/src/dashboard/dashboard-users.service.ts`
@@ -854,6 +865,7 @@ git commit -m "feat(server): replay browsing/sharing requires the replayReview f
 - Test: `apps/server/test/dashboard-features.e2e.spec.ts` (new)
 
 **Interfaces:**
+
 - Consumes: `UserRepo.setFeatures` / `listFeatured` (Task 2), `USER_FEATURES`/`UserFeature` (Task 1), `AuditService.log` (existing).
 - Produces:
   - `PUT /api/v1/dashboard/users/:id/features` body `{ features: UserFeature[] }` → `DashboardUserDetail` (replaces the whole set; guests → 400; audited as `'user.features'` with `{ before, after }`).
@@ -1114,12 +1126,14 @@ git commit -m "feat(server): dashboard feature-grant API behind users.features"
 ### Task 7: Admin — REST client additions + `AccountSelectorModal`
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts`
 - Create: `apps/admin/src/components/AccountSelectorModal.tsx`
 - Modify: `apps/admin/src/styles/` main stylesheet (the one defining `.oc-modal`)
 - Test: `apps/admin/src/components/AccountSelectorModal.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `UserFeature` from `@trm/shared`; existing `api.listUsers`, `.oc-modal` CSS, `SignalBadge`, `shortId`.
 - Produces:
   - `UserRow.features: UserFeature[]`, `UserDetail` inherits it.
@@ -1195,7 +1209,12 @@ describe('AccountSelectorModal', () => {
     });
     const onClose = vi.fn();
     render(
-      <AccountSelectorModal title="pick" excludeIds={['u1']} onSelect={() => {}} onClose={onClose} />,
+      <AccountSelectorModal
+        title="pick"
+        excludeIds={['u1']}
+        onSelect={() => {}}
+        onClose={onClose}
+      />,
     );
     expect(await screen.findByText('Bob')).toBeInTheDocument();
     expect(screen.queryByText('Alice')).not.toBeInTheDocument();
@@ -1246,20 +1265,23 @@ export function AccountSelectorModal({
 
   useEffect(() => {
     let cancelled = false;
-    const id = setTimeout(() => {
-      setLoading(true);
-      api
-        .listUsers({ ...(q.trim() ? { q: q.trim() } : {}), filter })
-        .then((page) => {
-          if (!cancelled) setRows(page.users);
-        })
-        .catch(() => {
-          if (!cancelled) setRows([]);
-        })
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
-    }, q ? 250 : 0); // debounce typing, load immediately on open
+    const id = setTimeout(
+      () => {
+        setLoading(true);
+        api
+          .listUsers({ ...(q.trim() ? { q: q.trim() } : {}), filter })
+          .then((page) => {
+            if (!cancelled) setRows(page.users);
+          })
+          .catch(() => {
+            if (!cancelled) setRows([]);
+          })
+          .finally(() => {
+            if (!cancelled) setLoading(false);
+          });
+      },
+      q ? 250 : 0,
+    ); // debounce typing, load immediately on open
     return () => {
       cancelled = true;
       clearTimeout(id);
@@ -1386,6 +1408,7 @@ git commit -m "feat(admin): REST feature endpoints + reusable AccountSelectorMod
 ### Task 8: Admin — Features view + nav/route + i18n
 
 **Files:**
+
 - Create: `apps/admin/src/components/FeatureToggles.tsx`
 - Create: `apps/admin/src/views/FeaturesView.tsx`
 - Modify: `apps/admin/src/store/ui.ts` (AdminView union + parsePath regex)
@@ -1394,6 +1417,7 @@ git commit -m "feat(admin): REST feature endpoints + reusable AccountSelectorMod
 - Test: `apps/admin/src/views/FeaturesView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `AccountSelectorModal`, `api.listFeaturedUsers`, `api.putUserFeatures` (Task 7); `USER_FEATURES`/`UserFeature` (Task 1); `useSession.hasPermission('users.features')`.
 - Produces:
   - `FeatureToggles({ userId, initial, onSaved? })` — checkbox-per-feature + save button (reused by Task 9's UserDrawer).
@@ -1644,7 +1668,7 @@ export function FeaturesView() {
 2. Extend the `parsePath` regex:
 
 ```ts
-  const m = /^\/(users|features|games|rooms|maintainers|audit)(?:\/([^/]+))?\/?$/.exec(p);
+const m = /^\/(users|features|games|rooms|maintainers|audit)(?:\/([^/]+))?\/?$/.exec(p);
 ```
 
 `apps/admin/src/App.tsx`:
@@ -1732,11 +1756,13 @@ git commit -m "feat(admin): Features view for per-account replay/map-builder gra
 ### Task 9: Admin — UserDrawer features section + MaintainersView uses the selector modal
 
 **Files:**
+
 - Modify: `apps/admin/src/views/UsersView.tsx`
 - Modify: `apps/admin/src/views/MaintainersView.tsx`
 - Modify: `apps/admin/src/i18n/index.ts` (one key swap)
 
 **Interfaces:**
+
 - Consumes: `FeatureToggles` (Task 8), `AccountSelectorModal` (Task 7), `useSession.hasPermission`.
 - Produces: features toggles inside the user detail drawer (registered users, viewer holds `users.features`); MaintainersView's add flow driven by the modal instead of a pasted userId.
 
@@ -1748,23 +1774,25 @@ In `apps/admin/src/views/UsersView.tsx`:
 2. Inside `UserDrawer`, add below the `canBan` line:
 
 ```ts
-  const canFeatures = useSession((s) => s.hasPermission('users.features'));
+const canFeatures = useSession((s) => s.hasPermission('users.features'));
 ```
 
 3. Insert a section between the history section and the ban section (`key` remounts the toggles when a save refreshes `detail`):
 
 ```tsx
-          {canFeatures && !detail.isGuest && (
-            <section>
-              <h3>{t('features.title')}</h3>
-              <FeatureToggles
-                key={detail.features.join(',')}
-                userId={detail.id}
-                initial={detail.features}
-                onSaved={setDetail}
-              />
-            </section>
-          )}
+{
+  canFeatures && !detail.isGuest && (
+    <section>
+      <h3>{t('features.title')}</h3>
+      <FeatureToggles
+        key={detail.features.join(',')}
+        userId={detail.id}
+        initial={detail.features}
+        onSaved={setDetail}
+      />
+    </section>
+  );
+}
 ```
 
 - [ ] **Step 2: MaintainersView add flow**
@@ -1776,29 +1804,33 @@ In `apps/admin/src/views/MaintainersView.tsx`:
 3. Replace the whole `{canWrite && (<div className="oc-toolbar">…</div>)}` block with:
 
 ```tsx
-      {canWrite && (
-        <div className="oc-toolbar">
-          <button className="oc-btn primary" onClick={() => setPicking(true)}>
-            {t('maintainers.add')}
-          </button>
-        </div>
-      )}
+{
+  canWrite && (
+    <div className="oc-toolbar">
+      <button className="oc-btn primary" onClick={() => setPicking(true)}>
+        {t('maintainers.add')}
+      </button>
+    </div>
+  );
+}
 ```
 
 4. Next to the existing `{editing && …}` render, add:
 
 ```tsx
-      {picking && (
-        <AccountSelectorModal
-          title={t('maintainers.addTitle')}
-          excludeIds={rows.map((m) => m.userId)}
-          onSelect={(u) => {
-            setPicking(false);
-            setEditing({ userId: u.id, displayName: u.displayName });
-          }}
-          onClose={() => setPicking(false)}
-        />
-      )}
+{
+  picking && (
+    <AccountSelectorModal
+      title={t('maintainers.addTitle')}
+      excludeIds={rows.map((m) => m.userId)}
+      onSelect={(u) => {
+        setPicking(false);
+        setEditing({ userId: u.id, displayName: u.displayName });
+      }}
+      onClose={() => setPicking(false)}
+    />
+  );
+}
 ```
 
 5. In `apps/admin/src/i18n/index.ts`, replace the `maintainers.addPrompt` key in **both** locales with `addTitle` (zh-Hant: `addTitle: '選擇要授權的帳號'`; en: `addTitle: 'Select an account to grant'`). Grep for `addPrompt` to confirm no other usage remains.
@@ -1820,6 +1852,7 @@ git commit -m "feat(admin): feature toggles in user drawer; maintainer add via a
 ### Task 10: Web — `PublicUser.features` + hide/redirect gated entry points
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Modify: `apps/web/src/store/session.ts`
 - Modify: `apps/web/src/App.tsx`
@@ -1831,6 +1864,7 @@ git commit -m "feat(admin): feature toggles in user drawer; maintainer add via a
 - Test: `apps/web/src/screens/HistoryScreen.test.tsx` (extend), plus fixture fixes surfaced by typecheck
 
 **Interfaces:**
+
 - Consumes: `UserFeature` from `@trm/shared`; server now always returns `features` on `PublicUser` (Task 2).
 - Produces: `PublicUser.features: UserFeature[]` (required); `useHasFeature(feature: UserFeature): boolean` hook exported from `store/session.ts`.
 
@@ -1842,13 +1876,13 @@ In `apps/web/src/screens/HistoryScreen.test.tsx`:
 2. Add a new test:
 
 ```tsx
-  it('hides the replay button entirely without the replayReview feature', async () => {
-    useSession.setState({ user: { ...signedIn, features: [] } });
-    mocked.history.mockResolvedValue([row()]);
-    render(<HistoryScreen />);
-    expect(await screen.findByText('Rival')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /重播/ })).not.toBeInTheDocument();
-  });
+it('hides the replay button entirely without the replayReview feature', async () => {
+  useSession.setState({ user: { ...signedIn, features: [] } });
+  mocked.history.mockResolvedValue([row()]);
+  render(<HistoryScreen />);
+  expect(await screen.findByText('Rival')).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /重播/ })).not.toBeInTheDocument();
+});
 ```
 
 - [ ] **Step 2: Run to verify it fails**
@@ -1892,13 +1926,13 @@ export const useHasFeature = (feature: import('@trm/shared').UserFeature): boole
 2. In the component body:
 
 ```ts
-  const canBuild = useHasFeature('mapBuilder');
-  const goHome = useUi((s) => s.goHome);
-  // The builder is feature-gated: a direct /maps URL without the grant lands home.
-  // (Cosmetic only — the server 403s regardless.)
-  useEffect(() => {
-    if (!booting && user && (view === 'maps' || view === 'mapEditor') && !canBuild) goHome();
-  }, [booting, user, view, canBuild, goHome]);
+const canBuild = useHasFeature('mapBuilder');
+const goHome = useUi((s) => s.goHome);
+// The builder is feature-gated: a direct /maps URL without the grant lands home.
+// (Cosmetic only — the server 403s regardless.)
+useEffect(() => {
+  if (!booting && user && (view === 'maps' || view === 'mapEditor') && !canBuild) goHome();
+}, [booting, user, view, canBuild, goHome]);
 ```
 
 `apps/web/src/screens/RoomScreen.tsx`:
@@ -1907,11 +1941,10 @@ export const useHasFeature = (feature: import('@trm/shared').UserFeature): boole
 2. Skip the maps fetch for non-granted users — change the effect body's guard to:
 
 ```ts
-    if (!user || !canBuild) return;
+if (!user || !canBuild) return;
 ```
 
-and add `canBuild` to that effect's dependency array.
-3. In the map picker, hide the custom option for non-granted hosts — replace the `Segmented` options with:
+and add `canBuild` to that effect's dependency array. 3. In the map picker, hide the custom option for non-granted hosts — replace the `Segmented` options with:
 
 ```tsx
                 options={
@@ -1930,28 +1963,28 @@ and add `canBuild` to that effect's dependency array.
 2. Wrap the replay button:
 
 ```tsx
-            {canReplay && (
-              <button
-                onClick={() => enterReplay(m.gameId)}
-                disabled={!m.replayable}
-                title={m.replayable ? t('history.watchReplay') : t('history.notReplayable')}
-              >
-                <Play size={14} aria-hidden /> {t('history.watchReplay')}
-              </button>
-            )}
+{
+  canReplay && (
+    <button
+      onClick={() => enterReplay(m.gameId)}
+      disabled={!m.replayable}
+      title={m.replayable ? t('history.watchReplay') : t('history.notReplayable')}
+    >
+      <Play size={14} aria-hidden /> {t('history.watchReplay')}
+    </button>
+  );
+}
 ```
 
 `apps/web/src/screens/ReplayScreen.tsx` — map the server's 403 to a specific message. In the fetch `.catch`/`try-catch` that currently sets `{ kind: 'error', msgKey: 'history.loadFailed' }`, distinguish the status (the file imports from `../net/rest` already — add `ApiError`):
 
 ```ts
-        if (!cancelled)
-          setLoad({
-            kind: 'error',
-            msgKey:
-              e instanceof ApiError && e.status === 403
-                ? 'history.replayDisabled'
-                : 'history.loadFailed',
-          });
+if (!cancelled)
+  setLoad({
+    kind: 'error',
+    msgKey:
+      e instanceof ApiError && e.status === 403 ? 'history.replayDisabled' : 'history.loadFailed',
+  });
 ```
 
 (match the existing catch parameter name; if the catch is `.catch(() => …)` style, convert it to `.catch((e: unknown) => …)`.)
@@ -1985,16 +2018,19 @@ git commit -m "feat(web): hide replay/map-builder entry points behind account fe
 ### Task 11: Docs, full validation, graphify
 
 **Files:**
+
 - Modify: `apps/server/CLAUDE.md`, `apps/web/CLAUDE.md`
 
 - [ ] **Step 1: Update the docs**
 
 `apps/server/CLAUDE.md`:
+
 - In the `src/maps/` bullet: change “CRUD + sharing for user-authored maps, registered users only (`RegisteredUserGuard`, 403 for guests)” to “CRUD + sharing for user-authored maps, gated on the per-account `mapBuilder` feature (`FeatureGuard` → 403 `FEATURE_DISABLED`; `RegisteredUserGuard` still excludes guests). `GET /content/:hash` lives on `MapsContentController` OUTSIDE the gate — players/replay viewers resolve content by hash.”
 - In the history/persistence paragraph, note the replay endpoint’s member path additionally requires the viewer’s `replayReview` feature (link visibility unchanged).
 - In the dashboard section, mention the `users.features` permission and the `PUT /dashboard/users/:id/features` + `GET /dashboard/users/features` endpoints (audited as `user.features`; guests can never hold features).
 
 `apps/web/CLAUDE.md`:
+
 - In the builder section: change “Registered-users-only (guests can play a custom map, not author one)” to “Feature-gated (`mapBuilder`, granted per-account from the maintainer dashboard; guests can still play a custom map). Entry points hide and `/maps` redirects home without the grant.”
 - In the replay section, add: replay browsing needs the `replayReview` feature; `/replay/:gameId` stays reachable for `link`-visibility replays; a 403 renders `history.replayDisabled`.
 

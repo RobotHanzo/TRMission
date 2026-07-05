@@ -51,11 +51,19 @@ export function CropDrawStage() {
   const initialCrop = draft.geography?.crop;
   const [committed, setCommitted] = useState<CropRect | null>(
     initialCrop
-      ? { lonMin: initialCrop.lonMin, lonMax: initialCrop.lonMax, latMin: initialCrop.latMin, latMax: initialCrop.latMax }
+      ? {
+          lonMin: initialCrop.lonMin,
+          lonMax: initialCrop.lonMax,
+          latMin: initialCrop.latMin,
+          latMax: initialCrop.latMax,
+        }
       : null,
   );
   const [drag, setDrag] = useState<DragPoints | null>(null);
-  const [moveBase, setMoveBase] = useState<{ origin: { lon: number; lat: number }; rect: CropRect } | null>(null);
+  const [moveBase, setMoveBase] = useState<{
+    origin: { lon: number; lat: number };
+    rect: CropRect;
+  } | null>(null);
 
   const toLonLat = (clientX: number, clientY: number): { lon: number; lat: number } | null => {
     if (!svgRef.current) return null;
@@ -74,7 +82,8 @@ export function CropDrawStage() {
     : null;
   const rect = liveDragRect ?? committed;
   const latSpan = rect ? rect.latMax - rect.latMin : 0;
-  const result = rect && rect.lonMin < rect.lonMax && rect.latMin < rect.latMax ? cropToGeography(rect) : null;
+  const result =
+    rect && rect.lonMin < rect.lonMax && rect.latMin < rect.latMax ? cropToGeography(rect) : null;
 
   // Left-click is never used for panning here (that's middle-click, see below), so a left-drag
   // starting on open water/land always begins a brand new rectangle — replacing any existing one.
@@ -228,7 +237,9 @@ export function CropDrawStage() {
           </TransformWrapper>
         </div>
         <p className="muted editor-hint">{hint}</p>
-        {latSpan > 60 && <p className="error editor-hint editor-hint--warning">{t('builder.cropLatWarning')}</p>}
+        {latSpan > 60 && (
+          <p className="error editor-hint editor-hint--warning">{t('builder.cropLatWarning')}</p>
+        )}
       </div>
       <aside className="card stack editor-inspector">
         <h3>{t('builder.cropPreview')}</h3>

@@ -214,7 +214,11 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
   });
 
   it('awaits an async boardResolver on recovery (custom-map content lookups are DB round-trips)', async () => {
-    const config: GameConfig = { seed: 'async-resolver', players: twoPlayers, contentHash: CONTENT_HASH };
+    const config: GameConfig = {
+      seed: 'async-resolver',
+      players: twoPlayers,
+      contentHash: CONTENT_HASH,
+    };
     const live = new GameSession('gasync', board, config);
     await store.createGame('gasync', config, live.raw(), live.digest());
     await driveDirect(live, 'gasync', 10);

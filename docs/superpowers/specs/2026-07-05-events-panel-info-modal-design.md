@@ -17,6 +17,7 @@ Escape-to-close).
 ## Scope
 
 Rows that get the info button — every row keyed by an event `kind`:
+
 - **Active events** (`ev.active`, each an `info.kind`)
 - **Charters** (`ev.charters`, always `CHARTER_SPECIAL`)
 - **Forecast** (`ev.forecast?.kind`)
@@ -48,19 +49,25 @@ existing inline copy.
   copy needed for the button itself.)
 - At the end of the component, when `infoKind` is set, render a modal:
   ```tsx
-  {infoKind && (
-    <div className="modal-backdrop" onClick={() => setInfoKind(null)}>
-      <div className="modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-head">
-          <h3>{t(eventNameKey(infoKind))}</h3>
-          <button className="icon-button" aria-label={t('close')} onClick={() => setInfoKind(null)}>
-            <X size={16} aria-hidden />
-          </button>
+  {
+    infoKind && (
+      <div className="modal-backdrop" onClick={() => setInfoKind(null)}>
+        <div className="modal" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-head">
+            <h3>{t(eventNameKey(infoKind))}</h3>
+            <button
+              className="icon-button"
+              aria-label={t('close')}
+              onClick={() => setInfoKind(null)}
+            >
+              <X size={16} aria-hidden />
+            </button>
+          </div>
+          <p>{t(eventDescKey(infoKind))}</p>
         </div>
-        <p>{t(eventDescKey(infoKind))}</p>
       </div>
-    </div>
-  )}
+    );
+  }
   ```
 - `Escape` closes the modal too (matching `ConfirmDialog`'s `useEffect` + `keydown` listener
   pattern), in addition to backdrop click and the `X` button.

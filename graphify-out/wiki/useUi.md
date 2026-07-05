@@ -7,6 +7,7 @@
 ## Connections by Relation
 
 ### calls
+
 - GameStage() `EXTRACTED`
 - TicketCard() `EXTRACTED`
 - ReplayStage() `EXTRACTED`
@@ -27,9 +28,11 @@
 - TutorialScreen() `EXTRACTED`
 
 ### contains
+
 - ui.ts `EXTRACTED`
 
 ### imports
+
 - GameStage.tsx `EXTRACTED`
 - Board.tsx `EXTRACTED`
 - ReplayScreen.tsx `EXTRACTED`
@@ -53,4 +56,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

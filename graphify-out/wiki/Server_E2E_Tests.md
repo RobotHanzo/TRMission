@@ -29,7 +29,7 @@
 - **.adopt()** (3 connections) — `apps/server/src/game/game-registry.ts`
 - **paymentToPb()** (3 connections) — `apps/server/test/helpers.ts`
 - **hello()** (3 connections) — `apps/server/test/history-chat.e2e.spec.ts`
-- *... and 33 more nodes in this community*
+- _... and 33 more nodes in this community_
 
 ## Relationships
 
@@ -73,4 +73,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

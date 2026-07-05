@@ -1,1 +1,104 @@
-{"nodes": [{"id": "_claude_skills_graphify_references_extraction_spec_subagent_prompt", "label": "Extraction Subagent Prompt", "file_type": "concept", "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "_claude_skills_graphify_references_extraction_spec_confidence_rubric", "label": "Confidence Scoring Rubric", "file_type": "rationale", "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "A discrete rubric (1.0 EXTRACTED; 0.95/0.85/0.75/0.65/0.55 for INFERRED; 0.1-0.3 AMBIGUOUS) exists because models follow discrete rubrics better than continuous ranges - the bimodal distribution observed in production (over 50% at 0.5, over 40% at 0.85+) showed free-form guidance collapsing to a binary."}, {"id": "_claude_skills_graphify_references_extraction_spec_node_id_format", "label": "Node ID Format Rule", "file_type": "rationale", "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "IDs must be {full_repo_relative_stem}_{entity}, using every directory level and not just the immediate parent, so semantic-extraction IDs deterministically match AST-extractor IDs and never create orphan ghost-duplicate nodes."}, {"id": "_claude_skills_graphify_references_extraction_spec_hyperedges_rule", "label": "Hyperedges Rule", "file_type": "concept", "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "_claude_skills_graphify_references_extraction_spec_semantic_similarity_rule", "label": "Semantic Similarity Edge Rule", "file_type": "concept", "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_claude_skills_graphify_references_extraction_spec_subagent_prompt", "target": "_claude_skills_graphify_references_extraction_spec_confidence_rubric", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "weight": 1.0}, {"source": "_claude_skills_graphify_references_extraction_spec_subagent_prompt", "target": "_claude_skills_graphify_references_extraction_spec_node_id_format", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "weight": 1.0}, {"source": "_claude_skills_graphify_references_extraction_spec_subagent_prompt", "target": "_claude_skills_graphify_references_extraction_spec_hyperedges_rule", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "weight": 1.0}, {"source": "_claude_skills_graphify_references_extraction_spec_subagent_prompt", "target": "_claude_skills_graphify_references_extraction_spec_semantic_similarity_rule", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".claude/skills/graphify/references/extraction-spec.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_claude_skills_graphify_references_extraction_spec_subagent_prompt",
+      "label": "Extraction Subagent Prompt",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "_claude_skills_graphify_references_extraction_spec_confidence_rubric",
+      "label": "Confidence Scoring Rubric",
+      "file_type": "rationale",
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "A discrete rubric (1.0 EXTRACTED; 0.95/0.85/0.75/0.65/0.55 for INFERRED; 0.1-0.3 AMBIGUOUS) exists because models follow discrete rubrics better than continuous ranges - the bimodal distribution observed in production (over 50% at 0.5, over 40% at 0.85+) showed free-form guidance collapsing to a binary."
+    },
+    {
+      "id": "_claude_skills_graphify_references_extraction_spec_node_id_format",
+      "label": "Node ID Format Rule",
+      "file_type": "rationale",
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "IDs must be {full_repo_relative_stem}_{entity}, using every directory level and not just the immediate parent, so semantic-extraction IDs deterministically match AST-extractor IDs and never create orphan ghost-duplicate nodes."
+    },
+    {
+      "id": "_claude_skills_graphify_references_extraction_spec_hyperedges_rule",
+      "label": "Hyperedges Rule",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "_claude_skills_graphify_references_extraction_spec_semantic_similarity_rule",
+      "label": "Semantic Similarity Edge Rule",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_claude_skills_graphify_references_extraction_spec_subagent_prompt",
+      "target": "_claude_skills_graphify_references_extraction_spec_confidence_rubric",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_claude_skills_graphify_references_extraction_spec_subagent_prompt",
+      "target": "_claude_skills_graphify_references_extraction_spec_node_id_format",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_claude_skills_graphify_references_extraction_spec_subagent_prompt",
+      "target": "_claude_skills_graphify_references_extraction_spec_hyperedges_rule",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_claude_skills_graphify_references_extraction_spec_subagent_prompt",
+      "target": "_claude_skills_graphify_references_extraction_spec_semantic_similarity_rule",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/skills/graphify/references/extraction-spec.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

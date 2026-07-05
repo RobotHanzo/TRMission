@@ -12,7 +12,7 @@
 
 - The existing `GET /auth/oauth/google/start` + `/callback` redirect flow stays exactly as-is — it is the accepted fallback, not something to remove or refactor (spec non-goal).
 - Discord's flow is untouched.
-- `googleClientId` is not a secret (Google client IDs are meant to be embedded in public web pages) — only the client *secret* stays server-only.
+- `googleClientId` is not a secret (Google client IDs are meant to be embedded in public web pages) — only the client _secret_ stays server-only.
 - Use `google-auth-library` only for `OAuth2Client.verifyIdToken` — do not hand-roll JWT/JWKS verification (approved in the spec: this is security-sensitive code not worth re-deriving, unlike the existing hand-rolled authorization-code exchange in `oauth.http.ts`, which has a code-exchange step to lean on that this flow does not).
 - Follow the codebase's existing DI-seam-for-network-calls pattern (`OAUTH_HTTP` / `FakeOauthHttp`) for the new Google ID-token verifier, so e2e tests never call Google's real JWKS endpoint.
 - Follow the existing zod-is-the-single-source pattern (`nestjs-zod`) for the new endpoint's request/response schemas — do not hand-write a separate OpenAPI schema.
@@ -24,12 +24,14 @@
 ### Task 1: Expose `googleClientId` via `GET /auth/config`
 
 **Files:**
+
 - Modify: `apps/server/src/auth/auth-config.ts:100-111` (`publicConfig()`)
 - Modify: `apps/server/src/auth/auth.schemas.ts:47-51` (`AuthConfigSchema`)
 - Modify: `apps/web/src/net/rest.ts:30-34` (`AuthConfig` interface)
 - Test: `apps/server/test/auth.e2e.spec.ts`
 
 **Interfaces:**
+
 - Produces: `AuthConfig.publicConfig()` return type gains `googleClientId?: string` — later tasks (Task 2, Task 5) read `config.googleClientId` to decide whether to attempt GSI at all.
 
 - [ ] **Step 1: Write the failing e2e assertion**
@@ -37,10 +39,10 @@
 In `apps/server/test/auth.e2e.spec.ts`, inside the existing `describe('auth: OAuth (Google + Discord, bound by email)', ...)` block (the one that does `o = await createTestApp({ authConfig: OAUTH_TEST_CONFIG, oauthHttp: fake })`), add a new test right after the existing `'advertises both providers via /config'` test:
 
 ```ts
-  it('exposes googleClientId alongside the boolean flag', async () => {
-    const res = await request(oServer()).get('/api/v1/auth/config').expect(200);
-    expect(res.body.googleClientId).toBe('gid');
-  });
+it('exposes googleClientId alongside the boolean flag', async () => {
+  const res = await request(oServer()).get('/api/v1/auth/config').expect(200);
+  expect(res.body.googleClientId).toBe('gid');
+});
 ```
 
 - [ ] **Step 2: Run it, confirm it fails**
@@ -137,6 +139,7 @@ git commit -m "feat(auth): expose googleClientId via /auth/config"
 ### Task 2: Google credential sign-in endpoint (`POST /auth/oauth/google/credential`)
 
 **Files:**
+
 - Create: `apps/server/src/auth/google-id-token.verifier.ts`
 - Modify: `apps/server/src/auth/oauth.service.ts`
 - Modify: `apps/server/src/auth/auth.controller.ts`
@@ -147,6 +150,7 @@ git commit -m "feat(auth): expose googleClientId via /auth/config"
 - Test: `apps/server/test/auth.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `OauthProfile` (`apps/server/src/auth/oauth.http.ts`) — `{ sub, email, emailVerified, displayName, avatarUrl }`; `OauthService`'s private `resolveAccount(provider: OauthProvider, email: string, sub: string, rawName: string, avatarUrl: string | null, guestUserId: string | undefined): Promise<UserDoc>`; `AuthService.issueFor(user: UserDoc): Promise<IssuedAuth>`; `OauthService.guestIdFromRefresh(refreshToken: string | undefined): Promise<string | undefined>`; `AuthConfig.provider('google')` (`apps/server/src/auth/auth-config.ts`).
 - Produces: `GOOGLE_ID_TOKEN_VERIFIER` DI token + `GoogleIdTokenVerifier` interface (`{ verify(idToken: string, audience: string): Promise<OauthProfile> }`) — a test double `FakeGoogleIdTokenVerifier` in `test/app.ts` with the same shape as `FakeOauthHttp` (public `profile`/`fail` fields). `OauthService.handleCredential(idToken: string, guestUserId: string | undefined): Promise<IssuedAuth>`.
 
@@ -220,8 +224,8 @@ Add a field to `TestAppOptions` (right after `oauthHttp`):
 In `createTestApp`, add the override alongside the existing `oauthHttp` override:
 
 ```ts
-  if (opts.googleVerifier)
-    builder = builder.overrideProvider(GOOGLE_ID_TOKEN_VERIFIER).useValue(opts.googleVerifier);
+if (opts.googleVerifier)
+  builder = builder.overrideProvider(GOOGLE_ID_TOKEN_VERIFIER).useValue(opts.googleVerifier);
 ```
 
 Add the fake class alongside `FakeOauthHttp`:
@@ -352,10 +356,7 @@ describe('auth: Google credential sign-in (One Tap / rendered button)', () => {
   });
 
   it('validates the request body via the zod pipe', async () => {
-    await request(oServer())
-      .post('/api/v1/auth/oauth/google/credential')
-      .send({})
-      .expect(400);
+    await request(oServer()).post('/api/v1/auth/oauth/google/credential').send({}).expect(400);
   });
 
   it('rejects with 403 when the provider is not configured', async () => {
@@ -404,10 +405,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 Add the verifier import, right after the `OAUTH_HTTP` import:
 
 ```ts
-import {
-  GOOGLE_ID_TOKEN_VERIFIER,
-  type GoogleIdTokenVerifier,
-} from './google-id-token.verifier';
+import { GOOGLE_ID_TOKEN_VERIFIER, type GoogleIdTokenVerifier } from './google-id-token.verifier';
 ```
 
 Add the constructor parameter, right after the existing `@Inject(OAUTH_HTTP)` one:
@@ -539,11 +537,13 @@ git commit -m "feat(auth): add Google credential sign-in endpoint for One Tap / 
 ### Task 3: Web API client + session store action
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Modify: `apps/web/src/store/session.ts`
 - Test: `apps/web/src/store/session.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AuthResult` (`apps/web/src/net/rest.ts`) — `{ user: PublicUser; accessToken: string }`.
 - Produces: `api.googleCredential(credential: string): Promise<AuthResult>`; `useSession`'s `loginWithGoogleCredential(credential: string): Promise<void>` — Task 5's `LoginScreen` calls this from the GSI callback.
 
@@ -629,10 +629,12 @@ git commit -m "feat(web): add loginWithGoogleCredential session action"
 ### Task 4: GSI script loader (`net/google.ts`)
 
 **Files:**
+
 - Create: `apps/web/src/net/google.ts`
 - Test: `apps/web/src/net/google.test.ts`
 
 **Interfaces:**
+
 - Produces: `GoogleAccountsId` interface (`{ initialize(config): void; prompt(): void; renderButton(parent, options): void }`); `loadGoogleIdentityServices(): Promise<GoogleAccountsId>`; `googleLocale(locale: string): string` — Task 5's `LoginScreen` imports all three.
 
 - [ ] **Step 1: Write the failing tests**
@@ -806,11 +808,13 @@ git commit -m "feat(web): add Google Identity Services script loader"
 ### Task 5: Wire `LoginScreen` to GSI (One Tap + rendered button + fallback)
 
 **Files:**
+
 - Modify: `apps/web/src/screens/LoginScreen.tsx`
 - Modify: `apps/web/src/styles/app.css`
 - Test: `apps/web/src/screens/LoginScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `loadGoogleIdentityServices`, `googleLocale`, `GoogleAccountsId` (Task 4, `../net/google`); `loginWithGoogleCredential` (Task 3, `useSession`); `config.googleClientId` (Task 1, `AuthConfig`).
 
 - [ ] **Step 1: Write the failing component tests**
@@ -829,42 +833,42 @@ vi.mock('../net/google', () => ({
 Add two new tests at the end of the `describe('LoginScreen', ...)` block:
 
 ```tsx
-  it("renders Google's rendered button and fires One Tap once GSI loads", async () => {
-    window.history.replaceState(null, '', '/login');
-    const accounts = { initialize: vi.fn(), prompt: vi.fn(), renderButton: vi.fn() };
-    vi.mocked(loadGoogleIdentityServices).mockResolvedValue(accounts);
-    vi.spyOn(api, 'config').mockResolvedValue({
-      passwordLogin: false,
-      guest: false,
-      providers: { google: true, discord: false },
-      googleClientId: 'test-client-id',
-    });
-    render(<LoginScreen />);
-
-    await waitFor(() => expect(accounts.prompt).toHaveBeenCalled());
-    expect(accounts.initialize).toHaveBeenCalledWith(
-      expect.objectContaining({ client_id: 'test-client-id' }),
-    );
-    expect(accounts.renderButton).toHaveBeenCalled();
-    expect(screen.getByTestId('google-signin-button')).toBeVisible();
-    expect(screen.queryByRole('link', { name: '使用 Google 繼續' })).not.toBeInTheDocument();
+it("renders Google's rendered button and fires One Tap once GSI loads", async () => {
+  window.history.replaceState(null, '', '/login');
+  const accounts = { initialize: vi.fn(), prompt: vi.fn(), renderButton: vi.fn() };
+  vi.mocked(loadGoogleIdentityServices).mockResolvedValue(accounts);
+  vi.spyOn(api, 'config').mockResolvedValue({
+    passwordLogin: false,
+    guest: false,
+    providers: { google: true, discord: false },
+    googleClientId: 'test-client-id',
   });
+  render(<LoginScreen />);
 
-  it('falls back to the legacy redirect button when GSI fails to load', async () => {
-    window.history.replaceState(null, '', '/login');
-    vi.mocked(loadGoogleIdentityServices).mockRejectedValue(new Error('blocked'));
-    vi.spyOn(api, 'config').mockResolvedValue({
-      passwordLogin: false,
-      guest: false,
-      providers: { google: true, discord: false },
-      googleClientId: 'test-client-id',
-    });
-    render(<LoginScreen />);
+  await waitFor(() => expect(accounts.prompt).toHaveBeenCalled());
+  expect(accounts.initialize).toHaveBeenCalledWith(
+    expect.objectContaining({ client_id: 'test-client-id' }),
+  );
+  expect(accounts.renderButton).toHaveBeenCalled();
+  expect(screen.getByTestId('google-signin-button')).toBeVisible();
+  expect(screen.queryByRole('link', { name: '使用 Google 繼續' })).not.toBeInTheDocument();
+});
 
-    const link = await screen.findByRole('link', { name: '使用 Google 繼續' });
-    expect(link).toHaveAttribute('href', '/api/v1/auth/oauth/google/start?redirect=%2F');
-    expect(screen.getByTestId('google-signin-button')).not.toBeVisible();
+it('falls back to the legacy redirect button when GSI fails to load', async () => {
+  window.history.replaceState(null, '', '/login');
+  vi.mocked(loadGoogleIdentityServices).mockRejectedValue(new Error('blocked'));
+  vi.spyOn(api, 'config').mockResolvedValue({
+    passwordLogin: false,
+    guest: false,
+    providers: { google: true, discord: false },
+    googleClientId: 'test-client-id',
   });
+  render(<LoginScreen />);
+
+  const link = await screen.findByRole('link', { name: '使用 Google 繼續' });
+  expect(link).toHaveAttribute('href', '/api/v1/auth/oauth/google/start?redirect=%2F');
+  expect(screen.getByTestId('google-signin-button')).not.toBeVisible();
+});
 ```
 
 Update the `@testing-library/react` import at the top of the file to include `waitFor`:
@@ -906,97 +910,101 @@ import { loadGoogleIdentityServices, googleLocale } from '../net/google';
 Change the `useTranslation()` destructure:
 
 ```tsx
-  const { t } = useTranslation();
+const { t } = useTranslation();
 ```
 
 to:
 
 ```tsx
-  const { t, i18n } = useTranslation();
+const { t, i18n } = useTranslation();
 ```
 
 Add the new session selector, right after the existing `register` selector:
 
 ```tsx
-  const register = useSession((s) => s.register);
-  const loginWithGoogleCredential = useSession((s) => s.loginWithGoogleCredential);
+const register = useSession((s) => s.register);
+const loginWithGoogleCredential = useSession((s) => s.loginWithGoogleCredential);
 ```
 
 Add new state + a ref, right after the existing `password` state:
 
 ```tsx
-  const [password, setPassword] = useState('');
-  const [googleWidget, setGoogleWidget] = useState<'pending' | 'ready' | 'failed'>('pending');
-  const googleButtonRef = useRef<HTMLDivElement>(null);
+const [password, setPassword] = useState('');
+const [googleWidget, setGoogleWidget] = useState<'pending' | 'ready' | 'failed'>('pending');
+const googleButtonRef = useRef<HTMLDivElement>(null);
 ```
 
 Add a new effect, right after the existing config-loading `useEffect` (the one calling `api.config()`):
 
 ```tsx
-  // Load Google Identity Services once we know the client id, render its own button, and fire
-  // One Tap. Falls back to the legacy redirect anchor if the script can't load (blocked, offline).
-  useEffect(() => {
-    const clientId = config?.googleClientId;
-    if (!config?.providers.google || !clientId) return;
-    let live = true;
-    void loadGoogleIdentityServices()
-      .then((accounts) => {
-        if (!live) return;
-        accounts.initialize({
-          client_id: clientId,
-          callback: (resp) => void loginWithGoogleCredential(resp.credential),
-          use_fedcm_for_prompt: true,
-        });
-        if (googleButtonRef.current) {
-          accounts.renderButton(googleButtonRef.current, {
-            theme: 'outline',
-            size: 'large',
-            text: 'continue_with',
-            locale: googleLocale(i18n.language),
-          });
-        }
-        accounts.prompt();
-        setGoogleWidget('ready');
-      })
-      .catch(() => {
-        if (live) setGoogleWidget('failed');
+// Load Google Identity Services once we know the client id, render its own button, and fire
+// One Tap. Falls back to the legacy redirect anchor if the script can't load (blocked, offline).
+useEffect(() => {
+  const clientId = config?.googleClientId;
+  if (!config?.providers.google || !clientId) return;
+  let live = true;
+  void loadGoogleIdentityServices()
+    .then((accounts) => {
+      if (!live) return;
+      accounts.initialize({
+        client_id: clientId,
+        callback: (resp) => void loginWithGoogleCredential(resp.credential),
+        use_fedcm_for_prompt: true,
       });
-    return () => {
-      live = false;
-    };
-  }, [config?.providers.google, config?.googleClientId, i18n.language, loginWithGoogleCredential]);
+      if (googleButtonRef.current) {
+        accounts.renderButton(googleButtonRef.current, {
+          theme: 'outline',
+          size: 'large',
+          text: 'continue_with',
+          locale: googleLocale(i18n.language),
+        });
+      }
+      accounts.prompt();
+      setGoogleWidget('ready');
+    })
+    .catch(() => {
+      if (live) setGoogleWidget('failed');
+    });
+  return () => {
+    live = false;
+  };
+}, [config?.providers.google, config?.googleClientId, i18n.language, loginWithGoogleCredential]);
 ```
 
 Replace the Google button block inside the `{hasOauth && (...)}` section:
 
 ```tsx
-              {config!.providers.google && (
-                <a className="oauth-btn oauth-google" href={oauthStartUrl('google')}>
-                  <GoogleIcon />
-                  {t('continueWithGoogle')}
-                </a>
-              )}
+{
+  config!.providers.google && (
+    <a className="oauth-btn oauth-google" href={oauthStartUrl('google')}>
+      <GoogleIcon />
+      {t('continueWithGoogle')}
+    </a>
+  );
+}
 ```
 
 with:
 
 ```tsx
-              {config!.providers.google && (
-                <>
-                  <div
-                    className="oauth-google-btn"
-                    data-testid="google-signin-button"
-                    ref={googleButtonRef}
-                    hidden={googleWidget !== 'ready'}
-                  />
-                  {googleWidget !== 'ready' && (
-                    <a className="oauth-btn oauth-google" href={oauthStartUrl('google')}>
-                      <GoogleIcon />
-                      {t('continueWithGoogle')}
-                    </a>
-                  )}
-                </>
-              )}
+{
+  config!.providers.google && (
+    <>
+      <div
+        className="oauth-google-btn"
+        data-testid="google-signin-button"
+        ref={googleButtonRef}
+        hidden={googleWidget !== 'ready'}
+      />
+      {googleWidget !== 'ready' && (
+        <a className="oauth-btn oauth-google" href={oauthStartUrl('google')}>
+          <GoogleIcon />
+          {t('continueWithGoogle')}
+        </a>
+      )}
+    </>
+  );
+}
 ```
 
 - [ ] **Step 4: Add the container's CSS**
@@ -1037,6 +1045,7 @@ git commit -m "feat(web): render Google's One Tap + sign-in button on LoginScree
 ### Task 6: Update CLAUDE.md docs
 
 **Files:**
+
 - Modify: `apps/server/CLAUDE.md`
 - Modify: `apps/web/CLAUDE.md`
 

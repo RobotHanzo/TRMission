@@ -29,7 +29,7 @@ The existing `eventToasts` slice already has the isolation semantics this needs 
 store is accessed through `useAnimationsStore`, which resolves to a **contextual, isolated**
 instance under `AnimationsStoreProvider` (used by the in-game encyclopedia sandbox and the replay
 screen) or falls back to the shared live singleton otherwise. This matters because a sandbox demo
-can be open *over* a live game at the same time (`EncyclopediaModal`) — without this isolation, a
+can be open _over_ a live game at the same time (`EncyclopediaModal`) — without this isolation, a
 demo's chips and the real game's chips would land in the same array. Building a brand-new store
 would have to re-solve this; extending the existing slice inherits it automatically. `RoomScreen`
 (no game yet, no provider) naturally falls back to the live singleton, which is correct since

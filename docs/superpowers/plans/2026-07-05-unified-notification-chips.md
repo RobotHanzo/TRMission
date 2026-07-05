@@ -21,7 +21,7 @@ discriminated union (`announced`/`bonus` event cues, `error`/`notice`/`success` 
 - No new i18n strings — every notification's text is already fully resolved by existing i18n keys
   at its call site (`copied`, `insufficientCards`, `insufficientLocos`, `noStationsLeft`,
   `actionRejected`, `errors.*` event-rejection keys, `log.eventAnnounced`, `log.eventBonus.*`).
-- No behavior change to *which* events produce a chip or to the chat-rejection filter
+- No behavior change to _which_ events produce a chip or to the chat-rejection filter
   (`isChatRejectionKey`) — only how/where chips render.
 - Auto-dismiss durations must exactly match today's: error 3000ms, notice 3500ms, success 2000ms,
   announced/bonus 3400ms (see the `HOLD_MS` map in Task 1).
@@ -37,6 +37,7 @@ discriminated union (`announced`/`bonus` event cues, `error`/`notice`/`success` 
 ### Task 1: Generalize the store slice + build the unified `NotificationStack` component
 
 **Files:**
+
 - Modify: `apps/web/src/store/animations.ts`
 - Modify: `apps/web/src/hooks/useAnimationDriver.ts`
 - Modify: `apps/web/src/components/EventBanner.tsx`
@@ -47,6 +48,7 @@ discriminated union (`announced`/`bonus` event cues, `error`/`notice`/`success` 
 - Test: `apps/web/src/components/NotificationStack.test.tsx` (create)
 
 **Interfaces:**
+
 - Produces (used by Tasks 2 & 3): `pushNotification(cue: DistributiveOmit<NotificationCue, 'id'>): void`
   and `removeNotification(id: number): void` on the `useAnimations`/`useAnimationsStore` API, plus
   the exported `<NotificationStack />` component (no props).
@@ -66,27 +68,27 @@ Append these two tests inside the existing `describe('animations store', ...)` b
 the closing `});`):
 
 ```ts
-  it('pushNotification adds an event cue; removeNotification removes it by id', () => {
-    useAnimations.getState().pushNotification({
-      variant: 'bonus',
-      kind: 'STAMP_RALLY',
-      reason: 'STAMP',
-      points: 1,
-      cityId: 'taipei',
-      routeId: '',
-    });
-    const cue = useAnimations.getState().notifications[0]!;
-    expect(cue.variant).toBe('bonus');
-    useAnimations.getState().removeNotification(cue.id);
-    expect(useAnimations.getState().notifications).toHaveLength(0);
+it('pushNotification adds an event cue; removeNotification removes it by id', () => {
+  useAnimations.getState().pushNotification({
+    variant: 'bonus',
+    kind: 'STAMP_RALLY',
+    reason: 'STAMP',
+    points: 1,
+    cityId: 'taipei',
+    routeId: '',
   });
+  const cue = useAnimations.getState().notifications[0]!;
+  expect(cue.variant).toBe('bonus');
+  useAnimations.getState().removeNotification(cue.id);
+  expect(useAnimations.getState().notifications).toHaveLength(0);
+});
 
-  it('pushNotification adds a plain system cue carrying pre-resolved text', () => {
-    useAnimations.getState().pushNotification({ variant: 'success', text: '已複製' });
-    const cue = useAnimations.getState().notifications[0]!;
-    expect(cue.variant).toBe('success');
-    expect(cue).toMatchObject({ text: '已複製' });
-  });
+it('pushNotification adds a plain system cue carrying pre-resolved text', () => {
+  useAnimations.getState().pushNotification({ variant: 'success', text: '已複製' });
+  const cue = useAnimations.getState().notifications[0]!;
+  expect(cue.variant).toBe('success');
+  expect(cue).toMatchObject({ text: '已複製' });
+});
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -469,13 +471,13 @@ import { NotificationStack } from './NotificationStack';
 and replace the last line of the portal's JSX:
 
 ```tsx
-      <EventToasts />
+<EventToasts />
 ```
 
 with:
 
 ```tsx
-      <NotificationStack />
+<NotificationStack />
 ```
 
 - [ ] **Step 10: Rename the push calls in `useAnimationDriver.ts`**
@@ -483,13 +485,13 @@ with:
 In `apps/web/src/hooks/useAnimationDriver.ts`, replace:
 
 ```ts
-  const pushEventToast = useAnimationsStore((s) => s.pushEventToast);
+const pushEventToast = useAnimationsStore((s) => s.pushEventToast);
 ```
 
 with:
 
 ```ts
-  const pushNotification = useAnimationsStore((s) => s.pushNotification);
+const pushNotification = useAnimationsStore((s) => s.pushNotification);
 ```
 
 Replace the two call sites:
@@ -672,9 +674,11 @@ EOF
 ### Task 2: Migrate `GameStage.tsx` off `<Toast>` onto the unified stack
 
 **Files:**
+
 - Modify: `apps/web/src/screens/GameStage.tsx`
 
 **Interfaces:**
+
 - Consumes: `useAnimationsStore((s) => s.pushNotification)` from Task 1, with cues shaped
   `{ variant: 'notice' | 'error', text: string }`.
 
@@ -709,18 +713,18 @@ import { useAnimationsStore } from '../store/animations';
 Replace:
 
 ```ts
-  // Client-side nudge (e.g. "not enough cards") shown when a click can't open a modal.
-  const [notice, setNotice] = useState<string | null>(null);
+// Client-side nudge (e.g. "not enough cards") shown when a click can't open a modal.
+const [notice, setNotice] = useState<string | null>(null);
 ```
 
 with:
 
 ```ts
-  const pushNotification = useAnimationsStore((s) => s.pushNotification);
-  // Tracks the last rejection object already turned into a chip, so the push effect below can
-  // list its true dependencies (rejection, pushNotification, t) without re-pushing the same
-  // rejection when pushNotification/t merely change identity (e.g. a locale switch).
-  const pushedRejectionRef = useRef<RejectionInfo | null>(null);
+const pushNotification = useAnimationsStore((s) => s.pushNotification);
+// Tracks the last rejection object already turned into a chip, so the push effect below can
+// list its true dependencies (rejection, pushNotification, t) without re-pushing the same
+// rejection when pushNotification/t merely change identity (e.g. a locale switch).
+const pushedRejectionRef = useRef<RejectionInfo | null>(null);
 ```
 
 Add `useRef` to the existing React import — replace:
@@ -738,35 +742,35 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 Replace:
 
 ```ts
-  useEffect(() => {
-    if (!rejection) return;
-    const id = setTimeout(() => setRejection(null), 3000);
-    return () => clearTimeout(id);
-  }, [rejection, setRejection]);
-  useEffect(() => {
-    if (!notice) return;
-    const id = setTimeout(() => setNotice(null), 3500);
-    return () => clearTimeout(id);
-  }, [notice]);
+useEffect(() => {
+  if (!rejection) return;
+  const id = setTimeout(() => setRejection(null), 3000);
+  return () => clearTimeout(id);
+}, [rejection, setRejection]);
+useEffect(() => {
+  if (!notice) return;
+  const id = setTimeout(() => setNotice(null), 3500);
+  return () => clearTimeout(id);
+}, [notice]);
 ```
 
 with:
 
 ```ts
-  useEffect(() => {
-    if (!rejection) return;
-    const id = setTimeout(() => setRejection(null), 3000);
-    return () => clearTimeout(id);
-  }, [rejection, setRejection]);
-  useEffect(() => {
-    if (!rejection || rejection === pushedRejectionRef.current) return;
-    pushedRejectionRef.current = rejection;
-    if (isChatRejectionKey(rejection.messageKey)) return;
-    pushNotification({
-      variant: 'error',
-      text: t(eventRejectionHintKey(rejection.messageKey) ?? 'actionRejected'),
-    });
-  }, [rejection, pushNotification, t]);
+useEffect(() => {
+  if (!rejection) return;
+  const id = setTimeout(() => setRejection(null), 3000);
+  return () => clearTimeout(id);
+}, [rejection, setRejection]);
+useEffect(() => {
+  if (!rejection || rejection === pushedRejectionRef.current) return;
+  pushedRejectionRef.current = rejection;
+  if (isChatRejectionKey(rejection.messageKey)) return;
+  pushNotification({
+    variant: 'error',
+    text: t(eventRejectionHintKey(rejection.messageKey) ?? 'actionRejected'),
+  });
+}, [rejection, pushNotification, t]);
 ```
 
 - [ ] **Step 2: Route the three client-side nudges through `pushNotification`**
@@ -774,62 +778,62 @@ with:
 Replace:
 
 ```ts
-    const s = routeShortfall(hand, route, extra);
-    setNotice(
-      s.kind === 'locos'
-        ? t('insufficientLocos', { need: s.need, have: s.have })
-        : t('insufficientCards', { need: s.need, have: s.have }),
-    );
+const s = routeShortfall(hand, route, extra);
+setNotice(
+  s.kind === 'locos'
+    ? t('insufficientLocos', { need: s.need, have: s.have })
+    : t('insufficientCards', { need: s.need, have: s.have }),
+);
 ```
 
 with:
 
 ```ts
-    const s = routeShortfall(hand, route, extra);
-    pushNotification({
-      variant: 'notice',
-      text:
-        s.kind === 'locos'
-          ? t('insufficientLocos', { need: s.need, have: s.have })
-          : t('insufficientCards', { need: s.need, have: s.have }),
-    });
+const s = routeShortfall(hand, route, extra);
+pushNotification({
+  variant: 'notice',
+  text:
+    s.kind === 'locos'
+      ? t('insufficientLocos', { need: s.need, have: s.have })
+      : t('insufficientCards', { need: s.need, have: s.have }),
+});
 ```
 
 Replace:
 
 ```ts
-    const remaining = myPub?.stationsRemaining ?? 0;
-    if (remaining <= 0) {
-      setNotice(t('noStationsLeft'));
-      return;
-    }
+const remaining = myPub?.stationsRemaining ?? 0;
+if (remaining <= 0) {
+  setNotice(t('noStationsLeft'));
+  return;
+}
 ```
 
 with:
 
 ```ts
-    const remaining = myPub?.stationsRemaining ?? 0;
-    if (remaining <= 0) {
-      pushNotification({ variant: 'notice', text: t('noStationsLeft') });
-      return;
-    }
+const remaining = myPub?.stationsRemaining ?? 0;
+if (remaining <= 0) {
+  pushNotification({ variant: 'notice', text: t('noStationsLeft') });
+  return;
+}
 ```
 
 Replace:
 
 ```ts
-    const s = stationShortfall(hand, cost);
-    setNotice(t('insufficientCards', { need: s.need, have: s.have }));
+const s = stationShortfall(hand, cost);
+setNotice(t('insufficientCards', { need: s.need, have: s.have }));
 ```
 
 with:
 
 ```ts
-    const s = stationShortfall(hand, cost);
-    pushNotification({
-      variant: 'notice',
-      text: t('insufficientCards', { need: s.need, have: s.have }),
-    });
+const s = stationShortfall(hand, cost);
+pushNotification({
+  variant: 'notice',
+  text: t('insufficientCards', { need: s.need, have: s.have }),
+});
 ```
 
 - [ ] **Step 3: Remove the `<Toast>` JSX**
@@ -851,7 +855,7 @@ Replace:
 with:
 
 ```tsx
-      <AnimationLayer />
+<AnimationLayer />
 ```
 
 - [ ] **Step 4: Run the web test suite**
@@ -887,9 +891,11 @@ EOF
 ### Task 3: Migrate `RoomScreen.tsx` off `<Toast>` onto the unified stack
 
 **Files:**
+
 - Modify: `apps/web/src/screens/RoomScreen.tsx`
 
 **Interfaces:**
+
 - Consumes: `useAnimationsStore((s) => s.pushNotification)` from Task 1, `{ variant: 'success', text }`.
 - Consumes: `NotificationStack` from Task 1 (`apps/web/src/components/NotificationStack.tsx`).
 
@@ -926,16 +932,16 @@ import { NotificationStack } from '../components/NotificationStack';
 Replace:
 
 ```ts
-  const [kicked, setKicked] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
+const [kicked, setKicked] = useState(false);
+const [toast, setToast] = useState<string | null>(null);
+const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
 ```
 
 with:
 
 ```ts
-  const [kicked, setKicked] = useState(false);
-  const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
+const [kicked, setKicked] = useState(false);
+const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
 ```
 
 Replace:
@@ -957,13 +963,12 @@ with:
 Replace:
 
 ```ts
-  const flashToast = (msg: string) => {
-    setToast(msg);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 2000);
-  };
-  useEffect(() => () => clearTimeout(toastTimer.current), []);
-
+const flashToast = (msg: string) => {
+  setToast(msg);
+  if (toastTimer.current) clearTimeout(toastTimer.current);
+  toastTimer.current = setTimeout(() => setToast(null), 2000);
+};
+useEffect(() => () => clearTimeout(toastTimer.current), []);
 ```
 
 with nothing (delete these 6 lines entirely — `pushNotification` cues self-expire on their own, no
@@ -974,19 +979,19 @@ local timer/state needed).
 Replace:
 
 ```ts
-    void Promise.resolve(navigator.clipboard.writeText(text)).then(
-      () => flashToast(t('copied')),
-      () => undefined,
-    );
+void Promise.resolve(navigator.clipboard.writeText(text)).then(
+  () => flashToast(t('copied')),
+  () => undefined,
+);
 ```
 
 with:
 
 ```ts
-    void Promise.resolve(navigator.clipboard.writeText(text)).then(
-      () => pushNotification({ variant: 'success', text: t('copied') }),
-      () => undefined,
-    );
+void Promise.resolve(navigator.clipboard.writeText(text)).then(
+  () => pushNotification({ variant: 'success', text: t('copied') }),
+  () => undefined,
+);
 ```
 
 - [ ] **Step 3: Swap the rendered component**
@@ -994,13 +999,13 @@ with:
 Replace:
 
 ```tsx
-      <Toast message={toast} variant="toast-success" />
+<Toast message={toast} variant="toast-success" />
 ```
 
 with:
 
 ```tsx
-      <NotificationStack />
+<NotificationStack />
 ```
 
 - [ ] **Step 4: Run the RoomScreen tests**
@@ -1033,6 +1038,7 @@ EOF
 ### Task 4: Delete `Toast.tsx` and the now-unused CSS
 
 **Files:**
+
 - Delete: `apps/web/src/components/Toast.tsx`
 - Modify: `apps/web/src/styles/game.css`
 
@@ -1112,7 +1118,6 @@ In `apps/web/src/styles/game.css`, delete the standalone toast block (currently 
     animation: none;
   }
 }
-
 ```
 
 (Leave the blank line and the following `/* Spectator banner ... */` section untouched — only the
@@ -1122,14 +1127,14 @@ block above is removed. Note `tr-toast-in`/`tr-toast-out` are already redefined 
 Then delete the dock override block (currently lines 1644–1651):
 
 ```css
-  /* Toasts clear the dock instead of covering the tab bar (fixed-position, but they render
+/* Toasts clear the dock instead of covering the tab bar (fixed-position, but they render
      inside .game so they inherit --tr-dock-h). */
-  .game--dock .toast {
-    bottom: calc(var(--tr-dock-h, 0px) + 72px);
-  }
-  .game--dock .toast.toast-notice {
-    bottom: calc(var(--tr-dock-h, 0px) + 120px);
-  }
+.game--dock .toast {
+  bottom: calc(var(--tr-dock-h, 0px) + 72px);
+}
+.game--dock .toast.toast-notice {
+  bottom: calc(var(--tr-dock-h, 0px) + 120px);
+}
 ```
 
 (Leave the surrounding `.dock-panel .hand { ... }` rule above it and the

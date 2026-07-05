@@ -17,7 +17,7 @@ apex from the straight chord — as an optional, author-editable per-route field
 
 1. **Interaction — drag handle + slider.** Click a route in the new stage → a handle appears at
    the curve's apex and drags along the chord's perpendicular; an inspector panel offers a slider
-   + numeric input, shows the auto-computed value for reference, and has "reset to auto".
+   - numeric input, shows the auto-computed value for reference, and has "reset to auto".
 2. **Scope — symmetric bow only.** One signed number per route (single quadratic Bézier apex
    deviation, the existing geometry model). S-curves / multi-segment waypoint paths are out of
    scope (they would rewrite the shared curve/slot/tie math and the renderer).

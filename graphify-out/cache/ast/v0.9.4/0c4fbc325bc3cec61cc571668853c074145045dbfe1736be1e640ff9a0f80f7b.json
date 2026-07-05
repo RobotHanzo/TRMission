@@ -1,1 +1,207 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_md", "label": "2026-07-03-unified-map-rendering-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "label": "Unified map rendering \u2014 design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_problem", "label": "Problem", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L6"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L32"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_decisions_user_approved", "label": "Decisions (user-approved)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L38"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design", "label": "Design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L45"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_1_shared_cartography_tokens_packages_map_data_src_render_tokens_ts_new", "label": "1. Shared cartography tokens \u2014 `packages/map-data/src/render-tokens.ts` (new)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L47"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_2_mapscene_the_single_map_component_apps_web_src_components_mapscene_tsx", "label": "2. `MapScene` \u2014 the single map component (`apps/web/src/components/MapScene.tsx`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L84"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_3_consumers_become_thin", "label": "3. Consumers become thin", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L117"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_4_og_card_consumes_tokens", "label": "4. OG card consumes tokens", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L130"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_error_handling", "label": "Error handling", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L139"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_testing_validation", "label": "Testing & validation", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L145"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L155"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_problem", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L6", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L32", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_decisions_user_approved", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L38", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L45", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_1_shared_cartography_tokens_packages_map_data_src_render_tokens_ts_new", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L47", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_2_mapscene_the_single_map_component_apps_web_src_components_mapscene_tsx", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L84", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_3_consumers_become_thin", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L117", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_4_og_card_consumes_tokens", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L130", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_error_handling", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L139", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_testing_validation", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L145", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md", "source_location": "L155", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_md",
+      "label": "2026-07-03-unified-map-rendering-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "label": "Unified map rendering \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L32"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_decisions_user_approved",
+      "label": "Decisions (user-approved)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L38"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design",
+      "label": "Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L45"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_1_shared_cartography_tokens_packages_map_data_src_render_tokens_ts_new",
+      "label": "1. Shared cartography tokens \u2014 `packages/map-data/src/render-tokens.ts` (new)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L47"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_2_mapscene_the_single_map_component_apps_web_src_components_mapscene_tsx",
+      "label": "2. `MapScene` \u2014 the single map component (`apps/web/src/components/MapScene.tsx`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L84"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_3_consumers_become_thin",
+      "label": "3. Consumers become thin",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L117"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_4_og_card_consumes_tokens",
+      "label": "4. OG card consumes tokens",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L130"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_error_handling",
+      "label": "Error handling",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L139"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_testing_validation",
+      "label": "Testing & validation",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L145"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L155"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_decisions_user_approved",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_1_shared_cartography_tokens_packages_map_data_src_render_tokens_ts_new",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_2_mapscene_the_single_map_component_apps_web_src_components_mapscene_tsx",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_3_consumers_become_thin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_4_og_card_consumes_tokens",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_error_handling",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L139",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_testing_validation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L145",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_unified_map_rendering_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_03_unified_map_rendering_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-03-unified-map-rendering-design.md",
+      "source_location": "L155",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

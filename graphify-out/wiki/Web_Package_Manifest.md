@@ -29,7 +29,7 @@
 - **@testing-library/react** (1 connections) — `apps/web/package.json`
 - **@types/canvas-confetti** (1 connections) — `apps/web/package.json`
 - **@types/react** (1 connections) — `apps/web/package.json`
-- *... and 16 more nodes in this community*
+- _... and 16 more nodes in this community_
 
 ## Relationships
 
@@ -47,4 +47,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

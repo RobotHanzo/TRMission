@@ -39,7 +39,7 @@ need `<head>`).
   bot requests rewrite to `/api/v1/og/page?path=$uri` (existing `/api/` proxy carries it);
   humans keep getting the SPA shell. Assets and other routes are untouched.
 - The server's meta page is tiny HTML: `og:title/description/image/url`, `twitter:card=
-  summary_large_image`, canonical link, and a meta-refresh to the real path as a safety net for
+summary_large_image`, canonical link, and a meta-refresh to the real path as a safety net for
   odd in-app browsers.
 - Absolute URLs derive from `X-Forwarded-Proto` + `Host` (nginx already forwards both), falling
   back to `env.oauthRedirectBase` — no new required env var.

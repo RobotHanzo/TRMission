@@ -144,11 +144,7 @@ export function SettingsModal({ onClose }: Props) {
             <div className="setting-label">{t('colorBlind')}</div>
             <div className="muted setting-desc">{t('colorBlindDesc')}</div>
           </div>
-          <Switch
-            checked={colorBlind}
-            onChange={chooseColorBlind}
-            label={t('colorBlind')}
-          />
+          <Switch checked={colorBlind} onChange={chooseColorBlind} label={t('colorBlind')} />
         </section>
 
         <section className="setting setting-row">
@@ -165,11 +161,7 @@ export function SettingsModal({ onClose }: Props) {
               onChange={(e) => setSoundVolume(Number(e.target.value))}
             />
           </div>
-          <Switch
-            checked={soundEnabled}
-            onChange={setSoundEnabled}
-            label={t('sound')}
-          />
+          <Switch checked={soundEnabled} onChange={setSoundEnabled} label={t('sound')} />
         </section>
       </div>
     </div>

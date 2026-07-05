@@ -30,7 +30,11 @@ function endgameSnap(version: number, triggered: boolean, triggerIndex = 1): Gam
     ],
     you: { playerId: 'p0' },
     turnOrder: ['p0', 'p1'],
-    endgame: { triggered, triggerPlayerIndex: triggered ? triggerIndex : -1, finalTurnsRemaining: 2 },
+    endgame: {
+      triggered,
+      triggerPlayerIndex: triggered ? triggerIndex : -1,
+      finalTurnsRemaining: 2,
+    },
   });
 }
 
@@ -54,7 +58,14 @@ describe('useAnimationDriver', () => {
   it('fires a fanfare + score float when a new ticket completes for me', () => {
     render(<Harness />);
     act(() => useGame.getState().applySnapshot(snap(1, [{ p: 'p0', t: T1 }])));
-    act(() => useGame.getState().applySnapshot(snap(2, [{ p: 'p0', t: T1 }, { p: 'p0', t: T2 }])));
+    act(() =>
+      useGame.getState().applySnapshot(
+        snap(2, [
+          { p: 'p0', t: T1 },
+          { p: 'p0', t: T2 },
+        ]),
+      ),
+    );
     expect(useAnimations.getState().fanfare?.ticketId).toBe(T2);
     expect(useAnimations.getState().floats.length).toBeGreaterThan(0);
   });

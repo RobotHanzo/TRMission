@@ -1,1 +1,237 @@
-{"nodes": [{"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "label": "Per-Game Settings Design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_ruleparams_variants", "label": "RuleParams rule-variant booleans", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_unlimitedstationborrow", "label": "unlimitedStationBorrow variant (monotonic union-of-borrows)", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_seconddrawafterblindrainbow", "label": "secondDrawAfterBlindRainbow variant", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_nounfinishedticketpenalty", "label": "noUnfinishedTicketPenalty variant", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_completedtickets_lockedstate", "label": "PlayerState.completedTickets locked/banked set", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_roomdoc_settings", "label": "RoomDoc.settings sub-document", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_spectator_path", "label": "Spectator path (seat=-1 ws-ticket sentinel)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_public_rooms_endpoint", "label": "GET /rooms/public endpoint", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_engine_version_bump", "label": "ENGINE_VERSION 1\u21922 bump + golden digest regen", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_ruleparams_variants", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_unlimitedstationborrow", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_seconddrawafterblindrainbow", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_nounfinishedticketpenalty", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_completedtickets_lockedstate", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_roomdoc_settings", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_spectator_path", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_public_rooms_endpoint", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc", "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_engine_version_bump", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_public_rooms_endpoint", "target": "docs_superpowers_specs_2026_06_28_url_routing_reload_state_design_store_ui_url_aware", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_completedtickets_lockedstate", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_completedtickets_wire", "relation": "conceptually_related_to", "confidence": "AMBIGUOUS", "confidence_score": 0.25, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_unlimitedstationborrow", "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_own_track_instant_completion", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.75, "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "label": "Per-Game Settings Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_ruleparams_variants",
+      "label": "RuleParams rule-variant booleans",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_unlimitedstationborrow",
+      "label": "unlimitedStationBorrow variant (monotonic union-of-borrows)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_seconddrawafterblindrainbow",
+      "label": "secondDrawAfterBlindRainbow variant",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_nounfinishedticketpenalty",
+      "label": "noUnfinishedTicketPenalty variant",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_completedtickets_lockedstate",
+      "label": "PlayerState.completedTickets locked/banked set",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_roomdoc_settings",
+      "label": "RoomDoc.settings sub-document",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_spectator_path",
+      "label": "Spectator path (seat=-1 ws-ticket sentinel)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_public_rooms_endpoint",
+      "label": "GET /rooms/public endpoint",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_28_per_game_settings_design_engine_version_bump",
+      "label": "ENGINE_VERSION 1\u21922 bump + golden digest regen",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_ruleparams_variants",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_unlimitedstationborrow",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_seconddrawafterblindrainbow",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_nounfinishedticketpenalty",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_completedtickets_lockedstate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_roomdoc_settings",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_spectator_path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_public_rooms_endpoint",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_doc",
+      "target": "docs_superpowers_specs_2026_06_28_per_game_settings_design_engine_version_bump",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_public_rooms_endpoint",
+      "target": "docs_superpowers_specs_2026_06_28_url_routing_reload_state_design_store_ui_url_aware",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_completedtickets_lockedstate",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_completedtickets_wire",
+      "relation": "conceptually_related_to",
+      "confidence": "AMBIGUOUS",
+      "confidence_score": 0.25,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_28_per_game_settings_design_unlimitedstationborrow",
+      "target": "docs_superpowers_specs_2026_06_28_ingame_animations_design_own_track_instant_completion",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "docs/superpowers/specs/2026-06-28-per-game-settings-design.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

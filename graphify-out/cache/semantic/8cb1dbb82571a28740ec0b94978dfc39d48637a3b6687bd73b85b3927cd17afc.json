@@ -1,1 +1,92 @@
-{"nodes": [{"id": "_claude_skills_graphify_references_update_incremental_update", "label": "--update (Incremental Re-extraction)", "file_type": "concept", "source_file": ".claude/skills/graphify/references/update.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "_claude_skills_graphify_references_update_cluster_only", "label": "--cluster-only", "file_type": "concept", "source_file": ".claude/skills/graphify/references/update.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "_claude_skills_graphify_references_update_build_merge_function", "label": "graphify.build.build_merge", "file_type": "concept", "source_file": ".claude/skills/graphify/references/update.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Reads graph.json directly without a NetworkX round-trip so edge direction (calls/implements/imports) is always preserved; replace-on-re-extract drops every source_file present in the new chunks from the base before merging, so changed files don't leave stale duplicate nodes behind."}, {"id": "_claude_skills_graphify_references_update_graph_diff_function", "label": "graphify.analyze.graph_diff", "file_type": "concept", "source_file": ".claude/skills/graphify/references/update.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_claude_skills_graphify_references_update_build_merge_function", "target": "_claude_skills_graphify_references_github_and_merge_merge_graphs", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.75, "source_file": ".claude/skills/graphify/references/update.md", "source_location": null, "weight": 1.0}, {"source": "_claude_skills_graphify_references_update_incremental_update", "target": "_claude_skills_graphify_references_update_build_merge_function", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".claude/skills/graphify/references/update.md", "source_location": null, "weight": 1.0}, {"source": "_claude_skills_graphify_references_update_incremental_update", "target": "_claude_skills_graphify_references_update_graph_diff_function", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".claude/skills/graphify/references/update.md", "source_location": null, "weight": 1.0}, {"source": "_claude_skills_graphify_references_update_incremental_update", "target": "_claude_skills_graphify_references_transcribe_transcribe_all_function", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".claude/skills/graphify/references/update.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_claude_skills_graphify_references_update_incremental_update",
+      "label": "--update (Incremental Re-extraction)",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/update.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "_claude_skills_graphify_references_update_cluster_only",
+      "label": "--cluster-only",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/update.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "_claude_skills_graphify_references_update_build_merge_function",
+      "label": "graphify.build.build_merge",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/update.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Reads graph.json directly without a NetworkX round-trip so edge direction (calls/implements/imports) is always preserved; replace-on-re-extract drops every source_file present in the new chunks from the base before merging, so changed files don't leave stale duplicate nodes behind."
+    },
+    {
+      "id": "_claude_skills_graphify_references_update_graph_diff_function",
+      "label": "graphify.analyze.graph_diff",
+      "file_type": "concept",
+      "source_file": ".claude/skills/graphify/references/update.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_claude_skills_graphify_references_update_build_merge_function",
+      "target": "_claude_skills_graphify_references_github_and_merge_merge_graphs",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": ".claude/skills/graphify/references/update.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_claude_skills_graphify_references_update_incremental_update",
+      "target": "_claude_skills_graphify_references_update_build_merge_function",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/skills/graphify/references/update.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_claude_skills_graphify_references_update_incremental_update",
+      "target": "_claude_skills_graphify_references_update_graph_diff_function",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/skills/graphify/references/update.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_claude_skills_graphify_references_update_incremental_update",
+      "target": "_claude_skills_graphify_references_transcribe_transcribe_all_function",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/skills/graphify/references/update.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

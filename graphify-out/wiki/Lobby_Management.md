@@ -29,7 +29,7 @@
 - **apiSchema()** (5 connections) — `apps/server/src/openapi/openapi.ts`
 - **.addBot()** (4 connections) — `apps/server/src/lobby/lobby.controller.ts`
 - **.create()** (4 connections) — `apps/server/src/lobby/lobby.controller.ts`
-- *... and 46 more nodes in this community*
+- _... and 46 more nodes in this community_
 
 ## Relationships
 
@@ -61,4 +61,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

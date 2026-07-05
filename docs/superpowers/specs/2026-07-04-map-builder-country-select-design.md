@@ -14,7 +14,7 @@ silhouette directly, with no manual rectangle and no stray neighbours.
 
 ## Decision (settled with the user)
 
-- **Selection UX:** both map-click *and* a searchable sidebar list (grouped by continent, A–Z
+- **Selection UX:** both map-click _and_ a searchable sidebar list (grouped by continent, A–Z
   within each) — not map-click-only. Natural Earth's admin-0 countries include tiny nations
   (Caribbean/Pacific microstates) that are impractical to hit precisely at world-map zoom; the list
   is the reliable path for those, the map click is the fast path for everything else.
@@ -41,7 +41,9 @@ export interface CountryLand {
   readonly continent: string; // CONTINENT, e.g. "Asia" — used for the sidebar's grouping
   readonly rings: readonly Ring[]; // exterior ring(s) only, same Ring type as clip.ts
 }
-export const WORLD_COUNTRIES: readonly CountryLand[] = [ /* 177 entries */ ];
+export const WORLD_COUNTRIES: readonly CountryLand[] = [
+  /* 177 entries */
+];
 ```
 
 Generation mirrors the `worldData.ts` fix from earlier today: fetch the source GeoJSON, keep only
@@ -70,7 +72,7 @@ Split today's `CropStage.tsx` (277 lines, all rectangle-drag logic) into:
     Click toggles that country's id in a local `Set<string>`, following the exact
     select/highlight/toggle pattern `TrimStage.tsx` already uses for its land rings (`selected`
     state, `land-ring--selected`-style CSS class, click-to-toggle, click-on-background-to-clear is
-    *not* wanted here since empty ocean clicks should just do nothing — countries only toggle via
+    _not_ wanted here since empty ocean clicks should just do nothing — countries only toggle via
     their own path or the list).
   - A sidebar list (new `CountryList.tsx`, kept separate so `CountryPickStage.tsx` doesn't balloon):
     a text search input filtering by `nameZh`/`nameEn`/`id`, grouped under continent headings,
@@ -88,7 +90,7 @@ Split today's `CropStage.tsx` (277 lines, all rectangle-drag logic) into:
 New function in `geo/world.ts`, parallel to the existing `cropToGeography(bbox)`:
 
 ```ts
-export function countriesToGeography(ids: readonly string[]): CropResult | null
+export function countriesToGeography(ids: readonly string[]): CropResult | null;
 ```
 
 1. Look up each id in `WORLD_COUNTRIES`; empty/all-unmatched selection returns `null` (mirrors

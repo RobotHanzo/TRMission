@@ -33,7 +33,10 @@ export function TrimStage() {
       // Don't hijack Delete while the user is editing a text field (e.g. the map's name inputs
       // in the header, which stay mounted regardless of stage).
       const target = e.target;
-      if (target instanceof HTMLElement && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      if (
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+      ) {
         return;
       }
       if (e.ctrlKey || e.metaKey) {
@@ -77,7 +80,13 @@ export function TrimStage() {
     <div className="editor-stage-layout">
       <div className="editor-canvas-wrap">
         <div className="editor-canvas-inner" ref={zoomVarRef}>
-          <TransformWrapper minScale={0.5} maxScale={12} initialScale={1} centerOnInit wheel={{ step: 0.0022 }}>
+          <TransformWrapper
+            minScale={0.5}
+            maxScale={12}
+            initialScale={1}
+            centerOnInit
+            wheel={{ step: 0.0022 }}
+          >
             <ZoomVar targetRef={zoomVarRef} />
             <CanvasControls />
             <TransformComponent
@@ -92,7 +101,11 @@ export function TrimStage() {
                 onClick={() => setSelected(new Set())}
               >
                 {geography && (
-                  <CustomGeography geography={geography} selectedRings={selected} onRingClick={toggleRing} />
+                  <CustomGeography
+                    geography={geography}
+                    selectedRings={selected}
+                    onRingClick={toggleRing}
+                  />
                 )}
               </svg>
             </TransformComponent>

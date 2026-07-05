@@ -46,9 +46,13 @@ export function validateRoutePayment(
   }
   if (colorCount + locomotives !== requiredCards) {
     return err(
-      violation('BAD_PAYMENT_LENGTH', `payment ${colorCount}+${locomotives} != length ${requiredCards}`, {
-        length: requiredCards,
-      }),
+      violation(
+        'BAD_PAYMENT_LENGTH',
+        `payment ${colorCount}+${locomotives} != length ${requiredCards}`,
+        {
+          length: requiredCards,
+        },
+      ),
     );
   }
   if (colorCount > 0 && color === null) {
@@ -57,7 +61,9 @@ export function validateRoutePayment(
   // Colour matching: a specific-colour route demands that colour; gray accepts any single colour.
   if (route.color !== 'GRAY' && colorCount > 0 && color !== route.color) {
     return err(
-      violation('BAD_PAYMENT_COLOR', `route needs ${route.color}, got ${color}`, { needed: route.color }),
+      violation('BAD_PAYMENT_COLOR', `route needs ${route.color}, got ${color}`, {
+        needed: route.color,
+      }),
     );
   }
   // Ferry: enough locomotives for the symbols.
@@ -69,7 +75,9 @@ export function validateRoutePayment(
     );
   }
   if (player.trainCars < route.length) {
-    return err(violation('NOT_ENOUGH_TRAINS', `needs ${route.length} trains`, { needed: route.length }));
+    return err(
+      violation('NOT_ENOUGH_TRAINS', `needs ${route.length} trains`, { needed: route.length }),
+    );
   }
   const playedColor = colorCount > 0 ? color : null;
   const spent = spentFrom(playedColor, colorCount, locomotives);

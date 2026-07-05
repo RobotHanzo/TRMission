@@ -52,14 +52,16 @@ export class FetchOauthHttp implements OauthHttp {
         code_verifier: codeVerifier,
       }),
     });
-    if (!tokenRes.ok) throw new Error(`${provider.provider} token exchange failed (${tokenRes.status})`);
+    if (!tokenRes.ok)
+      throw new Error(`${provider.provider} token exchange failed (${tokenRes.status})`);
     const token = (await tokenRes.json()) as { access_token?: string };
     if (!token.access_token) throw new Error(`${provider.provider} returned no access token`);
 
     const profileRes = await fetch(provider.userinfoUrl, {
       headers: { Authorization: `Bearer ${token.access_token}`, Accept: 'application/json' },
     });
-    if (!profileRes.ok) throw new Error(`${provider.provider} userinfo failed (${profileRes.status})`);
+    if (!profileRes.ok)
+      throw new Error(`${provider.provider} userinfo failed (${profileRes.status})`);
     const raw = (await profileRes.json()) as Record<string, unknown>;
 
     if (provider.provider === 'google') {

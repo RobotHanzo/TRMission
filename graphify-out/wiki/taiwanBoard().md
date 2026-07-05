@@ -7,6 +7,7 @@
 ## Connections by Relation
 
 ### calls
+
 - .start() `EXTRACTED`
 - makeConfig() `EXTRACTED`
 - seedDevGame() `EXTRACTED`
@@ -21,9 +22,11 @@
 - makeSandbox() `EXTRACTED`
 
 ### contains
+
 - taiwan.ts `EXTRACTED`
 
 ### imports
+
 - helpers.ts `EXTRACTED`
 - persistence.spec.ts `EXTRACTED`
 - spectators.spec.ts `EXTRACTED`
@@ -46,8 +49,9 @@
 - draw-rainbow.spec.ts `EXTRACTED`
 
 ### re_exports
+
 - index.ts `EXTRACTED`
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

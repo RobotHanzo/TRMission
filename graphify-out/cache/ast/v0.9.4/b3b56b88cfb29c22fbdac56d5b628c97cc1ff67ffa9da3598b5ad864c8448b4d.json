@@ -1,1 +1,255 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_md", "label": "2026-06-29-action-log-and-chat-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "label": "Action log + chat panel \u2014 design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L9"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_decisions_load_bearing", "label": "Decisions (load-bearing)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L17"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_layout_responsive_behaviour", "label": "Layout & responsive behaviour", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L51"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log", "label": "Action log", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L73"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_data_flow", "label": "Data flow", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L75"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_entry_model_translation", "label": "Entry model & translation", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L85"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_event_vocabulary_importance", "label": "Event vocabulary & importance", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L105"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat", "label": "Chat", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L127"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_wire_proto_changes_trm_proto", "label": "Wire / proto changes (`@trm/proto`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L144"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_server_changes_apps_server", "label": "Server changes (`apps/server`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L162"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_web_changes_apps_web", "label": "Web changes (`apps/web`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L179"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_error_handling_edge_cases", "label": "Error handling & edge cases", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L198"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_testing_verification", "label": "Testing & verification", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L209"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L224"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L9", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_decisions_load_bearing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L17", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_layout_responsive_behaviour", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L51", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L73", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_data_flow", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L75", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_entry_model_translation", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L85", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_event_vocabulary_importance", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L105", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L127", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_wire_proto_changes_trm_proto", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L144", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_server_changes_apps_server", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L162", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_web_changes_apps_web", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L179", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_error_handling_edge_cases", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L198", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_testing_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L209", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md", "source_location": "L224", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_md",
+      "label": "2026-06-29-action-log-and-chat-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "label": "Action log + chat panel \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L9"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_decisions_load_bearing",
+      "label": "Decisions (load-bearing)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L17"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_layout_responsive_behaviour",
+      "label": "Layout & responsive behaviour",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L51"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log",
+      "label": "Action log",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L73"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_data_flow",
+      "label": "Data flow",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L75"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_entry_model_translation",
+      "label": "Entry model & translation",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L85"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_event_vocabulary_importance",
+      "label": "Event vocabulary & importance",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L105"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat",
+      "label": "Chat",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L127"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_wire_proto_changes_trm_proto",
+      "label": "Wire / proto changes (`@trm/proto`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L144"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_server_changes_apps_server",
+      "label": "Server changes (`apps/server`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L162"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_web_changes_apps_web",
+      "label": "Web changes (`apps/web`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L179"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_error_handling_edge_cases",
+      "label": "Error handling & edge cases",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L198"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_testing_verification",
+      "label": "Testing & verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L209"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L224"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_decisions_load_bearing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_layout_responsive_behaviour",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L73",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_data_flow",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_entry_model_translation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_event_vocabulary_importance",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_chat",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L127",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_wire_proto_changes_trm_proto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L144",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_server_changes_apps_server",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L162",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_web_changes_apps_web",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_error_handling_edge_cases",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L198",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_testing_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L209",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_action_log_chat_panel_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-29-action-log-and-chat-design.md",
+      "source_location": "L224",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

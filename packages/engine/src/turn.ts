@@ -31,10 +31,18 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
 
   let endgame = state.endgame;
   let triggeredNow = false;
-  if (!endgame.triggered && (player?.trainCars ?? Infinity) <= state.ruleParams.endgameTrainThreshold) {
+  if (
+    !endgame.triggered &&
+    (player?.trainCars ?? Infinity) <= state.ruleParams.endgameTrainThreshold
+  ) {
     endgame = { triggered: true, triggerPlayerIndex: curIdx, finalTurnsRemaining: n };
     triggeredNow = true;
-    events.push({ e: 'ENDGAME_TRIGGERED', player: curPlayer, finalTurnsRemaining: n, visibility: 'PUBLIC' });
+    events.push({
+      e: 'ENDGAME_TRIGGERED',
+      player: curPlayer,
+      finalTurnsRemaining: n,
+      visibility: 'PUBLIC',
+    });
   } else if (endgame.triggered) {
     endgame = { ...endgame, finalTurnsRemaining: endgame.finalTurnsRemaining - 1 };
   }

@@ -25,10 +25,12 @@
 **Why this is first:** `countriesToGeography` (Task 3) will feed `isValidCrop` a bounding box computed from real countries' actual extents. Natural Earth's data puts Greenland's northern tip at **83.65°N**, Canada at **83.23°N**, Russia at **81.25°N**, Norway at **80.66°N** — all beyond the current `±80°` gate, which would silently reject perfectly ordinary single-country selections. Antarctica (which does need rejecting — it reaches **-90°**) will be excluded from the vendored dataset entirely in Task 2, so it's not a reason to loosen this further.
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/geo/projection.ts:30-41` (`isValidCrop`)
 - Modify: `apps/web/src/features/builder/geo/projection.test.ts:12-15` (existing `isValidCrop` describe block)
 
 **Interfaces:**
+
 - Consumes: nothing new.
 - Produces: `isValidCrop(crop: CropBBox): boolean` — same signature, only the polar threshold changes from 80 to 84. `CropBBox = { lonMin: number; lonMax: number; latMin: number; latMax: number }` (already defined in this file, unchanged).
 
@@ -37,15 +39,15 @@
 In `apps/web/src/features/builder/geo/projection.test.ts`, replace the `'rejects latitudes beyond the polar clamp'` test:
 
 ```ts
-  it('rejects latitudes beyond the polar clamp', () => {
-    expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: -85, latMax: 10 })).toBe(false);
-    expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: 0, latMax: 85 })).toBe(false);
-  });
+it('rejects latitudes beyond the polar clamp', () => {
+  expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: -85, latMax: 10 })).toBe(false);
+  expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: 0, latMax: 85 })).toBe(false);
+});
 
-  it('accepts real-world high-latitude country extents (Greenland reaches 83.65°N)', () => {
-    expect(isValidCrop({ lonMin: -73.3, lonMax: -12.21, latMin: 60.04, latMax: 83.65 })).toBe(true);
-    expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: 0, latMax: 84 })).toBe(true);
-  });
+it('accepts real-world high-latitude country extents (Greenland reaches 83.65°N)', () => {
+  expect(isValidCrop({ lonMin: -73.3, lonMax: -12.21, latMin: 60.04, latMax: 83.65 })).toBe(true);
+  expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: 0, latMax: 84 })).toBe(true);
+});
 ```
 
 - [ ] **Step 2: Run the test to see the new assertion fail**
@@ -94,17 +96,19 @@ git commit -m "fix(web): widen isValidCrop's polar bound for real country extent
 ### Task 2: Generate and vendor `geo/worldCountries.ts`
 
 **Files:**
+
 - Create: `apps/web/src/features/builder/geo/worldCountries.ts` (generated — see script below)
 - Create: `apps/web/src/features/builder/geo/worldCountries.test.ts`
 
 **Interfaces:**
+
 - Consumes: nothing from earlier tasks.
 - Produces:
   ```ts
   export interface CountryLand {
-    readonly id: string;       // Natural Earth ADM0_A3 code, e.g. "TWN", "JPN", "FRA"
+    readonly id: string; // Natural Earth ADM0_A3 code, e.g. "TWN", "JPN", "FRA"
     readonly nameEn: string;
-    readonly nameZh: string;   // Traditional Chinese
+    readonly nameZh: string; // Traditional Chinese
     readonly continent: string; // one of: "Africa" | "Asia" | "Europe" | "North America" | "South America" | "Oceania"
     readonly rings: readonly Ring[]; // Ring = readonly (readonly [number, number])[] from './clip', lon/lat points, exterior ring(s) only
   }
@@ -117,10 +121,12 @@ This task's "test" is generating real data, so the useful order is: write the ge
 - [ ] **Step 1: Fetch the source GeoJSON**
 
 Run (needs network access):
+
 ```bash
 curl -s --max-time 20 "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson" -o /tmp/ne_countries.geojson
 wc -c /tmp/ne_countries.geojson
 ```
+
 Expected: a file of roughly 830-840 KB. (If your environment has no network access, this step cannot be completed by you directly — ask the user for the file, or for permission to fetch it, before proceeding; do not fabricate the dataset.)
 
 - [ ] **Step 2: Write the generator script**
@@ -136,21 +142,30 @@ const TOLERANCE = 0.03; // same tolerance geo/worldData.ts's own land data uses
 const EXCLUDED_CONTINENTS = new Set(['Antarctica', 'Seven seas (open ocean)']);
 
 function perpendicularDistance(p, a, b) {
-  const [x, y] = p, [x1, y1] = a, [x2, y2] = b;
-  const dx = x2 - x1, dy = y2 - y1;
+  const [x, y] = p,
+    [x1, y1] = a,
+    [x2, y2] = b;
+  const dx = x2 - x1,
+    dy = y2 - y1;
   const len2 = dx * dx + dy * dy;
   if (len2 === 0) return Math.hypot(x - x1, y - y1);
   const t = ((x - x1) * dx + (y - y1) * dy) / len2;
-  const cx = x1 + t * dx, cy = y1 + t * dy;
+  const cx = x1 + t * dx,
+    cy = y1 + t * dy;
   return Math.hypot(x - cx, y - cy);
 }
 function simplifyPolyline(points, tolerance) {
   if (points.length <= 2) return points.slice();
-  let maxDist = -1, maxIdx = 0;
-  const first = points[0], last = points[points.length - 1];
+  let maxDist = -1,
+    maxIdx = 0;
+  const first = points[0],
+    last = points[points.length - 1];
   for (let i = 1; i < points.length - 1; i++) {
     const d = perpendicularDistance(points[i], first, last);
-    if (d > maxDist) { maxDist = d; maxIdx = i; }
+    if (d > maxDist) {
+      maxDist = d;
+      maxIdx = i;
+    }
   }
   if (maxDist <= tolerance) return [first, last];
   const left = simplifyPolyline(points.slice(0, maxIdx + 1), tolerance);
@@ -161,15 +176,21 @@ function simplifyRing(ring, tolerance) {
   if (ring.length <= 3 || tolerance <= 0) return ring;
   const cx = ring.reduce((s, p) => s + p[0], 0) / ring.length;
   const cy = ring.reduce((s, p) => s + p[1], 0) / ring.length;
-  let anchor = 0, maxD = -1;
+  let anchor = 0,
+    maxD = -1;
   for (let i = 0; i < ring.length; i++) {
     const d = Math.hypot(ring[i][0] - cx, ring[i][1] - cy);
-    if (d > maxD) { maxD = d; anchor = i; }
+    if (d > maxD) {
+      maxD = d;
+      anchor = i;
+    }
   }
   const rotated = [...ring.slice(anchor), ...ring.slice(0, anchor), ring[anchor]];
   return simplifyPolyline(rotated, tolerance).slice(0, -1);
 }
-function round2(v) { return Math.round(v * 100) / 100; }
+function round2(v) {
+  return Math.round(v * 100) / 100;
+}
 function cleanRing(ring) {
   const out = [];
   for (const [lon, lat] of ring) {
@@ -178,7 +199,8 @@ function cleanRing(ring) {
     if (!prev || prev[0] !== p[0] || prev[1] !== p[1]) out.push(p);
   }
   if (out.length >= 2) {
-    const f = out[0], l = out[out.length - 1];
+    const f = out[0],
+      l = out[out.length - 1];
     if (f[0] === l[0] && f[1] === l[1]) out.pop();
   }
   return out;
@@ -192,12 +214,19 @@ for (const f of gj.features) {
   const g = f.geometry;
   // Interior rings are holes (e.g. a lake) — same reasoning as geo/worldData.ts's own exterior-
   // ring-only fix. Keep exterior ring(s) only.
-  const exteriorRings = g.type === 'Polygon' ? [g.coordinates[0]] : g.coordinates.map((poly) => poly[0]);
+  const exteriorRings =
+    g.type === 'Polygon' ? [g.coordinates[0]] : g.coordinates.map((poly) => poly[0]);
   const rings = exteriorRings
     .map((r) => cleanRing(simplifyRing(r, TOLERANCE)))
     .filter((r) => r.length >= 3);
   if (rings.length === 0) continue;
-  countries.push({ id: p.ADM0_A3, nameEn: p.NAME_EN, nameZh: p.NAME_ZHT, continent: p.CONTINENT, rings });
+  countries.push({
+    id: p.ADM0_A3,
+    nameEn: p.NAME_EN,
+    nameZh: p.NAME_ZHT,
+    continent: p.CONTINENT,
+    rings,
+  });
 }
 // Taiwan gets this game's own hand-authored coastline everywhere else (geo/taiwan.ts, geo/world.ts's
 // WORLD_LAND_DETAILED) instead of Natural Earth's own — and this game calls it "Taiwan"/"台灣"
@@ -205,17 +234,29 @@ for (const f of gj.features) {
 // Override the display name only; geo/world.ts's countriesToGeography splices in the detailed
 // silhouette itself (rings here become unused for id 'TWN', but stay as a harmless fallback).
 const twn = countries.find((c) => c.id === 'TWN');
-if (twn) { twn.nameEn = 'Taiwan'; twn.nameZh = '台灣'; }
+if (twn) {
+  twn.nameEn = 'Taiwan';
+  twn.nameZh = '台灣';
+}
 
-countries.sort((a, b) => (a.continent < b.continent ? -1 : a.continent > b.continent ? 1 : a.nameEn < b.nameEn ? -1 : 1));
+countries.sort((a, b) =>
+  a.continent < b.continent ? -1 : a.continent > b.continent ? 1 : a.nameEn < b.nameEn ? -1 : 1,
+);
 
 console.log('countries:', countries.length);
 console.log('continents:', [...new Set(countries.map((c) => c.continent))].join(', '));
 
-function fmtRing(ring) { return `[${ring.map((p) => `[${p[0]},${p[1]}]`).join(',')}]`; }
-function esc(s) { return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+function fmtRing(ring) {
+  return `[${ring.map((p) => `[${p[0]},${p[1]}]`).join(',')}]`;
+}
+function esc(s) {
+  return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
 const body = countries
-  .map((c) => `  { id: '${c.id}', nameEn: '${esc(c.nameEn)}', nameZh: '${esc(c.nameZh)}', continent: '${esc(c.continent)}', rings: [${c.rings.map(fmtRing).join(',')}] }`)
+  .map(
+    (c) =>
+      `  { id: '${c.id}', nameEn: '${esc(c.nameEn)}', nameZh: '${esc(c.nameZh)}', continent: '${esc(c.continent)}', rings: [${c.rings.map(fmtRing).join(',')}] }`,
+  )
   .join(',\n');
 
 const out = `// Country-level land outlines for the map builder's "pick countries" crop mode: Natural Earth
@@ -251,12 +292,15 @@ console.log('bytes:', Buffer.byteLength(out));
 - [ ] **Step 3: Run the generator and copy the output into the repo**
 
 Run:
+
 ```bash
 node /tmp/gen-world-countries.cjs
 ```
+
 Expected output: `countries: 175`, `continents: Africa, Asia, Europe, North America, Oceania, South America` (or the same six names in a different enumeration order — order doesn't matter, only that all six and only these six appear), and a `bytes:` line around 145-155 KB.
 
 Then:
+
 ```bash
 cp /tmp/worldCountries.generated.ts apps/web/src/features/builder/geo/worldCountries.ts
 ```
@@ -301,7 +345,7 @@ describe('WORLD_COUNTRIES', () => {
     }
   });
 
-  it('carries Taiwan with this game\'s own display name, not the formal Natural Earth one', () => {
+  it("carries Taiwan with this game's own display name, not the formal Natural Earth one", () => {
     const twn = WORLD_COUNTRIES.find((c) => c.id === 'TWN');
     expect(twn).toBeDefined();
     expect(twn!.nameEn).toBe('Taiwan');
@@ -334,10 +378,12 @@ git commit -m "feat(web): vendor per-country land outlines for the map builder"
 ### Task 3: `countriesToGeography` in `geo/world.ts`
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/geo/world.ts` (full file, 49 lines today)
 - Modify: `apps/web/src/features/builder/geo/world.test.ts` (full file, 31 lines today)
 
 **Interfaces:**
+
 - Consumes:
   - `WORLD_COUNTRIES: readonly CountryLand[]` and `interface CountryLand { id: string; nameEn: string; nameZh: string; continent: string; rings: readonly Ring[] }` from `./worldCountries` (Task 2).
   - `taiwanRings(): Ring[]` from `./taiwan` (already imported in this file today).
@@ -345,11 +391,16 @@ git commit -m "feat(web): vendor per-country land outlines for the map builder"
   - `buildProjection(crop: CropBBox): { baseView, project, unproject }`, `isValidCrop(crop: CropBBox): boolean`, `type CropBBox = { lonMin: number; lonMax: number; latMin: number; latMax: number }` from `./projection` (already imported; `isValidCrop`'s bound is now ±84 per Task 1).
   - `simplifyToFit(rings, opts: { startTolerance?: number; maxVertices: number; maxRings: number }): { rings: Ring[]; droppedRings: number }` from `./simplify` (already imported).
 - Produces:
+
   ```ts
-  export interface CropResult { geography: MapGeography; droppedRings: number } // unchanged, already exists
+  export interface CropResult {
+    geography: MapGeography;
+    droppedRings: number;
+  } // unchanged, already exists
   export function cropToGeography(crop: CropBBox): CropResult | null; // unchanged behavior, refactored internals
   export function countriesToGeography(ids: readonly string[]): CropResult | null; // new
   ```
+
   `CountryPickStage.tsx` (Task 6) calls `countriesToGeography(ids)`.
 
 - [ ] **Step 1: Write the failing tests**
@@ -569,12 +620,14 @@ git commit -m "feat(web): add countriesToGeography for the map builder's country
 ### Task 4: Extract `CropDrawStage.tsx` from `CropStage.tsx` (pure move) and add its first tests
 
 **Files:**
+
 - Modify: `apps/web/src/vitest.setup.ts` (add a `setPointerCapture` jsdom stub)
 - Create: `apps/web/src/features/builder/editor/stages/CropDrawStage.tsx` (moved content, renamed export)
 - Create: `apps/web/src/features/builder/editor/stages/CropDrawStage.test.tsx`
 - Modify: `apps/web/src/features/builder/editor/stages/CropStage.tsx` (temporarily becomes a re-export shim; Task 7 replaces it with the real mode-toggle shell)
 
 **Interfaces:**
+
 - Consumes:
   - `worldLand(): readonly Ring[]`, `cropToGeography(crop: CropBBox): CropResult | null` from `../../geo/world` (already exist, unchanged by this task).
   - `clientToBoardPoint(svg: SVGSVGElement, clientX: number, clientY: number): { x: number; y: number } | null` from `../canvasProjection` (existing, unchanged).
@@ -654,11 +707,19 @@ export function CropDrawStage() {
   const initialCrop = draft.geography?.crop;
   const [committed, setCommitted] = useState<CropRect | null>(
     initialCrop
-      ? { lonMin: initialCrop.lonMin, lonMax: initialCrop.lonMax, latMin: initialCrop.latMin, latMax: initialCrop.latMax }
+      ? {
+          lonMin: initialCrop.lonMin,
+          lonMax: initialCrop.lonMax,
+          latMin: initialCrop.latMin,
+          latMax: initialCrop.latMax,
+        }
       : null,
   );
   const [drag, setDrag] = useState<DragPoints | null>(null);
-  const [moveBase, setMoveBase] = useState<{ origin: { lon: number; lat: number }; rect: CropRect } | null>(null);
+  const [moveBase, setMoveBase] = useState<{
+    origin: { lon: number; lat: number };
+    rect: CropRect;
+  } | null>(null);
 
   const toLonLat = (clientX: number, clientY: number): { lon: number; lat: number } | null => {
     if (!svgRef.current) return null;
@@ -677,7 +738,8 @@ export function CropDrawStage() {
     : null;
   const rect = liveDragRect ?? committed;
   const latSpan = rect ? rect.latMax - rect.latMin : 0;
-  const result = rect && rect.lonMin < rect.lonMax && rect.latMin < rect.latMax ? cropToGeography(rect) : null;
+  const result =
+    rect && rect.lonMin < rect.lonMax && rect.latMin < rect.latMax ? cropToGeography(rect) : null;
 
   // Left-click is never used for panning here (that's middle-click, see below), so a left-drag
   // starting on open water/land always begins a brand new rectangle — replacing any existing one.
@@ -831,7 +893,9 @@ export function CropDrawStage() {
           </TransformWrapper>
         </div>
         <p className="muted editor-hint">{hint}</p>
-        {latSpan > 60 && <p className="error editor-hint editor-hint--warning">{t('builder.cropLatWarning')}</p>}
+        {latSpan > 60 && (
+          <p className="error editor-hint editor-hint--warning">{t('builder.cropLatWarning')}</p>
+        )}
       </div>
       <aside className="card stack editor-inspector">
         <h3>{t('builder.cropPreview')}</h3>
@@ -908,7 +972,10 @@ import { useEditorStore } from '../store';
 // via a EditorCanvas mock). Stub it with an identity mapping so pointer events exercise
 // CropDrawStage's own drag logic instead of silently no-op'ing.
 vi.mock('../canvasProjection', () => ({
-  clientToBoardPoint: (_svg: unknown, clientX: number, clientY: number) => ({ x: clientX, y: clientY }),
+  clientToBoardPoint: (_svg: unknown, clientX: number, clientY: number) => ({
+    x: clientX,
+    y: clientY,
+  }),
 }));
 
 beforeEach(() => {
@@ -988,14 +1055,17 @@ git commit -m "refactor(web): extract CropDrawStage from CropStage ahead of the 
 ### Task 5: `CountryList.tsx` — searchable, continent-grouped sidebar
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts` (zh-Hant block ~line 319, en block ~line 747 — see exact anchors below)
 - Create: `apps/web/src/features/builder/editor/stages/CountryList.tsx`
 - Create: `apps/web/src/features/builder/editor/stages/CountryList.test.tsx`
 - Modify: `apps/web/src/styles/builder.css` (append new rules after the existing `.editor-crop-preview-svg` block, ~line 341)
 
 **Interfaces:**
+
 - Consumes: `WORLD_COUNTRIES: readonly CountryLand[]` where `CountryLand = { id: string; nameEn: string; nameZh: string; continent: string; rings: readonly Ring[] }` from `../../geo/worldCountries` (Task 2).
 - Produces:
+
   ```ts
   export interface CountryListProps {
     selected: ReadonlySet<string>;
@@ -1003,6 +1073,7 @@ git commit -m "refactor(web): extract CropDrawStage from CropStage ahead of the 
   }
   export function CountryList(props: CountryListProps): JSX.Element;
   ```
+
   Task 6's `CountryPickStage` renders `<CountryList selected={...} onToggle={...} />`.
 
 - [ ] **Step 1: Add i18n keys**
@@ -1170,7 +1241,10 @@ export function CountryList({ selected, onToggle }: CountryListProps) {
     const q = query.trim().toLowerCase();
     const matches = q
       ? WORLD_COUNTRIES.filter(
-          (c) => c.nameZh.includes(query.trim()) || c.nameEn.toLowerCase().includes(q) || c.id.toLowerCase() === q,
+          (c) =>
+            c.nameZh.includes(query.trim()) ||
+            c.nameEn.toLowerCase().includes(q) ||
+            c.id.toLowerCase() === q,
         )
       : WORLD_COUNTRIES;
     const byContinent = new Map<string, CountryLand[]>();
@@ -1179,9 +1253,10 @@ export function CountryList({ selected, onToggle }: CountryListProps) {
       list.push(c);
       byContinent.set(c.continent, list);
     }
-    return CONTINENT_ORDER.map((continent) => ({ continent, countries: byContinent.get(continent) ?? [] })).filter(
-      (g) => g.countries.length > 0,
-    );
+    return CONTINENT_ORDER.map((continent) => ({
+      continent,
+      countries: byContinent.get(continent) ?? [],
+    })).filter((g) => g.countries.length > 0);
   }, [query]);
 
   return (
@@ -1200,7 +1275,11 @@ export function CountryList({ selected, onToggle }: CountryListProps) {
             <h4 className="country-list-continent">{t(CONTINENT_KEY[continent]!)}</h4>
             {countries.map((c) => (
               <label key={c.id} className="country-list-row">
-                <input type="checkbox" checked={selected.has(c.id)} onChange={() => onToggle(c.id)} />
+                <input
+                  type="checkbox"
+                  checked={selected.has(c.id)}
+                  onChange={() => onToggle(c.id)}
+                />
                 {c.nameZh} <span className="muted">({c.nameEn})</span>
               </label>
             ))}
@@ -1229,11 +1308,13 @@ git commit -m "feat(web): add the searchable continent-grouped country list"
 ### Task 6: `CountryPickStage.tsx` — the clickable world map + confirm flow
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts` (zh-Hant block, en block — new keys, exact anchors below)
 - Create: `apps/web/src/features/builder/editor/stages/CountryPickStage.tsx`
 - Create: `apps/web/src/features/builder/editor/stages/CountryPickStage.test.tsx`
 
 **Interfaces:**
+
 - Consumes:
   - `WORLD_COUNTRIES: readonly CountryLand[]` from `../../geo/worldCountries` (Task 2).
   - `countriesToGeography(ids: readonly string[]): CropResult | null` from `../../geo/world` (Task 3), where `CropResult = { geography: MapGeography; droppedRings: number }` and `MapGeography = { baseView: { x, y, w, h }; land: readonly (readonly [number, number])[][]; crop: { lonMin, lonMax, latMin, latMax } }`.
@@ -1381,7 +1462,10 @@ export function CountryPickStage() {
     });
   };
 
-  const result = useMemo(() => (selected.size > 0 ? countriesToGeography([...selected]) : null), [selected]);
+  const result = useMemo(
+    () => (selected.size > 0 ? countriesToGeography([...selected]) : null),
+    [selected],
+  );
   const crop = result?.geography.crop;
   const lonSpan = crop ? crop.lonMax - crop.lonMin : 0;
   const latSpan = crop ? crop.latMax - crop.latMin : 0;
@@ -1421,7 +1505,11 @@ export function CountryPickStage() {
                   <path
                     key={c.id}
                     data-country-id={c.id}
-                    d={c.rings.map((ring) => `M ${ring.map(([lon, lat]) => `${lon},${-lat}`).join(' L ')} Z`).join(' ')}
+                    d={c.rings
+                      .map(
+                        (ring) => `M ${ring.map(([lon, lat]) => `${lon},${-lat}`).join(' L ')} Z`,
+                      )
+                      .join(' ')}
                     className={`editor-country${selected.has(c.id) ? ' editor-country--selected' : ''}`}
                     onClick={() => toggle(c.id)}
                   />
@@ -1441,7 +1529,9 @@ export function CountryPickStage() {
       <aside className="card stack editor-inspector">
         <h3>{t('builder.cropPreview')}</h3>
         <CountryList selected={selected} onToggle={toggle} />
-        {selected.size > 0 && <p className="muted">{t('builder.countrySelectedCount', { n: selected.size })}</p>}
+        {selected.size > 0 && (
+          <p className="muted">{t('builder.countrySelectedCount', { n: selected.size })}</p>
+        )}
         {result ? (
           <>
             <svg
@@ -1500,12 +1590,14 @@ git commit -m "feat(web): add CountryPickStage, the clickable-world-map country 
 ### Task 7: `CropStage.tsx` mode toggle — tie `CropDrawStage` and `CountryPickStage` together
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts` (zh-Hant block, en block — final 3 keys)
 - Modify: `apps/web/src/styles/builder.css` (append `.crop-stage-shell`/`.crop-stage-body`)
 - Modify: `apps/web/src/features/builder/editor/stages/CropStage.tsx` (replace the Task-4 re-export shim with the real mode-toggle shell)
 - Create: `apps/web/src/features/builder/editor/stages/CropStage.test.tsx`
 
 **Interfaces:**
+
 - Consumes:
   - `Segmented<T extends string>` from `../../../../components/ui/Segmented`: props `{ options: { value: T; label: string; icon?: LucideIcon }[]; value: T; onChange(next: T): void; ariaLabel: string }` (existing, unchanged).
   - `CropDrawStage` from `./CropDrawStage` (Task 4), `CountryPickStage` from `./CountryPickStage` (Task 6) — both zero-prop components.
@@ -1560,7 +1652,10 @@ import { useEditorStore } from '../store';
 
 // See CropDrawStage.test.tsx for why this stub is needed (jsdom has no getScreenCTM/createSVGPoint).
 vi.mock('../canvasProjection', () => ({
-  clientToBoardPoint: (_svg: unknown, clientX: number, clientY: number) => ({ x: clientX, y: clientY }),
+  clientToBoardPoint: (_svg: unknown, clientX: number, clientY: number) => ({
+    x: clientX,
+    y: clientY,
+  }),
 }));
 
 beforeEach(() => {
@@ -1661,7 +1756,9 @@ export function CropStage() {
         onChange={setMode}
         ariaLabel={t('builder.cropModeToggle')}
       />
-      <div className="crop-stage-body">{mode === 'draw' ? <CropDrawStage /> : <CountryPickStage />}</div>
+      <div className="crop-stage-body">
+        {mode === 'draw' ? <CropDrawStage /> : <CountryPickStage />}
+      </div>
     </div>
   );
 }

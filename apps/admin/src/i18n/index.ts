@@ -158,7 +158,8 @@ const zhHant = {
     delete: '刪除對局',
     deleteConfirmTitle: '刪除此對局?',
     deleteConfirmBody: '此操作無法復原,對局紀錄將永久刪除。',
-    deleteConfirmBodyLive: '此對局仍在進行中,將先強制終止(不會留下成績,無法重播),再永久刪除對局紀錄。此操作無法復原。',
+    deleteConfirmBodyLive:
+      '此對局仍在進行中,將先強制終止(不會留下成績,無法重播),再永久刪除對局紀錄。此操作無法復原。',
   },
   chat: {
     presets: {

@@ -82,7 +82,10 @@ describe('bots: fill out a short table for a single human', () => {
       'hc',
       encodeClient(++seq, {
         case: 'hello',
-        value: { ticket: makeDevTicket({ gameId: 'mixed', playerId: 'human', seat: 0 }), protocolVersion: 1 },
+        value: {
+          ticket: makeDevTicket({ gameId: 'mixed', playerId: 'human', seat: 0 }),
+          protocolVersion: 1,
+        },
       }),
     );
 

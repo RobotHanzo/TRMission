@@ -1,1 +1,175 @@
-{"nodes": [{"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_md", "label": "task-m6-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n", "label": "Task M6 report \u2014 Web UI: room setting, events panel, banner, log, board overlays, payments, i18n", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_status_done", "label": "Status: DONE", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes", "label": "Per-file changes", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_new_source", "label": "New source", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L15"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_modified_source", "label": "Modified source", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L33"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_tests_all_new_extended_table_driven_where_the_brief_asked", "label": "Tests (all new/extended, table-driven where the brief asked)", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L68"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_decisions", "label": "Decisions", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L76"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_verification", "label": "Verification", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L95"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_replay_smoke_section_9", "label": "Replay smoke (section 9)", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L103"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_concerns", "label": "Concerns", "file_type": "document", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L111"}], "edges": [{"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_md", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_status_done", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_new_source", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L15", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_modified_source", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L33", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_tests_all_new_extended_table_driven_where_the_brief_asked", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L68", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_decisions", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L76", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L95", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_replay_smoke_section_9", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L103", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m6-report.md", "source_location": "L111", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_md",
+      "label": "task-m6-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n",
+      "label": "Task M6 report \u2014 Web UI: room setting, events panel, banner, log, board overlays, payments, i18n",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_status_done",
+      "label": "Status: DONE",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes",
+      "label": "Per-file changes",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_new_source",
+      "label": "New source",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_modified_source",
+      "label": "Modified source",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L33"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_tests_all_new_extended_table_driven_where_the_brief_asked",
+      "label": "Tests (all new/extended, table-driven where the brief asked)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L68"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_decisions",
+      "label": "Decisions",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L76"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_verification",
+      "label": "Verification",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L95"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_replay_smoke_section_9",
+      "label": "Replay smoke (section 9)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L103"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_concerns",
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L111"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_md",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_status_done",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_new_source",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_modified_source",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_per_file_changes",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_tests_all_new_extended_table_driven_where_the_brief_asked",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L68",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_decisions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_replay_smoke_section_9",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_task_m6_report_web_ui_room_setting_events_panel_banner_log_board_overlays_payments_i18n",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m6_report_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m6-report.md",
+      "source_location": "L111",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

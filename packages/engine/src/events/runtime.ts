@@ -84,7 +84,10 @@ export function tickRound(
   let hotspots: Record<string, number> = { ...ev.hotspots };
   const openCharters: CharterContract[] = [...ev.charters];
 
-  while (nextIdx < ev.schedule.length && (ev.schedule[nextIdx] as EventScheduleEntry).startRound === roundIndex) {
+  while (
+    nextIdx < ev.schedule.length &&
+    (ev.schedule[nextIdx] as EventScheduleEntry).startRound === roundIndex
+  ) {
     const entry = ev.schedule[nextIdx] as EventScheduleEntry;
     // Surprise (non-telegraphed) entries are quiet-endgame checked here; telegraphed ones were
     // already checked (and either announced or suppressed) at announce time, so once they reach

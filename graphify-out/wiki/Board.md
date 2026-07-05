@@ -7,9 +7,11 @@
 ## Connections by Relation
 
 ### contains
+
 - board.ts `EXTRACTED`
 
 ### imports
+
 - reduce.ts `EXTRACTED`
 - hub.ts `EXTRACTED`
 - ReplayScreen.tsx `EXTRACTED`
@@ -32,9 +34,11 @@
 - game-registry.ts `EXTRACTED`
 
 ### re_exports
+
 - index.ts `EXTRACTED`
 
 ### references
+
 - [GameHub](GameHub.md) `EXTRACTED`
 - RouteDef `EXTRACTED`
 - RouteId `EXTRACTED`
@@ -54,4 +58,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

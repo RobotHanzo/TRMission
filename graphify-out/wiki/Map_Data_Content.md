@@ -29,7 +29,7 @@
 - **ROWS** (1 connections) — `packages/map-data/src/routes.ts`
 - **LONG_TICKETS** (1 connections) — `packages/map-data/src/tickets.ts`
 - **longRows** (1 connections) — `packages/map-data/src/tickets.ts`
-- *... and 3 more nodes in this community*
+- _... and 3 more nodes in this community_
 
 ## Relationships
 
@@ -65,4 +65,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

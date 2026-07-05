@@ -505,10 +505,7 @@ describe('auth: Google credential sign-in (One Tap / rendered button)', () => {
   });
 
   it('validates the request body via the zod pipe', async () => {
-    await request(oServer())
-      .post('/api/v1/auth/oauth/google/credential')
-      .send({})
-      .expect(400);
+    await request(oServer()).post('/api/v1/auth/oauth/google/credential').send({}).expect(400);
   });
 
   it('rejects with 403 when the provider is not configured', async () => {

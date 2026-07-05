@@ -1,1 +1,79 @@
-{"nodes": [{"id": "_superpowers_sdd_task_3_report", "label": "Task 3 Report \u2014 Server: history authz fix + extended list", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_test_lobby_e2e_spec", "label": "lobby.e2e.spec.ts (fixed _id\u2192gameId assertion)", "file_type": "code", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_3_report", "target": "_superpowers_sdd_task_3_brief", "relation": "implements", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-report.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_report", "target": "apps_server_src_history_history_repo", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-report.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_report", "target": "apps_server_src_history_history_controller", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-report.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_report", "target": "apps_server_test_lobby_e2e_spec", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-report.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_3_report", "target": "concept_history_authz_gate", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-3-report.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_3_report",
+      "label": "Task 3 Report \u2014 Server: history authz fix + extended list",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_test_lobby_e2e_spec",
+      "label": "lobby.e2e.spec.ts (fixed _id\u2192gameId assertion)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_3_report",
+      "target": "_superpowers_sdd_task_3_brief",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_report",
+      "target": "apps_server_src_history_history_repo",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_report",
+      "target": "apps_server_src_history_history_controller",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_report",
+      "target": "apps_server_test_lobby_e2e_spec",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_3_report",
+      "target": "concept_history_authz_gate",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

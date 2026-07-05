@@ -31,7 +31,10 @@ export function CountryPickStage() {
     });
   };
 
-  const result = useMemo(() => (selected.size > 0 ? countriesToGeography([...selected]) : null), [selected]);
+  const result = useMemo(
+    () => (selected.size > 0 ? countriesToGeography([...selected]) : null),
+    [selected],
+  );
   const crop = result?.geography.crop;
   const lonSpan = crop ? crop.lonMax - crop.lonMin : 0;
   const latSpan = crop ? crop.latMax - crop.latMin : 0;
@@ -71,7 +74,11 @@ export function CountryPickStage() {
                   <path
                     key={c.id}
                     data-country-id={c.id}
-                    d={c.rings.map((ring) => `M ${ring.map(([lon, lat]) => `${lon},${-lat}`).join(' L ')} Z`).join(' ')}
+                    d={c.rings
+                      .map(
+                        (ring) => `M ${ring.map(([lon, lat]) => `${lon},${-lat}`).join(' L ')} Z`,
+                      )
+                      .join(' ')}
                     className={`editor-country${selected.has(c.id) ? ' editor-country--selected' : ''}`}
                     onClick={() => toggle(c.id)}
                   />
@@ -91,7 +98,9 @@ export function CountryPickStage() {
       <aside className="card stack editor-inspector">
         <h3>{t('builder.cropPreview')}</h3>
         <CountryList selected={selected} onToggle={toggle} />
-        {selected.size > 0 && <p className="muted">{t('builder.countrySelectedCount', { n: selected.size })}</p>}
+        {selected.size > 0 && (
+          <p className="muted">{t('builder.countrySelectedCount', { n: selected.size })}</p>
+        )}
         {result ? (
           <>
             <svg

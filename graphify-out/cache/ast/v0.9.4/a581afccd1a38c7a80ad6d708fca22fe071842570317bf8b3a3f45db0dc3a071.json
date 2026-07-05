@@ -1,1 +1,143 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_md", "label": "2026-07-04-room-rematch.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "label": "Room Rematch Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L21"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_1_rematch_vote_data_model_repo_service_endpoint", "label": "Task 1: Rematch vote \u2014 data model, repo, service, endpoint", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L38"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_2_host_rematch_action_reset_a_finished_room_back_to_lobby", "label": "Task 2: Host rematch action \u2014 reset a finished room back to LOBBY", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L251"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_3_web_rest_client_rematch_endpoints", "label": "Task 3: Web REST client \u2014 rematch endpoints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L616"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_4_scoreboard_vote_toggle_host_play_again_button", "label": "Task 4: ScoreBoard \u2014 vote toggle + host \"Play Again\" button", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L704"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_5_gamescreen_poll_for_rematch_auto_redirect_to_the_reset_room", "label": "Task 5: GameScreen \u2014 poll for rematch, auto-redirect to the reset room", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L963"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_6_full_verification", "label": "Task 6: Full verification", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L1317"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L21", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_1_rematch_vote_data_model_repo_service_endpoint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L38", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_2_host_rematch_action_reset_a_finished_room_back_to_lobby", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L251", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_3_web_rest_client_rematch_endpoints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L616", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_4_scoreboard_vote_toggle_host_play_again_button", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L704", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_5_gamescreen_poll_for_rematch_auto_redirect_to_the_reset_room", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L963", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_6_full_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md", "source_location": "L1317", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_md",
+      "label": "2026-07-04-room-rematch.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "label": "Room Rematch Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L21"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_1_rematch_vote_data_model_repo_service_endpoint",
+      "label": "Task 1: Rematch vote \u2014 data model, repo, service, endpoint",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L38"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_2_host_rematch_action_reset_a_finished_room_back_to_lobby",
+      "label": "Task 2: Host rematch action \u2014 reset a finished room back to LOBBY",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L251"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_3_web_rest_client_rematch_endpoints",
+      "label": "Task 3: Web REST client \u2014 rematch endpoints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L616"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_4_scoreboard_vote_toggle_host_play_again_button",
+      "label": "Task 4: ScoreBoard \u2014 vote toggle + host \"Play Again\" button",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L704"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_5_gamescreen_poll_for_rematch_auto_redirect_to_the_reset_room",
+      "label": "Task 5: GameScreen \u2014 poll for rematch, auto-redirect to the reset room",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L963"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_6_full_verification",
+      "label": "Task 6: Full verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L1317"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_1_rematch_vote_data_model_repo_service_endpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_2_host_rematch_action_reset_a_finished_room_back_to_lobby",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L251",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_3_web_rest_client_rematch_endpoints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L616",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_4_scoreboard_vote_toggle_host_play_again_button",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L704",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_5_gamescreen_poll_for_rematch_auto_redirect_to_the_reset_room",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L963",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_room_rematch_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_04_room_rematch_task_6_full_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-04-room-rematch.md",
+      "source_location": "L1317",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

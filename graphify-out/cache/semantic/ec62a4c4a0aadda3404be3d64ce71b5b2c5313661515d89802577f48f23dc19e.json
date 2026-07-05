@@ -1,1 +1,101 @@
-{"nodes": [{"id": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_doc", "label": "Claim-cost Specimen Design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimcostspecimen", "label": "ClaimCostSpecimen component", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimtrack", "label": "ClaimTrack helper (mini route geometry)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_cyclingcard_count_aware", "label": "CyclingCard count-aware extension", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_doc", "target": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimcostspecimen", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_doc", "target": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimtrack", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_doc", "target": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_cyclingcard_count_aware", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimcostspecimen", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_cyclingcard_count_aware", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_doc",
+      "label": "Claim-cost Specimen Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimcostspecimen",
+      "label": "ClaimCostSpecimen component",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimtrack",
+      "label": "ClaimTrack helper (mini route geometry)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_cyclingcard_count_aware",
+      "label": "CyclingCard count-aware extension",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimcostspecimen",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimtrack",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_cyclingcard_count_aware",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_claimcostspecimen",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_claim_cost_specimen_design_cyclingcard_count_aware",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-claim-cost-specimen-design.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

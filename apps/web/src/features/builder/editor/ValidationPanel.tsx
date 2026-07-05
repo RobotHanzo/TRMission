@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CheckCircle2, ChevronUp, XCircle } from 'lucide-react';
-import { validateContent, validateGeographyIssues, validateForPlayIssues, type ValidationIssue } from '@trm/map-data';
+import {
+  validateContent,
+  validateGeographyIssues,
+  validateForPlayIssues,
+  type ValidationIssue,
+} from '@trm/map-data';
 import { useEditorStore } from './store';
 import { draftToContent } from './contentAdapter';
 
@@ -89,7 +94,11 @@ export function ValidationPanel() {
             {t('builder.validationWarningCount', { n: warnings.length })}
           </span>
         )}
-        <ChevronUp size={14} aria-hidden className={expanded ? 'validation-chevron' : 'validation-chevron collapsed'} />
+        <ChevronUp
+          size={14}
+          aria-hidden
+          className={expanded ? 'validation-chevron' : 'validation-chevron collapsed'}
+        />
       </button>
       {expanded && (
         <div className="stack validation-list">

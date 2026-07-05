@@ -60,7 +60,8 @@ export function buildBoard(content: GameContent): Board {
   };
 }
 
-export const getRoute = (board: Board, id: RouteId): RouteDef | undefined => board.routeById.get(id as string);
+export const getRoute = (board: Board, id: RouteId): RouteDef | undefined =>
+  board.routeById.get(id as string);
 export const getTicket = (board: Board, id: TicketId): TicketDef | undefined =>
   board.ticketById.get(id as string);
 export const siblingOf = (board: Board, id: RouteId): RouteId | undefined =>

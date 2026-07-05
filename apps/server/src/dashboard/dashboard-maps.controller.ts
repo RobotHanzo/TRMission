@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
@@ -50,7 +60,9 @@ export class DashboardMapsController {
   @Delete('maps/:id')
   @HttpCode(204)
   @RequirePermission('maps.moderate')
-  @ApiOperation({ summary: 'Hard-delete a custom map (any owner). Published content is unaffected.' })
+  @ApiOperation({
+    summary: 'Hard-delete a custom map (any owner). Published content is unaffected.',
+  })
   @ApiBody({ schema: apiSchema(ModerationReasonSchema) })
   deleteMap(
     @Param('id') id: string,

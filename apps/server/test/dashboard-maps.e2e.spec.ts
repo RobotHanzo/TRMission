@@ -98,7 +98,7 @@ describe('DELETE /dashboard/maps/:id', () => {
       .expect(403);
   });
 
-  it('deletes any owner\'s map and audits it; mapContents (if any) survives', async () => {
+  it("deletes any owner's map and audits it; mapContents (if any) survives", async () => {
     const m = await request(server())
       .post('/api/v1/maps')
       .set(auth(owner.token))
@@ -132,7 +132,9 @@ describe('DELETE /dashboard/maps/:id', () => {
     // Direct DB check (not just an API-level assertion): the draft is gone from customMaps...
     expect(await t.db.collection('customMaps').findOne({ _id: m.body.id } as never)).toBeNull();
     // ...but the immutable published content survives untouched.
-    expect(await t.db.collection('mapContents').findOne({ _id: contentHash } as never)).not.toBeNull();
+    expect(
+      await t.db.collection('mapContents').findOne({ _id: contentHash } as never),
+    ).not.toBeNull();
   });
 
   it('404s an unknown map', async () => {
@@ -189,10 +191,7 @@ describe('POST /dashboard/maps/:id/transfer', () => {
       .expect(200);
     expect(detail.body.ownerId).toBe(newOwner.id);
 
-    const list = await request(server())
-      .get('/api/v1/maps')
-      .set(auth(newOwner.token))
-      .expect(200);
+    const list = await request(server()).get('/api/v1/maps').set(auth(newOwner.token)).expect(200);
     expect(list.body.map((row: { id: string }) => row.id)).toContain(m.body.id);
   });
 });

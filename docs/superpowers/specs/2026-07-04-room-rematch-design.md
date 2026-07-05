@@ -194,7 +194,7 @@ carried into the reset lobby — `RoomScreen`'s poll would otherwise auto-join a
 landing on a `LOBBY` room, which is correct for a shared invite link but wrong for someone who was
 only ever watching.
 
-This poll only ever *reads*, and only ever navigates on the one `LOBBY` transition — it can't loop
+This poll only ever _reads_, and only ever navigates on the one `LOBBY` transition — it can't loop
 with `RoomScreen`'s own poll (which only auto-enters the game on `STARTED`+`gameId`), since by
 construction this effect never fires `enterRoom` until the room has already left `STARTED`.
 
@@ -244,7 +244,7 @@ poll tick to land back in the room.
   room code/link reconnects to the finished game (the match is still in the in-memory registry) and
   re-shows the `ScoreBoard`, from which `rematch` can still be called. No change needed to
   `findActiveByMember` for this to work.
-- **Dashboard game→room backlink**: `RoomDoc` only ever remembers its *current* `gameId`, so once a
+- **Dashboard game→room backlink**: `RoomDoc` only ever remembers its _current_ `gameId`, so once a
   room rematches, `RoomRepo.findByGameId(oldGameId)` stops resolving for that earlier game —
   `DashboardGamesService.gameDetail`'s `roomCode` field silently disappears for it. The game itself
   stays fully viewable via history/replay; only the "which room was this played from" convenience
@@ -272,6 +272,7 @@ poll tick to land back in the room.
 ## Testing plan
 
 **Server** (`apps/server`):
+
 - `RoomRepo.resetToLobby` — happy path clears `gameId`/`seed`, resets `ready`/`wantsRematch`, keeps
   bots ready; CAS fails on wrong host / wrong gameId / already-LOBBY (double call).
 - `RoomRepo.setRematchVote` — sets the right member, `not_found`/`not_member` cases.
@@ -283,6 +284,7 @@ poll tick to land back in the room.
   with a fresh `gameId`.
 
 **Web** (`apps/web`):
+
 - `ScoreBoard.test.tsx` — vote toggle calls `onVote`; tally renders correctly excluding bots;
   Play Again button only rendered/enabled for the host; clicking it calls `onPlayAgain`.
 - `GameScreen.test.tsx` — polls the room only at `GAME_OVER`, not during live play; calls

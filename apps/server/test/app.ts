@@ -53,7 +53,8 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
   let builder = Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(MONGO_DB)
     .useValue(db);
-  if (opts.authConfig) builder = builder.overrideProvider(AuthConfig).useValue(new AuthConfig(opts.authConfig));
+  if (opts.authConfig)
+    builder = builder.overrideProvider(AuthConfig).useValue(new AuthConfig(opts.authConfig));
   if (opts.oauthHttp) builder = builder.overrideProvider(OAUTH_HTTP).useValue(opts.oauthHttp);
   if (opts.googleVerifier)
     builder = builder.overrideProvider(GOOGLE_ID_TOKEN_VERIFIER).useValue(opts.googleVerifier);

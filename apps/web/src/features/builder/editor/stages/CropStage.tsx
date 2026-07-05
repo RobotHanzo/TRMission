@@ -25,7 +25,9 @@ export function CropStage() {
         onChange={setMode}
         ariaLabel={t('builder.cropModeToggle')}
       />
-      <div className="crop-stage-body">{mode === 'draw' ? <CropDrawStage /> : <CountryPickStage />}</div>
+      <div className="crop-stage-body">
+        {mode === 'draw' ? <CropDrawStage /> : <CountryPickStage />}
+      </div>
     </div>
   );
 }

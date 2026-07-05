@@ -1,1 +1,48 @@
-{"nodes": [{"id": "_superpowers_sdd_task_7_report", "label": "Task 7 Report \u2014 Web: History screen", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_7_report", "target": "_superpowers_sdd_task_7_brief", "relation": "implements", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-7-report.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_7_report", "target": "apps_web_src_screens_historyscreen", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-7-report.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_7_report", "target": "apps_web_src_styles_history_css", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-7-report.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_7_report",
+      "label": "Task 7 Report \u2014 Web: History screen",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_7_report",
+      "target": "_superpowers_sdd_task_7_brief",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_7_report",
+      "target": "apps_web_src_screens_historyscreen",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_7_report",
+      "target": "apps_web_src_styles_history_css",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

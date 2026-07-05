@@ -49,10 +49,11 @@ entire feature; `CameraSync` (the live/bot mechanism) is untouched.
    - `BUILD_STATION` → `{ kind: 'cities', ids: [action.cityId], instant: !player.animate }`
    - everything else (`DRAW_BLIND`, `DRAW_FACEUP`, `DRAW_TICKETS`, `KEEP_TICKETS`,
      `KEEP_INITIAL_TICKETS`, `RESOLVE_TUNNEL`, `PASS`) or `step === 0` → `null`
-   
+
    Gate the whole derivation on `followActing` (from `store/ui.ts`) so the target is `null` whenever
    follow is off — this is what makes the eye icon, already rendered on the replay screen today, do
    something. Pass the result straight through to the existing `frameTarget` prop on `GameStage`.
+
 5. **Default on** — `ReplayStage` sets `followActing` to `true` once on mount (`useEffect`, empty deps),
    so replay always opens with follow active regardless of whatever live play last left the shared
    toggle at. The user can still turn it off with the eye icon, same as live.
@@ -70,7 +71,7 @@ auto-pan, matching live behavior).
   glides the camera over 600ms (0ms under `prefers-reduced-motion`, unchanged accessibility behavior).
 - Seek (scrubber drag), prev, or a perspective switch (`setViewer`) → `applyTo()` → `animate` becomes
   `false` → `frameTarget` recomputed with `instant: true` → `SpotlightFramer` snaps with no glide.
-- A perspective switch re-targets the *same* step, so the derived `frameTarget` is unchanged
+- A perspective switch re-targets the _same_ step, so the derived `frameTarget` is unchanged
   (`SpotlightFramer`'s effect keys on `` `${kind}:${ids.join(',')}` ``) — the camera does not move on a
   pure viewer change, only the redacted hand/tickets do.
 - Non-spatial actions, and step 0 (before any action), produce `frameTarget: null` → `SpotlightFramer`
@@ -81,7 +82,7 @@ auto-pan, matching live behavior).
 - **Tunnels:** `CLAIM_ROUTE`'s `routeId` covers both a plain route claim and a tunnel attempt (the
   pending/resolve split is a later `RESOLVE_TUNNEL` action). Replay therefore pans to a tunnel the
   instant the claim is attempted, whether or not `RESOLVE_TUNNEL` later aborts it — slightly earlier
-  than live (which pans on the `tunnelRevealed` *event*), but within the same turn, not user-visible as
+  than live (which pans on the `tunnelRevealed` _event_), but within the same turn, not user-visible as
   a meaningful difference.
 - **Reduced motion:** still forces 0ms regardless of step vs. seek — `target.instant || reduced`, not
   `target.instant && reduced`.

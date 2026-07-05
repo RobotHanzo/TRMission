@@ -41,13 +41,29 @@ const lerpAtLat = (a: Point, b: Point, lat: number): Point => {
  */
 export function clipRingToBBox(ring: Ring, bbox: CropBBox): Ring {
   let pts: Point[] = ring.slice() as Point[];
-  pts = clipEdge(pts, (p) => p[0] >= bbox.lonMin, (a, b) => lerpAtLon(a, b, bbox.lonMin));
+  pts = clipEdge(
+    pts,
+    (p) => p[0] >= bbox.lonMin,
+    (a, b) => lerpAtLon(a, b, bbox.lonMin),
+  );
   if (pts.length === 0) return [];
-  pts = clipEdge(pts, (p) => p[0] <= bbox.lonMax, (a, b) => lerpAtLon(a, b, bbox.lonMax));
+  pts = clipEdge(
+    pts,
+    (p) => p[0] <= bbox.lonMax,
+    (a, b) => lerpAtLon(a, b, bbox.lonMax),
+  );
   if (pts.length === 0) return [];
-  pts = clipEdge(pts, (p) => p[1] >= bbox.latMin, (a, b) => lerpAtLat(a, b, bbox.latMin));
+  pts = clipEdge(
+    pts,
+    (p) => p[1] >= bbox.latMin,
+    (a, b) => lerpAtLat(a, b, bbox.latMin),
+  );
   if (pts.length === 0) return [];
-  pts = clipEdge(pts, (p) => p[1] <= bbox.latMax, (a, b) => lerpAtLat(a, b, bbox.latMax));
+  pts = clipEdge(
+    pts,
+    (p) => p[1] <= bbox.latMax,
+    (a, b) => lerpAtLat(a, b, bbox.latMax),
+  );
   return pts;
 }
 

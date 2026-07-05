@@ -13,7 +13,7 @@ Add motion and feedback to the in-game experience without changing game truth. F
    tickets tray on confirm.
 3. **Claim/station glow** — a route blooms in the owner's seat colour when claimed; a station marker
    pops with a ring glow when built. For **all** players.
-4. **Ticket-completion fanfare** — a full-screen, **skippable**, ≤7s celebration when one of *your*
+4. **Ticket-completion fanfare** — a full-screen, **skippable**, ≤7s celebration when one of _your_
    tickets completes: enlarged ticket card, confetti (more for long-haul), and a seat-colour glow
    that sweeps the completed route path from the start station to the end station. Points are awarded
    and shown **instantly** at completion.
@@ -28,16 +28,16 @@ Add motion and feedback to the in-game experience without changing game truth. F
   (`socket.onEvents` → `store/game.applyEvents`). `server.proto` explicitly frames `EventBatch` as
   "animation hints" — this is exactly that use.
 - **Ticket completion is derived client-side.** There is no `TicketCompleted` event. After each
-  snapshot we recompute which of *the local player's* kept tickets are connected (reusing the
+  snapshot we recompute which of _the local player's_ kept tickets are connected (reusing the
   engine's `UnionFind` + station-borrow logic from `packages/engine/src/graph/connectivity.ts`), and
-  fire on an incomplete→complete transition. Deriving it locally is *better* than an event: a BFS
+  fire on an incomplete→complete transition. Deriving it locally is _better_ than an event: a BFS
   over owned routes yields the actual start→end **path** to sweep, which an event would not carry.
 - **Instant ticket points are self-only.** Opponents' tickets are secret (`PublicPlayerState` carries
   route points only). So instant ticket scoring (the `+N` and the score bump) is shown for the local
   player; opponents' ticket points still reconcile at game-over via `finalScores`. This is a
   display/derivation choice — the deterministic engine is untouched. A future engine change could
   make ticket points live and authoritative for all players, but that is out of scope here.
-- **Opponents' draws show a branded cover.** The local player's draw animates the *real* card
+- **Opponents' draws show a branded cover.** The local player's draw animates the _real_ card
   (colour/art, since the drawn card is visible to its owner); opponents' draws animate a **cover**
   (train mark + 台鐵任務 / TRMission) into their tracker row — for both blind and face-up draws,
   for visual consistency.
@@ -52,11 +52,13 @@ Add motion and feedback to the in-game experience without changing game truth. F
 ## Architecture
 
 ### Animation event bus
+
 `store/game.ts` gains a `lastBatch: { seq: number; events: GameEvent[] } | null` field, incremented
 on every `applyEvents`. Animation consumers react to `lastBatch` changes (one batch at a time)
 instead of diffing the rolling 50-event `recentEvents` buffer.
 
 ### `game/animationModel.ts` (pure)
+
 Pure translation of `(prevSnapshot, snapshot, events)` → a list of typed **animation intents**:
 `{ kind: 'cardFly', toPlayerId, faceUp, color? }`, `{ kind: 'glowRoute', routeId, seat }`,
 `{ kind: 'glowStation', cityId, seat }`, `{ kind: 'scoreFloat', playerId, amount }`,
@@ -64,6 +66,7 @@ Pure translation of `(prevSnapshot, snapshot, events)` → a list of typed **ani
 `{ kind: 'ticketComplete', ticketId, long, seat, path }`. Pure ⇒ unit-testable.
 
 ### `game/tickets.ts` (pure)
+
 - `completedTicketIds(snapshot): Set<string>` — builds the local player's owned edges + station
   borrows from the snapshot and runs union-find (reusing the engine helper) to mark which kept
   tickets are connected.
@@ -73,16 +76,19 @@ Pure translation of `(prevSnapshot, snapshot, events)` → a list of typed **ani
   bump on the local player).
 
 ### `useAnimationDriver(snapshot)` (hook, mounted once in `GameScreen`)
+
 Holds `prevSnapshot` + `prevCompleted` refs. On each new `lastBatch`/snapshot it computes intents via
 `animationModel` and a completed-set diff, then dispatches them into the animation store. The first
 snapshot only **initializes** the refs (no firing) so reconnect/resume never replays a stale fanfare.
 
 ### `store/animations.ts` (zustand)
+
 Transient animation state the views render from: `glowingRoutes`/`glowingStations` (id→expiry),
 `flights` (in-flight cards), `floats` (score `+N`s), `turnCue`, `marketFlips`, and the current
 `fanfare` (the active ticket-completion overlay, or null). Entries self-expire.
 
 ### `<AnimationLayer/>` (fixed viewport portal)
+
 Renders flights, score floats, and the fanfare above the board. Uses FLIP
 (`getBoundingClientRect`) between **tagged DOM anchors**: the deck button, each market slot, the hand
 tray, and each tracker row (`data-anim="deck|market-slot|hand|tracker"`, `data-player-id`,
@@ -90,6 +96,7 @@ tray, and each tracker row (`data-anim="deck|market-slot|hand|tracker"`, `data-p
 start/end stations on screen for the sweep and confetti origins.
 
 ### `useReducedMotion()`
+
 Small hook over `matchMedia('(prefers-reduced-motion: reduce)')`, consumed by the driver and layer.
 
 ## Per-item implementation
@@ -117,11 +124,13 @@ Small hook over `matchMedia('(prefers-reduced-motion: reduce)')`, consumed by th
    - **Tunnel flip:** the 3 revealed cards in `TunnelModal` flip one-by-one (staggered) on mount.
 
 ## Score display
+
 The local player's displayed total becomes `routePoints (snapshot) + liveTicketPoints(snapshot)`,
 animated on increment. Opponents show snapshot `routePoints` only (ticket points hidden until
 game-over). Applies to `PlayerTrackers` (and any HUD score readout).
 
 ## Testing & verification
+
 - **Unit (vitest, TDD):** `game/tickets.ts` (completion, path, live points incl. station-borrow and
   reconnect-no-fire), `game/animationModel.ts` (events → intents, including opponent-cover and
   self-real-card branches).
@@ -132,11 +141,13 @@ game-over). Applies to `PlayerTrackers` (and any HUD score readout).
   Capture a GIF.
 
 ## Commit hygiene
+
 Parent branch `feat/url-routing-reload-state` has unrelated uncommitted WIP (PaymentModal,
 RoomScreen, rest.ts, payments, TrainCarCard, global.css, vitest.setup, new tests). Work happens on
 `feat/ingame-animations`; only animation files are staged/committed. The WIP is left untouched.
 
 ## Out of scope
+
 - Sound effects.
 - A user-facing animation on/off toggle beyond OS `prefers-reduced-motion` (can be added later).
 
@@ -151,12 +162,12 @@ Supersedes the earlier "instant ticket scoring is self-only" decision. User deci
   small **backend** change to reveal finished tickets through the sanctioned projection.
 - **Own-track instant completion.** A ticket counts as completed — instantly, permanently, points
   awarded, revealed, animated — the moment the player's **own** routes connect its two cities (no
-  station borrowing in the instant trigger). Such a ticket is *guaranteed* to also count at game-end,
+  station borrowing in the instant trigger). Such a ticket is _guaranteed_ to also count at game-end,
   so **end-game scoring and the station-borrow optimisation are unchanged** and the live total can
   never diverge from the final. The rare ticket completable only via a station borrow resolves at
   game-end exactly as today (no instant award for it).
 - **Fanfare scope:** the local player's completion → full-screen confetti fanfare + board sweep; an
-  opponent's completion → *subtle* cue (revealed ticket near their tracker + board path glow in their
+  opponent's completion → _subtle_ cue (revealed ticket near their tracker + board path glow in their
   seat colour + score float), **no** full-screen takeover.
 
 ### Backend changes (security-preserving)
@@ -184,7 +195,7 @@ Instead add a separate, explicitly-public collection:
 
 - Completion is now read from the wire (`snapshot.completedTickets`), authoritative for **all**
   players — not derived locally. So `game/tickets.ts` reduces to: `pathForTicket(snapshot, playerId,
-  ticketId)` (BFS over that player's public owned routes between the ticket's endpoints, for the
+ticketId)` (BFS over that player's public owned routes between the ticket's endpoints, for the
   sweep) and `playerLiveTotal(snapshot, playerId)` (= `routePoints` + Σ value of that player's
   `completedTickets`).
 - `useAnimationDriver` diffs `snapshot.completedTickets` (per player) across snapshots to fire

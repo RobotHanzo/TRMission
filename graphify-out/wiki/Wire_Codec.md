@@ -29,7 +29,7 @@
 - **phaseToPb()** (3 connections) — `packages/codec/src/enums.ts`
 - **decodeClient()** (2 connections) — `apps/server/test/helpers.ts`
 - **rejectionToPb()** (2 connections) — `packages/codec/src/enums.ts`
-- *... and 22 more nodes in this community*
+- _... and 22 more nodes in this community_
 
 ## Relationships
 
@@ -71,4 +71,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

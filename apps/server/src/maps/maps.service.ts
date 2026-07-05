@@ -2,7 +2,13 @@ import { randomUUID } from 'node:crypto';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { buildBoard } from '@trm/engine';
 import type { Board } from '@trm/engine';
-import { assertValidContent, hashContent, validateContent, validateForPlay, validateGeography } from '@trm/map-data';
+import {
+  assertValidContent,
+  hashContent,
+  validateContent,
+  validateForPlay,
+  validateGeography,
+} from '@trm/map-data';
 import type { MapRules } from '@trm/map-data';
 import { CustomMapRepo } from './custom-map.repo';
 import { MapContentRepo } from './map-content.repo';
@@ -37,7 +43,11 @@ const toSummary = (m: CustomMapDoc): MapSummary => ({
   updatedAt: m.updatedAt.toISOString(),
 });
 
-const toDetail = (m: CustomMapDoc): MapDetail => ({ ...toSummary(m), ownerId: m.ownerId, draft: m.draft });
+const toDetail = (m: CustomMapDoc): MapDetail => ({
+  ...toSummary(m),
+  ownerId: m.ownerId,
+  draft: m.draft,
+});
 
 @Injectable()
 export class MapsService {
@@ -64,7 +74,11 @@ export class MapsService {
   async update(
     id: string,
     ownerId: string,
-    patch: { nameZh?: string | undefined; nameEn?: string | undefined; draft?: MapDraft | undefined },
+    patch: {
+      nameZh?: string | undefined;
+      nameEn?: string | undefined;
+      draft?: MapDraft | undefined;
+    },
   ): Promise<MapDetail> {
     const doc = await this.maps.update(id, ownerId, patch);
     if (!doc) throw new NotFoundException('map not found');
@@ -86,7 +100,8 @@ export class MapsService {
   }
 
   async revokeShare(id: string, ownerId: string): Promise<void> {
-    if (!(await this.maps.revokeShareCode(id, ownerId))) throw new NotFoundException('map not found');
+    if (!(await this.maps.revokeShareCode(id, ownerId)))
+      throw new NotFoundException('map not found');
   }
 
   async peekByCode(code: string): Promise<SharedMapView> {
@@ -98,7 +113,12 @@ export class MapsService {
   async cloneByCode(code: string, ownerId: string): Promise<MapDetail> {
     const source = await this.maps.findByShareCode(code);
     if (!source) throw new NotFoundException('map not found');
-    const doc = await this.maps.create(randomUUID(), ownerId, `${source.nameZh} (副本)`, `${source.nameEn} (Copy)`);
+    const doc = await this.maps.create(
+      randomUUID(),
+      ownerId,
+      `${source.nameZh} (副本)`,
+      `${source.nameEn} (Copy)`,
+    );
     const updated = await this.maps.update(doc._id, ownerId, { draft: source.draft });
     return toDetail(updated ?? doc);
   }

@@ -72,10 +72,15 @@ existing catch block, which already bounces home on 400/403/404.
 
 ```ts
 const join = async () => {
-  setBusy(true); setErr(null);
+  setBusy(true);
+  setErr(null);
   try {
     enterRoom((await api.joinRoom(code.trim().toUpperCase())).code);
-  } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  } catch (e) {
+    setErr((e as Error).message);
+  } finally {
+    setBusy(false);
+  }
 };
 ```
 
@@ -84,7 +89,8 @@ instead of attempting (and failing) a join:
 
 ```ts
 const join = async () => {
-  setBusy(true); setErr(null);
+  setBusy(true);
+  setErr(null);
   try {
     const target = code.trim().toUpperCase();
     const r = await api.getRoom(target);
@@ -95,7 +101,11 @@ const join = async () => {
     } else {
       enterRoom((await api.joinRoom(target)).code);
     }
-  } catch (e) { setErr((e as Error).message); } finally { setBusy(false); }
+  } catch (e) {
+    setErr((e as Error).message);
+  } finally {
+    setBusy(false);
+  }
 };
 ```
 

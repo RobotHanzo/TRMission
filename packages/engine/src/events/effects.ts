@@ -144,11 +144,7 @@ export function playerOwnEdges(board: Board, state: GameState, player: PlayerId)
 }
 
 /** The set of city ids touched by `player`'s owned routes (endpoints of their own network). */
-export function playerNetworkCities(
-  board: Board,
-  state: GameState,
-  player: PlayerId,
-): Set<string> {
+export function playerNetworkCities(board: Board, state: GameState, player: PlayerId): Set<string> {
   const cities = new Set<string>();
   for (const [routeId, cell] of Object.entries(state.ownership)) {
     if ('owner' in cell && cell.owner === player) {

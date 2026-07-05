@@ -29,7 +29,7 @@
 - **refillMarket()** (8 connections) — `packages/engine/src/deck.ts`
 - **validateRoutePayment()** (8 connections) — `packages/engine/src/payments.ts`
 - **validateStationPayment()** (8 connections) — `packages/engine/src/payments.ts`
-- *... and 47 more nodes in this community*
+- _... and 47 more nodes in this community_
 
 ## Relationships
 
@@ -72,4 +72,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

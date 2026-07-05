@@ -45,11 +45,7 @@ export function offerTickets(
  * check alone. Such a player has no objective left, so the turn sequencer forces them to draw new
  * tickets at the start of their turn.
  */
-export function allKeptTicketsCompleted(
-  board: Board,
-  state: GameState,
-  player: PlayerId,
-): boolean {
+export function allKeptTicketsCompleted(board: Board, state: GameState, player: PlayerId): boolean {
   const p = state.players[player as string];
   if (!p || p.keptTickets.length === 0) return false;
 

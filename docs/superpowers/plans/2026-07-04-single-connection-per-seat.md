@@ -43,10 +43,12 @@ constants, `@trm/proto` (buf-generated wire types).
 ### Task 1: Shared WS close-code constant
 
 **Files:**
+
 - Create: `packages/shared/src/ws.ts`
 - Modify: `packages/shared/src/index.ts`
 
 **Interfaces:**
+
 - Produces: `SESSION_REPLACED_CLOSE_CODE: number` (value `4001`), importable as
   `import { SESSION_REPLACED_CLOSE_CODE } from '@trm/shared'`. Consumed by Task 3 (server) and
   Task 4 (client).
@@ -105,16 +107,18 @@ git commit -m "feat(shared): add SESSION_REPLACED_CLOSE_CODE constant"
 ### Task 2: Server forced-close capability
 
 **Files:**
+
 - Modify: `apps/server/src/ws/connection.ts`
 - Modify: `apps/server/src/ws/hub.ts` (only the `openConnection` method, lines 190-195)
 - Modify: `apps/server/src/ws/ws-server.ts`
 - Test: `apps/server/test/connection.spec.ts` (new)
 
 **Interfaces:**
+
 - Produces: `export type CloseFn = (code: number, reason: string) => void` from `connection.ts`;
   `Connection.terminate(code: number, reason: string): void`; `Connection`'s constructor gains an
   optional 3rd param `closeFn?: CloseFn`; `GameHub.openConnection(id: string, sink: Sink, closeFn?:
-  CloseFn): Connection`. Consumed by Task 3 (hub kick logic) and production `ws-server.ts` wiring
+CloseFn): Connection`. Consumed by Task 3 (hub kick logic) and production `ws-server.ts` wiring
   in this same task.
 - Consumes: nothing new from earlier tasks.
 
@@ -260,21 +264,21 @@ to:
 In `apps/server/src/ws/ws-server.ts`, change (currently lines 17-19):
 
 ```ts
-    hub.openConnection(id, (bytes) => {
-      if (socket.readyState === socket.OPEN) socket.send(bytes);
-    });
+hub.openConnection(id, (bytes) => {
+  if (socket.readyState === socket.OPEN) socket.send(bytes);
+});
 ```
 
 to:
 
 ```ts
-    hub.openConnection(
-      id,
-      (bytes) => {
-        if (socket.readyState === socket.OPEN) socket.send(bytes);
-      },
-      (code, reason) => socket.close(code, reason),
-    );
+hub.openConnection(
+  id,
+  (bytes) => {
+    if (socket.readyState === socket.OPEN) socket.send(bytes);
+  },
+  (code, reason) => socket.close(code, reason),
+);
 ```
 
 - [ ] **Step 6: Run the test, confirm it passes**
@@ -300,11 +304,13 @@ git commit -m "feat(server): add a forced-close capability to Connection"
 ### Task 3: Proto `SESSION_REPLACED` code + kick-on-Hello logic
 
 **Files:**
+
 - Modify: `packages/proto/proto/trmission/v1/common.proto`
 - Modify: `apps/server/src/ws/hub.ts` (`onHello`, and its `@trm/shared` import line)
 - Test: `apps/server/test/ws-session-replace.e2e.spec.ts` (new)
 
 **Interfaces:**
+
 - Consumes: `Connection.terminate` + `GameHub.openConnection`'s `closeFn` param (Task 2);
   `SESSION_REPLACED_CLOSE_CODE` (Task 1).
 - Produces: `RejectionCode.SESSION_REPLACED` (generated proto enum value `7`); the kick behavior in
@@ -482,30 +488,30 @@ In `apps/server/src/ws/hub.ts`'s `onHello`, insert the check immediately before 
 seat-binding line. Change:
 
 ```ts
-    conn.binding = { gameId: binding.gameId, player, seat: binding.seat };
-    conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
-    this.members.get(binding.gameId)?.set(binding.playerId, conn);
+conn.binding = { gameId: binding.gameId, player, seat: binding.seat };
+conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
+this.members.get(binding.gameId)?.set(binding.playerId, conn);
 ```
 
 to:
 
 ```ts
-    const prev = this.members.get(binding.gameId)?.get(binding.playerId);
-    if (prev && prev !== conn) {
-      prev.send(
-        rejectionFrame(
-          0,
-          RejectionCode.SESSION_REPLACED,
-          'errors:sessionReplaced',
-          'connected elsewhere',
-        ),
-      );
-      prev.terminate(SESSION_REPLACED_CLOSE_CODE, 'session_replaced');
-    }
+const prev = this.members.get(binding.gameId)?.get(binding.playerId);
+if (prev && prev !== conn) {
+  prev.send(
+    rejectionFrame(
+      0,
+      RejectionCode.SESSION_REPLACED,
+      'errors:sessionReplaced',
+      'connected elsewhere',
+    ),
+  );
+  prev.terminate(SESSION_REPLACED_CLOSE_CODE, 'session_replaced');
+}
 
-    conn.binding = { gameId: binding.gameId, player, seat: binding.seat };
-    conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
-    this.members.get(binding.gameId)?.set(binding.playerId, conn);
+conn.binding = { gameId: binding.gameId, player, seat: binding.seat };
+conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
+this.members.get(binding.gameId)?.set(binding.playerId, conn);
 ```
 
 (`rejectionFrame` and `RejectionCode` are already imported at the top of `hub.ts` — no further
@@ -536,10 +542,12 @@ git commit -m "feat(server): kick the older connection when a seat is re-claimed
 ### Task 4: Client `GameSocket` — recognize the forced close
 
 **Files:**
+
 - Modify: `apps/web/src/net/socket.ts`
 - Test: `apps/web/src/net/socket.test.ts` (append)
 
 **Interfaces:**
+
 - Consumes: `SESSION_REPLACED_CLOSE_CODE` from `@trm/shared` (Task 1).
 - Produces: `SocketHandlers.onSessionReplaced?(): void`, invoked instead of the normal
   `'reconnecting'` status flip when the close code matches. Consumed by Task 5.
@@ -665,32 +673,32 @@ export interface SocketHandlers {
 Change `ws.onclose` (currently):
 
 ```ts
-    ws.onclose = () => {
-      this.stopHeartbeat();
-      if (this.closed) return;
-      this.handlers.onStatus?.('reconnecting');
-      const delay = Math.min(30_000, 2 ** this.reconnectAttempts * 500);
-      this.reconnectAttempts += 1;
-      setTimeout(() => this.connect(), delay);
-    };
+ws.onclose = () => {
+  this.stopHeartbeat();
+  if (this.closed) return;
+  this.handlers.onStatus?.('reconnecting');
+  const delay = Math.min(30_000, 2 ** this.reconnectAttempts * 500);
+  this.reconnectAttempts += 1;
+  setTimeout(() => this.connect(), delay);
+};
 ```
 
 to:
 
 ```ts
-    ws.onclose = (ev: CloseEvent) => {
-      this.stopHeartbeat();
-      if (this.closed) return;
-      if (ev.code === SESSION_REPLACED_CLOSE_CODE) {
-        this.closed = true;
-        this.handlers.onSessionReplaced?.();
-        return;
-      }
-      this.handlers.onStatus?.('reconnecting');
-      const delay = Math.min(30_000, 2 ** this.reconnectAttempts * 500);
-      this.reconnectAttempts += 1;
-      setTimeout(() => this.connect(), delay);
-    };
+ws.onclose = (ev: CloseEvent) => {
+  this.stopHeartbeat();
+  if (this.closed) return;
+  if (ev.code === SESSION_REPLACED_CLOSE_CODE) {
+    this.closed = true;
+    this.handlers.onSessionReplaced?.();
+    return;
+  }
+  this.handlers.onStatus?.('reconnecting');
+  const delay = Math.min(30_000, 2 ** this.reconnectAttempts * 500);
+  this.reconnectAttempts += 1;
+  setTimeout(() => this.connect(), delay);
+};
 ```
 
 - [ ] **Step 4: Run the test, confirm it passes**
@@ -710,11 +718,13 @@ git commit -m "feat(web): recognize the session-replaced close code in GameSocke
 ### Task 5: Client store wiring — `sessionReplaced` flag
 
 **Files:**
+
 - Modify: `apps/web/src/store/game.ts`
 - Modify: `apps/web/src/net/connection.ts`
 - Test: `apps/web/src/store/game.test.ts` (append)
 
 **Interfaces:**
+
 - Consumes: `SocketHandlers.onSessionReplaced` (Task 4).
 - Produces: `GameState.sessionReplaced: boolean`, `GameState.setSessionReplaced(v: boolean): void`.
   Consumed by Task 6.
@@ -827,22 +837,22 @@ In `apps/web/src/net/connection.ts`, add `onSessionReplaced` to the `GameSocket`
 (after `onCameraMoved`):
 
 ```ts
-  socket = new GameSocket(ticket, {
-    onStatus: (status) => useGame.getState().setStatus(status),
-    onSnapshot: (snapshot) => useGame.getState().applySnapshot(snapshot),
-    onEvents: (version, events) => {
-      useGame.getState().applyEvents(version, events);
-      useLog.getState().ingestLive(events);
-    },
-    onRejection: (r) => useGame.getState().setRejection({ code: r.code, messageKey: r.messageKey }),
-    onChat: (playerId, text) => useChat.getState().ingest({ playerId, text }),
-    onHistory: (events, chat) => {
-      useLog.getState().ingestHistory(events);
-      useChat.getState().ingestHistory(chat);
-    },
-    onCameraMoved: (playerId, view) => useGame.getState().applyCameraMoved(playerId, view),
-    onSessionReplaced: () => useGame.getState().setSessionReplaced(true),
-  });
+socket = new GameSocket(ticket, {
+  onStatus: (status) => useGame.getState().setStatus(status),
+  onSnapshot: (snapshot) => useGame.getState().applySnapshot(snapshot),
+  onEvents: (version, events) => {
+    useGame.getState().applyEvents(version, events);
+    useLog.getState().ingestLive(events);
+  },
+  onRejection: (r) => useGame.getState().setRejection({ code: r.code, messageKey: r.messageKey }),
+  onChat: (playerId, text) => useChat.getState().ingest({ playerId, text }),
+  onHistory: (events, chat) => {
+    useLog.getState().ingestHistory(events);
+    useChat.getState().ingestHistory(chat);
+  },
+  onCameraMoved: (playerId, view) => useGame.getState().applyCameraMoved(playerId, view),
+  onSessionReplaced: () => useGame.getState().setSessionReplaced(true),
+});
 ```
 
 - [ ] **Step 5: Run the test, confirm it passes**
@@ -862,11 +872,13 @@ git commit -m "feat(web): add sessionReplaced flag to the game store"
 ### Task 6: Dialog UI + i18n
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts`
 - Modify: `apps/web/src/screens/GameScreen.tsx`
 - Test: `apps/web/src/screens/GameScreen.test.tsx` (append)
 
 **Interfaces:**
+
 - Consumes: `GameState.sessionReplaced` (Task 5); `useUi`'s `goHome` (already used in
   `GameScreen.tsx` — note `goHome()` already tears down the socket internally via
   `disconnectGame()`, `store/ui.ts:225-229`, so this task does not call `disconnectGame` directly,

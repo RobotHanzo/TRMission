@@ -1,1 +1,182 @@
-{"nodes": [{"id": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal", "label": "Replay Camera-Follow Design Goal", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Live gameplay's follow-acting-player camera glides to a bot's most recent route/tunnel/station event via CameraSync; replay mounts Board/GameStage with sandbox, which is exactly the flag that disables CameraSync, so replay has no camera-follow at all today. Extend replay so the camera auto-pans to the current action for every player, human or bot, since there is no live camera to mirror for a human in replay - the bot's infer-the-spot-from-the-action mechanism is the only viable one, applied uniformly."}, {"id": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_data_flow", "label": "Camera-Follow Data Flow", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Forward step -> useReplayPlayer.next() -> animate becomes true -> frameTarget recomputed with instant:false -> SpotlightFramer glides 600ms. Seek/prev/setViewer -> applyTo() -> animate becomes false -> frameTarget recomputed with instant:true -> SpotlightFramer snaps with no glide. A perspective switch re-targets the same step so the derived frameTarget key is unchanged and the camera does not move."}, {"id": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_edge_cases", "label": "Edge Cases (tunnels, reduced motion, repeated seeks)", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "CLAIM_ROUTE covers both a plain route claim and a tunnel attempt, so replay pans on the claim attempt rather than the tunnelRevealed event live uses - slightly earlier but not user-visibly different within the same turn. Reduced motion always forces 0ms via target.instant || reduced, not &&. Repeated seeks to the same step are a no-op because SpotlightFramer's effect keys on the target's kind:ids string, not the animate/instant flag."}, {"id": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_gamestage_frametarget", "label": "GameStage frameTarget prop", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_screens_gamestage_gamestage", "label": "GameStage", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "apps_web_src_components_board_spotlightframer", "target": "apps_web_src_game_boardview_boardframetarget", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_components_board_spotlightframer", "target": "apps_web_src_components_board_camerasync", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal", "target": "apps_web_src_components_board_camerasync", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal", "target": "apps_web_src_components_board_spotlightframer", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal", "target": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_data_flow", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_data_flow", "target": "apps_web_src_features_replay_usereplayplayer_animate", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_data_flow", "target": "apps_web_src_features_replay_frametarget_frametargetforaction", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_edge_cases", "target": "apps_web_src_game_boardview_boardframetarget", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_gamestage_frametarget", "target": "apps_web_src_screens_replayscreen_replaystage", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_screens_gamestage_gamestage", "target": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_gamestage_frametarget", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "replay_camera_follow_data_flow_mechanism", "label": "Replay Camera-Follow Data-Flow Mechanism", "nodes": ["apps_web_src_game_boardview_boardframetarget", "apps_web_src_components_board_spotlightframer", "apps_web_src_features_replay_usereplayplayer_animate", "apps_web_src_features_replay_frametarget_frametargetforaction", "apps_web_src_screens_replayscreen_replaystage", "apps_web_src_store_ui_followacting"], "relation": "participate_in", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md"}]}
+{
+  "nodes": [
+    {
+      "id": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal",
+      "label": "Replay Camera-Follow Design Goal",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Live gameplay's follow-acting-player camera glides to a bot's most recent route/tunnel/station event via CameraSync; replay mounts Board/GameStage with sandbox, which is exactly the flag that disables CameraSync, so replay has no camera-follow at all today. Extend replay so the camera auto-pans to the current action for every player, human or bot, since there is no live camera to mirror for a human in replay - the bot's infer-the-spot-from-the-action mechanism is the only viable one, applied uniformly."
+    },
+    {
+      "id": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_data_flow",
+      "label": "Camera-Follow Data Flow",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Forward step -> useReplayPlayer.next() -> animate becomes true -> frameTarget recomputed with instant:false -> SpotlightFramer glides 600ms. Seek/prev/setViewer -> applyTo() -> animate becomes false -> frameTarget recomputed with instant:true -> SpotlightFramer snaps with no glide. A perspective switch re-targets the same step so the derived frameTarget key is unchanged and the camera does not move."
+    },
+    {
+      "id": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_edge_cases",
+      "label": "Edge Cases (tunnels, reduced motion, repeated seeks)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "CLAIM_ROUTE covers both a plain route claim and a tunnel attempt, so replay pans on the claim attempt rather than the tunnelRevealed event live uses - slightly earlier but not user-visibly different within the same turn. Reduced motion always forces 0ms via target.instant || reduced, not &&. Repeated seeks to the same step are a no-op because SpotlightFramer's effect keys on the target's kind:ids string, not the animate/instant flag."
+    },
+    {
+      "id": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_gamestage_frametarget",
+      "label": "GameStage frameTarget prop",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_screens_gamestage_gamestage",
+      "label": "GameStage",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "apps_web_src_components_board_spotlightframer",
+      "target": "apps_web_src_game_boardview_boardframetarget",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_components_board_spotlightframer",
+      "target": "apps_web_src_components_board_camerasync",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal",
+      "target": "apps_web_src_components_board_camerasync",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal",
+      "target": "apps_web_src_components_board_spotlightframer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal",
+      "target": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_data_flow",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_data_flow",
+      "target": "apps_web_src_features_replay_usereplayplayer_animate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_data_flow",
+      "target": "apps_web_src_features_replay_frametarget_frametargetforaction",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_edge_cases",
+      "target": "apps_web_src_game_boardview_boardframetarget",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_gamestage_frametarget",
+      "target": "apps_web_src_screens_replayscreen_replaystage",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_screens_gamestage_gamestage",
+      "target": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_gamestage_frametarget",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "replay_camera_follow_data_flow_mechanism",
+      "label": "Replay Camera-Follow Data-Flow Mechanism",
+      "nodes": [
+        "apps_web_src_game_boardview_boardframetarget",
+        "apps_web_src_components_board_spotlightframer",
+        "apps_web_src_features_replay_usereplayplayer_animate",
+        "apps_web_src_features_replay_frametarget_frametargetforaction",
+        "apps_web_src_screens_replayscreen_replaystage",
+        "apps_web_src_store_ui_followacting"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md"
+    }
+  ]
+}

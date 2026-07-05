@@ -24,10 +24,12 @@ the drawer.
 ### Task 1: Always reveal the real color for face-up market draws
 
 **Files:**
+
 - Modify: `apps/web/src/game/animationModel.ts:57-64`
 - Test: `apps/web/src/game/animationModel.test.ts:44-50`
 
 **Interfaces:**
+
 - Consumes: existing `pbToCard(card: Pb): CardColor | null` from `apps/web/src/game/cards.ts`
   (already imported in `animationModel.ts:3`); existing `AnimIntent` union member
   `{ kind: 'cardFly'; toPlayerId: string; faceUp: boolean; color: CardColor | null; slot: number | null }`
@@ -39,25 +41,37 @@ the drawer.
 Replace the existing test in `apps/web/src/game/animationModel.test.ts` (currently lines 44-50):
 
 ```ts
-  it('face-up draw flies from the slot and flips the slot; opponent gets a cover', () => {
-    const out = intentsFromEvents(snap, [
-      event({ case: 'cardTakenFaceup', value: { playerId: 'p1', slot: 2, card: Pb.GREEN } as never }),
-    ]);
-    expect(out).toContainEqual({ kind: 'cardFly', toPlayerId: 'p1', faceUp: true, color: null, slot: 2 });
-    expect(out).toContainEqual({ kind: 'marketFlip', slot: 2 });
+it('face-up draw flies from the slot and flips the slot; opponent gets a cover', () => {
+  const out = intentsFromEvents(snap, [
+    event({ case: 'cardTakenFaceup', value: { playerId: 'p1', slot: 2, card: Pb.GREEN } as never }),
+  ]);
+  expect(out).toContainEqual({
+    kind: 'cardFly',
+    toPlayerId: 'p1',
+    faceUp: true,
+    color: null,
+    slot: 2,
   });
+  expect(out).toContainEqual({ kind: 'marketFlip', slot: 2 });
+});
 ```
 
 with:
 
 ```ts
-  it('face-up draw flies the real card for every viewer and flips the slot', () => {
-    const out = intentsFromEvents(snap, [
-      event({ case: 'cardTakenFaceup', value: { playerId: 'p1', slot: 2, card: Pb.GREEN } as never }),
-    ]);
-    expect(out).toContainEqual({ kind: 'cardFly', toPlayerId: 'p1', faceUp: true, color: 'GREEN', slot: 2 });
-    expect(out).toContainEqual({ kind: 'marketFlip', slot: 2 });
+it('face-up draw flies the real card for every viewer and flips the slot', () => {
+  const out = intentsFromEvents(snap, [
+    event({ case: 'cardTakenFaceup', value: { playerId: 'p1', slot: 2, card: Pb.GREEN } as never }),
+  ]);
+  expect(out).toContainEqual({
+    kind: 'cardFly',
+    toPlayerId: 'p1',
+    faceUp: true,
+    color: 'GREEN',
+    slot: 2,
   });
+  expect(out).toContainEqual({ kind: 'marketFlip', slot: 2 });
+});
 ```
 
 Note: `snap.you.playerId` is `'p0'` ([animationModel.test.ts:10](../../../apps/web/src/game/animationModel.test.ts#L10)),
@@ -100,7 +114,7 @@ with:
 ```
 
 Leave the `marketCover`/`marketFlip` push immediately below (lines 65-71) untouched ??that logic
-covers the *refilled* slot's suspense timing, not the taken card's color, and is unrelated to this
+covers the _refilled_ slot's suspense timing, not the taken card's color, and is unrelated to this
 change. Leave the `cardDrawnBlind` case (lines 48-56) untouched ??that draw is genuinely private
 and still gates on `ev.value.playerId === me`.
 

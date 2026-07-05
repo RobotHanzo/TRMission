@@ -6,7 +6,10 @@ import { useEditorStore } from '../store';
 
 // See CropDrawStage.test.tsx for why this stub is needed (jsdom has no getScreenCTM/createSVGPoint).
 vi.mock('../canvasProjection', () => ({
-  clientToBoardPoint: (_svg: unknown, clientX: number, clientY: number) => ({ x: clientX, y: clientY }),
+  clientToBoardPoint: (_svg: unknown, clientX: number, clientY: number) => ({
+    x: clientX,
+    y: clientY,
+  }),
 }));
 
 beforeEach(() => {

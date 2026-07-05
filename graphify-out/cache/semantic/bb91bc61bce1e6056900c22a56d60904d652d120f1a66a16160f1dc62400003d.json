@@ -1,1 +1,223 @@
-{"nodes": [{"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "label": "Tutorial UI Redesign \u2014 Focus, Animation & Visual Glossary Design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialspotlight", "label": "TutorialSpotlight (focus scrim)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_usespotlightrects", "label": "useSpotlightRects hook", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens", "label": "Specimens.tsx (visual glossary)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimenspec_type", "label": "SpecimenSpec union type", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_spotlightframer", "label": "SpotlightFramer (Board auto-pan)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_boardframetarget", "label": "BoardFrameTarget type", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialoverlay_redesign", "label": "TutorialOverlay redesign (specimen zone, progress bar, caret, dodge)", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_dim_glow_nonblocking", "label": "Non-blocking dim+glow focus style decision", "file_type": "rationale", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_encyclopedia_chapter_list", "label": "Chapter-grouped encyclopedia entry list", "file_type": "concept", "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialspotlight", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_usespotlightrects", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimenspec_type", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_spotlightframer", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_boardframetarget", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialoverlay_redesign", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_dim_glow_nonblocking", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc", "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_encyclopedia_chapter_list", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "tutorial_focus_glossary_system", "label": "Tutorial focus + visual glossary system", "nodes": ["docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialspotlight", "docs_superpowers_specs_2026_06_29_tutorial_ui_design_usespotlightrects", "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens", "docs_superpowers_specs_2026_06_29_tutorial_ui_design_spotlightframer", "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialoverlay_redesign"], "relation": "form", "confidence": "INFERRED", "confidence_score": 0.9, "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md"}]}
+{
+  "nodes": [
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "label": "Tutorial UI Redesign \u2014 Focus, Animation & Visual Glossary Design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialspotlight",
+      "label": "TutorialSpotlight (focus scrim)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_usespotlightrects",
+      "label": "useSpotlightRects hook",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens",
+      "label": "Specimens.tsx (visual glossary)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimenspec_type",
+      "label": "SpecimenSpec union type",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_spotlightframer",
+      "label": "SpotlightFramer (Board auto-pan)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_boardframetarget",
+      "label": "BoardFrameTarget type",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialoverlay_redesign",
+      "label": "TutorialOverlay redesign (specimen zone, progress bar, caret, dodge)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_dim_glow_nonblocking",
+      "label": "Non-blocking dim+glow focus style decision",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_encyclopedia_chapter_list",
+      "label": "Chapter-grouped encyclopedia entry list",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialspotlight",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_usespotlightrects",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimenspec_type",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_spotlightframer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_boardframetarget",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialoverlay_redesign",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_dim_glow_nonblocking",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_doc",
+      "target": "docs_superpowers_specs_2026_06_29_tutorial_ui_design_encyclopedia_chapter_list",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "tutorial_focus_glossary_system",
+      "label": "Tutorial focus + visual glossary system",
+      "nodes": [
+        "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialspotlight",
+        "docs_superpowers_specs_2026_06_29_tutorial_ui_design_usespotlightrects",
+        "docs_superpowers_specs_2026_06_29_tutorial_ui_design_specimens",
+        "docs_superpowers_specs_2026_06_29_tutorial_ui_design_spotlightframer",
+        "docs_superpowers_specs_2026_06_29_tutorial_ui_design_tutorialoverlay_redesign"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "docs/superpowers/specs/2026-06-29-tutorial-ui-design.md"
+    }
+  ]
+}

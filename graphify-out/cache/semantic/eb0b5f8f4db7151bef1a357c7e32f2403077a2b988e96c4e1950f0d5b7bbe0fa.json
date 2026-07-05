@@ -1,1 +1,28 @@
-{"nodes": [{"id": "apps_web_index_theme_bootstrap", "label": "Theme Bootstrap Script (pre-paint dark/light resolution)", "file_type": "concept", "source_file": "apps/web/index.html", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "apps_web_index_theme_bootstrap", "target": "apps_web_claude_store_ui", "relation": "conceptually_related_to", "confidence": "AMBIGUOUS", "confidence_score": 0.25, "source_file": "apps/web/index.html", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "apps_web_index_theme_bootstrap",
+      "label": "Theme Bootstrap Script (pre-paint dark/light resolution)",
+      "file_type": "concept",
+      "source_file": "apps/web/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "apps_web_index_theme_bootstrap",
+      "target": "apps_web_claude_store_ui",
+      "relation": "conceptually_related_to",
+      "confidence": "AMBIGUOUS",
+      "confidence_score": 0.25,
+      "source_file": "apps/web/index.html",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

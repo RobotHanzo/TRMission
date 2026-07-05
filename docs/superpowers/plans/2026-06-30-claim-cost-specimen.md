@@ -22,12 +22,14 @@
 ### Task 1: The `claim-cost` specimen
 
 **Files:**
+
 - Modify: `apps/web/src/features/tutorial/types.ts` (add the union member)
 - Modify: `apps/web/src/features/tutorial/Specimens.tsx` (imports, `CyclingCard` count, `ClaimTrack`, `ClaimCostSpecimen`, switch case)
 - Modify: `apps/web/src/styles/tutorial.css` (the `tut-claim-cost*` classes)
 - Test: `apps/web/src/features/tutorial/Specimens.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `TrainCarCard` (`apps/web/src/components/TrainCarCard.tsx` — props `{ color: CardColor; count?: number; showGlyph?: boolean; size?: number }`), `CARD_COLOR_TOKENS` (`apps/web/src/theme/colors.ts` — `CARD_COLOR_TOKENS[color].hex`), `useReducedMotion` (`apps/web/src/hooks/useReducedMotion.ts`), the existing `STATION_PALETTE` const and `.route`/`.bed`/`.slot` board classes.
 - Produces: `SpecimenSpec` gains `{ kind: 'claim-cost' }`; `<Specimen spec={{ kind: 'claim-cost' }} />` renders a `.tut-claim-cost` root with three `.tut-claim-cost-row` rows.
 
@@ -36,14 +38,14 @@
 Add `{ kind: 'claim-cost' }` to the `specs` array in `apps/web/src/features/tutorial/Specimens.test.tsx` (after the `{ kind: 'score-table' }` line), and add this test inside the `describe('Specimen', …)` block:
 
 ```tsx
-  it('the claim-cost specimen shows three rows costing ×2, ×4, ×3', () => {
-    const { container } = render(<Specimen spec={{ kind: 'claim-cost' }} />);
-    expect(container.querySelectorAll('.tut-claim-cost-row').length).toBe(3);
-    const text = container.textContent ?? '';
-    expect(text).toContain('×2');
-    expect(text).toContain('×4');
-    expect(text).toContain('×3');
-  });
+it('the claim-cost specimen shows three rows costing ×2, ×4, ×3', () => {
+  const { container } = render(<Specimen spec={{ kind: 'claim-cost' }} />);
+  expect(container.querySelectorAll('.tut-claim-cost-row').length).toBe(3);
+  const text = container.textContent ?? '';
+  expect(text).toContain('×2');
+  expect(text).toContain('×4');
+  expect(text).toContain('×3');
+});
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -249,9 +251,11 @@ git commit -m "feat(web): claim-cost tutorial specimen"
 ### Task 2: Attach the specimen to the `claim.intro` beat
 
 **Files:**
+
 - Modify: `apps/web/src/features/tutorial/curriculum.ts` (the `claim` lesson's `intro` beat)
 
 **Interfaces:**
+
 - Consumes: `SpecimenSpec` `{ kind: 'claim-cost' }` produced by Task 1.
 - Produces: the `claim.intro` beat now carries `specimen: { kind: 'claim-cost' }`, so the coachmark renders the graphic beside the rule text.
 
@@ -290,6 +294,7 @@ git commit -m "feat(web): show claim-cost specimen on the claim.intro beat"
 ## Self-Review
 
 **Spec coverage:**
+
 - New specimen on `claim.intro` → Task 2. ✓
 - Three rows, varying length, `[track] → [card ×N]` payment-modal idiom → Task 1 Step 6 (`ClaimCostSpecimen`, `TrainCarCard count`). ✓
 - Colored rows static matching colour; gray row animated colour-cycling → Task 1 Steps 4 & 6 (`CyclingCard` reuse). ✓

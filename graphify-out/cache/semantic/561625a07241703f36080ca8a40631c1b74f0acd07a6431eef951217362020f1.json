@@ -1,1 +1,462 @@
-{"nodes": [{"id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "label": "Replay Camera-Follow Implementation Plan", "file_type": "rationale", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Auto-pan the replay map to whatever action is currently playing out (route claim, station build) for any player, human or bot, reusing the existing tutorial auto-pan mechanism (BoardFrameTarget/SpotlightFramer) instead of touching live CameraSync."}, {"id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1", "label": "Task 1: instant framing + frameDurationMs in boardView.ts", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2", "label": "Task 2: Wire SpotlightFramer to frameDurationMs", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "A mechanical, behavior-neutral substitution for existing callers: every current frameTarget caller (tutorial, encyclopedia) never sets instant, so frameDurationMs returns exactly what the inline expression returned before."}, {"id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3", "label": "Task 3: animate signal on useReplayPlayer", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4", "label": "Task 4: frameTargetForAction mapping", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5", "label": "Task 5: Wire ReplayStage - default-on follow + per-step framing", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task6", "label": "Task 6: Full verification", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_global_constraints", "label": "Global Constraints (no engine/live/CameraSync changes)", "file_type": "rationale", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "No changes to @trm/engine, live gameplay, CameraSync, or spectator camera behavior; no change to perspective-switch redaction; no new UI elements; existing tutorial/encyclopedia auto-pan must keep its exact current behavior since the instant field defaults falsy for every caller that doesn't set it."}, {"id": "apps_web_src_game_boardview_boardframetarget", "label": "BoardFrameTarget", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "A board auto-pan target { kind: 'route' | 'cities', ids: string[], instant?: boolean } consumed by SpotlightFramer; instant skips the glide and snaps straight to the target (used by replay seeks/jumps)."}, {"id": "apps_web_src_game_boardview_framedurationms", "label": "frameDurationMs", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "frameDurationMs(target, reducedMotion) returns 0 when target.instant or reducedMotion is true, else 600 - factored out so the glide-vs-snap duration decision is unit-testable without the pan/zoom library."}, {"id": "apps_web_src_components_board_spotlightframer", "label": "SpotlightFramer", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "A headless child mounted unconditionally (not gated by sandbox) inside the pan/zoom TransformWrapper that drives the tutorial/encyclopedia/replay auto-pan, independent of CameraSync."}, {"id": "apps_web_src_components_board_camerasync", "label": "CameraSync", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "The live/bot follow-acting-player camera mechanism in Board.tsx that glides to a bot's most recent routeClaimed/tunnelRevealed/stationBuilt event; disabled by the sandbox flag, and deliberately left untouched by the replay camera-follow feature."}, {"id": "apps_web_src_features_replay_usereplayplayer_replaycontrols", "label": "ReplayControls (useReplayPlayer)", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_features_replay_usereplayplayer_animate", "label": "animate flag (useReplayPlayer)", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "True immediately after a next()-driven step, false after any applyTo()-driven change (seek, prev, setViewer, initial mount) - the glide-vs-snap signal for the replay camera-follow."}, {"id": "apps_web_src_features_replay_frametarget_frametargetforaction", "label": "frameTargetForAction", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Pure function mapping a replayed Action to a BoardFrameTarget: CLAIM_ROUTE -> route target, BUILD_STATION -> cities target, everything else (draws, ticket keeps, tunnel resolves, passes) -> null."}, {"id": "apps_web_src_screens_replayscreen_replaystage", "label": "ReplayStage (ReplayScreen.tsx)", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_store_ui_followacting", "label": "followActing (store/ui.ts)", "file_type": "concept", "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "The eye-icon toggle shared with live play; ReplayStage sets it true once on mount so replay always opens with follow active, and the user can still turn it off."}], "edges": [{"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "target": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task6", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_global_constraints", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1", "target": "apps_web_src_game_boardview_boardframetarget", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1", "target": "apps_web_src_game_boardview_framedurationms", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2", "target": "apps_web_src_components_board_spotlightframer", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2", "target": "apps_web_src_game_boardview_framedurationms", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3", "target": "apps_web_src_features_replay_usereplayplayer_replaycontrols", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3", "target": "apps_web_src_features_replay_usereplayplayer_animate", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4", "target": "apps_web_src_features_replay_frametarget_frametargetforaction", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4", "target": "apps_web_src_game_boardview_boardframetarget", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5", "target": "apps_web_src_screens_replayscreen_replaystage", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5", "target": "apps_web_src_features_replay_frametarget_frametargetforaction", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5", "target": "apps_web_src_features_replay_usereplayplayer_animate", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5", "target": "apps_web_src_store_ui_followacting", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task6", "target": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_global_constraints", "target": "apps_web_src_components_board_camerasync", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_global_constraints", "target": "claude_engine_reducer", "relation": "semantically_similar_to", "confidence": "INFERRED", "confidence_score": 0.75, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_features_replay_frametarget_frametargetforaction", "target": "apps_web_src_game_boardview_boardframetarget", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "replay_camera_follow_implementation_tasks", "label": "Replay Camera-Follow Implementation Task Sequence", "nodes": ["docs_superpowers_plans_2026_07_02_replay_camera_follow_plan", "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1", "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2", "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3", "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4", "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5", "docs_superpowers_plans_2026_07_02_replay_camera_follow_task6"], "relation": "form", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md"}]}
+{
+  "nodes": [
+    {
+      "id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "label": "Replay Camera-Follow Implementation Plan",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Auto-pan the replay map to whatever action is currently playing out (route claim, station build) for any player, human or bot, reusing the existing tutorial auto-pan mechanism (BoardFrameTarget/SpotlightFramer) instead of touching live CameraSync."
+    },
+    {
+      "id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1",
+      "label": "Task 1: instant framing + frameDurationMs in boardView.ts",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2",
+      "label": "Task 2: Wire SpotlightFramer to frameDurationMs",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "A mechanical, behavior-neutral substitution for existing callers: every current frameTarget caller (tutorial, encyclopedia) never sets instant, so frameDurationMs returns exactly what the inline expression returned before."
+    },
+    {
+      "id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3",
+      "label": "Task 3: animate signal on useReplayPlayer",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4",
+      "label": "Task 4: frameTargetForAction mapping",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5",
+      "label": "Task 5: Wire ReplayStage - default-on follow + per-step framing",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task6",
+      "label": "Task 6: Full verification",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_superpowers_plans_2026_07_02_replay_camera_follow_global_constraints",
+      "label": "Global Constraints (no engine/live/CameraSync changes)",
+      "file_type": "rationale",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "No changes to @trm/engine, live gameplay, CameraSync, or spectator camera behavior; no change to perspective-switch redaction; no new UI elements; existing tutorial/encyclopedia auto-pan must keep its exact current behavior since the instant field defaults falsy for every caller that doesn't set it."
+    },
+    {
+      "id": "apps_web_src_game_boardview_boardframetarget",
+      "label": "BoardFrameTarget",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "A board auto-pan target { kind: 'route' | 'cities', ids: string[], instant?: boolean } consumed by SpotlightFramer; instant skips the glide and snaps straight to the target (used by replay seeks/jumps)."
+    },
+    {
+      "id": "apps_web_src_game_boardview_framedurationms",
+      "label": "frameDurationMs",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "frameDurationMs(target, reducedMotion) returns 0 when target.instant or reducedMotion is true, else 600 - factored out so the glide-vs-snap duration decision is unit-testable without the pan/zoom library."
+    },
+    {
+      "id": "apps_web_src_components_board_spotlightframer",
+      "label": "SpotlightFramer",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "A headless child mounted unconditionally (not gated by sandbox) inside the pan/zoom TransformWrapper that drives the tutorial/encyclopedia/replay auto-pan, independent of CameraSync."
+    },
+    {
+      "id": "apps_web_src_components_board_camerasync",
+      "label": "CameraSync",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "The live/bot follow-acting-player camera mechanism in Board.tsx that glides to a bot's most recent routeClaimed/tunnelRevealed/stationBuilt event; disabled by the sandbox flag, and deliberately left untouched by the replay camera-follow feature."
+    },
+    {
+      "id": "apps_web_src_features_replay_usereplayplayer_replaycontrols",
+      "label": "ReplayControls (useReplayPlayer)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_features_replay_usereplayplayer_animate",
+      "label": "animate flag (useReplayPlayer)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "True immediately after a next()-driven step, false after any applyTo()-driven change (seek, prev, setViewer, initial mount) - the glide-vs-snap signal for the replay camera-follow."
+    },
+    {
+      "id": "apps_web_src_features_replay_frametarget_frametargetforaction",
+      "label": "frameTargetForAction",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Pure function mapping a replayed Action to a BoardFrameTarget: CLAIM_ROUTE -> route target, BUILD_STATION -> cities target, everything else (draws, ticket keeps, tunnel resolves, passes) -> null."
+    },
+    {
+      "id": "apps_web_src_screens_replayscreen_replaystage",
+      "label": "ReplayStage (ReplayScreen.tsx)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_store_ui_followacting",
+      "label": "followActing (store/ui.ts)",
+      "file_type": "concept",
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "The eye-icon toggle shared with live play; ReplayStage sets it true once on mount so replay always opens with follow active, and the user can still turn it off."
+    }
+  ],
+  "edges": [
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "target": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task6",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+      "target": "docs_superpowers_plans_2026_07_02_replay_camera_follow_global_constraints",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1",
+      "target": "apps_web_src_game_boardview_boardframetarget",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1",
+      "target": "apps_web_src_game_boardview_framedurationms",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2",
+      "target": "apps_web_src_components_board_spotlightframer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2",
+      "target": "apps_web_src_game_boardview_framedurationms",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3",
+      "target": "apps_web_src_features_replay_usereplayplayer_replaycontrols",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3",
+      "target": "apps_web_src_features_replay_usereplayplayer_animate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4",
+      "target": "apps_web_src_features_replay_frametarget_frametargetforaction",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4",
+      "target": "apps_web_src_game_boardview_boardframetarget",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5",
+      "target": "apps_web_src_screens_replayscreen_replaystage",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5",
+      "target": "apps_web_src_features_replay_frametarget_frametargetforaction",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5",
+      "target": "apps_web_src_features_replay_usereplayplayer_animate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5",
+      "target": "apps_web_src_store_ui_followacting",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_task6",
+      "target": "docs_superpowers_specs_2026_07_02_replay_camera_follow_design_goal",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_global_constraints",
+      "target": "apps_web_src_components_board_camerasync",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_07_02_replay_camera_follow_global_constraints",
+      "target": "claude_engine_reducer",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_features_replay_frametarget_frametargetforaction",
+      "target": "apps_web_src_game_boardview_boardframetarget",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "replay_camera_follow_implementation_tasks",
+      "label": "Replay Camera-Follow Implementation Task Sequence",
+      "nodes": [
+        "docs_superpowers_plans_2026_07_02_replay_camera_follow_plan",
+        "docs_superpowers_plans_2026_07_02_replay_camera_follow_task1",
+        "docs_superpowers_plans_2026_07_02_replay_camera_follow_task2",
+        "docs_superpowers_plans_2026_07_02_replay_camera_follow_task3",
+        "docs_superpowers_plans_2026_07_02_replay_camera_follow_task4",
+        "docs_superpowers_plans_2026_07_02_replay_camera_follow_task5",
+        "docs_superpowers_plans_2026_07_02_replay_camera_follow_task6"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-07-02-replay-camera-follow.md"
+    }
+  ]
+}

@@ -1,1 +1,28 @@
-{"nodes": [{"id": "yarnrc_yarn_config", "label": "Yarn 4 Configuration (.yarnrc.yml)", "file_type": "concept", "source_file": ".yarnrc.yml", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "yarnrc_yarn_config", "target": "claude_monorepo_build_order", "relation": "conceptually_related_to", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": ".yarnrc.yml", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "yarnrc_yarn_config",
+      "label": "Yarn 4 Configuration (.yarnrc.yml)",
+      "file_type": "concept",
+      "source_file": ".yarnrc.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "yarnrc_yarn_config",
+      "target": "claude_monorepo_build_order",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": ".yarnrc.yml",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

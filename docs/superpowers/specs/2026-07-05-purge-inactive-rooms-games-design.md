@@ -20,8 +20,8 @@ combination) no admin action capable of closing them at all. Two related gaps:
   signal is the **linked game's** `updatedAt`, found the same way `findActiveByMember`
   (`room.repo.ts:278-289`) already does — a `$lookup` into `games` on `gameId`.
 - **A `STARTED` room whose game finishes normally is never closed.** `MongoGameStore
-  .recordCompletion` (`game-store.ts:112-149`, called from `hub.ts:596-601` on natural
-  `GAME_OVER`) only flips the *game* to `COMPLETED` — it never touches the room. `closeRoom`
+.recordCompletion` (`game-store.ts:112-149`, called from `hub.ts:596-601` on natural
+  `GAME_OVER`) only flips the _game_ to `COMPLETED` — it never touches the room. `closeRoom`
   (`dashboard-games.service.ts:174-188`) explicitly 409s on a `STARTED` room ("terminate the game
   instead"), but `terminate()` (`dashboard-games.service.ts:144-172`) only CASes a game that's
   still `LIVE`. Net effect: **every room whose game completed and was never rematched is stuck in
@@ -39,11 +39,11 @@ combination) no admin action capable of closing them at all. Two related gaps:
 
 ## Scope
 
-- **Automated purge** targets only stale *non-terminal* sessions: `LOBBY` rooms, `STARTED` rooms
+- **Automated purge** targets only stale _non-terminal_ sessions: `LOBBY` rooms, `STARTED` rooms
   (via the finding above), and `LIVE` games. Terminal records (`CLOSED`/`COMPLETED`/`TERMINATED`)
   are never auto-deleted — including ones a sweep itself produces as a side effect (e.g. a room
   closed by cascading termination stays around until a maintainer deletes it manually).
-- **Manual delete** (admin panel) works on a room/game in *any* status, in one click: terminates/
+- **Manual delete** (admin panel) works on a room/game in _any_ status, in one click: terminates/
   closes first if still active, then hard-deletes.
 - **All delete actions require confirmation** — room delete, game delete, and "Run purge now" all
   go through the existing `ConfirmDialog` (danger, with a free-text reason where applicable),
@@ -55,12 +55,12 @@ combination) no admin action capable of closing them at all. Two related gaps:
 New `apps/server/src/config/env.ts` entries, following the existing unprefixed/`_MS`/`_HOURS`
 naming style:
 
-| Env var | Default | Meaning |
-|---|---|---|
-| `PURGE_AUTO_ENABLED` | `false` (opt-in) | Whether the background sweep runs at all. Off by default because this is new automated deletion of user data — an operator should turn it on deliberately after reviewing thresholds. |
-| `PURGE_INTERVAL_MS` | `3_600_000` (1h) | How often the background sweep fires. |
-| `ROOM_LOBBY_PURGE_HOURS` | `24` | How long a `LOBBY` room may sit with no room-level activity before it's purge-eligible. |
-| `GAME_LIVE_PURGE_HOURS` | `168` (7d) | How long a `LIVE` game may go without an action before it's purge-eligible. Reused for `STARTED` rooms via their linked game's `updatedAt` (see below) — it's the same underlying signal ("nothing has happened here"). |
+| Env var                  | Default          | Meaning                                                                                                                                                                                                                 |
+| ------------------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PURGE_AUTO_ENABLED`     | `false` (opt-in) | Whether the background sweep runs at all. Off by default because this is new automated deletion of user data — an operator should turn it on deliberately after reviewing thresholds.                                   |
+| `PURGE_INTERVAL_MS`      | `3_600_000` (1h) | How often the background sweep fires.                                                                                                                                                                                   |
+| `ROOM_LOBBY_PURGE_HOURS` | `24`             | How long a `LOBBY` room may sit with no room-level activity before it's purge-eligible.                                                                                                                                 |
+| `GAME_LIVE_PURGE_HOURS`  | `168` (7d)       | How long a `LIVE` game may go without an action before it's purge-eligible. Reused for `STARTED` rooms via their linked game's `updatedAt` (see below) — it's the same underlying signal ("nothing has happened here"). |
 
 Conservative defaults: long enough that a slow-paced game, or one where players stepped away and
 plan to reconnect (there is no reconnect grace period today — a human can rejoin a `LIVE` game
@@ -87,7 +87,7 @@ by manual delete and the auto-sweep, split so audit/metrics are attributed corre
   5. Return the game's prior status (for metrics/audit).
 - **`terminateIfLive(gameId, terminatedBy, reason)`** (private): the CAS-to-`TERMINATED` + evict +
   `closeByGameId` steps factored out of `purgeGameCore` on their own — a no-op if the game isn't
-  `LIVE`. This is the piece `purgeRoomCore` needs: deleting a room must only *terminate* a still-`LIVE`
+  `LIVE`. This is the piece `purgeRoomCore` needs: deleting a room must only _terminate_ a still-`LIVE`
   linked game (status flip, record kept, still visible in Games view), never delete that game's
   record — deleting the game itself is a separate action on the Games view. `purgeGameCore` calls
   this too, then goes on to hard-delete.
@@ -101,7 +101,7 @@ by manual delete and the auto-sweep, split so audit/metrics are attributed corre
   5. Return the room's prior status.
 - **`deleteGame(actor: AuthUser, gameId, reason?)`** (public, manual path): calls
   `purgeGameCore`, 404s if it returned `null`, then `audit.log(actor, 'game.delete', {type:'game',
-  id: gameId}, {reason, priorStatus})` and `metrics.gamePurged('manual', priorStatus)`.
+id: gameId}, {reason, priorStatus})` and `metrics.gamePurged('manual', priorStatus)`.
 - **`deleteRoom(actor: AuthUser, code, reason?)`** (public, manual path): same shape, `room.delete`,
   `metrics.roomPurged('manual', priorStatus)`.
 - **`runSweep(trigger: 'auto' | 'manual', actor?: AuthUser)`** (public — used by both the
@@ -124,8 +124,8 @@ by manual delete and the auto-sweep, split so audit/metrics are attributed corre
      non-terminal.)
   5. If any query hit its cap, note it (`capped: true` in the summary) — no silent truncation.
   6. Write **one** summary entry: `trigger === 'auto' ? audit.logSystem(...) :
-     audit.log(actor, ...)`, action `'purge.run'`, params `{roomsDeleted, gamesDeleted, capped,
-     thresholds}`. Per-item audit entries are deliberately skipped for the sweep (a run can touch
+audit.log(actor, ...)`, action `'purge.run'`, params `{roomsDeleted, gamesDeleted, capped,
+thresholds}`. Per-item audit entries are deliberately skipped for the sweep (a run can touch
      hundreds of docs; the summary is the record) — metrics still increment per item since
      Prometheus counters are meant to aggregate.
   7. Return `{roomsDeleted, gamesDeleted, capped}`.
@@ -148,12 +148,12 @@ New audit actions in `audit.repo.ts`'s `DashboardAuditAction` union: `room.delet
 
 New endpoints:
 
-| Method | Path | Permission | Body |
-|---|---|---|---|
-| `DELETE` | `/dashboard/rooms/:code` | `rooms.delete` | `ModerationReasonDto` (reused as-is) |
-| `DELETE` | `/dashboard/games/:gameId` | `games.delete` | `ModerationReasonDto` |
-| `POST` | `/dashboard/purge/run` | `purge.run` | none |
-| `GET` | `/dashboard/purge/status` | `purge.read` | — |
+| Method   | Path                       | Permission     | Body                                 |
+| -------- | -------------------------- | -------------- | ------------------------------------ |
+| `DELETE` | `/dashboard/rooms/:code`   | `rooms.delete` | `ModerationReasonDto` (reused as-is) |
+| `DELETE` | `/dashboard/games/:gameId` | `games.delete` | `ModerationReasonDto`                |
+| `POST`   | `/dashboard/purge/run`     | `purge.run`    | none                                 |
+| `GET`    | `/dashboard/purge/status`  | `purge.read`   | —                                    |
 
 The two `DELETE` routes live on the existing `DashboardGamesController` (conventional REST grouping
 by resource — games/rooms routes stay together) but call into the new `PurgeService`. `run`/
@@ -251,7 +251,7 @@ moment of deletion (`LOBBY`/`STARTED` or `LIVE`/`COMPLETED`/`TERMINATED`). Publi
     room with `COMPLETED` linked game → deletes the room, leaves the game untouched; `STARTED` room
     with no linked game doc (orphan) → deletes directly.
   - `runSweep`: seeds a stale `LOBBY` room, a stale `LIVE` game (with its `STARTED` room), and a
-    `STARTED` room whose game is `COMPLETED` and old — asserts all three get purged, a *fresh*
+    `STARTED` room whose game is `COMPLETED` and old — asserts all three get purged, a _fresh_
     version of each is left alone, and the `LIVE`-game room isn't double-processed by the
     `STARTED`-room query (ordering assertion). Asserts the cap + `capped: true` behavior with a
     seeded count over the limit. Asserts exactly one `purge.run` audit entry per call, with correct

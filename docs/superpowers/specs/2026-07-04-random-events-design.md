@@ -103,7 +103,7 @@ load-bearing property that keeps off-mode byte-identical. When on, the draw orde
    for as long as `startRound <= SCHEDULE_ROUND_CAP` (300 — comfortably beyond any realistic game;
    greedy-policy playtests top out around 70-75 rounds). There is no longer a fixed total-entry
    budget per game: the schedule keeps generating events for the whole game, and intensity instead
-   tunes *frequency* via `gapSpan` (the width of the random gap added between an event's start and
+   tunes _frequency_ via `gapSpan` (the width of the random gap added between an event's start and
    the next one's) — a smaller span means shorter average gaps, i.e. denser play. A prior revision
    capped generation at a fixed `count` (2/4/6) of entries within a 20-round window, which meant every
    real game (which routinely runs 45-75+ rounds) went quiet for its entire back half once that count
@@ -489,7 +489,7 @@ helpers: `charterToPb`, `activeEventToInfo`, `forecastToInfo`, `randomEventsToPb
   stranded; the started game's `game_settings.events_mode` always shows the truth. Started games are
   never retroactively affected by a later grant/revoke.
 - No server-wide flag, no `GET /rooms/config` endpoint — a room's viewers already learn whether
-  *they* hold the feature from `PublicUser.features` (`GET /auth/me`), the same signal `mapBuilder`
+  _they_ hold the feature from `PublicUser.features` (`GET /auth/me`), the same signal `mapBuilder`
   uses.
 - `apps/server/src/history/history.repo.ts`: `REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] =
 [4, 5]` replaces the old strict `engineVersion !== ENGINE_VERSION` gate — v5 replays a v4 action log

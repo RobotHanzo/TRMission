@@ -40,12 +40,14 @@ codegen, i18next.
 ### Task 1: Engine — generalize `lockCompletedTickets` to fire off-variant; bump `ENGINE_VERSION`
 
 **Files:**
+
 - Modify: `packages/engine/src/reduce.ts:19,791-834`
 - Modify: `packages/engine/src/types/state.ts:38-40,129-139`
 - Modify: `packages/engine/test/instant-completion.spec.ts:79,147-164`
 - Modify: `packages/engine/test/variants-determinism.spec.ts:1-3,22-24,75-80`
 
 **Interfaces:**
+
 - Produces: `lockCompletedTickets(board, state)` (unexported, same signature) now locks own-track
   completions in EVERY game, not just under `ruleParams.unlimitedStationBorrow`.
   `ENGINE_VERSION` becomes `7` (exported from `packages/engine/src/types/state.ts`, already
@@ -185,7 +187,11 @@ import { borrowConnectedTicketIds, citiesConnected } from './graph/connectivity'
 to:
 
 ```ts
-import { borrowConnectedTicketIds, ownConnectedTicketIds, citiesConnected } from './graph/connectivity';
+import {
+  borrowConnectedTicketIds,
+  ownConnectedTicketIds,
+  citiesConnected,
+} from './graph/connectivity';
 ```
 
 Then replace the whole `lockCompletedTickets` function and its doc comment (currently around
@@ -330,17 +336,17 @@ import { borrowConnectedTicketIds, ownConnectedTicketIds } from '../src/graph/co
 Change the version test (lines 22-24):
 
 ```ts
-  it('is engine version 6 (rule 7.5 also counts unlimitedStationBorrow-locked completion)', () => {
-    expect(ENGINE_VERSION).toBe(6);
-  });
+it('is engine version 6 (rule 7.5 also counts unlimitedStationBorrow-locked completion)', () => {
+  expect(ENGINE_VERSION).toBe(6);
+});
 ```
 
 to:
 
 ```ts
-  it('is engine version 7 (TICKET_COMPLETED/completedTickets lock now fires off-variant too)', () => {
-    expect(ENGINE_VERSION).toBe(7);
-  });
+it('is engine version 7 (TICKET_COMPLETED/completedTickets lock now fires off-variant too)', () => {
+  expect(ENGINE_VERSION).toBe(7);
+});
 ```
 
 Replace the off-variant test (lines 75-80):
@@ -425,10 +431,12 @@ EOF
 ### Task 2: Server — narrow the replay-compat allowlist to engine v7 only
 
 **Files:**
+
 - Modify: `apps/server/src/history/history.repo.ts:42-52`
 - Modify: `apps/server/test/history-replay-compat.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `ENGINE_VERSION` is now `7` (Task 1).
 - Produces: `REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [7]` (unchanged export
   name/type).
@@ -556,10 +564,12 @@ EOF
 ### Task 3: Proto — add the `TicketCompleted` wire message; bump `PROTOCOL_VERSION`
 
 **Files:**
+
 - Modify: `packages/proto/proto/trmission/v1/server.proto`
 - Modify: `packages/proto/src/index.ts`
 
 **Interfaces:**
+
 - Produces: `TicketCompleted { player_id: string; ticket_id: string }` message, wired into
   `GameEvent.event` oneof as `ticket_completed` (field 25) — consumed by
   `packages/codec/src/events.ts` in Task 4 as the `'ticketCompleted'` case, and by
@@ -721,10 +731,12 @@ Note: `src/gen/**` is gitignored, so `git add` above only stages the `.proto` so
 ### Task 4: Codec — stop dropping `TICKET_COMPLETED`
 
 **Files:**
+
 - Modify: `packages/codec/src/events.ts:118-121`
 - Modify: `packages/codec/test/codec.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `TicketCompletedSchema`/`ticketCompleted` oneof case from `@trm/proto` (Task 3).
 - Produces: `eventToProto` now returns a real frame for the engine's `'TICKET_COMPLETED'` case
   instead of `null`.
@@ -735,21 +747,21 @@ In `packages/codec/test/codec.spec.ts`, add this test inside the existing `descr
 eventToProto', ...)` block (after the last `it`, before the closing `});`):
 
 ```ts
-  it('wraps TICKET_COMPLETED into a real frame (public — finished tickets are not hidden)', () => {
-    const completed: GameEvent = {
-      e: 'TICKET_COMPLETED',
-      player: p1,
-      ticket: asTicketId('S17'),
-      visibility: 'PUBLIC',
-    };
-    const forOwner = eventToProto(completed, p1);
-    const forOther = eventToProto(completed, p2);
-    expect(forOwner?.event.case).toBe('ticketCompleted');
-    expect(forOther?.event.case).toBe('ticketCompleted');
-    if (forOwner?.event.case !== 'ticketCompleted') throw new Error('wrong case');
-    expect(forOwner.event.value.playerId).toBe('p1');
-    expect(forOwner.event.value.ticketId).toBe('S17');
-  });
+it('wraps TICKET_COMPLETED into a real frame (public — finished tickets are not hidden)', () => {
+  const completed: GameEvent = {
+    e: 'TICKET_COMPLETED',
+    player: p1,
+    ticket: asTicketId('S17'),
+    visibility: 'PUBLIC',
+  };
+  const forOwner = eventToProto(completed, p1);
+  const forOther = eventToProto(completed, p2);
+  expect(forOwner?.event.case).toBe('ticketCompleted');
+  expect(forOther?.event.case).toBe('ticketCompleted');
+  if (forOwner?.event.case !== 'ticketCompleted') throw new Error('wrong case');
+  expect(forOwner.event.value.playerId).toBe('p1');
+  expect(forOwner.event.value.ticketId).toBe('S17');
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -809,6 +821,7 @@ EOF
 ### Task 5: Web — log a line when a ticket completes
 
 **Files:**
+
 - Modify: `apps/web/src/game/logModel.ts:6-23,42-170`
 - Modify: `apps/web/src/game/logModel.test.ts`
 - Modify: `apps/web/src/components/LogPanel.tsx:9,44-88`
@@ -816,6 +829,7 @@ EOF
 - Modify: `apps/web/src/i18n/index.ts` (`log` block in both the `zh-Hant` and `en` resources)
 
 **Interfaces:**
+
 - Consumes: the `'ticketCompleted'` proto `GameEvent` case (Task 3/4); `ticketLabel(id, locale)`
   from `apps/web/src/game/content.ts` (existing, returns `{ a, b, value, long } | null`).
 - Produces: `LogKind` gains `'ticketCompleted'`; `entriesFromEvents` handles it; `LogPanel`
@@ -827,52 +841,52 @@ In `apps/web/src/game/logModel.test.ts`, add this case inside the existing `it('
 actions with the right importance', ...)` test — change:
 
 ```ts
-  it('maps important actions with the right importance', () => {
-    const out = entriesFromEvents([
-      ev({ case: 'routeClaimed', value: { playerId: 'p1', routeId: 'R1', pointsAwarded: 7 } }),
-      ev({ case: 'stationBuilt', value: { playerId: 'p2', cityId: 'C9' } }),
-      ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2 } }),
-    ]);
-    expect(out).toEqual([
-      {
-        kind: 'routeClaimed',
-        playerId: 'p1',
-        data: { routeId: 'R1', points: 7 },
-        importance: 'highlight',
-      },
-      { kind: 'stationBuilt', playerId: 'p2', data: { cityId: 'C9' }, importance: 'highlight' },
-      { kind: 'endgame', playerId: 'p1', data: { turns: 2 }, importance: 'alert' },
-    ]);
-  });
+it('maps important actions with the right importance', () => {
+  const out = entriesFromEvents([
+    ev({ case: 'routeClaimed', value: { playerId: 'p1', routeId: 'R1', pointsAwarded: 7 } }),
+    ev({ case: 'stationBuilt', value: { playerId: 'p2', cityId: 'C9' } }),
+    ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2 } }),
+  ]);
+  expect(out).toEqual([
+    {
+      kind: 'routeClaimed',
+      playerId: 'p1',
+      data: { routeId: 'R1', points: 7 },
+      importance: 'highlight',
+    },
+    { kind: 'stationBuilt', playerId: 'p2', data: { cityId: 'C9' }, importance: 'highlight' },
+    { kind: 'endgame', playerId: 'p1', data: { turns: 2 }, importance: 'alert' },
+  ]);
+});
 ```
 
 to:
 
 ```ts
-  it('maps important actions with the right importance', () => {
-    const out = entriesFromEvents([
-      ev({ case: 'routeClaimed', value: { playerId: 'p1', routeId: 'R1', pointsAwarded: 7 } }),
-      ev({ case: 'stationBuilt', value: { playerId: 'p2', cityId: 'C9' } }),
-      ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2 } }),
-      ev({ case: 'ticketCompleted', value: { playerId: 'p1', ticketId: 'S17' } }),
-    ]);
-    expect(out).toEqual([
-      {
-        kind: 'routeClaimed',
-        playerId: 'p1',
-        data: { routeId: 'R1', points: 7 },
-        importance: 'highlight',
-      },
-      { kind: 'stationBuilt', playerId: 'p2', data: { cityId: 'C9' }, importance: 'highlight' },
-      { kind: 'endgame', playerId: 'p1', data: { turns: 2 }, importance: 'alert' },
-      {
-        kind: 'ticketCompleted',
-        playerId: 'p1',
-        data: { ticketId: 'S17' },
-        importance: 'highlight',
-      },
-    ]);
-  });
+it('maps important actions with the right importance', () => {
+  const out = entriesFromEvents([
+    ev({ case: 'routeClaimed', value: { playerId: 'p1', routeId: 'R1', pointsAwarded: 7 } }),
+    ev({ case: 'stationBuilt', value: { playerId: 'p2', cityId: 'C9' } }),
+    ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2 } }),
+    ev({ case: 'ticketCompleted', value: { playerId: 'p1', ticketId: 'S17' } }),
+  ]);
+  expect(out).toEqual([
+    {
+      kind: 'routeClaimed',
+      playerId: 'p1',
+      data: { routeId: 'R1', points: 7 },
+      importance: 'highlight',
+    },
+    { kind: 'stationBuilt', playerId: 'p2', data: { cityId: 'C9' }, importance: 'highlight' },
+    { kind: 'endgame', playerId: 'p1', data: { turns: 2 }, importance: 'alert' },
+    {
+      kind: 'ticketCompleted',
+      playerId: 'p1',
+      data: { ticketId: 'S17' },
+      importance: 'highlight',
+    },
+  ]);
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -1140,10 +1154,12 @@ EOF
 ### Task 6: Web — rainbow locomotive chip in the log
 
 **Files:**
+
 - Modify: `apps/web/src/components/LogPanel.tsx:8,112-119`
 - Modify: `apps/web/src/components/LogPanel.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `LOCOMOTIVE_GRADIENT` from `apps/web/src/theme/colors.ts` (existing, already used by
   `CardMarket.tsx`).
 

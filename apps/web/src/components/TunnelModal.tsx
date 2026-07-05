@@ -117,7 +117,11 @@ export function TunnelModal({
                         className="payment-card payment-card--readonly"
                         aria-label={`${CARD_COLOR_TOKENS[surchargeColor].nameZh} ×${extraRequired}`}
                       >
-                        <TrainCarCard color={surchargeColor} count={extraRequired} size={CARD_SIZE} />
+                        <TrainCarCard
+                          color={surchargeColor}
+                          count={extraRequired}
+                          size={CARD_SIZE}
+                        />
                       </div>
                     </li>
                   </ul>

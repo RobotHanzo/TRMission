@@ -116,11 +116,19 @@ function MapDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 {t('maps.transfer')}
               </button>
               {detail.shared && (
-                <button className="oc-btn" disabled={busy} onClick={() => setConfirmingUnshare(true)}>
+                <button
+                  className="oc-btn"
+                  disabled={busy}
+                  onClick={() => setConfirmingUnshare(true)}
+                >
                   {t('maps.unshare')}
                 </button>
               )}
-              <button className="oc-btn danger" disabled={busy} onClick={() => setConfirmingDelete(true)}>
+              <button
+                className="oc-btn danger"
+                disabled={busy}
+                onClick={() => setConfirmingDelete(true)}
+              >
                 {t('maps.delete')}
               </button>
             </section>

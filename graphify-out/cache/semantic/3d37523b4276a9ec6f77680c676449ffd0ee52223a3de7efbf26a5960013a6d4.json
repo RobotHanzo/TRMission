@@ -1,1 +1,154 @@
-{"nodes": [{"id": "_superpowers_sdd_task_1_brief", "label": "Task 1 Brief \u2014 Server: spectator persistence in the store", "file_type": "document", "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "concept_spectator_persistence", "label": "Spectator Persistence Mechanism (addSpectator, GameDoc/MatchHistoryDoc)", "file_type": "rationale", "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_src_persistence_types_gamedoc", "label": "GameDoc.spectators (persistence/types.ts)", "file_type": "code", "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_src_persistence_types_matchhistorydoc", "label": "MatchHistoryDoc.spectators/engineVersion (persistence/types.ts)", "file_type": "code", "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_src_persistence_types_gamestoreport", "label": "GameStorePort.addSpectator (persistence/types.ts)", "file_type": "code", "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_src_persistence_game_store", "label": "game-store.ts (MongoGameStore.addSpectator/recordCompletion, ensureIndexes)", "file_type": "code", "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_test_spectators_spec", "label": "spectators.spec.ts", "file_type": "code", "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_1_brief", "target": "apps_server_src_persistence_types_gamedoc", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_1_brief", "target": "apps_server_src_persistence_types_matchhistorydoc", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_1_brief", "target": "apps_server_src_persistence_types_gamestoreport", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_1_brief", "target": "apps_server_src_persistence_game_store", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_1_brief", "target": "apps_server_test_spectators_spec", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_1_brief", "target": "concept_spectator_persistence", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "weight": 1.0}, {"source": "concept_spectator_persistence", "target": "apps_server_src_persistence_game_store", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-1-brief.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_1_brief",
+      "label": "Task 1 Brief \u2014 Server: spectator persistence in the store",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_spectator_persistence",
+      "label": "Spectator Persistence Mechanism (addSpectator, GameDoc/MatchHistoryDoc)",
+      "file_type": "rationale",
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_src_persistence_types_gamedoc",
+      "label": "GameDoc.spectators (persistence/types.ts)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_src_persistence_types_matchhistorydoc",
+      "label": "MatchHistoryDoc.spectators/engineVersion (persistence/types.ts)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_src_persistence_types_gamestoreport",
+      "label": "GameStorePort.addSpectator (persistence/types.ts)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_src_persistence_game_store",
+      "label": "game-store.ts (MongoGameStore.addSpectator/recordCompletion, ensureIndexes)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_test_spectators_spec",
+      "label": "spectators.spec.ts",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_1_brief",
+      "target": "apps_server_src_persistence_types_gamedoc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_1_brief",
+      "target": "apps_server_src_persistence_types_matchhistorydoc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_1_brief",
+      "target": "apps_server_src_persistence_types_gamestoreport",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_1_brief",
+      "target": "apps_server_src_persistence_game_store",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_1_brief",
+      "target": "apps_server_test_spectators_spec",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_1_brief",
+      "target": "concept_spectator_persistence",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_spectator_persistence",
+      "target": "apps_server_src_persistence_game_store",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-1-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

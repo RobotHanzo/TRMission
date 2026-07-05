@@ -24,10 +24,12 @@
 ### Task 1: `useDebouncedValue` hook
 
 **Files:**
+
 - Create: `apps/admin/src/hooks/useDebouncedValue.ts`
 - Test: `apps/admin/src/hooks/useDebouncedValue.test.ts`
 
 **Interfaces:**
+
 - Produces: `useDebouncedValue<T>(value: T, delayMs: number): T` — a generic hook returning `value` after it has been stable for `delayMs`. Used by Task 8.
 
 - [ ] **Step 1: Write the failing test**
@@ -140,6 +142,7 @@ git commit -m "feat(admin): add useDebouncedValue hook"
 ### Task 2: Toast store + `ToastStack` component, mounted in `App.tsx`
 
 **Files:**
+
 - Create: `apps/admin/src/store/toast.ts`
 - Create: `apps/admin/src/components/ToastStack.tsx`
 - Test: `apps/admin/src/components/ToastStack.test.tsx`
@@ -147,6 +150,7 @@ git commit -m "feat(admin): add useDebouncedValue hook"
 - Modify: `apps/admin/src/styles/admin.css`
 
 **Interfaces:**
+
 - Produces: `useToast` (zustand store) with state `{ toasts: ToastCue[] }` and actions
   `push(kind: 'success' | 'error', message: string): void`, `remove(id: number): void`,
   `reset(): void`; type `ToastCue = { id: number; kind: 'success' | 'error'; message: string }`.
@@ -262,8 +266,7 @@ const nextId = (): number => ++counter;
 
 export const useToast = create<ToastState>()((set) => ({
   toasts: [],
-  push: (kind, message) =>
-    set((s) => ({ toasts: [...s.toasts, { id: nextId(), kind, message }] })),
+  push: (kind, message) => set((s) => ({ toasts: [...s.toasts, { id: nextId(), kind, message }] })),
   remove: (id) => set((s) => ({ toasts: s.toasts.filter((c) => c.id !== id) })),
   reset: () => set({ toasts: [] }),
 }));
@@ -441,9 +444,11 @@ git commit -m "feat(admin): add toast notification system"
 ### Task 3: i18n additions (toast messages + new column/badge strings)
 
 **Files:**
+
 - Modify: `apps/admin/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Produces: i18n keys consumed by Tasks 5, 6, 7, 9, 10, 11, 12 —
   `toast.userBanned`, `toast.userUnbanned`, `toast.featuresSaved`, `toast.gameTerminated`,
   `toast.roomClosed`, `toast.maintainerSaved`, `toast.maintainerRevoked`,
@@ -536,12 +541,14 @@ git commit -m "feat(admin): add i18n strings for action toasts and users table c
 ### Task 4: Backend — expose `hasPassword` and `guestExpiresAt` on dashboard user rows
 
 **Files:**
+
 - Modify: `apps/server/src/dashboard/dashboard-users.service.ts:22-32` (the `toRow` function)
 - Modify: `apps/server/src/dashboard/dashboard.schemas.ts:89-99` (`DashboardUserRowSchema`)
 - Modify: `apps/admin/src/net/rest.ts:43-53` (`UserRow` interface)
 - Test: `apps/server/test/dashboard-read.e2e.spec.ts` (extend the existing `describe('users', ...)` block)
 
 **Interfaces:**
+
 - Produces: every dashboard user row/detail payload gains `hasPassword: boolean` and an
   optional `guestExpiresAt?: string` (ISO timestamp, present only for guests with a pending
   TTL). Used by Task 7 (`OAuthBadges`, `ExpiresCell` in `UsersView`).
@@ -553,23 +560,23 @@ Open `apps/server/test/dashboard-read.e2e.spec.ts` and add this test inside the 
 before `'user detail includes sessions...'`):
 
 ```ts
-  it('registered accounts report hasPassword; guest accounts report a pending guestExpiresAt', async () => {
-    const all = await request(server())
-      .get('/api/v1/dashboard/users')
-      .set(auth(admin.token))
-      .expect(200);
-    const adminRow = all.body.users.find((u: { id: string }) => u.id === admin.userId);
-    expect(adminRow.hasPassword).toBe(true);
-    expect(adminRow.guestExpiresAt).toBeUndefined();
+it('registered accounts report hasPassword; guest accounts report a pending guestExpiresAt', async () => {
+  const all = await request(server())
+    .get('/api/v1/dashboard/users')
+    .set(auth(admin.token))
+    .expect(200);
+  const adminRow = all.body.users.find((u: { id: string }) => u.id === admin.userId);
+  expect(adminRow.hasPassword).toBe(true);
+  expect(adminRow.guestExpiresAt).toBeUndefined();
 
-    const guests = await request(server())
-      .get('/api/v1/dashboard/users?filter=guests')
-      .set(auth(admin.token))
-      .expect(200);
-    const hostRow = guests.body.users.find((u: { id: string }) => u.id === host.userId);
-    expect(hostRow.hasPassword).toBe(false);
-    expect(typeof hostRow.guestExpiresAt).toBe('string');
-  });
+  const guests = await request(server())
+    .get('/api/v1/dashboard/users?filter=guests')
+    .set(auth(admin.token))
+    .expect(200);
+  const hostRow = guests.body.users.find((u: { id: string }) => u.id === host.userId);
+  expect(hostRow.hasPassword).toBe(false);
+  expect(typeof hostRow.guestExpiresAt).toBe('string');
+});
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -783,12 +790,14 @@ git commit -m "feat(server,admin): expose hasPassword and guestExpiresAt on dash
 ### Task 5: OAuth method badges (`OAuthBadges` + two glyph icons)
 
 **Files:**
+
 - Create: `apps/admin/src/components/icons/GoogleGlyph.tsx`
 - Create: `apps/admin/src/components/icons/DiscordGlyph.tsx`
 - Create: `apps/admin/src/components/OAuthBadges.tsx`
 - Test: `apps/admin/src/components/OAuthBadges.test.tsx`
 
 **Interfaces:**
+
 - Consumes: i18n keys `users.oauthGoogle`, `users.oauthDiscord`, `users.oauthPassword` (Task 3).
 - Produces: `<OAuthBadges oauthProviders={string[]} hasPassword={boolean} />`. Used by Task 7 in
   `UsersView.tsx` (table cell + drawer row).
@@ -939,10 +948,12 @@ git commit -m "feat(admin): add OAuth/password method badges"
 ### Task 6: Wire toasts into `UsersView` ban/unban (fixes the silent-failure bug)
 
 **Files:**
+
 - Modify: `apps/admin/src/views/UsersView.tsx:41-53` (`toggleBan`)
 - Test: `apps/admin/src/views/UsersView.test.tsx` (new file)
 
 **Interfaces:**
+
 - Consumes: `useToast` (Task 2), i18n keys `toast.userBanned`/`toast.userUnbanned` (Task 3).
 
 - [ ] **Step 1: Write the failing test**
@@ -1063,47 +1074,47 @@ import { useToast } from '../store/toast';
 Inside `UserDrawer`, add the hook alongside the other store hooks:
 
 ```tsx
-  const pushToast = useToast((s) => s.push);
+const pushToast = useToast((s) => s.push);
 ```
 
 Replace:
 
 ```tsx
-  const toggleBan = async (reason?: string) => {
-    if (!detail) return;
-    setBusy(true);
-    try {
-      const next = detail.disabledAt
-        ? await api.enableUser(detail.id)
-        : await api.disableUser(detail.id, reason);
-      setDetail(next);
-    } finally {
-      setBusy(false);
-      setConfirming(false);
-    }
-  };
+const toggleBan = async (reason?: string) => {
+  if (!detail) return;
+  setBusy(true);
+  try {
+    const next = detail.disabledAt
+      ? await api.enableUser(detail.id)
+      : await api.disableUser(detail.id, reason);
+    setDetail(next);
+  } finally {
+    setBusy(false);
+    setConfirming(false);
+  }
+};
 ```
 
 with:
 
 ```tsx
-  const toggleBan = async (reason?: string) => {
-    if (!detail) return;
-    const wasBanned = Boolean(detail.disabledAt);
-    setBusy(true);
-    try {
-      const next = wasBanned
-        ? await api.enableUser(detail.id)
-        : await api.disableUser(detail.id, reason);
-      setDetail(next);
-      pushToast('success', t(wasBanned ? 'toast.userUnbanned' : 'toast.userBanned'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setConfirming(false);
-    }
-  };
+const toggleBan = async (reason?: string) => {
+  if (!detail) return;
+  const wasBanned = Boolean(detail.disabledAt);
+  setBusy(true);
+  try {
+    const next = wasBanned
+      ? await api.enableUser(detail.id)
+      : await api.disableUser(detail.id, reason);
+    setDetail(next);
+    pushToast('success', t(wasBanned ? 'toast.userUnbanned' : 'toast.userBanned'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setConfirming(false);
+  }
+};
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -1123,9 +1134,11 @@ git commit -m "fix(admin): surface success/error toasts on user ban/unban"
 ### Task 7: `UsersView` — OAuth and Expires columns (table + drawer)
 
 **Files:**
+
 - Modify: `apps/admin/src/views/UsersView.tsx`
 
 **Interfaces:**
+
 - Consumes: `<OAuthBadges />` (Task 5), `UserRow.hasPassword`/`guestExpiresAt` (Task 4),
   `users.colOauth`/`colExpires`/`expiresDisabledSuffix` (Task 3).
 
@@ -1237,27 +1250,27 @@ function ExpiresCell({
 Replace:
 
 ```tsx
-            <tr>
-              <th>{t('users.colUser')}</th>
-              <th>{t('users.colEmail')}</th>
-              <th>{t('users.colKind')}</th>
-              <th>{t('users.colCreated')}</th>
-              <th>{t('users.colStatus')}</th>
-            </tr>
+<tr>
+  <th>{t('users.colUser')}</th>
+  <th>{t('users.colEmail')}</th>
+  <th>{t('users.colKind')}</th>
+  <th>{t('users.colCreated')}</th>
+  <th>{t('users.colStatus')}</th>
+</tr>
 ```
 
 with (new order: User / Email / Kind / OAuth / Status / Created / Expires):
 
 ```tsx
-            <tr>
-              <th>{t('users.colUser')}</th>
-              <th>{t('users.colEmail')}</th>
-              <th>{t('users.colKind')}</th>
-              <th>{t('users.colOauth')}</th>
-              <th>{t('users.colStatus')}</th>
-              <th>{t('users.colCreated')}</th>
-              <th>{t('users.colExpires')}</th>
-            </tr>
+<tr>
+  <th>{t('users.colUser')}</th>
+  <th>{t('users.colEmail')}</th>
+  <th>{t('users.colKind')}</th>
+  <th>{t('users.colOauth')}</th>
+  <th>{t('users.colStatus')}</th>
+  <th>{t('users.colCreated')}</th>
+  <th>{t('users.colExpires')}</th>
+</tr>
 ```
 
 - [ ] **Step 5: Update the table body row**
@@ -1265,55 +1278,55 @@ with (new order: User / Email / Kind / OAuth / Status / Created / Expires):
 Replace:
 
 ```tsx
-            {rows.map((u) => (
-              <tr key={u.id} className="clickable" onClick={() => openDetail('users', u.id)}>
-                <td>
-                  {u.displayName} <span className="oc-mono oc-muted">{shortId(u.id)}</span>
-                </td>
-                <td>{u.email ?? <span className="oc-muted">—</span>}</td>
-                <td>{u.isGuest ? t('users.guest') : t('users.registered')}</td>
-                <td className="num">{fmtDateTime(u.createdAt, locale)}</td>
-                <td>
-                  {u.disabledAt ? (
-                    <SignalBadge aspect="stop" label={t('users.disabledBadge')} />
-                  ) : (
-                    <SignalBadge aspect="clear" label={t('users.active')} />
-                  )}
-                </td>
-              </tr>
-            ))}
+{
+  rows.map((u) => (
+    <tr key={u.id} className="clickable" onClick={() => openDetail('users', u.id)}>
+      <td>
+        {u.displayName} <span className="oc-mono oc-muted">{shortId(u.id)}</span>
+      </td>
+      <td>{u.email ?? <span className="oc-muted">—</span>}</td>
+      <td>{u.isGuest ? t('users.guest') : t('users.registered')}</td>
+      <td className="num">{fmtDateTime(u.createdAt, locale)}</td>
+      <td>
+        {u.disabledAt ? (
+          <SignalBadge aspect="stop" label={t('users.disabledBadge')} />
+        ) : (
+          <SignalBadge aspect="clear" label={t('users.active')} />
+        )}
+      </td>
+    </tr>
+  ));
+}
 ```
 
 with:
 
 ```tsx
-            {rows.map((u) => (
-              <tr key={u.id} className="clickable" onClick={() => openDetail('users', u.id)}>
-                <td>
-                  {u.displayName} <span className="oc-mono oc-muted">{shortId(u.id)}</span>
-                </td>
-                <td>{u.email ?? <span className="oc-muted">—</span>}</td>
-                <td>{u.isGuest ? t('users.guest') : t('users.registered')}</td>
-                <td>
-                  <OAuthBadges oauthProviders={u.oauthProviders} hasPassword={u.hasPassword} />
-                </td>
-                <td>
-                  {u.disabledAt ? (
-                    <SignalBadge aspect="stop" label={t('users.disabledBadge')} />
-                  ) : (
-                    <SignalBadge aspect="clear" label={t('users.active')} />
-                  )}
-                </td>
-                <td className="num">{fmtDateTime(u.createdAt, locale)}</td>
-                <td className="num">
-                  <ExpiresCell
-                    guestExpiresAt={u.guestExpiresAt}
-                    disabledAt={u.disabledAt}
-                    locale={locale}
-                  />
-                </td>
-              </tr>
-            ))}
+{
+  rows.map((u) => (
+    <tr key={u.id} className="clickable" onClick={() => openDetail('users', u.id)}>
+      <td>
+        {u.displayName} <span className="oc-mono oc-muted">{shortId(u.id)}</span>
+      </td>
+      <td>{u.email ?? <span className="oc-muted">—</span>}</td>
+      <td>{u.isGuest ? t('users.guest') : t('users.registered')}</td>
+      <td>
+        <OAuthBadges oauthProviders={u.oauthProviders} hasPassword={u.hasPassword} />
+      </td>
+      <td>
+        {u.disabledAt ? (
+          <SignalBadge aspect="stop" label={t('users.disabledBadge')} />
+        ) : (
+          <SignalBadge aspect="clear" label={t('users.active')} />
+        )}
+      </td>
+      <td className="num">{fmtDateTime(u.createdAt, locale)}</td>
+      <td className="num">
+        <ExpiresCell guestExpiresAt={u.guestExpiresAt} disabledAt={u.disabledAt} locale={locale} />
+      </td>
+    </tr>
+  ));
+}
 ```
 
 - [ ] **Step 6: Update the drawer's OAuth row and add an Expires row**
@@ -1321,40 +1334,43 @@ with:
 Replace:
 
 ```tsx
-            {detail.oauthProviders.length > 0 && (
-              <div className="oc-kv">
-                <span className="k">{t('users.oauth')}</span>
-                <span className="v">{detail.oauthProviders.join(', ')}</span>
-              </div>
-            )}
+{
+  detail.oauthProviders.length > 0 && (
+    <div className="oc-kv">
+      <span className="k">{t('users.oauth')}</span>
+      <span className="v">{detail.oauthProviders.join(', ')}</span>
+    </div>
+  );
+}
 ```
 
 with:
 
 ```tsx
-            {(detail.oauthProviders.length > 0 || detail.hasPassword) && (
-              <div className="oc-kv">
-                <span className="k">{t('users.oauth')}</span>
-                <span className="v">
-                  <OAuthBadges
-                    oauthProviders={detail.oauthProviders}
-                    hasPassword={detail.hasPassword}
-                  />
-                </span>
-              </div>
-            )}
-            {detail.isGuest && detail.guestExpiresAt && (
-              <div className="oc-kv">
-                <span className="k">{t('users.colExpires')}</span>
-                <span className="v">
-                  <ExpiresCell
-                    guestExpiresAt={detail.guestExpiresAt}
-                    disabledAt={detail.disabledAt}
-                    locale={locale}
-                  />
-                </span>
-              </div>
-            )}
+{
+  (detail.oauthProviders.length > 0 || detail.hasPassword) && (
+    <div className="oc-kv">
+      <span className="k">{t('users.oauth')}</span>
+      <span className="v">
+        <OAuthBadges oauthProviders={detail.oauthProviders} hasPassword={detail.hasPassword} />
+      </span>
+    </div>
+  );
+}
+{
+  detail.isGuest && detail.guestExpiresAt && (
+    <div className="oc-kv">
+      <span className="k">{t('users.colExpires')}</span>
+      <span className="v">
+        <ExpiresCell
+          guestExpiresAt={detail.guestExpiresAt}
+          disabledAt={detail.disabledAt}
+          locale={locale}
+        />
+      </span>
+    </div>
+  );
+}
 ```
 
 - [ ] **Step 7: Run test to verify it passes**
@@ -1374,10 +1390,12 @@ git commit -m "feat(admin): add OAuth and Expires columns to the users table"
 ### Task 8: Switch `UsersView` and `AccountSelectorModal` to `useDebouncedValue`
 
 **Files:**
+
 - Modify: `apps/admin/src/views/UsersView.tsx:203-230`
 - Modify: `apps/admin/src/components/AccountSelectorModal.tsx:26-53`
 
 **Interfaces:**
+
 - Consumes: `useDebouncedValue` (Task 1).
 
 - [ ] **Step 1: Write the failing test (extends `UsersView.test.tsx`)**
@@ -1443,67 +1461,67 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 Replace:
 
 ```tsx
-  const [rows, setRows] = useState<UserRow[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [filter, setFilter] = useState<UserFilter>('all');
-  const [q, setQ] = useState('');
-  const [loading, setLoading] = useState(true);
+const [rows, setRows] = useState<UserRow[]>([]);
+const [cursor, setCursor] = useState<string | null>(null);
+const [filter, setFilter] = useState<UserFilter>('all');
+const [q, setQ] = useState('');
+const [loading, setLoading] = useState(true);
 
-  const load = useCallback(
-    async (append: string | null) => {
-      setLoading(true);
-      try {
-        const page = await api.listUsers({
-          ...(q.trim() ? { q: q.trim() } : {}),
-          filter,
-          ...(append ? { cursor: append } : {}),
-        });
-        setRows((prev) => (append ? [...prev, ...page.users] : page.users));
-        setCursor(page.nextCursor);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [filter, q],
-  );
+const load = useCallback(
+  async (append: string | null) => {
+    setLoading(true);
+    try {
+      const page = await api.listUsers({
+        ...(q.trim() ? { q: q.trim() } : {}),
+        filter,
+        ...(append ? { cursor: append } : {}),
+      });
+      setRows((prev) => (append ? [...prev, ...page.users] : page.users));
+      setCursor(page.nextCursor);
+    } finally {
+      setLoading(false);
+    }
+  },
+  [filter, q],
+);
 
-  useEffect(() => {
-    const id = setTimeout(() => void load(null), q ? 250 : 0); // debounce typing
-    return () => clearTimeout(id);
-  }, [load, q]);
+useEffect(() => {
+  const id = setTimeout(() => void load(null), q ? 250 : 0); // debounce typing
+  return () => clearTimeout(id);
+}, [load, q]);
 ```
 
 with:
 
 ```tsx
-  const [rows, setRows] = useState<UserRow[]>([]);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [filter, setFilter] = useState<UserFilter>('all');
-  const [q, setQ] = useState('');
-  const debouncedQ = useDebouncedValue(q, q.trim() ? 300 : 0);
-  const [loading, setLoading] = useState(true);
+const [rows, setRows] = useState<UserRow[]>([]);
+const [cursor, setCursor] = useState<string | null>(null);
+const [filter, setFilter] = useState<UserFilter>('all');
+const [q, setQ] = useState('');
+const debouncedQ = useDebouncedValue(q, q.trim() ? 300 : 0);
+const [loading, setLoading] = useState(true);
 
-  const load = useCallback(
-    async (append: string | null) => {
-      setLoading(true);
-      try {
-        const page = await api.listUsers({
-          ...(debouncedQ.trim() ? { q: debouncedQ.trim() } : {}),
-          filter,
-          ...(append ? { cursor: append } : {}),
-        });
-        setRows((prev) => (append ? [...prev, ...page.users] : page.users));
-        setCursor(page.nextCursor);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [filter, debouncedQ],
-  );
+const load = useCallback(
+  async (append: string | null) => {
+    setLoading(true);
+    try {
+      const page = await api.listUsers({
+        ...(debouncedQ.trim() ? { q: debouncedQ.trim() } : {}),
+        filter,
+        ...(append ? { cursor: append } : {}),
+      });
+      setRows((prev) => (append ? [...prev, ...page.users] : page.users));
+      setCursor(page.nextCursor);
+    } finally {
+      setLoading(false);
+    }
+  },
+  [filter, debouncedQ],
+);
 
-  useEffect(() => {
-    void load(null);
-  }, [load]);
+useEffect(() => {
+  void load(null);
+}, [load]);
 ```
 
 - [ ] **Step 4: Update `AccountSelectorModal.tsx`**
@@ -1517,62 +1535,62 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue';
 Replace:
 
 ```tsx
-  const [q, setQ] = useState('');
-  const [rows, setRows] = useState<UserRow[]>([]);
-  const [loading, setLoading] = useState(true);
+const [q, setQ] = useState('');
+const [rows, setRows] = useState<UserRow[]>([]);
+const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    const id = setTimeout(
-      () => {
-        setLoading(true);
-        api
-          .listUsers({ ...(q.trim() ? { q: q.trim() } : {}), filter })
-          .then((page) => {
-            if (!cancelled) setRows(page.users);
-          })
-          .catch(() => {
-            if (!cancelled) setRows([]);
-          })
-          .finally(() => {
-            if (!cancelled) setLoading(false);
-          });
-      },
-      q ? 250 : 0,
-    ); // debounce typing, load immediately on open
-    return () => {
-      cancelled = true;
-      clearTimeout(id);
-    };
-  }, [q, filter]);
+useEffect(() => {
+  let cancelled = false;
+  const id = setTimeout(
+    () => {
+      setLoading(true);
+      api
+        .listUsers({ ...(q.trim() ? { q: q.trim() } : {}), filter })
+        .then((page) => {
+          if (!cancelled) setRows(page.users);
+        })
+        .catch(() => {
+          if (!cancelled) setRows([]);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    },
+    q ? 250 : 0,
+  ); // debounce typing, load immediately on open
+  return () => {
+    cancelled = true;
+    clearTimeout(id);
+  };
+}, [q, filter]);
 ```
 
 with:
 
 ```tsx
-  const [q, setQ] = useState('');
-  const debouncedQ = useDebouncedValue(q, q.trim() ? 300 : 0);
-  const [rows, setRows] = useState<UserRow[]>([]);
-  const [loading, setLoading] = useState(true);
+const [q, setQ] = useState('');
+const debouncedQ = useDebouncedValue(q, q.trim() ? 300 : 0);
+const [rows, setRows] = useState<UserRow[]>([]);
+const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    api
-      .listUsers({ ...(debouncedQ.trim() ? { q: debouncedQ.trim() } : {}), filter })
-      .then((page) => {
-        if (!cancelled) setRows(page.users);
-      })
-      .catch(() => {
-        if (!cancelled) setRows([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [debouncedQ, filter]);
+useEffect(() => {
+  let cancelled = false;
+  setLoading(true);
+  api
+    .listUsers({ ...(debouncedQ.trim() ? { q: debouncedQ.trim() } : {}), filter })
+    .then((page) => {
+      if (!cancelled) setRows(page.users);
+    })
+    .catch(() => {
+      if (!cancelled) setRows([]);
+    })
+    .finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+  return () => {
+    cancelled = true;
+  };
+}, [debouncedQ, filter]);
 ```
 
 - [ ] **Step 5: Run test to verify it passes**
@@ -1597,10 +1615,12 @@ git commit -m "refactor(admin): extract shared useDebouncedValue hook for search
 ### Task 9: Wire toast into `FeatureToggles` save
 
 **Files:**
+
 - Modify: `apps/admin/src/components/FeatureToggles.tsx`
 - Test: `apps/admin/src/components/FeatureToggles.test.tsx` (new file)
 
 **Interfaces:**
+
 - Consumes: `useToast` (Task 2), `toast.featuresSaved` (Task 3).
 
 - [ ] **Step 1: Write the failing test**
@@ -1676,43 +1696,43 @@ import { useToast } from '../store/toast';
 Add the hook inside the component:
 
 ```tsx
-  const pushToast = useToast((s) => s.push);
+const pushToast = useToast((s) => s.push);
 ```
 
 Replace:
 
 ```tsx
-  const save = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      const detail = await api.putUserFeatures(userId, [...selected]);
-      onSaved?.(detail);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'error');
-    } finally {
-      setBusy(false);
-    }
-  };
+const save = async () => {
+  setBusy(true);
+  setError(null);
+  try {
+    const detail = await api.putUserFeatures(userId, [...selected]);
+    onSaved?.(detail);
+  } catch (e) {
+    setError(e instanceof Error ? e.message : 'error');
+  } finally {
+    setBusy(false);
+  }
+};
 ```
 
 with:
 
 ```tsx
-  const save = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      const detail = await api.putUserFeatures(userId, [...selected]);
-      onSaved?.(detail);
-      pushToast('success', t('toast.featuresSaved'));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'error');
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-    }
-  };
+const save = async () => {
+  setBusy(true);
+  setError(null);
+  try {
+    const detail = await api.putUserFeatures(userId, [...selected]);
+    onSaved?.(detail);
+    pushToast('success', t('toast.featuresSaved'));
+  } catch (e) {
+    setError(e instanceof Error ? e.message : 'error');
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+  }
+};
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -1732,10 +1752,12 @@ git commit -m "feat(admin): surface success/error toasts on feature-access save"
 ### Task 10: Wire toast into `GamesView` terminate
 
 **Files:**
+
 - Modify: `apps/admin/src/views/GamesView.tsx:58-66`
 - Modify: `apps/admin/src/views/GamesView.test.tsx` (extend)
 
 **Interfaces:**
+
 - Consumes: `useToast` (Task 2), `toast.gameTerminated` (Task 3).
 
 - [ ] **Step 1: Write the failing test**
@@ -1770,7 +1792,10 @@ describe('GamesView terminate toasts', () => {
   it('shows a success toast after terminating a live game', async () => {
     useUi.setState({ view: 'games', param: 'g1' });
     stubFetch({
-      '/dashboard/games/g1/terminate': { status: 200, body: { ...GAME_DETAIL, status: 'TERMINATED' } },
+      '/dashboard/games/g1/terminate': {
+        status: 200,
+        body: { ...GAME_DETAIL, status: 'TERMINATED' },
+      },
       '/dashboard/games/g1': { status: 200, body: { ...GAME_DETAIL, status: 'LIVE' } },
       '/dashboard/games?': { status: 200, body: { games: [], nextCursor: null } },
     });
@@ -1826,38 +1851,38 @@ import { useToast } from '../store/toast';
 Inside `GameDrawer`, add the hook:
 
 ```tsx
-  const pushToast = useToast((s) => s.push);
+const pushToast = useToast((s) => s.push);
 ```
 
 Replace:
 
 ```tsx
-  const terminate = async (reason?: string) => {
-    setBusy(true);
-    try {
-      setDetail(await api.terminateGame(id, reason));
-    } finally {
-      setBusy(false);
-      setConfirming(false);
-    }
-  };
+const terminate = async (reason?: string) => {
+  setBusy(true);
+  try {
+    setDetail(await api.terminateGame(id, reason));
+  } finally {
+    setBusy(false);
+    setConfirming(false);
+  }
+};
 ```
 
 with:
 
 ```tsx
-  const terminate = async (reason?: string) => {
-    setBusy(true);
-    try {
-      setDetail(await api.terminateGame(id, reason));
-      pushToast('success', t('toast.gameTerminated'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setConfirming(false);
-    }
-  };
+const terminate = async (reason?: string) => {
+  setBusy(true);
+  try {
+    setDetail(await api.terminateGame(id, reason));
+    pushToast('success', t('toast.gameTerminated'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setConfirming(false);
+  }
+};
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -1877,10 +1902,12 @@ git commit -m "fix(admin): surface success/error toasts on game termination"
 ### Task 11: Wire toast into `RoomsView` close
 
 **Files:**
+
 - Modify: `apps/admin/src/views/RoomsView.tsx:55-64`
 - Test: `apps/admin/src/views/RoomsView.test.tsx` (new file)
 
 **Interfaces:**
+
 - Consumes: `useToast` (Task 2), `toast.roomClosed` (Task 3).
 
 - [ ] **Step 1: Write the failing test**
@@ -1991,40 +2018,40 @@ import { useToast } from '../store/toast';
 Inside `RoomsView`, add the hook alongside the other store hooks:
 
 ```tsx
-  const pushToast = useToast((s) => s.push);
+const pushToast = useToast((s) => s.push);
 ```
 
 Replace:
 
 ```tsx
-  const close = async (code: string, reason?: string) => {
-    setBusy(true);
-    try {
-      const updated = await api.closeRoom(code, reason);
-      setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
-    } finally {
-      setBusy(false);
-      setClosing(null);
-    }
-  };
+const close = async (code: string, reason?: string) => {
+  setBusy(true);
+  try {
+    const updated = await api.closeRoom(code, reason);
+    setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
+  } finally {
+    setBusy(false);
+    setClosing(null);
+  }
+};
 ```
 
 with:
 
 ```tsx
-  const close = async (code: string, reason?: string) => {
-    setBusy(true);
-    try {
-      const updated = await api.closeRoom(code, reason);
-      setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
-      pushToast('success', t('toast.roomClosed'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setClosing(null);
-    }
-  };
+const close = async (code: string, reason?: string) => {
+  setBusy(true);
+  try {
+    const updated = await api.closeRoom(code, reason);
+    setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
+    pushToast('success', t('toast.roomClosed'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setClosing(null);
+  }
+};
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -2044,10 +2071,12 @@ git commit -m "fix(admin): surface success/error toasts on room close"
 ### Task 12: Wire toasts into `MaintainersView` save and revoke
 
 **Files:**
+
 - Modify: `apps/admin/src/views/MaintainersView.tsx:49-64,149-158`
 - Test: `apps/admin/src/views/MaintainersView.test.tsx` (new file)
 
 **Interfaces:**
+
 - Consumes: `useToast` (Task 2), `toast.maintainerSaved`/`toast.maintainerRevoked` (Task 3).
 
 - [ ] **Step 1: Write the failing test**
@@ -2178,47 +2207,47 @@ import { useToast } from '../store/toast';
 Inside `Editor`, add the hook and update `save`. Replace:
 
 ```tsx
-  const save = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await api.putMaintainer(row.userId, {
-        role,
-        ...(extra.size ? { extraPermissions: [...extra] } : {}),
-        ...(denied.size ? { deniedPermissions: [...denied] } : {}),
-      });
-      onSaved();
-      onClose();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'error');
-      setBusy(false);
-    }
-  };
+const save = async () => {
+  setBusy(true);
+  setError(null);
+  try {
+    await api.putMaintainer(row.userId, {
+      role,
+      ...(extra.size ? { extraPermissions: [...extra] } : {}),
+      ...(denied.size ? { deniedPermissions: [...denied] } : {}),
+    });
+    onSaved();
+    onClose();
+  } catch (e) {
+    setError(e instanceof Error ? e.message : 'error');
+    setBusy(false);
+  }
+};
 ```
 
 with:
 
 ```tsx
-  const pushToast = useToast((s) => s.push);
+const pushToast = useToast((s) => s.push);
 
-  const save = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      await api.putMaintainer(row.userId, {
-        role,
-        ...(extra.size ? { extraPermissions: [...extra] } : {}),
-        ...(denied.size ? { deniedPermissions: [...denied] } : {}),
-      });
-      pushToast('success', t('toast.maintainerSaved'));
-      onSaved();
-      onClose();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'error');
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-      setBusy(false);
-    }
-  };
+const save = async () => {
+  setBusy(true);
+  setError(null);
+  try {
+    await api.putMaintainer(row.userId, {
+      role,
+      ...(extra.size ? { extraPermissions: [...extra] } : {}),
+      ...(denied.size ? { deniedPermissions: [...denied] } : {}),
+    });
+    pushToast('success', t('toast.maintainerSaved'));
+    onSaved();
+    onClose();
+  } catch (e) {
+    setError(e instanceof Error ? e.message : 'error');
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    setBusy(false);
+  }
+};
 ```
 
 (Place the `const pushToast = useToast((s) => s.push);` line among `Editor`'s other hook calls,
@@ -2227,34 +2256,34 @@ right after the existing `useState` declarations, before `toggle`.)
 Inside `MaintainersView`, add the hook and update `revoke`. Replace:
 
 ```tsx
-  const revoke = async (userId: string) => {
-    setBusy(true);
-    try {
-      await api.deleteMaintainer(userId);
-      await load();
-    } finally {
-      setBusy(false);
-      setRevoking(null);
-    }
-  };
+const revoke = async (userId: string) => {
+  setBusy(true);
+  try {
+    await api.deleteMaintainer(userId);
+    await load();
+  } finally {
+    setBusy(false);
+    setRevoking(null);
+  }
+};
 ```
 
 with:
 
 ```tsx
-  const revoke = async (userId: string) => {
-    setBusy(true);
-    try {
-      await api.deleteMaintainer(userId);
-      await load();
-      pushToast('success', t('toast.maintainerRevoked'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setRevoking(null);
-    }
-  };
+const revoke = async (userId: string) => {
+  setBusy(true);
+  try {
+    await api.deleteMaintainer(userId);
+    await load();
+    pushToast('success', t('toast.maintainerRevoked'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setRevoking(null);
+  }
+};
 ```
 
 (Add `const pushToast = useToast((s) => s.push);` among `MaintainersView`'s other hook calls,

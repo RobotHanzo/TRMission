@@ -7,7 +7,15 @@ import type { EventScheduleEntry } from '../src/types/events-state';
 import { reduce, hasAnyLegalMove } from '../src/reduce';
 import { legalActions } from '../src/selectors';
 import { endTurn } from '../src/turn';
-import { afterSetup, withEvents, emptyEvents, setPlayer, drainPools, handOf, handTotal } from './events-helpers';
+import {
+  afterSetup,
+  withEvents,
+  emptyEvents,
+  setPlayer,
+  drainPools,
+  handOf,
+  handTotal,
+} from './events-helpers';
 
 const p0 = asPlayerId('p0');
 const EMPTY_PAYMENT: Payment = { color: null, colorCount: 0, locomotives: 0 };

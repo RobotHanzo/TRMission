@@ -29,7 +29,7 @@
 - **graphify.analyze.graph_diff** (1 connections) — `.claude/skills/graphify/references/update.md`
 - **Honesty Rules** (1 connections) — `.claude/skills/graphify/SKILL.md`
 - **Step 4.5: Graph Health Check** (1 connections) — `.claude/skills/graphify/SKILL.md`
-- *... and 2 more nodes in this community*
+- _... and 2 more nodes in this community_
 
 ## Relationships
 
@@ -56,4 +56,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

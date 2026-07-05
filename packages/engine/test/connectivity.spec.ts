@@ -73,7 +73,13 @@ describe('evaluateTickets', () => {
     // One station at b can borrow EITHER b-c or b-d (not both).
     // ticket a-c=3, a-d=10. Best = borrow b-d (net +10 -3 = 7) over b-c (net +3 -10 = -7).
     const borrow = new Map<string, Edge[]>([
-      ['b', [{ a: 'b', b: 'c' }, { a: 'b', b: 'd' }]],
+      [
+        'b',
+        [
+          { a: 'b', b: 'c' },
+          { a: 'b', b: 'd' },
+        ],
+      ],
     ]);
     const r = evaluateTickets({
       ownEdges: [{ a: 'a', b: 'b' }],

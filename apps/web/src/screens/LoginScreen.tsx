@@ -14,7 +14,14 @@ const oauthStartUrl = (provider: OauthProvider): string =>
 
 /** Google's multi-colour "G" mark (brand icons aren't in Lucide). */
 const GoogleIcon = () => (
-  <svg className="oauth-icon" viewBox="0 0 48 48" width="18" height="18" aria-hidden focusable="false">
+  <svg
+    className="oauth-icon"
+    viewBox="0 0 48 48"
+    width="18"
+    height="18"
+    aria-hidden
+    focusable="false"
+  >
     <path
       fill="#4285F4"
       d="M47.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h13.2c-.6 3-2.3 5.6-4.9 7.3v6h7.9c4.6-4.3 7.3-10.5 7.3-17.3z"
@@ -36,7 +43,15 @@ const GoogleIcon = () => (
 
 /** Discord wordmark glyph; inherits the button's text colour. */
 const DiscordIcon = () => (
-  <svg className="oauth-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden focusable="false">
+  <svg
+    className="oauth-icon"
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="currentColor"
+    aria-hidden
+    focusable="false"
+  >
     <path d="M20.317 4.369A19.79 19.79 0 0 0 15.432 3a13.7 13.7 0 0 0-.617 1.27 18.27 18.27 0 0 0-5.631 0A13.6 13.6 0 0 0 8.567 3 19.74 19.74 0 0 0 3.677 4.37C.533 9.046-.32 13.605.106 18.1a19.9 19.9 0 0 0 6.073 3.058c.49-.668.927-1.377 1.302-2.122a12.9 12.9 0 0 1-2.05-.984c.172-.126.34-.257.502-.392a14.2 14.2 0 0 0 12.135 0c.164.14.332.27.502.392-.654.388-1.343.718-2.053.985.375.744.81 1.453 1.3 2.12a19.84 19.84 0 0 0 6.075-3.057c.5-5.21-.838-9.728-3.55-13.732zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.42 0-1.333.955-2.42 2.157-2.42 1.21 0 2.176 1.096 2.157 2.42 0 1.335-.955 2.42-2.157 2.42zm7.975 0c-1.183 0-2.157-1.085-2.157-2.42 0-1.333.955-2.42 2.157-2.42 1.21 0 2.176 1.096 2.157 2.42 0 1.335-.946 2.42-2.157 2.42z" />
   </svg>
 );
@@ -77,7 +92,15 @@ export function LoginScreen() {
         setConfig(c);
         setMode(c.guest ? 'guest' : c.passwordLogin ? 'login' : null);
       })
-      .catch(() => live && setConfig({ passwordLogin: true, guest: true, providers: { google: false, discord: false } }));
+      .catch(
+        () =>
+          live &&
+          setConfig({
+            passwordLogin: true,
+            guest: true,
+            providers: { google: false, discord: false },
+          }),
+      );
     return () => {
       live = false;
     };
@@ -126,7 +149,10 @@ export function LoginScreen() {
   };
 
   const modes: AuthMode[] = config
-    ? [...(config.guest ? (['guest'] as const) : []), ...(config.passwordLogin ? (['login', 'register'] as const) : [])]
+    ? [
+        ...(config.guest ? (['guest'] as const) : []),
+        ...(config.passwordLogin ? (['login', 'register'] as const) : []),
+      ]
     : [];
   const hasOauth = !!config && (config.providers.google || config.providers.discord);
   const nothingEnabled = !!config && modes.length === 0 && !hasOauth;

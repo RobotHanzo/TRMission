@@ -29,7 +29,7 @@
 - **.applyPrepared()** (5 connections) — `apps/server/src/ws/hub.ts`
 - **.nextActableBot()** (5 connections) — `apps/server/src/ws/hub.ts`
 - **.onChat()** (5 connections) — `apps/server/src/ws/hub.ts`
-- *... and 20 more nodes in this community*
+- _... and 20 more nodes in this community_
 
 ## Relationships
 
@@ -64,4 +64,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

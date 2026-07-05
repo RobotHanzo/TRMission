@@ -14,7 +14,7 @@ accounts from the admin dashboard. A reusable account selector modal supports th
 
 1. **Map gate scope — everything custom-map.** Without the `mapBuilder` feature an account cannot
    author (create/edit/delete/share), clone shared maps, peek at share codes, or select/host a
-   custom map in the lobby. Playing *in* a custom-map game hosted by a granted user, and viewing
+   custom map in the lobby. Playing _in_ a custom-map game hosted by a granted user, and viewing
    existing custom-map replays, still work for everyone.
 2. **Replay gate scope — own-replay browsing/sharing only.** Without the `replayReview` feature a
    member (player/spectator) cannot fetch the replay payload of their own games or manage replay

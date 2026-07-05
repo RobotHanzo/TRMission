@@ -18,23 +18,25 @@ export interface ProviderConfig {
 // Endpoints + scopes are stable and public; only the client id/secret are environment-specific.
 // Google is OIDC (we read the userinfo endpoint rather than validating the id_token signature).
 // Discord is plain OAuth2 with `identify email` + GET /users/@me.
-const PROVIDER_ENDPOINTS: Record<OauthProvider, Omit<ProviderConfig, 'clientId' | 'clientSecret'>> =
-  {
-    google: {
-      provider: 'google',
-      authorizeUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-      tokenUrl: 'https://oauth2.googleapis.com/token',
-      userinfoUrl: 'https://openidconnect.googleapis.com/v1/userinfo',
-      scopes: 'openid email profile',
-    },
-    discord: {
-      provider: 'discord',
-      authorizeUrl: 'https://discord.com/api/oauth2/authorize',
-      tokenUrl: 'https://discord.com/api/oauth2/token',
-      userinfoUrl: 'https://discord.com/api/users/@me',
-      scopes: 'identify email',
-    },
-  };
+const PROVIDER_ENDPOINTS: Record<
+  OauthProvider,
+  Omit<ProviderConfig, 'clientId' | 'clientSecret'>
+> = {
+  google: {
+    provider: 'google',
+    authorizeUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+    tokenUrl: 'https://oauth2.googleapis.com/token',
+    userinfoUrl: 'https://openidconnect.googleapis.com/v1/userinfo',
+    scopes: 'openid email profile',
+  },
+  discord: {
+    provider: 'discord',
+    authorizeUrl: 'https://discord.com/api/oauth2/authorize',
+    tokenUrl: 'https://discord.com/api/oauth2/token',
+    userinfoUrl: 'https://discord.com/api/users/@me',
+    scopes: 'identify email',
+  },
+};
 
 /** Test-only overrides so specs can flip toggles / enable providers without mutating frozen `env`. */
 export interface AuthConfigOverrides {
@@ -118,6 +120,4 @@ const makeProvider = (
   clientId: string,
   clientSecret: string,
 ): ProviderConfig | null =>
-  clientId && clientSecret
-    ? { ...PROVIDER_ENDPOINTS[provider], clientId, clientSecret }
-    : null;
+  clientId && clientSecret ? { ...PROVIDER_ENDPOINTS[provider], clientId, clientSecret } : null;

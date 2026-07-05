@@ -32,12 +32,14 @@
 Foundation: extend the data model with route/board spotlights, a specimen spec, and an auto-pan frame; add pure helpers that map a spotlight to selectors, validate HUD selectors against an allow-list, and decide coachmark placement. Pure functions → fully unit-tested; everything else builds on these.
 
 **Files:**
+
 - Modify: `apps/web/src/features/tutorial/types.ts`
 - Modify: `apps/web/src/game/boardView.ts` (add the shared `BoardFrameTarget` type — keeps Board decoupled from the tutorial feature)
 - Create: `apps/web/src/features/tutorial/focus.ts`
 - Test: `apps/web/src/features/tutorial/focus.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `BoardFrameTarget = { kind: 'route' | 'cities'; ids: string[] }` (in `game/boardView.ts`).
   - `Spotlight` gains `| { kind: 'route'; ids: string[] } | { kind: 'board' }`.
@@ -69,7 +71,9 @@ describe('selectorsForSpotlight', () => {
     ]);
   });
   it('maps routes to data-route-id selectors', () => {
-    expect(selectorsForSpotlight({ kind: 'route', ids: ['R18'] })).toEqual(['[data-route-id="R18"]']);
+    expect(selectorsForSpotlight({ kind: 'route', ids: ['R18'] })).toEqual([
+      '[data-route-id="R18"]',
+    ]);
   });
   it('passes a hud selector through', () => {
     expect(selectorsForSpotlight({ kind: 'hud', selector: '.deck-area' })).toEqual(['.deck-area']);
@@ -250,11 +254,13 @@ git commit -m "Web: tutorial beat model + focus helpers (spotlight selectors, co
 Self-contained renderers reusing the real board/card CSS classes and components, so specimens look identical to the live game and cannot drift.
 
 **Files:**
+
 - Create: `apps/web/src/features/tutorial/Specimens.tsx`
 - Test: `apps/web/src/features/tutorial/Specimens.test.tsx`
 - Modify: `apps/web/src/styles/tutorial.css` (specimen layout/wrapper)
 
 **Interfaces:**
+
 - Consumes: `TrainCarCard` (`components/TrainCarCard`, props `{ color, size? }`), `TicketCard` (`components/TicketCard`, props `{ ticketId }`), `TRAIN_COLORS`/`CardColor` (`@trm/shared`), board CSS classes (`.route/.bed/.slot/.ferry-line/.ferry-pip/.slot.ferry-loco/.tunnel-bg/.tunnel-tie/.station`).
 - Produces: `Specimen({ spec }: { spec: SpecimenSpec })` — single entry point dispatching on `spec.kind`. Also `RouteSpecimen`, `RouteCompareSpecimen`, `CardRowSpecimen`, `StationSpecimen`, `TicketSpecimen` for direct use/testing. Every specimen root carries `data-testid="tut-specimen"`.
 
@@ -334,8 +340,11 @@ function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'do
   const locoMid = Math.floor(count / 2);
 
   const Track = ({ dy = 0, muted = false }: { dy?: number; muted?: boolean }) => (
-    <g className={'route' + (variant === 'tunnel' ? ' tunnel' : variant === 'ferry' ? ' ferry' : '')}
-       transform={`translate(0 ${dy})`} opacity={muted ? 0.4 : 1}>
+    <g
+      className={'route' + (variant === 'tunnel' ? ' tunnel' : variant === 'ferry' ? ' ferry' : '')}
+      transform={`translate(0 ${dy})`}
+      opacity={muted ? 0.4 : 1}
+    >
       {variant === 'tunnel' && <path className="tunnel-bg" d={path} />}
       <path className="bed" d={path} />
       {variant === 'tunnel' &&
@@ -347,8 +356,14 @@ function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'do
           <path className="ferry-line" d={path} />
           {slots.map((cx, i) =>
             i === locoMid ? (
-              <rect key={i} className="slot ferry-loco" x={-slotW / 2} width={slotW}
-                fill="#888" transform={`translate(${cx} ${y})`} />
+              <rect
+                key={i}
+                className="slot ferry-loco"
+                x={-slotW / 2}
+                width={slotW}
+                fill="#888"
+                transform={`translate(${cx} ${y})`}
+              />
             ) : (
               <circle key={i} className="ferry-pip" cx={cx} cy={y} fill={fill} />
             ),
@@ -356,16 +371,27 @@ function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'do
         </>
       ) : (
         slots.map((cx, i) => (
-          <rect key={i} className="slot" x={-slotW / 2} width={slotW} fill={muted ? '#9aa0a6' : fill}
-            transform={`translate(${cx} ${y})`} />
+          <rect
+            key={i}
+            className="slot"
+            x={-slotW / 2}
+            width={slotW}
+            fill={muted ? '#9aa0a6' : fill}
+            transform={`translate(${cx} ${y})`}
+          />
         ))
       )}
     </g>
   );
 
   return (
-    <svg className="tut-route-specimen" viewBox="0 0 120 28" data-testid="tut-specimen"
-      style={{ ['--inv-scale' as string]: '1' }} role="img">
+    <svg
+      className="tut-route-specimen"
+      viewBox="0 0 120 28"
+      data-testid="tut-specimen"
+      style={{ ['--inv-scale' as string]: '1' }}
+      role="img"
+    >
       {variant === 'double' ? (
         <>
           <Track dy={-5} />
@@ -410,8 +436,13 @@ function CardRowSpecimen() {
 
 function StationSpecimen() {
   return (
-    <svg className="tut-station-specimen" viewBox="0 0 48 48" data-testid="tut-specimen"
-      style={{ ['--marker-scale' as string]: '1' }} role="img">
+    <svg
+      className="tut-station-specimen"
+      viewBox="0 0 48 48"
+      data-testid="tut-specimen"
+      style={{ ['--marker-scale' as string]: '1' }}
+      role="img"
+    >
       <circle className="city-dot" cx={24} cy={24} r={4} />
       <circle className="station" cx={24} cy={24} style={{ fill: '#2b6cb0' }} />
     </svg>
@@ -526,10 +557,12 @@ git commit -m "Web: tutorial visual-glossary specimens (route/ferry/tunnel/doubl
 Resolve a beat's spotlight to live screen rects, re-measured across the board's pan transition, defensive in jsdom.
 
 **Files:**
+
 - Create: `apps/web/src/features/tutorial/useSpotlightRects.ts`
 - Test: `apps/web/src/features/tutorial/useSpotlightRects.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `selectorsForSpotlight` + `FlatRect` (`./focus`), `Spotlight` (`./types`).
 - Produces: `useSpotlightRects(spotlight: Spotlight | undefined): FlatRect[]` — empty array when no selectors resolve or rects are zero-sized (jsdom).
 
@@ -548,18 +581,14 @@ describe('useSpotlightRects', () => {
     expect(result.current).toEqual([]);
   });
   it('returns an empty array when targets are absent from the DOM', () => {
-    const { result } = renderHook(() =>
-      useSpotlightRects({ kind: 'cities', ids: ['nowhere'] }),
-    );
+    const { result } = renderHook(() => useSpotlightRects({ kind: 'cities', ids: ['nowhere'] }));
     expect(result.current).toEqual([]);
   });
   it('skips zero-sized rects (jsdom has no layout)', () => {
     const el = document.createElement('div');
     el.setAttribute('data-city-id', 'taipei');
     document.body.appendChild(el);
-    const { result } = renderHook(() =>
-      useSpotlightRects({ kind: 'cities', ids: ['taipei'] }),
-    );
+    const { result } = renderHook(() => useSpotlightRects({ kind: 'cities', ids: ['taipei'] }));
     expect(result.current).toEqual([]); // getBoundingClientRect is 0x0 in jsdom
     el.remove();
   });
@@ -602,7 +631,8 @@ export function useSpotlightRects(spotlight: Spotlight | undefined): FlatRect[] 
         const el = document.querySelector(sel);
         if (!el) continue;
         const r = el.getBoundingClientRect();
-        if (r.width > 0 && r.height > 0) next.push({ x: r.left, y: r.top, w: r.width, h: r.height });
+        if (r.width > 0 && r.height > 0)
+          next.push({ x: r.left, y: r.top, w: r.width, h: r.height });
       }
       setRects(next);
     };
@@ -648,11 +678,13 @@ git commit -m "Web: useSpotlightRects — live target measurement across board p
 A presentational, non-blocking SVG dim with a lit hole + pulsing ring per target, portaled to `document.body`.
 
 **Files:**
+
 - Create: `apps/web/src/features/tutorial/TutorialSpotlight.tsx`
 - Test: `apps/web/src/features/tutorial/TutorialSpotlight.test.tsx`
 - Modify: `apps/web/src/styles/tutorial.css` (scrim + ring styles)
 
 **Interfaces:**
+
 - Consumes: `FlatRect` (`./focus`).
 - Produces: `TutorialSpotlight({ rects, reducedMotion }: { rects: FlatRect[]; reducedMotion: boolean })`.
 
@@ -743,17 +775,38 @@ export function TutorialSpotlight({
           <mask id="tut-spot-mask">
             <rect x={0} y={0} width={w} height={h} fill="white" />
             {rects.map((r, i) => (
-              <rect key={i} x={r.x - PAD} y={r.y - PAD} width={r.w + PAD * 2} height={r.h + PAD * 2}
-                rx={RADIUS} ry={RADIUS} fill="black" />
+              <rect
+                key={i}
+                x={r.x - PAD}
+                y={r.y - PAD}
+                width={r.w + PAD * 2}
+                height={r.h + PAD * 2}
+                rx={RADIUS}
+                ry={RADIUS}
+                fill="black"
+              />
             ))}
           </mask>
         </defs>
-        <rect className="tut-spotlight-dim" x={0} y={0} width={w} height={h}
-          mask={hasHoles ? 'url(#tut-spot-mask)' : undefined} />
+        <rect
+          className="tut-spotlight-dim"
+          x={0}
+          y={0}
+          width={w}
+          height={h}
+          mask={hasHoles ? 'url(#tut-spot-mask)' : undefined}
+        />
         {rects.map((r, i) => (
-          <rect key={i} className={'tut-spotlight-ring' + (reducedMotion ? '' : ' pulse')}
-            x={r.x - PAD} y={r.y - PAD} width={r.w + PAD * 2} height={r.h + PAD * 2}
-            rx={RADIUS} ry={RADIUS} />
+          <rect
+            key={i}
+            className={'tut-spotlight-ring' + (reducedMotion ? '' : ' pulse')}
+            x={r.x - PAD}
+            y={r.y - PAD}
+            width={r.w + PAD * 2}
+            height={r.h + PAD * 2}
+            rx={RADIUS}
+            ry={RADIUS}
+          />
         ))}
       </svg>
     </div>,
@@ -795,12 +848,23 @@ Append to `apps/web/src/styles/tutorial.css`:
   animation: tut-ring-pulse 1.6s ease-in-out infinite;
 }
 @keyframes tut-ring-pulse {
-  0%, 100% { opacity: 0.95; stroke-width: 2.5; }
-  50% { opacity: 0.45; stroke-width: 4; }
+  0%,
+  100% {
+    opacity: 0.95;
+    stroke-width: 2.5;
+  }
+  50% {
+    opacity: 0.45;
+    stroke-width: 4;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .tut-spotlight-ring.pulse { animation: none; }
-  .tut-spotlight-dim { transition: none; }
+  .tut-spotlight-ring.pulse {
+    animation: none;
+  }
+  .tut-spotlight-dim {
+    transition: none;
+  }
 }
 ```
 
@@ -823,11 +887,13 @@ git commit -m "Web: non-blocking tutorial focus scrim (dim + lit hole + pulsing 
 Add the `frameTarget` prop (auto-pan via a `SpotlightFramer` cloned from `RevealFramer`) and `data-city-id` / `data-route-id` anchors so the scrim can measure cities and routes. Tutorial-agnostic.
 
 **Files:**
+
 - Modify: `apps/web/src/components/Board.tsx`
 - Modify: `apps/web/src/screens/GameStage.tsx` (thread `frameTarget` through; live game passes nothing)
 - Test: `apps/web/src/components/Board.test.tsx` (extend)
 
 **Interfaces:**
+
 - Consumes: `BoardFrameTarget` (`game/boardView`), `useReducedMotion` (`hooks/useReducedMotion`), existing `viewportProjection`, `viewToTransform`, `routeById`, `cityById`, `useControls`.
 - Produces: `Board` accepts `frameTarget?: BoardFrameTarget | null | undefined`; each city `<g>` gets `data-city-id`, each route `<g>` gets `data-route-id`. `GameStage` accepts `frameTarget?: BoardFrameTarget | null | undefined` and forwards it.
 
@@ -836,20 +902,20 @@ Add the `frameTarget` prop (auto-pan via a `SpotlightFramer` cloned from `Reveal
 Extend `apps/web/src/components/Board.test.tsx` — add inside the `describe('Board', …)` block:
 
 ```tsx
-  it('tags routes and cities with data attributes for the tutorial spotlight', () => {
-    const { container } = render(
-      <Board
-        snapshot={snap}
-        locale="zh-Hant"
-        colorBlind={false}
-        canAct={false}
-        onPickRoute={() => {}}
-        onPickCity={() => {}}
-      />,
-    );
-    expect(container.querySelectorAll('[data-route-id]').length).toBeGreaterThan(60);
-    expect(container.querySelector('[data-city-id="taipei"]')).toBeTruthy();
-  });
+it('tags routes and cities with data attributes for the tutorial spotlight', () => {
+  const { container } = render(
+    <Board
+      snapshot={snap}
+      locale="zh-Hant"
+      colorBlind={false}
+      canAct={false}
+      onPickRoute={() => {}}
+      onPickCity={() => {}}
+    />,
+  );
+  expect(container.querySelectorAll('[data-route-id]').length).toBeGreaterThan(60);
+  expect(container.querySelector('[data-city-id="taipei"]')).toBeTruthy();
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -972,17 +1038,17 @@ Add to `GameStageProps`:
 Destructure `frameTarget` in the `GameStage({ … })` signature, and pass it to `<Board …>`:
 
 ```tsx
-      <Board
-        snapshot={snapshot}
-        locale={locale}
-        colorBlind={colorBlind}
-        canAct={canAct}
-        onPickRoute={pickRoute}
-        onPickCity={pickCity}
-        highlightCities={highlightCities}
-        sandbox={sandbox}
-        frameTarget={frameTarget}
-      />
+<Board
+  snapshot={snapshot}
+  locale={locale}
+  colorBlind={colorBlind}
+  canAct={canAct}
+  onPickRoute={pickRoute}
+  onPickCity={pickCity}
+  highlightCities={highlightCities}
+  sandbox={sandbox}
+  frameTarget={frameTarget}
+/>
 ```
 
 - [ ] **Step 6: Run the tests to verify they pass**
@@ -1007,11 +1073,13 @@ git commit -m "Web: board auto-pan (SpotlightFramer) + data-city-id/data-route-i
 Rework the coachmark into a polished, animated panel that renders the beat's specimen, a progress bar, a connector caret toward the target, the bottom/top dodge, and beat-to-beat transitions.
 
 **Files:**
+
 - Modify: `apps/web/src/features/tutorial/TutorialOverlay.tsx`
 - Modify: `apps/web/src/styles/tutorial.css`
 - Test: `apps/web/src/features/tutorial/TutorialOverlay.test.tsx` (new)
 
 **Interfaces:**
+
 - Consumes: `Beat`, `SpecimenSpec` (`./types`); `Specimen` (`./Specimens`); `coachPosition`, `FlatRect` (`./focus`).
 - Produces: `TutorialOverlay` gains props `specimen?: SpecimenSpec | undefined` and `spotRects?: FlatRect[] | undefined` (additive; existing props unchanged). Root keeps `role="dialog"` and gains `data-pos` (`bottom`/`top`).
 
@@ -1136,7 +1204,11 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
         <span className="tut-coach-progress-text">
           {lessonNo}/{lessonCount}
         </span>
-        <button className="icon-btn tut-coach-x" onClick={props.onExit} aria-label={t('tutorial.exit')}>
+        <button
+          className="icon-btn tut-coach-x"
+          onClick={props.onExit}
+          aria-label={t('tutorial.exit')}
+        >
           <X size={16} />
         </button>
       </div>
@@ -1211,8 +1283,14 @@ In `apps/web/src/styles/tutorial.css`, replace the existing `.tut-coach` block a
   top: clamp(0.75rem, 3vh, 1.5rem);
 }
 @keyframes tut-coach-in {
-  from { opacity: 0; transform: translate(-50%, 14px) scale(0.98); }
-  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
 }
 .tut-coach-caret {
   position: absolute;
@@ -1248,7 +1326,9 @@ In `apps/web/src/styles/tutorial.css`, replace the existing `.tut-coach` block a
   font-size: 0.8rem;
   opacity: 0.6;
 }
-.tut-coach-x { margin-left: auto; }
+.tut-coach-x {
+  margin-left: auto;
+}
 .tut-coach-specimen {
   display: grid;
   place-items: center;
@@ -1259,8 +1339,14 @@ In `apps/web/src/styles/tutorial.css`, replace the existing `.tut-coach` block a
   animation: tut-specimen-in 320ms ease-out;
 }
 @keyframes tut-specimen-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .tut-coach-body {
   margin: 0.1rem 0 0.6rem;
@@ -1268,8 +1354,14 @@ In `apps/web/src/styles/tutorial.css`, replace the existing `.tut-coach` block a
   animation: tut-body-in 240ms ease-out;
 }
 @keyframes tut-body-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .tut-progress {
   height: 5px;
@@ -1289,7 +1381,9 @@ In `apps/web/src/styles/tutorial.css`, replace the existing `.tut-coach` block a
   align-items: center;
   gap: 0.5rem;
 }
-.tut-coach-actions .spacer { flex: 1; }
+.tut-coach-actions .spacer {
+  flex: 1;
+}
 .tut-coach-actions button {
   display: inline-flex;
   align-items: center;
@@ -1298,8 +1392,12 @@ In `apps/web/src/styles/tutorial.css`, replace the existing `.tut-coach` block a
 @media (prefers-reduced-motion: reduce) {
   .tut-coach,
   .tut-coach-specimen,
-  .tut-coach-body { animation: none; }
-  .tut-progress-fill { transition: none; }
+  .tut-coach-body {
+    animation: none;
+  }
+  .tut-progress-fill {
+    transition: none;
+  }
 }
 ```
 
@@ -1322,10 +1420,12 @@ git commit -m "Web: restyle tutorial coachmark — specimen, progress bar, caret
 Lift `useSpotlightRects`, render the scrim alongside the coachmark (keeping GameStage tutorial-agnostic and the chunk lazy), and pass `frameTarget`/`specimen`/`spotRects` through.
 
 **Files:**
+
 - Modify: `apps/web/src/features/tutorial/TutorialScreen.tsx`
 - Modify: `apps/web/src/features/tutorial/EncyclopediaModal.tsx`
 
 **Interfaces:**
+
 - Consumes: `useSpotlightRects` (`./useSpotlightRects`), `TutorialSpotlight` (`./TutorialSpotlight`), `useReducedMotion` (`../../hooks/useReducedMotion`), `GameStage` `frameTarget` prop (Task 5), `TutorialOverlay` `specimen`/`spotRects` props (Task 6).
 - Produces: no new exports; the overlay slot becomes `<><TutorialSpotlight/><TutorialOverlay/></>`.
 
@@ -1342,49 +1442,49 @@ import { TutorialSpotlight } from './TutorialSpotlight';
 Rewrite `TutorialRunner`'s render (replacing the `spotlightCities`/return section):
 
 ```tsx
-  const { t } = useTranslation();
-  const player = useScenarioPlayer(lesson, useGame);
-  const snapshot = useGame((s) => s.snapshot);
-  const reduced = useReducedMotion();
-  const beat = player.beat;
-  const spotlight = beat?.spotlight;
-  const rects = useSpotlightRects(spotlight);
-  const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
-  const frameTarget = beat?.frame ?? null;
+const { t } = useTranslation();
+const player = useScenarioPlayer(lesson, useGame);
+const snapshot = useGame((s) => s.snapshot);
+const reduced = useReducedMotion();
+const beat = player.beat;
+const spotlight = beat?.spotlight;
+const rects = useSpotlightRects(spotlight);
+const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
+const frameTarget = beat?.frame ?? null;
 
-  if (!snapshot) return <div className="card">{t('connecting')}</div>;
+if (!snapshot) return <div className="card">{t('connecting')}</div>;
 
-  return (
-    <GameStage
-      snapshot={snapshot}
-      commands={player.commands}
-      onLeave={onExit}
-      spotlightCities={spotlightCities}
-      frameTarget={frameTarget}
-      overlay={
-        <>
-          <TutorialSpotlight rects={rects} reducedMotion={reduced} />
-          <TutorialOverlay
-            beat={beat}
-            done={player.done}
-            index={player.index}
-            total={player.total}
-            lessonTitleKey={lesson.titleKey}
-            lessonNo={lessonNo}
-            lessonCount={lessonCount}
-            isLastLesson={isLast}
-            specimen={beat?.specimen}
-            spotRects={rects}
-            onAdvance={player.next}
-            onReplay={player.restart}
-            onPrevLesson={onPrevLesson}
-            onNextLesson={onNextLesson}
-            onExit={onExit}
-          />
-        </>
-      }
-    />
-  );
+return (
+  <GameStage
+    snapshot={snapshot}
+    commands={player.commands}
+    onLeave={onExit}
+    spotlightCities={spotlightCities}
+    frameTarget={frameTarget}
+    overlay={
+      <>
+        <TutorialSpotlight rects={rects} reducedMotion={reduced} />
+        <TutorialOverlay
+          beat={beat}
+          done={player.done}
+          index={player.index}
+          total={player.total}
+          lessonTitleKey={lesson.titleKey}
+          lessonNo={lessonNo}
+          lessonCount={lessonCount}
+          isLastLesson={isLast}
+          specimen={beat?.specimen}
+          spotRects={rects}
+          onAdvance={player.next}
+          onReplay={player.restart}
+          onPrevLesson={onPrevLesson}
+          onNextLesson={onNextLesson}
+          onExit={onExit}
+        />
+      </>
+    }
+  />
+);
 ```
 
 - [ ] **Step 2: Update `EncyclopediaPlayer` in `EncyclopediaModal.tsx`**
@@ -1400,51 +1500,51 @@ import { TutorialSpotlight } from './TutorialSpotlight';
 Rewrite the `EncyclopediaPlayer` body the same way (it uses the isolated `store`):
 
 ```tsx
-  const { t } = useTranslation();
-  const store = useGameStoreApi();
-  const player = useScenarioPlayer(entry, store);
-  const snapshot = useGameStore((s) => s.snapshot);
-  const reduced = useReducedMotion();
-  const beat = player.beat;
-  const spotlight = beat?.spotlight;
-  const rects = useSpotlightRects(spotlight);
-  const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
-  const frameTarget = beat?.frame ?? null;
+const { t } = useTranslation();
+const store = useGameStoreApi();
+const player = useScenarioPlayer(entry, store);
+const snapshot = useGameStore((s) => s.snapshot);
+const reduced = useReducedMotion();
+const beat = player.beat;
+const spotlight = beat?.spotlight;
+const rects = useSpotlightRects(spotlight);
+const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
+const frameTarget = beat?.frame ?? null;
 
-  if (!snapshot) return <div className="card">{t('connecting')}</div>;
+if (!snapshot) return <div className="card">{t('connecting')}</div>;
 
-  return (
-    <GameStage
-      snapshot={snapshot}
-      commands={player.commands}
-      sandbox
-      onLeave={onClose}
-      spotlightCities={spotlightCities}
-      frameTarget={frameTarget}
-      overlay={
-        <>
-          <TutorialSpotlight rects={rects} reducedMotion={reduced} />
-          <TutorialOverlay
-            beat={beat}
-            done={player.done}
-            index={player.index}
-            total={player.total}
-            lessonTitleKey={entry.titleKey}
-            lessonNo={1}
-            lessonCount={1}
-            isLastLesson
-            specimen={beat?.specimen}
-            spotRects={rects}
-            onAdvance={player.next}
-            onReplay={player.restart}
-            onPrevLesson={() => {}}
-            onNextLesson={onClose}
-            onExit={onClose}
-          />
-        </>
-      }
-    />
-  );
+return (
+  <GameStage
+    snapshot={snapshot}
+    commands={player.commands}
+    sandbox
+    onLeave={onClose}
+    spotlightCities={spotlightCities}
+    frameTarget={frameTarget}
+    overlay={
+      <>
+        <TutorialSpotlight rects={rects} reducedMotion={reduced} />
+        <TutorialOverlay
+          beat={beat}
+          done={player.done}
+          index={player.index}
+          total={player.total}
+          lessonTitleKey={entry.titleKey}
+          lessonNo={1}
+          lessonCount={1}
+          isLastLesson
+          specimen={beat?.specimen}
+          spotRects={rects}
+          onAdvance={player.next}
+          onReplay={player.restart}
+          onPrevLesson={() => {}}
+          onNextLesson={onClose}
+          onExit={onClose}
+        />
+      </>
+    }
+  />
+);
 ```
 
 - [ ] **Step 3: Typecheck + run the existing tutorial/store suites**
@@ -1469,12 +1569,14 @@ git commit -m "Web: wire focus scrim + auto-pan + specimens into tutorial & ency
 Attach specimens, spotlights, and auto-pan frames to the teaching beats using real content ids, and extend the replay test to validate every reference.
 
 **Files:**
+
 - Modify: `apps/web/src/features/tutorial/curriculum.ts`
 - Modify: `apps/web/src/features/tutorial/scenarios.test.ts`
 
 Content ids (verified in `packages/map-data/src/routes.ts`): tunnel **R18** (taipei–yilan), ferry **R82** (chiayi–penghu), double **R6**/**R7** (taipei–banqiao), claim demo **R16** (hsinchu–zhunan). City ids: `taipei`, `yilan`, `chiayi`, `penghu`, `banqiao`, `hsinchu`, `zhunan`.
 
 **Interfaces:**
+
 - Consumes: `cityById`, `routeById`, `ticketById` (`../../game/content`), `HUD_SPOTLIGHT_SELECTORS`/`isAllowedHudSelector` (`./focus`).
 - Produces: enriched `LESSONS` beats (additive fields only).
 
@@ -1515,7 +1617,10 @@ describe('tutorial beat visual references resolve to real content', () => {
       }
       if (beat.specimen?.kind === 'ticket') {
         it(`${lesson.id}/${beat.id} ticket specimen exists`, () => {
-          expect(ticketById.get(beat.specimen!.kind === 'ticket' ? beat.specimen!.id : ''), 'ticket').toBeTruthy();
+          expect(
+            ticketById.get(beat.specimen!.kind === 'ticket' ? beat.specimen!.id : ''),
+            'ticket',
+          ).toBeTruthy();
         });
       }
     }
@@ -1672,12 +1777,14 @@ git commit -m "Web: enrich tutorial beats with specimens/spotlights/auto-pan + s
 Replace the bare `<select>` topic picker with a chapter-grouped clickable list.
 
 **Files:**
+
 - Modify: `apps/web/src/features/tutorial/EncyclopediaModal.tsx`
 - Modify: `apps/web/src/styles/tutorial.css`
 - Modify: `apps/web/src/i18n/tutorial.ts` (chapter group labels)
 - Test: `apps/web/src/features/tutorial/EncyclopediaModal.test.tsx` (new)
 
 **Interfaces:**
+
 - Consumes: `encyclopediaEntries()` (`./curriculum`), `SandboxProvider` (`../../store/sandboxProvider`).
 - Produces: a grouped list UI; selecting an entry sets `idx`. No new exports.
 
@@ -1820,8 +1927,12 @@ In `apps/web/src/styles/tutorial.css`, replace the `.enc-head`/`.enc-select` rul
   align-items: center;
   margin-bottom: 0.35rem;
 }
-.enc-list-head .enc-x { margin-left: auto; }
-.enc-group { margin-bottom: 0.5rem; }
+.enc-list-head .enc-x {
+  margin-left: auto;
+}
+.enc-group {
+  margin-bottom: 0.5rem;
+}
 .enc-group-label {
   font-size: 0.72rem;
   text-transform: uppercase;
@@ -1840,7 +1951,9 @@ In `apps/web/src/styles/tutorial.css`, replace the `.enc-head`/`.enc-select` rul
   cursor: pointer;
   color: inherit;
 }
-.enc-entry:hover { background: color-mix(in srgb, var(--text, #111) 6%, transparent); }
+.enc-entry:hover {
+  background: color-mix(in srgb, var(--text, #111) 6%, transparent);
+}
 .enc-entry.is-active {
   background: color-mix(in srgb, var(--accent, #2b6cb0) 18%, transparent);
   color: var(--accent, #2b6cb0);
@@ -1860,8 +1973,15 @@ In `apps/web/src/styles/tutorial.css`, replace the `.enc-head`/`.enc-select` rul
   border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
 }
 @media (max-width: 640px) {
-  .enc-shell--split { grid-template-columns: 1fr; }
-  .enc-list { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12)); }
+  .enc-shell--split {
+    grid-template-columns: 1fr;
+  }
+  .enc-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: none;
+    border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.12));
+  }
 }
 ```
 
@@ -1911,6 +2031,7 @@ Expected: all matched files clean. If any are flagged, run the same with `--writ
 Run the dev server: `yarn workspace @trm/web dev` (note the printed port).
 
 Using the Chrome MCP tools, verify:
+
 1. Navigate to `/tutorial` → launcher shows Full/Quickstart.
 2. Start **Full** → board renders; the welcome `map` beat shows the light global dim; advancing to `draw` shows the **card-row specimen** in the coachmark and a **lit hole around the deck** with the rest dimmed; the deck is still clickable (draw a card → the await beat advances).
 3. Advance to **special routes** → the board **auto-pans** to the Taipei–Yilan tunnel, the dim frames it, and the coachmark shows the **rail/ferry/tunnel comparison** then the per-type specimens; the coachmark **dodges to the top** if it would cover the framed route.
@@ -1934,6 +2055,7 @@ git commit -m "Web: tutorial UI redesign — verification fixups"
 ## Self-Review
 
 **Spec coverage:**
+
 - Focus layer (dim+glow, non-blocking) → Tasks 3, 4, 7. ✔
 - Auto-pan to real examples → Task 5 (`SpotlightFramer`) + Task 8 (frames). ✔
 - Full visual glossary (railway/ferry/tunnel/double/station/cards/ticket) → Task 2. ✔

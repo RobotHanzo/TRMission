@@ -83,7 +83,7 @@ Feature-gated: authoring requires the per-account **`mapBuilder`** feature (gran
 maintainer dashboard; carried on `PublicUser.features`, checked via `useHasFeature` from
 `store/session.ts`). Without it the AppHeader entries hide, `/maps`+`/maps/:id/edit` redirect home
 (App.tsx effect — cosmetic; the server 403s regardless), and the room-settings custom-map option
-disappears; guests can still *play* a custom-map game. The authoring UI lives at `/maps` (list +
+disappears; guests can still _play_ a custom-map game. The authoring UI lives at `/maps` (list +
 clone-by-code) and `/maps/:id/edit` (staged editor: Crop → Trim → Stops → Routes → Curves →
 Missions → Rules → Share; Trim lets you click individual land rings — e.g. a stray outlying island —
 to delete them from the crop without re-drawing the whole bounding box; Curves tunes each route's
@@ -102,6 +102,7 @@ Mission auto-generation calls `@trm/map-data`'s `generateTickets` directly (seed
 reproduces the same list, so "reroll" is just bumping the seed). This entire feature is one lazy
 route chunk (`App.tsx`) — it must never inflate the main bundle; re-check chunk sizes after touching
 anything under `features/builder/`.
+
 - `game/` — view-only helpers (payment enumeration via the engine's `previewScore`/selectors, tunnel,
   cards, seat mapping). These mirror the server for optimistic preview but the server is authority.
 - `features/replay/` + `screens/ReplayScreen.tsx` — client-side replay of finished games. Browsing

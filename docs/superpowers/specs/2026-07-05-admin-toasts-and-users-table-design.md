@@ -32,14 +32,20 @@ tokens:
 
 - **`apps/admin/src/store/toast.ts`** (new) — a zustand store, same shape/pattern as
   `useSession`/`useUi`:
+
   ```ts
-  interface ToastCue { id: number; kind: 'success' | 'error'; message: string }
+  interface ToastCue {
+    id: number;
+    kind: 'success' | 'error';
+    message: string;
+  }
   interface ToastState {
     toasts: ToastCue[];
     push(kind: 'success' | 'error', message: string): void;
     remove(id: number): void;
   }
   ```
+
   `push` assigns an incrementing id and appends; no timers live in the store (kept in the
   component, matching `NotificationChip`'s per-chip-owns-its-timer approach).
 
@@ -61,15 +67,15 @@ tokens:
 
 ## Part 2 — Wire up toasts at every mutation site (and fix the silent-failure bug)
 
-| Action | File : function | Today | Change |
-|---|---|---|---|
-| Ban / unban | `UsersView.tsx` `toggleBan` | no catch | add try/catch; success + error toast |
-| Save features | `FeatureToggles.tsx` `save` | catch → inline red text only | keep inline text; **add** success + error toast |
-| Terminate game | `GamesView.tsx` `terminate` | no catch | add try/catch; success + error toast |
-| Close room | `RoomsView.tsx` `close` | no catch | add try/catch; success + error toast |
-| Save maintainer | `MaintainersView.tsx` `Editor.save` | catch → inline red text only | keep inline text; **add** success + error toast |
-| Revoke maintainer | `MaintainersView.tsx` `revoke` | no catch | add try/catch; success + error toast |
-| Logout | `session.ts` `logout` | deliberately swallowed | **out of scope** — not a meaningful user-facing action, swallow is intentional |
+| Action            | File : function                     | Today                        | Change                                                                         |
+| ----------------- | ----------------------------------- | ---------------------------- | ------------------------------------------------------------------------------ |
+| Ban / unban       | `UsersView.tsx` `toggleBan`         | no catch                     | add try/catch; success + error toast                                           |
+| Save features     | `FeatureToggles.tsx` `save`         | catch → inline red text only | keep inline text; **add** success + error toast                                |
+| Terminate game    | `GamesView.tsx` `terminate`         | no catch                     | add try/catch; success + error toast                                           |
+| Close room        | `RoomsView.tsx` `close`             | no catch                     | add try/catch; success + error toast                                           |
+| Save maintainer   | `MaintainersView.tsx` `Editor.save` | catch → inline red text only | keep inline text; **add** success + error toast                                |
+| Revoke maintainer | `MaintainersView.tsx` `revoke`      | no catch                     | add try/catch; success + error toast                                           |
+| Logout            | `session.ts` `logout`               | deliberately swallowed       | **out of scope** — not a meaningful user-facing action, swallow is intentional |
 
 Error toast message: `e instanceof ApiError || e instanceof Error ? e.message : t('common.error')`
 (matches the existing inline-error pattern already used in `FeatureToggles`/`Editor`). Success
@@ -130,6 +136,7 @@ both the table cell and the drawer (replacing the drawer's current plain
   always inlining text, given column-width constraints.
 
 **Expires column**:
+
 - Registered accounts (no `guestExpiresAt`): `—` (`common.never`).
 - Active guest: `fmtDateTime(u.guestExpiresAt, locale)`.
 - **Disabled guest with a pending `guestExpiresAt`** (edge case — the Mongo TTL keeps counting

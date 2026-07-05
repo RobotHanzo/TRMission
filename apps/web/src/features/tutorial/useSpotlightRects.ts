@@ -26,7 +26,8 @@ export function useSpotlightRects(spotlight: Spotlight | undefined): FlatRect[] 
         const el = document.querySelector(sel);
         if (!el) continue;
         const r = el.getBoundingClientRect();
-        if (r.width > 0 && r.height > 0) next.push({ x: r.left, y: r.top, w: r.width, h: r.height });
+        if (r.width > 0 && r.height > 0)
+          next.push({ x: r.left, y: r.top, w: r.width, h: r.height });
       }
       setRects(next);
     };

@@ -52,7 +52,7 @@ security boundary.
 
 This is a **separate system** from per-account `UserFeature` flags (`@trm/shared`'s
 `USER_FEATURES`, e.g. `mapBuilder`/`replayReview`) managed from the Users/Features views —
-dashboard permissions gate *this app*, user features gate capabilities in the *game* app.
+dashboard permissions gate _this app_, user features gate capabilities in the _game_ app.
 
 ## Routing (`store/ui.ts`)
 

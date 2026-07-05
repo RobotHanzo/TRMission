@@ -7,9 +7,11 @@
 ## Connections by Relation
 
 ### contains
+
 - hub.ts `EXTRACTED`
 
 ### imports
+
 - persistence.spec.ts `EXTRACTED`
 - spectators.spec.ts `EXTRACTED`
 - lobby.service.ts `EXTRACTED`
@@ -28,6 +30,7 @@
 - ws-server.ts `EXTRACTED`
 
 ### method
+
 - .onHello() `EXTRACTED`
 - .sendProjected() `EXTRACTED`
 - .broadcast() `EXTRACTED`
@@ -50,6 +53,7 @@
 - .closeConnection() `EXTRACTED`
 
 ### references
+
 - [GameConfig](GameConfig.md) `EXTRACTED`
 - [Board](Board.md) `EXTRACTED`
 - GameStorePort `EXTRACTED`
@@ -60,4 +64,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

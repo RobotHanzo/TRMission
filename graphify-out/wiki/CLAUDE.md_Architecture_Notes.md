@@ -29,7 +29,7 @@
 - **CONTENT_REGISTRY / resolveContentByHash / archive versioning** (2 connections) — `packages/map-data/CLAUDE.md`
 - **@trm/map-data (authored Taiwan content)** (2 connections) — `packages/map-data/CLAUDE.md`
 - **RejectionCode ⇄ RuleViolationCode 1:1 Mapping** (2 connections) — `packages/proto/CLAUDE.md`
-- *... and 11 more nodes in this community*
+- _... and 11 more nodes in this community_
 
 ## Relationships
 
@@ -56,4 +56,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

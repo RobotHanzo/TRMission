@@ -8,7 +8,13 @@ import { pbToCard } from './cards';
  * stream (`intentsFromEvents`); `ticketComplete` is built by the driver from a snapshot diff.
  */
 export type AnimIntent =
-  | { kind: 'cardFly'; toPlayerId: string; faceUp: boolean; color: CardColor | null; slot: number | null }
+  | {
+      kind: 'cardFly';
+      toPlayerId: string;
+      faceUp: boolean;
+      color: CardColor | null;
+      slot: number | null;
+    }
   | { kind: 'glowRoute'; routeId: string; seat: number }
   | { kind: 'glowStation'; cityId: string; seat: number }
   | { kind: 'scoreFloat'; playerId: string; amount: number }
@@ -37,13 +43,25 @@ export function intentsFromEvents(snapshot: GameSnapshot, events: GameEvent[]): 
     const ev = e.event;
     switch (ev.case) {
       case 'routeClaimed': {
-        out.push({ kind: 'glowRoute', routeId: ev.value.routeId, seat: seatOf(snapshot, ev.value.playerId) });
+        out.push({
+          kind: 'glowRoute',
+          routeId: ev.value.routeId,
+          seat: seatOf(snapshot, ev.value.playerId),
+        });
         if (ev.value.pointsAwarded > 0)
-          out.push({ kind: 'scoreFloat', playerId: ev.value.playerId, amount: ev.value.pointsAwarded });
+          out.push({
+            kind: 'scoreFloat',
+            playerId: ev.value.playerId,
+            amount: ev.value.pointsAwarded,
+          });
         break;
       }
       case 'stationBuilt':
-        out.push({ kind: 'glowStation', cityId: ev.value.cityId, seat: seatOf(snapshot, ev.value.playerId) });
+        out.push({
+          kind: 'glowStation',
+          cityId: ev.value.cityId,
+          seat: seatOf(snapshot, ev.value.playerId),
+        });
         break;
       case 'cardDrawnBlind':
         out.push({
@@ -71,7 +89,8 @@ export function intentsFromEvents(snapshot: GameSnapshot, events: GameEvent[]): 
         );
         break;
       case 'marketRecycled':
-        for (let slot = 0; slot < snapshot.market.length; slot++) out.push({ kind: 'marketFlip', slot });
+        for (let slot = 0; slot < snapshot.market.length; slot++)
+          out.push({ kind: 'marketFlip', slot });
         break;
       case 'turnStarted':
         out.push({ kind: 'turnCue', playerId: ev.value.playerId, isYou: ev.value.playerId === me });

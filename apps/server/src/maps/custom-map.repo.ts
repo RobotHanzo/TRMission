@@ -60,7 +60,11 @@ export class CustomMapRepo implements OnModuleInit {
   update(
     id: string,
     ownerId: string,
-    patch: { nameZh?: string | undefined; nameEn?: string | undefined; draft?: MapDraft | undefined },
+    patch: {
+      nameZh?: string | undefined;
+      nameEn?: string | undefined;
+      draft?: MapDraft | undefined;
+    },
   ): Promise<CustomMapDoc | null> {
     const set: Partial<CustomMapDoc> = { updatedAt: new Date() };
     if (patch.nameZh !== undefined) set.nameZh = patch.nameZh;
@@ -106,7 +110,9 @@ export class CustomMapRepo implements OnModuleInit {
    *  DashboardMapsService, the only caller allowed to bypass ownership. */
   listAllPage(cursor: { t: Date; id: string } | null, limit: number): Promise<CustomMapDoc[]> {
     const page = cursor
-      ? { $or: [{ updatedAt: { $lt: cursor.t } }, { updatedAt: cursor.t, _id: { $lt: cursor.id } }] }
+      ? {
+          $or: [{ updatedAt: { $lt: cursor.t } }, { updatedAt: cursor.t, _id: { $lt: cursor.id } }],
+        }
       : {};
     return this.col.find(page).sort({ updatedAt: -1, _id: -1 }).limit(limit).toArray();
   }

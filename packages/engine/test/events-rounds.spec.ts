@@ -30,7 +30,11 @@ function emptyEvents(mode: Mode = 'light'): EventsState {
 }
 
 /** initGame + resolve every initial ticket offer → AWAIT_ACTION, with events mode on. */
-function afterSetup(numPlayers: number, seed: string, mode: Mode): { board: Board; state: GameState } {
+function afterSetup(
+  numPlayers: number,
+  seed: string,
+  mode: Mode,
+): { board: Board; state: GameState } {
   const { board, config } = makeConfig(numPlayers, seed, { eventsMode: mode });
   let state = initGame(board, config);
   while (state.turn.phase === 'SETUP_TICKETS') {
@@ -136,7 +140,14 @@ describe('events runtime — round ticking', () => {
     const { board, state } = afterSetup(2, 'quiet-surprise', 'light');
     const city = board.cityIds[0]!;
     const sched: EventScheduleEntry[] = [
-      { id: 'ev1', kind: 'VIRAL_HOTSPOT', startRound: 2, durationRounds: 0, telegraphed: false, cityId: city },
+      {
+        id: 'ev1',
+        kind: 'VIRAL_HOTSPOT',
+        startRound: 2,
+        durationRounds: 0,
+        telegraphed: false,
+        cityId: city,
+      },
     ];
     let s = withEvents(
       { ...state, endgame: { triggered: true, triggerPlayerIndex: 0, finalTurnsRemaining: 20 } },

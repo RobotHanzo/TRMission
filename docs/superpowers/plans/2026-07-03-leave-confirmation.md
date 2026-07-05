@@ -36,11 +36,14 @@ one (the header brand becoming clickable). A separate `useLeaveWarning` hook wir
 ### Task 1: `ConfirmDialog` component
 
 **Files:**
+
 - Create: `apps/web/src/components/ConfirmDialog.tsx`
 - Test: `apps/web/src/components/ConfirmDialog.test.tsx`
 
 **Interfaces:**
+
 - Produces: `ConfirmDialog(props: ConfirmDialogProps)` where
+
   ```ts
   interface ConfirmDialogProps {
     title: string;
@@ -51,6 +54,7 @@ one (the header brand becoming clickable). A separate `useLeaveWarning` hook wir
     onCancel: () => void;
   }
   ```
+
   Renders a `role="dialog"` modal. Backdrop click, the Cancel button, and `Escape` all call
   `onCancel`. The Confirm button calls `onConfirm`. Later tasks import `ConfirmDialog` from
   `../components/ConfirmDialog`.
@@ -70,7 +74,12 @@ describe('ConfirmDialog', () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
     render(
-      <ConfirmDialog title="離開？" message="確定要離開嗎？" onConfirm={onConfirm} onCancel={onCancel} />,
+      <ConfirmDialog
+        title="離開？"
+        message="確定要離開嗎？"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
     );
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('離開？')).toBeInTheDocument();
@@ -84,7 +93,12 @@ describe('ConfirmDialog', () => {
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
     const { container } = render(
-      <ConfirmDialog title="離開？" message="確定要離開嗎？" onConfirm={onConfirm} onCancel={onCancel} />,
+      <ConfirmDialog
+        title="離開？"
+        message="確定要離開嗎？"
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />,
     );
     fireEvent.click(screen.getByRole('button', { name: '取消' }));
     expect(onCancel).toHaveBeenCalledTimes(1);
@@ -202,10 +216,12 @@ git commit -m "feat(web): add generic ConfirmDialog component"
 ### Task 2: `useConfirmAction` hook
 
 **Files:**
+
 - Create: `apps/web/src/hooks/useConfirmAction.ts`
 - Test: `apps/web/src/hooks/useConfirmAction.test.ts`
 
 **Interfaces:**
+
 - Produces: `useConfirmAction(): { open: boolean; request: (action: () => void) => void; confirm: () => void; cancel: () => void }`.
   `request(action)` stores `action` as pending and sets `open` to `true`. `confirm()` invokes the
   pending action then clears it (`open` becomes `false`). `cancel()` clears the pending action
@@ -310,11 +326,13 @@ git commit -m "feat(web): add useConfirmAction hook"
 ### Task 3: Wire the lobby "leave" button through the confirmation
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts:183` (zh-Hant), `apps/web/src/i18n/index.ts:562` (en)
 - Modify: `apps/web/src/screens/RoomScreen.tsx`
 - Test: `apps/web/src/screens/RoomScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `ConfirmDialog` (Task 1), `useConfirmAction` (Task 2).
 - Consumes new i18n keys: `t('leaveConfirmTitle')`, `t('leaveConfirmBody')`.
 
@@ -448,10 +466,12 @@ git commit -m "feat(web): confirm before leaving the room lobby"
 ### Task 4: Wire `GameScreen`'s leave (live game + post-game ScoreBoard) through the confirmation
 
 **Files:**
+
 - Modify: `apps/web/src/screens/GameScreen.tsx`
 - Test: `apps/web/src/screens/GameScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `ConfirmDialog` (Task 1), `useConfirmAction` (Task 2), `t('leaveConfirmTitle')` /
   `t('leaveConfirmBody')` (Task 3).
 - `GameScreen`'s `leave` only opens the confirmation when `snapshot` is truthy (covers live play and
@@ -615,12 +635,14 @@ git commit -m "feat(web): confirm before leaving a live or finished game"
 ### Task 5: Wire `AppHeader`'s leave button + make the brand clickable
 
 **Files:**
+
 - Modify: `apps/web/src/components/AppHeader.tsx`
 - Modify: `apps/web/src/styles/app.css`
 - Modify: `apps/web/src/components/AppHeader.phone.test.tsx`
 - Create: `apps/web/src/components/AppHeader.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `ConfirmDialog` (Task 1), `useConfirmAction` (Task 2), `t('leaveConfirmTitle')` /
   `t('leaveConfirmBody')` (Task 3).
 - The `.brand` element becomes `<button type="button" className="brand">` — same visible content,
@@ -892,11 +914,13 @@ git commit -m "feat(web): clickable header logo + confirm the header's leave act
 ### Task 6: Native `beforeunload` warning while in a room or game
 
 **Files:**
+
 - Create: `apps/web/src/hooks/useLeaveWarning.ts`
 - Test: `apps/web/src/hooks/useLeaveWarning.test.ts`
 - Modify: `apps/web/src/App.tsx`
 
 **Interfaces:**
+
 - Produces: `useLeaveWarning(): void` — a side-effect-only hook, no return value. Reads `view` from
   `useUi` internally. While `view` is `'room'` or `'game'`, a `beforeunload` listener calls
   `preventDefault()` and sets `returnValue`, which triggers the browser's own native "leave site?"
@@ -998,7 +1022,7 @@ Expected: PASS (4 tests).
    const user = useSession((s) => s.user);
    const booting = useSession((s) => s.booting);
    const restore = useSession((s) => s.restore);
- 
+
 +  useLeaveWarning();
 +
    useEffect(() => {
@@ -1051,6 +1075,7 @@ not use `git add -A`), then re-run `yarn format:check`.
 
 Run: `yarn workspace @trm/web dev` (needs `docker compose up -d mongo` and
 `yarn workspace @trm/server dev` running alongside for a real lobby/game flow). Verify by hand:
+
 - Clicking the header logo from the home screen navigates home with no dialog.
 - Creating/joining a room, then clicking "離開房間" (both the lobby button and the header logo)
   shows the confirmation; Cancel stays in the room, Confirm leaves it.

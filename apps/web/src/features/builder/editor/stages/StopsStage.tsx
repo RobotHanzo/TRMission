@@ -113,7 +113,8 @@ export function StopsStage() {
               />
             </div>
             <button type="button" onClick={() => setIsMoving((v) => !v)}>
-              <Move size={14} aria-hidden /> {isMoving ? t('builder.cancelMove') : t('builder.moveStop')}
+              <Move size={14} aria-hidden />{' '}
+              {isMoving ? t('builder.cancelMove') : t('builder.moveStop')}
             </button>
             {confirmDelete ? (
               <div className="stack">

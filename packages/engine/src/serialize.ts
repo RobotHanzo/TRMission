@@ -33,7 +33,9 @@ export function replay(board: Board, config: GameConfig, actions: readonly Actio
   actions.forEach((action, i) => {
     const res = reduce(board, state, action);
     if (!res.ok) {
-      throw new Error(`replay: action #${i} (${action.t}) rejected: ${res.error.code} — ${res.error.message}`);
+      throw new Error(
+        `replay: action #${i} (${action.t}) rejected: ${res.error.code} — ${res.error.message}`,
+      );
     }
     state = res.value.state;
     events.push(...res.value.events);

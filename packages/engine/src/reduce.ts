@@ -16,7 +16,11 @@ import { validateRoutePayment, validateStationPayment } from './payments';
 import { currentPlayerId, endTurn } from './turn';
 import { offerTickets } from './tickets';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
-import { borrowConnectedTicketIds, ownConnectedTicketIds, citiesConnected } from './graph/connectivity';
+import {
+  borrowConnectedTicketIds,
+  ownConnectedTicketIds,
+  citiesConnected,
+} from './graph/connectivity';
 import { stationBorrowEdges } from './scoring';
 import {
   isRouteClosed,
@@ -395,9 +399,7 @@ function applyClaimEffects(
 ): { state: GameState; events: GameEvent[] } {
   // Stamp-rally counts cities NEW to the claimer's network, so snapshot it BEFORE the claim (from
   // pre-claim ownership). Null when no stamp-rally window is active (off mode / feature absent).
-  const preClaimCities = stampRallyActive(state)
-    ? playerNetworkCities(board, state, player)
-    : null;
+  const preClaimCities = stampRallyActive(state) ? playerNetworkCities(board, state, player) : null;
 
   let next = setOwnership(state, route.id as string, { owner: player });
 
@@ -456,7 +458,9 @@ function applyClaimEffects(
   }
 
   // Both endpoint-driven bonuses iterate the route's endpoints sorted by cityId (deterministic).
-  const endpoints = [route.a as string, route.b as string].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const endpoints = [route.a as string, route.b as string].sort((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0,
+  );
 
   // (2) HOTSPOT — +level for each endpoint city carrying a viral-hotspot marker.
   for (const cityId of endpoints) {
@@ -718,7 +722,9 @@ function applyBuildStation(
   payment: Payment,
 ): ReduceResult {
   if (stationsSuspended(state))
-    return err(violation('EVENT_STATIONS_SUSPENDED', 'station builds suspended by a typhoon day off'));
+    return err(
+      violation('EVENT_STATIONS_SUSPENDED', 'station builds suspended by a typhoon day off'),
+    );
   if (!board.cityById.has(cityId as string)) return err(violation('UNKNOWN_CITY', 'unknown city'));
   if (state.stations.some((s) => s.cityId === cityId))
     return err(violation('STATION_CITY_TAKEN', 'city has a station'));

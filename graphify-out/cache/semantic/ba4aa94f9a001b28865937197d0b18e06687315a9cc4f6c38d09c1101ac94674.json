@@ -1,1 +1,249 @@
-{"nodes": [{"id": "_superpowers_sdd_task_9_brief", "label": "Task 9 Brief \u2014 Web: Replay screen, perspective switcher, control bar", "file_type": "document", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "concept_engine_version_gate", "label": "Engine/Schema/ContentHash Replayability Gate (client-side authoritative check)", "file_type": "rationale", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_screens_replayscreen", "label": "screens/ReplayScreen.tsx (ReplayScreen default export, ReplayStage)", "file_type": "code", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_features_replay_perspectiveswitcher", "label": "features/replay/PerspectiveSwitcher.tsx", "file_type": "code", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_styles_replay_css", "label": "styles/replay.css", "file_type": "code", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_screens_replayscreen_test", "label": "screens/ReplayScreen.test.tsx", "file_type": "code", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_9_brief", "target": "_superpowers_sdd_task_8_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "_superpowers_sdd_task_6_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "_superpowers_sdd_task_5_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "apps_web_src_screens_replayscreen", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "apps_web_src_features_replay_perspectiveswitcher", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "apps_web_src_styles_replay_css", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "apps_web_src_screens_replayscreen_test", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "apps_web_src_features_replay_usereplayplayer", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "apps_web_src_components_logpanel", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "apps_web_src_store_sandboxprovider", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_9_brief", "target": "concept_engine_version_gate", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_screens_replayscreen", "target": "apps_web_src_features_replay_usereplayplayer", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_screens_replayscreen", "target": "apps_web_src_features_replay_perspectiveswitcher", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_screens_replayscreen", "target": "apps_web_src_components_logpanel", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_screens_replayscreen", "target": "apps_web_src_store_sandboxprovider", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}, {"source": "concept_engine_version_gate", "target": "apps_web_src_screens_replayscreen", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "hyperedge_replay_playback_stack", "label": "Replay Playback Rendering Stack (ReplayScreen composition)", "nodes": ["apps_web_src_screens_replayscreen", "apps_web_src_features_replay_usereplayplayer", "apps_web_src_features_replay_perspectiveswitcher", "apps_web_src_components_logpanel", "apps_web_src_store_sandboxprovider"], "relation": "participate_in", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-9-brief.md"}]}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_9_brief",
+      "label": "Task 9 Brief \u2014 Web: Replay screen, perspective switcher, control bar",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_engine_version_gate",
+      "label": "Engine/Schema/ContentHash Replayability Gate (client-side authoritative check)",
+      "file_type": "rationale",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_screens_replayscreen",
+      "label": "screens/ReplayScreen.tsx (ReplayScreen default export, ReplayStage)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_features_replay_perspectiveswitcher",
+      "label": "features/replay/PerspectiveSwitcher.tsx",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_styles_replay_css",
+      "label": "styles/replay.css",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_screens_replayscreen_test",
+      "label": "screens/ReplayScreen.test.tsx",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "_superpowers_sdd_task_8_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "_superpowers_sdd_task_6_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "_superpowers_sdd_task_5_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "apps_web_src_screens_replayscreen",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "apps_web_src_features_replay_perspectiveswitcher",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "apps_web_src_styles_replay_css",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "apps_web_src_screens_replayscreen_test",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "apps_web_src_features_replay_usereplayplayer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "apps_web_src_components_logpanel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "apps_web_src_store_sandboxprovider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_9_brief",
+      "target": "concept_engine_version_gate",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_screens_replayscreen",
+      "target": "apps_web_src_features_replay_usereplayplayer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_screens_replayscreen",
+      "target": "apps_web_src_features_replay_perspectiveswitcher",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_screens_replayscreen",
+      "target": "apps_web_src_components_logpanel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_screens_replayscreen",
+      "target": "apps_web_src_store_sandboxprovider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_engine_version_gate",
+      "target": "apps_web_src_screens_replayscreen",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "hyperedge_replay_playback_stack",
+      "label": "Replay Playback Rendering Stack (ReplayScreen composition)",
+      "nodes": [
+        "apps_web_src_screens_replayscreen",
+        "apps_web_src_features_replay_usereplayplayer",
+        "apps_web_src_features_replay_perspectiveswitcher",
+        "apps_web_src_components_logpanel",
+        "apps_web_src_store_sandboxprovider"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-9-brief.md"
+    }
+  ]
+}

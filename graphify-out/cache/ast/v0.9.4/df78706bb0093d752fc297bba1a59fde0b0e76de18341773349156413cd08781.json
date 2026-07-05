@@ -1,1 +1,191 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_md", "label": "2026-07-04-single-connection-per-seat-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "label": "Single connection per seat \u2014 design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_protocol_change", "label": "Protocol change", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L17"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_server_forced_close_capability", "label": "Server: forced-close capability", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L33"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_server_kick_on_hello_logic", "label": "Server: kick-on-Hello logic", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L66"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_client_recognizing_the_forced_close", "label": "Client: recognizing the forced close", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L91"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_ui_the_dialog", "label": "UI: the dialog", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L116"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_edge_cases", "label": "Edge cases", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L126"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_implementation_surface", "label": "Implementation surface", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L141"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L164"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_success_criteria", "label": "Success criteria", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L171"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_protocol_change", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L17", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_server_forced_close_capability", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L33", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_server_kick_on_hello_logic", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L66", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_client_recognizing_the_forced_close", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L91", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_ui_the_dialog", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L116", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_edge_cases", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L126", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_implementation_surface", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L141", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L164", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_success_criteria", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md", "source_location": "L171", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_md",
+      "label": "2026-07-04-single-connection-per-seat-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "label": "Single connection per seat \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_protocol_change",
+      "label": "Protocol change",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L17"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_server_forced_close_capability",
+      "label": "Server: forced-close capability",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L33"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_server_kick_on_hello_logic",
+      "label": "Server: kick-on-Hello logic",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L66"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_client_recognizing_the_forced_close",
+      "label": "Client: recognizing the forced close",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L91"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_ui_the_dialog",
+      "label": "UI: the dialog",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L116"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_edge_cases",
+      "label": "Edge cases",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L126"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_implementation_surface",
+      "label": "Implementation surface",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L141"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L164"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_success_criteria",
+      "label": "Success criteria",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L171"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_protocol_change",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_server_forced_close_capability",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_server_kick_on_hello_logic",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_client_recognizing_the_forced_close",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L91",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_ui_the_dialog",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_edge_cases",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L126",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_implementation_surface",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L141",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L164",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_single_connection_per_seat_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_04_single_connection_per_seat_design_success_criteria",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-04-single-connection-per-seat-design.md",
+      "source_location": "L171",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

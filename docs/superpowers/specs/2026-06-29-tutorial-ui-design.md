@@ -35,17 +35,18 @@ The interactive tutorial and the in-game encyclopedia work, but their presentati
 
 ## Confirmed decisions
 
-| Decision | Choice | Consequence |
-| --- | --- | --- |
-| Focus style | **Dim + glow, non-blocking** | Scrim is `pointer-events: none`; the whole board stays clickable. No hard cutout that could trap the learner mid-`await`. |
-| Component visuals | **Full visual glossary** | Specimens for railway, ferry, tunnel, double route, station, the 8 card liveries + locomotive, and a ticket card. |
-| Demo depth | **Specimen + spotlight + auto-pan** | Narration-driven lessons gain a specimen, a focus dim, and a board auto-pan to a real example. No new engine scenarios → lowest risk. |
-| Coachmark placement | Bottom-anchored, **shifts aside** when it would cover a spotlighted HUD region | The dialog never hides the thing it explains. |
-| Encyclopedia list | **Chapter-grouped clickable list** (replaces the bare `<select>`) | |
+| Decision            | Choice                                                                         | Consequence                                                                                                                           |
+| ------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Focus style         | **Dim + glow, non-blocking**                                                   | Scrim is `pointer-events: none`; the whole board stays clickable. No hard cutout that could trap the learner mid-`await`.             |
+| Component visuals   | **Full visual glossary**                                                       | Specimens for railway, ferry, tunnel, double route, station, the 8 card liveries + locomotive, and a ticket card.                     |
+| Demo depth          | **Specimen + spotlight + auto-pan**                                            | Narration-driven lessons gain a specimen, a focus dim, and a board auto-pan to a real example. No new engine scenarios → lowest risk. |
+| Coachmark placement | Bottom-anchored, **shifts aside** when it would cover a spotlighted HUD region | The dialog never hides the thing it explains.                                                                                         |
+| Encyclopedia list   | **Chapter-grouped clickable list** (replaces the bare `<select>`)              |                                                                                                                                       |
 
 Design references: product-tour conventions (Intro.js / Shepherd / Userpilot — dim page + spotlight
-+ anchored tooltip + progress) and game-onboarding conventions (show-don't-tell, contextual
-coach-marks, visual glossary, progressive disclosure).
+
+- anchored tooltip + progress) and game-onboarding conventions (show-don't-tell, contextual
+  coach-marks, visual glossary, progressive disclosure).
 
 ## Architecture
 
@@ -134,13 +135,15 @@ already safe). Each variant is smoke-tested.
 ### 6. Beat model + curriculum enrichment — `types.ts` + `curriculum.ts` (modified, additive)
 
 `types.ts`:
+
 - `Spotlight` gains `{ kind: 'route'; ids: string[] }` and `{ kind: 'board' }`.
 - `Beat` gains optional `specimen?: SpecimenSpec` and `frame?: { kind: 'route'|'cities'; ids:
-  string[] }` (auto-pan target). `SpecimenSpec` is a small discriminated union mirroring the
+string[] }` (auto-pan target). `SpecimenSpec` is a small discriminated union mirroring the
   `Specimens.tsx` variants (`routes-compare`, `route`, `card-row`, `station`, `ticket`).
 - All fields optional ⇒ existing lessons and `scenarios.test.ts` keep passing unchanged.
 
 `curriculum.ts` — attach specimens / spotlights / pan targets to teaching beats:
+
 - **welcome.map** → `spotlight {kind:'board'}`, frame home.
 - **draw** → `CardRowSpecimen`; spotlight `[data-anim="deck"]` / market; loco beat shows a
   locomotive specimen.
@@ -181,6 +184,7 @@ the framed element.
 ## Files
 
 **New**
+
 - `apps/web/src/features/tutorial/TutorialSpotlight.tsx`
 - `apps/web/src/features/tutorial/useSpotlightRects.ts`
 - `apps/web/src/features/tutorial/Specimens.tsx`
@@ -188,6 +192,7 @@ the framed element.
 - `apps/web/src/features/tutorial/Specimens.test.tsx`
 
 **Modified**
+
 - `apps/web/src/features/tutorial/types.ts` — extend `Spotlight`, `Beat`, add `SpecimenSpec`.
 - `apps/web/src/features/tutorial/curriculum.ts` — enrich beats.
 - `apps/web/src/features/tutorial/TutorialOverlay.tsx` — restyle, host specimen, progress bar,

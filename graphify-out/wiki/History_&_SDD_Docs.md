@@ -29,7 +29,7 @@
 - **Replay Payload Endpoint — hard-gated on status=COMPLETED** (5 connections) — `.superpowers/sdd/task-4-brief.md`
 - **Task 2 Report — Server: hub records spectators on hello** (4 connections) — `.superpowers/sdd/task-2-report.md`
 - **.getForUser()** (4 connections) — `apps/server/src/history/history.repo.ts`
-- *... and 20 more nodes in this community*
+- _... and 20 more nodes in this community_
 
 ## Relationships
 
@@ -75,4 +75,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

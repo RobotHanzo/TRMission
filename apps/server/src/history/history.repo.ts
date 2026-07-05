@@ -77,7 +77,10 @@ export class HistoryRepo {
     rows: { contentHash: string; engineVersion: number | undefined }[],
   ): Promise<boolean[]> {
     const staticFlags: (boolean | undefined)[] = rows.map((r) => {
-      if (r.engineVersion === undefined || !REPLAY_COMPATIBLE_ENGINE_VERSIONS.includes(r.engineVersion))
+      if (
+        r.engineVersion === undefined ||
+        !REPLAY_COMPATIBLE_ENGINE_VERSIONS.includes(r.engineVersion)
+      )
         return false;
       try {
         boardForContentHash(r.contentHash);

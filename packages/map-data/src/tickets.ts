@@ -51,13 +51,15 @@ const shortRows: readonly Row[] = [
   ['S40', 'taitung', 'orchidisland', 4],
 ];
 
-const toTicket = (deck: 'LONG' | 'SHORT') => ([id, a, b, value]: Row): TicketDef => ({
-  id: asTicketId(id),
-  a: asCityId(a),
-  b: asCityId(b),
-  value,
-  deck,
-});
+const toTicket =
+  (deck: 'LONG' | 'SHORT') =>
+  ([id, a, b, value]: Row): TicketDef => ({
+    id: asTicketId(id),
+    a: asCityId(a),
+    b: asCityId(b),
+    value,
+    deck,
+  });
 
 export const LONG_TICKETS: readonly TicketDef[] = longRows.map(toTicket('LONG'));
 export const SHORT_TICKETS: readonly TicketDef[] = shortRows.map(toTicket('SHORT'));

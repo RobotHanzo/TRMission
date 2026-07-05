@@ -29,7 +29,7 @@
 - **build** (1 connections) — `package.json`
 - **format** (1 connections) — `package.json`
 - **format:check** (1 connections) — `package.json`
-- *... and 14 more nodes in this community*
+- _... and 14 more nodes in this community_
 
 ## Relationships
 
@@ -48,4 +48,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

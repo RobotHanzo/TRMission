@@ -1,1 +1,63 @@
-{"nodes": [{"id": "d_web_projects_trmission_packages_shared_claude_md", "label": "CLAUDE.md", "file_type": "document", "source_file": "packages/shared/CLAUDE.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_packages_shared_claude_claude_md", "label": "CLAUDE.md", "file_type": "document", "source_file": "packages/shared/CLAUDE.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_packages_shared_claude_what_lives_here_and_why_it_must_live_here", "label": "What lives here (and why it must live here)", "file_type": "document", "source_file": "packages/shared/CLAUDE.md", "source_location": "L9"}, {"id": "d_web_projects_trmission_packages_shared_claude_conventions", "label": "Conventions", "file_type": "document", "source_file": "packages/shared/CLAUDE.md", "source_location": "L29"}], "edges": [{"source": "d_web_projects_trmission_packages_shared_claude_md", "target": "d_web_projects_trmission_packages_shared_claude_claude_md", "relation": "contains", "confidence": "EXTRACTED", "source_file": "packages/shared/CLAUDE.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_packages_shared_claude_claude_md", "target": "d_web_projects_trmission_packages_shared_claude_what_lives_here_and_why_it_must_live_here", "relation": "contains", "confidence": "EXTRACTED", "source_file": "packages/shared/CLAUDE.md", "source_location": "L9", "weight": 1.0}, {"source": "d_web_projects_trmission_packages_shared_claude_claude_md", "target": "d_web_projects_trmission_packages_shared_claude_conventions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "packages/shared/CLAUDE.md", "source_location": "L29", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_packages_shared_claude_md",
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_shared_claude_claude_md",
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_shared_claude_what_lives_here_and_why_it_must_live_here",
+      "label": "What lives here (and why it must live here)",
+      "file_type": "document",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": "L9"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_shared_claude_conventions",
+      "label": "Conventions",
+      "file_type": "document",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": "L29"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_packages_shared_claude_md",
+      "target": "d_web_projects_trmission_packages_shared_claude_claude_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_shared_claude_claude_md",
+      "target": "d_web_projects_trmission_packages_shared_claude_what_lives_here_and_why_it_must_live_here",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_shared_claude_claude_md",
+      "target": "d_web_projects_trmission_packages_shared_claude_conventions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/shared/CLAUDE.md",
+      "source_location": "L29",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

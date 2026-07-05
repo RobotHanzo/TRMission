@@ -29,7 +29,7 @@
 - **SpecimenSpec** (5 connections) — `apps/web/src/features/tutorial/types.ts`
 - **useScenarioPlayer()** (5 connections) — `apps/web/src/features/tutorial/useScenarioPlayer.ts`
 - **unionRect()** (4 connections) — `apps/web/src/features/tutorial/focus.ts`
-- *... and 43 more nodes in this community*
+- _... and 43 more nodes in this community_
 
 ## Relationships
 
@@ -75,4 +75,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

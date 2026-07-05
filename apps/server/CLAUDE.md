@@ -70,7 +70,7 @@ viewer — the one sanctioned exception to "hidden info never leaves the server"
 `status: 'COMPLETED'` in `HistoryRepo.loadReplay`. The member path additionally requires the
 viewer's **`replayReview` feature** (403 `FEATURE_DISABLED` for a member without it; a `link`
 visibility replay stays viewable by anyone holding the URL, anonymous included), and
-`PATCH :gameId/visibility` checks seatedness *before* the feature so outsiders keep the
+`PATCH :gameId/visibility` checks seatedness _before_ the feature so outsiders keep the
 nondisclosing 404. A list entry's `isReplayable` batches its
 content-hash lookups (official registry ∪ one `mapContents` query for the unresolved hashes) rather
 than checking one game at a time — a custom map's draft being deleted never makes its past games
@@ -86,7 +86,7 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   `oauth.http`, hand-rolled with global `fetch`, no passport): authorization-code + PKCE; the profile
   comes from the provider's userinfo endpoint (no id_token signature work) for that redirect flow.
   Google also has a second entry point, `POST /auth/oauth/google/credential`, for a Google Identity
-  Services (One Tap / rendered button) ID-token credential — the one place that *does* verify a JWT
+  Services (One Tap / rendered button) ID-token credential — the one place that _does_ verify a JWT
   signature, via `google-auth-library` (`google-id-token.verifier.ts`, injected behind
   `GOOGLE_ID_TOKEN_VERIFIER` the same way `OAUTH_HTTP` is). Both entry points converge on the same
   `resolveAccount` logic. Bound by **verified
@@ -146,7 +146,7 @@ Rules that bite here:
 - **Hidden info**: a LIVE game's detail redacts `seed` (seed + contentHash = deck order = every
   hand) and never exposes state or the action log; log/replay endpoints stay hard-gated on
   `status: 'COMPLETED'` (the gate lives only in `HistoryRepo.loadReplay` — the dashboard bypasses
-  *membership*, never the gate).
+  _membership_, never the gate).
 - **Ban** (`users.ban`): sets `disabledAt` + revokes all refresh families; enforcement chokepoints
   are `AuthService.issue()`/`refresh()` and the lobby's three ws-ticket paths. `AccessTokenGuard`
   is deliberately untouched — already-issued access tokens keep read-only REST for ≤15min

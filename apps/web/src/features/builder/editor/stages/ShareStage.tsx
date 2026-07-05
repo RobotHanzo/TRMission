@@ -81,7 +81,11 @@ export function ShareStage() {
 
         <section className="stack editor-share-section">
           <h3>{t('builder.playTitle')}</h3>
-          <button className="primary" disabled={!ready || busy} onClick={() => void createRoomWithMap()}>
+          <button
+            className="primary"
+            disabled={!ready || busy}
+            onClick={() => void createRoomWithMap()}
+          >
             {t('builder.createRoomWithMap')}
           </button>
           {err && <p className="error">{err}</p>}

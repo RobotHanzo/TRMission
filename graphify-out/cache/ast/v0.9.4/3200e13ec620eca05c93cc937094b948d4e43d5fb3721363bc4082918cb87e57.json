@@ -1,1 +1,239 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_md", "label": "task-10-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan", "label": "Task 10 report \u2014 docs + full validation sweep (game-replay plan)", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_status_done_with_concerns", "label": "Status: DONE_WITH_CONCERNS", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates", "label": "Step 1: CLAUDE.md updates", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L14"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_apps_server_claude_md_persistence_recovery_section", "label": "`apps/server/CLAUDE.md` \u2014 \"Persistence & recovery\" section", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L16"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_apps_web_claude_md_store_ui_ts_bullet_new_rendering_content_bullet", "label": "`apps/web/CLAUDE.md` \u2014 `store/ui.ts` bullet + new \"Rendering & content\" bullet", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L37"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_prettier_check_on_the_two_touched_files", "label": "Prettier check on the two touched files", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L64"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_commit", "label": "Commit", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L74"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep", "label": "Step 2: Full validation sweep", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L88"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_typecheck_pass", "label": "`yarn typecheck` \u2014 PASS", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L90"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_lint_pass", "label": "`yarn lint` \u2014 PASS", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L103"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_test_pass_except_one_pre_existing_unrelated_failure", "label": "`yarn test` \u2014 PASS except one pre-existing/unrelated failure", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L109"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_format_yarn_format_check_fail_mostly_pre_existing_2_files_trace_to_this_plan", "label": "`yarn format` / `yarn format:check` \u2014 FAIL (mostly pre-existing; 2 files trace to this plan)", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L165"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_summary_table", "label": "Summary table", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L236"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_10_report_concerns_for_the_controller", "label": "Concerns for the controller", "file_type": "document", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L245"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_md", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_status_done_with_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L14", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_apps_server_claude_md_persistence_recovery_section", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L16", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_apps_web_claude_md_store_ui_ts_bullet_new_rendering_content_bullet", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L37", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_prettier_check_on_the_two_touched_files", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L64", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_commit", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L74", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L88", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_typecheck_pass", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L90", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_lint_pass", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L103", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_test_pass_except_one_pre_existing_unrelated_failure", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L109", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_format_yarn_format_check_fail_mostly_pre_existing_2_files_trace_to_this_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L165", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_summary_table", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L236", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan", "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_concerns_for_the_controller", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-10-report.md", "source_location": "L245", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_md",
+      "label": "task-10-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan",
+      "label": "Task 10 report \u2014 docs + full validation sweep (game-replay plan)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_status_done_with_concerns",
+      "label": "Status: DONE_WITH_CONCERNS",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates",
+      "label": "Step 1: CLAUDE.md updates",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L14"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_apps_server_claude_md_persistence_recovery_section",
+      "label": "`apps/server/CLAUDE.md` \u2014 \"Persistence & recovery\" section",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L16"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_apps_web_claude_md_store_ui_ts_bullet_new_rendering_content_bullet",
+      "label": "`apps/web/CLAUDE.md` \u2014 `store/ui.ts` bullet + new \"Rendering & content\" bullet",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L37"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_prettier_check_on_the_two_touched_files",
+      "label": "Prettier check on the two touched files",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L64"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_commit",
+      "label": "Commit",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L74"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep",
+      "label": "Step 2: Full validation sweep",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L88"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_typecheck_pass",
+      "label": "`yarn typecheck` \u2014 PASS",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L90"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_lint_pass",
+      "label": "`yarn lint` \u2014 PASS",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L103"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_test_pass_except_one_pre_existing_unrelated_failure",
+      "label": "`yarn test` \u2014 PASS except one pre-existing/unrelated failure",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L109"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_format_yarn_format_check_fail_mostly_pre_existing_2_files_trace_to_this_plan",
+      "label": "`yarn format` / `yarn format:check` \u2014 FAIL (mostly pre-existing; 2 files trace to this plan)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L165"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_summary_table",
+      "label": "Summary table",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L236"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_10_report_concerns_for_the_controller",
+      "label": "Concerns for the controller",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L245"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_status_done_with_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_apps_server_claude_md_persistence_recovery_section",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_apps_web_claude_md_store_ui_ts_bullet_new_rendering_content_bullet",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_prettier_check_on_the_two_touched_files",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_1_claude_md_updates",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_commit",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_typecheck_pass",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L90",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_lint_pass",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_test_pass_except_one_pre_existing_unrelated_failure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_step_2_full_validation_sweep",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_yarn_format_yarn_format_check_fail_mostly_pre_existing_2_files_trace_to_this_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L165",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_summary_table",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L236",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_10_report_task_10_report_docs_full_validation_sweep_game_replay_plan",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_10_report_concerns_for_the_controller",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-10-report.md",
+      "source_location": "L245",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

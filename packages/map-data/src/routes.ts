@@ -90,7 +90,8 @@ export function buildRoute([id, a, b, color, length, flag]: Row): RouteDef {
     color,
     length,
   };
-  if (flag.startsWith('D-')) return { ...base, doubleGroup: flag.slice(2), ferryLocos: 0, isTunnel: false };
+  if (flag.startsWith('D-'))
+    return { ...base, doubleGroup: flag.slice(2), ferryLocos: 0, isTunnel: false };
   if (flag === 'T') return { ...base, ferryLocos: 0, isTunnel: true };
   if (flag.startsWith('F')) return { ...base, ferryLocos: Number(flag.slice(1)), isTunnel: false };
   return { ...base, ferryLocos: 0, isTunnel: false };

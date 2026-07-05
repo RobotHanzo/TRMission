@@ -119,9 +119,18 @@ New `packages/shared/src/chat-presets.ts`:
 
 ```ts
 export const CHAT_PRESET_IDS = [
-  'GREETING', 'GOOD_LUCK', 'THANKS', 'SORRY', 'ONE_MOMENT',
-  'NICE_MOVE', 'WELL_PLAYED', 'GOOD_GAME', 'LETS_GO',
-  'STILL_THERE', 'YES', 'NO',
+  'GREETING',
+  'GOOD_LUCK',
+  'THANKS',
+  'SORRY',
+  'ONE_MOMENT',
+  'NICE_MOVE',
+  'WELL_PLAYED',
+  'GOOD_GAME',
+  'LETS_GO',
+  'STILL_THERE',
+  'YES',
+  'NO',
 ] as const;
 export type ChatPresetId = (typeof CHAT_PRESET_IDS)[number];
 export const isChatPresetId = (v: string): v is ChatPresetId =>
@@ -171,7 +180,7 @@ Re-exported from `packages/shared/src/index.ts`. Also add a new rejection messag
   `NotFoundException`/`ForbiddenException`/a rate-limit exception, otherwise `toView(r)`, mirroring
   `voteRematch`.
 - `lobby/lobby.controller.ts`: `POST :code/chat` with a `ChatSchema = z.object({ presetId:
-  z.enum(CHAT_PRESET_IDS) })` body, returning `RoomView` — same shape as every other lobby mutation.
+z.enum(CHAT_PRESET_IDS) })` body, returning `RoomView` — same shape as every other lobby mutation.
 - `lobby/lobby.schemas.ts`: `RoomViewSchema` gains the `chat` array.
 - `apps/web/src/screens/RoomScreen.tsx`: a preset-button row + compact translated log, reusing
   `chatPresetKey()`; new entries arrive for free via the existing 2s poll of `GET /rooms/:code`.
@@ -183,9 +192,9 @@ Re-exported from `packages/shared/src/index.ts`. Also add a new rejection messag
   (holding either the raw text or the preset id).
 - `apps/admin/src/views/GamesView.tsx` chat section (currently lines 154–168, raw/untranslated):
   for `kind === 'preset'`, render `t(chatPresetKey(value))` — a small admin-local `chatPresetKey(id)
-  => \`chat.presets.${id}\`` helper, same shape as web's but a separate module since the two apps
-  share no i18n code — plus an `.oc-chip` badge (`games.chatPresetBadge` i18n key: "預設"/"Preset");
-  for `kind === 'text'`, render `value` unchanged (today's behavior).
+=> \`chat.presets.${id}\``helper, same shape as web's but a separate module since the two apps
+share no i18n code — plus an`.oc-chip` badge (`games.chatPresetBadge`i18n key: "預設"/"Preset");
+for`kind === 'text'`, render `value` unchanged (today's behavior).
 - `apps/admin/src/i18n/index.ts`: new `chat.presets.*` keys (the same 12 ids, translated
   independently of `apps/web`'s copy — admin has no shared i18n resource with web today) plus
   `games.chatPresetBadge`.

@@ -1,1 +1,193 @@
-{"nodes": [{"id": "_superpowers_sdd_task_8_brief", "label": "Task 8 Brief \u2014 Web: the replay player hook", "file_type": "document", "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "concept_replay_player_algorithm", "label": "Replay Player Checkpoint + Seek + Autoplay Algorithm", "file_type": "concept", "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "concept_hidden_information_redaction", "label": "Hidden-Information Redaction (redactFor \u2192 viewToSnapshot per-viewer projection)", "file_type": "rationale", "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_features_replay_usereplayplayer", "label": "features/replay/useReplayPlayer.ts", "file_type": "code", "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_features_replay_usereplayplayer_test", "label": "features/replay/useReplayPlayer.test.ts", "file_type": "code", "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_net_sandboxsocket", "label": "net/sandboxSocket.ts (tutorial sandbox projection recipe)", "file_type": "code", "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_8_brief", "target": "_superpowers_sdd_task_5_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_8_brief", "target": "apps_web_src_features_replay_usereplayplayer", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_8_brief", "target": "apps_web_src_features_replay_usereplayplayer_test", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_8_brief", "target": "apps_web_src_store_game", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_8_brief", "target": "apps_web_src_store_log", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_8_brief", "target": "apps_web_src_net_sandboxsocket", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_8_brief", "target": "concept_replay_player_algorithm", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_8_brief", "target": "concept_hidden_information_redaction", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_features_replay_usereplayplayer", "target": "apps_web_src_store_game", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_features_replay_usereplayplayer", "target": "apps_web_src_store_log", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "concept_hidden_information_redaction", "target": "apps_web_src_features_replay_usereplayplayer", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}, {"source": "concept_replay_player_algorithm", "target": "apps_web_src_features_replay_usereplayplayer", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-8-brief.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_8_brief",
+      "label": "Task 8 Brief \u2014 Web: the replay player hook",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_replay_player_algorithm",
+      "label": "Replay Player Checkpoint + Seek + Autoplay Algorithm",
+      "file_type": "concept",
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_hidden_information_redaction",
+      "label": "Hidden-Information Redaction (redactFor \u2192 viewToSnapshot per-viewer projection)",
+      "file_type": "rationale",
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_features_replay_usereplayplayer",
+      "label": "features/replay/useReplayPlayer.ts",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_features_replay_usereplayplayer_test",
+      "label": "features/replay/useReplayPlayer.test.ts",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_net_sandboxsocket",
+      "label": "net/sandboxSocket.ts (tutorial sandbox projection recipe)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_8_brief",
+      "target": "_superpowers_sdd_task_5_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_8_brief",
+      "target": "apps_web_src_features_replay_usereplayplayer",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_8_brief",
+      "target": "apps_web_src_features_replay_usereplayplayer_test",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_8_brief",
+      "target": "apps_web_src_store_game",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_8_brief",
+      "target": "apps_web_src_store_log",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_8_brief",
+      "target": "apps_web_src_net_sandboxsocket",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_8_brief",
+      "target": "concept_replay_player_algorithm",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_8_brief",
+      "target": "concept_hidden_information_redaction",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_features_replay_usereplayplayer",
+      "target": "apps_web_src_store_game",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_features_replay_usereplayplayer",
+      "target": "apps_web_src_store_log",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_hidden_information_redaction",
+      "target": "apps_web_src_features_replay_usereplayplayer",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_replay_player_algorithm",
+      "target": "apps_web_src_features_replay_usereplayplayer",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-8-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

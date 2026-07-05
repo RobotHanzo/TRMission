@@ -64,7 +64,9 @@ export function CustomGeography({ geography, selectedRings, onRingClick }: Custo
         return (
           <g
             key={i}
-            className={onRingClick ? `land-ring${selected ? ' land-ring--selected' : ''}` : undefined}
+            className={
+              onRingClick ? `land-ring${selected ? ' land-ring--selected' : ''}` : undefined
+            }
             onClick={
               onRingClick
                 ? (e) => {

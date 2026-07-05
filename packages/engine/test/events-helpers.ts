@@ -64,7 +64,12 @@ export function handOf(partial: Partial<Record<CardColor, number>>): Record<Card
 /** Build a live ActiveEvent (defaults: a very-late expiry so it stays active for the whole test). */
 export function activeEvent(
   kind: RandomEventKind,
-  opts: { id?: string; endsAfterRound?: number; routeIds?: readonly RouteId[]; region?: string } = {},
+  opts: {
+    id?: string;
+    endsAfterRound?: number;
+    routeIds?: readonly RouteId[];
+    region?: string;
+  } = {},
 ): ActiveEvent {
   return {
     id: opts.id ?? kind.toLowerCase(),

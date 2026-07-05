@@ -52,10 +52,7 @@ export function skyLanternRouteIds(ev: RandomEventsState | undefined): ReadonlyS
  * The +1-card sky-lantern surcharge for claiming `routeId` (0 or 1). Exact mirror of the engine's
  * `skyLanternSurcharge`: 1 when the route is listed by an active SKY_LANTERN, else 0.
  */
-export function skyLanternSurcharge(
-  ev: RandomEventsState | undefined,
-  routeId: string,
-): 0 | 1 {
+export function skyLanternSurcharge(ev: RandomEventsState | undefined, routeId: string): 0 | 1 {
   return skyLanternRouteIds(ev).has(routeId) ? 1 : 0;
 }
 

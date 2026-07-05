@@ -32,7 +32,9 @@ describe('initGame', () => {
   it('different seeds → different genesis', () => {
     const a = makeConfig(4, 'seed-a');
     const b = makeConfig(4, 'seed-b');
-    expect(stateDigest(initGame(a.board, a.config))).not.toBe(stateDigest(initGame(b.board, b.config)));
+    expect(stateDigest(initGame(a.board, a.config))).not.toBe(
+      stateDigest(initGame(b.board, b.config)),
+    );
   });
 });
 

@@ -1,1 +1,31 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_task_9_brief_md", "label": "task-9-brief.md", "file_type": "document", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_brief_task_9_web_replay_screen_perspective_switcher_control_bar", "label": "Task 9: Web \u2014 Replay screen, perspective switcher, control bar", "file_type": "document", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": "L1"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_task_9_brief_md", "target": "d_web_projects_trmission_superpowers_sdd_task_9_brief_task_9_web_replay_screen_perspective_switcher_control_bar", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-brief.md", "source_location": "L1", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_brief_md",
+      "label": "task-9-brief.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_brief_task_9_web_replay_screen_perspective_switcher_control_bar",
+      "label": "Task 9: Web \u2014 Replay screen, perspective switcher, control bar",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": "L1"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_brief_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_brief_task_9_web_replay_screen_perspective_switcher_control_bar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-brief.md",
+      "source_location": "L1",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

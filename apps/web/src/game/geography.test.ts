@@ -20,7 +20,9 @@ describe('fitTransform', () => {
   });
 
   it('clamps a tiny target to MAX_SCALE instead of zooming past the limit', () => {
-    expect(fitTransform({ cx: 10, cy: 10, w: 1, h: 1 }, { w: 1000, h: 1000 }).scale).toBe(MAX_SCALE);
+    expect(fitTransform({ cx: 10, cy: 10, w: 1, h: 1 }, { w: 1000, h: 1000 }).scale).toBe(
+      MAX_SCALE,
+    );
   });
 
   it('clamps a huge target to MIN_SCALE instead of vanishing', () => {

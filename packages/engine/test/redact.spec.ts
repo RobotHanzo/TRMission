@@ -168,7 +168,10 @@ describe('redactFor — random events projection', () => {
     charterB: asCityId('SECRET_CITY_B'),
   };
 
-  function baseState(seed: string): { state: GameState; live: { closed: string; hot: string; a: string; b: string } } {
+  function baseState(seed: string): {
+    state: GameState;
+    live: { closed: string; hot: string; a: string; b: string };
+  } {
     const board = taiwanBoard();
     const state = afterSetup(2, seed);
     const closed = board.content.routes[0]!.id as string; // unclaimed after setup
@@ -199,9 +202,25 @@ describe('redactFor — random events projection', () => {
       nextIdx: 0,
       schedule: [future],
       suppressed: [],
-      active: [{ id: 'evTy', kind: 'TYPHOON_LANDFALL', endsAfterRound: 99, routeIds: [asRouteId(live.closed)] }],
+      active: [
+        {
+          id: 'evTy',
+          kind: 'TYPHOON_LANDFALL',
+          endsAfterRound: 99,
+          routeIds: [asRouteId(live.closed)],
+        },
+      ],
       hotspots: { [live.hot]: 2 },
-      charters: [{ id: 'evCh', a: asCityId(live.a), b: asCityId(live.b), points: 8, expiresAfterRound: 99, wonBy: null }],
+      charters: [
+        {
+          id: 'evCh',
+          a: asCityId(live.a),
+          b: asCityId(live.b),
+          points: 8,
+          expiresAfterRound: 99,
+          wonBy: null,
+        },
+      ],
       reopenBonus: [],
     };
     const withEv: GameState = { ...state, events };
@@ -209,7 +228,13 @@ describe('redactFor — random events projection', () => {
     for (const viewer of [asPlayerId('p0'), asPlayerId('p1'), null] as (PlayerId | null)[]) {
       const view = redactFor(board, withEv, viewer);
       const json = JSON.stringify(view);
-      for (const secret of [SECRET.id, SECRET.route as string, SECRET.city as string, SECRET.charterA as string, SECRET.charterB as string]) {
+      for (const secret of [
+        SECRET.id,
+        SECRET.route as string,
+        SECRET.city as string,
+        SECRET.charterA as string,
+        SECRET.charterB as string,
+      ]) {
         expect(json.includes(secret)).toBe(false);
       }
       expect(view.events).toBeDefined();

@@ -46,7 +46,12 @@ function utf8Bytes(str: string): Uint8Array {
       // surrogate pair
       const c2 = str.charCodeAt(++i);
       c = 0x10000 + ((c & 0x3ff) << 10) + (c2 & 0x3ff);
-      out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 0x3f), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+      out.push(
+        0xf0 | (c >> 18),
+        0x80 | ((c >> 12) & 0x3f),
+        0x80 | ((c >> 6) & 0x3f),
+        0x80 | (c & 0x3f),
+      );
     } else {
       out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
     }
@@ -73,8 +78,14 @@ export function sha256Hex(message: string): string {
   dv.setUint32(paddedLen - 8, hi);
   dv.setUint32(paddedLen - 4, lo);
 
-  let h0 = 0x6a09e667, h1 = 0xbb67ae85, h2 = 0x3c6ef372, h3 = 0xa54ff53a;
-  let h4 = 0x510e527f, h5 = 0x9b05688c, h6 = 0x1f83d9ab, h7 = 0x5be0cd19;
+  let h0 = 0x6a09e667,
+    h1 = 0xbb67ae85,
+    h2 = 0x3c6ef372,
+    h3 = 0xa54ff53a;
+  let h4 = 0x510e527f,
+    h5 = 0x9b05688c,
+    h6 = 0x1f83d9ab,
+    h7 = 0x5be0cd19;
 
   const w = new Uint32Array(64);
   for (let off = 0; off < paddedLen; off += 64) {
@@ -84,10 +95,17 @@ export function sha256Hex(message: string): string {
       const b = w[i - 2] as number;
       const s0 = rotr(a, 7) ^ rotr(a, 18) ^ (a >>> 3);
       const s1 = rotr(b, 17) ^ rotr(b, 19) ^ (b >>> 10);
-      w[i] = (((w[i - 16] as number) + s0 + (w[i - 7] as number) + s1) >>> 0);
+      w[i] = ((w[i - 16] as number) + s0 + (w[i - 7] as number) + s1) >>> 0;
     }
 
-    let a = h0, b = h1, c = h2, d = h3, e = h4, f = h5, g = h6, h = h7;
+    let a = h0,
+      b = h1,
+      c = h2,
+      d = h3,
+      e = h4,
+      f = h5,
+      g = h6,
+      h = h7;
     for (let i = 0; i < 64; i++) {
       const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
       const ch = (e & f) ^ (~e & g);
@@ -95,17 +113,29 @@ export function sha256Hex(message: string): string {
       const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
       const maj = (a & b) ^ (a & c) ^ (b & c);
       const t2 = (S0 + maj) >>> 0;
-      h = g; g = f; f = e;
+      h = g;
+      g = f;
+      f = e;
       e = (d + t1) >>> 0;
-      d = c; c = b; b = a;
+      d = c;
+      c = b;
+      b = a;
       a = (t1 + t2) >>> 0;
     }
-    h0 = (h0 + a) >>> 0; h1 = (h1 + b) >>> 0; h2 = (h2 + c) >>> 0; h3 = (h3 + d) >>> 0;
-    h4 = (h4 + e) >>> 0; h5 = (h5 + f) >>> 0; h6 = (h6 + g) >>> 0; h7 = (h7 + h) >>> 0;
+    h0 = (h0 + a) >>> 0;
+    h1 = (h1 + b) >>> 0;
+    h2 = (h2 + c) >>> 0;
+    h3 = (h3 + d) >>> 0;
+    h4 = (h4 + e) >>> 0;
+    h5 = (h5 + f) >>> 0;
+    h6 = (h6 + g) >>> 0;
+    h7 = (h7 + h) >>> 0;
   }
 
   const toHex = (n: number): string => (n >>> 0).toString(16).padStart(8, '0');
-  return toHex(h0) + toHex(h1) + toHex(h2) + toHex(h3) + toHex(h4) + toHex(h5) + toHex(h6) + toHex(h7);
+  return (
+    toHex(h0) + toHex(h1) + toHex(h2) + toHex(h3) + toHex(h4) + toHex(h5) + toHex(h6) + toHex(h7)
+  );
 }
 
 /** Hash any JSON-serializable value via canonical stringify → SHA-256. */

@@ -230,7 +230,11 @@ describe('GameScreen rematch redirect', () => {
       useUi.setState({ view: 'game', ticket: 'tkt', roomCode: 'ABCD', gameId: 'g1' });
       useGame.setState({ snapshot: liveSnap(), rejection: null });
       vi.mocked(api.getRoom).mockClear();
-      vi.mocked(api.getRoom).mockResolvedValue({ hostId: 'p0', status: 'LOBBY', members: [] } as never);
+      vi.mocked(api.getRoom).mockResolvedValue({
+        hostId: 'p0',
+        status: 'LOBBY',
+        members: [],
+      } as never);
       render(<GameScreen />);
       await vi.advanceTimersByTimeAsync(5000);
       // Only the pre-existing one-shot roster effect fires — the game-over poll never starts.
@@ -246,7 +250,11 @@ describe('GameScreen rematch redirect', () => {
     try {
       useUi.setState({ view: 'game', ticket: 'tkt', roomCode: 'ABCD', gameId: 'g1' });
       useGame.setState({ snapshot: gameOverSpectatorSnap(), rejection: null });
-      vi.mocked(api.getRoom).mockResolvedValue({ hostId: 'p0', status: 'LOBBY', members: [] } as never);
+      vi.mocked(api.getRoom).mockResolvedValue({
+        hostId: 'p0',
+        status: 'LOBBY',
+        members: [],
+      } as never);
       render(<GameScreen />);
       await vi.advanceTimersByTimeAsync(4000);
       expect(useUi.getState().view).toBe('game');

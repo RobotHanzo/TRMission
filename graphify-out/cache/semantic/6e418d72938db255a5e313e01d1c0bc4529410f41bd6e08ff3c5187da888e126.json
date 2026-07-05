@@ -1,1 +1,100 @@
-{"nodes": [{"id": "_superpowers_sdd_task_4_brief", "label": "Task 4 Brief \u2014 Server: replay payload endpoint", "file_type": "document", "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "concept_replay_payload_endpoint_design", "label": "Replay Payload Endpoint \u2014 hard-gated on status=COMPLETED", "file_type": "rationale", "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "concept_determinism_seal", "label": "Determinism Seal \u2014 replay() reproduces persisted stateDigest", "file_type": "rationale", "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_4_brief", "target": "_superpowers_sdd_task_3_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_4_brief", "target": "apps_server_src_history_history_controller", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_4_brief", "target": "apps_server_test_history_replay_e2e_spec", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_4_brief", "target": "concept_replay_payload_endpoint_design", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_4_brief", "target": "concept_determinism_seal", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "weight": 1.0}, {"source": "concept_determinism_seal", "target": "apps_server_test_history_replay_e2e_spec", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-4-brief.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_4_brief",
+      "label": "Task 4 Brief \u2014 Server: replay payload endpoint",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_replay_payload_endpoint_design",
+      "label": "Replay Payload Endpoint \u2014 hard-gated on status=COMPLETED",
+      "file_type": "rationale",
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_determinism_seal",
+      "label": "Determinism Seal \u2014 replay() reproduces persisted stateDigest",
+      "file_type": "rationale",
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_4_brief",
+      "target": "_superpowers_sdd_task_3_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_4_brief",
+      "target": "apps_server_src_history_history_controller",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_4_brief",
+      "target": "apps_server_test_history_replay_e2e_spec",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_4_brief",
+      "target": "concept_replay_payload_endpoint_design",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_4_brief",
+      "target": "concept_determinism_seal",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_determinism_seal",
+      "target": "apps_server_test_history_replay_e2e_spec",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-4-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

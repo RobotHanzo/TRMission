@@ -29,7 +29,17 @@ export function MapPreview({
         const a = byId.get(r.a);
         const b = byId.get(r.b);
         if (!a || !b) return null;
-        return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="currentColor" strokeWidth={0.4} />;
+        return (
+          <line
+            key={i}
+            x1={a.x}
+            y1={a.y}
+            x2={b.x}
+            y2={b.y}
+            stroke="currentColor"
+            strokeWidth={0.4}
+          />
+        );
       })}
       {draft.cities.map((c) => (
         <circle key={c.id} cx={c.x} cy={c.y} r={1.2} fill="currentColor" />

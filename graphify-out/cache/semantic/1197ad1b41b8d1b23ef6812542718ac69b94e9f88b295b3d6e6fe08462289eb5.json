@@ -1,1 +1,155 @@
-{"nodes": [{"id": "packages_engine_claude_trm_engine", "label": "@trm/engine (pure deterministic reducer)", "file_type": "concept", "source_file": "packages/engine/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_engine_claude_purity_adr_a4", "label": "ADR A4: Engine Purity Enforced by ESLint", "file_type": "rationale", "source_file": "packages/engine/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_engine_claude_reduce_ts", "label": "reduce.ts: reduce(board, state, action) \u2192 ReduceResult", "file_type": "concept", "source_file": "packages/engine/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_engine_claude_state_types", "label": "types/state.ts, actions.ts, events.ts", "file_type": "concept", "source_file": "packages/engine/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_engine_claude_selectors_redactfor", "label": "selectors.ts: legalActions, enumerateClaimPayments, redactFor", "file_type": "concept", "source_file": "packages/engine/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_engine_claude_longest_trail", "label": "graph/longestTrail.ts (longest-continuous-path bonus)", "file_type": "concept", "source_file": "packages/engine/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_engine_claude_connectivity", "label": "graph/connectivity.ts (ticket completion via union-find)", "file_type": "concept", "source_file": "packages/engine/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "packages_engine_claude_scoring_setup_turn", "label": "scoring.ts, setup.ts, turn.ts, serialize.ts, invariants.ts", "file_type": "concept", "source_file": "packages/engine/CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "packages_engine_claude_reduce_ts", "target": "packages_engine_claude_selectors_redactfor", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/engine/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "packages_engine_claude_reduce_ts", "target": "packages_map_data_claude_trm_map_data", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/engine/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "packages_engine_claude_purity_adr_a4", "target": "packages_shared_claude_rng", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/engine/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "packages_engine_claude_purity_adr_a4", "target": "packages_shared_claude_digest", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/engine/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "packages_engine_claude_scoring_setup_turn", "target": "packages_shared_claude_enums_constants", "relation": "references", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": "packages/engine/CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "packages_engine_claude_trm_engine", "target": "apps_web_claude_game_helpers", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "packages/engine/CLAUDE.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "packages_engine_claude_trm_engine",
+      "label": "@trm/engine (pure deterministic reducer)",
+      "file_type": "concept",
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_engine_claude_purity_adr_a4",
+      "label": "ADR A4: Engine Purity Enforced by ESLint",
+      "file_type": "rationale",
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_engine_claude_reduce_ts",
+      "label": "reduce.ts: reduce(board, state, action) \u2192 ReduceResult",
+      "file_type": "concept",
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_engine_claude_state_types",
+      "label": "types/state.ts, actions.ts, events.ts",
+      "file_type": "concept",
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_engine_claude_selectors_redactfor",
+      "label": "selectors.ts: legalActions, enumerateClaimPayments, redactFor",
+      "file_type": "concept",
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_engine_claude_longest_trail",
+      "label": "graph/longestTrail.ts (longest-continuous-path bonus)",
+      "file_type": "concept",
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_engine_claude_connectivity",
+      "label": "graph/connectivity.ts (ticket completion via union-find)",
+      "file_type": "concept",
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "packages_engine_claude_scoring_setup_turn",
+      "label": "scoring.ts, setup.ts, turn.ts, serialize.ts, invariants.ts",
+      "file_type": "concept",
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "packages_engine_claude_reduce_ts",
+      "target": "packages_engine_claude_selectors_redactfor",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "packages_engine_claude_reduce_ts",
+      "target": "packages_map_data_claude_trm_map_data",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "packages_engine_claude_purity_adr_a4",
+      "target": "packages_shared_claude_rng",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "packages_engine_claude_purity_adr_a4",
+      "target": "packages_shared_claude_digest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "packages_engine_claude_scoring_setup_turn",
+      "target": "packages_shared_claude_enums_constants",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "packages_engine_claude_trm_engine",
+      "target": "apps_web_claude_game_helpers",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "packages/engine/CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

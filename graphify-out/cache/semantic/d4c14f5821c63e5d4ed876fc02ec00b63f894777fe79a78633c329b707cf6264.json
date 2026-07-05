@@ -1,1 +1,204 @@
-{"nodes": [{"id": "_superpowers_sdd_task_6_brief", "label": "Task 6 Brief \u2014 Web: REST types, routes, header entry, i18n keys", "file_type": "document", "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_store_ui", "label": "store/ui.ts (useUi: enterHistory/enterReplay/syncFromUrl/navigateAfterAuth)", "file_type": "code", "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_net_rest", "label": "net/rest.ts (MatchSummary, ReplayPayload, api.history/api.replay)", "file_type": "code", "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_components_appheader", "label": "components/AppHeader.tsx", "file_type": "code", "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_app", "label": "App.tsx (view routing, lazy ReplayScreen)", "file_type": "code", "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_i18n_index", "label": "i18n/index.ts (history.* keys, zh-Hant + en)", "file_type": "code", "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_store_ui_test", "label": "store/ui.test.ts", "file_type": "code", "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_6_brief", "target": "_superpowers_sdd_task_7_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "_superpowers_sdd_task_8_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "_superpowers_sdd_task_9_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "apps_web_src_net_rest", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "apps_web_src_store_ui", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "apps_web_src_app", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "apps_web_src_components_appheader", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "apps_web_src_i18n_index", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "apps_web_src_store_ui_test", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "apps_web_src_screens_historyscreen", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_6_brief", "target": "apps_web_src_screens_replayscreen", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_net_rest", "target": "apps_server_src_history_history_controller", "relation": "shares_data_with", "confidence": "INFERRED", "confidence_score": 0.85, "source_file": ".superpowers/sdd/task-6-brief.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_6_brief",
+      "label": "Task 6 Brief \u2014 Web: REST types, routes, header entry, i18n keys",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_store_ui",
+      "label": "store/ui.ts (useUi: enterHistory/enterReplay/syncFromUrl/navigateAfterAuth)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_net_rest",
+      "label": "net/rest.ts (MatchSummary, ReplayPayload, api.history/api.replay)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_components_appheader",
+      "label": "components/AppHeader.tsx",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_app",
+      "label": "App.tsx (view routing, lazy ReplayScreen)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_i18n_index",
+      "label": "i18n/index.ts (history.* keys, zh-Hant + en)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_store_ui_test",
+      "label": "store/ui.test.ts",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "_superpowers_sdd_task_7_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "_superpowers_sdd_task_8_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "_superpowers_sdd_task_9_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "apps_web_src_net_rest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "apps_web_src_store_ui",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "apps_web_src_app",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "apps_web_src_components_appheader",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "apps_web_src_i18n_index",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "apps_web_src_store_ui_test",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "apps_web_src_screens_historyscreen",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_6_brief",
+      "target": "apps_web_src_screens_replayscreen",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_net_rest",
+      "target": "apps_server_src_history_history_controller",
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": ".superpowers/sdd/task-6-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

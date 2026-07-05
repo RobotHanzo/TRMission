@@ -29,7 +29,7 @@
 - **.updatePreferences()** (3 connections) — `apps/server/src/auth/user.repo.ts`
 - **DEFAULT_PREFERENCES** (2 connections) — `apps/server/src/auth/auth.types.ts`
 - **.upgradeGuest()** (2 connections) — `apps/server/src/auth/user.repo.ts`
-- *... and 7 more nodes in this community*
+- _... and 7 more nodes in this community_
 
 ## Relationships
 
@@ -58,4 +58,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

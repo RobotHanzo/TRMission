@@ -26,7 +26,10 @@ function findRoute(board: Board, pred: (r: RouteDef) => boolean): RouteDef {
 }
 
 /** A day-off state at AWAIT_ACTION (p0 to move) with a RED-only deck so blind draws are non-loco. */
-function dayOffState(seed: string, patch: Partial<GameState> = {}): { board: Board; state: GameState } {
+function dayOffState(
+  seed: string,
+  patch: Partial<GameState> = {},
+): { board: Board; state: GameState } {
   const { board, state } = afterSetup(2, seed);
   const s = withEvents(
     {
@@ -45,7 +48,10 @@ function dayOffState(seed: string, patch: Partial<GameState> = {}): { board: Boa
 describe('events — typhoon day off suspensions', () => {
   it('rejects CLAIM_ROUTE with EVENT_CLAIMS_SUSPENDED', () => {
     const { board, state } = dayOffState('dayoff-claim');
-    const route = findRoute(board, (r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined);
+    const route = findRoute(
+      board,
+      (r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined,
+    );
     const res = reduce(board, state, {
       t: 'CLAIM_ROUTE',
       player: p0,

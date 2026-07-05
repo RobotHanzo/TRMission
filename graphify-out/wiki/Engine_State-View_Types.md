@@ -29,7 +29,7 @@
 - **PlayerFinal** (6 connections) — `packages/engine/src/types/state.ts`
 - **RedactedPlayerFinal** (6 connections) — `packages/engine/src/types/view.ts`
 - **DEFAULT_RULE_PARAMS** (5 connections) — `packages/shared/src/constants.ts`
-- *... and 9 more nodes in this community*
+- _... and 9 more nodes in this community_
 
 ## Relationships
 
@@ -67,4 +67,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

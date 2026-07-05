@@ -29,7 +29,7 @@
 - **randomLegalAction()** (4 connections) — `packages/engine/test/property.spec.ts`
 - **.currentPlayer()** (3 connections) — `apps/server/src/game/game-session.ts`
 - **enumeratePayments()** (3 connections) — `packages/engine/src/selectors.ts`
-- *... and 5 more nodes in this community*
+- _... and 5 more nodes in this community_
 
 ## Relationships
 
@@ -70,4 +70,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

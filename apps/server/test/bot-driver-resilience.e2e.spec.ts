@@ -47,7 +47,10 @@ class FlakyStore implements GameStorePort {
   }
 }
 
-function stallCounter(): { stalls: { no_legal_action: number; persist_failed: number }; metrics: MetricsHooks } {
+function stallCounter(): {
+  stalls: { no_legal_action: number; persist_failed: number };
+  metrics: MetricsHooks;
+} {
   const stalls = { no_legal_action: 0, persist_failed: 0 };
   const metrics: MetricsHooks = {
     commandReceived() {},
@@ -69,7 +72,10 @@ function allBotConfig(gameId: string): { config: GameConfig; bots: BotProfile[] 
     { playerId: 'bot:2', difficulty: 'MEDIUM' },
     { playerId: 'bot:3', difficulty: 'HARD' },
   ];
-  const players: PlayerSeed[] = seats.map((s, i) => ({ id: asPlayerId(s.playerId), seat: i as SeatIndex }));
+  const players: PlayerSeed[] = seats.map((s, i) => ({
+    id: asPlayerId(s.playerId),
+    seat: i as SeatIndex,
+  }));
   return { config: { seed: `flaky-${gameId}`, players, contentHash: CONTENT_HASH }, bots: seats };
 }
 

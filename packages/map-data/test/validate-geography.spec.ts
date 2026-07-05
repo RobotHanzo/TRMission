@@ -91,7 +91,10 @@ describe('validateGeography', () => {
   });
 
   it('rejects an inverted crop bbox', () => {
-    const geo: MapGeography = { ...VALID, crop: { lonMin: 124, lonMax: 118, latMin: 20, latMax: 26 } };
+    const geo: MapGeography = {
+      ...VALID,
+      crop: { lonMin: 124, lonMax: 118, latMin: 20, latMax: 26 },
+    };
     expect(validateGeography(geo).some((e) => /crop/.test(e))).toBe(true);
   });
 });

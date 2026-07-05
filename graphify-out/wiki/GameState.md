@@ -7,9 +7,11 @@
 ## Connections by Relation
 
 ### contains
+
 - state.ts `EXTRACTED`
 
 ### imports
+
 - reduce.ts `EXTRACTED`
 - common.ts `EXTRACTED`
 - selectors.ts `EXTRACTED`
@@ -32,9 +34,11 @@
 - game-session.ts `EXTRACTED`
 
 ### re_exports
+
 - index.ts `EXTRACTED`
 
 ### references
+
 - [PlayerId](PlayerId.md) `EXTRACTED`
 - [CardColor](CardColor.md) `EXTRACTED`
 - GameSession `EXTRACTED`
@@ -58,4 +62,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

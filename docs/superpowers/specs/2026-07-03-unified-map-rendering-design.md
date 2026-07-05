@@ -8,12 +8,12 @@ Status: approved
 The map is rendered by four independent implementations that share the pure geometry math
 (`@trm/map-data/src/geometry.ts`) but each hand-roll the scene on top of it:
 
-| Surface | File | Today |
-| --- | --- | --- |
-| In-game board (game / replay / tutorial) | `apps/web/src/components/Board.tsx` | The "main version": React SVG, CSS-class styled, full feature set |
-| Login backdrop | `apps/web/src/components/MapBackdrop.tsx` | Re-implements the route/city loops inline (does not even use `RouteShape`) |
-| Map-builder canvas | `apps/web/src/features/builder/editor/EditorCanvas.tsx` | Duplicates the route-group / city-marker loops with editor states bolted on |
-| OG social card | `apps/server/src/og/map-svg.ts` | Full re-implementation in string-built SVG; every colour, stroke width and car dimension hand-copied from `game.css` / `tokens.css` / `theme/colors.ts` as literals |
+| Surface                                  | File                                                    | Today                                                                                                                                                               |
+| ---------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| In-game board (game / replay / tutorial) | `apps/web/src/components/Board.tsx`                     | The "main version": React SVG, CSS-class styled, full feature set                                                                                                   |
+| Login backdrop                           | `apps/web/src/components/MapBackdrop.tsx`               | Re-implements the route/city loops inline (does not even use `RouteShape`)                                                                                          |
+| Map-builder canvas                       | `apps/web/src/features/builder/editor/EditorCanvas.tsx` | Duplicates the route-group / city-marker loops with editor states bolted on                                                                                         |
+| OG social card                           | `apps/server/src/og/map-svg.ts`                         | Full re-implementation in string-built SVG; every colour, stroke width and car dimension hand-copied from `game.css` / `tokens.css` / `theme/colors.ts` as literals |
 
 Two further surfaces are fine as-is: `Specimens.tsx` (already unified through the shared
 `RouteShape` + `straightRouteGeometry`) and `RoutePreview.tsx` (deliberately schematic —

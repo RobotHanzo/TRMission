@@ -29,7 +29,7 @@
 - **toAwait()** (4 connections) — `packages/engine/test/draw-rainbow.spec.ts`
 - **afterSetup()** (4 connections) — `packages/engine/test/redact.spec.ts`
 - **apply()** (3 connections) — `packages/engine/test/rules.spec.ts`
-- *... and 16 more nodes in this community*
+- _... and 16 more nodes in this community_
 
 ## Relationships
 
@@ -76,4 +76,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

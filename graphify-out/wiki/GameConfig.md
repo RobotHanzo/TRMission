@@ -7,9 +7,11 @@
 ## Connections by Relation
 
 ### contains
+
 - config.ts `EXTRACTED`
 
 ### imports
+
 - hub.ts `EXTRACTED`
 - ReplayScreen.tsx `EXTRACTED`
 - helpers.ts `EXTRACTED`
@@ -32,9 +34,11 @@
 - scenarios.test.ts `EXTRACTED`
 
 ### re_exports
+
 - index.ts `EXTRACTED`
 
 ### references
+
 - [GameHub](GameHub.md) `EXTRACTED`
 - Lesson `EXTRACTED`
 - RuleParams `EXTRACTED`
@@ -51,4 +55,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

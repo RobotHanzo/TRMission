@@ -1,1 +1,219 @@
-{"nodes": [{"id": "_superpowers_sdd_task_5_brief", "label": "Task 5 Brief \u2014 Web: contextual log store", "file_type": "document", "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "concept_contextual_store_pattern", "label": "Contextual Zustand Store Pattern (createXStore/XStoreProvider/useXStore)", "file_type": "concept", "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_store_log", "label": "store/log.ts (useLog, createLogStore, useLogStore, useLogStoreApi)", "file_type": "code", "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_store_game", "label": "store/game.ts (createGameStore contextual-store pattern origin, GameStoreApi)", "file_type": "code", "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_store_sandboxprovider", "label": "store/sandboxProvider.tsx (SandboxProvider)", "file_type": "code", "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_components_logpanel", "label": "components/LogPanel.tsx", "file_type": "code", "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_src_store_log_test", "label": "store/log.test.ts", "file_type": "code", "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_5_brief", "target": "_superpowers_sdd_task_8_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_5_brief", "target": "_superpowers_sdd_task_9_brief", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_5_brief", "target": "apps_web_src_store_log", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_5_brief", "target": "apps_web_src_components_logpanel", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_5_brief", "target": "apps_web_src_store_sandboxprovider", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_5_brief", "target": "apps_web_src_store_game", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_5_brief", "target": "apps_web_src_store_log_test", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_5_brief", "target": "concept_contextual_store_pattern", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_store_log", "target": "apps_web_src_store_game", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_store_sandboxprovider", "target": "apps_web_src_store_log", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "apps_web_src_store_sandboxprovider", "target": "apps_web_src_store_game", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}, {"source": "concept_contextual_store_pattern", "target": "apps_web_src_store_game", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md", "source_location": null, "weight": 1.0}], "hyperedges": [{"id": "hyperedge_contextual_store_family", "label": "Contextual Store Family (game/log stores + SandboxProvider) sharing one zustand pattern", "nodes": ["apps_web_src_store_game", "apps_web_src_store_log", "apps_web_src_store_sandboxprovider", "concept_contextual_store_pattern"], "relation": "implement", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-5-brief.md"}]}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_5_brief",
+      "label": "Task 5 Brief \u2014 Web: contextual log store",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "concept_contextual_store_pattern",
+      "label": "Contextual Zustand Store Pattern (createXStore/XStoreProvider/useXStore)",
+      "file_type": "concept",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_store_log",
+      "label": "store/log.ts (useLog, createLogStore, useLogStore, useLogStoreApi)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_store_game",
+      "label": "store/game.ts (createGameStore contextual-store pattern origin, GameStoreApi)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_store_sandboxprovider",
+      "label": "store/sandboxProvider.tsx (SandboxProvider)",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_components_logpanel",
+      "label": "components/LogPanel.tsx",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_src_store_log_test",
+      "label": "store/log.test.ts",
+      "file_type": "code",
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_5_brief",
+      "target": "_superpowers_sdd_task_8_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_5_brief",
+      "target": "_superpowers_sdd_task_9_brief",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_5_brief",
+      "target": "apps_web_src_store_log",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_5_brief",
+      "target": "apps_web_src_components_logpanel",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_5_brief",
+      "target": "apps_web_src_store_sandboxprovider",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_5_brief",
+      "target": "apps_web_src_store_game",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_5_brief",
+      "target": "apps_web_src_store_log_test",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_5_brief",
+      "target": "concept_contextual_store_pattern",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_store_log",
+      "target": "apps_web_src_store_game",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_store_sandboxprovider",
+      "target": "apps_web_src_store_log",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "apps_web_src_store_sandboxprovider",
+      "target": "apps_web_src_store_game",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "concept_contextual_store_pattern",
+      "target": "apps_web_src_store_game",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "hyperedge_contextual_store_family",
+      "label": "Contextual Store Family (game/log stores + SandboxProvider) sharing one zustand pattern",
+      "nodes": [
+        "apps_web_src_store_game",
+        "apps_web_src_store_log",
+        "apps_web_src_store_sandboxprovider",
+        "concept_contextual_store_pattern"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-5-brief.md"
+    }
+  ]
+}

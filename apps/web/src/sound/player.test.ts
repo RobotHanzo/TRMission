@@ -37,7 +37,10 @@ describe('sound player', () => {
   it('plays a preloaded cue once and throttles a rapid repeat', async () => {
     const { ctx, starts } = mockContext();
     let t = 0;
-    const p = createSoundPlayer({ createContext: () => ctx as unknown as AudioContext, now: () => t });
+    const p = createSoundPlayer({
+      createContext: () => ctx as unknown as AudioContext,
+      now: () => t,
+    });
     await p.preload();
     p.play('cardDraw'); // t=0 → plays
     t = 10;
@@ -49,7 +52,10 @@ describe('sound player', () => {
 
   it('does not play when disabled', async () => {
     const { ctx, starts } = mockContext();
-    const p = createSoundPlayer({ createContext: () => ctx as unknown as AudioContext, now: () => 0 });
+    const p = createSoundPlayer({
+      createContext: () => ctx as unknown as AudioContext,
+      now: () => 0,
+    });
     await p.preload();
     p.setEnabled(false);
     p.play('cardDraw');

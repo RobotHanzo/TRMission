@@ -39,20 +39,21 @@ railway foley where it fits naturally, soft/unobtrusive UI cues for frequent act
 
 ## The cue palette
 
-| # | Cue | Sound | Trigger | Plays for |
-|---|-----|-------|---------|-----------|
-| 1 | Card draw | Soft, short card flick/slide (clean UI) | `CardDrawnBlind` / `CardTakenFaceup` | All (self crisp, opponents softer) |
-| 2 | Your turn | Taiwan platform "ding-dong" departure chime | `TurnStarted` where `playerId === me` | You only |
-| 3 | Tunnel draw | Low suspense swell / card riffle as the 3 cards flip | `TunnelModal` reveal start | Claimant |
-| 4 | Tunnel success | Bright relief chime (no surcharge) | `TunnelModal` result, `extraRequired === 0` | Claimant |
-| 5 | Tunnel needs payment | Cautionary descending "uh-oh" / soft thud | `TunnelModal` result, `extraRequired > 0` | Claimant |
-| 6 | Mission completed | Triumphant station-announcement flourish + sparkle | `completedTickets` diff, self completion (the fanfare) | You only |
-| 7 | Game over — win | Triumphant train-horn victory fanfare | `phase → GAME_OVER`, you ∈ winners | You (if won) |
-| 8 | Game over — normal | Gentler single horn / "end of the line" chime | `phase → GAME_OVER`, not a winner / spectator | Everyone else |
-| 9 | Station built | Construction stamp/thunk + tiny bell | `StationBuilt` | All (opponents softer) |
-| 10 | Railway built | Satisfying track "clack/clunk" (laying rails) | `RouteClaimed` | All (opponents softer) |
+| #   | Cue                  | Sound                                                | Trigger                                                | Plays for                          |
+| --- | -------------------- | ---------------------------------------------------- | ------------------------------------------------------ | ---------------------------------- |
+| 1   | Card draw            | Soft, short card flick/slide (clean UI)              | `CardDrawnBlind` / `CardTakenFaceup`                   | All (self crisp, opponents softer) |
+| 2   | Your turn            | Taiwan platform "ding-dong" departure chime          | `TurnStarted` where `playerId === me`                  | You only                           |
+| 3   | Tunnel draw          | Low suspense swell / card riffle as the 3 cards flip | `TunnelModal` reveal start                             | Claimant                           |
+| 4   | Tunnel success       | Bright relief chime (no surcharge)                   | `TunnelModal` result, `extraRequired === 0`            | Claimant                           |
+| 5   | Tunnel needs payment | Cautionary descending "uh-oh" / soft thud            | `TunnelModal` result, `extraRequired > 0`              | Claimant                           |
+| 6   | Mission completed    | Triumphant station-announcement flourish + sparkle   | `completedTickets` diff, self completion (the fanfare) | You only                           |
+| 7   | Game over — win      | Triumphant train-horn victory fanfare                | `phase → GAME_OVER`, you ∈ winners                     | You (if won)                       |
+| 8   | Game over — normal   | Gentler single horn / "end of the line" chime        | `phase → GAME_OVER`, not a winner / spectator          | Everyone else                      |
+| 9   | Station built        | Construction stamp/thunk + tiny bell                 | `StationBuilt`                                         | All (opponents softer)             |
+| 10  | Railway built        | Satisfying track "clack/clunk" (laying rails)        | `RouteClaimed`                                         | All (opponents softer)             |
 
 Notes:
+
 - **Win vs normal** is decided exactly as `ScoreBoard` does: winners = `finalScores.ranking[0].playerIds`.
   Local player ∈ winners → cue #7; otherwise (incl. spectators with no `you`) → cue #8. Exactly one of
   #7/#8 fires, once, on the `phase → GAME_OVER` transition.
@@ -74,13 +75,16 @@ i18n/index.ts                    ← sound/mute/volume strings (zh-Hant + en)
 ```
 
 ### `sound/cues.ts` (pure data)
+
 A `Cue` string union (`'cardDraw' | 'yourTurn' | 'tunnelDraw' | 'tunnelSuccess' | 'tunnelPayment' |
 'missionComplete' | 'gameOverWin' | 'gameOverNormal' | 'stationBuilt' | 'railwayBuilt'`) and a
 `CUES: Record<Cue, { src: string; gain: number; throttleMs: number }>` catalog. `throttleMs` is the
 minimum interval between two plays of the same cue (drops duplicates inside the window).
 
 ### `sound/soundModel.ts` (pure, unit-tested)
+
 Mirrors `animationModel.ts`:
+
 - `cuesFromEvents(snapshot, events): { cue: Cue; isSelf: boolean }[]` — maps `CardDrawnBlind`/
   `CardTakenFaceup` → `cardDraw`, `TurnStarted`(self) → `yourTurn`, `StationBuilt` → `stationBuilt`,
   `RouteClaimed` → `railwayBuilt`. `isSelf` (= `playerId === me`) selects the self/opponent gain.
@@ -90,6 +94,7 @@ Mirrors `animationModel.ts`:
   animation driver/fanfare uses), firing `missionComplete` on a new own completion.
 
 ### `sound/player.ts` (Web Audio manager)
+
 - Lazily creates a single `AudioContext` + master `GainNode`; `master.gain` follows `soundVolume`
   (and is 0 when `soundEnabled` is false).
 - `preload()` fetches + `decodeAudioData` for every cue once (idempotent).
@@ -101,7 +106,9 @@ Mirrors `animationModel.ts`:
   is a safe no-op so existing vitest/jsdom suites are unaffected. Unit tests inject a mock context.
 
 ### `hooks/useSoundDriver.ts`
+
 Mounted once in `GameScreen` (next to `useAnimationDriver`). Reactions:
+
 - new `lastBatch` → `cuesFromEvents` → `player.play` each (opponent cues at the reduced scale).
 - snapshot `phase` transition into `GAME_OVER` → `player.play(gameOverCue(snapshot))` once.
 - snapshot `completedTickets` self diff → `player.play('missionComplete')` per new own completion.
@@ -109,6 +116,7 @@ Mounted once in `GameScreen` (next to `useAnimationDriver`). Reactions:
   the one-time gesture `unlock()`.
 
 ### `store/ui.ts`
+
 Add `soundEnabled: boolean` (default `true`) and `soundVolume: number` (0–1, default `0.6`) seeded
 from `localStorage` (`trm.soundEnabled`, `trm.soundVolume`) with `setSoundEnabled`/`setSoundVolume`
 setters that write through — the exact pattern already used for `theme`/`colorBlind`/`boardLayout`.
@@ -116,12 +124,14 @@ The `player` subscribes to these (or reads them on each `play`) so changes apply
 to `applyPreferences`/`UserPreferences` (per-device only).
 
 ### `components/SettingsModal.tsx`
+
 A new "音效 / Sound" section above or below colour-blind: a mute `switch` (role="switch", bound to
 `soundEnabled`) and a volume `slider` (`<input type="range">`, bound to `soundVolume`, disabled when
 muted). Persists via the ui-store setters (localStorage); **not** routed through `savePreferences`.
 New i18n keys: `sound`, `soundMute`/reuse a switch label, `volume`.
 
 ## Sourcing & credits
+
 CC0 / royalty-free only, preferring CC0. Candidate sources: **Kenney** (CC0 UI/impact packs),
 **Pixabay** (royalty-free, no attribution required), **Mixkit** (free SFX). Each shipped file is
 logged in `apps/web/public/sounds/CREDITS.md` with: cue, filename, source, author, license, and URL.
@@ -130,6 +140,7 @@ If a particular high-quality clip cannot be fetched in this environment, the gap
 CREDITS.md rather than silently shipping a wrong/placeholder sound.
 
 ## Testing & verification
+
 - **Unit (vitest, TDD):**
   - `sound/soundModel.ts` — events→cues incl. self/opponent flag; `gameOverCue` win vs normal vs
     null; (mission completion diff is covered at the driver level).
@@ -146,6 +157,7 @@ CREDITS.md rather than silently shipping a wrong/placeholder sound.
   flourish, and both game-over endings. Verify the Settings mute/volume apply live.
 
 ## Out of scope
+
 - Account-synced sound preferences.
 - Background music / ambient loops.
 - Per-cue user customization or a separate SFX/music volume split.
@@ -158,21 +170,21 @@ The 10 cues were sourced (all **Mixkit**, Free Sound Effects License — commerc
 required; credited anyway in `apps/web/public/sounds/CREDITS.md`). Final files shipped under
 `apps/web/public/sounds/`:
 
-| Cue (catalog key) | File | Mixkit source | Edit |
-|-------------------|------|---------------|------|
-| `cardDraw` | `card-draw.mp3` | Poker card flick (2002) | — |
-| `yourTurn` | `your-turn.mp3` | Elegant door announcement (224) | trim + 2× speed (pitch-up) |
-| `tunnelDraw` | `tunnel-draw.mp3` | Poker card **placement** (2001) | — (see behaviour below) |
-| `tunnelSuccess` | `tunnel-success.mp3` | Achievement bell (600) | — |
-| `tunnelPayment` | `tunnel-payment.mp3` | Negative tone interface tap (2569) | — |
-| `missionComplete` | `mission-complete.mp3` | Arcade complete / approved mission (205) | — |
-| `gameOverWin` | `game-over-win.mp3` | Successful horns fanfare (722) | — |
-| `gameOverNormal` | `game-over-normal.mp3` | Orchestral violin jingle (2280) | — |
-| `stationBuilt` | `station-built.mp3` | Metal hammer hit (833) | trim + ×3 + pitch-down/bass (heavier) |
-| `railwayBuilt` | `railway-built.mp3` | Wood hard hit (2182) | trim + ×3 |
+| Cue (catalog key) | File                   | Mixkit source                            | Edit                                  |
+| ----------------- | ---------------------- | ---------------------------------------- | ------------------------------------- |
+| `cardDraw`        | `card-draw.mp3`        | Poker card flick (2002)                  | —                                     |
+| `yourTurn`        | `your-turn.mp3`        | Elegant door announcement (224)          | trim + 2× speed (pitch-up)            |
+| `tunnelDraw`      | `tunnel-draw.mp3`      | Poker card **placement** (2001)          | — (see behaviour below)               |
+| `tunnelSuccess`   | `tunnel-success.mp3`   | Achievement bell (600)                   | —                                     |
+| `tunnelPayment`   | `tunnel-payment.mp3`   | Negative tone interface tap (2569)       | —                                     |
+| `missionComplete` | `mission-complete.mp3` | Arcade complete / approved mission (205) | —                                     |
+| `gameOverWin`     | `game-over-win.mp3`    | Successful horns fanfare (722)           | —                                     |
+| `gameOverNormal`  | `game-over-normal.mp3` | Orchestral violin jingle (2280)          | —                                     |
+| `stationBuilt`    | `station-built.mp3`    | Metal hammer hit (833)                   | trim + ×3 + pitch-down/bass (heavier) |
+| `railwayBuilt`    | `railway-built.mp3`    | Wood hard hit (2182)                     | trim + ×3                             |
 
 **Behaviour change — tunnel draw is per-card.** Instead of one long whoosh, `tunnelDraw` plays the
-short card-*placement* sound **once per revealed card (3 total)**, fired from `TunnelModal` in step
+short card-_placement_ sound **once per revealed card (3 total)**, fired from `TunnelModal` in step
 with the existing card-flip stagger (`REVEAL_STAGGER_MS`). The `soundModel`/driver does not emit this
 cue; `TunnelModal` schedules the three plays (and still emits `tunnelSuccess`/`tunnelPayment` at the
 result). This makes `card-draw` vs `tunnel-draw` two distinct card timbres on purpose.

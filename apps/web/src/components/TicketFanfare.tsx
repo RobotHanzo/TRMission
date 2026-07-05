@@ -46,13 +46,25 @@ export function TicketFanfare({ fanfare, reducedMotion, onDone }: Props) {
     const confettiTimers: number[] = [];
     if (!reducedMotion) {
       const fire = (opts?: Parameters<typeof confetti>[0]): void => {
-        confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 }, colors: [color, '#ffffff'], ...opts });
+        confetti({
+          particleCount: 90,
+          spread: 75,
+          origin: { y: 0.6 },
+          colors: [color, '#ffffff'],
+          ...opts,
+        });
       };
       fire();
       if (fanfare.long) {
         confettiTimers.push(
-          window.setTimeout(() => fire({ particleCount: 130, angle: 60, spread: 100, origin: { x: 0, y: 0.7 } }), 250),
-          window.setTimeout(() => fire({ particleCount: 130, angle: 120, spread: 100, origin: { x: 1, y: 0.7 } }), 450),
+          window.setTimeout(
+            () => fire({ particleCount: 130, angle: 60, spread: 100, origin: { x: 0, y: 0.7 } }),
+            250,
+          ),
+          window.setTimeout(
+            () => fire({ particleCount: 130, angle: 120, spread: 100, origin: { x: 1, y: 0.7 } }),
+            450,
+          ),
           window.setTimeout(() => fire({ particleCount: 90 }), 950),
         );
       }

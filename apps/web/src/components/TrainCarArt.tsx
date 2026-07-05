@@ -123,7 +123,16 @@ function Locomotive({ uid }: { uid: string }) {
       {/* cab (rear / left) */}
       <rect x="12" y="13" width="30" height="30" rx="3" fill={`url(#boiler-${uid})`} />
       <rect x="12" y="11" width="30" height="5" rx="2" fill={dark} />
-      <rect x="17" y="18" width="14" height="11" rx="2" fill={tint(steel, 0.62)} stroke={dark} strokeWidth="0.8" />
+      <rect
+        x="17"
+        y="18"
+        width="14"
+        height="11"
+        rx="2"
+        fill={tint(steel, 0.62)}
+        stroke={dark}
+        strokeWidth="0.8"
+      />
 
       {/* boiler */}
       <rect x="38" y="24" width="64" height="19" rx="9.5" fill={`url(#boiler-${uid})`} />
@@ -191,7 +200,15 @@ function Locomotive({ uid }: { uid: string }) {
           />
         ))}
         {/* glint across the strip */}
-        <rect x="13" y="46.6" width="33.6" height="1.1" rx="0.5" fill="rgba(255,255,255,0.45)" stroke="none" />
+        <rect
+          x="13"
+          y="46.6"
+          width="33.6"
+          height="1.1"
+          rx="0.5"
+          fill="rgba(255,255,255,0.45)"
+          stroke="none"
+        />
       </g>
     </svg>
   );

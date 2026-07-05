@@ -29,6 +29,7 @@
 ## File Structure
 
 **Create:**
+
 - `apps/web/src/game/logModel.ts` — pure `GameEvent[] → LogDatum[]` (kind + importance + data).
 - `apps/web/src/store/log.ts` — action-log store (live + history ingest, cap 1000).
 - `apps/web/src/store/chat.ts` — chat message store (live + history ingest, cap 500).
@@ -38,6 +39,7 @@
 - Web tests: `logModel.test.ts`, `store/log.test.ts`, `store/chat.test.ts`, `components/LogPanel.test.tsx`, `components/ChatPanel.test.tsx`.
 
 **Modify:**
+
 - `packages/proto/proto/trmission/v1/server.proto` — `ChatEntry`, `HistoryReplay`, oneof entry.
 - `apps/server/src/game/game-session.ts` — `history()`.
 - `apps/server/src/codec/frames.ts` — `historyReplayFrame`.
@@ -51,10 +53,12 @@
 ## Task 1: Proto — `HistoryReplay` + `ChatEntry`
 
 **Files:**
+
 - Modify: `packages/proto/proto/trmission/v1/server.proto`
 - Test: `packages/proto/test/proto.spec.ts`
 
 **Interfaces:**
+
 - Produces: `HistoryReplay { events: GameEvent[]; chat: ChatEntry[]; stateVersion: number }`, `ChatEntry { playerId: string; text: string; ts: bigint }`, and `ServerEnvelope.event` oneof case `'history'`. Schemas `HistoryReplaySchema`, `ChatEntrySchema` exported from `@trm/proto`.
 
 - [ ] **Step 1: Add the messages to `server.proto`.** Insert after the `ChatBroadcast` message (around line 157):
@@ -91,25 +95,25 @@ Expected: completes; `packages/proto/src/gen/` now contains `HistoryReplaySchema
 - [ ] **Step 4: Write the round-trip test.** Append to `packages/proto/test/proto.spec.ts` (inside the existing `describe`):
 
 ```ts
-  it('round-trips a HistoryReplay envelope with chat entries', () => {
-    const env = create(ServerEnvelopeSchema, {
-      serverSeq: 3,
-      event: {
-        case: 'history',
-        value: {
-          stateVersion: 12,
-          events: [],
-          chat: [{ playerId: 'p2', text: 'hello', ts: 1719600000000n }],
-        },
+it('round-trips a HistoryReplay envelope with chat entries', () => {
+  const env = create(ServerEnvelopeSchema, {
+    serverSeq: 3,
+    event: {
+      case: 'history',
+      value: {
+        stateVersion: 12,
+        events: [],
+        chat: [{ playerId: 'p2', text: 'hello', ts: 1719600000000n }],
       },
-    });
-    const back = fromBinary(ServerEnvelopeSchema, toBinary(ServerEnvelopeSchema, env));
-    expect(back.event.case).toBe('history');
-    if (back.event.case !== 'history') throw new Error('wrong case');
-    expect(back.event.value.stateVersion).toBe(12);
-    expect(back.event.value.chat[0]?.text).toBe('hello');
-    expect(back.event.value.chat[0]?.ts).toBe(1719600000000n);
+    },
   });
+  const back = fromBinary(ServerEnvelopeSchema, toBinary(ServerEnvelopeSchema, env));
+  expect(back.event.case).toBe('history');
+  if (back.event.case !== 'history') throw new Error('wrong case');
+  expect(back.event.value.stateVersion).toBe(12);
+  expect(back.event.value.chat[0]?.text).toBe('hello');
+  expect(back.event.value.chat[0]?.ts).toBe(1719600000000n);
+});
 ```
 
 - [ ] **Step 5: Run the test.**
@@ -129,10 +133,12 @@ git commit -m "Proto: HistoryReplay + ChatEntry frames for log/chat backfill"
 ## Task 2: Server — `GameSession.history()`
 
 **Files:**
+
 - Modify: `apps/server/src/game/game-session.ts`
 - Test: `apps/server/test/history-session.spec.ts`
 
 **Interfaces:**
+
 - Consumes: existing engine `initGame`, `reduce` (already imported in `game-session.ts`); `appliedActions`, `board`, `config` on the session.
 - Produces: `GameSession.history(): GameEvent[]` — the full cosmetic event stream re-derived by replaying `appliedActions` from genesis. Pure; never mutates the live state.
 
@@ -230,10 +236,12 @@ git commit -m "Server: GameSession.history() re-derives the event stream from th
 ## Task 3: Server — chat persistence in the store
 
 **Files:**
+
 - Modify: `apps/server/src/persistence/types.ts`, `apps/server/src/persistence/game-store.ts`
 - Test: `apps/server/test/chat-store.spec.ts`
 
 **Interfaces:**
+
 - Produces: `ChatEntry { playerId: string; text: string; ts: number }` (server-internal); `GameStorePort.appendChat(gameId, seq, playerId, text): Promise<void>` and `loadChat(gameId): Promise<ChatEntry[]>`; `MongoGameStore` implementing both; `gameChats` unique `(gameId, seq)` index in `ensureIndexes`.
 
 - [ ] **Step 1: Write the failing test.** Create `apps/server/test/chat-store.spec.ts`:
@@ -320,9 +328,7 @@ In the imports from `./types`, add `type GameChatDoc` and `type ChatEntry`.
 In `ensureIndexes`, after the `gameSnapshots` index:
 
 ```ts
-  await db
-    .collection<GameChatDoc>('gameChats')
-    .createIndex({ gameId: 1, seq: 1 }, { unique: true });
+await db.collection<GameChatDoc>('gameChats').createIndex({ gameId: 1, seq: 1 }, { unique: true });
 ```
 
 Add the collection field (next to `private readonly history`):
@@ -334,7 +340,7 @@ Add the collection field (next to `private readonly history`):
 In the constructor (after `this.history = ...`):
 
 ```ts
-    this.chats = db.collection<GameChatDoc>('gameChats');
+this.chats = db.collection<GameChatDoc>('gameChats');
 ```
 
 Add the two methods after `loadForRecovery`:
@@ -370,10 +376,12 @@ git commit -m "Server: persist chat in a gameChats collection (append/load)"
 ## Task 4: Server — `historyReplayFrame`, history-on-hello, chat enforcement
 
 **Files:**
+
 - Modify: `apps/server/src/codec/frames.ts`, `apps/server/src/ws/connection.ts`, `apps/server/src/ws/hub.ts`
 - Test: `apps/server/test/history-chat.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `GameSession.history()` (Task 2), `store.appendChat`/`loadChat` (Task 3), `eventToProto` (existing), the `'history'` oneof (Task 1).
 - Produces: `historyReplayFrame(events, chat, stateVersion)` builder; the hub sends a `HistoryReplay` to every connection right after the snapshot, and `onChat` enforces `CHAT_MAX_LEN`/rate limit + persists.
 
@@ -478,15 +486,21 @@ describe('history + chat over the hub', () => {
     f2.length = 0;
 
     await hub.receive('c1', encodeClient(2, { case: 'chat', value: { text: '  hi there  ' } }));
-    const chat1 = f1.find((f) => f.event.case === 'chat')?.event.value as { text: string } | undefined;
-    const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as { text: string } | undefined;
+    const chat1 = f1.find((f) => f.event.case === 'chat')?.event.value as
+      | { text: string }
+      | undefined;
+    const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as
+      | { text: string }
+      | undefined;
     expect(chat1?.text).toBe('hi there'); // trimmed
     expect(chat2?.text).toBe('hi there'); // both members receive it
 
     // Over-length → MALFORMED rejection, nothing broadcast.
     f2.length = 0;
     await hub.receive('c1', encodeClient(3, { case: 'chat', value: { text: 'x'.repeat(2049) } }));
-    const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as { code: number } | undefined;
+    const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
+      | { code: number }
+      | undefined;
     expect(rej?.code).toBe(RejectionCode.MALFORMED);
     expect(f2.find((f) => f.event.case === 'chat')).toBeUndefined();
 
@@ -495,7 +509,9 @@ describe('history + chat over the hub', () => {
     for (let i = 0; i < 6; i++) {
       await hub.receive('c1', encodeClient(10 + i, { case: 'chat', value: { text: `m${i}` } }));
     }
-    lastRej = (f1.filter((f) => f.event.case === 'rejection').pop()?.event.value as { code: number }).code;
+    lastRej = (
+      f1.filter((f) => f.event.case === 'rejection').pop()?.event.value as { code: number }
+    ).code;
     expect(lastRej).toBe(RejectionCode.RATE_LIMITED);
   });
 });
@@ -546,31 +562,31 @@ const CHAT_RATE_WINDOW_MS = 5000;
 5d. Seed it in `createMatch` (after `this.members.set(gameId, new Map());`):
 
 ```ts
-    this.chatLog.set(gameId, []);
+this.chatLog.set(gameId, []);
 ```
 
 5e. Hydrate it in `recoverMatch` (after `const match = this.registry.adopt(...)`, before the bots block):
 
 ```ts
-    if (this.store && !this.chatLog.has(gameId)) {
-      try {
-        this.chatLog.set(gameId, await this.store.loadChat(gameId));
-      } catch {
-        this.chatLog.set(gameId, []); // non-fatal: chat is cosmetic
-      }
-    }
+if (this.store && !this.chatLog.has(gameId)) {
+  try {
+    this.chatLog.set(gameId, await this.store.loadChat(gameId));
+  } catch {
+    this.chatLog.set(gameId, []); // non-fatal: chat is cosmetic
+  }
+}
 ```
 
 5f. Send history after the snapshot. In `onHello`, in the **spectator branch**, after `this.sendProjected(conn, match, null, clientSeq);`:
 
 ```ts
-      this.sendHistory(conn, match, null);
+this.sendHistory(conn, match, null);
 ```
 
 and in the **member path**, after `this.sendSnapshot(conn, match);`:
 
 ```ts
-    this.sendHistory(conn, match, player);
+this.sendHistory(conn, match, player);
 ```
 
 5g. Change the chat route to pass `clientSeq`. Replace the `case 'chat':` block in `receive`:
@@ -665,10 +681,12 @@ git commit -m "Server: backfill HistoryReplay on hello; enforce + persist chat"
 ## Task 5: Web — `logModel` (pure event → log entry)
 
 **Files:**
+
 - Create: `apps/web/src/game/logModel.ts`
 - Test: `apps/web/src/game/logModel.test.ts`
 
 **Interfaces:**
+
 - Consumes: proto `GameEvent`; `pbToCard` from `./cards`.
 - Produces: `type Importance = 'normal' | 'highlight' | 'alert'`; `type LogKind`; `interface LogDatum { kind; playerId: string|null; data: Record<string,unknown>; importance }`; `interface LogEntry extends LogDatum { id: number }`; `entriesFromEvents(events: GameEvent[]): LogDatum[]`.
 
@@ -691,7 +709,12 @@ describe('entriesFromEvents', () => {
       ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2 } }),
     ]);
     expect(out).toEqual([
-      { kind: 'routeClaimed', playerId: 'p1', data: { routeId: 'R1', points: 7 }, importance: 'highlight' },
+      {
+        kind: 'routeClaimed',
+        playerId: 'p1',
+        data: { routeId: 'R1', points: 7 },
+        importance: 'highlight',
+      },
       { kind: 'stationBuilt', playerId: 'p2', data: { cityId: 'C9' }, importance: 'highlight' },
       { kind: 'endgame', playerId: 'p1', data: { turns: 2 }, importance: 'alert' },
     ]);
@@ -772,7 +795,12 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
         out.push({ kind: 'gameStarted', playerId: null, data: {}, importance: 'normal' });
         break;
       case 'turnStarted':
-        out.push({ kind: 'turnStarted', playerId: ev.value.playerId, data: {}, importance: 'normal' });
+        out.push({
+          kind: 'turnStarted',
+          playerId: ev.value.playerId,
+          data: {},
+          importance: 'normal',
+        });
         break;
       case 'routeClaimed':
         out.push({
@@ -816,7 +844,12 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
         );
         break;
       case 'cardDrawnBlind':
-        out.push({ kind: 'drewBlind', playerId: ev.value.playerId, data: {}, importance: 'normal' });
+        out.push({
+          kind: 'drewBlind',
+          playerId: ev.value.playerId,
+          data: {},
+          importance: 'normal',
+        });
         break;
       case 'cardTakenFaceup':
         out.push({
@@ -874,10 +907,12 @@ git commit -m "Web: pure logModel — GameEvent → log rows with importance"
 ## Task 6: Web — log + chat stores
 
 **Files:**
+
 - Create: `apps/web/src/store/log.ts`, `apps/web/src/store/chat.ts`
 - Test: `apps/web/src/store/log.test.ts`, `apps/web/src/store/chat.test.ts`
 
 **Interfaces:**
+
 - Consumes: `entriesFromEvents`, `LogEntry` from `../game/logModel`.
 - Produces: `useLog` with `entries: LogEntry[]`, `ingestLive(events)`, `ingestHistory(events)`, `reset()`. `useChat` with `messages: ChatMessage[]` (`{ id, playerId, text }`), `ingest({playerId,text})`, `ingestHistory(msgs)`, `reset()`.
 
@@ -1045,11 +1080,13 @@ git commit -m "Web: log + chat stores (live + one-shot history ingest)"
 ## Task 7: Web — socket `onHistory` + connection wiring
 
 **Files:**
+
 - Modify: `apps/web/src/net/socket.ts`, `apps/web/src/net/connection.ts`
 - Test: extend `apps/web/src/store/log.test.ts` is NOT needed; covered by a focused socket dispatch test below.
 - Test: `apps/web/src/net/socket.test.ts` (create if absent)
 
 **Interfaces:**
+
 - Consumes: the `'history'` oneof (Task 1); `useLog`, `useChat` (Task 6).
 - Produces: `SocketHandlers.onHistory?(events: GameEvent[], chat: { playerId: string; text: string }[])`; `connection.ts` resets both stores on connect, feeds the log on `onEvents`, and routes chat/history.
 
@@ -1061,7 +1098,10 @@ import { create, toBinary } from '@bufbuild/protobuf';
 import { ServerEnvelopeSchema } from '@trm/proto';
 import { GameSocket } from './socket';
 
-function deliver(socket: GameSocket, env: Parameters<typeof create<typeof ServerEnvelopeSchema>>[1]) {
+function deliver(
+  socket: GameSocket,
+  env: Parameters<typeof create<typeof ServerEnvelopeSchema>>[1],
+) {
   // Reach into the private dispatch via the message path.
   (socket as unknown as { dispatch(b: Uint8Array): void }).dispatch(
     toBinary(ServerEnvelopeSchema, create(ServerEnvelopeSchema, env)),
@@ -1175,11 +1215,13 @@ git commit -m "Web: route HistoryReplay to onHistory; feed log + reset stores on
 ## Task 8: Web — `LogPanel` + log i18n
 
 **Files:**
+
 - Create: `apps/web/src/components/LogPanel.tsx`
 - Modify: `apps/web/src/i18n/index.ts`
 - Test: `apps/web/src/components/LogPanel.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useLog`, `useGame`, `useUi`, `usePlayerName`, `SEAT_COLORS`/`CARD_COLOR_TOKENS`, `cityName`/`routeById`, `LogEntry`.
 - Produces: `<LogPanel />` — renders the log entries (translated + seat-coloured, importance classes), auto-scrolls to bottom.
 
@@ -1286,7 +1328,13 @@ describe('LogPanel', () => {
   it('renders a highlighted route-claimed line', () => {
     useLog.setState({
       entries: [
-        { id: 1, kind: 'routeClaimed', playerId: 'p1', data: { routeId: 'X', points: 7 }, importance: 'highlight' },
+        {
+          id: 1,
+          kind: 'routeClaimed',
+          playerId: 'p1',
+          data: { routeId: 'X', points: 7 },
+          importance: 'highlight',
+        },
       ],
       nextId: 2,
     });
@@ -1345,7 +1393,9 @@ export function LogPanel() {
   const lineText = (e: LogEntry): string => {
     const seat = seatOf(snapshot, e.playerId);
     const name =
-      e.playerId === null ? '' : nameOf({ id: e.playerId, seat: seat ?? 0, isMe: e.playerId === me });
+      e.playerId === null
+        ? ''
+        : nameOf({ id: e.playerId, seat: seat ?? 0, isMe: e.playerId === me });
     switch (e.kind) {
       case 'gameStarted':
         return t('log.gameStarted');
@@ -1354,7 +1404,11 @@ export function LogPanel() {
       case 'turnStarted':
         return t('log.turnStarted', { name });
       case 'routeClaimed':
-        return t('log.routeClaimed', { name, route: routeName(String(e.data.routeId)), points: e.data.points });
+        return t('log.routeClaimed', {
+          name,
+          route: routeName(String(e.data.routeId)),
+          points: e.data.points,
+        });
       case 'stationBuilt':
         return t('log.stationBuilt', { name, city: cityName(String(e.data.cityId), locale) });
       case 'tunnelRevealed':
@@ -1433,10 +1487,12 @@ git commit -m "Web: LogPanel renders seat-coloured, translated action log"
 ## Task 9: Web — `ChatPanel` (input, client-side limits)
 
 **Files:**
+
 - Create: `apps/web/src/components/ChatPanel.tsx`
 - Test: `apps/web/src/components/ChatPanel.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useChat`, `useGame`, `getSocket`, `usePlayerName`, `SEAT_COLORS`. i18n `chat.*` (Task 8).
 - Produces: `<ChatPanel disabled?: boolean />` — message list + input; trims, enforces `maxLength=2048` and a 5-msg/5s client guard; sends via `getSocket().chat`.
 
@@ -1556,7 +1612,10 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
         ) : (
           messages.map((m) => (
             <div className="chat-msg" key={m.id}>
-              <span className="chat-author" style={{ color: SEAT_COLORS[seatOf(m.playerId) % 5] ?? '#888' }}>
+              <span
+                className="chat-author"
+                style={{ color: SEAT_COLORS[seatOf(m.playerId) % 5] ?? '#888' }}
+              >
                 {nameOf({ id: m.playerId, seat: seatOf(m.playerId), isMe: m.playerId === me })}
               </span>
               <span className="chat-text">{m.text}</span>
@@ -1606,11 +1665,13 @@ git commit -m "Web: ChatPanel with client-side length + rate guards"
 ## Task 10: Web — `CommsPanel`, `useMediaQuery`, GameScreen + CSS
 
 **Files:**
+
 - Create: `apps/web/src/components/CommsPanel.tsx`, `apps/web/src/hooks/useMediaQuery.ts`
 - Modify: `apps/web/src/screens/GameScreen.tsx`, `apps/web/src/styles/game.css`
 - Test: `apps/web/src/screens/GameScreen.test.tsx` (verify still green)
 
 **Interfaces:**
+
 - Consumes: `LogPanel`, `ChatPanel`, `useMediaQuery`.
 - Produces: `<CommsPanel chatDisabled: boolean />` (log over chat); `useMediaQuery(query): boolean`; GameScreen renders the comms region (third column ≥1300px, else a `[Rail | Log+Chat]` tab in the rail slot).
 
@@ -1667,8 +1728,8 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 3b. Add hooks state inside the component (after `const goHome = useUi(...)`, near line 51):
 
 ```ts
-  const wide = useMediaQuery('(min-width: 1300px)');
-  const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
+const wide = useMediaQuery('(min-width: 1300px)');
+const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
 ```
 
 (`useState` is already imported.)
@@ -1676,108 +1737,108 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 3c. Replace the entire `return ( ... )` block (lines ~255–324, from `return (` to the final `);`) with:
 
 ```tsx
-  const railInner = needKeep ? (
-    <TicketChooser
-      offered={snapshot.you?.pendingOfferTicketIds ?? []}
-      minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
-      lockLong={phase === Phase.SETUP_TICKETS}
-      hand={snapshot.you?.hand}
-      handCount={myPub?.handCount ?? 0}
-      keptTicketIds={snapshot.you?.keptTicketIds ?? []}
-      completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
-      onConfirm={confirmKeep}
-    />
-  ) : boardLayout === 'rail' ? (
-    <>
-      {trackers}
-      {market}
-      {handSection}
-      {ticketsSection}
-    </>
-  ) : (
-    <>
-      {trackers}
-      {market}
-      {ticketsSection}
-    </>
-  );
-  const showHandStrip = !needKeep && boardLayout === 'tray';
-  const comms = <CommsPanel chatDisabled={isSpectator} />;
+const railInner = needKeep ? (
+  <TicketChooser
+    offered={snapshot.you?.pendingOfferTicketIds ?? []}
+    minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
+    lockLong={phase === Phase.SETUP_TICKETS}
+    hand={snapshot.you?.hand}
+    handCount={myPub?.handCount ?? 0}
+    keptTicketIds={snapshot.you?.keptTicketIds ?? []}
+    completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
+    onConfirm={confirmKeep}
+  />
+) : boardLayout === 'rail' ? (
+  <>
+    {trackers}
+    {market}
+    {handSection}
+    {ticketsSection}
+  </>
+) : (
+  <>
+    {trackers}
+    {market}
+    {ticketsSection}
+  </>
+);
+const showHandStrip = !needKeep && boardLayout === 'tray';
+const comms = <CommsPanel chatDisabled={isSpectator} />;
 
-  return (
-    <div className={`game game--${boardLayout}`} data-comms-tab={commsTab}>
-      {isSpectator && (
-        <div className="spectator-banner" role="status">
-          <strong>{t('spectating')}</strong> — {t('spectatingHint')}
-        </div>
-      )}
-      {boardPanel}
-      {wide ? (
-        <>
-          <aside className="game-rail">{railInner}</aside>
-          {showHandStrip && <div className="game-hand-strip">{handSection}</div>}
-          <aside className="game-comms">{comms}</aside>
-        </>
-      ) : (
-        <>
-          <aside className="game-rail">
-            <div className="comms-tabs" role="tablist">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={commsTab === 'rail'}
-                className={commsTab === 'rail' ? 'active' : ''}
-                onClick={() => setCommsTab('rail')}
-              >
-                {t('tabRail')}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={commsTab === 'comms'}
-                className={commsTab === 'comms' ? 'active' : ''}
-                onClick={() => setCommsTab('comms')}
-              >
-                {t('tabComms')}
-              </button>
-            </div>
-            {commsTab === 'rail' ? railInner : comms}
-          </aside>
-          {showHandStrip && commsTab === 'rail' && (
-            <div className="game-hand-strip">{handSection}</div>
-          )}
-        </>
-      )}
+return (
+  <div className={`game game--${boardLayout}`} data-comms-tab={commsTab}>
+    {isSpectator && (
+      <div className="spectator-banner" role="status">
+        <strong>{t('spectating')}</strong> — {t('spectatingHint')}
+      </div>
+    )}
+    {boardPanel}
+    {wide ? (
+      <>
+        <aside className="game-rail">{railInner}</aside>
+        {showHandStrip && <div className="game-hand-strip">{handSection}</div>}
+        <aside className="game-comms">{comms}</aside>
+      </>
+    ) : (
+      <>
+        <aside className="game-rail">
+          <div className="comms-tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={commsTab === 'rail'}
+              className={commsTab === 'rail' ? 'active' : ''}
+              onClick={() => setCommsTab('rail')}
+            >
+              {t('tabRail')}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={commsTab === 'comms'}
+              className={commsTab === 'comms' ? 'active' : ''}
+              onClick={() => setCommsTab('comms')}
+            >
+              {t('tabComms')}
+            </button>
+          </div>
+          {commsTab === 'rail' ? railInner : comms}
+        </aside>
+        {showHandStrip && commsTab === 'rail' && (
+          <div className="game-hand-strip">{handSection}</div>
+        )}
+      </>
+    )}
 
-      {claim && (
-        <PaymentModal
-          title={claim.kind === 'route' ? t('claimRoute') : t('buildStation')}
-          options={claim.payments}
-          onPick={confirmPayment}
-          onCancel={() => setClaim(null)}
-        />
-      )}
-      {tunnelMine && snapshot.pendingTunnel && (
-        <TunnelModal
-          revealed={snapshot.pendingTunnel.revealed}
-          extraRequired={snapshot.pendingTunnel.extraRequired}
-          options={tunnelExtras}
-          onCommit={(p) => {
-            socket?.resolveTunnel(true, paymentToProto(p));
-            setTunnelBase(null);
-          }}
-          onAbort={() => {
-            socket?.resolveTunnel(false);
-            setTunnelBase(null);
-          }}
-        />
-      )}
-      {phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={leave} />}
-      <Toast message={notice} variant="toast-notice" />
-      <Toast message={rejection ? t('actionRejected') : null} />
-      <AnimationLayer />
-    </div>
-  );
+    {claim && (
+      <PaymentModal
+        title={claim.kind === 'route' ? t('claimRoute') : t('buildStation')}
+        options={claim.payments}
+        onPick={confirmPayment}
+        onCancel={() => setClaim(null)}
+      />
+    )}
+    {tunnelMine && snapshot.pendingTunnel && (
+      <TunnelModal
+        revealed={snapshot.pendingTunnel.revealed}
+        extraRequired={snapshot.pendingTunnel.extraRequired}
+        options={tunnelExtras}
+        onCommit={(p) => {
+          socket?.resolveTunnel(true, paymentToProto(p));
+          setTunnelBase(null);
+        }}
+        onAbort={() => {
+          socket?.resolveTunnel(false);
+          setTunnelBase(null);
+        }}
+      />
+    )}
+    {phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={leave} />}
+    <Toast message={notice} variant="toast-notice" />
+    <Toast message={rejection ? t('actionRejected') : null} />
+    <AnimationLayer />
+  </div>
+);
 ```
 
 - [ ] **Step 4: Add the CSS.** In `apps/web/src/styles/game.css`:
@@ -1785,7 +1846,7 @@ import { useMediaQuery } from '../hooks/useMediaQuery';
 4a. Add `--tr-comms-w` to the `.game` rule (after `--tr-rail-w: 340px;`):
 
 ```css
-  --tr-comms-w: 320px;
+--tr-comms-w: 320px;
 ```
 
 4b. Add the three-column templates + comms styles. Insert after the `.game-hand-strip` rule (around line 59):
@@ -1982,6 +2043,7 @@ yarn workspace @trm/web dev
 ```
 
 Verify against a game with bots:
+
 - The log fills with seat-coloured lines; route/station/tunnel-commit are highlighted; endgame + game-over read as alerts; market refills/reshuffles are absent.
 - Send chat; both members see it. Paste >2048 chars → blocked by the input; fire 6 messages fast → the 6th shows the rate hint.
 - Reconnect mid-game (kill the web tab, reopen): the log **and** chat backfill fully with **no** replayed fly-card animations or sounds.

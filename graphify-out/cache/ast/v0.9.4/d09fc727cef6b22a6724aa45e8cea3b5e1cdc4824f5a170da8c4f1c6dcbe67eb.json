@@ -1,1 +1,271 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_md", "label": "2026-06-29-action-log-and-chat.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "label": "Action Log + Chat Panel Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_refinements_decided_during_planning_vs_the_spec", "label": "Refinements decided during planning (vs. the spec)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L22"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_file_structure", "label": "File Structure", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L29"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_1_proto_historyreplay_chatentry", "label": "Task 1: Proto \u2014 `HistoryReplay` + `ChatEntry`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L51"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_2_server_gamesession_history", "label": "Task 2: Server \u2014 `GameSession.history()`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L129"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_3_server_chat_persistence_in_the_store", "label": "Task 3: Server \u2014 chat persistence in the store", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L230"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_4_server_historyreplayframe_history_on_hello_chat_enforcement", "label": "Task 4: Server \u2014 `historyReplayFrame`, history-on-hello, chat enforcement", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L370"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_5_web_logmodel_pure_event_log_entry", "label": "Task 5: Web \u2014 `logModel` (pure event \u2192 log entry)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L665"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_6_web_log_chat_stores", "label": "Task 6: Web \u2014 log + chat stores", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L874"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_7_web_socket_onhistory_connection_wiring", "label": "Task 7: Web \u2014 socket `onHistory` + connection wiring", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1045"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_8_web_logpanel_log_i18n", "label": "Task 8: Web \u2014 `LogPanel` + log i18n", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1175"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_9_web_chatpanel_input_client_side_limits", "label": "Task 9: Web \u2014 `ChatPanel` (input, client-side limits)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1433"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_10_web_commspanel_usemediaquery_gamescreen_css", "label": "Task 10: Web \u2014 `CommsPanel`, `useMediaQuery`, GameScreen + CSS", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1606"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_11_whole_stack_verification", "label": "Task 11: Whole-stack verification", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1964"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_self_review", "label": "Self-Review", "file_type": "document", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L2000"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_refinements_decided_during_planning_vs_the_spec", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L22", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_file_structure", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L29", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_1_proto_historyreplay_chatentry", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L51", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_2_server_gamesession_history", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L129", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_3_server_chat_persistence_in_the_store", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L230", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_4_server_historyreplayframe_history_on_hello_chat_enforcement", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L370", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_5_web_logmodel_pure_event_log_entry", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L665", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_6_web_log_chat_stores", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L874", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_7_web_socket_onhistory_connection_wiring", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1045", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_8_web_logpanel_log_i18n", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1175", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_9_web_chatpanel_input_client_side_limits", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1433", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_10_web_commspanel_usemediaquery_gamescreen_css", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1606", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_11_whole_stack_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L1964", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_self_review", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md", "source_location": "L2000", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_md",
+      "label": "2026-06-29-action-log-and-chat.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "label": "Action Log + Chat Panel Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_refinements_decided_during_planning_vs_the_spec",
+      "label": "Refinements decided during planning (vs. the spec)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L22"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_file_structure",
+      "label": "File Structure",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L29"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_1_proto_historyreplay_chatentry",
+      "label": "Task 1: Proto \u2014 `HistoryReplay` + `ChatEntry`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L51"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_2_server_gamesession_history",
+      "label": "Task 2: Server \u2014 `GameSession.history()`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L129"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_3_server_chat_persistence_in_the_store",
+      "label": "Task 3: Server \u2014 chat persistence in the store",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L230"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_4_server_historyreplayframe_history_on_hello_chat_enforcement",
+      "label": "Task 4: Server \u2014 `historyReplayFrame`, history-on-hello, chat enforcement",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L370"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_5_web_logmodel_pure_event_log_entry",
+      "label": "Task 5: Web \u2014 `logModel` (pure event \u2192 log entry)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L665"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_6_web_log_chat_stores",
+      "label": "Task 6: Web \u2014 log + chat stores",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L874"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_7_web_socket_onhistory_connection_wiring",
+      "label": "Task 7: Web \u2014 socket `onHistory` + connection wiring",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1045"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_8_web_logpanel_log_i18n",
+      "label": "Task 8: Web \u2014 `LogPanel` + log i18n",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1175"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_9_web_chatpanel_input_client_side_limits",
+      "label": "Task 9: Web \u2014 `ChatPanel` (input, client-side limits)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1433"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_10_web_commspanel_usemediaquery_gamescreen_css",
+      "label": "Task 10: Web \u2014 `CommsPanel`, `useMediaQuery`, GameScreen + CSS",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1606"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_11_whole_stack_verification",
+      "label": "Task 11: Whole-stack verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1964"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_self_review",
+      "label": "Self-Review",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L2000"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_refinements_decided_during_planning_vs_the_spec",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_file_structure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_1_proto_historyreplay_chatentry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_2_server_gamesession_history",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_3_server_chat_persistence_in_the_store",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L230",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_4_server_historyreplayframe_history_on_hello_chat_enforcement",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L370",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_5_web_logmodel_pure_event_log_entry",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L665",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_6_web_log_chat_stores",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L874",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_7_web_socket_onhistory_connection_wiring",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1045",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_8_web_logpanel_log_i18n",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1175",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_9_web_chatpanel_input_client_side_limits",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1433",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_10_web_commspanel_usemediaquery_gamescreen_css",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1606",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_task_11_whole_stack_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L1964",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_action_log_chat_panel_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_06_29_action_log_and_chat_self_review",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-06-29-action-log-and-chat.md",
+      "source_location": "L2000",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

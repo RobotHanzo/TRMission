@@ -1,1 +1,383 @@
-{"nodes": [{"id": "claude_trmission", "label": "TRMission (\u53f0\u9435\u4efb\u52d9)", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "A multiplayer web board game: a clean-room reimplementation of the mechanics of Ticket to Ride: Europe, re-themed onto Taiwan's railways. The map, city graph, artwork, palette, and rules wording are original; only the mechanics and real Taiwanese place-names are reused."}, {"id": "claude_engine_reducer", "label": "@trm/engine Pure Deterministic Reducer", "file_type": "rationale", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "reduce(state, action) -> { state, events } with zero I/O. Determinism is enforced structurally: @trm/engine is ESLint-banned from Date, Math.random, crypto.randomUUID, and new Date(); all randomness comes from the seeded counter PRNG. Golden-replay digests are a CI gate."}, {"id": "claude_shared_prng", "label": "@trm/shared Seeded Counter PRNG", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claude_hidden_information_redactfor", "label": "redactFor / Hidden Information Structural Design", "file_type": "rationale", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Opponents are a counts-only wire type (PublicPlayerState); a viewer's secrets live in a disjoint SelfView. The single redactFor projection is the only thing that should ever reach the wire, backed by a runtime egress guard and the trm_security_leak_blocked_total metric - raw GameState must never be serialized to a client."}, {"id": "claude_hub_ws", "label": "apps/server/src/ws/hub.ts (hub)", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "The critical loop: decode -> serialize through a per-game queue -> write-ahead persist -> commit on the engine -> fan out a per-recipient redacted snapshot."}, {"id": "claude_codec_seam", "label": "apps/server/src/codec/ (engine-proto-wire seam)", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claude_swc_not_tsx", "label": "swc, not tsx (tooling pin)", "file_type": "rationale", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "NestJS DI resolves constructor deps from emitted decorator metadata, which esbuild/tsx does not produce. Server dev/start run via @swc-node/register, vitest uses unplugin-swc - switching to tsx/esbuild silently breaks DI at runtime."}, {"id": "claude_single_writer_per_game", "label": "Single-Writer Per Game", "file_type": "rationale", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "A per-game command queue serializes decode->validate->apply->persist->fan-out; a unique (gameId, seq) Mongo index is the durable double-apply guard; idempotency is on the monotonic per-socket client_seq."}, {"id": "claude_version_pins", "label": "Version Pins (engineVersion/contentHash/schemaVersion)", "file_type": "rationale", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "Stamped on persisted games; replay refuses to cross versions. CONTENT_HASH is derived from the authored map-data content, so any map edit changes it."}, {"id": "claude_naming_tooling_pins", "label": "Naming/Tooling Pins (PURPLE, seat indices, Vite ^5)", "file_type": "rationale", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "The 6th card colour is PURPLE everywhere (never PINK); seat colours are abstract indices 0-4 on the wire, coloured client-side; apps/web pins Vite ^5 for vitest 2 compatibility - do not bump to Vite 6."}, {"id": "claude_graphify_integration", "label": "graphify Knowledge Graph Integration", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null, "rationale": "The project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships; codebase questions should run graphify query/path/explain before falling back to GRAPH_REPORT.md or raw grep."}, {"id": "claude_pkg_proto", "label": "@trm/proto", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claude_pkg_shared", "label": "@trm/shared", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claude_pkg_map_data", "label": "@trm/map-data", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claude_pkg_engine", "label": "@trm/engine (package)", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claude_pkg_server", "label": "apps/server", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "claude_pkg_web", "label": "apps/web", "file_type": "concept", "source_file": "CLAUDE.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "claude_graphify_integration", "target": "_claude_skills_graphify_skill_graphify_skill", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_graphify_integration", "target": "_claude_skills_graphify_references_query_path_command", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_graphify_integration", "target": "_claude_skills_graphify_references_query_explain_command", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_graphify_integration", "target": "_claude_skills_graphify_references_update_incremental_update", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_proto", "target": "claude_pkg_shared", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_shared", "target": "claude_pkg_map_data", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_map_data", "target": "claude_pkg_engine", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_engine", "target": "claude_pkg_server", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_engine", "target": "claude_pkg_web", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_engine", "target": "claude_engine_reducer", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_shared", "target": "claude_shared_prng", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_hub_ws", "target": "claude_codec_seam", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_hub_ws", "target": "claude_hidden_information_redactfor", "relation": "shares_data_with", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_server", "target": "claude_swc_not_tsx", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_server", "target": "claude_single_writer_per_game", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_trmission", "target": "claude_version_pins", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_trmission", "target": "claude_naming_tooling_pins", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}, {"source": "claude_pkg_web", "target": "claude_naming_tooling_pins", "relation": "rationale_for", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "CLAUDE.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "claude_trmission",
+      "label": "TRMission (\u53f0\u9435\u4efb\u52d9)",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "A multiplayer web board game: a clean-room reimplementation of the mechanics of Ticket to Ride: Europe, re-themed onto Taiwan's railways. The map, city graph, artwork, palette, and rules wording are original; only the mechanics and real Taiwanese place-names are reused."
+    },
+    {
+      "id": "claude_engine_reducer",
+      "label": "@trm/engine Pure Deterministic Reducer",
+      "file_type": "rationale",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "reduce(state, action) -> { state, events } with zero I/O. Determinism is enforced structurally: @trm/engine is ESLint-banned from Date, Math.random, crypto.randomUUID, and new Date(); all randomness comes from the seeded counter PRNG. Golden-replay digests are a CI gate."
+    },
+    {
+      "id": "claude_shared_prng",
+      "label": "@trm/shared Seeded Counter PRNG",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "claude_hidden_information_redactfor",
+      "label": "redactFor / Hidden Information Structural Design",
+      "file_type": "rationale",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Opponents are a counts-only wire type (PublicPlayerState); a viewer's secrets live in a disjoint SelfView. The single redactFor projection is the only thing that should ever reach the wire, backed by a runtime egress guard and the trm_security_leak_blocked_total metric - raw GameState must never be serialized to a client."
+    },
+    {
+      "id": "claude_hub_ws",
+      "label": "apps/server/src/ws/hub.ts (hub)",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "The critical loop: decode -> serialize through a per-game queue -> write-ahead persist -> commit on the engine -> fan out a per-recipient redacted snapshot."
+    },
+    {
+      "id": "claude_codec_seam",
+      "label": "apps/server/src/codec/ (engine-proto-wire seam)",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "claude_swc_not_tsx",
+      "label": "swc, not tsx (tooling pin)",
+      "file_type": "rationale",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "NestJS DI resolves constructor deps from emitted decorator metadata, which esbuild/tsx does not produce. Server dev/start run via @swc-node/register, vitest uses unplugin-swc - switching to tsx/esbuild silently breaks DI at runtime."
+    },
+    {
+      "id": "claude_single_writer_per_game",
+      "label": "Single-Writer Per Game",
+      "file_type": "rationale",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "A per-game command queue serializes decode->validate->apply->persist->fan-out; a unique (gameId, seq) Mongo index is the durable double-apply guard; idempotency is on the monotonic per-socket client_seq."
+    },
+    {
+      "id": "claude_version_pins",
+      "label": "Version Pins (engineVersion/contentHash/schemaVersion)",
+      "file_type": "rationale",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Stamped on persisted games; replay refuses to cross versions. CONTENT_HASH is derived from the authored map-data content, so any map edit changes it."
+    },
+    {
+      "id": "claude_naming_tooling_pins",
+      "label": "Naming/Tooling Pins (PURPLE, seat indices, Vite ^5)",
+      "file_type": "rationale",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "The 6th card colour is PURPLE everywhere (never PINK); seat colours are abstract indices 0-4 on the wire, coloured client-side; apps/web pins Vite ^5 for vitest 2 compatibility - do not bump to Vite 6."
+    },
+    {
+      "id": "claude_graphify_integration",
+      "label": "graphify Knowledge Graph Integration",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "The project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships; codebase questions should run graphify query/path/explain before falling back to GRAPH_REPORT.md or raw grep."
+    },
+    {
+      "id": "claude_pkg_proto",
+      "label": "@trm/proto",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "claude_pkg_shared",
+      "label": "@trm/shared",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "claude_pkg_map_data",
+      "label": "@trm/map-data",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "claude_pkg_engine",
+      "label": "@trm/engine (package)",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "claude_pkg_server",
+      "label": "apps/server",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "claude_pkg_web",
+      "label": "apps/web",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "claude_graphify_integration",
+      "target": "_claude_skills_graphify_skill_graphify_skill",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_graphify_integration",
+      "target": "_claude_skills_graphify_references_query_path_command",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_graphify_integration",
+      "target": "_claude_skills_graphify_references_query_explain_command",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_graphify_integration",
+      "target": "_claude_skills_graphify_references_update_incremental_update",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_proto",
+      "target": "claude_pkg_shared",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_shared",
+      "target": "claude_pkg_map_data",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_map_data",
+      "target": "claude_pkg_engine",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_engine",
+      "target": "claude_pkg_server",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_engine",
+      "target": "claude_pkg_web",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_engine",
+      "target": "claude_engine_reducer",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_shared",
+      "target": "claude_shared_prng",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_hub_ws",
+      "target": "claude_codec_seam",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_hub_ws",
+      "target": "claude_hidden_information_redactfor",
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_server",
+      "target": "claude_swc_not_tsx",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_server",
+      "target": "claude_single_writer_per_game",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_trmission",
+      "target": "claude_version_pins",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_trmission",
+      "target": "claude_naming_tooling_pins",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "claude_pkg_web",
+      "target": "claude_naming_tooling_pins",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

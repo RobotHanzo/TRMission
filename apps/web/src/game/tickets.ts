@@ -34,7 +34,11 @@ export function playerLiveTotal(snapshot: GameSnapshot, playerId: string): numbe
  * OWNED by `playerId` — the segments to glow start→end during the completion fanfare. `[]` if
  * the player's own routes don't connect the endpoints (e.g. the ticket isn't actually theirs).
  */
-export function pathForTicket(snapshot: GameSnapshot, playerId: string, ticketId: string): string[] {
+export function pathForTicket(
+  snapshot: GameSnapshot,
+  playerId: string,
+  ticketId: string,
+): string[] {
   const ticket = ticketById.get(ticketId);
   if (!ticket) return [];
   const a = ticket.a as string;

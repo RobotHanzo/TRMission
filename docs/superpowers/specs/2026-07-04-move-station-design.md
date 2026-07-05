@@ -32,7 +32,7 @@ disconnected from the visual map that this builder is built around).
 2. Clicking it enters **move mode**:
    - The button's own label swaps to **"Cancel Move"**.
    - The hint text under the canvas (normally `builder.stopsHint`) swaps to
-     `builder.moveStopHint`, interpolating the station's `nameZh` (e.g. *"點擊地圖以將「{{name}}」移動到新位置"* / *"Click the map to move '{{name}}' to a new location"*).
+     `builder.moveStopHint`, interpolating the station's `nameZh` (e.g. _"點擊地圖以將「{{name}}」移動到新位置"_ / _"Click the map to move '{{name}}' to a new location"_).
 3. The next click on empty canvas, instead of creating a new station, calls
    `moveCity(id, x, y)` with the same `Math.round(pt.x * 10) / 10` rounding the add-flow already
    uses. Move mode then exits automatically and the station stays selected (so its inspector stays

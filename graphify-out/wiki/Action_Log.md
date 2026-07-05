@@ -29,7 +29,7 @@
 - **LogDatum** (2 connections) — `apps/web/src/game/logModel.ts`
 - **LogStoreApi** (2 connections) — `apps/web/src/store/log.ts`
 - **ColorToken** (2 connections) — `apps/web/src/theme/colors.ts`
-- *... and 9 more nodes in this community*
+- _... and 9 more nodes in this community_
 
 ## Relationships
 
@@ -68,4 +68,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

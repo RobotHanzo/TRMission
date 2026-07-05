@@ -1,7 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { toBinary } from '@bufbuild/protobuf';
 import { initGame, redactFor, taiwanBoard, CONTENT_HASH } from '@trm/engine';
-import type { Action, GameConfig, GameEvent, GameState, EventsState, EventScheduleEntry } from '@trm/engine';
+import type {
+  Action,
+  GameConfig,
+  GameEvent,
+  GameState,
+  EventsState,
+  EventScheduleEntry,
+} from '@trm/engine';
 import { asPlayerId, asTicketId, asCityId, asRouteId } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
 import { CardColor, Phase, GameSnapshotSchema } from '@trm/proto';

@@ -1,1 +1,319 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_md", "label": "2026-06-28-ingame-animations-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "label": "In-game animations \u2014 design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L7"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_decisions_load_bearing", "label": "Decisions (load-bearing)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L23"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "label": "Architecture", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L52"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus", "label": "Animation event bus", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L54"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_game_animationmodel_ts_pure", "label": "`game/animationModel.ts` (pure)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L59"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_game_tickets_ts_pure", "label": "`game/tickets.ts` (pure)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L66"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver_snapshot_hook_mounted_once_in_gamescreen", "label": "`useAnimationDriver(snapshot)` (hook, mounted once in `GameScreen`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L75"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_store_animations_ts_zustand", "label": "`store/animations.ts` (zustand)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L80"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer_fixed_viewport_portal", "label": "`<AnimationLayer/>` (fixed viewport portal)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L85"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_usereducedmotion", "label": "`useReducedMotion()`", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L92"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_per_item_implementation", "label": "Per-item implementation", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L95"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_score_display", "label": "Score display", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L119"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_testing_verification", "label": "Testing & verification", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L124"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_commit_hygiene", "label": "Commit hygiene", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L134"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L139"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_revision_1_2026_06_28_finished_tickets_are_public_instant_points_for_all", "label": "REVISION 1 (2026-06-28) \u2014 finished tickets are public; instant points for all", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L145"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_backend_changes_security_preserving", "label": "Backend changes (security-preserving)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L162"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_web_changes_vs_the_original_plan", "label": "Web changes (vs the original plan)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L183"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L7", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_decisions_load_bearing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L23", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L52", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L54", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_game_animationmodel_ts_pure", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L59", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_game_tickets_ts_pure", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L66", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver_snapshot_hook_mounted_once_in_gamescreen", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L75", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_store_animations_ts_zustand", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L80", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer_fixed_viewport_portal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L85", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_usereducedmotion", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L92", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_per_item_implementation", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L95", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_score_display", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L119", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_testing_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L124", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_commit_hygiene", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L134", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L139", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_revision_1_2026_06_28_finished_tickets_are_public_instant_points_for_all", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L145", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_revision_1_2026_06_28_finished_tickets_are_public_instant_points_for_all", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_backend_changes_security_preserving", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L162", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_revision_1_2026_06_28_finished_tickets_are_public_instant_points_for_all", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_web_changes_vs_the_original_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md", "source_location": "L183", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_md",
+      "label": "2026-06-28-ingame-animations-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "label": "In-game animations \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L7"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_decisions_load_bearing",
+      "label": "Decisions (load-bearing)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L23"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "label": "Architecture",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L52"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus",
+      "label": "Animation event bus",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L54"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_game_animationmodel_ts_pure",
+      "label": "`game/animationModel.ts` (pure)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L59"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_game_tickets_ts_pure",
+      "label": "`game/tickets.ts` (pure)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L66"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver_snapshot_hook_mounted_once_in_gamescreen",
+      "label": "`useAnimationDriver(snapshot)` (hook, mounted once in `GameScreen`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L75"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_store_animations_ts_zustand",
+      "label": "`store/animations.ts` (zustand)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L80"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer_fixed_viewport_portal",
+      "label": "`<AnimationLayer/>` (fixed viewport portal)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L85"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_usereducedmotion",
+      "label": "`useReducedMotion()`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L92"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_per_item_implementation",
+      "label": "Per-item implementation",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L95"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_score_display",
+      "label": "Score display",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L119"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_testing_verification",
+      "label": "Testing & verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L124"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_commit_hygiene",
+      "label": "Commit hygiene",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L134"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L139"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_revision_1_2026_06_28_finished_tickets_are_public_instant_points_for_all",
+      "label": "REVISION 1 (2026-06-28) \u2014 finished tickets are public; instant points for all",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L145"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_backend_changes_security_preserving",
+      "label": "Backend changes (security-preserving)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L162"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_web_changes_vs_the_original_plan",
+      "label": "Web changes (vs the original plan)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L183"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_decisions_load_bearing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_animation_event_bus",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_game_animationmodel_ts_pure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_game_tickets_ts_pure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_useanimationdriver_snapshot_hook_mounted_once_in_gamescreen",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_store_animations_ts_zustand",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_animationlayer_fixed_viewport_portal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_usereducedmotion",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L92",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_per_item_implementation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_score_display",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L119",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_testing_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L124",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_commit_hygiene",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L134",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L139",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_in_game_animations_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_revision_1_2026_06_28_finished_tickets_are_public_instant_points_for_all",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L145",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_revision_1_2026_06_28_finished_tickets_are_public_instant_points_for_all",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_backend_changes_security_preserving",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L162",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_revision_1_2026_06_28_finished_tickets_are_public_instant_points_for_all",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_ingame_animations_design_web_changes_vs_the_original_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-ingame-animations-design.md",
+      "source_location": "L183",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -8,20 +8,20 @@ Each entry lists the in-repo filename, the cue it powers, the original Mixkit so
 direct asset URL, and any editing applied. Edits were done with `ffmpeg` 5.x (recipes below are
 reproducible from the original Mixkit download).
 
-| File | Cue | Mixkit sound | id | Edited? |
-|------|-----|--------------|----|---------|
-| `card-draw.mp3` | Card draw | Poker card flick | 2002 | — |
-| `your-turn.mp3` | Your turn | Elegant door announcement | 224 | ✅ trim + 2× speed (pitch-up) |
-| `tunnel-draw.mp3` | Tunnel reveal (played 3×, one per card) | Poker card placement | 2001 | — |
-| `tunnel-success.mp3` | Tunnel needs no surcharge | Achievement bell | 600 | — |
-| `tunnel-payment.mp3` | Tunnel needs extra payment | Negative tone interface tap | 2569 | — |
-| `mission-complete.mp3` | Ticket/mission completed (self) | Arcade game complete or approved mission | 205 | — |
-| `game-over-win.mp3` | Game over — you won | Successful horns fanfare | 722 | — |
-| `game-over-normal.mp3` | Game over — you didn't win | Orchestral violin jingle | 2280 | — |
-| `station-built.mp3` | Station built | Metal hammer hit | 833 | ✅ trim + ×3 + pitch-down/bass (heavier) |
-| `railway-built.mp3` | Railway claimed | Wood hard hit | 2182 | ✅ trim + ×3 |
-| `event-start.mp3` | Random event start banner | Game level completed | 2059 | — |
-| `chat-message.mp3` | Chat message received | Message pop alert | 2354 | — |
+| File                   | Cue                                     | Mixkit sound                             | id   | Edited?                                  |
+| ---------------------- | --------------------------------------- | ---------------------------------------- | ---- | ---------------------------------------- |
+| `card-draw.mp3`        | Card draw                               | Poker card flick                         | 2002 | —                                        |
+| `your-turn.mp3`        | Your turn                               | Elegant door announcement                | 224  | ✅ trim + 2× speed (pitch-up)            |
+| `tunnel-draw.mp3`      | Tunnel reveal (played 3×, one per card) | Poker card placement                     | 2001 | —                                        |
+| `tunnel-success.mp3`   | Tunnel needs no surcharge               | Achievement bell                         | 600  | —                                        |
+| `tunnel-payment.mp3`   | Tunnel needs extra payment              | Negative tone interface tap              | 2569 | —                                        |
+| `mission-complete.mp3` | Ticket/mission completed (self)         | Arcade game complete or approved mission | 205  | —                                        |
+| `game-over-win.mp3`    | Game over — you won                     | Successful horns fanfare                 | 722  | —                                        |
+| `game-over-normal.mp3` | Game over — you didn't win              | Orchestral violin jingle                 | 2280 | —                                        |
+| `station-built.mp3`    | Station built                           | Metal hammer hit                         | 833  | ✅ trim + ×3 + pitch-down/bass (heavier) |
+| `railway-built.mp3`    | Railway claimed                         | Wood hard hit                            | 2182 | ✅ trim + ×3                             |
+| `event-start.mp3`      | Random event start banner               | Game level completed                     | 2059 | —                                        |
+| `chat-message.mp3`     | Chat message received                   | Message pop alert                        | 2354 | —                                        |
 
 Direct asset URLs follow the pattern
 `https://assets.mixkit.co/active_storage/sfx/<id>/<id>.wav` (full) or `<id>-preview.mp3` (the
@@ -29,7 +29,7 @@ web-sized mp3 shipped here). e.g. card-draw = <https://assets.mixkit.co/active_s
 
 ## Notes
 
-- **`tunnel-draw.mp3`** intentionally reuses the *card-placement* timbre (distinct from `card-draw`):
+- **`tunnel-draw.mp3`** intentionally reuses the _card-placement_ timbre (distinct from `card-draw`):
   the tunnel reveal fires it **once per revealed card (3×)**, synced to the card-flip stagger in
   `TunnelModal`, rather than playing a single long whoosh.
 - **`event-start.mp3`** (Mixkit "Game level completed", 2059) was previously kept in reserve

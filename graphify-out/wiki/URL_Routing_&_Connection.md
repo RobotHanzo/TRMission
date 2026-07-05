@@ -29,7 +29,7 @@
 - **replayIdFromPath()** (1 connections) — `apps/web/src/store/ui.ts`
 - **path()** (1 connections) — `apps/web/src/store/ui.test.ts`
 - **THEMES** (1 connections) — `apps/web/src/store/ui.ts`
-- *... and 2 more nodes in this community*
+- _... and 2 more nodes in this community_
 
 ## Relationships
 
@@ -63,4 +63,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

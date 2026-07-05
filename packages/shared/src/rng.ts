@@ -58,7 +58,8 @@ export function nextU32(r: RngState): [number, RngState] {
 
 /** Unbiased integer in [0, n) via rejection sampling (pure). */
 export function nextInt(r: RngState, n: number): [number, RngState] {
-  if (!Number.isInteger(n) || n <= 0) throw new RangeError(`nextInt bound must be a positive integer, got ${n}`);
+  if (!Number.isInteger(n) || n <= 0)
+    throw new RangeError(`nextInt bound must be a positive integer, got ${n}`);
   const range = n >>> 0;
   // Largest multiple of `range` that fits in uint32, to discard the biased tail.
   const max = Math.floor(0x100000000 / range) * range;

@@ -80,7 +80,11 @@ export function Dropdown<T extends string>({
         onClick={() => setOpen((o) => !o)}
       >
         <span className="dropdown-trigger-value">
-          {selected ? (selected.render ?? selected.label) : <span className="muted">{placeholder}</span>}
+          {selected ? (
+            (selected.render ?? selected.label)
+          ) : (
+            <span className="muted">{placeholder}</span>
+          )}
         </span>
         <ChevronDown size={14} aria-hidden className="dropdown-chevron" />
       </button>

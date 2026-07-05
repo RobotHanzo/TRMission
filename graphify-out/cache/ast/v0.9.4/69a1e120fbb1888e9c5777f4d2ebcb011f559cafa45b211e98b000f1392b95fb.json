@@ -1,1 +1,159 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_md", "label": "task-3-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "label": "Task 3 report \u2014 Server: history authz fix + extended list", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_what_i_implemented", "label": "What I implemented", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_botprofile_shape_check", "label": "BotProfile shape check", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L45"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_tdd_evidence", "label": "TDD evidence", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L51"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_unplanned_but_necessary_fix_apps_server_test_lobby_e2e_spec_ts", "label": "Unplanned but necessary fix: `apps/server/test/lobby.e2e.spec.ts`", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L67"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_lint_typecheck_format_confirmation", "label": "Lint / typecheck / format confirmation", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L79"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_files_changed", "label": "Files changed", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L87"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_self_review", "label": "Self-review", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L101"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_3_report_concerns", "label": "Concerns", "file_type": "document", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L130"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_md", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_what_i_implemented", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_botprofile_shape_check", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L45", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_tdd_evidence", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L51", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_unplanned_but_necessary_fix_apps_server_test_lobby_e2e_spec_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L67", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_lint_typecheck_format_confirmation", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L79", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_files_changed", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L87", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_self_review", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L101", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list", "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-3-report.md", "source_location": "L130", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_md",
+      "label": "task-3-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "label": "Task 3 report \u2014 Server: history authz fix + extended list",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_what_i_implemented",
+      "label": "What I implemented",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_botprofile_shape_check",
+      "label": "BotProfile shape check",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L45"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_tdd_evidence",
+      "label": "TDD evidence",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L51"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_unplanned_but_necessary_fix_apps_server_test_lobby_e2e_spec_ts",
+      "label": "Unplanned but necessary fix: `apps/server/test/lobby.e2e.spec.ts`",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L67"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_lint_typecheck_format_confirmation",
+      "label": "Lint / typecheck / format confirmation",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L79"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_files_changed",
+      "label": "Files changed",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L87"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_self_review",
+      "label": "Self-review",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L101"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_3_report_concerns",
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L130"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_what_i_implemented",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_botprofile_shape_check",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_tdd_evidence",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_unplanned_but_necessary_fix_apps_server_test_lobby_e2e_spec_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_lint_typecheck_format_confirmation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_files_changed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_self_review",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_3_report_task_3_report_server_history_authz_fix_extended_list",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_3_report_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-3-report.md",
+      "source_location": "L130",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

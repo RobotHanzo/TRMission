@@ -34,7 +34,11 @@ const RESTRICTIVE_OR_MIXED = new Set<RandomEventKind>([
   'SKY_LANTERN',
   'AFTERSHOCK',
 ]);
-const FIRST_BASE: Record<Exclude<EventsMode, 'off'>, number> = { light: 4, moderate: 3, intense: 2 };
+const FIRST_BASE: Record<Exclude<EventsMode, 'off'>, number> = {
+  light: 4,
+  moderate: 3,
+  intense: 2,
+};
 const GAP_SPAN: Record<Exclude<EventsMode, 'off'>, number> = { light: 6, moderate: 4, intense: 2 };
 const SCHEDULE_ROUND_CAP = 300;
 
@@ -110,7 +114,11 @@ describe('generateSchedule — determinism & structure', () => {
   });
 
   it('intensity controls frequency: higher intensity packs in more entries over the same span', () => {
-    const avgCount: Record<Exclude<EventsMode, 'off'>, number> = { light: 0, moderate: 0, intense: 0 };
+    const avgCount: Record<Exclude<EventsMode, 'off'>, number> = {
+      light: 0,
+      moderate: 0,
+      intense: 0,
+    };
     const seeds = 40;
     for (const mode of ['light', 'moderate', 'intense'] as const) {
       let total = 0;
@@ -169,7 +177,9 @@ describe('generateSchedule — determinism & structure', () => {
       const [ev] = gen('intense', `targets-${s}`);
       for (const e of ev!.schedule) {
         if (e.kind === 'CHARTER_SPECIAL' && e.charter) {
-          expect(hops(board, e.charter.a as string, e.charter.b as string)).toBeGreaterThanOrEqual(4);
+          expect(hops(board, e.charter.a as string, e.charter.b as string)).toBeGreaterThanOrEqual(
+            4,
+          );
         }
         if ((e.kind === 'TYPHOON_LANDFALL' || e.kind === 'SKY_LANTERN') && e.region && e.routeIds) {
           for (const rid of e.routeIds) {
@@ -216,7 +226,11 @@ describe('generateSchedule — determinism & structure', () => {
     };
     const sparse = buildBoard(content);
     for (const mode of ['light', 'moderate', 'intense'] as const) {
-      const [ev] = generateSchedule(sparse, { ...DEFAULT_RULE_PARAMS, eventsMode: mode }, makeRng('sparse'));
+      const [ev] = generateSchedule(
+        sparse,
+        { ...DEFAULT_RULE_PARAMS, eventsMode: mode },
+        makeRng('sparse'),
+      );
       expect(ev).toBeDefined();
       for (const e of ev!.schedule) {
         expect(e.kind).not.toBe('TYPHOON_LANDFALL');

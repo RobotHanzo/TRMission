@@ -111,7 +111,11 @@ describe('events — aftershock tunnel effects', () => {
     if (!begin.ok) return;
     const handAfterBegin = handTotal(begin.value.state, p0);
     const deckAfterBegin = begin.value.state.deck.length;
-    const abort = reduce(board, begin.value.state, { t: 'RESOLVE_TUNNEL', player: p0, commit: false });
+    const abort = reduce(board, begin.value.state, {
+      t: 'RESOLVE_TUNNEL',
+      player: p0,
+      commit: false,
+    });
     expect(abort.ok).toBe(true);
     if (!abort.ok) return;
     expect(handTotal(abort.value.state, p0)).toBe(handAfterBegin + 1);
@@ -127,7 +131,9 @@ describe('events — aftershock tunnel effects', () => {
     const tunnel = findTunnel(board);
     const payColor = payColorFor(tunnel);
     const s = withEvents(
-      drainPools(setPlayer(state, p0, { hand: handOf({ [payColor]: tunnel.length }), trainCars: 45 })),
+      drainPools(
+        setPlayer(state, p0, { hand: handOf({ [payColor]: tunnel.length }), trainCars: 45 }),
+      ),
       { ...emptyEvents(), active: [activeEvent('AFTERSHOCK')] },
     );
     const begin = reduce(board, s, {
@@ -140,7 +146,11 @@ describe('events — aftershock tunnel effects', () => {
     if (!begin.ok) return;
     expect(begin.value.state.pendingTunnel!.revealed).toHaveLength(0); // nothing to reveal
     const handAfterBegin = handTotal(begin.value.state, p0);
-    const abort = reduce(board, begin.value.state, { t: 'RESOLVE_TUNNEL', player: p0, commit: false });
+    const abort = reduce(board, begin.value.state, {
+      t: 'RESOLVE_TUNNEL',
+      player: p0,
+      commit: false,
+    });
     expect(abort.ok).toBe(true);
     if (!abort.ok) return;
     expect(handTotal(abort.value.state, p0)).toBe(handAfterBegin); // no consolation card

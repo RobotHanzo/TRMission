@@ -1,1 +1,255 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_md", "label": "2026-06-28-sound-effects-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "label": "Sound effects \u2014 design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L8"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_decisions_load_bearing", "label": "Decisions (load-bearing)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L14"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_the_cue_palette", "label": "The cue palette", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L40"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only", "label": "Architecture (`apps/web` only)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L63"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_cues_ts_pure_data", "label": "`sound/cues.ts` (pure data)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L76"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_soundmodel_ts_pure_unit_tested", "label": "`sound/soundModel.ts` (pure, unit-tested)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L82"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_player_ts_web_audio_manager", "label": "`sound/player.ts` (Web Audio manager)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L92"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_hooks_usesounddriver_ts", "label": "`hooks/useSoundDriver.ts`", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L103"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_store_ui_ts", "label": "`store/ui.ts`", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L111"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_components_settingsmodal_tsx", "label": "`components/SettingsModal.tsx`", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L118"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sourcing_credits", "label": "Sourcing & credits", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L124"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_testing_verification", "label": "Testing & verification", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L132"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L148"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_revision_1_2026_06_28_final_sourced_assets", "label": "REVISION 1 (2026-06-28) \u2014 final sourced assets", "file_type": "document", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L155"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L8", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_decisions_load_bearing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L14", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_the_cue_palette", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L40", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L63", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_cues_ts_pure_data", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L76", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_soundmodel_ts_pure_unit_tested", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L82", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_player_ts_web_audio_manager", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L92", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_hooks_usesounddriver_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L103", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_store_ui_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L111", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_components_settingsmodal_tsx", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L118", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sourcing_credits", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L124", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_testing_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L132", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L148", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_revision_1_2026_06_28_final_sourced_assets", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md", "source_location": "L155", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_md",
+      "label": "2026-06-28-sound-effects-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "label": "Sound effects \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L8"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_decisions_load_bearing",
+      "label": "Decisions (load-bearing)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L14"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_the_cue_palette",
+      "label": "The cue palette",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L40"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only",
+      "label": "Architecture (`apps/web` only)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L63"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_cues_ts_pure_data",
+      "label": "`sound/cues.ts` (pure data)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L76"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_soundmodel_ts_pure_unit_tested",
+      "label": "`sound/soundModel.ts` (pure, unit-tested)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L82"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_player_ts_web_audio_manager",
+      "label": "`sound/player.ts` (Web Audio manager)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L92"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_hooks_usesounddriver_ts",
+      "label": "`hooks/useSoundDriver.ts`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L103"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_store_ui_ts",
+      "label": "`store/ui.ts`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L111"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_components_settingsmodal_tsx",
+      "label": "`components/SettingsModal.tsx`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L118"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sourcing_credits",
+      "label": "Sourcing & credits",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L124"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_testing_verification",
+      "label": "Testing & verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L132"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L148"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_revision_1_2026_06_28_final_sourced_assets",
+      "label": "REVISION 1 (2026-06-28) \u2014 final sourced assets",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L155"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_decisions_load_bearing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_the_cue_palette",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_cues_ts_pure_data",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_soundmodel_ts_pure_unit_tested",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_player_ts_web_audio_manager",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L92",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_hooks_usesounddriver_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_store_ui_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_architecture_apps_web_only",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_components_settingsmodal_tsx",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sourcing_credits",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L124",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_testing_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L132",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L148",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_sound_effects_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_28_sound_effects_design_revision_1_2026_06_28_final_sourced_assets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-06-28-sound-effects-design.md",
+      "source_location": "L155",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -49,7 +49,12 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
         out.push({ kind: 'gameStarted', playerId: null, data: {}, importance: 'normal' });
         break;
       case 'turnStarted':
-        out.push({ kind: 'turnStarted', playerId: ev.value.playerId, data: {}, importance: 'normal' });
+        out.push({
+          kind: 'turnStarted',
+          playerId: ev.value.playerId,
+          data: {},
+          importance: 'normal',
+        });
         break;
       case 'routeClaimed':
         out.push({
@@ -93,7 +98,12 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
         );
         break;
       case 'cardDrawnBlind':
-        out.push({ kind: 'drewBlind', playerId: ev.value.playerId, data: {}, importance: 'normal' });
+        out.push({
+          kind: 'drewBlind',
+          playerId: ev.value.playerId,
+          data: {},
+          importance: 'normal',
+        });
         break;
       case 'cardTakenFaceup':
         out.push({

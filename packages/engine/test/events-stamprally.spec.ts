@@ -5,12 +5,22 @@ import type { Board } from '../src/board';
 import type { GameState, OwnerCell } from '../src/types/state';
 import type { GameEvent } from '../src/types/events';
 import { reduce } from '../src/reduce';
-import { afterSetup, withEvents, emptyEvents, activeEvent, setPlayer, drainPools, handOf } from './events-helpers';
+import {
+  afterSetup,
+  withEvents,
+  emptyEvents,
+  activeEvent,
+  setPlayer,
+  drainPools,
+  handOf,
+} from './events-helpers';
 
 const p0 = asPlayerId('p0');
 
 const simpleRoutes = (board: Board): RouteDef[] =>
-  board.content.routes.filter((r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined);
+  board.content.routes.filter(
+    (r) => !r.isTunnel && r.ferryLocos === 0 && r.doubleGroup === undefined,
+  );
 
 /** Two simple routes r1=(A,M), r2=(M,C) sharing city M with distinct outer endpoints A,C. */
 function findChain(board: Board): { r1: RouteDef; r2: RouteDef; A: string; M: string; C: string } {
@@ -95,7 +105,9 @@ describe('events — stamp rally new-city bonus', () => {
     if (!res.ok) return;
     const bs = stampBonuses(res.value.events);
     expect(bs).toHaveLength(2);
-    const sorted = [route.a as string, route.b as string].sort((x, y) => (x < y ? -1 : x > y ? 1 : 0));
+    const sorted = [route.a as string, route.b as string].sort((x, y) =>
+      x < y ? -1 : x > y ? 1 : 0,
+    );
     expect(bs.map((e) => e.cityId as string)).toEqual(sorted);
     for (const e of bs) expect(e.points).toBe(1);
     const basePoints = state.ruleParams.routePoints[route.length] ?? 0;
@@ -157,7 +169,11 @@ describe('events — stamp rally new-city bonus', () => {
     });
     expect(begin.ok).toBe(true);
     if (!begin.ok) return;
-    const commit = reduce(base.board, begin.value.state, { t: 'RESOLVE_TUNNEL', player: p0, commit: true });
+    const commit = reduce(base.board, begin.value.state, {
+      t: 'RESOLVE_TUNNEL',
+      player: p0,
+      commit: true,
+    });
     expect(commit.ok).toBe(true);
     if (!commit.ok) return;
     const bs = stampBonuses(commit.value.events);

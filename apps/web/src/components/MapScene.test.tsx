@@ -48,9 +48,7 @@ describe('MapScene', () => {
     expect(container.querySelector('[data-route-id="r1"]')!.classList.contains('claimable')).toBe(
       true,
     );
-    expect(container.querySelector('[data-route-id="r2"]')!.classList.contains('owned')).toBe(
-      true,
-    );
+    expect(container.querySelector('[data-route-id="r2"]')!.classList.contains('owned')).toBe(true);
     expect(container.querySelectorAll('rect.slot.ferry-loco').length).toBe(0);
   });
 

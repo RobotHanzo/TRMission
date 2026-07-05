@@ -1,1 +1,80 @@
-{"nodes": [{"id": "_superpowers_sdd_task_10_brief", "label": "Task 10 Brief \u2014 Docs, full validation, manual verification", "file_type": "document", "source_file": ".superpowers/sdd/task-10-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_server_claude_md", "label": "apps/server/CLAUDE.md", "file_type": "document", "source_file": ".superpowers/sdd/task-10-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}, {"id": "apps_web_claude_md", "label": "apps/web/CLAUDE.md", "file_type": "document", "source_file": ".superpowers/sdd/task-10-brief.md", "source_location": null, "source_url": null, "captured_at": null, "author": null, "contributor": null}], "edges": [{"source": "_superpowers_sdd_task_10_brief", "target": "apps_server_claude_md", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-10-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_10_brief", "target": "apps_web_claude_md", "relation": "references", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-10-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_10_brief", "target": "concept_spectator_persistence", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-10-brief.md", "source_location": null, "weight": 1.0}, {"source": "_superpowers_sdd_task_10_brief", "target": "concept_replay_payload_endpoint_design", "relation": "conceptually_related_to", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": ".superpowers/sdd/task-10-brief.md", "source_location": null, "weight": 1.0}], "hyperedges": []}
+{
+  "nodes": [
+    {
+      "id": "_superpowers_sdd_task_10_brief",
+      "label": "Task 10 Brief \u2014 Docs, full validation, manual verification",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_server_claude_md",
+      "label": "apps/server/CLAUDE.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "apps_web_claude_md",
+      "label": "apps/web/CLAUDE.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-10-brief.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "_superpowers_sdd_task_10_brief",
+      "target": "apps_server_claude_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-10-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_10_brief",
+      "target": "apps_web_claude_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-10-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_10_brief",
+      "target": "concept_spectator_persistence",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-10-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    },
+    {
+      "source": "_superpowers_sdd_task_10_brief",
+      "target": "concept_replay_payload_endpoint_design",
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".superpowers/sdd/task-10-brief.md",
+      "source_location": null,
+      "weight": 1.0
+    }
+  ],
+  "hyperedges": []
+}

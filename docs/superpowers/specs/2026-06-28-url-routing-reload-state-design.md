@@ -51,10 +51,10 @@ same state. Back/forward navigation behaves consistently.
 
 ## URL scheme
 
-| State                  | URL          |
-| ---------------------- | ------------ |
-| Home                   | `/`          |
-| Lobby **and** in-game  | `/room/ABCD` |
+| State                 | URL          |
+| --------------------- | ------------ |
+| Home                  | `/`          |
+| Lobby **and** in-game | `/room/ABCD` |
 
 ## Changes
 

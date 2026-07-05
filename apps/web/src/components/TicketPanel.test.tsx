@@ -19,9 +19,7 @@ describe('TicketPanel', () => {
 
   it('sinks completed missions to the bottom while keeping the order of the rest', () => {
     // A completed, B & C open — completed A should end up last.
-    const { container } = render(
-      <TicketPanel ticketIds={[A, B, C]} completedIds={new Set([A])} />,
-    );
+    const { container } = render(<TicketPanel ticketIds={[A, B, C]} completedIds={new Set([A])} />);
     const cards = [...container.querySelectorAll('.ticket-card')];
     expect(cards[0]!.classList.contains('is-completed')).toBe(false);
     expect(cards[1]!.classList.contains('is-completed')).toBe(false);

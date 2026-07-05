@@ -6,11 +6,7 @@ import { useEditorStore } from '../store';
 import type { CityDraft, RouteDraft } from '../../../../net/rest';
 
 vi.mock('../EditorCanvas', () => ({
-  EditorCanvas: ({
-    onRouteClick,
-  }: {
-    onRouteClick?: (id: string) => void;
-  }) => (
+  EditorCanvas: ({ onRouteClick }: { onRouteClick?: (id: string) => void }) => (
     <div data-testid="fake-canvas">
       <button type="button" onClick={() => onRouteClick?.('r1')}>
         route-r1

@@ -38,6 +38,7 @@ vitest/@testing-library/react on the client. No new dependencies.
 ## Task 1: Rematch vote — data model, repo, service, endpoint
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts:37-46` (RoomMember interface), add method before the
   closing brace at `apps/server/src/lobby/room.repo.ts:353`
 - Modify: `apps/server/src/lobby/lobby.schemas.ts`
@@ -46,6 +47,7 @@ vitest/@testing-library/react on the client. No new dependencies.
 - Test/Create: `apps/server/test/lobby-rematch.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: existing `RoomRepo`/`LobbyService`/`LobbyController` patterns (`markStarted`, `ready`,
   `toView`), existing `createTestApp()` test harness.
 - Produces: `RoomRepo.setRematchVote(code: string, userId: string, vote: boolean): Promise<RoomDoc | 'not_found' | 'not_member'>`,
@@ -251,6 +253,7 @@ git commit -m "feat(server): add advisory rematch vote endpoint"
 ## Task 2: Host rematch action — reset a finished room back to LOBBY
 
 **Files:**
+
 - Modify: `apps/server/src/persistence/types.ts:101-123` (`GameStorePort` interface)
 - Modify: `apps/server/src/persistence/game-store.ts:111-148` (add method after `recordCompletion`)
 - Modify: `apps/server/src/ws/hub.ts:161-178` (add method after `evictMatch`)
@@ -260,6 +263,7 @@ git commit -m "feat(server): add advisory rematch vote endpoint"
 - Test: `apps/server/test/lobby-rematch.e2e.spec.ts` (append to the file from Task 1)
 
 **Interfaces:**
+
 - Consumes: `RoomRepo.setRematchVote`/`wantsRematch` from Task 1; existing `GameRegistry`,
   `GameSession.phase`, `MongoGameStore` collections.
 - Produces: `GameStorePort.getStatus(gameId: string): Promise<GameDoc['status'] | undefined>`,
@@ -616,10 +620,12 @@ git commit -m "feat(server): let the host reset a finished room back to LOBBY"
 ## Task 3: Web REST client — rematch endpoints
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts:39-47` (`RoomMember`), `:285-304` (room API methods)
 - Modify: `apps/web/src/net/rest.test.ts:36-71` (existing describe block)
 
 **Interfaces:**
+
 - Consumes: nothing new (existing `req` helper, `RoomView`).
 - Produces: `RoomMember.wantsRematch?: boolean`,
   `api.voteRematch(code: string, wantsRematch: boolean): Promise<RoomView>`,
@@ -631,25 +637,25 @@ Append to the `'rest client: per-game settings + spectating'` describe block in
 `apps/web/src/net/rest.test.ts` (after the "POSTs a spectate request" test):
 
 ```ts
-  it('POSTs a rematch vote', async () => {
-    const fetchMock = vi.fn(() => Promise.resolve(res(200, { code: 'ABCDEF', members: [] })));
-    vi.stubGlobal('fetch', fetchMock);
-    await api.voteRematch('ABCDEF', true);
-    const [path, init] = fetchMock.mock.calls[0]!;
-    expect(path).toBe('/api/v1/rooms/ABCDEF/rematch-vote');
-    expect(init?.method).toBe('POST');
-    expect(JSON.parse(init?.body as string)).toEqual({ wantsRematch: true });
-  });
+it('POSTs a rematch vote', async () => {
+  const fetchMock = vi.fn(() => Promise.resolve(res(200, { code: 'ABCDEF', members: [] })));
+  vi.stubGlobal('fetch', fetchMock);
+  await api.voteRematch('ABCDEF', true);
+  const [path, init] = fetchMock.mock.calls[0]!;
+  expect(path).toBe('/api/v1/rooms/ABCDEF/rematch-vote');
+  expect(init?.method).toBe('POST');
+  expect(JSON.parse(init?.body as string)).toEqual({ wantsRematch: true });
+});
 
-  it('POSTs a rematch request', async () => {
-    const fetchMock = vi.fn(() => Promise.resolve(res(200, { code: 'ABCDEF', members: [] })));
-    vi.stubGlobal('fetch', fetchMock);
-    await api.rematch('ABCDEF');
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/v1/rooms/ABCDEF/rematch',
-      expect.objectContaining({ method: 'POST' }),
-    );
-  });
+it('POSTs a rematch request', async () => {
+  const fetchMock = vi.fn(() => Promise.resolve(res(200, { code: 'ABCDEF', members: [] })));
+  vi.stubGlobal('fetch', fetchMock);
+  await api.rematch('ABCDEF');
+  expect(fetchMock).toHaveBeenCalledWith(
+    '/api/v1/rooms/ABCDEF/rematch',
+    expect.objectContaining({ method: 'POST' }),
+  );
+});
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -708,14 +714,15 @@ props are optional, so `GameScreen` (unchanged until Task 5) keeps calling `<Gam
 them and everything still typechecks.
 
 **Files:**
+
 - Modify: `apps/web/src/components/ScoreBoard.tsx` (props + new UI block)
 - Modify: `apps/web/src/screens/GameStage.tsx:54-71` (props interface), `:73-82` (destructure),
   `:475` (ScoreBoard call site)
-- Modify: `apps/web/src/i18n/index.ts` (new keys, zh-Hant block near line 197, en block near line
-  613)
+- Modify: `apps/web/src/i18n/index.ts` (new keys, zh-Hant block near line 197, en block near line 613)
 - Modify: `apps/web/src/components/ScoreBoard.test.tsx` (append new tests)
 
 **Interfaces:**
+
 - Consumes: nothing new.
 - Produces: `GameStageProps.isHost?: boolean`, `GameStageProps.rematchMembers?: RoomMember[]`,
   `GameStageProps.onVoteRematch?(wantsRematch: boolean): void`, `GameStageProps.onPlayAgain?(): void`
@@ -749,7 +756,10 @@ describe('ScoreBoard rematch', () => {
 
   it('lets a viewer toggle their rematch vote', () => {
     const onVote = vi.fn();
-    const members = [member({ userId: 'p0' }), member({ userId: 'bot:1', isBot: true, ready: true })];
+    const members = [
+      member({ userId: 'p0' }),
+      member({ userId: 'bot:1', isBot: true, ready: true }),
+    ];
     render(<ScoreBoard snapshot={snap} onLeave={() => {}} members={members} onVote={onVote} />);
     fireEvent.click(screen.getByRole('button', { name: /想再玩一局/ }));
     expect(onVote).toHaveBeenCalledWith(true);
@@ -840,33 +850,35 @@ Right after the `dismissed` early-return block (i.e. right before the existing
 `const modalPlayer = ticketModal && ...` line), add:
 
 ```tsx
-  const myVote = members?.find((m) => m.userId === snapshot.you?.playerId)?.wantsRematch ?? false;
-  const humanMembers = members?.filter((m) => !m.isBot) ?? [];
-  const rematchCount = humanMembers.filter((m) => m.wantsRematch).length;
+const myVote = members?.find((m) => m.userId === snapshot.you?.playerId)?.wantsRematch ?? false;
+const humanMembers = members?.filter((m) => !m.isBot) ?? [];
+const rematchCount = humanMembers.filter((m) => m.wantsRematch).length;
 ```
 
 Right before the existing `<div className="scoreboard-actions">` block, add:
 
 ```tsx
-        {members && snapshot.you && (onVote || onPlayAgain) && (
-          <div className="row between rematch-row">
-            <span className="muted">
-              {t('rematchTally', { count: rematchCount, total: humanMembers.length })}
-            </span>
-            <div className="row">
-              {onVote && (
-                <button className={myVote ? 'success' : ''} onClick={() => onVote(!myVote)}>
-                  🔁 {t('wantRematch')}
-                </button>
-              )}
-              {isHost && onPlayAgain && (
-                <button className="primary" onClick={onPlayAgain}>
-                  {t('playAgain')}
-                </button>
-              )}
-            </div>
-          </div>
+{
+  members && snapshot.you && (onVote || onPlayAgain) && (
+    <div className="row between rematch-row">
+      <span className="muted">
+        {t('rematchTally', { count: rematchCount, total: humanMembers.length })}
+      </span>
+      <div className="row">
+        {onVote && (
+          <button className={myVote ? 'success' : ''} onClick={() => onVote(!myVote)}>
+            🔁 {t('wantRematch')}
+          </button>
         )}
+        {isHost && onPlayAgain && (
+          <button className="primary" onClick={onPlayAgain}>
+            {t('playAgain')}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 ```
 
 - [ ] **Step 4: Thread the props through `GameStage.tsx`**
@@ -901,22 +913,26 @@ Add the same four names to the destructured parameters (lines 73-82), right afte
 Change line 475 from:
 
 ```tsx
-      {phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={onLeave} />}
+{
+  phase === Phase.GAME_OVER && <ScoreBoard snapshot={snapshot} onLeave={onLeave} />;
+}
 ```
 
 to:
 
 ```tsx
-      {phase === Phase.GAME_OVER && (
-        <ScoreBoard
-          snapshot={snapshot}
-          onLeave={onLeave}
-          isHost={isHost}
-          members={rematchMembers}
-          onVote={onVoteRematch}
-          onPlayAgain={onPlayAgain}
-        />
-      )}
+{
+  phase === Phase.GAME_OVER && (
+    <ScoreBoard
+      snapshot={snapshot}
+      onLeave={onLeave}
+      isHost={isHost}
+      members={rematchMembers}
+      onVote={onVoteRematch}
+      onPlayAgain={onPlayAgain}
+    />
+  );
+}
 ```
 
 - [ ] **Step 5: Add i18n keys**
@@ -963,10 +979,12 @@ git commit -m "feat(web): add rematch vote toggle + host Play Again button to Sc
 ## Task 5: GameScreen — poll for rematch, auto-redirect to the reset room
 
 **Files:**
+
 - Modify: `apps/web/src/screens/GameScreen.tsx` (full file, currently 89 lines)
 - Modify: `apps/web/src/screens/GameScreen.test.tsx` (append new tests + mock updates)
 
 **Interfaces:**
+
 - Consumes: `GameStageProps.isHost`/`rematchMembers`/`onVoteRematch`/`onPlayAgain` from Task 4;
   `api.getRoom` (existing), `api.voteRematch`/`api.rematch` from Task 3; `useUi().enterRoom`
   (existing, currently unused by `GameScreen`); `useSession().user` (existing store, not yet
@@ -1347,6 +1365,7 @@ yarn workspace @trm/web dev
 ```
 
 With two browser windows (or one regular + one incognito) as two different guests:
+
 1. Create a room in window A, join it from window B, add 0 bots (2 humans is enough), ready up
    both, start.
 2. Play the game to completion (or use bots: add 2 EASY bots instead of a second human, ready up,

@@ -20,8 +20,7 @@ const nextId = (): number => ++counter;
 
 export const useToast = create<ToastState>()((set) => ({
   toasts: [],
-  push: (kind, message) =>
-    set((s) => ({ toasts: [...s.toasts, { id: nextId(), kind, message }] })),
+  push: (kind, message) => set((s) => ({ toasts: [...s.toasts, { id: nextId(), kind, message }] })),
   remove: (id) => set((s) => ({ toasts: s.toasts.filter((c) => c.id !== id) })),
   reset: () => set({ toasts: [] }),
 }));

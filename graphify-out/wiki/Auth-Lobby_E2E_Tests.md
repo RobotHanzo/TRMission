@@ -29,7 +29,7 @@
 - **server()** (2 connections) — `apps/server/test/lobby-settings.e2e.spec.ts`
 - **auth()** (2 connections) — `apps/server/test/lobby-spectate.e2e.spec.ts`
 - **.close()** (1 connections) — `apps/server/test/app.ts`
-- *... and 6 more nodes in this community*
+- _... and 6 more nodes in this community_
 
 ## Relationships
 
@@ -64,4 +64,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

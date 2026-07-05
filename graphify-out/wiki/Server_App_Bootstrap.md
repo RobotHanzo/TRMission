@@ -29,7 +29,7 @@
 - **HistoryModule** (2 connections) — `apps/server/src/history/history.module.ts`
 - **LobbyModule** (2 connections) — `apps/server/src/lobby/lobby.module.ts`
 - **.constructor()** (2 connections) — `apps/server/src/openapi/docs.controller.ts`
-- *... and 10 more nodes in this community*
+- _... and 10 more nodes in this community_
 
 ## Relationships
 
@@ -71,4 +71,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

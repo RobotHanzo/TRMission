@@ -29,7 +29,7 @@
 - **EMPTY** (1 connections) — `apps/web/src/hooks/useSoundDriver.ts`
 - **{ play }** (1 connections) — `apps/web/src/hooks/useSoundDriver.test.tsx`
 - **snap()** (1 connections) — `apps/web/src/hooks/useSoundDriver.test.tsx`
-- *... and 10 more nodes in this community*
+- _... and 10 more nodes in this community_
 
 ## Relationships
 
@@ -67,4 +67,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

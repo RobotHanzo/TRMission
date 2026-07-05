@@ -29,7 +29,7 @@
 - **GameSnapshotDoc** (4 connections) — `apps/server/src/persistence/types.ts`
 - **.createGame()** (4 connections) — `apps/server/src/persistence/types.ts`
 - **StoredConfig** (4 connections) — `apps/server/src/persistence/types.ts`
-- *... and 32 more nodes in this community*
+- _... and 32 more nodes in this community_
 
 ## Relationships
 
@@ -70,4 +70,4 @@
 
 ---
 
-*Part of the graphify knowledge wiki. See [index](index.md) to navigate.*
+_Part of the graphify knowledge wiki. See [index](index.md) to navigate._

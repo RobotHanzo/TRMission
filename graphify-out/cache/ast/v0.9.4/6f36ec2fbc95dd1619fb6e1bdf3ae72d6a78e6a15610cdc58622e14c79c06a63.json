@@ -1,1 +1,175 @@
-{"nodes": [{"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_md", "label": "task-m1-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events", "label": "Task M1 report \u2014 shared types + engine scaffolding for random events", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_what_was_built", "label": "What was built", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L6"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched", "label": "Files touched", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_trm_shared", "label": "@trm/shared", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L15"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_trm_engine", "label": "@trm/engine", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L22"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_cross_package_ripple_forced_see_concerns", "label": "Cross-package ripple (forced; see Concerns)", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L43"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_design_decisions_brief_left_these_to_me", "label": "Design decisions (brief left these to me)", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L51"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_draw_order_documented_in_schedule_ts_header_implemented_verbatim_from_the_brief", "label": "Draw order (documented in schedule.ts header, implemented verbatim from the brief)", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L77"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_verification_all_green", "label": "Verification (all green)", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L82"}, {"id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_concerns", "label": "Concerns", "file_type": "document", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L101"}], "edges": [{"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_md", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_what_was_built", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L6", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_trm_shared", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L15", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_trm_engine", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L22", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_cross_package_ripple_forced_see_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L43", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_design_decisions_brief_left_these_to_me", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L51", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_draw_order_documented_in_schedule_ts_header_implemented_verbatim_from_the_brief", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L77", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_verification_all_green", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L82", "weight": 1.0}, {"source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events", "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-m1-report.md", "source_location": "L101", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_md",
+      "label": "task-m1-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events",
+      "label": "Task M1 report \u2014 shared types + engine scaffolding for random events",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_what_was_built",
+      "label": "What was built",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched",
+      "label": "Files touched",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_trm_shared",
+      "label": "@trm/shared",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_trm_engine",
+      "label": "@trm/engine",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L22"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_cross_package_ripple_forced_see_concerns",
+      "label": "Cross-package ripple (forced; see Concerns)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L43"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_design_decisions_brief_left_these_to_me",
+      "label": "Design decisions (brief left these to me)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L51"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_draw_order_documented_in_schedule_ts_header_implemented_verbatim_from_the_brief",
+      "label": "Draw order (documented in schedule.ts header, implemented verbatim from the brief)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L77"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_verification_all_green",
+      "label": "Verification (all green)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L82"
+    },
+    {
+      "id": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_concerns",
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L101"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_md",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_what_was_built",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_trm_shared",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_trm_engine",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_files_touched",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_cross_package_ripple_forced_see_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_design_decisions_brief_left_these_to_me",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_draw_order_documented_in_schedule_ts_header_implemented_verbatim_from_the_brief",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_verification_all_green",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_task_m1_report_shared_types_engine_scaffolding_for_random_events",
+      "target": "d_web_projects_trmission_claude_worktrees_random_events_superpowers_sdd_task_m1_report_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-m1-report.md",
+      "source_location": "L101",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
