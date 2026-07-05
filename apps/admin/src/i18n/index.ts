@@ -160,6 +160,7 @@ const zhHant = {
     deleteConfirmBody: '此操作無法復原,對局紀錄將永久刪除。',
     deleteConfirmBodyLive:
       '此對局仍在進行中,將先強制終止(不會留下成績,無法重播),再永久刪除對局紀錄。此操作無法復原。',
+    viewReplay: '查看回放',
   },
   chat: {
     presets: {
@@ -490,6 +491,7 @@ const en: typeof zhHant = {
     deleteConfirmBodyLive:
       'This game is still in progress. It will be force-terminated first (no scores, never ' +
       'replayable), then the game record is permanently deleted. This cannot be undone.',
+    viewReplay: 'View Replay',
   },
   chat: {
     presets: {

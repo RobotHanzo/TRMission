@@ -31,6 +31,7 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const canTerminate = useSession((s) => s.hasPermission('games.terminate'));
   const canDelete = useSession((s) => s.hasPermission('games.delete'));
   const canReadLog = useSession((s) => s.hasPermission('games.readLog'));
+  const canViewReplay = useSession((s) => s.hasPermission('games.viewReplay'));
   const pushToast = useToast((s) => s.push);
   const [detail, setDetail] = useState<GameDetail | null>(null);
   const [log, setLog] = useState<GameLogEntry[] | null>(null);
@@ -69,6 +70,18 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     } finally {
       setBusy(false);
       setConfirming(false);
+    }
+  };
+
+  const viewReplay = async () => {
+    try {
+      const { ticket } = await api.mintReplayTicket(id);
+      window.open(
+        `${window.location.origin}/admin-replay/${encodeURIComponent(id)}?ticket=${encodeURIComponent(ticket)}`,
+        '_blank',
+      );
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
     }
   };
 
@@ -217,6 +230,14 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                   ))}
                 </div>
               )}
+            </section>
+          )}
+
+          {canViewReplay && (detail.status === 'COMPLETED' || detail.status === 'TERMINATED') && (
+            <section>
+              <button className="oc-btn" onClick={() => void viewReplay()}>
+                {t('games.viewReplay')}
+              </button>
             </section>
           )}
 

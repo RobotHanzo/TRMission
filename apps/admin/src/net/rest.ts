@@ -293,6 +293,12 @@ export const api = {
       'GET',
       `/dashboard/games/${encodeURIComponent(id)}/log`,
     ),
+  mintReplayTicket: (id: string) =>
+    req<{ ticket: string; expiresIn: string }>(
+      'POST',
+      `/dashboard/games/${encodeURIComponent(id)}/replay-ticket`,
+      {},
+    ),
   terminateGame: (id: string, reason?: string) =>
     req<GameDetail>('POST', `/dashboard/games/${encodeURIComponent(id)}/terminate`, { reason }),
   deleteGame: (id: string, reason?: string) =>

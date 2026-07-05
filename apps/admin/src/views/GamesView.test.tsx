@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import '../i18n';
 import { GamesView } from './GamesView';
 import { useUi } from '../store/ui';
@@ -213,5 +213,37 @@ describe('GamesView delete toasts', () => {
         '此對局仍在進行中,將先強制終止(不會留下成績,無法重播),再永久刪除對局紀錄。此操作無法復原。',
       ),
     ).toBeInTheDocument();
+  });
+});
+
+describe('GamesView view-replay button', () => {
+  beforeEach(() => {
+    useSession.setState({
+      phase: 'ready',
+      user: { id: 'u1', displayName: 'Ops', isGuest: false },
+      role: 'admin',
+      permissions: new Set(['games.read', 'games.viewReplay']),
+    });
+  });
+
+  it('opens a new tab to the web app admin-replay route with a minted ticket', async () => {
+    useUi.setState({ view: 'games', param: 'g1' });
+    stubFetch({
+      '/dashboard/games/g1/replay-ticket': {
+        status: 200,
+        body: { ticket: 'tok', expiresIn: '5m' },
+      },
+      '/dashboard/games/g1': { status: 200, body: { ...GAME_DETAIL, status: 'COMPLETED' } },
+      '/dashboard/games?': { status: 200, body: { games: [], nextCursor: null } },
+    });
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    render(<GamesView />);
+    fireEvent.click(await screen.findByText('查看回放'));
+    await waitFor(() =>
+      expect(openSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/admin-replay/g1?ticket=tok'),
+        '_blank',
+      ),
+    );
   });
 });
