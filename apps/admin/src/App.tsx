@@ -11,6 +11,7 @@ import {
   Swords,
   ToggleRight,
   TrainFront,
+  Trash2,
   Users,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +26,7 @@ import { GamesView } from './views/GamesView';
 import { RoomsView } from './views/RoomsView';
 import { MaintainersView } from './views/MaintainersView';
 import { AuditView } from './views/AuditView';
+import { PurgeView } from './views/PurgeView';
 import { ToastStack } from './components/ToastStack';
 
 const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof Users }[] = [
@@ -35,6 +37,7 @@ const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof User
   { view: 'rooms', permission: 'rooms.read', icon: DoorOpen },
   { view: 'maintainers', permission: 'maintainers.read', icon: ShieldCheck },
   { view: 'audit', permission: 'audit.read', icon: ClipboardList },
+  { view: 'purge', permission: 'purge.read', icon: Trash2 },
 ];
 
 const ROLE_KEY = {
@@ -58,6 +61,8 @@ function ActiveView({ view }: { view: AdminView }) {
       return <MaintainersView />;
     case 'audit':
       return <AuditView />;
+    case 'purge':
+      return <PurgeView />;
     default:
       return <OverviewView />;
   }

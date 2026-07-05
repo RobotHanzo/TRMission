@@ -10,7 +10,8 @@ export type AdminView =
   | 'games'
   | 'rooms'
   | 'maintainers'
-  | 'audit';
+  | 'audit'
+  | 'purge';
 
 export type AdminTheme = 'dark' | 'light';
 export type AdminLocale = 'zh-Hant' | 'en';
@@ -23,7 +24,7 @@ const LOCALE_KEY = 'trm.admin.locale';
 export function parsePath(pathname: string): { view: AdminView; param: string | null } {
   let p = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
   if (!p.startsWith('/')) p = `/${p}`;
-  const m = /^\/(users|features|games|rooms|maintainers|audit)(?:\/([^/]+))?\/?$/.exec(p);
+  const m = /^\/(users|features|games|rooms|maintainers|audit|purge)(?:\/([^/]+))?\/?$/.exec(p);
   if (m) return { view: m[1] as AdminView, param: m[2] ? decodeURIComponent(m[2]) : null };
   return { view: 'overview', param: null };
 }

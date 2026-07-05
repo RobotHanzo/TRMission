@@ -75,6 +75,7 @@ describe('permission-gated shell', () => {
     expect(screen.getByText('房間')).toBeInTheDocument();
     expect(screen.queryByText('維護者')).not.toBeInTheDocument();
     expect(screen.queryByText('稽核')).not.toBeInTheDocument();
+    expect(screen.queryByText('清理')).not.toBeInTheDocument();
   });
 
   it('an owner sees every section', async () => {
@@ -86,17 +87,22 @@ describe('permission-gated shell', () => {
         'games.read',
         'games.readLog',
         'games.terminate',
+        'games.delete',
         'rooms.read',
         'rooms.close',
+        'rooms.delete',
         'maintainers.read',
         'maintainers.write',
         'audit.read',
+        'purge.read',
+        'purge.run',
       ],
       'owner',
     );
     render(<App />);
     expect(await screen.findByText('維護者')).toBeInTheDocument();
     expect(screen.getByText('稽核')).toBeInTheDocument();
+    expect(screen.getByText('清理')).toBeInTheDocument();
   });
 
   it('a denied account gets the denied screen with a sign-out', async () => {
