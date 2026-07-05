@@ -37,15 +37,12 @@ async function startGame(hostName: string, memberName: string) {
   return { code, gameId: started.body.gameId as string, host, member };
 }
 
-// Not called by this task's tests — kept for the deleteRoom/runSweep staleness tests a later
-// task adds to this same file (they backdate a room/game before asserting a sweep purges it).
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/** Used by the purge-sweep tests below to simulate an idle LIVE game/LOBBY room. */
 async function backdateGame(gameId: string, hoursAgo: number) {
   await t.db.collection('games').updateOne({ _id: gameId } as never, {
     $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) },
   });
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function backdateRoom(code: string, hoursAgo: number) {
   await t.db.collection('rooms').updateOne({ _id: code } as never, {
     $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) },
@@ -253,4 +250,138 @@ describe('delete room', () => {
       .send({})
       .expect(404);
   });
+});
+
+describe('purge sweep + status', () => {
+  it('403s a moderator on run and status (admin-tier permissions)', async () => {
+    await request(server())
+      .post('/api/v1/dashboard/purge/run')
+      .set(auth(moderator.token))
+      .send({})
+      .expect(403);
+    await request(server()).get('/api/v1/dashboard/purge/status').set(auth(moderator.token)).expect(403);
+  });
+
+  it('returns config + thresholds from status', async () => {
+    const res = await request(server())
+      .get('/api/v1/dashboard/purge/status')
+      .set(auth(admin.token))
+      .expect(200);
+    expect(res.body.autoEnabled).toBe(false);
+    expect(typeof res.body.intervalMs).toBe('number');
+    expect(typeof res.body.roomLobbyPurgeHours).toBe('number');
+    expect(typeof res.body.gameLivePurgeHours).toBe('number');
+    expect(Array.isArray(res.body.recentRuns)).toBe(true);
+  });
+
+  it(
+    'purges a stale LOBBY room, a stale LIVE game (closing but not deleting its room), and a ' +
+      'STARTED room whose game finished long ago — leaves fresh ones alone',
+    async () => {
+      // Stale LOBBY room (> 24h default threshold) vs. a fresh one.
+      const staleLobbyHost = await guest('SL');
+      const staleLobby = await request(server())
+        .post('/api/v1/rooms')
+        .set(auth(staleLobbyHost.token))
+        .send({})
+        .expect(201);
+      await backdateRoom(staleLobby.body.code, 30);
+      const freshLobbyHost = await guest('FL');
+      const freshLobby = await request(server())
+        .post('/api/v1/rooms')
+        .set(auth(freshLobbyHost.token))
+        .send({})
+        .expect(201);
+
+      // Stale LIVE game (> 168h default threshold) vs. a fresh one.
+      const stale = await startGame('SG-H', 'SG-M');
+      await backdateGame(stale.gameId, 200);
+      const fresh = await startGame('FG-H', 'FG-M');
+
+      // STARTED room whose game finished normally long ago and was never rematched — the
+      // key gap this feature exists to close (see the design doc's finding).
+      const finished = await startGame('DG-H', 'DG-M');
+      await t.db
+        .collection('games')
+        .updateOne(
+          { _id: finished.gameId } as never,
+          { $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) } },
+        );
+
+      const res = await request(server())
+        .post('/api/v1/dashboard/purge/run')
+        .set(auth(admin.token))
+        .expect(200);
+      expect(res.body.roomsDeleted).toBe(2); // staleLobby + finished's room
+      expect(res.body.gamesDeleted).toBe(1); // stale LIVE game
+      expect(res.body.capped).toBe(false);
+
+      // Stale LOBBY room: gone. Fresh LOBBY room: untouched.
+      expect(await t.db.collection('rooms').findOne({ _id: staleLobby.body.code } as never)).toBeNull();
+      expect(
+        await t.db.collection('rooms').findOne({ _id: freshLobby.body.code } as never),
+      ).not.toBeNull();
+
+      // Stale LIVE game: deleted; its room is CLOSED but NOT deleted (non-goal: terminal
+      // records produced as a side effect of a sweep are left for manual cleanup).
+      expect(await t.db.collection('games').findOne({ _id: stale.gameId } as never)).toBeNull();
+      const staleRoom = await t.db.collection('rooms').findOne({ _id: stale.code } as never);
+      expect(staleRoom?.status).toBe('CLOSED');
+      // Fresh LIVE game: untouched.
+      expect(await t.db.collection('games').findOne({ _id: fresh.gameId } as never)).not.toBeNull();
+
+      // Finished-long-ago room: deleted; its COMPLETED game record is left alone.
+      expect(await t.db.collection('rooms').findOne({ _id: finished.code } as never)).toBeNull();
+      const finishedGame = await t.db.collection('games').findOne({ _id: finished.gameId } as never);
+      expect(finishedGame?.status).toBe('COMPLETED');
+
+      // Exactly one purge.run audit entry, attributed to the admin who triggered it.
+      const auditEntries = await t.db
+        .collection('dashboardAudit')
+        .find({ action: 'purge.run' } as never)
+        .toArray();
+      expect(auditEntries.length).toBe(1);
+      expect((auditEntries[0] as unknown as { actorId: string }).actorId).toBe(admin.userId);
+
+      // Recent-runs now shows it.
+      const status = await request(server())
+        .get('/api/v1/dashboard/purge/status')
+        .set(auth(admin.token))
+        .expect(200);
+      expect(status.body.recentRuns.length).toBeGreaterThanOrEqual(1);
+      expect(status.body.recentRuns[0].roomsDeleted).toBe(res.body.roomsDeleted);
+    },
+    60_000,
+  );
+
+  it(
+    'caps a sweep at 500 rooms per run and reports capped:true',
+    async () => {
+      const stale = new Date(Date.now() - 30 * 3_600_000);
+      const docs = Array.from({ length: 501 }, (_, i) => ({
+        _id: `CAP${i}`,
+        hostId: 'nobody',
+        status: 'LOBBY',
+        members: [],
+        maxPlayers: 5,
+        settings: {},
+        createdAt: stale,
+        updatedAt: stale,
+      }));
+      await t.db.collection('rooms').insertMany(docs as never);
+
+      const res = await request(server())
+        .post('/api/v1/dashboard/purge/run')
+        .set(auth(admin.token))
+        .expect(200);
+      expect(res.body.capped).toBe(true);
+      expect(res.body.roomsDeleted).toBe(500);
+
+      const remaining = await t.db
+        .collection('rooms')
+        .countDocuments({ _id: { $regex: /^CAP/ } } as never);
+      expect(remaining).toBe(1);
+    },
+    30_000,
+  );
 });

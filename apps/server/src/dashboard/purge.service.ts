@@ -1,13 +1,32 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  type OnModuleDestroy,
+  type OnModuleInit,
+} from '@nestjs/common';
 import type { Collection, Db } from 'mongodb';
 import { MONGO_DB } from '../db/tokens';
+import { env } from '../config/env';
 import { GameHub } from '../ws/hub';
 import { GameRegistry } from '../game/game-registry';
 import { RoomRepo, type RoomDoc } from '../lobby/room.repo';
 import type { GameDoc, GameEventDoc, GameSnapshotDoc, GameChatDoc } from '../persistence/types';
 import type { AuthUser } from '../auth/auth.types';
 import { AuditService } from './audit.service';
+import { DashboardAuditRepo } from './audit.repo';
 import { MetricsService } from '../observability/metrics.service';
+
+export type PurgeTrigger = 'auto' | 'manual';
+
+export interface PurgeSummary {
+  roomsDeleted: number;
+  gamesDeleted: number;
+  capped: boolean;
+}
+
+const SWEEP_CAP = 500;
+const SYSTEM_ACTOR_ID = 'system:purge';
 
 /**
  * Hard-delete mechanics for rooms/games, shared by the manual admin delete buttons and the
@@ -15,12 +34,13 @@ import { MetricsService } from '../observability/metrics.service';
  * first if it's still active — never deleted out from under a live session.
  */
 @Injectable()
-export class PurgeService {
+export class PurgeService implements OnModuleInit, OnModuleDestroy {
   private readonly games: Collection<GameDoc>;
   private readonly events: Collection<GameEventDoc>;
   private readonly snapshots: Collection<GameSnapshotDoc>;
   private readonly chats: Collection<GameChatDoc>;
   private readonly roomsCol: Collection<RoomDoc>;
+  private timer: NodeJS.Timeout | undefined;
 
   constructor(
     @Inject(MONGO_DB) db: Db,
@@ -28,6 +48,7 @@ export class PurgeService {
     private readonly hub: GameHub,
     private readonly rooms: RoomRepo,
     private readonly audit: AuditService,
+    private readonly auditRepo: DashboardAuditRepo,
     private readonly metrics: MetricsService,
   ) {
     this.games = db.collection<GameDoc>('games');
@@ -35,6 +56,16 @@ export class PurgeService {
     this.snapshots = db.collection<GameSnapshotDoc>('gameSnapshots');
     this.chats = db.collection<GameChatDoc>('gameChats');
     this.roomsCol = db.collection<RoomDoc>('rooms');
+  }
+
+  onModuleInit(): void {
+    if (env.purgeAutoEnabled) {
+      this.timer = setInterval(() => void this.runSweep('auto'), env.purgeIntervalMs);
+    }
+  }
+
+  onModuleDestroy(): void {
+    if (this.timer) clearInterval(this.timer);
   }
 
   /** Terminate a LIVE game in place: CAS to TERMINATED, evict, close its room. A no-op
@@ -145,5 +176,108 @@ export class PurgeService {
       { reason, priorStatus },
     );
     this.metrics.roomPurged('manual', priorStatus);
+  }
+
+  async runSweep(trigger: PurgeTrigger, actor?: AuthUser): Promise<PurgeSummary> {
+    if (trigger === 'manual' && !actor) throw new Error('manual sweep requires an actor');
+    const terminatedBy = trigger === 'auto' ? SYSTEM_ACTOR_ID : actor!.userId;
+    const now = Date.now();
+    const gameThreshold = new Date(now - env.gameLivePurgeHours * 3_600_000);
+    const roomThreshold = new Date(now - env.roomLobbyPurgeHours * 3_600_000);
+
+    const staleGames = await this.games
+      .find({ status: 'LIVE', updatedAt: { $lt: gameThreshold } })
+      .limit(SWEEP_CAP + 1)
+      .toArray();
+    const gamesCapped = staleGames.length > SWEEP_CAP;
+    for (const g of staleGames.slice(0, SWEEP_CAP)) {
+      const prior = await this.purgeGameCore(g._id, terminatedBy, 'auto-purge: inactive LIVE game');
+      if (prior) this.metrics.gamePurged(trigger, prior);
+    }
+
+    const staleLobby = await this.roomsCol
+      .find({ status: 'LOBBY', updatedAt: { $lt: roomThreshold } })
+      .limit(SWEEP_CAP + 1)
+      .toArray();
+    const lobbyCapped = staleLobby.length > SWEEP_CAP;
+    for (const r of staleLobby.slice(0, SWEEP_CAP)) {
+      const prior = await this.purgeRoomCore(r._id, terminatedBy, 'auto-purge: inactive LOBBY room');
+      if (prior) this.metrics.roomPurged(trigger, prior);
+    }
+
+    const staleStarted = await this.roomsCol
+      .aggregate<RoomDoc>([
+        { $match: { status: 'STARTED' } },
+        { $lookup: { from: 'games', localField: 'gameId', foreignField: '_id', as: 'game' } },
+        {
+          $addFields: {
+            effectiveUpdatedAt: {
+              $ifNull: [{ $arrayElemAt: ['$game.updatedAt', 0] }, '$updatedAt'],
+            },
+          },
+        },
+        { $match: { effectiveUpdatedAt: { $lt: gameThreshold } } },
+        { $project: { game: 0, effectiveUpdatedAt: 0 } },
+        { $limit: SWEEP_CAP + 1 },
+      ])
+      .toArray();
+    const startedCapped = staleStarted.length > SWEEP_CAP;
+    for (const r of staleStarted.slice(0, SWEEP_CAP)) {
+      const prior = await this.purgeRoomCore(
+        r._id,
+        terminatedBy,
+        'auto-purge: inactive STARTED room',
+      );
+      if (prior) this.metrics.roomPurged(trigger, prior);
+    }
+
+    const summary: PurgeSummary = {
+      gamesDeleted: Math.min(staleGames.length, SWEEP_CAP),
+      roomsDeleted:
+        Math.min(staleLobby.length, SWEEP_CAP) + Math.min(staleStarted.length, SWEEP_CAP),
+      capped: gamesCapped || lobbyCapped || startedCapped,
+    };
+    const params = {
+      ...summary,
+      thresholds: {
+        gameLiveHours: env.gameLivePurgeHours,
+        roomLobbyHours: env.roomLobbyPurgeHours,
+      },
+    };
+    if (trigger === 'auto') {
+      await this.audit.logSystem('purge.run', undefined, params);
+    } else {
+      await this.audit.log(actor!, 'purge.run', undefined, params);
+    }
+    return summary;
+  }
+
+  async status(): Promise<{
+    autoEnabled: boolean;
+    intervalMs: number;
+    roomLobbyPurgeHours: number;
+    gameLivePurgeHours: number;
+    recentRuns: {
+      at: string;
+      actorName: string;
+      roomsDeleted: number;
+      gamesDeleted: number;
+      capped: boolean;
+    }[];
+  }> {
+    const entries = await this.auditRepo.listByAction('purge.run', 10);
+    return {
+      autoEnabled: env.purgeAutoEnabled,
+      intervalMs: env.purgeIntervalMs,
+      roomLobbyPurgeHours: env.roomLobbyPurgeHours,
+      gameLivePurgeHours: env.gameLivePurgeHours,
+      recentRuns: entries.map((e) => ({
+        at: e.at.toISOString(),
+        actorName: e.actorName,
+        roomsDeleted: (e.params?.roomsDeleted as number | undefined) ?? 0,
+        gamesDeleted: (e.params?.gamesDeleted as number | undefined) ?? 0,
+        capped: (e.params?.capped as boolean | undefined) ?? false,
+      })),
+    };
   }
 }

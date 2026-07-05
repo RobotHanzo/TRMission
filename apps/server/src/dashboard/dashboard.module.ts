@@ -17,6 +17,7 @@ import { DashboardController } from './dashboard.controller';
 import { DashboardUsersController } from './dashboard-users.controller';
 import { DashboardGamesController } from './dashboard-games.controller';
 import { DashboardMaintainersController } from './dashboard-maintainers.controller';
+import { DashboardPurgeController } from './dashboard-purge.controller';
 import { DashboardBootstrap } from './dashboard-bootstrap';
 
 // Maintainer dashboard: access control lives in the separate `dashboardAccounts`
@@ -31,6 +32,7 @@ import { DashboardBootstrap } from './dashboard-bootstrap';
     DashboardUsersController,
     DashboardGamesController,
     DashboardMaintainersController,
+    DashboardPurgeController,
   ],
   providers: [
     DashboardConfig,

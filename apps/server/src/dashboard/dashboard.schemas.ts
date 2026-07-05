@@ -261,3 +261,27 @@ export const AuditListSchema = z.object({
   entries: z.array(AuditEntrySchema),
   nextCursor: z.string().nullable(),
 });
+
+// ---- purge --------------------------------------------------------------------------
+
+export const PurgeRunResultSchema = z.object({
+  roomsDeleted: z.number(),
+  gamesDeleted: z.number(),
+  capped: z.boolean(),
+});
+
+export const PurgeStatusSchema = z.object({
+  autoEnabled: z.boolean(),
+  intervalMs: z.number(),
+  roomLobbyPurgeHours: z.number(),
+  gameLivePurgeHours: z.number(),
+  recentRuns: z.array(
+    z.object({
+      at: z.string(),
+      actorName: z.string(),
+      roomsDeleted: z.number(),
+      gamesDeleted: z.number(),
+      capped: z.boolean(),
+    }),
+  ),
+});
