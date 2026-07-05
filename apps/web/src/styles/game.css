@@ -193,6 +193,25 @@
   font-size: 0.75rem;
   color: var(--tr-ember);
 }
+.chat-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tr-space-2);
+  margin-bottom: var(--tr-space-2);
+}
+.chat-preset-btn {
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--tr-line);
+  background: var(--tr-surface-2);
+  color: var(--tr-ink);
+  cursor: pointer;
+}
+.chat-preset-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 .chat-input {
   display: flex;
   gap: var(--tr-space-2);

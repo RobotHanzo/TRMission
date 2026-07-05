@@ -6,6 +6,7 @@ import { getSocket } from '../net/connection';
 import { usePlayerName } from '../game/playerName';
 import { SEAT_COLORS } from '../theme/colors';
 import { chatRejectionHintKey } from '../game/chatErrors';
+import { CHAT_PRESET_IDS, chatPresetKey } from '../game/chatPresets';
 
 const MAX_LEN = 2048;
 const RATE_MAX = 5;
@@ -28,8 +29,8 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
-  // Surface a server-side chat rejection (length / rate limit) as inline chat feedback
-  // instead of the generic action toast. Client guards usually prevent it ever firing.
+  // Surface a server-side chat rejection (length / rate limit / unknown preset) as inline chat
+  // feedback instead of the generic action toast. Client guards usually prevent it ever firing.
   useEffect(() => {
     if (!rejection) return;
     const key = chatRejectionHintKey(rejection.messageKey);
@@ -38,18 +39,30 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
 
   const seatOf = (pid: string): number => snapshot?.players.find((p) => p.id === pid)?.seat ?? 0;
 
-  const send = (): void => {
-    const text = draft.trim();
-    if (!text || disabled) return;
+  const withinRateLimit = (): boolean => {
     const now = Date.now();
     sentAt.current = sentAt.current.filter((ts) => now - ts < RATE_WINDOW_MS);
     if (sentAt.current.length >= RATE_MAX) {
       setHint(t('chat.rateLimited'));
-      return;
+      return false;
     }
-    getSocket()?.chat(text.slice(0, MAX_LEN));
     sentAt.current.push(now);
+    return true;
+  };
+
+  const send = (): void => {
+    const text = draft.trim();
+    if (!text || disabled) return;
+    if (!withinRateLimit()) return;
+    getSocket()?.chat(text.slice(0, MAX_LEN));
     setDraft('');
+    setHint(null);
+  };
+
+  const sendPreset = (id: string): void => {
+    if (disabled) return;
+    if (!withinRateLimit()) return;
+    getSocket()?.chatPreset(id);
     setHint(null);
   };
 
@@ -70,12 +83,27 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
               >
                 {nameOf({ id: m.playerId, seat: seatOf(m.playerId), isMe: m.playerId === me })}
               </span>
-              <span className="chat-text">{m.text}</span>
+              <span className="chat-text">
+                {m.content.case === 'presetId' ? t(chatPresetKey(m.content.value)) : m.content.value}
+              </span>
             </div>
           ))
         )}
       </div>
       {hint && <p className="chat-hint">{hint}</p>}
+      <div className="chat-presets">
+        {CHAT_PRESET_IDS.map((id) => (
+          <button
+            key={id}
+            type="button"
+            className="chat-preset-btn"
+            disabled={disabled}
+            onClick={() => sendPreset(id)}
+          >
+            {t(chatPresetKey(id))}
+          </button>
+        ))}
+      </div>
       <form
         className="chat-input"
         onSubmit={(e) => {
