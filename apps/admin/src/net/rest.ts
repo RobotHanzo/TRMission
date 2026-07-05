@@ -144,6 +144,25 @@ export interface AuditEntry {
   at: string;
 }
 
+export interface PurgeRunResult {
+  roomsDeleted: number;
+  gamesDeleted: number;
+  capped: boolean;
+}
+export interface PurgeStatus {
+  autoEnabled: boolean;
+  intervalMs: number;
+  roomLobbyPurgeHours: number;
+  gameLivePurgeHours: number;
+  recentRuns: {
+    at: string;
+    actorName: string;
+    roomsDeleted: number;
+    gamesDeleted: number;
+    capped: boolean;
+  }[];
+}
+
 export type UsersPage = { users: UserRow[]; nextCursor: string | null };
 export type GamesPage = { games: GameRow[]; nextCursor: string | null };
 export type RoomsPage = { rooms: RoomRow[]; nextCursor: string | null };
@@ -254,11 +273,15 @@ export const api = {
     ),
   terminateGame: (id: string, reason?: string) =>
     req<GameDetail>('POST', `/dashboard/games/${encodeURIComponent(id)}/terminate`, { reason }),
+  deleteGame: (id: string, reason?: string) =>
+    req<void>('DELETE', `/dashboard/games/${encodeURIComponent(id)}`, { reason }),
 
   listRooms: (opts: { status?: string; cursor?: string } = {}) =>
     req<RoomsPage>('GET', `/dashboard/rooms${qs(opts)}`),
   closeRoom: (code: string, reason?: string) =>
     req<RoomRow>('POST', `/dashboard/rooms/${encodeURIComponent(code)}/close`, { reason }),
+  deleteRoom: (code: string, reason?: string) =>
+    req<void>('DELETE', `/dashboard/rooms/${encodeURIComponent(code)}`, { reason }),
 
   listMaintainers: () => req<{ maintainers: MaintainerRow[] }>('GET', '/dashboard/maintainers'),
   putMaintainer: (
@@ -274,4 +297,7 @@ export const api = {
 
   listAudit: (opts: { cursor?: string } = {}) =>
     req<AuditPage>('GET', `/dashboard/audit${qs(opts)}`),
+
+  getPurgeStatus: () => req<PurgeStatus>('GET', '/dashboard/purge/status'),
+  runPurge: () => req<PurgeRunResult>('POST', '/dashboard/purge/run', {}),
 };
