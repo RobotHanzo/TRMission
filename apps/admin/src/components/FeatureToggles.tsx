@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { USER_FEATURES, type UserFeature } from '@trm/shared';
 import { api, type UserDetail } from '../net/rest';
+import { useToast } from '../store/toast';
 
 /** Checkbox-per-feature editor saving via PUT /dashboard/users/:id/features. */
 export function FeatureToggles({
@@ -14,6 +15,7 @@ export function FeatureToggles({
   onSaved?: (detail: UserDetail) => void;
 }) {
   const { t } = useTranslation();
+  const pushToast = useToast((s) => s.push);
   const [selected, setSelected] = useState<Set<UserFeature>>(new Set(initial));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +34,10 @@ export function FeatureToggles({
     try {
       const detail = await api.putUserFeatures(userId, [...selected]);
       onSaved?.(detail);
+      pushToast('success', t('toast.featuresSaved'));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'error');
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
     } finally {
       setBusy(false);
     }

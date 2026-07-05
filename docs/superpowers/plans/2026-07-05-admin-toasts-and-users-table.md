@@ -1649,7 +1649,10 @@ describe('FeatureToggles toasts', () => {
       </>,
     );
     fireEvent.click(screen.getByText('儲存'));
-    expect(await screen.findByText('boom')).toBeInTheDocument();
+    // FeatureToggles also shows the same message as an inline paragraph (existing
+    // behavior, kept as-is), so scope to the toast specifically (role="status") rather
+    // than a plain text query, which would become ambiguous once both are on screen.
+    expect(await screen.findByRole('status')).toHaveTextContent('boom');
   });
 });
 ```
@@ -1657,8 +1660,10 @@ describe('FeatureToggles toasts', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `yarn workspace @trm/admin test FeatureToggles`
-Expected: FAIL — no toast text rendered (the mutation has no success toast yet, and the error
-path only sets local inline error state)
+Expected: FAIL on the success case (no toast exists yet). The error case, if queried by plain
+text instead of `role="status"`, would misleadingly pass already — the mutation's existing
+inline error paragraph already renders the same message, which is exactly why the test scopes
+to `role="status"` instead.
 
 - [ ] **Step 3: Wire the toast into `save`**
 
