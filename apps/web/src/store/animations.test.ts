@@ -98,4 +98,11 @@ describe('animations store', () => {
     expect(cue.variant).toBe('success');
     expect(cue).toMatchObject({ text: '已複製' });
   });
+
+  it('setEventSpotlight sets the board camera target for events; reset clears it', () => {
+    useAnimations.getState().setEventSpotlight({ kind: 'route', ids: ['R1', 'R2'] });
+    expect(useAnimations.getState().eventSpotlight).toEqual({ kind: 'route', ids: ['R1', 'R2'] });
+    useAnimations.getState().reset();
+    expect(useAnimations.getState().eventSpotlight).toBeNull();
+  });
 });

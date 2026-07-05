@@ -2,6 +2,7 @@ import { create, useStore, type StateCreator } from 'zustand';
 import { createContext, useContext } from 'react';
 import type { CardColor } from '@trm/shared';
 import type { AnimIntent } from '../game/animationModel';
+import type { BoardFrameTarget } from '../game/boardView';
 
 /**
  * Transient, view-only animation state. Components render from these slices; the
@@ -119,6 +120,8 @@ interface AnimState {
   notifications: NotificationCue[];
   /** Longest-trail route highlight shown while reviewing the final scoreboard (null = none). */
   routeReveal: RouteReveal | null;
+  /** One-shot board camera target requested from the events panel (null = none pending). */
+  eventSpotlight: BoardFrameTarget | null;
   pushIntent(intent: AnimIntent): void;
   clearGlowRoute(id: string): void;
   clearGlowStation(id: string): void;
@@ -139,6 +142,7 @@ interface AnimState {
   removeNotification(id: number): void;
   setRouteReveal(seat: number, path: string[]): void;
   clearRouteReveal(): void;
+  setEventSpotlight(target: BoardFrameTarget): void;
   reset(): void;
 }
 
@@ -161,6 +165,7 @@ const initial = () => ({
   eventBanner: null as EventBannerCue | null,
   notifications: [] as NotificationCue[],
   routeReveal: null as RouteReveal | null,
+  eventSpotlight: null as BoardFrameTarget | null,
 });
 
 const creator: StateCreator<AnimState> = (set) => ({
@@ -293,6 +298,7 @@ const creator: StateCreator<AnimState> = (set) => ({
     set((s) => ({ notifications: s.notifications.filter((c) => c.id !== id) })),
   setRouteReveal: (seat, path) => set({ routeReveal: { seat, path } }),
   clearRouteReveal: () => set({ routeReveal: null }),
+  setEventSpotlight: (target) => set({ eventSpotlight: target }),
   reset: () => set(initial()),
 });
 
