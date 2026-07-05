@@ -8,12 +8,10 @@ import { Dropdown, type DropdownOption } from '../../../../components/ui/Dropdow
 import { Segmented } from '../../../../components/ui/Segmented';
 import { Switch } from '../../../../components/ui/Switch';
 import { EditorCanvas } from '../EditorCanvas';
-import { useEditorStore } from '../store';
+import { useEditorStore, newRouteId, nextDoubleGroupLetter } from '../store';
 import type { RouteDraft } from '../../../../net/rest';
 
 const ROUTE_COLORS: readonly RouteColor[] = [...TRAIN_COLORS, 'GRAY'];
-let nextRouteCounter = 0;
-const newRouteId = (): string => `r${Date.now().toString(36)}${(nextRouteCounter++).toString(36)}`;
 
 export function RoutesStage() {
   const { t } = useTranslation();
@@ -23,6 +21,7 @@ export function RoutesStage() {
   const addRoute = useEditorStore((s) => s.addRoute);
   const updateRoute = useEditorStore((s) => s.updateRoute);
   const removeRoute = useEditorStore((s) => s.removeRoute);
+  const convertToDouble = useEditorStore((s) => s.convertToDouble);
   const [pendingFrom, setPendingFrom] = useState<string | null>(null);
   const [draftPair, setDraftPair] = useState<{ a: string; b: string } | null>(null);
 
@@ -108,9 +107,18 @@ export function RoutesStage() {
             onCancel={() => select(null)}
             onSubmit={(route) => updateRoute(selectedRoute.id, route)}
             extra={
-              <button className="danger" onClick={() => removeRoute(selectedRoute.id)}>
-                <Trash2 size={14} aria-hidden /> {t('builder.deleteRoute')}
-              </button>
+              <>
+                {!selectedRoute.doubleGroup &&
+                  !selectedRoute.isTunnel &&
+                  selectedRoute.ferryLocos === 0 && (
+                    <button onClick={() => convertToDouble(selectedRoute.id)}>
+                      {t('builder.convertToDouble')}
+                    </button>
+                  )}
+                <button className="danger" onClick={() => removeRoute(selectedRoute.id)}>
+                  <Trash2 size={14} aria-hidden /> {t('builder.deleteRoute')}
+                </button>
+              </>
             }
           />
         ) : (
@@ -147,12 +155,6 @@ function RouteForm({
   const [ferryLocos, setFerryLocos] = useState(initial.ferryLocos);
   const [makeDouble, setMakeDouble] = useState(false);
   const isFerry = ferryLocos > 0;
-
-  const nextDoubleGroup = (): string => {
-    const letters = 'ABCDEFGHIJ';
-    for (const l of letters) if (!existingDoubleGroups.includes(l)) return l;
-    return 'A';
-  };
 
   const colorOptions: DropdownOption<RouteColor>[] = ROUTE_COLORS.map((c) => {
     const token = c === 'GRAY' ? GRAY_TOKEN : CARD_COLOR_TOKENS[c];
@@ -228,7 +230,7 @@ function RouteForm({
                 length,
                 isTunnel,
                 ferryLocos,
-                ...(makeDouble ? { doubleGroup: nextDoubleGroup() } : {}),
+                ...(makeDouble ? { doubleGroup: nextDoubleGroupLetter(existingDoubleGroups) } : {}),
               },
               makeDouble,
             )
