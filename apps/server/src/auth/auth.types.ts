@@ -42,6 +42,15 @@ export interface WsTicketPayload {
   seat: number;
 }
 
+/** Admin-replay ticket JWT payload — a maintainer's handoff from the dashboard to
+ *  apps/web's ticket-authorized replay route. Bypasses membership entirely; the ticket
+ *  itself (scoped to one gameId, short-lived) is the sole authority. */
+export interface AdminReplayTicketPayload {
+  kind: 'admin-replay';
+  gameId: string;
+  actorId: string;
+}
+
 /**
  * Signed, short-lived OAuth `state`. It survives the cross-site round-trip to the provider (where
  * cookies under `/api/v1/auth` are not sent), so anything the callback needs — the post-login

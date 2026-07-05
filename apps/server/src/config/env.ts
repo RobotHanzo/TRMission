@@ -17,6 +17,9 @@ export const env = {
   accessTtl: process.env.JWT_ACCESS_TTL ?? '15m',
   /** ws-game ticket lifetime (short — it's redeemed immediately for a socket). */
   wsTicketTtl: process.env.WS_TICKET_TTL ?? '45s',
+  /** Admin replay ticket lifetime — short-lived handoff from the dashboard to apps/web's
+   *  ticket-authorized replay route (ADR: same pattern as the ws-game ticket). */
+  adminReplayTicketTtl: process.env.ADMIN_REPLAY_TICKET_TTL ?? '5m',
   refreshTtlMs: Number(process.env.REFRESH_TTL_MS ?? 30 * day),
   guestTtlMs: Number(process.env.GUEST_TTL_MS ?? 30 * day),
   cookieSecure: process.env.COOKIE_SECURE === '1',

@@ -78,6 +78,17 @@ export class DashboardGamesController {
     return this.games.gameReplay(gameId);
   }
 
+  @Post('games/:gameId/replay-ticket')
+  @HttpCode(200)
+  @RequirePermission('games.viewReplay')
+  @ApiOperation({
+    summary: "Mint a short-lived ticket to view a game's replay in apps/web",
+    description: 'Works for COMPLETED and TERMINATED games. 409 for LIVE (nothing to replay yet).',
+  })
+  mintReplayTicket(@Param('gameId') gameId: string, @CurrentUser() actor: AuthUser) {
+    return this.games.mintReplayTicket(actor, gameId);
+  }
+
   @Post('games/:gameId/terminate')
   @HttpCode(200)
   @RequirePermission('games.terminate')

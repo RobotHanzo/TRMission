@@ -9,6 +9,7 @@ export type DashboardAuditAction =
   | 'user.features'
   | 'game.terminate'
   | 'game.delete'
+  | 'game.viewReplay'
   | 'room.close'
   | 'room.delete'
   | 'purge.run'

@@ -6,6 +6,8 @@ import { GameRegistry } from '../game/game-registry';
 import { RoomRepo, type RoomDoc } from '../lobby/room.repo';
 import { HistoryRepo } from '../history/history.repo';
 import type { AuthUser } from '../auth/auth.types';
+import { TokenService } from '../auth/token.service';
+import { env } from '../config/env';
 import type { GameChatDoc, GameDoc, GameEventDoc } from '../persistence/types';
 import { AuditService } from './audit.service';
 import { decodeCursor, encodeCursor } from './cursor';
@@ -57,6 +59,7 @@ export class DashboardGamesService {
     private readonly rooms: RoomRepo,
     private readonly history: HistoryRepo,
     private readonly audit: AuditService,
+    private readonly tokens: TokenService,
   ) {
     this.games = db.collection<GameDoc>('games');
     this.events = db.collection<GameEventDoc>('gameEvents');
@@ -204,6 +207,22 @@ export class DashboardGamesService {
         stateDigest: e.stateDigest,
         ts: e.ts.toISOString(),
       })),
+    };
+  }
+
+  /** Mint a short-lived ticket a maintainer hands off to apps/web's ticket-authorized
+   *  replay route — works for COMPLETED and TERMINATED games (unlike the player-facing
+   *  replay feature, which stays COMPLETED-only forever; see HistoryRepo.loadReplayForAdmin). */
+  async mintReplayTicket(actor: AuthUser, gameId: string): Promise<{ ticket: string; expiresIn: string }> {
+    const game = await this.games.findOne({ _id: gameId });
+    if (!game) throw new NotFoundException('game not found');
+    if (game.status !== 'COMPLETED' && game.status !== 'TERMINATED') {
+      throw new ConflictException('replay is only available for completed or terminated games');
+    }
+    await this.audit.log(actor, 'game.viewReplay', { type: 'game', id: gameId });
+    return {
+      ticket: this.tokens.signAdminReplayTicket({ gameId, actorId: actor.userId }),
+      expiresIn: env.adminReplayTicketTtl,
     };
   }
 
