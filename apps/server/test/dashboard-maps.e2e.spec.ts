@@ -83,3 +83,116 @@ describe('GET /dashboard/maps/:id', () => {
     await request(server()).get('/api/v1/dashboard/maps/nope').set(auth(admin.token)).expect(404);
   });
 });
+
+describe('DELETE /dashboard/maps/:id', () => {
+  it('403s a viewer (admin-tier permission)', async () => {
+    const m = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(owner.token))
+      .send({ nameZh: 'A', nameEn: 'A' })
+      .expect(201);
+    await request(server())
+      .delete(`/api/v1/dashboard/maps/${m.body.id}`)
+      .set(auth(viewer.token))
+      .send({})
+      .expect(403);
+  });
+
+  it('deletes any owner\'s map and audits it; mapContents (if any) survives', async () => {
+    const m = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(owner.token))
+      .send({ nameZh: 'B', nameEn: 'B' })
+      .expect(201);
+    // Simulate a previously-published revision of this draft: mapContents is immutable and
+    // append-only, written once at game start, and must never be touched by a draft delete.
+    const contentHash = `fake-hash-${m.body.id}`;
+    await t.db.collection('mapContents').insertOne({
+      _id: contentHash,
+      content: { cities: [], routes: [], tickets: [] },
+      sourceMapId: m.body.id,
+      ownerId: owner.id,
+      publishedAt: new Date(),
+    } as never);
+
+    await request(server())
+      .delete(`/api/v1/dashboard/maps/${m.body.id}`)
+      .set(auth(admin.token))
+      .send({ reason: 'abuse' })
+      .expect(204);
+    await request(server())
+      .get(`/api/v1/dashboard/maps/${m.body.id}`)
+      .set(auth(admin.token))
+      .expect(404);
+    expect(
+      await t.db
+        .collection('dashboardAudit')
+        .countDocuments({ action: 'map.delete', 'target.id': m.body.id } as never),
+    ).toBe(1);
+    // Direct DB check (not just an API-level assertion): the draft is gone from customMaps...
+    expect(await t.db.collection('customMaps').findOne({ _id: m.body.id } as never)).toBeNull();
+    // ...but the immutable published content survives untouched.
+    expect(await t.db.collection('mapContents').findOne({ _id: contentHash } as never)).not.toBeNull();
+  });
+
+  it('404s an unknown map', async () => {
+    await request(server())
+      .delete('/api/v1/dashboard/maps/nope')
+      .set(auth(admin.token))
+      .send({})
+      .expect(404);
+  });
+});
+
+describe('DELETE /dashboard/maps/:id/share', () => {
+  it('force-unshares regardless of owner', async () => {
+    const m = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(owner.token))
+      .send({ nameZh: 'C', nameEn: 'C' })
+      .expect(201);
+    await request(server())
+      .post(`/api/v1/maps/${m.body.id}/share`)
+      .set(auth(owner.token))
+      .expect(200);
+    await request(server())
+      .delete(`/api/v1/dashboard/maps/${m.body.id}/share`)
+      .set(auth(admin.token))
+      .send({})
+      .expect(204);
+    const detail = await request(server())
+      .get(`/api/v1/dashboard/maps/${m.body.id}`)
+      .set(auth(admin.token))
+      .expect(200);
+    expect(detail.body.shareCode).toBeUndefined();
+    expect(detail.body.shared).toBe(false);
+  });
+});
+
+describe('POST /dashboard/maps/:id/transfer', () => {
+  it('reassigns ownerId; new owner sees it via the player-facing list', async () => {
+    const newOwner = await registered('newowner@example.com', 'NewOwner');
+    const m = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(owner.token))
+      .send({ nameZh: 'D', nameEn: 'D' })
+      .expect(201);
+    await request(server())
+      .post(`/api/v1/dashboard/maps/${m.body.id}/transfer`)
+      .set(auth(admin.token))
+      .send({ newOwnerId: newOwner.id })
+      .expect(200);
+
+    const detail = await request(server())
+      .get(`/api/v1/dashboard/maps/${m.body.id}`)
+      .set(auth(admin.token))
+      .expect(200);
+    expect(detail.body.ownerId).toBe(newOwner.id);
+
+    const list = await request(server())
+      .get('/api/v1/maps')
+      .set(auth(newOwner.token))
+      .expect(200);
+    expect(list.body.map((row: { id: string }) => row.id)).toContain(m.body.id);
+  });
+});

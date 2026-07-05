@@ -6,6 +6,8 @@ import { MapContentRepo } from '../maps/map-content.repo';
 import type { CustomMapDoc } from '../maps/maps.types';
 import type { GameDoc } from '../persistence/types';
 import type { UserDoc } from '../auth/user.repo';
+import type { AuthUser } from '../auth/auth.types';
+import { AuditService } from './audit.service';
 import { decodeCursor, encodeCursor } from './cursor';
 
 const toRow = (m: CustomMapDoc, ownerDisplayName?: string) => ({
@@ -28,6 +30,7 @@ export class DashboardMapsService {
     @Inject(MONGO_DB) db: Db,
     private readonly maps: CustomMapRepo,
     private readonly content: MapContentRepo,
+    private readonly audit: AuditService,
   ) {
     this.games = db.collection<GameDoc>('games');
     this.users = db.collection<UserDoc>('users');
@@ -74,5 +77,22 @@ export class DashboardMapsService {
       usageCount,
       draft: doc.draft,
     };
+  }
+
+  async deleteMap(actor: AuthUser, id: string, reason?: string): Promise<void> {
+    if (!(await this.maps.removeAny(id))) throw new NotFoundException('map not found');
+    await this.audit.log(actor, 'map.delete', { type: 'map', id }, reason ? { reason } : {});
+  }
+
+  async unshareMap(actor: AuthUser, id: string, reason?: string): Promise<void> {
+    if (!(await this.maps.revokeShareCodeAny(id))) throw new NotFoundException('map not found');
+    await this.audit.log(actor, 'map.unshare', { type: 'map', id }, reason ? { reason } : {});
+  }
+
+  async transferMap(actor: AuthUser, id: string, newOwnerId: string) {
+    const updated = await this.maps.transferOwner(id, newOwnerId);
+    if (!updated) throw new NotFoundException('map not found');
+    await this.audit.log(actor, 'map.transfer', { type: 'map', id }, { newOwnerId });
+    return this.mapDetail(id);
   }
 }

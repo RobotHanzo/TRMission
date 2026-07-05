@@ -14,10 +14,13 @@ export type DashboardAuditAction =
   | 'purge.run'
   | 'maintainer.grant'
   | 'maintainer.update'
-  | 'maintainer.revoke';
+  | 'maintainer.revoke'
+  | 'map.delete'
+  | 'map.unshare'
+  | 'map.transfer';
 
 export interface AuditTarget {
-  type: 'user' | 'game' | 'room' | 'maintainer';
+  type: 'user' | 'game' | 'room' | 'maintainer' | 'map';
   id: string;
 }
 
