@@ -201,11 +201,9 @@ describe('delete room', () => {
 
   it('deletes a STARTED room whose linked game is already COMPLETED: room gone, game untouched', async () => {
     const { code, gameId } = await startGame('H7', 'M7');
-    await t.db
-      .collection('games')
-      .updateOne({ _id: gameId } as never, {
-        $set: { status: 'COMPLETED', updatedAt: new Date() },
-      });
+    await t.db.collection('games').updateOne({ _id: gameId } as never, {
+      $set: { status: 'COMPLETED', updatedAt: new Date() },
+    });
 
     await request(server())
       .delete(`/api/v1/dashboard/rooms/${code}`)
@@ -226,11 +224,9 @@ describe('delete room', () => {
       .send({})
       .expect(201);
     const code: string = room.body.code;
-    await t.db
-      .collection('rooms')
-      .updateOne({ _id: code } as never, {
-        $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() },
-      });
+    await t.db.collection('rooms').updateOne({ _id: code } as never, {
+      $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() },
+    });
 
     await request(server())
       .delete(`/api/v1/dashboard/rooms/${code}`)
@@ -302,11 +298,9 @@ describe('purge sweep + status', () => {
       // STARTED room whose game finished normally long ago and was never rematched — the
       // key gap this feature exists to close (see the design doc's finding).
       const finished = await startGame('DG-H', 'DG-M');
-      await t.db
-        .collection('games')
-        .updateOne({ _id: finished.gameId } as never, {
-          $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) },
-        });
+      await t.db.collection('games').updateOne({ _id: finished.gameId } as never, {
+        $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) },
+      });
 
       const res = await request(server())
         .post('/api/v1/dashboard/purge/run')

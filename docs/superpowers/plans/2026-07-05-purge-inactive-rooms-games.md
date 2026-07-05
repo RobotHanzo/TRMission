@@ -411,18 +411,14 @@ async function startGame(hostName: string, memberName: string) {
 }
 
 async function backdateGame(gameId: string, hoursAgo: number) {
-  await t.db
-    .collection('games')
-    .updateOne({ _id: gameId } as never, {
-      $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) },
-    });
+  await t.db.collection('games').updateOne({ _id: gameId } as never, {
+    $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) },
+  });
 }
 async function backdateRoom(code: string, hoursAgo: number) {
-  await t.db
-    .collection('rooms')
-    .updateOne({ _id: code } as never, {
-      $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) },
-    });
+  await t.db.collection('rooms').updateOne({ _id: code } as never, {
+    $set: { updatedAt: new Date(Date.now() - hoursAgo * 3_600_000) },
+  });
 }
 
 let admin: { userId: string; token: string };
@@ -498,11 +494,9 @@ describe('delete game', () => {
     // Simulate natural completion without playing a full game out: the hub never evicts on
     // its own natural-completion path (hub.ts), so the match stays registered exactly like a
     // real finished game would.
-    await t.db
-      .collection('games')
-      .updateOne({ _id: gameId } as never, {
-        $set: { status: 'COMPLETED', updatedAt: new Date() },
-      });
+    await t.db.collection('games').updateOne({ _id: gameId } as never, {
+      $set: { status: 'COMPLETED', updatedAt: new Date() },
+    });
     expect(t.app.get(GameRegistry).get(gameId)).toBeTruthy();
 
     await request(server())
@@ -857,11 +851,9 @@ describe('delete room', () => {
 
   it('deletes a STARTED room whose linked game is already COMPLETED: room gone, game untouched', async () => {
     const { code, gameId } = await startGame('H7', 'M7');
-    await t.db
-      .collection('games')
-      .updateOne({ _id: gameId } as never, {
-        $set: { status: 'COMPLETED', updatedAt: new Date() },
-      });
+    await t.db.collection('games').updateOne({ _id: gameId } as never, {
+      $set: { status: 'COMPLETED', updatedAt: new Date() },
+    });
 
     await request(server())
       .delete(`/api/v1/dashboard/rooms/${code}`)
@@ -882,11 +874,9 @@ describe('delete room', () => {
       .send({})
       .expect(201);
     const code: string = room.body.code;
-    await t.db
-      .collection('rooms')
-      .updateOne({ _id: code } as never, {
-        $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() },
-      });
+    await t.db.collection('rooms').updateOne({ _id: code } as never, {
+      $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() },
+    });
 
     await request(server())
       .delete(`/api/v1/dashboard/rooms/${code}`)
@@ -1168,11 +1158,9 @@ describe('purge sweep + status', () => {
       // STARTED room whose game finished normally long ago and was never rematched — the
       // key gap this feature exists to close (see the design doc's finding).
       const finished = await startGame('DG-H', 'DG-M');
-      await t.db
-        .collection('games')
-        .updateOne({ _id: finished.gameId } as never, {
-          $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) },
-        });
+      await t.db.collection('games').updateOne({ _id: finished.gameId } as never, {
+        $set: { status: 'COMPLETED', updatedAt: new Date(Date.now() - 200 * 3_600_000) },
+      });
 
       const res = await request(server())
         .post('/api/v1/dashboard/purge/run')
