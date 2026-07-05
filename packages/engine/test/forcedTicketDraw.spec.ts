@@ -193,7 +193,7 @@ describe('forced ticket re-draw (rule 7.5)', () => {
         { p0: { keptTickets: [t.id] }, p1: { hand: locoHand(), keptTickets: [] } },
         { [r.id as string]: { owner: p1 } }, // p1 owns the direct route — p0 owns nothing itself
       ),
-      stations: [{ playerId: p0, cityId: t.a as string }], // p0's station borrows p1's route
+      stations: [{ playerId: p0, cityId: t.a }], // p0's station borrows p1's route
     };
 
     const res = reduce(board, state, {
