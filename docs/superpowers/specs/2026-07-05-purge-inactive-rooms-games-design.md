@@ -85,12 +85,18 @@ by manual delete and the auto-sweep, split so audit/metrics are attributed corre
      `matchHistory` is **never touched** — it's the intentional denormalized archive, and is only
      written for `COMPLETED` games in the first place.
   5. Return the game's prior status (for metrics/audit).
+- **`terminateIfLive(gameId, terminatedBy, reason)`** (private): the CAS-to-`TERMINATED` + evict +
+  `closeByGameId` steps factored out of `purgeGameCore` on their own — a no-op if the game isn't
+  `LIVE`. This is the piece `purgeRoomCore` needs: deleting a room must only *terminate* a still-`LIVE`
+  linked game (status flip, record kept, still visible in Games view), never delete that game's
+  record — deleting the game itself is a separate action on the Games view. `purgeGameCore` calls
+  this too, then goes on to hard-delete.
 - **`purgeRoomCore(code, reason)`** (private):
   1. Load the room; return `null` if missing.
   2. If `status === 'LOBBY'`: best-effort `closeLobby(code)` (CAS; harmless no-op if it raced to
      `STARTED` — re-fetch and fall through to the next branch in that case).
-  3. Re-fetch. If `status === 'STARTED'` and `gameId` is set: call `purgeGameCore` for that game
-     (idempotent if it's already terminal — the CAS/evict steps simply no-op).
+  3. Re-fetch. If `status === 'STARTED'` and `gameId` is set: `terminateIfLive` for that game (a
+     no-op if it's already `COMPLETED`/`TERMINATED` — the game record is left exactly as-is).
   4. Hard-delete the room doc regardless of final status.
   5. Return the room's prior status.
 - **`deleteGame(actor: AuthUser, gameId, reason?)`** (public, manual path): calls
