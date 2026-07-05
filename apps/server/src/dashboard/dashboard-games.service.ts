@@ -116,7 +116,12 @@ export class DashboardGamesService {
       })),
       spectators: game.spectators ?? [],
       ...(room ? { roomCode: room._id } : {}),
-      chat: chat.map((c) => ({ playerId: c.playerId, text: c.text, ts: c.ts.toISOString() })),
+      chat: chat.map((c) => ({
+        playerId: c.playerId,
+        ts: c.ts.toISOString(),
+        kind: c.content.case === 'presetId' ? ('preset' as const) : ('text' as const),
+        value: c.content.value,
+      })),
       ...(game.terminatedAt
         ? {
             terminated: {

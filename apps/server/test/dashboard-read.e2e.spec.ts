@@ -97,6 +97,16 @@ beforeAll(async () => {
     { gameId: doneGameId, seq: 1, action: { type: 'X' }, stateDigest: 'd1', ts: now },
     { gameId: doneGameId, seq: 2, action: { type: 'Y' }, stateDigest: 'd2', ts: now },
   ] as never[]);
+  await t.db.collection('gameChats').insertMany([
+    { gameId: doneGameId, seq: 0, playerId: 'p-one', content: { case: 'text', value: 'gg' }, ts: now },
+    {
+      gameId: doneGameId,
+      seq: 1,
+      playerId: 'p-two',
+      content: { case: 'presetId', value: 'GOOD_GAME' },
+      ts: now,
+    },
+  ] as never[]);
   await t.db.collection('matchHistory').insertOne({
     _id: doneGameId,
     players: [
@@ -222,6 +232,17 @@ describe('games', () => {
       .set(auth(admin.token))
       .expect(200);
     expect(res.body.seed).toBe('seed-fixture');
+  });
+
+  it('COMPLETED game detail exposes chat with a text/preset discriminator', async () => {
+    const res = await request(server())
+      .get(`/api/v1/dashboard/games/${doneGameId}`)
+      .set(auth(admin.token))
+      .expect(200);
+    expect(res.body.chat).toEqual([
+      { playerId: 'p-one', ts: expect.any(String), kind: 'text', value: 'gg' },
+      { playerId: 'p-two', ts: expect.any(String), kind: 'preset', value: 'GOOD_GAME' },
+    ]);
   });
 
   it('action log: 409 for LIVE, full entries for COMPLETED (moderator permission)', async () => {

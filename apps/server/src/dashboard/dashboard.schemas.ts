@@ -165,7 +165,14 @@ export const DashboardGameDetailSchema = z.object({
   ),
   spectators: z.array(z.string()),
   roomCode: z.string().optional(),
-  chat: z.array(z.object({ playerId: z.string(), text: z.string(), ts: z.string() })),
+  chat: z.array(
+    z.object({
+      playerId: z.string(),
+      ts: z.string(),
+      kind: z.enum(['text', 'preset']),
+      value: z.string(),
+    }),
+  ),
   terminated: z
     .object({ at: z.string(), by: z.string(), reason: z.string().optional() })
     .optional(),
