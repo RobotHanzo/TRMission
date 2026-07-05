@@ -5,6 +5,7 @@ import { GameSnapshotSchema, Phase } from '@trm/proto';
 import '../i18n';
 import { EventsPanel } from './EventsPanel';
 import { useGame } from '../store/game';
+import { useAnimations } from '../store/animations';
 
 const snapshot = (
   randomEvents?: MessageInitShape<typeof GameSnapshotSchema>['randomEvents'],
@@ -23,6 +24,7 @@ const snapshot = (
 
 beforeEach(() => {
   useGame.getState().reset();
+  useAnimations.getState().reset();
 });
 
 describe('EventsPanel', () => {
@@ -112,6 +114,9 @@ describe('EventsPanel', () => {
     expect(
       within(dialog).getByText('封閉部分路線；恢復通車後首位鋪設者可得 +2 分'),
     ).toBeInTheDocument();
+    // 'r1'/'r2' aren't real route ids — the affected-routes section has nothing resolvable, so
+    // it doesn't render at all (regression: no stray empty section).
+    expect(within(dialog).queryByText('受影響路線')).toBeNull();
   });
 
   it("opens the description modal from a charter row's info button", () => {
@@ -196,5 +201,80 @@ describe('EventsPanel', () => {
     render(<EventsPanel />);
     const freeRow = screen.getByText('本輪首座車站免費').closest('.event-row') as HTMLElement;
     expect(within(freeRow).queryByLabelText('查看')).toBeNull();
+  });
+
+  it("lists unclaimed affected routes on an active event's info modal, and pans the board on click", () => {
+    useGame.setState({
+      snapshot: create(GameSnapshotSchema, {
+        stateVersion: 1,
+        phase: Phase.AWAIT_ACTION,
+        currentPlayerId: 'p1',
+        turnOrder: ['p1', 'p2'],
+        players: [
+          { id: 'p1', seat: 0, trainCars: 45, stationsRemaining: 3 },
+          { id: 'p2', seat: 1, trainCars: 45, stationsRemaining: 3 },
+        ],
+        // R4 (taipei–tamsui) is already claimed — it must be excluded from the list.
+        ownership: [{ routeId: 'R4', cell: { case: 'ownerPlayerId', value: 'p1' } }],
+        randomEvents: {
+          mode: 'intense',
+          roundIndex: 2,
+          active: [
+            { id: 'ev1', kind: 'SKY_LANTERN', routeIds: ['R2', 'R3', 'R4'], endsAfterRound: 4 },
+          ],
+        },
+      }),
+    });
+    render(<EventsPanel />);
+
+    fireEvent.click(screen.getByLabelText('查看'));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('受影響路線')).toBeInTheDocument();
+    expect(within(dialog).getByText('基隆–臺北')).toBeInTheDocument(); // R2, keelung–taipei
+    expect(within(dialog).getByText('瑞芳–臺北')).toBeInTheDocument(); // R3, ruifang–taipei
+    expect(within(dialog).queryByText('臺北–淡水')).toBeNull(); // R4 — already owned, excluded
+
+    fireEvent.click(within(dialog).getByText('基隆–臺北'));
+    expect(screen.queryByRole('dialog')).toBeNull(); // clicking a route closes the modal
+    expect(useAnimations.getState().eventSpotlight).toEqual({ kind: 'route', ids: ['R2'] });
+  });
+
+  it("also lists affected routes on the forecast row's info modal", () => {
+    useGame.setState({
+      snapshot: snapshot({
+        mode: 'moderate',
+        roundIndex: 3,
+        forecast: {
+          id: 'f1',
+          kind: 'SKY_LANTERN',
+          startRound: 3,
+          durationRounds: 2,
+          routeIds: ['R2', 'R3'],
+        },
+      }),
+    });
+    render(<EventsPanel />);
+
+    fireEvent.click(screen.getByLabelText('查看'));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('受影響路線')).toBeInTheDocument();
+    expect(within(dialog).getByText('基隆–臺北')).toBeInTheDocument();
+    expect(within(dialog).getByText('瑞芳–臺北')).toBeInTheDocument();
+  });
+
+  it('does not show an affected-routes section for a non-route event kind', () => {
+    useGame.setState({
+      snapshot: snapshot({
+        mode: 'intense',
+        roundIndex: 2,
+        active: [{ id: 'ev1', kind: 'AFTERSHOCK', endsAfterRound: 3 }],
+      }),
+    });
+    render(<EventsPanel />);
+
+    fireEvent.click(screen.getByLabelText('查看'));
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('餘震特報')).toBeInTheDocument();
+    expect(within(dialog).queryByText('受影響路線')).toBeNull();
   });
 });

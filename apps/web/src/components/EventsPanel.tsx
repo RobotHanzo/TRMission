@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Info, X } from 'lucide-react';
 import type { RandomEventInfo } from '@trm/proto';
 import { useGameStore } from '../store/game';
 import { useUi } from '../store/ui';
+import { useAnimationsStore } from '../store/animations';
 import { usePlayerName } from '../game/playerName';
-import { cityName } from '../game/content';
+import { cityName, routeById } from '../game/content';
+import { ownershipMap } from '../game/view';
 import { eventDescKey, eventNameKey, roundsLeft } from '../game/events';
 
 /**
@@ -13,13 +15,16 @@ import { eventDescKey, eventNameKey, roundsLeft } from '../game/events';
  * carries a `random_events` block (i.e. the mode is not "off"); everything shown is derived purely
  * from that authoritative projection — active effects, open charters, the one-round forecast, and
  * the gala free-station window. City names resolve by id through the active content catalog. Each
- * kind-bearing row carries an info button opening a modal with that event's full description.
+ * kind-bearing row carries an info button opening a modal with that event's full description; for a
+ * route-targeting kind (Sky Lantern, Typhoon Landfall) the modal also lists the currently-unclaimed
+ * affected routes, each clickable to pan the board's camera straight to it.
  */
 export function EventsPanel() {
   const { t } = useTranslation();
   const snapshot = useGameStore((s) => s.snapshot);
   const locale = useUi((s) => s.locale);
   const nameOf = usePlayerName();
+  const setEventSpotlight = useAnimationsStore((s) => s.setEventSpotlight);
   const [infoKind, setInfoKind] = useState<string | null>(null);
 
   useEffect(() => {
@@ -32,6 +37,18 @@ export function EventsPanel() {
   }, [infoKind]);
 
   const ev = snapshot?.randomEvents;
+  const owned = useMemo(() => (snapshot ? ownershipMap(snapshot) : null), [snapshot]);
+
+  // The resolvable, currently-unclaimed route ids for whichever kind's info modal is open. At most
+  // one active/forecast instance of a given kind exists at once (the schedule generator's
+  // gap-spacing invariant never overlaps two windows), so matching purely on `kind` is unambiguous.
+  const infoRouteIds = useMemo(() => {
+    if (!ev || !infoKind) return [];
+    const active = ev.active.find((a) => a.kind === infoKind)?.routeIds;
+    const raw = active ?? (ev.forecast?.kind === infoKind ? ev.forecast.routeIds : []);
+    return raw.filter((rid) => !owned?.has(rid) && routeById.has(rid));
+  }, [ev, infoKind, owned]);
+
   if (!ev) return null;
 
   const me = snapshot?.you?.playerId ?? null;
@@ -150,6 +167,31 @@ export function EventsPanel() {
               </button>
             </div>
             <p>{t(eventDescKey(infoKind))}</p>
+            {infoRouteIds.length > 0 && (
+              <div className="event-route-section">
+                <h4>{t('events.routeListTitle')}</h4>
+                <ul className="event-route-list">
+                  {infoRouteIds.map((rid) => {
+                    const r = routeById.get(rid);
+                    if (!r) return null;
+                    return (
+                      <li key={rid}>
+                        <button
+                          type="button"
+                          className="event-route-item"
+                          onClick={() => {
+                            setEventSpotlight({ kind: 'route', ids: [rid] });
+                            setInfoKind(null);
+                          }}
+                        >
+                          {cityName(r.a, locale)}–{cityName(r.b, locale)}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       )}
