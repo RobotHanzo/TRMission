@@ -20,7 +20,12 @@ export class HealthController {
 
   @Get('version')
   @ApiOperation({ summary: 'Engine / protocol / content / commit versions' })
-  version(): { engineVersion: number; protocolVersion: number; contentHash: string; commitHash: string } {
+  version(): {
+    engineVersion: number;
+    protocolVersion: number;
+    contentHash: string;
+    commitHash: string;
+  } {
     return {
       engineVersion: ENGINE_VERSION,
       protocolVersion: PROTOCOL_VERSION,
