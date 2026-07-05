@@ -1,7 +1,7 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
-import type { EventsMode } from '@trm/shared';
+import type { EventsMode, ChatPresetId } from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
 import type { BotDifficulty } from '../bots/types';
 
@@ -53,6 +53,12 @@ export interface RoomMember {
   wantsRematch?: boolean;
 }
 
+export interface RoomChatEntry {
+  userId: string;
+  presetId: string;
+  ts: number;
+}
+
 export interface RoomDoc {
   _id: string; // room code
   hostId: string;
@@ -62,6 +68,8 @@ export interface RoomDoc {
   settings: RoomSettings;
   gameId?: string;
   seed?: string;
+  /** Capped, ephemeral preset-only chat for the lobby (never persisted past the room's lifetime). */
+  chat?: RoomChatEntry[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,11 +84,16 @@ export type JoinResult = RoomDoc | 'not_found' | 'full' | 'started' | 'already';
 export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidden';
 export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 export type KickResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
+export type SendChatResult = RoomDoc | 'not_found' | 'not_member' | 'rate_limited';
 
 // Room codes: 6 chars, no easily-confused glyphs (no I/O/0/1).
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const newCode = (): string =>
   Array.from({ length: 6 }, () => ALPHABET.charAt(randomInt(ALPHABET.length))).join('');
+
+const ROOM_CHAT_CAP = 30;
+const ROOM_CHAT_RATE_MAX = 5;
+const ROOM_CHAT_RATE_WINDOW_MS = 5000;
 
 @Injectable()
 export class RoomRepo implements OnModuleInit {
@@ -371,6 +384,29 @@ export class RoomRepo implements OnModuleInit {
     await this.col.updateOne(
       { _id: code, 'members.userId': userId },
       { $set: { 'members.$.wantsRematch': vote, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /** Any room member sends a preset chat message; rate-limited from the persisted array itself
+   *  (no separate in-memory tracker) so it survives restarts without new state. */
+  async sendChat(code: string, userId: string, presetId: ChatPresetId): Promise<SendChatResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (!room.members.some((m) => m.userId === userId)) return 'not_member';
+
+    const now = Date.now();
+    const recent = (room.chat ?? []).filter(
+      (c) => c.userId === userId && now - c.ts < ROOM_CHAT_RATE_WINDOW_MS,
+    );
+    if (recent.length >= ROOM_CHAT_RATE_MAX) return 'rate_limited';
+
+    await this.col.updateOne(
+      { _id: code },
+      {
+        $push: { chat: { $each: [{ userId, presetId, ts: now }], $slice: -ROOM_CHAT_CAP } },
+        $set: { updatedAt: new Date() },
+      },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }

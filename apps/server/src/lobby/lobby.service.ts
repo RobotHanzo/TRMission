@@ -9,7 +9,7 @@ import { buildBoard } from '@trm/engine';
 import type { Board, GameConfig, PlayerSeed } from '@trm/engine';
 import { officialMapById } from '@trm/map-data';
 import type { MapRules } from '@trm/map-data';
-import { asPlayerId, type SeatIndex } from '@trm/shared';
+import { asPlayerId, type SeatIndex, type ChatPresetId } from '@trm/shared';
 import {
   RoomRepo,
   DEFAULT_ROOM_SETTINGS,
@@ -18,6 +18,7 @@ import {
   type RoomMember,
   type RoomSettings,
   type RoomSettingsPatch,
+  type RoomChatEntry,
 } from './room.repo';
 import { LobbyConfig } from './lobby-config';
 import { GameHub } from '../ws/hub';
@@ -37,6 +38,7 @@ export interface RoomView {
   settings: RoomSettings;
   gameId?: string;
   mapName?: { zh: string; en: string };
+  chat: RoomChatEntry[];
 }
 
 export interface TicketResult {
@@ -65,6 +67,7 @@ const toView = (r: RoomDoc): RoomView => {
     settings,
     ...(r.gameId ? { gameId: r.gameId } : {}),
     ...(mapName ? { mapName } : {}),
+    chat: r.chat ?? [],
   };
 };
 
@@ -175,6 +178,15 @@ export class LobbyService {
     const r = await this.rooms.setRematchVote(code, user.userId, vote);
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    return toView(r);
+  }
+
+  /** Any room member sends a preset chat message. */
+  async sendChat(code: string, user: AuthUser, presetId: ChatPresetId): Promise<RoomView> {
+    const r = await this.rooms.sendChat(code, user.userId, presetId);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    if (r === 'rate_limited') throw new BadRequestException('sending chat too fast');
     return toView(r);
   }
 

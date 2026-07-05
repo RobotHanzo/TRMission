@@ -11,11 +11,13 @@ import {
   AddBotDto,
   UpdateSettingsDto,
   RematchVoteDto,
+  ChatDto,
   CreateRoomSchema,
   ReadySchema,
   AddBotSchema,
   UpdateSettingsSchema,
   RematchVoteSchema,
+  ChatSchema,
   RoomViewSchema,
   RoomConfigSchema,
   TicketResultSchema,
@@ -100,6 +102,15 @@ export class LobbyController {
     @Body() body: RematchVoteDto,
   ) {
     return this.lobby.voteRematch(code.toUpperCase(), user, body.wantsRematch);
+  }
+
+  @Post(':code/chat')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Send a preset chat message to the room' })
+  @ApiBody({ schema: apiSchema(ChatSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  sendChat(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: ChatDto) {
+    return this.lobby.sendChat(code.toUpperCase(), user, body.presetId);
   }
 
   @Post(':code/bots')
