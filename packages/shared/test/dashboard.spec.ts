@@ -75,4 +75,11 @@ describe('dashboard permission taxonomy', () => {
     expect(ROLE_PERMISSIONS.admin).toContain('maps.moderate');
     expect(ROLE_PERMISSIONS.admin).toContain('maps.read');
   });
+
+  it('games.viewReplay is a viewer permission, independent of games.readLog', () => {
+    expect(ROLE_PERMISSIONS.viewer).toContain('games.viewReplay');
+    expect(ROLE_PERMISSIONS.viewer).not.toContain('games.readLog');
+    expect(ROLE_PERMISSIONS.moderator).toContain('games.readLog');
+    expect(ROLE_PERMISSIONS.moderator).toContain('games.viewReplay');
+  });
 });
