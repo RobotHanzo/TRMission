@@ -67,4 +67,12 @@ describe('dashboard permission taxonomy', () => {
     expect(isDashboardRole('owner')).toBe(true);
     expect(isDashboardRole('root')).toBe(false);
   });
+
+  it('maps.read is a viewer permission; maps.moderate is admin-tier', () => {
+    expect(ROLE_PERMISSIONS.viewer).toContain('maps.read');
+    expect(ROLE_PERMISSIONS.viewer).not.toContain('maps.moderate');
+    expect(ROLE_PERMISSIONS.moderator).not.toContain('maps.moderate');
+    expect(ROLE_PERMISSIONS.admin).toContain('maps.moderate');
+    expect(ROLE_PERMISSIONS.admin).toContain('maps.read');
+  });
 });

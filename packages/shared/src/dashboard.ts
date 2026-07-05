@@ -30,6 +30,8 @@ export const DASHBOARD_PERMISSIONS = [
   'audit.read',
   'purge.read',
   'purge.run',
+  'maps.read',
+  'maps.moderate',
 ] as const;
 export type DashboardPermission = (typeof DASHBOARD_PERMISSIONS)[number];
 
@@ -41,6 +43,7 @@ const VIEWER_PERMISSIONS: readonly DashboardPermission[] = [
   'users.read',
   'games.read',
   'rooms.read',
+  'maps.read',
 ];
 
 const MODERATOR_PERMISSIONS: readonly DashboardPermission[] = [
@@ -60,6 +63,7 @@ const ADMIN_PERMISSIONS: readonly DashboardPermission[] = [
   'rooms.delete',
   'purge.read',
   'purge.run',
+  'maps.moderate',
 ];
 
 /** Role → permission set. Strict escalation chain; only `owner` can manage maintainers. */
