@@ -93,3 +93,60 @@ describe('UsersView ban/unban toasts', () => {
     expect(await screen.findByText('boom')).toBeInTheDocument();
   });
 });
+
+describe('UsersView columns', () => {
+  it('renders OAuth badges and an expiry timestamp for a disabled guest', async () => {
+    useUi.setState({ view: 'users', param: null });
+    stubFetch({
+      '/dashboard/users?': {
+        status: 200,
+        body: {
+          users: [
+            {
+              id: 'g1',
+              displayName: 'Guest One',
+              isGuest: true,
+              oauthProviders: ['google'],
+              hasPassword: false,
+              features: [],
+              createdAt: '2026-01-01T00:00:00.000Z',
+              disabledAt: '2026-01-02T00:00:00.000Z',
+              guestExpiresAt: '2026-07-12T03:00:00.000Z',
+            },
+          ],
+          nextCursor: null,
+        },
+      },
+    });
+    render(<UsersView />);
+    expect(await screen.findByTitle('Google')).toBeInTheDocument();
+    expect(screen.getByText('（已停權）')).toBeInTheDocument();
+  });
+
+  it('renders a dash in the Expires column for a registered account', async () => {
+    useUi.setState({ view: 'users', param: null });
+    stubFetch({
+      '/dashboard/users?': {
+        status: 200,
+        body: {
+          users: [
+            {
+              id: 'r1',
+              displayName: 'Reg One',
+              isGuest: false,
+              oauthProviders: [],
+              hasPassword: true,
+              features: [],
+              createdAt: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+          nextCursor: null,
+        },
+      },
+    });
+    render(<UsersView />);
+    expect(await screen.findByTitle('密碼')).toBeInTheDocument();
+    // Two dashes expected: Email column ("—") and Expires column ("—").
+    expect(screen.getAllByText('—')).toHaveLength(2);
+  });
+});

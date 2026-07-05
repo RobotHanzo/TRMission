@@ -1213,8 +1213,12 @@ function ExpiresCell({
   disabledAt,
   locale,
 }: {
-  guestExpiresAt?: string;
-  disabledAt?: string;
+  // Not `?:` — the project's `exactOptionalPropertyTypes: true` distinguishes "prop omitted"
+  // from "prop present with value undefined", and callers pass `u.guestExpiresAt` /
+  // `u.disabledAt` directly (typed `string | undefined`, since they're optional fields on
+  // `UserRow`/`UserDetail`), so the prop type must match that union exactly.
+  guestExpiresAt: string | undefined;
+  disabledAt: string | undefined;
   locale: string;
 }) {
   const { t } = useTranslation();

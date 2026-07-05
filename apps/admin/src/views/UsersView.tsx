@@ -7,6 +7,7 @@ import { SignalBadge } from '../components/SignalBadge';
 import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { FeatureToggles } from '../components/FeatureToggles';
+import { OAuthBadges } from '../components/OAuthBadges';
 import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
@@ -17,6 +18,25 @@ const FILTER_KEY: Record<UserFilter, string> = {
   registered: 'users.filterRegistered',
   disabled: 'users.filterDisabled',
 };
+
+function ExpiresCell({
+  guestExpiresAt,
+  disabledAt,
+  locale,
+}: {
+  guestExpiresAt: string | undefined;
+  disabledAt: string | undefined;
+  locale: string;
+}) {
+  const { t } = useTranslation();
+  if (!guestExpiresAt) return <span className="oc-muted">—</span>;
+  return (
+    <>
+      {fmtDateTime(guestExpiresAt, locale)}
+      {disabledAt && <span className="oc-muted"> {t('users.expiresDisabledSuffix')}</span>}
+    </>
+  );
+}
 
 function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
@@ -94,10 +114,27 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 <span className="v">{detail.locale}</span>
               </div>
             )}
-            {detail.oauthProviders.length > 0 && (
+            {(detail.oauthProviders.length > 0 || detail.hasPassword) && (
               <div className="oc-kv">
                 <span className="k">{t('users.oauth')}</span>
-                <span className="v">{detail.oauthProviders.join(', ')}</span>
+                <span className="v">
+                  <OAuthBadges
+                    oauthProviders={detail.oauthProviders}
+                    hasPassword={detail.hasPassword}
+                  />
+                </span>
+              </div>
+            )}
+            {detail.isGuest && detail.guestExpiresAt && (
+              <div className="oc-kv">
+                <span className="k">{t('users.colExpires')}</span>
+                <span className="v">
+                  <ExpiresCell
+                    guestExpiresAt={detail.guestExpiresAt}
+                    disabledAt={detail.disabledAt}
+                    locale={locale}
+                  />
+                </span>
               </div>
             )}
             <div className="oc-kv">
@@ -268,8 +305,10 @@ export function UsersView() {
               <th>{t('users.colUser')}</th>
               <th>{t('users.colEmail')}</th>
               <th>{t('users.colKind')}</th>
-              <th>{t('users.colCreated')}</th>
+              <th>{t('users.colOauth')}</th>
               <th>{t('users.colStatus')}</th>
+              <th>{t('users.colCreated')}</th>
+              <th>{t('users.colExpires')}</th>
             </tr>
           </thead>
           <tbody>
@@ -280,13 +319,23 @@ export function UsersView() {
                 </td>
                 <td>{u.email ?? <span className="oc-muted">—</span>}</td>
                 <td>{u.isGuest ? t('users.guest') : t('users.registered')}</td>
-                <td className="num">{fmtDateTime(u.createdAt, locale)}</td>
+                <td>
+                  <OAuthBadges oauthProviders={u.oauthProviders} hasPassword={u.hasPassword} />
+                </td>
                 <td>
                   {u.disabledAt ? (
                     <SignalBadge aspect="stop" label={t('users.disabledBadge')} />
                   ) : (
                     <SignalBadge aspect="clear" label={t('users.active')} />
                   )}
+                </td>
+                <td className="num">{fmtDateTime(u.createdAt, locale)}</td>
+                <td className="num">
+                  <ExpiresCell
+                    guestExpiresAt={u.guestExpiresAt}
+                    disabledAt={u.disabledAt}
+                    locale={locale}
+                  />
                 </td>
               </tr>
             ))}
