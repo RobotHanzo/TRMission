@@ -807,3 +807,18 @@ table.oc-table {
 .oc-toast-chip--error {
   background: var(--oc-signal-stop);
 }
+
+/* ---- oauth badges --------------------------------------------------------------------- */
+
+.oc-oauth-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.oc-oauth-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--oc-ink-soft);
+}
