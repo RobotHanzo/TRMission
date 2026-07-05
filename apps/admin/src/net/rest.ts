@@ -120,6 +120,28 @@ export interface RoomRow {
   members: { userId: string; displayName: string; isBot: boolean; seat: number }[];
 }
 
+export interface MapAdminRow {
+  id: string;
+  ownerId: string;
+  ownerDisplayName?: string;
+  nameZh: string;
+  nameEn: string;
+  revision: number;
+  shared: boolean;
+  updatedAt: string;
+}
+export interface MapAdminDetail extends MapAdminRow {
+  createdAt: string;
+  shareCode?: string;
+  usageCount: number;
+  draft: {
+    cities: { id: string; x: number; y: number }[];
+    routes: { a: string; b: string }[];
+    tickets: unknown[];
+  };
+}
+export type MapsPage = { maps: MapAdminRow[]; nextCursor: string | null };
+
 export interface MaintainerRow {
   userId: string;
   role: DashboardRole;
@@ -300,4 +322,15 @@ export const api = {
 
   getPurgeStatus: () => req<PurgeStatus>('GET', '/dashboard/purge/status'),
   runPurge: () => req<PurgeRunResult>('POST', '/dashboard/purge/run', {}),
+
+  listMaps: (opts: { cursor?: string } = {}) => req<MapsPage>('GET', `/dashboard/maps${qs(opts)}`),
+  getMap: (id: string) => req<MapAdminDetail>('GET', `/dashboard/maps/${encodeURIComponent(id)}`),
+  deleteMap: (id: string, reason?: string) =>
+    req<void>('DELETE', `/dashboard/maps/${encodeURIComponent(id)}`, { reason }),
+  unshareMap: (id: string, reason?: string) =>
+    req<void>('DELETE', `/dashboard/maps/${encodeURIComponent(id)}/share`, { reason }),
+  transferMap: (id: string, newOwnerId: string) =>
+    req<MapAdminDetail>('POST', `/dashboard/maps/${encodeURIComponent(id)}/transfer`, {
+      newOwnerId,
+    }),
 };

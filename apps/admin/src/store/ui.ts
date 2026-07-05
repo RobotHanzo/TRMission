@@ -11,7 +11,8 @@ export type AdminView =
   | 'rooms'
   | 'maintainers'
   | 'audit'
-  | 'purge';
+  | 'purge'
+  | 'maps';
 
 export type AdminTheme = 'dark' | 'light';
 export type AdminLocale = 'zh-Hant' | 'en';
@@ -24,7 +25,9 @@ const LOCALE_KEY = 'trm.admin.locale';
 export function parsePath(pathname: string): { view: AdminView; param: string | null } {
   let p = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
   if (!p.startsWith('/')) p = `/${p}`;
-  const m = /^\/(users|features|games|rooms|maintainers|audit|purge)(?:\/([^/]+))?\/?$/.exec(p);
+  const m = /^\/(users|features|games|rooms|maintainers|audit|purge|maps)(?:\/([^/]+))?\/?$/.exec(
+    p,
+  );
   if (m) return { view: m[1] as AdminView, param: m[2] ? decodeURIComponent(m[2]) : null };
   return { view: 'overview', param: null };
 }
@@ -71,7 +74,7 @@ interface UiState {
   locale: AdminLocale;
   navigate(view: AdminView, param?: string | null): void;
   /** Detail drawers push their id into the URL so refresh/share lands back on them. */
-  openDetail(view: 'users' | 'games', id: string): void;
+  openDetail(view: 'users' | 'games' | 'maps', id: string): void;
   closeDetail(): void;
   syncFromUrl(): void;
   setTheme(theme: AdminTheme): void;
@@ -94,7 +97,7 @@ export const useUi = create<UiState>()((set, get) => ({
   },
   closeDetail() {
     const { view } = get();
-    if (view === 'users' || view === 'games') {
+    if (view === 'users' || view === 'games' || view === 'maps') {
       pushPath(pathFor(view));
       set({ param: null });
     }

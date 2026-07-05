@@ -10,6 +10,7 @@ const zhHant = {
     features: '功能開通',
     games: '對局',
     rooms: '房間',
+    maps: '地圖',
     maintainers: '維護者',
     audit: '稽核',
     purge: '清理',
@@ -198,6 +199,16 @@ const zhHant = {
     deleteConfirmBodyStarted:
       '此房間仍有進行中的對局,將先強制終止該對局(不會留下成績),再永久刪除房間紀錄。此操作無法復原。',
   },
+  maps: {
+    title: '自訂地圖管理',
+    colName: '名稱',
+    colOwner: '擁有者',
+    colRevision: '版本',
+    colShared: '分享狀態',
+    colUpdated: '更新時間',
+    sharedYes: '已分享',
+    sharedNo: '未分享',
+  },
   maintainers: {
     title: '維護者管理',
     colUser: '使用者',
@@ -309,6 +320,7 @@ const en: typeof zhHant = {
     features: 'Feature access',
     games: 'Games',
     rooms: 'Rooms',
+    maps: 'Maps',
     maintainers: 'Maintainers',
     audit: 'Audit',
     purge: 'Purge',
@@ -499,6 +511,16 @@ const en: typeof zhHant = {
     deleteConfirmBodyStarted:
       'This room still has a game in progress. It will be force-terminated first (no scores, ' +
       'not replayable), then the room record is permanently deleted. This cannot be undone.',
+  },
+  maps: {
+    title: 'Custom Maps',
+    colName: 'Name',
+    colOwner: 'Owner',
+    colRevision: 'Revision',
+    colShared: 'Sharing',
+    colUpdated: 'Updated',
+    sharedYes: 'Shared',
+    sharedNo: 'Not shared',
   },
   maintainers: {
     title: 'Maintainers',
