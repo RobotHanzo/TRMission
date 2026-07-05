@@ -37,6 +37,7 @@ export interface Overview {
     protocolVersion: number;
     contentHash: string;
     uptimeSeconds: number;
+    commitHash: string;
   };
 }
 

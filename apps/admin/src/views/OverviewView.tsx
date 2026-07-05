@@ -68,6 +68,12 @@ export function OverviewView() {
 
   const m = data.metrics;
   const leaksAspect = m.leaksBlocked > 0 ? 'stop' : 'clear';
+  const webCommitHash = (import.meta.env.VITE_COMMIT_HASH as string | undefined) ?? 'dev';
+  const mismatch =
+    !!data &&
+    data.versions.commitHash !== 'dev' &&
+    webCommitHash !== 'dev' &&
+    data.versions.commitHash !== webCommitHash;
 
   return (
     <div>
@@ -167,6 +173,23 @@ export function OverviewView() {
                 {data.versions.contentHash.slice(0, 12)}…
               </span>
             </div>
+            <div className="oc-kv">
+              <span className="k">{t('overview.serverCommit')}</span>
+              <span className="v" title={data.versions.commitHash}>
+                {data.versions.commitHash}
+              </span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('overview.webCommit')}</span>
+              <span className="v" title={webCommitHash}>
+                {webCommitHash}
+              </span>
+            </div>
+            {mismatch && (
+              <div className="oc-kv">
+                <SignalBadge aspect="caution" label={t('overview.versionMismatch')} />
+              </div>
+            )}
             <div className="oc-kv">
               <span className="k">{t('overview.uptime')}</span>
               <span className="v">{fmtUptime(data.versions.uptimeSeconds)}</span>
