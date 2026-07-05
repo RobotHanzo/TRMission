@@ -101,4 +101,39 @@ export class CustomMapRepo implements OnModuleInit {
     const res = await this.col.updateOne({ _id: id, ownerId }, { $unset: { shareCode: '' } });
     return res.matchedCount === 1;
   }
+
+  /** Admin listing: every map, any owner, newest-updated first. No ownerId filter — see
+   *  DashboardMapsService, the only caller allowed to bypass ownership. */
+  listAllPage(cursor: { t: Date; id: string } | null, limit: number): Promise<CustomMapDoc[]> {
+    const page = cursor
+      ? { $or: [{ updatedAt: { $lt: cursor.t } }, { updatedAt: cursor.t, _id: { $lt: cursor.id } }] }
+      : {};
+    return this.col.find(page).sort({ updatedAt: -1, _id: -1 }).limit(limit).toArray();
+  }
+
+  /** Admin lookup: no ownerId filter. */
+  findByIdAny(id: string): Promise<CustomMapDoc | null> {
+    return this.col.findOne({ _id: id });
+  }
+
+  /** Admin hard-delete: no ownerId filter. Leaves any published `mapContents` untouched. */
+  async removeAny(id: string): Promise<boolean> {
+    const res = await this.col.deleteOne({ _id: id });
+    return res.deletedCount === 1;
+  }
+
+  /** Admin force-unshare: no ownerId filter. */
+  async revokeShareCodeAny(id: string): Promise<boolean> {
+    const res = await this.col.updateOne({ _id: id }, { $unset: { shareCode: '' } });
+    return res.matchedCount === 1;
+  }
+
+  /** Admin transfer: reassigns ownerId, no ownerId filter on the match. */
+  transferOwner(id: string, newOwnerId: string): Promise<CustomMapDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: id },
+      { $set: { ownerId: newOwnerId, updatedAt: new Date() } },
+      { returnDocument: 'after' },
+    );
+  }
 }

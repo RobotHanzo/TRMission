@@ -20,6 +20,7 @@ export class MapContentRepo implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.col.createIndex({ ownerId: 1 });
+    await this.col.createIndex({ sourceMapId: 1 });
   }
 
   findByHash(hash: string): Promise<MapContentDoc | null> {
@@ -33,5 +34,10 @@ export class MapContentRepo implements OnModuleInit {
     } catch (e) {
       if (!isDuplicateKey(e)) throw e;
     }
+  }
+
+  /** Every published revision of one custom map (for admin usage-count aggregation). */
+  findBySourceMapId(sourceMapId: string): Promise<MapContentDoc[]> {
+    return this.col.find({ sourceMapId }).toArray();
   }
 }

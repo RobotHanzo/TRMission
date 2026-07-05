@@ -10,6 +10,6 @@ import { AuthModule } from '../auth/auth.module';
   imports: [AuthModule],
   controllers: [MapsContentController, MapsController],
   providers: [MapsService, CustomMapRepo, MapContentRepo],
-  exports: [MapsService, MapContentRepo],
+  exports: [MapsService, CustomMapRepo, MapContentRepo],
 })
 export class MapsModule {}
