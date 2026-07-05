@@ -12,8 +12,9 @@ import {
   type ClientEnvelope,
   type GameEvent as PbGameEvent,
   type CameraView,
+  type Chat,
 } from '@trm/proto';
-import { asPlayerId, messageKeyFor, SESSION_REPLACED_CLOSE_CODE } from '@trm/shared';
+import { asPlayerId, isChatPresetId, messageKeyFor, SESSION_REPLACED_CLOSE_CODE } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
 import { boardForContentHash } from '@trm/engine';
 import type { Action, Board, GameConfig, GameEvent } from '@trm/engine';
@@ -40,7 +41,7 @@ import {
   cameraMovedFrame,
   pongFrame,
 } from '@trm/codec';
-import type { ChatEntry } from '../persistence/types';
+import type { ChatEntry, ChatContent } from '../persistence/types';
 
 export interface GameHubOptions {
   verifier?: TicketVerifier;
@@ -254,7 +255,7 @@ export class GameHub {
         this.onResync(conn);
         return;
       case 'chat':
-        await this.onChat(conn, env.clientSeq, cmd.value.text);
+        await this.onChat(conn, env.clientSeq, cmd.value.content);
         return;
       case 'cameraUpdate':
         this.onCameraUpdate(conn, cmd.value.view);
@@ -379,16 +380,37 @@ export class GameHub {
     }
   }
 
-  private async onChat(conn: Connection, clientSeq: number, raw: string): Promise<void> {
+  private async onChat(conn: Connection, clientSeq: number, content: Chat['content']): Promise<void> {
     if (!conn.binding || conn.binding.seat < 0) return; // unbound or spectator → no chat
-    const text = raw.trim();
-    if (text.length === 0) return; // ignore empty
-    if (text.length > CHAT_MAX_LEN) {
-      conn.send(
-        rejectionFrame(clientSeq, RejectionCode.MALFORMED, 'errors:chatTooLong', 'chat too long'),
-      );
-      return;
+
+    let toSend: ChatContent;
+    if (content.case === 'text') {
+      const text = content.value.trim();
+      if (text.length === 0) return; // ignore empty
+      if (text.length > CHAT_MAX_LEN) {
+        conn.send(
+          rejectionFrame(clientSeq, RejectionCode.MALFORMED, 'errors:chatTooLong', 'chat too long'),
+        );
+        return;
+      }
+      toSend = { case: 'text', value: text };
+    } else if (content.case === 'presetId') {
+      if (!isChatPresetId(content.value)) {
+        conn.send(
+          rejectionFrame(
+            clientSeq,
+            RejectionCode.MALFORMED,
+            'errors:chatInvalidPreset',
+            'unknown chat preset',
+          ),
+        );
+        return;
+      }
+      toSend = { case: 'presetId', value: content.value };
+    } else {
+      return; // empty oneof — nothing to send
     }
+
     const now = Date.now();
     conn.chatTimes = conn.chatTimes.filter((ts) => now - ts < CHAT_RATE_WINDOW_MS);
     if (conn.chatTimes.length >= CHAT_RATE_MAX) {
@@ -408,11 +430,11 @@ export class GameHub {
     const playerId = conn.binding.player as string;
     const log = this.chatLog.get(gameId) ?? [];
     const seq = log.length;
-    log.push({ playerId, text, ts: now });
+    log.push({ playerId, content: toSend, ts: now });
     this.chatLog.set(gameId, log);
     if (this.store) {
       try {
-        await this.store.appendChat(gameId, seq, playerId, text);
+        await this.store.appendChat(gameId, seq, playerId, toSend);
       } catch {
         // non-fatal: in-memory log still serves this session's backfill
       }
@@ -420,7 +442,7 @@ export class GameHub {
 
     const members = this.members.get(gameId);
     if (!members) return;
-    for (const member of members.values()) member.send(chatFrame(playerId, text));
+    for (const member of members.values()) member.send(chatFrame(playerId, toSend));
   }
 
   /**
