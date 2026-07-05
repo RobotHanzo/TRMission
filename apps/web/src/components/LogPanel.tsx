@@ -6,7 +6,7 @@ import { useGameStore } from '../store/game';
 import { useUi } from '../store/ui';
 import { usePlayerName } from '../game/playerName';
 import { SEAT_COLORS, CARD_COLOR_TOKENS } from '../theme/colors';
-import { cityName, routeById } from '../game/content';
+import { cityName, routeById, ticketLabel } from '../game/content';
 import { eventNameKey } from '../game/events';
 import type { CardColor } from '@trm/shared';
 import type { LogEntry } from '../game/logModel';
@@ -84,6 +84,17 @@ export function LogPanel() {
           city: e.data.cityId ? cityName(String(e.data.cityId), locale) : '',
           route: e.data.routeId ? routeName(String(e.data.routeId)) : '',
         });
+      case 'ticketCompleted': {
+        const label = ticketLabel(String(e.data.ticketId), locale);
+        return label
+          ? t('log.ticketCompleted', {
+              name,
+              from: label.a,
+              to: label.b,
+              points: label.value,
+            })
+          : '';
+      }
     }
   };
 

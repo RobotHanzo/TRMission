@@ -14,6 +14,7 @@ export type LogKind =
   | 'drewBlind'
   | 'tookFaceup'
   | 'ticketsKept'
+  | 'ticketCompleted'
   | 'passed'
   | 'endgame'
   | 'gameEnded'
@@ -159,6 +160,14 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
             cityId: ev.value.cityId,
             routeId: ev.value.routeId,
           },
+          importance: 'highlight',
+        });
+        break;
+      case 'ticketCompleted':
+        out.push({
+          kind: 'ticketCompleted',
+          playerId: ev.value.playerId,
+          data: { ticketId: ev.value.ticketId },
           importance: 'highlight',
         });
         break;

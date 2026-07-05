@@ -6,6 +6,7 @@ import '../i18n';
 import { LogPanel } from './LogPanel';
 import { useLog } from '../store/log';
 import { useGame } from '../store/game';
+import { TICKETS } from '../game/content';
 
 beforeEach(() => {
   useLog.getState().reset();
@@ -40,5 +41,24 @@ describe('LogPanel', () => {
     // P1 fallback name (no roster) + points; importance class present.
     expect(screen.getByText(/P1/)).toBeInTheDocument();
     expect(document.querySelector('.log-line.log-highlight')).not.toBeNull();
+  });
+
+  it('renders a ticket-completed line with the resolved cities and points', () => {
+    const ticket = TICKETS[0]!;
+    useLog.setState({
+      entries: [
+        {
+          id: 1,
+          kind: 'ticketCompleted',
+          playerId: 'p1',
+          data: { ticketId: ticket.id },
+          importance: 'highlight',
+        },
+      ],
+      nextId: 2,
+    });
+    render(<LogPanel />);
+    expect(document.querySelector('.log-line.log-highlight')).not.toBeNull();
+    expect(screen.getByText(new RegExp(`\\+${ticket.value}`))).toBeInTheDocument();
   });
 });

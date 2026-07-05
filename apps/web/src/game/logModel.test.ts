@@ -12,6 +12,7 @@ describe('entriesFromEvents', () => {
       ev({ case: 'routeClaimed', value: { playerId: 'p1', routeId: 'R1', pointsAwarded: 7 } }),
       ev({ case: 'stationBuilt', value: { playerId: 'p2', cityId: 'C9' } }),
       ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2 } }),
+      ev({ case: 'ticketCompleted', value: { playerId: 'p1', ticketId: 'S17' } }),
     ]);
     expect(out).toEqual([
       {
@@ -22,6 +23,12 @@ describe('entriesFromEvents', () => {
       },
       { kind: 'stationBuilt', playerId: 'p2', data: { cityId: 'C9' }, importance: 'highlight' },
       { kind: 'endgame', playerId: 'p1', data: { turns: 2 }, importance: 'alert' },
+      {
+        kind: 'ticketCompleted',
+        playerId: 'p1',
+        data: { ticketId: 'S17' },
+        importance: 'highlight',
+      },
     ]);
   });
 
