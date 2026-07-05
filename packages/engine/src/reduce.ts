@@ -16,7 +16,7 @@ import { validateRoutePayment, validateStationPayment } from './payments';
 import { currentPlayerId, endTurn } from './turn';
 import { offerTickets } from './tickets';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
-import { borrowConnectedTicketIds, citiesConnected } from './graph/connectivity';
+import { borrowConnectedTicketIds, ownConnectedTicketIds, citiesConnected } from './graph/connectivity';
 import { stationBorrowEdges } from './scoring';
 import {
   isRouteClosed,
@@ -782,17 +782,18 @@ function applyPass(board: Board, state: GameState, player: PlayerId): ReduceResu
 // ─────────────────────────────────────── instant ticket completion ──────────────────────────
 
 /**
- * Under `unlimitedStationBorrow`, re-evaluate every player's kept tickets after a connectivity
- * change and lock any newly-completed ones into `completedTickets`, emitting TICKET_COMPLETED.
- * No-op when the variant is off. ALL players are checked because an opponent's claim into a
- * player's station city can complete that player's ticket. The borrow graph only grows, so this
- * is monotonic — a locked ticket never retracts, and the locked set equals the end-game total.
+ * Re-evaluate every player's kept tickets after a connectivity change and lock any
+ * newly-completed ones into `completedTickets`, emitting TICKET_COMPLETED. Own-track completion
+ * (`ownConnectedTicketIds`) is checked in EVERY game; under `unlimitedStationBorrow` the fuller
+ * borrow-aware check (`borrowConnectedTicketIds`, a superset) is used instead. ALL players are
+ * checked because an opponent's claim into a player's station city can complete that player's
+ * ticket under the borrow variant. Both checks are monotonic — a locked ticket never retracts,
+ * and the locked set equals the end-game total.
  */
 function lockCompletedTickets(
   board: Board,
   state: GameState,
 ): { state: GameState; events: GameEvent[] } {
-  if (!state.ruleParams.unlimitedStationBorrow) return { state, events: [] };
   let next = state;
   const events: GameEvent[] = [];
   for (const pid of state.turnOrder) {
@@ -814,11 +815,13 @@ function lockCompletedTickets(
       })
       .filter((x): x is { id: string; a: string; b: string } => x !== null);
 
-    const connected = borrowConnectedTicketIds({
-      ownEdges,
-      borrowEdges: stationBorrowEdges(board, next, pid),
-      tickets,
-    });
+    const connected = state.ruleParams.unlimitedStationBorrow
+      ? borrowConnectedTicketIds({
+          ownEdges,
+          borrowEdges: stationBorrowEdges(board, next, pid),
+          tickets,
+        })
+      : ownConnectedTicketIds({ ownEdges, tickets });
     const newly = connected.filter((id) => !already.has(id));
     if (newly.length > 0) {
       const newIds = newly.map((id) => asTicketId(id));

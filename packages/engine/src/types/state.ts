@@ -35,8 +35,9 @@ export interface PlayerState {
   readonly pendingTicketOffer: readonly TicketId[] | null;
   /** Running board score from claimed routes (tickets/bonus added at game end). */
   readonly routePoints: number;
-  /** Tickets locked as completed mid-game (only populated under the unlimitedStationBorrow
-   *  variant). Monotonic; points are banked the moment a ticket enters this list. */
+  /** Tickets locked as completed mid-game the instant own-track connectivity (or, under
+   *  unlimitedStationBorrow, the fuller borrow-aware check) joins their endpoints. Monotonic;
+   *  points are banked the moment a ticket enters this list. */
   readonly completedTickets: readonly TicketId[];
 }
 
@@ -136,4 +137,10 @@ export const SCHEMA_VERSION = 1;
 // unlimitedStationBorrow variant's station-borrow completion), not just own-connected — closing a
 // gap where a borrow-only completion never triggered the forced re-draw. Off-variant behavior
 // (completedTickets always empty) is identical to v5.
-export const ENGINE_VERSION = 6;
+// v7: TICKET_COMPLETED (and the completedTickets lock) now fires for own-track completion in
+// EVERY game, not just unlimitedStationBorrow — closing the gap where a standard game's ticket
+// completions were never locked/announced mid-game, only computed on demand for display. This
+// only changes *when* completedTickets is populated; a game's final scoring is unaffected
+// (evaluatePlayerTickets always re-derives completion independently, never reading this field
+// off-variant).
+export const ENGINE_VERSION = 7;

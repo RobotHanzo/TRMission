@@ -76,7 +76,7 @@ function readyState(
   };
 }
 
-describe('instant locked ticket completion (unlimitedStationBorrow on)', () => {
+describe('instant locked ticket completion', () => {
   it('locks a ticket the moment own track connects it', () => {
     const { board, config } = cfg({ unlimitedStationBorrow: true });
     const found = findDirect(board);
@@ -144,7 +144,7 @@ describe('instant locked ticket completion (unlimitedStationBorrow on)', () => {
     ).toBe(true);
   });
 
-  it('does not record completion in state when the variant is off', () => {
+  it('also locks own-track completion when the variant is off (default game)', () => {
     const { board, config } = cfg(); // default: unlimitedStationBorrow false
     const { t, r } = findDirect(board)!;
     const me = asPlayerId('p0');
@@ -159,7 +159,11 @@ describe('instant locked ticket completion (unlimitedStationBorrow on)', () => {
     });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
-    expect(res.value.state.players['p0']!.completedTickets).toEqual([]);
-    expect(res.value.events.some((e) => e.e === 'TICKET_COMPLETED')).toBe(false);
+    expect(res.value.state.players['p0']!.completedTickets).toContain(t.id);
+    expect(
+      res.value.events.some(
+        (e) => e.e === 'TICKET_COMPLETED' && e.ticket === t.id && e.player === me,
+      ),
+    ).toBe(true);
   });
 });

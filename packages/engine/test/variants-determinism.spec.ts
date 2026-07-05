@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ENGINE_VERSION } from '../src/types/state';
-import { borrowConnectedTicketIds } from '../src/graph/connectivity';
+import { borrowConnectedTicketIds, ownConnectedTicketIds } from '../src/graph/connectivity';
 import { stationBorrowEdges, evaluatePlayerTickets } from '../src/scoring';
 import { stateDigest, replay } from '../src/serialize';
 import { playGreedyGame } from './helpers';
@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 6 (rule 7.5 also counts unlimitedStationBorrow-locked completion)', () => {
-    expect(ENGINE_VERSION).toBe(6);
+  it('is engine version 7 (TICKET_COMPLETED/completedTickets lock now fires off-variant too)', () => {
+    expect(ENGINE_VERSION).toBe(7);
   });
 
   it('replays byte-identically under each variant', () => {
@@ -72,10 +72,25 @@ describe('rule-variant determinism & version', () => {
     expect(sawCompletion).toBe(true); // sanity: at least one ticket was actually completed
   });
 
-  it('records no locked completion when the variant is off (default game)', () => {
+  it('locked completion (variant off) always equals a fresh own-track recomputation', () => {
     const r = playGreedyGame(3, 'no-variant', {});
+    expect(r.finalState.turn.phase).toBe('GAME_OVER');
     for (const pid of r.finalState.turnOrder) {
-      expect(r.finalState.players[pid as string]!.completedTickets).toEqual([]);
+      const p = r.finalState.players[pid as string]!;
+      const keptGoals = p.keptTickets
+        .map((id) => {
+          const t = r.board.ticketById.get(id as string);
+          return t ? { id: id as string, a: t.a as string, b: t.b as string } : null;
+        })
+        .filter((x): x is { id: string; a: string; b: string } => x !== null);
+      const fresh = new Set(
+        ownConnectedTicketIds({
+          ownEdges: ownEdgesOf(r.board, r.finalState, pid as string),
+          tickets: keptGoals,
+        }),
+      );
+      const locked = new Set(p.completedTickets as readonly string[]);
+      expect(locked).toEqual(fresh);
     }
   });
 });
