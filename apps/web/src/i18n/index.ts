@@ -232,6 +232,7 @@ const resources = {
         charterWon: '{{name}} 完成觀光專列',
         hotspotLevel: '打卡熱點 +{{n}}',
         affectedRoutes: '{{n}} 條路線',
+        routeListTitle: '受影響路線',
         TYPHOON_LANDFALL: { name: '颱風登陸', desc: '封閉部分路線；恢復通車後首位鋪設者可得 +2 分' },
         TYPHOON_DAY_OFF: { name: '颱風假', desc: '本輪不可佔領路線，但每回合可多抽一張車廂卡' },
         VIRAL_HOTSPOT: {
@@ -722,6 +723,7 @@ const resources = {
         charterWon: '{{name}} completed the charter',
         hotspotLevel: 'Hotspot +{{n}}',
         affectedRoutes: '{{n}} routes',
+        routeListTitle: 'Affected routes',
         TYPHOON_LANDFALL: {
           name: 'Typhoon Landfall',
           desc: 'Closes some routes; the first to rebuild a reopened route scores +2',
