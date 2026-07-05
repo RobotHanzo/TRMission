@@ -95,7 +95,7 @@ export interface GameDetail {
   players: GamePlayer[];
   spectators: string[];
   roomCode?: string;
-  chat: { playerId: string; text: string; ts: string }[];
+  chat: { playerId: string; ts: string; kind: 'text' | 'preset'; value: string }[];
   terminated?: { at: string; by: string; reason?: string };
 }
 export interface GameLogEntry {

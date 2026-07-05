@@ -7,6 +7,7 @@ import { SignalBadge, aspectForStatus } from '../components/SignalBadge';
 import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { fmtDateTime, shortId } from '../lib/fmt';
+import { chatPresetKey } from '../game/chatPresets';
 
 const TABS = ['LIVE', 'COMPLETED', 'TERMINATED', 'all'] as const;
 const TAB_KEY: Record<(typeof TABS)[number], string> = {
@@ -160,7 +161,14 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 <div className="oc-kv" key={i}>
                   <span className="k oc-mono">{shortId(c.playerId)}</span>
                   <span className="v" style={{ fontFamily: 'inherit' }}>
-                    {c.text}
+                    {c.kind === 'preset' ? (
+                      <>
+                        {t(chatPresetKey(c.value))}{' '}
+                        <span className="oc-chip">{t('games.chatPresetBadge')}</span>
+                      </>
+                    ) : (
+                      c.value
+                    )}
                   </span>
                 </div>
               ))
