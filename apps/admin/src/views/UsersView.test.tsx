@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, within, act } from '@testing-library/react';
 import '../i18n';
 import { UsersView } from './UsersView';
 import { useUi } from '../store/ui';
@@ -148,5 +148,37 @@ describe('UsersView columns', () => {
     expect(await screen.findByTitle('密碼')).toBeInTheDocument();
     // Two dashes expected: Email column ("—") and Expires column ("—").
     expect(screen.getAllByText('—')).toHaveLength(2);
+  });
+});
+
+describe('UsersView search debounce', () => {
+  it('debounces typed search input by 300ms before calling the API', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      useUi.setState({ view: 'users', param: null });
+      stubFetch({ '/dashboard/users?': { status: 200, body: { users: [], nextCursor: null } } });
+      const fetchSpy = vi.mocked(fetch);
+      render(<UsersView />);
+      await screen.findByPlaceholderText('搜尋 ID、電子郵件或名稱…');
+      const callsBeforeTyping = fetchSpy.mock.calls.length;
+
+      fireEvent.change(screen.getByPlaceholderText('搜尋 ID、電子郵件或名稱…'), {
+        target: { value: 'alice' },
+      });
+      // 260ms: past the old 250ms delay (would already have fired under the previous
+      // implementation) but still under the new 300ms delay — this is what actually
+      // discriminates the two, unlike a 200ms/350ms split which both satisfy.
+      await act(async () => {
+        vi.advanceTimersByTime(260);
+      });
+      expect(fetchSpy.mock.calls.length).toBe(callsBeforeTyping);
+
+      await act(async () => {
+        vi.advanceTimersByTime(50); // total 310ms, past the 300ms debounce
+      });
+      expect(fetchSpy.mock.calls.length).toBeGreaterThan(callsBeforeTyping);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

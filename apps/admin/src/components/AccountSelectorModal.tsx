@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, type UserFilter, type UserRow } from '../net/rest';
 import { SignalBadge } from './SignalBadge';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { shortId } from '../lib/fmt';
 
 interface Props {
@@ -24,33 +25,28 @@ export function AccountSelectorModal({
 }: Props) {
   const { t } = useTranslation();
   const [q, setQ] = useState('');
+  const debouncedQ = useDebouncedValue(q, q.trim() ? 300 : 0);
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    const id = setTimeout(
-      () => {
-        setLoading(true);
-        api
-          .listUsers({ ...(q.trim() ? { q: q.trim() } : {}), filter })
-          .then((page) => {
-            if (!cancelled) setRows(page.users);
-          })
-          .catch(() => {
-            if (!cancelled) setRows([]);
-          })
-          .finally(() => {
-            if (!cancelled) setLoading(false);
-          });
-      },
-      q ? 250 : 0,
-    ); // debounce typing, load immediately on open
+    setLoading(true);
+    api
+      .listUsers({ ...(debouncedQ.trim() ? { q: debouncedQ.trim() } : {}), filter })
+      .then((page) => {
+        if (!cancelled) setRows(page.users);
+      })
+      .catch(() => {
+        if (!cancelled) setRows([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
-      clearTimeout(id);
     };
-  }, [q, filter]);
+  }, [debouncedQ, filter]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

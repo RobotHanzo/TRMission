@@ -9,6 +9,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { FeatureToggles } from '../components/FeatureToggles';
 import { OAuthBadges } from '../components/OAuthBadges';
 import { useToast } from '../store/toast';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
 const FILTERS: UserFilter[] = ['all', 'guests', 'registered', 'disabled'];
@@ -247,6 +248,7 @@ export function UsersView() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [filter, setFilter] = useState<UserFilter>('all');
   const [q, setQ] = useState('');
+  const debouncedQ = useDebouncedValue(q, q.trim() ? 300 : 0);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(
@@ -254,7 +256,7 @@ export function UsersView() {
       setLoading(true);
       try {
         const page = await api.listUsers({
-          ...(q.trim() ? { q: q.trim() } : {}),
+          ...(debouncedQ.trim() ? { q: debouncedQ.trim() } : {}),
           filter,
           ...(append ? { cursor: append } : {}),
         });
@@ -264,13 +266,12 @@ export function UsersView() {
         setLoading(false);
       }
     },
-    [filter, q],
+    [filter, debouncedQ],
   );
 
   useEffect(() => {
-    const id = setTimeout(() => void load(null), q ? 250 : 0); // debounce typing
-    return () => clearTimeout(id);
-  }, [load, q]);
+    void load(null);
+  }, [load]);
 
   return (
     <div>

@@ -1399,14 +1399,17 @@ describe('UsersView search debounce', () => {
       fireEvent.change(screen.getByPlaceholderText('搜尋 ID、電子郵件或名稱…'), {
         target: { value: 'alice' },
       });
-      // Not yet — under the 300ms debounce delay.
+      // 260ms: past the old 250ms delay (would already have fired under the previous
+      // implementation) but still under the new 300ms delay — this is what actually
+      // discriminates the two, unlike a 200ms/350ms split which both satisfy (both old
+      // and new code would pass a split that doesn't straddle the exact 250ms boundary).
       await act(async () => {
-        vi.advanceTimersByTime(200);
+        vi.advanceTimersByTime(260);
       });
       expect(fetchSpy.mock.calls.length).toBe(callsBeforeTyping);
 
       await act(async () => {
-        vi.advanceTimersByTime(150); // total 350ms, past the 300ms debounce
+        vi.advanceTimersByTime(50); // total 310ms, past the 300ms debounce
       });
       expect(fetchSpy.mock.calls.length).toBeGreaterThan(callsBeforeTyping);
     } finally {
@@ -1426,9 +1429,8 @@ import { render, screen, fireEvent, within, act } from '@testing-library/react';
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `yarn workspace @trm/admin test UsersView`
-Expected: FAIL — the current implementation debounces at 250ms via its own inline `setTimeout`;
-the test's 200ms/150ms split straddles the new 300ms line, not the old 250ms line, so it won't
-pass until Step 3 lands.
+Expected: FAIL — the current implementation debounces at 250ms via its own inline `setTimeout`,
+so by 260ms it has already fired, failing the `toBe(callsBeforeTyping)` assertion.
 
 - [ ] **Step 3: Update `UsersView.tsx`**
 
