@@ -19,7 +19,7 @@ export function connectGame(ticket: string): GameSocket {
       useLog.getState().ingestLive(events);
     },
     onRejection: (r) => useGame.getState().setRejection({ code: r.code, messageKey: r.messageKey }),
-    onChat: (playerId, text) => useChat.getState().ingest({ playerId, text }),
+    onChat: (playerId, content) => useChat.getState().ingest({ playerId, content }),
     onHistory: (events, chat) => {
       useLog.getState().ingestHistory(events);
       useChat.getState().ingestHistory(chat);

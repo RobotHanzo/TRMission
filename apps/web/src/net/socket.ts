@@ -19,15 +19,18 @@ export type PaymentInit = MessageInitShape<typeof PaymentSchema>;
 
 export type SocketStatus = 'connecting' | 'open' | 'reconnecting' | 'closed';
 
+/** Either free text or a preset id — the same discriminated shape the wire carries. */
+export type ChatContent = { case: 'text'; value: string } | { case: 'presetId'; value: string };
+
 export interface SocketHandlers {
   onStatus?(status: SocketStatus): void;
   onWelcome?(welcome: Welcome): void;
   onSnapshot?(snapshot: GameSnapshot): void;
   onEvents?(stateVersion: number, events: GameEvent[]): void;
   onRejection?(rejection: Rejection): void;
-  onChat?(playerId: string, text: string): void;
+  onChat?(playerId: string, content: ChatContent): void;
   /** One-shot backfill of the action-log history + persisted chat on (re)connect. */
-  onHistory?(events: GameEvent[], chat: { playerId: string; text: string }[]): void;
+  onHistory?(events: GameEvent[], chat: { playerId: string; content: ChatContent }[]): void;
   /** Another member's camera framing, relayed for "follow the acting player". */
   onCameraMoved?(playerId: string, view: CameraView): void;
   /** This seat was claimed by another connection; the socket will not auto-reconnect. */
@@ -106,13 +109,17 @@ export class GameSocket {
       case 'rejection':
         this.handlers.onRejection?.(env.event.value);
         break;
-      case 'chat':
-        this.handlers.onChat?.(env.event.value.playerId, env.event.value.text);
+      case 'chat': {
+        const content = env.event.value.content;
+        if (content.case) this.handlers.onChat?.(env.event.value.playerId, content);
         break;
+      }
       case 'history':
         this.handlers.onHistory?.(
           env.event.value.events,
-          env.event.value.chat.map((c) => ({ playerId: c.playerId, text: c.text })),
+          env.event.value.chat
+            .filter((c) => c.content.case)
+            .map((c) => ({ playerId: c.playerId, content: c.content as ChatContent })),
         );
         break;
       case 'cameraMoved':
@@ -141,7 +148,11 @@ export class GameSocket {
     this.send({ case: 'resync', value: {} });
   }
   chat(text: string): void {
-    this.send({ case: 'chat', value: { text } });
+    this.send({ case: 'chat', value: { content: { case: 'text', value: text } } });
+  }
+  /** Send a preset ("canned") chat message by id — resolved to text by every viewer's own i18n. */
+  chatPreset(presetId: string): void {
+    this.send({ case: 'chat', value: { content: { case: 'presetId', value: presetId } } });
   }
   /** Broadcast this client's camera framing so others can follow (ephemeral, cosmetic). */
   cameraUpdate(view: CameraViewInit): void {

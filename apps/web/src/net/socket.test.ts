@@ -22,11 +22,17 @@ describe('GameSocket history dispatch', () => {
       serverSeq: 1,
       event: {
         case: 'history',
-        value: { stateVersion: 3, events: [], chat: [{ playerId: 'p1', text: 'hi', ts: 5n }] },
+        value: {
+          stateVersion: 3,
+          events: [],
+          chat: [{ playerId: 'p1', ts: 5n, content: { case: 'text', value: 'hi' } }],
+        },
       },
     });
     expect(onHistory).toHaveBeenCalledTimes(1);
-    expect(onHistory.mock.calls[0]?.[1]).toEqual([{ playerId: 'p1', text: 'hi' }]);
+    expect(onHistory.mock.calls[0]?.[1]).toEqual([
+      { playerId: 'p1', content: { case: 'text', value: 'hi' } },
+    ]);
   });
 });
 
