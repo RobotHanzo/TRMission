@@ -195,7 +195,10 @@ describe('@trm/proto wire round-trip', () => {
         value: { playerId: 'p1', content: { case: 'presetId', value: 'THANKS' } },
       },
     });
-    const broadcastBack = fromBinary(ServerEnvelopeSchema, toBinary(ServerEnvelopeSchema, broadcastEnv));
+    const broadcastBack = fromBinary(
+      ServerEnvelopeSchema,
+      toBinary(ServerEnvelopeSchema, broadcastEnv),
+    );
     expect(broadcastBack.event.case).toBe('chat');
     if (broadcastBack.event.case !== 'chat') throw new Error('wrong case');
     expect(broadcastBack.event.value.content.case).toBe('presetId');
@@ -209,12 +212,19 @@ describe('@trm/proto wire round-trip', () => {
           stateVersion: 1,
           events: [],
           chat: [
-            { playerId: 'p2', ts: 1719600000000n, content: { case: 'presetId', value: 'GOOD_GAME' } },
+            {
+              playerId: 'p2',
+              ts: 1719600000000n,
+              content: { case: 'presetId', value: 'GOOD_GAME' },
+            },
           ],
         },
       },
     });
-    const historyBack = fromBinary(ServerEnvelopeSchema, toBinary(ServerEnvelopeSchema, historyEnv));
+    const historyBack = fromBinary(
+      ServerEnvelopeSchema,
+      toBinary(ServerEnvelopeSchema, historyEnv),
+    );
     expect(historyBack.event.case).toBe('history');
     if (historyBack.event.case !== 'history') throw new Error('wrong case');
     expect(historyBack.event.value.chat[0]?.content.case).toBe('presetId');

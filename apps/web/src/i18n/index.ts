@@ -233,7 +233,10 @@ const resources = {
         hotspotLevel: '打卡熱點 +{{n}}',
         affectedRoutes: '{{n}} 條路線',
         routeListTitle: '受影響路線',
-        TYPHOON_LANDFALL: { name: '颱風登陸', desc: '封閉部分路線；恢復通車後首位鋪設者可得 +2 分' },
+        TYPHOON_LANDFALL: {
+          name: '颱風登陸',
+          desc: '封閉部分路線；恢復通車後首位鋪設者可得 +2 分',
+        },
         TYPHOON_DAY_OFF: { name: '颱風假', desc: '本輪不可佔領路線，但每回合可多抽一張車廂卡' },
         VIRAL_HOTSPOT: {
           name: '爆紅打卡站',
@@ -553,7 +556,7 @@ const resources = {
             'Follow a 5-minute interactive tutorial to learn routes, mission tickets, and scoring step by step.',
           learnCta: 'Start tutorial',
           skipTitle: 'Jump right in',
-          skipDesc: "Skip the tutorial and create a room right away — you can learn as you play.",
+          skipDesc: 'Skip the tutorial and create a room right away — you can learn as you play.',
           skipCta: 'Go to homepage',
           footnote: 'You can always revisit the tutorial later from the "Rules" button up top.',
         },

@@ -122,7 +122,10 @@ describe('lobby: preset chat', () => {
       }
       await new Promise((r) => setTimeout(r, 5100));
     }
-    const read = await request(server()).get(`/api/v1/rooms/${code}`).set(auth(a.token)).expect(200);
+    const read = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(a.token))
+      .expect(200);
     expect(read.body.chat).toHaveLength(30);
   }, 60_000);
 });

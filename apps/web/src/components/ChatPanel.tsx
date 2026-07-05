@@ -84,7 +84,9 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean }) {
                 {nameOf({ id: m.playerId, seat: seatOf(m.playerId), isMe: m.playerId === me })}
               </span>
               <span className="chat-text">
-                {m.content.case === 'presetId' ? t(chatPresetKey(m.content.value)) : m.content.value}
+                {m.content.case === 'presetId'
+                  ? t(chatPresetKey(m.content.value))
+                  : m.content.value}
               </span>
             </div>
           ))

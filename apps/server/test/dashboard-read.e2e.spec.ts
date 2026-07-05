@@ -98,7 +98,13 @@ beforeAll(async () => {
     { gameId: doneGameId, seq: 2, action: { type: 'Y' }, stateDigest: 'd2', ts: now },
   ] as never[]);
   await t.db.collection('gameChats').insertMany([
-    { gameId: doneGameId, seq: 0, playerId: 'p-one', content: { case: 'text', value: 'gg' }, ts: now },
+    {
+      gameId: doneGameId,
+      seq: 0,
+      playerId: 'p-one',
+      content: { case: 'text', value: 'gg' },
+      ts: now,
+    },
     {
       gameId: doneGameId,
       seq: 1,

@@ -50,14 +50,18 @@ beforeEach(() => {
 describe('useSoundDriver', () => {
   it('does not fire game-over on the first snapshot (resume safety)', () => {
     render(<Harness />);
-    act(() => useGame.getState().applySnapshot(snap(1, { phase: Phase.GAME_OVER, winners: ['p0'] })));
+    act(() =>
+      useGame.getState().applySnapshot(snap(1, { phase: Phase.GAME_OVER, winners: ['p0'] })),
+    );
     expect(play).not.toHaveBeenCalledWith('gameOverWin');
   });
 
   it('fires gameOverWin on the transition into GAME_OVER', () => {
     render(<Harness />);
     act(() => useGame.getState().applySnapshot(snap(1, {})));
-    act(() => useGame.getState().applySnapshot(snap(2, { phase: Phase.GAME_OVER, winners: ['p0'] })));
+    act(() =>
+      useGame.getState().applySnapshot(snap(2, { phase: Phase.GAME_OVER, winners: ['p0'] })),
+    );
     expect(play).toHaveBeenCalledWith('gameOverWin');
   });
 
@@ -81,7 +85,9 @@ describe('useSoundDriver', () => {
   it('plays yourTurn on a turnStarted event for me', () => {
     render(<Harness />);
     act(() => useGame.getState().applySnapshot(snap(1, {})));
-    const ev: GameEvent = { event: { case: 'turnStarted', value: { playerId: 'p0' } } } as GameEvent;
+    const ev: GameEvent = {
+      event: { case: 'turnStarted', value: { playerId: 'p0' } },
+    } as GameEvent;
     act(() => useGame.getState().applyEvents(2, [ev]));
     expect(play).toHaveBeenCalledWith('yourTurn', 1);
   });
@@ -89,7 +95,9 @@ describe('useSoundDriver', () => {
   it('suppresses yourTurn in sandbox mode (encyclopedia/replay loops)', () => {
     render(<Harness sandbox />);
     act(() => useGame.getState().applySnapshot(snap(1, {})));
-    const ev: GameEvent = { event: { case: 'turnStarted', value: { playerId: 'p0' } } } as GameEvent;
+    const ev: GameEvent = {
+      event: { case: 'turnStarted', value: { playerId: 'p0' } },
+    } as GameEvent;
     act(() => useGame.getState().applyEvents(2, [ev]));
     expect(play).not.toHaveBeenCalledWith('yourTurn', expect.anything());
   });

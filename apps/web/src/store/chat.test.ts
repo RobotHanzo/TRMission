@@ -39,7 +39,9 @@ describe('useChat', () => {
   });
 
   it('ingests a preset message distinctly from free text', () => {
-    useChat.getState().ingest({ playerId: 'p1', content: { case: 'presetId', value: 'GOOD_LUCK' } });
+    useChat
+      .getState()
+      .ingest({ playerId: 'p1', content: { case: 'presetId', value: 'GOOD_LUCK' } });
     expect(useChat.getState().messages[0]?.content).toEqual({
       case: 'presetId',
       value: 'GOOD_LUCK',

@@ -169,7 +169,7 @@ export class LobbyController {
 
   @Post(':code/rematch')
   @HttpCode(200)
-  @ApiOperation({ summary: "Host resets a finished room back to LOBBY for another round" })
+  @ApiOperation({ summary: 'Host resets a finished room back to LOBBY for another round' })
   @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
   rematch(@CurrentUser() user: AuthUser, @Param('code') code: string) {
     return this.lobby.rematch(code.toUpperCase(), user);

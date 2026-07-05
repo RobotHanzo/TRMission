@@ -74,7 +74,10 @@ describe('history + chat over the hub', () => {
 
     await hub.receive(
       'c1',
-      encodeClient(2, { case: 'chat', value: { content: { case: 'text', value: '  hi there  ' } } }),
+      encodeClient(2, {
+        case: 'chat',
+        value: { content: { case: 'text', value: '  hi there  ' } },
+      }),
     );
     const chat1 = f1.find((f) => f.event.case === 'chat')?.event.value as
       | { content: { case: string; value: string } }
@@ -89,7 +92,10 @@ describe('history + chat over the hub', () => {
     f2.length = 0;
     await hub.receive(
       'c1',
-      encodeClient(3, { case: 'chat', value: { content: { case: 'text', value: 'x'.repeat(2049) } } }),
+      encodeClient(3, {
+        case: 'chat',
+        value: { content: { case: 'text', value: 'x'.repeat(2049) } },
+      }),
     );
     const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
       | { code: number }
@@ -101,7 +107,10 @@ describe('history + chat over the hub', () => {
     for (let i = 0; i < 6; i++) {
       await hub.receive(
         'c1',
-        encodeClient(10 + i, { case: 'chat', value: { content: { case: 'text', value: `m${i}` } } }),
+        encodeClient(10 + i, {
+          case: 'chat',
+          value: { content: { case: 'text', value: `m${i}` } },
+        }),
       );
     }
     const lastRej = (
@@ -126,7 +135,10 @@ describe('history + chat over the hub', () => {
 
     await hub.receive(
       'c1',
-      encodeClient(2, { case: 'chat', value: { content: { case: 'presetId', value: 'GOOD_LUCK' } } }),
+      encodeClient(2, {
+        case: 'chat',
+        value: { content: { case: 'presetId', value: 'GOOD_LUCK' } },
+      }),
     );
     const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as
       | { content: { case: string; value: string } }
@@ -136,7 +148,10 @@ describe('history + chat over the hub', () => {
     f1.length = 0;
     await hub.receive(
       'c1',
-      encodeClient(3, { case: 'chat', value: { content: { case: 'presetId', value: 'NOT_REAL' } } }),
+      encodeClient(3, {
+        case: 'chat',
+        value: { content: { case: 'presetId', value: 'NOT_REAL' } },
+      }),
     );
     const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
       | { code: number; messageKey: string }

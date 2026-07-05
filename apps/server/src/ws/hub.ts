@@ -14,7 +14,12 @@ import {
   type CameraView,
   type Chat,
 } from '@trm/proto';
-import { asPlayerId, isChatPresetId, messageKeyFor, SESSION_REPLACED_CLOSE_CODE } from '@trm/shared';
+import {
+  asPlayerId,
+  isChatPresetId,
+  messageKeyFor,
+  SESSION_REPLACED_CLOSE_CODE,
+} from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
 import { boardForContentHash } from '@trm/engine';
 import type { Action, Board, GameConfig, GameEvent } from '@trm/engine';
@@ -110,7 +115,8 @@ export class GameHub {
     this.metrics = options.metrics ?? NOOP_METRICS;
     this.botMoveDelayMs = options.botMoveDelayMs ?? 600;
     this.botPersistRetries = options.botPersistRetries ?? DEFAULT_BOT_PERSIST_RETRIES;
-    this.botPersistRetryDelayMs = options.botPersistRetryDelayMs ?? DEFAULT_BOT_PERSIST_RETRY_DELAY_MS;
+    this.botPersistRetryDelayMs =
+      options.botPersistRetryDelayMs ?? DEFAULT_BOT_PERSIST_RETRY_DELAY_MS;
     this.botDriverRescheduleMs = options.botDriverRescheduleMs ?? DEFAULT_BOT_DRIVER_RESCHEDULE_MS;
   }
 
@@ -380,7 +386,11 @@ export class GameHub {
     }
   }
 
-  private async onChat(conn: Connection, clientSeq: number, content: Chat['content']): Promise<void> {
+  private async onChat(
+    conn: Connection,
+    clientSeq: number,
+    content: Chat['content'],
+  ): Promise<void> {
     if (!conn.binding || conn.binding.seat < 0) return; // unbound or spectator → no chat
 
     let toSend: ChatContent;
@@ -670,7 +680,12 @@ export class GameHub {
   /** Choose + apply one move for `profile`. */
   private async botMove(match: Match, profile: BotProfile): Promise<BotMoveOutcome> {
     const botId = asPlayerId(profile.playerId);
-    const chosen = chooseBotAction(match.session.board, match.session.raw(), botId, profile.difficulty);
+    const chosen = chooseBotAction(
+      match.session.board,
+      match.session.raw(),
+      botId,
+      profile.difficulty,
+    );
     const chosenPrep = chosen ? match.session.prepare(chosen) : null;
 
     let action: Action;

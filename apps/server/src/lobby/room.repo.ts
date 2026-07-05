@@ -144,10 +144,7 @@ export class RoomRepo implements OnModuleInit {
   ): Promise<RoomDoc[]> {
     const page = cursor
       ? {
-          $or: [
-            { updatedAt: { $lt: cursor.t } },
-            { updatedAt: cursor.t, _id: { $lt: cursor.id } },
-          ],
+          $or: [{ updatedAt: { $lt: cursor.t } }, { updatedAt: cursor.t, _id: { $lt: cursor.id } }],
         }
       : {};
     return this.col
@@ -429,7 +426,10 @@ export class RoomRepo implements OnModuleInit {
     }));
     const res = await this.col.updateOne(
       { _id: code, hostId, status: 'STARTED', gameId: expectedGameId },
-      { $set: { status: 'LOBBY', members, updatedAt: new Date() }, $unset: { gameId: '', seed: '' } },
+      {
+        $set: { status: 'LOBBY', members, updatedAt: new Date() },
+        $unset: { gameId: '', seed: '' },
+      },
     );
     return res.modifiedCount === 1;
   }
