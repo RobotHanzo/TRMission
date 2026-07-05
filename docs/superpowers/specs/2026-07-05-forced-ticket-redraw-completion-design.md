@@ -63,6 +63,18 @@ extend the version-history comment to describe this fix. Existing golden fixture
 be unaffected (none currently exercise a borrow-only-complete-all-tickets scenario at a turn
 boundary) but must still be re-run to confirm.
 
+Unlike the v4 → v5 bump (provably inert for a v4 game — see the comment on
+`REPLAY_COMPATIBLE_ENGINE_VERSIONS` in `apps/server/src/history/history.repo.ts`), this fix is
+**not** guaranteed inert for existing `unlimitedStationBorrow` games: a v4- or v5-stamped game that
+hit the borrow-only-completion edge case would, on replay under the fixed engine, hit a phase
+mismatch (the next logged action expects `AWAIT_ACTION`/`TICKET_SELECTION` per the old sequencing,
+but the fixed engine now diverges into `TICKET_SELECTION` a turn earlier) — not just a digest
+mismatch, but a replay that cannot finish. Decision: narrow `REPLAY_COMPATIBLE_ENGINE_VERSIONS` to
+`[6]` (drop 4 and 5) rather than extend it to `[5, 6]`. This immediately marks all pre-existing
+match history as "not replayable" in the history UI — accepted because correctness (never
+presenting a replay that can silently break mid-playback) outweighs preserving replayability of
+history recorded before this fix, and the project is pre-launch.
+
 ### Tests
 
 `packages/engine/test/forcedTicketDraw.spec.ts` (or a new sibling file): add a case with
