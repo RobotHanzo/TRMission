@@ -98,6 +98,18 @@ describe('PurgeView', () => {
     expect(await screen.findByText('boom')).toBeInTheDocument();
   });
 
+  it('shows an error toast when the initial status fetch fails, and stops showing the loading label', async () => {
+    stubFetch({ '/dashboard/purge/status': { status: 500, body: { message: 'boom' } } });
+    render(
+      <>
+        <PurgeView />
+        <ToastStack />
+      </>,
+    );
+    expect(await screen.findByText('boom')).toBeInTheDocument();
+    expect(screen.queryByText('載入中…')).not.toBeInTheDocument();
+  });
+
   it('hides the run button without purge.run', async () => {
     useSession.setState({
       phase: 'ready',

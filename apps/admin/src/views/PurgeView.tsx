@@ -22,10 +22,12 @@ export function PurgeView() {
     setLoading(true);
     try {
       setStatus(await api.getPurgeStatus());
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [pushToast, t]);
 
   useEffect(() => {
     void load();
@@ -49,7 +51,7 @@ export function PurgeView() {
     return (
       <div>
         <h1 className="oc-page-title">{t('purge.title')}</h1>
-        <div className="oc-empty">{t('common.loading')}</div>
+        <div className="oc-empty">{loading ? t('common.loading') : t('common.empty')}</div>
       </div>
     );
   }
