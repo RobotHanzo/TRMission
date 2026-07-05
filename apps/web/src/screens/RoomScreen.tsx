@@ -57,14 +57,12 @@ export function RoomScreen() {
   const locale = useUi((s) => s.locale);
   const user = useSession((s) => s.user);
   const canBuild = useHasFeature('mapBuilder');
+  const canConfigureEvents = useHasFeature('randomEvents');
 
   const [room, setRoom] = useState<RoomView | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [kicked, setKicked] = useState(false);
   const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
-  // Server feature flag: the events intensity picker is shown ONLY when this is true. A missing
-  // field or a fetch error is treated as disabled (the picker stays hidden).
-  const [eventsFlag, setEventsFlag] = useState(false);
   const pushNotification = useAnimationsStore((s) => s.pushNotification);
   const {
     open: leaveOpen,
@@ -83,22 +81,6 @@ export function RoomScreen() {
       .then(setMyMaps)
       .catch(() => setMyMaps([]));
   }, [user, canBuild]);
-
-  // Fetch the lobby feature-flag once on mount; any failure leaves the picker hidden.
-  useEffect(() => {
-    let active = true;
-    api
-      .getRoomsConfig()
-      .then((c) => {
-        if (active) setEventsFlag(c.randomEventsEnabled);
-      })
-      .catch(() => {
-        if (active) setEventsFlag(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // Poll the room (lobby push is a later enhancement); auto-enter the game when started.
   // `active` doubles as the terminal flag: a terminal outcome clears it, and the interval
@@ -216,6 +198,9 @@ export function RoomScreen() {
 
   const settings = room.settings;
   const settingsLocked = !isHost || room.status !== 'LOBBY';
+  // The host only sees the picker while holding the randomEvents feature; a non-host still sees
+  // (read-only) whatever mode the host already configured, so it's never a mystery mid-game.
+  const showEventsPicker = isHost ? canConfigureEvents : settings.eventsMode !== 'off';
   const setSetting = (patch: Partial<RoomSettings>) =>
     void guard(api.updateRoomSettings(code, patch));
   const RULE_TOGGLES = [
@@ -417,7 +402,7 @@ export function RoomScreen() {
             />
           </div>
         ))}
-        {eventsFlag && (
+        {showEventsPicker && (
           <div className="row between setting-row">
             <span>
               <strong>{t('settingRandomEvents')}</strong>

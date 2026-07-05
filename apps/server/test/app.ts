@@ -16,7 +16,6 @@ import {
   type GoogleIdTokenVerifier,
 } from '../src/auth/google-id-token.verifier';
 import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
-import { LobbyConfig, type LobbyConfigOverrides } from '../src/lobby/lobby-config';
 
 export interface TestApp {
   app: INestApplication;
@@ -42,8 +41,6 @@ export interface TestAppOptions {
   mongod?: MongoMemoryServer;
   /** Logical database name to use on a shared `mongod` (default: 'trm-test'). */
   dbName?: string;
-  /** Override LobbyConfig (random-events feature flag) without touching env. */
-  lobbyConfig?: LobbyConfigOverrides;
 }
 
 export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp> {
@@ -64,8 +61,6 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
     builder = builder
       .overrideProvider(DashboardConfig)
       .useValue(new DashboardConfig(opts.dashboardConfig));
-  if (opts.lobbyConfig)
-    builder = builder.overrideProvider(LobbyConfig).useValue(new LobbyConfig(opts.lobbyConfig));
 
   const moduleRef = await builder.compile();
 

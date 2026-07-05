@@ -21,7 +21,8 @@ export interface RoomSettings {
   noUnfinishedTicketPenalty: boolean;
   doubleRouteSingleFor23: boolean;
   /** Random-events tier fed into the engine at start ('off' = feature absent). Gated server-side
-   *  by LobbyConfig.randomEvents — a room can only carry a non-'off' value while the flag is on. */
+   *  by the host's per-account `randomEvents` feature (`@trm/shared`'s `USER_FEATURES`) — a room
+   *  can only carry a non-'off' value while its host holds that feature. */
   eventsMode: EventsMode;
   allowSpectating: boolean;
   visibility: RoomVisibility;

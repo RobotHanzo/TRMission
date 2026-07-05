@@ -4,7 +4,7 @@
  * server guard, the admin UI, and the web client can never drift — the same
  * no-drift pattern as the dashboard permission taxonomy.
  */
-export const USER_FEATURES = ['replayReview', 'mapBuilder'] as const;
+export const USER_FEATURES = ['replayReview', 'mapBuilder', 'randomEvents'] as const;
 export type UserFeature = (typeof USER_FEATURES)[number];
 
 export const isUserFeature = (s: string): s is UserFeature =>

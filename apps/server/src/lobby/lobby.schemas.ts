@@ -27,9 +27,6 @@ export const GameSettingsSchema = z.object({
 });
 export const UpdateSettingsSchema = GameSettingsSchema.partial();
 
-/** Server-level room configuration (which options a maintainer has enabled). */
-export const RoomConfigSchema = z.object({ randomEventsEnabled: z.boolean() });
-
 export class CreateRoomDto extends createZodDto(CreateRoomSchema) {}
 export class ReadyDto extends createZodDto(ReadySchema) {}
 export class AddBotDto extends createZodDto(AddBotSchema) {}

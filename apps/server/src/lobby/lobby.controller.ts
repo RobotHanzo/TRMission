@@ -2,7 +2,6 @@ import { Body, Controller, Get, HttpCode, Param, Patch, Post, UseGuards } from '
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 import { LobbyService } from './lobby.service';
-import { LobbyConfig } from './lobby-config';
 import { AccessTokenGuard } from '../auth/access-token.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import {
@@ -19,7 +18,6 @@ import {
   RematchVoteSchema,
   ChatSchema,
   RoomViewSchema,
-  RoomConfigSchema,
   TicketResultSchema,
 } from './lobby.schemas';
 import { apiSchema } from '../openapi/openapi';
@@ -30,10 +28,7 @@ import type { AuthUser } from '../auth/auth.types';
 @UseGuards(AccessTokenGuard)
 @Controller('api/v1/rooms')
 export class LobbyController {
-  constructor(
-    private readonly lobby: LobbyService,
-    private readonly lobbyConfig: LobbyConfig,
-  ) {}
+  constructor(private readonly lobby: LobbyService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a room (you become the host)' })
@@ -41,14 +36,6 @@ export class LobbyController {
   @ApiResponse({ status: 201, schema: apiSchema(RoomViewSchema) })
   create(@CurrentUser() user: AuthUser, @Body() body: CreateRoomDto) {
     return this.lobby.create(user, body.maxPlayers ?? 5);
-  }
-
-  // Declared before ':code' so the literal path is matched here, not captured as a room code.
-  @Get('config')
-  @ApiOperation({ summary: 'Server room configuration (which options are enabled)' })
-  @ApiResponse({ status: 200, schema: apiSchema(RoomConfigSchema) })
-  config() {
-    return { randomEventsEnabled: this.lobbyConfig.randomEvents };
   }
 
   // Declared before ':code' so the literal path is matched here, not captured as a room code.

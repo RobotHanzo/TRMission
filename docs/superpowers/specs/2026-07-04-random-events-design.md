@@ -19,9 +19,13 @@ description, and visual is original TRMission content — no wording or art is c
 
 1. **Opt-in room option with intensity levels** — `eventsMode: 'off' | 'light' | 'moderate' | 'intense'`
    (typhoon-warning flavored labels: 關閉／輕度／中度／強烈), default `'off'`.
-2. **Server feature flag, default OFF** — `TRM_RANDOM_EVENTS_ENABLED === '1'` gates whether the option
-   is even selectable; the server enforces it (a settings PATCH turning it on returns 403 while the
-   flag is off; UI hiding is never trusted on its own).
+2. **Per-account gated feature, default OFF** (revised 2026-07-05) — `randomEvents` in `@trm/shared`'s
+   `USER_FEATURES` (same dashboard-granted, per-request-checked mechanism as `mapBuilder`/
+   `replayReview`) gates whether a room's HOST may turn the option on; the server enforces it (a
+   settings PATCH turning it on 403s `FEATURE_DISABLED` unless the host holds the feature; UI hiding
+   is never trusted on its own). Originally shipped as a single server-wide env var
+   (`TRM_RANDOM_EVENTS_ENABLED`) — superseded because enablement needs to vary per account, not just
+   per deployment.
 3. **Forecast + surprises** — restrictive/mixed events (typhoons, sky lantern, aftershock) are
    telegraphed one full round ahead; purely positive events (hotspot, charter, gala, stamp rally) fire
    as surprises at round start with no warning.
@@ -467,28 +471,26 @@ helpers: `charterToPb`, `activeEventToInfo`, `forecastToInfo`, `randomEventsToPb
 `randomEvents` (`undefined` when the view carries none) and `view.settings.eventsMode` →
 `gameSettings.eventsMode` unconditionally (including `"off"`).
 
-### Server flag + config chain
+### Feature-flag + config chain (revised 2026-07-05 — see decision #2)
 
-- `apps/server/src/config/env.ts`: `randomEvents: process.env.TRM_RANDOM_EVENTS_ENABLED === '1'` — the
-  **inverted** idiom versus the auth toggles (`!== '0'`): a missing env var means `false`, so the
-  feature stays off unless a maintainer opts in explicitly.
-- `apps/server/src/lobby/lobby-config.ts` (new): injectable `LobbyConfig` on the `AuthConfig` pattern —
-  `@Optional()` constructor override so tests build `new LobbyConfig({ randomEvents: true })`;
-  `readonly randomEvents: boolean`.
+- `packages/shared/src/features.ts`: `USER_FEATURES` gains `'randomEvents'`, alongside `mapBuilder`/
+  `replayReview` — one array, no separate taxonomy, so the server guard, the admin UI, and the web
+  client can't drift.
 - `apps/server/src/lobby/room.repo.ts`: `RoomSettings.eventsMode: EventsMode`;
   `DEFAULT_ROOM_SETTINGS.eventsMode = 'off'`.
 - Zod: `eventsMode: z.enum(['off','light','moderate','intense'])` added to `GameSettingsSchema`
-  (`lobby.schemas.ts`), so the PATCH partial and `RoomViewSchema.settings` echo it automatically;
-  `RoomConfigSchema = z.object({ randomEventsEnabled: z.boolean() })`.
-- `apps/server/src/lobby/lobby.controller.ts`: `GET /api/v1/rooms/config` declared **before** the
-  `':code'` route (the same trick as the existing `'mine'`), returning
-  `{ randomEventsEnabled: this.lobbyConfig.randomEvents }`.
-- `apps/server/src/lobby/lobby.service.ts`: `updateSettings` throws `ForbiddenException` (403) on a
-  patch setting `eventsMode !== 'off'` while the flag is off; a patch to `'off'` is always allowed.
-  `start()`'s `ruleParams` merge downgrades silently: `eventsMode: this.lobbyConfig.randomEvents ?
-s.eventsMode : 'off'` — a room configured before an ops flag flip is never stranded; the started
-  game's `game_settings.events_mode` always shows the truth. Started games are never retroactively
-  affected by the flag.
+  (`lobby.schemas.ts`), so the PATCH partial and `RoomViewSchema.settings` echo it automatically.
+- `apps/server/src/lobby/lobby.service.ts`: `assertEventsAllowed(userId)` (same strict-gate shape as
+  `assertCustomMapAllowed`/`mapBuilder`) throws `featureDisabled('randomEvents')` (403
+  `FEATURE_DISABLED`) when the caller lacks the feature. `updateSettings` calls it whenever a patch
+  sets `eventsMode !== 'off'`; a patch to `'off'` is always allowed. `start()`'s `ruleParams` merge
+  downgrades silently: `eventsMode: eventsAllowed ? s.eventsMode : 'off'` (checked against the host,
+  who is also the caller of `start()`) — a room configured before the feature is revoked is never
+  stranded; the started game's `game_settings.events_mode` always shows the truth. Started games are
+  never retroactively affected by a later grant/revoke.
+- No server-wide flag, no `GET /rooms/config` endpoint — a room's viewers already learn whether
+  *they* hold the feature from `PublicUser.features` (`GET /auth/me`), the same signal `mapBuilder`
+  uses.
 - `apps/server/src/history/history.repo.ts`: `REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] =
 [4, 5]` replaces the old strict `engineVersion !== ENGINE_VERSION` gate — v5 replays a v4 action log
   identically (v5 only adds inert genesis fields that draw zero extra RNG for a v4-configured game).
@@ -499,12 +501,13 @@ Everything is driven exclusively from `snapshot.randomEvents` / `snapshot.gameSe
 the four event frames arriving in the store's `lastBatch` — the client never recomputes schedule/rule
 truth, only mirrors the server's payment/legality predicates for optimistic UI.
 
-- `apps/web/src/net/rest.ts`: `RoomSettings.eventsMode: EventsMode`; `RoomsConfig` +
-  `api.getRoomsConfig()` (`GET /rooms/config`).
-- `apps/web/src/screens/RoomScreen.tsx`: fetches `rooms/config` once on mount (a failed fetch just
-  hides the picker); a `Segmented<EventsMode>` intensity control (關閉/輕度/中度/強烈) inside the
-  game-settings fieldset, rendered only when the flag is true, wired through the existing
-  `setSetting({ eventsMode })` patch path (non-host / post-start disables it like every other setting).
+- `apps/web/src/net/rest.ts`: `RoomSettings.eventsMode: EventsMode`.
+- `apps/web/src/screens/RoomScreen.tsx`: `useHasFeature('randomEvents')` (same hook `mapBuilder` uses)
+  drives `showEventsPicker` — a `Segmented<EventsMode>` intensity control (關閉/輕度/中度/強烈) inside
+  the game-settings fieldset, wired through the existing `setSetting({ eventsMode })` patch path
+  (non-host / post-start disables it like every other setting). Shown to the host only while they
+  hold the feature; shown read-only to a non-host once the room's `eventsMode` is already non-`'off'`
+  (so it's never a mystery mid-configuration), hidden otherwise.
 - `apps/web/src/game/events.ts` (new): the single snapshot-driven derivation module — `EVENT_KINDS`,
   `eventNameKey`/`eventDescKey` (i18n key builders), `closedRouteIds`/`reopenBonusRouteIds`/
   `skyLanternRouteIds` (route-id sets), `skyLanternSurcharge`/`freeStationAvailable` (exact mirrors of

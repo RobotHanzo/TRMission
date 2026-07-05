@@ -20,7 +20,6 @@ import {
   type RoomSettingsPatch,
   type RoomChatEntry,
 } from './room.repo';
-import { LobbyConfig } from './lobby-config';
 import { GameHub } from '../ws/hub';
 import { TokenService } from '../auth/token.service';
 import { UserRepo } from '../auth/user.repo';
@@ -79,7 +78,6 @@ export class LobbyService {
     private readonly tokens: TokenService,
     private readonly maps: MapsService,
     private readonly users: UserRepo,
-    private readonly lobbyConfig: LobbyConfig,
   ) {}
 
   /**
@@ -97,6 +95,14 @@ export class LobbyService {
     if (selector.source !== 'custom') return;
     if (!(await this.users.hasFeature(userId, 'mapBuilder'))) {
       throw featureDisabled('mapBuilder');
+    }
+  }
+
+  /** Turning on random events is part of the per-account randomEvents feature (same strict-gate
+   *  pattern as mapBuilder) — a dashboard grant on the HOST, not a server-wide env var. */
+  private async assertEventsAllowed(userId: string): Promise<void> {
+    if (!(await this.users.hasFeature(userId, 'randomEvents'))) {
+      throw featureDisabled('randomEvents');
     }
   }
 
@@ -227,10 +233,10 @@ export class LobbyService {
   /** Host updates the per-game settings while the room is still in LOBBY. */
   async updateSettings(code: string, user: AuthUser, patch: RoomSettingsPatch): Promise<RoomView> {
     if (patch.map) await this.assertMapSelectable(patch.map, user.userId);
-    // Server enforcement (UI hiding is not enough): the events option can only be turned on while
-    // the server flag is on. Patching back to 'off' is always allowed.
-    if (patch.eventsMode && patch.eventsMode !== 'off' && !this.lobbyConfig.randomEvents) {
-      throw new ForbiddenException('random events are disabled on this server');
+    // Server enforcement (UI hiding is not enough): the events option can only be turned on by a
+    // host holding the randomEvents feature. Patching back to 'off' is always allowed.
+    if (patch.eventsMode && patch.eventsMode !== 'off') {
+      await this.assertEventsAllowed(user.userId);
     }
     const r = await this.rooms.updateSettings(code, user.userId, patch);
     if (r === 'not_found') throw new NotFoundException('room not found');
@@ -271,6 +277,9 @@ export class LobbyService {
       user.userId,
       room.maxPlayers,
     );
+    // The host is asserted above (`room.hostId === user.userId`), so this checks the same account
+    // that configured the room.
+    const eventsAllowed = await this.users.hasFeature(user.userId, 'randomEvents');
     const config: GameConfig = {
       seed,
       players,
@@ -281,9 +290,9 @@ export class LobbyService {
         secondDrawAfterBlindRainbow: s.secondDrawAfterBlindRainbow,
         noUnfinishedTicketPenalty: s.noUnfinishedTicketPenalty,
         doubleRouteSingleFor23: s.doubleRouteSingleFor23,
-        // Silent downgrade to 'off' if the flag was flipped off between configure and start, so a
+        // Silent downgrade to 'off' if the feature was revoked between configure and start, so a
         // ready room is never stranded. The started game's game_settings.events_mode shows the truth.
-        eventsMode: this.lobbyConfig.randomEvents ? s.eventsMode : 'off',
+        eventsMode: eventsAllowed ? s.eventsMode : 'off',
       },
     };
     const bots: BotProfile[] = room.members

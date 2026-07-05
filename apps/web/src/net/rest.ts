@@ -60,10 +60,6 @@ export interface RoomSettings {
   map: MapSelector;
   eventsMode: EventsMode;
 }
-/** Server feature-flag state for the lobby (drives whether the events picker shows at all). */
-export interface RoomsConfig {
-  randomEventsEnabled: boolean;
-}
 export interface RoomChatEntry {
   userId: string;
   presetId: string;
@@ -309,8 +305,6 @@ export const api = {
   startRoom: (code: string) => req<TicketResult>('POST', `/rooms/${code}/start`),
   getTicket: (code: string) => req<TicketResult>('POST', `/rooms/${code}/ticket`),
   getPublicRooms: () => req<RoomView[]>('GET', '/rooms/public'),
-  /** Server feature-flag state for the lobby (random-events availability). */
-  getRoomsConfig: () => req<RoomsConfig>('GET', '/rooms/config'),
   /** Rooms the signed-in user is currently seated in (lobby or live game) — the rejoin banner. */
   getMyRooms: () => req<RoomView[]>('GET', '/rooms/mine'),
   updateRoomSettings: (code: string, patch: Partial<RoomSettings>) =>
