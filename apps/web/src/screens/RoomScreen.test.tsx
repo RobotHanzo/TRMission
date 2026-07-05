@@ -26,6 +26,7 @@ vi.mock('../net/rest', () => {
       getRoom: vi.fn(),
       getTicket: vi.fn(),
       joinRoom: vi.fn(),
+      spectate: vi.fn(),
       setReady: vi.fn(),
       leaveRoom: vi.fn(),
       addBot: vi.fn(),
@@ -85,6 +86,7 @@ const mocked = api as unknown as {
   getRoom: ReturnType<typeof vi.fn>;
   getTicket: ReturnType<typeof vi.fn>;
   joinRoom: ReturnType<typeof vi.fn>;
+  spectate: ReturnType<typeof vi.fn>;
   kickPlayer: ReturnType<typeof vi.fn>;
   updateRoomSettings: ReturnType<typeof vi.fn>;
 };
@@ -112,11 +114,28 @@ describe('RoomScreen join-via-link', () => {
     expect(mocked.joinRoom).not.toHaveBeenCalled();
   });
 
-  it('does not try to join a game already in progress that it is not part of', async () => {
-    mocked.getRoom.mockResolvedValue(room({ status: 'STARTED', gameId: 'g1' }));
+  it('spectates a started room that allows it, instead of bouncing home', async () => {
+    mocked.getRoom.mockResolvedValue(room({ status: 'STARTED', gameId: 'g1' })); // allowSpectating: true by default
+    mocked.spectate.mockResolvedValue({ gameId: 'g1', ticket: 'spectator-ticket' });
     render(<RoomScreen />);
-    await waitFor(() => expect(useUi.getState().view).toBe('home')); // bounced home
+    await waitFor(() => expect(mocked.spectate).toHaveBeenCalledWith('ABCD'));
+    await waitFor(() => expect(useUi.getState().view).toBe('game'));
+    expect(useUi.getState().gameId).toBe('g1');
     expect(mocked.joinRoom).not.toHaveBeenCalled();
+  });
+
+  it('bounces home instead of spectating when the room disables it', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        status: 'STARTED',
+        gameId: 'g1',
+        settings: { ...baseRoom().settings, allowSpectating: false },
+      }),
+    );
+    render(<RoomScreen />);
+    await waitFor(() => expect(useUi.getState().view).toBe('home'));
+    expect(mocked.joinRoom).not.toHaveBeenCalled();
+    expect(mocked.spectate).not.toHaveBeenCalled();
   });
 
   it('stops polling after a terminal join failure (e.g. 400 room full) instead of retrying forever', async () => {

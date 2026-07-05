@@ -118,7 +118,8 @@ export function RoomScreen() {
           return;
         }
         // A shared link can land a non-member here. Join the lobby once; a game already in
-        // progress that we aren't part of can't be joined, so bail home rather than trap.
+        // progress that we aren't part of can't be joined, so spectate instead if the room
+        // allows it, otherwise bail home rather than trap.
         // (Existing members of a STARTED game skip this and reconnect via the ticket below —
         // the server rejects join on a started room even for members.)
         if (!r.members.some((m) => m.userId === user?.id)) {
@@ -130,8 +131,16 @@ export function RoomScreen() {
             else goHome();
             return;
           }
-          // A started game we aren't in can't be joined: bail home rather than trap.
           if (r.status !== 'LOBBY') {
+            // A started game we aren't in can't be joined — spectate if it's allowed,
+            // otherwise bail home rather than trap.
+            if (r.status === 'STARTED' && r.gameId && r.settings.allowSpectating) {
+              const tk = await api.spectate(code);
+              if (!active) return;
+              connectGame(tk.ticket);
+              enterGame(tk.gameId, tk.ticket);
+              return;
+            }
             active = false;
             goHome();
             return;
