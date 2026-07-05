@@ -61,4 +61,22 @@ describe('LogPanel', () => {
     expect(document.querySelector('.log-line.log-highlight')).not.toBeNull();
     expect(screen.getByText(new RegExp(`\\+${ticket.value}`))).toBeInTheDocument();
   });
+
+  it('renders the taken face-up locomotive chip as the rainbow gradient, not a flat hex', () => {
+    useLog.setState({
+      entries: [
+        {
+          id: 1,
+          kind: 'tookFaceup',
+          playerId: 'p1',
+          data: { color: 'LOCOMOTIVE' },
+          importance: 'normal',
+        },
+      ],
+      nextId: 2,
+    });
+    render(<LogPanel />);
+    const chip = document.querySelector('.log-chip') as HTMLElement;
+    expect(chip.style.background).toContain('linear-gradient');
+  });
 });

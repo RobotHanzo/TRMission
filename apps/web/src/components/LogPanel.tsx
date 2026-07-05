@@ -5,7 +5,7 @@ import { useLogStore } from '../store/log';
 import { useGameStore } from '../store/game';
 import { useUi } from '../store/ui';
 import { usePlayerName } from '../game/playerName';
-import { SEAT_COLORS, CARD_COLOR_TOKENS } from '../theme/colors';
+import { SEAT_COLORS, CARD_COLOR_TOKENS, LOCOMOTIVE_GRADIENT } from '../theme/colors';
 import { cityName, routeById, ticketLabel } from '../game/content';
 import { eventNameKey } from '../game/events';
 import type { CardColor } from '@trm/shared';
@@ -123,7 +123,10 @@ export function LogPanel() {
                 {e.kind === 'tookFaceup' && color && (
                   <span
                     className="log-chip"
-                    style={{ background: CARD_COLOR_TOKENS[color].hex }}
+                    style={{
+                      background:
+                        color === 'LOCOMOTIVE' ? LOCOMOTIVE_GRADIENT : CARD_COLOR_TOKENS[color].hex,
+                    }}
                     title={CARD_COLOR_TOKENS[color].nameZh}
                     aria-hidden
                   />
