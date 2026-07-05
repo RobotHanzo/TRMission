@@ -18,7 +18,9 @@ function stubFetch(routes: Record<string, Route>) {
       const url = String(input);
       const hit = Object.entries(routes).find(([path]) => url.includes(path));
       const route = hit?.[1] ?? { status: 404, body: { message: 'not found' } };
-      return new Response(JSON.stringify(route.body), { status: route.status });
+      // A 204 response must not carry a body, or the Response constructor throws.
+      const body = route.status === 204 ? null : JSON.stringify(route.body);
+      return new Response(body, { status: route.status });
     }),
   );
 }
@@ -120,5 +122,96 @@ describe('GamesView terminate toasts', () => {
     const dialog = await screen.findByRole('dialog', { name: '強制終止此對局?' });
     fireEvent.click(within(dialog).getByRole('button', { name: '強制終止' }));
     expect(await screen.findByText('boom')).toBeInTheDocument();
+  });
+});
+
+// GET /dashboard/games/g1 (detail) and DELETE /dashboard/games/g1 (this task's new route)
+// hit the IDENTICAL path — REST convention, no /verb suffix like /terminate has — and
+// stubFetch() only matches by URL substring, blind to HTTP method. So the two tests that
+// actually invoke delete use a bespoke sequenced mock (1st hit to that path = the detail
+// GET, 2nd = the delete) instead of the shared stubFetch. The third test never clicks
+// confirm (no delete call fires), so it can use stubFetch as normal.
+describe('GamesView delete toasts', () => {
+  beforeEach(() => {
+    useToast.getState().reset();
+    useUi.setState({ view: 'games', param: 'g1' });
+    useSession.setState({
+      phase: 'ready',
+      user: { id: 'u1', displayName: 'Ops', isGuest: false },
+      role: 'admin',
+      permissions: new Set(['games.read', 'games.delete']),
+    });
+  });
+
+  it('shows a success toast and closes the drawer after deleting a game', async () => {
+    let call = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('/dashboard/games?')) {
+          return new Response(JSON.stringify({ games: [], nextCursor: null }), { status: 200 });
+        }
+        if (url.includes('/dashboard/games/g1')) {
+          call += 1;
+          if (call === 1) return new Response(JSON.stringify(GAME_DETAIL), { status: 200 });
+          return new Response(null, { status: 204 });
+        }
+        return new Response(JSON.stringify({ message: 'not found' }), { status: 404 });
+      }),
+    );
+    render(
+      <>
+        <GamesView />
+        <ToastStack />
+      </>,
+    );
+    fireEvent.click(await screen.findByText('刪除對局'));
+    const dialog = await screen.findByRole('dialog', { name: '刪除此對局?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: '刪除對局' }));
+    expect(await screen.findByText('對局已刪除')).toBeInTheDocument();
+  });
+
+  it('shows an error toast when deleting fails', async () => {
+    let call = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('/dashboard/games?')) {
+          return new Response(JSON.stringify({ games: [], nextCursor: null }), { status: 200 });
+        }
+        if (url.includes('/dashboard/games/g1')) {
+          call += 1;
+          if (call === 1) return new Response(JSON.stringify(GAME_DETAIL), { status: 200 });
+          return new Response(JSON.stringify({ message: 'boom' }), { status: 500 });
+        }
+        return new Response(JSON.stringify({ message: 'not found' }), { status: 404 });
+      }),
+    );
+    render(
+      <>
+        <GamesView />
+        <ToastStack />
+      </>,
+    );
+    fireEvent.click(await screen.findByText('刪除對局'));
+    const dialog = await screen.findByRole('dialog', { name: '刪除此對局?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: '刪除對局' }));
+    expect(await screen.findByText('boom')).toBeInTheDocument();
+  });
+
+  it('shows the LIVE-specific confirm body when deleting a live game', async () => {
+    stubFetch({
+      '/dashboard/games/g1': { status: 200, body: { ...GAME_DETAIL, status: 'LIVE' } },
+      '/dashboard/games?': { status: 200, body: { games: [], nextCursor: null } },
+    });
+    render(<GamesView />);
+    fireEvent.click(await screen.findByText('刪除對局'));
+    expect(
+      await screen.findByText(
+        '此對局仍在進行中,將先強制終止(不會留下成績,無法重播),再永久刪除對局紀錄。此操作無法復原。',
+      ),
+    ).toBeInTheDocument();
   });
 });

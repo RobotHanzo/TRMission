@@ -29,11 +29,13 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const canTerminate = useSession((s) => s.hasPermission('games.terminate'));
+  const canDelete = useSession((s) => s.hasPermission('games.delete'));
   const canReadLog = useSession((s) => s.hasPermission('games.readLog'));
   const pushToast = useToast((s) => s.push);
   const [detail, setDetail] = useState<GameDetail | null>(null);
   const [log, setLog] = useState<GameLogEntry[] | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -67,6 +69,20 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     } finally {
       setBusy(false);
       setConfirming(false);
+    }
+  };
+
+  const del = async (reason?: string) => {
+    setBusy(true);
+    try {
+      await api.deleteGame(id, reason);
+      pushToast('success', t('toast.gameDeleted'));
+      onClose();
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+      setConfirmingDelete(false);
     }
   };
 
@@ -212,6 +228,18 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             </section>
           )}
 
+          {canDelete && (
+            <section>
+              <button
+                className="oc-btn danger"
+                disabled={busy}
+                onClick={() => setConfirmingDelete(true)}
+              >
+                {t('games.delete')}
+              </button>
+            </section>
+          )}
+
           {confirming && (
             <ConfirmDialog
               title={t('games.terminateConfirmTitle')}
@@ -222,6 +250,23 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               busy={busy}
               onConfirm={(reason) => void terminate(reason)}
               onCancel={() => setConfirming(false)}
+            />
+          )}
+
+          {confirmingDelete && (
+            <ConfirmDialog
+              title={t('games.deleteConfirmTitle')}
+              body={
+                detail.status === 'LIVE'
+                  ? t('games.deleteConfirmBodyLive')
+                  : t('games.deleteConfirmBody')
+              }
+              confirmLabel={t('games.delete')}
+              danger
+              withReason
+              busy={busy}
+              onConfirm={(reason) => void del(reason)}
+              onCancel={() => setConfirmingDelete(false)}
             />
           )}
         </>
