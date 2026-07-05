@@ -53,19 +53,22 @@ export interface GameSnapshotDoc {
   ts: Date;
 }
 
+/** Either free-typed text or a validated preset id — the same discriminated shape the wire uses. */
+export type ChatContent = { case: 'text'; value: string } | { case: 'presetId'; value: string };
+
 /** A persisted chat line. Chat is non-authoritative (outside the engine/digest). */
 export interface GameChatDoc {
   gameId: string;
   seq: number;
   playerId: string;
-  text: string;
+  content: ChatContent;
   ts: Date;
 }
 
 /** In-memory chat line (the hub keeps these per game and replays them on connect). */
 export interface ChatEntry {
   playerId: string;
-  text: string;
+  content: ChatContent;
   ts: number;
 }
 
@@ -122,7 +125,7 @@ export interface GameStorePort {
   /** Record that a user spectated this game (idempotent; no-op for unknown games). */
   addSpectator(gameId: string, userId: string): Promise<void>;
   loadForRecovery(gameId: string): Promise<RecoveryData | null>;
-  appendChat(gameId: string, seq: number, playerId: string, text: string): Promise<void>;
+  appendChat(gameId: string, seq: number, playerId: string, content: ChatContent): Promise<void>;
   loadChat(gameId: string): Promise<ChatEntry[]>;
 }
 

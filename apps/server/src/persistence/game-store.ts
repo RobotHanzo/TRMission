@@ -18,6 +18,7 @@ import {
   type MatchHistoryDoc,
   type GameChatDoc,
   type ChatEntry,
+  type ChatContent,
 } from './types';
 
 /** Write a full checkpoint snapshot every N actions (also at game over). */
@@ -159,16 +160,21 @@ export class MongoGameStore implements GameStorePort {
     );
   }
 
-  async appendChat(gameId: string, seq: number, playerId: string, text: string): Promise<void> {
+  async appendChat(
+    gameId: string,
+    seq: number,
+    playerId: string,
+    content: ChatContent,
+  ): Promise<void> {
     await this.chats.insertOne(
-      { gameId, seq, playerId, text, ts: new Date() },
+      { gameId, seq, playerId, content, ts: new Date() },
       { writeConcern: { w: 'majority' } },
     );
   }
 
   async loadChat(gameId: string): Promise<ChatEntry[]> {
     const docs = await this.chats.find({ gameId }).sort({ seq: 1 }).toArray();
-    return docs.map((d) => ({ playerId: d.playerId, text: d.text, ts: d.ts.getTime() }));
+    return docs.map((d) => ({ playerId: d.playerId, content: d.content, ts: d.ts.getTime() }));
   }
 
   async loadForRecovery(gameId: string): Promise<RecoveryData | null> {
