@@ -107,21 +107,29 @@ describe('useSoundDriver', () => {
   it('plays chatMessage for an incoming message (opponent attenuated)', () => {
     render(<Harness />);
     act(() => useGame.getState().applySnapshot(snap(1, {})));
-    act(() => useChat.getState().ingest({ playerId: 'p1', text: 'hi' }));
+    act(() =>
+      useChat.getState().ingest({ playerId: 'p1', content: { case: 'text', value: 'hi' } }),
+    );
     expect(play).toHaveBeenCalledWith('chatMessage', 0.5);
   });
 
   it('plays chatMessage at full gain for my own message', () => {
     render(<Harness />);
     act(() => useGame.getState().applySnapshot(snap(1, {})));
-    act(() => useChat.getState().ingest({ playerId: 'p0', text: 'hi' }));
+    act(() =>
+      useChat.getState().ingest({ playerId: 'p0', content: { case: 'text', value: 'hi' } }),
+    );
     expect(play).toHaveBeenCalledWith('chatMessage', 1);
   });
 
   it('does not replay chatMessage from a reconnect history backfill', () => {
     render(<Harness />);
     act(() => useGame.getState().applySnapshot(snap(1, {})));
-    act(() => useChat.getState().ingestHistory([{ playerId: 'p1', text: 'old' }]));
+    act(() =>
+      useChat
+        .getState()
+        .ingestHistory([{ playerId: 'p1', content: { case: 'text', value: 'old' } }]),
+    );
     expect(play).not.toHaveBeenCalledWith('chatMessage', expect.anything());
   });
 });

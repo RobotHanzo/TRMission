@@ -1,9 +1,10 @@
 import { create } from 'zustand';
+import type { ChatContent } from '../net/socket';
 
 export interface ChatMessage {
   id: number;
   playerId: string;
-  text: string;
+  content: ChatContent;
 }
 
 const CAP = 500;
@@ -14,8 +15,8 @@ interface ChatState {
   /** The most recently INGESTED live message (never set by ingestHistory) — lets consumers like the
    *  sound driver react to genuinely new chat only, never to a reconnect's history backfill. */
   lastLive: ChatMessage | null;
-  ingest(msg: { playerId: string; text: string }): void;
-  ingestHistory(msgs: { playerId: string; text: string }[]): void;
+  ingest(msg: { playerId: string; content: ChatContent }): void;
+  ingestHistory(msgs: { playerId: string; content: ChatContent }[]): void;
   reset(): void;
 }
 
