@@ -122,6 +122,23 @@ export interface ReplayPayload {
   /** True when the signed-in viewer is a seated player of this game. */
   canConfigureVisibility: boolean;
 }
+/** The ticket-authorized maintainer replay payload — no normal auth involved, the ticket minted
+ *  by the dashboard is the sole authority. Covers COMPLETED and TERMINATED games alike. */
+export interface AdminReplayPayload {
+  gameId: string;
+  config: ReplayPayload['config'];
+  engineVersion: number;
+  schemaVersion: number;
+  actions: unknown[];
+  status: 'COMPLETED' | 'TERMINATED';
+  players: ReplayPlayerMeta[];
+  winners?: string[];
+  completedAt?: string;
+  terminatedAt?: string;
+  terminatedBy?: string;
+  terminatedReason?: string;
+  finalDigest?: string;
+}
 
 // --- custom maps (builder + shared/cloned + published content by hash) ---
 export interface CityDraft {
@@ -324,6 +341,11 @@ export const api = {
       'PATCH',
       `/history/${encodeURIComponent(gameId)}/visibility`,
       { visibility },
+    ),
+  adminReplay: (gameId: string, ticket: string) =>
+    req<AdminReplayPayload>(
+      'GET',
+      `/history/${encodeURIComponent(gameId)}/admin-replay?ticket=${encodeURIComponent(ticket)}`,
     ),
 
   listMaps: () => req<MapSummary[]>('GET', '/maps'),

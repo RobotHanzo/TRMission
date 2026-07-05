@@ -19,6 +19,7 @@ export type View =
   | 'loginCallback'
   | 'history'
   | 'replay'
+  | 'adminReplay'
   | 'maps'
   | 'mapEditor';
 
@@ -35,6 +36,7 @@ const LOGIN_CALLBACK_PATH = '/login/callback';
 const TUTORIAL_PATH = '/tutorial';
 const HISTORY_PATH = '/history';
 const REPLAY_PATH = /^\/replay\/([^/]+)$/;
+const ADMIN_REPLAY_PATH = /^\/admin-replay\/([^/]+)$/;
 const MAPS_PATH = '/maps';
 const MAP_EDITOR_PATH = /^\/maps\/([^/]+)\/edit$/;
 
@@ -46,6 +48,15 @@ export const roomCodeFromPath = (): string | null => {
 export const replayIdFromPath = (): string | null => {
   const id = REPLAY_PATH.exec(window.location.pathname)?.[1];
   return id ? decodeURIComponent(id) : null;
+};
+
+/** Parses `/admin-replay/:gameId?ticket=...` — the ticket-authorized maintainer route, reachable
+ *  only by loading the URL directly (the dashboard mints it into a fresh tab). */
+export const adminReplayFromPath = (): { id: string; ticket: string | null } | null => {
+  const id = ADMIN_REPLAY_PATH.exec(window.location.pathname)?.[1];
+  if (!id) return null;
+  const ticket = new URLSearchParams(window.location.search).get('ticket');
+  return { id: decodeURIComponent(id), ticket };
 };
 
 export const mapEditorIdFromPath = (): string | null => {
@@ -154,6 +165,9 @@ interface UiState {
   gameId: string | null;
   ticket: string | null;
   replayGameId: string | null;
+  /** The ticket-authorized /admin-replay/:gameId route — game id + ticket parsed from the URL. */
+  adminReplayGameId: string | null;
+  adminReplayTicket: string | null;
   /** The custom map id being edited on /maps/:id/edit. */
   editingMapId: string | null;
   locale: Locale;
@@ -211,6 +225,8 @@ export const useUi = create<UiState>()((set, get) => ({
   gameId: null,
   ticket: null,
   replayGameId: null,
+  adminReplayGameId: null,
+  adminReplayTicket: null,
   editingMapId: null,
   // Seed display prefs from localStorage so guests (and the pre-/auth/me window) persist them.
   locale: readLocale(),
@@ -349,6 +365,22 @@ export const useUi = create<UiState>()((set, get) => ({
       }
       disconnectGame();
       set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    // Ticket-authorized maintainer view — never auth-gated (the ticket is the sole
+    // authority), reachable from a fresh tab with no prior session in this app.
+    const adminReplay = adminReplayFromPath();
+    if (adminReplay) {
+      disconnectGame();
+      set({
+        view: 'adminReplay',
+        adminReplayGameId: adminReplay.id,
+        adminReplayTicket: adminReplay.ticket,
+        roomCode: null,
+        gameId: null,
+        ticket: null,
+        replayGameId: null,
+      });
       return;
     }
     // Replays are NOT auth-gated: a view-by-link replay is watchable while signed out

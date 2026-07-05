@@ -173,7 +173,7 @@ export default function ReplayScreen() {
   );
 }
 
-function ReplayStage({
+export function ReplayStage({
   board,
   config,
   actions,
@@ -189,8 +189,8 @@ function ReplayStage({
   players: ReplayPlayerMeta[];
   finalDigest: string | undefined;
   initialViewer: ReturnType<typeof asPlayerId> | null;
-  share: { gameId: string; visibility: ReplayVisibility; canConfigure: boolean };
-  onLeave: () => void;
+  share?: { gameId: string; visibility: ReplayVisibility; canConfigure: boolean };
+  onLeave?: () => void;
 }) {
   const { t } = useTranslation();
   const gameStore = useGameStoreApi();
@@ -228,16 +228,18 @@ function ReplayStage({
           commands={null}
           sandbox
           frameTarget={frameTarget}
-          onLeave={onLeave}
+          onLeave={onLeave ?? (() => {})}
         />
       </div>
       <aside className="replay-rail">
         <PerspectiveSwitcher players={players} viewer={player.viewer} onChange={player.setViewer} />
-        <ReplayShare
-          gameId={share.gameId}
-          visibility={share.visibility}
-          canConfigure={share.canConfigure}
-        />
+        {share && (
+          <ReplayShare
+            gameId={share.gameId}
+            visibility={share.visibility}
+            canConfigure={share.canConfigure}
+          />
+        )}
         <LogPanel />
       </aside>
       <div className="replay-controls">

@@ -313,6 +313,9 @@ const resources = {
         linkCopied: '已複製連結',
         signInToView: '此重播需要登入後才能觀看',
         signIn: '登入',
+        terminatedReplayNotice:
+          '此對局已被管理員強制終止;回放僅顯示到終止當下的進度,無最終比分。',
+        completedReplayNotice: '此為已完成對局的管理檢視。',
       },
       chat: {
         heading: '聊天',
@@ -841,6 +844,9 @@ const resources = {
         linkCopied: 'Link copied',
         signInToView: 'Sign in to watch this replay',
         signIn: 'Sign in',
+        terminatedReplayNotice:
+          'This game was force-terminated by a maintainer — the replay only shows progress up to that point, with no final score.',
+        completedReplayNotice: 'Maintainer view of a completed game.',
       },
       chat: {
         heading: 'Chat',

@@ -17,6 +17,7 @@ import './styles/home.css';
 const TutorialScreen = lazy(() => import('./features/tutorial/TutorialScreen'));
 const EncyclopediaModal = lazy(() => import('./features/tutorial/EncyclopediaModal'));
 const ReplayScreen = lazy(() => import('./screens/ReplayScreen'));
+const AdminReplayScreen = lazy(() => import('./screens/AdminReplayScreen'));
 // The map builder (world data + zod-shaped editor state) is its own chunk too.
 const MapsScreen = lazy(() => import('./features/builder/MapsScreen'));
 const MapEditorScreen = lazy(() => import('./features/builder/editor/EditorScreen'));
@@ -119,6 +120,11 @@ export function App() {
             {view === 'replay' && (
               <Suspense fallback={<div className="card">{t('connecting')}</div>}>
                 <ReplayScreen />
+              </Suspense>
+            )}
+            {view === 'adminReplay' && (
+              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
+                <AdminReplayScreen />
               </Suspense>
             )}
             {view === 'game' && <GameScreen />}
