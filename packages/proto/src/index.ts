@@ -8,7 +8,9 @@
 // four RandomEvent* GameEvent oneof cases (M4).
 // v4: TicketCompleted GameEvent oneof case (own-track ticket completion, now announced in every
 // game — see ENGINE_VERSION v7 in @trm/engine).
-export const PROTOCOL_VERSION = 4;
+// v5: preset_id oneof case on Chat/ChatBroadcast/ChatEntry — canned, per-locale-translated chat
+// messages alongside free text (@trm/shared's chat-presets catalog).
+export const PROTOCOL_VERSION = 5;
 
 export * from './gen/trmission/v1/common_pb';
 export * from './gen/trmission/v1/client_pb';

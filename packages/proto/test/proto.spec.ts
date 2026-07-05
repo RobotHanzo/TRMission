@@ -164,7 +164,7 @@ describe('@trm/proto wire round-trip', () => {
         value: {
           stateVersion: 12,
           events: [],
-          chat: [{ playerId: 'p2', text: 'hello', ts: 1719600000000n }],
+          chat: [{ playerId: 'p2', ts: 1719600000000n, content: { case: 'text', value: 'hello' } }],
         },
       },
     });
@@ -172,7 +172,52 @@ describe('@trm/proto wire round-trip', () => {
     expect(back.event.case).toBe('history');
     if (back.event.case !== 'history') throw new Error('wrong case');
     expect(back.event.value.stateVersion).toBe(12);
-    expect(back.event.value.chat[0]?.text).toBe('hello');
+    expect(back.event.value.chat[0]?.content.case).toBe('text');
+    expect(back.event.value.chat[0]?.content.value).toBe('hello');
     expect(back.event.value.chat[0]?.ts).toBe(1719600000000n);
+  });
+
+  it('round-trips a preset chat message on Chat, ChatBroadcast, and ChatEntry', () => {
+    const clientEnv = create(ClientEnvelopeSchema, {
+      clientSeq: 4,
+      command: { case: 'chat', value: { content: { case: 'presetId', value: 'GOOD_LUCK' } } },
+    });
+    const clientBack = fromBinary(ClientEnvelopeSchema, toBinary(ClientEnvelopeSchema, clientEnv));
+    expect(clientBack.command.case).toBe('chat');
+    if (clientBack.command.case !== 'chat') throw new Error('wrong case');
+    expect(clientBack.command.value.content.case).toBe('presetId');
+    expect(clientBack.command.value.content.value).toBe('GOOD_LUCK');
+
+    const broadcastEnv = create(ServerEnvelopeSchema, {
+      serverSeq: 5,
+      event: {
+        case: 'chat',
+        value: { playerId: 'p1', content: { case: 'presetId', value: 'THANKS' } },
+      },
+    });
+    const broadcastBack = fromBinary(ServerEnvelopeSchema, toBinary(ServerEnvelopeSchema, broadcastEnv));
+    expect(broadcastBack.event.case).toBe('chat');
+    if (broadcastBack.event.case !== 'chat') throw new Error('wrong case');
+    expect(broadcastBack.event.value.content.case).toBe('presetId');
+    expect(broadcastBack.event.value.content.value).toBe('THANKS');
+
+    const historyEnv = create(ServerEnvelopeSchema, {
+      serverSeq: 6,
+      event: {
+        case: 'history',
+        value: {
+          stateVersion: 1,
+          events: [],
+          chat: [
+            { playerId: 'p2', ts: 1719600000000n, content: { case: 'presetId', value: 'GOOD_GAME' } },
+          ],
+        },
+      },
+    });
+    const historyBack = fromBinary(ServerEnvelopeSchema, toBinary(ServerEnvelopeSchema, historyEnv));
+    expect(historyBack.event.case).toBe('history');
+    if (historyBack.event.case !== 'history') throw new Error('wrong case');
+    expect(historyBack.event.value.chat[0]?.content.case).toBe('presetId');
+    expect(historyBack.event.value.chat[0]?.content.value).toBe('GOOD_GAME');
   });
 });

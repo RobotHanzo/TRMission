@@ -60,7 +60,10 @@ message Pass {}
 message Resync {}
 
 message Chat {
-  string text = 1;
+  oneof content {
+    string text = 1;
+    string preset_id = 2;
+  }
 }
 
 // Ephemeral, non-authoritative: the sender's current camera framing, fanned out to
