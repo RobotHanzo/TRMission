@@ -111,6 +111,77 @@ describe('editor store', () => {
     expect(remaining[0]!.doubleGroup).toBeUndefined();
   });
 
+  it('convertToDouble assigns a doubleGroup and creates a matching sibling route', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2'));
+    s.addRoute(route('r1', 'c1', 'c2', { color: 'RED', length: 3, isTunnel: false, ferryLocos: 0 }));
+
+    s.convertToDouble('r1');
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(2);
+    const original = routes.find((r) => r.id === 'r1')!;
+    expect(original.doubleGroup).toBe('A');
+    const sibling = routes.find((r) => r.id !== 'r1')!;
+    expect(sibling).toMatchObject({
+      a: 'c1',
+      b: 'c2',
+      length: 3,
+      isTunnel: false,
+      ferryLocos: 0,
+      doubleGroup: 'A',
+      color: 'BLUE',
+    });
+  });
+
+  it('convertToDouble picks the next free double-group letter', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2'));
+    s.placeCity(city('c3'));
+    s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r3', 'c2', 'c3'));
+
+    s.convertToDouble('r3');
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes.find((r) => r.id === 'r3')!.doubleGroup).toBe('B');
+  });
+
+  it('convertToDouble is a no-op for tunnel, ferry, or already-double routes', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2'));
+    s.addRoute(route('r1', 'c1', 'c2', { isTunnel: true }));
+    s.addRoute(route('r2', 'c1', 'c2', { ferryLocos: 1, color: 'GRAY' }));
+    s.addRoute(route('r3', 'c1', 'c2', { doubleGroup: 'A' }));
+
+    s.convertToDouble('r1');
+    s.convertToDouble('r2');
+    s.convertToDouble('r3');
+
+    expect(useEditorStore.getState().draft.routes).toHaveLength(3);
+  });
+
+  it('reverts convertToDouble in a single undo step', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2'));
+    s.addRoute(route('r1', 'c1', 'c2'));
+
+    s.convertToDouble('r1');
+    expect(useEditorStore.getState().draft.routes).toHaveLength(2);
+
+    useEditorStore.getState().undo();
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(1);
+    expect(routes[0]).toMatchObject({ id: 'r1' });
+    expect(routes[0]!.doubleGroup).toBeUndefined();
+  });
+
   it('clears the selection when the selected city/route is removed', () => {
     const s = useEditorStore.getState();
     s.placeCity(city('c1'));

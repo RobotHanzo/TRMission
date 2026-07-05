@@ -38,6 +38,21 @@ export type Selection =
 
 const emptyDraft = (): MapDraft => ({ cities: [], routes: [], tickets: [] });
 
+let nextRouteCounter = 0;
+/** Mints a unique route id for a newly authored route or double-pair sibling. */
+export const newRouteId = (): string =>
+  `r${Date.now().toString(36)}${(nextRouteCounter++).toString(36)}`;
+
+const DOUBLE_GROUP_LETTERS = 'ABCDEFGHIJ';
+/** First double-group letter (A-J) not already used by `existingGroups`; falls back to 'A' once
+ *  all ten are taken (a builder-side limit, not enforced elsewhere). */
+export function nextDoubleGroupLetter(existingGroups: readonly string[]): string {
+  for (const letter of DOUBLE_GROUP_LETTERS) {
+    if (!existingGroups.includes(letter)) return letter;
+  }
+  return 'A';
+}
+
 interface EditorState {
   mapId: string | null;
   loadState: 'idle' | 'loading' | 'ready' | 'error';
@@ -67,6 +82,7 @@ interface EditorState {
   addRoute(route: RouteDraft): void;
   updateRoute(id: string, patch: Partial<RouteDraft>): void;
   removeRoute(id: string): void;
+  convertToDouble(id: string): void;
   /** Set (clamped ±BOW_LIMIT, 0.1-rounded) or clear (undefined) a route's curvature override.
    *  A double pair's siblings are always patched together so the twin track bows as one. */
   setRouteBow(id: string, bow: number | undefined): void;
@@ -198,6 +214,28 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
         }),
     });
     if (get().selection?.kind === 'route' && get().selection?.id === id) set({ selection: null });
+  },
+  convertToDouble: (id) => {
+    const { draft } = get();
+    const target = draft.routes.find((r) => r.id === id);
+    if (!target || target.doubleGroup || target.isTunnel || target.ferryLocos > 0) return;
+    const existingGroups = [
+      ...new Set(draft.routes.map((r) => r.doubleGroup).filter(Boolean)),
+    ] as string[];
+    const group = nextDoubleGroupLetter(existingGroups);
+    const sibling: RouteDraft = {
+      ...target,
+      id: newRouteId(),
+      color: target.color === 'RED' ? 'BLUE' : 'RED',
+      doubleGroup: group,
+    };
+    mutate(get, set, {
+      ...draft,
+      routes: [
+        ...draft.routes.map((r) => (r.id === id ? { ...r, doubleGroup: group } : r)),
+        sibling,
+      ],
+    });
   },
   setRouteBow: (id, bow) => {
     const { draft } = get();
