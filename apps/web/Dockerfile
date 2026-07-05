@@ -3,6 +3,8 @@
 # proxied to the server service — same origin, so the Strict refresh cookie works
 # for both apps.
 FROM node:24-slim AS build
+ARG GIT_COMMIT=dev
+ENV VITE_COMMIT_HASH=$GIT_COMMIT
 WORKDIR /app
 RUN corepack enable
 COPY . .

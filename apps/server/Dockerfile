@@ -9,6 +9,8 @@ RUN yarn install --immutable
 RUN yarn workspace @trm/proto generate
 
 FROM node:24-slim AS run
+ARG GIT_COMMIT=dev
+ENV GIT_COMMIT=$GIT_COMMIT
 WORKDIR /app
 RUN corepack enable
 # CJK + latin fonts for the dynamically rendered social-preview cards (resvg loads
