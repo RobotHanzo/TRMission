@@ -5,6 +5,7 @@ import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { SignalBadge, aspectForStatus } from '../components/SignalBadge';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useToast } from '../store/toast';
 import { fmtDateTime } from '../lib/fmt';
 
 const TABS = ['LOBBY', 'STARTED', 'CLOSED', 'all'] as const;
@@ -26,6 +27,7 @@ export function RoomsView() {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const canClose = useSession((s) => s.hasPermission('rooms.close'));
+  const pushToast = useToast((s) => s.push);
 
   const [rows, setRows] = useState<RoomRow[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -57,6 +59,9 @@ export function RoomsView() {
     try {
       const updated = await api.closeRoom(code, reason);
       setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
+      pushToast('success', t('toast.roomClosed'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
     } finally {
       setBusy(false);
       setClosing(null);
