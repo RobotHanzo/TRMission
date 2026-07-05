@@ -313,8 +313,7 @@ const resources = {
         linkCopied: '已複製連結',
         signInToView: '此重播需要登入後才能觀看',
         signIn: '登入',
-        terminatedReplayNotice:
-          '此對局已被管理員強制終止;回放僅顯示到終止當下的進度,無最終比分。',
+        terminatedReplayNotice: '此對局已被管理員強制終止;回放僅顯示到終止當下的進度,無最終比分。',
         completedReplayNotice: '此為已完成對局的管理檢視。',
       },
       chat: {
@@ -346,6 +345,7 @@ const resources = {
       commsTabsLabel: '面板切換',
       dockTabsLabel: '遊戲面板切換',
       dockDraw: '抽牌',
+      dockEvents: '事件',
       dockPlayers: '玩家',
       menu: '選單',
       builder: {
@@ -877,6 +877,7 @@ const resources = {
       commsTabsLabel: 'Panel tabs',
       dockTabsLabel: 'Game panels',
       dockDraw: 'Draw',
+      dockEvents: 'Events',
       dockPlayers: 'Players',
       menu: 'Menu',
       builder: {

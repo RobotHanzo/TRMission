@@ -52,7 +52,7 @@ type Claim =
   | { kind: 'station'; cityId: string; payments: Payment[] };
 
 /** Phone bottom-dock panels: the rail's sections plus the log/chat, one visible at a time. */
-type DockTab = 'hand' | 'draw' | 'missions' | 'players' | 'comms';
+type DockTab = 'hand' | 'draw' | 'missions' | 'events' | 'players' | 'comms';
 
 export interface GameStageProps {
   snapshot: GameSnapshot;
@@ -379,15 +379,17 @@ export function GameStage({
           ) : (
             <>
               <div className="dock-tabs" role="tablist" aria-label={t('dockTabsLabel')}>
-                {(
-                  [
-                    ['hand', t('cards'), myPub?.handCount ?? 0],
-                    ['draw', t('dockDraw'), null],
-                    ['missions', t('tickets'), snapshot.you?.keptTicketIds.length ?? 0],
-                    ['players', t('dockPlayers'), null],
-                    ['comms', t('tabComms'), null],
-                  ] as const
-                ).map(([key, label, count]) => (
+                {[
+                  ['hand', t('cards'), myPub?.handCount ?? 0] as const,
+                  ['draw', t('dockDraw'), null] as const,
+                  ['missions', t('tickets'), snapshot.you?.keptTicketIds.length ?? 0] as const,
+                  // Only reachable once the game actually carries a random-events block —
+                  // mirrors EventsPanel's own `if (!ev) return null` on desktop, so a
+                  // random-events-off game doesn't grow an empty sixth tab.
+                  ...(randomEvents ? [['events', t('dockEvents'), null] as const] : []),
+                  ['players', t('dockPlayers'), null] as const,
+                  ['comms', t('tabComms'), null] as const,
+                ].map(([key, label, count]) => (
                   <button
                     key={key}
                     type="button"
@@ -409,20 +411,19 @@ export function GameStage({
                 role="tabpanel"
                 aria-labelledby={`dock-tab-${dockTab}`}
               >
-                {dockTab === 'hand'
-                  ? handSection
-                  : dockTab === 'draw'
-                    ? market
-                    : dockTab === 'missions'
-                      ? ticketsSection
-                      : dockTab === 'players'
-                        ? (
-                            <>
-                              <EventsPanel />
-                              {trackers}
-                            </>
-                          )
-                        : comms}
+                {dockTab === 'hand' ? (
+                  handSection
+                ) : dockTab === 'draw' ? (
+                  market
+                ) : dockTab === 'missions' ? (
+                  ticketsSection
+                ) : dockTab === 'events' ? (
+                  <EventsPanel />
+                ) : dockTab === 'players' ? (
+                  trackers
+                ) : (
+                  comms
+                )}
               </div>
             </>
           )}

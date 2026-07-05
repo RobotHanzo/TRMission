@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { create } from '@bufbuild/protobuf';
+import { create, type MessageInitShape } from '@bufbuild/protobuf';
 import { CardColor, GameSnapshotSchema, Phase } from '@trm/proto';
 import '../i18n';
 import { GameStage } from './GameStage';
@@ -23,7 +23,7 @@ const phoneMatchMedia = (query: string): MediaQueryList =>
     dispatchEvent: () => false,
   }) as unknown as MediaQueryList;
 
-const baseSnap = () =>
+const baseSnap = (randomEvents?: MessageInitShape<typeof GameSnapshotSchema>['randomEvents']) =>
   create(GameSnapshotSchema, {
     stateVersion: 1,
     phase: Phase.AWAIT_ACTION,
@@ -37,6 +37,7 @@ const baseSnap = () =>
       { id: 'p1', seat: 1, trainCars: 45, stationsRemaining: 3 },
     ],
     you: { playerId: 'p0', hand: {}, keptTicketIds: [], pendingOfferTicketIds: [] },
+    ...(randomEvents ? { randomEvents } : {}),
   });
 
 const dockTablist = () => screen.queryByRole('tablist', { name: '遊戲面板切換' });
@@ -86,5 +87,26 @@ describe('GameStage phone dock (live game at ≤700px)', () => {
     render(<GameStage snapshot={baseSnap()} commands={null} onLeave={() => {}} sandbox />);
     expect(document.querySelector('.game--dock')).toBeNull();
     expect(document.querySelector('.game-rail')).not.toBeNull();
+  });
+
+  it('omits the Events tab when the game carries no random-events block', () => {
+    render(<GameStage snapshot={baseSnap()} commands={null} onLeave={() => {}} />);
+    expect(screen.queryByRole('tab', { name: '事件' })).toBeNull();
+  });
+
+  it('gives random events their own dock tab, separate from Players', () => {
+    const snap = baseSnap({ mode: 'intense', roundIndex: 1, freeStationAvailable: true });
+    // EventsPanel (like LogPanel) reads the contextual game store directly rather than the
+    // `snapshot` prop threaded through GameStage, so the store needs the events block too.
+    useGame.setState({ snapshot: snap, rejection: null });
+    render(<GameStage snapshot={snap} commands={null} onLeave={() => {}} />);
+
+    fireEvent.click(screen.getByRole('tab', { name: '事件' }));
+    expect(document.querySelector('.dock-panel .events-panel')).not.toBeNull();
+    expect(document.querySelector('.dock-panel .trackers')).toBeNull();
+
+    fireEvent.click(screen.getByRole('tab', { name: '玩家' }));
+    expect(document.querySelector('.dock-panel .trackers')).not.toBeNull();
+    expect(document.querySelector('.dock-panel .events-panel')).toBeNull();
   });
 });

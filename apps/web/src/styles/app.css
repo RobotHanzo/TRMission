@@ -662,14 +662,13 @@
   .row > button {
     white-space: nowrap;
   }
-  /* In-game the connection + turn status gets its own full-width second header row — squeezed
-     between brand and actions it would either vanish or (centred flex overflow) spill over them. */
-  .app-header {
-    flex-wrap: wrap;
-  }
+  /* In-game the connection + turn status stays on the header's single row (never wraps to a
+     second line): it shrinks into the space left between the fixed-size brand and actions, the
+     turn label ellipsizes, and the connection pill itself collapses to a plain colour dot below
+     so its text never has to compete for room. */
   .header-status {
-    order: 3;
-    flex: 1 1 100%;
+    flex: 1 1 auto;
+    min-width: 0;
     justify-content: flex-start;
     overflow: hidden;
   }
@@ -679,7 +678,25 @@
     text-overflow: ellipsis;
   }
   .conn {
-    white-space: nowrap;
+    flex: none;
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--tr-ink-soft);
+    overflow: hidden;
+  }
+  .conn-label {
+    display: none;
+  }
+  .conn-open {
+    background: var(--tr-ok);
+  }
+  .conn-reconnecting {
+    background: var(--tr-ember);
+  }
+  .conn-closed {
+    background: var(--tr-danger);
   }
   .app-main {
     padding: var(--tr-space-4) var(--tr-space-3);

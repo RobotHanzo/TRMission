@@ -66,6 +66,12 @@ export function AppHeader() {
   // carries the "leave" action, so there is a single top bar rather than two stacked rows.
   const inGame = view === 'game' && !!snapshot;
   const turn = snapshot ? turnStatus(snapshot) : null;
+  const connText =
+    status === 'open'
+      ? t('connected')
+      : status === 'closed'
+        ? t('disconnected')
+        : t('reconnecting');
   const onAuthScreen = view === 'login' || view === 'loginCallback';
 
   const {
@@ -110,12 +116,13 @@ export function AppHeader() {
 
       {inGame && turn && (
         <div className="header-status">
-          <span className={`conn conn-${status}`}>
-            {status === 'open'
-              ? t('connected')
-              : status === 'closed'
-                ? t('disconnected')
-                : t('reconnecting')}
+          <span
+            className={`conn conn-${status}`}
+            role="status"
+            aria-label={connText}
+            title={connText}
+          >
+            <span className="conn-label">{connText}</span>
           </span>
           <strong className="turn-label">
             {turn.key === 'turnOf' && turn.player

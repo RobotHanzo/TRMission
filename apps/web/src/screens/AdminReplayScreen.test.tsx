@@ -62,9 +62,7 @@ describe('AdminReplayScreen', () => {
     vi.mocked(api.adminReplay).mockResolvedValue(loadable({ status: 'TERMINATED' }));
     render(<AdminReplayScreen />);
     expect(
-      await screen.findByText(
-        '此對局已被管理員強制終止;回放僅顯示到終止當下的進度,無最終比分。',
-      ),
+      await screen.findByText('此對局已被管理員強制終止;回放僅顯示到終止當下的進度,無最終比分。'),
     ).toBeInTheDocument();
   });
 });
