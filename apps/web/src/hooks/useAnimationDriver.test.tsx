@@ -6,6 +6,7 @@ import { TICKETS } from '../game/content';
 import { useGame } from '../store/game';
 import { useAnimations } from '../store/animations';
 import { useAnimationDriver } from './useAnimationDriver';
+import i18n from '../i18n';
 
 const T1 = TICKETS[0]!.id as string;
 const T2 = TICKETS[1]!.id as string;
@@ -99,5 +100,32 @@ describe('useAnimationDriver', () => {
     } as GameEvent;
     act(() => useGame.getState().applyEvents(2, [ev]));
     expect(useAnimations.getState().glowingRoutes.get('R1')).toBe(0);
+  });
+
+  it('notifies me when my turn opens straight into a forced ticket re-draw', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(snap(1, [])));
+    const turnStarted: GameEvent = {
+      event: { case: 'turnStarted', value: { playerId: 'p0', orderIndex: 0 } },
+    } as GameEvent;
+    const ticketsOffered: GameEvent = {
+      event: { case: 'ticketsOffered', value: { playerId: 'p0', ticketIds: [T1] } },
+    } as GameEvent;
+    act(() => useGame.getState().applyEvents(2, [turnStarted, ticketsOffered]));
+    const notifications = useAnimations.getState().notifications;
+    expect(
+      notifications.some((n) => n.variant === 'success' && n.text === i18n.t('forcedTicketRedraw')),
+    ).toBe(true);
+  });
+
+  it('does not notify for a voluntary mid-turn ticket draw (no accompanying turnStarted)', () => {
+    render(<Harness />);
+    act(() => useGame.getState().applySnapshot(snap(1, [])));
+    const ticketsOffered: GameEvent = {
+      event: { case: 'ticketsOffered', value: { playerId: 'p0', ticketIds: [T1] } },
+    } as GameEvent;
+    act(() => useGame.getState().applyEvents(2, [ticketsOffered]));
+    const notifications = useAnimations.getState().notifications;
+    expect(notifications.some((n) => n.variant === 'success')).toBe(false);
   });
 });

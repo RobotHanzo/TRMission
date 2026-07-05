@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Phase, type GameSnapshot } from '@trm/proto';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useAnimationsStore } from '../store/animations';
@@ -14,6 +15,7 @@ import { ticketById } from '../game/content';
  *    baseline, so resuming a game never replays a stale fanfare.
  */
 export function useAnimationDriver(): void {
+  const { t } = useTranslation();
   const gameStore = useGameStoreApi();
   const snapshot = useGameStore((s) => s.snapshot);
   const lastBatch = useGameStore((s) => s.lastBatch);
@@ -39,6 +41,23 @@ export function useAnimationDriver(): void {
     seenBatchSeq.current = lastBatch.seq;
     const snap = gameStore.getState().snapshot;
     if (!snap) return;
+    const me = snap.you?.playerId;
+    // Rule 7.5's forced re-draw opens straight into TICKET_SELECTION at turn start, emitting
+    // TURN_STARTED + TICKETS_OFFERED together in the same batch — unlike a voluntary DRAW_TICKETS
+    // click mid-turn, which only ever emits TICKETS_OFFERED alone. That pairing is the signal.
+    const forcedRedraw =
+      !!me &&
+      lastBatch.events.some((e) => {
+        const ev = e.event;
+        return ev.case === 'turnStarted' && ev.value.playerId === me;
+      }) &&
+      lastBatch.events.some((e) => {
+        const ev = e.event;
+        return ev.case === 'ticketsOffered' && ev.value.playerId === me;
+      });
+    if (forcedRedraw) {
+      pushNotification({ variant: 'success', text: t('forcedTicketRedraw') });
+    }
     for (const intent of intentsFromEvents(snap, lastBatch.events)) pushIntent(intent);
     for (const e of lastBatch.events) {
       const ev = e.event;
@@ -65,7 +84,7 @@ export function useAnimationDriver(): void {
         });
       }
     }
-  }, [lastBatch, pushIntent, gameStore, showEventBanner, pushNotification]);
+  }, [lastBatch, pushIntent, gameStore, showEventBanner, pushNotification, t]);
 
   // Ticket completion via snapshot diff (authoritative `completedTickets`).
   useEffect(() => {
