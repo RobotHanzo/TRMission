@@ -2074,7 +2074,10 @@ function stubFetch(routes: Record<string, Route>) {
       const url = String(input);
       const hit = Object.entries(routes).find(([path]) => url.includes(path));
       const route = hit?.[1] ?? { status: 404, body: { message: 'not found' } };
-      return new Response(JSON.stringify(route.body), { status: route.status });
+      // A 204 response must not carry a body, or the Response constructor throws — the
+      // revoke-success case below stubs a real 204, matching deleteMaintainer's response.
+      const body = route.status === 204 ? null : JSON.stringify(route.body);
+      return new Response(body, { status: route.status });
     }),
   );
 }

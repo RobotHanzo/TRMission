@@ -12,6 +12,7 @@ import { useUi } from '../store/ui';
 import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Drawer } from '../components/Drawer';
+import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
 const ROLE_KEY: Record<DashboardRole, string> = {
@@ -38,6 +39,7 @@ function Editor({
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pushToast = useToast((s) => s.push);
 
   const toggle = (set: Set<DashboardPermission>, p: DashboardPermission) => {
     const next = new Set(set);
@@ -55,10 +57,12 @@ function Editor({
         ...(extra.size ? { extraPermissions: [...extra] } : {}),
         ...(denied.size ? { deniedPermissions: [...denied] } : {}),
       });
+      pushToast('success', t('toast.maintainerSaved'));
       onSaved();
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'error');
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
       setBusy(false);
     }
   };
@@ -123,6 +127,7 @@ export function MaintainersView() {
   const locale = useUi((s) => s.locale);
   const canWrite = useSession((s) => s.hasPermission('maintainers.write'));
   const selfId = useSession((s) => s.user?.id);
+  const pushToast = useToast((s) => s.push);
 
   const [rows, setRows] = useState<MaintainerRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -151,6 +156,9 @@ export function MaintainersView() {
     try {
       await api.deleteMaintainer(userId);
       await load();
+      pushToast('success', t('toast.maintainerRevoked'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
     } finally {
       setBusy(false);
       setRevoking(null);
