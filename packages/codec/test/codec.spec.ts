@@ -63,6 +63,22 @@ describe('@trm/codec eventToProto', () => {
     expect(eventToProto(offered, p1)).not.toBeNull();
     expect(eventToProto(offered, p2)).toBeNull();
   });
+
+  it('wraps TICKET_COMPLETED into a real frame (public — finished tickets are not hidden)', () => {
+    const completed: GameEvent = {
+      e: 'TICKET_COMPLETED',
+      player: p1,
+      ticket: asTicketId('S17'),
+      visibility: 'PUBLIC',
+    };
+    const forOwner = eventToProto(completed, p1);
+    const forOther = eventToProto(completed, p2);
+    expect(forOwner?.event.case).toBe('ticketCompleted');
+    expect(forOther?.event.case).toBe('ticketCompleted');
+    if (forOwner?.event.case !== 'ticketCompleted') throw new Error('wrong case');
+    expect(forOwner.event.value.playerId).toBe('p1');
+    expect(forOwner.event.value.ticketId).toBe('S17');
+  });
 });
 
 describe('@trm/codec commandToAction', () => {
