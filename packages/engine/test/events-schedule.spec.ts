@@ -34,8 +34,9 @@ const RESTRICTIVE_OR_MIXED = new Set<RandomEventKind>([
   'SKY_LANTERN',
   'AFTERSHOCK',
 ]);
-const COUNTS: Record<Exclude<EventsMode, 'off'>, number> = { light: 2, moderate: 4, intense: 6 };
 const FIRST_BASE: Record<Exclude<EventsMode, 'off'>, number> = { light: 4, moderate: 3, intense: 2 };
+const GAP_SPAN: Record<Exclude<EventsMode, 'off'>, number> = { light: 6, moderate: 4, intense: 2 };
+const SCHEDULE_ROUND_CAP = 300;
 
 function gen(mode: EventsMode, seed: string) {
   const rp: RuleParams = { ...DEFAULT_RULE_PARAMS, eventsMode: mode };
@@ -93,20 +94,34 @@ describe('generateSchedule — determinism & structure', () => {
     expect(r1.counter).toBe(r0.counter);
   });
 
-  it('produces the intended entry count per intensity (the >20 cap only shrinks it)', () => {
+  it('keeps generating events for the whole game span, not just an initial burst', () => {
     for (const mode of ['light', 'moderate', 'intense'] as const) {
-      const lengths: number[] = [];
-      for (let s = 0; s < 60; s++) {
-        const [ev] = gen(mode, `count-${mode}-${s}`);
-        expect(ev).toBeDefined();
-        const len = ev!.schedule.length;
-        expect(len).toBeGreaterThanOrEqual(1);
-        expect(len).toBeLessThanOrEqual(COUNTS[mode]);
-        lengths.push(len);
+      for (let s = 0; s < 20; s++) {
+        const [ev] = gen(mode, `span-${mode}-${s}`);
+        const sched = ev!.schedule;
+        expect(sched.length).toBeGreaterThan(0);
+        // A real greedy-policy game routinely runs 45-75 rounds (see the schedule.ts doc comment);
+        // the schedule must keep reaching well past that, not stop dead after a fixed handful of
+        // entries the way the old count-capped generator did.
+        const last = sched[sched.length - 1]!;
+        expect(last.startRound + occupancy(last)).toBeGreaterThan(60);
       }
-      // Some seed hits the full pre-cap count (min gaps keep every entry ≤ 20).
-      expect(Math.max(...lengths)).toBe(COUNTS[mode]);
     }
+  });
+
+  it('intensity controls frequency: higher intensity packs in more entries over the same span', () => {
+    const avgCount: Record<Exclude<EventsMode, 'off'>, number> = { light: 0, moderate: 0, intense: 0 };
+    const seeds = 40;
+    for (const mode of ['light', 'moderate', 'intense'] as const) {
+      let total = 0;
+      for (let s = 0; s < seeds; s++) {
+        const [ev] = gen(mode, `density-${mode}-${s}`);
+        total += ev!.schedule.length;
+      }
+      avgCount[mode] = total / seeds;
+    }
+    expect(avgCount.light).toBeLessThan(avgCount.moderate);
+    expect(avgCount.moderate).toBeLessThan(avgCount.intense);
   });
 
   it('respects the first-start-round bounds, gap minimums, and non-overlapping windows', () => {
@@ -115,12 +130,12 @@ describe('generateSchedule — determinism & structure', () => {
         const [ev] = gen(mode, `struct-${mode}-${s}`);
         const sched = ev!.schedule;
         if (sched.length === 0) continue;
-        // First start round ∈ {base, base+1}, never below 2.
+        // First start round ∈ [base, base + gapSpan - 1], never below 2.
         expect(sched[0]!.startRound).toBeGreaterThanOrEqual(Math.max(2, FIRST_BASE[mode]));
-        expect(sched[0]!.startRound).toBeLessThanOrEqual(FIRST_BASE[mode] + 1);
-        // All within the 20-round cap; strictly increasing; gap ≥ occupancy + 1.
+        expect(sched[0]!.startRound).toBeLessThanOrEqual(FIRST_BASE[mode] + GAP_SPAN[mode] - 1);
+        // All within the generation round cap; strictly increasing; gap ≥ occupancy + 1.
         for (let i = 0; i < sched.length; i++) {
-          expect(sched[i]!.startRound).toBeLessThanOrEqual(20);
+          expect(sched[i]!.startRound).toBeLessThanOrEqual(SCHEDULE_ROUND_CAP);
           if (i > 0) {
             const gap = sched[i]!.startRound - sched[i - 1]!.startRound;
             expect(gap).toBeGreaterThanOrEqual(occupancy(sched[i - 1]!) + 1);

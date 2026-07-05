@@ -11,10 +11,17 @@ import type { EventsState, EventScheduleEntry, RandomEventKind } from '../types/
  * absent, for pre-v5 recovery) it consumes ZERO draws and returns `[undefined, rng]` untouched —
  * this is what keeps an off-mode genesis identical to a pre-feature game.
  *
+ * The schedule keeps generating entries for the whole `SCHEDULE_ROUND_CAP`-round span (well beyond
+ * any realistic game length — greedy-policy playtests top out around 70-75 rounds), not just a
+ * fixed handful near the start: a hard per-mode entry count previously stopped the schedule dead
+ * around round ~15-20, leaving the back half of every real game with zero events. Intensity now
+ * controls *frequency* (via `gapSpan`, the width of the random gap added between events) rather than
+ * a total-for-the-game budget: light spaces events out, intense packs them tighter, and all three
+ * keep firing for as long as the game runs.
+ *
  * Draw order (ON mode), consumed strictly in this sequence so replays are deterministic:
- *   1. Count            — NO draw (light 2 / moderate 4 / intense 6).
- *   2. First startRound — one draw (light 4+nextInt(2) / moderate 3+nextInt(2) / intense 2+nextInt(2)).
- *   3. Per slot, in order:
+ *   1. First startRound — one draw (firstStartBase + nextInt(gapSpan), floored at round 2).
+ *   2. Per slot, in order, while startRound <= SCHEDULE_ROUND_CAP:
  *      a. Category      — one weighted draw over positive/mixed/restrictive weights.
  *                         (If the picked category has no placeable kind, it is dropped and a fresh
  *                          weighted draw is taken over the remaining categories; if none remain,
@@ -23,8 +30,7 @@ import type { EventsState, EventScheduleEntry, RandomEventKind } from '../types/
  *      b. Kind          — one draw over the category's kinds that have a valid target on this board.
  *      c. Targets       — kind-specific draws (see below).
  *      d. Duration      — fixed table, NO draw.
- *      e. Next start    — one draw: current + occupancy + 1 + nextInt(2).
- *   4. Drop entries whose startRound > 20 (a strictly-increasing suffix).
+ *      e. Next start    — one draw: current + occupancy + 1 + nextInt(gapSpan).
  */
 export function generateSchedule(
   board: Board,
@@ -83,11 +89,10 @@ export function generateSchedule(
 
   let cur = rng;
 
-  // (1)+(2) count and first start round.
-  const count = tuning.count;
+  // (1) First start round.
   let startRound: number;
   {
-    const [n, next] = nextInt(cur, 2);
+    const [n, next] = nextInt(cur, tuning.gapSpan);
     cur = next;
     // Floor of 2: a round-2 first start has no round-1 tick, so it never gets an EVENT_ANNOUNCED
     // frame — but it's still telegraphed via the snapshot forecast, which redactFor exposes from
@@ -97,8 +102,8 @@ export function generateSchedule(
   }
 
   const entries: EventScheduleEntry[] = [];
-  for (let slot = 0; slot < count; slot++) {
-    // (3a) Category — weighted, with drop-and-redraw when a category has no placeable kind.
+  while (startRound <= SCHEDULE_ROUND_CAP) {
+    // (2a) Category — weighted, with drop-and-redraw when a category has no placeable kind.
     let available = CATEGORY_ORDER.map((cat) => ({ cat, weight: tuning.weights[cat] }));
     let chosenKind: RandomEventKind | null = null;
     while (available.length > 0) {
@@ -109,7 +114,7 @@ export function generateSchedule(
         available = available.filter((a) => a.cat !== cat);
         continue;
       }
-      // (3b) Kind.
+      // (2b) Kind.
       const [ki, next2] = nextInt(cur, valid.length);
       cur = next2;
       chosenKind = valid[ki] as RandomEventKind;
@@ -118,7 +123,7 @@ export function generateSchedule(
     if (chosenKind === null) break; // no category has any placeable kind — stop generating.
     const kind = chosenKind;
 
-    // (3c) Targets.
+    // (2c) Targets.
     let routeIds: RouteId[] | undefined;
     let region: string | undefined;
     let cityId: CityId | undefined;
@@ -167,7 +172,7 @@ export function generateSchedule(
 
     const durationRounds = DURATIONS[kind];
     const entry: EventScheduleEntry = {
-      id: `ev${slot + 1}`,
+      id: `ev${entries.length + 1}`,
       kind,
       startRound,
       durationRounds,
@@ -179,21 +184,18 @@ export function generateSchedule(
     };
     entries.push(entry);
 
-    // (3e) Next start round.
+    // (2e) Next start round.
     const occupancy = CATEGORY_OF[kind] === 'positive' ? 1 : durationRounds;
-    const [gap, nextG] = nextInt(cur, 2);
+    const [gap, nextG] = nextInt(cur, tuning.gapSpan);
     cur = nextG;
     startRound = startRound + occupancy + 1 + gap;
   }
-
-  // (4) Drop the >20 suffix.
-  const schedule = entries.filter((e) => e.startRound <= 20);
 
   const events: EventsState = {
     mode,
     roundIndex: 1,
     nextIdx: 0,
-    schedule,
+    schedule: entries,
     suppressed: [],
     active: [],
     hotspots: {},
@@ -202,6 +204,10 @@ export function generateSchedule(
   };
   return [events, cur];
 }
+
+/** Generation stops once a slot's `startRound` would exceed this — generously above any realistic
+ * game length (greedy-policy playtests top out around 70-75 rounds; see schedule.ts's doc comment). */
+const SCHEDULE_ROUND_CAP = 300;
 
 // ─────────────────────────────────────────────── tables ─────────────────────────────────────────
 
@@ -248,15 +254,17 @@ const TELEGRAPHED: ReadonlySet<RandomEventKind> = new Set<RandomEventKind>([
 const CHARTER_MIN_HOPS = 4;
 
 interface ModeTuning {
-  readonly count: number;
   readonly firstStartBase: number;
+  /** Width of the `nextInt` draw added to each inter-event gap (drawn from [0, gapSpan)) — the
+   * frequency knob. A smaller span means a shorter average gap between events, i.e. denser play. */
+  readonly gapSpan: number;
   readonly weights: Record<Category, number>;
 }
 
 const MODE_TUNING: Record<Exclude<EventsMode, 'off'>, ModeTuning> = {
-  light: { count: 2, firstStartBase: 4, weights: { positive: 3, mixed: 1, restrictive: 1 } },
-  moderate: { count: 4, firstStartBase: 3, weights: { positive: 2, mixed: 2, restrictive: 2 } },
-  intense: { count: 6, firstStartBase: 2, weights: { positive: 2, mixed: 3, restrictive: 3 } },
+  light: { firstStartBase: 4, gapSpan: 6, weights: { positive: 3, mixed: 1, restrictive: 1 } },
+  moderate: { firstStartBase: 3, gapSpan: 4, weights: { positive: 2, mixed: 2, restrictive: 2 } },
+  intense: { firstStartBase: 2, gapSpan: 2, weights: { positive: 2, mixed: 3, restrictive: 3 } },
 };
 
 // ────────────────────────────────────────────── helpers ─────────────────────────────────────────

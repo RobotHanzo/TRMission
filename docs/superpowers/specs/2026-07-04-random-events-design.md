@@ -91,19 +91,29 @@ const [events, rngAfterEvents] = generateSchedule(board, ruleParams, rng);
 `generateSchedule` returns `[undefined, rng]` untouched for `mode === undefined || mode === 'off'` — the
 load-bearing property that keeps off-mode byte-identical. When on, the draw order is fixed:
 
-1. **Count** — no draw: `light 2 / moderate 4 / intense 6` schedule entries.
-2. **First `startRound`** — one draw: `Math.max(2, firstStartBase + nextInt(2))`, where
+1. **First `startRound`** — one draw: `Math.max(2, firstStartBase + nextInt(gapSpan))`, where
    `firstStartBase` is `light 4 / moderate 3 / intense 2`. The `max(2, …)` floor means no entry can
    start on round 1 (a telegraphed round-2 start has no round-1 tick to announce it — it just begins
    un-announced; this is intended, not a bug).
-3. **Per slot** — category (weighted draw) → kind → kind-specific targets → next start:
+2. **Per slot** — category (weighted draw) → kind → kind-specific targets → next start, repeated
+   for as long as `startRound <= SCHEDULE_ROUND_CAP` (300 — comfortably beyond any realistic game;
+   greedy-policy playtests top out around 70-75 rounds). There is no longer a fixed total-entry
+   budget per game: the schedule keeps generating events for the whole game, and intensity instead
+   tunes *frequency* via `gapSpan` (the width of the random gap added between an event's start and
+   the next one's) — a smaller span means shorter average gaps, i.e. denser play. A prior revision
+   capped generation at a fixed `count` (2/4/6) of entries within a 20-round window, which meant every
+   real game (which routinely runs 45-75+ rounds) went quiet for its entire back half once that count
+   was exhausted; this was a bug, not a design choice, and is what the round-cap/`gapSpan` rework below
+   fixes.
 
 ```ts
 // packages/engine/src/events/schedule.ts
+const SCHEDULE_ROUND_CAP = 300;
+
 const MODE_TUNING: Record<Exclude<EventsMode, 'off'>, ModeTuning> = {
-  light: { count: 2, firstStartBase: 4, weights: { positive: 3, mixed: 1, restrictive: 1 } },
-  moderate: { count: 4, firstStartBase: 3, weights: { positive: 2, mixed: 2, restrictive: 2 } },
-  intense: { count: 6, firstStartBase: 2, weights: { positive: 2, mixed: 3, restrictive: 3 } },
+  light: { firstStartBase: 4, gapSpan: 6, weights: { positive: 3, mixed: 1, restrictive: 1 } },
+  moderate: { firstStartBase: 3, gapSpan: 4, weights: { positive: 2, mixed: 2, restrictive: 2 } },
+  intense: { firstStartBase: 2, gapSpan: 2, weights: { positive: 2, mixed: 3, restrictive: 3 } },
 };
 
 const CATEGORY_KINDS = {
@@ -140,11 +150,14 @@ fallback, and it never throws.
   pair in shuffle order; reward `6 + nextInt(5)`. None of this touches `@trm/map-data` — corridors are
   derived on the fly from each `CityDef.region`, so zero map-data edits and zero `CONTENT_HASH` churn;
   a sparse/custom map with no eligible target for a kind simply excludes that kind from the draw.
-- **Next start round** = `start + occupancy + 1 + nextInt(2)`, where `occupancy` is `1` for a positive
-  (surprise) kind or the kind's `durationRounds` otherwise — so restrictive/mixed windows never overlap
-  by construction (positive kinds only "occupy" the round they start on).
-- **Cap.** After generation, any entry with `startRound > 20` is dropped (a strictly-increasing suffix,
-  so this is a straight tail-trim).
+- **Next start round** = `start + occupancy + 1 + nextInt(gapSpan)`, where `occupancy` is `1` for a
+  positive (surprise) kind or the kind's `durationRounds` otherwise — so restrictive/mixed windows
+  never overlap by construction (positive kinds only "occupy" the round they start on) — and
+  `gapSpan` is the per-mode frequency knob (`light 6 / moderate 4 / intense 2`, i.e. average extra
+  gap `2.5 / 1.5 / 0.5` rounds): the narrower the span, the tighter events pack together.
+- **Cap.** Generation stops once the next slot's `startRound` would exceed `SCHEDULE_ROUND_CAP` (300).
+  This is generously past any realistic game length purely as a genesis-time loop bound — it is not a
+  per-game entry budget, so a long game keeps getting new events for as long as it runs.
 
 ### `EventsState` + `GameState.events`
 
@@ -565,9 +578,11 @@ landed keys:
   `main`); replayed under v5 and asserted deep-equal except `engineVersion`/`ruleParams.eventsMode`.
   Guards off-mode behavior and v4-in-flight recovery.
 - `events-schedule.spec.ts` — genesis determinism (off mode consumes zero RNG draws, no `events` key);
-  per-intensity counts (2/4/6) pre-cap; first-start bounds; gap ≥ occupancy + 1; non-overlapping
-  restrictive/mixed windows; telegraphed/duration tables; charter ≥4 hops; typhoon routes touch their
-  region; sparse-board fallback (never throws).
+  the schedule keeps generating well past a typical 45-75 round game instead of stopping after an
+  initial handful; higher intensity yields more entries over the same span (frequency, not a fixed
+  total); first-start bounds; gap ≥ occupancy + 1; non-overlapping restrictive/mixed windows;
+  telegraphed/duration tables; charter ≥4 hops; typhoon routes touch their region; sparse-board
+  fallback (never throws).
 - `events-rounds.spec.ts` — round ticking incl. all-PASS/endgame edge cases; announce → start → end
   ordering and the exact batch order; quiet-endgame suppression; an announced-telegraphed entry always
   starts; no tick on the game-ending turn; the gala free-station window closing after exactly its own
