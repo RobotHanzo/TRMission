@@ -137,4 +137,21 @@ export class DashboardGamesController {
   ) {
     return this.games.closeRoom(actor, code, body.reason);
   }
+
+  @Delete('rooms/:code')
+  @HttpCode(204)
+  @RequirePermission('rooms.delete')
+  @ApiOperation({
+    summary: 'Hard-delete a room (admin-only)',
+    description:
+      'Closes it first if LOBBY; if STARTED with a LIVE game, terminates that game (its ' +
+      'record is kept, not deleted) before removing the room doc.',
+  })
+  deleteRoom(
+    @Param('code') code: string,
+    @CurrentUser() actor: AuthUser,
+    @Body() body: ModerationReasonDto,
+  ) {
+    return this.purge.deleteRoom(actor, code, body.reason);
+  }
 }

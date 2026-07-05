@@ -148,3 +148,109 @@ describe('delete game', () => {
       .expect(404);
   });
 });
+
+describe('delete room', () => {
+  it('403s a moderator (admin-tier permission)', async () => {
+    const host = await guest('H4');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
+    await request(server())
+      .delete(`/api/v1/dashboard/rooms/${room.body.code}`)
+      .set(auth(moderator.token))
+      .send({})
+      .expect(403);
+  });
+
+  it('deletes a LOBBY room', async () => {
+    const host = await guest('H5');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+
+    await request(server())
+      .delete(`/api/v1/dashboard/rooms/${code}`)
+      .set(auth(admin.token))
+      .send({ reason: 'cleanup' })
+      .expect(204);
+
+    expect(await t.db.collection('rooms').findOne({ _id: code } as never)).toBeNull();
+    expect(
+      await t.db
+        .collection('dashboardAudit')
+        .countDocuments({ action: 'room.delete', 'target.id': code } as never),
+    ).toBe(1);
+  });
+
+  it('deletes a STARTED room with a LIVE game: terminates the game (record kept), deletes only the room', async () => {
+    const { code, gameId } = await startGame('H6', 'M6');
+
+    await request(server())
+      .delete(`/api/v1/dashboard/rooms/${code}`)
+      .set(auth(admin.token))
+      .send({})
+      .expect(204);
+
+    expect(await t.db.collection('rooms').findOne({ _id: code } as never)).toBeNull();
+    const gameDoc = await t.db.collection('games').findOne({ _id: gameId } as never);
+    expect(gameDoc?.status).toBe('TERMINATED');
+    expect(t.app.get(GameRegistry).get(gameId)).toBeUndefined();
+  });
+
+  it('deletes a STARTED room whose linked game is already COMPLETED: room gone, game untouched', async () => {
+    const { code, gameId } = await startGame('H7', 'M7');
+    await t.db
+      .collection('games')
+      .updateOne(
+        { _id: gameId } as never,
+        { $set: { status: 'COMPLETED', updatedAt: new Date() } },
+      );
+
+    await request(server())
+      .delete(`/api/v1/dashboard/rooms/${code}`)
+      .set(auth(admin.token))
+      .send({})
+      .expect(204);
+
+    expect(await t.db.collection('rooms').findOne({ _id: code } as never)).toBeNull();
+    const gameDoc = await t.db.collection('games').findOne({ _id: gameId } as never);
+    expect(gameDoc?.status).toBe('COMPLETED'); // untouched — not deleted, not re-terminated
+  });
+
+  it('deletes a STARTED room whose linked game no longer exists (orphan)', async () => {
+    const host = await guest('H8');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await t.db
+      .collection('rooms')
+      .updateOne(
+        { _id: code } as never,
+        { $set: { status: 'STARTED', gameId: 'ghost-game-id', updatedAt: new Date() } },
+      );
+
+    await request(server())
+      .delete(`/api/v1/dashboard/rooms/${code}`)
+      .set(auth(admin.token))
+      .send({})
+      .expect(204);
+
+    expect(await t.db.collection('rooms').findOne({ _id: code } as never)).toBeNull();
+  });
+
+  it('404s an unknown room', async () => {
+    await request(server())
+      .delete('/api/v1/dashboard/rooms/NOPE1')
+      .set(auth(admin.token))
+      .send({})
+      .expect(404);
+  });
+});

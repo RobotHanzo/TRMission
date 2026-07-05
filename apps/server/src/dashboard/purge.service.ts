@@ -3,7 +3,7 @@ import type { Collection, Db } from 'mongodb';
 import { MONGO_DB } from '../db/tokens';
 import { GameHub } from '../ws/hub';
 import { GameRegistry } from '../game/game-registry';
-import { RoomRepo } from '../lobby/room.repo';
+import { RoomRepo, type RoomDoc } from '../lobby/room.repo';
 import type { GameDoc, GameEventDoc, GameSnapshotDoc, GameChatDoc } from '../persistence/types';
 import type { AuthUser } from '../auth/auth.types';
 import { AuditService } from './audit.service';
@@ -20,6 +20,7 @@ export class PurgeService {
   private readonly events: Collection<GameEventDoc>;
   private readonly snapshots: Collection<GameSnapshotDoc>;
   private readonly chats: Collection<GameChatDoc>;
+  private readonly roomsCol: Collection<RoomDoc>;
 
   constructor(
     @Inject(MONGO_DB) db: Db,
@@ -33,6 +34,7 @@ export class PurgeService {
     this.events = db.collection<GameEventDoc>('gameEvents');
     this.snapshots = db.collection<GameSnapshotDoc>('gameSnapshots');
     this.chats = db.collection<GameChatDoc>('gameChats');
+    this.roomsCol = db.collection<RoomDoc>('rooms');
   }
 
   /** Terminate a LIVE game in place: CAS to TERMINATED, evict, close its room. A no-op
@@ -104,5 +106,44 @@ export class PurgeService {
       { reason, priorStatus },
     );
     this.metrics.gamePurged('manual', priorStatus);
+  }
+
+  /** Delete a room: close it first if LOBBY, terminate (not delete) its linked game if
+   *  STARTED with one still LIVE, then hard-delete the room doc regardless of status. A
+   *  STARTED room whose game is already COMPLETED/TERMINATED is left as-is — deleting the
+   *  game itself is a separate action on the Games view. */
+  private async purgeRoomCore(
+    code: string,
+    terminatedBy: string,
+    reason: string,
+  ): Promise<RoomDoc['status'] | null> {
+    let room = await this.rooms.get(code);
+    if (!room) return null;
+    const priorStatus = room.status;
+    if (room.status === 'LOBBY') {
+      await this.rooms.closeLobby(code);
+      room = (await this.rooms.get(code)) ?? room;
+    }
+    if (room.status === 'STARTED' && room.gameId) {
+      await this.terminateIfLive(room.gameId, terminatedBy, reason);
+    }
+    await this.roomsCol.deleteOne({ _id: code });
+    return priorStatus;
+  }
+
+  async deleteRoom(actor: AuthUser, code: string, reason?: string): Promise<void> {
+    const priorStatus = await this.purgeRoomCore(
+      code,
+      actor.userId,
+      reason ?? 'deleted by a maintainer',
+    );
+    if (priorStatus === null) throw new NotFoundException('room not found');
+    await this.audit.log(
+      actor,
+      'room.delete',
+      { type: 'room', id: code },
+      { reason, priorStatus },
+    );
+    this.metrics.roomPurged('manual', priorStatus);
   }
 }
