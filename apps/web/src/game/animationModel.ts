@@ -59,7 +59,7 @@ export function intentsFromEvents(snapshot: GameSnapshot, events: GameEvent[]): 
           kind: 'cardFly',
           toPlayerId: ev.value.playerId,
           faceUp: true,
-          color: ev.value.playerId === me ? pbToCard(ev.value.card) : null,
+          color: pbToCard(ev.value.card),
           slot: ev.value.slot,
         });
         // While the drawer still owes a second card (snapshot is post-action), keep the refilled

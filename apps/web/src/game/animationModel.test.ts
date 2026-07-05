@@ -41,11 +41,11 @@ describe('intentsFromEvents', () => {
     expect(opp).toContainEqual({ kind: 'cardFly', toPlayerId: 'p1', faceUp: false, color: null, slot: null });
   });
 
-  it('face-up draw flies from the slot and flips the slot; opponent gets a cover', () => {
+  it('face-up draw flies the real card for every viewer and flips the slot', () => {
     const out = intentsFromEvents(snap, [
       event({ case: 'cardTakenFaceup', value: { playerId: 'p1', slot: 2, card: Pb.GREEN } as never }),
     ]);
-    expect(out).toContainEqual({ kind: 'cardFly', toPlayerId: 'p1', faceUp: true, color: null, slot: 2 });
+    expect(out).toContainEqual({ kind: 'cardFly', toPlayerId: 'p1', faceUp: true, color: 'GREEN', slot: 2 });
     expect(out).toContainEqual({ kind: 'marketFlip', slot: 2 });
   });
 
