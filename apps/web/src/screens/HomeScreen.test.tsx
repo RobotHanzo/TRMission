@@ -56,6 +56,7 @@ const pubRoom = (code: string, status: RoomView['status'], gameId?: string): Roo
   maxPlayers: 5,
   members: [{ userId: 'h', displayName: 'h', isGuest: false, seat: 0, ready: false }],
   settings,
+  chat: [],
   ...(gameId ? { gameId } : {}),
 });
 

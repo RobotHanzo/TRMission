@@ -64,6 +64,11 @@ export interface RoomSettings {
 export interface RoomsConfig {
   randomEventsEnabled: boolean;
 }
+export interface RoomChatEntry {
+  userId: string;
+  presetId: string;
+  ts: number;
+}
 export interface RoomView {
   code: string;
   hostId: string;
@@ -73,6 +78,7 @@ export interface RoomView {
   settings: RoomSettings;
   gameId?: string;
   mapName?: { zh: string; en: string };
+  chat: RoomChatEntry[];
 }
 export interface TicketResult {
   gameId: string;
@@ -312,6 +318,8 @@ export const api = {
   spectate: (code: string) => req<TicketResult>('POST', `/rooms/${code}/spectate`),
   voteRematch: (code: string, wantsRematch: boolean) =>
     req<RoomView>('POST', `/rooms/${code}/rematch-vote`, { wantsRematch }),
+  sendRoomChat: (code: string, presetId: string) =>
+    req<RoomView>('POST', `/rooms/${code}/chat`, { presetId }),
   rematch: (code: string) => req<RoomView>('POST', `/rooms/${code}/rematch`),
 
   history: () => req<MatchSummary[]>('GET', '/history'),

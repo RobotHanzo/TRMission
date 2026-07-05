@@ -25,6 +25,7 @@ import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
 import type { Locale } from '../store/ui';
+import { CHAT_PRESET_IDS, chatPresetKey } from '../game/chatPresets';
 
 const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
 
@@ -206,6 +207,10 @@ export function RoomScreen() {
 
   const memberName = (m: RoomMember): string =>
     m.isBot ? t('botName', { level: t(`difficulty_${m.difficulty ?? 'EASY'}`) }) : m.displayName;
+  const chatAuthorName = (userId: string): string => {
+    const m = room.members.find((x) => x.userId === userId);
+    return m ? memberName(m) : userId;
+  };
 
   const guard = (p: Promise<RoomView>) => p.then(setRoom).catch((e: Error) => setErr(e.message));
 
@@ -236,6 +241,7 @@ export function RoomScreen() {
   const addBot = (d: BotDifficulty) => void guard(api.addBot(code, d));
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
+  const sendChat = (presetId: string) => void guard(api.sendRoomChat(code, presetId));
   const copy = (text: string) => {
     if (!navigator.clipboard) return;
     void Promise.resolve(navigator.clipboard.writeText(text)).then(
@@ -311,6 +317,25 @@ export function RoomScreen() {
           </li>
         ))}
       </ul>
+
+      <div className="card stack room-chat">
+        <div className="row wrap">
+          {CHAT_PRESET_IDS.map((id) => (
+            <button key={id} type="button" className="chip-btn" onClick={() => sendChat(id)}>
+              {t(chatPresetKey(id))}
+            </button>
+          ))}
+        </div>
+        {room.chat.length > 0 && (
+          <ul className="room-chat-log">
+            {room.chat.map((c, i) => (
+              <li key={i}>
+                <strong>{chatAuthorName(c.userId)}</strong>: {t(chatPresetKey(c.presetId))}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <fieldset className="card stack game-settings" disabled={settingsLocked}>
         <legend>{t('gameSettings')}</legend>

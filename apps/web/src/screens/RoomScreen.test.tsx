@@ -36,6 +36,7 @@ vi.mock('../net/rest', () => {
       updateRoomSettings: vi.fn(),
       listMaps: vi.fn(() => Promise.resolve([])),
       getRoomsConfig: vi.fn(() => Promise.resolve({ randomEventsEnabled: false })),
+      sendRoomChat: vi.fn(),
     },
   };
 });
@@ -80,6 +81,7 @@ const baseRoom = () => ({
   },
   gameId: undefined as string | undefined,
   mapName: undefined as { zh: string; en: string } | undefined,
+  chat: [] as { userId: string; presetId: string; ts: number }[],
 });
 
 const mocked = api as unknown as {
@@ -390,5 +392,39 @@ describe('RoomScreen leave confirmation', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(api.leaveRoom).not.toHaveBeenCalled();
     expect(useUi.getState().view).toBe('room');
+  });
+});
+
+describe('RoomScreen preset chat', () => {
+  it('sends a preset message and shows it in the log with the translated text', async () => {
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    (api.sendRoomChat as ReturnType<typeof vi.fn>).mockResolvedValue(
+      room({
+        members: [member('host'), member('u-me')],
+        chat: [{ userId: 'u-me', presetId: 'GOOD_LUCK', ts: 1 }],
+      }),
+    );
+    const { container } = render(<RoomScreen />);
+    const btn = await screen.findByRole('button', { name: '祝你好運，玩得開心！' });
+    fireEvent.click(btn);
+    expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', 'GOOD_LUCK');
+    await waitFor(() =>
+      expect(container.querySelector('.room-chat-log li')?.textContent).toContain(
+        '祝你好運，玩得開心！',
+      ),
+    );
+  });
+
+  it('renders an existing chat log entry attributed to the sending member', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        members: [member('host'), member('u-me')],
+        chat: [{ userId: 'host', presetId: 'THANKS', ts: 1 }],
+      }),
+    );
+    const { container } = render(<RoomScreen />);
+    await waitFor(() =>
+      expect(container.querySelector('.room-chat-log li')?.textContent).toContain('謝謝！'),
+    );
   });
 });
