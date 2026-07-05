@@ -27,6 +27,7 @@ export function RoomsView() {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const canClose = useSession((s) => s.hasPermission('rooms.close'));
+  const canDelete = useSession((s) => s.hasPermission('rooms.delete'));
   const pushToast = useToast((s) => s.push);
 
   const [rows, setRows] = useState<RoomRow[]>([]);
@@ -34,6 +35,7 @@ export function RoomsView() {
   const [tab, setTab] = useState<(typeof TABS)[number]>('all');
   const [loading, setLoading] = useState(true);
   const [closing, setClosing] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(
@@ -68,6 +70,20 @@ export function RoomsView() {
     }
   };
 
+  const del = async (code: string, reason?: string) => {
+    setBusy(true);
+    try {
+      await api.deleteRoom(code, reason);
+      setRows((prev) => prev.filter((r) => r.code !== code));
+      pushToast('success', t('toast.roomDeleted'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+      setDeleting(null);
+    }
+  };
+
   return (
     <div>
       <h1 className="oc-page-title">{t('rooms.title')}</h1>
@@ -96,7 +112,7 @@ export function RoomsView() {
               <th className="num">{t('rooms.colMembers')}</th>
               <th>{t('rooms.colVisibility')}</th>
               <th className="num">{t('rooms.colUpdated')}</th>
-              {canClose && <th />}
+              {(canClose || canDelete) && <th />}
             </tr>
           </thead>
           <tbody>
@@ -111,17 +127,26 @@ export function RoomsView() {
                 </td>
                 <td>{r.visibility === 'PUBLIC' ? t('rooms.visPublic') : t('rooms.visInvite')}</td>
                 <td className="num">{fmtDateTime(r.updatedAt, locale)}</td>
-                {canClose && (
+                {(canClose || canDelete) && (
                   <td>
-                    {r.status === 'LOBBY' && (
+                    {canClose && r.status === 'LOBBY' && (
                       <button className="oc-btn danger" onClick={() => setClosing(r.code)}>
                         {t('rooms.close')}
                       </button>
                     )}
-                    {r.status === 'STARTED' && (
+                    {canClose && r.status === 'STARTED' && (
                       <span className="oc-muted" style={{ fontSize: 11 }}>
                         {t('rooms.startedHint')}
                       </span>
+                    )}
+                    {canDelete && (
+                      <button
+                        className="oc-btn danger"
+                        style={{ marginLeft: 6 }}
+                        onClick={() => setDeleting(r.code)}
+                      >
+                        {t('rooms.delete')}
+                      </button>
                     )}
                   </td>
                 )}
@@ -151,6 +176,22 @@ export function RoomsView() {
           busy={busy}
           onConfirm={(reason) => void close(closing, reason)}
           onCancel={() => setClosing(null)}
+        />
+      )}
+      {deleting && (
+        <ConfirmDialog
+          title={t('rooms.deleteConfirmTitle')}
+          body={
+            rows.find((r) => r.code === deleting)?.status === 'STARTED'
+              ? t('rooms.deleteConfirmBodyStarted')
+              : t('rooms.deleteConfirmBody')
+          }
+          confirmLabel={t('rooms.delete')}
+          danger
+          withReason
+          busy={busy}
+          onConfirm={(reason) => void del(deleting, reason)}
+          onCancel={() => setDeleting(null)}
         />
       )}
     </div>
