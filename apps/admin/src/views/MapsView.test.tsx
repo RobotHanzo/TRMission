@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within, cleanup } from '@testing-library/react';
 import '../i18n';
 import { MapsView } from './MapsView';
 import { useUi } from '../store/ui';
+import { useSession } from '../store/session';
 
 interface Route {
   status: number;
@@ -61,5 +62,56 @@ describe('MapsView', () => {
     fireEvent.click(screen.getByText('Test'));
     await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument());
     expect(screen.getByText('尚無內容')).toBeInTheDocument(); // MapPreview's empty state
+  });
+});
+
+describe('MapsView destructive actions', () => {
+  it('hides delete/unshare/transfer without maps.moderate, shows them with it', async () => {
+    useSession.setState({ permissions: new Set(['maps.read']) } as never);
+    stubFetch({
+      '/dashboard/maps/map-1': { status: 200, body: MAP_DETAIL },
+      '/dashboard/maps': { status: 200, body: { maps: [MAP_ROW], nextCursor: null } },
+    });
+    render(<MapsView />);
+    await waitFor(() => expect(screen.getByText('Test')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Test'));
+    await waitFor(() => expect(screen.getByText('尚無內容')).toBeInTheDocument());
+    expect(screen.queryByText('刪除地圖')).not.toBeInTheDocument();
+
+    // Unmount the first tree before re-rendering: useUi/useSession are shared module-level
+    // stores, so a second render() without cleanup would leave both trees subscribed to the
+    // same param/permissions and both would react to the state below (duplicate elements).
+    cleanup();
+    useSession.setState({ permissions: new Set(['maps.read', 'maps.moderate']) } as never);
+    render(<MapsView />);
+    await waitFor(() => expect(screen.getAllByText('Test').length).toBeGreaterThan(0));
+    fireEvent.click(screen.getAllByText('Test')[0]!);
+    await waitFor(() => expect(screen.getByText('刪除地圖')).toBeInTheDocument());
+  });
+
+  it('deletes a map after confirmation and closes the drawer', async () => {
+    useSession.setState({ permissions: new Set(['maps.read', 'maps.moderate']) } as never);
+    let deleteCalled = false;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.includes('/dashboard/maps/map-1') && init?.method === 'DELETE') {
+          deleteCalled = true;
+          return new Response(null, { status: 204 });
+        }
+        if (url.includes('/dashboard/maps/map-1')) {
+          return new Response(JSON.stringify(MAP_DETAIL), { status: 200 });
+        }
+        return new Response(JSON.stringify({ maps: [MAP_ROW], nextCursor: null }), { status: 200 });
+      }),
+    );
+    render(<MapsView />);
+    await waitFor(() => expect(screen.getByText('Test')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Test'));
+    fireEvent.click(await screen.findByText('刪除地圖'));
+    const dialog = await screen.findByRole('dialog', { name: '確認刪除地圖' });
+    fireEvent.click(within(dialog).getByRole('button', { name: '刪除地圖' }));
+    await waitFor(() => expect(deleteCalled).toBe(true));
   });
 });

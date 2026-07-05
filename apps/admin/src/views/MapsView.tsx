@@ -1,15 +1,25 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { api, type MapAdminDetail, type MapAdminRow } from '../net/rest';
+import { api, type MapAdminDetail, type MapAdminRow, type UserRow } from '../net/rest';
 import { useUi } from '../store/ui';
+import { useSession } from '../store/session';
+import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
 import { Drawer } from '../components/Drawer';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { MapPreview } from '../components/MapPreview';
 
 function MapDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
+  const canModerate = useSession((s) => s.hasPermission('maps.moderate'));
+  const pushToast = useToast((s) => s.push);
   const [detail, setDetail] = useState<MapAdminDetail | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [confirmingUnshare, setConfirmingUnshare] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -23,6 +33,47 @@ function MapDrawer({ id, onClose }: { id: string; onClose: () => void }) {
       cancelled = true;
     };
   }, [id, onClose]);
+
+  const del = async (reason?: string) => {
+    setBusy(true);
+    try {
+      await api.deleteMap(id, reason);
+      pushToast('success', t('toast.mapDeleted'));
+      onClose();
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+      setConfirmingDelete(false);
+    }
+  };
+
+  const unshare = async (reason?: string) => {
+    setBusy(true);
+    try {
+      const updated = await api.unshareMap(id, reason).then(() => api.getMap(id));
+      setDetail(updated);
+      pushToast('success', t('toast.mapUnshared'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+      setConfirmingUnshare(false);
+    }
+  };
+
+  const transfer = async (user: UserRow) => {
+    setPicking(false);
+    setBusy(true);
+    try {
+      setDetail(await api.transferMap(id, user.id));
+      pushToast('success', t('toast.mapTransferred'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <Drawer title={`${t('maps.detailTitle')} · ${shortId(id)}`} onClose={onClose}>
@@ -58,6 +109,54 @@ function MapDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               </div>
             )}
           </section>
+
+          {canModerate && (
+            <section style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button className="oc-btn" disabled={busy} onClick={() => setPicking(true)}>
+                {t('maps.transfer')}
+              </button>
+              {detail.shared && (
+                <button className="oc-btn" disabled={busy} onClick={() => setConfirmingUnshare(true)}>
+                  {t('maps.unshare')}
+                </button>
+              )}
+              <button className="oc-btn danger" disabled={busy} onClick={() => setConfirmingDelete(true)}>
+                {t('maps.delete')}
+              </button>
+            </section>
+          )}
+
+          {confirmingDelete && (
+            <ConfirmDialog
+              title={t('maps.deleteConfirmTitle')}
+              body={t('maps.deleteConfirmBody')}
+              confirmLabel={t('maps.delete')}
+              danger
+              withReason
+              busy={busy}
+              onConfirm={(reason) => void del(reason)}
+              onCancel={() => setConfirmingDelete(false)}
+            />
+          )}
+          {confirmingUnshare && (
+            <ConfirmDialog
+              title={t('maps.unshareConfirmTitle')}
+              body={t('maps.unshareConfirmBody')}
+              confirmLabel={t('maps.unshare')}
+              danger
+              withReason
+              busy={busy}
+              onConfirm={(reason) => void unshare(reason)}
+              onCancel={() => setConfirmingUnshare(false)}
+            />
+          )}
+          {picking && (
+            <AccountSelectorModal
+              title={t('maps.transferPickTitle')}
+              onSelect={(u) => void transfer(u)}
+              onClose={() => setPicking(false)}
+            />
+          )}
         </>
       )}
     </Drawer>
