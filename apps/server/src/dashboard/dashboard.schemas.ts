@@ -285,3 +285,35 @@ export const PurgeStatusSchema = z.object({
     }),
   ),
 });
+
+// ---- maps ------------------------------------------------------------------------
+
+export const MapAdminRowSchema = z.object({
+  id: z.string(),
+  ownerId: z.string(),
+  ownerDisplayName: z.string().optional(),
+  nameZh: z.string(),
+  nameEn: z.string(),
+  revision: z.number(),
+  shared: z.boolean(),
+  updatedAt: z.string(),
+});
+
+export const MapsListSchema = z.object({
+  maps: z.array(MapAdminRowSchema),
+  nextCursor: z.string().nullable(),
+});
+
+export const MapAdminDetailSchema = MapAdminRowSchema.extend({
+  createdAt: z.string(),
+  shareCode: z.string().optional(),
+  usageCount: z.number(),
+  draft: z.object({
+    cities: z.array(z.unknown()),
+    routes: z.array(z.unknown()),
+    tickets: z.array(z.unknown()),
+  }),
+});
+
+export const TransferMapSchema = z.object({ newOwnerId: z.string().min(1) });
+export class TransferMapDto extends createZodDto(TransferMapSchema) {}
