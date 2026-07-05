@@ -1711,6 +1711,42 @@ button.ticket-card:hover {
   color: var(--tr-accent);
 }
 
+/* Affected-routes list appended inside a route-targeting event's info modal. */
+.event-route-section {
+  margin-top: var(--tr-space-3);
+  padding-top: var(--tr-space-3);
+  border-top: 1px solid var(--tr-surface-2);
+}
+.event-route-section h4 {
+  margin: 0 0 var(--tr-space-2);
+  font-size: 13px;
+  color: var(--tr-ink-soft);
+}
+.event-route-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.event-route-item {
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border: none;
+  border-radius: var(--tr-radius-sm);
+  background: transparent;
+  color: var(--tr-ink);
+  font-size: 13px;
+  cursor: pointer;
+}
+.event-route-item:hover {
+  background: color-mix(in srgb, var(--tr-ink) 12%, transparent);
+}
+
 /* ─── Notification chips (system messages + event announcements/bonuses) ───────── */
 .notification-stack {
   position: fixed;
