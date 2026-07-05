@@ -6,6 +6,7 @@ import { useUi } from '../store/ui';
 import { SignalBadge, aspectForStatus } from '../components/SignalBadge';
 import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
 import { chatPresetKey } from '../game/chatPresets';
 
@@ -29,6 +30,7 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const locale = useUi((s) => s.locale);
   const canTerminate = useSession((s) => s.hasPermission('games.terminate'));
   const canReadLog = useSession((s) => s.hasPermission('games.readLog'));
+  const pushToast = useToast((s) => s.push);
   const [detail, setDetail] = useState<GameDetail | null>(null);
   const [log, setLog] = useState<GameLogEntry[] | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -59,6 +61,9 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     setBusy(true);
     try {
       setDetail(await api.terminateGame(id, reason));
+      pushToast('success', t('toast.gameTerminated'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
     } finally {
       setBusy(false);
       setConfirming(false);
