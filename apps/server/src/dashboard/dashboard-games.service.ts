@@ -231,7 +231,10 @@ export class DashboardGamesService {
 
   /**
    * Replay payload with the MEMBERSHIP check bypassed — never the COMPLETED gate, which
-   * stays in exactly one place (HistoryRepo.loadReplay).
+   * stays in exactly one place for the PLAYER-FACING path (HistoryRepo.loadReplay). A
+   * second, deliberately more permissive path exists for maintainers
+   * (HistoryRepo.loadReplayForAdmin, reachable only via a minted ticket — see
+   * admin-replay.controller.ts) that also accepts TERMINATED games.
    */
   async gameReplay(gameId: string) {
     const doc = await this.history.get(gameId);

@@ -39,6 +39,15 @@ export interface ReplayData {
   finalDigest?: string;
 }
 
+export interface AdminReplayData extends ReplayData {
+  status: 'COMPLETED' | 'TERMINATED';
+  winners?: string[];
+  completedAt?: string;
+  terminatedAt?: string;
+  terminatedBy?: string;
+  terminatedReason?: string;
+}
+
 /**
  * Engine major versions whose persisted action logs the current server can still replay
  * byte-identically. v5 replayed a v4 log identically (v5 only added inert genesis fields), but v6
@@ -204,6 +213,45 @@ export class HistoryRepo {
       bots: game.bots ?? [],
       actions: events.map((e) => e.action),
       ...(last ? { finalDigest: last.stateDigest } : {}),
+    };
+  }
+
+  /**
+   * Admin-only replay source, sourced from `games`/`gameEvents` directly rather than the
+   * `matchHistory` archive (which is only written on natural completion — a TERMINATED
+   * game has no such doc). `winners`/`completedAt` are present only when a matchHistory
+   * doc exists (COMPLETED); `terminatedAt`/`terminatedBy` only when the game was
+   * terminated. Reachable ONLY through the ticket-authorized admin-replay route — never
+   * exposed to the player-facing /history endpoints, which keep the original
+   * COMPLETED-only gate in `loadReplay` above untouched.
+   */
+  async loadReplayForAdmin(gameId: string): Promise<AdminReplayData | null> {
+    const game = await this.games.findOne({
+      _id: gameId,
+      status: { $in: ['COMPLETED', 'TERMINATED'] },
+    });
+    if (!game) return null;
+    const events = await this.events.find({ gameId }).sort({ seq: 1 }).toArray();
+    const last = events[events.length - 1];
+    const archive = await this.col.findOne({ _id: gameId });
+    return {
+      config: game.config,
+      engineVersion: game.engineVersion,
+      schemaVersion: game.schemaVersion,
+      bots: game.bots ?? [],
+      actions: events.map((e) => e.action),
+      ...(last ? { finalDigest: last.stateDigest } : {}),
+      status: game.status as 'COMPLETED' | 'TERMINATED',
+      ...(archive
+        ? { winners: archive.winners, completedAt: archive.completedAt.toISOString() }
+        : {}),
+      ...(game.terminatedAt
+        ? {
+            terminatedAt: game.terminatedAt.toISOString(),
+            terminatedBy: game.terminatedBy ?? 'unknown',
+            ...(game.terminatedReason ? { terminatedReason: game.terminatedReason } : {}),
+          }
+        : {}),
     };
   }
 }

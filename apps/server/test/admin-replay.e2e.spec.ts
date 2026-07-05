@@ -200,3 +200,57 @@ describe('POST /dashboard/games/:gameId/replay-ticket', () => {
     expect(typeof res.body.ticket).toBe('string');
   });
 });
+
+async function mintTicket(gameId: string): Promise<string> {
+  const res = await request(server())
+    .post(`/api/v1/dashboard/games/${gameId}/replay-ticket`)
+    .set(auth(viewer.token))
+    .expect(200);
+  return res.body.ticket;
+}
+
+describe('GET /history/:gameId/admin-replay', () => {
+  it('404s with no ticket, a garbage ticket, or a ticket scoped to a different game', async () => {
+    await request(server()).get(`/api/v1/history/${completedGameId}/admin-replay`).expect(404);
+    await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .query({ ticket: 'garbage' })
+      .expect(404);
+    const ticketForOther = await mintTicket(terminatedGameId);
+    await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .query({ ticket: ticketForOther })
+      .expect(404);
+  });
+
+  it('returns the COMPLETED payload: winners + completedAt, no terminatedAt', async () => {
+    const ticket = await mintTicket(completedGameId);
+    const res = await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .query({ ticket })
+      .expect(200);
+    expect(res.body.gameId).toBe(completedGameId);
+    expect(res.body.status).toBe('COMPLETED');
+    expect(res.body.actions.length).toBeGreaterThan(0);
+    expect(Array.isArray(res.body.winners)).toBe(true);
+    expect(typeof res.body.completedAt).toBe('string');
+    expect(res.body.terminatedAt).toBeUndefined();
+    const names = res.body.players.map((p: { displayName?: string }) => p.displayName);
+    expect(names).toContain('Host');
+  });
+
+  it('returns the TERMINATED payload: terminatedAt/terminatedBy, no winners/completedAt', async () => {
+    const ticket = await mintTicket(terminatedGameId);
+    const res = await request(server())
+      .get(`/api/v1/history/${terminatedGameId}/admin-replay`)
+      .query({ ticket })
+      .expect(200);
+    expect(res.body.gameId).toBe(terminatedGameId);
+    expect(res.body.status).toBe('TERMINATED');
+    expect(res.body.actions.length).toBe(1);
+    expect(res.body.winners).toBeUndefined();
+    expect(res.body.completedAt).toBeUndefined();
+    expect(typeof res.body.terminatedAt).toBe('string');
+    expect(typeof res.body.terminatedBy).toBe('string');
+  });
+});
