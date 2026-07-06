@@ -31,6 +31,7 @@ export const GoogleCredentialSchema = z.object({
 });
 export const RefreshSchema = z.object({ refreshToken: z.string().min(1).optional() });
 export const LogoutSchema = z.object({ refreshToken: z.string().min(1).optional() });
+export const MobileExchangeSchema = z.object({ code: z.string().min(1) });
 
 export class GuestDto extends createZodDto(GuestSchema) {}
 export class RegisterDto extends createZodDto(RegisterSchema) {}
@@ -42,6 +43,7 @@ export class UpdatePreferencesDto extends createZodDto(PreferencesSchema) {}
 // DTO defaults to {} — otherwise the zod pipe would 400 every cookie-based refresh/logout.
 export class RefreshDto extends createZodDto(RefreshSchema.default({})) {}
 export class LogoutDto extends createZodDto(LogoutSchema.default({})) {}
+export class MobileExchangeDto extends createZodDto(MobileExchangeSchema) {}
 
 export const PublicUserSchema = z.object({
   id: z.string(),
@@ -59,6 +61,12 @@ export const AuthResultSchema = z.object({
 export const AccessResultSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string().optional(), // present iff the refresh token arrived in the body
+});
+export const MobileCarryResultSchema = z.object({ code: z.string() });
+export const MobileAuthResultSchema = z.object({
+  user: PublicUserSchema,
+  accessToken: z.string(),
+  refreshToken: z.string(),
 });
 
 // Tells the web which entry methods are available so it renders only those (the server still

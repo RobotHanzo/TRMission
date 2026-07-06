@@ -5,6 +5,7 @@ import { TokenService } from './token.service';
 import { AuthService } from './auth.service';
 import { UserRepo, type UserDoc } from './user.repo';
 import { SessionRepo } from './session.repo';
+import { MobileCodeRepo } from './mobile-code.repo';
 import { OAUTH_HTTP, type OauthHttp } from './oauth.http';
 import { GOOGLE_ID_TOKEN_VERIFIER, type GoogleIdTokenVerifier } from './google-id-token.verifier';
 import type { IssuedAuth, Locale } from './auth.types';
@@ -45,8 +46,8 @@ const cleanDisplayName = (raw: string, email: string): string => {
 };
 
 export type CallbackResult =
-  | { ok: true; issued: IssuedAuth; redirect: string }
-  | { ok: false; error: string; redirect: string };
+  | { ok: true; user: UserDoc; redirect: string; mobile: boolean }
+  | { ok: false; error: string; redirect: string; mobile?: boolean };
 
 @Injectable()
 export class OauthService {
@@ -56,6 +57,7 @@ export class OauthService {
     private readonly auth: AuthService,
     private readonly users: UserRepo,
     private readonly sessions: SessionRepo,
+    private readonly mobileCodes: MobileCodeRepo,
     @Inject(OAUTH_HTTP) private readonly http: OauthHttp,
     @Inject(GOOGLE_ID_TOKEN_VERIFIER) private readonly verifier: GoogleIdTokenVerifier,
   ) {}
@@ -71,6 +73,14 @@ export class OauthService {
     return user?.isGuest ? user._id : undefined;
   }
 
+  /** Mobile flavor of guestIdFromRefresh: the app minted a single-use carry code over Bearer. */
+  async guestIdFromCarryCode(code: string | undefined): Promise<string | undefined> {
+    const userId = await this.mobileCodes.redeem('carry', code);
+    if (!userId) return undefined;
+    const user = await this.users.findById(userId);
+    return user?.isGuest ? user._id : undefined;
+  }
+
   /**
    * Build the provider authorization URL + the CSRF nonce to set as the `trm_oauth` cookie. Caller
    * is responsible for confirming the provider is enabled (the controller does, returning 404).
@@ -79,6 +89,7 @@ export class OauthService {
     provider: OauthProvider,
     redirect: string | undefined,
     guestUserId?: string,
+    mobile = false,
   ): { url: string; nonce: string } | null {
     const cfg = this.authConfig.provider(provider);
     if (!cfg) return null;
@@ -92,6 +103,7 @@ export class OauthService {
       nonce,
       codeVerifier,
       ...(guestUserId ? { guestUserId } : {}),
+      ...(mobile ? { mobile: true } : {}),
     });
 
     const params = new URLSearchParams({
@@ -126,11 +138,12 @@ export class OauthService {
       return { ok: false, error: 'invalid_state', redirect: '/' };
     }
     const redirect = safeRedirect(payload.redirect);
+    const mobile = !!payload.mobile;
     if (!nonceCookie || nonceCookie !== payload.nonce) {
-      return { ok: false, error: 'invalid_state', redirect };
+      return { ok: false, error: 'invalid_state', redirect, mobile };
     }
     const cfg = this.authConfig.provider(provider);
-    if (!cfg) return { ok: false, error: 'provider_disabled', redirect };
+    if (!cfg) return { ok: false, error: 'provider_disabled', redirect, mobile };
 
     let profile;
     try {
@@ -141,14 +154,15 @@ export class OauthService {
         payload.codeVerifier,
       );
     } catch {
-      return { ok: false, error: 'exchange_failed', redirect };
+      return { ok: false, error: 'exchange_failed', redirect, mobile };
     }
     if (!profile.email || !profile.emailVerified || !profile.sub) {
-      return { ok: false, error: 'email_unverified', redirect };
+      return { ok: false, error: 'email_unverified', redirect, mobile };
     }
 
-    // Account resolution + issuance is a DB sequence with a (narrow) unique-email race; never let a
-    // failure bubble to a raw 500 on what is a top-level browser navigation — redirect with an error.
+    // Account resolution is a DB sequence with a (narrow) unique-email race; never let a
+    // failure bubble to a raw 500 on what is a top-level browser navigation — redirect with an
+    // error. Session issuance moved to the caller: web sets the cookie, mobile mints a code.
     try {
       const user = await this.resolveAccount(
         provider,
@@ -158,10 +172,9 @@ export class OauthService {
         profile.avatarUrl,
         payload.guestUserId,
       );
-      const issued = await this.auth.issueFor(user);
-      return { ok: true, issued, redirect };
+      return { ok: true, user, redirect, mobile };
     } catch {
-      return { ok: false, error: 'server_error', redirect };
+      return { ok: false, error: 'server_error', redirect, mobile };
     }
   }
 

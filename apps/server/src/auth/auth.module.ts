@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { UserRepo } from './user.repo';
 import { SessionRepo } from './session.repo';
+import { MobileCodeRepo } from './mobile-code.repo';
 import { AccessTokenGuard } from './access-token.guard';
 import { FeatureGuard } from './feature.guard';
 import { AuthConfig } from './auth-config';
@@ -21,6 +22,7 @@ import { GOOGLE_ID_TOKEN_VERIFIER, GoogleAuthLibraryVerifier } from './google-id
     TokenService,
     UserRepo,
     SessionRepo,
+    MobileCodeRepo,
     AccessTokenGuard,
     FeatureGuard,
     AuthConfig,

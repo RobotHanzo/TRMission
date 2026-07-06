@@ -126,6 +126,134 @@ describe('google credential: mobile audiences', () => {
   });
 });
 
+describe('mobile OAuth handoff: one-time code round trip', () => {
+  let o: TestApp;
+  let fake: FakeOauthHttp;
+  const oServer = () => o.app.getHttpServer();
+
+  const pickCookie = (res: { headers: Record<string, unknown> }, name: string): string => {
+    const sc = res.headers['set-cookie'] as string[] | undefined;
+    const c = sc?.find((s) => s.startsWith(`${name}=`));
+    return c ? (c.split(';')[0] ?? '') : '';
+  };
+  const locationOf = (res: { headers: Record<string, unknown> }): string =>
+    String(res.headers.location ?? '');
+
+  beforeAll(async () => {
+    fake = new FakeOauthHttp();
+    o = await createTestApp({
+      mongod: sharedMongod,
+      dbName: 'trm-test-mobile-oauth',
+      authConfig: OAUTH_TEST_CONFIG,
+      oauthHttp: fake,
+    });
+  }, 60_000);
+  afterAll(() => o.close());
+
+  it('start(client=mobile) → callback → /m/callback?code → exchange upgrades the carried guest', async () => {
+    // Mobile guest signs in and mints a carry code over Bearer.
+    const guest = await request(oServer())
+      .post('/api/v1/auth/guest')
+      .set('x-trm-client', 'mobile')
+      .send({ displayName: 'MobileGuest' })
+      .expect(201);
+    const carry = await request(oServer())
+      .post('/api/v1/auth/mobile/carry')
+      .set('Authorization', `Bearer ${guest.body.accessToken}`)
+      .expect(201);
+    expect(carry.body.code).toBeTruthy();
+
+    // System browser: start → provider → callback.
+    fake.profile = {
+      sub: 'g-mob-1',
+      email: 'mobileguest@example.com',
+      emailVerified: true,
+      displayName: 'MobileGuest',
+      avatarUrl: null,
+    };
+    fake.fail = false;
+    const start = await request(oServer())
+      .get('/api/v1/auth/oauth/google/start')
+      .query({ client: 'mobile', carry: carry.body.code })
+      .expect(302);
+    const state = new URL(locationOf(start)).searchParams.get('state');
+    const cb = await request(oServer())
+      .get('/api/v1/auth/oauth/google/callback')
+      .query({ code: 'auth-code', state })
+      .set('Cookie', pickCookie(start, 'trm_oauth'))
+      .expect(302);
+
+    // Mobile landing: deep-link URL with a one-time code, and NO refresh cookie.
+    const loc = new URL(locationOf(cb));
+    expect(loc.pathname).toBe('/m/callback');
+    const code = loc.searchParams.get('code');
+    expect(code).toBeTruthy();
+    expect(refreshCookie(cb)).toBe('');
+
+    // Exchange: tokens in the body, guest upgraded in place (same id).
+    const ex = await request(oServer())
+      .post('/api/v1/auth/mobile/exchange')
+      .send({ code })
+      .expect(200);
+    expect(ex.body.user.id).toBe(guest.body.user.id);
+    expect(ex.body.user.isGuest).toBe(false);
+    expect(ex.body.user.email).toBe('mobileguest@example.com');
+    expect(ex.body.accessToken).toBeTruthy();
+    expect(ex.body.refreshToken).toBeTruthy();
+
+    // The code is single-use.
+    await request(oServer()).post('/api/v1/auth/mobile/exchange').send({ code }).expect(401);
+
+    // The returned refresh token works on the body transport.
+    await request(oServer())
+      .post('/api/v1/auth/refresh')
+      .send({ refreshToken: ex.body.refreshToken })
+      .expect(200);
+  });
+
+  it('mobile error paths land on /m/callback with an error param', async () => {
+    fake.profile = {
+      sub: 'g-mob-2',
+      email: 'unverified-mobile@example.com',
+      emailVerified: false,
+      displayName: 'Nope',
+      avatarUrl: null,
+    };
+    const start = await request(oServer())
+      .get('/api/v1/auth/oauth/google/start')
+      .query({ client: 'mobile' })
+      .expect(302);
+    const state = new URL(locationOf(start)).searchParams.get('state');
+    const cb = await request(oServer())
+      .get('/api/v1/auth/oauth/google/callback')
+      .query({ code: 'auth-code', state })
+      .set('Cookie', pickCookie(start, 'trm_oauth'))
+      .expect(302);
+    const loc = new URL(locationOf(cb));
+    expect(loc.pathname).toBe('/m/callback');
+    expect(loc.searchParams.get('error')).toBe('email_unverified');
+  });
+
+  it('web flow still sets the cookie and redirects to /login/callback', async () => {
+    fake.profile = {
+      sub: 'g-web-1',
+      email: 'stillweb@example.com',
+      emailVerified: true,
+      displayName: 'StillWeb',
+      avatarUrl: null,
+    };
+    const start = await request(oServer()).get('/api/v1/auth/oauth/google/start').expect(302);
+    const state = new URL(locationOf(start)).searchParams.get('state');
+    const cb = await request(oServer())
+      .get('/api/v1/auth/oauth/google/callback')
+      .query({ code: 'auth-code', state })
+      .set('Cookie', pickCookie(start, 'trm_oauth'))
+      .expect(302);
+    expect(locationOf(cb)).toContain('/login/callback');
+    expect(refreshCookie(cb)).toContain('trm_refresh=');
+  });
+});
+
 describe('guest TTL: refresh slides guestExpiresAt forward', () => {
   it('extends an almost-expired guest on refresh', async () => {
     const guest = await request(server()).post('/api/v1/auth/guest').send({}).expect(201);

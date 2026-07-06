@@ -10,6 +10,7 @@ import {
   Query,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -24,6 +25,8 @@ import { randomInt } from 'node:crypto';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AccessTokenGuard } from './access-token.guard';
+import { MobileCodeRepo } from './mobile-code.repo';
+import { UserRepo } from './user.repo';
 import { CurrentUser } from './current-user.decorator';
 import { AuthConfig, OAUTH_PROVIDERS, type OauthProvider } from './auth-config';
 import { OauthService } from './oauth.service';
@@ -38,6 +41,10 @@ import {
   LogoutDto,
   RefreshSchema,
   LogoutSchema,
+  MobileExchangeDto,
+  MobileExchangeSchema,
+  MobileCarryResultSchema,
+  MobileAuthResultSchema,
   GuestSchema,
   RegisterSchema,
   UpgradeSchema,
@@ -61,6 +68,8 @@ const REFRESH_PATH = '/api/v1/auth';
 const OAUTH_NONCE_COOKIE = 'trm_oauth';
 const OAUTH_NONCE_PATH = '/api/v1/auth/oauth';
 const randomGuestName = (): string => `旅客${randomInt(1000, 10000)}`;
+/** Exchange codes only need to survive the 302 → app-open → POST hop. */
+const EXCHANGE_CODE_TTL_MS = 60_000;
 const asProvider = (p: string): OauthProvider | null =>
   (OAUTH_PROVIDERS as readonly string[]).includes(p) ? (p as OauthProvider) : null;
 
@@ -71,6 +80,8 @@ export class AuthController {
     private readonly auth: AuthService,
     private readonly authConfig: AuthConfig,
     private readonly oauth: OauthService,
+    private readonly mobileCodes: MobileCodeRepo,
+    private readonly users: UserRepo,
   ) {}
 
   private setRefresh(res: Response, token: string): void {
@@ -200,6 +211,33 @@ export class AuthController {
     return this.finish(req, res, await this.oauth.handleCredential(body.credential, guestUserId));
   }
 
+  @Post('mobile/carry')
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Mint a single-use carry code so mobile OAuth can upgrade this guest' })
+  @ApiResponse({ status: 201, schema: apiSchema(MobileCarryResultSchema) })
+  async mobileCarry(@CurrentUser() user: AuthUser) {
+    return { code: await this.mobileCodes.mint('carry', user.userId, env.oauthStateTtlMs) };
+  }
+
+  @Post('mobile/exchange')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Redeem a one-time OAuth code for a mobile token pair' })
+  @ApiBody({ schema: apiSchema(MobileExchangeSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(MobileAuthResultSchema) })
+  async mobileExchange(@Body() body: MobileExchangeDto) {
+    const userId = await this.mobileCodes.redeem('exchange', body.code);
+    if (!userId) throw new UnauthorizedException('invalid or expired code');
+    const user = await this.users.findById(userId);
+    if (!user) throw new UnauthorizedException('user not found');
+    const issued = await this.auth.issueFor(user);
+    return {
+      user: issued.user,
+      accessToken: issued.accessToken,
+      refreshToken: issued.refreshToken,
+    };
+  }
+
   @Post('refresh')
   @HttpCode(200)
   @ApiOperation({ summary: 'Rotate the refresh token (cookie for web, body for mobile)' })
@@ -261,20 +299,34 @@ export class AuthController {
   async oauthStart(
     @Param('provider') providerParam: string,
     @Query('redirect') redirect: string | undefined,
+    @Query('client') client: string | undefined,
+    @Query('carry') carry: string | undefined,
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     const provider = asProvider(providerParam);
+    const mobile = client === 'mobile';
     if (!provider || !this.authConfig.provider(provider)) {
-      res.redirect(this.authConfig.webCallback({ error: 'provider_disabled' }));
+      res.redirect(
+        mobile
+          ? this.authConfig.mobileCallback({ error: 'provider_disabled' })
+          : this.authConfig.webCallback({ error: 'provider_disabled' }),
+      );
       return;
     }
-    // A logged-in guest (identified from the refresh cookie, which IS sent on this same-site
-    // navigation) is carried into the flow so the callback can upgrade them in place.
-    const guestUserId = await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
-    const built = this.oauth.buildAuthorize(provider, redirect, guestUserId);
+    // A logged-in guest is carried into the flow so the callback can upgrade them in place.
+    // Web: identified from the refresh cookie (sent on this same-site navigation). Mobile:
+    // the system browser holds no app session — the app pre-minted a single-use carry code.
+    const guestUserId = mobile
+      ? await this.oauth.guestIdFromCarryCode(carry)
+      : await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
+    const built = this.oauth.buildAuthorize(provider, redirect, guestUserId, mobile);
     if (!built) {
-      res.redirect(this.authConfig.webCallback({ error: 'provider_disabled' }));
+      res.redirect(
+        mobile
+          ? this.authConfig.mobileCallback({ error: 'provider_disabled' })
+          : this.authConfig.webCallback({ error: 'provider_disabled' }),
+      );
       return;
     }
     res.cookie(OAUTH_NONCE_COOKIE, built.nonce, {
@@ -309,10 +361,32 @@ export class AuthController {
       req.cookies?.[OAUTH_NONCE_COOKIE],
     );
     if (!result.ok) {
-      res.redirect(this.authConfig.webCallback({ redirect: result.redirect, error: result.error }));
+      res.redirect(
+        result.mobile
+          ? this.authConfig.mobileCallback({ error: result.error })
+          : this.authConfig.webCallback({ redirect: result.redirect, error: result.error }),
+      );
       return;
     }
-    this.setRefresh(res, result.issued.refreshToken);
-    res.redirect(this.authConfig.webCallback({ redirect: result.redirect }));
+    if (result.mobile) {
+      // No cookie can survive the system-browser → app hop; hand off a single-use code instead.
+      const exchangeCode = await this.mobileCodes.mint(
+        'exchange',
+        result.user._id,
+        EXCHANGE_CODE_TTL_MS,
+      );
+      res.redirect(this.authConfig.mobileCallback({ code: exchangeCode }));
+      return;
+    }
+    try {
+      const issued = await this.auth.issueFor(result.user);
+      this.setRefresh(res, issued.refreshToken);
+      res.redirect(this.authConfig.webCallback({ redirect: result.redirect }));
+    } catch {
+      // e.g. account disabled between resolution and issuance — never 500 a top-level navigation.
+      res.redirect(
+        this.authConfig.webCallback({ redirect: result.redirect, error: 'server_error' }),
+      );
+    }
   }
 }

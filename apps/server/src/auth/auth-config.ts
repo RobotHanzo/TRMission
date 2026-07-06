@@ -108,6 +108,15 @@ export class AuthConfig {
     return `${this.redirectBase}/login/callback${qs ? `?${qs}` : ''}`;
   }
 
+  /** Mobile deep-link landing (Universal/App Link): carries a one-time exchange code or error. */
+  mobileCallback(params: { code?: string; error?: string }): string {
+    const q = new URLSearchParams();
+    if (params.code) q.set('code', params.code);
+    if (params.error) q.set('error', params.error);
+    const qs = q.toString();
+    return `${this.redirectBase}/m/callback${qs ? `?${qs}` : ''}`;
+  }
+
   /** The UI hint sent to the web app so it renders only the available entry methods. */
   publicConfig(): {
     passwordLogin: boolean;
