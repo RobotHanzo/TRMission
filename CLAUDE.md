@@ -123,7 +123,9 @@ every boot; other maintainers are managed from the dashboard itself).
 
 Mobile clients: `MOBILE_MIN_BUILD` (forced-update floor served at `GET /version/mobile`),
 `GOOGLE_MOBILE_CLIENT_IDS` (comma list — extra ID-token audiences for the iOS/Android
-Google Sign-In apps), `APPLE_APP_ID` + `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256`
+Google Sign-In apps), `APPLE_CLIENT_IDS` (comma list of bundle ids / Services IDs accepted
+as Sign in with Apple identity-token audiences — enables `POST /auth/oauth/apple/credential`),
+`APPLE_APP_ID` + `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256`
 (serve `/.well-known/apple-app-site-association` + `assetlinks.json` for the `/m/callback`
 deep link; unset ⇒ 404). A client sending `x-trm-client: mobile` receives its refresh
 token in the response body (Keychain/Keystore storage) instead of the Strict cookie, and

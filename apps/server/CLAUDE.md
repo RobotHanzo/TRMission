@@ -107,6 +107,12 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   a signed-in guest is carried via `POST /auth/mobile/carry` → `?carry=` (the cookie-free
   analogue of the refresh-cookie peek). Google ID tokens verify against
   `AuthConfig.googleAudiences()` (web + `GOOGLE_MOBILE_CLIENT_IDS`).
+  **Sign in with Apple** is credential-only: `POST /auth/oauth/apple/credential`
+  (`{identityToken, fullName?, refreshToken?}`) verifies against Apple's JWKS
+  (`apple-id-token.verifier.ts`, audiences = `APPLE_CLIENT_IDS`) and converges on
+  `resolveAccount` under the `'apple'` identity — Hide My Email relay addresses are
+  treated as verified emails and simply don't cross-link with other providers. There is
+  no `/oauth/apple/start`; Apple never enters the redirect flow.
 - `src/lobby/` — rooms lifecycle with atomic seat CAS; `RoomSettings.map` selects
   `{source:'official', mapId}` or `{source:'custom', customMapId}` (default: official Taiwan).
   `start` resolves the selector via `MapsService.resolveForStart` (validates a custom draft, hashes
