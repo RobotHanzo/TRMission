@@ -47,7 +47,7 @@
   - Repo additions: `UserRepo.deleteById(id): Promise<void>`, `SessionRepo.deleteAllForUser(userId): Promise<void>`, `HistoryRepo.pullSpectator(userId): Promise<void>`, `CustomMapRepo.removeAllByOwner(ownerId): Promise<number>`.
   - Env: `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` (PKCS8 PEM, `\n`-escaped newlines allowed).
 
-- [ ] **Step 1: Write the failing e2e spec** (`apps/server/test/account-delete.e2e.spec.ts`)
+- [x] **Step 1: Write the failing e2e spec** (`apps/server/test/account-delete.e2e.spec.ts`)
 
 ```ts
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
@@ -232,12 +232,12 @@ describe('DELETE /auth/me: Apple token revocation', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `yarn workspace @trm/server test --run account-delete`
 Expected: FAIL — `FakeAppleTokenRevoker` not exported from `./app` (compile error).
 
-- [ ] **Step 3: Env + repo cascade methods + cookie-constant exports**
+- [x] **Step 3: Env + repo cascade methods + cookie-constant exports**
 
 `apps/server/src/config/env.ts` after `appleClientIds`:
 
@@ -296,7 +296,7 @@ export const REFRESH_PATH = '/api/v1/auth';
 
 `apps/server/src/dashboard/dashboard.module.ts`: add `exports: [DashboardAccountRepo],` to the `@Module({...})`.
 
-- [ ] **Step 4: Apple revoker seam** (`apps/server/src/account/apple-token-revoker.ts`)
+- [x] **Step 4: Apple revoker seam** (`apps/server/src/account/apple-token-revoker.ts`)
 
 ```ts
 import { Injectable, Logger } from '@nestjs/common';
@@ -383,7 +383,7 @@ export class FetchAppleTokenRevoker implements AppleTokenRevoker {
 }
 ```
 
-- [ ] **Step 5: Service, controller, module, schema, wiring**
+- [x] **Step 5: Service, controller, module, schema, wiring**
 
 `apps/server/src/auth/auth.schemas.ts`:
 
@@ -543,14 +543,14 @@ export class FakeAppleTokenRevoker implements AppleTokenRevoker {
 }
 ```
 
-- [ ] **Step 6: Run the spec + regressions**
+- [x] **Step 6: Run the spec + regressions**
 
 Run: `yarn workspace @trm/server test --run account-delete`
 Expected: PASS (7 tests)
 Run: `yarn workspace @trm/server test --run auth.e2e`
 Expected: PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/server/src/account apps/server/src/config/env.ts apps/server/src/auth/auth.controller.ts apps/server/src/auth/auth.schemas.ts apps/server/src/auth/user.repo.ts apps/server/src/auth/session.repo.ts apps/server/src/history/history.repo.ts apps/server/src/maps/custom-map.repo.ts apps/server/src/dashboard/dashboard.module.ts apps/server/src/app.module.ts apps/server/test/app.ts apps/server/test/account-delete.e2e.spec.ts
@@ -564,11 +564,11 @@ git commit -m "feat(server): in-app account deletion with Apple token revocation
 **Files:**
 - Modify: `CLAUDE.md`, `apps/server/CLAUDE.md`, `docs/TODO.md`
 
-- [ ] **Step 1: Gates**
+- [x] **Step 1: Gates**
 
 Run: `yarn workspace @trm/server test` → all PASS; `yarn typecheck` → clean; `yarn lint` → clean.
 
-- [ ] **Step 2: Docs**
+- [x] **Step 2: Docs**
 
 Root `CLAUDE.md` mobile paragraph — append after the `APPLE_CLIENT_IDS` clause:
 
@@ -596,7 +596,7 @@ Root `CLAUDE.md` mobile paragraph — append after the `APPLE_CLIENT_IDS` clause
   does not. Needed before store listing (P6).
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add CLAUDE.md apps/server/CLAUDE.md docs/TODO.md
