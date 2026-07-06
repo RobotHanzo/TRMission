@@ -34,6 +34,7 @@
     "expo-linking": "~56.0.15",
     "expo-notifications": "~56.0.19",
     "expo-secure-store": "~56.0.4",
+    "expo-sqlite": "~56.0.5",
     "expo-status-bar": "~56.0.4",
     "expo-web-browser": "~56.0.5",
     "fast-text-encoding": "^1.0.6",

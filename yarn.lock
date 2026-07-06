@@ -4157,6 +4157,7 @@ __metadata:
     expo-linking: "npm:~56.0.15"
     expo-notifications: "npm:~56.0.19"
     expo-secure-store: "npm:~56.0.4"
+    expo-sqlite: "npm:~56.0.5"
     expo-status-bar: "npm:~56.0.4"
     expo-web-browser: "npm:~56.0.5"
     fast-text-encoding: "npm:^1.0.6"
@@ -5259,6 +5260,13 @@ __metadata:
   version: 0.4.0
   resolution: "asynckit@npm:0.4.0"
   checksum: 10/3ce727cbc78f69d6a4722517a58ee926c8c21083633b1d3fdf66fd688f6c127a53a592141bd4866f9b63240a86e9d8e974b13919450bd17fa33c2d22c4558ad8
+  languageName: node
+  linkType: hard
+
+"await-lock@npm:^2.2.2":
+  version: 2.2.2
+  resolution: "await-lock@npm:2.2.2"
+  checksum: 10/feb11f36768a8545879ed2d214b46aae484e6564ffa466af9212d5782897203770795cae01f813de04a46f66c0b8ee6bc690a0c435b04e00cad5a18ef0842e25
   languageName: node
   linkType: hard
 
@@ -7314,6 +7322,19 @@ __metadata:
   version: 56.0.5
   resolution: "expo-server@npm:56.0.5"
   checksum: 10/0fa69600d65d09f100d513c431ce5152531d588db46fc56d18a9d029b0d758d061d9981afa394c0d30a01ae580050ad0c570f3a58f6a296d719dbf8812952fe1
+  languageName: node
+  linkType: hard
+
+"expo-sqlite@npm:~56.0.5":
+  version: 56.0.5
+  resolution: "expo-sqlite@npm:56.0.5"
+  dependencies:
+    await-lock: "npm:^2.2.2"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10/f8bfa6d2a0ae6e6a9b179d27e218a878dbfa00b5f901e5d32e7454a5f3e9e7839dcb3d7dd5a96946e544b56ca5d0255877657a0c7cb9150251a51d051b8d7272
   languageName: node
   linkType: hard
 
