@@ -22,6 +22,10 @@ jest.mock('../net/secureStore', () => ({
   clearRefreshToken: jest.fn(),
 }));
 jest.mock('./ui', () => ({ useUi: { getState: () => ({ applyPreferences: jest.fn() }) } }));
+jest.mock('../push/register', () => ({
+  registerDeviceForPush: jest.fn().mockResolvedValue(undefined),
+  unregisterDeviceForPush: jest.fn().mockResolvedValue(undefined),
+}));
 
 import { useSession } from './session';
 import { api } from '../net/rest';

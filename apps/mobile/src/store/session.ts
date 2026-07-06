@@ -8,6 +8,7 @@ import {
   type UserPreferences,
 } from '../net/rest';
 import { clearRefreshToken, getRefreshToken } from '../net/secureStore';
+import { registerDeviceForPush, unregisterDeviceForPush } from '../push/register';
 import { useUi } from './ui';
 
 /** How the current session was established — P5's account-deletion flow branches on `apple`. */
@@ -58,7 +59,8 @@ export const useSession = create<SessionState>()((set, get) => {
       const r = await action();
       set({ user: r.user, loading: false, signInMethod: method });
       hydratePrefs(r.user);
-      // Task 9 registers this device for push here (after a successful auth).
+      // Register for push after a successful auth (fire-and-forget; never blocks sign-in).
+      void registerDeviceForPush().catch(() => undefined);
     } catch (e) {
       set({ loading: false, error: (e as Error).message });
     }
@@ -118,7 +120,8 @@ export const useSession = create<SessionState>()((set, get) => {
       // Clear local state synchronously first: navigation gates on `user`, so it must see the
       // signed-out state immediately — not after the network round-trip.
       set({ user: null, accessToken: null, signInMethod: null });
-      // Task 9 unregisters this device for push here (before the logout round-trip).
+      // Unregister push before logout revokes the access token removeDevice needs.
+      await unregisterDeviceForPush().catch(() => undefined);
       await api.logout().catch(() => undefined);
       await clearLocalSession();
     },
