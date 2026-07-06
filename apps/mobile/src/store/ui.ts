@@ -10,6 +10,9 @@ const THEME_KEY = 'trm.theme';
 const LOCALE_KEY = 'trm.locale';
 const COLOR_BLIND_KEY = 'trm.colorBlind';
 const BOARD_LAYOUT_KEY = 'trm.boardLayout';
+const FOLLOW_ACTING_KEY = 'trm.followActing';
+const SOUND_ENABLED_KEY = 'trm.soundEnabled';
+const SOUND_VOLUME_KEY = 'trm.soundVolume';
 
 const THEMES: readonly Theme[] = ['system', 'light', 'dark'];
 const LOCALES: readonly Locale[] = ['zh-Hant', 'en'];
@@ -22,6 +25,10 @@ interface UiState {
   locale: Locale;
   colorBlind: boolean;
   boardLayout: BoardLayout;
+  /** "Follow the acting player" camera toggle (ports web store/ui.ts followActing; used in P2 Task 5). */
+  followActing: boolean;
+  soundEnabled: boolean;
+  soundVolume: number;
   /** True once AsyncStorage has been read on boot. */
   hydrated: boolean;
   hydrate(): Promise<void>;
@@ -29,6 +36,9 @@ interface UiState {
   setLocale(locale: Locale): Promise<void>;
   setColorBlind(colorBlind: boolean): Promise<void>;
   setBoardLayout(boardLayout: BoardLayout): Promise<void>;
+  setFollowActing(followActing: boolean): Promise<void>;
+  setSoundEnabled(soundEnabled: boolean): Promise<void>;
+  setSoundVolume(soundVolume: number): Promise<void>;
   /** Adopt a registered account's server-side prefs on sign-in. */
   applyPreferences(prefs: UserPreferences): void;
 }
@@ -38,21 +48,32 @@ export const useUi = create<UiState>()((set) => ({
   locale: 'zh-Hant',
   colorBlind: false,
   boardLayout: 'rail',
+  followActing: true,
+  soundEnabled: true,
+  soundVolume: 0.6,
   hydrated: false,
   async hydrate() {
     try {
-      const [theme, locale, colorBlind, boardLayout] = await AsyncStorage.multiGet([
-        THEME_KEY,
-        LOCALE_KEY,
-        COLOR_BLIND_KEY,
-        BOARD_LAYOUT_KEY,
-      ]);
+      const [theme, locale, colorBlind, boardLayout, followActing, soundEnabled, soundVolume] =
+        await AsyncStorage.multiGet([
+          THEME_KEY,
+          LOCALE_KEY,
+          COLOR_BLIND_KEY,
+          BOARD_LAYOUT_KEY,
+          FOLLOW_ACTING_KEY,
+          SOUND_ENABLED_KEY,
+          SOUND_VOLUME_KEY,
+        ]);
       const nextLocale = oneOf(LOCALES, locale[1], 'zh-Hant');
+      const vol = soundVolume[1] != null ? Number(soundVolume[1]) : NaN;
       set({
         theme: oneOf(THEMES, theme[1], 'system'),
         locale: nextLocale,
         colorBlind: colorBlind[1] === '1',
         boardLayout: oneOf(BOARD_LAYOUTS, boardLayout[1], 'rail'),
+        followActing: followActing[1] == null ? true : followActing[1] === '1',
+        soundEnabled: soundEnabled[1] == null ? true : soundEnabled[1] === '1',
+        soundVolume: Number.isFinite(vol) ? Math.max(0, Math.min(1, vol)) : 0.6,
         hydrated: true,
       });
       if (i18n.language !== nextLocale) await i18n.changeLanguage(nextLocale);
@@ -76,6 +97,19 @@ export const useUi = create<UiState>()((set) => ({
   async setBoardLayout(boardLayout) {
     set({ boardLayout });
     await AsyncStorage.setItem(BOARD_LAYOUT_KEY, boardLayout).catch(() => undefined);
+  },
+  async setFollowActing(followActing) {
+    set({ followActing });
+    await AsyncStorage.setItem(FOLLOW_ACTING_KEY, followActing ? '1' : '0').catch(() => undefined);
+  },
+  async setSoundEnabled(soundEnabled) {
+    set({ soundEnabled });
+    await AsyncStorage.setItem(SOUND_ENABLED_KEY, soundEnabled ? '1' : '0').catch(() => undefined);
+  },
+  async setSoundVolume(v) {
+    const soundVolume = Math.max(0, Math.min(1, v));
+    set({ soundVolume });
+    await AsyncStorage.setItem(SOUND_VOLUME_KEY, String(soundVolume)).catch(() => undefined);
   },
   applyPreferences(prefs) {
     set({
