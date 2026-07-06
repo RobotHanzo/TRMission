@@ -12,6 +12,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { OgModule } from './og/og.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { HealthController } from './health/health.controller';
+import { WellKnownController } from './health/well-known.controller';
+import { MobileLinksConfig } from './config/mobile-links.config';
 import { DocsController } from './openapi/docs.controller';
 import { OpenApiHolder } from './openapi/openapi.holder';
 
@@ -31,9 +33,10 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     DashboardModule,
     OgModule,
   ],
-  controllers: [HealthController, DocsController],
+  controllers: [HealthController, DocsController, WellKnownController],
   providers: [
     OpenApiHolder,
+    MobileLinksConfig,
     { provide: APP_PIPE, useClass: ZodValidationPipe },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],

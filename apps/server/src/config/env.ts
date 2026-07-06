@@ -47,6 +47,13 @@ export const env = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
+  /** Universal/App Link verification (served under /.well-known when set). */
+  appleAppId: process.env.APPLE_APP_ID ?? '', // "TEAMID.bundle.id"
+  androidPackageName: process.env.ANDROID_PACKAGE_NAME ?? '',
+  androidCertSha256: (process.env.ANDROID_CERT_SHA256 ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   /**
    * Public base URL the browser uses to reach this app. Builds both the provider `redirect_uri`
    * (`${base}/api/v1/auth/oauth/:provider/callback`) and the post-callback web redirect

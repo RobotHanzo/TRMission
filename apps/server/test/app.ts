@@ -16,6 +16,10 @@ import {
   type GoogleIdTokenVerifier,
 } from '../src/auth/google-id-token.verifier';
 import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
+import {
+  MobileLinksConfig,
+  type MobileLinksConfigOverrides,
+} from '../src/config/mobile-links.config';
 
 export interface TestApp {
   app: INestApplication;
@@ -32,6 +36,8 @@ export interface TestAppOptions {
   googleVerifier?: GoogleIdTokenVerifier;
   /** Override DashboardConfig (owner-email bootstrap) without touching env. */
   dashboardConfig?: DashboardConfigOverrides;
+  /** Override MobileLinksConfig (deep-link verification files) without touching env. */
+  mobileLinks?: MobileLinksConfigOverrides;
   /**
    * Reuse an already-running MongoMemoryServer instead of spawning a new `mongod` process.
    * Specs that boot several TestApps (e.g. one per auth-config variant) should share one —
@@ -62,6 +68,10 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
     builder = builder
       .overrideProvider(DashboardConfig)
       .useValue(new DashboardConfig(opts.dashboardConfig));
+  if (opts.mobileLinks)
+    builder = builder
+      .overrideProvider(MobileLinksConfig)
+      .useValue(new MobileLinksConfig(opts.mobileLinks));
 
   const moduleRef = await builder.compile();
 
