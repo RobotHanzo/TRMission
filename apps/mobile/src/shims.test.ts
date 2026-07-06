@@ -43,4 +43,33 @@ describe('runtime shims (simulating Hermes)', () => {
       (Intl as { PluralRules?: unknown }).PluralRules = saved;
     }
   });
+
+  it('installs Intl.Locale before the pluralrules polyfill loads (Hermes ships no Intl.Locale)', () => {
+    // Regression for the boot crash caught on the first physical Android run: intl-pluralrules'
+    // shouldPolyfill routes through @formatjs/intl-localematcher's best-fit matcher, which does
+    // `new Intl.Locale(…)`. Hermes has no Intl.Locale, so loading the pluralrules polyfill before an
+    // Intl.Locale polyfill throws "… is not a constructor" at boot, before any screen renders. The
+    // PluralRules test above can't catch this because Node keeps its native Intl.Locale — only
+    // deleting BOTH reproduces the device, and the shim must polyfill Locale FIRST.
+    const savedPluralRules = Intl.PluralRules;
+    const savedLocale = (Intl as { Locale?: unknown }).Locale;
+    try {
+      delete (Intl as { PluralRules?: unknown }).PluralRules;
+      delete (Intl as { Locale?: unknown }).Locale;
+      expect(() =>
+        jest.isolateModules(() => {
+          // isolateModules needs a non-hoisted require so ./shims re-runs against the deleted globals.
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          require('./shims');
+        }),
+      ).not.toThrow();
+      expect(typeof (Intl as { Locale?: unknown }).Locale).toBe('function');
+      expect(typeof Intl.PluralRules).toBe('function');
+      expect(new Intl.PluralRules('en').select(1)).toBe('one');
+      expect(new Intl.PluralRules('zh').select(1)).toBe('other');
+    } finally {
+      (Intl as { PluralRules?: unknown }).PluralRules = savedPluralRules;
+      (Intl as { Locale?: unknown }).Locale = savedLocale;
+    }
+  });
 });
