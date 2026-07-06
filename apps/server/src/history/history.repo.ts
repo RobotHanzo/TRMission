@@ -121,6 +121,11 @@ export class HistoryRepo {
     return new Map(docs.map((u) => [u._id, u.displayName]));
   }
 
+  /** Account deletion: remove the user's spectator references (player rows keep opaque ids). */
+  async pullSpectator(userId: string): Promise<void> {
+    await this.col.updateMany({ spectators: userId }, { $pull: { spectators: userId } });
+  }
+
   /** Finished games the user played in or spectated, newest first. */
   async listForUser(userId: string, limit = 50): Promise<MatchSummary[]> {
     const docs = await this.col

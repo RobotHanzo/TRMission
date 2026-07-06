@@ -32,6 +32,10 @@ export const GoogleCredentialSchema = z.object({
 export const RefreshSchema = z.object({ refreshToken: z.string().min(1).optional() });
 export const LogoutSchema = z.object({ refreshToken: z.string().min(1).optional() });
 export const MobileExchangeSchema = z.object({ code: z.string().min(1) });
+export const DeleteAccountSchema = z.object({
+  /** Apple 5.1.1(v)/TN3194: a fresh SIWA authorizationCode so the server can revoke tokens. */
+  appleAuthorizationCode: z.string().min(1).optional(),
+});
 export const AppleCredentialSchema = z.object({
   identityToken: z.string().min(1),
   /** Apple surfaces the user's name ONCE, client-side, on first authorization — pass it through. */
@@ -52,6 +56,8 @@ export class RefreshDto extends createZodDto(RefreshSchema.default({})) {}
 export class LogoutDto extends createZodDto(LogoutSchema.default({})) {}
 export class MobileExchangeDto extends createZodDto(MobileExchangeSchema) {}
 export class AppleCredentialDto extends createZodDto(AppleCredentialSchema) {}
+// Web sends DELETE /auth/me with no body — default to {} so the zod pipe doesn't 400 it.
+export class DeleteAccountDto extends createZodDto(DeleteAccountSchema.default({})) {}
 
 export const PublicUserSchema = z.object({
   id: z.string(),

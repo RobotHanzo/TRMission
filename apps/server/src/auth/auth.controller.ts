@@ -62,8 +62,8 @@ import { apiSchema } from '../openapi/openapi';
 import { env } from '../config/env';
 import type { AuthUser, IssuedAuth } from './auth.types';
 
-const REFRESH_COOKIE = 'trm_refresh';
-const REFRESH_PATH = '/api/v1/auth';
+export const REFRESH_COOKIE = 'trm_refresh';
+export const REFRESH_PATH = '/api/v1/auth';
 // CSRF nonce for the OAuth round-trip. SameSite=Lax (NOT Strict): the provider callback is a
 // cross-site top-level navigation, on which Strict cookies would be withheld — breaking every
 // callback. Scoped to the oauth subtree so it never rides along with ordinary auth calls.

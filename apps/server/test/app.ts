@@ -19,6 +19,7 @@ import {
   APPLE_ID_TOKEN_VERIFIER,
   type AppleIdTokenVerifier,
 } from '../src/auth/apple-id-token.verifier';
+import { APPLE_TOKEN_REVOKER, type AppleTokenRevoker } from '../src/account/apple-token-revoker';
 import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
 import {
   MobileLinksConfig,
@@ -40,6 +41,8 @@ export interface TestAppOptions {
   googleVerifier?: GoogleIdTokenVerifier;
   /** Stub Apple identity-token verification (Sign in with Apple credential flow). */
   appleVerifier?: AppleIdTokenVerifier;
+  /** Stub Apple token revocation (account deletion). */
+  appleRevoker?: AppleTokenRevoker;
   /** Override DashboardConfig (owner-email bootstrap) without touching env. */
   dashboardConfig?: DashboardConfigOverrides;
   /** Override MobileLinksConfig (deep-link verification files) without touching env. */
@@ -72,6 +75,8 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
     builder = builder.overrideProvider(GOOGLE_ID_TOKEN_VERIFIER).useValue(opts.googleVerifier);
   if (opts.appleVerifier)
     builder = builder.overrideProvider(APPLE_ID_TOKEN_VERIFIER).useValue(opts.appleVerifier);
+  if (opts.appleRevoker)
+    builder = builder.overrideProvider(APPLE_TOKEN_REVOKER).useValue(opts.appleRevoker);
   if (opts.dashboardConfig)
     builder = builder
       .overrideProvider(DashboardConfig)
@@ -130,6 +135,16 @@ export class FakeAppleIdTokenVerifier implements AppleIdTokenVerifier {
     this.lastAudience = audience;
     if (this.fail || !this.profile) throw new Error('fake apple verify failed');
     return this.profile;
+  }
+}
+
+/** A controllable stand-in for Apple token revocation. */
+export class FakeAppleTokenRevoker implements AppleTokenRevoker {
+  calls: string[] = [];
+  result = true;
+  async revoke(code: string): Promise<boolean> {
+    this.calls.push(code);
+    return this.result;
   }
 }
 

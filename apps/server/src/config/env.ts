@@ -52,6 +52,10 @@ export const env = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
+  /** Sign in with Apple token revocation (account deletion). All three + a client id required. */
+  appleTeamId: process.env.APPLE_TEAM_ID ?? '',
+  appleKeyId: process.env.APPLE_KEY_ID ?? '',
+  applePrivateKey: (process.env.APPLE_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
   /** Universal/App Link verification (served under /.well-known when set). */
   appleAppId: process.env.APPLE_APP_ID ?? '', // "TEAMID.bundle.id"
   androidPackageName: process.env.ANDROID_PACKAGE_NAME ?? '',

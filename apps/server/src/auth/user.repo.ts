@@ -164,6 +164,11 @@ export class UserRepo implements OnModuleInit {
     );
   }
 
+  /** Hard-delete an account doc (account deletion). Cascade is AccountDeletionService's job. */
+  async deleteById(id: string): Promise<void> {
+    await this.col.deleteOne({ _id: id });
+  }
+
   /** Record a provider identity on an existing account (idempotent re-link); refresh the avatar. */
   linkOauthIdentity(
     userId: string,

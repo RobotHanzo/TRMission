@@ -52,5 +52,8 @@ import { DashboardBootstrap } from './dashboard-bootstrap';
     PurgeService,
     DashboardMapsService,
   ],
+  // AccountModule's deletion flow checks maintainer status (the same "revoke access first"
+  // protection the ban flow uses) — the repo is the only export; services stay internal.
+  exports: [DashboardAccountRepo],
 })
 export class DashboardModule {}

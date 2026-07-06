@@ -102,6 +102,11 @@ export class SessionRepo implements OnModuleInit {
     await this.col.updateMany({ userId, revoked: { $ne: true } }, { $set: { revoked: true } });
   }
 
+  /** Account deletion: hard-delete every refresh family (revocation is not enough — PII purge). */
+  async deleteAllForUser(userId: string): Promise<void> {
+    await this.col.deleteMany({ userId });
+  }
+
   /** Live (unrevoked, unexpired) refresh families for a user — dashboard user detail. */
   countActiveForUser(userId: string): Promise<number> {
     return this.col.countDocuments({
