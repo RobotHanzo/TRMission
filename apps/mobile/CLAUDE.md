@@ -71,7 +71,10 @@ Strings are `x-trm-client: mobile`, deep-link scheme `trmission://`, OAuth retur
 
 ### Required CI secrets / variables
 
-Repo **variables**: `TRM_SERVER_ORIGIN`, `TRM_GOOGLE_WEB_CLIENT_ID`, `TRM_GOOGLE_IOS_CLIENT_ID`.
+Repo **variables**: `TRM_SERVER_ORIGIN`, `TRM_GOOGLE_WEB_CLIENT_ID`, `TRM_GOOGLE_IOS_CLIENT_ID`,
+`TRM_GOOGLE_IOS_URL_SCHEME` (the reversed iOS OAuth client id, `com.googleusercontent.apps.*` — the
+google-signin config plugin validates it at every config eval, so `expo prebuild`/`run:android` need
+it set or fall back to a format-valid placeholder; see `app.config.ts`).
 
 Android **secrets**: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
 `ANDROID_KEY_PASSWORD`.

@@ -4,6 +4,15 @@ import type { ExpoConfig } from 'expo/config';
 // Bump it on every store submission; keep it in lockstep with versionCode/buildNumber in P6.
 const BUILD_NUMBER = 1;
 
+// The google-signin config plugin (without-Firebase mode) VALIDATES `iosUrlScheme` at every config
+// eval — for `expo run:android`/`prebuild` too, not just iOS — and rejects anything not prefixed
+// `com.googleusercontent.apps.`. That's the reversed iOS OAuth client id (shown as its own value in
+// the Google console). Provisioned at store-setup (P6) via TRM_GOOGLE_IOS_URL_SCHEME; until then a
+// format-valid placeholder lets native builds run — consistent with the Google button no-op'ing
+// until real client ids land (see `extra` below).
+const googleIosUrlScheme =
+  process.env.TRM_GOOGLE_IOS_URL_SCHEME ?? 'com.googleusercontent.apps.placeholder';
+
 const config: ExpoConfig = {
   name: 'TRMission',
   slug: 'trmission',
@@ -30,7 +39,7 @@ const config: ExpoConfig = {
   plugins: [
     'expo-secure-store',
     'expo-apple-authentication',
-    ['@react-native-google-signin/google-signin', {}],
+    ['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }],
     'expo-notifications',
   ],
   extra: {
