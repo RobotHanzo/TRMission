@@ -99,6 +99,14 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   the SPA's origin. A logged-in guest's id is read from the refresh cookie at `/oauth/:p/start`
   (`SessionRepo.peekUserId`, no rotation) and carried in the signed `state`, because the callback
   arrives cross-site without the cookie.
+  **Mobile transport** (no SameSite cookie can reach a native app): `x-trm-client: mobile`
+  on any issuance route returns the refresh token in the body; `/auth/refresh` + `/auth/logout`
+  take `{refreshToken}` in the body (body-in → body-out, never a cookie). The OAuth redirect
+  flow with `?client=mobile` ends at `/m/callback?code=<single-use exchange code>` (minted in
+  `mobile-code.repo.ts`, redeemed by `POST /auth/mobile/exchange` for a fresh token pair);
+  a signed-in guest is carried via `POST /auth/mobile/carry` → `?carry=` (the cookie-free
+  analogue of the refresh-cookie peek). Google ID tokens verify against
+  `AuthConfig.googleAudiences()` (web + `GOOGLE_MOBILE_CLIENT_IDS`).
 - `src/lobby/` — rooms lifecycle with atomic seat CAS; `RoomSettings.map` selects
   `{source:'official', mapId}` or `{source:'custom', customMapId}` (default: official Taiwan).
   `start` resolves the selector via `MapsService.resolveForStart` (validates a custom draft, hashes

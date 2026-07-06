@@ -121,6 +121,15 @@ demo game on boot), `TRM_BOT_DELAY_MS` (pause between bot moves; `0` in tests),
 `DASHBOARD_OWNER_EMAILS` (comma list of registered emails granted the `owner` dashboard role at
 every boot; other maintainers are managed from the dashboard itself).
 
+Mobile clients: `MOBILE_MIN_BUILD` (forced-update floor served at `GET /version/mobile`),
+`GOOGLE_MOBILE_CLIENT_IDS` (comma list — extra ID-token audiences for the iOS/Android
+Google Sign-In apps), `APPLE_APP_ID` + `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256`
+(serve `/.well-known/apple-app-site-association` + `assetlinks.json` for the `/m/callback`
+deep link; unset ⇒ 404). A client sending `x-trm-client: mobile` receives its refresh
+token in the response body (Keychain/Keystore storage) instead of the Strict cookie, and
+`POST /auth/refresh`/`logout` accept `{refreshToken}` in the body. Guest TTLs slide
+forward on refresh.
+
 **Auth methods** (each independently switchable; the web reads `GET /auth/config`, the server
 enforces): `AUTH_PASSWORD_LOGIN_ENABLED` (`0` disables email/password login+register+upgrade),
 `AUTH_GUEST_ENABLED` (`0` disables guest sessions). **OAuth** (bound by _verified_ email — same
