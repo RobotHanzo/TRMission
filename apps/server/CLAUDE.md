@@ -113,6 +113,12 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   `resolveAccount` under the `'apple'` identity — Hide My Email relay addresses are
   treated as verified emails and simply don't cross-link with other providers. There is
   no `/oauth/apple/start`; Apple never enters the redirect flow.
+  **Account deletion**: `DELETE /auth/me` (Bearer; optional `{appleAuthorizationCode}` from a
+  fresh SIWA re-auth for token revocation, best-effort). Cascade in `src/account/`: deletes
+  users/authSessions/customMaps drafts, leaves LOBBY rooms via `RoomRepo.leave`, `$pull`s
+  matchHistory spectators; the event-sourced game log, `mapContents`, and `dashboardAudit`
+  stay (dangling opaque ids = the same posture as guest TTL expiry). Maintainers get 409
+  until dashboard access is revoked.
 - `src/lobby/` — rooms lifecycle with atomic seat CAS; `RoomSettings.map` selects
   `{source:'official', mapId}` or `{source:'custom', customMapId}` (default: official Taiwan).
   `start` resolves the selector via `MapsService.resolveForStart` (validates a custom draft, hashes

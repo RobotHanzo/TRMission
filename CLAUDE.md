@@ -125,6 +125,8 @@ Mobile clients: `MOBILE_MIN_BUILD` (forced-update floor served at `GET /version/
 `GOOGLE_MOBILE_CLIENT_IDS` (comma list — extra ID-token audiences for the iOS/Android
 Google Sign-In apps), `APPLE_CLIENT_IDS` (comma list of bundle ids / Services IDs accepted
 as Sign in with Apple identity-token audiences — enables `POST /auth/oauth/apple/credential`),
+`APPLE_TEAM_ID` + `APPLE_KEY_ID` + `APPLE_PRIVATE_KEY` (SIWA token revocation during
+`DELETE /auth/me` account deletion; revocation is best-effort per TN3194),
 `APPLE_APP_ID` + `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256`
 (serve `/.well-known/apple-app-site-association` + `assetlinks.json` for the `/m/callback`
 deep link; unset ⇒ 404). A client sending `x-trm-client: mobile` receives its refresh

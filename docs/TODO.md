@@ -22,6 +22,9 @@
   claim-a-route happy path on device).
 - **Self-hosted Mac runner** — swap for GitHub-hosted macOS minutes in `mobile-ios.yml`
   when Mac hardware is available; workflow is a drop-in change.
+- **Public web account-deletion page** — Google Play's Data-safety form requires an HTTPS
+  URL usable without the app; the server endpoint exists (`DELETE /auth/me`), the web page
+  does not. Needed before store listing (P6).
 
 ## Cross-platform (surfaced by the mobile research, benefits web too)
 
