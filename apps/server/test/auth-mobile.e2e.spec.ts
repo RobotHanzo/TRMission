@@ -85,6 +85,13 @@ describe('mobile refresh/logout: token in the body', () => {
   });
 });
 
+describe('mobile version gate', () => {
+  it('serves minBuild (default 0) + commitHash', async () => {
+    const res = await request(server()).get('/version/mobile').expect(200);
+    expect(res.body).toEqual({ minBuild: 0, commitHash: expect.any(String) });
+  });
+});
+
 describe('google credential: mobile audiences', () => {
   let o: TestApp;
   let verifier: FakeGoogleIdTokenVerifier;

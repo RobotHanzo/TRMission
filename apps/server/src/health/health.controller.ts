@@ -33,4 +33,10 @@ export class HealthController {
       commitHash: env.gitCommit,
     };
   }
+
+  @Get('version/mobile')
+  @ApiOperation({ summary: 'Mobile forced-update gate: minimum accepted app build' })
+  versionMobile(): { minBuild: number; commitHash: string } {
+    return { minBuild: env.mobileMinBuild, commitHash: env.gitCommit };
+  }
 }

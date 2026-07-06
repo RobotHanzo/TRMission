@@ -13,6 +13,8 @@ export const env = {
   devGame: process.env.TRM_DEV_GAME === '1',
   /** Delay between consecutive bot moves (ms) so humans can follow the play. */
   botMoveDelayMs: Number(process.env.TRM_BOT_DELAY_MS ?? 600),
+  /** Force-update floor for the mobile app: builds below this are told to update. 0 = off. */
+  mobileMinBuild: Number(process.env.MOBILE_MIN_BUILD ?? 0),
 
   // Auth (Step C). The default secret is for local dev only — set JWT_SECRET in prod.
   jwtSecret: process.env.JWT_SECRET ?? 'dev-insecure-secret-change-me',
