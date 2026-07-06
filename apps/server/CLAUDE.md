@@ -119,6 +119,15 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   matchHistory spectators; the event-sourced game log, `mapContents`, and `dashboardAudit`
   stay (dangling opaque ids = the same posture as guest TTL expiry). Maintainers get 409
   until dashboard access is revoked.
+  **Push** (`src/push/`): `POST/DELETE /me/devices` registers native device tokens
+  (`userDevices`, token = `_id`, re-registering moves it to the new account); `PushService`
+  speaks FCM HTTP v1 and APNs HTTP/2 token-auth directly (no relay; empty credentials =
+  disabled no-op), localizes zh-Hant/en from account preferences, and prunes dead tokens
+  (FCM 404, APNs 410). The hub's `push?: PushSink` option (metrics-hooks idiom) drives
+  **your-turn** (debounced `PUSH_YOUR_TURN_DELAY_MS`, only when the current player has no
+  live socket, re-checked at fire time) and **game-over** (absent humans only) off the same
+  `broadcast` fan-out bots share; **game-started** fires from `LobbyService.start`. Metrics:
+  `trm_push_sent_total`/`trm_push_failed_total` by kind.
 - `src/lobby/` — rooms lifecycle with atomic seat CAS; `RoomSettings.map` selects
   `{source:'official', mapId}` or `{source:'custom', customMapId}` (default: official Taiwan).
   `start` resolves the selector via `MapsService.resolveForStart` (validates a custom draft, hashes

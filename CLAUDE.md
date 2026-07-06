@@ -132,7 +132,11 @@ as Sign in with Apple identity-token audiences — enables `POST /auth/oauth/app
 deep link; unset ⇒ 404). A client sending `x-trm-client: mobile` receives its refresh
 token in the response body (Keychain/Keystore storage) instead of the Strict cookie, and
 `POST /auth/refresh`/`logout` accept `{refreshToken}` in the body. Guest TTLs slide
-forward on refresh.
+forward on refresh. Push (`src/push/`, direct — no relay): Android via
+`FCM_PROJECT_ID`+`FCM_CLIENT_EMAIL`+`FCM_PRIVATE_KEY`, iOS via
+`APNS_TEAM_ID`+`APNS_KEY_ID`+`APNS_PRIVATE_KEY`+`APNS_BUNDLE_ID` (+`APNS_SANDBOX=1`);
+a platform is enabled only when ALL its credentials are set. `PUSH_YOUR_TURN_DELAY_MS`
+debounces the your-turn reminder (default 15s).
 
 **Auth methods** (each independently switchable; the web reads `GET /auth/config`, the server
 enforces): `AUTH_PASSWORD_LOGIN_ENABLED` (`0` disables email/password login+register+upgrade),
