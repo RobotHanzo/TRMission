@@ -27,6 +27,7 @@ import { featureDisabled } from '../auth/feature.guard';
 import type { AuthUser } from '../auth/auth.types';
 import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '../bots/types';
 import { MapsService } from '../maps/maps.service';
+import { PushService } from '../push/push.service';
 
 export interface RoomView {
   code: string;
@@ -78,6 +79,7 @@ export class LobbyService {
     private readonly tokens: TokenService,
     private readonly maps: MapsService,
     private readonly users: UserRepo,
+    private readonly push: PushService,
   ) {}
 
   /**
@@ -303,6 +305,12 @@ export class LobbyService {
       throw new BadRequestException('could not start (already started?)');
     }
     await this.hub.createMatch(gameId, board, config, bots);
+    // Fire-and-forget (PushService never throws): backgrounded members learn the game began.
+    this.push.notifyGameStarted(
+      room.members.filter((m) => !m.isBot).map((m) => m.userId),
+      gameId,
+      code,
+    );
     return { gameId, ticket: this.ticketFor(gameId, user.userId, this.seatOf(room, user.userId)) };
   }
 
