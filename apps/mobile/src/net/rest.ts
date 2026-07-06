@@ -275,6 +275,14 @@ export const api = {
   getRoom: (code: string): Promise<RoomView> => req<RoomView>('GET', `/rooms/${code}`),
   /** Rooms the signed-in user is currently seated in (lobby or live game). */
   getMyRooms: (): Promise<RoomView[]> => req<RoomView[]>('GET', '/rooms/mine'),
+  createRoom: (maxPlayers?: number): Promise<RoomView> =>
+    req<RoomView>('POST', '/rooms', { maxPlayers }),
+  joinRoom: (code: string): Promise<RoomView> => req<RoomView>('POST', `/rooms/${code}/join`),
+  leaveRoom: (code: string): Promise<RoomView> => req<RoomView>('POST', `/rooms/${code}/leave`),
+  setReady: (code: string, ready: boolean): Promise<RoomView> =>
+    req<RoomView>('POST', `/rooms/${code}/ready`, { ready }),
+  startRoom: (code: string): Promise<TicketResult> =>
+    req<TicketResult>('POST', `/rooms/${code}/start`),
   getTicket: (code: string): Promise<TicketResult> =>
     req<TicketResult>('POST', `/rooms/${code}/ticket`),
   mapContent: (hash: string): Promise<MapContentDto> =>

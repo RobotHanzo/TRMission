@@ -12,7 +12,17 @@ void i18n.use(initReactI18next).init({
   resources: {
     'zh-Hant': {
       translation: {
-        home: { title: '台鐵任務' },
+        home: {
+          title: '台鐵任務',
+          greeting: '嗨，{{name}}',
+          myRooms: '進行中的房間',
+          playersCount: '{{n}} / {{max}} 人',
+          joinPlaceholder: '房間代碼',
+          join: '加入',
+          create: '建立房間',
+          playBots: '對戰電腦（即將推出）',
+          signOut: '登出',
+        },
         login: {
           tagline: '在台灣鐵道上搶占路線、完成任務卡。',
           guest: '以訪客身分遊玩',
@@ -27,11 +37,40 @@ void i18n.use(initReactI18next).init({
           discord: '使用 Discord 登入',
           or: '或',
         },
+        room: {
+          title: '房間',
+          code: '房間代碼 {{code}}',
+          members: '玩家',
+          host: '房主',
+          ready: '已準備',
+          notReady: '尚未準備',
+          start: '開始遊戲',
+          leave: '離開房間',
+        },
+        game: {
+          title: '遊戲',
+          placeholder: '遊戲畫面將於 P2 實作',
+          roomLabel: '房間 {{code}}',
+        },
+        boot: {
+          updateTitle: '需要更新',
+          updateBody: '請更新至最新版本以繼續遊玩。',
+        },
       },
     },
     en: {
       translation: {
-        home: { title: 'TRMission' },
+        home: {
+          title: 'TRMission',
+          greeting: 'Hi, {{name}}',
+          myRooms: 'Active rooms',
+          playersCount: '{{n}} / {{max}} players',
+          joinPlaceholder: 'Room code',
+          join: 'Join',
+          create: 'Create room',
+          playBots: 'Play vs bots (coming soon)',
+          signOut: 'Sign out',
+        },
         login: {
           tagline: 'Claim routes across Taiwan’s railways and complete mission cards.',
           guest: 'Play as guest',
@@ -45,6 +84,25 @@ void i18n.use(initReactI18next).init({
           google: 'Continue with Google',
           discord: 'Continue with Discord',
           or: 'or',
+        },
+        room: {
+          title: 'Room',
+          code: 'Room code {{code}}',
+          members: 'Players',
+          host: 'Host',
+          ready: 'Ready',
+          notReady: 'Not ready',
+          start: 'Start game',
+          leave: 'Leave room',
+        },
+        game: {
+          title: 'Game',
+          placeholder: 'The game screen lands in P2',
+          roomLabel: 'Room {{code}}',
+        },
+        boot: {
+          updateTitle: 'Update required',
+          updateBody: 'Please update to the latest version to continue.',
         },
       },
     },
