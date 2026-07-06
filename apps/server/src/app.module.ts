@@ -10,6 +10,7 @@ import { HistoryModule } from './history/history.module';
 import { MapsModule } from './maps/maps.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AccountModule } from './account/account.module';
+import { PushModule } from './push/push.module';
 import { OgModule } from './og/og.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { HealthController } from './health/health.controller';
@@ -33,6 +34,7 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     HistoryModule,
     DashboardModule,
     AccountModule,
+    PushModule,
     OgModule,
   ],
   controllers: [HealthController, DocsController, WellKnownController],

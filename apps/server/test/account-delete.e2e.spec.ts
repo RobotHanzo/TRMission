@@ -102,6 +102,13 @@ describe('DELETE /auth/me: cascade', () => {
       createdAt: now,
       updatedAt: now,
     } as never);
+    await t.db.collection('userDevices').insertOne({
+      _id: 'del-tok-1' as never,
+      userId: uid,
+      platform: 'android',
+      createdAt: now,
+      lastSeenAt: now,
+    } as never);
 
     await request(server())
       .delete('/api/v1/auth/me')
@@ -114,6 +121,7 @@ describe('DELETE /auth/me: cascade', () => {
     const hist = await t.db.collection('matchHistory').findOne({ _id: 'delgame1' as never });
     expect(hist?.spectators).toEqual([]);
     expect(await t.db.collection('customMaps').countDocuments({ ownerId: uid })).toBe(0);
+    expect(await t.db.collection('userDevices').countDocuments({ userId: uid })).toBe(0);
   });
 
   it('refuses to delete a maintainer with 409 until access is revoked', async () => {

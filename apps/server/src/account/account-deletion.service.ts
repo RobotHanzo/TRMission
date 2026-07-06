@@ -5,6 +5,7 @@ import { RoomRepo } from '../lobby/room.repo';
 import { HistoryRepo } from '../history/history.repo';
 import { CustomMapRepo } from '../maps/custom-map.repo';
 import { DashboardAccountRepo } from '../dashboard/dashboard-account.repo';
+import { DeviceRepo } from '../push/device.repo';
 import { APPLE_TOKEN_REVOKER, type AppleTokenRevoker } from './apple-token-revoker';
 import type { AuthUser } from '../auth/auth.types';
 
@@ -23,6 +24,7 @@ export class AccountDeletionService {
     private readonly history: HistoryRepo,
     private readonly customMaps: CustomMapRepo,
     private readonly dashboardAccounts: DashboardAccountRepo,
+    private readonly devices: DeviceRepo,
     @Inject(APPLE_TOKEN_REVOKER) private readonly appleRevoker: AppleTokenRevoker,
   ) {}
 
@@ -45,6 +47,7 @@ export class AccountDeletionService {
     }
     await this.history.pullSpectator(user.userId);
     await this.customMaps.removeAllByOwner(user.userId);
+    await this.devices.deleteAllForUser(user.userId);
     await this.sessions.deleteAllForUser(user.userId);
     await this.users.deleteById(user.userId);
   }
