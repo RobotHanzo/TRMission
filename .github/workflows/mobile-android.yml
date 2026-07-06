@@ -1,0 +1,56 @@
+name: mobile-android
+
+# Continuous Native Generation: android/ is produced by `expo prebuild` here, never committed.
+# Signing is self-managed (no EAS) via AGP's injected-signing properties.
+on:
+  push:
+    branches: ['release/**']
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: yarn
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: corepack enable
+      - run: yarn install --immutable
+
+      - name: Prebuild the Android native project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --no-install
+        env:
+          TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
+          TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
+          TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+
+      - name: Decode the release keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build the signed AAB
+        working-directory: apps/mobile/android
+        run: |
+          ./gradlew :app:bundleRelease \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.keystore" \
+            -Pandroid.injected.signing.store.password="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key.alias="${{ secrets.ANDROID_KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key.password="${{ secrets.ANDROID_KEY_PASSWORD }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trmission-release-aab
+          path: apps/mobile/android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+# P6 flips the final step to `fastlane supply` (Play internal track) instead of uploading an artifact.

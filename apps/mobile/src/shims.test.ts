@@ -14,6 +14,8 @@ describe('runtime shims (simulating Hermes)', () => {
       // @ts-expect-error simulate Hermes: no spec TextDecoder
       delete globalThis.TextDecoder;
       jest.isolateModules(() => {
+        // isolateModules needs a non-hoisted require so ./shims re-runs against the deleted globals.
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('./shims');
       });
       expect(typeof globalThis.TextDecoder).toBe('function');
@@ -30,6 +32,8 @@ describe('runtime shims (simulating Hermes)', () => {
       // simulate Hermes: incomplete Intl (the cast makes PluralRules deletable)
       delete (Intl as { PluralRules?: unknown }).PluralRules;
       jest.isolateModules(() => {
+        // isolateModules needs a non-hoisted require so ./shims re-runs against the deleted globals.
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('./shims');
       });
       expect(typeof Intl.PluralRules).toBe('function');
