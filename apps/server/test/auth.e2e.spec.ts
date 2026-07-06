@@ -46,7 +46,7 @@ describe('auth: /config endpoint', () => {
     expect(res.body).toEqual({
       passwordLogin: true,
       guest: true,
-      providers: { google: false, discord: false },
+      providers: { google: false, discord: false, apple: false },
     });
   });
 });
@@ -202,7 +202,7 @@ describe('auth: method gating (password + guest disabled)', () => {
     expect(res.body).toEqual({
       passwordLogin: false,
       guest: false,
-      providers: { google: false, discord: false },
+      providers: { google: false, discord: false, apple: false },
     });
   });
 
@@ -259,7 +259,7 @@ describe('auth: OAuth (Google + Discord, bound by email)', () => {
 
   it('advertises both providers via /config', async () => {
     const res = await request(oServer()).get('/api/v1/auth/config').expect(200);
-    expect(res.body.providers).toEqual({ google: true, discord: true });
+    expect(res.body.providers).toEqual({ google: true, discord: true, apple: false });
   });
 
   it('exposes googleClientId alongside the boolean flag', async () => {

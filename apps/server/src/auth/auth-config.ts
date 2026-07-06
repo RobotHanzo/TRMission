@@ -45,6 +45,7 @@ export interface AuthConfigOverrides {
   redirectBase?: string;
   providers?: Partial<Record<OauthProvider, { clientId: string; clientSecret: string }>>;
   googleMobileClientIds?: string[];
+  appleClientIds?: string[];
 }
 
 /**
@@ -58,6 +59,7 @@ export class AuthConfig {
   readonly guest: boolean;
   readonly redirectBase: string;
   readonly googleMobileClientIds: string[];
+  readonly appleClientIds: string[];
   private readonly providers: Record<OauthProvider, ProviderConfig | null>;
 
   // @Optional so Nest injects `undefined` for the real provider (env-driven); tests pass overrides
@@ -67,6 +69,7 @@ export class AuthConfig {
     this.guest = overrides?.guest ?? env.authGuest;
     this.redirectBase = (overrides?.redirectBase ?? env.oauthRedirectBase).replace(/\/+$/, '');
     this.googleMobileClientIds = overrides?.googleMobileClientIds ?? env.googleMobileClientIds;
+    this.appleClientIds = overrides?.appleClientIds ?? env.appleClientIds;
     const g = overrides?.providers?.google;
     const d = overrides?.providers?.discord;
     this.providers = {
@@ -86,6 +89,11 @@ export class AuthConfig {
   /** The provider's config, or null if it is not fully configured (id + secret both required). */
   provider(p: OauthProvider): ProviderConfig | null {
     return this.providers[p] ?? null;
+  }
+
+  /** Sign in with Apple is credential-only: enabled iff at least one audience is configured. */
+  get appleEnabled(): boolean {
+    return this.appleClientIds.length > 0;
   }
 
   /** Every audience a Google ID token may carry: web client id + native app client ids. */
@@ -121,13 +129,17 @@ export class AuthConfig {
   publicConfig(): {
     passwordLogin: boolean;
     guest: boolean;
-    providers: { google: boolean; discord: boolean };
+    providers: { google: boolean; discord: boolean; apple: boolean };
     googleClientId?: string;
   } {
     return {
       passwordLogin: this.passwordLogin,
       guest: this.guest,
-      providers: { google: !!this.providers.google, discord: !!this.providers.discord },
+      providers: {
+        google: !!this.providers.google,
+        discord: !!this.providers.discord,
+        apple: this.appleEnabled,
+      },
       ...(this.providers.google ? { googleClientId: this.providers.google.clientId } : {}),
     };
   }

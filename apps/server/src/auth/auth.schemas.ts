@@ -74,6 +74,6 @@ export const MobileAuthResultSchema = z.object({
 export const AuthConfigSchema = z.object({
   passwordLogin: z.boolean(),
   guest: z.boolean(),
-  providers: z.object({ google: z.boolean(), discord: z.boolean() }),
+  providers: z.object({ google: z.boolean(), discord: z.boolean(), apple: z.boolean() }),
   googleClientId: z.string().optional(),
 });

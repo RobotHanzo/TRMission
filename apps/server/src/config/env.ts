@@ -47,6 +47,11 @@ export const env = {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),
+  /** Sign in with Apple audiences: bundle ids / Services IDs accepted as identity-token `aud`. */
+  appleClientIds: (process.env.APPLE_CLIENT_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   /** Universal/App Link verification (served under /.well-known when set). */
   appleAppId: process.env.APPLE_APP_ID ?? '', // "TEAMID.bundle.id"
   androidPackageName: process.env.ANDROID_PACKAGE_NAME ?? '',
