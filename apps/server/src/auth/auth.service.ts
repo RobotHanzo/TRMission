@@ -82,6 +82,7 @@ export class AuthService {
     // Belt-and-braces on top of ban-time revokeAllForUser: a family minted in a race
     // with the ban still can't be rotated into a fresh access token.
     if (user.disabledAt) throw new UnauthorizedException('account disabled');
+    if (user.isGuest) await this.users.extendGuestExpiry(user._id);
     return { accessToken: this.tokens.signAccess(user), refreshToken: outcome.token };
   }
 

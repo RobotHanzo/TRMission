@@ -152,6 +152,18 @@ export class UserRepo implements OnModuleInit {
     );
   }
 
+  /**
+   * Sliding guest lifetime: re-anchor the TTL on activity so an ACTIVE guest is never
+   * hard-deleted mid-use (mobile installs live on guest accounts for a long time).
+   * No-op for registered accounts (the filter excludes them).
+   */
+  async extendGuestExpiry(userId: string): Promise<void> {
+    await this.col.updateOne(
+      { _id: userId, isGuest: true },
+      { $set: { guestExpiresAt: new Date(Date.now() + env.guestTtlMs) } },
+    );
+  }
+
   /** Record a provider identity on an existing account (idempotent re-link); refresh the avatar. */
   linkOauthIdentity(
     userId: string,
