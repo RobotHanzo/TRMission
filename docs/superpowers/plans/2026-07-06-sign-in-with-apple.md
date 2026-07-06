@@ -33,7 +33,7 @@
 **Interfaces:**
 - Produces: env `APPLE_CLIENT_IDS` → `AuthConfig.appleClientIds: string[]`, `AuthConfig.appleEnabled: boolean` (getter, true iff non-empty), `AuthConfigOverrides.appleClientIds?: string[]`, and `publicConfig().providers.apple: boolean`. Task 2 consumes `appleClientIds` as the verification audiences.
 
-- [ ] **Step 1: Update the three existing `/auth/config` assertions to expect `apple: false` (failing tests)**
+- [x] **Step 1: Update the three existing `/auth/config` assertions to expect `apple: false` (failing tests)**
 
 In `apps/server/test/auth.e2e.spec.ts`:
 
@@ -63,12 +63,12 @@ In `apps/server/test/auth.e2e.spec.ts`:
     expect(res.body.providers).toEqual({ google: true, discord: true, apple: false });
 ```
 
-- [ ] **Step 2: Run to verify they fail**
+- [x] **Step 2: Run to verify they fail**
 
 Run: `yarn workspace @trm/server test --run auth.e2e`
 Expected: FAIL — 3 assertions (`apple: false` missing from actual `providers`).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `apps/server/src/config/env.ts`, after `googleMobileClientIds`:
 
@@ -119,12 +119,12 @@ In `publicConfig()`, widen the return type's `providers` to `{ google: boolean; 
   providers: z.object({ google: z.boolean(), discord: z.boolean(), apple: z.boolean() }),
 ```
 
-- [ ] **Step 4: Run to verify it passes**
+- [x] **Step 4: Run to verify it passes**
 
 Run: `yarn workspace @trm/server test --run auth.e2e`
 Expected: PASS (all 27+ tests).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/config/env.ts apps/server/src/auth/auth-config.ts apps/server/src/auth/auth.schemas.ts apps/server/test/auth.e2e.spec.ts
@@ -156,7 +156,7 @@ git commit -m "feat(server): advertise Sign in with Apple via auth config"
   - `POST /api/v1/auth/oauth/apple/credential` body `{ identityToken, fullName?, refreshToken? }` → `AuthResultSchema` shape
   - `FakeAppleIdTokenVerifier` with `profile`, `fail`, `lastAudience` (same idiom as the Google fake)
 
-- [ ] **Step 1: Write the failing e2e spec**
+- [x] **Step 1: Write the failing e2e spec**
 
 Create `apps/server/test/auth-apple.e2e.spec.ts`:
 
@@ -330,17 +330,17 @@ describe('apple stays credential-only', () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify it fails**
+- [x] **Step 2: Run to verify it fails**
 
 Run: `yarn workspace @trm/server test --run auth-apple`
 Expected: FAIL — `FakeAppleIdTokenVerifier` is not exported from `./app` (compile error).
 
-- [ ] **Step 3: Add the `jose` dependency**
+- [x] **Step 3: Add the `jose` dependency**
 
 Run: `yarn workspace @trm/server add jose`
 Expected: `apps/server/package.json` gains `"jose"` in dependencies; `yarn.lock` updated.
 
-- [ ] **Step 4: Create the verifier seam**
+- [x] **Step 4: Create the verifier seam**
 
 Create `apps/server/src/auth/apple-id-token.verifier.ts`:
 
@@ -386,7 +386,7 @@ export class JoseAppleIdTokenVerifier implements AppleIdTokenVerifier {
 }
 ```
 
-- [ ] **Step 5: Widen identity linking to `IdentityProvider`**
+- [x] **Step 5: Widen identity linking to `IdentityProvider`**
 
 `apps/server/src/auth/auth-config.ts`, beside `OauthProvider`:
 
@@ -417,7 +417,7 @@ and change the `provider` parameter type from `OauthProvider` to `IdentityProvid
 
 with `IdentityProvider` added to the existing `./auth-config` import.
 
-- [ ] **Step 6: Service handler + route + schema + module + fake**
+- [x] **Step 6: Service handler + route + schema + module + fake**
 
 `apps/server/src/auth/auth.schemas.ts`:
 
@@ -560,7 +560,7 @@ export class FakeAppleIdTokenVerifier implements AppleIdTokenVerifier {
 }
 ```
 
-- [ ] **Step 7: Run the spec + neighbors**
+- [x] **Step 7: Run the spec + neighbors**
 
 Run: `yarn workspace @trm/server test --run auth-apple`
 Expected: PASS (all 10 tests)
@@ -569,7 +569,7 @@ Expected: PASS
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: PASS
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add apps/server/package.json yarn.lock apps/server/src/auth/apple-id-token.verifier.ts apps/server/src/auth/auth-config.ts apps/server/src/auth/user.repo.ts apps/server/src/auth/oauth.service.ts apps/server/src/auth/auth.schemas.ts apps/server/src/auth/auth.controller.ts apps/server/src/auth/auth.module.ts apps/server/test/app.ts apps/server/test/auth-apple.e2e.spec.ts
@@ -584,7 +584,7 @@ git commit -m "feat(server): Sign in with Apple credential route"
 - Modify: `CLAUDE.md` (root — mobile env-var paragraph from P0-a)
 - Modify: `apps/server/CLAUDE.md` (auth section — mobile transport paragraph from P0-a)
 
-- [ ] **Step 1: Run the full validation gates**
+- [x] **Step 1: Run the full validation gates**
 
 Run: `yarn workspace @trm/server test`
 Expected: all specs PASS.
@@ -593,7 +593,7 @@ Expected: clean.
 Run: `yarn lint`
 Expected: clean.
 
-- [ ] **Step 2: Document**
+- [x] **Step 2: Document**
 
 Root `CLAUDE.md`, in the "Mobile clients:" paragraph, change the `GOOGLE_MOBILE_CLIENT_IDS` sentence region to also cover Apple — insert after the `GOOGLE_MOBILE_CLIENT_IDS (…)` clause:
 
@@ -613,7 +613,7 @@ identity-token audiences — enables `POST /auth/oauth/apple/credential`),
   no `/oauth/apple/start`; Apple never enters the redirect flow.
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add CLAUDE.md apps/server/CLAUDE.md
