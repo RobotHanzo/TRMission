@@ -36,6 +36,11 @@ const config: ExpoConfig = {
   extra: {
     serverOrigin: process.env.TRM_SERVER_ORIGIN ?? 'http://localhost:3001',
     buildNumber: BUILD_NUMBER,
+    // Google Sign-In client ids (native app + the server "web" audience). Real values are
+    // provisioned at store-setup time (P6); the server accepts the native ids via
+    // GOOGLE_MOBILE_CLIENT_IDS. Empty here ⇒ the Google button no-ops until configured.
+    googleWebClientId: process.env.TRM_GOOGLE_WEB_CLIENT_ID ?? '',
+    googleIosClientId: process.env.TRM_GOOGLE_IOS_CLIENT_ID ?? '',
   },
 };
 
