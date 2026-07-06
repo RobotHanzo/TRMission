@@ -45,6 +45,8 @@ import {
   MobileExchangeSchema,
   MobileCarryResultSchema,
   MobileAuthResultSchema,
+  AppleCredentialDto,
+  AppleCredentialSchema,
   GuestSchema,
   RegisterSchema,
   UpgradeSchema,
@@ -209,6 +211,27 @@ export class AuthController {
       body.refreshToken ?? req.cookies?.[REFRESH_COOKIE],
     );
     return this.finish(req, res, await this.oauth.handleCredential(body.credential, guestUserId));
+  }
+
+  @Post('oauth/apple/credential')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Sign in with Apple via a native identity token' })
+  @ApiBody({ schema: apiSchema(AppleCredentialSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(AuthResultSchema) })
+  async appleCredential(
+    @Body() body: AppleCredentialDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    if (!this.authConfig.appleEnabled) throw new ForbiddenException('apple sign-in disabled');
+    const guestUserId = await this.oauth.guestIdFromRefresh(
+      body.refreshToken ?? req.cookies?.[REFRESH_COOKIE],
+    );
+    return this.finish(
+      req,
+      res,
+      await this.oauth.handleAppleCredential(body.identityToken, body.fullName, guestUserId),
+    );
   }
 
   @Post('mobile/carry')

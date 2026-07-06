@@ -2181,6 +2181,7 @@ __metadata:
     cookie-parser: "npm:^1.4.7"
     google-auth-library: "npm:^10.9.0"
     helmet: "npm:^8.2.0"
+    jose: "npm:^6.2.3"
     mongodb: "npm:^6.12.0"
     mongodb-memory-server: "npm:^10.1.4"
     nestjs-zod: "npm:^5.4.0"
@@ -4641,6 +4642,13 @@ __metadata:
   version: 1.2.1
   resolution: "iterare@npm:1.2.1"
   checksum: 10/ee8322dd9d92e86d8653c899df501c58c5b8e90d6767cf2af0b6d6dc5a4b9b7ed8bce936976f4f4c3a55be110a300c8a7d71967d03f72e104e8db66befcfd874
+  languageName: node
+  linkType: hard
+
+"jose@npm:^6.2.3":
+  version: 6.2.3
+  resolution: "jose@npm:6.2.3"
+  checksum: 10/876974613c5ee988d43b65a34c96ce440dbf7706a2f07f465b8874af16ee532102e224459a7068d2c6ef044affe49690667d23ca12770c279804baec95a09608
   languageName: node
   linkType: hard
 

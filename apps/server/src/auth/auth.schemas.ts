@@ -32,6 +32,13 @@ export const GoogleCredentialSchema = z.object({
 export const RefreshSchema = z.object({ refreshToken: z.string().min(1).optional() });
 export const LogoutSchema = z.object({ refreshToken: z.string().min(1).optional() });
 export const MobileExchangeSchema = z.object({ code: z.string().min(1) });
+export const AppleCredentialSchema = z.object({
+  identityToken: z.string().min(1),
+  /** Apple surfaces the user's name ONCE, client-side, on first authorization — pass it through. */
+  fullName: z.string().trim().max(48).optional(),
+  /** Mobile only: the app's refresh token, so a signed-in guest upgrades in place. */
+  refreshToken: z.string().min(1).optional(),
+});
 
 export class GuestDto extends createZodDto(GuestSchema) {}
 export class RegisterDto extends createZodDto(RegisterSchema) {}
@@ -44,6 +51,7 @@ export class UpdatePreferencesDto extends createZodDto(PreferencesSchema) {}
 export class RefreshDto extends createZodDto(RefreshSchema.default({})) {}
 export class LogoutDto extends createZodDto(LogoutSchema.default({})) {}
 export class MobileExchangeDto extends createZodDto(MobileExchangeSchema) {}
+export class AppleCredentialDto extends createZodDto(AppleCredentialSchema) {}
 
 export const PublicUserSchema = z.object({
   id: z.string(),

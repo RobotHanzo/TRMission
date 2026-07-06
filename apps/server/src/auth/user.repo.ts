@@ -6,7 +6,7 @@ import { MONGO_DB } from '../db/tokens';
 import { env } from '../config/env';
 import type { Locale, PublicUser, UserPreferences } from './auth.types';
 import { DEFAULT_PREFERENCES } from './auth.types';
-import type { OauthProvider } from './auth-config';
+import type { IdentityProvider } from './auth-config';
 
 export interface UserDoc {
   _id: string;
@@ -17,7 +17,7 @@ export interface UserDoc {
   email?: string;
   passwordHash?: string;
   /** Linked OAuth identities: provider → the provider's subject id. Binding key stays `email`. */
-  oauth?: Partial<Record<OauthProvider, string>>;
+  oauth?: Partial<Record<IdentityProvider, string>>;
   /** Avatar URL carried over from an OAuth provider (refreshed on each OAuth sign-in). */
   avatarUrl?: string;
   tokenVersion: number;
@@ -132,7 +132,7 @@ export class UserRepo implements OnModuleInit {
   async attachOauthToGuest(
     userId: string,
     email: string,
-    provider: OauthProvider,
+    provider: IdentityProvider,
     sub: string,
     avatarUrl: string | null,
   ): Promise<UserDoc | null> {
@@ -167,7 +167,7 @@ export class UserRepo implements OnModuleInit {
   /** Record a provider identity on an existing account (idempotent re-link); refresh the avatar. */
   linkOauthIdentity(
     userId: string,
-    provider: OauthProvider,
+    provider: IdentityProvider,
     sub: string,
     avatarUrl: string | null,
   ): Promise<UserDoc | null> {
@@ -278,7 +278,7 @@ export class UserRepo implements OnModuleInit {
   async createOauthUser(
     email: string,
     displayName: string,
-    provider: OauthProvider,
+    provider: IdentityProvider,
     sub: string,
     locale: Locale,
     avatarUrl: string | null,

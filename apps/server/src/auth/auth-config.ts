@@ -4,6 +4,9 @@ import { env } from '../config/env';
 export type OauthProvider = 'google' | 'discord';
 export const OAUTH_PROVIDERS: readonly OauthProvider[] = ['google', 'discord'];
 
+/** Providers an account identity can be linked under. Apple is credential-only (no redirect flow). */
+export type IdentityProvider = OauthProvider | 'apple';
+
 /** Everything needed to drive one provider's authorization-code + PKCE flow. */
 export interface ProviderConfig {
   provider: OauthProvider;

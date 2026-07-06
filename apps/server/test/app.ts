@@ -15,6 +15,10 @@ import {
   GOOGLE_ID_TOKEN_VERIFIER,
   type GoogleIdTokenVerifier,
 } from '../src/auth/google-id-token.verifier';
+import {
+  APPLE_ID_TOKEN_VERIFIER,
+  type AppleIdTokenVerifier,
+} from '../src/auth/apple-id-token.verifier';
 import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
 import {
   MobileLinksConfig,
@@ -34,6 +38,8 @@ export interface TestAppOptions {
   oauthHttp?: OauthHttp;
   /** Stub Google ID-token verification (One Tap / rendered-button credential flow). */
   googleVerifier?: GoogleIdTokenVerifier;
+  /** Stub Apple identity-token verification (Sign in with Apple credential flow). */
+  appleVerifier?: AppleIdTokenVerifier;
   /** Override DashboardConfig (owner-email bootstrap) without touching env. */
   dashboardConfig?: DashboardConfigOverrides;
   /** Override MobileLinksConfig (deep-link verification files) without touching env. */
@@ -64,6 +70,8 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
   if (opts.oauthHttp) builder = builder.overrideProvider(OAUTH_HTTP).useValue(opts.oauthHttp);
   if (opts.googleVerifier)
     builder = builder.overrideProvider(GOOGLE_ID_TOKEN_VERIFIER).useValue(opts.googleVerifier);
+  if (opts.appleVerifier)
+    builder = builder.overrideProvider(APPLE_ID_TOKEN_VERIFIER).useValue(opts.appleVerifier);
   if (opts.dashboardConfig)
     builder = builder
       .overrideProvider(DashboardConfig)
@@ -109,6 +117,18 @@ export class FakeGoogleIdTokenVerifier implements GoogleIdTokenVerifier {
   async verify(_idToken: string, audience: string | string[]): Promise<OauthProfile> {
     this.lastAudience = audience;
     if (this.fail || !this.profile) throw new Error('fake google verify failed');
+    return this.profile;
+  }
+}
+
+/** A controllable stand-in for Apple identity-token verification. */
+export class FakeAppleIdTokenVerifier implements AppleIdTokenVerifier {
+  profile: OauthProfile | null = null;
+  fail = false;
+  lastAudience: string[] | null = null;
+  async verify(_idToken: string, audience: string[]): Promise<OauthProfile> {
+    this.lastAudience = audience;
+    if (this.fail || !this.profile) throw new Error('fake apple verify failed');
     return this.profile;
   }
 }

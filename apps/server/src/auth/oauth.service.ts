@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { createHash, randomBytes } from 'node:crypto';
-import { AuthConfig, type OauthProvider } from './auth-config';
+import { AuthConfig, type IdentityProvider, type OauthProvider } from './auth-config';
 import { TokenService } from './token.service';
 import { AuthService } from './auth.service';
 import { UserRepo, type UserDoc } from './user.repo';
@@ -8,6 +8,7 @@ import { SessionRepo } from './session.repo';
 import { MobileCodeRepo } from './mobile-code.repo';
 import { OAUTH_HTTP, type OauthHttp } from './oauth.http';
 import { GOOGLE_ID_TOKEN_VERIFIER, type GoogleIdTokenVerifier } from './google-id-token.verifier';
+import { APPLE_ID_TOKEN_VERIFIER, type AppleIdTokenVerifier } from './apple-id-token.verifier';
 import type { IssuedAuth, Locale } from './auth.types';
 
 const base64url = (b: Buffer): string => b.toString('base64url');
@@ -60,6 +61,7 @@ export class OauthService {
     private readonly mobileCodes: MobileCodeRepo,
     @Inject(OAUTH_HTTP) private readonly http: OauthHttp,
     @Inject(GOOGLE_ID_TOKEN_VERIFIER) private readonly verifier: GoogleIdTokenVerifier,
+    @Inject(APPLE_ID_TOKEN_VERIFIER) private readonly appleVerifier: AppleIdTokenVerifier,
   ) {}
 
   /**
@@ -209,8 +211,43 @@ export class OauthService {
     return this.auth.issueFor(user);
   }
 
+  /**
+   * Verify a Sign in with Apple identity token and resolve the account through the same
+   * verified-email binding. Hide My Email relay addresses count as verified: Apple owns
+   * deliverability, and a relay account simply won't cross-link with the user's real-email
+   * accounts on other providers (accepted trade-off — see the mobile design spec).
+   */
+  async handleAppleCredential(
+    identityToken: string,
+    fullName: string | undefined,
+    guestUserId: string | undefined,
+  ): Promise<IssuedAuth> {
+    const audiences = this.authConfig.appleClientIds;
+    if (audiences.length === 0) throw new UnauthorizedException('provider_disabled');
+
+    let profile;
+    try {
+      profile = await this.appleVerifier.verify(identityToken, audiences);
+    } catch {
+      throw new UnauthorizedException('invalid_credential');
+    }
+    if (!profile.email || !profile.emailVerified || !profile.sub) {
+      throw new UnauthorizedException('email_unverified');
+    }
+
+    const user = await this.resolveAccount(
+      'apple',
+      profile.email,
+      profile.sub,
+      fullName ?? profile.displayName,
+      profile.avatarUrl,
+      guestUserId,
+    );
+    return this.auth.issueFor(user);
+  }
+
   private async resolveAccount(
-    provider: OauthProvider,
+    provider: IdentityProvider,
     email: string,
     sub: string,
     rawName: string,
