@@ -1,19 +1,26 @@
-// SPIKE (P2 Task 1): renders the full Taiwan board in one Skia canvas with pan/pinch/tap.
-// Purpose is risk retirement, not reuse — Tasks 4/5 replace this with MapSceneSkia/BoardView.
-import { Canvas, Circle, Group, Path, Rect, Skia } from '@shopify/react-native-skia';
+// Dev board screen (behind the __DEV__ Home button): the full Taiwan board rendered through the
+// SHARED MapSceneSkia (paper roadbeds, car slots, tunnel ties, ferry pips, cities, labels) driven by
+// the reusable useBoardCamera hook (pan / pinch / double-tap-zoom + quantized LOD). This is the P2
+// device gate's visual target — the same rendering the online/offline BoardView will use, minus the
+// snapshot/game-state wiring. Tap a route/city to see the hit-test result.
+import { Canvas, Group } from '@shopify/react-native-skia';
 import { useMemo, useState } from 'react';
-import { Text, useWindowDimensions, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { runOnJS, useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { GestureDetector } from 'react-native-gesture-handler';
 import {
   TAIWAN_CONTENT,
   TAIWAN_BASE_VIEW,
-  TAIWAN_LAND_PATH,
+  MAP_PALETTE_LIGHT,
   buildRouteGeometryFor,
-  ROUTE_COLOR_HEX,
+  computeHubsFor,
 } from '@trm/map-data';
-import { boundsOfContent, clampSpan, homeCamera } from '../board/camera';
+import { boundsOfContent, homeCamera, pinchTo, type CameraState } from '../board/camera';
 import { buildHitScene, hitTest } from '../board/hitTest';
+import { useBoardCamera } from '../board/useBoardCamera';
+import { MapSceneSkia } from '../board/MapSceneSkia';
+import { cityTier } from '../game/lod';
+
+const P = MAP_PALETTE_LIGHT;
 
 export function BoardSpikeScreen(): React.JSX.Element {
   const { width: w, height: h } = useWindowDimensions();
@@ -22,97 +29,97 @@ export function BoardSpikeScreen(): React.JSX.Element {
     () => buildRouteGeometryFor(TAIWAN_CONTENT.cities, TAIWAN_CONTENT.routes),
     [],
   );
+  const hubs = useMemo(() => computeHubsFor(TAIWAN_CONTENT.cities, TAIWAN_CONTENT.routes), []);
   const scene = useMemo(
     () => buildHitScene(TAIWAN_CONTENT.cities, TAIWAN_CONTENT.routes, geometry),
     [geometry],
   );
-  const land = useMemo(() => Skia.Path.MakeFromSVGString(TAIWAN_LAND_PATH)!, []);
   const home = useMemo(() => homeCamera(boundsOfContent(TAIWAN_CONTENT), vp), [w, h]);
-
-  const cx = useSharedValue(home.cx);
-  const cy = useSharedValue(home.cy);
-  const span = useSharedValue(home.span);
-  const pinchStartSpan = useSharedValue(home.span);
   const [hitLabel, setHitLabel] = useState('tap a route or city');
 
-  const onTap = (x: number, y: number): void => {
-    const cam = { cx: cx.value, cy: cy.value, span: span.value };
-    const hit = hitTest({ x, y }, cam, vp, scene);
+  const onTap = (screen: { x: number; y: number }, cam: CameraState): void => {
+    const hit = hitTest(screen, cam, vp, scene);
     setHitLabel(hit ? `${hit.kind}: ${hit.id}` : 'miss');
   };
 
-  const pan = Gesture.Pan()
-    .averageTouches(true)
-    .onChange((e) => {
-      const s = w / span.value;
-      cx.value -= e.changeX / s;
-      cy.value -= e.changeY / s;
-    });
-  const pinch = Gesture.Pinch()
-    .onStart(() => {
-      pinchStartSpan.value = span.value;
-    })
-    .onChange((e) => {
-      // Focal anchoring: board point under the focal stays put (camera.pinchTo, inlined
-      // as a worklet — same math, shared-value form).
-      const s0 = w / span.value;
-      const bx = cx.value + (e.focalX - w / 2) / s0;
-      const by = cy.value + (e.focalY - h / 2) / s0;
-      const next = clampSpan(pinchStartSpan.value / e.scale, TAIWAN_BASE_VIEW);
-      const s1 = w / next;
-      span.value = next;
-      cx.value = bx - (e.focalX - w / 2) / s1;
-      cy.value = by - (e.focalY - h / 2) / s1;
-    });
-  const tap = Gesture.Tap().onEnd((e, ok) => {
-    if (ok) runOnJS(onTap)(e.x, e.y);
-  });
-  const gesture = Gesture.Race(Gesture.Simultaneous(pan, pinch), tap);
+  const cam = useBoardCamera(vp, TAIWAN_BASE_VIEW, home, { onTap });
 
-  const transform = useDerivedValue(() => {
-    const s = w / span.value;
-    return [
-      { translateX: w / 2 - cx.value * s },
-      { translateY: h / 2 - cy.value * s },
-      { scale: s },
-    ];
-  });
+  const centerZoom = (factor: number): void =>
+    cam.animateTo(
+      pinchTo(cam.currentCamera(), { x: w / 2, y: h / 2 }, factor, vp, TAIWAN_BASE_VIEW),
+      180,
+    );
+  const reset = (): void => cam.animateTo(homeCamera(boundsOfContent(TAIWAN_CONTENT), vp), 220);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0d1b26' }}>
-      <GestureDetector gesture={gesture}>
-        <Canvas style={{ flex: 1 }}>
-          <Group transform={transform}>
-            <Path path={land} color="#e8e0cd" />
-            {[...geometry.entries()].map(([id, g]) => {
-              const r = TAIWAN_CONTENT.routes.find((x) => (x.id as string) === id)!;
-              const bed = Skia.Path.MakeFromSVGString(g.path)!;
-              const fill = ROUTE_COLOR_HEX[r.color as keyof typeof ROUTE_COLOR_HEX];
-              return (
-                <Group key={id} transform={[{ translateX: g.perp.x }, { translateY: g.perp.y }]}>
-                  <Path path={bed} style="stroke" strokeWidth={1.6} color="#f5efdf" />
-                  {g.slots.map((s, i) => (
-                    <Group
-                      key={i}
-                      transform={[
-                        { translateX: s.x },
-                        { translateY: s.y },
-                        { rotate: (s.angle * Math.PI) / 180 },
-                      ]}
-                    >
-                      <Rect x={-s.len / 2} y={-0.55} width={s.len} height={1.1} color={fill} />
-                    </Group>
-                  ))}
-                </Group>
-              );
-            })}
-            {TAIWAN_CONTENT.cities.map((c) => (
-              <Circle key={c.id as string} cx={c.x} cy={c.y} r={0.9} color="#22303c" />
-            ))}
+    <View style={[styles.fill, { backgroundColor: P.sea }]}>
+      <GestureDetector gesture={cam.gesture}>
+        <Canvas style={styles.fill}>
+          <Group transform={cam.transform}>
+            <MapSceneSkia
+              cities={TAIWAN_CONTENT.cities}
+              routes={TAIWAN_CONTENT.routes}
+              geometry={geometry}
+              hubs={hubs}
+              geography={null}
+              view={TAIWAN_BASE_VIEW}
+              cityLabel={(c) => c.id}
+              cityTier={cityTier}
+              bucket={cam.lod.bucket}
+              inv={cam.lod.inv}
+              marker={cam.lod.marker}
+            />
           </Group>
         </Canvas>
       </GestureDetector>
-      <Text style={{ position: 'absolute', top: 60, left: 16, color: 'white' }}>{hitLabel}</Text>
+
+      <View style={styles.controls}>
+        <Ctl label="+" onPress={() => centerZoom(1.4)} />
+        <Ctl label="−" onPress={() => centerZoom(1 / 1.4)} />
+        <Ctl label="⤢" onPress={reset} />
+      </View>
+      <Text style={styles.hit}>{hitLabel}</Text>
     </View>
   );
 }
+
+function Ctl({ label, onPress }: { label: string; onPress: () => void }): React.JSX.Element {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.ctl, pressed && styles.ctlPressed]}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <Text style={styles.ctlText}>{label}</Text>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+  controls: { position: 'absolute', right: 16, bottom: 44, gap: 10 },
+  ctl: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: P.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: P.coast,
+  },
+  ctlPressed: { backgroundColor: P.relief },
+  ctlText: { fontSize: 22, color: P.ink, lineHeight: 26 },
+  hit: {
+    position: 'absolute',
+    top: 60,
+    left: 16,
+    color: P.ink,
+    backgroundColor: 'rgba(255,253,248,0.8)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+});
