@@ -146,7 +146,7 @@ export function RoomsView() {
                     {canDelete && (
                       <button
                         className="oc-btn danger"
-                        style={{ marginLeft: 6 }}
+                        style={canClose && r.status === 'LOBBY' ? { marginLeft: 6 } : undefined}
                         onClick={() => setDeleting(r.code)}
                       >
                         <Trash2 size={14} aria-hidden />
