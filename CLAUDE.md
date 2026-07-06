@@ -50,7 +50,7 @@ gitignored and a drift between it and the `.proto` is a CI failure.
 ## Monorepo layout & build order
 
 ```
-packages/proto  → shared → map-data → engine → apps/{server,web,admin}
+packages/proto  → shared → map-data → engine → apps/{server,web,admin,mobile}
 ```
 
 - `@trm/shared` — enums, scoring/rule constants, **seeded counter PRNG**, ids, error taxonomy, digest.
@@ -63,6 +63,10 @@ packages/proto  → shared → map-data → engine → apps/{server,web,admin}
   `/admin/`). Dashboard access lives in the `dashboardAccounts` collection (role + per-account
   permission overrides referencing `users._id`); the permission taxonomy is in `@trm/shared`.
   A LIVE game's hidden info (state, action log, even the seed) never reaches this surface.
+- `apps/mobile` — React Native + Expo client (`@trm/mobile`); reuses the TS packages and
+  authenticates against the P0 mobile server surface (guest/password/Google/Apple/Discord). Point it
+  at a server with `TRM_SERVER_ORIGIN` (the app is not served same-origin — absolute API/WS base +
+  token-in-body refresh). Builds via GitHub Actions + fastlane (no EAS). See its `CLAUDE.md`.
 
 Internal packages export **TS source** (no per-lib build step) except `proto` (codegen). Each area
 has its own `CLAUDE.md` with the local architecture — read it before working there.
