@@ -1,0 +1,62 @@
+{
+  "name": "@trm/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild --clean",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.12.1",
+    "@formatjs/intl-pluralrules": "^5.4.4",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/netinfo": "12.0.1",
+    "@react-native-google-signin/google-signin": "^15.0.0",
+    "@react-navigation/native": "^7.1.6",
+    "@react-navigation/native-stack": "^7.3.10",
+    "@trm/codec": "workspace:*",
+    "@trm/engine": "workspace:*",
+    "@trm/map-data": "workspace:*",
+    "@trm/proto": "workspace:*",
+    "@trm/shared": "workspace:*",
+    "expo": "~56.0.0",
+    "expo-apple-authentication": "~56.0.4",
+    "expo-auth-session": "~56.0.15",
+    "expo-constants": "~56.0.20",
+    "expo-crypto": "~56.0.4",
+    "expo-linking": "~56.0.15",
+    "expo-notifications": "~56.0.19",
+    "expo-secure-store": "~56.0.4",
+    "expo-status-bar": "~56.0.4",
+    "i18next": "^24.2.0",
+    "immer": "^10.1.1",
+    "react": "19.2.7",
+    "react-i18next": "^15.4.0",
+    "react-native": "0.85.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.25.2",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@react-native/jest-preset": "0.85.3",
+    "@testing-library/react-native": "^13.0.0",
+    "@types/react": "~19.2.0",
+    "eslint": "^9.0.0",
+    "jest": "^30.0.0",
+    "jest-expo": "~56.0.0",
+    "react-test-renderer": "19.2.7",
+    "typescript": "^5.7.3"
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@bufbuild/.*|@formatjs/.*|@trm/.*))"
+    ]
+  }
+}
