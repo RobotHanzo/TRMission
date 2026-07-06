@@ -16,6 +16,18 @@ export const env = {
   /** Force-update floor for the mobile app: builds below this are told to update. 0 = off. */
   mobileMinBuild: Number(process.env.MOBILE_MIN_BUILD ?? 0),
 
+  // Mobile push (src/push). Each platform enables only when ALL of its credentials are set.
+  fcmProjectId: process.env.FCM_PROJECT_ID ?? '',
+  fcmClientEmail: process.env.FCM_CLIENT_EMAIL ?? '',
+  fcmPrivateKey: (process.env.FCM_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
+  apnsTeamId: process.env.APNS_TEAM_ID ?? '',
+  apnsKeyId: process.env.APNS_KEY_ID ?? '',
+  apnsPrivateKey: (process.env.APNS_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
+  apnsBundleId: process.env.APNS_BUNDLE_ID ?? '',
+  apnsSandbox: process.env.APNS_SANDBOX === '1',
+  /** Debounce before a your-turn push to a socketless player (ms; 0 = immediate). */
+  pushYourTurnDelayMs: Number(process.env.PUSH_YOUR_TURN_DELAY_MS ?? 15_000),
+
   // Auth (Step C). The default secret is for local dev only — set JWT_SECRET in prod.
   jwtSecret: process.env.JWT_SECRET ?? 'dev-insecure-secret-change-me',
   accessTtl: process.env.JWT_ACCESS_TTL ?? '15m',

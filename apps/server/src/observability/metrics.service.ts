@@ -15,6 +15,8 @@ export class MetricsService implements MetricsHooks {
   private readonly botStalls: Counter<'reason'>;
   private readonly roomsPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly gamesPurged: Counter<'trigger' | 'priorStatus'>;
+  private readonly pushesSent: Counter<'kind'>;
+  private readonly pushesFailed: Counter<'kind'>;
 
   constructor() {
     collectDefaultMetrics({ register: this.registry });
@@ -63,6 +65,18 @@ export class MetricsService implements MetricsHooks {
       labelNames: ['trigger', 'priorStatus'],
       registers: [this.registry],
     });
+    this.pushesSent = new Counter({
+      name: 'trm_push_sent_total',
+      help: 'Push notifications delivered to a platform gateway, by kind',
+      labelNames: ['kind'],
+      registers: [this.registry],
+    });
+    this.pushesFailed = new Counter({
+      name: 'trm_push_failed_total',
+      help: 'Push notification sends that failed or hit a dead token, by kind',
+      labelNames: ['kind'],
+      registers: [this.registry],
+    });
   }
 
   commandReceived(): void {
@@ -91,6 +105,12 @@ export class MetricsService implements MetricsHooks {
   }
   gamePurged(trigger: 'auto' | 'manual', priorStatus: string): void {
     this.gamesPurged.inc({ trigger, priorStatus });
+  }
+  pushSent(kind: string): void {
+    this.pushesSent.inc({ kind });
+  }
+  pushFailed(kind: string): void {
+    this.pushesFailed.inc({ kind });
   }
 
   metrics(): Promise<string> {
