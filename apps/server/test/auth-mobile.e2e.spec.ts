@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { createTestApp, refreshCookie, type TestApp } from './app';
+import {
+  createTestApp,
+  refreshCookie,
+  FakeGoogleIdTokenVerifier,
+  FakeOauthHttp,
+  OAUTH_TEST_CONFIG,
+  type TestApp,
+} from './app';
 
 let sharedMongod: MongoMemoryServer;
 beforeAll(async () => {
@@ -75,6 +82,40 @@ describe('mobile refresh/logout: token in the body', () => {
       .post('/api/v1/auth/refresh')
       .send({ refreshToken: guest.body.refreshToken })
       .expect(401);
+  });
+});
+
+describe('google credential: mobile audiences', () => {
+  let o: TestApp;
+  let verifier: FakeGoogleIdTokenVerifier;
+  const oServer = () => o.app.getHttpServer();
+
+  beforeAll(async () => {
+    verifier = new FakeGoogleIdTokenVerifier();
+    o = await createTestApp({
+      mongod: sharedMongod,
+      dbName: 'trm-test-mobile-aud',
+      authConfig: { ...OAUTH_TEST_CONFIG, googleMobileClientIds: ['ios-id', 'android-id'] },
+      googleVerifier: verifier,
+    });
+  }, 60_000);
+  afterAll(() => o.close());
+
+  it('passes web + mobile client ids to the verifier', async () => {
+    verifier.profile = {
+      sub: 'g-m-1',
+      email: 'mobileaud@example.com',
+      emailVerified: true,
+      displayName: 'MobileAud',
+      avatarUrl: null,
+    };
+    verifier.fail = false;
+    await request(oServer())
+      .post('/api/v1/auth/oauth/google/credential')
+      .set('x-trm-client', 'mobile')
+      .send({ credential: 'fake-jwt' })
+      .expect(200);
+    expect(verifier.lastAudience).toEqual(['gid', 'ios-id', 'android-id']);
   });
 });
 

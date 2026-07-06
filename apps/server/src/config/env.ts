@@ -40,6 +40,11 @@ export const env = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
   discordClientId: process.env.DISCORD_CLIENT_ID ?? '',
   discordClientSecret: process.env.DISCORD_CLIENT_SECRET ?? '',
+  /** Extra Google OAuth client ids (iOS/Android apps) accepted as ID-token audiences. */
+  googleMobileClientIds: (process.env.GOOGLE_MOBILE_CLIENT_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   /**
    * Public base URL the browser uses to reach this app. Builds both the provider `redirect_uri`
    * (`${base}/api/v1/auth/oauth/:provider/callback`) and the post-callback web redirect

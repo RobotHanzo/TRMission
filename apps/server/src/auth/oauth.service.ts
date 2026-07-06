@@ -177,7 +177,7 @@ export class OauthService {
 
     let profile;
     try {
-      profile = await this.verifier.verify(idToken, cfg.clientId);
+      profile = await this.verifier.verify(idToken, this.authConfig.googleAudiences());
     } catch {
       throw new UnauthorizedException('invalid_credential');
     }

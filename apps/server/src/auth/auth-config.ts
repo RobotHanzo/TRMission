@@ -44,6 +44,7 @@ export interface AuthConfigOverrides {
   guest?: boolean;
   redirectBase?: string;
   providers?: Partial<Record<OauthProvider, { clientId: string; clientSecret: string }>>;
+  googleMobileClientIds?: string[];
 }
 
 /**
@@ -56,6 +57,7 @@ export class AuthConfig {
   readonly passwordLogin: boolean;
   readonly guest: boolean;
   readonly redirectBase: string;
+  readonly googleMobileClientIds: string[];
   private readonly providers: Record<OauthProvider, ProviderConfig | null>;
 
   // @Optional so Nest injects `undefined` for the real provider (env-driven); tests pass overrides
@@ -64,6 +66,7 @@ export class AuthConfig {
     this.passwordLogin = overrides?.passwordLogin ?? env.authPasswordLogin;
     this.guest = overrides?.guest ?? env.authGuest;
     this.redirectBase = (overrides?.redirectBase ?? env.oauthRedirectBase).replace(/\/+$/, '');
+    this.googleMobileClientIds = overrides?.googleMobileClientIds ?? env.googleMobileClientIds;
     const g = overrides?.providers?.google;
     const d = overrides?.providers?.discord;
     this.providers = {
@@ -83,6 +86,12 @@ export class AuthConfig {
   /** The provider's config, or null if it is not fully configured (id + secret both required). */
   provider(p: OauthProvider): ProviderConfig | null {
     return this.providers[p] ?? null;
+  }
+
+  /** Every audience a Google ID token may carry: web client id + native app client ids. */
+  googleAudiences(): string[] {
+    const g = this.providers.google;
+    return g ? [g.clientId, ...this.googleMobileClientIds] : [];
   }
 
   /** The provider `redirect_uri` — must byte-match the value registered in the provider console. */

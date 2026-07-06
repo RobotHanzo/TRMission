@@ -95,7 +95,9 @@ export class FakeOauthHttp implements OauthHttp {
 export class FakeGoogleIdTokenVerifier implements GoogleIdTokenVerifier {
   profile: OauthProfile | null = null;
   fail = false;
-  async verify(): Promise<OauthProfile> {
+  lastAudience: string | string[] | null = null;
+  async verify(_idToken: string, audience: string | string[]): Promise<OauthProfile> {
+    this.lastAudience = audience;
     if (this.fail || !this.profile) throw new Error('fake google verify failed');
     return this.profile;
   }
