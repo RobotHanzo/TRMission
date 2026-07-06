@@ -31,7 +31,7 @@
 - Consumes: `UserRepo.col` (users collection), `env.guestTtlMs`.
 - Produces: `UserRepo.extendGuestExpiry(userId: string): Promise<void>` — no-op for non-guests. Called by `AuthService.refresh` after a successful rotation.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `apps/server/test/auth-mobile.e2e.spec.ts` (this file grows through Tasks 1–5):
 
@@ -77,12 +77,12 @@ describe('guest TTL: refresh slides guestExpiresAt forward', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: FAIL — `guestExpiresAt` is still `now + 1000ms` (refresh never touches it today).
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `apps/server/src/auth/user.repo.ts`, add after `attachOauthToGuest`:
 
@@ -106,12 +106,12 @@ In `apps/server/src/auth/auth.service.ts`, inside `refresh(...)`, after the `dis
     if (user.isGuest) await this.users.extendGuestExpiry(user._id);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/auth/user.repo.ts apps/server/src/auth/auth.service.ts apps/server/test/auth-mobile.e2e.spec.ts
@@ -131,7 +131,7 @@ git commit -m "feat(server): slide guest TTL forward on refresh"
 - Consumes: `AuthService.refresh/logout` (already token-in, token-out), `IssuedAuth.refreshToken`.
 - Produces: header contract `x-trm-client: mobile` → issuance responses include `refreshToken`, no `Set-Cookie`. `POST /api/v1/auth/refresh` with body `{refreshToken}` → `{accessToken, refreshToken}`, no cookie. `POST /api/v1/auth/logout` with body `{refreshToken}` revokes it. `GoogleCredentialSchema` gains optional `refreshToken` (mobile guest-upgrade carry).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `apps/server/test/auth-mobile.e2e.spec.ts`:
 
@@ -198,12 +198,12 @@ describe('mobile refresh/logout: token in the body', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: FAIL — `refreshToken` undefined in bodies; body-token refresh 401s (`no refresh token`).
 
-- [ ] **Step 3: Implement the schemas**
+- [x] **Step 3: Implement the schemas**
 
 In `apps/server/src/auth/auth.schemas.ts`:
 
@@ -243,7 +243,7 @@ export const AccessResultSchema = z.object({
 });
 ```
 
-- [ ] **Step 4: Implement the controller changes**
+- [x] **Step 4: Implement the controller changes**
 
 In `apps/server/src/auth/auth.controller.ts`:
 
@@ -334,14 +334,14 @@ Replace `refresh` and `logout`:
   }
 ```
 
-- [ ] **Step 5: Run the new tests AND the untouched web suite**
+- [x] **Step 5: Run the new tests AND the untouched web suite**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: PASS
 Run: `yarn workspace @trm/server test --run auth.e2e`
 Expected: PASS (web cookie semantics unchanged)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/server/src/auth/auth.schemas.ts apps/server/src/auth/auth.controller.ts apps/server/test/auth-mobile.e2e.spec.ts
@@ -364,7 +364,7 @@ git commit -m "feat(server): token-in-body auth transport for mobile clients"
 - Consumes: `AuthConfigOverrides` test-override pattern.
 - Produces: env `GOOGLE_MOBILE_CLIENT_IDS` (comma list) → `AuthConfig.googleAudiences(): string[]` (`[webClientId, ...mobileIds]`, `[]` when Google unconfigured); `GoogleIdTokenVerifier.verify(idToken, audience: string | string[])`; `FakeGoogleIdTokenVerifier.lastAudience` for assertions.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `apps/server/test/auth-mobile.e2e.spec.ts` (new top-level describe; boots its own app with providers enabled — mirror the import list with `FakeGoogleIdTokenVerifier, OAUTH_TEST_CONFIG`):
 
@@ -406,12 +406,12 @@ describe('google credential: mobile audiences', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: FAIL — TS compile error: `googleMobileClientIds` not in `AuthConfigOverrides` / `lastAudience` not on the fake.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `apps/server/src/config/env.ts`, after `discordClientSecret`:
 
@@ -481,14 +481,14 @@ export class FakeGoogleIdTokenVerifier implements GoogleIdTokenVerifier {
 }
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: PASS
 Run: `yarn workspace @trm/server test --run auth.e2e`
 Expected: PASS (web credential flow now passes `['gid']` — same acceptance set as before)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/config/env.ts apps/server/src/auth/auth-config.ts apps/server/src/auth/google-id-token.verifier.ts apps/server/src/auth/oauth.service.ts apps/server/test/app.ts apps/server/test/auth-mobile.e2e.spec.ts
@@ -507,7 +507,7 @@ git commit -m "feat(server): accept iOS/Android Google client ids as credential 
 **Interfaces:**
 - Produces: `GET /version/mobile` → `{ minBuild: number; commitHash: string }` (env `MOBILE_MIN_BUILD`, default 0 = never forces an update). The mobile app (P1 plan) blocks boot when its build number < `minBuild`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `apps/server/test/auth-mobile.e2e.spec.ts`:
 
@@ -520,12 +520,12 @@ describe('mobile version gate', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: FAIL — 404.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `apps/server/src/config/env.ts` after `botMoveDelayMs`:
 
@@ -544,12 +544,12 @@ Expected: FAIL — 404.
   }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/config/env.ts apps/server/src/health/health.controller.ts apps/server/test/auth-mobile.e2e.spec.ts
@@ -581,7 +581,7 @@ git commit -m "feat(server): mobile forced-update version gate endpoint"
   - `POST /api/v1/auth/mobile/exchange` `{ code }` → `{ user, accessToken, refreshToken }`
   - `OauthService.handleCallback` now returns the resolved `UserDoc` (`{ ok: true; user; redirect; mobile }`) — the **controller** issues the session (web) or mints the exchange code (mobile).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `apps/server/test/auth-mobile.e2e.spec.ts` (reuses the `FakeOauthHttp` import added in Task 3):
 
@@ -715,12 +715,12 @@ describe('mobile OAuth handoff: one-time code round trip', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: FAIL — `POST /auth/mobile/carry` 404.
 
-- [ ] **Step 3: Create `apps/server/src/auth/mobile-code.repo.ts`**
+- [x] **Step 3: Create `apps/server/src/auth/mobile-code.repo.ts`**
 
 ```ts
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
@@ -781,7 +781,7 @@ export class MobileCodeRepo implements OnModuleInit {
 }
 ```
 
-- [ ] **Step 4: Thread the `mobile` flag through state, authorize, and callback**
+- [x] **Step 4: Thread the `mobile` flag through state, authorize, and callback**
 
 `apps/server/src/auth/auth.types.ts` — add to `OauthStatePayload`:
 
@@ -873,7 +873,7 @@ In `handleCallback`: after `const redirect = safeRedirect(payload.redirect);` ad
     }
 ```
 
-- [ ] **Step 5: Controller wiring + the two new endpoints**
+- [x] **Step 5: Controller wiring + the two new endpoints**
 
 `apps/server/src/auth/auth.schemas.ts`:
 
@@ -1006,14 +1006,14 @@ New endpoints (place after `googleCredential`):
 
 `apps/server/src/auth/auth.module.ts` — import `MobileCodeRepo` and add it to `providers`.
 
-- [ ] **Step 6: Run tests**
+- [x] **Step 6: Run tests**
 
 Run: `yarn workspace @trm/server test --run auth-mobile`
 Expected: PASS (all three new describe blocks)
 Run: `yarn workspace @trm/server test --run auth.e2e`
 Expected: PASS (web OAuth semantics unchanged — the third test in the new block double-covers this)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/server/src/auth/mobile-code.repo.ts apps/server/src/auth/auth.types.ts apps/server/src/auth/auth-config.ts apps/server/src/auth/oauth.service.ts apps/server/src/auth/auth.controller.ts apps/server/src/auth/auth.schemas.ts apps/server/src/auth/auth.module.ts apps/server/test/auth-mobile.e2e.spec.ts
@@ -1035,7 +1035,7 @@ git commit -m "feat(server): mobile OAuth handoff via single-use exchange codes"
 **Interfaces:**
 - Produces: `GET /.well-known/apple-app-site-association` and `GET /.well-known/assetlinks.json`, both 404 until configured. `MobileLinksConfig` (injectable, `@Optional()` overrides — same pattern as `AuthConfig`): `{ appleAppId: string; androidPackageName: string; androidCertSha256: string[] }`. Env: `APPLE_APP_ID` (`TEAMID.bundle.id`), `ANDROID_PACKAGE_NAME`, `ANDROID_CERT_SHA256` (comma list of colon-hex fingerprints).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `apps/server/test/well-known.e2e.spec.ts`:
 
@@ -1111,12 +1111,12 @@ describe('/.well-known: configured payloads', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `yarn workspace @trm/server test --run well-known`
 Expected: FAIL — TS error: `mobileLinks` not a `TestAppOptions` field.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `apps/server/src/config/env.ts`, after `googleMobileClientIds`:
 
@@ -1248,12 +1248,12 @@ import { MobileLinksConfig, type MobileLinksConfigOverrides } from '../src/confi
       .useValue(new MobileLinksConfig(opts.mobileLinks));
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `yarn workspace @trm/server test --run well-known`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/server/src/config/env.ts apps/server/src/config/mobile-links.config.ts apps/server/src/health/well-known.controller.ts apps/server/src/app.module.ts apps/server/test/app.ts apps/server/test/well-known.e2e.spec.ts
@@ -1268,7 +1268,7 @@ git commit -m "feat(server): serve Universal/App Link verification files"
 - Modify: `CLAUDE.md` (root — server env vars section)
 - Modify: `apps/server/CLAUDE.md` (auth section)
 
-- [ ] **Step 1: Run the full validation gates**
+- [x] **Step 1: Run the full validation gates**
 
 Run: `yarn workspace @trm/server test`
 Expected: all specs PASS (including every pre-existing auth/lobby/dashboard spec).
@@ -1277,7 +1277,7 @@ Expected: clean.
 Run: `yarn lint`
 Expected: clean.
 
-- [ ] **Step 2: Document the new env vars**
+- [x] **Step 2: Document the new env vars**
 
 In root `CLAUDE.md`, "Server env vars" section, append after the `GUEST_TTL_MS` mention:
 
@@ -1305,7 +1305,7 @@ In `apps/server/CLAUDE.md`, at the end of the `src/auth/` bullet in "Auth, lobby
   `AuthConfig.googleAudiences()` (web + `GOOGLE_MOBILE_CLIENT_IDS`).
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add CLAUDE.md apps/server/CLAUDE.md
