@@ -6,7 +6,7 @@
 import type { Db, Collection } from 'mongodb';
 import { ENGINE_VERSION } from '@trm/engine';
 import type { GameConfig, GameState, Action } from '@trm/engine';
-import type { BotProfile } from '../bots/types';
+import type { BotProfile } from '@trm/bots';
 import {
   configToStored,
   storedToConfig,

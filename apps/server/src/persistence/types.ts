@@ -6,7 +6,7 @@
 import { asPlayerId } from '@trm/shared';
 import type { RuleParams, SeatIndex } from '@trm/shared';
 import type { GameConfig, GameState, Action, FinalScoreboard } from '@trm/engine';
-import type { BotProfile } from '../bots/types';
+import type { BotProfile } from '@trm/bots';
 
 export interface StoredConfig {
   seed: string | number;

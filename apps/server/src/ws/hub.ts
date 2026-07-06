@@ -29,8 +29,7 @@ import { Connection, type CloseFn, type Sink } from './connection';
 import { DevTicketVerifier, type TicketVerifier } from './ticket';
 import type { GameStorePort } from '../persistence/types';
 import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
-import { chooseBotAction } from '../bots/policy';
-import { isBotId, type BotProfile } from '../bots/types';
+import { chooseBotAction, isBotId, type BotProfile } from '@trm/bots';
 import { botStepDelayMs } from './bot-pacing';
 import {
   rejectionToPb,

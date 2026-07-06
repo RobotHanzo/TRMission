@@ -11,7 +11,7 @@ import type {
   StoredConfig,
 } from '../persistence/types';
 import type { UserDoc } from '../auth/user.repo';
-import type { BotProfile } from '../bots/types';
+import type { BotProfile } from '@trm/bots';
 import type { MapContentDoc } from '../maps/maps.types';
 
 export interface HistoryPlayer {

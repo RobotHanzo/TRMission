@@ -4081,6 +4081,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@trm/bots@workspace:*, @trm/bots@workspace:packages/bots":
+  version: 0.0.0-use.local
+  resolution: "@trm/bots@workspace:packages/bots"
+  dependencies:
+    "@trm/engine": "workspace:*"
+    "@trm/shared": "workspace:*"
+    typescript: "npm:^5.7.3"
+    vitest: "npm:^2.1.8"
+  languageName: unknown
+  linkType: soft
+
 "@trm/codec@workspace:*, @trm/codec@workspace:packages/codec":
   version: 0.0.0-use.local
   resolution: "@trm/codec@workspace:packages/codec"
@@ -4195,6 +4206,7 @@ __metadata:
     "@resvg/resvg-js": "npm:^2.6.2"
     "@swc-node/register": "npm:^1.10.9"
     "@swc/core": "npm:^1.15.43"
+    "@trm/bots": "workspace:*"
     "@trm/codec": "workspace:*"
     "@trm/engine": "workspace:*"
     "@trm/map-data": "workspace:*"

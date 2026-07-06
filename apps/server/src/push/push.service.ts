@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { isBotId } from '../bots/types';
+import { isBotId } from '@trm/bots';
 import { UserRepo } from '../auth/user.repo';
 import { MetricsService } from '../observability/metrics.service';
 import { DeviceRepo } from './device.repo';

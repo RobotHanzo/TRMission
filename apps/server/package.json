@@ -21,6 +21,7 @@
     "@nestjs/throttler": "^6.5.0",
     "@node-rs/argon2": "^2.0.2",
     "@resvg/resvg-js": "^2.6.2",
+    "@trm/bots": "workspace:*",
     "@trm/codec": "workspace:*",
     "@trm/engine": "workspace:*",
     "@trm/map-data": "workspace:*",

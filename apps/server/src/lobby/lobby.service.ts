@@ -25,7 +25,7 @@ import { TokenService } from '../auth/token.service';
 import { UserRepo } from '../auth/user.repo';
 import { featureDisabled } from '../auth/feature.guard';
 import type { AuthUser } from '../auth/auth.types';
-import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '../bots/types';
+import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '@trm/bots';
 import { MapsService } from '../maps/maps.service';
 import { PushService } from '../push/push.service';
 

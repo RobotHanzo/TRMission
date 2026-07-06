@@ -69,6 +69,26 @@ export default tseslint.config(
       ],
     },
   },
+  // Bot policy determinism: a pick must be a pure function of state + botId (the server
+  // logs the chosen action, so replay/recovery must reproduce it byte-identically).
+  {
+    files: ['packages/bots/src/**/*.ts'],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'Math',
+          property: 'random',
+          message: 'Bot picks must be deterministic — seed from state.actionSeq (see rngFor).',
+        },
+        {
+          object: 'Date',
+          property: 'now',
+          message: 'Bot picks must be deterministic — no wall-clock.',
+        },
+      ],
+    },
+  },
   // NestJS DI resolves constructor dependencies from emitted decorator metadata, which
   // requires injected classes to be VALUE imports. consistent-type-imports can't see
   // that usage, so it is disabled here; verbatimModuleSyntax still enforces correctness.
