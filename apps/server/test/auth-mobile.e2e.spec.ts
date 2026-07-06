@@ -17,6 +17,67 @@ beforeAll(async () => {
 }, 60_000);
 afterAll(() => t.close());
 
+describe('mobile issuance: x-trm-client header returns the refresh token in the body', () => {
+  it('guest with the mobile header gets refreshToken and NO cookie', async () => {
+    const res = await request(server())
+      .post('/api/v1/auth/guest')
+      .set('x-trm-client', 'mobile')
+      .send({ displayName: 'Pocket' })
+      .expect(201);
+    expect(res.body.refreshToken).toBeTruthy();
+    expect(refreshCookie(res)).toBe('');
+  });
+
+  it("web guest (no header) keeps today's behavior: cookie set, no body token", async () => {
+    const res = await request(server()).post('/api/v1/auth/guest').send({}).expect(201);
+    expect(res.body.refreshToken).toBeUndefined();
+    expect(refreshCookie(res)).toContain('trm_refresh=');
+  });
+});
+
+describe('mobile refresh/logout: token in the body', () => {
+  it('rotates via body token and burns the family on reuse', async () => {
+    const guest = await request(server())
+      .post('/api/v1/auth/guest')
+      .set('x-trm-client', 'mobile')
+      .send({})
+      .expect(201);
+    const t1 = guest.body.refreshToken as string;
+
+    const r1 = await request(server())
+      .post('/api/v1/auth/refresh')
+      .send({ refreshToken: t1 })
+      .expect(200);
+    expect(r1.body.accessToken).toBeTruthy();
+    expect(r1.body.refreshToken).toBeTruthy();
+    expect(r1.body.refreshToken).not.toBe(t1);
+    expect(refreshCookie(r1)).toBe(''); // body transport never sets the cookie
+
+    // Reusing the rotated-away token = theft → family burned, latest token dies too.
+    await request(server()).post('/api/v1/auth/refresh').send({ refreshToken: t1 }).expect(401);
+    await request(server())
+      .post('/api/v1/auth/refresh')
+      .send({ refreshToken: r1.body.refreshToken })
+      .expect(401);
+  });
+
+  it('logout accepts the body token', async () => {
+    const guest = await request(server())
+      .post('/api/v1/auth/guest')
+      .set('x-trm-client', 'mobile')
+      .send({})
+      .expect(201);
+    await request(server())
+      .post('/api/v1/auth/logout')
+      .send({ refreshToken: guest.body.refreshToken })
+      .expect(204);
+    await request(server())
+      .post('/api/v1/auth/refresh')
+      .send({ refreshToken: guest.body.refreshToken })
+      .expect(401);
+  });
+});
+
 describe('guest TTL: refresh slides guestExpiresAt forward', () => {
   it('extends an almost-expired guest on refresh', async () => {
     const guest = await request(server()).post('/api/v1/auth/guest').send({}).expect(201);

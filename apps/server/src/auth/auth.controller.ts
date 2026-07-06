@@ -34,6 +34,10 @@ import {
   LoginDto,
   GoogleCredentialDto,
   UpdatePreferencesDto,
+  RefreshDto,
+  LogoutDto,
+  RefreshSchema,
+  LogoutSchema,
   GuestSchema,
   RegisterSchema,
   UpgradeSchema,
@@ -79,10 +83,24 @@ export class AuthController {
     });
   }
 
+  /** Native clients cannot use SameSite cookies; they self-identify with this header. */
+  private isMobile(req: Request): boolean {
+    return req.headers['x-trm-client'] === 'mobile';
+  }
+
   private finish(
+    req: Request,
     res: Response,
     issued: IssuedAuth,
-  ): { user: IssuedAuth['user']; accessToken: string } {
+  ): { user: IssuedAuth['user']; accessToken: string; refreshToken?: string } {
+    if (this.isMobile(req)) {
+      // Token-in-body transport: the refresh token goes to Keychain/Keystore, never a cookie.
+      return {
+        user: issued.user,
+        accessToken: issued.accessToken,
+        refreshToken: issued.refreshToken,
+      };
+    }
     this.setRefresh(res, issued.refreshToken);
     return { user: issued.user, accessToken: issued.accessToken };
   }
@@ -98,9 +116,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Create a guest session (play instantly)' })
   @ApiBody({ schema: apiSchema(GuestSchema) })
   @ApiResponse({ status: 201, schema: apiSchema(AuthResultSchema) })
-  async guest(@Body() body: GuestDto, @Res({ passthrough: true }) res: Response) {
+  async guest(
+    @Body() body: GuestDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     if (!this.authConfig.guest) throw new ForbiddenException('guest sign-in disabled');
     return this.finish(
+      req,
       res,
       await this.auth.guest(body.displayName ?? randomGuestName(), body.locale ?? 'zh-Hant'),
     );
@@ -110,9 +133,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new account' })
   @ApiBody({ schema: apiSchema(RegisterSchema) })
   @ApiResponse({ status: 201, schema: apiSchema(AuthResultSchema) })
-  async register(@Body() body: RegisterDto, @Res({ passthrough: true }) res: Response) {
+  async register(
+    @Body() body: RegisterDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
     return this.finish(
+      req,
       res,
       await this.auth.register(
         body.email,
@@ -133,10 +161,11 @@ export class AuthController {
   async upgrade(
     @CurrentUser() user: AuthUser,
     @Body() body: UpgradeDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
-    return this.finish(res, await this.auth.upgrade(user.userId, body.email, body.password));
+    return this.finish(req, res, await this.auth.upgrade(user.userId, body.email, body.password));
   }
 
   @Post('login')
@@ -144,9 +173,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Log in with email + password' })
   @ApiBody({ schema: apiSchema(LoginSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(AuthResultSchema) })
-  async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() body: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
-    return this.finish(res, await this.auth.login(body.email, body.password));
+    return this.finish(req, res, await this.auth.login(body.email, body.password));
   }
 
   @Post('oauth/google/credential')
@@ -161,25 +194,42 @@ export class AuthController {
   ) {
     if (!this.authConfig.provider('google'))
       throw new ForbiddenException('google sign-in disabled');
-    const guestUserId = await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
-    return this.finish(res, await this.oauth.handleCredential(body.credential, guestUserId));
+    const guestUserId = await this.oauth.guestIdFromRefresh(
+      body.refreshToken ?? req.cookies?.[REFRESH_COOKIE],
+    );
+    return this.finish(req, res, await this.oauth.handleCredential(body.credential, guestUserId));
   }
 
   @Post('refresh')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Rotate the refresh cookie and mint a new access token' })
+  @ApiOperation({ summary: 'Rotate the refresh token (cookie for web, body for mobile)' })
+  @ApiBody({ schema: apiSchema(RefreshSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(AccessResultSchema) })
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const result = await this.auth.refresh(req.cookies?.[REFRESH_COOKIE]);
+  async refresh(
+    @Body() body: RefreshDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const bodyToken = body.refreshToken;
+    const result = await this.auth.refresh(bodyToken ?? req.cookies?.[REFRESH_COOKIE]);
+    if (bodyToken) {
+      // Body-in → body-out; never downgrade a mobile session onto a cookie.
+      return { accessToken: result.accessToken, refreshToken: result.refreshToken };
+    }
     this.setRefresh(res, result.refreshToken);
     return { accessToken: result.accessToken };
   }
 
   @Post('logout')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Revoke the refresh family and clear the cookie' })
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
-    await this.auth.logout(req.cookies?.[REFRESH_COOKIE]);
+  @ApiOperation({ summary: 'Revoke the refresh family (cookie or body token) and clear the cookie' })
+  @ApiBody({ schema: apiSchema(LogoutSchema) })
+  async logout(
+    @Body() body: LogoutDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    await this.auth.logout(body.refreshToken ?? req.cookies?.[REFRESH_COOKIE]);
     res.clearCookie(REFRESH_COOKIE, { path: REFRESH_PATH });
   }
 
