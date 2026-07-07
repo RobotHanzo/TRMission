@@ -333,6 +333,8 @@ export const api = {
   updateRoomSettings: (code: string, patch: Partial<RoomSettings>) =>
     req<RoomView>('PATCH', `/rooms/${code}/settings`, patch),
   spectate: (code: string) => req<TicketResult>('POST', `/rooms/${code}/spectate`),
+  watchRoom: (code: string) => req<RoomView>('POST', `/rooms/${code}/watch`),
+  rejoinRoom: (code: string) => req<RoomView>('POST', `/rooms/${code}/rejoin`),
   voteRematch: (code: string, wantsRematch: boolean) =>
     req<RoomView>('POST', `/rooms/${code}/rematch-vote`, { wantsRematch }),
   sendRoomChat: (code: string, presetId: string) =>

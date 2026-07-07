@@ -36,6 +36,8 @@ vi.mock('../net/rest', () => {
       updateRoomSettings: vi.fn(),
       listMaps: vi.fn(() => Promise.resolve([])),
       sendRoomChat: vi.fn(),
+      watchRoom: vi.fn(),
+      rejoinRoom: vi.fn(),
     },
   };
 });
@@ -80,6 +82,7 @@ const baseRoom = () => ({
   },
   gameId: undefined as string | undefined,
   mapName: undefined as { zh: string; en: string } | undefined,
+  spectators: [] as { userId: string; displayName: string; isGuest: boolean }[],
   chat: [] as { userId: string; presetId: string; ts: number }[],
 });
 
@@ -90,6 +93,8 @@ const mocked = api as unknown as {
   spectate: ReturnType<typeof vi.fn>;
   kickPlayer: ReturnType<typeof vi.fn>;
   updateRoomSettings: ReturnType<typeof vi.fn>;
+  watchRoom: ReturnType<typeof vi.fn>;
+  rejoinRoom: ReturnType<typeof vi.fn>;
 };
 
 beforeEach(() => {
@@ -430,5 +435,87 @@ describe('RoomScreen preset chat', () => {
     await waitFor(() =>
       expect(container.querySelector('.room-chat-log li')?.textContent).toContain('謝謝！'),
     );
+  });
+});
+
+describe('RoomScreen spectating', () => {
+  it('does not re-join a lobby spectator on subsequent polls', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        members: [member('host')],
+        spectators: [{ userId: 'u-me', displayName: 'Me', isGuest: true }],
+      }),
+    );
+    render(<RoomScreen />);
+    await screen.findByText('host');
+    expect(mocked.joinRoom).not.toHaveBeenCalled();
+  });
+
+  it('shows an enabled Spectate button next to Ready when there are other members', async () => {
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    mocked.watchRoom.mockResolvedValue(
+      room({
+        members: [member('host')],
+        spectators: [{ userId: 'u-me', displayName: 'u-me', isGuest: false }],
+      }),
+    );
+    render(<RoomScreen />);
+    const spectateBtn = await screen.findByRole('button', { name: '觀戰' });
+    expect(spectateBtn).not.toBeDisabled();
+    fireEvent.click(spectateBtn);
+    await waitFor(() => expect(mocked.watchRoom).toHaveBeenCalledWith('ABCD'));
+  });
+
+  it('disables Spectate when the viewer is the only member', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    render(<RoomScreen />);
+    const spectateBtn = await screen.findByRole('button', { name: '觀戰' });
+    expect(spectateBtn).toBeDisabled();
+  });
+
+  it('shows "Join as player" for a spectator and calls rejoinRoom', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        members: [member('host')],
+        spectators: [{ userId: 'u-me', displayName: 'Me', isGuest: true }],
+      }),
+    );
+    mocked.rejoinRoom.mockResolvedValue(
+      room({ members: [member('host'), member('u-me')], spectators: [] }),
+    );
+    render(<RoomScreen />);
+    const joinBtn = await screen.findByRole('button', { name: '加入遊戲' });
+    expect(joinBtn).not.toBeDisabled();
+    fireEvent.click(joinBtn);
+    await waitFor(() => expect(mocked.rejoinRoom).toHaveBeenCalledWith('ABCD'));
+  });
+
+  it('disables "Join as player" when the room is full', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        maxPlayers: 1,
+        members: [member('host')],
+        spectators: [{ userId: 'u-me', displayName: 'Me', isGuest: true }],
+      }),
+    );
+    render(<RoomScreen />);
+    const joinBtn = await screen.findByRole('button', { name: '加入遊戲' });
+    expect(joinBtn).toBeDisabled();
+  });
+
+  it('renders the spectator list with a kick control for the host', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        hostId: 'u-me',
+        members: [member('u-me')],
+        spectators: [{ userId: 'g1', displayName: 'Watcher', isGuest: true }],
+      }),
+    );
+    render(<RoomScreen />);
+    await screen.findByText('Watcher');
+    const kickBtns = await screen.findAllByRole('button', { name: '移除玩家' });
+    expect(kickBtns.length).toBeGreaterThan(0);
+    fireEvent.click(kickBtns[0]!);
+    expect(mocked.kickPlayer).toHaveBeenCalledWith('ABCD', 'g1');
   });
 });

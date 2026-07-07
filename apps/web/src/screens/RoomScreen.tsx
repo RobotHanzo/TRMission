@@ -88,9 +88,9 @@ export function RoomScreen() {
   useEffect(() => {
     if (!code) return; // no room to poll (e.g. mid-navigation after leaving/being kicked)
     let active = true;
-    // Whether we have ever been seated here. Once true, vanishing from the roster means the
-    // host kicked us — go home instead of silently rejoining on the next tick.
-    let wasMember = false;
+    // Whether we have ever been present here (seated or spectating). Once true, vanishing
+    // from both lists means the host kicked us — go home instead of silently rejoining.
+    let wasPresent = false;
     const poll = async () => {
       try {
         let r = await api.getRoom(code);
@@ -106,9 +106,9 @@ export function RoomScreen() {
         // (Existing members of a STARTED game skip this and reconnect via the ticket below —
         // the server rejects join on a started room even for members.)
         if (!r.members.some((m) => m.userId === user?.id)) {
-          if (wasMember) {
-            // We were seated and have been dropped. In LOBBY that's a host kick — surface a
-            // modal and let the player dismiss it home; otherwise just bail home.
+          if (wasPresent) {
+            // We were seated/spectating and have been dropped. In LOBBY that's a host kick —
+            // surface a modal and let the player dismiss it home; otherwise just bail home.
             active = false;
             if (r.status === 'LOBBY') setKicked(true);
             else goHome();
@@ -128,10 +128,16 @@ export function RoomScreen() {
             goHome();
             return;
           }
-          r = await api.joinRoom(code);
-          if (!active) return;
+          // A demoted lobby spectator is also a non-member, but must not be auto-joined back
+          // onto a seat — they keep watching until they either rejoin a seat themselves or the
+          // game starts (handled by the STARTED branch above, since they're a non-member too).
+          const amSpectator = r.spectators.some((s) => s.userId === user?.id);
+          if (!amSpectator) {
+            r = await api.joinRoom(code);
+            if (!active) return;
+          }
         }
-        wasMember = true;
+        wasPresent = true;
         setRoom(r);
         if (r.status === 'STARTED' && r.gameId) {
           const ticket = await api.getTicket(code);
@@ -181,6 +187,7 @@ export function RoomScreen() {
     );
 
   const me = room.members.find((m) => m.userId === user?.id);
+  const mySpectator = room.spectators.find((s) => s.userId === user?.id);
   const isHost = room.hostId === user?.id;
   // A shareable link that drops a friend straight into this room (joins on open, after login).
   const roomLink = `${window.location.origin}/room/${code}`;
@@ -227,6 +234,8 @@ export function RoomScreen() {
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
   const sendChat = (presetId: string) => void guard(api.sendRoomChat(code, presetId));
+  const becomeSpectator = () => void guard(api.watchRoom(code));
+  const becomePlayer = () => void guard(api.rejoinRoom(code));
   const copy = (text: string) => {
     if (!navigator.clipboard) return;
     void Promise.resolve(navigator.clipboard.writeText(text)).then(
@@ -302,6 +311,30 @@ export function RoomScreen() {
           </li>
         ))}
       </ul>
+
+      {room.spectators.length > 0 && (
+        <>
+          <h4 className="muted">{t('spectatorsHeading')}</h4>
+          <ul className="member-list spectator-list">
+            {room.spectators.map((s) => (
+              <li key={s.userId}>
+                <span>{s.displayName}</span>
+                {s.userId === user?.id && <em className="muted">({t('you')})</em>}
+                {isHost && (
+                  <button
+                    className="icon-btn"
+                    aria-label={t('kickPlayer')}
+                    title={t('kickPlayer')}
+                    onClick={() => kick(s.userId)}
+                  >
+                    <UserMinus size={14} aria-hidden />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       <div className="card stack room-chat">
         <div className="row wrap">
@@ -458,9 +491,31 @@ export function RoomScreen() {
       )}
 
       <div className="row">
-        <button className={me?.ready ? 'danger' : 'success'} onClick={toggleReady}>
-          {me?.ready ? t('cancelReady') : t('markReady')}
-        </button>
+        {me && (
+          <>
+            <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
+              {me.ready ? t('cancelReady') : t('markReady')}
+            </button>
+            <button
+              onClick={() => void becomeSpectator()}
+              disabled={room.members.length <= 1}
+              title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
+            >
+              {t('watch')}
+            </button>
+          </>
+        )}
+        {mySpectator && (
+          <button
+            onClick={() => void becomePlayer()}
+            disabled={room.members.length >= room.maxPlayers}
+            title={
+              room.members.length >= room.maxPlayers ? t('becomePlayerDisabledFull') : undefined
+            }
+          >
+            {t('becomePlayer')}
+          </button>
+        )}
         {isHost && (
           <button className="primary" disabled={!allReady} onClick={() => void start()}>
             {t('start')}
