@@ -94,4 +94,22 @@ describe('spectating', () => {
     const s = await guest('Blocked');
     await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(s.token)).expect(403);
   });
+
+  it('records the spectator on the room doc when minting a spectate ticket', async () => {
+    const { code } = await startedRoom();
+    const s = await guest('Recorder');
+
+    await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(s.token)).expect(200);
+
+    const read = await request(server()).get(`/api/v1/rooms/${code}`).set(auth(s.token)).expect(200);
+    expect(read.body.spectators).toEqual([{ userId: s.id, displayName: 'Recorder', isGuest: true }]);
+
+    // Minting a second ticket (e.g. a reconnect) doesn't duplicate the entry.
+    await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(s.token)).expect(200);
+    const read2 = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(s.token))
+      .expect(200);
+    expect(read2.body.spectators).toHaveLength(1);
+  });
 });

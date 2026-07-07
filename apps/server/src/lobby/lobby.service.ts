@@ -348,13 +348,20 @@ export class LobbyService {
     return this.get(code);
   }
 
-  /** Mint a spectator ws-ticket (seat -1) for a started room, if it allows spectating. */
+  /** Mint a spectator ws-ticket (seat -1) for a started room, if it allows spectating. Also
+   *  records the caller onto `RoomDoc.spectators` (idempotent) — the same list a lobby demote
+   *  populates, so every path that watches this room's game shares one identity list. */
   async spectateTicket(code: string, user: AuthUser): Promise<TicketResult> {
     await this.assertNotDisabled(user.userId);
     const room = await this.require(code);
     const s = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
     if (!s.allowSpectating) throw new ForbiddenException('spectating is disabled for this room');
     if (!room.gameId) throw new BadRequestException('game has not started');
+    await this.rooms.recordSpectator(code, {
+      userId: user.userId,
+      displayName: user.displayName,
+      isGuest: user.isGuest,
+    });
     return {
       gameId: room.gameId,
       ticket: this.tokens.signWsTicket({ gameId: room.gameId, playerId: user.userId, seat: -1 }),
