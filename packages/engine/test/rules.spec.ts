@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import type { CardColor } from '@trm/shared';
 import { asPlayerId, asRouteId, asCityId, makeRng, DEFAULT_RULE_PARAMS } from '@trm/shared';
 import { taiwanBoard } from '../src/taiwan';
+import { buildBoard } from '../src/board';
+import type { GameContent } from '@trm/map-data';
 import type {
   GameState,
   OwnerCell,
@@ -188,6 +190,95 @@ describe('ferries', () => {
     expect(res.ok).toBe(false);
     if (res.ok) return;
     expect(res.error.code).toBe('FERRY_LOCOS_SHORT');
+  });
+});
+
+describe('double-ferry routes', () => {
+  // A small custom board with a double-route pair where BOTH members are ferries, with
+  // different locomotive counts — proves doubleGroup (sibling lock) and ferryLocos (payment)
+  // stay fully independent even on the same pair. taiwanBoard() has no such route by the
+  // bundled map's own convention, so this content is purpose-built.
+  const doubleFerryContent: GameContent = {
+    meta: { mapId: 'test-double-ferry', version: 1, nameZh: '雙渡輪測試', nameEn: 'Double Ferry Test' },
+    cities: [
+      { id: asCityId('x1'), nameZh: '甲', nameEn: 'X1', x: 0, y: 0, region: 'test', isIsland: false },
+      { id: asCityId('x2'), nameZh: '乙', nameEn: 'X2', x: 10, y: 0, region: 'test', isIsland: false },
+    ],
+    routes: [
+      {
+        id: asRouteId('DF1'),
+        a: asCityId('x1'),
+        b: asCityId('x2'),
+        color: 'GRAY',
+        length: 2,
+        ferryLocos: 1,
+        isTunnel: false,
+        doubleGroup: 'A',
+      },
+      {
+        id: asRouteId('DF2'),
+        a: asCityId('x1'),
+        b: asCityId('x2'),
+        color: 'GRAY',
+        length: 2,
+        ferryLocos: 2,
+        isTunnel: false,
+        doubleGroup: 'A',
+      },
+    ],
+    tickets: [],
+  };
+  const doubleFerryBoard = buildBoard(doubleFerryContent);
+  const apply2 = (state: GameState, action: Action) => reduce(doubleFerryBoard, state, action);
+
+  it('locks the ferry sibling in a 2-player game, exactly like a non-ferry double route', () => {
+    const state = st({ numPlayers: 2, hands: { p0: { RED: 1, LOCOMOTIVE: 1 } } });
+    const res = apply2(state, {
+      t: 'CLAIM_ROUTE',
+      player: p0,
+      routeId: asRouteId('DF1'),
+      payment: { color: 'RED', colorCount: 1, locomotives: 1 },
+    });
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.value.state.ownership['DF1']).toEqual({ owner: p0 });
+    expect(res.value.state.ownership['DF2']).toEqual({ locked: true });
+  });
+
+  it("keeps each side's locomotive requirement independent", () => {
+    const state = st({
+      numPlayers: 4,
+      hands: { p0: { RED: 1, LOCOMOTIVE: 1 }, p1: { BLUE: 1, LOCOMOTIVE: 2 } },
+    });
+    const r1 = apply2(state, {
+      t: 'CLAIM_ROUTE',
+      player: p0,
+      routeId: asRouteId('DF1'),
+      payment: { color: 'RED', colorCount: 1, locomotives: 1 },
+    });
+    expect(r1.ok).toBe(true);
+    if (!r1.ok) return;
+    expect(r1.value.state.ownership['DF2']).toBeUndefined(); // 4p: no sibling lock
+
+    const underpaid = apply2(r1.value.state, {
+      t: 'CLAIM_ROUTE',
+      player: p1,
+      routeId: asRouteId('DF2'),
+      payment: { color: 'BLUE', colorCount: 1, locomotives: 1 },
+    });
+    expect(underpaid.ok).toBe(false);
+    if (underpaid.ok) return;
+    expect(underpaid.error.code).toBe('FERRY_LOCOS_SHORT'); // DF2 needs 2 locos, not 1
+
+    const r2 = apply2(r1.value.state, {
+      t: 'CLAIM_ROUTE',
+      player: p1,
+      routeId: asRouteId('DF2'),
+      payment: { color: null, colorCount: 0, locomotives: 2 },
+    });
+    expect(r2.ok).toBe(true);
+    if (!r2.ok) return;
+    expect(r2.value.state.ownership['DF2']).toEqual({ owner: p1 });
   });
 });
 
