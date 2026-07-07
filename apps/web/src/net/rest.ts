@@ -46,6 +46,11 @@ export interface RoomMember {
   difficulty?: BotDifficulty;
   wantsRematch?: boolean;
 }
+export interface RoomSpectator {
+  userId: string;
+  displayName: string;
+  isGuest: boolean;
+}
 export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
 export type MapSelector =
   | { source: 'official'; mapId: string }
@@ -71,6 +76,7 @@ export interface RoomView {
   status: 'LOBBY' | 'STARTED' | 'CLOSED';
   maxPlayers: number;
   members: RoomMember[];
+  spectators: RoomSpectator[];
   settings: RoomSettings;
   gameId?: string;
   mapName?: { zh: string; en: string };

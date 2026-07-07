@@ -42,7 +42,7 @@ export function GameScreen() {
       .getRoom(roomCode)
       .then((r) => {
         if (!cancelled) {
-          setRoster(r.members);
+          setRoster(r.members, r.spectators);
           setRoom(r);
         }
       })
@@ -71,7 +71,7 @@ export function GameScreen() {
           enterRoom(roomCode);
           return;
         }
-        setRoster(r.members);
+        setRoster(r.members, r.spectators);
         setRoom(r);
       } catch {
         // transient — next tick retries; this is a convenience poll, not a critical path
@@ -109,7 +109,7 @@ export function GameScreen() {
     if (!roomCode) return;
     try {
       const r = await api.voteRematch(roomCode, wantsRematch);
-      setRoster(r.members);
+      setRoster(r.members, r.spectators);
       setRoom(r);
     } catch {
       // transient — the next poll tick resyncs
