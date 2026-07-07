@@ -192,3 +192,44 @@ describe('lobby → game → history (end to end)', () => {
     expect(detail.body.players).toHaveLength(2);
   });
 });
+
+describe('lobby: spectator leave + kick', () => {
+  it('lets a demoted spectator leave without affecting the seated members', async () => {
+    const a = await guest('Ivy');
+    const b = await guest('Jax');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(b.token)).expect(200);
+
+    const left = await request(server())
+      .post(`/api/v1/rooms/${code}/leave`)
+      .set(auth(b.token))
+      .expect(200);
+    expect(left.body.spectators).toEqual([]);
+    expect(left.body.members.map((m: { userId: string }) => m.userId)).toEqual([a.id]);
+  });
+
+  it('lets the host remove a spectator', async () => {
+    const a = await guest('Kim');
+    const b = await guest('Lee');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(b.token)).expect(200);
+
+    const kicked = await request(server())
+      .post(`/api/v1/rooms/${code}/kick/${b.id}`)
+      .set(auth(a.token))
+      .expect(200);
+    expect(kicked.body.spectators).toEqual([]);
+  });
+});

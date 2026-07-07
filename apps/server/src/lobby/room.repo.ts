@@ -231,11 +231,20 @@ export class RoomRepo implements OnModuleInit {
     return this.col.findOne({ _id: code });
   }
 
-  /** Leave a LOBBY room: drop the member, keep seats contiguous, transfer host or close. */
+  /** Leave a LOBBY room: a spectator just drops off `spectators`; a seated member drops the
+   *  member, keeps seats contiguous, and transfers host or closes exactly as before. */
   async leave(code: string, userId: string): Promise<RoomDoc | null> {
     const room = await this.col.findOne({ _id: code });
     if (!room) return null;
     if (room.status !== 'LOBBY') return room;
+
+    if (room.spectators?.some((s) => s.userId === userId)) {
+      await this.col.updateOne(
+        { _id: code },
+        { $pull: { spectators: { userId } }, $set: { updatedAt: new Date() } },
+      );
+      return this.col.findOne({ _id: code });
+    }
 
     const remaining = room.members
       .filter((m) => m.userId !== userId)
@@ -368,7 +377,7 @@ export class RoomRepo implements OnModuleInit {
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
 
-  /** Host-only: remove another member (human or bot) and keep seats contiguous.
+  /** Host-only: remove another member or spectator (human or bot) and keep seats contiguous.
    *  The host cannot kick themselves — leaving is a separate, host-transferring path. */
   async kick(code: string, hostId: string, targetId: string): Promise<KickResult> {
     const room = await this.col.findOne({ _id: code });
@@ -376,8 +385,16 @@ export class RoomRepo implements OnModuleInit {
     if (room.status !== 'LOBBY') return 'started';
     if (room.hostId !== hostId) return 'forbidden';
     if (targetId === hostId) return 'invalid';
-    if (!room.members.some((m) => m.userId === targetId)) return 'invalid';
 
+    if (room.spectators?.some((s) => s.userId === targetId)) {
+      await this.col.updateOne(
+        { _id: code },
+        { $pull: { spectators: { userId: targetId } }, $set: { updatedAt: new Date() } },
+      );
+      return (await this.col.findOne({ _id: code })) ?? 'not_found';
+    }
+
+    if (!room.members.some((m) => m.userId === targetId)) return 'invalid';
     const remaining = room.members
       .filter((m) => m.userId !== targetId)
       .map((m, i) => ({ ...m, seat: i }));
