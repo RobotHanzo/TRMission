@@ -426,7 +426,10 @@ export class RoomRepo implements OnModuleInit {
   async sendChat(code: string, userId: string, presetId: ChatPresetId): Promise<SendChatResult> {
     const room = await this.col.findOne({ _id: code });
     if (!room) return 'not_found';
-    if (!room.members.some((m) => m.userId === userId)) return 'not_member';
+    const isParticipant =
+      room.members.some((m) => m.userId === userId) ||
+      (room.spectators?.some((s) => s.userId === userId) ?? false);
+    if (!isParticipant) return 'not_member';
 
     const now = Date.now();
     const recent = (room.chat ?? []).filter(

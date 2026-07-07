@@ -128,4 +128,24 @@ describe('lobby: preset chat', () => {
       .expect(200);
     expect(read.body.chat).toHaveLength(30);
   }, 60_000);
+
+  it('lets a demoted spectator send a preset message too', async () => {
+    const a = await guest('Mo');
+    const b = await guest('Nia');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(b.token)).expect(200);
+
+    const sent = await request(server())
+      .post(`/api/v1/rooms/${code}/chat`)
+      .set(auth(b.token))
+      .send({ presetId: 'THANKS' })
+      .expect(200);
+    expect(sent.body.chat[0]).toMatchObject({ userId: b.id, presetId: 'THANKS' });
+  });
 });
