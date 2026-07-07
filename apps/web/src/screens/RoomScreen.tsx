@@ -26,6 +26,8 @@ import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
 import type { Locale } from '../store/ui';
 import { CHAT_PRESET_IDS, chatPresetKey } from '../game/chatPresets';
+import '../styles/game.css';
+import '../styles/room.css';
 
 const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
 
@@ -198,7 +200,9 @@ export function RoomScreen() {
     m.isBot ? t('botName', { level: t(`difficulty_${m.difficulty ?? 'EASY'}`) }) : m.displayName;
   const chatAuthorName = (userId: string): string => {
     const m = room.members.find((x) => x.userId === userId);
-    return m ? memberName(m) : userId;
+    if (m) return memberName(m);
+    const s = room.spectators.find((x) => x.userId === userId);
+    return s ? s.displayName : userId;
   };
 
   const guard = (p: Promise<RoomView>) => p.then(setRoom).catch((e: Error) => setErr(e.message));
@@ -258,304 +262,319 @@ export function RoomScreen() {
   };
 
   return (
-    <div className="stack">
-      <div className="row between">
-        <h2>
-          {t('room')} <code className="room-code">{code}</code>
-        </h2>
-        <div className="row">
-          <button onClick={() => copy(code)}>{t('copyCode')}</button>
-          <button onClick={() => copy(roomLink)}>{t('copyLink')}</button>
+    <div className="room-layout">
+      <div className="stack room-main">
+        <div className="row between">
+          <h2>
+            {t('room')} <code className="room-code">{code}</code>
+          </h2>
+          <div className="row">
+            <button onClick={() => copy(code)}>{t('copyCode')}</button>
+            <button onClick={() => copy(roomLink)}>{t('copyLink')}</button>
+          </div>
         </div>
-      </div>
 
-      <ul className="member-list">
-        {room.members.map((m) => (
-          <li key={m.userId}>
-            <span
-              className="seat-dot"
-              style={{ background: SEAT_COLORS[m.seat % 5] ?? '#888' }}
-              aria-hidden
-            />
-            {m.isBot && <Bot size={15} aria-hidden />}
-            <span>{memberName(m)}</span>
-            {m.userId === room.hostId && <em className="muted">({t('host')})</em>}
-            {m.userId === user?.id && <em className="muted">({t('you')})</em>}
-            {m.isBot ? (
-              <span className="badge bot">{t('botTag')}</span>
-            ) : (
-              <span className={m.ready ? 'badge ok' : 'badge'}>
-                {m.ready ? t('ready') : t('notReady')}
-              </span>
-            )}
-            {isHost && m.isBot && (
-              <button
-                className="icon-btn"
-                aria-label={t('removeBot')}
-                title={t('removeBot')}
-                onClick={() => removeBot(m.userId)}
-              >
-                <X size={14} aria-hidden />
-              </button>
-            )}
-            {isHost && !m.isBot && m.userId !== room.hostId && (
-              <button
-                className="icon-btn"
-                aria-label={t('kickPlayer')}
-                title={t('kickPlayer')}
-                onClick={() => kick(m.userId)}
-              >
-                <UserMinus size={14} aria-hidden />
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-
-      {room.spectators.length > 0 && (
-        <>
-          <h4 className="muted">{t('spectatorsHeading')}</h4>
-          <ul className="member-list spectator-list">
-            {room.spectators.map((s) => (
-              <li key={s.userId}>
-                <span>{s.displayName}</span>
-                {s.userId === user?.id && <em className="muted">({t('you')})</em>}
-                {isHost && (
-                  <button
-                    className="icon-btn"
-                    aria-label={t('kickPlayer')}
-                    title={t('kickPlayer')}
-                    onClick={() => kick(s.userId)}
-                  >
-                    <UserMinus size={14} aria-hidden />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      <div className="card stack room-chat">
-        <div className="row wrap">
-          {CHAT_PRESET_IDS.map((id) => (
-            <button key={id} type="button" className="chip-btn" onClick={() => sendChat(id)}>
-              {t(chatPresetKey(id))}
-            </button>
-          ))}
-        </div>
-        {room.chat.length > 0 && (
-          <ul className="room-chat-log">
-            {room.chat.map((c, i) => (
-              <li key={i}>
-                <strong>{chatAuthorName(c.userId)}</strong>: {t(chatPresetKey(c.presetId))}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <fieldset className="card stack game-settings" disabled={settingsLocked}>
-        <legend>{t('gameSettings')}</legend>
-        <div className="row between setting-row">
-          <strong>{t('mapLabel')}</strong>
-          {isHost ? (
-            <div className="row">
-              <Segmented<'official' | 'custom'>
-                options={
-                  canBuild
-                    ? [
-                        { value: 'official', label: t('mapOfficial') },
-                        { value: 'custom', label: t('mapCustom') },
-                      ]
-                    : [{ value: 'official', label: t('mapOfficial') }]
-                }
-                value={settings.map.source}
-                onChange={(src) => {
-                  if (src === 'official') {
-                    const first = OFFICIAL_MAPS[0];
-                    if (first) setSetting({ map: { source: 'official', mapId: first.mapId } });
-                  } else if (myMaps && myMaps.length > 0) {
-                    setSetting({ map: { source: 'custom', customMapId: myMaps[0]!.id } });
-                  } else {
-                    enterMaps();
-                  }
-                }}
-                ariaLabel={t('mapLabel')}
+        <ul className="member-list">
+          {room.members.map((m) => (
+            <li key={m.userId}>
+              <span
+                className="seat-dot"
+                style={{ background: SEAT_COLORS[m.seat % 5] ?? '#888' }}
+                aria-hidden
               />
-              {settings.map.source === 'official' ? (
-                <select
-                  aria-label={t('mapOfficial')}
-                  value={settings.map.mapId}
-                  onChange={(e) =>
-                    setSetting({ map: { source: 'official', mapId: e.target.value } })
-                  }
-                >
-                  {OFFICIAL_MAPS.map((m) => (
-                    <option key={m.mapId} value={m.mapId}>
-                      {locale === 'en' ? m.content.meta.nameEn : m.content.meta.nameZh}
-                    </option>
-                  ))}
-                </select>
-              ) : myMaps && myMaps.length > 0 ? (
-                <select
-                  aria-label={t('mapCustom')}
-                  value={settings.map.customMapId}
-                  onChange={(e) =>
-                    setSetting({ map: { source: 'custom', customMapId: e.target.value } })
-                  }
-                >
-                  {myMaps.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {locale === 'en' ? m.nameEn : m.nameZh}
-                    </option>
-                  ))}
-                </select>
+              {m.isBot && <Bot size={15} aria-hidden />}
+              <span>{memberName(m)}</span>
+              {m.userId === room.hostId && <em className="muted">({t('host')})</em>}
+              {m.userId === user?.id && <em className="muted">({t('you')})</em>}
+              {m.isBot ? (
+                <span className="badge bot">{t('botTag')}</span>
               ) : (
-                <button onClick={enterMaps}>
-                  <MapIcon size={14} aria-hidden /> {t('mapCreateOne')}
+                <span className={m.ready ? 'badge ok' : 'badge'}>
+                  {m.ready ? t('ready') : t('notReady')}
+                </span>
+              )}
+              {isHost && m.isBot && (
+                <button
+                  className="icon-btn"
+                  aria-label={t('removeBot')}
+                  title={t('removeBot')}
+                  onClick={() => removeBot(m.userId)}
+                >
+                  <X size={14} aria-hidden />
                 </button>
               )}
-            </div>
-          ) : (
-            <span>{mapDisplayName(settings.map, myMaps, room.mapName, locale)}</span>
-          )}
-        </div>
-        {RULE_TOGGLES.map(([key, label, desc]) => (
-          <div key={key} className="row between setting-row">
-            <span>
-              <strong>{t(label)}</strong>
-              <br />
-              <span className="muted">{t(desc)}</span>
-            </span>
-            <Switch
-              checked={settings[key]}
-              onChange={(next) => setSetting({ [key]: next } as Partial<RoomSettings>)}
-              label={t(label)}
-            />
-          </div>
-        ))}
-        {showEventsPicker && (
-          <div className="row between setting-row">
-            <span>
-              <strong>{t('settingRandomEvents')}</strong>
-              <br />
-              <span className="muted">{t('settingRandomEventsDesc')}</span>
-            </span>
-            <Segmented<EventsMode>
-              options={[
-                { value: 'off', label: t('eventsMode_off') },
-                { value: 'light', label: t('eventsMode_light') },
-                { value: 'moderate', label: t('eventsMode_moderate') },
-                { value: 'intense', label: t('eventsMode_intense') },
-              ]}
-              value={settings.eventsMode}
-              onChange={(v) => setSetting({ eventsMode: v })}
-              ariaLabel={t('settingRandomEvents')}
-            />
-          </div>
-        )}
-        <div className="row between setting-row">
-          <span>
-            <strong>{t('allowSpectating')}</strong>
-          </span>
-          <Switch
-            checked={settings.allowSpectating}
-            onChange={(next) => setSetting({ allowSpectating: next })}
-            label={t('allowSpectating')}
-          />
-        </div>
-        <div className="row between setting-row">
-          <strong>{t('roomVisibility')}</strong>
-          <Segmented<RoomVisibility>
-            options={[
-              { value: 'PUBLIC', label: t('visibility_PUBLIC'), icon: Globe },
-              { value: 'INVITE_ONLY', label: t('visibility_INVITE_ONLY'), icon: Lock },
-            ]}
-            value={settings.visibility}
-            onChange={(v) => setSetting({ visibility: v })}
-            ariaLabel={t('roomVisibility')}
-          />
-        </div>
-      </fieldset>
-
-      {canAddBot && (
-        <div className="row bot-controls">
-          <span className="muted">{t('addBot')}</span>
-          {DIFFICULTIES.map((d) => (
-            <button key={d} onClick={() => addBot(d)}>
-              {t(`difficulty_${d}`)}
-            </button>
+              {isHost && !m.isBot && m.userId !== room.hostId && (
+                <button
+                  className="icon-btn"
+                  aria-label={t('kickPlayer')}
+                  title={t('kickPlayer')}
+                  onClick={() => kick(m.userId)}
+                >
+                  <UserMinus size={14} aria-hidden />
+                </button>
+              )}
+            </li>
           ))}
-        </div>
-      )}
+        </ul>
 
-      <div className="row">
-        {me && (
+        {room.spectators.length > 0 && (
           <>
-            <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
-              {me.ready ? t('cancelReady') : t('markReady')}
-            </button>
-            <button
-              onClick={() => void becomeSpectator()}
-              disabled={room.members.length <= 1}
-              title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
-            >
-              {t('watch')}
-            </button>
+            <h4 className="muted">{t('spectatorsHeading')}</h4>
+            <ul className="member-list spectator-list">
+              {room.spectators.map((s) => (
+                <li key={s.userId}>
+                  <span>{s.displayName}</span>
+                  {s.userId === user?.id && <em className="muted">({t('you')})</em>}
+                  {isHost && (
+                    <button
+                      className="icon-btn"
+                      aria-label={t('kickPlayer')}
+                      title={t('kickPlayer')}
+                      onClick={() => kick(s.userId)}
+                    >
+                      <UserMinus size={14} aria-hidden />
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
           </>
         )}
-        {mySpectator && (
-          <button
-            onClick={() => void becomePlayer()}
-            disabled={room.members.length >= room.maxPlayers}
-            title={
-              room.members.length >= room.maxPlayers ? t('becomePlayerDisabledFull') : undefined
-            }
-          >
-            {t('becomePlayer')}
-          </button>
-        )}
-        {isHost && (
-          <button className="primary" disabled={!allReady} onClick={() => void start()}>
-            {t('start')}
-          </button>
-        )}
-        <button onClick={() => requestLeave(() => void leave())}>{t('leave')}</button>
-      </div>
 
-      <p className="muted">
-        {room.members.length < 2 ? t('waitingForPlayers') : !allReady ? t('waitingForReady') : ''}
-      </p>
-      {err && <p className="error">{err}</p>}
-      <NotificationStack />
-      {kicked && (
-        <div className="modal-backdrop" onClick={goHome}>
-          <div
-            className="modal stack"
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="kicked-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 id="kicked-title">{t('kickedTitle')}</h3>
-            <p>{t('kickedBody')}</p>
-            <div className="row">
-              <button className="primary" onClick={goHome}>
-                {t('kickedAck')}
+        <fieldset className="card stack game-settings" disabled={settingsLocked}>
+          <legend>{t('gameSettings')}</legend>
+          <div className="row between setting-row">
+            <strong>{t('mapLabel')}</strong>
+            {isHost ? (
+              <div className="row">
+                <Segmented<'official' | 'custom'>
+                  options={
+                    canBuild
+                      ? [
+                          { value: 'official', label: t('mapOfficial') },
+                          { value: 'custom', label: t('mapCustom') },
+                        ]
+                      : [{ value: 'official', label: t('mapOfficial') }]
+                  }
+                  value={settings.map.source}
+                  onChange={(src) => {
+                    if (src === 'official') {
+                      const first = OFFICIAL_MAPS[0];
+                      if (first) setSetting({ map: { source: 'official', mapId: first.mapId } });
+                    } else if (myMaps && myMaps.length > 0) {
+                      setSetting({ map: { source: 'custom', customMapId: myMaps[0]!.id } });
+                    } else {
+                      enterMaps();
+                    }
+                  }}
+                  ariaLabel={t('mapLabel')}
+                />
+                {settings.map.source === 'official' ? (
+                  <select
+                    aria-label={t('mapOfficial')}
+                    value={settings.map.mapId}
+                    onChange={(e) =>
+                      setSetting({ map: { source: 'official', mapId: e.target.value } })
+                    }
+                  >
+                    {OFFICIAL_MAPS.map((m) => (
+                      <option key={m.mapId} value={m.mapId}>
+                        {locale === 'en' ? m.content.meta.nameEn : m.content.meta.nameZh}
+                      </option>
+                    ))}
+                  </select>
+                ) : myMaps && myMaps.length > 0 ? (
+                  <select
+                    aria-label={t('mapCustom')}
+                    value={settings.map.customMapId}
+                    onChange={(e) =>
+                      setSetting({ map: { source: 'custom', customMapId: e.target.value } })
+                    }
+                  >
+                    {myMaps.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {locale === 'en' ? m.nameEn : m.nameZh}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <button onClick={enterMaps}>
+                    <MapIcon size={14} aria-hidden /> {t('mapCreateOne')}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <span>{mapDisplayName(settings.map, myMaps, room.mapName, locale)}</span>
+            )}
+          </div>
+          {RULE_TOGGLES.map(([key, label, desc]) => (
+            <div key={key} className="row between setting-row">
+              <span>
+                <strong>{t(label)}</strong>
+                <br />
+                <span className="muted">{t(desc)}</span>
+              </span>
+              <Switch
+                checked={settings[key]}
+                onChange={(next) => setSetting({ [key]: next } as Partial<RoomSettings>)}
+                label={t(label)}
+              />
+            </div>
+          ))}
+          {showEventsPicker && (
+            <div className="row between setting-row">
+              <span>
+                <strong>{t('settingRandomEvents')}</strong>
+                <br />
+                <span className="muted">{t('settingRandomEventsDesc')}</span>
+              </span>
+              <Segmented<EventsMode>
+                options={[
+                  { value: 'off', label: t('eventsMode_off') },
+                  { value: 'light', label: t('eventsMode_light') },
+                  { value: 'moderate', label: t('eventsMode_moderate') },
+                  { value: 'intense', label: t('eventsMode_intense') },
+                ]}
+                value={settings.eventsMode}
+                onChange={(v) => setSetting({ eventsMode: v })}
+                ariaLabel={t('settingRandomEvents')}
+              />
+            </div>
+          )}
+          <div className="row between setting-row">
+            <span>
+              <strong>{t('allowSpectating')}</strong>
+            </span>
+            <Switch
+              checked={settings.allowSpectating}
+              onChange={(next) => setSetting({ allowSpectating: next })}
+              label={t('allowSpectating')}
+            />
+          </div>
+          <div className="row between setting-row">
+            <strong>{t('roomVisibility')}</strong>
+            <Segmented<RoomVisibility>
+              options={[
+                { value: 'PUBLIC', label: t('visibility_PUBLIC'), icon: Globe },
+                { value: 'INVITE_ONLY', label: t('visibility_INVITE_ONLY'), icon: Lock },
+              ]}
+              value={settings.visibility}
+              onChange={(v) => setSetting({ visibility: v })}
+              ariaLabel={t('roomVisibility')}
+            />
+          </div>
+        </fieldset>
+
+        {canAddBot && (
+          <div className="row bot-controls">
+            <span className="muted">{t('addBot')}</span>
+            {DIFFICULTIES.map((d) => (
+              <button key={d} onClick={() => addBot(d)}>
+                {t(`difficulty_${d}`)}
               </button>
+            ))}
+          </div>
+        )}
+
+        <div className="row">
+          {me && (
+            <>
+              <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
+                {me.ready ? t('cancelReady') : t('markReady')}
+              </button>
+              <button
+                onClick={() => void becomeSpectator()}
+                disabled={room.members.length <= 1}
+                title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
+              >
+                {t('watch')}
+              </button>
+            </>
+          )}
+          {mySpectator && (
+            <button
+              onClick={() => void becomePlayer()}
+              disabled={room.members.length >= room.maxPlayers}
+              title={
+                room.members.length >= room.maxPlayers ? t('becomePlayerDisabledFull') : undefined
+              }
+            >
+              {t('becomePlayer')}
+            </button>
+          )}
+          {isHost && (
+            <button className="primary" disabled={!allReady} onClick={() => void start()}>
+              {t('start')}
+            </button>
+          )}
+          <button onClick={() => requestLeave(() => void leave())}>{t('leave')}</button>
+        </div>
+
+        <p className="muted">
+          {room.members.length < 2 ? t('waitingForPlayers') : !allReady ? t('waitingForReady') : ''}
+        </p>
+        {err && <p className="error">{err}</p>}
+        <NotificationStack />
+        {kicked && (
+          <div className="modal-backdrop" onClick={goHome}>
+            <div
+              className="modal stack"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="kicked-title"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 id="kicked-title">{t('kickedTitle')}</h3>
+              <p>{t('kickedBody')}</p>
+              <div className="row">
+                <button className="primary" onClick={goHome}>
+                  {t('kickedAck')}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      {leaveOpen && (
-        <ConfirmDialog
-          title={t('leaveConfirmTitle')}
-          message={t('leaveConfirmBody')}
-          onConfirm={confirmLeave}
-          onCancel={cancelLeave}
-        />
-      )}
+        )}
+        {leaveOpen && (
+          <ConfirmDialog
+            title={t('leaveConfirmTitle')}
+            message={t('leaveConfirmBody')}
+            onConfirm={confirmLeave}
+            onCancel={cancelLeave}
+          />
+        )}
+      </div>
+
+      <aside className="comms room-chat-panel">
+        <section className="chat-panel">
+          <div className="tray-head">
+            <h4>{t('chat.heading')}</h4>
+          </div>
+          <div className="chat-messages">
+            {room.chat.length === 0 ? (
+              <p className="chat-empty">{t('chat.empty')}</p>
+            ) : (
+              room.chat.map((c, i) => (
+                <div className="chat-msg" key={i}>
+                  <span className="chat-author">{chatAuthorName(c.userId)}</span>{' '}
+                  <span className="chat-text">{t(chatPresetKey(c.presetId))}</span>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="chat-presets">
+            {CHAT_PRESET_IDS.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className="chat-preset-btn"
+                onClick={() => sendChat(id)}
+              >
+                {t(chatPresetKey(id))}
+              </button>
+            ))}
+          </div>
+        </section>
+      </aside>
     </div>
   );
 }

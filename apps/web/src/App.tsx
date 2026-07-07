@@ -96,7 +96,9 @@ export function App() {
       ? 'app-main app-main--login'
       : view === 'home'
         ? 'app-main app-main--home' // the hero + two-column grid needs more than the reading column
-        : 'app-main';
+        : view === 'room'
+          ? 'app-main app-main--room' // the room+chat two-column grid needs more than the reading column
+          : 'app-main';
 
   return (
     <div className={isGameLayout ? 'app app--game' : 'app'}>

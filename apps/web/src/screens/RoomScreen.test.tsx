@@ -418,7 +418,7 @@ describe('RoomScreen preset chat', () => {
     fireEvent.click(btn);
     expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', 'GOOD_LUCK');
     await waitFor(() =>
-      expect(container.querySelector('.room-chat-log li')?.textContent).toContain(
+      expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain(
         '祝你好運，玩得開心！',
       ),
     );
@@ -433,7 +433,7 @@ describe('RoomScreen preset chat', () => {
     );
     const { container } = render(<RoomScreen />);
     await waitFor(() =>
-      expect(container.querySelector('.room-chat-log li')?.textContent).toContain('謝謝！'),
+      expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain('謝謝！'),
     );
   });
 });

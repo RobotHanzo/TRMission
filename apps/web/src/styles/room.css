@@ -1,0 +1,33 @@
+/* apps/web/src/styles/room.css — lobby-only layout: the two-column room+chat grid, the
+   spectator list, and the room chat panel (reuses game.css's chat-panel/chat-messages/
+   chat-msg/chat-author/chat-presets/chat-preset-btn classes so it looks like in-game chat). */
+
+.room-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-4);
+}
+@media (min-width: 1000px) {
+  .room-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    gap: var(--tr-space-4);
+  }
+}
+
+.spectator-list li {
+  opacity: 0.85;
+}
+
+/* The lobby has no action log, so the chat-panel fills the whole card instead of the
+   in-game 45% split, and doesn't need the top border game.css gives it as a divider
+   from the log panel above it. */
+.room-chat-panel .chat-panel {
+  flex: 1;
+  max-height: none;
+  border-top: none;
+}
+.room-chat-panel .chat-messages {
+  max-height: 320px;
+}
