@@ -6,6 +6,7 @@ import '../i18n';
 import { ChatPanel } from './ChatPanel';
 import { useChat } from '../store/chat';
 import { useGame } from '../store/game';
+import { useRoster } from '../store/roster';
 
 const chatSpy = vi.fn();
 const chatPresetSpy = vi.fn();
@@ -17,6 +18,7 @@ beforeEach(() => {
   chatSpy.mockClear();
   chatPresetSpy.mockClear();
   useChat.getState().reset();
+  useRoster.getState().clear();
   useGame.setState({
     snapshot: create(GameSnapshotSchema, {
       stateVersion: 1,
@@ -61,10 +63,15 @@ describe('ChatPanel', () => {
     expect(chatPresetSpy).toHaveBeenCalledWith('THANKS');
   });
 
-  it('disables the input and preset buttons for spectators', () => {
-    render(<ChatPanel disabled />);
-    expect(screen.getByRole('button', { name: '傳送' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: '謝謝！' })).toBeDisabled();
+  it('renders a spectator (non-seated) message with their roster name and a neutral colour', () => {
+    useRoster
+      .getState()
+      .setMembers([], [{ userId: 'watcher-1', displayName: 'Watcher One', isGuest: true }]);
+    useChat.getState().ingest({ playerId: 'watcher-1', content: { case: 'text', value: 'hi all' } });
+    const { container } = render(<ChatPanel />);
+    const author = container.querySelector('.chat-author');
+    expect(author?.textContent).toBe('Watcher One');
+    expect(author).toHaveStyle({ color: 'var(--tr-ink-soft)' });
   });
 
   it('shows an inline hint for a server chat rejection', () => {
