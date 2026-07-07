@@ -160,3 +160,80 @@ describe('history + chat over the hub', () => {
     expect(rej?.messageKey).toBe('errors:chatInvalidPreset');
   });
 });
+
+describe('spectator chat', () => {
+  it('lets a spectator send chat, broadcasting to both members and other spectators', async () => {
+    const board = taiwanBoard();
+    const hub = new GameHub(new GameRegistry());
+    await hub.createMatch('g', board, config);
+
+    const fMember: ServerEnvelope[] = [];
+    const fSpec: ServerEnvelope[] = [];
+    hub.openConnection('m1', (b) => fMember.push(decodeServer(b)));
+    hub.openConnection('s1', (b) => fSpec.push(decodeServer(b)));
+    await hub.receive('m1', hello('p1', 0, 1));
+    await hub.receive(
+      's1',
+      encodeClient(1, {
+        case: 'hello',
+        value: {
+          ticket: makeDevTicket({ gameId: 'g', playerId: 'watcher', seat: -1 }),
+          protocolVersion: 1,
+        },
+      }),
+    );
+    fMember.length = 0;
+    fSpec.length = 0;
+
+    await hub.receive(
+      's1',
+      encodeClient(2, {
+        case: 'chat',
+        value: { content: { case: 'text', value: 'hi from the stands' } },
+      }),
+    );
+
+    const memberChat = fMember.find((f) => f.event.case === 'chat')?.event.value as
+      | { playerId: string; content: { case: string; value: string } }
+      | undefined;
+    const specChat = fSpec.find((f) => f.event.case === 'chat')?.event.value as
+      | { playerId: string; content: { case: string; value: string } }
+      | undefined;
+    expect(memberChat?.playerId).toBe('watcher');
+    expect(memberChat?.content).toEqual({ case: 'text', value: 'hi from the stands' });
+    expect(specChat?.content).toEqual({ case: 'text', value: 'hi from the stands' });
+  });
+
+  it('backfills chat history to a spectator on hello', async () => {
+    const board = taiwanBoard();
+    const hub = new GameHub(new GameRegistry());
+    await hub.createMatch('g', board, config);
+
+    hub.openConnection('m1', () => {});
+    await hub.receive('m1', hello('p1', 0, 1));
+    await hub.receive(
+      'm1',
+      encodeClient(2, {
+        case: 'chat',
+        value: { content: { case: 'text', value: 'before you joined' } },
+      }),
+    );
+
+    const fSpec: ServerEnvelope[] = [];
+    hub.openConnection('s1', (b) => fSpec.push(decodeServer(b)));
+    await hub.receive(
+      's1',
+      encodeClient(1, {
+        case: 'hello',
+        value: {
+          ticket: makeDevTicket({ gameId: 'g', playerId: 'watcher', seat: -1 }),
+          protocolVersion: 1,
+        },
+      }),
+    );
+
+    const h = historyOf(fSpec);
+    expect(h?.chat).toHaveLength(1);
+    expect(h?.chat[0]?.content).toEqual({ case: 'text', value: 'before you joined' });
+  });
+});

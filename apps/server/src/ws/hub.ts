@@ -391,7 +391,7 @@ export class GameHub {
     clientSeq: number,
     content: Chat['content'],
   ): Promise<void> {
-    if (!conn.binding || conn.binding.seat < 0) return; // unbound or spectator → no chat
+    if (!conn.binding) return; // unbound → no chat
 
     let toSend: ChatContent;
     if (content.case === 'text') {
@@ -451,8 +451,9 @@ export class GameHub {
     }
 
     const members = this.members.get(gameId);
-    if (!members) return;
-    for (const member of members.values()) member.send(chatFrame(playerId, toSend));
+    if (members) for (const member of members.values()) member.send(chatFrame(playerId, toSend));
+    const specs = this.spectators.get(gameId);
+    if (specs) for (const spec of specs) spec.send(chatFrame(playerId, toSend));
   }
 
   /**
@@ -751,7 +752,7 @@ export class GameHub {
       .history()
       .map((e) => eventToProto(e, viewer))
       .filter((e): e is PbGameEvent => e !== null);
-    const chat = viewer === null ? [] : (this.chatLog.get(match.session.gameId) ?? []);
+    const chat = this.chatLog.get(match.session.gameId) ?? [];
     conn.send(historyReplayFrame(events, chat, match.session.stateVersion));
   }
 
