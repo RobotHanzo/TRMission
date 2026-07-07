@@ -117,7 +117,7 @@ export function RoutesStage() {
             onSubmit={(route) => updateRoute(selectedRoute.id, route)}
             extra={
               <>
-                {!selectedRoute.doubleGroup && !selectedRoute.isTunnel && (
+                {!selectedRoute.doubleGroup && (
                   <button onClick={() => convertToDouble(selectedRoute.id)}>
                     {t('builder.convertToDouble')}
                   </button>

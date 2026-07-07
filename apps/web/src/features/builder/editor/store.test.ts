@@ -152,17 +152,39 @@ describe('editor store', () => {
     expect(routes.find((r) => r.id === 'r3')!.doubleGroup).toBe('B');
   });
 
-  it('convertToDouble is a no-op for tunnel or already-double routes', () => {
+  it('convertToDouble is a no-op for already-double routes', () => {
     const s = useEditorStore.getState();
     s.placeCity(city('c1'));
     s.placeCity(city('c2'));
-    s.addRoute(route('r1', 'c1', 'c2', { isTunnel: true }));
-    s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
 
     s.convertToDouble('r1');
-    s.convertToDouble('r2');
 
-    expect(useEditorStore.getState().draft.routes).toHaveLength(2);
+    expect(useEditorStore.getState().draft.routes).toHaveLength(1);
+  });
+
+  it('convertToDouble mirrors a tunnel route into a double-tunnel pair', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2'));
+    s.addRoute(route('r1', 'c1', 'c2', { color: 'RED', length: 3, isTunnel: true }));
+
+    s.convertToDouble('r1');
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(2);
+    const original = routes.find((r) => r.id === 'r1')!;
+    expect(original.doubleGroup).toBe('A');
+    const sibling = routes.find((r) => r.id !== 'r1')!;
+    expect(sibling).toMatchObject({
+      a: 'c1',
+      b: 'c2',
+      length: 3,
+      isTunnel: true,
+      ferryLocos: 0,
+      doubleGroup: 'A',
+      color: 'BLUE',
+    });
   });
 
   it('convertToDouble mirrors a ferry route into a double-ferry pair', () => {

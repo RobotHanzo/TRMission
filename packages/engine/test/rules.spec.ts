@@ -282,6 +282,123 @@ describe('double-ferry routes', () => {
   });
 });
 
+describe('double-tunnel routes', () => {
+  // A small custom board with a double-route pair where BOTH members are tunnels, with
+  // different colours — proves doubleGroup (sibling lock) and the tunnel reveal mechanic
+  // stay fully independent for each side, even on a parallel pair. taiwanBoard() has no
+  // double-tunnel pair by the bundled map's own convention, so this content is purpose-built.
+  const doubleTunnelContent: GameContent = {
+    meta: { mapId: 'test-double-tunnel', version: 1, nameZh: '雙鐵路測試', nameEn: 'Double Tunnel Test' },
+    cities: [
+      { id: asCityId('y1'), nameZh: '甲', nameEn: 'Y1', x: 0, y: 0, region: 'test', isIsland: false },
+      { id: asCityId('y2'), nameZh: '乙', nameEn: 'Y2', x: 10, y: 0, region: 'test', isIsland: false },
+    ],
+    routes: [
+      {
+        id: asRouteId('DT1'),
+        a: asCityId('y1'),
+        b: asCityId('y2'),
+        color: 'RED',
+        length: 2,
+        ferryLocos: 0,
+        isTunnel: true,
+        doubleGroup: 'A',
+      },
+      {
+        id: asRouteId('DT2'),
+        a: asCityId('y1'),
+        b: asCityId('y2'),
+        color: 'BLUE',
+        length: 2,
+        ferryLocos: 0,
+        isTunnel: true,
+        doubleGroup: 'A',
+      },
+    ],
+    tickets: [],
+  };
+  const doubleTunnelBoard = buildBoard(doubleTunnelContent);
+  const apply2 = (state: GameState, action: Action) => reduce(doubleTunnelBoard, state, action);
+
+  it('locks the tunnel sibling in a 2-player game, exactly like a non-tunnel double route', () => {
+    // DT1 reveal top-3 = [RED, GREEN, BLUE] → extraRequired = 1 (the RED matches the played colour).
+    const state = st({
+      numPlayers: 2,
+      hands: {
+        p0: { RED: 4, LOCOMOTIVE: 2 },
+        p1: { YELLOW: 1 },
+      },
+      deck: ['RED', 'GREEN', 'BLUE'],
+    });
+    const laid = apply2(state, {
+      t: 'CLAIM_ROUTE',
+      player: p0,
+      routeId: asRouteId('DT1'),
+      payment: { color: 'RED', colorCount: 2, locomotives: 0 },
+    });
+    expect(laid.ok).toBe(true);
+    if (!laid.ok) return;
+    const committed = apply2(laid.value.state, {
+      t: 'RESOLVE_TUNNEL',
+      player: p0,
+      commit: true,
+      extra: { color: 'RED', colorCount: 1, locomotives: 0 },
+    });
+    expect(committed.ok).toBe(true);
+    if (!committed.ok) return;
+    expect(committed.value.state.ownership['DT1']).toEqual({ owner: p0 });
+    expect(committed.value.state.ownership['DT2']).toEqual({ locked: true });
+  });
+
+  it('runs an independent tunnel reveal + commit on each side in a 4-player game', () => {
+    const r1 = apply2(
+      st({
+        numPlayers: 4,
+        hands: { p0: { RED: 4, LOCOMOTIVE: 2 }, p1: { BLUE: 4, LOCOMOTIVE: 2 } },
+        deck: ['RED', 'GREEN', 'BLUE'],
+      }),
+      {
+        t: 'CLAIM_ROUTE',
+        player: p0,
+        routeId: asRouteId('DT1'),
+        payment: { color: 'RED', colorCount: 2, locomotives: 0 },
+      },
+    );
+    expect(r1.ok).toBe(true);
+    if (!r1.ok) return;
+    // DT1 reveal top-3 = [RED, GREEN, BLUE] → extraRequired = 1 (the RED).
+    expect(r1.value.state.turn.phase).toBe('TUNNEL_PENDING');
+    expect(r1.value.state.pendingTunnel?.routeId).toBe('DT1');
+    expect(r1.value.state.pendingTunnel?.extraRequired).toBe(1);
+
+    const commit1 = apply2(r1.value.state, {
+      t: 'RESOLVE_TUNNEL',
+      player: p0,
+      commit: true,
+      extra: { color: 'RED', colorCount: 1, locomotives: 0 },
+    });
+    expect(commit1.ok).toBe(true);
+    if (!commit1.ok) return;
+    expect(commit1.value.state.ownership['DT1']).toEqual({ owner: p0 });
+    // 4-player: no automatic sibling lock.
+    expect(commit1.value.state.ownership['DT2']).toBeUndefined();
+
+    // p1 (next turn) lays DT2. By now the deck is empty and the discard holds DT1's 3 reveals,
+    // so the next tunnel-reveal reshuffles from discard. Either way we just need the PHASE/RID
+    // change — extraRequired depends on the reshuffle order and is irrelevant to the claim.
+    const laid2 = apply2(commit1.value.state, {
+      t: 'CLAIM_ROUTE',
+      player: p1,
+      routeId: asRouteId('DT2'),
+      payment: { color: 'BLUE', colorCount: 2, locomotives: 0 },
+    });
+    expect(laid2.ok).toBe(true);
+    if (!laid2.ok) return;
+    expect(laid2.value.state.turn.phase).toBe('TUNNEL_PENDING');
+    expect(laid2.value.state.pendingTunnel?.routeId).toBe('DT2');
+  });
+});
+
 describe('tunnels', () => {
   // R20 = 苗栗–豐原, BLUE length 2, tunnel. deck top three = BLUE,RED,GREEN → 1 BLUE match.
   const tunnelStart = () =>

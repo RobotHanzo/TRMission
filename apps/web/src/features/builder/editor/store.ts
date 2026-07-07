@@ -218,17 +218,22 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
   convertToDouble: (id) => {
     const { draft } = get();
     const target = draft.routes.find((r) => r.id === id);
-    if (!target || target.doubleGroup || target.isTunnel) return;
+    if (!target || target.doubleGroup) return;
     const existingGroups = [
       ...new Set(draft.routes.map((r) => r.doubleGroup).filter(Boolean)),
     ] as string[];
     const group = nextDoubleGroupLetter(existingGroups);
-    // A ferry sibling must stay GRAY (validateContent's ferryMustBeGray) and mirrors the
-    // source's locomotive count, so doubling a ferry produces a true double-ferry pair by
-    // default; a plain route still gets the RED/BLUE alternation for visual distinction.
+    // Sibling defaults by source flavor — each side stays self-consistent so validateContent
+    // accepts the pair without a follow-up edit:
+    //   ferry:   mirror the source's GRAY color and locomotive count (ferryMustBeGray).
+    //   tunnel:  mirror the tunnel flag; otherwise use the same RED↔BLUE flip as a plain route
+    //            (a non-RED source — YELLOW, GREEN, GRAY, ... — silently lands on RED, mirroring
+    //            the existing plain-route heuristic rather than introducing a new branch).
+    //   plain:   flip color RED↔BLUE (no flavors to mirror).
     const sibling: RouteDraft = {
       ...target,
       id: newRouteId(),
+      isTunnel: target.isTunnel,
       color: target.ferryLocos > 0 ? target.color : target.color === 'RED' ? 'BLUE' : 'RED',
       doubleGroup: group,
     };

@@ -88,13 +88,6 @@ describe('RoutesStage', () => {
     expect(screen.getByText('轉換為雙軌路線')).toBeInTheDocument();
   });
 
-  it('hides the convert-to-double button for a tunnel route', () => {
-    render(<RoutesStage />);
-    fireEvent.click(screen.getByText('route-r2'));
-
-    expect(screen.queryByText('轉換為雙軌路線')).not.toBeInTheDocument();
-  });
-
   it('hides the convert-to-double button for a route that is already part of a double pair', () => {
     render(<RoutesStage />);
     fireEvent.click(screen.getByText('route-r3'));
@@ -167,6 +160,58 @@ describe('RoutesStage', () => {
       b: 'c2',
       color: 'GRAY',
       ferryLocos: 2,
+      doubleGroup: first!.doubleGroup,
+    });
+  });
+
+  it('shows the convert-to-double button for a tunnel route', () => {
+    render(<RoutesStage />);
+    fireEvent.click(screen.getByText('route-r2'));
+
+    expect(screen.getByText('轉換為雙軌路線')).toBeInTheDocument();
+  });
+
+  it('clicking convert-to-double on a tunnel route mirrors it into a double-tunnel pair', () => {
+    render(<RoutesStage />);
+    fireEvent.click(screen.getByText('route-r2'));
+    fireEvent.click(screen.getByText('轉換為雙軌路線'));
+
+    const routes = useEditorStore.getState().draft.routes;
+    const original = routes.find((r) => r.id === 'r2')!;
+    expect(original.doubleGroup).toBe('B'); // 'A' is already taken by r3
+    const sibling = routes.find((r) => r.doubleGroup === 'B' && r.id !== 'r2');
+    expect(sibling).toMatchObject({
+      a: 'c1',
+      b: 'c2',
+      length: 2,
+      isTunnel: true,
+      ferryLocos: 0,
+      color: 'BLUE',
+    });
+  });
+
+  it('creates a mirrored double-tunnel pair from the new-route form when tunnel and make-double are both set', () => {
+    // This branch is the new-route path (RouteForm mounted with draftPair, `hideDouble` not
+    // set), so the make-double Switch renders alongside the isTunnel Switch — both toggles are
+    // user-driven, the test path is intentional rather than exploiting a defaults leak.
+    render(<RoutesStage />);
+    fireEvent.click(screen.getByText('city-c1'));
+    fireEvent.click(screen.getByText('city-c2'));
+
+    fireEvent.click(screen.getByRole('switch', { name: '隧道' }));
+    fireEvent.click(screen.getByRole('switch', { name: '建立為雙軌路線' }));
+    fireEvent.click(screen.getByText('儲存'));
+
+    const routes = useEditorStore.getState().draft.routes;
+    const created = routes.filter((r) => !baseRoutes.some((b) => b.id === r.id));
+    expect(created).toHaveLength(2);
+    const [first, second] = created;
+    expect(first).toMatchObject({ a: 'c1', b: 'c2', color: 'RED', isTunnel: true });
+    expect(second).toMatchObject({
+      a: 'c1',
+      b: 'c2',
+      color: 'BLUE',
+      isTunnel: true,
       doubleGroup: first!.doubleGroup,
     });
   });
