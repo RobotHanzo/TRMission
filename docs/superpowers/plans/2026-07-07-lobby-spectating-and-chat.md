@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - No `.proto`/wire changes — `Chat`/`ChatBroadcast`/`ChatEntry`/`HistoryReplay` already carry what's needed.
-- Lobby chat stays preset-only (no free text) — only *who* may send/receive widens, not *what*.
+- Lobby chat stays preset-only (no free text) — only _who_ may send/receive widens, not _what_.
 - Demoting requires `room.members.length > 1` and `settings.allowSpectating === true`.
 - Never use `git add -A`/`git add .` — stage only the files each step actually touches.
 - Server tests are integration-style (supertest against the full Nest app via `createTestApp()`, or direct `GameHub` instantiation for ws-level tests) — this codebase has no isolated `RoomRepo` unit tests; follow that convention rather than introducing a new one.
@@ -21,6 +21,7 @@
 ### Task 1: Lobby demote/rejoin endpoints (`watch` / `rejoin`)
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts`
 - Modify: `apps/server/src/lobby/lobby.service.ts`
 - Modify: `apps/server/src/lobby/lobby.controller.ts`
@@ -28,6 +29,7 @@
 - Test: `apps/server/test/lobby-demote.e2e.spec.ts` (new)
 
 **Interfaces:**
+
 - Produces: `RoomRepo.becomeSpectator(code: string, userId: string): Promise<RoomDoc | 'not_found' | 'started' | 'not_member' | 'only_member' | 'spectating_disabled'>`; `RoomRepo.becomePlayer(code: string, userId: string): Promise<RoomDoc | 'not_found' | 'started' | 'not_spectator' | 'full'>`; `RoomRepo.recordSpectator(code: string, spectator: RoomSpectator): Promise<void>` (idempotent add-if-absent, consumed by Task 4); `RoomDoc.spectators?: RoomSpectator[]`; `RoomView.spectators: RoomSpectator[]`; `POST /api/v1/rooms/:code/watch` and `POST /api/v1/rooms/:code/rejoin`, both returning `RoomView`.
 
 - [ ] **Step 1: Write the failing e2e test**
@@ -133,7 +135,10 @@ describe('lobby: demote to spectator / rejoin as player', () => {
       .send({})
       .expect(201);
     const code: string = room.body.code;
-    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(outsider.token)).expect(403);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/watch`)
+      .set(auth(outsider.token))
+      .expect(403);
     await request(server())
       .post(`/api/v1/rooms/${code}/rejoin`)
       .set(auth(outsider.token))
@@ -474,10 +479,12 @@ git commit -m "feat(server): let a lobby member demote to spectating and rejoin 
 ### Task 2: Widen `leave`/`kick` to recognize spectators
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts`
 - Modify: `apps/server/test/lobby.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `RoomDoc.spectators` (Task 1).
 - Produces: `RoomRepo.leave`/`RoomRepo.kick` now also remove a target from `spectators` when they aren't a seated member.
 
@@ -623,10 +630,12 @@ git commit -m "feat(server): let leave/kick target a lobby spectator, not just a
 ### Task 3: Widen lobby preset chat to spectators
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts`
 - Modify: `apps/server/test/lobby-chat.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `RoomDoc.spectators` (Task 1).
 - Produces: `RoomRepo.sendChat` accepts a caller who is a spectator, not just a seated member.
 
@@ -635,25 +644,25 @@ git commit -m "feat(server): let leave/kick target a lobby spectator, not just a
 In `apps/server/test/lobby-chat.e2e.spec.ts`, add inside the `describe('lobby: preset chat', ...)` block, after the last existing `it(...)`:
 
 ```ts
-  it('lets a demoted spectator send a preset message too', async () => {
-    const a = await guest('Mo');
-    const b = await guest('Nia');
-    const room = await request(server())
-      .post('/api/v1/rooms')
-      .set(auth(a.token))
-      .send({})
-      .expect(201);
-    const code: string = room.body.code;
-    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
-    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(b.token)).expect(200);
+it('lets a demoted spectator send a preset message too', async () => {
+  const a = await guest('Mo');
+  const b = await guest('Nia');
+  const room = await request(server())
+    .post('/api/v1/rooms')
+    .set(auth(a.token))
+    .send({})
+    .expect(201);
+  const code: string = room.body.code;
+  await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+  await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(b.token)).expect(200);
 
-    const sent = await request(server())
-      .post(`/api/v1/rooms/${code}/chat`)
-      .set(auth(b.token))
-      .send({ presetId: 'THANKS' })
-      .expect(200);
-    expect(sent.body.chat[0]).toMatchObject({ userId: b.id, presetId: 'THANKS' });
-  });
+  const sent = await request(server())
+    .post(`/api/v1/rooms/${code}/chat`)
+    .set(auth(b.token))
+    .send({ presetId: 'THANKS' })
+    .expect(200);
+  expect(sent.body.chat[0]).toMatchObject({ userId: b.id, presetId: 'THANKS' });
+});
 ```
 
 - [ ] **Step 2: Run it to verify it fails**
@@ -694,10 +703,12 @@ git commit -m "feat(server): let lobby spectators send preset chat too"
 ### Task 4: Unify post-start spectating into `RoomDoc.spectators`
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/lobby.service.ts`
 - Modify: `apps/server/test/lobby-spectate.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `RoomRepo.recordSpectator` (Task 1).
 - Produces: `LobbyService.spectateTicket` now also records the caller onto `RoomDoc.spectators`.
 
@@ -706,23 +717,20 @@ git commit -m "feat(server): let lobby spectators send preset chat too"
 In `apps/server/test/lobby-spectate.e2e.spec.ts`, add inside `describe('spectating', ...)`, after the existing tests:
 
 ```ts
-  it('records the spectator on the room doc when minting a spectate ticket', async () => {
-    const { code } = await startedRoom();
-    const s = await guest('Recorder');
+it('records the spectator on the room doc when minting a spectate ticket', async () => {
+  const { code } = await startedRoom();
+  const s = await guest('Recorder');
 
-    await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(s.token)).expect(200);
+  await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(s.token)).expect(200);
 
-    const read = await request(server()).get(`/api/v1/rooms/${code}`).set(auth(s.token)).expect(200);
-    expect(read.body.spectators).toEqual([{ userId: s.id, displayName: 'Recorder', isGuest: true }]);
+  const read = await request(server()).get(`/api/v1/rooms/${code}`).set(auth(s.token)).expect(200);
+  expect(read.body.spectators).toEqual([{ userId: s.id, displayName: 'Recorder', isGuest: true }]);
 
-    // Minting a second ticket (e.g. a reconnect) doesn't duplicate the entry.
-    await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(s.token)).expect(200);
-    const read2 = await request(server())
-      .get(`/api/v1/rooms/${code}`)
-      .set(auth(s.token))
-      .expect(200);
-    expect(read2.body.spectators).toHaveLength(1);
-  });
+  // Minting a second ticket (e.g. a reconnect) doesn't duplicate the entry.
+  await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(s.token)).expect(200);
+  const read2 = await request(server()).get(`/api/v1/rooms/${code}`).set(auth(s.token)).expect(200);
+  expect(read2.body.spectators).toHaveLength(1);
+});
 ```
 
 - [ ] **Step 2: Run it to verify it fails**
@@ -773,10 +781,12 @@ git commit -m "feat(server): record post-start spectate-ticket holders onto Room
 ### Task 5: In-game chat opens to spectators (hub)
 
 **Files:**
+
 - Modify: `apps/server/src/ws/hub.ts`
 - Modify: `apps/server/test/history-chat.e2e.spec.ts`
 
 **Interfaces:**
+
 - Produces: any bound connection (member or spectator) may send chat; `broadcast` fans chat out to `this.spectators` too; `sendHistory` always sends the real chat log, even to a `null` viewer.
 
 - [ ] **Step 1: Write the failing tests**
@@ -872,7 +882,7 @@ Expected: FAIL — the spectator's chat send is silently dropped (no `chat` fram
 In `apps/server/src/ws/hub.ts`, change the guard at the top of `onChat`:
 
 ```ts
-    if (!conn.binding) return; // unbound → no chat
+if (!conn.binding) return; // unbound → no chat
 ```
 
 (replacing `if (!conn.binding || conn.binding.seat < 0) return; // unbound or spectator → no chat`)
@@ -896,7 +906,7 @@ Replace the tail of `onChat`:
 In `sendHistory`, replace:
 
 ```ts
-    const chat = this.chatLog.get(match.session.gameId) ?? [];
+const chat = this.chatLog.get(match.session.gameId) ?? [];
 ```
 
 (replacing `const chat = viewer === null ? [] : (this.chatLog.get(match.session.gameId) ?? []);`)
@@ -923,6 +933,7 @@ git commit -m "feat(server): let in-game spectators send and receive chat"
 ### Task 6: Web roster store learns about spectators
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Modify: `apps/web/src/store/roster.ts`
 - Modify: `apps/web/src/screens/GameScreen.tsx`
@@ -930,6 +941,7 @@ git commit -m "feat(server): let in-game spectators send and receive chat"
 - Test: `apps/web/src/store/roster.test.ts` (new)
 
 **Interfaces:**
+
 - Produces: `RoomSpectator` type (`net/rest.ts`); `RoomView.spectators: RoomSpectator[]`; `useRoster.setMembers(members: RoomMember[], spectators?: RoomSpectator[]): void`; roster entries carry `isSpectator?: boolean`.
 
 - [ ] **Step 1: Write the failing test**
@@ -1083,37 +1095,37 @@ In `apps/web/src/screens/GameScreen.tsx`, there are three call sites — update 
 1. The initial room-fetch effect (around line 45):
 
 ```ts
-    api
-      .getRoom(roomCode)
-      .then((r) => {
-        if (!cancelled) {
-          setRoster(r.members, r.spectators);
-          setRoom(r);
-        }
-      })
-      .catch(() => {});
+api
+  .getRoom(roomCode)
+  .then((r) => {
+    if (!cancelled) {
+      setRoster(r.members, r.spectators);
+      setRoom(r);
+    }
+  })
+  .catch(() => {});
 ```
 
 2. The post-game-over poll (around line 74):
 
 ```ts
-        setRoster(r.members, r.spectators);
-        setRoom(r);
+setRoster(r.members, r.spectators);
+setRoom(r);
 ```
 
 3. `voteRematch` (around line 112):
 
 ```ts
-  const voteRematch = async (wantsRematch: boolean) => {
-    if (!roomCode) return;
-    try {
-      const r = await api.voteRematch(roomCode, wantsRematch);
-      setRoster(r.members, r.spectators);
-      setRoom(r);
-    } catch {
-      // transient — the next poll tick resyncs
-    }
-  };
+const voteRematch = async (wantsRematch: boolean) => {
+  if (!roomCode) return;
+  try {
+    const r = await api.voteRematch(roomCode, wantsRematch);
+    setRoster(r.members, r.spectators);
+    setRoom(r);
+  } catch {
+    // transient — the next poll tick resyncs
+  }
+};
 ```
 
 - [ ] **Step 7: Typecheck the web workspace**
@@ -1138,11 +1150,13 @@ git commit -m "feat(web): roster store learns about spectators, not just seated 
 ### Task 7: `ChatPanel` opens to spectators (removes the disabled gate, fixes author colour)
 
 **Files:**
+
 - Modify: `apps/web/src/components/ChatPanel.tsx`
 - Modify: `apps/web/src/components/ChatPanel.test.tsx`
 - Modify: `apps/web/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Consumes: `useRoster` (Task 6) — `usePlayerName` already resolves `m.displayName` from it with no changes needed.
 - Produces: `ChatPanel` takes no props (the `disabled` prop is removed); a message from an id absent from `snapshot.players` renders with a neutral colour instead of seat 0's colour.
 
@@ -1157,22 +1171,22 @@ import { useRoster } from '../store/roster';
 Add to `beforeEach` (after `useChat.getState().reset();`):
 
 ```tsx
-  useRoster.getState().clear();
+useRoster.getState().clear();
 ```
 
 Replace the `'disables the input and preset buttons for spectators'` test with:
 
 ```tsx
-  it('renders a spectator (non-seated) message with their roster name and a neutral colour', () => {
-    useRoster
-      .getState()
-      .setMembers([], [{ userId: 'watcher-1', displayName: 'Watcher One', isGuest: true }]);
-    useChat.getState().ingest({ playerId: 'watcher-1', content: { case: 'text', value: 'hi all' } });
-    const { container } = render(<ChatPanel />);
-    const author = container.querySelector('.chat-author');
-    expect(author?.textContent).toBe('Watcher One');
-    expect(author).toHaveStyle({ color: 'var(--tr-ink-soft)' });
-  });
+it('renders a spectator (non-seated) message with their roster name and a neutral colour', () => {
+  useRoster
+    .getState()
+    .setMembers([], [{ userId: 'watcher-1', displayName: 'Watcher One', isGuest: true }]);
+  useChat.getState().ingest({ playerId: 'watcher-1', content: { case: 'text', value: 'hi all' } });
+  const { container } = render(<ChatPanel />);
+  const author = container.querySelector('.chat-author');
+  expect(author?.textContent).toBe('Watcher One');
+  expect(author).toHaveStyle({ color: 'var(--tr-ink-soft)' });
+});
 ```
 
 - [ ] **Step 2: Run it to verify it fails**
@@ -1337,10 +1351,12 @@ git commit -m "feat(web): let spectators use in-game chat; fix author colour for
 ### Task 8: Drop the now-dead `chatDisabled` plumbing (`CommsPanel`, `GameStage`)
 
 **Files:**
+
 - Modify: `apps/web/src/components/CommsPanel.tsx`
 - Modify: `apps/web/src/screens/GameStage.tsx`
 
 **Interfaces:**
+
 - Consumes: `ChatPanel` (Task 7) now takes no props.
 - Produces: `CommsPanel` takes no props.
 
@@ -1368,7 +1384,7 @@ export function CommsPanel() {
 In `apps/web/src/screens/GameStage.tsx`, change:
 
 ```tsx
-  const comms = sandbox ? null : <CommsPanel />;
+const comms = sandbox ? null : <CommsPanel />;
 ```
 
 (replacing `const comms = sandbox ? null : <CommsPanel chatDisabled={isSpectator} />;` — `isSpectator` itself stays, still used by the spectator banner a few lines below.)
@@ -1395,12 +1411,14 @@ git commit -m "refactor(web): drop the dead chatDisabled prop now that spectator
 ### Task 9: `RoomScreen` — Spectate / Join-as-player buttons + spectator list + poll-effect fix
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Modify: `apps/web/src/screens/RoomScreen.tsx`
 - Modify: `apps/web/src/screens/RoomScreen.test.tsx`
 - Modify: `apps/web/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Consumes: `RoomView.spectators` (Task 6; `apps/web/src/screens/HomeScreen.test.tsx`'s `pubRoom` helper was already updated there).
 - Produces: `api.watchRoom(code)`, `api.rejoinRoom(code)`.
 
@@ -1540,98 +1558,98 @@ Add to the `en` block right after `cancelReady: 'Cancel ready',`:
 In `apps/web/src/screens/RoomScreen.tsx`, replace the whole poll `useEffect` (the one starting `useEffect(() => { if (!code) return;`):
 
 ```tsx
-  useEffect(() => {
-    if (!code) return; // no room to poll (e.g. mid-navigation after leaving/being kicked)
-    let active = true;
-    // Whether we have ever been present here (seated or spectating). Once true, vanishing
-    // from both lists means the host kicked us — go home instead of silently rejoining.
-    let wasPresent = false;
-    const poll = async () => {
-      try {
-        let r = await api.getRoom(code);
-        if (!active) return;
-        if (r.status === 'CLOSED') {
+useEffect(() => {
+  if (!code) return; // no room to poll (e.g. mid-navigation after leaving/being kicked)
+  let active = true;
+  // Whether we have ever been present here (seated or spectating). Once true, vanishing
+  // from both lists means the host kicked us — go home instead of silently rejoining.
+  let wasPresent = false;
+  const poll = async () => {
+    try {
+      let r = await api.getRoom(code);
+      if (!active) return;
+      if (r.status === 'CLOSED') {
+        active = false;
+        goHome(); // the room is gone — nothing to wait in or rejoin
+        return;
+      }
+      // A shared link can land a non-member here. Join the lobby once; a game already in
+      // progress that we aren't part of can't be joined, so spectate instead if the room
+      // allows it, otherwise bail home rather than trap.
+      // (Existing members of a STARTED game skip this and reconnect via the ticket below —
+      // the server rejects join on a started room even for members.)
+      if (!r.members.some((m) => m.userId === user?.id)) {
+        if (wasPresent) {
+          // We were seated/spectating and have been dropped. In LOBBY that's a host kick —
+          // surface a modal and let the player dismiss it home; otherwise just bail home.
           active = false;
-          goHome(); // the room is gone — nothing to wait in or rejoin
+          if (r.status === 'LOBBY') setKicked(true);
+          else goHome();
           return;
         }
-        // A shared link can land a non-member here. Join the lobby once; a game already in
-        // progress that we aren't part of can't be joined, so spectate instead if the room
-        // allows it, otherwise bail home rather than trap.
-        // (Existing members of a STARTED game skip this and reconnect via the ticket below —
-        // the server rejects join on a started room even for members.)
-        if (!r.members.some((m) => m.userId === user?.id)) {
-          if (wasPresent) {
-            // We were seated/spectating and have been dropped. In LOBBY that's a host kick —
-            // surface a modal and let the player dismiss it home; otherwise just bail home.
-            active = false;
-            if (r.status === 'LOBBY') setKicked(true);
-            else goHome();
-            return;
-          }
-          if (r.status !== 'LOBBY') {
-            // A started game we aren't in can't be joined — spectate if it's allowed,
-            // otherwise bail home rather than trap.
-            if (r.status === 'STARTED' && r.gameId && r.settings.allowSpectating) {
-              const tk = await api.spectate(code);
-              if (!active) return;
-              connectGame(tk.ticket);
-              enterGame(tk.gameId, tk.ticket);
-              return;
-            }
-            active = false;
-            goHome();
-            return;
-          }
-          // A demoted lobby spectator is also a non-member, but must not be auto-joined back
-          // onto a seat — they keep watching until they either rejoin a seat themselves or
-          // the game starts (handled by the STARTED branch above, since they're a non-member).
-          const amSpectator = r.spectators.some((s) => s.userId === user?.id);
-          if (!amSpectator) {
-            r = await api.joinRoom(code);
+        if (r.status !== 'LOBBY') {
+          // A started game we aren't in can't be joined — spectate if it's allowed,
+          // otherwise bail home rather than trap.
+          if (r.status === 'STARTED' && r.gameId && r.settings.allowSpectating) {
+            const tk = await api.spectate(code);
             if (!active) return;
+            connectGame(tk.ticket);
+            enterGame(tk.gameId, tk.ticket);
+            return;
           }
-        }
-        wasPresent = true;
-        setRoom(r);
-        if (r.status === 'STARTED' && r.gameId) {
-          const ticket = await api.getTicket(code);
-          if (!active) return;
-          connectGame(ticket.ticket);
-          enterGame(ticket.gameId, ticket.ticket);
-        }
-      } catch (e) {
-        if (!active) return;
-        // A room we can't fetch (deleted, or we're not a member) can't be restored —
-        // e.g. landing on a stale /room/:code after a reload. Bail home, don't trap.
-        if (e instanceof ApiError && (e.status === 404 || e.status === 403)) {
           active = false;
           goHome();
           return;
         }
-        // A 400 from join (room full, or the host started the game mid-poll) is terminal —
-        // stop polling so we don't re-spam join every 2s; the error card offers a way home.
-        if (e instanceof ApiError && e.status === 400) {
-          active = false;
-          setErr((e as Error).message);
-          return;
+        // A demoted lobby spectator is also a non-member, but must not be auto-joined back
+        // onto a seat — they keep watching until they either rejoin a seat themselves or
+        // the game starts (handled by the STARTED branch above, since they're a non-member).
+        const amSpectator = r.spectators.some((s) => s.userId === user?.id);
+        if (!amSpectator) {
+          r = await api.joinRoom(code);
+          if (!active) return;
         }
-        setErr((e as Error).message);
       }
-    };
-    void poll();
-    const id = setInterval(() => {
-      if (!active) {
-        clearInterval(id);
+      wasPresent = true;
+      setRoom(r);
+      if (r.status === 'STARTED' && r.gameId) {
+        const ticket = await api.getTicket(code);
+        if (!active) return;
+        connectGame(ticket.ticket);
+        enterGame(ticket.gameId, ticket.ticket);
+      }
+    } catch (e) {
+      if (!active) return;
+      // A room we can't fetch (deleted, or we're not a member) can't be restored —
+      // e.g. landing on a stale /room/:code after a reload. Bail home, don't trap.
+      if (e instanceof ApiError && (e.status === 404 || e.status === 403)) {
+        active = false;
+        goHome();
         return;
       }
-      void poll();
-    }, 2000);
-    return () => {
-      active = false;
+      // A 400 from join (room full, or the host started the game mid-poll) is terminal —
+      // stop polling so we don't re-spam join every 2s; the error card offers a way home.
+      if (e instanceof ApiError && e.status === 400) {
+        active = false;
+        setErr((e as Error).message);
+        return;
+      }
+      setErr((e as Error).message);
+    }
+  };
+  void poll();
+  const id = setInterval(() => {
+    if (!active) {
       clearInterval(id);
-    };
-  }, [code, user?.id, enterGame, goHome]);
+      return;
+    }
+    void poll();
+  }, 2000);
+  return () => {
+    active = false;
+    clearInterval(id);
+  };
+}, [code, user?.id, enterGame, goHome]);
 ```
 
 - [ ] **Step 6: Add the `mySpectator` derived value and the two action functions**
@@ -1639,14 +1657,14 @@ In `apps/web/src/screens/RoomScreen.tsx`, replace the whole poll `useEffect` (th
 Right after `const me = room.members.find((m) => m.userId === user?.id);`, add:
 
 ```tsx
-  const mySpectator = room.spectators.find((s) => s.userId === user?.id);
+const mySpectator = room.spectators.find((s) => s.userId === user?.id);
 ```
 
 Right after `const kick = (userId: string) => void guard(api.kickPlayer(code, userId));`, add:
 
 ```tsx
-  const becomeSpectator = () => void guard(api.watchRoom(code));
-  const becomePlayer = () => void guard(api.rejoinRoom(code));
+const becomeSpectator = () => void guard(api.watchRoom(code));
+const becomePlayer = () => void guard(api.rejoinRoom(code));
 ```
 
 - [ ] **Step 7: Render the spectator list**
@@ -1654,29 +1672,31 @@ Right after `const kick = (userId: string) => void guard(api.kickPlayer(code, us
 Right after the closing `</ul>` of the existing `.member-list` (and before the `<div className="card stack room-chat">` block), add:
 
 ```tsx
-      {room.spectators.length > 0 && (
-        <>
-          <h4 className="muted">{t('spectatorsHeading')}</h4>
-          <ul className="member-list spectator-list">
-            {room.spectators.map((s) => (
-              <li key={s.userId}>
-                <span>{s.displayName}</span>
-                {s.userId === user?.id && <em className="muted">({t('you')})</em>}
-                {isHost && (
-                  <button
-                    className="icon-btn"
-                    aria-label={t('kickPlayer')}
-                    title={t('kickPlayer')}
-                    onClick={() => kick(s.userId)}
-                  >
-                    <UserMinus size={14} aria-hidden />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+{
+  room.spectators.length > 0 && (
+    <>
+      <h4 className="muted">{t('spectatorsHeading')}</h4>
+      <ul className="member-list spectator-list">
+        {room.spectators.map((s) => (
+          <li key={s.userId}>
+            <span>{s.displayName}</span>
+            {s.userId === user?.id && <em className="muted">({t('you')})</em>}
+            {isHost && (
+              <button
+                className="icon-btn"
+                aria-label={t('kickPlayer')}
+                title={t('kickPlayer')}
+                onClick={() => kick(s.userId)}
+              >
+                <UserMinus size={14} aria-hidden />
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </>
+  );
+}
 ```
 
 - [ ] **Step 8: Add the Spectate / Join-as-player buttons to the button row**
@@ -1684,39 +1704,37 @@ Right after the closing `</ul>` of the existing `.member-list` (and before the `
 Replace the button row:
 
 ```tsx
-      <div className="row">
-        {me && (
-          <>
-            <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
-              {me.ready ? t('cancelReady') : t('markReady')}
-            </button>
-            <button
-              onClick={() => void becomeSpectator()}
-              disabled={room.members.length <= 1}
-              title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
-            >
-              {t('watch')}
-            </button>
-          </>
-        )}
-        {mySpectator && (
-          <button
-            onClick={() => void becomePlayer()}
-            disabled={room.members.length >= room.maxPlayers}
-            title={
-              room.members.length >= room.maxPlayers ? t('becomePlayerDisabledFull') : undefined
-            }
-          >
-            {t('becomePlayer')}
-          </button>
-        )}
-        {isHost && (
-          <button className="primary" disabled={!allReady} onClick={() => void start()}>
-            {t('start')}
-          </button>
-        )}
-        <button onClick={() => requestLeave(() => void leave())}>{t('leave')}</button>
-      </div>
+<div className="row">
+  {me && (
+    <>
+      <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
+        {me.ready ? t('cancelReady') : t('markReady')}
+      </button>
+      <button
+        onClick={() => void becomeSpectator()}
+        disabled={room.members.length <= 1}
+        title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
+      >
+        {t('watch')}
+      </button>
+    </>
+  )}
+  {mySpectator && (
+    <button
+      onClick={() => void becomePlayer()}
+      disabled={room.members.length >= room.maxPlayers}
+      title={room.members.length >= room.maxPlayers ? t('becomePlayerDisabledFull') : undefined}
+    >
+      {t('becomePlayer')}
+    </button>
+  )}
+  {isHost && (
+    <button className="primary" disabled={!allReady} onClick={() => void start()}>
+      {t('start')}
+    </button>
+  )}
+  <button onClick={() => requestLeave(() => void leave())}>{t('leave')}</button>
+</div>
 ```
 
 - [ ] **Step 9: Run the tests to verify they pass**
@@ -1744,6 +1762,7 @@ git commit -m "feat(web): add Spectate/Join-as-player buttons and the spectator 
 ### Task 10: Restyle the lobby chat panel as a right-hand column
 
 **Files:**
+
 - Modify: `apps/web/src/screens/RoomScreen.tsx`
 - Modify: `apps/web/src/App.tsx`
 - Modify: `apps/web/src/styles/app.css`
@@ -1751,6 +1770,7 @@ git commit -m "feat(web): add Spectate/Join-as-player buttons and the spectator 
 - Modify: `apps/web/src/screens/RoomScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: game.css's `.comms`/`.chat-panel`/`.chat-messages`/`.chat-msg`/`.chat-author`/`.chat-presets`/`.chat-preset-btn` classes (unchanged, reused verbatim).
 
 - [ ] **Step 1: Update the two existing preset-chat tests for the new markup**
@@ -1758,37 +1778,37 @@ git commit -m "feat(web): add Spectate/Join-as-player buttons and the spectator 
 In `apps/web/src/screens/RoomScreen.test.tsx`, inside `describe('RoomScreen preset chat', ...)`, change both occurrences of `container.querySelector('.room-chat-log li')` to `container.querySelector('.chat-messages .chat-msg')`:
 
 ```tsx
-  it('sends a preset message and shows it in the log with the translated text', async () => {
-    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
-    (api.sendRoomChat as ReturnType<typeof vi.fn>).mockResolvedValue(
-      room({
-        members: [member('host'), member('u-me')],
-        chat: [{ userId: 'u-me', presetId: 'GOOD_LUCK', ts: 1 }],
-      }),
-    );
-    const { container } = render(<RoomScreen />);
-    const btn = await screen.findByRole('button', { name: '祝你好運，玩得開心！' });
-    fireEvent.click(btn);
-    expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', 'GOOD_LUCK');
-    await waitFor(() =>
-      expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain(
-        '祝你好運，玩得開心！',
-      ),
-    );
-  });
+it('sends a preset message and shows it in the log with the translated text', async () => {
+  mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+  (api.sendRoomChat as ReturnType<typeof vi.fn>).mockResolvedValue(
+    room({
+      members: [member('host'), member('u-me')],
+      chat: [{ userId: 'u-me', presetId: 'GOOD_LUCK', ts: 1 }],
+    }),
+  );
+  const { container } = render(<RoomScreen />);
+  const btn = await screen.findByRole('button', { name: '祝你好運，玩得開心！' });
+  fireEvent.click(btn);
+  expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', 'GOOD_LUCK');
+  await waitFor(() =>
+    expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain(
+      '祝你好運，玩得開心！',
+    ),
+  );
+});
 
-  it('renders an existing chat log entry attributed to the sending member', async () => {
-    mocked.getRoom.mockResolvedValue(
-      room({
-        members: [member('host'), member('u-me')],
-        chat: [{ userId: 'host', presetId: 'THANKS', ts: 1 }],
-      }),
-    );
-    const { container } = render(<RoomScreen />);
-    await waitFor(() =>
-      expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain('謝謝！'),
-    );
-  });
+it('renders an existing chat log entry attributed to the sending member', async () => {
+  mocked.getRoom.mockResolvedValue(
+    room({
+      members: [member('host'), member('u-me')],
+      chat: [{ userId: 'host', presetId: 'THANKS', ts: 1 }],
+    }),
+  );
+  const { container } = render(<RoomScreen />);
+  await waitFor(() =>
+    expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain('謝謝！'),
+  );
+});
 ```
 
 - [ ] **Step 2: Run it to verify it fails**
@@ -1846,15 +1866,15 @@ import '../styles/room.css';
 In `apps/web/src/App.tsx`, widen the `mainClass` ternary:
 
 ```tsx
-  const mainClass = isGameLayout
-    ? 'app-main app-main--game'
-    : isLogin
-      ? 'app-main app-main--login'
-      : view === 'home'
-        ? 'app-main app-main--home' // the hero + two-column grid needs more than the reading column
-        : view === 'room'
-          ? 'app-main app-main--room' // the room+chat two-column grid needs more than the reading column
-          : 'app-main';
+const mainClass = isGameLayout
+  ? 'app-main app-main--game'
+  : isLogin
+    ? 'app-main app-main--login'
+    : view === 'home'
+      ? 'app-main app-main--home' // the hero + two-column grid needs more than the reading column
+      : view === 'room'
+        ? 'app-main app-main--room' // the room+chat two-column grid needs more than the reading column
+        : 'app-main';
 ```
 
 In `apps/web/src/styles/app.css`, add near the other `.app-main--*` rules (there are none in `app.css` today — `app-main--home` lives in `home.css` and `app-main--game`/`app-main--login` are styled inline in `game.css`/within `app.css`'s login section; add this as a new small block right before the `.room-chat`/`.chip-btn`/`.room-chat-log` rules you're about to delete in the next step):
@@ -1898,12 +1918,12 @@ Delete these three rule blocks from `apps/web/src/styles/app.css`:
 Widen `chatAuthorName` (it currently only checks `room.members`) so a spectator sender resolves to their display name instead of their raw userId:
 
 ```tsx
-  const chatAuthorName = (userId: string): string => {
-    const m = room.members.find((x) => x.userId === userId);
-    if (m) return memberName(m);
-    const s = room.spectators.find((x) => x.userId === userId);
-    return s ? s.displayName : userId;
-  };
+const chatAuthorName = (userId: string): string => {
+  const m = room.members.find((x) => x.userId === userId);
+  if (m) return memberName(m);
+  const s = room.spectators.find((x) => x.userId === userId);
+  return s ? s.displayName : userId;
+};
 ```
 
 This is three surgical edits against the existing return statement — the large, untouched middle (member list, spectator list, game-settings fieldset, bot controls, button row, hints, modals) stays exactly where it is between the first and third edit; only its indentation level changes, which `yarn format` (run in Task 11) normalizes automatically.
@@ -1928,24 +1948,24 @@ Replace with:
 **Edit B — delete the old room-chat block.** Find (currently sandwiched between the member list's closing `</ul>` and the game-settings `<fieldset>`):
 
 ```tsx
-      <div className="card stack room-chat">
-        <div className="row wrap">
-          {CHAT_PRESET_IDS.map((id) => (
-            <button key={id} type="button" className="chip-btn" onClick={() => sendChat(id)}>
-              {t(chatPresetKey(id))}
-            </button>
-          ))}
-        </div>
-        {room.chat.length > 0 && (
-          <ul className="room-chat-log">
-            {room.chat.map((c, i) => (
-              <li key={i}>
-                <strong>{chatAuthorName(c.userId)}</strong>: {t(chatPresetKey(c.presetId))}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+<div className="card stack room-chat">
+  <div className="row wrap">
+    {CHAT_PRESET_IDS.map((id) => (
+      <button key={id} type="button" className="chip-btn" onClick={() => sendChat(id)}>
+        {t(chatPresetKey(id))}
+      </button>
+    ))}
+  </div>
+  {room.chat.length > 0 && (
+    <ul className="room-chat-log">
+      {room.chat.map((c, i) => (
+        <li key={i}>
+          <strong>{chatAuthorName(c.userId)}</strong>: {t(chatPresetKey(c.presetId))}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
 ```
 
 Delete it entirely (replace with nothing) — its replacement is added in Edit C, as a sibling of `.room-main` rather than inline with it.
@@ -2026,6 +2046,7 @@ Expected: no errors
 - [ ] **Step 9: Manual check**
 
 Run: `yarn workspace @trm/server dev` (needs `docker compose up -d mongo` first) and, in another terminal, `yarn workspace @trm/web dev`. Open two browser windows, create a room in one, join from the other, and confirm:
+
 - The chat column sits to the right of the room content on a wide window, and stacks below it under ~1000px width.
 - The chat panel looks like the in-game one (message list on top, preset pills at the bottom) instead of pills-then-log.
 - Sending a preset shows up correctly attributed in both windows.

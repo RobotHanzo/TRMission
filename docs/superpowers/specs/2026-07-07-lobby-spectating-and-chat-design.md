@@ -33,12 +33,13 @@ Three related changes to how spectating and chat work in the lobby and in-game:
   lives, populated from either path:
   - a seated member demoting pre-start (new — see below), or
   - anyone minting a spectate ticket via the existing `POST :code/spectate` (post-start; unchanged
-    behavior — this endpoint now *additionally* upserts the caller into `RoomDoc.spectators`,
+    behavior — this endpoint now _additionally_ upserts the caller into `RoomDoc.spectators`,
     alongside its existing `GameDoc.spectators` bookkeeping, which stays untouched for its own
     purpose: match-history/replay access).
 
   This is what lets the in-game roster (fed from `RoomView`) resolve a spectator's display name
   regardless of how they came to be watching, instead of only knowing about lobby-side demotions.
+
 - **Demoting is member-initiated only — no new visitor-facing join choice.** Landing on a
   not-yet-started room via a link still auto-joins a non-member as a seated player exactly as today
   (`RoomScreen.tsx`'s poll effect, `api.joinRoom`). The only way to become a lobby spectator is for
@@ -57,7 +58,7 @@ Three related changes to how spectating and chat work in the lobby and in-game:
   receives the broadcast and history backfill) plus a client **rendering** fix (resolving a
   spectator's name/colour instead of mis-rendering them as seat 0 / "P1"), not a schema change.
 - **Lobby chat stays preset-only.** Unchanged from the 2026-07-05 design — this pass only widens
-  *who* may send/receive it (spectators too), not *what* can be sent.
+  _who_ may send/receive it (spectators too), not _what_ can be sent.
 - **The lobby chat panel is restyled by reusing the in-game `ChatPanel`'s CSS classes verbatim**
   (`chat-panel`, `chat-messages`, `chat-msg`, `chat-author`, `chat-presets`, `chat-preset-btn`)
   rather than inventing parallel styling — this is what guarantees the "looks like the in-game one"
@@ -84,13 +85,13 @@ mirror it.
 ## Server changes — lobby (`apps/server/src/lobby/`)
 
 - **`RoomRepo.becomeSpectator(code, userId)`** → `RoomDoc | 'not_found' | 'started' | 'not_member' |
-  'only_member' | 'spectating_disabled'`. Validates `status === 'LOBBY'`, caller is a current member,
+'only_member' | 'spectating_disabled'`. Validates `status === 'LOBBY'`, caller is a current member,
   `members.length > 1`, and `settings.allowSpectating`. Removes the caller from `members`
   (renumbering seats + host transfer — identical to the existing `leave()` logic), appends them to
   `spectators`.
 - **`RoomRepo.becomePlayer(code, userId)`** → `RoomDoc | 'not_found' | 'started' | 'not_spectator' |
-  'full'`. Validates `status === 'LOBBY'`, caller is a current spectator, `members.length <
-  maxPlayers`. Same atomic seat-CAS retry loop as `join()`. Removes the caller from `spectators`,
+'full'`. Validates `status === 'LOBBY'`, caller is a current spectator, `members.length <
+maxPlayers`. Same atomic seat-CAS retry loop as `join()`. Removes the caller from `spectators`,
   appends to `members` at the next free seat, `ready: false`.
 - **`RoomRepo.leave`** widens: if the caller is in `spectators` (not `members`), simply filter them
   out of `spectators` — no seat/host/close side effects. Member-leave behavior is unchanged.
@@ -145,7 +146,7 @@ mirror it.
 
 - **Poll effect**: the existing "non-member on a `LOBBY` room auto-joins as a player" branch
   (`RoomScreen.tsx:108-133`) must not fire for a user already present in `room.spectators` — check
-  membership in *either* list before deciding to auto-join. A lobby spectator polling while status
+  membership in _either_ list before deciding to auto-join. A lobby spectator polling while status
   stays `LOBBY` should simply keep rendering the spectator view. When status flips to `STARTED`, the
   existing "non-member on a started room spectates if allowed" branch (`RoomScreen.tsx:117-126`,
   already calls `api.spectate` + `connectGame`) already covers a lobby spectator with no changes
@@ -187,7 +188,7 @@ mirror it.
   instead.
 - Demoting while `settings.allowSpectating` is false → blocked (same reasoning as the start-time
   gate).
-- Host flips `allowSpectating` off *after* someone has already demoted → that lobby spectator is
+- Host flips `allowSpectating` off _after_ someone has already demoted → that lobby spectator is
   bounced home when the game actually starts (existing `RoomScreen.tsx:120` behavior, unchanged) —
   a pre-existing edge case for any spectate-ineligible visitor, not a new gap introduced here.
 - Rejoining when the room is already full → blocked (button disabled).
@@ -206,7 +207,7 @@ mirror it.
   rejected design fork, above) — the auto-join-as-player flow for non-members is untouched.
 - Free-text chat in the lobby (still preset-only, per the 2026-07-05 design).
 - Any change to post-game match-history/replay spectator access (`GameDoc.spectators` stays as the
-  authority there; this design only adds a *parallel* record on `RoomDoc` for identity/UI purposes).
+  authority there; this design only adds a _parallel_ record on `RoomDoc` for identity/UI purposes).
 - Chat moderation, DMs, threads, reactions (unchanged from prior designs).
 - A spectator count/badge anywhere outside the lobby's own spectator list (e.g. no in-game HUD
   spectator counter).
