@@ -357,7 +357,7 @@ export function GameStage({
   );
   const showHandStrip = !needKeep && boardLayout === 'tray';
   // Chat/comms is a live-multiplayer feature; the tutorial/encyclopedia sandbox has none.
-  const comms = sandbox ? null : <CommsPanel chatDisabled={isSpectator} />;
+  const comms = sandbox ? null : <CommsPanel />;
 
   return (
     <div

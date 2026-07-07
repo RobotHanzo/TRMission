@@ -2,11 +2,11 @@ import { LogPanel } from './LogPanel';
 import { ChatPanel } from './ChatPanel';
 
 /** The comms column content: action log on top, chat docked below. */
-export function CommsPanel({ chatDisabled }: { chatDisabled: boolean }) {
+export function CommsPanel() {
   return (
     <div className="comms">
       <LogPanel />
-      <ChatPanel disabled={chatDisabled} />
+      <ChatPanel />
     </div>
   );
 }
