@@ -67,7 +67,9 @@ describe('ChatPanel', () => {
     useRoster
       .getState()
       .setMembers([], [{ userId: 'watcher-1', displayName: 'Watcher One', isGuest: true }]);
-    useChat.getState().ingest({ playerId: 'watcher-1', content: { case: 'text', value: 'hi all' } });
+    useChat
+      .getState()
+      .ingest({ playerId: 'watcher-1', content: { case: 'text', value: 'hi all' } });
     const { container } = render(<ChatPanel />);
     const author = container.querySelector('.chat-author');
     expect(author?.textContent).toBe('Watcher One');

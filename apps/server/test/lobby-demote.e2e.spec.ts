@@ -96,7 +96,10 @@ describe('lobby: demote to spectator / rejoin as player', () => {
       .send({})
       .expect(201);
     const code: string = room.body.code;
-    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(outsider.token)).expect(403);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/watch`)
+      .set(auth(outsider.token))
+      .expect(403);
     await request(server())
       .post(`/api/v1/rooms/${code}/rejoin`)
       .set(auth(outsider.token))
