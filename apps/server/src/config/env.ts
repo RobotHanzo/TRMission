@@ -66,11 +66,11 @@ export const env = {
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean),
 
-  // Background purge of stale LOBBY rooms / LIVE games (dashboard/purge.service.ts). Off by
-  // default — this permanently deletes data; an operator opts in after reviewing thresholds.
+  // Background purge of stale LOBBY rooms / LIVE games (dashboard/purge.service.ts). On by
+  // default with conservative thresholds below; set PURGE_AUTO_ENABLED=0 to disable.
   // A STARTED room's own updatedAt freezes the moment play begins, so it's swept using its
   // linked game's updatedAt — gameLivePurgeHours governs both.
-  purgeAutoEnabled: process.env.PURGE_AUTO_ENABLED === '1',
+  purgeAutoEnabled: process.env.PURGE_AUTO_ENABLED !== '0',
   purgeIntervalMs: Number(process.env.PURGE_INTERVAL_MS ?? 60 * 60 * 1000),
   roomLobbyPurgeHours: Number(process.env.ROOM_LOBBY_PURGE_HOURS ?? 24),
   gameLivePurgeHours: Number(process.env.GAME_LIVE_PURGE_HOURS ?? 24 * 7),

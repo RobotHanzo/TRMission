@@ -264,7 +264,7 @@ describe('purge sweep + status', () => {
       .get('/api/v1/dashboard/purge/status')
       .set(auth(admin.token))
       .expect(200);
-    expect(res.body.autoEnabled).toBe(false);
+    expect(res.body.autoEnabled).toBe(true);
     expect(typeof res.body.intervalMs).toBe('number');
     expect(typeof res.body.roomLobbyPurgeHours).toBe('number');
     expect(typeof res.body.gameLivePurgeHours).toBe('number');
