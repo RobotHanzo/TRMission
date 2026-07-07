@@ -6,7 +6,13 @@ import { useEditorStore } from '../store';
 import type { CityDraft, RouteDraft } from '../../../../net/rest';
 
 vi.mock('../EditorCanvas', () => ({
-  EditorCanvas: ({ onRouteClick }: { onRouteClick?: (id: string) => void }) => (
+  EditorCanvas: ({
+    onRouteClick,
+    onCityClick,
+  }: {
+    onRouteClick?: (id: string) => void;
+    onCityClick?: (id: string) => void;
+  }) => (
     <div data-testid="fake-canvas">
       <button type="button" onClick={() => onRouteClick?.('r1')}>
         route-r1
@@ -16,6 +22,15 @@ vi.mock('../EditorCanvas', () => ({
       </button>
       <button type="button" onClick={() => onRouteClick?.('r3')}>
         route-r3
+      </button>
+      <button type="button" onClick={() => onRouteClick?.('r4')}>
+        route-r4
+      </button>
+      <button type="button" onClick={() => onCityClick?.('c1')}>
+        city-c1
+      </button>
+      <button type="button" onClick={() => onCityClick?.('c2')}>
+        city-c2
       </button>
     </div>
   ),
@@ -39,6 +54,7 @@ const baseRoutes: RouteDraft[] = [
     isTunnel: false,
     doubleGroup: 'A',
   },
+  { id: 'r4', a: 'c1', b: 'c2', color: 'GRAY', length: 2, ferryLocos: 1, isTunnel: false },
 ];
 
 beforeEach(() => {
@@ -104,5 +120,54 @@ describe('RoutesStage', () => {
       color: 'BLUE',
     });
     expect(screen.queryByText('轉換為雙軌路線')).not.toBeInTheDocument();
+  });
+
+  it('shows the convert-to-double button for a ferry route', () => {
+    render(<RoutesStage />);
+    fireEvent.click(screen.getByText('route-r4'));
+
+    expect(screen.getByText('轉換為雙軌路線')).toBeInTheDocument();
+  });
+
+  it('clicking convert-to-double on a ferry route mirrors it into a double-ferry pair', () => {
+    render(<RoutesStage />);
+    fireEvent.click(screen.getByText('route-r4'));
+    fireEvent.click(screen.getByText('轉換為雙軌路線'));
+
+    const routes = useEditorStore.getState().draft.routes;
+    const original = routes.find((r) => r.id === 'r4')!;
+    expect(original.doubleGroup).toBe('B'); // 'A' is already taken by r3
+    const sibling = routes.find((r) => r.doubleGroup === 'B' && r.id !== 'r4');
+    expect(sibling).toMatchObject({
+      a: 'c1',
+      b: 'c2',
+      length: 2,
+      isTunnel: false,
+      ferryLocos: 1,
+      color: 'GRAY',
+    });
+  });
+
+  it('creates a mirrored double-ferry pair from the new-route form when ferry and make-double are both set', () => {
+    render(<RoutesStage />);
+    fireEvent.click(screen.getByText('city-c1'));
+    fireEvent.click(screen.getByText('city-c2'));
+
+    fireEvent.change(screen.getByLabelText('渡輪所需火車頭數'), { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('switch', { name: '建立為雙軌路線' }));
+    fireEvent.click(screen.getByText('儲存'));
+
+    const routes = useEditorStore.getState().draft.routes;
+    const created = routes.filter((r) => !baseRoutes.some((b) => b.id === r.id));
+    expect(created).toHaveLength(2);
+    const [first, second] = created;
+    expect(first).toMatchObject({ a: 'c1', b: 'c2', color: 'GRAY', ferryLocos: 2 });
+    expect(second).toMatchObject({
+      a: 'c1',
+      b: 'c2',
+      color: 'GRAY',
+      ferryLocos: 2,
+      doubleGroup: first!.doubleGroup,
+    });
   });
 });

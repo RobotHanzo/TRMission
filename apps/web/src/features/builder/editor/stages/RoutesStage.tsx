@@ -91,11 +91,14 @@ export function RoutesStage() {
               addRoute(route);
               if (makeDouble) {
                 // route.doubleGroup is already set by RouteForm whenever makeDouble is true —
-                // the spread carries it through, the sibling only needs a fresh id and colour.
+                // the spread carries it through, the sibling only needs a fresh id and colour. A
+                // ferry sibling mirrors the source's GRAY colour (and thus its locomotive count)
+                // instead of the RED/BLUE alternation, since ferries must stay GRAY.
                 addRoute({
                   ...route,
                   id: newRouteId(),
-                  color: route.color === 'RED' ? 'BLUE' : 'RED',
+                  color:
+                    route.ferryLocos > 0 ? route.color : route.color === 'RED' ? 'BLUE' : 'RED',
                 });
               }
               setDraftPair(null);
@@ -114,13 +117,11 @@ export function RoutesStage() {
             onSubmit={(route) => updateRoute(selectedRoute.id, route)}
             extra={
               <>
-                {!selectedRoute.doubleGroup &&
-                  !selectedRoute.isTunnel &&
-                  selectedRoute.ferryLocos === 0 && (
-                    <button onClick={() => convertToDouble(selectedRoute.id)}>
-                      {t('builder.convertToDouble')}
-                    </button>
-                  )}
+                {!selectedRoute.doubleGroup && !selectedRoute.isTunnel && (
+                  <button onClick={() => convertToDouble(selectedRoute.id)}>
+                    {t('builder.convertToDouble')}
+                  </button>
+                )}
                 <button className="danger" onClick={() => removeRoute(selectedRoute.id)}>
                   <Trash2 size={14} aria-hidden /> {t('builder.deleteRoute')}
                 </button>
