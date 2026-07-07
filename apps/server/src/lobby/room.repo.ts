@@ -60,6 +60,12 @@ export interface RoomChatEntry {
   ts: number;
 }
 
+export interface RoomSpectator {
+  userId: string;
+  displayName: string;
+  isGuest: boolean;
+}
+
 export interface RoomDoc {
   _id: string; // room code
   hostId: string;
@@ -71,6 +77,10 @@ export interface RoomDoc {
   seed?: string;
   /** Capped, ephemeral preset-only chat for the lobby (never persisted past the room's lifetime). */
   chat?: RoomChatEntry[];
+  /** Anyone watching this room's game — populated by a lobby demote (below) or by minting a
+   *  post-start spectate ticket (`LobbyService.spectateTicket`). One list for both paths, so
+   *  a spectator's identity is known everywhere regardless of how they came to be watching. */
+  spectators?: RoomSpectator[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,6 +96,14 @@ export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidd
 export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 export type KickResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
 export type SendChatResult = RoomDoc | 'not_found' | 'not_member' | 'rate_limited';
+export type BecomeSpectatorResult =
+  | RoomDoc
+  | 'not_found'
+  | 'started'
+  | 'not_member'
+  | 'only_member'
+  | 'spectating_disabled';
+export type BecomePlayerResult = RoomDoc | 'not_found' | 'started' | 'not_spectator' | 'full';
 
 // Room codes: 6 chars, no easily-confused glyphs (no I/O/0/1).
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -433,5 +451,76 @@ export class RoomRepo implements OnModuleInit {
       },
     );
     return res.modifiedCount === 1;
+  }
+
+  /** A seated member gives up their seat to watch instead: everything but their identity moves
+   *  out of `members` into `spectators` — seats renumber and host transfers exactly like
+   *  `leave()` already does. Blocked if they're the room's only member (nothing left to seat)
+   *  or spectating is disabled (they'd be orphaned the moment the game actually starts). */
+  async becomeSpectator(code: string, userId: string): Promise<BecomeSpectatorResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    const leaving = room.members.find((m) => m.userId === userId);
+    if (!leaving) return 'not_member';
+    if (room.members.length <= 1) return 'only_member';
+    const settings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+    if (!settings.allowSpectating) return 'spectating_disabled';
+
+    const remaining = room.members
+      .filter((m) => m.userId !== userId)
+      .map((m, i) => ({ ...m, seat: i }));
+    const hostId = room.hostId === userId ? (remaining[0]?.userId ?? room.hostId) : room.hostId;
+    const spectator: RoomSpectator = {
+      userId: leaving.userId,
+      displayName: leaving.displayName,
+      isGuest: leaving.isGuest,
+    };
+    await this.col.updateOne(
+      { _id: code },
+      {
+        $set: { members: remaining, hostId, updatedAt: new Date() },
+        $push: { spectators: spectator },
+      },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /** A spectator takes an open seat back. Atomic seat-CAS retry loop, same shape as `join()`. */
+  async becomePlayer(code: string, userId: string): Promise<BecomePlayerResult> {
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const room = await this.col.findOne({ _id: code });
+      if (!room) return 'not_found';
+      if (room.status !== 'LOBBY') return 'started';
+      const spectator = room.spectators?.find((s) => s.userId === userId);
+      if (!spectator) return 'not_spectator';
+      if (room.members.length >= room.maxPlayers) return 'full';
+
+      const seat = room.members.length;
+      const member: RoomMember = { ...spectator, seat, ready: false };
+      const res = await this.col.updateOne(
+        { _id: code, status: 'LOBBY', members: { $size: seat }, 'spectators.userId': userId },
+        {
+          $push: { members: member },
+          $pull: { spectators: { userId } },
+          $set: { updatedAt: new Date() },
+        },
+      );
+      if (res.modifiedCount === 1) {
+        const updated = await this.col.findOne({ _id: code });
+        if (updated) return updated;
+      }
+    }
+    throw new Error('becomePlayer contention');
+  }
+
+  /** Idempotent: records a spectator identity if not already present. Called both indirectly
+   *  (via `becomeSpectator`, above) and directly by `LobbyService.spectateTicket`, so every path
+   *  that watches a room's game ends up in the one list. */
+  async recordSpectator(code: string, spectator: RoomSpectator): Promise<void> {
+    await this.col.updateOne(
+      { _id: code, 'spectators.userId': { $ne: spectator.userId } },
+      { $push: { spectators: spectator }, $set: { updatedAt: new Date() } },
+    );
   }
 }

@@ -19,6 +19,7 @@ import {
   type RoomSettings,
   type RoomSettingsPatch,
   type RoomChatEntry,
+  type RoomSpectator,
 } from './room.repo';
 import { GameHub } from '../ws/hub';
 import { TokenService } from '../auth/token.service';
@@ -34,6 +35,7 @@ export interface RoomView {
   status: RoomDoc['status'];
   maxPlayers: number;
   members: RoomMember[];
+  spectators: RoomSpectator[];
   settings: RoomSettings;
   gameId?: string;
   mapName?: { zh: string; en: string };
@@ -63,6 +65,7 @@ const toView = (r: RoomDoc): RoomView => {
     status: r.status,
     maxPlayers: r.maxPlayers,
     members: r.members,
+    spectators: r.spectators ?? [],
     settings,
     ...(r.gameId ? { gameId: r.gameId } : {}),
     ...(mapName ? { mapName } : {}),
@@ -184,6 +187,29 @@ export class LobbyService {
     const r = await this.rooms.setRematchVote(code, user.userId, vote);
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    return toView(r);
+  }
+
+  /** A seated member demotes to spectating. */
+  async becomeSpectator(code: string, user: AuthUser): Promise<RoomView> {
+    const r = await this.rooms.becomeSpectator(code, user.userId);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    if (r === 'only_member') throw new BadRequestException('cannot spectate as the only member');
+    if (r === 'spectating_disabled') {
+      throw new BadRequestException('spectating is disabled for this room');
+    }
+    return toView(r);
+  }
+
+  /** A spectator takes an open seat. */
+  async becomePlayer(code: string, user: AuthUser): Promise<RoomView> {
+    const r = await this.rooms.becomePlayer(code, user.userId);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'not_spectator') throw new ForbiddenException('not a spectator of this room');
+    if (r === 'full') throw new BadRequestException('room is full');
     return toView(r);
   }
 

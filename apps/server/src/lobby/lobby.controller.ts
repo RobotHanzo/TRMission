@@ -91,6 +91,22 @@ export class LobbyController {
     return this.lobby.voteRematch(code.toUpperCase(), user, body.wantsRematch);
   }
 
+  @Post(':code/watch')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Seated member gives up their seat to spectate instead (LOBBY only)' })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  watch(@CurrentUser() user: AuthUser, @Param('code') code: string) {
+    return this.lobby.becomeSpectator(code.toUpperCase(), user);
+  }
+
+  @Post(':code/rejoin')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Spectator takes an open seat to become a player (LOBBY only)' })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  rejoin(@CurrentUser() user: AuthUser, @Param('code') code: string) {
+    return this.lobby.becomePlayer(code.toUpperCase(), user);
+  }
+
   @Post(':code/chat')
   @HttpCode(200)
   @ApiOperation({ summary: 'Send a preset chat message to the room' })

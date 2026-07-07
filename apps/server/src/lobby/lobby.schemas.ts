@@ -49,12 +49,18 @@ export const RoomChatEntrySchema = z.object({
   presetId: z.string(),
   ts: z.number(),
 });
+export const RoomSpectatorSchema = z.object({
+  userId: z.string(),
+  displayName: z.string(),
+  isGuest: z.boolean(),
+});
 export const RoomViewSchema = z.object({
   code: z.string(),
   hostId: z.string(),
   status: z.enum(['LOBBY', 'STARTED', 'CLOSED']),
   maxPlayers: z.number(),
   members: z.array(RoomMemberSchema),
+  spectators: z.array(RoomSpectatorSchema),
   settings: GameSettingsSchema,
   gameId: z.string().optional(),
   /** Resolved display name for settings.map, when known (e.g. an official map). */
