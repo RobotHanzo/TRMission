@@ -1,1 +1,191 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_md", "label": "2026-07-05-purge-inactive-rooms-games.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_purge_inactive_rooms_games_admin_delete_implementation_plan", "label": "Purge Inactive Rooms/Games + Admin Delete Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L20"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_1_shared_plumbing_permissions_env_vars_audit_actions_metrics_counters", "label": "Task 1: Shared plumbing \u2014 permissions, env vars, audit actions, metrics counters", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L58"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_2_purgeservice_deletegame_manual_delete_any_status", "label": "Task 2: PurgeService \u2014 deleteGame (manual delete, any status)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L348"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_3_purgeservice_deleteroom_manual_delete_any_status", "label": "Task 3: PurgeService \u2014 deleteRoom (manual delete, any status)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L776"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_4_purgeservice_runsweep_status_scheduler_dashboardpurgecontroller", "label": "Task 4: PurgeService \u2014 runSweep + status + scheduler + DashboardPurgeController", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L1079"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_5_admin_rest_client_i18n", "label": "Task 5: Admin REST client + i18n", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L1620"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_6_roomsview_delete_button", "label": "Task 6: RoomsView delete button", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L2153"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_7_gamesview_gamedrawer_delete_button", "label": "Task 7: GamesView (GameDrawer) delete button", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L2514"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_8_purgeview_nav_wiring", "label": "Task 8: PurgeView + nav wiring", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L2854"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_after_all_8_tasks", "label": "After all 8 tasks", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L3417"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_purge_inactive_rooms_games_admin_delete_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_purge_inactive_rooms_games_admin_delete_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L20", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_1_shared_plumbing_permissions_env_vars_audit_actions_metrics_counters", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L58", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_2_purgeservice_deletegame_manual_delete_any_status", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L348", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_3_purgeservice_deleteroom_manual_delete_any_status", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L776", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_4_purgeservice_runsweep_status_scheduler_dashboardpurgecontroller", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L1079", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_5_admin_rest_client_i18n", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L1620", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_6_roomsview_delete_button", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L2153", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_7_gamesview_gamedrawer_delete_button", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L2514", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_8_purgeview_nav_wiring", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L2854", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_purge_inactive_rooms_games_admin_delete_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_after_all_8_tasks", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md", "source_location": "L3417", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_md",
+      "label": "2026-07-05-purge-inactive-rooms-games.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_purge_inactive_rooms_games_admin_delete_implementation_plan",
+      "label": "Purge Inactive Rooms/Games + Admin Delete Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L20"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_1_shared_plumbing_permissions_env_vars_audit_actions_metrics_counters",
+      "label": "Task 1: Shared plumbing \u2014 permissions, env vars, audit actions, metrics counters",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L58"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_2_purgeservice_deletegame_manual_delete_any_status",
+      "label": "Task 2: PurgeService \u2014 deleteGame (manual delete, any status)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L348"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_3_purgeservice_deleteroom_manual_delete_any_status",
+      "label": "Task 3: PurgeService \u2014 deleteRoom (manual delete, any status)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L776"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_4_purgeservice_runsweep_status_scheduler_dashboardpurgecontroller",
+      "label": "Task 4: PurgeService \u2014 runSweep + status + scheduler + DashboardPurgeController",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L1079"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_5_admin_rest_client_i18n",
+      "label": "Task 5: Admin REST client + i18n",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L1620"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_6_roomsview_delete_button",
+      "label": "Task 6: RoomsView delete button",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L2153"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_7_gamesview_gamedrawer_delete_button",
+      "label": "Task 7: GamesView (GameDrawer) delete button",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L2514"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_8_purgeview_nav_wiring",
+      "label": "Task 8: PurgeView + nav wiring",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L2854"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_after_all_8_tasks",
+      "label": "After all 8 tasks",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L3417"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_purge_inactive_rooms_games_admin_delete_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_purge_inactive_rooms_games_admin_delete_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_1_shared_plumbing_permissions_env_vars_audit_actions_metrics_counters",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_2_purgeservice_deletegame_manual_delete_any_status",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L348",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_3_purgeservice_deleteroom_manual_delete_any_status",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L776",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_4_purgeservice_runsweep_status_scheduler_dashboardpurgecontroller",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L1079",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_5_admin_rest_client_i18n",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L1620",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_6_roomsview_delete_button",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L2153",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_7_gamesview_gamedrawer_delete_button",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L2514",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_task_8_purgeview_nav_wiring",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L2854",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_purge_inactive_rooms_games_admin_delete_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_05_purge_inactive_rooms_games_after_all_8_tasks",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-05-purge-inactive-rooms-games.md",
+      "source_location": "L3417",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
