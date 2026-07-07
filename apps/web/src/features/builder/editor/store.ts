@@ -218,15 +218,18 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
   convertToDouble: (id) => {
     const { draft } = get();
     const target = draft.routes.find((r) => r.id === id);
-    if (!target || target.doubleGroup || target.isTunnel || target.ferryLocos > 0) return;
+    if (!target || target.doubleGroup || target.isTunnel) return;
     const existingGroups = [
       ...new Set(draft.routes.map((r) => r.doubleGroup).filter(Boolean)),
     ] as string[];
     const group = nextDoubleGroupLetter(existingGroups);
+    // A ferry sibling must stay GRAY (validateContent's ferryMustBeGray) and mirrors the
+    // source's locomotive count, so doubling a ferry produces a true double-ferry pair by
+    // default; a plain route still gets the RED/BLUE alternation for visual distinction.
     const sibling: RouteDraft = {
       ...target,
       id: newRouteId(),
-      color: target.color === 'RED' ? 'BLUE' : 'RED',
+      color: target.ferryLocos > 0 ? target.color : target.color === 'RED' ? 'BLUE' : 'RED',
       doubleGroup: group,
     };
     mutate(get, set, {

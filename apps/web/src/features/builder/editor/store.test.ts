@@ -152,19 +152,43 @@ describe('editor store', () => {
     expect(routes.find((r) => r.id === 'r3')!.doubleGroup).toBe('B');
   });
 
-  it('convertToDouble is a no-op for tunnel, ferry, or already-double routes', () => {
+  it('convertToDouble is a no-op for tunnel or already-double routes', () => {
     const s = useEditorStore.getState();
     s.placeCity(city('c1'));
     s.placeCity(city('c2'));
     s.addRoute(route('r1', 'c1', 'c2', { isTunnel: true }));
-    s.addRoute(route('r2', 'c1', 'c2', { ferryLocos: 1, color: 'GRAY' }));
-    s.addRoute(route('r3', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
 
     s.convertToDouble('r1');
     s.convertToDouble('r2');
-    s.convertToDouble('r3');
 
-    expect(useEditorStore.getState().draft.routes).toHaveLength(3);
+    expect(useEditorStore.getState().draft.routes).toHaveLength(2);
+  });
+
+  it('convertToDouble mirrors a ferry route into a double-ferry pair', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2'));
+    s.addRoute(
+      route('r1', 'c1', 'c2', { color: 'GRAY', length: 3, ferryLocos: 2, isTunnel: false }),
+    );
+
+    s.convertToDouble('r1');
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(2);
+    const original = routes.find((r) => r.id === 'r1')!;
+    expect(original.doubleGroup).toBe('A');
+    const sibling = routes.find((r) => r.id !== 'r1')!;
+    expect(sibling).toMatchObject({
+      a: 'c1',
+      b: 'c2',
+      length: 3,
+      isTunnel: false,
+      ferryLocos: 2,
+      color: 'GRAY',
+      doubleGroup: 'A',
+    });
   });
 
   it('reverts convertToDouble in a single undo step', () => {
