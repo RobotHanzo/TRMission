@@ -57,6 +57,9 @@ are unaffected by content edits regardless of the registry.
   web board — keep them in that normalized space.
 - Route flags carry mechanics: `doubleGroup` (A–J pairs), `ferryLocos > 0` (gray ferry, N locomotives
   required), `isTunnel`. The engine reads these directly, so they must match the intended rule.
+  `doubleGroup` and `ferryLocos` may combine on custom maps — a "double ferry" pair where one or both
+  members require locomotives — even though the bundled Taiwan map's own authoring convention
+  (`routes.ts`) keeps every route at most one of double/tunnel/ferry.
 
 ## Extending `GameContent` without breaking old hashes
 
