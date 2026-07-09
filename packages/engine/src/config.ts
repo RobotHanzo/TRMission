@@ -24,3 +24,15 @@ export type DoubleRouteVariant = 'SINGLE_ONLY' | 'BOTH';
 
 export const variantForPlayerCount = (n: number, singleFor23: boolean): DoubleRouteVariant =>
   n <= 3 && singleFor23 ? 'SINGLE_ONLY' : 'BOTH';
+
+/**
+ * How many tracks of a parallel group (2 or 3 routes between one pair) may be claimed.
+ * With `doubleRouteSingleFor23` on (the default), the count scales with the player count:
+ * 2–3p → 1, 4p → 2, 5p → 3 (clamped to the group's size), which is exactly the historical
+ * double behavior (2 open at 4–5p, 1 open at 2–3p). With the flag off, every track is open.
+ */
+export const openTrackCount = (
+  groupSize: number,
+  playerCount: number,
+  singleFor23: boolean,
+): number => (singleFor23 ? Math.min(groupSize, Math.max(1, playerCount - 2)) : groupSize);

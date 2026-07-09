@@ -12,7 +12,7 @@ export {
 } from './board';
 
 export type { GameConfig, PlayerSeed, DoubleRouteVariant } from './config';
-export { variantForPlayerCount } from './config';
+export { variantForPlayerCount, openTrackCount } from './config';
 
 export type {
   GameState,
