@@ -218,6 +218,40 @@ export const RoomsListSchema = z.object({
   nextCursor: z.string().nullable(),
 });
 
+export const DashboardRoomDetailSchema = z.object({
+  code: z.string(),
+  hostId: z.string(),
+  hostName: z.string().optional(),
+  status: z.string(),
+  visibility: z.string(),
+  maxPlayers: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  gameId: z.string().optional(),
+  gameStatus: z.string().optional(),
+  members: z.array(
+    z.object({
+      userId: z.string(),
+      displayName: z.string(),
+      seat: z.number(),
+      isBot: z.boolean(),
+      isGuest: z.boolean(),
+      ready: z.boolean(),
+      difficulty: z.string().optional(),
+    }),
+  ),
+  spectators: z.array(z.object({ userId: z.string(), displayName: z.string() })),
+  settings: z.object({
+    map: z.object({ source: z.enum(['official', 'custom']), id: z.string() }),
+    allowSpectating: z.boolean(),
+    eventsMode: z.string(),
+    unlimitedStationBorrow: z.boolean(),
+    secondDrawAfterBlindRainbow: z.boolean(),
+    noUnfinishedTicketPenalty: z.boolean(),
+    doubleRouteSingleFor23: z.boolean(),
+  }),
+});
+
 // ---- maintainers --------------------------------------------------------------------
 
 export const MaintainerPutSchema = z.object({

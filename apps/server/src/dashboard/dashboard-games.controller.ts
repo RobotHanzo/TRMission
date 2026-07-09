@@ -20,6 +20,7 @@ import { DashboardGamesService } from './dashboard-games.service';
 import { PurgeService } from './purge.service';
 import {
   DashboardGameDetailSchema,
+  DashboardRoomDetailSchema,
   DashboardRoomRowSchema,
   GameLogSchema,
   GamesListQueryDto,
@@ -131,6 +132,16 @@ export class DashboardGamesController {
   @ApiResponse({ status: 200, schema: apiSchema(RoomsListSchema) })
   listRooms(@Query() query: RoomsListQueryDto) {
     return this.games.listRooms(query);
+  }
+
+  @Get('rooms/:code')
+  @RequirePermission('rooms.read')
+  @ApiOperation({
+    summary: 'One room: members, settings, and linked game status. Never exposes the seed.',
+  })
+  @ApiResponse({ status: 200, schema: apiSchema(DashboardRoomDetailSchema) })
+  roomDetail(@Param('code') code: string) {
+    return this.games.roomDetail(code);
   }
 
   @Post('rooms/:code/close')

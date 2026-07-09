@@ -3,7 +3,7 @@ import type { Db, Collection } from 'mongodb';
 import { MONGO_DB } from '../db/tokens';
 import { GameHub } from '../ws/hub';
 import { GameRegistry } from '../game/game-registry';
-import { RoomRepo, type RoomDoc } from '../lobby/room.repo';
+import { RoomRepo, DEFAULT_ROOM_SETTINGS, type RoomDoc } from '../lobby/room.repo';
 import { HistoryRepo } from '../history/history.repo';
 import type { AuthUser } from '../auth/auth.types';
 import { TokenService } from '../auth/token.service';
@@ -274,6 +274,57 @@ export class DashboardGamesService {
     return {
       rooms: docs.map(toRoomRow),
       nextCursor: last ? encodeCursor(last.updatedAt, last._id) : null,
+    };
+  }
+
+  async roomDetail(code: string) {
+    const room = await this.rooms.get(code);
+    if (!room) throw new NotFoundException('room not found');
+
+    const gameDoc = room.gameId
+      ? await this.games.findOne({ _id: room.gameId }, { projection: { status: 1 } })
+      : null;
+    // Merge over defaults so a room written before a settings field existed still projects fully.
+    const settings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+    const hostName = room.members.find((m) => m.userId === room.hostId)?.displayName;
+
+    return {
+      code: room._id,
+      hostId: room.hostId,
+      ...(hostName ? { hostName } : {}),
+      status: room.status,
+      visibility: settings.visibility,
+      maxPlayers: room.maxPlayers,
+      createdAt: room.createdAt.toISOString(),
+      updatedAt: room.updatedAt.toISOString(),
+      ...(room.gameId ? { gameId: room.gameId } : {}),
+      ...(gameDoc?.status ? { gameStatus: gameDoc.status } : {}),
+      // NOTE: room.seed is deliberately never projected — it encodes deck order (hidden hands).
+      members: room.members.map((m) => ({
+        userId: m.userId,
+        displayName: m.displayName,
+        seat: m.seat,
+        isBot: m.isBot === true,
+        isGuest: m.isGuest === true,
+        ready: m.ready === true,
+        ...(m.difficulty ? { difficulty: m.difficulty } : {}),
+      })),
+      spectators: (room.spectators ?? []).map((s) => ({
+        userId: s.userId,
+        displayName: s.displayName,
+      })),
+      settings: {
+        map:
+          settings.map.source === 'custom'
+            ? { source: 'custom' as const, id: settings.map.customMapId }
+            : { source: 'official' as const, id: settings.map.mapId },
+        allowSpectating: settings.allowSpectating,
+        eventsMode: settings.eventsMode,
+        unlimitedStationBorrow: settings.unlimitedStationBorrow,
+        secondDrawAfterBlindRainbow: settings.secondDrawAfterBlindRainbow,
+        noUnfinishedTicketPenalty: settings.noUnfinishedTicketPenalty,
+        doubleRouteSingleFor23: settings.doubleRouteSingleFor23,
+      },
     };
   }
 }

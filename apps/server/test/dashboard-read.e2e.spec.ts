@@ -314,4 +314,26 @@ describe('rooms', () => {
     expect(row.memberCount).toBe(2);
     expect(row.gameId).toBe(liveGameId);
   });
+
+  it('room detail returns members, settings, and linked game status — never the seed', async () => {
+    const res = await request(server())
+      .get(`/api/v1/dashboard/rooms/${roomCode}`)
+      .set(auth(admin.token))
+      .expect(200);
+    expect(res.body.code).toBe(roomCode);
+    expect(res.body.status).toBe('STARTED');
+    expect(res.body.gameId).toBe(liveGameId);
+    expect(res.body.gameStatus).toBe('LIVE');
+    expect(res.body.members).toHaveLength(2);
+    expect(res.body.settings.map.source).toBe('official');
+    expect(typeof res.body.settings.unlimitedStationBorrow).toBe('boolean');
+    expect(res.body).not.toHaveProperty('seed');
+  });
+
+  it('404s an unknown room code', async () => {
+    await request(server())
+      .get('/api/v1/dashboard/rooms/NOPE1')
+      .set(auth(admin.token))
+      .expect(404);
+  });
 });
