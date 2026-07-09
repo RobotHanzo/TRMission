@@ -64,8 +64,8 @@
   gap: var(--tr-space-2);
 }
 .brand-banner--header .brand-banner-icon {
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 36px;
 }
 .brand-banner--header .brand-banner-zh {
   font-size: 17px;
@@ -74,14 +74,14 @@
   font-size: 7px;
 }
 .brand-banner--hero .brand-banner-icon {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
 }
 .brand-banner--hero .brand-banner-zh {
-  font-size: 36px;
+  font-size: 48px;
 }
 .brand-banner--hero .brand-banner-en {
-  font-size: 11px;
+  font-size: 16px;
 }
 .header-actions {
   display: flex;

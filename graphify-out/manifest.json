@@ -385,18 +385,18 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/AppHeader.tsx": {
-    "mtime": 1783276378.0896225,
-    "ast_hash": "23b60c474d4760e8123ab0ad6287f9bc",
+    "mtime": 1783583398.0718713,
+    "ast_hash": "ae84934f7cbf1a65aaaabe1849cabe00",
     "semantic_hash": ""
   },
   "apps/web/src/components/Board.test.tsx": {
-    "mtime": 1783236082.7473838,
-    "ast_hash": "9235a0f7bfeb48cbded51db8f7c230f3",
+    "mtime": 1783582982.8641243,
+    "ast_hash": "ee5d9a4dc65036d0ba5d851a0cd792b8",
     "semantic_hash": ""
   },
   "apps/web/src/components/Board.tsx": {
-    "mtime": 1783236054.7338119,
-    "ast_hash": "151557847bf9437dc1ae2834d00f74fd",
+    "mtime": 1783582929.149231,
+    "ast_hash": "8117537280d5b4a474262e15316955ba",
     "semantic_hash": ""
   },
   "apps/web/src/components/CardMarket.test.tsx": {
@@ -610,9 +610,9 @@
     "semantic_hash": "905c3f58dc1cf243f797173467b15d0e"
   },
   "apps/web/src/features/tutorial/TutorialScreen.tsx": {
-    "mtime": 1783005450.231845,
-    "ast_hash": "3bb204a26bfdc679b345108dd02848b2",
-    "semantic_hash": "3bb204a26bfdc679b345108dd02848b2"
+    "mtime": 1783582513.104701,
+    "ast_hash": "e3ee42561e2bd81595d5a51fcc001d6a",
+    "semantic_hash": ""
   },
   "apps/web/src/features/tutorial/TutorialSpotlight.test.tsx": {
     "mtime": 1782775136.6409788,
@@ -625,8 +625,8 @@
     "semantic_hash": "f77a7915a0461e76d8dedaa1a5739dc1"
   },
   "apps/web/src/features/tutorial/curriculum.ts": {
-    "mtime": 1783579896.1957705,
-    "ast_hash": "424bab6e41f7fdf56d9119126bc19252",
+    "mtime": 1783582369.7363813,
+    "ast_hash": "806eedbd86c77361bba70cd03c80ad08",
     "semantic_hash": ""
   },
   "apps/web/src/features/tutorial/focus.test.ts": {
@@ -635,9 +635,9 @@
     "semantic_hash": "f2bb422b5f9f1b4eff54c4abec7d8369"
   },
   "apps/web/src/features/tutorial/focus.ts": {
-    "mtime": 1782775136.6430895,
-    "ast_hash": "24105887011fc111d8eac89a89fb1c6b",
-    "semantic_hash": "24105887011fc111d8eac89a89fb1c6b"
+    "mtime": 1783582469.353371,
+    "ast_hash": "9f368d4112b446a2298cb798b32708fd",
+    "semantic_hash": ""
   },
   "apps/web/src/features/tutorial/gate.test.ts": {
     "mtime": 1782776214.6613045,
@@ -820,8 +820,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/tutorial.ts": {
-    "mtime": 1783579943.1696596,
-    "ast_hash": "e254b38952ed5e8cea152c4842f5d33c",
+    "mtime": 1783583094.3045578,
+    "ast_hash": "5615e455ab655874057bf41b4c5ebef2",
     "semantic_hash": ""
   },
   "apps/web/src/main.tsx": {
@@ -880,13 +880,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/screens/GameStage.gate.test.tsx": {
-    "mtime": 1782776214.663702,
-    "ast_hash": "48aea4831e4592f7c76271d1fcfa9cce",
-    "semantic_hash": "48aea4831e4592f7c76271d1fcfa9cce"
+    "mtime": 1783583031.7716424,
+    "ast_hash": "1bff0e44f350890234f545f08647d97e",
+    "semantic_hash": ""
   },
   "apps/web/src/screens/GameStage.tsx": {
-    "mtime": 1783399699.3062446,
-    "ast_hash": "cd16eff215a87e6e5ca595538f2caf8b",
+    "mtime": 1783582971.0933435,
+    "ast_hash": "c960cd297b80ee8d1cc1159ed357790a",
     "semantic_hash": ""
   },
   "apps/web/src/screens/HistoryScreen.test.tsx": {
@@ -1520,8 +1520,8 @@
     "semantic_hash": ""
   },
   "apps/web/index.html": {
-    "mtime": 1783051193.212931,
-    "ast_hash": "43621a52d96f0b37c57ac7632e8b9faa",
+    "mtime": 1783580889.7686923,
+    "ast_hash": "af30bba56303bb93442f2cb25b271c6e",
     "semantic_hash": ""
   },
   "apps/web/public/sounds/CREDITS.md": {
@@ -2310,8 +2310,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/App.tsx": {
-    "mtime": 1783273385.6526103,
-    "ast_hash": "ecd86a5652b0015287d5e4817641a56e",
+    "mtime": 1783581244.0807488,
+    "ast_hash": "bd169d34f0c00f28efb233a327d280be",
     "semantic_hash": ""
   },
   "apps/admin/src/components/ConfirmDialog.tsx": {
@@ -2425,8 +2425,8 @@
     "semantic_hash": ""
   },
   "apps/admin/index.html": {
-    "mtime": 1783106315.8305728,
-    "ast_hash": "f03bac2d9d2ebe5e2195a2e3bfadc0e3",
+    "mtime": 1783580891.2485187,
+    "ast_hash": "5c67e179e7c97a224b2a8455f64eea5d",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-04-docker-build-push-workflow-design.md": {
@@ -2550,8 +2550,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/screens/WelcomeScreen.tsx": {
-    "mtime": 1783138953.3289177,
-    "ast_hash": "bf5d0401dd3547ffa7da8b6ada7dc2ac",
+    "mtime": 1783583404.9344695,
+    "ast_hash": "1d9dce78621c7d2ca45ff0cab72ab65a",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-04-admin-login-redirect-design.md": {
@@ -2965,13 +2965,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/MapScene.test.tsx": {
-    "mtime": 1783276378.2643836,
-    "ast_hash": "0334969e5df0ea0aaf786055285d099f",
+    "mtime": 1783583018.7552104,
+    "ast_hash": "af3557392dd2d8533f0cbac04bca25b0",
     "semantic_hash": ""
   },
   "apps/web/src/components/MapScene.tsx": {
-    "mtime": 1783195674.8247037,
-    "ast_hash": "a2c7b2b63e80748cee44499f1808937a",
+    "mtime": 1783582902.7776601,
+    "ast_hash": "1c0fcbff02586fb5cfad3508373d1ae6",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md": {
@@ -3467,6 +3467,31 @@
   "packages/map-data/test/double-tunnel.spec.ts": {
     "mtime": 1783411610.747736,
     "ast_hash": "9f2a05e92101577d9df1c976a9b39da5",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/favicon.png": {
+    "mtime": 1783580881.883289,
+    "ast_hash": "701563d245370de0a723736d20f06cba",
+    "semantic_hash": ""
+  },
+  "apps/admin/public/icon.svg": {
+    "mtime": 1783580881.856283,
+    "ast_hash": "53a17a2d6d4356c04ac9142ed1b62cd3",
+    "semantic_hash": ""
+  },
+  "apps/web/public/favicon.png": {
+    "mtime": 1783580613.7899427,
+    "ast_hash": "701563d245370de0a723736d20f06cba",
+    "semantic_hash": ""
+  },
+  "apps/web/public/icon.svg": {
+    "mtime": 1783543623.9364774,
+    "ast_hash": "53a17a2d6d4356c04ac9142ed1b62cd3",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/BrandBanner.tsx": {
+    "mtime": 1783583385.621796,
+    "ast_hash": "8e3f49fbe47b2ab992a5d69213f75623",
     "semantic_hash": ""
   }
 }
