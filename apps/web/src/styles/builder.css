@@ -513,7 +513,9 @@
   width: max-content;
   min-width: 12em;
   max-width: min(24em, 90vw);
-  max-height: 20em;
+  /* Only clip (and scroll) once the popover would actually run past the viewport — a fixed em
+     cap clipped this well before the window ran out of room. */
+  max-height: min(28em, calc(100vh - 6em));
   overflow-y: auto;
   background: var(--tr-surface);
   border: 1px solid var(--tr-line);
@@ -541,6 +543,9 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
+}
+.stats-color-icon {
+  color: var(--tr-ink-soft);
 }
 .stats-color-count {
   font-weight: 600;

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronUp, MapPin, Route } from 'lucide-react';
+import { ChevronUp, MapPin, Route, Ship, TrainFrontTunnel } from 'lucide-react';
 import { TRAIN_COLORS } from '@trm/shared';
 import type { RouteColor } from '@trm/shared';
 import { CARD_COLOR_TOKENS, GRAY_TOKEN } from '../../../theme/colors';
@@ -14,8 +14,15 @@ export interface MapStats {
   routes: number;
   /** Total train-car segments across every route (a length-4 route counts as 4). */
   segments: number;
-  /** Segment totals per colour, canonical order, colours with zero segments omitted. */
+  /** Segment totals per colour, canonical order, colours with zero segments omitted. Tunnel and
+   *  ferry routes are broken out separately (below) rather than folded into their colour — a
+   *  tunnel can be any colour and a ferry is always GRAY, so leaving them in would make that
+   *  colour's count (GRAY especially) a mix of unrelated mechanics. */
   segmentsByColor: { color: RouteColor; segments: number }[];
+  /** Total segments across tunnel routes of any colour. */
+  tunnelSegments: number;
+  /** Total segments across ferry routes (always GRAY). */
+  ferrySegments: number;
   shortTickets: number;
   longTickets: number;
 }
@@ -25,9 +32,17 @@ export function useMapStats(): MapStats {
   return useMemo(() => {
     const byColor = new Map<string, number>();
     let segments = 0;
+    let tunnelSegments = 0;
+    let ferrySegments = 0;
     for (const r of draft.routes) {
       segments += r.length;
-      byColor.set(r.color, (byColor.get(r.color) ?? 0) + r.length);
+      if (r.ferryLocos > 0) {
+        ferrySegments += r.length;
+      } else if (r.isTunnel) {
+        tunnelSegments += r.length;
+      } else {
+        byColor.set(r.color, (byColor.get(r.color) ?? 0) + r.length);
+      }
     }
     const segmentsByColor = ROUTE_COLORS.filter((c) => (byColor.get(c) ?? 0) > 0).map((color) => ({
       color,
@@ -38,6 +53,8 @@ export function useMapStats(): MapStats {
       routes: draft.routes.length,
       segments,
       segmentsByColor,
+      tunnelSegments,
+      ferrySegments,
       shortTickets: draft.tickets.filter((tk) => tk.deck === 'SHORT').length,
       longTickets: draft.tickets.filter((tk) => tk.deck === 'LONG').length,
     };
@@ -106,7 +123,9 @@ export function StatsPanel() {
           <StatRow label={t('builder.statStations')} value={stats.stations} />
           <StatRow label={t('builder.statRoutes')} value={stats.routes} />
           <StatRow label={t('builder.statSegments')} value={stats.segments} />
-          {stats.segmentsByColor.length > 0 && (
+          {(stats.segmentsByColor.length > 0 ||
+            stats.tunnelSegments > 0 ||
+            stats.ferrySegments > 0) && (
             <>
               <span className="muted stats-sublabel">{t('builder.statSegmentsByColor')}</span>
               <div className="stats-colors">
@@ -128,6 +147,26 @@ export function StatsPanel() {
                     </div>
                   );
                 })}
+                {stats.tunnelSegments > 0 && (
+                  <div
+                    className="stats-color-chip"
+                    title={`${t('builder.statTunnelSegments')}: ${stats.tunnelSegments}`}
+                  >
+                    <TrainFrontTunnel size={14} className="stats-color-icon" aria-hidden />
+                    <span className="stats-color-name">{t('builder.statTunnelSegments')}</span>
+                    <span className="stats-color-count">{stats.tunnelSegments}</span>
+                  </div>
+                )}
+                {stats.ferrySegments > 0 && (
+                  <div
+                    className="stats-color-chip"
+                    title={`${t('builder.statFerrySegments')}: ${stats.ferrySegments}`}
+                  >
+                    <Ship size={14} className="stats-color-icon" aria-hidden />
+                    <span className="stats-color-name">{t('builder.statFerrySegments')}</span>
+                    <span className="stats-color-count">{stats.ferrySegments}</span>
+                  </div>
+                )}
               </div>
             </>
           )}

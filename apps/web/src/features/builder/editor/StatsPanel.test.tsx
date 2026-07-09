@@ -11,7 +11,9 @@ const cities: CityDraft[] = [
   { id: 'c3', nameZh: '丙', nameEn: 'C', x: 30, y: 30, region: 'r', isIsland: false },
 ];
 
-// Segments per colour: RED = 2+3+2 = 7, BLUE = 4+2 = 6, GRAY = 1 (ferry). Total = 14.
+// Segments per colour: RED = 2+3+2 = 7 (plain only, r7 tunnel excluded), BLUE = 4+2 = 6.
+// r4 (GRAY, ferry) and r7 (RED, tunnel) are broken out of the colour breakdown entirely.
+// Total = 2+3+4+1+2+2+3 = 17.
 const routes: RouteDraft[] = [
   { id: 'r1', a: 'c1', b: 'c2', color: 'RED', length: 2, ferryLocos: 0, isTunnel: false },
   { id: 'r2', a: 'c2', b: 'c3', color: 'RED', length: 3, ferryLocos: 0, isTunnel: false },
@@ -37,6 +39,7 @@ const routes: RouteDraft[] = [
     isTunnel: false,
     doubleGroup: 'A',
   },
+  { id: 'r7', a: 'c1', b: 'c3', color: 'RED', length: 3, ferryLocos: 0, isTunnel: true },
 ];
 
 const tickets: TicketDraft[] = [
@@ -60,7 +63,7 @@ describe('StatsPanel', () => {
     render(<StatsPanel />);
     const toggle = screen.getByRole('button', { name: '地圖統計' });
     expect(toggle.textContent).toContain('3'); // 3 stations
-    expect(toggle.textContent).toContain('6'); // 6 routes
+    expect(toggle.textContent).toContain('7'); // 7 routes
     // The breakdown stays hidden until expanded.
     expect(screen.queryByText('車廂總數')).not.toBeInTheDocument();
   });
@@ -72,8 +75,8 @@ describe('StatsPanel', () => {
     const rowValue = (label: string): string | null =>
       screen.getByText(label).closest('.stats-row')?.textContent ?? null;
     expect(rowValue('車站')).toContain('3');
-    expect(rowValue('路線')).toContain('6');
-    expect(rowValue('車廂總數')).toContain('14');
+    expect(rowValue('路線')).toContain('7');
+    expect(rowValue('車廂總數')).toContain('17');
     expect(rowValue('短途任務')).toContain('2');
     expect(rowValue('長途任務')).toContain('1');
   });
@@ -85,8 +88,20 @@ describe('StatsPanel', () => {
     // Sum of lengths per colour (both halves of the double pair count).
     expect(screen.getByTitle('紅: 7')).toBeInTheDocument();
     expect(screen.getByTitle('藍: 6')).toBeInTheDocument();
-    expect(screen.getByTitle('灰: 1')).toBeInTheDocument();
     // Colours with no routes never appear.
     expect(screen.queryByTitle(/^綠:/)).not.toBeInTheDocument();
+  });
+
+  it('breaks tunnel and ferry segments out of the colour breakdown entirely', () => {
+    render(<StatsPanel />);
+    fireEvent.click(screen.getByRole('button', { name: '地圖統計' }));
+
+    // r4 is a GRAY ferry route: it never shows up as a GRAY chip...
+    expect(screen.queryByTitle(/^灰:/)).not.toBeInTheDocument();
+    // ...it's counted under its own Ferry chip instead.
+    expect(screen.getByTitle('渡輪車廂: 1')).toBeInTheDocument();
+    // r7 is a RED tunnel route: it's excluded from the RED chip (which stays at 7, the plain
+    // RED routes only) and counted under its own Tunnel chip instead.
+    expect(screen.getByTitle('隧道車廂: 3')).toBeInTheDocument();
   });
 });
