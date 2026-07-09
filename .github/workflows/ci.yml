@@ -32,6 +32,12 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Cache mongodb-memory-server binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
       - name: Typecheck
         run: yarn typecheck
 
