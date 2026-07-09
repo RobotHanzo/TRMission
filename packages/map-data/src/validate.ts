@@ -53,8 +53,12 @@ export function formatIssue(issue: ValidationIssue): string {
       return `${p.routeId}: route cannot be both ferry and tunnel`;
     case 'bowOutOfRange':
       return `${p.routeId}: bow ${p.bow} is outside the allowed range [-${p.limit}, ${p.limit}]`;
-    case 'doubleGroupWrongCount':
-      return `double group ${p.group}: expected exactly 2 routes, got ${p.count}`;
+    case 'doubleGroupInvalidSize':
+      return `parallel group ${p.group}: expected 2 or 3 routes, got ${p.count}`;
+    case 'tooManyParallelRoutes':
+      return `city pair ${p.pair}: ${p.count} parallel routes exceeds the maximum of 3`;
+    case 'multipleGroupsOnPair':
+      return `city pair ${p.pair}: has more than one parallel group (${p.groups})`;
     case 'doubleGroupDifferentPairs':
       return `double group ${p.group}: the two routes connect different city pairs`;
     case 'doubleGroupLengthMismatch':
@@ -173,19 +177,34 @@ export function validateContent(content: GameContent): ValidationResult {
     }
   }
 
-  // --- double-route pairs ---
+  // --- parallel-route groups (2 or 3 members between one city pair) ---
   for (const [group, members] of doubleGroups) {
-    if (members.length !== 2) {
-      push('doubleGroupWrongCount', { group, count: members.length });
+    if (members.length < 2 || members.length > 3) {
+      push('doubleGroupInvalidSize', { group, count: members.length });
       continue;
     }
-    const [m0, m1] = members as [RouteDef, RouteDef];
-    if (pairKey(m0.a as string, m0.b as string) !== pairKey(m1.a as string, m1.b as string)) {
+    const first = members[0] as RouteDef;
+    const firstPair = pairKey(first.a as string, first.b as string);
+    if (members.some((m) => pairKey(m.a as string, m.b as string) !== firstPair)) {
       push('doubleGroupDifferentPairs', { group });
     }
-    if (m0.length !== m1.length) {
+    if (members.some((m) => m.length !== first.length)) {
       push('doubleGroupLengthMismatch', { group });
     }
+  }
+
+  // --- per-pair parallelism cap: at most 3 routes and at most 1 group per city pair ---
+  const routesByPair = new Map<string, RouteDef[]>();
+  for (const r of routes) {
+    const k = pairKey(r.a as string, r.b as string);
+    const arr = routesByPair.get(k) ?? [];
+    arr.push(r);
+    routesByPair.set(k, arr);
+  }
+  for (const [pair, rs] of routesByPair) {
+    if (rs.length > 3) push('tooManyParallelRoutes', { pair, count: rs.length });
+    const groups = new Set(rs.map((r) => r.doubleGroup).filter(Boolean));
+    if (groups.size > 1) push('multipleGroupsOnPair', { pair, groups: [...groups].join(',') });
   }
 
   // --- tickets ---
