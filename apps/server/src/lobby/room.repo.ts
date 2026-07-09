@@ -101,6 +101,7 @@ export type BecomeSpectatorResult =
   | 'not_found'
   | 'started'
   | 'not_member'
+  | 'is_host'
   | 'only_member'
   | 'spectating_disabled';
 export type BecomePlayerResult = RoomDoc | 'not_found' | 'started' | 'not_spectator' | 'full';
@@ -473,16 +474,17 @@ export class RoomRepo implements OnModuleInit {
     return res.modifiedCount === 1;
   }
 
-  /** A seated member gives up their seat to watch instead: everything but their identity moves
-   *  out of `members` into `spectators` — seats renumber and host transfers exactly like
-   *  `leave()` already does. Blocked if they're the room's only member (nothing left to seat)
-   *  or spectating is disabled (they'd be orphaned the moment the game actually starts). */
+  /** A seated non-host member gives up their seat to watch instead: everything but their identity
+   *  moves out of `members` into `spectators` and seats renumber. Blocked for the host (owners
+   *  can't spectate — they leave via transfer/close), if they're the room's only member (nothing
+   *  left to seat), or if spectating is disabled (they'd be orphaned once the game starts). */
   async becomeSpectator(code: string, userId: string): Promise<BecomeSpectatorResult> {
     const room = await this.col.findOne({ _id: code });
     if (!room) return 'not_found';
     if (room.status !== 'LOBBY') return 'started';
     const leaving = room.members.find((m) => m.userId === userId);
     if (!leaving) return 'not_member';
+    if (room.hostId === userId) return 'is_host';
     if (room.members.length <= 1) return 'only_member';
     const settings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
     if (!settings.allowSpectating) return 'spectating_disabled';
@@ -490,7 +492,6 @@ export class RoomRepo implements OnModuleInit {
     const remaining = room.members
       .filter((m) => m.userId !== userId)
       .map((m, i) => ({ ...m, seat: i }));
-    const hostId = room.hostId === userId ? (remaining[0]?.userId ?? room.hostId) : room.hostId;
     const spectator: RoomSpectator = {
       userId: leaving.userId,
       displayName: leaving.displayName,
@@ -498,10 +499,7 @@ export class RoomRepo implements OnModuleInit {
     };
     await this.col.updateOne(
       { _id: code },
-      {
-        $set: { members: remaining, hostId, updatedAt: new Date() },
-        $push: { spectators: spectator },
-      },
+      { $set: { members: remaining }, $push: { spectators: spectator } },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }

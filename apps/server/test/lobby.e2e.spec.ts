@@ -233,3 +233,27 @@ describe('lobby: spectator leave + kick', () => {
     expect(kicked.body.spectators).toEqual([]);
   });
 });
+
+describe('lobby: host cannot spectate', () => {
+  it('rejects the host demoting to spectator, but lets a non-host demote', async () => {
+    const a = await guest('Ada');
+    const b = await guest('Ben');
+    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(a.token)).expect(400); // host
+    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(b.token)).expect(200); // non-host
+  });
+
+  it('rejects a seated player minting a spectate ticket for their own game', async () => {
+    const a = await guest('Cid');
+    const b = await guest('Dot');
+    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/ready`).set(auth(a.token)).send({ ready: true }).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/ready`).set(auth(b.token)).send({ ready: true }).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/start`).set(auth(a.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(a.token)).expect(403);
+  });
+});

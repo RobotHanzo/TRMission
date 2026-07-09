@@ -196,6 +196,7 @@ export class LobbyService {
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'started') throw new BadRequestException('game already started');
     if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    if (r === 'is_host') throw new BadRequestException('the host cannot spectate');
     if (r === 'only_member') throw new BadRequestException('cannot spectate as the only member');
     if (r === 'spectating_disabled') {
       throw new BadRequestException('spectating is disabled for this room');
@@ -357,6 +358,9 @@ export class LobbyService {
     const s = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
     if (!s.allowSpectating) throw new ForbiddenException('spectating is disabled for this room');
     if (!room.gameId) throw new BadRequestException('game has not started');
+    if (this.seatOf(room, user.userId) >= 0) {
+      throw new ForbiddenException('players cannot spectate their own game');
+    }
     await this.rooms.recordSpectator(code, {
       userId: user.userId,
       displayName: user.displayName,
