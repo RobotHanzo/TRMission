@@ -286,7 +286,7 @@ const resources = {
         ticketsKept: '{{name}} 保留了 {{count}} 張任務卡',
         ticketCompleted: '{{name}} 完成任務 {{from}}–{{to}}（+{{points}}）',
         passed: '{{name}} 跳過',
-        endgame: '最終回合：剩 {{turns}} 回合',
+        endgame: '最終回合：剩餘 {{turns}} 輪',
         gameEnded: '遊戲結束',
         eventAnnounced: '預報：{{event}} 即將來臨',
         eventStarted: '{{event}} 開始',
