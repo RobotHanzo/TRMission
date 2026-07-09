@@ -154,10 +154,7 @@ export class MongoGameStore implements GameStorePort {
   }
 
   async addSpectator(gameId: string, userId: string): Promise<void> {
-    await this.games.updateOne(
-      { _id: gameId },
-      { $addToSet: { spectators: userId }, $set: { updatedAt: new Date() } },
-    );
+    await this.games.updateOne({ _id: gameId }, { $addToSet: { spectators: userId } });
   }
 
   async appendChat(

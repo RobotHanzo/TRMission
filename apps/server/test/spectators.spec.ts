@@ -76,6 +76,19 @@ describe('spectator persistence', () => {
     expect(doc?.spectators).toEqual(['watcher']);
   });
 
+  it('addSpectator does not bump the game updatedAt (spectating is not activity)', async () => {
+    const board = taiwanBoard();
+    const config: GameConfig = { seed: 'spect-nobump', players, contentHash: CONTENT_HASH };
+    const genesis = initGame(board, config);
+    await store.createGame('gs-nobump', config, genesis, stateDigest(genesis));
+    const before = await db.collection<GameDoc>('games').findOne({ _id: 'gs-nobump' });
+    await new Promise((r) => setTimeout(r, 5));
+    await store.addSpectator('gs-nobump', 'watcher');
+    const after = await db.collection<GameDoc>('games').findOne({ _id: 'gs-nobump' });
+    expect(after?.spectators).toEqual(['watcher']);
+    expect(after?.updatedAt.getTime()).toBe(before?.updatedAt.getTime());
+  });
+
   it('recordCompletion copies spectators (minus seated players) and stamps engineVersion', async () => {
     const board = taiwanBoard();
     const config: GameConfig = { seed: 'spect-2', players, contentHash: CONTENT_HASH };

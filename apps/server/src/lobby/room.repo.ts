@@ -540,7 +540,7 @@ export class RoomRepo implements OnModuleInit {
   async recordSpectator(code: string, spectator: RoomSpectator): Promise<void> {
     await this.col.updateOne(
       { _id: code, 'spectators.userId': { $ne: spectator.userId } },
-      { $push: { spectators: spectator }, $set: { updatedAt: new Date() } },
+      { $push: { spectators: spectator } },
     );
   }
 }
