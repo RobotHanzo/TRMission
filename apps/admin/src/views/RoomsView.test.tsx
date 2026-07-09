@@ -154,3 +154,40 @@ describe('RoomsView delete toasts', () => {
     ).toBeInTheDocument();
   });
 });
+
+describe('RoomsView detail drawer', () => {
+  const ROOM_DETAIL = {
+    code: 'ABCD',
+    hostId: 'h1',
+    hostName: 'Hostie',
+    status: 'LOBBY',
+    visibility: 'PUBLIC',
+    maxPlayers: 5,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    members: [
+      { userId: 'h1', displayName: 'Hostie', seat: 0, isBot: false, isGuest: false, ready: true },
+    ],
+    spectators: [],
+    settings: {
+      map: { source: 'official', id: 'taiwan' },
+      allowSpectating: true,
+      eventsMode: 'off',
+      unlimitedStationBorrow: true,
+      secondDrawAfterBlindRainbow: false,
+      noUnfinishedTicketPenalty: false,
+      doubleRouteSingleFor23: true,
+    },
+  };
+
+  it('opens the detail drawer when a room row is clicked', async () => {
+    stubFetch({
+      '/dashboard/rooms/ABCD': { status: 200, body: ROOM_DETAIL },
+      '/dashboard/rooms?': { status: 200, body: { rooms: [ROOM_ROW], nextCursor: null } },
+    });
+    render(<RoomsView />);
+    fireEvent.click(await screen.findByText('ABCD'));
+    expect(await screen.findByText('Hostie')).toBeInTheDocument();
+    expect(await screen.findByText('房間詳情 · ABCD')).toBeInTheDocument();
+  });
+});

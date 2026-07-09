@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { DoorClosed, Info, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { api, type RoomRow } from '../net/rest';
+import { api, type RoomDetail, type RoomRow } from '../net/rest';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { SignalBadge, aspectForStatus } from '../components/SignalBadge';
+import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useToast } from '../store/toast';
-import { fmtDateTime } from '../lib/fmt';
+import { fmtDateTime, shortId } from '../lib/fmt';
 
 const TABS = ['LOBBY', 'STARTED', 'CLOSED', 'all'] as const;
 const TAB_KEY: Record<(typeof TABS)[number], string> = {
@@ -24,9 +25,189 @@ const statusKey = (s: string): string =>
       ? 'rooms.statusStarted'
       : 'rooms.statusClosed';
 
+function RoomDrawer({
+  row,
+  onClose,
+  onRequestClose,
+  onRequestDelete,
+}: {
+  row: RoomRow;
+  onClose: () => void;
+  onRequestClose: (code: string) => void;
+  onRequestDelete: (code: string) => void;
+}) {
+  const { t } = useTranslation();
+  const locale = useUi((s) => s.locale);
+  const canClose = useSession((s) => s.hasPermission('rooms.close'));
+  const canDelete = useSession((s) => s.hasPermission('rooms.delete'));
+  const [detail, setDetail] = useState<RoomDetail | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void api
+      .getRoom(row.code)
+      .then((d) => {
+        if (!cancelled) setDetail(d);
+      })
+      .catch(() => onClose());
+    return () => {
+      cancelled = true;
+    };
+  }, [row.code, onClose]);
+
+  const flag = (on: boolean): string => (on ? t('rooms.on') : t('rooms.off'));
+
+  return (
+    <Drawer title={`${t('rooms.detailTitle')} · ${row.code}`} onClose={onClose}>
+      {!detail ? (
+        <div className="oc-empty">{t('common.loading')}</div>
+      ) : (
+        <>
+          <section>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.colStatus')}</span>
+              <span className="v">
+                <SignalBadge
+                  aspect={aspectForStatus(row.status)}
+                  label={t(statusKey(row.status))}
+                />
+              </span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.host')}</span>
+              <span className="v">{detail.hostName ?? shortId(detail.hostId)}</span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.colVisibility')}</span>
+              <span className="v">
+                {detail.visibility === 'PUBLIC' ? t('rooms.visPublic') : t('rooms.visInvite')}
+              </span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.colMembers')}</span>
+              <span className="v">
+                {row.memberCount}/{detail.maxPlayers}
+              </span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.created')}</span>
+              <span className="v">{fmtDateTime(detail.createdAt, locale)}</span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.updated')}</span>
+              <span className="v">{fmtDateTime(detail.updatedAt, locale)}</span>
+            </div>
+          </section>
+
+          {detail.gameId && (
+            <section>
+              <h3>{t('rooms.linkedGame')}</h3>
+              <div className="oc-kv">
+                <span className="k">ID</span>
+                <span className="v oc-mono" title={detail.gameId}>
+                  {shortId(detail.gameId)}
+                </span>
+              </div>
+              {detail.gameStatus && (
+                <div className="oc-kv">
+                  <span className="k">{t('rooms.gameStatus')}</span>
+                  <span className="v">{detail.gameStatus}</span>
+                </div>
+              )}
+            </section>
+          )}
+
+          <section>
+            <h3>{t('rooms.members')}</h3>
+            {detail.members.map((m) => (
+              <div className="oc-kv" key={m.userId}>
+                <span className="k">
+                  P{m.seat + 1} {m.displayName}
+                </span>
+                <span className="v">
+                  {m.isBot
+                    ? `${t('rooms.bot')}${m.difficulty ? ` · ${m.difficulty}` : ''}`
+                    : m.isGuest
+                      ? t('rooms.guest')
+                      : ''}{' '}
+                  <span className="oc-muted">
+                    {m.ready ? t('rooms.ready') : t('rooms.notReady')}
+                  </span>
+                </span>
+              </div>
+            ))}
+            {detail.spectators.length > 0 && (
+              <div className="oc-kv">
+                <span className="k">{t('rooms.spectators')}</span>
+                <span className="v">{detail.spectators.length}</span>
+              </div>
+            )}
+          </section>
+
+          <section>
+            <h3>{t('rooms.settings')}</h3>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.map')}</span>
+              <span className="v">
+                {detail.settings.map.source === 'custom'
+                  ? `${t('rooms.mapCustom')} · ${shortId(detail.settings.map.id)}`
+                  : `${t('rooms.mapOfficial')} · ${detail.settings.map.id}`}
+              </span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.allowSpectating')}</span>
+              <span className="v">{flag(detail.settings.allowSpectating)}</span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.eventsMode')}</span>
+              <span className="v">{detail.settings.eventsMode}</span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.flagUnlimitedStationBorrow')}</span>
+              <span className="v">{flag(detail.settings.unlimitedStationBorrow)}</span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.flagSecondDrawAfterBlindRainbow')}</span>
+              <span className="v">{flag(detail.settings.secondDrawAfterBlindRainbow)}</span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.flagNoUnfinishedTicketPenalty')}</span>
+              <span className="v">{flag(detail.settings.noUnfinishedTicketPenalty)}</span>
+            </div>
+            <div className="oc-kv">
+              <span className="k">{t('rooms.flagDoubleRouteSingleFor23')}</span>
+              <span className="v">{flag(detail.settings.doubleRouteSingleFor23)}</span>
+            </div>
+          </section>
+
+          {canClose && row.status === 'LOBBY' && (
+            <section>
+              <button className="oc-btn danger" onClick={() => onRequestClose(row.code)}>
+                <DoorClosed size={14} aria-hidden />
+                {t('rooms.close')}
+              </button>
+            </section>
+          )}
+          {canDelete && (
+            <section>
+              <button className="oc-btn danger" onClick={() => onRequestDelete(row.code)}>
+                <Trash2 size={14} aria-hidden />
+                {t('rooms.delete')}
+              </button>
+            </section>
+          )}
+        </>
+      )}
+    </Drawer>
+  );
+}
+
 export function RoomsView() {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
+  const param = useUi((s) => s.param);
+  const openDetail = useUi((s) => s.openDetail);
+  const closeDetail = useUi((s) => s.closeDetail);
   const canClose = useSession((s) => s.hasPermission('rooms.close'));
   const canDelete = useSession((s) => s.hasPermission('rooms.delete'));
   const pushToast = useToast((s) => s.push);
@@ -76,6 +257,7 @@ export function RoomsView() {
     try {
       await api.deleteRoom(code, reason);
       setRows((prev) => prev.filter((r) => r.code !== code));
+      if (param === code) closeDetail();
       pushToast('success', t('toast.roomDeleted'));
     } catch (e) {
       pushToast('error', e instanceof Error ? e.message : t('common.error'));
@@ -84,6 +266,8 @@ export function RoomsView() {
       setDeleting(null);
     }
   };
+
+  const openRow = param ? rows.find((r) => r.code === param) : undefined;
 
   return (
     <div>
@@ -125,7 +309,7 @@ export function RoomsView() {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.code}>
+              <tr key={r.code} className="clickable" onClick={() => openDetail('rooms', r.code)}>
                 <td className="oc-mono">{r.code}</td>
                 <td>
                   <SignalBadge aspect={aspectForStatus(r.status)} label={t(statusKey(r.status))} />
@@ -138,7 +322,13 @@ export function RoomsView() {
                 {(canClose || canDelete) && (
                   <td>
                     {canClose && r.status === 'LOBBY' && (
-                      <button className="oc-btn danger" onClick={() => setClosing(r.code)}>
+                      <button
+                        className="oc-btn danger"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setClosing(r.code);
+                        }}
+                      >
                         <DoorClosed size={14} aria-hidden />
                         {t('rooms.close')}
                       </button>
@@ -147,7 +337,10 @@ export function RoomsView() {
                       <button
                         className="oc-btn danger"
                         style={canClose && r.status === 'LOBBY' ? { marginLeft: 6 } : undefined}
-                        onClick={() => setDeleting(r.code)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleting(r.code);
+                        }}
                       >
                         <Trash2 size={14} aria-hidden />
                         {t('rooms.delete')}
@@ -170,6 +363,15 @@ export function RoomsView() {
           </div>
         )}
       </div>
+
+      {openRow && (
+        <RoomDrawer
+          row={openRow}
+          onClose={closeDetail}
+          onRequestClose={setClosing}
+          onRequestDelete={setDeleting}
+        />
+      )}
 
       {closing && (
         <ConfirmDialog
