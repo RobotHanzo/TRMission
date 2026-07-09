@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useEditorStore } from './store';
+import { useEditorStore, nextDoubleGroupLetter } from './store';
 import { api } from '../../../net/rest';
 import type * as Rest from '../../../net/rest';
 import type { CityDraft, MapGeographyDraft, RouteDraft, TicketDraft } from '../../../net/rest';
@@ -194,6 +194,41 @@ describe('editor store', () => {
       expect(routes.find((r) => r.id === 'r3')!.doubleGroup).toBe('B');
     });
 
+    it('never reuses a letter when all of A–J are already taken', () => {
+      const s = useEditorStore.getState();
+      // Ten distinct pairs, one double-group each — exhausting A–J (as the bundled map does).
+      const letters = 'ABCDEFGHIJ';
+      for (let i = 0; i < letters.length; i++) {
+        const a = `p${i}a`;
+        const b = `p${i}b`;
+        s.placeCity(city(a, i));
+        s.placeCity(city(b, i + 1));
+        s.addRoute(route(`${a}1`, a, b, { doubleGroup: letters[i]! }));
+        s.addRoute(route(`${a}2`, a, b, { doubleGroup: letters[i]! }));
+      }
+      // An 11th pair converted to a double must get a fresh, unique letter — not a duplicate 'A'.
+      s.placeCity(city('z1', 50));
+      s.placeCity(city('z2', 60));
+      s.addRoute(route('z', 'z1', 'z2'));
+
+      s.setPairTrackCount('z', 2);
+
+      const routes = useEditorStore.getState().draft.routes;
+      const group = routes.find((r) => r.id === 'z')!.doubleGroup;
+      expect(letters).not.toContain(group);
+      // Every group letter still maps to exactly one city pair (no cross-pair collision).
+      const pairsByGroup = new Map<string, Set<string>>();
+      for (const r of routes) {
+        if (!r.doubleGroup) continue;
+        const key = [r.a, r.b].sort().join('~');
+        (
+          pairsByGroup.get(r.doubleGroup) ??
+          pairsByGroup.set(r.doubleGroup, new Set()).get(r.doubleGroup)!
+        ).add(key);
+      }
+      for (const pairs of pairsByGroup.values()) expect(pairs.size).toBe(1);
+    });
+
     it('normalizes a messy pair (two groups on one pair) into a single clean group', () => {
       const s = useEditorStore.getState();
       s.placeCity(city('c1'));
@@ -224,6 +259,28 @@ describe('editor store', () => {
       const routes = useEditorStore.getState().draft.routes;
       expect(routes).toHaveLength(1);
       expect(routes[0]!.doubleGroup).toBeUndefined();
+    });
+  });
+
+  describe('nextDoubleGroupLetter', () => {
+    it('returns the first free single letter', () => {
+      expect(nextDoubleGroupLetter([])).toBe('A');
+      expect(nextDoubleGroupLetter(['A'])).toBe('B');
+      expect(nextDoubleGroupLetter(['A', 'C'])).toBe('B');
+      expect(nextDoubleGroupLetter(['B'])).toBe('A');
+    });
+
+    it('extends past J with a fresh letter instead of reusing one when A–J are taken', () => {
+      const aToJ = [...'ABCDEFGHIJ'];
+      const next = nextDoubleGroupLetter(aToJ);
+      expect(aToJ).not.toContain(next);
+      expect(next).toBe('K');
+    });
+
+    it('never returns a letter already in use, however many exist', () => {
+      const aToZ = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+      const next = nextDoubleGroupLetter(aToZ);
+      expect(aToZ).not.toContain(next);
     });
   });
 

@@ -43,14 +43,28 @@ let nextRouteCounter = 0;
 export const newRouteId = (): string =>
   `r${Date.now().toString(36)}${(nextRouteCounter++).toString(36)}`;
 
-const DOUBLE_GROUP_LETTERS = 'ABCDEFGHIJ';
-/** First double-group letter (A-J) not already used by `existingGroups`; falls back to 'A' once
- *  all ten are taken (a builder-side limit, not enforced elsewhere). */
-export function nextDoubleGroupLetter(existingGroups: readonly string[]): string {
-  for (const letter of DOUBLE_GROUP_LETTERS) {
-    if (!existingGroups.includes(letter)) return letter;
+/** Spreadsheet-style column label for `n` (0→'A', 25→'Z', 26→'AA', …) — a bijective base-26
+ *  encoding, so distinct `n` always yield distinct labels. */
+function groupLabel(n: number): string {
+  let label = '';
+  for (let x = n; x >= 0; x = Math.floor(x / 26) - 1) {
+    label = String.fromCharCode(65 + (x % 26)) + label;
   }
-  return 'A';
+  return label;
+}
+/** First group label not already used by `existingGroups`, scanning A, B, … Z, AA, AB, … A–J is
+ *  the bundled convention, but a map can exceed ten parallel groups (the bundled map already uses
+ *  all of A–J), so we keep minting fresh labels — never reusing one, which would collide two
+ *  distinct city pairs onto the same group. Pigeonhole: among the first `size+1` distinct labels
+ *  at least one is unused, so the scan always returns. */
+export function nextDoubleGroupLetter(existingGroups: readonly string[]): string {
+  const used = new Set(existingGroups);
+  for (let n = 0; n <= used.size; n++) {
+    const label = groupLabel(n);
+    if (!used.has(label)) return label;
+  }
+  /* c8 ignore next -- unreachable by pigeonhole; satisfies the return type */
+  return groupLabel(used.size);
 }
 
 interface EditorState {
