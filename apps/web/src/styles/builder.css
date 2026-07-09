@@ -476,6 +476,77 @@
   color: var(--tr-ember);
 }
 
+/* Map-stats chip — a sibling of .validation-panel, same header-popover pattern. */
+.stats-panel {
+  position: relative;
+  font-size: 0.85em;
+}
+.stats-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-1) var(--tr-space-2);
+}
+.stats-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.stats-count svg {
+  color: var(--tr-ink-soft);
+}
+.stats-chevron {
+  flex-shrink: 0;
+  color: var(--tr-ink-soft);
+  transition: transform 0.15s ease;
+}
+.stats-chevron.collapsed {
+  transform: rotate(180deg);
+}
+.stats-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 40;
+  width: max-content;
+  min-width: 12em;
+  max-width: min(24em, 90vw);
+  max-height: 20em;
+  overflow-y: auto;
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  padding: var(--tr-space-3);
+}
+.stats-row {
+  gap: var(--tr-space-4);
+}
+.stats-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.stats-sublabel {
+  font-size: 0.85em;
+}
+.stats-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tr-space-2) var(--tr-space-3);
+  padding-left: var(--tr-space-2);
+}
+.stats-color-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.stats-color-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Phone tier — keep in sync with PHONE_QUERY (hooks/useMediaQuery.ts) ────── */
 @media (max-width: 700px) {
   /* Maps list: the create row (two name inputs + button) and row actions wrap. */

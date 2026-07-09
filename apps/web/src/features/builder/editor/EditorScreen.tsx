@@ -15,6 +15,7 @@ import {
 import { useUi } from '../../../store/ui';
 import { useEditorStore, STAGES, type Stage } from './store';
 import { ValidationPanel } from './ValidationPanel';
+import { StatsPanel } from './StatsPanel';
 import { CropStage } from './stages/CropStage';
 import { TrimStage } from './stages/TrimStage';
 import { StopsStage } from './stages/StopsStage';
@@ -121,6 +122,7 @@ export default function EditorScreen() {
           </div>
         </div>
         <div className="row">
+          <StatsPanel />
           <ValidationPanel />
           <span
             className={
