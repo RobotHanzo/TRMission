@@ -129,11 +129,14 @@ export class LobbyController {
 
   @Post(':code/chat')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Send a preset chat message to the room' })
+  @ApiOperation({ summary: 'Send a preset or free-text chat message to the room' })
   @ApiBody({ schema: apiSchema(ChatSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
   sendChat(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: ChatDto) {
-    return this.lobby.sendChat(code.toUpperCase(), user, body.presetId);
+    return this.lobby.sendChat(code.toUpperCase(), user, {
+      presetId: body.presetId,
+      text: body.text,
+    });
   }
 
   @Post(':code/bots')

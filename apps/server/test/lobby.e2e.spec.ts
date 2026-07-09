@@ -300,3 +300,19 @@ describe('lobby: ownership transfer, close, and bot-safe leave', () => {
     expect(left.body.status).toBe('CLOSED');
   });
 });
+
+describe('lobby: free-text chat', () => {
+  it('accepts free text, still accepts presets, and rejects empty / both / neither', async () => {
+    const a = await guest('Lee');
+    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const code: string = room.body.code;
+    const sent = await request(server())
+      .post(`/api/v1/rooms/${code}/chat`).set(auth(a.token)).send({ text: 'hello there' }).expect(200);
+    const last = sent.body.chat[sent.body.chat.length - 1];
+    expect(last.text).toBe('hello there');
+    expect(last.presetId).toBeUndefined();
+    await request(server()).post(`/api/v1/rooms/${code}/chat`).set(auth(a.token)).send({ presetId: 'THANKS' }).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/chat`).set(auth(a.token)).send({ text: '   ' }).expect(400);
+    await request(server()).post(`/api/v1/rooms/${code}/chat`).set(auth(a.token)).send({}).expect(400);
+  });
+});

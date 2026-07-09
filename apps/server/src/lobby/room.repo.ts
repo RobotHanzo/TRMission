@@ -56,8 +56,10 @@ export interface RoomMember {
 
 export interface RoomChatEntry {
   userId: string;
-  presetId: string;
   ts: number;
+  /** Exactly one of presetId / text is set. Legacy rows carry presetId. */
+  presetId?: string;
+  text?: string;
 }
 
 export interface RoomSpectator {
@@ -116,6 +118,7 @@ const newCode = (): string =>
 const ROOM_CHAT_CAP = 30;
 const ROOM_CHAT_RATE_MAX = 5;
 const ROOM_CHAT_RATE_WINDOW_MS = 5000;
+export const ROOM_CHAT_MAX_LEN = 2048;
 
 @Injectable()
 export class RoomRepo implements OnModuleInit {
@@ -437,9 +440,13 @@ export class RoomRepo implements OnModuleInit {
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
 
-  /** Any room member sends a preset chat message; rate-limited from the persisted array itself
-   *  (no separate in-memory tracker) so it survives restarts without new state. */
-  async sendChat(code: string, userId: string, presetId: ChatPresetId): Promise<SendChatResult> {
+  /** Any room member sends a preset OR free-text chat message; rate-limited from the persisted
+   *  array itself (no separate in-memory tracker) so it survives restarts without new state. */
+  async sendChat(
+    code: string,
+    userId: string,
+    entry: { presetId: ChatPresetId } | { text: string },
+  ): Promise<SendChatResult> {
     const room = await this.col.findOne({ _id: code });
     if (!room) return 'not_found';
     const isParticipant =
@@ -456,7 +463,7 @@ export class RoomRepo implements OnModuleInit {
     await this.col.updateOne(
       { _id: code },
       {
-        $push: { chat: { $each: [{ userId, presetId, ts: now }], $slice: -ROOM_CHAT_CAP } },
+        $push: { chat: { $each: [{ userId, ...entry, ts: now }], $slice: -ROOM_CHAT_CAP } },
         $set: { updatedAt: new Date() },
       },
     );

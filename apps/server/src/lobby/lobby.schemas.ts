@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
 import { CHAT_PRESET_IDS } from '@trm/shared';
+import { ROOM_CHAT_MAX_LEN } from './room.repo';
 
 const botDifficulty = z.enum(['EASY', 'MEDIUM', 'HARD']);
 
@@ -8,7 +9,10 @@ export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).m
 export const ReadySchema = z.object({ ready: z.boolean() });
 export const AddBotSchema = z.object({ difficulty: botDifficulty });
 export const RematchVoteSchema = z.object({ wantsRematch: z.boolean() });
-export const ChatSchema = z.object({ presetId: z.enum(CHAT_PRESET_IDS) });
+export const ChatSchema = z.object({
+  presetId: z.enum(CHAT_PRESET_IDS).optional(),
+  text: z.string().max(ROOM_CHAT_MAX_LEN).optional(),
+});
 
 export const MapSelectorSchema = z.discriminatedUnion('source', [
   z.object({ source: z.literal('official'), mapId: z.string().min(1) }),
@@ -46,8 +50,9 @@ export const RoomMemberSchema = z.object({
 });
 export const RoomChatEntrySchema = z.object({
   userId: z.string(),
-  presetId: z.string(),
   ts: z.number(),
+  presetId: z.string().optional(),
+  text: z.string().optional(),
 });
 export const RoomSpectatorSchema = z.object({
   userId: z.string(),

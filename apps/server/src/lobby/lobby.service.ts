@@ -13,6 +13,7 @@ import { asPlayerId, type SeatIndex, type ChatPresetId } from '@trm/shared';
 import {
   RoomRepo,
   DEFAULT_ROOM_SETTINGS,
+  ROOM_CHAT_MAX_LEN,
   type MapSelector,
   type RoomDoc,
   type RoomMember,
@@ -233,9 +234,25 @@ export class LobbyService {
     return toView(r);
   }
 
-  /** Any room member sends a preset chat message. */
-  async sendChat(code: string, user: AuthUser, presetId: ChatPresetId): Promise<RoomView> {
-    const r = await this.rooms.sendChat(code, user.userId, presetId);
+  /** Any room member sends a preset OR a free-text chat message (exactly one). */
+  async sendChat(
+    code: string,
+    user: AuthUser,
+    payload: { presetId?: ChatPresetId | undefined; text?: string | undefined },
+  ): Promise<RoomView> {
+    const hasPreset = payload.presetId !== undefined;
+    const hasText = payload.text !== undefined;
+    if (hasPreset === hasText) throw new BadRequestException('send exactly one of preset or text');
+    let entry: { presetId: ChatPresetId } | { text: string };
+    if (hasPreset) {
+      entry = { presetId: payload.presetId! };
+    } else {
+      const text = payload.text!.trim();
+      if (text.length === 0) throw new BadRequestException('empty chat message');
+      if (text.length > ROOM_CHAT_MAX_LEN) throw new BadRequestException('chat too long');
+      entry = { text };
+    }
+    const r = await this.rooms.sendChat(code, user.userId, entry);
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'not_member') throw new ForbiddenException('not a member of this room');
     if (r === 'rate_limited') throw new BadRequestException('sending chat too fast');
