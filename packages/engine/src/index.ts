@@ -1,7 +1,15 @@
 // Public API of the pure deterministic game engine.
 
 export type { Board } from './board';
-export { buildBoard, getRoute, getTicket, siblingOf, incidentRoutes } from './board';
+export {
+  buildBoard,
+  getRoute,
+  getTicket,
+  siblingOf,
+  groupMembersOf,
+  groupSizeOf,
+  incidentRoutes,
+} from './board';
 
 export type { GameConfig, PlayerSeed, DoubleRouteVariant } from './config';
 export { variantForPlayerCount } from './config';

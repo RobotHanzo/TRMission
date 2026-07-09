@@ -16,6 +16,8 @@ export interface Board {
   readonly incident: ReadonlyMap<string, readonly RouteId[]>;
   /** routeId → sibling routeId for double-route pairs (only present for paired routes). */
   readonly doubleSibling: ReadonlyMap<string, RouteId>;
+  /** routeId → the OTHER members of its parallel group (2–3 routes); empty for lone routes. */
+  readonly parallelGroup: ReadonlyMap<string, readonly RouteId[]>;
 }
 
 export function buildBoard(content: GameContent): Board {
@@ -24,6 +26,7 @@ export function buildBoard(content: GameContent): Board {
   const ticketById = new Map<string, TicketDef>();
   const incident = new Map<string, RouteId[]>();
   const doubleSibling = new Map<string, RouteId>();
+  const parallelGroup = new Map<string, readonly RouteId[]>();
 
   for (const c of content.cities) {
     cityById.set(c.id as string, c);
@@ -41,6 +44,14 @@ export function buildBoard(content: GameContent): Board {
     }
   }
   for (const members of byGroup.values()) {
+    if (members.length < 2 || members.length > 3) continue;
+    for (const m of members) {
+      parallelGroup.set(
+        m.id as string,
+        members.filter((x) => x.id !== m.id).map((x) => x.id),
+      );
+    }
+    // Retain the pairwise sibling map for size-2 groups (used by legacy event-effect helpers).
     if (members.length === 2) {
       const [m0, m1] = members as [RouteDef, RouteDef];
       doubleSibling.set(m0.id as string, m1.id);
@@ -57,6 +68,7 @@ export function buildBoard(content: GameContent): Board {
     ticketById,
     incident,
     doubleSibling,
+    parallelGroup,
   };
 }
 
@@ -66,5 +78,11 @@ export const getTicket = (board: Board, id: TicketId): TicketDef | undefined =>
   board.ticketById.get(id as string);
 export const siblingOf = (board: Board, id: RouteId): RouteId | undefined =>
   board.doubleSibling.get(id as string);
+export const groupMembersOf = (board: Board, id: RouteId): readonly RouteId[] =>
+  board.parallelGroup.get(id as string) ?? [];
+export const groupSizeOf = (board: Board, id: RouteId): number => {
+  const others = board.parallelGroup.get(id as string);
+  return others ? others.length + 1 : 1;
+};
 export const incidentRoutes = (board: Board, city: CityId): readonly RouteId[] =>
   board.incident.get(city as string) ?? [];
