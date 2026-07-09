@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { ticketById, ticketLabel } from '../game/content';
+import { ticketById, ticketLabel, CITIES, ROUTES, cityById } from '../game/content';
+import { ACTIVE_GEOGRAPHY, ACTIVE_BASE_VIEW } from '../game/catalog';
 import { useUi } from '../store/ui';
 import { RoutePreview } from './RoutePreview';
 
@@ -31,11 +32,24 @@ export function TicketCard({ ticketId, selected, onToggle, disabled, completed }
   const aria = `${label.a} – ${label.b}, ${label.value} ${t('points')}${
     completed ? `, ${t('completed')}` : ''
   }`;
+  const a = cityById.get(def.a as string);
+  const b = cityById.get(def.b as string);
 
   const body = (
     <>
       <div className="ticket-map">
-        <RoutePreview aId={def.a as string} bId={def.b as string} tone={tone} />
+        {a && b && (
+          <RoutePreview
+            a={a}
+            b={b}
+            cities={CITIES}
+            routes={ROUTES}
+            geography={ACTIVE_GEOGRAPHY}
+            baseView={ACTIVE_BASE_VIEW}
+            view={def.view}
+            tone={tone}
+          />
+        )}
         {label.long && <span className="ticket-flag">{t('longRoute')}</span>}
         {selectable && <span className="ticket-check" aria-hidden />}
       </div>
