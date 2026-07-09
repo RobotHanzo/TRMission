@@ -3,8 +3,8 @@ import type { Result, RuleViolation } from '@trm/shared';
 import { ok, err, violation, asTicketId, TRAIN_COLORS } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
-import { getRoute, siblingOf } from './board';
-import { variantForPlayerCount } from './config';
+import { getRoute, groupMembersOf } from './board';
+import { openTrackCount } from './config';
 import type { GameState } from './types/state';
 import type { CharterContract } from './types/events-state';
 import type { Action, Payment } from './types/actions';
@@ -380,11 +380,10 @@ function claimPreconditions(
   }
   if (isRouteClosed(state, routeId))
     return err(violation('ROUTE_CLOSED_BY_EVENT', 'route closed by a typhoon landfall'));
-  const sib = siblingOf(board, routeId);
-  if (sib) {
-    const sibCell = state.ownership[sib as string];
-    if (sibCell && 'owner' in sibCell && sibCell.owner === player) {
-      return err(violation('DOUBLE_ROUTE_OWN_BOTH', 'cannot own both of a double route'));
+  for (const other of groupMembersOf(board, routeId)) {
+    const oc = state.ownership[other as string];
+    if (oc && 'owner' in oc && oc.owner === player) {
+      return err(violation('DOUBLE_ROUTE_OWN_BOTH', 'cannot own two tracks of a parallel route'));
     }
   }
   return ok(route);
@@ -403,17 +402,29 @@ function applyClaimEffects(
 
   let next = setOwnership(state, route.id as string, { owner: player });
 
-  // Sibling lock is emitted AFTER the claim/bonus events; buffer it here.
+  // Parallel-group lock is emitted AFTER the claim/bonus events; buffer it here. Once the group's
+  // owned tracks reach the open-track count, every remaining track locks. For a 2-member group at
+  // 2–3p this reduces to the historical "lock the one sibling."
   const lockedEvents: GameEvent[] = [];
-  const variant = variantForPlayerCount(
-    state.turnOrder.length,
-    state.ruleParams.doubleRouteSingleFor23,
-  );
-  if (variant === 'SINGLE_ONLY') {
-    const sib = siblingOf(board, route.id);
-    if (sib && !next.ownership[sib as string]) {
-      next = setOwnership(next, sib as string, { locked: true });
-      lockedEvents.push({ e: 'DOUBLE_ROUTE_LOCKED', routeId: sib, visibility: 'PUBLIC' });
+  const groupMembers = groupMembersOf(board, route.id);
+  if (groupMembers.length > 0) {
+    const open = openTrackCount(
+      groupMembers.length + 1,
+      state.turnOrder.length,
+      state.ruleParams.doubleRouteSingleFor23,
+    );
+    let owned = 1; // the route just claimed
+    for (const other of groupMembers) {
+      const oc = next.ownership[other as string];
+      if (oc && 'owner' in oc) owned++;
+    }
+    if (owned >= open) {
+      for (const other of groupMembers) {
+        if (!next.ownership[other as string]) {
+          next = setOwnership(next, other as string, { locked: true });
+          lockedEvents.push({ e: 'DOUBLE_ROUTE_LOCKED', routeId: other, visibility: 'PUBLIC' });
+        }
+      }
     }
   }
 
@@ -872,11 +883,11 @@ export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId
     for (const route of board.content.routes) {
       if (state.ownership[route.id as string]) continue;
       if (closed.has(route.id as string)) continue;
-      const sib = siblingOf(board, route.id);
-      if (sib) {
-        const sc = state.ownership[sib as string];
-        if (sc && 'owner' in sc && sc.owner === player) continue;
-      }
+      const ownsGroupMember = groupMembersOf(board, route.id).some((other) => {
+        const sc = state.ownership[other as string];
+        return sc && 'owner' in sc && sc.owner === player;
+      });
+      if (ownsGroupMember) continue;
       if (p.trainCars < route.length) continue;
       if (canAffordRoute(p.hand, route, skyLanternSurcharge(state, route.id))) return true;
     }

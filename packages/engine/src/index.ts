@@ -11,8 +11,8 @@ export {
   incidentRoutes,
 } from './board';
 
-export type { GameConfig, PlayerSeed, DoubleRouteVariant } from './config';
-export { variantForPlayerCount, openTrackCount } from './config';
+export type { GameConfig, PlayerSeed } from './config';
+export { openTrackCount } from './config';
 
 export type {
   GameState,

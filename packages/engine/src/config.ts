@@ -18,13 +18,6 @@ export interface GameConfig {
   readonly contentHash: string;
 }
 
-/** Player counts of 2–3 use the "only one of each double-route" variant (SINGLE_ONLY) when
- *  `doubleRouteSingleFor23` is enabled. With the flag off all games use BOTH. */
-export type DoubleRouteVariant = 'SINGLE_ONLY' | 'BOTH';
-
-export const variantForPlayerCount = (n: number, singleFor23: boolean): DoubleRouteVariant =>
-  n <= 3 && singleFor23 ? 'SINGLE_ONLY' : 'BOTH';
-
 /**
  * How many tracks of a parallel group (2 or 3 routes between one pair) may be claimed.
  * With `doubleRouteSingleFor23` on (the default), the count scales with the player count:

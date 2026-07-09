@@ -55,15 +55,14 @@ export function checkInvariants(board: Board, state: GameState): string[] {
     }
   }
 
-  // 3. Ownership exclusivity: no player owns both edges of a double-route pair.
+  // 3. Ownership exclusivity: no player owns two members of a parallel group.
   for (const [routeId, cell] of Object.entries(state.ownership)) {
     if ('owner' in cell) {
-      const sib = board.doubleSibling.get(routeId);
-      if (sib) {
-        const sc = state.ownership[sib as string];
+      for (const other of board.parallelGroup.get(routeId) ?? []) {
+        const sc = state.ownership[other as string];
         if (sc && 'owner' in sc && sc.owner === cell.owner) {
           problems.push(
-            `double-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${sib as string}`,
+            `parallel-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${other as string}`,
           );
         }
       }

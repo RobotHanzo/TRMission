@@ -164,6 +164,92 @@ describe('double routes', () => {
   });
 });
 
+describe('triple routes', () => {
+  // Custom 3-member parallel group so we can exercise the open-track scaling; the bundled
+  // Taiwan map has no triple by its authoring convention.
+  const tripleContent: GameContent = {
+    meta: { mapId: 'test-triple', version: 1, nameZh: '三軌測試', nameEn: 'Triple Test' },
+    cities: [
+      { id: asCityId('x1'), nameZh: '甲', nameEn: 'X1', x: 0, y: 0, region: 'test', isIsland: false },
+      { id: asCityId('x2'), nameZh: '乙', nameEn: 'X2', x: 10, y: 0, region: 'test', isIsland: false },
+    ],
+    routes: [
+      { id: asRouteId('T1'), a: asCityId('x1'), b: asCityId('x2'), color: 'RED', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
+      { id: asRouteId('T2'), a: asCityId('x1'), b: asCityId('x2'), color: 'BLUE', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
+      { id: asRouteId('T3'), a: asCityId('x1'), b: asCityId('x2'), color: 'GREEN', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
+    ],
+    tickets: [],
+  };
+  const tripleBoard = buildBoard(tripleContent);
+  const applyT = (state: GameState, action: Action) => reduce(tripleBoard, state, action);
+  const claim = (routeId: string, color: CardColor): Action => ({
+    t: 'CLAIM_ROUTE',
+    player: p0,
+    routeId: asRouteId(routeId),
+    payment: { color, colorCount: 1, locomotives: 0 },
+  });
+
+  it('locks BOTH other tracks in a 2-player game (only 1 open)', () => {
+    const state = st({ numPlayers: 2, hands: { p0: { RED: 1 } } });
+    const res = applyT(state, claim('T1', 'RED'));
+    expect(res.ok).toBe(true);
+    if (!res.ok) return;
+    expect(res.value.state.ownership['T1']).toEqual({ owner: p0 });
+    expect(res.value.state.ownership['T2']).toEqual({ locked: true });
+    expect(res.value.state.ownership['T3']).toEqual({ locked: true });
+  });
+
+  it('opens 2 of 3 tracks in a 4-player game: first claim locks nothing, second locks the third', () => {
+    const p1 = asPlayerId('p1');
+    const state = st({ numPlayers: 4, hands: { p0: { RED: 1 }, p1: { BLUE: 1 } } });
+    const r1 = applyT(state, claim('T1', 'RED'));
+    expect(r1.ok).toBe(true);
+    if (!r1.ok) return;
+    expect(r1.value.state.ownership['T2']).toBeUndefined();
+    expect(r1.value.state.ownership['T3']).toBeUndefined();
+    const r2 = applyT(r1.value.state, {
+      t: 'CLAIM_ROUTE',
+      player: p1,
+      routeId: asRouteId('T2'),
+      payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
+    });
+    expect(r2.ok).toBe(true);
+    if (!r2.ok) return;
+    expect(r2.value.state.ownership['T2']).toEqual({ owner: p1 });
+    expect(r2.value.state.ownership['T3']).toEqual({ locked: true });
+  });
+
+  it('opens all 3 tracks in a 5-player game', () => {
+    const p1 = asPlayerId('p1');
+    const p2 = asPlayerId('p2');
+    const state = st({ numPlayers: 5, hands: { p0: { RED: 1 }, p1: { BLUE: 1 }, p2: { GREEN: 1 } } });
+    const r1 = applyT(state, claim('T1', 'RED'));
+    if (!r1.ok) throw new Error('r1');
+    const r2 = applyT(r1.value.state, {
+      t: 'CLAIM_ROUTE', player: p1, routeId: asRouteId('T2'),
+      payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
+    });
+    if (!r2.ok) throw new Error('r2');
+    expect(r2.value.state.ownership['T3']).toBeUndefined(); // still open
+    const r3 = applyT(r2.value.state, {
+      t: 'CLAIM_ROUTE', player: p2, routeId: asRouteId('T3'),
+      payment: { color: 'GREEN', colorCount: 1, locomotives: 0 },
+    });
+    expect(r3.ok).toBe(true);
+    if (!r3.ok) return;
+    expect(r3.value.state.ownership['T3']).toEqual({ owner: p2 });
+  });
+
+  it('rejects one player owning two tracks of a triple', () => {
+    const owned: Record<string, OwnerCell> = { T1: { owner: p0 } };
+    const state = st({ numPlayers: 5, hands: { p0: { BLUE: 1 } }, ownership: owned });
+    const res = applyT(state, claim('T2', 'BLUE'));
+    expect(res.ok).toBe(false);
+    if (res.ok) return;
+    expect(res.error.code).toBe('DOUBLE_ROUTE_OWN_BOTH');
+  });
+});
+
 describe('ferries', () => {
   it('claims a ferry with the required locomotives', () => {
     // R56 = 羅東–龜山島, GRAY length 2, Ferry(1).
