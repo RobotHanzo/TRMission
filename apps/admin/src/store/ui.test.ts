@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parsePath, pathFor } from './ui';
+import { parsePath, pathFor, useUi } from './ui';
 
 describe('admin router path mapping', () => {
   it('parses base and view paths under /admin', () => {
@@ -22,5 +22,13 @@ describe('admin router path mapping', () => {
     expect(parsePath(pathFor('users', 'abc'))).toEqual({ view: 'users', param: 'abc' });
     expect(parsePath(pathFor('rooms'))).toEqual({ view: 'rooms', param: null });
     expect(parsePath(pathFor('overview'))).toEqual({ view: 'overview', param: null });
+  });
+
+  it('opens and closes the rooms detail drawer param', () => {
+    useUi.getState().openDetail('rooms', 'ABCD');
+    expect(useUi.getState().view).toBe('rooms');
+    expect(useUi.getState().param).toBe('ABCD');
+    useUi.getState().closeDetail();
+    expect(useUi.getState().param).toBeNull();
   });
 });

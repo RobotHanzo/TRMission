@@ -121,6 +121,37 @@ export interface RoomRow {
   updatedAt: string;
   members: { userId: string; displayName: string; isBot: boolean; seat: number }[];
 }
+export interface RoomDetail {
+  code: string;
+  hostId: string;
+  hostName?: string;
+  status: string;
+  visibility: string;
+  maxPlayers: number;
+  createdAt: string;
+  updatedAt: string;
+  gameId?: string;
+  gameStatus?: string;
+  members: {
+    userId: string;
+    displayName: string;
+    seat: number;
+    isBot: boolean;
+    isGuest: boolean;
+    ready: boolean;
+    difficulty?: string;
+  }[];
+  spectators: { userId: string; displayName: string }[];
+  settings: {
+    map: { source: 'official' | 'custom'; id: string };
+    allowSpectating: boolean;
+    eventsMode: string;
+    unlimitedStationBorrow: boolean;
+    secondDrawAfterBlindRainbow: boolean;
+    noUnfinishedTicketPenalty: boolean;
+    doubleRouteSingleFor23: boolean;
+  };
+}
 
 export interface MapAdminRow {
   id: string;
@@ -313,6 +344,7 @@ export const api = {
     req<RoomRow>('POST', `/dashboard/rooms/${encodeURIComponent(code)}/close`, { reason }),
   deleteRoom: (code: string, reason?: string) =>
     req<void>('DELETE', `/dashboard/rooms/${encodeURIComponent(code)}`, { reason }),
+  getRoom: (code: string) => req<RoomDetail>('GET', `/dashboard/rooms/${encodeURIComponent(code)}`),
 
   listMaintainers: () => req<{ maintainers: MaintainerRow[] }>('GET', '/dashboard/maintainers'),
   putMaintainer: (

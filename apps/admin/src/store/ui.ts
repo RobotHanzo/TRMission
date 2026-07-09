@@ -68,13 +68,13 @@ const applyTheme = (theme: AdminTheme): void => {
 
 interface UiState {
   view: AdminView;
-  /** Detail id for users/games (a drawer over the list). */
+  /** Detail id for users/games/rooms/maps (a drawer over the list). */
   param: string | null;
   theme: AdminTheme;
   locale: AdminLocale;
   navigate(view: AdminView, param?: string | null): void;
   /** Detail drawers push their id into the URL so refresh/share lands back on them. */
-  openDetail(view: 'users' | 'games' | 'maps', id: string): void;
+  openDetail(view: 'users' | 'games' | 'maps' | 'rooms', id: string): void;
   closeDetail(): void;
   syncFromUrl(): void;
   setTheme(theme: AdminTheme): void;
@@ -97,7 +97,7 @@ export const useUi = create<UiState>()((set, get) => ({
   },
   closeDetail() {
     const { view } = get();
-    if (view === 'users' || view === 'games' || view === 'maps') {
+    if (view === 'users' || view === 'games' || view === 'maps' || view === 'rooms') {
       pushPath(pathFor(view));
       set({ param: null });
     }
