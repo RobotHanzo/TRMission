@@ -46,16 +46,17 @@
 }
 .brand-banner-zh {
   font-family: var(--tr-font-cjk);
-  font-weight: 700;
+  font-weight: 750;
   line-height: 1;
   color: #e55509;
-  letter-spacing: 2px;
+  /* em, not px: scales with font-size so header and hero read with the same proportions. */
+  letter-spacing: 0.056em;
   transform: skewX(-6deg);
 }
 .brand-banner-en {
   font-family: 'Archivo', sans-serif;
   font-weight: 600;
-  letter-spacing: 5px;
+  letter-spacing: 0.455em;
   color: var(--tr-brand-navy);
   transform: skewX(-6deg);
 }
