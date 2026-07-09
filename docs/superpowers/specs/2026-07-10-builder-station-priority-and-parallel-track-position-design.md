@@ -25,10 +25,26 @@ Two independent asks in the custom map builder:
    zoom cutoffs) rather than a freeform numeric priority — it's the exact mechanism the live board
    already runs, so custom maps get the same progressive-reveal behavior for free.
 2. Since the tier must persist with the custom map (authored content in Mongo, unlike Taiwan's
-   hardcoded lists baked into the web bundle), it becomes a new **required** field on `CityDef` in
+   hardcoded lists baked into the web bundle), it becomes a new field on `CityDef` in
    `@trm/map-data`. The bundled Taiwan map is migrated too — its hardcoded tier lists retired in
    favor of the same authored field, edited in place on the current (v4) content. No archive/version
    bump: v4 is unreleased and no game has ever been played on it.
+
+   **Revised during planning: `tier` is `optional`, not required.** Grepping the repo for literal
+   `CityDef`/`CityDraft` fixtures (`isIsland: false` as the marker) turns up ~24 files across
+   `packages/engine/test`, `packages/map-data/test`, `apps/server/test`, and `apps/web/src` —
+   ad-hoc test content that builds a `GameContent` purely to exercise unrelated engine/validation
+   behavior and has no reason to care about a rendering-only field. `@trm/map-data`'s own documented
+   convention (`packages/map-data/CLAUDE.md`, "Extending `GameContent` without breaking old hashes")
+   is exactly this shape: an optional field that hashes identically when absent, because the shared
+   `digest()` (`packages/shared/src/digest.ts`) drops `undefined`-valued keys — a mechanism that
+   already applies recursively to every object nested in `cities`, not just top-level `GameContent`
+   keys, so no special-casing is needed in `hashContent`. Making `tier` optional means: **zero**
+   unrelated test fixtures need touching, Taiwan's `cities.ts` still sets a real value for every
+   city (unaffected), and the builder still always writes an explicit value for an authored station
+   (§3) — the only practical effect is that content which predates this feature, or a test fixture
+   that never mentions it, reads as `undefined` and falls back to `'minor'` at the one read site
+   (§4), the same graceful-fallback shape `cityName` already uses for an unknown id.
 3. Builder UI gets a **plain selector only** (no canvas indicator/preview) — a `Segmented` field in
    the Stops-stage inspector, matching the existing `isIsland` control's pattern.
 4. While relocating the parallel-tracks control, remove the duplication that caused the bug: give
@@ -39,12 +55,13 @@ Two independent asks in the custom map builder:
 ### `packages/map-data/src/types.ts`
 
 - Add `export type CityTier = 'major' | 'secondary' | 'tertiary' | 'minor';`
-- Add `readonly tier: CityTier;` to `CityDef`.
+- Add `readonly tier?: CityTier;` to `CityDef` (optional — see the revised Decision 2).
 
 ### `packages/map-data/src/cities.ts`
 
 - Extend the `c(...)` helper with a `tier: CityTier = 'minor'` parameter (mirrors the existing
-  `isIsland = false` default), threaded into the returned `CityDef`.
+  `isIsland = false` default), threaded into the returned `CityDef`. Taiwan sets this explicitly for
+  every city (the field being optional on the type doesn't mean Taiwan's own table leaves it unset).
 - Set explicit tiers matching the current hardcoded sets in `apps/web/src/game/lod.ts`
   (`MAJOR_CITIES` → 10 cities, `SECONDARY_CITIES` → 10, `TERTIARY_CITIES` → 6); every other city
   keeps the `'minor'` default. This is a straight id-for-id migration — behavior-preserving for the
@@ -52,8 +69,9 @@ Two independent asks in the custom map builder:
 
 ### `packages/map-data/src/index.ts`
 
-- No structural change. `hashContent` already folds `cities` in wholesale, so the new required
-  field naturally changes `CONTENT_HASH` — expected and accepted per Decision 2.
+- No change. `hashContent` already folds `cities` in wholesale; an optional per-city key that's
+  present hashes as part of the object same as any other field, and one that's absent is dropped by
+  `stableStringify` same as today — no special-casing needed (see the revised Decision 2).
 
 ### Validation (`packages/map-data/src/validate.ts`)
 
@@ -65,20 +83,20 @@ Two independent asks in the custom map builder:
 
 ### `apps/server/src/maps/maps.schemas.ts`
 
-- Add `tier: z.enum(['major', 'secondary', 'tertiary', 'minor'])` to `CityDraftSchema`.
+- Add `tier: z.enum(['major', 'secondary', 'tertiary', 'minor']).optional()` to `CityDraftSchema`.
 - `draftFromDto`'s city mapping already spreads `c` — `tier` passes through unchanged (no line
   change needed there; only the schema gains the field).
 
 ### `apps/server/src/maps/maps.types.ts`
 
 - No change. `MapDraft.cities: CityDef[]` imports `CityDef` from `@trm/map-data` directly, so it
-  picks up the new required field automatically.
+  picks up the new optional field automatically.
 
 ### `apps/web/src/net/rest.ts`
 
-- Add `tier: string;` to the `CityDraft` interface — loosely typed, matching the existing `color:
-  string` convention on `RouteDraft` (the editor only ever writes one of the 4 valid literals
-  through its own `<Segmented>`, so no branded/union type is needed client-side).
+- Add `tier?: string;` to the `CityDraft` interface — optional and loosely typed, matching the
+  existing `color: string` convention on `RouteDraft` (the editor only ever writes one of the 4
+  valid literals through its own `<Segmented>`, so no branded/union type is needed client-side).
 
 ### `apps/web/src/features/builder/editor/contentAdapter.ts`
 
@@ -89,10 +107,12 @@ Two independent asks in the custom map builder:
 
 - Add a `Segmented<CityTier>` field labelled `t('builder.stationPriority')`, options `major` /
   `secondary` / `tertiary` / `minor` (high → low), placed directly below the existing `isIsland`
-  row. `onChange` calls `updateCity(selected.id, { tier: v })`.
-- `placeCity(...)`'s default payload for a newly-dropped station gains `tier: 'minor'` (matches
-  today's de-facto behavior for every custom-map station — no regression for authors who never
-  touch the new control).
+  row. `value` reads `selected.tier ?? 'minor'` (the field is optional on the type, and this is the
+  same fallback `cityTier()` uses at render time, §4). `onChange` calls
+  `updateCity(selected.id, { tier: v })`.
+- `placeCity(...)`'s default payload for a newly-dropped station is **unchanged** — a station with
+  no `tier` set already reads as `'minor'` everywhere (the Segmented above, `cityTier()` in §4), so
+  there's nothing to default explicitly.
 
 ## 4. Station priority — making it actually render
 
@@ -119,18 +139,19 @@ Two independent asks in the custom map builder:
 
 ## 6. Station priority — testing
 
-- **`packages/map-data`**: extend `test/content.spec.ts` (or add a small assertion) that every
-  `CITIES` entry has a `tier` and the migrated major/secondary/tertiary sets match the prior
-  `lod.ts` lists (count + membership). Update the pinned v4 hash literal in `test/versions.spec.ts`
-  once the new hash is computed (`hashContent(TAIWAN_CONTENT)` changes because `tier` is now part
-  of every city).
+- **`packages/map-data`**: extend `test/content.spec.ts` that every `CITIES` entry's tier (falling
+  back to `'minor'` when absent) matches the prior `lod.ts` lists (count + membership). Update the
+  pinned v4 hash literal in `test/versions.spec.ts` once the new hash is computed
+  (`hashContent(TAIWAN_CONTENT)` changes because Taiwan's cities now carry an explicit `tier`).
 - **`apps/web`**: move `game/lod.test.ts`'s `cityTier` describe block to `game/content.test.ts`
-  (new or existing), asserting against the real `TAIWAN_CONTENT`-backed `cityById` instead of
-  hardcoded sets; `lod.test.ts` keeps only the `zoomBucket` tests. Update `StopsStage.test.tsx` for
-  the new field (default `minor` on a new station, selecting a tier calls `updateCity` correctly)
-  and `contentAdapter.test.ts`/`store.test.ts` if they construct literal `CityDraft` fixtures.
-- **`apps/server`**: update any literal `CityDraft`/`CityDef` fixtures in `maps.e2e.spec.ts` /
-  `lobby-custom-map.e2e.spec.ts` to include `tier`.
+  (new), asserting against the real `TAIWAN_CONTENT`-backed `cityById` instead of hardcoded sets,
+  plus a case for an id absent from `cityById` falling back to `'minor'`; `lod.test.ts` keeps only
+  the `zoomBucket` tests. Add a `StopsStage.test.tsx` case for the new field (selecting a tier calls
+  `updateCity` with it; a station with no `tier` set shows `minor` selected).
+- **No unrelated fixtures need touching.** Because `tier` is optional, none of the ~24 files
+  elsewhere in the repo that build literal `CityDef`/`CityDraft` test content (engine specs,
+  map-data's own non-Taiwan fixtures, server e2e specs, other web component tests) need any change
+  — confirmed by the optional-field decision above.
 
 ## 7. Parallel-track control — position + dedup
 
