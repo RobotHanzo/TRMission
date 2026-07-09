@@ -5,7 +5,15 @@ import type { GameContent } from '../src/types';
 import type { RouteColor } from '@trm/shared';
 
 const city = (id: string, x = 0, y = 0) =>
-  ({ id, nameZh: id, nameEn: id, x, y, region: 'r', isIsland: false }) as GameContent['cities'][number];
+  ({
+    id,
+    nameZh: id,
+    nameEn: id,
+    x,
+    y,
+    region: 'r',
+    isIsland: false,
+  }) as GameContent['cities'][number];
 const route = (
   id: string,
   a: string,

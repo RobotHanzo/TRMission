@@ -125,7 +125,13 @@ describe('editor store', () => {
       const group = routes.find((r) => r.id === 'r1')!.doubleGroup;
       expect(group).toBe('A');
       const sibling = routes.find((r) => r.id !== 'r1')!;
-      expect(sibling).toMatchObject({ a: 'c1', b: 'c2', length: 3, color: 'BLUE', doubleGroup: 'A' });
+      expect(sibling).toMatchObject({
+        a: 'c1',
+        b: 'c2',
+        length: 3,
+        color: 'BLUE',
+        doubleGroup: 'A',
+      });
     });
 
     it('2→3 mints a third track, all one group, equal length', () => {

@@ -1066,7 +1066,8 @@ const resources = {
           bowOutOfRange:
             '{{routeId}}: bow {{bow}} is outside the allowed range [-{{limit}}, {{limit}}]',
           doubleGroupInvalidSize: 'Parallel group {{group}}: expected 2 or 3 routes, got {{count}}',
-          tooManyParallelRoutes: 'City pair {{pair}}: {{count}} parallel routes exceeds the maximum of 3',
+          tooManyParallelRoutes:
+            'City pair {{pair}}: {{count}} parallel routes exceeds the maximum of 3',
           multipleGroupsOnPair: 'City pair {{pair}}: has more than one parallel group ({{groups}})',
           doubleGroupDifferentPairs:
             'Double group {{group}}: the two routes connect different stop pairs',
