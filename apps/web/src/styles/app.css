@@ -28,6 +28,14 @@
   padding: 0;
   cursor: pointer;
 }
+.brand-icon {
+  flex: none;
+  border-radius: 22%;
+}
+.brand strong {
+  font-style: italic;
+  color: #ae3c04;
+}
 .header-actions {
   display: flex;
   gap: var(--tr-space-2);

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  TrainFront,
   Settings,
   LogOut,
   DoorOpen,
@@ -110,7 +109,7 @@ export function AppHeader() {
   return (
     <header className="app-header">
       <button type="button" className="brand" onClick={onBrandClick}>
-        <TrainFront size={22} aria-hidden />
+        <img className="brand-icon" src="/icon.svg" width={22} height={22} alt="" />
         <strong>{t('appName')}</strong>
       </button>
 

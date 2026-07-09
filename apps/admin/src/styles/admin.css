@@ -114,6 +114,11 @@ code,
   flex: none;
 }
 
+.oc-brand-icon {
+  flex: none;
+  border-radius: 22%;
+}
+
 .oc-brand .name {
   font-weight: 600;
   font-size: 14px;

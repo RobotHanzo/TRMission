@@ -308,12 +308,7 @@ button.home-side-card {
 .welcome-badge {
   width: 64px;
   height: 64px;
-  border-radius: 50%;
-  background: var(--tr-blue);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 22%;
   margin-bottom: var(--tr-space-6);
 }
 .welcome-title {

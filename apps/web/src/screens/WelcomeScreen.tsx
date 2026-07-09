@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { CirclePlay, GraduationCap, TrainFront } from 'lucide-react';
+import { CirclePlay, GraduationCap } from 'lucide-react';
 
 interface WelcomeScreenProps {
   name: string;
@@ -13,9 +13,7 @@ export function WelcomeScreen({ name, onStartTutorial, onContinue }: WelcomeScre
 
   return (
     <div className="welcome">
-      <div className="welcome-badge">
-        <TrainFront size={32} aria-hidden />
-      </div>
+      <img className="welcome-badge" src="/icon.svg" width={64} height={64} alt="" />
       <h1 className="welcome-title">{t('home.welcome.title', { name })}</h1>
       <p className="welcome-subtitle">{t('home.welcome.subtitle')}</p>
 

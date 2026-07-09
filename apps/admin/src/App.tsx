@@ -11,7 +11,6 @@ import {
   Sun,
   Swords,
   ToggleRight,
-  TrainFront,
   Trash2,
   Users,
 } from 'lucide-react';
@@ -97,7 +96,13 @@ export default function App() {
     <div className="oc-shell">
       <nav className="oc-rail" aria-label="main">
         <div className="oc-brand">
-          <TrainFront size={20} aria-hidden />
+          <img
+            className="oc-brand-icon"
+            src={`${import.meta.env.BASE_URL}icon.svg`}
+            width={20}
+            height={20}
+            alt=""
+          />
           <div className="text">
             <span className="name">{t('brand.name')}</span>
             <span className="sub">{t('brand.sub')}</span>
