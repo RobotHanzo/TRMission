@@ -11,7 +11,7 @@ import type { RouteDef } from './types';
 export type Row = [string, string, string, RouteColor, RouteLength, string, number?];
 
 const ROWS: readonly Row[] = [
-  ['R1', 'taipei', 'banqiao', 'ORANGE', 1, ''],
+  ['R1', 'taipei', 'banqiao', 'GRAY', 1, 'D-H'],
   ['R2', 'taipei', 'banqiao', 'GREEN', 1, 'D-H'],
   ['R3', 'taipei', 'keelung', 'YELLOW', 2, 'D-B'],
   ['R4', 'taipei', 'keelung', 'PURPLE', 2, 'D-B'],
@@ -80,13 +80,12 @@ const ROWS: readonly Row[] = [
   ['R67', 'keelung', 'pingxi', 'ORANGE', 2, ''],
   ['R68', 'liuqiu', 'chaozhou', 'WHITE', 1, '', 0.1],
   ['R69', 'hualien', 'greenisland', 'GRAY', 6, 'F3'],
-  ['R70', 'taipei', 'banqiao', 'GRAY', 1, 'D-H'],
-  ['R71', 'zuoying', 'kaohsiung', 'BLUE', 1, 'D-K'],
-  ['R72', 'tainan', 'zuoying', 'BLACK', 1, 'D-A'],
-  ['R73', 'zuoying', 'kaohsiung', 'RED', 1, 'D-K'],
-  ['R74', 'tainan', 'zuoying', 'GRAY', 1, 'D-A'],
-  ['R75', 'kinmen', 'changhua', 'GRAY', 6, 'F2'],
-  ['R76', 'shalu', 'matsu', 'GRAY', 8, 'F3'],
+  ['R70', 'zuoying', 'kaohsiung', 'BLUE', 1, 'D-K'],
+  ['R71', 'tainan', 'zuoying', 'BLACK', 1, 'D-A'],
+  ['R72', 'zuoying', 'kaohsiung', 'RED', 1, 'D-K'],
+  ['R73', 'tainan', 'zuoying', 'GRAY', 1, 'D-A'],
+  ['R74', 'kinmen', 'changhua', 'GRAY', 6, 'F2'],
+  ['R75', 'shalu', 'matsu', 'GRAY', 8, 'F3'],
 ];
 
 export function buildRoute([id, a, b, color, length, flag, bow]: Row): RouteDef {

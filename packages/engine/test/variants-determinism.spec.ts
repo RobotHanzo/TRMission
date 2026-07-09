@@ -41,9 +41,26 @@ describe('rule-variant determinism & version', () => {
   });
 
   it('locked completion set equals a fresh end-game evaluation (monotonicity invariant)', () => {
-    const r = playGreedyGame(4, 'borrow-monotone-9', {
-      ruleParams: { unlimitedStationBorrow: true },
-    });
+    // Exercise the invariant on a game that actually completes a ticket. Any single seed's outcome
+    // shifts with content/engine tweaks (this test used to pin one brittle seed), so scan a handful
+    // and take the first game that reaches GAME_OVER with a completion.
+    const completingGame = () => {
+      for (let i = 0; i < 40; i++) {
+        const g = playGreedyGame(4, `borrow-monotone-${i}`, {
+          ruleParams: { unlimitedStationBorrow: true },
+        });
+        const completed =
+          g.finalState.turn.phase === 'GAME_OVER' &&
+          g.finalState.turnOrder.some(
+            (pid) =>
+              (g.finalState.players[pid as string]!.completedTickets as readonly string[]).length >
+              0,
+          );
+        if (completed) return g;
+      }
+      throw new Error('no borrow-monotone seed produced a ticket completion');
+    };
+    const r = completingGame();
     expect(r.finalState.turn.phase).toBe('GAME_OVER');
     let sawCompletion = false;
     for (const pid of r.finalState.turnOrder) {

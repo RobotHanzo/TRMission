@@ -12,16 +12,15 @@ describe('Taiwan map content', () => {
   it('has the expected size and shape (Taiwan map v4 — the tw2.1 network)', () => {
     const s = result.stats;
     expect(s.cityCount).toBe(36);
-    expect(s.routeCount).toBe(76);
-    // 64 distinct pairs; 76 − 64 = 12 parallel edges (11 grouped double pairs + the extra
-    // Taipei–Banqiao single that runs beside the group-H double).
+    expect(s.routeCount).toBe(75);
+    // 64 distinct pairs; 75 − 64 = 11 parallel edges — exactly one per grouped double pair (A–K).
     expect(s.distinctPairCount).toBe(64);
     expect(s.doublePairCount).toBe(11);
     expect(s.tunnelCount).toBe(9);
     expect(s.ferryCount).toBe(14);
     expect(s.ferryLocoSymbols).toBe(26);
-    // Sum over ALL 76 segments.
-    expect(s.totalTrackLength).toBe(222);
+    // Sum over ALL 75 segments.
+    expect(s.totalTrackLength).toBe(221);
     expect(s.ticketCount).toBe(84);
     expect(s.longTicketCount).toBe(9);
   });
@@ -32,7 +31,7 @@ describe('Taiwan map content', () => {
       GREEN: 5,
       BLUE: 6,
       WHITE: 7,
-      ORANGE: 7,
+      ORANGE: 6,
       YELLOW: 7,
       PURPLE: 6,
       BLACK: 5,

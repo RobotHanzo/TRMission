@@ -145,10 +145,10 @@ describe('anti-cheat: the server rejects illegal & forged frames', () => {
     await startGame();
     const before = session().stateVersion;
     seq.set('a', (seq.get('a') ?? 0) + 1);
-    // R1 (基隆–瑞芳) is a Yellow length-1 route; paying RED is invalid.
+    // R38 (高雄–屏東) is an Orange route; paying RED is the wrong colour (RED is never valid for it).
     await send('a', {
       case: 'claimRoute',
-      value: { routeId: 'R1', payment: { color: CardColor.RED, colorCount: 1, locomotives: 0 } },
+      value: { routeId: 'R38', payment: { color: CardColor.RED, colorCount: 1, locomotives: 0 } },
     });
     const code = lastRejection('a');
     expect(code).not.toBeNull();

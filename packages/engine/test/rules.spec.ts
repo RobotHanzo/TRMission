@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { CardColor } from '@trm/shared';
+import type { CardColor, TrainColor } from '@trm/shared';
 import { asPlayerId, asRouteId, asCityId, makeRng, DEFAULT_RULE_PARAMS } from '@trm/shared';
 import { taiwanBoard } from '../src/taiwan';
 import { buildBoard } from '../src/board';
@@ -83,18 +83,18 @@ const p1 = asPlayerId('p1');
 
 describe('double routes', () => {
   it('locks the sibling in a 2-player game', () => {
-    // R71 / R73 = 左營–高雄 double pair (BLUE / RED, length 1).
+    // R70 / R72 = 左營–高雄 double pair (BLUE / RED, length 1).
     const state = st({ numPlayers: 2, hands: { p0: { BLUE: 1 } } });
     const res = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R71'),
+      routeId: asRouteId('R70'),
       payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
-    expect(res.value.state.ownership['R71']).toEqual({ owner: p0 });
-    expect(res.value.state.ownership['R73']).toEqual({ locked: true });
+    expect(res.value.state.ownership['R70']).toEqual({ owner: p0 });
+    expect(res.value.state.ownership['R72']).toEqual({ locked: true });
   });
 
   it('does NOT lock the sibling in a 4-player game; the other edge stays claimable', () => {
@@ -102,31 +102,31 @@ describe('double routes', () => {
     const r1 = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R71'),
+      routeId: asRouteId('R70'),
       payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     expect(r1.ok).toBe(true);
     if (!r1.ok) return;
-    expect(r1.value.state.ownership['R73']).toBeUndefined();
+    expect(r1.value.state.ownership['R72']).toBeUndefined();
     // Now p1 (next turn) claims the parallel edge.
     const r2 = apply(r1.value.state, {
       t: 'CLAIM_ROUTE',
       player: p1,
-      routeId: asRouteId('R73'),
+      routeId: asRouteId('R72'),
       payment: { color: 'RED', colorCount: 1, locomotives: 0 },
     });
     expect(r2.ok).toBe(true);
     if (!r2.ok) return;
-    expect(r2.value.state.ownership['R73']).toEqual({ owner: p1 });
+    expect(r2.value.state.ownership['R72']).toEqual({ owner: p1 });
   });
 
   it('rejects claiming both edges of a pair', () => {
-    const owned: Record<string, OwnerCell> = { R71: { owner: p0 } };
+    const owned: Record<string, OwnerCell> = { R70: { owner: p0 } };
     const state = st({ numPlayers: 4, hands: { p0: { RED: 1 } }, ownership: owned });
     const res = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R73'),
+      routeId: asRouteId('R72'),
       payment: { color: 'RED', colorCount: 1, locomotives: 0 },
     });
     expect(res.ok).toBe(false);
@@ -144,23 +144,23 @@ describe('double routes', () => {
     const r1 = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R71'),
+      routeId: asRouteId('R70'),
       payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     expect(r1.ok).toBe(true);
     if (!r1.ok) return;
     // Sibling should remain open (not locked).
-    expect(r1.value.state.ownership['R73']).toBeUndefined();
+    expect(r1.value.state.ownership['R72']).toBeUndefined();
     // p1 can now claim the parallel route.
     const r2 = apply(r1.value.state, {
       t: 'CLAIM_ROUTE',
       player: p1,
-      routeId: asRouteId('R73'),
+      routeId: asRouteId('R72'),
       payment: { color: 'RED', colorCount: 1, locomotives: 0 },
     });
     expect(r2.ok).toBe(true);
     if (!r2.ok) return;
-    expect(r2.value.state.ownership['R73']).toEqual({ owner: p1 });
+    expect(r2.value.state.ownership['R72']).toEqual({ owner: p1 });
   });
 });
 
@@ -182,7 +182,7 @@ describe('triple routes', () => {
   };
   const tripleBoard = buildBoard(tripleContent);
   const applyT = (state: GameState, action: Action) => reduce(tripleBoard, state, action);
-  const claim = (routeId: string, color: CardColor): Action => ({
+  const claim = (routeId: string, color: TrainColor): Action => ({
     t: 'CLAIM_ROUTE',
     player: p0,
     routeId: asRouteId(routeId),
@@ -597,7 +597,7 @@ describe('turn enforcement', () => {
     const res = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p1,
-      routeId: asRouteId('R71'),
+      routeId: asRouteId('R70'),
       payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     expect(res.ok).toBe(false);

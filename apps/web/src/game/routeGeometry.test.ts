@@ -64,7 +64,7 @@ describe('route geometry', () => {
 
   it('marks high-degree junctions as hubs and leaves through-stations plain', () => {
     expect(HUB_CITIES.has('tainan')).toBe(true); // degree 7
-    expect(HUB_CITIES.has('taipei')).toBe(true); // degree 6
+    expect(HUB_CITIES.has('taipei')).toBe(true); // degree 5
     expect(HUB_CITIES.has('kaohsiung')).toBe(true); // degree 5
     expect(HUB_CITIES.has('chishang')).toBe(false); // degree 2 — a through-station
     expect(HUB_CITIES.has('matsu')).toBe(false); // island ferry stub

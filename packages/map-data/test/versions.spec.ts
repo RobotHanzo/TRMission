@@ -39,7 +39,7 @@ describe('content version registry', () => {
   it('current content is map version 4 (the tw2.1 network)', () => {
     expect(TAIWAN_CONTENT.meta.version).toBe(4);
     expect(TAIWAN_CONTENT.cities.length).toBe(36);
-    expect(TAIWAN_CONTENT.routes.length).toBe(76);
+    expect(TAIWAN_CONTENT.routes.length).toBe(75);
   });
 
   it('v3 content is map version 3 with R77 as a length-2 tunnel', () => {
@@ -88,7 +88,7 @@ describe('content version registry', () => {
   // The current (v4) hash — new games are stamped with this.
   it('pins the v4 (current) content hash', () => {
     expect(hashContent(TAIWAN_CONTENT)).toBe(
-      '1977feaae22361e837a17763b12f07b919913fce107e435858df09cb3a88d930',
+      '45581204915bfa0d947bdacf54ec81ab07c19a7941dba82fbbe1074bef7ac581',
     );
   });
 });

@@ -56,11 +56,17 @@ liuqiu (33,78). 龜山島 keeps its transformed offshore-NE position (~73.7, 28)
 
 ## Content stats (post-edit, for `content.spec.ts`)
 
-cityCount 36 · routeCount 76 · distinctPairCount 64 · doublePairCount **11** · tunnelCount 9 ·
-ferryCount 14 · ferryLocoSymbols 26 · totalTrackLength 222 · ticketCount 84 · longTicketCount 9.
-colorBalance: ORANGE 7, GREEN 5, YELLOW 7, PURPLE 6, **RED 7**, GRAY 26, **BLUE 6**, BLACK 5,
+cityCount 36 · routeCount 75 · distinctPairCount 64 · doublePairCount **11** · tunnelCount 9 ·
+ferryCount 14 · ferryLocoSymbols 26 · totalTrackLength 221 · ticketCount 84 · longTicketCount 9.
+colorBalance: ORANGE 6, GREEN 5, YELLOW 7, PURPLE 6, **RED 7**, GRAY 26, **BLUE 6**, BLACK 5,
 WHITE 7. Fully connected; no length-5/7 routes; all ferries GRAY; no ferry/tunnel/double overlaps.
 Passes `validateContent()` (verified against raw tw2.1 with a mirror pre-check).
+
+> **Follow-up (post-v4):** the lone ORANGE 臺北–板橋 single (old `R1`) that ran beside the group-H
+> double was dropped; its former gray partner (old `R70`) took `R1`, and `R71`–`R76` shifted forward
+> to `R70`–`R75`. This is an in-place correction to v4 (never deployed, no persisted games), so the
+> v4 hash was simply re-pinned rather than a v5 archived — routeCount 76→75, ORANGE 7→6,
+> totalTrackLength 222→221 (reflected above).
 
 ## Version / registry (load-bearing — ADR A6/A13)
 
