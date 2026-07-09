@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { BOW_LIMIT } from '@trm/map-data';
+import type { TicketView } from '@trm/map-data';
 import {
   api,
   type CityDraft,
@@ -109,6 +110,10 @@ interface EditorState {
   updateTicket(id: string, patch: Partial<TicketDraft>): void;
   removeTicket(id: string): void;
   replaceTickets(tickets: TicketDraft[]): void;
+  /** Set (or, with undefined, clear by removing the key) a ticket's displayed-area override. */
+  setTicketView(id: string, view?: TicketView): void;
+  /** Set/clear the map-wide default displayed area on geography (no-op without geography). */
+  setDefaultTicketView(view?: TicketView): void;
 
   setGeography(geography: NonNullable<MapDraft['geography']>): void;
   removeGeographyRings(indices: readonly number[]): void;
@@ -332,6 +337,30 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
   replaceTickets: (tickets) => {
     const { draft } = get();
     mutate(get, set, { ...draft, tickets });
+  },
+  setTicketView: (id, view) => {
+    const { draft } = get();
+    mutate(get, set, {
+      ...draft,
+      tickets: draft.tickets.map((t) => {
+        if (t.id !== id) return t;
+        if (view === undefined) {
+          const { view: _drop, ...rest } = t;
+          return rest;
+        }
+        return { ...t, view };
+      }),
+    });
+  },
+  setDefaultTicketView: (view) => {
+    const { draft } = get();
+    if (!draft.geography) return; // map default only meaningful once the map has geography
+    if (view === undefined) {
+      const { defaultTicketView: _drop, ...geo } = draft.geography;
+      mutate(get, set, { ...draft, geography: geo });
+    } else {
+      mutate(get, set, { ...draft, geography: { ...draft.geography, defaultTicketView: view } });
+    }
   },
 
   setGeography: (geography) => {

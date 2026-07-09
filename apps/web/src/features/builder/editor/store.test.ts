@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { TicketView } from '@trm/map-data';
 import { useEditorStore, nextDoubleGroupLetter } from './store';
 import { api } from '../../../net/rest';
 import type * as Rest from '../../../net/rest';
@@ -467,5 +468,42 @@ describe('editor store', () => {
       s.clearAllRouteBows(); // nothing left to clear
       expect(useEditorStore.getState().undoStack.length).toBe(undoBefore + 1);
     });
+  });
+});
+
+describe('display-area setters', () => {
+  it('setTicketView sets and clears a ticket view (clearing removes the key)', () => {
+    useEditorStore.setState({
+      draft: { cities: [], routes: [], tickets: [ticket('t1', 'a', 'b')] },
+      undoStack: [],
+      redoStack: [],
+    });
+    const view: TicketView = { mode: 'zoom', level: 0.4 };
+    useEditorStore.getState().setTicketView('t1', view);
+    expect(useEditorStore.getState().draft.tickets[0]?.view).toEqual(view);
+
+    useEditorStore.getState().setTicketView('t1', undefined);
+    expect('view' in (useEditorStore.getState().draft.tickets[0] ?? {})).toBe(false);
+  });
+
+  it('setDefaultTicketView writes/removes the key on geography, no-op without geography', () => {
+    useEditorStore.setState({
+      draft: { cities: [], routes: [], tickets: [] },
+      undoStack: [],
+      redoStack: [],
+    });
+    useEditorStore.getState().setDefaultTicketView({ mode: 'auto' });
+    expect(useEditorStore.getState().draft.geography).toBeUndefined(); // no geography → no-op
+
+    useEditorStore.setState({
+      draft: { cities: [], routes: [], tickets: [], geography: geography([]) },
+      undoStack: [],
+      redoStack: [],
+    });
+    useEditorStore.getState().setDefaultTicketView({ mode: 'auto' });
+    expect(useEditorStore.getState().draft.geography?.defaultTicketView).toEqual({ mode: 'auto' });
+
+    useEditorStore.getState().setDefaultTicketView(undefined);
+    expect('defaultTicketView' in (useEditorStore.getState().draft.geography ?? {})).toBe(false);
   });
 });

@@ -2,6 +2,7 @@
 // refresh token is an httpOnly cookie sent automatically (credentials: 'include').
 // A 401 triggers one silent refresh + retry.
 import type { EventsMode, UserFeature } from '@trm/shared';
+import type { TicketView } from '@trm/map-data';
 
 export type Theme = 'system' | 'light' | 'dark';
 export type Locale = 'zh-Hant' | 'en';
@@ -175,11 +176,15 @@ export interface TicketDraft {
   b: string;
   value: number;
   deck: 'LONG' | 'SHORT';
+  /** Per-ticket displayed-area override for the mission mini-map; absent ⇒ inherit the map default. */
+  view?: TicketView;
 }
 export interface MapGeographyDraft {
   baseView: { x: number; y: number; w: number; h: number };
   land: readonly (readonly (readonly [number, number])[])[];
   crop: { lonMin: number; lonMax: number; latMin: number; latMax: number };
+  /** Map-wide default displayed area for tickets that set no `view`. */
+  defaultTicketView?: TicketView;
 }
 export interface MapRulesDraft {
   trainCarsStart?: number;
