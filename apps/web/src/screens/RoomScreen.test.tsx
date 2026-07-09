@@ -83,7 +83,7 @@ const baseRoom = () => ({
   gameId: undefined as string | undefined,
   mapName: undefined as { zh: string; en: string } | undefined,
   spectators: [] as { userId: string; displayName: string; isGuest: boolean }[],
-  chat: [] as { userId: string; presetId: string; ts: number }[],
+  chat: [] as { userId: string; presetId?: string; text?: string; ts: number }[],
 });
 
 const mocked = api as unknown as {
@@ -416,11 +416,29 @@ describe('RoomScreen preset chat', () => {
     const { container } = render(<RoomScreen />);
     const btn = await screen.findByRole('button', { name: '祝你好運，玩得開心！' });
     fireEvent.click(btn);
-    expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', 'GOOD_LUCK');
+    expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', { presetId: 'GOOD_LUCK' });
     await waitFor(() =>
       expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain(
         '祝你好運，玩得開心！',
       ),
+    );
+  });
+
+  it('sends a free-text message from the input box and renders it', async () => {
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    (api.sendRoomChat as ReturnType<typeof vi.fn>).mockResolvedValue(
+      room({
+        members: [member('host'), member('u-me')],
+        chat: [{ userId: 'u-me', text: 'gg wp', ts: 1 }],
+      }),
+    );
+    const { container } = render(<RoomScreen />);
+    const input = await screen.findByPlaceholderText('輸入訊息…');
+    fireEvent.change(input, { target: { value: 'gg wp' } });
+    fireEvent.click(screen.getByRole('button', { name: '傳送' }));
+    expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', { text: 'gg wp' });
+    await waitFor(() =>
+      expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain('gg wp'),
     );
   });
 

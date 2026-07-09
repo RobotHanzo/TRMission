@@ -67,8 +67,9 @@ export interface RoomSettings {
 }
 export interface RoomChatEntry {
   userId: string;
-  presetId: string;
   ts: number;
+  presetId?: string;
+  text?: string;
 }
 export interface RoomView {
   code: string;
@@ -337,8 +338,8 @@ export const api = {
   rejoinRoom: (code: string) => req<RoomView>('POST', `/rooms/${code}/rejoin`),
   voteRematch: (code: string, wantsRematch: boolean) =>
     req<RoomView>('POST', `/rooms/${code}/rematch-vote`, { wantsRematch }),
-  sendRoomChat: (code: string, presetId: string) =>
-    req<RoomView>('POST', `/rooms/${code}/chat`, { presetId }),
+  sendRoomChat: (code: string, payload: { presetId: string } | { text: string }) =>
+    req<RoomView>('POST', `/rooms/${code}/chat`, payload),
   rematch: (code: string) => req<RoomView>('POST', `/rooms/${code}/rematch`),
 
   history: () => req<MatchSummary[]>('GET', '/history'),

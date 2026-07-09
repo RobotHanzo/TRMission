@@ -64,6 +64,7 @@ export function RoomScreen() {
   const [room, setRoom] = useState<RoomView | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [kicked, setKicked] = useState(false);
+  const [chatDraft, setChatDraft] = useState('');
   const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
   const pushNotification = useAnimationsStore((s) => s.pushNotification);
   const {
@@ -236,7 +237,7 @@ export function RoomScreen() {
   const addBot = (d: BotDifficulty) => void guard(api.addBot(code, d));
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
-  const sendChat = (presetId: string) => void guard(api.sendRoomChat(code, presetId));
+  const sendChat = (presetId: string) => void guard(api.sendRoomChat(code, { presetId }));
   const becomeSpectator = () => void guard(api.watchRoom(code));
   const becomePlayer = () => void guard(api.rejoinRoom(code));
   const copy = (text: string) => {
@@ -555,7 +556,9 @@ export function RoomScreen() {
               room.chat.map((c, i) => (
                 <div className="chat-msg" key={i}>
                   <span className="chat-author">{chatAuthorName(c.userId)}</span>{' '}
-                  <span className="chat-text">{t(chatPresetKey(c.presetId))}</span>
+                  <span className="chat-text">
+                    {c.text ?? t(chatPresetKey(c.presetId ?? ''))}
+                  </span>
                 </div>
               ))
             )}
@@ -572,6 +575,27 @@ export function RoomScreen() {
               </button>
             ))}
           </div>
+          <form
+            className="chat-input"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const text = chatDraft.trim();
+              if (!text) return;
+              setChatDraft('');
+              void guard(api.sendRoomChat(code, { text }));
+            }}
+          >
+            <input
+              type="text"
+              maxLength={2048}
+              value={chatDraft}
+              placeholder={t('chat.placeholder')}
+              onChange={(e) => setChatDraft(e.target.value)}
+            />
+            <button type="submit" disabled={chatDraft.trim().length === 0}>
+              {t('chat.send')}
+            </button>
+          </form>
         </section>
       </aside>
     </div>
