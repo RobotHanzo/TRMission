@@ -134,16 +134,15 @@ export function generateSchedule(
       cur = nextR;
       region = eligibleRegions[ri] as string;
       const touching = regionTouching.get(region) ?? [];
-      if (kind === 'TYPHOON_LANDFALL') {
-        const [extra, nextC] = nextInt(cur, 2);
-        cur = nextC;
-        const pickCount = 2 + extra;
-        const [shuffled, nextS] = shuffle(touching, cur);
-        cur = nextS;
-        routeIds = shuffled.slice(0, pickCount);
-      } else {
-        routeIds = [...touching]; // SKY_LANTERN: ALL touching routes, no further draw.
-      }
+      // TYPHOON_LANDFALL picks 2 or 3 of the region's touching routes; SKY_LANTERN picks 3 or 4 —
+      // both a random subset (shuffled), never the whole touching set.
+      const pickBase = kind === 'TYPHOON_LANDFALL' ? 2 : 3;
+      const [extra, nextC] = nextInt(cur, 2);
+      cur = nextC;
+      const pickCount = pickBase + extra;
+      const [shuffled, nextS] = shuffle(touching, cur);
+      cur = nextS;
+      routeIds = shuffled.slice(0, pickCount);
     } else if (kind === 'VIRAL_HOTSPOT') {
       const cities = eligibleHotspotCities();
       const [ci, nextC] = nextInt(cur, cities.length);

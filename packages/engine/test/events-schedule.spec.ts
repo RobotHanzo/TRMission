@@ -193,6 +193,10 @@ describe('generateSchedule — determinism & structure', () => {
             expect(e.routeIds.length).toBeGreaterThanOrEqual(2);
             expect(e.routeIds.length).toBeLessThanOrEqual(3);
           }
+          if (e.kind === 'SKY_LANTERN') {
+            expect(e.routeIds.length).toBeGreaterThanOrEqual(3);
+            expect(e.routeIds.length).toBeLessThanOrEqual(4);
+          }
         }
       }
     }

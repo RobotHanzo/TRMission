@@ -3,8 +3,8 @@
 ## Goal
 
 `SKY_LANTERN` (天燈之夜) and `TYPHOON_LANDFALL` (颱風登陸) are the two random-event kinds that
-target a specific set of routes — a whole region's touching routes for Sky Lantern, 2-3 of them for
-Typhoon Landfall (`packages/engine/src/events/schedule.ts`). Today `EventsPanel.tsx`'s active/
+target a specific set of routes — a random 3-4 of a region's touching routes for Sky Lantern, 2-3 of
+them for Typhoon Landfall (`packages/engine/src/events/schedule.ts`). Today `EventsPanel.tsx`'s active/
 forecast rows only ever show a route **count** ("2 條路線" via `events.affectedRoutes`), and the
 existing info modal (landed in `2026-07-05-events-panel-info-modal-design.md`) shows only the
 event's name + rule description — a player has no way to see _which_ routes are affected short of
