@@ -8,7 +8,7 @@ import { Dropdown, type DropdownOption } from '../../../../components/ui/Dropdow
 import { Segmented } from '../../../../components/ui/Segmented';
 import { Switch } from '../../../../components/ui/Switch';
 import { EditorCanvas } from '../EditorCanvas';
-import { useEditorStore, newRouteId, nextDoubleGroupLetter } from '../store';
+import { useEditorStore, newRouteId } from '../store';
 import type { RouteDraft } from '../../../../net/rest';
 
 const ROUTE_COLORS: readonly RouteColor[] = [...TRAIN_COLORS, 'GRAY'];
@@ -21,7 +21,7 @@ export function RoutesStage() {
   const addRoute = useEditorStore((s) => s.addRoute);
   const updateRoute = useEditorStore((s) => s.updateRoute);
   const removeRoute = useEditorStore((s) => s.removeRoute);
-  const convertToDouble = useEditorStore((s) => s.convertToDouble);
+  const setPairTrackCount = useEditorStore((s) => s.setPairTrackCount);
   const [pendingFrom, setPendingFrom] = useState<string | null>(null);
   const [draftPair, setDraftPair] = useState<{ a: string; b: string } | null>(null);
 
@@ -52,8 +52,15 @@ export function RoutesStage() {
               setPendingFrom(null);
               return;
             }
-            setDraftPair({ a: pendingFrom, b: id });
+            const existing = draft.routes.find(
+              (r) => (r.a === pendingFrom && r.b === id) || (r.a === id && r.b === pendingFrom),
+            );
             setPendingFrom(null);
+            if (existing) {
+              select({ kind: 'route', id: existing.id });
+              return;
+            }
+            setDraftPair({ a: pendingFrom, b: id });
           }}
           onRouteClick={(id) => {
             setPendingFrom(null);
@@ -83,24 +90,10 @@ export function RoutesStage() {
               ferryLocos: 0,
               isTunnel: false,
             }}
-            existingDoubleGroups={
-              [...new Set(draft.routes.map((r) => r.doubleGroup).filter(Boolean))] as string[]
-            }
             onCancel={() => setDraftPair(null)}
-            onSubmit={(route, makeDouble) => {
-              addRoute(route);
-              if (makeDouble) {
-                // route.doubleGroup is already set by RouteForm whenever makeDouble is true —
-                // the spread carries it through, the sibling only needs a fresh id and colour. A
-                // ferry sibling mirrors the source's GRAY colour (and thus its locomotive count)
-                // instead of the RED/BLUE alternation, since ferries must stay GRAY.
-                addRoute({
-                  ...route,
-                  id: newRouteId(),
-                  color:
-                    route.ferryLocos > 0 ? route.color : route.color === 'RED' ? 'BLUE' : 'RED',
-                });
-              }
+            onSubmit={(newRoute, trackCount) => {
+              addRoute(newRoute);
+              if (trackCount > 1) setPairTrackCount(newRoute.id, trackCount as 2 | 3);
               setDraftPair(null);
             }}
           />
@@ -111,17 +104,33 @@ export function RoutesStage() {
               b: cityName(selectedRoute.b),
             })}
             initial={selectedRoute}
-            existingDoubleGroups={[]}
             hideDouble
             onCancel={() => select(null)}
             onSubmit={(route) => updateRoute(selectedRoute.id, route)}
             extra={
               <>
-                {!selectedRoute.doubleGroup && (
-                  <button onClick={() => convertToDouble(selectedRoute.id)}>
-                    {t('builder.convertToDouble')}
-                  </button>
-                )}
+                <div className="field">
+                  <span className="field-label">{t('builder.parallelTracks')}</span>
+                  <Segmented<string>
+                    options={[
+                      { value: '1', label: '1' },
+                      { value: '2', label: '2' },
+                      { value: '3', label: '3' },
+                    ]}
+                    value={String(
+                      Math.min(
+                        3,
+                        draft.routes.filter(
+                          (r) =>
+                            (r.a === selectedRoute.a && r.b === selectedRoute.b) ||
+                            (r.a === selectedRoute.b && r.b === selectedRoute.a),
+                        ).length,
+                      ),
+                    )}
+                    onChange={(v) => setPairTrackCount(selectedRoute.id, Number(v) as 1 | 2 | 3)}
+                    ariaLabel={t('builder.parallelTracks')}
+                  />
+                </div>
                 <button className="danger" onClick={() => removeRoute(selectedRoute.id)}>
                   <Trash2 size={14} aria-hidden /> {t('builder.deleteRoute')}
                 </button>
@@ -139,7 +148,6 @@ export function RoutesStage() {
 function RouteForm({
   title,
   initial,
-  existingDoubleGroups,
   hideDouble,
   onCancel,
   onSubmit,
@@ -147,10 +155,9 @@ function RouteForm({
 }: {
   title: string;
   initial: RouteDraft;
-  existingDoubleGroups: string[];
   hideDouble?: boolean;
   onCancel(): void;
-  onSubmit(route: RouteDraft, makeDouble: boolean): void;
+  onSubmit(route: RouteDraft, trackCount: number): void;
   extra?: React.ReactNode;
 }) {
   const { t } = useTranslation();
@@ -160,7 +167,7 @@ function RouteForm({
   const [length, setLength] = useState<RouteLength>(initial.length as RouteLength);
   const [isTunnel, setIsTunnel] = useState(initial.isTunnel);
   const [ferryLocos, setFerryLocos] = useState(initial.ferryLocos);
-  const [makeDouble, setMakeDouble] = useState(false);
+  const [trackCount, setTrackCount] = useState(1);
   const isFerry = ferryLocos > 0;
 
   const colorOptions: DropdownOption<RouteColor>[] = ROUTE_COLORS.map((c) => {
@@ -226,27 +233,24 @@ function RouteForm({
         />
       </label>
       {!hideDouble && (
-        <div className="row between setting-row">
-          <span className="field-label">{t('builder.makeDouble')}</span>
-          <Switch checked={makeDouble} onChange={setMakeDouble} label={t('builder.makeDouble')} />
+        <div className="field">
+          <span className="field-label">{t('builder.parallelTracks')}</span>
+          <Segmented<string>
+            options={[
+              { value: '1', label: '1' },
+              { value: '2', label: '2' },
+              { value: '3', label: '3' },
+            ]}
+            value={String(trackCount)}
+            onChange={(v) => setTrackCount(Number(v))}
+            ariaLabel={t('builder.parallelTracks')}
+          />
         </div>
       )}
       <div className="row">
         <button
           className="primary"
-          onClick={() =>
-            onSubmit(
-              {
-                ...initial,
-                color,
-                length,
-                isTunnel,
-                ferryLocos,
-                ...(makeDouble ? { doubleGroup: nextDoubleGroupLetter(existingDoubleGroups) } : {}),
-              },
-              makeDouble,
-            )
-          }
+          onClick={() => onSubmit({ ...initial, color, length, isTunnel, ferryLocos }, trackCount)}
         >
           {t('save')}
         </button>

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import '../../../../i18n';
 import { RoutesStage } from './RoutesStage';
 import { useEditorStore } from '../store';
@@ -17,20 +17,17 @@ vi.mock('../EditorCanvas', () => ({
       <button type="button" onClick={() => onRouteClick?.('r1')}>
         route-r1
       </button>
-      <button type="button" onClick={() => onRouteClick?.('r2')}>
-        route-r2
-      </button>
       <button type="button" onClick={() => onRouteClick?.('r3')}>
         route-r3
-      </button>
-      <button type="button" onClick={() => onRouteClick?.('r4')}>
-        route-r4
       </button>
       <button type="button" onClick={() => onCityClick?.('c1')}>
         city-c1
       </button>
       <button type="button" onClick={() => onCityClick?.('c2')}>
         city-c2
+      </button>
+      <button type="button" onClick={() => onCityClick?.('c3')}>
+        city-c3
       </button>
     </div>
   ),
@@ -39,22 +36,13 @@ vi.mock('../EditorCanvas', () => ({
 const baseCities: CityDraft[] = [
   { id: 'c1', nameZh: '甲', nameEn: 'A', x: 10, y: 50, region: 'r', isIsland: false },
   { id: 'c2', nameZh: '乙', nameEn: 'B', x: 60, y: 50, region: 'r', isIsland: false },
+  { id: 'c3', nameZh: '丙', nameEn: 'C', x: 90, y: 50, region: 'r', isIsland: false },
 ];
 
+// Two lone routes on distinct pairs (c1-c2 and c2-c3).
 const baseRoutes: RouteDraft[] = [
   { id: 'r1', a: 'c1', b: 'c2', color: 'RED', length: 2, ferryLocos: 0, isTunnel: false },
-  { id: 'r2', a: 'c1', b: 'c2', color: 'RED', length: 2, ferryLocos: 0, isTunnel: true },
-  {
-    id: 'r3',
-    a: 'c1',
-    b: 'c2',
-    color: 'RED',
-    length: 2,
-    ferryLocos: 0,
-    isTunnel: false,
-    doubleGroup: 'A',
-  },
-  { id: 'r4', a: 'c1', b: 'c2', color: 'GRAY', length: 2, ferryLocos: 1, isTunnel: false },
+  { id: 'r3', a: 'c2', b: 'c3', color: 'RED', length: 2, ferryLocos: 0, isTunnel: false },
 ];
 
 beforeEach(() => {
@@ -80,139 +68,59 @@ beforeEach(() => {
   });
 });
 
+const onPair = (a: string, b: string) => (r: RouteDraft) =>
+  (r.a === a && r.b === b) || (r.a === b && r.b === a);
+
 describe('RoutesStage', () => {
-  it('shows the convert-to-double button for a plain single route', () => {
+  it('shows the parallel-tracks control at 1 for a lone route', () => {
     render(<RoutesStage />);
     fireEvent.click(screen.getByText('route-r1'));
-
-    expect(screen.getByText('轉換為雙軌路線')).toBeInTheDocument();
+    const group = screen.getByRole('radiogroup', { name: '平行軌道' });
+    expect(within(group).getByRole('radio', { name: '1' })).toHaveAttribute('aria-checked', 'true');
   });
 
-  it('hides the convert-to-double button for a route that is already part of a double pair', () => {
-    render(<RoutesStage />);
-    fireEvent.click(screen.getByText('route-r3'));
-
-    expect(screen.queryByText('轉換為雙軌路線')).not.toBeInTheDocument();
-  });
-
-  it('clicking convert-to-double turns the selected route into a double pair', () => {
+  it('clicking [2] turns a lone route into a clean double', () => {
     render(<RoutesStage />);
     fireEvent.click(screen.getByText('route-r1'));
-    fireEvent.click(screen.getByText('轉換為雙軌路線'));
+    const group = screen.getByRole('radiogroup', { name: '平行軌道' });
+    fireEvent.click(within(group).getByRole('radio', { name: '2' }));
 
     const routes = useEditorStore.getState().draft.routes;
-    const original = routes.find((r) => r.id === 'r1')!;
-    expect(original.doubleGroup).toBe('B'); // 'A' is already taken by r3
-    const sibling = routes.find((r) => r.doubleGroup === 'B' && r.id !== 'r1');
-    expect(sibling).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      length: 2,
-      isTunnel: false,
-      ferryLocos: 0,
-      color: 'BLUE',
-    });
-    expect(screen.queryByText('轉換為雙軌路線')).not.toBeInTheDocument();
+    const pair = routes.filter(onPair('c1', 'c2'));
+    expect(pair).toHaveLength(2);
+    expect(new Set(pair.map((r) => r.doubleGroup))).toEqual(new Set(['A']));
   });
 
-  it('shows the convert-to-double button for a ferry route', () => {
+  it('clicking [3] turns a lone route into a clean triple', () => {
     render(<RoutesStage />);
-    fireEvent.click(screen.getByText('route-r4'));
+    fireEvent.click(screen.getByText('route-r1'));
+    const group = screen.getByRole('radiogroup', { name: '平行軌道' });
+    fireEvent.click(within(group).getByRole('radio', { name: '3' }));
 
-    expect(screen.getByText('轉換為雙軌路線')).toBeInTheDocument();
+    const pair = useEditorStore.getState().draft.routes.filter(onPair('c1', 'c2'));
+    expect(pair).toHaveLength(3);
+    expect(new Set(pair.map((r) => r.doubleGroup)).size).toBe(1);
   });
 
-  it('clicking convert-to-double on a ferry route mirrors it into a double-ferry pair', () => {
-    render(<RoutesStage />);
-    fireEvent.click(screen.getByText('route-r4'));
-    fireEvent.click(screen.getByText('轉換為雙軌路線'));
-
-    const routes = useEditorStore.getState().draft.routes;
-    const original = routes.find((r) => r.id === 'r4')!;
-    expect(original.doubleGroup).toBe('B'); // 'A' is already taken by r3
-    const sibling = routes.find((r) => r.doubleGroup === 'B' && r.id !== 'r4');
-    expect(sibling).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      length: 2,
-      isTunnel: false,
-      ferryLocos: 1,
-      color: 'GRAY',
-    });
-  });
-
-  it('creates a mirrored double-ferry pair from the new-route form when ferry and make-double are both set', () => {
+  it('creates a double directly from the new-route form via the track selector', () => {
     render(<RoutesStage />);
     fireEvent.click(screen.getByText('city-c1'));
-    fireEvent.click(screen.getByText('city-c2'));
-
-    fireEvent.change(screen.getByLabelText('渡輪所需彩色車頭數'), { target: { value: '2' } });
-    fireEvent.click(screen.getByRole('switch', { name: '建立為雙軌路線' }));
+    fireEvent.click(screen.getByText('city-c3')); // c1-c3 is a brand-new pair
+    const group = screen.getByRole('radiogroup', { name: '平行軌道' });
+    fireEvent.click(within(group).getByRole('radio', { name: '2' }));
     fireEvent.click(screen.getByText('儲存'));
 
-    const routes = useEditorStore.getState().draft.routes;
-    const created = routes.filter((r) => !baseRoutes.some((b) => b.id === r.id));
+    const created = useEditorStore.getState().draft.routes.filter(onPair('c1', 'c3'));
     expect(created).toHaveLength(2);
-    const [first, second] = created;
-    expect(first).toMatchObject({ a: 'c1', b: 'c2', color: 'GRAY', ferryLocos: 2 });
-    expect(second).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      color: 'GRAY',
-      ferryLocos: 2,
-      doubleGroup: first!.doubleGroup,
-    });
+    expect(new Set(created.map((r) => r.doubleGroup)).size).toBe(1);
   });
 
-  it('shows the convert-to-double button for a tunnel route', () => {
-    render(<RoutesStage />);
-    fireEvent.click(screen.getByText('route-r2'));
-
-    expect(screen.getByText('轉換為雙軌路線')).toBeInTheDocument();
-  });
-
-  it('clicking convert-to-double on a tunnel route mirrors it into a double-tunnel pair', () => {
-    render(<RoutesStage />);
-    fireEvent.click(screen.getByText('route-r2'));
-    fireEvent.click(screen.getByText('轉換為雙軌路線'));
-
-    const routes = useEditorStore.getState().draft.routes;
-    const original = routes.find((r) => r.id === 'r2')!;
-    expect(original.doubleGroup).toBe('B'); // 'A' is already taken by r3
-    const sibling = routes.find((r) => r.doubleGroup === 'B' && r.id !== 'r2');
-    expect(sibling).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      length: 2,
-      isTunnel: true,
-      ferryLocos: 0,
-      color: 'BLUE',
-    });
-  });
-
-  it('creates a mirrored double-tunnel pair from the new-route form when tunnel and make-double are both set', () => {
-    // This branch is the new-route path (RouteForm mounted with draftPair, `hideDouble` not
-    // set), so the make-double Switch renders alongside the isTunnel Switch — both toggles are
-    // user-driven, the test path is intentional rather than exploiting a defaults leak.
+  it('selecting two cities that already have a route selects it instead of drawing a duplicate', () => {
     render(<RoutesStage />);
     fireEvent.click(screen.getByText('city-c1'));
-    fireEvent.click(screen.getByText('city-c2'));
-
-    fireEvent.click(screen.getByRole('switch', { name: '隧道' }));
-    fireEvent.click(screen.getByRole('switch', { name: '建立為雙軌路線' }));
-    fireEvent.click(screen.getByText('儲存'));
-
-    const routes = useEditorStore.getState().draft.routes;
-    const created = routes.filter((r) => !baseRoutes.some((b) => b.id === r.id));
-    expect(created).toHaveLength(2);
-    const [first, second] = created;
-    expect(first).toMatchObject({ a: 'c1', b: 'c2', color: 'RED', isTunnel: true });
-    expect(second).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      color: 'BLUE',
-      isTunnel: true,
-      doubleGroup: first!.doubleGroup,
-    });
+    fireEvent.click(screen.getByText('city-c2')); // r1 already connects c1-c2
+    // The existing route is selected (edit form) and no duplicate route is drawn.
+    expect(useEditorStore.getState().selection).toEqual({ kind: 'route', id: 'r1' });
+    expect(useEditorStore.getState().draft.routes.filter(onPair('c1', 'c2'))).toHaveLength(1);
   });
 });

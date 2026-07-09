@@ -450,6 +450,7 @@ const resources = {
         ferryLocos: '渡輪所需彩色車頭數',
         makeDouble: '建立為雙軌路線',
         convertToDouble: '轉換為雙軌路線',
+        parallelTracks: '平行軌道',
         deleteRoute: '刪除路線',
         curvesHint: '拖曳曲線頂點的圓點，或使用右側滑桿調整彎曲程度',
         curvesEmptyHint: '點擊路線以調整其彎曲程度',
@@ -505,7 +506,9 @@ const resources = {
           ferryLocosExceedLength: '{{routeId}}：所需彩色車頭數 {{ferryLocos}} 超過長度 {{length}}',
           ferryAndTunnel: '{{routeId}}：路線不能同時是渡輪與隧道',
           bowOutOfRange: '{{routeId}}：彎曲程度 {{bow}} 超出允許範圍 [-{{limit}}, {{limit}}]',
-          doubleGroupWrongCount: '雙軌組 {{group}}：應恰好有 2 條路線，實際為 {{count}} 條',
+          doubleGroupInvalidSize: '平行軌道組 {{group}}：應有 2 或 3 條路線，實際為 {{count}} 條',
+          tooManyParallelRoutes: '車站組合 {{pair}}：{{count}} 條平行路線超過上限 3 條',
+          multipleGroupsOnPair: '車站組合 {{pair}}：同一組車站有超過一組平行軌道（{{groups}}）',
           doubleGroupDifferentPairs: '雙軌組 {{group}}：兩條路線連接不同的車站組合',
           doubleGroupLengthMismatch: '雙軌組 {{group}}：兩條並行路線的長度必須相同',
           ticketUnknownCityA: '任務卡 {{ticketId}}：起點車站不存在（{{cityId}}）',
@@ -1004,6 +1007,7 @@ const resources = {
         ferryLocos: 'Ferry locomotives required',
         makeDouble: 'Make this a double route',
         convertToDouble: 'Convert to double route',
+        parallelTracks: 'Parallel tracks',
         deleteRoute: 'Delete route',
         curvesHint: 'Drag the dot at the apex of the curve, or tune the bend with the slider',
         curvesEmptyHint: 'Click a route to tune its bend',
@@ -1061,7 +1065,9 @@ const resources = {
           ferryAndTunnel: '{{routeId}}: a route cannot be both a ferry and a tunnel',
           bowOutOfRange:
             '{{routeId}}: bow {{bow}} is outside the allowed range [-{{limit}}, {{limit}}]',
-          doubleGroupWrongCount: 'Double group {{group}}: expected exactly 2 routes, got {{count}}',
+          doubleGroupInvalidSize: 'Parallel group {{group}}: expected 2 or 3 routes, got {{count}}',
+          tooManyParallelRoutes: 'City pair {{pair}}: {{count}} parallel routes exceeds the maximum of 3',
+          multipleGroupsOnPair: 'City pair {{pair}}: has more than one parallel group ({{groups}})',
           doubleGroupDifferentPairs:
             'Double group {{group}}: the two routes connect different stop pairs',
           doubleGroupLengthMismatch:

@@ -82,7 +82,10 @@ interface EditorState {
   addRoute(route: RouteDraft): void;
   updateRoute(id: string, patch: Partial<RouteDraft>): void;
   removeRoute(id: string): void;
-  convertToDouble(id: string): void;
+  /** Normalize all routes on the target route's city pair into ONE parallel group of `count`
+   *  tracks (1 = single/no group, 2 = double, 3 = triple). Mints or drops sibling routes as
+   *  needed and re-groups them under a single letter; one undo step. */
+  setPairTrackCount(id: string, count: 1 | 2 | 3): void;
   /** Set (clamped ±BOW_LIMIT, 0.1-rounded) or clear (undefined) a route's curvature override.
    *  A double pair's siblings are always patched together so the twin track bows as one. */
   setRouteBow(id: string, bow: number | undefined): void;
@@ -215,35 +218,50 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     });
     if (get().selection?.kind === 'route' && get().selection?.id === id) set({ selection: null });
   },
-  convertToDouble: (id) => {
+  setPairTrackCount: (id, count) => {
     const { draft } = get();
     const target = draft.routes.find((r) => r.id === id);
-    if (!target || target.doubleGroup) return;
-    const existingGroups = [
-      ...new Set(draft.routes.map((r) => r.doubleGroup).filter(Boolean)),
-    ] as string[];
-    const group = nextDoubleGroupLetter(existingGroups);
-    // Sibling defaults by source flavor — each side stays self-consistent so validateContent
-    // accepts the pair without a follow-up edit:
-    //   ferry:   mirror the source's GRAY color and locomotive count (ferryMustBeGray).
-    //   tunnel:  mirror the tunnel flag; otherwise use the same RED↔BLUE flip as a plain route
-    //            (a non-RED source — YELLOW, GREEN, GRAY, ... — silently lands on RED, mirroring
-    //            the existing plain-route heuristic rather than introducing a new branch).
-    //   plain:   flip color RED↔BLUE (no flavors to mirror).
-    const sibling: RouteDraft = {
-      ...target,
-      id: newRouteId(),
-      isTunnel: target.isTunnel,
-      color: target.ferryLocos > 0 ? target.color : target.color === 'RED' ? 'BLUE' : 'RED',
-      doubleGroup: group,
-    };
-    mutate(get, set, {
-      ...draft,
-      routes: [
-        ...draft.routes.map((r) => (r.id === id ? { ...r, doubleGroup: group } : r)),
-        sibling,
-      ],
-    });
+    if (!target) return;
+    const clamped = Math.max(1, Math.min(3, Math.round(count)));
+    const onPair = (r: RouteDraft): boolean =>
+      (r.a === target.a && r.b === target.b) || (r.a === target.b && r.b === target.a);
+    // Target first, then the pair's other routes in draft order.
+    const pairRoutes = [target, ...draft.routes.filter((r) => r.id !== target.id && onPair(r))];
+    const others = draft.routes.filter((r) => !onPair(r));
+
+    if (clamped === 1) {
+      const { doubleGroup: _drop, ...survivor } = target;
+      mutate(get, set, { ...draft, routes: [...others, survivor] });
+      return;
+    }
+
+    // Reuse the pair's existing group letter if any; otherwise the next free one.
+    const existingLetter = pairRoutes.map((r) => r.doubleGroup).find(Boolean);
+    const group =
+      existingLetter ??
+      nextDoubleGroupLetter([
+        ...new Set(draft.routes.map((r) => r.doubleGroup).filter(Boolean)),
+      ] as string[]);
+    // Minted siblings mirror the target (ferry stays GRAY; otherwise flip RED↔BLUE).
+    const siblingColor =
+      target.ferryLocos > 0 ? target.color : target.color === 'RED' ? 'BLUE' : 'RED';
+
+    const grouped: RouteDraft[] = [];
+    for (let i = 0; i < clamped; i++) {
+      const existing = pairRoutes[i];
+      if (existing) {
+        grouped.push({ ...existing, length: target.length, doubleGroup: group });
+      } else {
+        grouped.push({
+          ...target,
+          id: newRouteId(),
+          color: siblingColor,
+          length: target.length,
+          doubleGroup: group,
+        });
+      }
+    }
+    mutate(get, set, { ...draft, routes: [...others, ...grouped] });
   },
   setRouteBow: (id, bow) => {
     const { draft } = get();

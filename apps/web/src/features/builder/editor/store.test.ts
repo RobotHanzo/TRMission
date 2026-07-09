@@ -111,123 +111,114 @@ describe('editor store', () => {
     expect(remaining[0]!.doubleGroup).toBeUndefined();
   });
 
-  it('convertToDouble assigns a doubleGroup and creates a matching sibling route', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.addRoute(
-      route('r1', 'c1', 'c2', { color: 'RED', length: 3, isTunnel: false, ferryLocos: 0 }),
-    );
+  describe('setPairTrackCount', () => {
+    it('1→2 mints a sibling, one group, alternate colour, equal length', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2', { color: 'RED', length: 3 }));
 
-    s.convertToDouble('r1');
+      s.setPairTrackCount('r1', 2);
 
-    const routes = useEditorStore.getState().draft.routes;
-    expect(routes).toHaveLength(2);
-    const original = routes.find((r) => r.id === 'r1')!;
-    expect(original.doubleGroup).toBe('A');
-    const sibling = routes.find((r) => r.id !== 'r1')!;
-    expect(sibling).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      length: 3,
-      isTunnel: false,
-      ferryLocos: 0,
-      doubleGroup: 'A',
-      color: 'BLUE',
+      const routes = useEditorStore.getState().draft.routes;
+      expect(routes).toHaveLength(2);
+      const group = routes.find((r) => r.id === 'r1')!.doubleGroup;
+      expect(group).toBe('A');
+      const sibling = routes.find((r) => r.id !== 'r1')!;
+      expect(sibling).toMatchObject({ a: 'c1', b: 'c2', length: 3, color: 'BLUE', doubleGroup: 'A' });
     });
-  });
 
-  it('convertToDouble picks the next free double-group letter', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.placeCity(city('c3'));
-    s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
-    s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
-    s.addRoute(route('r3', 'c2', 'c3'));
+    it('2→3 mints a third track, all one group, equal length', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('r2', 'c1', 'c2', { color: 'BLUE', doubleGroup: 'A' }));
 
-    s.convertToDouble('r3');
+      s.setPairTrackCount('r1', 3);
 
-    const routes = useEditorStore.getState().draft.routes;
-    expect(routes.find((r) => r.id === 'r3')!.doubleGroup).toBe('B');
-  });
-
-  it('convertToDouble is a no-op for already-double routes', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
-
-    s.convertToDouble('r1');
-
-    expect(useEditorStore.getState().draft.routes).toHaveLength(1);
-  });
-
-  it('convertToDouble mirrors a tunnel route into a double-tunnel pair', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.addRoute(route('r1', 'c1', 'c2', { color: 'RED', length: 3, isTunnel: true }));
-
-    s.convertToDouble('r1');
-
-    const routes = useEditorStore.getState().draft.routes;
-    expect(routes).toHaveLength(2);
-    const original = routes.find((r) => r.id === 'r1')!;
-    expect(original.doubleGroup).toBe('A');
-    const sibling = routes.find((r) => r.id !== 'r1')!;
-    expect(sibling).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      length: 3,
-      isTunnel: true,
-      ferryLocos: 0,
-      doubleGroup: 'A',
-      color: 'BLUE',
+      const routes = useEditorStore.getState().draft.routes;
+      expect(routes).toHaveLength(3);
+      expect(new Set(routes.map((r) => r.doubleGroup))).toEqual(new Set(['A']));
+      expect(routes.every((r) => r.a === 'c1' && r.b === 'c2' && r.length === 2)).toBe(true);
     });
-  });
 
-  it('convertToDouble mirrors a ferry route into a double-ferry pair', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.addRoute(
-      route('r1', 'c1', 'c2', { color: 'GRAY', length: 3, ferryLocos: 2, isTunnel: false }),
-    );
+    it('3→2 drops one track', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('r3', 'c1', 'c2', { doubleGroup: 'A' }));
 
-    s.convertToDouble('r1');
+      s.setPairTrackCount('r1', 2);
 
-    const routes = useEditorStore.getState().draft.routes;
-    expect(routes).toHaveLength(2);
-    const original = routes.find((r) => r.id === 'r1')!;
-    expect(original.doubleGroup).toBe('A');
-    const sibling = routes.find((r) => r.id !== 'r1')!;
-    expect(sibling).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      length: 3,
-      isTunnel: false,
-      ferryLocos: 2,
-      color: 'GRAY',
-      doubleGroup: 'A',
+      const routes = useEditorStore.getState().draft.routes;
+      expect(routes).toHaveLength(2);
+      expect(routes.map((r) => r.id).sort()).toEqual(['r1', 'r2']);
     });
-  });
 
-  it('reverts convertToDouble in a single undo step', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.addRoute(route('r1', 'c1', 'c2'));
+    it('2→1 strips the group, leaving a single plain route', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
 
-    s.convertToDouble('r1');
-    expect(useEditorStore.getState().draft.routes).toHaveLength(2);
+      s.setPairTrackCount('r1', 1);
 
-    useEditorStore.getState().undo();
+      const routes = useEditorStore.getState().draft.routes;
+      expect(routes).toHaveLength(1);
+      expect(routes[0]).toMatchObject({ id: 'r1' });
+      expect(routes[0]!.doubleGroup).toBeUndefined();
+    });
 
-    const routes = useEditorStore.getState().draft.routes;
-    expect(routes).toHaveLength(1);
-    expect(routes[0]).toMatchObject({ id: 'r1' });
-    expect(routes[0]!.doubleGroup).toBeUndefined();
+    it('picks the next free group letter when others exist', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.placeCity(city('c3', 20));
+      s.addRoute(route('x1', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('x2', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('r3', 'c2', 'c3'));
+
+      s.setPairTrackCount('r3', 2);
+
+      const routes = useEditorStore.getState().draft.routes;
+      expect(routes.find((r) => r.id === 'r3')!.doubleGroup).toBe('B');
+    });
+
+    it('normalizes a messy pair (two groups on one pair) into a single clean group', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('a1', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('a2', 'c1', 'c2', { doubleGroup: 'A' }));
+      s.addRoute(route('b1', 'c1', 'c2', { doubleGroup: 'B' }));
+      s.addRoute(route('b2', 'c1', 'c2', { doubleGroup: 'B' }));
+
+      s.setPairTrackCount('a1', 2);
+
+      const routes = useEditorStore.getState().draft.routes;
+      expect(routes).toHaveLength(2);
+      expect(new Set(routes.map((r) => r.doubleGroup))).toEqual(new Set(['A']));
+    });
+
+    it('reverts a track-count change in a single undo step', () => {
+      const s = useEditorStore.getState();
+      s.placeCity(city('c1'));
+      s.placeCity(city('c2', 10));
+      s.addRoute(route('r1', 'c1', 'c2'));
+
+      s.setPairTrackCount('r1', 2);
+      expect(useEditorStore.getState().draft.routes).toHaveLength(2);
+
+      useEditorStore.getState().undo();
+
+      const routes = useEditorStore.getState().draft.routes;
+      expect(routes).toHaveLength(1);
+      expect(routes[0]!.doubleGroup).toBeUndefined();
+    });
   });
 
   it('clears the selection when the selected city/route is removed', () => {
