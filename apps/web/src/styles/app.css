@@ -21,20 +21,66 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: var(--tr-space-2);
-  color: var(--tr-blue);
   border: none;
   background: none;
   padding: 0;
   cursor: pointer;
 }
-.brand-icon {
+
+/* Fixed bilingual logotype (icon + stacked 台鐵任務 / TRMISSION wordmark), shared by the app
+   header and the welcome screen's hero — see BrandBanner.tsx. Unlike t('appName'), this doesn't
+   switch with locale: it's the brand mark, not a translated label. */
+.brand-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-3);
+}
+.brand-banner-icon {
   flex: none;
   border-radius: 22%;
 }
-.brand strong {
-  font-style: italic;
-  color: #ae3c04;
+.brand-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.brand-banner-zh {
+  font-family: var(--tr-font-cjk);
+  font-weight: 700;
+  line-height: 1;
+  color: #e55509;
+  letter-spacing: 2px;
+  transform: skewX(-6deg);
+}
+.brand-banner-en {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 600;
+  letter-spacing: 5px;
+  color: var(--tr-brand-navy);
+  transform: skewX(-6deg);
+}
+.brand-banner--header {
+  gap: var(--tr-space-2);
+}
+.brand-banner--header .brand-banner-icon {
+  width: 26px;
+  height: 26px;
+}
+.brand-banner--header .brand-banner-zh {
+  font-size: 17px;
+}
+.brand-banner--header .brand-banner-en {
+  font-size: 7px;
+}
+.brand-banner--hero .brand-banner-icon {
+  width: 64px;
+  height: 64px;
+}
+.brand-banner--hero .brand-banner-zh {
+  font-size: 36px;
+}
+.brand-banner--hero .brand-banner-en {
+  font-size: 11px;
 }
 .header-actions {
   display: flex;

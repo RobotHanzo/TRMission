@@ -18,6 +18,7 @@ import { usePlayerName } from '../game/playerName';
 import { PHONE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { SettingsModal } from './SettingsModal';
 import { ConfirmDialog } from './ConfirmDialog';
+import { BrandBanner } from './BrandBanner';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 
 export function AppHeader() {
@@ -109,8 +110,7 @@ export function AppHeader() {
   return (
     <header className="app-header">
       <button type="button" className="brand" onClick={onBrandClick}>
-        <img className="brand-icon" src="/icon.svg" width={22} height={22} alt="" />
-        <strong>{t('appName')}</strong>
+        <BrandBanner size="header" />
       </button>
 
       {inGame && turn && (

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { CirclePlay, GraduationCap } from 'lucide-react';
+import { BrandBanner } from '../components/BrandBanner';
 
 interface WelcomeScreenProps {
   name: string;
@@ -13,7 +14,7 @@ export function WelcomeScreen({ name, onStartTutorial, onContinue }: WelcomeScre
 
   return (
     <div className="welcome">
-      <img className="welcome-badge" src="/icon.svg" width={64} height={64} alt="" />
+      <BrandBanner size="hero" className="welcome-brand" />
       <h1 className="welcome-title">{t('home.welcome.title', { name })}</h1>
       <p className="welcome-subtitle">{t('home.welcome.subtitle')}</p>
 

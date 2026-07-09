@@ -305,10 +305,7 @@ button.home-side-card {
   text-align: center;
   padding: var(--tr-space-8) var(--tr-space-4);
 }
-.welcome-badge {
-  width: 64px;
-  height: 64px;
-  border-radius: 22%;
+.welcome-brand {
   margin-bottom: var(--tr-space-6);
 }
 .welcome-title {
