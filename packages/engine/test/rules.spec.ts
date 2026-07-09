@@ -170,13 +170,56 @@ describe('triple routes', () => {
   const tripleContent: GameContent = {
     meta: { mapId: 'test-triple', version: 1, nameZh: '三軌測試', nameEn: 'Triple Test' },
     cities: [
-      { id: asCityId('x1'), nameZh: '甲', nameEn: 'X1', x: 0, y: 0, region: 'test', isIsland: false },
-      { id: asCityId('x2'), nameZh: '乙', nameEn: 'X2', x: 10, y: 0, region: 'test', isIsland: false },
+      {
+        id: asCityId('x1'),
+        nameZh: '甲',
+        nameEn: 'X1',
+        x: 0,
+        y: 0,
+        region: 'test',
+        isIsland: false,
+      },
+      {
+        id: asCityId('x2'),
+        nameZh: '乙',
+        nameEn: 'X2',
+        x: 10,
+        y: 0,
+        region: 'test',
+        isIsland: false,
+      },
     ],
     routes: [
-      { id: asRouteId('T1'), a: asCityId('x1'), b: asCityId('x2'), color: 'RED', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
-      { id: asRouteId('T2'), a: asCityId('x1'), b: asCityId('x2'), color: 'BLUE', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
-      { id: asRouteId('T3'), a: asCityId('x1'), b: asCityId('x2'), color: 'GREEN', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
+      {
+        id: asRouteId('T1'),
+        a: asCityId('x1'),
+        b: asCityId('x2'),
+        color: 'RED',
+        length: 1,
+        ferryLocos: 0,
+        isTunnel: false,
+        doubleGroup: 'A',
+      },
+      {
+        id: asRouteId('T2'),
+        a: asCityId('x1'),
+        b: asCityId('x2'),
+        color: 'BLUE',
+        length: 1,
+        ferryLocos: 0,
+        isTunnel: false,
+        doubleGroup: 'A',
+      },
+      {
+        id: asRouteId('T3'),
+        a: asCityId('x1'),
+        b: asCityId('x2'),
+        color: 'GREEN',
+        length: 1,
+        ferryLocos: 0,
+        isTunnel: false,
+        doubleGroup: 'A',
+      },
     ],
     tickets: [],
   };
@@ -222,17 +265,24 @@ describe('triple routes', () => {
   it('opens all 3 tracks in a 5-player game', () => {
     const p1 = asPlayerId('p1');
     const p2 = asPlayerId('p2');
-    const state = st({ numPlayers: 5, hands: { p0: { RED: 1 }, p1: { BLUE: 1 }, p2: { GREEN: 1 } } });
+    const state = st({
+      numPlayers: 5,
+      hands: { p0: { RED: 1 }, p1: { BLUE: 1 }, p2: { GREEN: 1 } },
+    });
     const r1 = applyT(state, claim('T1', 'RED'));
     if (!r1.ok) throw new Error('r1');
     const r2 = applyT(r1.value.state, {
-      t: 'CLAIM_ROUTE', player: p1, routeId: asRouteId('T2'),
+      t: 'CLAIM_ROUTE',
+      player: p1,
+      routeId: asRouteId('T2'),
       payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     if (!r2.ok) throw new Error('r2');
     expect(r2.value.state.ownership['T3']).toBeUndefined(); // still open
     const r3 = applyT(r2.value.state, {
-      t: 'CLAIM_ROUTE', player: p2, routeId: asRouteId('T3'),
+      t: 'CLAIM_ROUTE',
+      player: p2,
+      routeId: asRouteId('T3'),
       payment: { color: 'GREEN', colorCount: 1, locomotives: 0 },
     });
     expect(r3.ok).toBe(true);
@@ -285,10 +335,31 @@ describe('double-ferry routes', () => {
   // stay fully independent even on the same pair. taiwanBoard() has no such route by the
   // bundled map's own convention, so this content is purpose-built.
   const doubleFerryContent: GameContent = {
-    meta: { mapId: 'test-double-ferry', version: 1, nameZh: '雙渡輪測試', nameEn: 'Double Ferry Test' },
+    meta: {
+      mapId: 'test-double-ferry',
+      version: 1,
+      nameZh: '雙渡輪測試',
+      nameEn: 'Double Ferry Test',
+    },
     cities: [
-      { id: asCityId('x1'), nameZh: '甲', nameEn: 'X1', x: 0, y: 0, region: 'test', isIsland: false },
-      { id: asCityId('x2'), nameZh: '乙', nameEn: 'X2', x: 10, y: 0, region: 'test', isIsland: false },
+      {
+        id: asCityId('x1'),
+        nameZh: '甲',
+        nameEn: 'X1',
+        x: 0,
+        y: 0,
+        region: 'test',
+        isIsland: false,
+      },
+      {
+        id: asCityId('x2'),
+        nameZh: '乙',
+        nameEn: 'X2',
+        x: 10,
+        y: 0,
+        region: 'test',
+        isIsland: false,
+      },
     ],
     routes: [
       {
@@ -374,10 +445,31 @@ describe('double-tunnel routes', () => {
   // stay fully independent for each side, even on a parallel pair. taiwanBoard() has no
   // double-tunnel pair by the bundled map's own convention, so this content is purpose-built.
   const doubleTunnelContent: GameContent = {
-    meta: { mapId: 'test-double-tunnel', version: 1, nameZh: '雙鐵路測試', nameEn: 'Double Tunnel Test' },
+    meta: {
+      mapId: 'test-double-tunnel',
+      version: 1,
+      nameZh: '雙鐵路測試',
+      nameEn: 'Double Tunnel Test',
+    },
     cities: [
-      { id: asCityId('y1'), nameZh: '甲', nameEn: 'Y1', x: 0, y: 0, region: 'test', isIsland: false },
-      { id: asCityId('y2'), nameZh: '乙', nameEn: 'Y2', x: 10, y: 0, region: 'test', isIsland: false },
+      {
+        id: asCityId('y1'),
+        nameZh: '甲',
+        nameEn: 'Y1',
+        x: 0,
+        y: 0,
+        region: 'test',
+        isIsland: false,
+      },
+      {
+        id: asCityId('y2'),
+        nameZh: '乙',
+        nameEn: 'Y2',
+        x: 10,
+        y: 0,
+        region: 'test',
+        isIsland: false,
+      },
     ],
     routes: [
       {
