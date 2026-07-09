@@ -3,7 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 import { ROUTE_LENGTHS, TRAIN_COLORS, asCityId, asRouteId, asTicketId } from '@trm/shared';
 import type { RouteLength } from '@trm/shared';
 import { BOW_LIMIT, RULE_BOUNDS } from '@trm/map-data';
-import type { MapRules } from '@trm/map-data';
+import type { MapGeography, MapRules } from '@trm/map-data';
 import type { MapDraft } from './maps.types';
 
 // Hard caps a builder draft can never exceed, independent of validateContent/validateForPlay
@@ -141,6 +141,15 @@ function compactRules(rules: z.infer<typeof MapRulesDraftSchema>): MapRules {
   return out;
 }
 
+/** Drop zod's explicit-`undefined` optional key on geography — like {@link compactRules},
+ *  exactOptionalPropertyTypes needs "key absent", not "key present with value undefined". */
+function compactGeography(
+  geo: NonNullable<z.infer<typeof MapDraftSchema>['geography']>,
+): MapGeography {
+  const { defaultTicketView, ...rest } = geo;
+  return { ...rest, ...(defaultTicketView !== undefined ? { defaultTicketView } : {}) };
+}
+
 /** The wire shape carries plain strings; the internal MapDraft uses branded ids. Already
  *  zod-validated at this point, so the casts are a trust boundary, not a leap of faith. */
 export function draftFromDto(dto: z.infer<typeof MapDraftSchema>): MapDraft {
@@ -157,13 +166,14 @@ export function draftFromDto(dto: z.infer<typeof MapDraftSchema>): MapDraft {
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
       ...(r.bow !== undefined ? { bow: r.bow } : {}),
     })),
-    tickets: dto.tickets.map((t) => ({
+    tickets: dto.tickets.map(({ view, ...t }) => ({
       ...t,
       id: asTicketId(t.id),
       a: asCityId(t.a),
       b: asCityId(t.b),
+      ...(view !== undefined ? { view } : {}),
     })),
-    ...(dto.geography !== undefined ? { geography: dto.geography } : {}),
+    ...(dto.geography !== undefined ? { geography: compactGeography(dto.geography) } : {}),
     ...(dto.rules !== undefined ? { rules: compactRules(dto.rules) } : {}),
   };
 }

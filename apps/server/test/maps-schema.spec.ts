@@ -21,7 +21,7 @@ describe('MapDraftSchema keeps display-area fields', () => {
       routes: [],
       tickets: [{ id: 't1', a: 'a', b: 'b', value: 2, deck: 'SHORT', view: { mode: 'auto' } }],
     });
-    expect(parsed.tickets[0].view).toEqual({ mode: 'auto' });
+    expect(parsed.tickets[0]?.view).toEqual({ mode: 'auto' });
   });
   it('keeps a geography defaultTicketView', () => {
     const parsed = MapDraftSchema.parse({

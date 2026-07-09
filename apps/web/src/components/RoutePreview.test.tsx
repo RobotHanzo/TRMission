@@ -29,7 +29,14 @@ describe('RoutePreview', () => {
     const geography = {
       baseView: base,
       crop: { lonMin: 0, lonMax: 1, latMin: 0, latMax: 1 },
-      land: [[[0, 0], [20, 0], [20, 20], [0, 20]] as [number, number][]],
+      land: [
+        [
+          [0, 0],
+          [20, 0],
+          [20, 20],
+          [0, 20],
+        ] as [number, number][],
+      ],
     };
     const { container } = render(
       <RoutePreview

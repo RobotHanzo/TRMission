@@ -43,7 +43,13 @@ export function RoutePreview({ a, b, cities, routes, geography, baseView, view, 
     return d;
   }, [cities, routes]);
 
-  const rect = ticketRect(view !== undefined ? { view } : {}, a, b, baseView, geography ?? undefined);
+  const rect = ticketRect(
+    view !== undefined ? { view } : {},
+    a,
+    b,
+    baseView,
+    geography ?? undefined,
+  );
   const viewBox = `${rect.x} ${rect.y} ${rect.w} ${rect.h}`;
 
   // A gentle arc bowed perpendicular to the A–B line so it reads as "a connection", never as one
@@ -105,9 +111,7 @@ export function RoutePreview({ a, b, cities, routes, geography, baseView, view, 
       {/* faint city dots for the rest, so the network has anchors */}
       <g className="rp-cities">
         {cities.map((c) =>
-          c.id === a.id || c.id === b.id ? null : (
-            <circle key={c.id} cx={c.x} cy={c.y} r="0.5" />
-          ),
+          c.id === a.id || c.id === b.id ? null : <circle key={c.id} cx={c.x} cy={c.y} r="0.5" />,
         )}
       </g>
     </svg>

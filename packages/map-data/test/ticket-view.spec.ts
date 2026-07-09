@@ -11,7 +11,10 @@ const b = { x: 50, y: 50 };
 describe('ticketViewSpec (precedence)', () => {
   it('uses the ticket view when present', () => {
     expect(
-      ticketViewSpec({ view: { mode: 'zoom', level: 0.3 } }, { defaultTicketView: { mode: 'auto' } }),
+      ticketViewSpec(
+        { view: { mode: 'zoom', level: 0.3 } },
+        { defaultTicketView: { mode: 'auto' } },
+      ),
     ).toEqual({
       mode: 'zoom',
       level: 0.3,
@@ -42,7 +45,12 @@ describe('ticketViewRect', () => {
   });
   it('zoom level 1 → tight box centered on the midpoint', () => {
     // w = 100 * 0.18 = 18, centered on (45,45)
-    expect(ticketViewRect({ mode: 'zoom', level: 1 }, a, b, base)).toEqual({ x: 36, y: 36, w: 18, h: 18 });
+    expect(ticketViewRect({ mode: 'zoom', level: 1 }, a, b, base)).toEqual({
+      x: 36,
+      y: 36,
+      w: 18,
+      h: 18,
+    });
   });
   it('zoom clamps an out-of-range level into [0,1]', () => {
     expect(ticketViewRect({ mode: 'zoom', level: 5 }, a, b, base)).toEqual(
@@ -77,8 +85,8 @@ describe('ticketViewIssues', () => {
     expect(
       formatIssue({ code: 'ticketViewLevelOutOfRange', params: { where: 'T1', level: 2 } }),
     ).toContain('[0, 1]');
-    expect(formatIssue({ code: 'ticketViewInvalidMode', params: { where: 'T1', mode: 'wat' } })).toContain(
-      'wat',
-    );
+    expect(
+      formatIssue({ code: 'ticketViewInvalidMode', params: { where: 'T1', mode: 'wat' } }),
+    ).toContain('wat');
   });
 });
