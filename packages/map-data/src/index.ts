@@ -14,6 +14,7 @@ export * from './validate';
 export * from './graph';
 export * from './generate';
 export * from './geometry';
+export * from './ticket-view';
 export * from './taiwan-geography';
 export * from './render-tokens';
 
