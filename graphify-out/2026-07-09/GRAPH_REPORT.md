@@ -1,7 +1,7 @@
 # Graph Report - TRMission  (2026-07-09)
 
 ## Corpus Check
-- 675 files · ~589,443 words
+- 675 files · ~589,785 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6453dd0c`
+- Built from commit: `631284f5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -1411,7 +1411,7 @@ Cohesion: 0.17
 Nodes (11): 1. Store — new atomic `convertToDouble` action (`editor/store.ts`), 2. UI — `RoutesStage.tsx`, 3. i18n, 4. No changes needed elsewhere, 5. Testing, Decisions (settled with the user), Goal, Map builder: "Convert to double" button on the Routes stage (+3 more)
 
 ## Knowledge Gaps
-- **1746 isolated node(s):** `HERE`, `OUT_DIR`, `CUSTOM_MAP`, `Card`, `rooms` (+1741 more)
+- **1746 isolated node(s):** `FONTS_DIR`, `SEAT_COLORS`, `Banner`, `RoomSeatMember`, `STATUS_LABEL` (+1741 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **141 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -1424,7 +1424,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
 - **Why does `api` connect `frameTarget.test.ts` to `Bot Adoption & Game Session Apply`, `extraction-spec.md`, `ChatState`, `graphify reference: extra exports and benchmark`, `RoomsView.tsx`, `MetricsHooks`?**
   _High betweenness centrality (0.013) - this node is a cross-community bridge._
-- **What connects `HERE`, `OUT_DIR`, `CUSTOM_MAP` to the rest of the system?**
+- **What connects `FONTS_DIR`, `SEAT_COLORS`, `Banner` to the rest of the system?**
   _1767 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Command Queue & Game Registry` be split into smaller, more focused modules?**
   _Cohesion score 0.04878048780487805 - nodes in this community are weakly interconnected._

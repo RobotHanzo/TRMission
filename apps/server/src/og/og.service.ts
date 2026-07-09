@@ -27,7 +27,7 @@ import {
 
 const SITE_TITLE = '台鐵任務 TRMission';
 const SITE_DESCRIPTION =
-  '台灣鐵道路線競逐桌遊 — 鋪設路線、連接城市、完成任務。A railway board game set in Taiwan: claim routes, link cities, complete missions.';
+  '搶佔台灣鐵道路線 — 鋪設路線、連接城市、完成任務。A railway board game set in Taiwan: claim routes, link cities, complete missions.';
 
 export interface PageMeta {
   title: string;

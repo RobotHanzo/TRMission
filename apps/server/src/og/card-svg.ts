@@ -280,9 +280,9 @@ export function siteCardSvg(): string {
   const banner = brandBanner(66, 176, 140, 456);
   return card2a(`
 ${SITE_ROUTE_MOTIF}
-${text(66, 128, 24, INK_SOFT, '路線建設桌遊', { spacing: 3, font: F_SANS })}
+${text(66, 128, 24, INK_SOFT, '鐵道建設桌遊', { spacing: 3, font: F_SANS })}
 ${banner.markup}
-${text(66, 446, 32, INK_SOFT, '搶佔路線，連接城市。', { font: F_SANS })}
+${text(66, 446, 32, INK_SOFT, '搶佔路線，連接城市', { font: F_SANS })}
 ${text(66, 590, 23, INK_SOFT, 'trmission.robothanzo.dev', { font: F_MONO })}
 `);
 }
