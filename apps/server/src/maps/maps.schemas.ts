@@ -18,6 +18,13 @@ const name60 = z.string().min(1).max(60);
 const isRouteLength = (n: number): n is RouteLength =>
   (ROUTE_LENGTHS as readonly number[]).includes(n);
 
+/** Presentation-only "displayed area" for a mission ticket's mini-map (see @trm/map-data TicketView). */
+export const TicketViewSchema = z.discriminatedUnion('mode', [
+  z.object({ mode: z.literal('full') }),
+  z.object({ mode: z.literal('auto') }),
+  z.object({ mode: z.literal('zoom'), level: z.number().finite().min(0).max(1) }),
+]);
+
 export const CityDraftSchema = z.object({
   id: idString,
   nameZh: name60,
@@ -46,6 +53,7 @@ export const TicketDraftSchema = z.object({
   b: idString,
   value: z.number().int().min(1).max(50),
   deck: z.enum(['LONG', 'SHORT']),
+  view: TicketViewSchema.optional(),
 });
 
 const ringSchema = z.array(z.tuple([z.number().finite(), z.number().finite()])).min(3);
@@ -63,6 +71,7 @@ export const MapGeographyDraftSchema = z.object({
     latMin: z.number().finite(),
     latMax: z.number().finite(),
   }),
+  defaultTicketView: TicketViewSchema.optional(),
 });
 
 export const MapRulesDraftSchema = z.object({
