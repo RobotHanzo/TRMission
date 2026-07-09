@@ -71,13 +71,15 @@ export class OgService {
   async roomPng(code: string): Promise<Buffer> {
     const room = await this.roomOrNull(code);
     if (!room) return this.sitePng();
-    const host = room.members.find((m) => m.userId === room.hostId);
     return this.renderPng(
       roomCardSvg({
         code: room.code,
-        ...(host ? { hostName: host.displayName } : {}),
-        seatsTaken: room.members.length,
-        maxPlayers: room.maxPlayers,
+        maxSeats: room.maxPlayers,
+        seatMembers: room.members.map((m) => ({
+          seat: m.seat,
+          kind: m.isBot ? 'bot' : 'human',
+          ready: m.ready,
+        })),
         ...(room.mapName ? { mapName: room.mapName } : {}),
         status: room.status,
       }),
