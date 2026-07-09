@@ -39,7 +39,7 @@ describe('lobby: demote to spectator / rejoin as player', () => {
     expect(demoted.body.spectators).toEqual([{ userId: b.id, displayName: 'Bo', isGuest: true }]);
   });
 
-  it('transfers host when the host demotes', async () => {
+  it('blocks the host from demoting to spectator (owners cannot spectate)', async () => {
     const a = await guest('Ada2');
     const b = await guest('Bo2');
     const room = await request(server())
@@ -50,12 +50,14 @@ describe('lobby: demote to spectator / rejoin as player', () => {
     const code: string = room.body.code;
     await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
 
-    const demoted = await request(server())
-      .post(`/api/v1/rooms/${code}/watch`)
+    await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(a.token)).expect(400);
+    // The room is untouched: the host stays host, both members remain seated.
+    const after = await request(server())
+      .get(`/api/v1/rooms/${code}`)
       .set(auth(a.token))
       .expect(200);
-    expect(demoted.body.hostId).toBe(b.id);
-    expect(demoted.body.members.map((m: { userId: string }) => m.userId)).toEqual([b.id]);
+    expect(after.body.hostId).toBe(a.id);
+    expect(after.body.members.map((m: { userId: string }) => m.userId)).toEqual([a.id, b.id]);
   });
 
   it("blocks demoting the room's only member", async () => {

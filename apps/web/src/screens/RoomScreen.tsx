@@ -600,9 +600,7 @@ export function RoomScreen() {
               room.chat.map((c, i) => (
                 <div className="chat-msg" key={i}>
                   <span className="chat-author">{chatAuthorName(c.userId)}</span>{' '}
-                  <span className="chat-text">
-                    {c.text ?? t(chatPresetKey(c.presetId ?? ''))}
-                  </span>
+                  <span className="chat-text">{c.text ?? t(chatPresetKey(c.presetId ?? ''))}</span>
                 </div>
               ))
             )}
