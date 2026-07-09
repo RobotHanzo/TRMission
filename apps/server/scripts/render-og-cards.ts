@@ -6,9 +6,9 @@
 //
 // Output lands in apps/server/.og-preview/ (gitignored) and is left on disk between runs — open
 // index.html in a browser, or the individual .png files, to review.
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { Resvg } from '@resvg/resvg-js';
 import { TAIWAN_CONTENT } from '@trm/map-data';
 import {
@@ -34,6 +34,36 @@ function renderPng(svg: string): Buffer {
     font: { loadSystemFonts: false, fontFiles: OG_FONT_FILES },
   });
   return resvg.render().asPng();
+}
+
+/** apps/server/src/og/card-svg.ts's `<text font-family="...">` values reference these three
+ *  families by name only — resvg resolves them via `OG_FONT_FILES` (passed as data, not
+ *  markup), so the family names alone mean nothing to any *other* SVG viewer. Opening a
+ *  `.svg` sibling directly in a browser/editor would silently substitute whatever "Noto Sans
+ *  TC"/"Cascadia Code"/"Archivo" (if any) happens to be installed on THAT machine — a
+ *  different font, a different weight behaviour, nothing to do with the actual card markup.
+ *  A `<style>@font-face{...url('./fonts/…ttf')}</style>` pointing at one shared copy of each
+ *  font (copied into OUT_DIR/fonts/ once below) makes every saved `.svg` resolve the real
+ *  fonts in any viewer that's opened it from this folder — without base64-duplicating ~13MB
+ *  of font data into every single card file (which is exactly what filled the disk the first
+ *  time this was tried here).
+ */
+const FONT_FACE_STYLE = (() => {
+  const nameFor = (path: string) =>
+    basename(path).startsWith('NotoSansTC')
+      ? 'Noto Sans TC'
+      : basename(path).startsWith('CascadiaCode')
+        ? 'Cascadia Code'
+        : 'Archivo';
+  const rules = OG_FONT_FILES.map(
+    (path) => `@font-face{font-family:'${nameFor(path)}';src:url('./fonts/${basename(path)}');}`,
+  ).join('');
+  return `<defs><style>${rules}</style></defs>`;
+})();
+
+/** Self-contained-when-viewed-from-OUT_DIR version of a card's SVG — see `FONT_FACE_STYLE`. */
+function embedFonts(svg: string): string {
+  return svg.replace(/<svg[^>]*>/, (openTag) => `${openTag}${FONT_FACE_STYLE}`);
 }
 
 // A small synthetic custom map — exercises the bounding-box fallback view (no `geography`),
@@ -193,8 +223,11 @@ const cards: Card[] = [
 ];
 
 mkdirSync(OUT_DIR, { recursive: true });
+mkdirSync(join(OUT_DIR, 'fonts'), { recursive: true });
+for (const path of OG_FONT_FILES) copyFileSync(path, join(OUT_DIR, 'fonts', basename(path)));
+
 for (const card of cards) {
-  writeFileSync(join(OUT_DIR, `${card.file}.svg`), card.svg);
+  writeFileSync(join(OUT_DIR, `${card.file}.svg`), embedFonts(card.svg));
   writeFileSync(join(OUT_DIR, `${card.file}.png`), renderPng(card.svg));
 }
 
@@ -206,15 +239,19 @@ body{background:#2a2a2a;color:#eee;font:14px/1.4 system-ui,sans-serif;padding:24
 figure{margin:0;background:#1a1a1a;border-radius:8px;padding:12px;}
 figcaption{margin-top:8px;color:#aaa;}
 figcaption b{color:#fff;}
+figcaption a{color:#8ab4f8;}
 img{width:100%;border-radius:6px;display:block;}
 </style></head><body>
 <h1>OG card preview</h1>
-<p>Regenerate with <code>yarn workspace @trm/server preview:og</code>.</p>
+<p>Regenerate with <code>yarn workspace @trm/server preview:og</code>. The .png is the actual
+production output (rasterised by resvg, exactly like OgService); the .svg sibling is a
+self-contained copy for inspecting/editing raw markup — its fonts are embedded as base64
+<code>@font-face</code> data so it matches the .png in any viewer, but the .png is what ships.</p>
 <div class="grid">
 ${cards
   .map(
     (c) =>
-      `<figure><img src="${c.file}.png" alt="${c.file}"><figcaption><b>${c.file}</b> — ${c.label}</figcaption></figure>`,
+      `<figure><img src="${c.file}.png" alt="${c.file}"><figcaption><b>${c.file}</b> — ${c.label} (<a href="${c.file}.svg">.svg</a>)</figcaption></figure>`,
   )
   .join('\n')}
 </div>

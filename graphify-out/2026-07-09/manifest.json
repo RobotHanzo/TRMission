@@ -2070,8 +2070,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/og/card-svg.ts": {
-    "mtime": 1783588324.780076,
-    "ast_hash": "c5bfeff3c8a110ccddc6a3262bdfa2f1",
+    "mtime": 1783591215.7713523,
+    "ast_hash": "ded8aa23ff9ebefbefd660d0369a86e6",
     "semantic_hash": ""
   },
   "apps/server/src/og/og.controller.ts": {
@@ -2085,8 +2085,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/og/og.service.ts": {
-    "mtime": 1783588337.8179686,
-    "ast_hash": "f569902ebc58c0d558a2aef7417243ae",
+    "mtime": 1783590413.660422,
+    "ast_hash": "d918b946d3acc4ea2c0ae3461fde1763",
     "semantic_hash": ""
   },
   "apps/server/test/og.e2e.spec.ts": {
@@ -3495,8 +3495,23 @@
     "semantic_hash": ""
   },
   "apps/server/scripts/render-og-cards.ts": {
-    "mtime": 1783588468.8164263,
-    "ast_hash": "615ae7c537f3868d12768427e290e6b7",
+    "mtime": 1783590425.4676414,
+    "ast_hash": "e331056e2b5c89baa95fe7efc7d6b28c",
+    "semantic_hash": ""
+  },
+  "apps/server/assets/fonts/LICENSES/Archivo-OFL.txt": {
+    "mtime": 1783590032.1861675,
+    "ast_hash": "f77a6739188f623654c0a7ad6c11f82b",
+    "semantic_hash": ""
+  },
+  "apps/server/assets/fonts/LICENSES/CascadiaCode-OFL.txt": {
+    "mtime": 1783590032.2142408,
+    "ast_hash": "d7c8ce104cefae86ac6fbc55bf0e3f82",
+    "semantic_hash": ""
+  },
+  "apps/server/assets/fonts/LICENSES/NotoSansTC-OFL.txt": {
+    "mtime": 1783590032.1583824,
+    "ast_hash": "9e6561baca2756628871baf0c1e23539",
     "semantic_hash": ""
   }
 }

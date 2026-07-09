@@ -233,16 +233,20 @@ function brandBanner(x: number, y: number, targetIconSize: number, maxWidth: num
   const enSpacing = m.enSize * 0.455;
   const zhCenterX = textX + m.zhWidth / 2;
 
-  // `weight` is deliberately left at text()'s default (700) for both lines, not the CSS
-  // component's real 750/600 — resvg appears to ignore font-weight on our variable fonts (the
-  // PNG output looks the same regardless), but *other* SVG viewers (a browser opening the raw
-  // .svg, e.g.) do honour it, and applying a real weight on top of the stroke-based faux-bold
-  // there double-thickens the glyphs into a clumpy mess. The stroke-only path below is what
-  // actually renders everywhere; `boldStroke` alone carries the zh/en weight contrast.
+  // Neither `weight` nor a custom `boldStroke` is set here — both lines fall through to
+  // text()'s plain default (weight 700, stroke size*0.035), the same treatment every other
+  // piece of text on every other card already uses cleanly. Two earlier attempts to
+  // reproduce the component's real 750-vs-600 weight *contrast* — first via a real
+  // `font-weight` (double-thickened in renderers that DO honour it on variable fonts, on top
+  // of the stroke) and then via an enlarged `boldStroke` on the zh line alone (~0.065×
+  // fontSize, nearly double the proven-safe 0.035 default) — both came back looking wrong on
+  // the dense zh glyphs (鐵/務 are intricate; a heavy uniform stroke merges their close-set
+  // strokes into a blob). Matching the exact weight contrast isn't worth another regression;
+  // the default reads clean and is legible at thumbnail scale like everywhere else.
   const markup =
     `<g transform="translate(${x} ${y}) scale(${m.iconSize / 120})">${ICON_MARK}</g>` +
-    `<g transform="translate(${textX} ${zhBaseline}) skewX(-6)">${text(0, 0, m.zhSize, BANNER_ORANGE, '台鐵任務', { spacing: m.zhSpacing, font: F_SANS, boldStroke: m.zhSize * 0.065 })}</g>` +
-    `<g transform="translate(${zhCenterX} ${enBaseline}) skewX(-6)">${text(0, 0, m.enSize, BANNER_NAVY, 'TRMISSION', { anchor: 'middle', spacing: enSpacing, font: F_LATIN, boldStroke: m.enSize * 0.02 })}</g>`;
+    `<g transform="translate(${textX} ${zhBaseline}) skewX(-6)">${text(0, 0, m.zhSize, BANNER_ORANGE, '台鐵任務', { spacing: m.zhSpacing, font: F_SANS })}</g>` +
+    `<g transform="translate(${zhCenterX} ${enBaseline}) skewX(-6)">${text(0, 0, m.enSize, BANNER_NAVY, 'TRMISSION', { anchor: 'middle', spacing: enSpacing, font: F_LATIN })}</g>`;
 
   return { width: m.iconSize + m.gap + m.zhWidth, height: m.iconSize, markup };
 }
