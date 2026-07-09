@@ -17,6 +17,7 @@ import {
   roomCardSvg,
   replayCardSvg,
   mapCardSvg,
+  OG_FONT_FILES,
   type RoomCardData,
   type ReplayCardData,
   type MapCardData,
@@ -26,10 +27,11 @@ import type { RenderableMap } from '../src/og/map-svg';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(HERE, '..', '.og-preview');
 
+// Same font config as OgService.renderPng — the preview must show exactly what prod renders.
 function renderPng(svg: string): Buffer {
   const resvg = new Resvg(svg, {
     fitTo: { mode: 'width', value: CARD_W },
-    font: { loadSystemFonts: true },
+    font: { loadSystemFonts: false, fontFiles: OG_FONT_FILES },
   });
   return resvg.render().asPng();
 }

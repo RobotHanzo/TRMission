@@ -3,10 +3,26 @@
 // Text is XML-escaped here; rasterisation happens in OgService via resvg.
 /* eslint no-irregular-whitespace: ["error", { "skipStrings": true, "skipTemplates": true }] --
    the card copy deliberately uses U+3000 ideographic spaces for CJK typography */
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { ferryLocoGradientDef, mapPanelSvg, type RenderableMap } from './map-svg';
 
 export const CARD_W = 1200;
 export const CARD_H = 630;
+
+/**
+ * The exact font files every card's `F_SANS`/`F_MONO`/`F_LATIN` family names resolve to
+ * (apps/server/assets/fonts) — resvg is handed these directly (`loadSystemFonts: false` in
+ * OgService's `renderPng`) instead of a `loadSystemFonts: true` guess against whatever the
+ * render box happens to have installed. See apps/server/assets/fonts/LICENSES for each
+ * font's licence (all SIL OFL 1.1).
+ */
+const FONTS_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets', 'fonts');
+export const OG_FONT_FILES: string[] = [
+  join(FONTS_DIR, 'NotoSansTC-Variable.ttf'), // F_SANS — CJK + Latin display/body
+  join(FONTS_DIR, 'CascadiaCode-Regular.ttf'), // F_MONO — labels, codes, numbers
+  join(FONTS_DIR, 'Archivo-Variable.ttf'), // F_LATIN — the BrandBanner TRMISSION wordmark
+];
 
 // Brand tokens mirrored from apps/web/src/styles/tokens.css (light theme — social
 // cards render on platform-neutral backgrounds, so the light palette reads best).
@@ -29,16 +45,18 @@ const BANNER_NAVY = '#17346f';
 /** Seat colours (apps/web/src/theme/colors.ts SEAT_COLORS) for player chips/dots. */
 const SEAT_COLORS = ['#0E8C8C', '#C0398B', '#E8A33D', '#5A6B7B', '#7CB342'] as const;
 
-/** The "黑體 Gothic" system (redesign turn 2 / option 2a): sans CJK display + mono data,
- *  reordered PingFang-first per that exploration. Shared by every card below. */
-const F_SANS =
-  "'PingFang TC','Heiti TC','Microsoft JhengHei','Noto Sans TC','Noto Sans CJK TC','Noto Sans',sans-serif";
-const F_MONO = "'DejaVu Sans Mono','Consolas','Menlo','Courier New',monospace";
-/** Plain Latin captions (map subtitles, etc.) — NOT the BrandBanner wordmark's face. */
-const F_HELV = "'Helvetica','Arial','DejaVu Sans',sans-serif";
-/** The BrandBanner TRMISSION line's Latin face; not a system font on most render boxes, so it
- *  falls through to the same Helvetica/DejaVu stack the rest of the card uses. */
-const F_LATIN = "'Archivo','Helvetica','Arial','DejaVu Sans',sans-serif";
+/**
+ * The "黑體 Gothic" system (redesign turn 2/3): sans CJK display/body + a mono face for
+ * labels, codes, and numbers, plus one dedicated Latin face for the BrandBanner wordmark.
+ * These three families are bundled as real font files under apps/server/assets/fonts and
+ * passed to resvg explicitly (og.service.ts's `renderPng`, `loadSystemFonts: false`) — not
+ * a long guess-and-fall-back stack of faces that may or may not be installed on the render
+ * box. Plain Latin captions (e.g. a map's English subtitle) also use `F_SANS`: Noto Sans TC
+ * covers Latin well, and it keeps the bundle to exactly three files.
+ */
+const F_SANS = "'Noto Sans TC',sans-serif";
+const F_MONO = "'Cascadia Code',monospace";
+const F_LATIN = "'Archivo',sans-serif";
 
 export function escapeXml(s: string): string {
   return s
@@ -93,6 +111,27 @@ function text(
   );
 }
 
+/**
+ * A "中文 · ENGLISH" kicker/label, each half in its own face (`F_SANS` for the CJK run,
+ * `F_MONO` for the Latin run) via nested `<tspan>`s. resvg picks ONE font per text run by
+ * whichever face covers every character in it — a single `<text>` mixing CJK and Latin under
+ * `font-family="Cascadia Code"` has no CJK glyphs to offer, so the *entire* run (Latin half
+ * included) silently falls back to the CJK face and the mono look is lost. Splitting the run
+ * ourselves keeps each half in its intended face. `zh`/`en` must already be escaped.
+ */
+function bilingualText(
+  x: number,
+  y: number,
+  size: number,
+  fill: string,
+  zh: string,
+  en: string,
+  opts: { spacing?: number } = {},
+): string {
+  const content = `<tspan font-family="${F_SANS}">${zh}</tspan><tspan font-family="${F_MONO}"> · ${en}</tspan>`;
+  return text(x, y, size, fill, content, opts);
+}
+
 // =============================================================================
 // Redesign turn 2/3: shared wrapper + the BrandBanner lockup.
 // =============================================================================
@@ -103,6 +142,15 @@ function text(
 function card2a(inner: string): string {
   return `<svg width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}" xmlns="http://www.w3.org/2000/svg">
 <rect width="${CARD_W}" height="${CARD_H}" fill="${PAPER}"/>
+${inner}
+</svg>`;
+}
+
+/** Like `card2a`, but with no opaque canvas-filling rect — for a card whose own silhouette
+ *  (not the full 1200×630 frame) is the shape, so resvg leaves everything outside it as real
+ *  alpha-transparent PNG rather than a same-colour, invisible-but-opaque fill. */
+function cardCutout(inner: string): string {
+  return `<svg width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}" xmlns="http://www.w3.org/2000/svg">
 ${inner}
 </svg>`;
 }
@@ -138,10 +186,13 @@ interface Banner {
  * overruns whatever slot on the card it's dropped into.
  */
 function brandBanner(x: number, y: number, targetIconSize: number, maxWidth: number): Banner {
+  // Ratios lifted straight from BrandBanner.tsx's `--hero` size (icon 80px, zh 48px, en 16px,
+  // icon↔text gap var(--tr-space-3)=12px, zh↔en line gap 3px), so this lockup is that
+  // component's exact proportions at whatever scale the card needs.
   const measure = (iconSize: number) => {
-    const gap = iconSize * 0.16;
-    const zhSize = iconSize * 0.6;
-    const enSize = iconSize * 0.2;
+    const gap = iconSize * (12 / 80);
+    const zhSize = iconSize * (48 / 80);
+    const enSize = iconSize * (16 / 80);
     const zhSpacing = zhSize * 0.056;
     const zhWidth = estimateWidth('台鐵任務', zhSize) + zhSpacing * 3;
     return { iconSize, gap, zhSize, enSize, zhSpacing, zhWidth, total: iconSize + gap + zhWidth };
@@ -150,7 +201,7 @@ function brandBanner(x: number, y: number, targetIconSize: number, maxWidth: num
   while (m.total > maxWidth && m.iconSize > 40) m = measure(m.iconSize - 2);
 
   const textX = x + m.iconSize + m.gap;
-  const lineGap = m.zhSize * 0.16;
+  const lineGap = m.zhSize * (3 / 48);
   const zhCap = m.zhSize * 0.74;
   const enCap = m.enSize * 0.74;
   const blockTop = y + (m.iconSize - (zhCap + lineGap + enCap)) / 2;
@@ -188,14 +239,14 @@ const SITE_ROUTE_MOTIF = `
 </g>
 <circle cx="700" cy="90" r="18" fill="${EMBER}"/>
 <rect width="560" height="${CARD_H}" fill="${PAPER}" opacity="0.94"/>
-<rect width="12" height="${CARD_H}" fill="${BLUE}"/>`;
+<rect width="12" height="${CARD_H}" fill="${BANNER_ORANGE}"/>`;
 
 /** The generic brand card — the homepage unfurl and the nondisclosing fallback. */
 export function siteCardSvg(): string {
   const banner = brandBanner(66, 176, 140, 456);
   return card2a(`
 ${SITE_ROUTE_MOTIF}
-${text(66, 128, 24, INK_SOFT, '路線建設桌遊', { spacing: 3, font: F_MONO })}
+${text(66, 128, 24, INK_SOFT, '路線建設桌遊', { spacing: 3, font: F_SANS })}
 ${banner.markup}
 ${text(66, 446, 32, INK_SOFT, '搶佔路線，連接城市。', { font: F_SANS })}
 ${text(66, 590, 23, INK_SOFT, 'trmission.robothanzo.dev', { font: F_MONO })}
@@ -209,10 +260,47 @@ ${text(66, 590, 23, INK_SOFT, 'trmission.robothanzo.dev', { font: F_MONO })}
 const ROOM_MX = 410;
 const ROOM_MR = 1120;
 
+const TICKET_X = 36;
+const TICKET_Y = 36;
+const TICKET_W = 1128;
+const TICKET_H = 558;
+const TICKET_RX = 30;
+const TICKET_NOTCH_R = 40;
+const TICKET_NOTCH_CY = 315; // vertical centre of the ticket
+
+/**
+ * The ticket-stub silhouette as ONE continuous path — the rounded-rect boundary, except at
+ * each side's punch-hole where it detours along the notch's *inward* semicircle instead of
+ * the straight edge. This is a single simple (non-self-intersecting) outline, not a rect
+ * plus two full circles combined via `fill-rule="evenodd"`: a full circle centred exactly on
+ * the rect's edge is only half-contained by it, and `evenodd` is crossing-parity, not true
+ * boolean subtraction, so the half that pokes outside the rect paints back in as a phantom
+ * opaque crescent in the margin. Tracing the notch as part of the boundary itself sidesteps
+ * that entirely — fill and stroke both just follow the one true edge, with no clip needed and
+ * no seam where a clip would otherwise flatten the stroke into a straight line across the
+ * notch's diameter.
+ */
+function ticketOutlinePath(): string {
+  const x = TICKET_X;
+  const y = TICKET_Y;
+  const w = TICKET_W;
+  const h = TICKET_H;
+  const rx = TICKET_RX;
+  const r = TICKET_NOTCH_R;
+  const ncy = TICKET_NOTCH_CY;
+  return (
+    `M ${x + rx} ${y} L ${x + w - rx} ${y} A ${rx} ${rx} 0 0 1 ${x + w} ${y + rx} ` +
+    `L ${x + w} ${ncy - r} A ${r} ${r} 0 0 0 ${x + w} ${ncy + r} ` + // right notch, bulges inward (-x)
+    `L ${x + w} ${y + h - rx} A ${rx} ${rx} 0 0 1 ${x + w - rx} ${y + h} ` +
+    `L ${x + rx} ${y + h} A ${rx} ${rx} 0 0 1 ${x} ${y + h - rx} ` +
+    `L ${x} ${ncy + r} A ${r} ${r} 0 0 0 ${x} ${ncy - r} ` + // left notch, bulges inward (+x)
+    `L ${x} ${y + rx} A ${rx} ${rx} 0 0 1 ${x + rx} ${y} Z`
+  );
+}
+
 function stubShell(): string {
   return `
-<defs><mask id="stubPunch"><rect x="36" y="36" width="1128" height="558" rx="30" fill="#fff"/><circle cx="36" cy="315" r="40" fill="#000"/><circle cx="1164" cy="315" r="40" fill="#000"/></mask></defs>
-<rect x="36" y="36" width="1128" height="558" rx="30" fill="${PAPER}" stroke="${LINE}" stroke-width="2" mask="url(#stubPunch)"/>
+<path d="${ticketOutlinePath()}" fill="${PAPER}" stroke="${INK_SOFT}" stroke-width="3.5" stroke-linejoin="round"/>
 <line x1="372" y1="66" x2="372" y2="564" stroke="#c2b8a2" stroke-width="4" stroke-dasharray="2 13"/>`;
 }
 
@@ -273,8 +361,8 @@ const STATUS_LABEL: Record<RoomCardData['status'], string> = {
   CLOSED: '已關閉',
 };
 const STATUS_COLOR: Record<RoomCardData['status'], string> = {
-  LOBBY: EMBER,
-  STARTED: BLUE,
+  LOBBY: BLUE,
+  STARTED: EMBER,
   CLOSED: INK_SOFT,
 };
 
@@ -311,11 +399,11 @@ export function roomCardSvg(d: RoomCardData): string {
   const badgeW = Math.max(120, estimateWidth(statusLabel, 24) + 68);
   const badgeX = ROOM_MR - badgeW;
 
-  return card2a(`
+  return cardCutout(`
 ${stubShell()}
 ${brandBannerRotated(158, 315, 100, 480)}
 ${d.mapName ? text(70, 560, 30, BLUE, escapeXml(fitText(d.mapName.zh, 30, 280)), { font: F_SANS }) : ''}
-${text(ROOM_MX, 150, 24, INK_SOFT, '房間代碼 · ROOM CODE', { spacing: 4, font: F_MONO })}
+${bilingualText(ROOM_MX, 150, 24, INK_SOFT, '房間代碼', 'ROOM CODE', { spacing: 4 })}
 ${text(ROOM_MX - 4, 300, codeSize, BLUE, code, { spacing: codeSpacing, font: F_MONO })}
 <rect x="${badgeX}" y="60" width="${badgeW}" height="50" rx="25" fill="#f3e4d6"/>
 <circle cx="${badgeX + 26}" cy="85" r="7" fill="${statusColor}"/>
@@ -361,15 +449,16 @@ ${text(612, y + 56, 48, row.color, String(row.value), { anchor: 'end', font: F_M
  */
 export function mapCardSvg(d: MapCardData): string {
   const panel = { x: 680, y: 66, w: 448, h: 500, r: 20 };
-  const kickerText = d.official ? '官方地圖 · OFFICIAL MAP' : '分享地圖 · SHARED MAP';
+  const kickerZh = d.official ? '官方地圖' : '分享地圖';
+  const kickerEn = d.official ? 'OFFICIAL MAP' : 'SHARED MAP';
   const idW = Math.max(estimateWidth(d.code, 22) + 96, 180);
 
   return card2a(`
 <defs>${ferryLocoGradientDef()}</defs>
 <rect width="14" height="${CARD_H}" fill="${BANNER_ORANGE}"/>
-${text(72, 104, 22, INK_SOFT, escapeXml(kickerText), { spacing: 4, font: F_MONO })}
+${bilingualText(72, 104, 22, INK_SOFT, kickerZh, kickerEn, { spacing: 4 })}
 ${text(70, 182, 70, INK, escapeXml(fitText(d.nameZh, 70, 560)), { font: F_SANS })}
-${text(72, 230, 34, BLUE, escapeXml(fitText(d.nameEn, 34, 560)), { spacing: 2, font: F_HELV })}
+${text(72, 230, 34, BLUE, escapeXml(fitText(d.nameEn, 34, 560)), { spacing: 2, font: F_SANS })}
 <rect x="72" y="262" width="${idW}" height="46" rx="10" fill="${SURFACE_2}" stroke="${LINE}" stroke-width="1.5"/>
 ${text(90, 292, 20, INK_SOFT, 'ID', { spacing: 1, font: F_MONO })}
 ${text(128, 292, 22, INK, escapeXml(d.code.toUpperCase()), { spacing: 2, font: F_MONO })}
@@ -407,7 +496,9 @@ export function replayCardSvg(d: ReplayCardData): string {
   const players = d.players.slice(0, 5);
   const ROW_Y0 = 239;
   const ROW_H = 81.25;
-  const NAME_X = 510;
+  const RANK_X = 104;
+  const SWATCH_X = 152;
+  const NAME_X = 208;
   const NAME_RIGHT = 1000;
 
   const rows = players
@@ -416,9 +507,9 @@ export function replayCardSvg(d: ReplayCardData): string {
       const isWin = i === 0;
       const color = SEAT_COLORS[p.seat % SEAT_COLORS.length];
       const rank = isWin
-        ? `<circle cx="418" cy="${cy}" r="24" fill="${EMBER}"/>${text(418, cy + 9, 26, SURFACE, String(i + 1), { anchor: 'middle', font: F_MONO })}`
-        : text(418, cy + 9, 26, INK_SOFT, String(i + 1), { anchor: 'middle', font: F_MONO });
-      const swatch = `<rect x="458" y="${cy - 18}" width="36" height="36" rx="9" fill="${color}"/>`;
+        ? `<circle cx="${RANK_X}" cy="${cy}" r="24" fill="${EMBER}"/>${text(RANK_X, cy + 9, 26, SURFACE, String(i + 1), { anchor: 'middle', font: F_MONO })}`
+        : text(RANK_X, cy + 9, 26, INK_SOFT, String(i + 1), { anchor: 'middle', font: F_MONO });
+      const swatch = `<rect x="${SWATCH_X}" y="${cy - 18}" width="36" height="36" rx="9" fill="${color}"/>`;
       const nameMaxW = NAME_RIGHT - NAME_X - (isWin ? 110 : 0);
       const nameStr = fitText(p.name, 38, nameMaxW);
       const name = text(NAME_X, cy + 13, 38, INK, escapeXml(nameStr), { font: F_SANS });
@@ -442,8 +533,8 @@ export function replayCardSvg(d: ReplayCardData): string {
     .join('\n');
 
   return card2a(`
-<rect width="14" height="${CARD_H}" fill="${BLUE}"/>
-${text(72, 98, 22, INK_SOFT, '對局重播 · REPLAY', { spacing: 4, font: F_MONO })}
+<rect width="14" height="${CARD_H}" fill="${BANNER_ORANGE}"/>
+${bilingualText(72, 98, 22, INK_SOFT, '對局重播', 'REPLAY', { spacing: 4 })}
 ${text(70, 158, 52, INK, escapeXml(fitText(title, 52, 1000)), { font: F_SANS })}
 ${text(1128, 90, 22, INK_SOFT, date, { anchor: 'end', font: F_MONO })}
 ${time ? text(1128, 116, 22, INK_SOFT, time, { anchor: 'end', font: F_MONO }) : ''}

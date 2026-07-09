@@ -18,6 +18,7 @@ import {
   CARD_W,
   escapeXml,
   mapCardSvg,
+  OG_FONT_FILES,
   replayCardSvg,
   roomCardSvg,
   siteCardSvg,
@@ -55,11 +56,13 @@ export class OgService {
     this.mapContents = db.collection<MapContentDoc>('mapContents');
   }
 
-  /** Rasterise one of the card SVGs; system fonts cover the zh-Hant text. */
+  /** Rasterise one of the card SVGs. Fonts are the exact bundled files (`OG_FONT_FILES`),
+   *  not whatever happens to be installed on the render box — deterministic output, and no
+   *  tofu boxes for a face the container image doesn't ship. */
   private renderPng(svg: string): Buffer {
     const resvg = new Resvg(svg, {
       fitTo: { mode: 'width', value: CARD_W },
-      font: { loadSystemFonts: true },
+      font: { loadSystemFonts: false, fontFiles: OG_FONT_FILES },
     });
     return resvg.render().asPng();
   }

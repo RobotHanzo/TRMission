@@ -13,11 +13,9 @@ ARG GIT_COMMIT=dev
 ENV GIT_COMMIT=$GIT_COMMIT
 WORKDIR /app
 RUN corepack enable
-# CJK + latin fonts for the dynamically rendered social-preview cards (resvg loads
-# system fonts; without a TC face the zh-Hant card text would render as tofu boxes).
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-core \
-  && rm -rf /var/lib/apt/lists/*
+# No system font packages needed: the social-preview cards (src/og/) hand resvg its own
+# bundled font files (apps/server/assets/fonts, loadSystemFonts: false) instead of relying
+# on whatever the image happens to have installed.
 COPY --from=deps /app /app
 ENV NODE_ENV=production
 ENV PORT=3001
