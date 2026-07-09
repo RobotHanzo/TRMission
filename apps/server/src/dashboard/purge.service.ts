@@ -248,8 +248,13 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
       },
     };
     if (trigger === 'auto') {
-      await this.audit.logSystem('purge.run', undefined, params);
+      // An idle auto sweep that changed nothing isn't worth an audit row (it would otherwise
+      // stream 0/0 entries on every interval and fill the Purge view's recent-runs table).
+      if (summary.roomsDeleted > 0 || summary.gamesDeleted > 0) {
+        await this.audit.logSystem('purge.run', undefined, params);
+      }
     } else {
+      // A manual run always logs — it records that an operator triggered a sweep, even a no-op.
       await this.audit.log(actor!, 'purge.run', undefined, params);
     }
     return summary;
