@@ -21,6 +21,7 @@ import { SEAT_COLORS } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { NotificationStack } from '../components/NotificationStack';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { OwnerLeaveDialog } from '../components/OwnerLeaveDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
@@ -73,6 +74,13 @@ export function RoomScreen() {
     confirm: confirmLeave,
     cancel: cancelLeave,
   } = useConfirmAction();
+  const {
+    open: closeOpen,
+    request: requestClose,
+    confirm: confirmClose,
+    cancel: cancelClose,
+  } = useConfirmAction();
+  const [ownerLeaveOpen, setOwnerLeaveOpen] = useState(false);
 
   // The host's own custom maps, for the picker's "custom" dropdown — fetched once, lazily,
   // only for whoever can actually change the setting AND holds the mapBuilder feature
@@ -259,6 +267,26 @@ export function RoomScreen() {
   const leave = async () => {
     await api.leaveRoom(code).catch(() => undefined);
     goHome();
+  };
+  const otherHumans = room.members.filter((m) => m.userId !== user?.id && !m.isBot);
+  const closeAndGoHome = async () => {
+    await api.closeRoom(code).catch(() => undefined);
+    goHome();
+  };
+  const transferAndLeave = async (targetId: string) => {
+    setOwnerLeaveOpen(false);
+    await api.transferOwnership(code, targetId).catch(() => undefined);
+    await api.leaveRoom(code).catch(() => undefined);
+    goHome();
+  };
+  const onLeaveClick = () => {
+    if (!isHost) {
+      requestLeave(() => void leave());
+    } else if (otherHumans.length === 0) {
+      requestClose(() => void closeAndGoHome());
+    } else {
+      setOwnerLeaveOpen(true);
+    }
   };
 
   return (
@@ -507,7 +535,7 @@ export function RoomScreen() {
               {t('start')}
             </button>
           )}
-          <button onClick={() => requestLeave(() => void leave())}>{t('leave')}</button>
+          <button onClick={onLeaveClick}>{t('leave')}</button>
         </div>
 
         <p className="muted">
@@ -540,6 +568,22 @@ export function RoomScreen() {
             message={t('leaveConfirmBody')}
             onConfirm={confirmLeave}
             onCancel={cancelLeave}
+          />
+        )}
+        {closeOpen && (
+          <ConfirmDialog
+            title={t('closeRoomConfirmTitle')}
+            message={t('closeRoomConfirmBody')}
+            onConfirm={confirmClose}
+            onCancel={cancelClose}
+          />
+        )}
+        {ownerLeaveOpen && (
+          <OwnerLeaveDialog
+            candidates={otherHumans}
+            onTransfer={(id) => void transferAndLeave(id)}
+            onClose={() => void closeAndGoHome()}
+            onCancel={() => setOwnerLeaveOpen(false)}
           />
         )}
       </div>

@@ -336,6 +336,9 @@ export const api = {
   spectate: (code: string) => req<TicketResult>('POST', `/rooms/${code}/spectate`),
   watchRoom: (code: string) => req<RoomView>('POST', `/rooms/${code}/watch`),
   rejoinRoom: (code: string) => req<RoomView>('POST', `/rooms/${code}/rejoin`),
+  transferOwnership: (code: string, userId: string) =>
+    req<RoomView>('POST', `/rooms/${code}/transfer/${encodeURIComponent(userId)}`),
+  closeRoom: (code: string) => req<RoomView>('POST', `/rooms/${code}/close`),
   voteRematch: (code: string, wantsRematch: boolean) =>
     req<RoomView>('POST', `/rooms/${code}/rematch-vote`, { wantsRematch }),
   sendRoomChat: (code: string, payload: { presetId: string } | { text: string }) =>

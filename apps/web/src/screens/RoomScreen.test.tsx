@@ -38,6 +38,8 @@ vi.mock('../net/rest', () => {
       sendRoomChat: vi.fn(),
       watchRoom: vi.fn(),
       rejoinRoom: vi.fn(),
+      transferOwnership: vi.fn(),
+      closeRoom: vi.fn(),
     },
   };
 });
@@ -565,5 +567,40 @@ describe('RoomScreen spectating', () => {
     expect(kickBtns.length).toBeGreaterThan(0);
     fireEvent.click(kickBtns[0]!);
     expect(mocked.kickPlayer).toHaveBeenCalledWith('ABCD', 'g1');
+  });
+});
+
+describe('RoomScreen owner leave', () => {
+  const meHost = { userId: 'u-me', displayName: 'Me', isGuest: true, seat: 0, ready: false };
+  const human = { userId: 'g1', displayName: 'Guest', isGuest: true, seat: 1, ready: false };
+
+  it('prompts to transfer or close, then transfers ownership and leaves', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [meHost, human] }));
+    (api.transferOwnership as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+    (api.leaveRoom as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+    render(<RoomScreen />);
+    fireEvent.click(await screen.findByRole('button', { name: '離開房間' }));
+    fireEvent.click(screen.getByRole('button', { name: '移轉並離開' }));
+    await waitFor(() => expect(api.transferOwnership).toHaveBeenCalledWith('ABCD', 'g1'));
+    await waitFor(() => expect(api.leaveRoom).toHaveBeenCalledWith('ABCD'));
+    expect(useUi.getState().view).toBe('home');
+  });
+
+  it('closes the room when the owner leaves with only bots present', async () => {
+    const bot = {
+      userId: 'bot:1',
+      displayName: 'Bot-EASY',
+      isGuest: false,
+      seat: 1,
+      ready: true,
+      isBot: true,
+    };
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [meHost, bot] }));
+    (api.closeRoom as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+    render(<RoomScreen />);
+    fireEvent.click(await screen.findByRole('button', { name: '離開房間' }));
+    fireEvent.click(screen.getByRole('button', { name: '確認' })); // close-room confirmation
+    await waitFor(() => expect(api.closeRoom).toHaveBeenCalledWith('ABCD'));
+    expect(useUi.getState().view).toBe('home');
   });
 });
