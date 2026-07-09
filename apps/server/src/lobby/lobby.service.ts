@@ -176,6 +176,25 @@ export class LobbyService {
     return toView(r);
   }
 
+  /** Host-only: hand ownership to another seated member (they stay seated). */
+  async transferOwnership(code: string, user: AuthUser, targetId: string): Promise<RoomView> {
+    const r = await this.rooms.transferHost(code, user.userId, targetId);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'forbidden') throw new ForbiddenException('only the host can transfer ownership');
+    if (r === 'invalid') throw new BadRequestException('cannot transfer to that player');
+    return toView(r);
+  }
+
+  /** Host-only: close the whole room. */
+  async closeRoom(code: string, user: AuthUser): Promise<RoomView> {
+    const r = await this.rooms.closeRoom(code, user.userId);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'forbidden') throw new ForbiddenException('only the host can close the room');
+    return toView(r);
+  }
+
   async ready(code: string, user: AuthUser, ready: boolean): Promise<RoomView> {
     const r = await this.rooms.setReady(code, user.userId, ready);
     if (!r) throw new NotFoundException('room not found');

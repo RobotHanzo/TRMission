@@ -257,3 +257,46 @@ describe('lobby: host cannot spectate', () => {
     await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(a.token)).expect(403);
   });
 });
+
+describe('lobby: ownership transfer, close, and bot-safe leave', () => {
+  it('transfers ownership to a seated member, keeping the old host seated', async () => {
+    const a = await guest('Eve');
+    const b = await guest('Fox');
+    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    const res = await request(server()).post(`/api/v1/rooms/${code}/transfer/${b.id}`).set(auth(a.token)).expect(200);
+    expect(res.body.hostId).toBe(b.id);
+    expect(res.body.members.map((m: { userId: string }) => m.userId)).toContain(a.id);
+  });
+
+  it('rejects transfer by a non-host and to an invalid target', async () => {
+    const a = await guest('Gil');
+    const b = await guest('Hal');
+    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/transfer/${a.id}`).set(auth(b.token)).expect(403);
+    await request(server()).post(`/api/v1/rooms/${code}/transfer/nobody`).set(auth(a.token)).expect(400);
+  });
+
+  it('lets the host close the room for everyone', async () => {
+    const a = await guest('Ivy');
+    const b = await guest('Jon');
+    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/close`).set(auth(b.token)).expect(403); // non-host
+    const res = await request(server()).post(`/api/v1/rooms/${code}/close`).set(auth(a.token)).expect(200);
+    expect(res.body.status).toBe('CLOSED');
+  });
+
+  it('closes the room when the host leaves with only bots remaining', async () => {
+    const a = await guest('Kim');
+    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/bots`).set(auth(a.token)).send({ difficulty: 'EASY' }).expect(200);
+    const left = await request(server()).post(`/api/v1/rooms/${code}/leave`).set(auth(a.token)).expect(200);
+    expect(left.body.status).toBe('CLOSED');
+  });
+});

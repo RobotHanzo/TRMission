@@ -69,6 +69,26 @@ export class LobbyController {
     return this.lobby.leave(code.toUpperCase(), user);
   }
 
+  @Post(':code/transfer/:userId')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Host hands ownership to another seated member (LOBBY only)' })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  transfer(
+    @CurrentUser() user: AuthUser,
+    @Param('code') code: string,
+    @Param('userId') userId: string,
+  ) {
+    return this.lobby.transferOwnership(code.toUpperCase(), user, userId);
+  }
+
+  @Post(':code/close')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Host closes the room for everyone (LOBBY only)' })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  close(@CurrentUser() user: AuthUser, @Param('code') code: string) {
+    return this.lobby.closeRoom(code.toUpperCase(), user);
+  }
+
   @Post(':code/ready')
   @HttpCode(200)
   @ApiOperation({ summary: 'Set your ready flag' })

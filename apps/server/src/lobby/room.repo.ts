@@ -105,6 +105,8 @@ export type BecomeSpectatorResult =
   | 'only_member'
   | 'spectating_disabled';
 export type BecomePlayerResult = RoomDoc | 'not_found' | 'started' | 'not_spectator' | 'full';
+export type TransferHostResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
+export type CloseRoomResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 
 // Room codes: 6 chars, no easily-confused glyphs (no I/O/0/1).
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -255,11 +257,24 @@ export class RoomRepo implements OnModuleInit {
         { _id: code },
         { $set: { status: 'CLOSED', members: [], updatedAt: new Date() } },
       );
+    } else if (room.hostId === userId) {
+      const nextHuman = remaining.find((m) => !m.isBot);
+      if (!nextHuman) {
+        // Host leaving a room with only bots left — close it (there is no such thing as a bot host).
+        await this.col.updateOne(
+          { _id: code },
+          { $set: { status: 'CLOSED', members: [], updatedAt: new Date() } },
+        );
+      } else {
+        await this.col.updateOne(
+          { _id: code },
+          { $set: { members: remaining, hostId: nextHuman.userId, updatedAt: new Date() } },
+        );
+      }
     } else {
-      const hostId = room.hostId === userId ? (remaining[0]?.userId ?? room.hostId) : room.hostId;
       await this.col.updateOne(
         { _id: code },
-        { $set: { members: remaining, hostId, updatedAt: new Date() } },
+        { $set: { members: remaining, updatedAt: new Date() } },
       );
     }
     return this.col.findOne({ _id: code });
@@ -500,6 +515,34 @@ export class RoomRepo implements OnModuleInit {
     await this.col.updateOne(
       { _id: code },
       { $set: { members: remaining }, $push: { spectators: spectator } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /** Host-only, LOBBY-only: hand ownership to another seated, non-bot member. */
+  async transferHost(code: string, hostId: string, targetId: string): Promise<TransferHostResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    if (room.hostId !== hostId) return 'forbidden';
+    const target = room.members.find((m) => m.userId === targetId);
+    if (!target || target.isBot || targetId === hostId) return 'invalid';
+    await this.col.updateOne(
+      { _id: code, hostId, status: 'LOBBY' },
+      { $set: { hostId: targetId, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /** Host-only, LOBBY-only: close the room for everyone. CAS on LOBBY so a concurrent start wins. */
+  async closeRoom(code: string, hostId: string): Promise<CloseRoomResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    if (room.hostId !== hostId) return 'forbidden';
+    await this.col.updateOne(
+      { _id: code, hostId, status: 'LOBBY' },
+      { $set: { status: 'CLOSED', updatedAt: new Date() } },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
