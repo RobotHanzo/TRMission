@@ -29,14 +29,13 @@ const BANNER_NAVY = '#17346f';
 /** Seat colours (apps/web/src/theme/colors.ts SEAT_COLORS) for player chips/dots. */
 const SEAT_COLORS = ['#0E8C8C', '#C0398B', '#E8A33D', '#5A6B7B', '#7CB342'] as const;
 
-const FONT_STACK =
-  "'Noto Sans TC','Noto Sans CJK TC','Microsoft JhengHei','PingFang TC','Noto Sans',sans-serif";
 /** The "黑體 Gothic" system (redesign turn 2 / option 2a): sans CJK display + mono data,
- *  reordered PingFang-first per that exploration. Used by the site/room/replay cards below;
- *  `FONT_STACK` (and `frame()`) stay untouched for the still turn-1-styled map card. */
+ *  reordered PingFang-first per that exploration. Shared by every card below. */
 const F_SANS =
   "'PingFang TC','Heiti TC','Microsoft JhengHei','Noto Sans TC','Noto Sans CJK TC','Noto Sans',sans-serif";
 const F_MONO = "'DejaVu Sans Mono','Consolas','Menlo','Courier New',monospace";
+/** Plain Latin captions (map subtitles, etc.) — NOT the BrandBanner wordmark's face. */
+const F_HELV = "'Helvetica','Arial','DejaVu Sans',sans-serif";
 /** The BrandBanner TRMISSION line's Latin face; not a system font on most render boxes, so it
  *  falls through to the same Helvetica/DejaVu stack the rest of the card uses. */
 const F_LATIN = "'Archivo','Helvetica','Arial','DejaVu Sans',sans-serif";
@@ -73,8 +72,7 @@ export function fitText(s: string, fontSize: number, maxPx: number): string {
  * a bare `font-weight` request then silently collapses back to Regular with no visible change),
  * the glyphs are additionally stroked in their own fill colour so every card reads clearly at
  * social-platform thumbnail scale regardless of which weights the installed font actually
- * ships. `content` must already be escaped. `font` defaults to the ambient `<g font-family>`
- * (set by `frame()`) when omitted — callers outside `frame()` must pass one explicitly.
+ * ships. `content` must already be escaped; every caller should pass `font` explicitly.
  */
 function text(
   x: number,
@@ -95,61 +93,13 @@ function text(
   );
 }
 
-/** Diagonal strings of rounded "train car" slots — the background motif. */
-function routeRibbons(): string {
-  const rows = [
-    { y: 70, colors: [0, 1, 2, 3, 4, 0, 1, 2] },
-    { y: 260, colors: [3, 4, 0, 1, 2, 3, 4, 0] },
-    { y: 450, colors: [2, 3, 4, 0, 1, 2, 3, 4] },
-  ];
-  const cars = rows
-    .map((row, r) =>
-      row.colors
-        .map((c, i) => {
-          const x = -80 + i * 190 + r * 45;
-          return `<rect x="${x}" y="${row.y}" width="150" height="34" rx="10" fill="${SEAT_COLORS[c]}"/>
-<circle cx="${x + 170}" cy="${row.y + 17}" r="7" fill="${LINE}"/>`;
-        })
-        .join('\n'),
-    )
-    .join('\n');
-  return `<g opacity="0.12" transform="rotate(-7 600 315)">${cars}</g>`;
-}
-
-/** Tiny original locomotive glyph for the brand lockup (x/y = top-left of a 72×44 box). */
-function trainGlyph(x: number, y: number): string {
-  return `<g transform="translate(${x} ${y})">
-  <rect x="0" y="4" width="58" height="28" rx="9" fill="${BLUE}"/>
-  <rect x="8" y="11" width="12" height="10" rx="2.5" fill="${SURFACE}"/>
-  <rect x="26" y="11" width="12" height="10" rx="2.5" fill="${SURFACE}"/>
-  <rect x="44" y="11" width="8" height="10" rx="2.5" fill="${SURFACE}"/>
-  <circle cx="14" cy="36" r="6" fill="${INK}"/>
-  <circle cx="42" cy="36" r="6" fill="${INK}"/>
-  <rect x="58" y="14" width="10" height="18" rx="3" fill="${BLUE}"/>
-</g>`;
-}
-
-function frame(inner: string): string {
-  return `<svg width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}" xmlns="http://www.w3.org/2000/svg">
-<rect width="${CARD_W}" height="${CARD_H}" fill="${SURFACE}"/>
-${routeRibbons()}
-<rect width="${CARD_W}" height="12" fill="${BLUE}"/>
-<rect y="${CARD_H - 12}" width="${CARD_W}" height="12" fill="${BLUE}"/>
-<g font-family="${FONT_STACK}">
-${trainGlyph(72, 60)}
-${text(156, 94, 36, BLUE, '台鐵任務 TRMission')}
-${inner}
-</g>
-</svg>`;
-}
-
 // =============================================================================
-// Redesign turn 2 / option "2a": shared wrapper + the BrandBanner lockup.
+// Redesign turn 2/3: shared wrapper + the BrandBanner lockup.
 // =============================================================================
 
-/** Plain paper card, no shared header — each of the three cards below carries its own
- *  bespoke frame per the 2a exploration (a route-map hero, a ticket-stub silhouette, a
- *  quiet scoreboard rule), unlike the older `frame()` used by the still turn-1 map card. */
+/** Plain paper card, no shared header — each card below carries its own bespoke frame
+ *  per its exploration (a route-map hero, a ticket-stub silhouette, a quiet scoreboard
+ *  rule, a map's data column + preview panel). */
 function card2a(inner: string): string {
   return `<svg width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}" xmlns="http://www.w3.org/2000/svg">
 <rect width="${CARD_W}" height="${CARD_H}" fill="${PAPER}"/>
@@ -378,34 +328,59 @@ ${seatAvatarRow(d.maxSeats, d.seatMembers, 508)}
 export interface MapCardData {
   nameZh: string;
   nameEn: string;
-  /** A share code (custom map) or an official map id — shown as the chip under the stats. */
+  /** A share code (custom map) or an official map id — shown in the ID chip. */
   code: string;
   map: RenderableMap;
+  /** Ticket/mission count — the third stat-ledger row. */
+  missionCount: number;
   /** Draw the hand-authored Taiwan coastline/relief/islands instead of `map.geography` — set
    *  for the bundled official map, never for a user-authored custom map. */
   official?: boolean;
 }
 
+/** One 車站數/路線數/任務數-style row: CN label, EN caption, right-aligned mono value,
+ *  divider above. Rows stack at a fixed 92px pitch starting at `y0`. */
+function statLedger(y0: number, rows: { labelZh: string; labelEn: string; color: string; value: number }[]): string {
+  return rows
+    .map((row, i) => {
+      const y = y0 + i * 92;
+      return `
+<line x1="72" y1="${y}" x2="612" y2="${y}" stroke="${LINE}" stroke-width="1.5"/>
+${text(72, y + 46, 30, INK, row.labelZh, { font: F_SANS })}
+${text(72, y + 70, 16, INK_SOFT, row.labelEn, { spacing: 2, font: F_MONO })}
+${text(612, y + 56, 48, row.color, String(row.value), { anchor: 'end', font: F_MONO })}`;
+    })
+    .join('\n');
+}
+
 /**
- * A map's card: name + stats on the left, and on the right a live snapshot of the map itself
- * rendered with the exact in-game cartography (stations shown, no labels). Used both for a
- * shared custom map's link (by share code) and for the bundled official map.
+ * A map's card (redesign turn 3 / option "3a"): name + ID chip + stat ledger on the left,
+ * and on the right a live snapshot of the map itself rendered with the exact in-game
+ * cartography (stations shown, no labels), framed in a dashed panel. Used both for a shared
+ * custom map's link (by share code) and for the bundled official map.
  */
 export function mapCardSvg(d: MapCardData): string {
-  const panel = { x: 620, y: 112, w: 508, h: 470, r: 18 };
-  const cityCount = d.map.cities.length;
-  const routeCount = d.map.routes.length;
+  const panel = { x: 680, y: 66, w: 448, h: 500, r: 20 };
   const kickerText = d.official ? '官方地圖 · OFFICIAL MAP' : '分享地圖 · SHARED MAP';
-  return frame(`
+  const idW = Math.max(estimateWidth(d.code, 22) + 96, 180);
+
+  return card2a(`
 <defs>${ferryLocoGradientDef()}</defs>
-${text(72, 204, 27, INK_SOFT, escapeXml(kickerText), { spacing: 2 })}
-${text(72, 300, 52, INK, escapeXml(fitText(d.nameZh, 52, 500)))}
-${text(72, 356, 32, INK_SOFT, escapeXml(fitText(d.nameEn, 32, 500)))}
-${text(72, 430, 28, INK, escapeXml(`${cityCount} 個車站　·　${routeCount} 條路線`))}
-<rect x="72" y="470" width="${Math.max(estimateWidth(`代碼 ${d.code}`, 28) + 48, 200).toFixed(0)}" height="56" rx="12" fill="${SURFACE_2}" stroke="${LINE}" stroke-width="2"/>
-${text(96, 507, 28, BLUE, escapeXml(`代碼 ${d.code.toUpperCase()}`), { spacing: 3 })}
+<rect width="14" height="${CARD_H}" fill="${BANNER_ORANGE}"/>
+${text(72, 104, 22, INK_SOFT, escapeXml(kickerText), { spacing: 4, font: F_MONO })}
+${text(70, 182, 70, INK, escapeXml(fitText(d.nameZh, 70, 560)), { font: F_SANS })}
+${text(72, 230, 34, BLUE, escapeXml(fitText(d.nameEn, 34, 560)), { spacing: 2, font: F_HELV })}
+<rect x="72" y="262" width="${idW}" height="46" rx="10" fill="${SURFACE_2}" stroke="${LINE}" stroke-width="1.5"/>
+${text(90, 292, 20, INK_SOFT, 'ID', { spacing: 1, font: F_MONO })}
+${text(128, 292, 22, INK, escapeXml(d.code.toUpperCase()), { spacing: 2, font: F_MONO })}
+${statLedger(346, [
+  { labelZh: '車站數', labelEn: 'STATIONS', color: BLUE, value: d.map.cities.length },
+  { labelZh: '路線數', labelEn: 'ROUTES', color: BLUE, value: d.map.routes.length },
+  { labelZh: '任務數', labelEn: 'MISSIONS', color: EMBER, value: d.missionCount },
+])}
 ${mapPanelSvg(d.map, panel, 'mapClip', d.official)}
-<rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="${panel.r}" fill="none" stroke="${LINE}" stroke-width="2.5"/>
+<rect x="${panel.x}" y="${panel.y}" width="${panel.w}" height="${panel.h}" rx="${panel.r}" fill="none" stroke="${BLUE}" stroke-width="2.5" stroke-dasharray="10 8"/>
+${text(1112, 98, 18, INK_SOFT, 'MAP PREVIEW', { anchor: 'end', spacing: 3, font: F_MONO })}
 `);
 }
 

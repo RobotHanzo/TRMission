@@ -14,6 +14,9 @@ coverage/
 .vitest/
 test-results/
 
+# dev-only rendered output (apps/server/scripts/render-og-cards.ts)
+apps/server/.og-preview/
+
 # turbo
 .turbo/
 

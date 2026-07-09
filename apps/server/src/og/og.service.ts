@@ -101,6 +101,7 @@ export class OgService {
         nameEn: shared.nameEn,
         code,
         map: shared.draft,
+        missionCount: shared.draft.tickets.length,
       }),
     );
   }

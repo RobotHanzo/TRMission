@@ -385,8 +385,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/AppHeader.tsx": {
-    "mtime": 1783581224.5715902,
-    "ast_hash": "a91ef8c66d5f1fb8f68a2d6719b2c7b8",
+    "mtime": 1783583398.0718713,
+    "ast_hash": "ae84934f7cbf1a65aaaabe1849cabe00",
     "semantic_hash": ""
   },
   "apps/web/src/components/Board.test.tsx": {
@@ -2550,8 +2550,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/screens/WelcomeScreen.tsx": {
-    "mtime": 1783581533.0049615,
-    "ast_hash": "233c971e7571493eb1a4b9a69135915a",
+    "mtime": 1783583404.9344695,
+    "ast_hash": "1d9dce78621c7d2ca45ff0cab72ab65a",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-04-admin-login-redirect-design.md": {
@@ -3487,6 +3487,11 @@
   "apps/web/public/icon.svg": {
     "mtime": 1783543623.9364774,
     "ast_hash": "53a17a2d6d4356c04ac9142ed1b62cd3",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/BrandBanner.tsx": {
+    "mtime": 1783583385.621796,
+    "ast_hash": "8e3f49fbe47b2ab992a5d69213f75623",
     "semantic_hash": ""
   }
 }
