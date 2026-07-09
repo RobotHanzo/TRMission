@@ -4,13 +4,16 @@ import type { Spotlight } from './types';
 /** HUD spotlight selectors the tutorial is allowed to target. Every entry MUST resolve to a real
  *  element in the live HUD — a selector that matches nothing leaves the spotlight with no cutout,
  *  which degrades to a whole-screen dim that hides the very element being taught. (The DOM roots:
- *  `.market` = CardMarket, `.trackers` = PlayerTrackers, the `data-anim` hooks live on the deck
- *  button, face-up slots, hand, and missions tray.) Validated by scenarios.test.ts. */
+ *  `.market` = CardMarket, `.trackers` = PlayerTrackers, `.payment-options` = the claim/station
+ *  PaymentModal's option list (rendered only once the learner's click opens it — see
+ *  TutorialScreen's pay-hint override), the `data-anim` hooks live on the deck button, face-up
+ *  slots, hand, and missions tray.) Validated by scenarios.test.ts. */
 export const HUD_SPOTLIGHT_SELECTORS = [
   '.market',
   '.trackers',
   '.board-viewport',
   '.ticket-chooser',
+  '.payment-options',
   '[data-anim="deck"]',
   '[data-anim="market-slot"]',
   '[data-anim="hand"]',

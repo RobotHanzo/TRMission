@@ -116,7 +116,7 @@ export const LESSONS: Lesson[] = [
         text: 'tutorial.claim.try',
         mode: 'await',
         expect: { t: 'CLAIM_ROUTE', routeId: 'R16' },
-        spotlight: { kind: 'cities', ids: ['hsinchu', 'zhunan'] },
+        spotlight: { kind: 'route', ids: ['R16'] },
         frame: { kind: 'route', ids: ['R16'] },
         specimen: { kind: 'route', variant: 'rail' },
       },

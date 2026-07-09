@@ -67,7 +67,10 @@ export interface MapSceneProps<C extends SceneCity, R extends SceneRoute> {
   glowingStations?: ReadonlyMap<string, number> | undefined;
   /** Cities to softly highlight (offered-ticket endpoints): ticket-target class + halo. */
   highlightCities?: ReadonlySet<string> | undefined;
-  canAct?: boolean | undefined;
+  /** Gates route claimability independently of station buildability — a tutorial `await` beat
+   *  waiting on one keeps only that one's affordance (and hover/hit-area) live on the map. */
+  canClaim?: boolean | undefined;
+  canBuildStation?: boolean | undefined;
   colorBlind?: boolean | undefined;
   /** Draw the required-loco rainbow pips on unclaimed ferries (default true; the login
    *  backdrop turns them off to keep its quiet all-pips look). */
@@ -92,7 +95,7 @@ export interface MapSceneProps<C extends SceneCity, R extends SceneRoute> {
   cityHitArea?: 'marker' | 'group' | undefined;
 
   /* ── per-element extension points (the board's random-events dressing) ── */
-  /** Extra claimability predicate ANDed into the usual canAct/unowned gate (e.g. a
+  /** Extra claimability predicate ANDed into the usual canClaim/unowned gate (e.g. a
    *  typhoon-closed route can't be claimed even while unowned). */
   claimFilter?: ((route: R) => boolean) | undefined;
   /** Extra data-* attributes spread onto a route group (e.g. data-closed). */
@@ -135,7 +138,8 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
   glowingRoutes,
   glowingStations,
   highlightCities,
-  canAct,
+  canClaim,
+  canBuildStation,
   colorBlind,
   showFerryLocos,
   cityLabel,
@@ -186,7 +190,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         if (!g) return null;
 
         const o = owned?.get(r.id);
-        const claimable = !!canAct && !o && !!onRouteClick && (claimFilter ? claimFilter(r) : true);
+        const claimable = !!canClaim && !o && !!onRouteClick && (claimFilter ? claimFilter(r) : true);
         const clickable = claimable || (!!alwaysHitRoutes && !!onRouteClick);
         // Unclaimed → route colour; claimed → owner's seat colour; locked → muted grey.
         const fill =
@@ -271,7 +275,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
       {cities.map((c) => {
         const stationSeat = stations?.get(c.id);
         const hasStation = stationSeat !== undefined;
-        const buildable = !!canAct && !hasStation && !!onCityClick;
+        const buildable = !!canBuildStation && !hasStation && !!onCityClick;
         const isHub = hubs.has(c.id);
         // Tier drives the cartographic label level-of-detail (see game/lod.ts + the
         // [data-zoom] rules in game.css); islands always keep their label.

@@ -50,7 +50,10 @@ interface BoardProps {
   snapshot: GameSnapshot;
   locale: Locale;
   colorBlind: boolean;
-  canAct: boolean;
+  /** Gated independently so a tutorial `await` beat waiting on one action (claim a route / build a
+   *  station) doesn't leave the OTHER category's affordance live on the map. */
+  canClaim: boolean;
+  canBuildStation: boolean;
   onPickRoute(routeId: string): void;
   onPickCity(cityId: string): void;
   /** Cities to softly highlight (the offered tickets' endpoints, while choosing tickets). */
@@ -503,7 +506,8 @@ export function Board({
   snapshot,
   locale,
   colorBlind,
-  canAct,
+  canClaim,
+  canBuildStation,
   onPickRoute,
   onPickCity,
   highlightCities,
@@ -669,7 +673,8 @@ export function Board({
             glowingRoutes={startedGlowRoutes}
             glowingStations={glowingStations}
             highlightCities={highlightCities}
-            canAct={canAct}
+            canClaim={canClaim}
+            canBuildStation={canBuildStation}
             colorBlind={colorBlind}
             cityLabel={(c) => cityName(c.id, locale)}
             cityTier={cityTier}

@@ -61,14 +61,32 @@ function TutorialRunner({
   const snapshot = useGame((s) => s.snapshot);
   const reduced = useReducedMotion();
   const beat = player.beat;
-  const spotlight = beat?.spotlight;
+  // Once the learner's click on the highlighted route/city opens the payment dialog, redirect the
+  // coachmark to IT instead of the map target — the beat itself doesn't finish (and advance) until
+  // a payment is actually confirmed, so the learner needs to be told where to look next.
+  const [pendingClaim, setPendingClaim] = useState<'route' | 'station' | null>(null);
+  useEffect(() => {
+    setPendingClaim(null);
+  }, [beat?.id]);
+  const awaitsPayment =
+    !!beat &&
+    beat.mode === 'await' &&
+    (beat.expect.t === 'CLAIM_ROUTE' || beat.expect.t === 'BUILD_STATION');
+  const showPayHint = awaitsPayment && pendingClaim !== null;
+  const effectiveBeat =
+    showPayHint && beat ? { ...beat, text: 'tutorial.payHint', specimen: undefined } : beat;
+  const spotlight = showPayHint
+    ? ({ kind: 'hud', selector: '.payment-options' } as const)
+    : beat?.spotlight;
   const rects = useSpotlightRects(spotlight);
   const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
   const frameTarget = beat?.frame ?? null;
   // Gate the HUD to the action the current beat is waiting for. On an `await` beat only the expected
   // affordance is live (so e.g. the draw-tickets button is disabled while we ask for a train-card
   // draw); on any narration / scripted beat — and once the lesson is done — the whole HUD is locked,
-  // so the learner can't act ahead of the prompt and strand a later step (no dead ends).
+  // so the learner can't act ahead of the prompt and strand a later step (no dead ends). A
+  // CLAIM_ROUTE/BUILD_STATION gate additionally names the ONE route/city that's interactive —
+  // GameStage ignores clicks elsewhere on the map.
   const actionGate: ActionGate = beat && beat.mode === 'await' ? beat.expect : 'locked';
   // Only a whole-board overview (or a beat with no spotlight at all) should dim the entire stage;
   // a beat that names a target must never dim everything while its rect resolves.
@@ -84,11 +102,12 @@ function TutorialRunner({
       spotlightCities={spotlightCities}
       frameTarget={frameTarget}
       actionGate={actionGate}
+      onPendingClaim={setPendingClaim}
       overlay={
         <>
           <TutorialSpotlight rects={rects} reducedMotion={reduced} dimAll={dimAll} />
           <TutorialOverlay
-            beat={beat}
+            beat={effectiveBeat}
             done={player.done}
             index={player.index}
             total={player.total}
@@ -96,7 +115,7 @@ function TutorialRunner({
             lessonNo={lessonNo}
             lessonCount={lessonCount}
             isLastLesson={isLast}
-            specimen={beat?.specimen}
+            specimen={effectiveBeat?.specimen}
             spotRects={rects}
             onAdvance={player.next}
             onReplay={player.restart}

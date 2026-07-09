@@ -77,6 +77,9 @@ export interface GameStageProps {
    *  only the matching affordance live; a `'locked'` gate (narration / scripted / done) disables
    *  every affordance, so a stray click can't change phase and strand the lesson. */
   actionGate?: ActionGate | null | undefined;
+  /** Tutorial only: fires whenever the payment-choice modal opens/closes, so the coachmark can
+   *  redirect its spotlight + copy to the payment dialog once the learner's click opens it. */
+  onPendingClaim?: ((kind: 'route' | 'station' | null) => void) | undefined;
 }
 
 export function GameStage({
@@ -92,6 +95,7 @@ export function GameStage({
   sandbox,
   frameTarget,
   actionGate,
+  onPendingClaim,
 }: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -106,6 +110,11 @@ export function GameStage({
   useSoundDriver(sandbox);
 
   const [claim, setClaim] = useState<Claim | null>(null);
+  // Tutorial: let the coachmark know a payment choice just opened (or closed), so it can redirect
+  // its spotlight + copy to the dialog instead of the map target that opened it.
+  useEffect(() => {
+    onPendingClaim?.(claim?.kind ?? null);
+  }, [claim, onPendingClaim]);
   // The base payment committed to a pending tunnel claim. Its cards stay in hand until the tunnel
   // resolves, so the surcharge must be enumerated against the hand minus this.
   const [tunnelBase, setTunnelBase] = useState<Payment | null>(null);
@@ -168,15 +177,26 @@ export function GameStage({
 
   // Tutorial action gate: an `await` beat keeps only its expected affordance live; a `'locked'` gate
   // (narration / scripted / done) disables them all — so a stray click can't change phase and
-  // dead-end the lesson. No gate (live game) ⇒ every affordance enabled.
+  // dead-end the lesson. No gate (live game) ⇒ every affordance enabled. Claim and station are
+  // gated INDEPENDENTLY (not just OR'd into one board-wide flag) so e.g. a CLAIM_ROUTE beat doesn't
+  // leave every city on the map still clickable for BUILD_STATION, and vice versa.
   const allow = gateFlags(actionGate);
-  const boardCanAct = canAct && (allow.claim || allow.station);
+  const boardCanClaim = canAct && allow.claim;
+  const boardCanBuildStation = canAct && allow.station;
   const marketCanDraw = canDraw && allow.draw;
 
   // Random-events payment mirrors — derived exclusively from the snapshot so the offered options
   // agree with the server's validation (sky-lantern +1-card surcharge; gala zero-cost station).
   const randomEvents = snapshot.randomEvents;
   const pickRoute = (routeId: string) => {
+    // Tutorial: while an await beat is active, only a CLAIM_ROUTE beat accepts a route click at
+    // all, and — when it names a specific route — only THAT route. Everything else (a different
+    // action entirely, or the right action but the wrong route) is ignored outright, so a stray
+    // click can't spend the learner's hand on the wrong claim or strand the beat on a non-match.
+    if (actionGate && actionGate !== 'locked') {
+      if (actionGate.t !== 'CLAIM_ROUTE') return;
+      if (actionGate.routeId && actionGate.routeId !== routeId) return;
+    }
     const route = routeById.get(routeId);
     if (!route) return;
     const extra = skyLanternSurcharge(randomEvents, routeId);
@@ -195,6 +215,12 @@ export function GameStage({
     });
   };
   const pickCity = (cityId: string) => {
+    // Tutorial: same treatment as `pickRoute` — only a BUILD_STATION beat accepts a city click,
+    // and only the named city when one is specified.
+    if (actionGate && actionGate !== 'locked') {
+      if (actionGate.t !== 'BUILD_STATION') return;
+      if (actionGate.cityId && actionGate.cityId !== cityId) return;
+    }
     const remaining = myPub?.stationsRemaining ?? 0;
     if (remaining <= 0) {
       pushNotification({ variant: 'notice', text: t('noStationsLeft') });
@@ -265,7 +291,8 @@ export function GameStage({
         snapshot={snapshot}
         locale={locale}
         colorBlind={colorBlind}
-        canAct={boardCanAct}
+        canClaim={boardCanClaim}
+        canBuildStation={boardCanBuildStation}
         onPickRoute={pickRoute}
         onPickCity={pickCity}
         highlightCities={highlightCities}

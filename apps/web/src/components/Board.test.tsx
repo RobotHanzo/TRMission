@@ -31,7 +31,8 @@ describe('Board', () => {
         snapshot={snap}
         locale="zh-Hant"
         colorBlind={false}
-        canAct={false}
+        canClaim={false}
+        canBuildStation={false}
         onPickRoute={() => {}}
         onPickCity={() => {}}
       />,
@@ -86,7 +87,8 @@ describe('Board', () => {
         snapshot={eventSnap}
         locale="zh-Hant"
         colorBlind={false}
-        canAct={false}
+        canClaim={false}
+        canBuildStation={false}
         onPickRoute={() => {}}
         onPickCity={() => {}}
       />,
@@ -109,7 +111,8 @@ describe('Board', () => {
         snapshot={snap}
         locale="zh-Hant"
         colorBlind={false}
-        canAct={false}
+        canClaim={false}
+        canBuildStation={false}
         onPickRoute={() => {}}
         onPickCity={() => {}}
       />,
@@ -125,7 +128,8 @@ describe('Board', () => {
         snapshot={snap}
         locale="zh-Hant"
         colorBlind={false}
-        canAct={false}
+        canClaim={false}
+        canBuildStation={false}
         onPickRoute={() => {}}
         onPickCity={() => {}}
       />,

@@ -42,7 +42,7 @@ describe('MapScene', () => {
   it('claim mode: hit + claimable only on unowned routes; owned ferry hides its rainbow', () => {
     const owned = new Map([['r2', { ownerSeat: 1 }]]);
     const { container } = render(
-      <MapScene {...base} owned={owned} canAct onRouteClick={() => {}} />,
+      <MapScene {...base} owned={owned} canClaim onRouteClick={() => {}} />,
     );
     expect(container.querySelectorAll('path.hit').length).toBe(1); // r1 only
     expect(container.querySelector('[data-route-id="r1"]')!.classList.contains('claimable')).toBe(
@@ -50,6 +50,20 @@ describe('MapScene', () => {
     );
     expect(container.querySelector('[data-route-id="r2"]')!.classList.contains('owned')).toBe(true);
     expect(container.querySelectorAll('rect.slot.ferry-loco').length).toBe(0);
+  });
+
+  it('claim and station affordances gate independently — one never leaks the other', () => {
+    const { container: claimOnly } = render(
+      <MapScene {...base} canClaim onRouteClick={() => {}} onCityClick={() => {}} />,
+    );
+    expect(claimOnly.querySelectorAll('.claimable').length).toBeGreaterThan(0);
+    expect(claimOnly.querySelectorAll('.buildable').length).toBe(0);
+
+    const { container: stationOnly } = render(
+      <MapScene {...base} canBuildStation onRouteClick={() => {}} onCityClick={() => {}} />,
+    );
+    expect(stationOnly.querySelectorAll('.claimable').length).toBe(0);
+    expect(stationOnly.querySelectorAll('.buildable').length).toBeGreaterThan(0);
   });
 
   it('labels, class hooks, and always-hit compose (the editor shape)', () => {
@@ -78,7 +92,7 @@ describe('MapScene', () => {
     const { container } = render(
       <MapScene
         {...base}
-        canAct
+        canClaim
         onRouteClick={() => {}}
         claimFilter={(r) => r.id !== 'r1'}
         routeData={(r) => ({ 'data-closed': r.id === 'r1' ? 'true' : undefined })}
