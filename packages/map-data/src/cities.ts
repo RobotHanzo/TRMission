@@ -12,57 +12,49 @@ const c = (
   isIsland = false,
 ): CityDef => ({ id: asCityId(id), nameZh, nameEn, x, y, region, isIsland });
 
-/** 39 cities — original Taiwan-geography graph inspired by real TRA / THSR / branch-line stations.
- *  At most one station per county outside the dense north metro and the eastern seaboard.
- *  Coordinates are an equal-scale geographic projection of each station's real lon/lat into the
- *  0–100 board (x: 0=west…100=east, y: 0=north…100=south), north-up, so the network registers
- *  against the Taiwan silhouette drawn in apps/web `geography.ts`. The six outlying islands keep
- *  their true bearing but have their (large) open-sea gaps compressed to stay on the board.
- *
- *  Exception: the dense northern knot (the Taipei basin, the Keelung corner, and the Yilan plain)
- *  is fanned out slightly from its true projection so the station labels stop colliding at the home
- *  zoom — these cities are genuinely only a few km apart. The relative bearings are preserved; only
- *  the local spacing is exaggerated. Every dot still sits inside the coastline. */
+/** 36 cities — Taiwan map v4 (the tw2.1 network). The station graph is authored in the map
+ *  editor and imported here; each mainland stop's editor position is mapped onto the bundled
+ *  hand-drawn coast by a single affine fit (see docs/superpowers/specs/2026-07-10-taiwan-map-v4),
+ *  the outlying islands + Matsu are pinned by hand onto their existing coastline blobs. Regions and
+ *  zh names come from the editor; the 30 stations shared with the previous map keep their canonical
+ *  English spellings. Coordinates are x 0 (west)…100 (east), y 0 (north)…100 (south). */
 export const CITIES: readonly CityDef[] = [
-  c('keelung', '基隆', 'Keelung', 65.6, 9.8, 'North'),
-  c('ruifang', '瑞芳', 'Ruifang', 70.2, 12.2, 'North'),
-  c('taipei', '臺北', 'Taipei', 62.8, 12.8, 'North'),
-  c('tamsui', '淡水', 'Tamsui', 57.6, 9.8, 'North'),
-  c('banqiao', '板橋', 'Banqiao', 60.2, 16, 'North'),
-  c('taoyuan', '桃園', 'Taoyuan', 56.8, 13.6, 'North'),
-  c('zhongli', '中壢', 'Zhongli', 53, 16.2, 'North'),
-  c('hsinchu', '新竹', 'Hsinchu', 49.3, 18.6, 'Northwest'),
-  c('zhunan', '竹南', 'Zhunan', 47.1, 21.3, 'Northwest'),
-  c('miaoli', '苗栗', 'Miaoli', 46, 24.2, 'Northwest'),
-  c('fengyuan', '豐原', 'Fengyuan', 43.7, 32.1, 'Central-West'),
-  c('taichung', '臺中', 'Taichung', 42.8, 34.8, 'Central-West'),
-  c('changhua', '彰化', 'Changhua', 39.7, 36.2, 'Central-West'),
-  c('nantou', '南投', 'Nantou', 43, 40.4, 'Interior'),
-  c('sunmoonlake', '日月潭', 'Sun Moon Lake', 48.2, 41.6, 'Interior'),
-  c('douliu', '斗六', 'Douliu', 39.7, 45.3, 'Yun-Chia-Nan'),
-  c('chiayi', '嘉義', 'Chiayi', 37.7, 50.9, 'Yun-Chia-Nan'),
-  c('alishan', '阿里山', 'Alishan', 45.5, 50.2, 'Interior'),
-  c('tainan', '臺南', 'Tainan', 32.3, 62.9, 'Yun-Chia-Nan'),
-  c('kaohsiung', '高雄', 'Kaohsiung', 34.3, 71.8, 'South'),
-  c('pingtung', '屏東', 'Pingtung', 38.6, 70.8, 'South'),
-  c('chaozhou', '潮州', 'Chaozhou', 39.7, 73.7, 'South'),
-  c('hengchun', '恆春', 'Hengchun', 44.4, 86, 'South'),
-  c('dawu', '大武', 'Dawu', 47.8, 78.4, 'South-link'),
-  c('taitung', '臺東', 'Taitung', 53.1, 68.6, 'South-link'),
-  c('zhiben', '知本', 'Zhiben', 51.3, 69.8, 'South-link'),
-  c('chishang', '池上', 'Chishang', 54.7, 59.8, 'East-Rift'),
-  c('yuli', '玉里', 'Yuli', 57.2, 54.6, 'East-Rift'),
-  c('hualien', '花蓮', 'Hualien', 63.5, 38.7, 'East-Rift'),
-  c('suao', '蘇澳', "Su'ao", 71, 24.4, 'Northeast'),
-  c('luodong', '羅東', 'Luodong', 69.2, 22, 'Northeast'),
-  c('yilan', '宜蘭', 'Yilan', 66.4, 19.4, 'Northeast'),
-  c('toucheng', '頭城', 'Toucheng', 69.4, 16.6, 'Northeast'),
-  c('penghu', '澎湖', 'Penghu', 16, 50, 'Islands', true),
-  c('kinmen', '金門', 'Kinmen', 4, 33, 'Islands', true),
-  c('matsu', '馬祖', 'Matsu', 24, 7, 'Islands', true),
-  c('liuqiu', '小琉球', 'Liuqiu', 33, 78, 'Islands', true),
-  c('greenisland', '綠島', 'Green Island', 65, 70, 'Islands', true),
-  c('orchidisland', '蘭嶼', 'Orchid Island', 68, 85, 'Islands', true),
+  c('matsu', '馬祖', 'Matsu', 24, 7, '離島', true),
+  c('kinmen', '金門', 'Kinmen', 4, 33, '離島', true),
+  c('penghu', '澎湖', 'Penghu', 16, 50, '離島', true),
+  c('greenisland', '綠島', 'Green Island', 65, 70, '東部', true),
+  c('orchidisland', '蘭嶼', 'Orchid Island', 68, 85, '東部', true),
+  c('taipei', '臺北', 'Taipei', 61.8, 12.8, '北部'),
+  c('banqiao', '板橋', 'Banqiao', 59.3, 14.6, '北部'),
+  c('taoyuan', '桃園', 'Taoyuan', 55.2, 14, '北部'),
+  c('hsinchu', '新竹', 'Hsinchu', 50.8, 17.6, '北部'),
+  c('zhunan', '竹南', 'Zhunan', 47.8, 19.5, '中部'),
+  c('miaoli', '苗栗', 'Miaoli', 49.2, 27.1, '中部'),
+  c('shalu', '沙鹿', 'Shalu', 41.4, 29, '中部'),
+  c('taichung', '臺中', 'Taichung', 43.4, 35.7, '中部'),
+  c('changhua', '彰化', 'Changhua', 35.6, 38.3, '中部'),
+  c('nantou', '南投', 'Nantou', 48.4, 39.4, '中部'),
+  c('douliu', '斗六', 'Douliu', 41, 45.8, '中部'),
+  c('chiayi', '嘉義', 'Chiayi', 36.9, 53.8, '南部'),
+  c('tainan', '臺南', 'Tainan', 31.8, 58.2, '南部'),
+  c('kaohsiung', '高雄', 'Kaohsiung', 33.9, 68.8, '南部'),
+  c('pingtung', '屏東', 'Pingtung', 39.7, 73.7, '南部'),
+  c('chaozhou', '潮州', 'Chaozhou', 40.2, 78.1, '南部'),
+  c('keelung', '基隆', 'Keelung', 66.5, 10.5, '北部'),
+  c('hualien', '花蓮', 'Hualien', 61.6, 39.7, '東部'),
+  c('yilan', '宜蘭', 'Yilan', 65, 22, '北部'),
+  c('luodong', '羅東', 'Luodong', 66.3, 28, '北部'),
+  c('taitung', '臺東', 'Taitung', 53.5, 65.8, '東部'),
+  c('chishang', '池上', 'Chishang', 57.1, 56, '東部'),
+  c('yuli', '玉里', 'Yuli', 59, 47.7, '東部'),
+  c('alishan', '阿里山', 'Alishan', 45.5, 53.9, '南部'),
+  c('jiji', '集集', 'JiJi', 46, 45.3, '中部'),
+  c('huwei', '虎尾', 'Huwei', 35.7, 46, '中部'),
+  c('guishan', '龜山島', 'Guishan Island', 73.7, 28, '北部', true),
+  c('hengchun', '恆春', 'Hengchun', 43, 85.2, '南部'),
+  c('liuqiu', '小琉球', 'Liuqiu', 33, 78, '南部', true),
+  c('zuoying', '左營', 'Zuoying', 31.5, 63.6, '南部'),
+  c('pingxi', '平溪', 'Pingxi', 64.8, 16.8, '北部'),
 ];
 
 export const CITY_IDS: readonly CityId[] = CITIES.map((x) => x.id);

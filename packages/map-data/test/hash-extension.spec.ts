@@ -6,7 +6,7 @@ import type { GameContent, MapGeography } from '../src/index';
  * Tripwire for the hashContent formula extension (custom maps): geography/rules enter the
  * digest ONLY when present, so every hash minted before the extension stays byte-identical.
  */
-const PINNED_V3_HASH = '26ad5c18b2cd52c4ccea89de4319843b0dc46a1cdf992333fbfa0d8abe173b09';
+const PINNED_HASH = '1977feaae22361e837a17763b12f07b919913fce107e435858df09cb3a88d930';
 
 const GEO: MapGeography = {
   baseView: { x: 0, y: 0, w: 100, h: 100 },
@@ -21,22 +21,22 @@ const GEO: MapGeography = {
 };
 
 describe('hashContent extension', () => {
-  it('pins the current Taiwan (v3) hash', () => {
-    expect(CONTENT_HASH).toBe(PINNED_V3_HASH);
+  it('pins the current Taiwan (v4) hash', () => {
+    expect(CONTENT_HASH).toBe(PINNED_HASH);
   });
 
   it('hashes content without geography/rules exactly as before the extension', () => {
-    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_V3_HASH);
+    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
   });
 
   it('geography changes the hash', () => {
     const withGeo: GameContent = { ...TAIWAN_CONTENT, geography: GEO };
-    expect(hashContent(withGeo)).not.toBe(PINNED_V3_HASH);
+    expect(hashContent(withGeo)).not.toBe(PINNED_HASH);
   });
 
   it('rules change the hash', () => {
     const withRules: GameContent = { ...TAIWAN_CONTENT, rules: { trainCarsStart: 30 } };
-    expect(hashContent(withRules)).not.toBe(PINNED_V3_HASH);
+    expect(hashContent(withRules)).not.toBe(PINNED_HASH);
   });
 
   it('geography-only and rules-only variants hash differently from each other', () => {
@@ -50,8 +50,8 @@ describe('hashContent extension', () => {
       ...TAIWAN_CONTENT,
       routes: TAIWAN_CONTENT.routes.map((r, i) => (i === 0 ? { ...r, bow: 3 } : r)),
     };
-    expect(hashContent(withBow)).not.toBe(PINNED_V3_HASH);
+    expect(hashContent(withBow)).not.toBe(PINNED_HASH);
     // The type extension alone must not move any pre-existing hash.
-    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_V3_HASH);
+    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
   });
 });

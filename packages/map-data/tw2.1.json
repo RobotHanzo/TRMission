@@ -1,0 +1,2069 @@
+{
+  "_id": "690c6a66-26c5-4615-88c4-62760a70a13b",
+  "ownerId": "9473f0da-a58f-4445-a02d-41efa5ffe70f",
+  "nameZh": "臺灣 2.1版本 ",
+  "nameEn": "Taiwan V2.1",
+  "revision": 145,
+  "draft": {
+    "cities": [
+      {
+        "id": "cmr6v5dad13",
+        "nameZh": "馬祖",
+        "nameEn": "Mazu",
+        "x": 35.2,
+        "y": 7.7,
+        "region": "離島",
+        "isIsland": true
+      },
+      {
+        "id": "cmr6v5oxs14",
+        "nameZh": "金門",
+        "nameEn": "Kinmen",
+        "x": 8.4,
+        "y": 40.6,
+        "region": "離島",
+        "isIsland": true
+      },
+      {
+        "id": "cmr6v66yj15",
+        "nameZh": "澎湖",
+        "nameEn": "Penghu",
+        "x": 29.1,
+        "y": 57.3,
+        "region": "離島",
+        "isIsland": true
+      },
+      {
+        "id": "cmr6v6k0f16",
+        "nameZh": "綠島",
+        "nameEn": "Ludao",
+        "x": 62.4,
+        "y": 75,
+        "region": "東部",
+        "isIsland": true
+      },
+      {
+        "id": "cmr6v7bjc17",
+        "nameZh": "蘭嶼",
+        "nameEn": "Lanyu",
+        "x": 63.6,
+        "y": 86.6,
+        "region": "東部",
+        "isIsland": true
+      },
+      {
+        "id": "cmr6v809l18",
+        "nameZh": "臺北",
+        "nameEn": "Taipei",
+        "x": 63.8,
+        "y": 29.5,
+        "region": "北部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6v8xpw19",
+        "nameZh": "板橋",
+        "nameEn": "Banqiao",
+        "x": 61.5,
+        "y": 30.1,
+        "region": "北部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6valrl1a",
+        "nameZh": "桃園",
+        "nameEn": "Taoyuan",
+        "x": 57.7,
+        "y": 30.8,
+        "region": "北部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vcn5v1e",
+        "nameZh": "新竹",
+        "nameEn": "Hsinchu",
+        "x": 54.3,
+        "y": 35.3,
+        "region": "北部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vdcjk1g",
+        "nameZh": "竹南",
+        "nameEn": "Zhunan",
+        "x": 51.6,
+        "y": 37.2,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vea4n1h",
+        "nameZh": "苗栗",
+        "nameEn": "Miaoli",
+        "x": 53.4,
+        "y": 42.6,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6verqy1i",
+        "nameZh": "沙鹿",
+        "nameEn": "Shalu",
+        "x": 46.2,
+        "y": 45.1,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vfj6k1j",
+        "nameZh": "臺中",
+        "nameEn": "Taichung",
+        "x": 48.5,
+        "y": 49.8,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vgfi71m",
+        "nameZh": "彰化",
+        "nameEn": "Chunghua",
+        "x": 41.4,
+        "y": 52.8,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vhg6r1n",
+        "nameZh": "南投",
+        "nameEn": "Nantou",
+        "x": 53.4,
+        "y": 51.8,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vil0d1p",
+        "nameZh": "斗六",
+        "nameEn": "Douliu",
+        "x": 46.9,
+        "y": 57.6,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vj22v1q",
+        "nameZh": "嘉義",
+        "nameEn": "Chayi",
+        "x": 43.5,
+        "y": 64.1,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vka711s",
+        "nameZh": "臺南",
+        "nameEn": "Tainan",
+        "x": 39,
+        "y": 68.1,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vkkqf1t",
+        "nameZh": "高雄",
+        "nameEn": "Kaosiung",
+        "x": 41.7,
+        "y": 75.6,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vl5er1u",
+        "nameZh": "屏東",
+        "nameEn": "Pingtung",
+        "x": 47.4,
+        "y": 78.4,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vlj5f1v",
+        "nameZh": "潮州",
+        "nameEn": "Chaozhou",
+        "x": 48.1,
+        "y": 81.6,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vnfpz1x",
+        "nameZh": "基隆",
+        "nameEn": "Keelung",
+        "x": 68.7,
+        "y": 28.6,
+        "region": "北部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vpe081y",
+        "nameZh": "花蓮",
+        "nameEn": "Hualian",
+        "x": 65.7,
+        "y": 50.1,
+        "region": "東部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vprw31z",
+        "nameZh": "宜蘭",
+        "nameEn": "Yilan",
+        "x": 67.8,
+        "y": 36.5,
+        "region": "北部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vrugq20",
+        "nameZh": "羅東",
+        "nameEn": "Luodong",
+        "x": 69.4,
+        "y": 40.8,
+        "region": "北部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vspt021",
+        "nameZh": "臺東",
+        "nameEn": "Taitung",
+        "x": 59.8,
+        "y": 70.6,
+        "region": "東部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vtzxs23",
+        "nameZh": "池上",
+        "nameEn": "Chishang",
+        "x": 62.5,
+        "y": 62.8,
+        "region": "東部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vv86r25",
+        "nameZh": "玉里",
+        "nameEn": "Yuli",
+        "x": 63.8,
+        "y": 56.4,
+        "region": "東部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr6vwzoz26",
+        "nameZh": "阿里山",
+        "nameEn": "Alisan",
+        "x": 51.6,
+        "y": 62.9,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr7g67c91",
+        "nameZh": "集集",
+        "nameEn": "JiJi",
+        "x": 51.5,
+        "y": 56.5,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr7gr2fq5",
+        "nameZh": "虎尾",
+        "nameEn": "Huwei",
+        "x": 41.9,
+        "y": 58.5,
+        "region": "中部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr7h6vgq6",
+        "nameZh": "龜山島",
+        "nameEn": "Guishan Island",
+        "x": 76.3,
+        "y": 39.7,
+        "region": "北部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr7hnlxra",
+        "nameZh": "恆春",
+        "nameEn": "Hengchun",
+        "x": 49.1,
+        "y": 87,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmr7hpujxb",
+        "nameZh": "小琉球",
+        "nameEn": "Xiaoliuqiu",
+        "x": 42.1,
+        "y": 80.9,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmrcfyvqp3",
+        "nameZh": "左營",
+        "nameEn": "Zuoying",
+        "x": 39.1,
+        "y": 72.1,
+        "region": "南部",
+        "isIsland": false
+      },
+      {
+        "id": "cmrcg5ghc4",
+        "nameZh": "平溪",
+        "nameEn": "Pingxi",
+        "x": 67,
+        "y": 33.2,
+        "region": "北部",
+        "isIsland": false
+      }
+    ],
+    "routes": [
+      {
+        "id": "rmr6w0g3c32",
+        "a": "cmr6v809l18",
+        "b": "cmr6v8xpw19",
+        "color": "ORANGE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6w0sor33",
+        "a": "cmr6v809l18",
+        "b": "cmr6v8xpw19",
+        "color": "GREEN",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "H"
+      },
+      {
+        "id": "rmr6w0z2734",
+        "a": "cmr6v809l18",
+        "b": "cmr6vnfpz1x",
+        "color": "YELLOW",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "B"
+      },
+      {
+        "id": "rmr6w1c5535",
+        "a": "cmr6v809l18",
+        "b": "cmr6vnfpz1x",
+        "color": "PURPLE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "B"
+      },
+      {
+        "id": "rmr6w2jbh38",
+        "a": "cmr6valrl1a",
+        "b": "cmr6vprw31z",
+        "color": "RED",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "rmr6w37sd3b",
+        "a": "cmr6vnfpz1x",
+        "b": "cmr6vprw31z",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "rmr6w4mnm3f",
+        "a": "cmr6vcn5v1e",
+        "b": "cmr6vea4n1h",
+        "color": "RED",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": true,
+        "bow": -1
+      },
+      {
+        "id": "rmr6w5bf03h",
+        "a": "cmr6verqy1i",
+        "b": "cmr6vfj6k1j",
+        "color": "GREEN",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6w5in33i",
+        "a": "cmr6vdcjk1g",
+        "b": "cmr6verqy1i",
+        "color": "GRAY",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6w68aw3l",
+        "a": "cmr6vea4n1h",
+        "b": "cmr6vfj6k1j",
+        "color": "BLUE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "C",
+        "bow": -1.2
+      },
+      {
+        "id": "rmr6w6b5w3m",
+        "a": "cmr6vea4n1h",
+        "b": "cmr6vfj6k1j",
+        "color": "YELLOW",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "C",
+        "bow": -1.2
+      },
+      {
+        "id": "rmr6w7iei3o",
+        "a": "cmr6verqy1i",
+        "b": "cmr6vgfi71m",
+        "color": "PURPLE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6w8m753q",
+        "a": "cmr6vfj6k1j",
+        "b": "cmr6vhg6r1n",
+        "color": "BLACK",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6w990f3s",
+        "a": "cmr6vdcjk1g",
+        "b": "cmr6vea4n1h",
+        "color": "WHITE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6w9w8g3t",
+        "a": "cmr6vgfi71m",
+        "b": "cmr6vhg6r1n",
+        "color": "GRAY",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0.1
+      },
+      {
+        "id": "rmr6wafik3u",
+        "a": "cmr6vnfpz1x",
+        "b": "cmr6v5dad13",
+        "color": "GRAY",
+        "length": 8,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wapp03v",
+        "a": "cmr6v5oxs14",
+        "b": "cmr6v5dad13",
+        "color": "GRAY",
+        "length": 8,
+        "ferryLocos": 3,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wb2cn3w",
+        "a": "cmr6v5oxs14",
+        "b": "cmr6v66yj15",
+        "color": "GRAY",
+        "length": 6,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wbj243x",
+        "a": "cmr6vspt021",
+        "b": "cmr6v6k0f16",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 1,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wd4u542",
+        "a": "cmr6vprw31z",
+        "b": "cmr6vrugq20",
+        "color": "GREEN",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "D"
+      },
+      {
+        "id": "rmr6wd6hy43",
+        "a": "cmr6vprw31z",
+        "b": "cmr6vrugq20",
+        "color": "PURPLE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "D"
+      },
+      {
+        "id": "rmr6wdrfp44",
+        "a": "cmr6vpe081y",
+        "b": "cmr6vv86r25",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6we9ea46",
+        "a": "cmr6vhg6r1n",
+        "b": "cmr6vv86r25",
+        "color": "WHITE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "rmr6wef4447",
+        "a": "cmr6vhg6r1n",
+        "b": "cmr6vpe081y",
+        "color": "ORANGE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "rmr6wftnb4a",
+        "a": "cmr6v66yj15",
+        "b": "cmr6vkkqf1t",
+        "color": "GRAY",
+        "length": 4,
+        "ferryLocos": 2,
+        "isTunnel": false,
+        "bow": 5.6
+      },
+      {
+        "id": "rmr6wg4j24b",
+        "a": "cmr6vka711s",
+        "b": "cmr6v66yj15",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 1,
+        "isTunnel": false,
+        "bow": 0.8
+      },
+      {
+        "id": "rmr6wgwgv4d",
+        "a": "cmr6vgfi71m",
+        "b": "cmr6vil0d1p",
+        "color": "YELLOW",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0
+      },
+      {
+        "id": "rmr6wi3oq4f",
+        "a": "cmr6vil0d1p",
+        "b": "cmr6vj22v1q",
+        "color": "RED",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0
+      },
+      {
+        "id": "rmr6wixaa4g",
+        "a": "cmr6vhg6r1n",
+        "b": "cmr6vwzoz26",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "rmr6wk3tu4i",
+        "a": "cmr6vj22v1q",
+        "b": "cmr6vka711s",
+        "color": "YELLOW",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "E"
+      },
+      {
+        "id": "rmr6wk85r4j",
+        "a": "cmr6vj22v1q",
+        "b": "cmr6vka711s",
+        "color": "ORANGE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "E"
+      },
+      {
+        "id": "rmr6wkuxd4k",
+        "a": "cmr6vj22v1q",
+        "b": "cmr6vwzoz26",
+        "color": "PURPLE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wlnij4n",
+        "a": "cmr6vwzoz26",
+        "b": "cmr6vspt021",
+        "color": "BLACK",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "rmr6wmsml4p",
+        "a": "cmr6vspt021",
+        "b": "cmr6v7bjc17",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 2,
+        "isTunnel": false,
+        "bow": 1.9
+      },
+      {
+        "id": "rmr6wn1li4q",
+        "a": "cmr6v6k0f16",
+        "b": "cmr6v7bjc17",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 1,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wnbbc4s",
+        "a": "cmr6vv86r25",
+        "b": "cmr6vtzxs23",
+        "color": "BLUE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wnj684t",
+        "a": "cmr6vtzxs23",
+        "b": "cmr6vspt021",
+        "color": "YELLOW",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wodlh4w",
+        "a": "cmr6vkkqf1t",
+        "b": "cmr6vl5er1u",
+        "color": "ORANGE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wp77j4y",
+        "a": "cmr6vka711s",
+        "b": "cmr6vl5er1u",
+        "color": "GREEN",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wpxxj50",
+        "a": "cmr6vspt021",
+        "b": "cmr6vl5er1u",
+        "color": "PURPLE",
+        "length": 6,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6wq5fq51",
+        "a": "cmr6vspt021",
+        "b": "cmr6vlj5f1v",
+        "color": "BLUE",
+        "length": 6,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": -1.9
+      },
+      {
+        "id": "rmr6wr8br52",
+        "a": "cmr6vl5er1u",
+        "b": "cmr6vlj5f1v",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6x6n8w53",
+        "a": "cmr6vfj6k1j",
+        "b": "cmr6vgfi71m",
+        "color": "RED",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr6xg3y255",
+        "a": "cmr6vcn5v1e",
+        "b": "cmr6vdcjk1g",
+        "color": "WHITE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "F"
+      },
+      {
+        "id": "rmr6xg7cb56",
+        "a": "cmr6vcn5v1e",
+        "b": "cmr6vdcjk1g",
+        "color": "ORANGE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "F"
+      },
+      {
+        "id": "rmr6xh6iy5c",
+        "a": "cmr6valrl1a",
+        "b": "cmr6vcn5v1e",
+        "color": "BLACK",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "G"
+      },
+      {
+        "id": "rmr6xh9n35d",
+        "a": "cmr6valrl1a",
+        "b": "cmr6vcn5v1e",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "G"
+      },
+      {
+        "id": "rmr6ztevu1",
+        "a": "cmr6valrl1a",
+        "b": "cmr6v8xpw19",
+        "color": "BLUE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "I"
+      },
+      {
+        "id": "rmr6ztlhs2",
+        "a": "cmr6valrl1a",
+        "b": "cmr6v8xpw19",
+        "color": "WHITE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "I"
+      },
+      {
+        "id": "rmr7g6tgc0",
+        "a": "cmr7g67c91",
+        "b": "cmr6vwzoz26",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": -0.1
+      },
+      {
+        "id": "rmr7g733p1",
+        "a": "cmr6vhg6r1n",
+        "b": "cmr7g67c91",
+        "color": "ORANGE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7g7g2n2",
+        "a": "cmr6vil0d1p",
+        "b": "cmr7g67c91",
+        "color": "BLUE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7g9iec4",
+        "a": "cmr6vea4n1h",
+        "b": "cmr6vpe081y",
+        "color": "GREEN",
+        "length": 6,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "rmr7grwao5",
+        "a": "cmr6vgfi71m",
+        "b": "cmr7gr2fq5",
+        "color": "BLACK",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7gsndu7",
+        "a": "cmr7gr2fq5",
+        "b": "cmr6vka711s",
+        "color": "WHITE",
+        "length": 6,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7h7pon8",
+        "a": "cmr6vrugq20",
+        "b": "cmr7h6vgq6",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 1,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7h8cyl9",
+        "a": "cmr6vprw31z",
+        "b": "cmr7h6vgq6",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 1,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7horjqa",
+        "a": "cmr6vlj5f1v",
+        "b": "cmr7hnlxra",
+        "color": "YELLOW",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7hqwqrc",
+        "a": "cmr6vkkqf1t",
+        "b": "cmr7hpujxb",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7hr5uve",
+        "a": "cmr7hpujxb",
+        "b": "cmr7hnlxra",
+        "color": "RED",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7hricyf",
+        "a": "cmr7hnlxra",
+        "b": "cmr6v7bjc17",
+        "color": "GRAY",
+        "length": 4,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "rmr7l5vaf2",
+        "a": "cmr6vrugq20",
+        "b": "cmr6vpe081y",
+        "color": "RED",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "J"
+      },
+      {
+        "id": "rmr7l5xn63",
+        "a": "cmr6vrugq20",
+        "b": "cmr6vpe081y",
+        "color": "YELLOW",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "J"
+      },
+      {
+        "id": "rmr7oc6tm0",
+        "a": "cmr7gr2fq5",
+        "b": "cmr6vil0d1p",
+        "color": "PURPLE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmrcg6ajib",
+        "a": "cmr6v809l18",
+        "b": "cmrcg5ghc4",
+        "color": "WHITE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmrcg6hxxc",
+        "a": "cmrcg5ghc4",
+        "b": "cmr6vprw31z",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "rmrcg6nmjd",
+        "a": "cmr6vnfpz1x",
+        "b": "cmrcg5ghc4",
+        "color": "ORANGE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmrcgafnog",
+        "a": "cmr7hpujxb",
+        "b": "cmr6vlj5f1v",
+        "color": "WHITE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0.1
+      },
+      {
+        "id": "rmrcglgfyi",
+        "a": "cmr6vpe081y",
+        "b": "cmr6v6k0f16",
+        "color": "GRAY",
+        "length": 6,
+        "ferryLocos": 3,
+        "isTunnel": false
+      },
+      {
+        "id": "rmrd19ifsj",
+        "a": "cmr6v809l18",
+        "b": "cmr6v8xpw19",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "H"
+      },
+      {
+        "id": "rmrdgmh6w1",
+        "a": "cmrcfyvqp3",
+        "b": "cmr6vkkqf1t",
+        "color": "BLUE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmrdgoshn6",
+        "a": "cmr6vka711s",
+        "b": "cmrcfyvqp3",
+        "color": "BLACK",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "A"
+      },
+      {
+        "id": "rmrdgr2qe8",
+        "a": "cmrcfyvqp3",
+        "b": "cmr6vkkqf1t",
+        "color": "BLUE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "rmrdgro2p9",
+        "a": "cmr6vka711s",
+        "b": "cmrcfyvqp3",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "A"
+      },
+      {
+        "id": "rmrdprgdk7",
+        "a": "cmr6v5oxs14",
+        "b": "cmr6vgfi71m",
+        "color": "GRAY",
+        "length": 6,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "rmrdprrlg8",
+        "a": "cmr6verqy1i",
+        "b": "cmr6v5dad13",
+        "color": "GRAY",
+        "length": 8,
+        "ferryLocos": 3,
+        "isTunnel": false
+      }
+    ],
+    "tickets": [
+      {
+        "id": "TG227115_1",
+        "a": "cmr6v66yj15",
+        "b": "cmr6v809l18",
+        "value": 23,
+        "deck": "LONG"
+      },
+      {
+        "id": "tmr7hc70g3",
+        "a": "cmr6v5dad13",
+        "b": "cmr6v7bjc17",
+        "value": 30,
+        "deck": "LONG"
+      },
+      {
+        "id": "tmr7hcqf24",
+        "a": "cmr6v5oxs14",
+        "b": "cmr6vrugq20",
+        "value": 24,
+        "deck": "LONG"
+      },
+      {
+        "id": "tmr7hfwui5",
+        "a": "cmr6vdcjk1g",
+        "b": "cmr6vtzxs23",
+        "value": 22,
+        "deck": "LONG"
+      },
+      {
+        "id": "tmr7iknqa1",
+        "a": "cmr6v8xpw19",
+        "b": "cmr6vka711s",
+        "value": 22,
+        "deck": "LONG"
+      },
+      {
+        "id": "tmr7imoi92",
+        "a": "cmr7hnlxra",
+        "b": "cmr6vhg6r1n",
+        "value": 18,
+        "deck": "LONG"
+      },
+      {
+        "id": "tmr7irb3z3",
+        "a": "cmr7g67c91",
+        "b": "cmr6vnfpz1x",
+        "value": 18,
+        "deck": "LONG"
+      },
+      {
+        "id": "tmr7p20rm0",
+        "a": "cmr6v5dad13",
+        "b": "cmr6vnfpz1x",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pblsq2",
+        "a": "cmr6v5dad13",
+        "b": "cmr6v809l18",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pc4lc3",
+        "a": "cmr6v5oxs14",
+        "b": "cmr6verqy1i",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pd6rk5",
+        "a": "cmr6v5oxs14",
+        "b": "cmr6v66yj15",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pdonx6",
+        "a": "cmr6v5oxs14",
+        "b": "cmr6vka711s",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pq1op1",
+        "a": "cmr6v66yj15",
+        "b": "cmr6vj22v1q",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pqxtv3",
+        "a": "cmr6v66yj15",
+        "b": "cmr6vkkqf1t",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7prltc4",
+        "a": "cmr6v66yj15",
+        "b": "cmr7hpujxb",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7punxn7",
+        "a": "cmr6vnfpz1x",
+        "b": "cmr7h6vgq6",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pwmvdb",
+        "a": "cmr6v809l18",
+        "b": "cmr6vrugq20",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pwz2rc",
+        "a": "cmr6v809l18",
+        "b": "cmr6vpe081y",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7py1uqe",
+        "a": "cmr6v809l18",
+        "b": "cmr6vdcjk1g",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pylref",
+        "a": "cmr6v809l18",
+        "b": "cmr6vea4n1h",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7pz2ytg",
+        "a": "cmr6v809l18",
+        "b": "cmr6vfj6k1j",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7q9ng0j",
+        "a": "cmr6v8xpw19",
+        "b": "cmr7h6vgq6",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qauirk",
+        "a": "cmr6v8xpw19",
+        "b": "cmr6vdcjk1g",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qbkqol",
+        "a": "cmr6v8xpw19",
+        "b": "cmr6vfj6k1j",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qcl0bm",
+        "a": "cmr6valrl1a",
+        "b": "cmr6vcn5v1e",
+        "value": 2,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qd582n",
+        "a": "cmr6valrl1a",
+        "b": "cmr6vpe081y",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qdwhio",
+        "a": "cmr6valrl1a",
+        "b": "cmr6verqy1i",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qefuvp",
+        "a": "cmr6valrl1a",
+        "b": "cmr6vea4n1h",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qfmpqr",
+        "a": "cmr6vcn5v1e",
+        "b": "cmr6verqy1i",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qg3vfs",
+        "a": "cmr6vcn5v1e",
+        "b": "cmr6vfj6k1j",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qhl8ut",
+        "a": "cmr6vcn5v1e",
+        "b": "cmr6vv86r25",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qig25u",
+        "a": "cmr6vdcjk1g",
+        "b": "cmr6verqy1i",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qjb24w",
+        "a": "cmr6vdcjk1g",
+        "b": "cmr6vgfi71m",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qk2pwx",
+        "a": "cmr6vdcjk1g",
+        "b": "cmr6vfj6k1j",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qktqiy",
+        "a": "cmr6vea4n1h",
+        "b": "cmr7g67c91",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7ql3brz",
+        "a": "cmr6vea4n1h",
+        "b": "cmr6vfj6k1j",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qlmfx10",
+        "a": "cmr6vea4n1h",
+        "b": "cmr6vv86r25",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qmi3511",
+        "a": "cmr6vea4n1h",
+        "b": "cmr6vil0d1p",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qnfnn13",
+        "a": "cmr6verqy1i",
+        "b": "cmr6vgfi71m",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qos1015",
+        "a": "cmr6verqy1i",
+        "b": "cmr7gr2fq5",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qptzj16",
+        "a": "cmr6vfj6k1j",
+        "b": "cmr6vpe081y",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qt7c21a",
+        "a": "cmr6vfj6k1j",
+        "b": "cmr6vil0d1p",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qtojd1b",
+        "a": "cmr6vfj6k1j",
+        "b": "cmr6vj22v1q",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qub7n1c",
+        "a": "cmr6vfj6k1j",
+        "b": "cmr6vka711s",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qv3581d",
+        "a": "cmr6vgfi71m",
+        "b": "cmr6vhg6r1n",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qwb4e1g",
+        "a": "cmr6vgfi71m",
+        "b": "cmr7g67c91",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7qwxr31h",
+        "a": "cmr6vgfi71m",
+        "b": "cmr6vspt021",
+        "value": 12,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7r3o4w1j",
+        "a": "cmr6vhg6r1n",
+        "b": "cmr6vv86r25",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7r5i2m1l",
+        "a": "cmr6vhg6r1n",
+        "b": "cmr6vspt021",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7r7blp1m",
+        "a": "cmr6vhg6r1n",
+        "b": "cmr6vj22v1q",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7r8cg41n",
+        "a": "cmr7g67c91",
+        "b": "cmr6v6k0f16",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7r94zz1o",
+        "a": "cmr7g67c91",
+        "b": "cmr6vkkqf1t",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7raywf1s",
+        "a": "cmr6vil0d1p",
+        "b": "cmr6vl5er1u",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rc9bk1u",
+        "a": "cmr6vil0d1p",
+        "b": "cmr6vwzoz26",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rdk5t1v",
+        "a": "cmr6vil0d1p",
+        "b": "cmr6vka711s",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7ree781w",
+        "a": "cmr7gr2fq5",
+        "b": "cmr6vka711s",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rf2um1x",
+        "a": "cmr7gr2fq5",
+        "b": "cmr7hpujxb",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rguf21z",
+        "a": "cmr7gr2fq5",
+        "b": "cmr6vj22v1q",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7ri92l21",
+        "a": "cmr6vwzoz26",
+        "b": "cmr6vl5er1u",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7riz1z22",
+        "a": "cmr6vwzoz26",
+        "b": "cmr6vka711s",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rjy4i23",
+        "a": "cmr6vj22v1q",
+        "b": "cmr6vka711s",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rka5224",
+        "a": "cmr6vj22v1q",
+        "b": "cmr6vkkqf1t",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rl6ji25",
+        "a": "cmr6vj22v1q",
+        "b": "cmr7hnlxra",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rm0tr26",
+        "a": "cmr6vj22v1q",
+        "b": "cmr6vspt021",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rn24z28",
+        "a": "cmr6vka711s",
+        "b": "cmr6vl5er1u",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rng2w29",
+        "a": "cmr6vka711s",
+        "b": "cmr6vlj5f1v",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7ro3nm2a",
+        "a": "cmr6vka711s",
+        "b": "cmr6v6k0f16",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rppic2d",
+        "a": "cmr6vkkqf1t",
+        "b": "cmr6vtzxs23",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rr4xa2e",
+        "a": "cmr6vkkqf1t",
+        "b": "cmr6v7bjc17",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rt87a2g",
+        "a": "cmr6vl5er1u",
+        "b": "cmr7hpujxb",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rvnnt2k",
+        "a": "cmr6vprw31z",
+        "b": "cmr6vpe081y",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rw2cj2l",
+        "a": "cmr6vprw31z",
+        "b": "cmr6vtzxs23",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rwgvs2m",
+        "a": "cmr6vrugq20",
+        "b": "cmr7h6vgq6",
+        "value": 2,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7rwyrq2n",
+        "a": "cmr6vrugq20",
+        "b": "cmr6v6k0f16",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7s0kur2o",
+        "a": "cmr6vrugq20",
+        "b": "cmr6vv86r25",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7s1cuv2q",
+        "a": "cmr6vpe081y",
+        "b": "cmr6vspt021",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7s2nhz2s",
+        "a": "cmr6vv86r25",
+        "b": "cmr6vspt021",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7s33it2t",
+        "a": "cmr6vv86r25",
+        "b": "cmr6v7bjc17",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7s45ol2v",
+        "a": "cmr6vtzxs23",
+        "b": "cmr6v7bjc17",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7s648k2x",
+        "a": "cmr6vspt021",
+        "b": "cmr6v7bjc17",
+        "value": 3,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7s7k1h2y",
+        "a": "cmr6vspt021",
+        "b": "cmr6vlj5f1v",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7s85cv2z",
+        "a": "cmr6vspt021",
+        "b": "cmr7hnlxra",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "tmr7ts15h0",
+        "a": "cmr6vkkqf1t",
+        "b": "cmr6vdcjk1g",
+        "value": 20,
+        "deck": "LONG"
+      },
+      {
+        "id": "tmrcgemfa0",
+        "a": "cmrcg5ghc4",
+        "b": "cmrcfyvqp3",
+        "value": 21,
+        "deck": "LONG"
+      }
+    ],
+    "geography": {
+      "baseView": {
+        "x": -4,
+        "y": -4,
+        "w": 100,
+        "h": 100
+      },
+      "land": [
+        [
+          [
+            50.97,
+            89.64
+          ],
+          [
+            49.95,
+            89.44
+          ],
+          [
+            48.67,
+            88.62
+          ],
+          [
+            46.45,
+            86.2
+          ],
+          [
+            45.89,
+            84.75
+          ],
+          [
+            45.04,
+            80.01
+          ],
+          [
+            44.1,
+            78.45
+          ],
+          [
+            42.94,
+            77.5
+          ],
+          [
+            40.55,
+            76.89
+          ],
+          [
+            39.82,
+            76.17
+          ],
+          [
+            39.17,
+            74.77
+          ],
+          [
+            38.06,
+            70.87
+          ],
+          [
+            37.51,
+            67.04
+          ],
+          [
+            37.49,
+            63.29
+          ],
+          [
+            38.14,
+            58.73
+          ],
+          [
+            39.47,
+            53.36
+          ],
+          [
+            40.73,
+            49.86
+          ],
+          [
+            47.85,
+            39.73
+          ],
+          [
+            50.66,
+            33.94
+          ],
+          [
+            52.46,
+            31.37
+          ],
+          [
+            54.48,
+            29.31
+          ],
+          [
+            55.57,
+            28.71
+          ],
+          [
+            59.01,
+            27.59
+          ],
+          [
+            62.32,
+            24.91
+          ],
+          [
+            63.22,
+            24.38
+          ],
+          [
+            63.89,
+            24.34
+          ],
+          [
+            67.09,
+            26.64
+          ],
+          [
+            70.78,
+            28.61
+          ],
+          [
+            72.1,
+            30.13
+          ],
+          [
+            72.19,
+            30.88
+          ],
+          [
+            71.89,
+            31.88
+          ],
+          [
+            70.7,
+            34.32
+          ],
+          [
+            70.39,
+            35.5
+          ],
+          [
+            70.6,
+            36.5
+          ],
+          [
+            71.59,
+            38.42
+          ],
+          [
+            71.64,
+            39.73
+          ],
+          [
+            71.06,
+            41.54
+          ],
+          [
+            67.58,
+            49.35
+          ],
+          [
+            63.65,
+            65.18
+          ],
+          [
+            62.52,
+            68.88
+          ],
+          [
+            61.12,
+            71.68
+          ],
+          [
+            59.4,
+            74.29
+          ],
+          [
+            54.64,
+            80.4
+          ],
+          [
+            53.6,
+            82.58
+          ],
+          [
+            51.64,
+            88.97
+          ]
+        ],
+        [
+          [
+            30.42,
+            57.58
+          ],
+          [
+            30.26,
+            56.99
+          ],
+          [
+            29.25,
+            56.4
+          ],
+          [
+            28.23,
+            56.99
+          ],
+          [
+            28.08,
+            57.58
+          ],
+          [
+            28.23,
+            58.16
+          ],
+          [
+            29.25,
+            58.75
+          ],
+          [
+            30.26,
+            58.16
+          ]
+        ],
+        [
+          [
+            31.66,
+            61.42
+          ],
+          [
+            31.57,
+            61.09
+          ],
+          [
+            31,
+            60.76
+          ],
+          [
+            30.43,
+            61.09
+          ],
+          [
+            30.34,
+            61.42
+          ],
+          [
+            30.43,
+            61.75
+          ],
+          [
+            31,
+            62.09
+          ],
+          [
+            31.57,
+            61.75
+          ]
+        ],
+        [
+          [
+            27.04,
+            55.85
+          ],
+          [
+            27.67,
+            56.47
+          ],
+          [
+            28.29,
+            55.85
+          ],
+          [
+            27.67,
+            55.22
+          ]
+        ],
+        [
+          [
+            8.33,
+            41.8
+          ],
+          [
+            8.85,
+            40.85
+          ],
+          [
+            8.33,
+            39.9
+          ]
+        ],
+        [
+          [
+            35.83,
+            7.79
+          ],
+          [
+            35.72,
+            7.39
+          ],
+          [
+            35.03,
+            7
+          ],
+          [
+            34.34,
+            7.39
+          ],
+          [
+            34.24,
+            7.79
+          ],
+          [
+            34.34,
+            8.18
+          ],
+          [
+            35.03,
+            8.57
+          ],
+          [
+            35.72,
+            8.18
+          ]
+        ],
+        [
+          [
+            36.99,
+            6.44
+          ],
+          [
+            36.44,
+            5.89
+          ],
+          [
+            35.88,
+            6.44
+          ],
+          [
+            36.44,
+            6.99
+          ]
+        ],
+        [
+          [
+            63.17,
+            75.07
+          ],
+          [
+            63.06,
+            74.68
+          ],
+          [
+            62.39,
+            74.29
+          ],
+          [
+            62.01,
+            74.39
+          ],
+          [
+            61.62,
+            75.07
+          ],
+          [
+            61.72,
+            75.46
+          ],
+          [
+            62.39,
+            75.85
+          ],
+          [
+            62.78,
+            75.75
+          ]
+        ],
+        [
+          [
+            62.7,
+            86.8
+          ],
+          [
+            62.82,
+            87.27
+          ],
+          [
+            63.62,
+            87.74
+          ],
+          [
+            64.42,
+            87.27
+          ],
+          [
+            64.55,
+            86.8
+          ],
+          [
+            64.42,
+            86.33
+          ],
+          [
+            63.62,
+            85.86
+          ],
+          [
+            62.82,
+            86.33
+          ]
+        ]
+      ],
+      "crop": {
+        "lonMin": 118.40753936767578,
+        "lonMax": 122.70305633544922,
+        "latMin": 21.779399871826172,
+        "latMax": 26.565021514892578
+      }
+    },
+    "rules": {}
+  },
+  "createdAt": {
+    "$date": "2026-07-08T16:37:16.801Z"
+  },
+  "updatedAt": {
+    "$date": "2026-07-09T16:33:09.238Z"
+  },
+  "shareCode": "ZZU7RDK6"
+}

@@ -116,7 +116,7 @@ describe('tutorial scenarios replay through the engine', () => {
     });
   }
 
-  it('the claim demo can actually afford R16 from the dealt hand', () => {
+  it('the claim demo can actually afford its target route from the dealt hand', () => {
     const board = taiwanBoard();
     const lesson = LESSONS.find((l) => l.id === 'claim')!;
     const config: GameConfig = {
@@ -129,7 +129,7 @@ describe('tutorial scenarios replay through the engine', () => {
       const r = reduce(board, state, a);
       if (r.ok) state = r.value.state;
     }
-    const route = board.content.routes.find((r) => (r.id as string) === 'R16')!;
+    const route = board.content.routes.find((r) => (r.id as string) === 'R42')!;
     const pays = enumerateClaimPayments(board, state, asPlayerId(lesson.viewer), route);
     expect(pays.length).toBeGreaterThan(0);
   });

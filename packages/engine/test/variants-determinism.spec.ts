@@ -41,7 +41,7 @@ describe('rule-variant determinism & version', () => {
   });
 
   it('locked completion set equals a fresh end-game evaluation (monotonicity invariant)', () => {
-    const r = playGreedyGame(4, 'borrow-monotone', {
+    const r = playGreedyGame(4, 'borrow-monotone-9', {
       ruleParams: { unlimitedStationBorrow: true },
     });
     expect(r.finalState.turn.phase).toBe('GAME_OVER');

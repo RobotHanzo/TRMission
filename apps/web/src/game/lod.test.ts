@@ -32,13 +32,13 @@ describe('cityTier', () => {
   });
 
   it('classifies district towns / junctions as tertiary', () => {
-    expect(cityTier('zhongli')).toBe('tertiary');
-    expect(cityTier('suao')).toBe('tertiary');
+    expect(cityTier('zhunan')).toBe('tertiary');
+    expect(cityTier('chaozhou')).toBe('tertiary');
   });
 
   it('defaults the smallest stations to minor', () => {
-    expect(cityTier('tamsui')).toBe('minor');
-    expect(cityTier('toucheng')).toBe('minor');
+    expect(cityTier('jiji')).toBe('minor');
+    expect(cityTier('chishang')).toBe('minor');
   });
 
   it('assigns each tiered city to exactly one tier (no overlaps)', () => {

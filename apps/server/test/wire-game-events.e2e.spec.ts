@@ -147,15 +147,20 @@ describe('random-events wire leak test (byte-level) — no future unannounced en
     );
 
     const hiddenIds = hidden.map((e) => e.id);
-    const hiddenMapIds = [
-      ...new Set(
-        hidden.flatMap((e) => [
-          ...(e.routeIds ?? []).map((r) => r as string),
-          ...(e.cityId ? [e.cityId as string] : []),
-          ...(e.charter ? [e.charter.a as string, e.charter.b as string] : []),
-        ]),
-      ),
+    const mapIdsOf = (e: (typeof ev.schedule)[number]) => [
+      ...(e.routeIds ?? []).map((r) => r as string),
+      ...(e.cityId ? [e.cityId as string] : []),
+      ...(e.charter ? [e.charter.a as string, e.charter.b as string] : []),
     ];
+    // Route/city ids that already-announced (active, or the one-round forecast) events legitimately
+    // expose — a hidden future entry that merely REUSES one of them is not leaking it. Only ids that
+    // belong EXCLUSIVELY to hidden entries can constitute a leak.
+    const publicMapIds = new Set(
+      ev.schedule.filter((e, idx) => idx < ev.nextIdx || e.id === forecastId).flatMap(mapIdsOf),
+    );
+    const hiddenMapIds = [...new Set(hidden.flatMap(mapIdsOf))].filter(
+      (id) => !publicMapIds.has(id),
+    );
 
     for (const r of recipients()) {
       for (const env of received.get(r) ?? []) {
@@ -175,8 +180,13 @@ describe('random-events wire leak test (byte-level) — no future unannounced en
           });
           const blockRaw = Buffer.from(toBinary(GameSnapshotSchema, blockOnly)).toString('latin1');
           for (const mid of hiddenMapIds) {
+            // Search for the id in its protobuf-framed form — a length-delimited string is preceded
+            // by its byte length as a varint (a single byte for the short ids here) — rather than as
+            // a raw substring, so a short id ('R7') is not falsely matched as a prefix of a longer id
+            // that IS in the block ('R71'). A genuine leak still encodes the id as its own field.
+            const framed = String.fromCharCode(mid.length) + mid;
             expect(
-              blockRaw.includes(mid),
+              blockRaw.includes(framed),
               `${r}: hidden map id ${mid} leaked in random_events`,
             ).toBe(false);
           }

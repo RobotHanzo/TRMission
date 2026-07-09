@@ -26,7 +26,7 @@ const myTurnSnap = () =>
     you: { playerId: 'p0', hand: {}, keptTicketIds: [], pendingOfferTicketIds: [] },
   });
 
-// Same as above but with a hand that can pay for R16 (claim) or a first station (build) purely
+// Same as above but with a hand that can pay for the claim route or a first station (build) purely
 // with locomotives, so a click that reaches the payment-enumeration step always succeeds.
 const payableSnap = () =>
   create(GameSnapshotSchema, {
@@ -105,12 +105,12 @@ describe('GameStage tutorial action gate wiring', () => {
         commands={null}
         onLeave={() => {}}
         sandbox
-        actionGate={{ t: 'CLAIM_ROUTE', routeId: 'R16' }}
+        actionGate={{ t: 'CLAIM_ROUTE', routeId: 'R42' }}
       />,
     );
-    fireEvent.click(document.querySelector('[data-route-id="R6"]')!);
+    fireEvent.click(document.querySelector('[data-route-id="R1"]')!);
     expect(paymentModal()).toBeNull();
-    fireEvent.click(document.querySelector('[data-route-id="R16"]')!);
+    fireEvent.click(document.querySelector('[data-route-id="R42"]')!);
     expect(paymentModal()).not.toBeNull();
   });
 
@@ -137,7 +137,7 @@ describe('GameStage tutorial action gate wiring', () => {
         commands={null}
         onLeave={() => {}}
         sandbox
-        actionGate={{ t: 'CLAIM_ROUTE', routeId: 'R16' }}
+        actionGate={{ t: 'CLAIM_ROUTE', routeId: 'R42' }}
       />,
     );
     expect(cityMarker('taipei').classList.contains('buildable')).toBe(false);
@@ -155,10 +155,10 @@ describe('GameStage tutorial action gate wiring', () => {
         actionGate={{ t: 'BUILD_STATION', cityId: 'taipei' }}
       />,
     );
-    expect(document.querySelector('[data-route-id="R16"]')!.classList.contains('claimable')).toBe(
+    expect(document.querySelector('[data-route-id="R42"]')!.classList.contains('claimable')).toBe(
       false,
     );
-    fireEvent.click(document.querySelector('[data-route-id="R16"]')!);
+    fireEvent.click(document.querySelector('[data-route-id="R42"]')!);
     expect(paymentModal()).toBeNull();
   });
 
@@ -169,10 +169,10 @@ describe('GameStage tutorial action gate wiring', () => {
         commands={null}
         onLeave={() => {}}
         sandbox
-        actionGate={{ t: 'CLAIM_ROUTE', routeId: 'R16' }}
+        actionGate={{ t: 'CLAIM_ROUTE', routeId: 'R42' }}
       />,
     );
-    fireEvent.click(document.querySelector('[data-route-id="R16"]')!);
+    fireEvent.click(document.querySelector('[data-route-id="R42"]')!);
     expect(document.querySelector('.payment-options')).not.toBeNull();
   });
 
@@ -184,12 +184,12 @@ describe('GameStage tutorial action gate wiring', () => {
         commands={null}
         onLeave={() => {}}
         sandbox
-        actionGate={{ t: 'CLAIM_ROUTE', routeId: 'R16' }}
+        actionGate={{ t: 'CLAIM_ROUTE', routeId: 'R42' }}
         onPendingClaim={onPendingClaim}
       />,
     );
     expect(onPendingClaim).toHaveBeenLastCalledWith(null);
-    fireEvent.click(document.querySelector('[data-route-id="R16"]')!);
+    fireEvent.click(document.querySelector('[data-route-id="R42"]')!);
     expect(onPendingClaim).toHaveBeenLastCalledWith('route');
     fireEvent.click(document.querySelector('.modal-backdrop')!); // cancel
     expect(onPendingClaim).toHaveBeenLastCalledWith(null);

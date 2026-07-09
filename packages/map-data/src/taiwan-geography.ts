@@ -78,6 +78,7 @@ export const TAIWAN_ISLANDS: readonly { cx: number; cy: number; r: number }[] = 
   { cx: 33, cy: 78, r: 1.0 }, // Liuqiu
   { cx: 65, cy: 70, r: 1.0 }, // Green Island
   { cx: 68, cy: 85, r: 1.2 }, // Orchid Island
+  { cx: 73.7, cy: 28, r: 0.9 }, // Guishan Island (龜山島) — off the Yilan/Su'ao coast (map v4)
 ];
 
 /** A faint cartographic grid for the "real map" feel — kept very quiet behind the land. */

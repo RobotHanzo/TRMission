@@ -41,7 +41,7 @@ export const SECONDARY_CITIES: ReadonlySet<string> = new Set([
   'changhua', // 彰化 — county seat / central junction
   'douliu', // 斗六 — Yunlin county seat
   'pingtung', // 屏東 — county seat
-  'sunmoonlake', // 日月潭 — signature landmark
+  'nantou', // 南投 — county seat / central junction
   'alishan', // 阿里山 — mountain-railway landmark
   'yuli', // 玉里 — Rift Valley hub
   'luodong', // 羅東 — largest Yilan town
@@ -49,15 +49,16 @@ export const SECONDARY_CITIES: ReadonlySet<string> = new Set([
 
 // Tier 3 — district towns and line junctions; revealed at `district` (the home view).
 export const TERTIARY_CITIES: ReadonlySet<string> = new Set([
-  'zhongli', // 中壢
   'zhunan', // 竹南
-  'fengyuan', // 豐原
-  'nantou', // 南投
+  'banqiao', // 板橋
+  'shalu', // 沙鹿
+  'huwei', // 虎尾
+  'zuoying', // 左營
   'chaozhou', // 潮州
-  'suao', // 蘇澳
 ]);
-// Everything else (淡水, 板橋, 瑞芳, 大武, 知本, 池上, 頭城, …) is `minor` and only
-// appears at `local`. Islands always show their label regardless of tier (handled in CSS).
+// Everything else (集集, 平溪, 池上, …) is `minor` and only appears at `local`. Islands
+// (馬祖, 金門, 澎湖, 綠島, 蘭嶼, 小琉球, 龜山島) always show their label regardless of tier
+// (handled in CSS).
 
 export const cityTier = (id: string): CityTier =>
   MAJOR_CITIES.has(id)

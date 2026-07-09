@@ -214,13 +214,18 @@ describe('EventsPanel', () => {
           { id: 'p1', seat: 0, trainCars: 45, stationsRemaining: 3 },
           { id: 'p2', seat: 1, trainCars: 45, stationsRemaining: 3 },
         ],
-        // R4 (taipei–tamsui) is already claimed — it must be excluded from the list.
-        ownership: [{ routeId: 'R4', cell: { case: 'ownerPlayerId', value: 'p1' } }],
+        // R1 (臺北–板橋) is already claimed — it must be excluded from the list.
+        ownership: [{ routeId: 'R1', cell: { case: 'ownerPlayerId', value: 'p1' } }],
         randomEvents: {
           mode: 'intense',
           roundIndex: 2,
           active: [
-            { id: 'ev1', kind: 'SKY_LANTERN', routeIds: ['R2', 'R3', 'R4'], endsAfterRound: 4 },
+            {
+              id: 'ev1',
+              kind: 'SKY_LANTERN',
+              routeIds: ['R3', 'R65', 'R1'],
+              endsAfterRound: 4,
+            },
           ],
         },
       }),
@@ -230,13 +235,13 @@ describe('EventsPanel', () => {
     fireEvent.click(screen.getByLabelText('查看'));
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText('受影響路線')).toBeInTheDocument();
-    expect(within(dialog).getByText('基隆–臺北')).toBeInTheDocument(); // R2, keelung–taipei
-    expect(within(dialog).getByText('瑞芳–臺北')).toBeInTheDocument(); // R3, ruifang–taipei
-    expect(within(dialog).queryByText('臺北–淡水')).toBeNull(); // R4 — already owned, excluded
+    expect(within(dialog).getByText('臺北–基隆')).toBeInTheDocument(); // R3, taipei–keelung
+    expect(within(dialog).getByText('臺北–平溪')).toBeInTheDocument(); // R65, taipei–pingxi
+    expect(within(dialog).queryByText('臺北–板橋')).toBeNull(); // R1 — already owned, excluded
 
-    fireEvent.click(within(dialog).getByText('基隆–臺北'));
+    fireEvent.click(within(dialog).getByText('臺北–基隆'));
     expect(screen.queryByRole('dialog')).toBeNull(); // clicking a route closes the modal
-    expect(useAnimations.getState().eventSpotlight).toEqual({ kind: 'route', ids: ['R2'] });
+    expect(useAnimations.getState().eventSpotlight).toEqual({ kind: 'route', ids: ['R3'] });
   });
 
   it("also lists affected routes on the forecast row's info modal", () => {
@@ -249,7 +254,7 @@ describe('EventsPanel', () => {
           kind: 'SKY_LANTERN',
           startRound: 3,
           durationRounds: 2,
-          routeIds: ['R2', 'R3'],
+          routeIds: ['R3', 'R65'],
         },
       }),
     });
@@ -258,8 +263,8 @@ describe('EventsPanel', () => {
     fireEvent.click(screen.getByLabelText('查看'));
     const dialog = screen.getByRole('dialog');
     expect(within(dialog).getByText('受影響路線')).toBeInTheDocument();
-    expect(within(dialog).getByText('基隆–臺北')).toBeInTheDocument();
-    expect(within(dialog).getByText('瑞芳–臺北')).toBeInTheDocument();
+    expect(within(dialog).getByText('臺北–基隆')).toBeInTheDocument();
+    expect(within(dialog).getByText('臺北–平溪')).toBeInTheDocument();
   });
 
   it('does not show an affected-routes section for a non-route event kind', () => {

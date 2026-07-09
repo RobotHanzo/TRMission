@@ -86,43 +86,13 @@ const MAX_BOW = 4.6;
 export const BOW_LIMIT = 12;
 
 /**
- * Hand-tuned outward bows (board units, signed along the chord normal) for routes whose straight
- * or auto-bowed path would cut across other content. Each value arcs the route into open space;
- * it replaces the auto-bow and is NOT clamped by MAX_BOW, and it composes with the double-gap so a
- * pair bows together yet stays a twin track. These are official-Taiwan route ids; a custom map's
- * generated ids never collide with them.
+ * Hand-tuned outward bows (board units, signed along the chord normal) for bundled-map routes whose
+ * straight or auto-bowed path would cut across other content — keyed by official route id. Empty
+ * since the Taiwan map v4 (tw2.1) network: those routes carry their own authored `bow` values (which
+ * win here too, via `r.bow` below), so no id-keyed override is needed. Kept as the mechanism for any
+ * future official route that needs a bow the editor can't express.
  */
-const BOW_OVERRIDE: Record<string, number> = {
-  // Keelung–Matsu ferry: the straight crossing skims Tamsui and the north coast, and the auto-bow
-  // would push it further into land — arc it north over the open sea (but kept inside the top edge).
-  R81: 6,
-  // Hsinchu–Miaoli: the auto-bow leans east into the corridor; flip it west, clear of Zhunan.
-  R17: 4,
-  // Taoyuan–Hsinchu: the auto-bow leans south-east over the Zhongli junction; bend it the other
-  // way (north-west, toward the coast) instead.
-  R14: 4,
-  // Hengchun–Taitung: bending inland (north-west, past Dawu) swings the curve within 0.2 units of
-  // Zhiben — nearly drawing through that station even though it isn't an endpoint. A full flip
-  // toward the coast clears both, but the coastline here hugs close, so keep the bow modest —
-  // any more and the curve pokes out over open water.
-  R70: 1,
-  // Kaohsiung–Kinmen ferry: the straight crossing runs right over Penghu — and the auto-bow skips
-  // it because Penghu is an island. Curve it south-west through the open strait, clear of Penghu.
-  // (The Kaohsiung–Penghu ferry has no intruder, so it stays straight on its own.)
-  R85: -5,
-  // Taipei–Yilan tunnel: the auto-bow would arc it away from Toucheng, but the Xuehe Tunnel runs
-  // straight through the mountains — force it to zero so it draws as a direct line.
-  R18: 0,
-  // Taoyuan–Yilan tunnel (北橫): Banqiao sits almost exactly on the straight chord, so the auto-bow
-  // swings hard north to dodge it — straight through the Taipei hub, crossing Ruifang–Taipei,
-  // both Taipei–Banqiao tracks, and the Taipei–Yilan tunnel. Flip it south instead, clear of Taipei.
-  R91: 4,
-  // Nantou–Yuli tunnel (中橫): the auto-bow swings west to dodge Sun Moon Lake and ends up running
-  // almost on top of the Nantou–Alishan route for most of its length. The Central Cross-Island
-  // Highway runs fairly direct through the mountains anyway — force it straight, which clears both
-  // Sun Moon Lake and Nantou–Alishan.
-  R92: 0,
-};
+const BOW_OVERRIDE: Record<string, number> = {};
 
 /** Cap on a single car's length so long routes read as many cars, not few long bars. */
 const SLOT_MAX_LEN = 2.6;

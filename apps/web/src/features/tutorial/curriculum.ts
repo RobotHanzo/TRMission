@@ -1,9 +1,9 @@
 // The authored lesson list. Each lesson is a scripted scenario over a real local engine game; the
 // guided tutorial plays an ordered, scope-filtered subset and the encyclopedia exposes them as
 // replayable entries. Robust mechanisms only: interactive beats use actions any starting hand can
-// perform (keep tickets, draw a card) — the claim practice targets R16 (Hsinchu–Zhunan, GRAY length
-// 1) and the station practice targets Taipei's first station (cost 1), both affordable with any
-// single card. Both are `await` beats: the learner performs the real click themselves (the
+// perform (keep tickets, draw a card) — the claim practice targets R42 (Pingtung–Chaozhou,
+// GRAY length 1) and the station practice targets Taipei's first station (cost 1), both affordable
+// with any single card. Both are `await` beats: the learner performs the real click themselves (the
 // guided tutorial waits for it; the encyclopedia's read-only demo auto-performs it for the viewer —
 // see `performAwait` in EncyclopediaModal.tsx).
 import { asPlayerId, type SeatIndex } from '@trm/shared';
@@ -115,9 +115,9 @@ export const LESSONS: Lesson[] = [
         id: 'try',
         text: 'tutorial.claim.try',
         mode: 'await',
-        expect: { t: 'CLAIM_ROUTE', routeId: 'R16' },
-        spotlight: { kind: 'route', ids: ['R16'] },
-        frame: { kind: 'route', ids: ['R16'] },
+        expect: { t: 'CLAIM_ROUTE', routeId: 'R42' },
+        spotlight: { kind: 'route', ids: ['R42'] },
+        frame: { kind: 'route', ids: ['R42'] },
         specimen: { kind: 'route', variant: 'rail' },
       },
       { id: 'scored', text: 'tutorial.claim.scored', mode: 'info' },
@@ -152,24 +152,24 @@ export const LESSONS: Lesson[] = [
         text: 'tutorial.special.double',
         mode: 'info',
         specimen: { kind: 'route', variant: 'double' },
-        spotlight: { kind: 'route', ids: ['R6', 'R7'] },
-        frame: { kind: 'route', ids: ['R6', 'R7'] },
+        spotlight: { kind: 'route', ids: ['R48', 'R49'] },
+        frame: { kind: 'route', ids: ['R48', 'R49'] },
       },
       {
         id: 'ferry',
         text: 'tutorial.special.ferry',
         mode: 'info',
         specimen: { kind: 'route', variant: 'ferry' },
-        spotlight: { kind: 'route', ids: ['R82'] },
-        frame: { kind: 'route', ids: ['R82'] },
+        spotlight: { kind: 'route', ids: ['R26'] },
+        frame: { kind: 'route', ids: ['R26'] },
       },
       {
         id: 'tunnel',
         text: 'tutorial.special.tunnel',
         mode: 'info',
         specimen: { kind: 'route', variant: 'tunnel' },
-        spotlight: { kind: 'route', ids: ['R18'] },
-        frame: { kind: 'route', ids: ['R18'] },
+        spotlight: { kind: 'route', ids: ['R5'] },
+        frame: { kind: 'route', ids: ['R5'] },
       },
     ],
   },
@@ -219,7 +219,7 @@ export const LESSONS: Lesson[] = [
         id: 'complete',
         text: 'tutorial.tickets.complete',
         mode: 'info',
-        specimen: { kind: 'ticket', id: 'S1' },
+        specimen: { kind: 'ticket', id: 'S14' },
       },
       { id: 'penalty', text: 'tutorial.tickets.penalty', mode: 'info' },
       {

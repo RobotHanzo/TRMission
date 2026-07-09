@@ -1,7 +1,6 @@
 import type { GameContent, MapMeta, RouteDef } from '../types';
 import { buildRoute, type Row } from '../routes';
-import { CITIES } from '../cities';
-import { TICKETS } from '../tickets';
+import { CITIES_V3, TICKETS_V3 } from './v3';
 
 /**
  * Frozen snapshot of map content version 2 — the content as it was *before* R77
@@ -9,12 +8,11 @@ import { TICKETS } from '../tickets';
  * `contentHash`; the registry uses this snapshot to rebuild the exact board they replay
  * against, so a content change never breaks recovery of an in-flight game (ADR A6/A13).
  *
- * Only the route table diverged between v2 and the current map, so the v2 routes are
- * captured here in full as an immutable literal, while `cities`/`tickets` (byte-identical
- * across the two versions) are referenced from the live tables. The pinned hash assertion
- * in `test/versions.spec.ts` is the tripwire: if a future edit ever changes a v2-era city
- * or ticket, this snapshot would silently drift and that test fails — at which point the
- * diverged table must be frozen into this file too.
+ * Only the route table diverged between v2 and v3, so the v2 routes are captured here in full
+ * as an immutable literal, while `cities`/`tickets` (byte-identical between v2 and v3) are
+ * referenced from the frozen v3 snapshot (`archive/v3.ts`) — NOT the live tables, which v4
+ * replaced. The pinned v2 hash assertion in `test/versions.spec.ts` is the tripwire that this
+ * stays byte-exact.
  */
 const V2_ROWS: readonly Row[] = [
   ['R1', 'keelung', 'ruifang', 'YELLOW', 1, ''],
@@ -98,7 +96,7 @@ const V2_ROUTES: readonly RouteDef[] = V2_ROWS.map(buildRoute);
 
 export const CONTENT_V2: GameContent = {
   meta: V2_META,
-  cities: CITIES,
+  cities: CITIES_V3,
   routes: V2_ROUTES,
-  tickets: TICKETS,
+  tickets: TICKETS_V3,
 };

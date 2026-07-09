@@ -83,50 +83,50 @@ const p1 = asPlayerId('p1');
 
 describe('double routes', () => {
   it('locks the sibling in a 2-player game', () => {
-    // R6/R7 = 臺北–板橋 double pair (WHITE / RED, length 1).
-    const state = st({ numPlayers: 2, hands: { p0: { WHITE: 1 } } });
+    // R71 / R73 = 左營–高雄 double pair (BLUE / RED, length 1).
+    const state = st({ numPlayers: 2, hands: { p0: { BLUE: 1 } } });
     const res = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R6'),
-      payment: { color: 'WHITE', colorCount: 1, locomotives: 0 },
+      routeId: asRouteId('R71'),
+      payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
-    expect(res.value.state.ownership['R6']).toEqual({ owner: p0 });
-    expect(res.value.state.ownership['R7']).toEqual({ locked: true });
+    expect(res.value.state.ownership['R71']).toEqual({ owner: p0 });
+    expect(res.value.state.ownership['R73']).toEqual({ locked: true });
   });
 
   it('does NOT lock the sibling in a 4-player game; the other edge stays claimable', () => {
-    const state = st({ numPlayers: 4, hands: { p0: { WHITE: 1 }, p1: { RED: 1 } } });
+    const state = st({ numPlayers: 4, hands: { p0: { BLUE: 1 }, p1: { RED: 1 } } });
     const r1 = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R6'),
-      payment: { color: 'WHITE', colorCount: 1, locomotives: 0 },
+      routeId: asRouteId('R71'),
+      payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     expect(r1.ok).toBe(true);
     if (!r1.ok) return;
-    expect(r1.value.state.ownership['R7']).toBeUndefined();
-    // Now p1 (next turn) claims the parallel R7.
+    expect(r1.value.state.ownership['R73']).toBeUndefined();
+    // Now p1 (next turn) claims the parallel edge.
     const r2 = apply(r1.value.state, {
       t: 'CLAIM_ROUTE',
       player: p1,
-      routeId: asRouteId('R7'),
+      routeId: asRouteId('R73'),
       payment: { color: 'RED', colorCount: 1, locomotives: 0 },
     });
     expect(r2.ok).toBe(true);
     if (!r2.ok) return;
-    expect(r2.value.state.ownership['R7']).toEqual({ owner: p1 });
+    expect(r2.value.state.ownership['R73']).toEqual({ owner: p1 });
   });
 
   it('rejects claiming both edges of a pair', () => {
-    const owned: Record<string, OwnerCell> = { R6: { owner: p0 } };
+    const owned: Record<string, OwnerCell> = { R71: { owner: p0 } };
     const state = st({ numPlayers: 4, hands: { p0: { RED: 1 } }, ownership: owned });
     const res = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R7'),
+      routeId: asRouteId('R73'),
       payment: { color: 'RED', colorCount: 1, locomotives: 0 },
     });
     expect(res.ok).toBe(false);
@@ -135,48 +135,48 @@ describe('double routes', () => {
   });
 
   it('does NOT lock the sibling in a 2-player game when doubleRouteSingleFor23 is off', () => {
-    // Same pair as the first test (R6/R7), but with the rule variant disabled.
+    // Same pair as the first test, but with the rule variant disabled.
     const state = st({
       numPlayers: 2,
-      hands: { p0: { WHITE: 1 }, p1: { RED: 1 } },
+      hands: { p0: { BLUE: 1 }, p1: { RED: 1 } },
       ruleParams: { ...DEFAULT_RULE_PARAMS, doubleRouteSingleFor23: false },
     });
     const r1 = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R6'),
-      payment: { color: 'WHITE', colorCount: 1, locomotives: 0 },
+      routeId: asRouteId('R71'),
+      payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     expect(r1.ok).toBe(true);
     if (!r1.ok) return;
     // Sibling should remain open (not locked).
-    expect(r1.value.state.ownership['R7']).toBeUndefined();
+    expect(r1.value.state.ownership['R73']).toBeUndefined();
     // p1 can now claim the parallel route.
     const r2 = apply(r1.value.state, {
       t: 'CLAIM_ROUTE',
       player: p1,
-      routeId: asRouteId('R7'),
+      routeId: asRouteId('R73'),
       payment: { color: 'RED', colorCount: 1, locomotives: 0 },
     });
     expect(r2.ok).toBe(true);
     if (!r2.ok) return;
-    expect(r2.value.state.ownership['R7']).toEqual({ owner: p1 });
+    expect(r2.value.state.ownership['R73']).toEqual({ owner: p1 });
   });
 });
 
 describe('ferries', () => {
   it('claims a ferry with the required locomotives', () => {
-    // R88 = 臺東–綠島, GRAY length 2, Ferry(1).
+    // R56 = 羅東–龜山島, GRAY length 2, Ferry(1).
     const state = st({ hands: { p0: { RED: 1, LOCOMOTIVE: 1 } } });
     const res = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R88'),
+      routeId: asRouteId('R56'),
       payment: { color: 'RED', colorCount: 1, locomotives: 1 },
     });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
-    expect(res.value.state.ownership['R88']).toEqual({ owner: p0 });
+    expect(res.value.state.ownership['R56']).toEqual({ owner: p0 });
   });
 
   it('rejects a ferry payment without enough locomotives', () => {
@@ -184,7 +184,7 @@ describe('ferries', () => {
     const res = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R88'),
+      routeId: asRouteId('R56'),
       payment: { color: 'RED', colorCount: 2, locomotives: 0 },
     });
     expect(res.ok).toBe(false);
@@ -400,16 +400,16 @@ describe('double-tunnel routes', () => {
 });
 
 describe('tunnels', () => {
-  // R20 = 苗栗–豐原, BLUE length 2, tunnel. deck top three = BLUE,RED,GREEN → 1 BLUE match.
+  // R5 = 桃園–宜蘭, RED length 3, tunnel. revealed three = GREEN,RED,BLUE → 1 RED match.
   const tunnelStart = () =>
-    st({ hands: { p0: { BLUE: 4, LOCOMOTIVE: 2 } }, deck: ['GREEN', 'RED', 'BLUE'] });
+    st({ hands: { p0: { RED: 5, LOCOMOTIVE: 2 } }, deck: ['GREEN', 'RED', 'BLUE'] });
 
   it('reveals top-3 and computes the surcharge', () => {
     const res = apply(tunnelStart(), {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R20'),
-      payment: { color: 'BLUE', colorCount: 2, locomotives: 0 },
+      routeId: asRouteId('R5'),
+      payment: { color: 'RED', colorCount: 3, locomotives: 0 },
     });
     expect(res.ok).toBe(true);
     if (!res.ok) return;
@@ -421,20 +421,20 @@ describe('tunnels', () => {
     const r1 = apply(tunnelStart(), {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R20'),
-      payment: { color: 'BLUE', colorCount: 2, locomotives: 0 },
+      routeId: asRouteId('R5'),
+      payment: { color: 'RED', colorCount: 3, locomotives: 0 },
     });
     if (!r1.ok) throw new Error('lay failed');
     const r2 = apply(r1.value.state, {
       t: 'RESOLVE_TUNNEL',
       player: p0,
       commit: true,
-      extra: { color: 'BLUE', colorCount: 1, locomotives: 0 },
+      extra: { color: 'RED', colorCount: 1, locomotives: 0 },
     });
     expect(r2.ok).toBe(true);
     if (!r2.ok) return;
-    expect(r2.value.state.ownership['R20']).toEqual({ owner: p0 });
-    expect(r2.value.state.players['p0']!.hand.BLUE).toBe(1); // 4 - 2 base - 1 surcharge
+    expect(r2.value.state.ownership['R5']).toEqual({ owner: p0 });
+    expect(r2.value.state.players['p0']!.hand.RED).toBe(1); // 5 - 3 base - 1 surcharge
     expect(r2.value.state.turn.phase).toBe('AWAIT_ACTION');
   });
 
@@ -442,16 +442,16 @@ describe('tunnels', () => {
     const r1 = apply(tunnelStart(), {
       t: 'CLAIM_ROUTE',
       player: p0,
-      routeId: asRouteId('R20'),
-      payment: { color: 'BLUE', colorCount: 2, locomotives: 0 },
+      routeId: asRouteId('R5'),
+      payment: { color: 'RED', colorCount: 3, locomotives: 0 },
     });
     if (!r1.ok) throw new Error('lay failed');
     const r2 = apply(r1.value.state, { t: 'RESOLVE_TUNNEL', player: p0, commit: false });
     expect(r2.ok).toBe(true);
     if (!r2.ok) return;
-    expect(r2.value.state.ownership['R20']).toBeUndefined();
-    expect(r2.value.state.players['p0']!.hand.BLUE).toBe(4); // nothing spent
-    expect(r2.value.state.discard.BLUE).toBe(1); // revealed cards discarded
+    expect(r2.value.state.ownership['R5']).toBeUndefined();
+    expect(r2.value.state.players['p0']!.hand.RED).toBe(5); // nothing spent
+    expect(r2.value.state.discard.RED).toBe(1); // revealed cards discarded
   });
 });
 
@@ -507,12 +507,12 @@ describe('stations', () => {
 
 describe('turn enforcement', () => {
   it('rejects acting out of turn', () => {
-    const state = st({ numPlayers: 2, hands: { p1: { WHITE: 1 } } });
+    const state = st({ numPlayers: 2, hands: { p1: { BLUE: 1 } } });
     const res = apply(state, {
       t: 'CLAIM_ROUTE',
       player: p1,
-      routeId: asRouteId('R6'),
-      payment: { color: 'WHITE', colorCount: 1, locomotives: 0 },
+      routeId: asRouteId('R71'),
+      payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     expect(res.ok).toBe(false);
     if (res.ok) return;

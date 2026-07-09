@@ -9,33 +9,34 @@ describe('Taiwan map content', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('has the expected size and shape after the one-station-per-county reduction', () => {
+  it('has the expected size and shape (Taiwan map v4 — the tw2.1 network)', () => {
     const s = result.stats;
-    expect(s.cityCount).toBe(39);
-    expect(s.routeCount).toBe(68);
-    expect(s.distinctPairCount).toBe(60); // 60 distinct pairs + 8 second-of-pair double edges
-    expect(s.doublePairCount).toBe(8);
-    expect(s.tunnelCount).toBe(15);
-    expect(s.ferryCount).toBe(9);
-    expect(s.ferryLocoSymbols).toBe(15);
-    // Sum over ALL 68 segments. (Counting each double-route pair once gives 166, the
-    // usable track in 2–3p where only one parallel is claimable.)
-    expect(s.totalTrackLength).toBe(180);
-    expect(s.ticketCount).toBe(42);
-    expect(s.longTicketCount).toBe(6);
+    expect(s.cityCount).toBe(36);
+    expect(s.routeCount).toBe(76);
+    // 64 distinct pairs; 76 − 64 = 12 parallel edges (11 grouped double pairs + the extra
+    // Taipei–Banqiao single that runs beside the group-H double).
+    expect(s.distinctPairCount).toBe(64);
+    expect(s.doublePairCount).toBe(11);
+    expect(s.tunnelCount).toBe(9);
+    expect(s.ferryCount).toBe(14);
+    expect(s.ferryLocoSymbols).toBe(26);
+    // Sum over ALL 76 segments.
+    expect(s.totalTrackLength).toBe(222);
+    expect(s.ticketCount).toBe(84);
+    expect(s.longTicketCount).toBe(9);
   });
 
   it('has the planned colour balance', () => {
     expect(result.stats.colorBalance).toMatchObject({
       RED: 7,
-      GREEN: 8,
-      BLUE: 8,
-      WHITE: 8,
-      ORANGE: 6,
-      YELLOW: 6,
+      GREEN: 5,
+      BLUE: 6,
+      WHITE: 7,
+      ORANGE: 7,
+      YELLOW: 7,
       PURPLE: 6,
       BLACK: 5,
-      GRAY: 14,
+      GRAY: 26,
     });
   });
 
