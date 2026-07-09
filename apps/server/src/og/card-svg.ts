@@ -11,17 +11,31 @@ export const CARD_W = 1200;
 export const CARD_H = 630;
 
 /**
- * The exact font files every card's `F_SANS`/`F_MONO`/`F_LATIN` family names resolve to
- * (apps/server/assets/fonts) — resvg is handed these directly (`loadSystemFonts: false` in
- * OgService's `renderPng`) instead of a `loadSystemFonts: true` guess against whatever the
- * render box happens to have installed. See apps/server/assets/fonts/LICENSES for each
- * font's licence (all SIL OFL 1.1).
+ * The exact font files every card's `F_SANS`/`F_MONO`/`F_LATIN`/`F_SANS_BANNER` family names
+ * resolve to (apps/server/assets/fonts) — resvg is handed these directly
+ * (`loadSystemFonts: false` in OgService's `renderPng`) instead of a `loadSystemFonts: true`
+ * guess against whatever the render box happens to have installed. See
+ * apps/server/assets/fonts/LICENSES for each font's licence (all SIL OFL 1.1).
+ *
+ * resvg does NOT interpolate a variable font's `wght` axis at render time — it only ever
+ * rasterises whichever single instance is baked into the file's base `glyf` table (that
+ * font's `fvar` *default* position), and a `font-weight` attribute in the SVG has zero effect
+ * on the output (verified directly: weight 400/700/900 render byte-identical). For
+ * `NotoSansTC-Variable.ttf` that baked default happens to be **Thin**, and for
+ * `Archivo-Variable.ttf` it happens to already be **SemiBold/600** — pure coincidence of each
+ * upstream file's own default, not something this file controls. `NotoSansTC-Banner750.ttf`
+ * is a static instantiation of the same Noto Sans TC file pinned to wght=750 (via
+ * `fonttools varLib.instancer --static`, same OFL licence — see LICENSES), used only for the
+ * BrandBanner's 台鐵任務 line so it actually matches the live component's real 750-weight
+ * display treatment instead of silently rendering Thin. Archivo needed no such instance: its
+ * baked default already matches the component's 600-weight `TRMISSION` line.
  */
 const FONTS_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'assets', 'fonts');
 export const OG_FONT_FILES: string[] = [
   join(FONTS_DIR, 'NotoSansTC-Variable.ttf'), // F_SANS — CJK + Latin display/body
   join(FONTS_DIR, 'CascadiaCode-Regular.ttf'), // F_MONO — labels, codes, numbers
   join(FONTS_DIR, 'Archivo-Variable.ttf'), // F_LATIN — the BrandBanner TRMISSION wordmark
+  join(FONTS_DIR, 'NotoSansTC-Banner750.ttf'), // F_SANS_BANNER — the BrandBanner 台鐵任務 line
 ];
 
 // Brand tokens mirrored from apps/web/src/styles/tokens.css (light theme — social
@@ -57,6 +71,10 @@ const SEAT_COLORS = ['#0E8C8C', '#C0398B', '#E8A33D', '#5A6B7B', '#7CB342'] as c
 const F_SANS = "'Noto Sans TC',sans-serif";
 const F_MONO = "'Cascadia Code',monospace";
 const F_LATIN = "'Archivo',sans-serif";
+/** True 750-weight static instance — see `OG_FONT_FILES`'s comment for why this exists
+ *  separately from `F_SANS` (only the BrandBanner's 台鐵任務 line needs real bold; every other
+ *  card text stays on the Thin-by-default `F_SANS` plus its faux-bold stroke, unchanged). */
+const F_SANS_BANNER = "'Noto Sans TC Banner',sans-serif";
 
 export function escapeXml(s: string): string {
   return s
@@ -233,19 +251,15 @@ function brandBanner(x: number, y: number, targetIconSize: number, maxWidth: num
   const enSpacing = m.enSize * 0.455;
   const zhCenterX = textX + m.zhWidth / 2;
 
-  // Neither `weight` nor a custom `boldStroke` is set here — both lines fall through to
-  // text()'s plain default (weight 700, stroke size*0.035), the same treatment every other
-  // piece of text on every other card already uses cleanly. Two earlier attempts to
-  // reproduce the component's real 750-vs-600 weight *contrast* — first via a real
-  // `font-weight` (double-thickened in renderers that DO honour it on variable fonts, on top
-  // of the stroke) and then via an enlarged `boldStroke` on the zh line alone (~0.065×
-  // fontSize, nearly double the proven-safe 0.035 default) — both came back looking wrong on
-  // the dense zh glyphs (鐵/務 are intricate; a heavy uniform stroke merges their close-set
-  // strokes into a blob). Matching the exact weight contrast isn't worth another regression;
-  // the default reads clean and is legible at thumbnail scale like everywhere else.
+  // zh uses F_SANS_BANNER (a true 750-weight static instance — see OG_FONT_FILES's comment for
+  // why `font-weight` alone can't do this) with `boldStroke: 0`: the glyphs are already
+  // genuinely bold, so layering the usual faux-bold stroke on top would double-thicken them
+  // back into the same blobby look two earlier attempts already ran into. en's `F_LATIN`
+  // (Archivo) needs no such instance — its own baked default already renders at 600 — so it
+  // keeps text()'s plain default treatment like every other piece of text on every other card.
   const markup =
     `<g transform="translate(${x} ${y}) scale(${m.iconSize / 120})">${ICON_MARK}</g>` +
-    `<g transform="translate(${textX} ${zhBaseline}) skewX(-6)">${text(0, 0, m.zhSize, BANNER_ORANGE, '台鐵任務', { spacing: m.zhSpacing, font: F_SANS })}</g>` +
+    `<g transform="translate(${textX} ${zhBaseline}) skewX(-6)">${text(0, 0, m.zhSize, BANNER_ORANGE, '台鐵任務', { spacing: m.zhSpacing, font: F_SANS_BANNER, boldStroke: 0 })}</g>` +
     `<g transform="translate(${zhCenterX} ${enBaseline}) skewX(-6)">${text(0, 0, m.enSize, BANNER_NAVY, 'TRMISSION', { anchor: 'middle', spacing: enSpacing, font: F_LATIN })}</g>`;
 
   return { width: m.iconSize + m.gap + m.zhWidth, height: m.iconSize, markup };

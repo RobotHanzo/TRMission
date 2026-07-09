@@ -49,12 +49,13 @@ function renderPng(svg: string): Buffer {
  *  time this was tried here).
  */
 const FONT_FACE_STYLE = (() => {
-  const nameFor = (path: string) =>
-    basename(path).startsWith('NotoSansTC')
-      ? 'Noto Sans TC'
-      : basename(path).startsWith('CascadiaCode')
-        ? 'Cascadia Code'
-        : 'Archivo';
+  const nameFor = (path: string) => {
+    const file = basename(path);
+    if (file.startsWith('NotoSansTC-Banner')) return 'Noto Sans TC Banner';
+    if (file.startsWith('NotoSansTC')) return 'Noto Sans TC';
+    if (file.startsWith('CascadiaCode')) return 'Cascadia Code';
+    return 'Archivo';
+  };
   const rules = OG_FONT_FILES.map(
     (path) => `@font-face{font-family:'${nameFor(path)}';src:url('./fonts/${basename(path)}');}`,
   ).join('');
