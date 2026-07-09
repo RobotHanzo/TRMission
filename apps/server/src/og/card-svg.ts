@@ -91,6 +91,11 @@ export function fitText(s: string, fontSize: number, maxPx: number): string {
  * the glyphs are additionally stroked in their own fill colour so every card reads clearly at
  * social-platform thumbnail scale regardless of which weights the installed font actually
  * ships. `content` must already be escaped; every caller should pass `font` explicitly.
+ * `weight` sets the `font-weight` attribute (default 700, matching prior behaviour); the faux
+ * stroke defaults to a fixed `size * 0.035` (also matching prior behaviour) but can be
+ * overridden via `boldStroke` for a caller that wants a specific, weight-differentiated look
+ * (e.g. the BrandBanner's 750-weight zh line vs its 600-weight en line) independent of
+ * whatever resvg does or doesn't do with the numeric `font-weight` itself.
  */
 function text(
   x: number,
@@ -98,14 +103,21 @@ function text(
   size: number,
   fill: string,
   content: string,
-  opts: { anchor?: 'middle' | 'end'; spacing?: number; font?: string } = {},
+  opts: {
+    anchor?: 'middle' | 'end';
+    spacing?: number;
+    font?: string;
+    weight?: number;
+    boldStroke?: number;
+  } = {},
 ): string {
   const anchor = opts.anchor ? ` text-anchor="${opts.anchor}"` : '';
   const spacing = opts.spacing ? ` letter-spacing="${opts.spacing}"` : '';
   const font = opts.font ? ` font-family="${opts.font}"` : '';
-  const strokeWidth = Math.max(0.6, size * 0.035);
+  const weight = opts.weight ?? 700;
+  const strokeWidth = opts.boldStroke ?? Math.max(0.6, size * 0.035);
   return (
-    `<text x="${x}" y="${y}" font-size="${size}" font-weight="700"${anchor}${spacing}${font} ` +
+    `<text x="${x}" y="${y}" font-size="${size}" font-weight="${weight}"${anchor}${spacing}${font} ` +
     `fill="${fill}" stroke="${fill}" stroke-width="${strokeWidth}" stroke-linejoin="round" ` +
     `paint-order="stroke">${content}</text>`
   );
@@ -186,9 +198,20 @@ interface Banner {
  * overruns whatever slot on the card it's dropped into.
  */
 function brandBanner(x: number, y: number, targetIconSize: number, maxWidth: number): Banner {
-  // Ratios lifted straight from BrandBanner.tsx's `--hero` size (icon 80px, zh 48px, en 16px,
-  // icon↔text gap var(--tr-space-3)=12px, zh↔en line gap 3px), so this lockup is that
-  // component's exact proportions at whatever scale the card needs.
+  // Ratios measured directly off the live component (a headless render of BrandBanner.tsx's
+  // actual CSS at --hero size: icon 80px, zh 48px, en 16px) rather than approximated by eye:
+  //  - icon↔text gap: var(--tr-space-3) = 12px → 12/80 of the icon.
+  //  - zh line box: line-height:1, so its box is exactly zhSize tall; its baseline sits
+  //    44.8px down from the box top (measured via a zero-size baseline-aligned marker) →
+  //    44.8/48 of zhSize.
+  //  - zh↔en line gap: the flex column's literal `gap: 3px` → 3/48 of zhSize.
+  //  - en line box: line-height:normal measures 17.6px tall at enSize=16 → 1.1 × enSize;
+  //    its baseline sits 14.4px down from ITS box top → 14.4/16 = 0.9 of enSize.
+  //  - en is horizontally CENTRED under zh (measured identical centre-x for both lines),
+  //    not left-aligned with it, despite neither span setting `text-align` — column-flex
+  //    stretch, apparently. Reproduced below via `text-anchor="middle"` at zh's mid-x.
+  //  - weights: zh 750, en 600 — a real, deliberate contrast (chunky display vs semibold),
+  //    not the uniform faux-bold every other card text() uses.
   const measure = (iconSize: number) => {
     const gap = iconSize * (12 / 80);
     const zhSize = iconSize * (48 / 80);
@@ -201,18 +224,25 @@ function brandBanner(x: number, y: number, targetIconSize: number, maxWidth: num
   while (m.total > maxWidth && m.iconSize > 40) m = measure(m.iconSize - 2);
 
   const textX = x + m.iconSize + m.gap;
+  const zhBoxH = m.zhSize;
+  const enBoxH = m.enSize * 1.1;
   const lineGap = m.zhSize * (3 / 48);
-  const zhCap = m.zhSize * 0.74;
-  const enCap = m.enSize * 0.74;
-  const blockTop = y + (m.iconSize - (zhCap + lineGap + enCap)) / 2;
-  const zhBaseline = blockTop + zhCap;
-  const enBaseline = zhBaseline + lineGap + enCap;
+  const blockTop = y + (m.iconSize - (zhBoxH + lineGap + enBoxH)) / 2;
+  const zhBaseline = blockTop + m.zhSize * (44.8 / 48);
+  const enBaseline = blockTop + zhBoxH + lineGap + m.enSize * (14.4 / 16);
   const enSpacing = m.enSize * 0.455;
+  const zhCenterX = textX + m.zhWidth / 2;
 
+  // `weight` is deliberately left at text()'s default (700) for both lines, not the CSS
+  // component's real 750/600 — resvg appears to ignore font-weight on our variable fonts (the
+  // PNG output looks the same regardless), but *other* SVG viewers (a browser opening the raw
+  // .svg, e.g.) do honour it, and applying a real weight on top of the stroke-based faux-bold
+  // there double-thickens the glyphs into a clumpy mess. The stroke-only path below is what
+  // actually renders everywhere; `boldStroke` alone carries the zh/en weight contrast.
   const markup =
     `<g transform="translate(${x} ${y}) scale(${m.iconSize / 120})">${ICON_MARK}</g>` +
-    `<g transform="translate(${textX} ${zhBaseline}) skewX(-6)">${text(0, 0, m.zhSize, BANNER_ORANGE, '台鐵任務', { spacing: m.zhSpacing, font: F_SANS })}</g>` +
-    `<g transform="translate(${textX} ${enBaseline}) skewX(-6)">${text(0, 0, m.enSize, BANNER_NAVY, 'TRMISSION', { spacing: enSpacing, font: F_LATIN })}</g>`;
+    `<g transform="translate(${textX} ${zhBaseline}) skewX(-6)">${text(0, 0, m.zhSize, BANNER_ORANGE, '台鐵任務', { spacing: m.zhSpacing, font: F_SANS, boldStroke: m.zhSize * 0.065 })}</g>` +
+    `<g transform="translate(${zhCenterX} ${enBaseline}) skewX(-6)">${text(0, 0, m.enSize, BANNER_NAVY, 'TRMISSION', { anchor: 'middle', spacing: enSpacing, font: F_LATIN, boldStroke: m.enSize * 0.02 })}</g>`;
 
   return { width: m.iconSize + m.gap + m.zhWidth, height: m.iconSize, markup };
 }

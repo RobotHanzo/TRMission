@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   "apps/server/package.json": {
-    "mtime": 1783389765.6149473,
-    "ast_hash": "eb72edf2390aa2c96b239f89c0d4c8d2",
+    "mtime": 1783588473.3042614,
+    "ast_hash": "23b5a738f43bb0fcc4982d0c29608002",
     "semantic_hash": ""
   },
   "apps/server/src/app.module.ts": {
@@ -2070,8 +2070,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/og/card-svg.ts": {
-    "mtime": 1783586065.078979,
-    "ast_hash": "2da0efd7e76755ee5e209f1aa9b96813",
+    "mtime": 1783588324.780076,
+    "ast_hash": "c5bfeff3c8a110ccddc6a3262bdfa2f1",
     "semantic_hash": ""
   },
   "apps/server/src/og/og.controller.ts": {
@@ -2085,8 +2085,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/og/og.service.ts": {
-    "mtime": 1783585851.7205982,
-    "ast_hash": "02f5785146d73bc45e6a3316b961b69d",
+    "mtime": 1783588337.8179686,
+    "ast_hash": "f569902ebc58c0d558a2aef7417243ae",
     "semantic_hash": ""
   },
   "apps/server/test/og.e2e.spec.ts": {
@@ -3492,6 +3492,11 @@
   "apps/web/src/components/BrandBanner.tsx": {
     "mtime": 1783583385.621796,
     "ast_hash": "8e3f49fbe47b2ab992a5d69213f75623",
+    "semantic_hash": ""
+  },
+  "apps/server/scripts/render-og-cards.ts": {
+    "mtime": 1783588468.8164263,
+    "ast_hash": "615ae7c537f3868d12768427e290e6b7",
     "semantic_hash": ""
   }
 }
