@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { ticketViewSpec, ticketViewRect, ticketRect } from '../src/ticket-view';
+import { ticketViewIssues } from '../src/validate';
+import { formatIssue } from '../src/index';
+import type { TicketView } from '../src/types';
 
 const base = { x: 0, y: 0, w: 100, h: 100 };
 const a = { x: 40, y: 40 };
@@ -52,5 +55,30 @@ describe('ticketRect (spec + rect)', () => {
   it('resolves precedence then computes the rect', () => {
     expect(ticketRect({}, a, b, base, { defaultTicketView: { mode: 'full' } })).toEqual(base);
     expect(ticketRect({ view: { mode: 'zoom', level: 0 } }, a, b, base, undefined)).toEqual(base);
+  });
+});
+
+describe('ticketViewIssues', () => {
+  it('accepts a valid spec', () => {
+    expect(ticketViewIssues({ mode: 'auto' }, 'T1')).toEqual([]);
+    expect(ticketViewIssues({ mode: 'zoom', level: 0.5 }, 'T1')).toEqual([]);
+  });
+  it('rejects an out-of-range zoom level', () => {
+    expect(ticketViewIssues({ mode: 'zoom', level: 2 }, 'T1')).toEqual([
+      { code: 'ticketViewLevelOutOfRange', params: { where: 'T1', level: 2 } },
+    ]);
+  });
+  it('rejects an unknown mode', () => {
+    // deliberately malformed (untrusted authored data)
+    const bad = { mode: 'wat' } as unknown as TicketView;
+    expect(ticketViewIssues(bad, 'T1')[0]?.code).toBe('ticketViewInvalidMode');
+  });
+  it('formats the new codes in English', () => {
+    expect(
+      formatIssue({ code: 'ticketViewLevelOutOfRange', params: { where: 'T1', level: 2 } }),
+    ).toContain('[0, 1]');
+    expect(formatIssue({ code: 'ticketViewInvalidMode', params: { where: 'T1', mode: 'wat' } })).toContain(
+      'wat',
+    );
   });
 });

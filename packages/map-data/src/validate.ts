@@ -1,6 +1,6 @@
 import { ROUTE_LENGTHS, TRAIN_COLORS, DEFAULT_RULE_PARAMS } from '@trm/shared';
 import type { RouteColor, RuleParams } from '@trm/shared';
-import type { GameContent, RouteDef, MapGeography, MapRules } from './types';
+import type { GameContent, RouteDef, MapGeography, MapRules, TicketView } from './types';
 import { isFerry, MAP_RULE_KEYS } from './types';
 import { BOW_LIMIT } from './geometry';
 
@@ -73,6 +73,10 @@ export function formatIssue(issue: ValidationIssue): string {
       return `ticket ${p.ticketId}: value must be positive`;
     case 'graphNotConnected':
       return `graph is not connected: ${p.components} components`;
+    case 'ticketViewInvalidMode':
+      return `${p.where}: unknown display-area mode ${p.mode}`;
+    case 'ticketViewLevelOutOfRange':
+      return `${p.where}: zoom level ${p.level} is outside the allowed range [0, 1]`;
     case 'baseViewInvalid':
       return 'baseView must have finite x/y and positive width/height';
     case 'tooManyLandRings':
@@ -110,6 +114,25 @@ export interface ValidationResult {
 }
 
 const pairKey = (a: string, b: string): string => (a < b ? `${a}|${b}` : `${b}|${a}`);
+
+/**
+ * Structural check for a {@link TicketView} — a known `mode`, and for `zoom` a finite `level` in
+ * [0,1]. `where` labels the offending object (a ticket id, or a token for the map default) so the
+ * issue renders usefully. Accepts possibly-malformed authored data, hence the runtime mode check.
+ */
+export function ticketViewIssues(view: TicketView, where: string): ValidationIssue[] {
+  const mode = (view as { mode?: unknown }).mode;
+  if (mode !== 'full' && mode !== 'auto' && mode !== 'zoom') {
+    return [{ code: 'ticketViewInvalidMode', params: { where, mode: String(mode) } }];
+  }
+  if (mode === 'zoom') {
+    const level = (view as { level?: unknown }).level;
+    if (typeof level !== 'number' || !Number.isFinite(level) || level < 0 || level > 1) {
+      return [{ code: 'ticketViewLevelOutOfRange', params: { where, level: Number(level) } }];
+    }
+  }
+  return [];
+}
 
 /** Validate authored content against every structural game invariant; also compute stats. */
 export function validateContent(content: GameContent): ValidationResult {
@@ -216,6 +239,7 @@ export function validateContent(content: GameContent): ValidationResult {
       push('ticketUnknownCityB', { ticketId: tid, cityId: t.b as string });
     if ((t.a as string) === (t.b as string)) push('ticketEndpointsIdentical', { ticketId: tid });
     if (t.value <= 0) push('ticketValueNotPositive', { ticketId: tid });
+    if (t.view) for (const issue of ticketViewIssues(t.view, tid)) issues.push(issue);
   }
 
   // --- connectivity (union-find over all routes; every city reachable) ---
@@ -331,6 +355,11 @@ export function validateGeographyIssues(geo: MapGeography): ValidationIssue[] {
 
   if (crop.lonMin >= crop.lonMax || crop.latMin >= crop.latMax) {
     push('cropBboxInvalid');
+  }
+
+  if (geo.defaultTicketView) {
+    for (const issue of ticketViewIssues(geo.defaultTicketView, 'defaultTicketView'))
+      push(issue.code, issue.params);
   }
 
   return issues;
