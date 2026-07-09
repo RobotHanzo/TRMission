@@ -30,12 +30,25 @@ export interface RouteDef {
   readonly bow?: number;
 }
 
+/**
+ * Presentation-only "displayed area" for a mission ticket's mini-map (ignored by the engine).
+ *  - `full`  → the whole map (baseView).
+ *  - `auto`  → auto-crop: the bounding box of the ticket's two cities, padded; always contains both.
+ *  - `zoom`  → auto-frame centered on the midpoint of the two cities; `level` 0 (whole map) … 1 (tight).
+ */
+export type TicketView =
+  | { readonly mode: 'full' }
+  | { readonly mode: 'auto' }
+  | { readonly mode: 'zoom'; readonly level: number };
+
 export interface TicketDef {
   readonly id: TicketId;
   readonly a: CityId;
   readonly b: CityId;
   readonly value: number;
   readonly deck: 'LONG' | 'SHORT';
+  /** Per-ticket displayed-area override; absent ⇒ inherit the map default (see MapGeography). */
+  readonly view?: TicketView;
 }
 
 export interface MapMeta {
@@ -62,6 +75,8 @@ export interface MapGeography {
     readonly latMin: number;
     readonly latMax: number;
   };
+  /** Map-wide default displayed area for tickets that set no `view` of their own. */
+  readonly defaultTicketView?: TicketView;
 }
 
 /** The curated subset of RuleParams a map may set as its own defaults (ignored by the engine
