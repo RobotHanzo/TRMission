@@ -44,6 +44,9 @@ jobs:
       - name: Lint
         run: yarn lint
 
+      - name: Warm MongoDB binary cache
+        run: yarn workspace @trm/server warm-mongo
+
       - name: Test
         run: yarn test -- --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
 

@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src test",
-    "preview:og": "node --import @swc-node/register/esm-register scripts/render-og-cards.ts"
+    "preview:og": "node --import @swc-node/register/esm-register scripts/render-og-cards.ts",
+    "warm-mongo": "node --import @swc-node/register/esm-register scripts/warm-mongo-binary.ts"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.12.1",
