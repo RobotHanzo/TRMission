@@ -466,11 +466,41 @@ describe('RoomScreen spectating', () => {
     await waitFor(() => expect(mocked.watchRoom).toHaveBeenCalledWith('ABCD'));
   });
 
-  it('disables Spectate when the viewer is the only member', async () => {
+  it('hides Spectate from the host who is the only member', async () => {
     mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
     render(<RoomScreen />);
-    const spectateBtn = await screen.findByRole('button', { name: '觀戰' });
-    expect(spectateBtn).toBeDisabled();
+    await screen.findByRole('button', { name: '我準備好了' });
+    expect(screen.queryByRole('button', { name: '觀戰' })).toBeNull();
+  });
+
+  it('hides Spectate from the host even with other members present', async () => {
+    const meHost = { userId: 'u-me', displayName: 'Me', isGuest: true, seat: 0, ready: false };
+    const g1 = { userId: 'g1', displayName: 'g1', isGuest: false, seat: 1, ready: false };
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [meHost, g1] }));
+    render(<RoomScreen />);
+    await screen.findByText('g1');
+    expect(screen.queryByRole('button', { name: '觀戰' })).toBeNull();
+  });
+
+  it('does not raise the kicked modal when the viewer demotes themselves to spectator', async () => {
+    vi.useFakeTimers();
+    try {
+      mocked.getRoom
+        .mockResolvedValueOnce(room({ members: [member('host'), member('u-me')] }))
+        .mockResolvedValue(
+          room({
+            members: [member('host')],
+            spectators: [{ userId: 'u-me', displayName: 'Me', isGuest: true }],
+          }),
+        );
+      render(<RoomScreen />);
+      await vi.advanceTimersByTimeAsync(100); // first poll: seated
+      await vi.advanceTimersByTimeAsync(2100); // next poll: now a spectator — must NOT look like a kick
+      expect(useUi.getState().view).toBe('room');
+      expect(screen.queryByRole('button', { name: '返回首頁' })).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('shows "Join as player" for a spectator and calls rejoinRoom', async () => {

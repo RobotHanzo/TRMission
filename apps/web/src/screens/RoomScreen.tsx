@@ -108,17 +108,18 @@ export function RoomScreen() {
         // (Existing members of a STARTED game skip this and reconnect via the ticket below —
         // the server rejects join on a started room even for members.)
         if (!r.members.some((m) => m.userId === user?.id)) {
-          if (wasPresent) {
-            // We were seated/spectating and have been dropped. In LOBBY that's a host kick —
-            // surface a modal and let the player dismiss it home; otherwise just bail home.
+          // Spectators (arrived watching OR demoted themselves from a seat) are legitimately
+          // absent from `members`; only vanishing from BOTH lists is a kick.
+          const amSpectator = r.spectators.some((s) => s.userId === user?.id);
+          if (wasPresent && !amSpectator) {
             active = false;
             if (r.status === 'LOBBY') setKicked(true);
             else goHome();
             return;
           }
           if (r.status !== 'LOBBY') {
-            // A started game we aren't in can't be joined — spectate if it's allowed,
-            // otherwise bail home rather than trap.
+            // A started game we aren't seated in can't be joined — spectate if allowed (this
+            // carries a demoted lobby spectator into watching once the game starts); else bail home.
             if (r.status === 'STARTED' && r.gameId && r.settings.allowSpectating) {
               const tk = await api.spectate(code);
               if (!active) return;
@@ -130,10 +131,8 @@ export function RoomScreen() {
             goHome();
             return;
           }
-          // A demoted lobby spectator is also a non-member, but must not be auto-joined back
-          // onto a seat — they keep watching until they either rejoin a seat themselves or the
-          // game starts (handled by the STARTED branch above, since they're a non-member too).
-          const amSpectator = r.spectators.some((s) => s.userId === user?.id);
+          // A lobby non-member who isn't a spectator joins a seat once; a demoted spectator
+          // falls through to keep watching the lobby (never auto-rejoined onto a seat).
           if (!amSpectator) {
             r = await api.joinRoom(code);
             if (!active) return;
@@ -478,18 +477,18 @@ export function RoomScreen() {
 
         <div className="row">
           {me && (
-            <>
-              <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
-                {me.ready ? t('cancelReady') : t('markReady')}
-              </button>
-              <button
-                onClick={() => void becomeSpectator()}
-                disabled={room.members.length <= 1}
-                title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
-              >
-                {t('watch')}
-              </button>
-            </>
+            <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
+              {me.ready ? t('cancelReady') : t('markReady')}
+            </button>
+          )}
+          {me && !isHost && (
+            <button
+              onClick={() => void becomeSpectator()}
+              disabled={room.members.length <= 1}
+              title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
+            >
+              {t('watch')}
+            </button>
           )}
           {mySpectator && (
             <button
