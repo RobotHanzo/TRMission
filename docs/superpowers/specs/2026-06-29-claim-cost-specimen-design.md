@@ -4,7 +4,7 @@
 
 The `claim.intro` tutorial beat narrates the route-claiming rule:
 
-> 宣告路線時，支付與路線「等長、同一種顏色」的火車牌（火車頭可當任意顏色）；灰色路線可用任一種顏色支付。每段路線各花一個火車車廂。
+> 宣告路線時，支付與路線「等長、同一種顏色」的火車牌（彩色車頭可當任意顏色）；灰色路線可用任一種顏色支付。每段路線各花一個火車車廂。
 
 It currently renders **no specimen**. Add a graphic — in the existing coachmark visual-glossary
 style — that shows railways of **varying length each pointing to the cards that pay for it**, so the

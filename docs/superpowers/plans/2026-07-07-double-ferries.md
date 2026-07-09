@@ -656,7 +656,7 @@ In the same file, add these tests inside the `describe('RoutesStage', ...)` bloc
     fireEvent.click(screen.getByText('city-c1'));
     fireEvent.click(screen.getByText('city-c2'));
 
-    fireEvent.change(screen.getByLabelText('渡輪所需火車頭數'), { target: { value: '2' } });
+    fireEvent.change(screen.getByLabelText('渡輪所需彩色車頭數'), { target: { value: '2' } });
     fireEvent.click(screen.getByRole('switch', { name: '建立為雙軌路線' }));
     fireEvent.click(screen.getByText('儲存'));
 
