@@ -7,6 +7,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward, X } from 'lucide-react';
+import { asPlayerId } from '@trm/shared';
+import { legalActions } from '@trm/engine';
 import { useGameStore, useGameStoreApi } from '../../store/game';
 import { SandboxProvider } from '../../store/sandboxProvider';
 import { GameStage } from '../../screens/GameStage';
@@ -24,11 +26,13 @@ const INFO_MS = 4200;
 const AWAIT_MS = 1600;
 const LOOP_PAUSE_MS = 3400;
 
-/** Perform an `await` beat on the viewer's behalf (the encyclopedia demo has no learner). Only the
- *  mechanisms an encyclopedia entry actually scripts are handled; a CLAIM/STATION/TUNNEL demo should
- *  be authored as an `auto` beat (which carries a concrete payment) rather than awaited here. */
+/** Perform an `await` beat on the viewer's behalf (the encyclopedia demo has no learner, so it plays
+ *  the highlighted move for them). CLAIM_ROUTE/BUILD_STATION pick the first legal payment for the
+ *  beat's target (mirrors what the guided tutorial's real learner would click); RESOLVE_TUNNEL stays
+ *  unsupported — that demo is authored as an `auto` beat instead (its payment isn't a single pick). */
 function performAwait(cmd: SandboxSocket, expect: ExpectSpec, viewer: string): void {
   const state = cmd.getState();
+  const player = asPlayerId(viewer);
   switch (expect.t) {
     case 'DRAW_ANY':
     case 'DRAW_BLIND':
@@ -48,6 +52,20 @@ function performAwait(cmd: SandboxSocket, expect: ExpectSpec, viewer: string): v
       return cmd.keepInitialTickets([...(state.players[viewer]?.pendingTicketOffer ?? [])]);
     case 'KEEP_TICKETS':
       return cmd.keepTickets([...(state.players[viewer]?.pendingTicketOffer ?? [])].slice(0, 1));
+    case 'CLAIM_ROUTE': {
+      const action = legalActions(cmd.getBoard(), state, player).find(
+        (a) => a.t === 'CLAIM_ROUTE' && (!expect.routeId || a.routeId === expect.routeId),
+      );
+      if (action) cmd.auto(action);
+      return;
+    }
+    case 'BUILD_STATION': {
+      const action = legalActions(cmd.getBoard(), state, player).find(
+        (a) => a.t === 'BUILD_STATION' && (!expect.cityId || a.cityId === expect.cityId),
+      );
+      if (action) cmd.auto(action);
+      return;
+    }
     default:
       return; // unsupported await mechanism — leave to the manual replay control
   }

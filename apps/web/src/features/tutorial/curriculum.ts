@@ -1,10 +1,12 @@
 // The authored lesson list. Each lesson is a scripted scenario over a real local engine game; the
 // guided tutorial plays an ordered, scope-filtered subset and the encyclopedia exposes them as
 // replayable entries. Robust mechanisms only: interactive beats use actions any starting hand can
-// perform (keep tickets, draw a card), and the claim demo targets R16 (Hsinchu–Zhunan, GRAY length
-// 1) which is affordable with any single card.
+// perform (keep tickets, draw a card) — the claim practice targets R16 (Hsinchu–Zhunan, GRAY length
+// 1) and the station practice targets Taipei's first station (cost 1), both affordable with any
+// single card. Both are `await` beats: the learner performs the real click themselves (the
+// guided tutorial waits for it; the encyclopedia's read-only demo auto-performs it for the viewer —
+// see `performAwait` in EncyclopediaModal.tsx).
 import { asPlayerId, type SeatIndex } from '@trm/shared';
-import { enumerateClaimPayments } from '@trm/engine';
 import type { Action, GameState } from '@trm/engine';
 import type { Lesson, Scope } from './types';
 
@@ -110,18 +112,13 @@ export const LESSONS: Lesson[] = [
     beats: [
       { id: 'intro', text: 'tutorial.claim.intro', mode: 'info', specimen: { kind: 'claim-cost' } },
       {
-        id: 'demo',
-        text: 'tutorial.claim.demo',
-        mode: 'auto',
-        delayMs: 1200,
+        id: 'try',
+        text: 'tutorial.claim.try',
+        mode: 'await',
+        expect: { t: 'CLAIM_ROUTE', routeId: 'R16' },
         spotlight: { kind: 'cities', ids: ['hsinchu', 'zhunan'] },
         frame: { kind: 'route', ids: ['R16'] },
         specimen: { kind: 'route', variant: 'rail' },
-        action: (s, board) => {
-          const route = board.content.routes.find((r) => (r.id as string) === 'R16')!;
-          const pays = enumerateClaimPayments(board, s, P0, route);
-          return { t: 'CLAIM_ROUTE', player: P0, routeId: route.id, payment: pays[0]! };
-        },
       },
       { id: 'scored', text: 'tutorial.claim.scored', mode: 'info' },
       {
@@ -194,6 +191,14 @@ export const LESSONS: Lesson[] = [
         text: 'tutorial.stations.cost',
         mode: 'info',
         specimen: { kind: 'station-cost' },
+      },
+      {
+        id: 'try',
+        text: 'tutorial.stations.try',
+        mode: 'await',
+        expect: { t: 'BUILD_STATION', cityId: 'taipei' },
+        spotlight: { kind: 'cities', ids: ['taipei'] },
+        frame: { kind: 'cities', ids: ['taipei'] },
       },
       { id: 'bonus', text: 'tutorial.stations.bonus', mode: 'info' },
     ],

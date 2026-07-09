@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { taiwanBoard, CONTENT_HASH, initGame, reduce, enumerateClaimPayments } from '@trm/engine';
+import {
+  taiwanBoard,
+  CONTENT_HASH,
+  initGame,
+  reduce,
+  enumerateClaimPayments,
+  legalActions,
+} from '@trm/engine';
 import type { Action, Board, GameConfig, GameState } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
 import { LESSONS } from './curriculum';
@@ -15,6 +22,7 @@ function synthAwait(
   expect: ExpectSpec,
   viewer: ReturnType<typeof asPlayerId>,
   s: GameState,
+  board: Board,
 ): Action {
   switch (expect.t) {
     case 'KEEP_INITIAL_TICKETS':
@@ -45,6 +53,20 @@ function synthAwait(
       return { t: 'DRAW_TICKETS', player: viewer };
     case 'PASS':
       return { t: 'PASS', player: viewer };
+    case 'CLAIM_ROUTE': {
+      const action = legalActions(board, s, viewer).find(
+        (a) => a.t === 'CLAIM_ROUTE' && (!expect.routeId || a.routeId === expect.routeId),
+      );
+      if (!action) throw new Error(`no legal CLAIM_ROUTE for ${expect.routeId ?? '(any)'}`);
+      return action;
+    }
+    case 'BUILD_STATION': {
+      const action = legalActions(board, s, viewer).find(
+        (a) => a.t === 'BUILD_STATION' && (!expect.cityId || a.cityId === expect.cityId),
+      );
+      if (!action) throw new Error(`no legal BUILD_STATION for ${expect.cityId ?? '(any)'}`);
+      return action;
+    }
     default:
       throw new Error(`scenario test cannot synthesize await ${expect.t}`);
   }
@@ -72,7 +94,7 @@ function runLesson(lesson: Lesson, board: Board): GameState {
     if (beat.mode === 'auto') {
       apply(typeof beat.action === 'function' ? beat.action(state, board) : beat.action);
     } else if (beat.mode === 'await') {
-      apply(synthAwait(beat.expect, viewer, state));
+      apply(synthAwait(beat.expect, viewer, state, board));
     }
   }
   return state;

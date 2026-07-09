@@ -50,6 +50,11 @@ export class SandboxSocket implements GameCommands {
     return this.state;
   }
 
+  /** The static board content — pairs with `getState()` for scripting engine-level actions. */
+  getBoard(): Board {
+    return this.board;
+  }
+
   /** Apply a scripted action (a bot move or a demo beat) carrying its own `player`. */
   auto(action: Action): boolean {
     return this.dispatch(action);

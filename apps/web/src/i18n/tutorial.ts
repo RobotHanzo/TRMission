@@ -48,8 +48,8 @@ export const tutorialZh = {
     title: '宣告路線',
     blurb: '支付對應顏色的牌來占下路線並立即得分。',
     intro:
-      '宣告路線時，支付與路線「等長、同一種顏色」的火車牌（火車頭可當任意顏色）；灰色路線可用任一種顏色支付。每段路線各花一個火車車廂。',
-    demo: '看這裡：示範宣告一條短路線（新竹—竹南，灰色 1 格），用任一張牌即可。',
+      '宣告路線的方法：在地圖上點選一段路線，付出與它「等長、同一種顏色」的火車牌（彩色車頭可當任意顏色；灰色路線可用任一種顏色）即可蓋上鐵軌。每段路線各花一個火車車廂。',
+    try: '換你了：點選地圖上「新竹—竹南」這段路線（灰色，長度 1），選一張任意顏色的火車牌來宣告它。',
     scored: '完成的路線立即依長度得分，並顯示為你的座位顏色。',
     table: '長度越長分數越高：1→1、2→2、3→4、4→7、6→15、8→21 分。',
   },
@@ -59,15 +59,16 @@ export const tutorialZh = {
     intro: '台鐵的路線分成三種：一般鐵路、跨海渡輪與穿山隧道。下面比較它們的外觀：',
     double:
       '雙線路線：兩座城市之間有兩條平行線。2–3 人時，一條被占下、另一條就鎖住；4–5 人時兩條都可用。你不能同時擁有同一組的兩條。',
-    ferry: '渡輪路線（通往離島）：支付時必須包含「足夠數量的火車頭」，圖示會標明需要幾個。',
+    ferry: '渡輪路線（通往離島）：支付時必須包含「足夠數量的彩色車頭」，圖示會標明需要幾個。',
     tunnel:
-      '隧道路線：宣告後會從牌庫翻開 3 張牌；每翻到一張與你支付顏色相同、或火車頭的牌，就要「額外」多付一張同色或火車頭，否則可以放棄（已付的牌會留在手上）。',
+      '隧道路線：宣告後會從牌庫翻開 3 張牌；每翻到一張與你支付顏色相同、或彩色車頭的牌，就要「額外」多付一張同色或彩色車頭，否則可以放棄（已付的牌會留在手上）。',
   },
   stations: {
     title: '車站',
     blurb: '蓋車站可在結算時借用對手路線完成任務。',
-    what: '在城市蓋車站，結算時可「借用」該城所有對手的路線來幫忙連通任務卡。每座城市只能有一個車站。',
-    cost: '蓋車站要支付「同一種顏色」的牌：第 1 座 1 張、第 2 座 2 張、第 3 座 3 張（火車頭萬用）。',
+    what: '蓋車站的方法：在地圖上點選一座城市、支付火車牌即可蓋站。結算時，車站可「借用」該城所有對手的路線來幫忙連通任務卡。每座城市只能有一個車站。',
+    cost: '蓋車站要支付「同一種顏色」的牌：第 1 座 1 張、第 2 座 2 張、第 3 座 3 張（彩色車頭萬用）。',
+    try: '換你了：點選地圖上的「臺北」蓋一座車站——這是你的第一座，只要任一顏色的 1 張牌。',
     bonus: '每個「沒用到」的車站在結算時值 +4 分，所以蓋車站等於放棄這個獎勵——需要時才蓋。',
     specimenBuilt: '已蓋車站',
     specimenEmpty: '尚未蓋站',
@@ -166,8 +167,8 @@ export const tutorialEn = {
     title: 'Claiming routes',
     blurb: 'Pay matching cards to take a route and score at once.',
     intro:
-      'To claim a route, pay train cards equal to its length, all of one colour (locomotives are wild). Gray routes accept any single colour. Each segment costs one train car.',
-    demo: 'Watch: claiming a short route (Hsinchu–Zhunan, gray length 1) takes just one card of any colour.',
+      'To claim a route: click it on the map, then pay train cards equal to its length, all of one colour (locomotives are wild). Gray routes accept any single colour. Each segment costs one train car.',
+    try: 'Your turn: click the Hsinchu–Zhunan route on the map (gray, length 1) and pay with one card of any colour to claim it.',
     scored: 'A claimed route scores immediately by length and shows in your seat colour.',
     table: 'Longer routes score far more: 1→1, 2→2, 3→4, 4→7, 6→15, 8→21 points.',
   },
@@ -186,8 +187,9 @@ export const tutorialEn = {
   stations: {
     title: 'Stations',
     blurb: 'Build a station to borrow rival routes at game end.',
-    what: "Build a station in a city to 'borrow' the rival routes there at game end to help connect a ticket. One station per city.",
+    what: "To build a station: click a city on the map, then pay train cards. At game end a station 'borrows' the rival routes there to help connect a ticket. One station per city.",
     cost: 'A station is paid in a single colour: 1 card for your first, 2 for the second, 3 for the third (locomotives wild).',
+    try: 'Your turn: click Taipei on the map to build a station there — your first costs just one card of any colour.',
     bonus:
       'Each unused station is worth +4 at game end — so building one gives up that bonus. Build only when it saves a ticket.',
     specimenBuilt: 'Station built',
