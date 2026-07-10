@@ -11,9 +11,9 @@ const cities: CityDraft[] = [
   { id: 'c3', nameZh: '丙', nameEn: 'C', x: 30, y: 30, region: 'r', isIsland: false },
 ];
 
-// Segments per colour: RED = 2+3+2 = 7 (plain only, r7 tunnel excluded), BLUE = 4+2 = 6.
-// r4 (GRAY, ferry) and r7 (RED, tunnel) are broken out of the colour breakdown entirely.
-// Total = 2+3+4+1+2+2+3 = 17.
+// Segments per colour: RED = 2+3+2+3 = 10 (r7 tunnel counts toward RED too), BLUE = 4+2 = 6.
+// r7 (RED, tunnel) counts toward its colour AND is totalled again on its own Tunnel chip; r4
+// (GRAY, ferry) is the only route kept out of the colour breakdown. Total = 2+3+4+1+2+2+3 = 17.
 const routes: RouteDraft[] = [
   { id: 'r1', a: 'c1', b: 'c2', color: 'RED', length: 2, ferryLocos: 0, isTunnel: false },
   { id: 'r2', a: 'c2', b: 'c3', color: 'RED', length: 3, ferryLocos: 0, isTunnel: false },
@@ -85,14 +85,15 @@ describe('StatsPanel', () => {
     render(<StatsPanel />);
     fireEvent.click(screen.getByRole('button', { name: '地圖統計' }));
 
-    // Sum of lengths per colour (both halves of the double pair count).
-    expect(screen.getByTitle('紅: 7')).toBeInTheDocument();
+    // Sum of lengths per colour (both halves of the double pair count, and the r7 tunnel counts
+    // toward RED as well).
+    expect(screen.getByTitle('紅: 10')).toBeInTheDocument();
     expect(screen.getByTitle('藍: 6')).toBeInTheDocument();
     // Colours with no routes never appear.
     expect(screen.queryByTitle(/^綠:/)).not.toBeInTheDocument();
   });
 
-  it('breaks tunnel and ferry segments out of the colour breakdown entirely', () => {
+  it('keeps ferries out of the colour breakdown but still totals tunnels and ferries separately', () => {
     render(<StatsPanel />);
     fireEvent.click(screen.getByRole('button', { name: '地圖統計' }));
 
@@ -100,8 +101,8 @@ describe('StatsPanel', () => {
     expect(screen.queryByTitle(/^灰:/)).not.toBeInTheDocument();
     // ...it's counted under its own Ferry chip instead.
     expect(screen.getByTitle('渡輪車廂: 1')).toBeInTheDocument();
-    // r7 is a RED tunnel route: it's excluded from the RED chip (which stays at 7, the plain
-    // RED routes only) and counted under its own Tunnel chip instead.
+    // r7 is a RED tunnel route: it counts toward the RED chip (now 10) AND is totalled again on
+    // its own Tunnel chip.
     expect(screen.getByTitle('隧道車廂: 3')).toBeInTheDocument();
   });
 });

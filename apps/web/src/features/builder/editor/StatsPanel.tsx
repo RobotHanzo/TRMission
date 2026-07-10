@@ -14,12 +14,14 @@ export interface MapStats {
   routes: number;
   /** Total train-car segments across every route (a length-4 route counts as 4). */
   segments: number;
-  /** Segment totals per colour, canonical order, colours with zero segments omitted. Tunnel and
-   *  ferry routes are broken out separately (below) rather than folded into their colour — a
-   *  tunnel can be any colour and a ferry is always GRAY, so leaving them in would make that
-   *  colour's count (GRAY especially) a mix of unrelated mechanics. */
+  /** Segment totals per colour, canonical order, colours with zero segments omitted. Tunnel routes
+   *  DO count toward their colour here (a tunnel carries a real colour) and are *also* totalled on
+   *  their own in `tunnelSegments`. Ferry routes are the exception: always GRAY, they're kept out
+   *  and reported only under `ferrySegments`, so GRAY's count isn't a mix of unrelated ferry
+   *  mechanics. */
   segmentsByColor: { color: RouteColor; segments: number }[];
-  /** Total segments across tunnel routes of any colour. */
+  /** Total segments across tunnel routes of any colour. These are *also* folded into their
+   *  colour's `segmentsByColor` entry, so this is a supplementary view, not a disjoint bucket. */
   tunnelSegments: number;
   /** Total segments across ferry routes (always GRAY). */
   ferrySegments: number;
@@ -37,10 +39,12 @@ export function useMapStats(): MapStats {
     for (const r of draft.routes) {
       segments += r.length;
       if (r.ferryLocos > 0) {
+        // Ferries are always GRAY — kept out of the colour breakdown and reported on their own.
         ferrySegments += r.length;
-      } else if (r.isTunnel) {
-        tunnelSegments += r.length;
       } else {
+        // Tunnels count toward their colour like any plain route, and are *also* totalled on their
+        // own Tunnel chip below.
+        if (r.isTunnel) tunnelSegments += r.length;
         byColor.set(r.color, (byColor.get(r.color) ?? 0) + r.length);
       }
     }
