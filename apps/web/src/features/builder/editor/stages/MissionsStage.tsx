@@ -4,6 +4,7 @@ import { Dices, Eye, Trash2, Wand2 } from 'lucide-react';
 import { generateTickets } from '@trm/map-data';
 import type { TicketView } from '@trm/map-data';
 import { Segmented } from '../../../../components/ui/Segmented';
+import { Slider } from '../../../../components/ui/Slider';
 import { Dropdown, type DropdownOption } from '../../../../components/ui/Dropdown';
 import { RoutePreview } from '../../../../components/RoutePreview';
 import { useEditorStore } from '../store';
@@ -85,14 +86,10 @@ export function MissionsStage() {
           ariaLabel={ariaLabel}
         />
         {mode === 'zoom' && (
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
+          <Slider
             value={level}
-            aria-label={t('builder.zoomLevel')}
-            onChange={(e) => onChange({ mode: 'zoom', level: Number(e.target.value) })}
+            onChange={(next) => onChange({ mode: 'zoom', level: next })}
+            ariaLabel={t('builder.zoomLevel')}
           />
         )}
       </div>

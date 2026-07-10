@@ -1,5 +1,5 @@
-import { type CSSProperties } from 'react';
 import { Volume1, Volume2, VolumeX } from 'lucide-react';
+import { Slider } from './Slider';
 
 interface Props {
   value: number;
@@ -30,18 +30,7 @@ export function VolumeSlider({
       >
         <Icon size={18} aria-hidden />
       </button>
-      <input
-        type="range"
-        className="volume-range"
-        min={0}
-        max={1}
-        step={0.05}
-        value={value}
-        disabled={!enabled}
-        aria-label={rangeLabel}
-        style={{ '--tr-range-fill': value } as CSSProperties}
-        onChange={(e) => onChangeValue(Number(e.target.value))}
-      />
+      <Slider value={value} onChange={onChangeValue} ariaLabel={rangeLabel} disabled={!enabled} />
     </div>
   );
 }

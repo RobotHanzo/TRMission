@@ -660,7 +660,7 @@
   transform: translateX(18px);
 }
 
-/* Volume slider (settings modal) — icon + restyled native <input type="range"> */
+/* Volume slider (settings modal) — icon + shared restyled range slider */
 .volume-slider {
   display: flex;
   align-items: center;
@@ -689,7 +689,8 @@
   outline: 2px solid var(--tr-blue);
   outline-offset: 2px;
 }
-.volume-range {
+/* Shared restyled native <input type="range">: settings volume + builder ticket-view zoom level. */
+.slider-range {
   -webkit-appearance: none;
   appearance: none;
   flex: 1;
@@ -705,7 +706,7 @@
 /* WebKit: draw the track + fill on the runnable-track so it shares the thumb's coordinate space.
    The thumb's centre travels from 8px (half its width) to width-8px, so the fill boundary is
    offset to match — at 0 it sits at 8px, fully hidden under the thumb, leaving no stray nub. */
-.volume-range::-webkit-slider-runnable-track {
+.slider-range::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
   background: linear-gradient(
@@ -714,7 +715,7 @@
     var(--tr-surface-2) calc(8px + var(--tr-range-fill, 0) * (100% - 16px))
   );
 }
-.volume-range::-webkit-slider-thumb {
+.slider-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   margin-top: -6px; /* centre the 16px thumb on the 4px track */
   width: 16px;
@@ -725,21 +726,21 @@
   cursor: pointer;
   transition: transform 0.15s ease;
 }
-.volume-range::-webkit-slider-thumb:hover {
+.slider-range::-webkit-slider-thumb:hover {
   transform: scale(1.15);
 }
 /* Firefox fills natively via ::-moz-range-progress (already thumb-aligned), so no offset needed. */
-.volume-range::-moz-range-track {
+.slider-range::-moz-range-track {
   height: 4px;
   border-radius: 999px;
   background: var(--tr-surface-2);
 }
-.volume-range::-moz-range-progress {
+.slider-range::-moz-range-progress {
   height: 4px;
   border-radius: 999px;
   background: var(--tr-blue);
 }
-.volume-range::-moz-range-thumb {
+.slider-range::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border: none;
@@ -748,21 +749,21 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   cursor: pointer;
 }
-.volume-range:focus-visible {
+.slider-range:focus-visible {
   outline: 2px solid var(--tr-blue);
   outline-offset: 2px;
 }
-.volume-range:disabled {
+.slider-range:disabled {
   cursor: not-allowed;
 }
-.volume-range:disabled::-webkit-slider-runnable-track {
+.slider-range:disabled::-webkit-slider-runnable-track {
   background: var(--tr-surface-2);
 }
-.volume-range:disabled::-moz-range-progress {
+.slider-range:disabled::-moz-range-progress {
   background: var(--tr-surface-2);
 }
-.volume-range:disabled::-webkit-slider-thumb,
-.volume-range:disabled::-moz-range-thumb {
+.slider-range:disabled::-webkit-slider-thumb,
+.slider-range:disabled::-moz-range-thumb {
   background: var(--tr-ink-soft);
 }
 
