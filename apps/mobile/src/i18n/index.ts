@@ -49,8 +49,15 @@ void i18n.use(initReactI18next).init({
         },
         game: {
           title: '遊戲',
-          placeholder: '遊戲畫面將於 P2 實作',
           roomLabel: '房間 {{code}}',
+          connecting: '連線中…',
+          reconnecting: '重新連線中…',
+          offlineBanner: '目前離線',
+          back: '返回',
+          unknownMap: '找不到此對局使用的地圖版本',
+          sessionReplacedTitle: '連線已在別處建立',
+          sessionReplacedBody: '你的座位已在另一個裝置或分頁上重新連線，此裝置已中斷連線。',
+          sessionReplacedAck: '返回首頁',
         },
         board: {
           zoomIn: '放大',
@@ -104,8 +111,16 @@ void i18n.use(initReactI18next).init({
         },
         game: {
           title: 'Game',
-          placeholder: 'The game screen lands in P2',
           roomLabel: 'Room {{code}}',
+          connecting: 'Connecting…',
+          reconnecting: 'Reconnecting…',
+          offlineBanner: "You're offline",
+          back: 'Back',
+          unknownMap: 'The map version this game used is not available',
+          sessionReplacedTitle: 'Disconnected elsewhere',
+          sessionReplacedBody:
+            'Your seat reconnected on another device or tab, so this one was disconnected.',
+          sessionReplacedAck: 'Back to home',
         },
         board: {
           zoomIn: 'Zoom in',

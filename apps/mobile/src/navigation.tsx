@@ -2,7 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { BoardSpikeScreen } from './screens/BoardSpikeScreen';
 import { BootScreen } from './screens/BootScreen';
-import { GamePlaceholderScreen } from './screens/GamePlaceholderScreen';
+import { GameScreen } from './screens/GameScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { RoomScreen } from './screens/RoomScreen';
 import { LoginScreen } from './screens/LoginScreen';
@@ -13,7 +13,7 @@ export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
   Room: { code: string };
-  /** P2 replaces GamePlaceholderScreen with the real Skia board here. */
+  /** The live game (Skia board; the full GameStage HUD lands with Task 9). */
   Game: { roomCode: string };
   /** Dev-only board rendering spike (P2 Task 1 device gate). */
   BoardSpike: undefined;
@@ -38,11 +38,7 @@ export function RootNavigator(): React.JSX.Element {
         <>
           <Stack.Screen name="Home" component={HomeScreen} options={{ title: t('home.title') }} />
           <Stack.Screen name="Room" component={RoomScreen} options={{ title: t('room.title') }} />
-          <Stack.Screen
-            name="Game"
-            component={GamePlaceholderScreen}
-            options={{ title: t('game.title') }}
-          />
+          <Stack.Screen name="Game" component={GameScreen} options={{ title: t('game.title') }} />
           {__DEV__ && (
             <Stack.Screen
               name="BoardSpike"
