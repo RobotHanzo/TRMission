@@ -56,6 +56,13 @@ export const LIVERY_COLORS = MAP_LIVERY_COLORS;
  */
 export const LOCOMOTIVE_GRADIENT = `linear-gradient(135deg, ${LIVERY_COLORS.join(', ')})`;
 
+/** The liveries in the ≥2-stop tuple shape expo-linear-gradient's `colors` prop requires. */
+export const LIVERY_GRADIENT_COLORS = LIVERY_COLORS as unknown as readonly [
+  string,
+  string,
+  ...string[],
+];
+
 /** Seat colours — deliberately distinct from the 8 card colours (ADR A11). */
 export const SEAT_COLORS = ['#0E8C8C', '#C0398B', '#E8A33D', '#5A6B7B', '#7CB342'] as const;
 

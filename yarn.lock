@@ -4189,6 +4189,7 @@ __metadata:
     expo-auth-session: "npm:~56.0.15"
     expo-constants: "npm:~56.0.20"
     expo-crypto: "npm:~56.0.4"
+    expo-linear-gradient: "npm:~56.0.4"
     expo-linking: "npm:~56.0.15"
     expo-notifications: "npm:~56.0.19"
     expo-secure-store: "npm:~56.0.4"
@@ -7354,6 +7355,17 @@ __metadata:
     expo: "*"
     react: "*"
   checksum: 10/6a3704ba20ce54b97745ea16627669b0b3d09cd4ee9dd546bd4973af3cb0caa93f5ad33643a16504ef90b3231f4012f3702e40de4c0b10f9e16b07d185229946
+  languageName: node
+  linkType: hard
+
+"expo-linear-gradient@npm:~56.0.4":
+  version: 56.0.4
+  resolution: "expo-linear-gradient@npm:56.0.4"
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10/72386b28e4cf01edbb5834cc6a19c860af32520fc25bc77d698becd1a667a9e502a90f3a260b5d9daab4ee5fe789179a4cafea17b740b3c58ef09d962e655ac8
   languageName: node
   linkType: hard
 

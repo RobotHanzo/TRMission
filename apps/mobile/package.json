@@ -33,6 +33,7 @@
     "expo-auth-session": "~56.0.15",
     "expo-constants": "~56.0.20",
     "expo-crypto": "~56.0.4",
+    "expo-linear-gradient": "~56.0.4",
     "expo-linking": "~56.0.15",
     "expo-notifications": "~56.0.19",
     "expo-secure-store": "~56.0.4",
@@ -68,7 +69,7 @@
   "jest": {
     "preset": "jest-expo",
     "transformIgnorePatterns": [
-      "node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@bufbuild/.*|@formatjs/.*|@trm/.*))"
+      "node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@bufbuild/.*|@formatjs/.*|@trm/.*|lucide-react-native|react-native-svg))"
     ]
   }
 }
