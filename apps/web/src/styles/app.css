@@ -649,6 +649,99 @@
   transform: translateX(18px);
 }
 
+/* Volume slider (settings modal) — icon + restyled native <input type="range"> */
+.volume-slider {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  margin-top: var(--tr-space-1);
+}
+.volume-icon-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--tr-radius-sm);
+  background: transparent;
+  color: var(--tr-ink-soft);
+  cursor: pointer;
+}
+.volume-icon-btn:hover {
+  color: var(--tr-ink);
+  background: var(--tr-surface-2);
+}
+.volume-icon-btn:focus-visible {
+  outline: 2px solid var(--tr-blue);
+  outline-offset: 2px;
+}
+.volume-range {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  min-width: 100px;
+  max-width: 160px;
+  height: 4px;
+  border-radius: 999px;
+  /* The thumb travels within (track width - thumb width), centered 8px (half the 16px thumb) in
+     from each edge — not edge to edge — so a plain value*100% gradient stop only lines up with
+     the thumb at exactly 50%. Offsetting by that radius keeps them aligned across the whole range. */
+  background: linear-gradient(
+    to right,
+    var(--tr-blue) calc(8px + var(--tr-range-fill, 0) * (100% - 16px)),
+    var(--tr-surface-2) calc(8px + var(--tr-range-fill, 0) * (100% - 16px))
+  );
+  outline: none;
+  cursor: pointer;
+}
+.volume-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--tr-blue);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.volume-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.volume-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--tr-surface-2);
+}
+.volume-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--tr-blue);
+}
+.volume-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--tr-blue);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.volume-range:focus-visible {
+  outline: 2px solid var(--tr-blue);
+  outline-offset: 2px;
+}
+.volume-range:disabled {
+  cursor: not-allowed;
+  background: var(--tr-surface-2);
+}
+.volume-range:disabled::-webkit-slider-thumb,
+.volume-range:disabled::-moz-range-thumb {
+  background: var(--tr-ink-soft);
+}
+
 /* A one-shot attention pulse, e.g. the create-game button after the tutorial finale guides the
    learner here. The ring fades in/out a few times, then the focus is cleared (removing the class). */
 .tut-focus-pulse {

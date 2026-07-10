@@ -73,4 +73,15 @@ describe('SettingsModal sound section', () => {
     fireEvent.change(slider, { target: { value: '0.3' } });
     expect(useUi.getState().soundVolume).toBeCloseTo(0.3);
   });
+
+  it('mutes via the volume icon shortcut', () => {
+    render(<SettingsModal onClose={() => undefined} />);
+    const muteBtn = screen.getByRole('button', { name: /sound|音效/i });
+    expect(muteBtn).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(muteBtn);
+
+    expect(useUi.getState().soundEnabled).toBe(false);
+    expect(muteBtn).toHaveAttribute('aria-pressed', 'false');
+  });
 });

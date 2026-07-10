@@ -16,6 +16,7 @@ import type { Theme, UserPreferences } from '../net/rest';
 import type { BoardLayout, Locale } from '../store/ui';
 import { Switch } from './ui/Switch';
 import { Segmented } from './ui/Segmented';
+import { VolumeSlider } from './ui/VolumeSlider';
 
 interface Props {
   onClose(): void;
@@ -150,15 +151,13 @@ export function SettingsModal({ onClose }: Props) {
         <section className="setting setting-row">
           <div>
             <div className="setting-label">{t('sound')}</div>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
+            <VolumeSlider
               value={soundVolume}
-              disabled={!soundEnabled}
-              aria-label={t('volume')}
-              onChange={(e) => setSoundVolume(Number(e.target.value))}
+              enabled={soundEnabled}
+              onChangeValue={setSoundVolume}
+              onToggleEnabled={setSoundEnabled}
+              rangeLabel={t('volume')}
+              muteLabel={t('sound')}
             />
           </div>
           <Switch checked={soundEnabled} onChange={setSoundEnabled} label={t('sound')} />
