@@ -28,6 +28,7 @@ export const DASHBOARD_PERMISSIONS = [
   'games.spectateLive',
   'rooms.read',
   'rooms.close',
+  'rooms.transferHost',
   'rooms.delete',
   'maintainers.read',
   'maintainers.write',
@@ -62,6 +63,7 @@ const MODERATOR_PERMISSIONS: readonly DashboardPermission[] = [
   'games.readLog',
   'games.terminate',
   'rooms.close',
+  'rooms.transferHost',
 ];
 
 const ADMIN_PERMISSIONS: readonly DashboardPermission[] = [

@@ -10,4 +10,10 @@ describe('dashboard permission taxonomy', () => {
     expect(ROLE_PERMISSIONS.viewer).toContain('games.spectateLive');
     expect(effectivePermissions('viewer').has('games.spectateLive')).toBe(true);
   });
+
+  it('includes rooms.transferHost as a known permission, granted at the moderator tier', () => {
+    expect(DASHBOARD_PERMISSIONS).toContain('rooms.transferHost');
+    expect(ROLE_PERMISSIONS.moderator).toContain('rooms.transferHost');
+    expect(effectivePermissions('moderator').has('rooms.transferHost')).toBe(true);
+  });
 });
