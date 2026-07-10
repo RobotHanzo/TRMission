@@ -7,6 +7,7 @@ import { useSession } from '../store/session';
 import { useRoster } from '../store/roster';
 import { api, type RoomView } from '../net/rest';
 import { connectGame, getSocket } from '../net/connection';
+import { track } from '../lib/analytics';
 import { useActiveContent } from '../game/useActiveContent';
 import { GameStage } from './GameStage';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -36,6 +37,9 @@ export function GameScreen() {
     // than replaying an expired one; a seated member is the only case that reaches this branch.
     if (ticket && !getSocket()) connectGame(ticket, roomCode ? { roomCode } : undefined);
   }, [ticket, roomCode]);
+  useEffect(() => {
+    if (sessionReplaced) track('session_replaced', {});
+  }, [sessionReplaced]);
   // Pull the room's members (real account names / bot labels) so the trackers, scoreboard and turn
   // banner can show them instead of "P{seat+1}". Snapshots carry ids only — names are lobby data.
   useEffect(() => {

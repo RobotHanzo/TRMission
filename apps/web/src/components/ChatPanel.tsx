@@ -4,6 +4,7 @@ import { useChat } from '../store/chat';
 import { useGame } from '../store/game';
 import { useRoster } from '../store/roster';
 import { getSocket } from '../net/connection';
+import { track } from '../lib/analytics';
 import { usePlayerName } from '../game/playerName';
 import { SEAT_COLORS } from '../theme/colors';
 import { chatRejectionHintKey } from '../game/chatErrors';
@@ -59,14 +60,22 @@ export function ChatPanel() {
     const text = draft.trim();
     if (!text) return;
     if (!withinRateLimit()) return;
-    getSocket()?.chat(text.slice(0, MAX_LEN));
+    const socket = getSocket();
+    if (socket) {
+      socket.chat(text.slice(0, MAX_LEN));
+      track('chat_send', { kind: 'text', context: 'game' });
+    }
     setDraft('');
     setHint(null);
   };
 
   const sendPreset = (id: string): void => {
     if (!withinRateLimit()) return;
-    getSocket()?.chatPreset(id);
+    const socket = getSocket();
+    if (socket) {
+      socket.chatPreset(id);
+      track('chat_send', { kind: 'preset', context: 'game' });
+    }
     setHint(null);
   };
 

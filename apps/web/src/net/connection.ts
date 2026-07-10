@@ -1,11 +1,15 @@
-import { GameSocket } from './socket';
+import { GameSocket, type SocketStatus } from './socket';
 import { api } from './rest';
 import { useGame } from '../store/game';
 import { useLog } from '../store/log';
 import { useChat } from '../store/chat';
+import { track } from '../lib/analytics';
 
 // Single live game socket, wired to the game/log/chat stores.
 let socket: GameSocket | null = null;
+// Prior socket status, so a 'reconnecting' → 'open' transition (an actual recovery, never the
+// initial connect) can be reported once as a `reconnect` analytics event.
+let lastStatus: SocketStatus | null = null;
 
 /**
  * How to re-mint a ws-game ticket when the socket reconnects: the room code plus whether this
@@ -19,6 +23,7 @@ export interface TicketSource {
 
 export function connectGame(ticket: string, ticketSource?: TicketSource): GameSocket {
   disconnectGame();
+  lastStatus = null;
   useGame.getState().reset();
   useLog.getState().reset();
   useChat.getState().reset();
@@ -32,7 +37,11 @@ export function connectGame(ticket: string, ticketSource?: TicketSource): GameSo
   socket = new GameSocket(
     ticket,
     {
-      onStatus: (status) => useGame.getState().setStatus(status),
+      onStatus: (status) => {
+        if (status === 'open' && lastStatus === 'reconnecting') track('reconnect', {});
+        lastStatus = status;
+        useGame.getState().setStatus(status);
+      },
       onSnapshot: (snapshot) => useGame.getState().applySnapshot(snapshot),
       onEvents: (version, events) => {
         useGame.getState().applyEvents(version, events);
