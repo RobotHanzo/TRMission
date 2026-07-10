@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Edit3, Plus, Trash2 } from 'lucide-react';
-import { api, ApiError, type MapSummary, type SharedMapView } from '../../net/rest';
+import {
+  api,
+  ApiError,
+  type MapSummary,
+  type OfficialMapSummary,
+  type SharedMapView,
+} from '../../net/rest';
 import { useUi } from '../../store/ui';
 import '../../styles/builder.css';
 
@@ -18,6 +24,8 @@ export default function MapsScreen() {
   const [peek, setPeek] = useState<SharedMapView | null>(null);
   const [peekError, setPeekError] = useState<string | null>(null);
   const [cloning, setCloning] = useState(false);
+  const [official, setOfficial] = useState<OfficialMapSummary[] | null>(null);
+  const [forking, setForking] = useState<string | null>(null);
 
   const refresh = () => {
     api
@@ -26,6 +34,25 @@ export default function MapsScreen() {
       .catch(() => setError('load failed'));
   };
   useEffect(refresh, []);
+
+  useEffect(() => {
+    api
+      .listOfficialMaps()
+      .then(setOfficial)
+      .catch(() => setOfficial([]));
+  }, []);
+
+  const doFork = async (mapId: string) => {
+    setForking(mapId);
+    try {
+      const detail = await api.forkOfficialMap(mapId);
+      enterMapEditor(detail.id);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setForking(null);
+    }
+  };
 
   // A shared link (/maps?code=XXXXXXXX — what ShareStage copies) lands with the code
   // prefilled and previewed, so the recipient only has to press clone.
@@ -137,33 +164,58 @@ export default function MapsScreen() {
         </div>
       </div>
 
-      <div className="card stack">
-        <h2>{t('builder.cloneByCode')}</h2>
-        <div className="row">
-          <input
-            placeholder={t('builder.shareCode')}
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-          />
-          <button onClick={() => void doPeek()}>{t('builder.peek')}</button>
+      <div className="row maps-columns">
+        <div className="card stack">
+          <h2>{t('builder.forkOfficialTitle')}</h2>
+          {official?.map((m) => (
+            <div key={m.mapId} className="row between maps-row">
+              <div className="maps-row-name">
+                <span>
+                  {m.nameZh} <span className="muted">({m.nameEn})</span>
+                </span>
+                <span className="muted maps-row-updated">
+                  {t('builder.peekSummary', { cities: m.cities, routes: m.routes })}
+                </span>
+              </div>
+              <button
+                className="primary"
+                disabled={forking === m.mapId}
+                onClick={() => void doFork(m.mapId)}
+              >
+                {t('builder.forkMap')}
+              </button>
+            </div>
+          ))}
         </div>
-        {peekError && <p className="error">{peekError}</p>}
-        {peek && (
-          <div className="stack">
-            <p>
-              {peek.nameZh} <span className="muted">({peek.nameEn})</span>
-            </p>
-            <p className="muted">
-              {t('builder.peekSummary', {
-                cities: peek.draft.cities.length,
-                routes: peek.draft.routes.length,
-              })}
-            </p>
-            <button className="primary" disabled={cloning} onClick={() => void doClone()}>
-              {t('builder.cloneMap')}
-            </button>
+
+        <div className="card stack">
+          <h2>{t('builder.cloneByCode')}</h2>
+          <div className="row">
+            <input
+              placeholder={t('builder.shareCode')}
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+            />
+            <button onClick={() => void doPeek()}>{t('builder.peek')}</button>
           </div>
-        )}
+          {peekError && <p className="error">{peekError}</p>}
+          {peek && (
+            <div className="stack">
+              <p>
+                {peek.nameZh} <span className="muted">({peek.nameEn})</span>
+              </p>
+              <p className="muted">
+                {t('builder.peekSummary', {
+                  cities: peek.draft.cities.length,
+                  routes: peek.draft.routes.length,
+                })}
+              </p>
+              <button className="primary" disabled={cloning} onClick={() => void doClone()}>
+                {t('builder.cloneMap')}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -22,6 +22,16 @@
   font-size: 0.8em;
 }
 
+/* Fork-official and clone-by-code sit side by side below the My-maps card; stack on narrow. */
+.maps-columns {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.maps-columns > .card {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
 /* ── Field label — a small caption above an input/dropdown/segmented control ────────────── */
 .field {
   display: flex;

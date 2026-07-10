@@ -215,6 +215,13 @@ export interface MapDetail extends MapSummary {
   ownerId: string;
   draft: MapDraft;
 }
+export interface OfficialMapSummary {
+  mapId: string;
+  nameZh: string;
+  nameEn: string;
+  cities: number;
+  routes: number;
+}
 export interface SharedMapView {
   nameZh: string;
   nameEn: string;
@@ -367,6 +374,9 @@ export const api = {
     ),
 
   listMaps: () => req<MapSummary[]>('GET', '/maps'),
+  listOfficialMaps: () => req<OfficialMapSummary[]>('GET', '/maps/official'),
+  forkOfficialMap: (mapId: string) =>
+    req<MapDetail>('POST', `/maps/fork/${encodeURIComponent(mapId)}`),
   createMap: (nameZh: string, nameEn: string) =>
     req<MapDetail>('POST', '/maps', { nameZh, nameEn }),
   getMap: (id: string) => req<MapDetail>('GET', `/maps/${encodeURIComponent(id)}`),
