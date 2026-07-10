@@ -12,6 +12,7 @@ export type DashboardAuditAction =
   | 'game.terminate'
   | 'game.delete'
   | 'game.viewReplay'
+  | 'game.spectateLive'
   | 'room.close'
   | 'room.delete'
   | 'purge.run'

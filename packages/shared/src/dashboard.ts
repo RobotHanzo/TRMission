@@ -25,6 +25,7 @@ export const DASHBOARD_PERMISSIONS = [
   'games.terminate',
   'games.delete',
   'games.viewReplay',
+  'games.spectateLive',
   'rooms.read',
   'rooms.close',
   'rooms.delete',
@@ -49,6 +50,7 @@ const VIEWER_PERMISSIONS: readonly DashboardPermission[] = [
   'games.read',
   'rooms.read',
   'games.viewReplay',
+  'games.spectateLive',
   'maps.read',
   'ratings.read',
 ];
