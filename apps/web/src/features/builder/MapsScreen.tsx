@@ -9,6 +9,8 @@ import {
   type SharedMapView,
 } from '../../net/rest';
 import { useUi } from '../../store/ui';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { useConfirmAction } from '../../hooks/useConfirmAction';
 import '../../styles/builder.css';
 
 export default function MapsScreen() {
@@ -26,6 +28,13 @@ export default function MapsScreen() {
   const [cloning, setCloning] = useState(false);
   const [official, setOfficial] = useState<OfficialMapSummary[] | null>(null);
   const [forking, setForking] = useState<string | null>(null);
+  const [deleteLabel, setDeleteLabel] = useState('');
+  const {
+    open: deleteOpen,
+    request: requestDelete,
+    confirm: confirmDelete,
+    cancel: cancelDelete,
+  } = useConfirmAction();
 
   const refresh = () => {
     api
@@ -139,7 +148,10 @@ export default function MapsScreen() {
               </button>
               <button
                 className="danger icon-btn"
-                onClick={() => void remove(m.id)}
+                onClick={() => {
+                  setDeleteLabel(`${m.nameZh} (${m.nameEn})`);
+                  requestDelete(() => void remove(m.id));
+                }}
                 aria-label={t('delete')}
               >
                 <Trash2 size={14} aria-hidden />
@@ -217,6 +229,14 @@ export default function MapsScreen() {
           )}
         </div>
       </div>
+      {deleteOpen && (
+        <ConfirmDialog
+          title={t('builder.deleteMapConfirmTitle')}
+          message={t('builder.deleteMapConfirmBody', { name: deleteLabel })}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
+      )}
     </div>
   );
 }
