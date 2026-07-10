@@ -394,6 +394,33 @@ describe('RoomScreen kick', () => {
   });
 });
 
+describe('RoomScreen ownership transfer', () => {
+  const meHost = { userId: 'u-me', displayName: 'Me', isGuest: true, seat: 0, ready: false };
+  const guestMember = { userId: 'g1', displayName: 'Guest', isGuest: true, seat: 1, ready: false };
+
+  it('lets the host make another member the owner without leaving', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [meHost, guestMember] }));
+    (api.transferOwnership as ReturnType<typeof vi.fn>).mockResolvedValue(
+      room({ hostId: 'g1', members: [meHost, guestMember] }),
+    );
+    render(<RoomScreen />);
+    const makeOwnerBtn = await screen.findByRole('button', { name: '設為房主' });
+    fireEvent.click(makeOwnerBtn);
+    expect(api.transferOwnership).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '確認' }));
+    await waitFor(() => expect(api.transferOwnership).toHaveBeenCalledWith('ABCD', 'g1'));
+    expect(useUi.getState().view).toBe('room');
+  });
+
+  it('shows no make-owner button to a non-host', async () => {
+    mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
+    render(<RoomScreen />);
+    await screen.findByText('host');
+    expect(screen.queryByRole('button', { name: '設為房主' })).toBeNull();
+  });
+});
+
 describe('RoomScreen leave confirmation', () => {
   it('shows a confirmation dialog before leaving, and only leaves once confirmed', async () => {
     mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));

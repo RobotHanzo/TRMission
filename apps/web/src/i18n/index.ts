@@ -139,6 +139,7 @@ const resources = {
 
       room: '房間',
       host: '房主',
+      makeOwner: '設為房主',
       kickPlayer: '移除玩家',
       kickedTitle: '你已被移出房間',
       kickedBody: '房主已將你移出此房間。',
@@ -235,6 +236,8 @@ const resources = {
       closeRoom: '關閉房間',
       closeRoomConfirmTitle: '關閉房間？',
       closeRoomConfirmBody: '這會將所有人移出並關閉房間，確定嗎？',
+      transferConfirmTitle: '設為新房主？',
+      transferConfirmBody: '你將失去房主權限，確定要將房主移轉給這位玩家嗎？',
       playAgain: '再玩一局',
       wantRematch: '想再玩一局',
       rematchTally: '{{count}}/{{total}} 人想再玩一局',
@@ -722,6 +725,7 @@ const resources = {
 
       room: 'Room',
       host: 'Host',
+      makeOwner: 'Make owner',
       kickPlayer: 'Remove player',
       kickedTitle: "You've been removed",
       kickedBody: 'The host removed you from this room.',
@@ -820,6 +824,8 @@ const resources = {
       closeRoom: 'Close room',
       closeRoomConfirmTitle: 'Close room?',
       closeRoomConfirmBody: 'This removes everyone and closes the room. Are you sure?',
+      transferConfirmTitle: 'Make new owner?',
+      transferConfirmBody: 'You will lose host controls. Transfer ownership to this player?',
       playAgain: 'Play Again',
       wantRematch: 'Want a rematch',
       rematchTally: '{{count}}/{{total}} want a rematch',

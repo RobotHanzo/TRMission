@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
+import { Bot, Crown, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import type { EventsMode } from '@trm/shared';
 import { useUi } from '../store/ui';
@@ -81,6 +81,12 @@ export function RoomScreen() {
     request: requestClose,
     confirm: confirmClose,
     cancel: cancelClose,
+  } = useConfirmAction();
+  const {
+    open: transferOpen,
+    request: requestTransfer,
+    confirm: confirmTransfer,
+    cancel: cancelTransfer,
   } = useConfirmAction();
   const [ownerLeaveOpen, setOwnerLeaveOpen] = useState(false);
 
@@ -260,6 +266,7 @@ export function RoomScreen() {
   };
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
+  const transferHost = (userId: string) => void guard(api.transferOwnership(code, userId));
   const sendChat = (presetId: string) => {
     track('chat_send', { kind: 'preset', context: 'lobby' });
     void guard(api.sendRoomChat(code, { presetId }));
@@ -348,6 +355,16 @@ export function RoomScreen() {
                   onClick={() => removeBot(m.userId)}
                 >
                   <X size={14} aria-hidden />
+                </button>
+              )}
+              {isHost && !m.isBot && m.userId !== room.hostId && (
+                <button
+                  className="icon-btn"
+                  aria-label={t('makeOwner')}
+                  title={t('makeOwner')}
+                  onClick={() => requestTransfer(() => transferHost(m.userId))}
+                >
+                  <Crown size={14} aria-hidden />
                 </button>
               )}
               {isHost && !m.isBot && m.userId !== room.hostId && (
@@ -595,6 +612,14 @@ export function RoomScreen() {
             message={t('closeRoomConfirmBody')}
             onConfirm={confirmClose}
             onCancel={cancelClose}
+          />
+        )}
+        {transferOpen && (
+          <ConfirmDialog
+            title={t('transferConfirmTitle')}
+            message={t('transferConfirmBody')}
+            onConfirm={confirmTransfer}
+            onCancel={cancelTransfer}
           />
         )}
         {ownerLeaveOpen && (
