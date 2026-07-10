@@ -25,6 +25,8 @@ const resources = {
       sound: '音效',
       volume: '音量',
       close: '關閉',
+      rateAppPrompt: '這場遊戲玩得如何？',
+      starRatingValue: '{{n}} 顆星',
 
       guestName: '暱稱',
       playAsGuest: '以訪客身分遊玩',
@@ -584,6 +586,8 @@ const resources = {
       sound: 'Sound',
       volume: 'Volume',
       close: 'Close',
+      rateAppPrompt: 'How was this game?',
+      starRatingValue: '{{n}} star(s)',
 
       guestName: 'Display name',
       playAsGuest: 'Play as guest',
