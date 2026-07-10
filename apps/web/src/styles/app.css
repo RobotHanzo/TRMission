@@ -425,6 +425,10 @@
 }
 .dropdown-trigger {
   width: 100%;
+  /* Never shrinks to icon-only in a tight flex row (e.g. missions table's "顯示範圍" column) —
+     otherwise the current value becomes invisible and, once opened, a panel width-matched to
+     the collapsed trigger wraps CJK option labels one character per line. */
+  min-width: 4.5em;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -490,6 +494,9 @@
   background: transparent;
   padding: var(--tr-space-2);
   border-radius: var(--tr-radius-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .dropdown-option:hover:not(:disabled) {
   filter: none;

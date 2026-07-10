@@ -100,10 +100,13 @@ export function Dropdown<T extends string>({
       const spaceBelow = window.innerHeight - rect.bottom;
       const openUp = panelHeight > spaceBelow && rect.top > spaceBelow;
       const gap = 4;
+      // The trigger can be squeezed well below its label's natural width in a tight flex row
+      // (its value span shrinks to fit, ellipsizing) — but the panel must stay wide enough for
+      // option text to lay out on one line, or CJK labels wrap one character per row.
       setPanelRect({
         top: openUp ? rect.top - gap : rect.bottom + gap,
         left: rect.left,
-        width: rect.width,
+        width: Math.max(rect.width, 160),
         openUp,
       });
     };
