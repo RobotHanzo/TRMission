@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { UserRepo } from './user.repo';
+import { FeatureDefaultsRepo } from './feature-defaults.repo';
 import { SessionRepo } from './session.repo';
 import { AccessTokenGuard } from './access-token.guard';
 import { FeatureGuard } from './feature.guard';
@@ -20,6 +21,7 @@ import { GOOGLE_ID_TOKEN_VERIFIER, GoogleAuthLibraryVerifier } from './google-id
     AuthService,
     TokenService,
     UserRepo,
+    FeatureDefaultsRepo,
     SessionRepo,
     AccessTokenGuard,
     FeatureGuard,
@@ -29,7 +31,8 @@ import { GOOGLE_ID_TOKEN_VERIFIER, GoogleAuthLibraryVerifier } from './google-id
     { provide: GOOGLE_ID_TOKEN_VERIFIER, useClass: GoogleAuthLibraryVerifier },
   ],
   // Exported so the lobby can sign ws-game tickets and guard its routes; SessionRepo
-  // for the dashboard's per-user session counts + ban-time revocation.
-  exports: [TokenService, AccessTokenGuard, FeatureGuard, UserRepo, SessionRepo],
+  // for the dashboard's per-user session counts + ban-time revocation; FeatureDefaultsRepo
+  // for the dashboard's default-flags endpoint (Task 5).
+  exports: [TokenService, AccessTokenGuard, FeatureGuard, UserRepo, FeatureDefaultsRepo, SessionRepo],
 })
 export class AuthModule {}

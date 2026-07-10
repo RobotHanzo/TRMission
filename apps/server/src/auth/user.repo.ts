@@ -7,6 +7,7 @@ import { env } from '../config/env';
 import type { Locale, PublicUser, UserPreferences } from './auth.types';
 import { DEFAULT_PREFERENCES } from './auth.types';
 import type { OauthProvider } from './auth-config';
+import { FeatureDefaultsRepo } from './feature-defaults.repo';
 
 export interface UserDoc {
   _id: string;
@@ -54,7 +55,10 @@ export const toPublicUser = (u: UserDoc): PublicUser => ({
 export class UserRepo implements OnModuleInit {
   private readonly col: Collection<UserDoc>;
 
-  constructor(@Inject(MONGO_DB) db: Db) {
+  constructor(
+    @Inject(MONGO_DB) db: Db,
+    private readonly defaults: FeatureDefaultsRepo,
+  ) {
     this.col = db.collection<UserDoc>('users');
   }
 
@@ -207,10 +211,12 @@ export class UserRepo implements OnModuleInit {
     return res.deletedCount === 1;
   }
 
-  /** Per-request feature check (projection-only point read). Used by FeatureGuard + inline gates. */
+  /** Per-request feature check (projection-only point read), unioned with the global default
+   *  set. Used by FeatureGuard + inline gates. */
   async hasFeature(userId: string, feature: UserFeature): Promise<boolean> {
     const doc = await this.col.findOne({ _id: userId }, { projection: { features: 1 } });
-    return !!doc?.features?.includes(feature);
+    if (doc?.features?.includes(feature)) return true;
+    return (await this.defaults.get()).includes(feature);
   }
 
   /** Replace the feature set (dashboard). Guests can never hold features — the filter refuses them. */
