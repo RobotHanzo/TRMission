@@ -175,6 +175,7 @@ const zhHant = {
     deleteConfirmBodyLive:
       '此對局仍在進行中,將先強制終止(不會留下成績,無法重播),再永久刪除對局紀錄。此操作無法復原。',
     viewReplay: '查看回放',
+    spectate: '強制觀戰',
   },
   chat: {
     presets: {
@@ -316,6 +317,7 @@ const zhHant = {
       'game.terminate': '終止對局',
       'game.delete': '刪除對局',
       'game.viewReplay': '檢視回放',
+      'game.spectateLive': '強制觀戰對局',
       'room.close': '關閉房間',
       'room.delete': '刪除房間',
       'purge.run': '執行閒置清理',
@@ -356,6 +358,7 @@ const zhHant = {
     'games.terminate': '終止對局',
     'games.delete': '刪除對局',
     'games.viewReplay': '檢視回放',
+    'games.spectateLive': '強制觀戰對局',
     'rooms.read': '檢視房間',
     'rooms.close': '關閉房間',
     'rooms.delete': '刪除房間',
@@ -567,6 +570,7 @@ const en: typeof zhHant = {
       'This game is still in progress. It will be force-terminated first (no scores, never ' +
       'replayable), then the game record is permanently deleted. This cannot be undone.',
     viewReplay: 'View Replay',
+    spectate: 'Spectate',
   },
   chat: {
     presets: {
@@ -710,6 +714,7 @@ const en: typeof zhHant = {
       'game.terminate': 'Terminated game',
       'game.delete': 'Deleted game',
       'game.viewReplay': 'Viewed replay',
+      'game.spectateLive': 'Force-spectated a live game',
       'room.close': 'Closed room',
       'room.delete': 'Deleted room',
       'purge.run': 'Ran purge',
@@ -751,6 +756,7 @@ const en: typeof zhHant = {
     'games.terminate': 'Terminate games',
     'games.delete': 'Delete games',
     'games.viewReplay': 'View replays',
+    'games.spectateLive': 'Force-spectate live games',
     'rooms.read': 'View rooms',
     'rooms.close': 'Close rooms',
     'rooms.delete': 'Delete rooms',

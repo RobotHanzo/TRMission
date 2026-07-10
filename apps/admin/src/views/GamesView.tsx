@@ -33,6 +33,7 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const canDelete = useSession((s) => s.hasPermission('games.delete'));
   const canReadLog = useSession((s) => s.hasPermission('games.readLog'));
   const canViewReplay = useSession((s) => s.hasPermission('games.viewReplay'));
+  const canSpectateLive = useSession((s) => s.hasPermission('games.spectateLive'));
   const pushToast = useToast((s) => s.push);
   const [detail, setDetail] = useState<GameDetail | null>(null);
   const [log, setLog] = useState<GameLogEntry[] | null>(null);
@@ -79,6 +80,18 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
       const { ticket } = await api.mintReplayTicket(id);
       window.open(
         `${webOrigin()}/admin-replay/${encodeURIComponent(id)}?ticket=${encodeURIComponent(ticket)}`,
+        '_blank',
+      );
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    }
+  };
+
+  const spectate = async () => {
+    try {
+      const { ticket } = await api.mintSpectateTicket(id);
+      window.open(
+        `${webOrigin()}/admin-spectate/${encodeURIComponent(id)}?ticket=${encodeURIComponent(ticket)}`,
         '_blank',
       );
     } catch (e) {
@@ -238,6 +251,14 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             <section>
               <button className="oc-btn" onClick={() => void viewReplay()}>
                 {t('games.viewReplay')}
+              </button>
+            </section>
+          )}
+
+          {canSpectateLive && detail.status === 'LIVE' && (
+            <section>
+              <button className="oc-btn" onClick={() => void spectate()}>
+                {t('games.spectate')}
               </button>
             </section>
           )}

@@ -357,6 +357,12 @@ export const api = {
       `/dashboard/games/${encodeURIComponent(id)}/replay-ticket`,
       {},
     ),
+  mintSpectateTicket: (id: string) =>
+    req<{ ticket: string; expiresIn: string }>(
+      'POST',
+      `/dashboard/games/${encodeURIComponent(id)}/spectate-ticket`,
+      {},
+    ),
   terminateGame: (id: string, reason?: string) =>
     req<GameDetail>('POST', `/dashboard/games/${encodeURIComponent(id)}/terminate`, { reason }),
   deleteGame: (id: string, reason?: string) =>

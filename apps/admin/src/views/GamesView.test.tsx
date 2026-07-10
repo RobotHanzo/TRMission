@@ -250,3 +250,35 @@ describe('GamesView view-replay button', () => {
     );
   });
 });
+
+describe('GamesView spectate button', () => {
+  beforeEach(() => {
+    useSession.setState({
+      phase: 'ready',
+      user: { id: 'u1', displayName: 'Ops', isGuest: false },
+      role: 'admin',
+      permissions: new Set(['games.read', 'games.spectateLive']),
+    });
+  });
+
+  it('opens a new tab to the web app admin-spectate route with a minted ticket', async () => {
+    useUi.setState({ view: 'games', param: 'g1' });
+    stubFetch({
+      '/dashboard/games/g1/spectate-ticket': {
+        status: 200,
+        body: { ticket: 'tok', expiresIn: '45s' },
+      },
+      '/dashboard/games/g1': { status: 200, body: { ...GAME_DETAIL, status: 'LIVE' } },
+      '/dashboard/games?': { status: 200, body: { games: [], nextCursor: null } },
+    });
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    render(<GamesView />);
+    fireEvent.click(await screen.findByText('強制觀戰'));
+    await waitFor(() =>
+      expect(openSpy).toHaveBeenCalledWith(
+        'http://localhost:5173/admin-spectate/g1?ticket=tok',
+        '_blank',
+      ),
+    );
+  });
+});
