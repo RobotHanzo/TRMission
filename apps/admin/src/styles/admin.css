@@ -719,13 +719,18 @@ table.oc-table {
 /* ---- map preview ---------------------------------------------------------------------- */
 
 .oc-map-preview {
+  display: block;
+  box-sizing: border-box;
   width: 100%;
   max-height: 220px;
   color: var(--oc-ink);
+  background: var(--oc-bg);
+  border: 1px solid var(--oc-line);
+  border-radius: var(--oc-radius);
 }
 
 .oc-map-preview .sea {
-  fill: var(--oc-bg);
+  fill: var(--oc-accent-bg);
 }
 
 .oc-map-preview .graticule line {
@@ -735,8 +740,8 @@ table.oc-table {
 
 .oc-map-preview .land {
   fill: var(--oc-surface-2);
-  stroke: var(--oc-line);
-  stroke-width: 0.3;
+  stroke: var(--oc-ink-soft);
+  stroke-width: 0.5;
   stroke-linejoin: round;
 }
 
