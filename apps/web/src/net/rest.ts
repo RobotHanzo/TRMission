@@ -157,6 +157,7 @@ export interface CityDraft {
   y: number;
   region: string;
   isIsland: boolean;
+  tier?: string;
 }
 export interface RouteDraft {
   id: string;

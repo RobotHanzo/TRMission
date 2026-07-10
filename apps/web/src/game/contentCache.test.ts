@@ -42,6 +42,23 @@ describe('resolveContent', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('carries an authored city tier into the resolved GameContent', async () => {
+    setAccessToken('AT');
+    const hash = 'w'.repeat(64);
+    const dto = {
+      ...customDto(hash),
+      cities: [
+        { id: 'c1', nameZh: '甲', nameEn: 'C1', x: 10, y: 10, region: 'r', isIsland: false, tier: 'major' },
+        { id: 'c2', nameZh: '乙', nameEn: 'C2', x: 20, y: 10, region: 'r', isIsland: false },
+      ],
+    };
+    const fetchMock = vi.fn(() => Promise.resolve(res(200, dto)));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const content = await resolveContent(hash);
+    expect(content.cities[0]!.tier).toBe('major');
+  });
+
   it('caches a resolved hash — a second call makes no further network request', async () => {
     setAccessToken('AT');
     const hash = 'y'.repeat(64);

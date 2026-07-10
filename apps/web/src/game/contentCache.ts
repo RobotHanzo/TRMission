@@ -1,7 +1,7 @@
 import { asCityId, asRouteId, asTicketId } from '@trm/shared';
 import type { RouteLength } from '@trm/shared';
 import { TAIWAN_CONTENT, CONTENT_HASH } from '@trm/map-data';
-import type { GameContent } from '@trm/map-data';
+import type { CityTier, GameContent } from '@trm/map-data';
 import { api, type MapContentDto } from '../net/rest';
 
 const bundled = new Map<string, GameContent>([[CONTENT_HASH, TAIWAN_CONTENT]]);
@@ -13,7 +13,11 @@ const inflight = new Map<string, Promise<GameContent>>();
 function contentFromDto(dto: MapContentDto): GameContent {
   return {
     meta: dto.meta,
-    cities: dto.cities.map((c) => ({ ...c, id: asCityId(c.id) })),
+    cities: dto.cities.map(({ tier, ...c }) => ({
+      ...c,
+      id: asCityId(c.id),
+      ...(tier !== undefined ? { tier: tier as CityTier } : {}),
+    })),
     routes: dto.routes.map((r) => ({
       id: asRouteId(r.id),
       a: asCityId(r.a),

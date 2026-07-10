@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import '../../../../i18n';
 import { StopsStage } from './StopsStage';
 import { useEditorStore } from '../store';
@@ -125,6 +125,28 @@ describe('StopsStage', () => {
 
     expect(screen.getByText('移動車站')).toBeInTheDocument();
     expect(screen.queryByText('取消移動')).not.toBeInTheDocument();
+  });
+
+  it('shows minor selected by default for a station with no tier set', () => {
+    render(<StopsStage />);
+    fireEvent.click(screen.getByText('city-c1'));
+
+    const group = screen.getByRole('radiogroup', { name: '車站優先度' });
+    expect(within(group).getByRole('radio', { name: '小站' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+  });
+
+  it('selecting a priority updates the station tier', () => {
+    render(<StopsStage />);
+    fireEvent.click(screen.getByText('city-c1'));
+
+    const group = screen.getByRole('radiogroup', { name: '車站優先度' });
+    fireEvent.click(within(group).getByRole('radio', { name: '主要' }));
+
+    const city = useEditorStore.getState().draft.cities.find((c) => c.id === 'c1');
+    expect(city?.tier).toBe('major');
   });
 
   it('deleting the selected station exits move mode along with the inspector', () => {

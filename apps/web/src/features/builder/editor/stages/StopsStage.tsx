@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Move, Trash2 } from 'lucide-react';
+import { Segmented } from '../../../../components/ui/Segmented';
 import { Switch } from '../../../../components/ui/Switch';
 import { EditorCanvas } from '../EditorCanvas';
 import { useEditorStore } from '../store';
@@ -110,6 +111,20 @@ export function StopsStage() {
                 checked={selected.isIsland}
                 onChange={(v) => updateCity(selected.id, { isIsland: v })}
                 label={t('builder.isIsland')}
+              />
+            </div>
+            <div className="field">
+              <span className="field-label">{t('builder.stationPriority')}</span>
+              <Segmented<string>
+                options={[
+                  { value: 'major', label: t('builder.tierMajor') },
+                  { value: 'secondary', label: t('builder.tierSecondary') },
+                  { value: 'tertiary', label: t('builder.tierTertiary') },
+                  { value: 'minor', label: t('builder.tierMinor') },
+                ]}
+                value={selected.tier ?? 'minor'}
+                onChange={(v) => updateCity(selected.id, { tier: v })}
+                ariaLabel={t('builder.stationPriority')}
               />
             </div>
             <button type="button" onClick={() => setIsMoving((v) => !v)}>
