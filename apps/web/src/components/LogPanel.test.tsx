@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema, Phase } from '@trm/proto';
 import '../i18n';
@@ -7,6 +7,54 @@ import { LogPanel } from './LogPanel';
 import { useLog } from '../store/log';
 import { useGame } from '../store/game';
 import { TICKETS } from '../game/content';
+import type { LogEntry } from '../game/logModel';
+
+const makeEntry = (id: number): LogEntry => ({
+  id,
+  kind: 'gameStarted',
+  playerId: null,
+  data: {},
+  importance: 'normal',
+});
+
+const setLogEntries = (ids: number[]): void => {
+  useLog.setState({
+    entries: ids.map(makeEntry),
+    nextId: (ids.at(-1) ?? 0) + 1,
+  });
+};
+
+const mockScrollableList = (
+  element: HTMLElement,
+  initialScrollHeight = 300,
+  clientHeight = 100,
+) => {
+  let scrollHeight = initialScrollHeight;
+  let scrollTop = Math.max(0, scrollHeight - clientHeight);
+  const maxScrollTop = (): number => Math.max(0, scrollHeight - clientHeight);
+
+  Object.defineProperties(element, {
+    clientHeight: { configurable: true, get: () => clientHeight },
+    scrollHeight: { configurable: true, get: () => scrollHeight },
+    scrollTop: {
+      configurable: true,
+      get: () => scrollTop,
+      set: (value: number) => {
+        scrollTop = Math.min(Math.max(0, value), maxScrollTop());
+      },
+    },
+  });
+
+  return {
+    setScrollTop(value: number): void {
+      scrollTop = Math.min(Math.max(0, value), maxScrollTop());
+    },
+    setScrollHeight(value: number): void {
+      scrollHeight = value;
+      scrollTop = Math.min(scrollTop, maxScrollTop());
+    },
+  };
+};
 
 beforeEach(() => {
   useLog.getState().reset();
@@ -84,5 +132,77 @@ describe('LogPanel', () => {
     render(<LogPanel />);
     const chip = document.querySelector('.log-chip') as HTMLElement;
     expect(chip.style.background).toContain('linear-gradient');
+  });
+
+  it('pauses auto-scroll after manual scrolling and resumes when scrolled back to the bottom', () => {
+    setLogEntries([1]);
+    render(<LogPanel />);
+    const list = document.querySelector('.log-list') as HTMLElement;
+    const scroll = mockScrollableList(list);
+
+    scroll.setScrollTop(80);
+    fireEvent.scroll(list);
+    expect(screen.getByRole('button', { name: '捲動至最新動作' })).toBeInTheDocument();
+
+    scroll.setScrollHeight(320);
+    act(() => setLogEntries([1, 2]));
+    expect(list.scrollTop).toBe(80);
+
+    scroll.setScrollTop(220);
+    fireEvent.scroll(list);
+    expect(screen.queryByRole('button', { name: '捲動至最新動作' })).not.toBeInTheDocument();
+
+    scroll.setScrollHeight(340);
+    act(() => setLogEntries([1, 2, 3]));
+    expect(list.scrollTop).toBe(240);
+  });
+
+  it('jumps to the bottom from the floating button and restores auto-follow', () => {
+    setLogEntries([1]);
+    render(<LogPanel />);
+    const list = document.querySelector('.log-list') as HTMLElement;
+    const scroll = mockScrollableList(list);
+
+    scroll.setScrollTop(50);
+    fireEvent.scroll(list);
+    fireEvent.click(screen.getByRole('button', { name: '捲動至最新動作' }));
+
+    expect(list.scrollTop).toBe(200);
+    expect(screen.queryByRole('button', { name: '捲動至最新動作' })).not.toBeInTheDocument();
+
+    scroll.setScrollHeight(320);
+    act(() => setLogEntries([1, 2]));
+    expect(list.scrollTop).toBe(220);
+  });
+
+  it('keeps following when the newest entry changes without changing the list length', () => {
+    setLogEntries([1]);
+    render(<LogPanel />);
+    const list = document.querySelector('.log-list') as HTMLElement;
+    const scroll = mockScrollableList(list);
+
+    scroll.setScrollHeight(320);
+    act(() => setLogEntries([2]));
+
+    expect(list.scrollTop).toBe(220);
+  });
+
+  it('resumes following when a shorter replacement clamps the viewport to the bottom', () => {
+    setLogEntries([1, 2]);
+    render(<LogPanel />);
+    const list = document.querySelector('.log-list') as HTMLElement;
+    const scroll = mockScrollableList(list, 500);
+
+    scroll.setScrollTop(300);
+    fireEvent.scroll(list);
+    expect(screen.getByRole('button', { name: '捲動至最新動作' })).toBeInTheDocument();
+
+    scroll.setScrollHeight(250);
+    act(() => setLogEntries([3]));
+    expect(screen.queryByRole('button', { name: '捲動至最新動作' })).not.toBeInTheDocument();
+
+    scroll.setScrollHeight(270);
+    act(() => setLogEntries([3, 4]));
+    expect(list.scrollTop).toBe(170);
   });
 });
