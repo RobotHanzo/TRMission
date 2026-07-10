@@ -20,6 +20,9 @@ interface SessionState {
   logout(): Promise<void>;
   /** Persist display prefs to the account for registered users (guests stay localStorage-only). */
   savePreferences(prefs: UserPreferences): Promise<void>;
+  /** Mark the guided tutorial as completed (called from the tutorial finale). Non-fatal on failure
+   *  — a failed write just means the welcome-screen recommendation shows up again next time. */
+  completeTutorial(): Promise<void>;
   clearError(): void;
 }
 
@@ -81,6 +84,13 @@ export const useSession = create<SessionState>()((set, get) => {
         set({ user: await api.updatePreferences(prefs) });
       } catch {
         /* non-fatal: the ui store + localStorage already hold the new value */
+      }
+    },
+    async completeTutorial() {
+      try {
+        set({ user: await api.markTutorialCompleted() });
+      } catch {
+        /* non-fatal: popup just keeps recommending the tutorial next time */
       }
     },
     clearError: () => set({ error: null }),

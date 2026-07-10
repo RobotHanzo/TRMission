@@ -20,6 +20,8 @@ export interface PublicUser {
   preferences: UserPreferences;
   /** Per-account gated features granted from the maintainer dashboard. */
   features: UserFeature[];
+  /** Whether this account has reached the guided tutorial's finale. */
+  tutorialCompleted: boolean;
   email?: string;
   avatarUrl?: string;
 }
@@ -333,6 +335,7 @@ export const api = {
   me: () => req<PublicUser>('GET', '/auth/me'),
   updatePreferences: (prefs: UserPreferences) =>
     req<PublicUser>('PATCH', '/auth/me/preferences', prefs),
+  markTutorialCompleted: () => req<PublicUser>('POST', '/auth/me/tutorial-completed'),
   logout: () => req<void>('POST', '/auth/logout').then(() => setAccessToken(null)),
 
   createRoom: (maxPlayers?: number) => req<RoomView>('POST', '/rooms', { maxPlayers }),

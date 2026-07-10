@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUi } from '../../store/ui';
+import { useSession } from '../../store/session';
 import { useGame } from '../../store/game';
 import { resetToDefaultContent } from '../../game/catalog';
 import { GameStage } from '../../screens/GameStage';
@@ -133,8 +134,14 @@ function TutorialRunner({
 export default function TutorialScreen() {
   const exit = useUi((s) => s.goHome);
   // The finale CTA leaves the tutorial for home and spotlights the create-game button there (rather
-  // than minting a room from inside the tutorial).
+  // than minting a room from inside the tutorial). It also marks the tutorial completed first, so
+  // the welcome screen's recommendation dialog stops appearing for this account.
   const createGame = useUi((s) => s.requestCreateGame);
+  const completeTutorial = useSession((s) => s.completeTutorial);
+  const finishTutorial = () => {
+    void completeTutorial();
+    createGame();
+  };
   const [scope, setScope] = useState<Scope | null>(null);
   const [lessonIdx, setLessonIdx] = useState(0);
   const lessons = useMemo(() => (scope ? lessonsForScope(scope) : []), [scope]);
@@ -169,7 +176,7 @@ export default function TutorialScreen() {
       onPrevLesson={() => setLessonIdx((i) => Math.max(0, i - 1))}
       onNextLesson={() => setLessonIdx((i) => Math.min(lessons.length - 1, i + 1))}
       onExit={exit}
-      onCreateGame={createGame}
+      onCreateGame={finishTutorial}
     />
   );
 }
