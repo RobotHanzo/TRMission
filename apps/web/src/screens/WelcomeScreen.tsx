@@ -79,7 +79,7 @@ export function WelcomeScreen({
       </div>
 
       <div className="welcome-discord">
-        <button className="welcome-discord-cta" onClick={openDiscord}>
+        <button className="discord-cta" onClick={openDiscord}>
           <DiscordGlyph size={18} /> {t('home.welcome.discordCta')}
         </button>
       </div>
