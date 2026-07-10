@@ -82,4 +82,13 @@ describe('dashboard permission taxonomy', () => {
     expect(ROLE_PERMISSIONS.moderator).toContain('games.readLog');
     expect(ROLE_PERMISSIONS.moderator).toContain('games.viewReplay');
   });
+
+  it('users.delete is admin-tier, above the moderator-tier users.ban', () => {
+    expect(ROLE_PERMISSIONS.viewer).not.toContain('users.delete');
+    expect(ROLE_PERMISSIONS.moderator).toContain('users.ban');
+    expect(ROLE_PERMISSIONS.moderator).not.toContain('users.delete');
+    expect(ROLE_PERMISSIONS.admin).toContain('users.delete');
+    expect(ROLE_PERMISSIONS.owner).toContain('users.delete');
+    expect(DASHBOARD_PERMISSIONS).toContain('users.delete');
+  });
 });

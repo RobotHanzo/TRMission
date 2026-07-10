@@ -17,6 +17,7 @@ export const DASHBOARD_PERMISSIONS = [
   'overview.read',
   'users.read',
   'users.ban',
+  'users.delete',
   'users.features',
   'games.read',
   'games.readLog',
@@ -59,6 +60,7 @@ const MODERATOR_PERMISSIONS: readonly DashboardPermission[] = [
 const ADMIN_PERMISSIONS: readonly DashboardPermission[] = [
   ...MODERATOR_PERMISSIONS,
   'users.features',
+  'users.delete',
   'maintainers.read',
   'audit.read',
   'games.delete',
