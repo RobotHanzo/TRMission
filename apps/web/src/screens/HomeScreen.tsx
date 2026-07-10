@@ -145,7 +145,7 @@ export function HomeScreen() {
   const watch = async (roomCode: string) => {
     try {
       const tk = await api.spectate(roomCode);
-      connectGame(tk.ticket);
+      connectGame(tk.ticket, { roomCode, spectator: true });
       // enterRoom first: it sets roomCode + pushes /room/:code, which GameScreen's roster fetch
       // (real names instead of "P{seat+1}") and a reload's syncFromUrl both depend on.
       enterRoom(roomCode);
@@ -174,7 +174,7 @@ export function HomeScreen() {
       const r = await api.getRoom(target);
       if (r.status === 'STARTED' && r.settings.allowSpectating) {
         const tk = await api.spectate(target);
-        connectGame(tk.ticket);
+        connectGame(tk.ticket, { roomCode: target, spectator: true });
         // Same as watch() above: establish roomCode + the /room/:code URL before entering.
         enterRoom(target);
         enterGame(tk.gameId, tk.ticket);

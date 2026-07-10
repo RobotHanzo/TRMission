@@ -31,8 +31,11 @@ export function GameScreen() {
   const [room, setRoom] = useState<RoomView | null>(null);
 
   useEffect(() => {
-    if (ticket && !getSocket()) connectGame(ticket);
-  }, [ticket]);
+    // Fallback connect (normal paths connect via RoomScreen before entering the game, including the
+    // spectator path). Pass the room code so a later reconnect can re-mint a fresh ws ticket rather
+    // than replaying an expired one; a seated member is the only case that reaches this branch.
+    if (ticket && !getSocket()) connectGame(ticket, roomCode ? { roomCode } : undefined);
+  }, [ticket, roomCode]);
   // Pull the room's members (real account names / bot labels) so the trackers, scoreboard and turn
   // banner can show them instead of "P{seat+1}". Snapshots carry ids only — names are lobby data.
   useEffect(() => {

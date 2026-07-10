@@ -40,6 +40,14 @@ export interface SocketHandlers {
 /** A board-space camera framing (board units), the payload of a camera update. */
 export type CameraViewInit = { cx: number; cy: number; span: number };
 
+/**
+ * Mints a fresh ws-game ticket for a reconnect. The ticket handed to the constructor is short-lived
+ * (server default 45s) and is almost always expired by the time the socket drops — a server restart
+ * mid-game being the canonical case — so every reconnect re-mints one rather than replaying the
+ * stale one (which the gateway would reject UNAUTHENTICATED, leaving the socket open-but-unbound).
+ */
+export type TicketRefresh = () => Promise<string>;
+
 function defaultWsUrl(): string {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   return `${proto}://${location.host}/ws`;
@@ -51,12 +59,17 @@ export class GameSocket {
   private heartbeat: ReturnType<typeof setInterval> | undefined;
   private reconnectAttempts = 0;
   private closed = false;
+  /** Current ticket; the seed one for the first connect, re-minted before each reconnect. */
+  private ticket: string;
 
   constructor(
-    private readonly ticket: string,
+    ticket: string,
     private readonly handlers: SocketHandlers,
     private readonly url: string = defaultWsUrl(),
-  ) {}
+    private readonly refreshTicket?: TicketRefresh,
+  ) {
+    this.ticket = ticket;
+  }
 
   connect(): void {
     this.handlers.onStatus?.(this.reconnectAttempts === 0 ? 'connecting' : 'reconnecting');
@@ -89,9 +102,28 @@ export class GameSocket {
       this.handlers.onStatus?.('reconnecting');
       const delay = Math.min(30_000, 2 ** this.reconnectAttempts * 500);
       this.reconnectAttempts += 1;
-      setTimeout(() => this.connect(), delay);
+      setTimeout(() => void this.reconnect(), delay);
     };
     ws.onerror = () => ws.close();
+  }
+
+  /**
+   * Re-mint a fresh ticket (the old one is short-lived and usually expired after a drop), then open
+   * a new socket. If minting fails — server still restarting, or a transient REST error — fall back
+   * to the current ticket and connect anyway: a rejected hello just closes the socket and the
+   * backoff loop schedules the next attempt, so minting is retried until the server recovers.
+   */
+  private async reconnect(): Promise<void> {
+    if (this.closed) return;
+    if (this.refreshTicket) {
+      try {
+        this.ticket = await this.refreshTicket();
+      } catch {
+        // keep the previous ticket; the ensuing close reschedules another attempt.
+      }
+    }
+    if (this.closed) return;
+    this.connect();
   }
 
   private dispatch(bytes: Uint8Array): void {

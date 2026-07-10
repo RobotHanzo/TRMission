@@ -133,7 +133,7 @@ export function RoomScreen() {
             if (r.status === 'STARTED' && r.gameId && r.settings.allowSpectating) {
               const tk = await api.spectate(code);
               if (!active) return;
-              connectGame(tk.ticket);
+              connectGame(tk.ticket, { roomCode: code, spectator: true });
               enterGame(tk.gameId, tk.ticket);
               return;
             }
@@ -153,7 +153,7 @@ export function RoomScreen() {
         if (r.status === 'STARTED' && r.gameId) {
           const ticket = await api.getTicket(code);
           if (!active) return;
-          connectGame(ticket.ticket);
+          connectGame(ticket.ticket, { roomCode: code });
           enterGame(ticket.gameId, ticket.ticket);
         }
       } catch (e) {
@@ -259,7 +259,7 @@ export function RoomScreen() {
   const start = async () => {
     try {
       const tk = await api.startRoom(code);
-      connectGame(tk.ticket);
+      connectGame(tk.ticket, { roomCode: code });
       enterGame(tk.gameId, tk.ticket);
     } catch (e) {
       setErr((e as Error).message);
