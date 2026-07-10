@@ -8,6 +8,7 @@ import {
   Map as MapIcon,
   Moon,
   ShieldCheck,
+  Star,
   Sun,
   Swords,
   ToggleRight,
@@ -25,6 +26,7 @@ import { FeaturesView } from './views/FeaturesView';
 import { GamesView } from './views/GamesView';
 import { RoomsView } from './views/RoomsView';
 import { MapsView } from './views/MapsView';
+import { RatingsView } from './views/RatingsView';
 import { MaintainersView } from './views/MaintainersView';
 import { AuditView } from './views/AuditView';
 import { PurgeView } from './views/PurgeView';
@@ -37,6 +39,7 @@ const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof User
   { view: 'games', permission: 'games.read', icon: Swords },
   { view: 'rooms', permission: 'rooms.read', icon: DoorOpen },
   { view: 'maps', permission: 'maps.read', icon: MapIcon },
+  { view: 'ratings', permission: 'ratings.read', icon: Star },
   { view: 'maintainers', permission: 'maintainers.read', icon: ShieldCheck },
   { view: 'audit', permission: 'audit.read', icon: ClipboardList },
   { view: 'purge', permission: 'purge.read', icon: Trash2 },
@@ -61,6 +64,8 @@ function ActiveView({ view }: { view: AdminView }) {
       return <RoomsView />;
     case 'maps':
       return <MapsView />;
+    case 'ratings':
+      return <RatingsView />;
     case 'maintainers':
       return <MaintainersView />;
     case 'audit':
