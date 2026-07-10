@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, CirclePlay, GraduationCap } from 'lucide-react';
 import { BrandBanner } from '../components/BrandBanner';
 import { DiscordGlyph } from '../components/icons/DiscordGlyph';
 import { openDiscord } from '../discord';
+import { track } from '../lib/analytics';
 import { TutorialRecommendDialog } from '../components/TutorialRecommendDialog';
 
 interface WelcomeScreenProps {
@@ -25,6 +26,10 @@ export function WelcomeScreen({
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // First-run impression — the denominator for the onboarding funnel.
+  useEffect(() => {
+    track('welcome_shown', {});
+  }, []);
   // Set when Practice/Jump-in is clicked without the tutorial completed yet — holds which action
   // to run once the recommendation dialog is resolved (either path always runs one of the two).
   const [pendingAction, setPendingAction] = useState<'practice' | 'continue' | null>(null);
@@ -107,7 +112,13 @@ export function WelcomeScreen({
       </div>
 
       <div className="welcome-discord">
-        <button className="discord-cta" onClick={openDiscord}>
+        <button
+          className="discord-cta"
+          onClick={() => {
+            track('discord_click', { source: 'welcome' });
+            openDiscord();
+          }}
+        >
           <DiscordGlyph size={18} /> {t('home.welcome.discordCta')}
         </button>
       </div>

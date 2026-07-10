@@ -22,6 +22,7 @@ import { BrandBanner } from './BrandBanner';
 import { DiscordGlyph } from './icons/DiscordGlyph';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { openDiscord } from '../discord';
+import { track } from '../lib/analytics';
 
 export function AppHeader() {
   const { t } = useTranslation();
@@ -173,12 +174,22 @@ export function AppHeader() {
                   <button
                     className="header-menu-item"
                     role="menuitem"
-                    onClick={menuAct(() => openEncyclopedia(true))}
+                    onClick={menuAct(() => {
+                      track('encyclopedia_open', {});
+                      openEncyclopedia(true);
+                    })}
                   >
                     <BookOpen size={16} aria-hidden /> {t('tutorial.open')}
                   </button>
                 )}
-                <button className="header-menu-item" role="menuitem" onClick={menuAct(openDiscord)}>
+                <button
+                  className="header-menu-item"
+                  role="menuitem"
+                  onClick={menuAct(() => {
+                    track('discord_click', { source: 'header' });
+                    openDiscord();
+                  })}
+                >
                   <DiscordGlyph size={16} /> {t('discord')}
                 </button>
                 <button
@@ -236,14 +247,24 @@ export function AppHeader() {
             )}
             {!onAuthScreen && (
               <button
-                onClick={() => openEncyclopedia(true)}
+                onClick={() => {
+                  track('encyclopedia_open', {});
+                  openEncyclopedia(true);
+                }}
                 aria-label={t('tutorial.open')}
                 title={t('tutorial.open')}
               >
                 <BookOpen size={16} aria-hidden />
               </button>
             )}
-            <button onClick={openDiscord} aria-label={t('discord')} title={t('discord')}>
+            <button
+              onClick={() => {
+                track('discord_click', { source: 'header' });
+                openDiscord();
+              }}
+              aria-label={t('discord')}
+              title={t('discord')}
+            >
               <DiscordGlyph size={16} />
             </button>
             <button

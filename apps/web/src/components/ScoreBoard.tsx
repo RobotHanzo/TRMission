@@ -15,6 +15,7 @@ import { TicketCard } from './TicketCard';
 import { StarRating } from './StarRating';
 import { DiscordGlyph } from './icons/DiscordGlyph';
 import { openDiscord } from '../discord';
+import { track } from '../lib/analytics';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
 const ticketValue = (id: string): number => ticketById.get(id)?.value ?? 0;
@@ -95,6 +96,7 @@ export function ScoreBoard({
     setRatingError(false);
     try {
       await api.submitRating({ gameId, roomId: roomCode, stars });
+      track('rating_submit', { stars });
       markGameRated(gameId);
       setAlreadyRated(true);
     } catch {
@@ -279,12 +281,24 @@ export function ScoreBoard({
             </span>
             <div className="row">
               {onVote && (
-                <button className={myVote ? 'success' : ''} onClick={() => onVote(!myVote)}>
+                <button
+                  className={myVote ? 'success' : ''}
+                  onClick={() => {
+                    track('rematch_vote', { wants: !myVote });
+                    onVote(!myVote);
+                  }}
+                >
                   🔁 {t('wantRematch')}
                 </button>
               )}
               {isHost && onPlayAgain && (
-                <button className="primary" onClick={onPlayAgain}>
+                <button
+                  className="primary"
+                  onClick={() => {
+                    track('play_again', {});
+                    onPlayAgain();
+                  }}
+                >
                   {t('playAgain')}
                 </button>
               )}
@@ -312,7 +326,13 @@ export function ScoreBoard({
           </div>
         )}
         <div className="scoreboard-discord">
-          <button className="discord-cta" onClick={openDiscord}>
+          <button
+            className="discord-cta"
+            onClick={() => {
+              track('discord_click', { source: 'endgame' });
+              openDiscord();
+            }}
+          >
             <DiscordGlyph size={18} /> {t('home.welcome.discordCta')}
           </button>
         </div>
