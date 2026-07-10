@@ -17,6 +17,7 @@ import {
   type BotDifficulty,
 } from '../net/rest';
 import { connectGame } from '../net/connection';
+import { track } from '../lib/analytics';
 import { SEAT_COLORS } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { NotificationStack } from '../components/NotificationStack';
@@ -229,8 +230,10 @@ export function RoomScreen() {
   // The host only sees the picker while holding the randomEvents feature; a non-host still sees
   // (read-only) whatever mode the host already configured, so it's never a mystery mid-game.
   const showEventsPicker = isHost ? canConfigureEvents : settings.eventsMode !== 'off';
-  const setSetting = (patch: Partial<RoomSettings>) =>
+  const setSetting = (patch: Partial<RoomSettings>) => {
+    track('room_settings_change', { setting: Object.keys(patch)[0] ?? 'unknown' });
     void guard(api.updateRoomSettings(code, patch));
+  };
   const RULE_TOGGLES = [
     [
       'unlimitedStationBorrow',
@@ -251,10 +254,16 @@ export function RoomScreen() {
   ] as const;
 
   const toggleReady = () => void guard(api.setReady(code, !me?.ready));
-  const addBot = (d: BotDifficulty) => void guard(api.addBot(code, d));
+  const addBot = (d: BotDifficulty) => {
+    track('bot_add', { difficulty: d });
+    void guard(api.addBot(code, d));
+  };
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
-  const sendChat = (presetId: string) => void guard(api.sendRoomChat(code, { presetId }));
+  const sendChat = (presetId: string) => {
+    track('chat_send', { kind: 'preset', context: 'lobby' });
+    void guard(api.sendRoomChat(code, { presetId }));
+  };
   const becomeSpectator = () => void guard(api.watchRoom(code));
   const becomePlayer = () => void guard(api.rejoinRoom(code));
   const copy = (text: string) => {
@@ -289,6 +298,7 @@ export function RoomScreen() {
     goHome();
   };
   const onLeaveClick = () => {
+    track('room_leave', {});
     if (!isHost) {
       requestLeave(() => void leave());
     } else if (otherHumans.length === 0) {
@@ -621,6 +631,7 @@ export function RoomScreen() {
               const text = chatDraft.trim();
               if (!text) return;
               setChatDraft('');
+              track('chat_send', { kind: 'text', context: 'lobby' });
               void guard(api.sendRoomChat(code, { text }));
             }}
           >

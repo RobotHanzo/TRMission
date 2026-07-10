@@ -6,6 +6,7 @@ import { useUi } from '../store/ui';
 import { useAnimationsStore } from '../store/animations';
 import { api, type RoomView } from '../net/rest';
 import { connectGame } from '../net/connection';
+import { track } from '../lib/analytics';
 import { WelcomeScreen } from './WelcomeScreen';
 
 /** The guest sidebar notice: a one-line nudge that expands into the upgrade form in place. */
@@ -65,6 +66,7 @@ export function HomeScreen() {
   const openEncyclopedia = useUi((s) => s.setEncyclopediaOpen);
   const homeFocus = useUi((s) => s.homeFocus);
   const clearHomeFocus = useUi((s) => s.clearHomeFocus);
+  const setPractice = useUi((s) => s.setPractice);
   const pushNotification = useAnimationsStore((s) => s.pushNotification);
 
   const [code, setCode] = useState('');
@@ -134,6 +136,8 @@ export function HomeScreen() {
   // Welcome-screen "practice with bots": one server call spins up a started game vs bots, then we
   // navigate exactly like watch() does (roomCode + /room/:code URL before entering the game view).
   const startPractice = async () => {
+    setPractice(true);
+    track('practice_start', {});
     const tk = await api.startPractice();
     connectGame(tk.ticket, { roomCode: tk.code });
     enterRoom(tk.code);
@@ -157,6 +161,7 @@ export function HomeScreen() {
   const watch = async (roomCode: string) => {
     try {
       const tk = await api.spectate(roomCode);
+      track('spectate_start', {});
       connectGame(tk.ticket, { roomCode, spectator: true });
       // enterRoom first: it sets roomCode + pushes /room/:code, which GameScreen's roster fetch
       // (real names instead of "P{seat+1}") and a reload's syncFromUrl both depend on.
@@ -171,7 +176,10 @@ export function HomeScreen() {
     setBusy(true);
     setErr(null);
     try {
-      enterRoom((await api.createRoom()).code);
+      const room = await api.createRoom();
+      setPractice(false);
+      track('room_create', {});
+      enterRoom(room.code);
     } catch (e) {
       setErr((e as Error).message);
     } finally {
@@ -181,11 +189,13 @@ export function HomeScreen() {
   const join = async () => {
     setBusy(true);
     setErr(null);
+    setPractice(false);
     try {
       const target = code.trim().toUpperCase();
       const r = await api.getRoom(target);
       if (r.status === 'STARTED' && r.settings.allowSpectating) {
         const tk = await api.spectate(target);
+        track('spectate_start', {});
         connectGame(tk.ticket, { roomCode: target, spectator: true });
         // Same as watch() above: establish roomCode + the /room/:code URL before entering.
         enterRoom(target);
@@ -200,6 +210,7 @@ export function HomeScreen() {
         ) {
           pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') });
         }
+        track('room_join', { via: 'code' });
         enterRoom(joined.code);
       }
     } catch (e) {
@@ -237,7 +248,13 @@ export function HomeScreen() {
             <p className="home-hero-tagline">{t('tagline')}</p>
           </div>
           {activeRoom && (
-            <button className="home-rejoin" onClick={() => enterRoom(activeRoom.code)}>
+            <button
+              className="home-rejoin"
+              onClick={() => {
+                track('room_join', { via: 'rejoin' });
+                enterRoom(activeRoom.code);
+              }}
+            >
               {t('home.rejoin', { code: activeRoom.code })} →
             </button>
           )}
@@ -296,7 +313,14 @@ export function HomeScreen() {
                 </span>
               </div>
               {r.status === 'LOBBY' ? (
-                <button onClick={() => enterRoom(r.code)}>{t('home.join')}</button>
+                <button
+                  onClick={() => {
+                    track('room_join', { via: 'public_list' });
+                    enterRoom(r.code);
+                  }}
+                >
+                  {t('home.join')}
+                </button>
               ) : (
                 <button className="home-watch" onClick={() => void watch(r.code)}>
                   {t('watch')}
@@ -307,7 +331,13 @@ export function HomeScreen() {
         </section>
 
         <aside className="home-side">
-          <button className="home-side-card" onClick={() => openEncyclopedia(true)}>
+          <button
+            className="home-side-card"
+            onClick={() => {
+              track('encyclopedia_open', {});
+              openEncyclopedia(true);
+            }}
+          >
             <span className="home-side-icon home-side-icon--accent">
               <BookOpen size={18} aria-hidden />
             </span>
