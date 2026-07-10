@@ -132,4 +132,13 @@ export class DashboardUsersController {
   ) {
     return this.users.setFeatures(actor, id, body.features);
   }
+
+  @Post(':id/tutorial-reset')
+  @HttpCode(200)
+  @RequirePermission('users.tutorialReset')
+  @ApiOperation({ summary: "Reset a user's tutorial-completed flag back to false" })
+  @ApiResponse({ status: 200, schema: apiSchema(DashboardUserDetailSchema) })
+  resetTutorial(@Param('id') id: string, @CurrentUser() actor: AuthUser) {
+    return this.users.resetTutorial(actor, id);
+  }
 }

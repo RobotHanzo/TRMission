@@ -31,6 +31,7 @@ const toRow = (u: UserDoc) => ({
   oauthProviders: Object.keys(u.oauth ?? {}),
   hasPassword: !!u.passwordHash,
   features: u.features ?? [],
+  tutorialCompleted: u.tutorialCompleted ?? false,
   createdAt: u.createdAt.toISOString(),
   ...(u.disabledAt ? { disabledAt: u.disabledAt.toISOString() } : {}),
   ...(u.guestExpiresAt ? { guestExpiresAt: u.guestExpiresAt.toISOString() } : {}),
@@ -161,6 +162,20 @@ export class DashboardUsersService {
       'user.features',
       { type: 'user', id: userId },
       { before: target.features ?? [], after: deduped },
+    );
+    return this.detail(userId);
+  }
+
+  /** Reset a user's tutorial-completed flag (dashboard `users.tutorialReset`). */
+  async resetTutorial(actor: AuthUser, userId: string) {
+    const target = await this.users.findById(userId);
+    if (!target) throw new NotFoundException('user not found');
+    await this.users.setTutorialCompleted(userId, false);
+    await this.audit.log(
+      actor,
+      'user.tutorialReset',
+      { type: 'user', id: userId },
+      { before: target.tutorialCompleted ?? false, after: false },
     );
     return this.detail(userId);
   }

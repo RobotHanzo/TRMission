@@ -96,6 +96,7 @@ export const DashboardUserRowSchema = z.object({
   oauthProviders: z.array(z.string()),
   hasPassword: z.boolean(),
   features: z.array(UserFeatureSchema),
+  tutorialCompleted: z.boolean(),
   createdAt: z.string(),
   disabledAt: z.string().optional(),
   guestExpiresAt: z.string().optional(),

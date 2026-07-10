@@ -7,6 +7,7 @@ export type DashboardAuditAction =
   | 'user.ban'
   | 'user.unban'
   | 'user.features'
+  | 'user.tutorialReset'
   | 'user.delete'
   | 'game.terminate'
   | 'game.delete'
