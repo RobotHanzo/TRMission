@@ -45,6 +45,7 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const canBan = useSession((s) => s.hasPermission('users.ban'));
   const canDelete = useSession((s) => s.hasPermission('users.delete'));
   const canFeatures = useSession((s) => s.hasPermission('users.features'));
+  const canResetTutorial = useSession((s) => s.hasPermission('users.tutorialReset'));
   const pushToast = useToast((s) => s.push);
   const [detail, setDetail] = useState<UserDetail | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -78,6 +79,19 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     } finally {
       setBusy(false);
       setConfirming(false);
+    }
+  };
+
+  const resetTutorial = async () => {
+    if (!detail) return;
+    setBusy(true);
+    try {
+      setDetail(await api.resetUserTutorial(detail.id));
+      pushToast('success', t('toast.tutorialReset'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -158,6 +172,12 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               <span className="k">{t('users.sessions')}</span>
               <span className="v">{detail.activeSessions}</span>
             </div>
+            <div className="oc-kv">
+              <span className="k">{t('users.colTutorial')}</span>
+              <span className="v">
+                {detail.tutorialCompleted ? t('users.tutorialDone') : t('users.tutorialNotDone')}
+              </span>
+            </div>
           </section>
 
           {detail.disabledAt && (
@@ -213,6 +233,14 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 target={{ kind: 'user', userId: detail.id, onSaved: setDetail }}
                 initial={detail.features}
               />
+            </section>
+          )}
+
+          {canResetTutorial && detail.tutorialCompleted && (
+            <section>
+              <button className="oc-btn" disabled={busy} onClick={() => void resetTutorial()}>
+                {t('users.resetTutorial')}
+              </button>
             </section>
           )}
 
@@ -348,6 +376,7 @@ export function UsersView() {
               <th>{t('users.colKind')}</th>
               <th>{t('users.colOauth')}</th>
               <th>{t('users.colStatus')}</th>
+              <th>{t('users.colTutorial')}</th>
               <th>{t('users.colCreated')}</th>
               <th>{t('users.colExpires')}</th>
             </tr>
@@ -370,6 +399,7 @@ export function UsersView() {
                     <SignalBadge aspect="clear" label={t('users.active')} />
                   )}
                 </td>
+                <td>{u.tutorialCompleted ? '✓' : <span className="oc-muted">—</span>}</td>
                 <td className="num">{fmtDateTime(u.createdAt, locale)}</td>
                 <td className="num">
                   <ExpiresCell

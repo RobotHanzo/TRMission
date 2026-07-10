@@ -137,6 +137,7 @@ describe('UsersView columns', () => {
               oauthProviders: [],
               hasPassword: true,
               features: [],
+              tutorialCompleted: true,
               createdAt: '2026-01-01T00:00:00.000Z',
             },
           ],
@@ -236,5 +237,55 @@ describe('UsersView search debounce', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe('UsersView tutorial-completed flag', () => {
+  it('shows a check mark in the table for a completed account', async () => {
+    useUi.setState({ view: 'users', param: null });
+    stubFetch({
+      '/dashboard/users?': {
+        status: 200,
+        body: { users: [{ ...USER_DETAIL, tutorialCompleted: true }], nextCursor: null },
+      },
+    });
+    render(<UsersView />);
+    expect(await screen.findByText('✓')).toBeInTheDocument();
+  });
+
+  it("lets a permitted admin reset a completed account's tutorial flag", async () => {
+    useSession.setState({
+      phase: 'ready',
+      user: { id: 'admin1', displayName: 'Ops', isGuest: false },
+      role: 'admin',
+      permissions: new Set(['users.read', 'users.tutorialReset']),
+    });
+    stubFetch({
+      '/dashboard/users/u1/tutorial-reset': {
+        status: 200,
+        body: { ...USER_DETAIL, tutorialCompleted: false },
+      },
+      '/dashboard/users/u1': { status: 200, body: { ...USER_DETAIL, tutorialCompleted: true } },
+      '/dashboard/users?': { status: 200, body: { users: [], nextCursor: null } },
+    });
+    render(
+      <>
+        <UsersView />
+        <ToastStack />
+      </>,
+    );
+    const drawer = await screen.findByRole('dialog', { name: 'Alice' });
+    fireEvent.click(within(drawer).getByText('重置教學狀態'));
+    expect(await screen.findByText('已重置教學狀態')).toBeInTheDocument();
+  });
+
+  it('hides the reset control without users.tutorialReset permission', async () => {
+    stubFetch({
+      '/dashboard/users/u1': { status: 200, body: { ...USER_DETAIL, tutorialCompleted: true } },
+      '/dashboard/users?': { status: 200, body: { users: [], nextCursor: null } },
+    });
+    render(<UsersView />);
+    const drawer = await screen.findByRole('dialog', { name: 'Alice' });
+    expect(within(drawer).queryByText('重置教學狀態')).toBeNull();
   });
 });

@@ -51,6 +51,7 @@ export interface UserRow {
   oauthProviders: string[];
   hasPassword: boolean;
   features: UserFeature[];
+  tutorialCompleted: boolean;
   createdAt: string;
   disabledAt?: string;
   guestExpiresAt?: string;
@@ -333,6 +334,8 @@ export const api = {
     req<UserDetail>('POST', `/dashboard/users/${encodeURIComponent(id)}/enable`, {}),
   putUserFeatures: (id: string, features: UserFeature[]) =>
     req<UserDetail>('PUT', `/dashboard/users/${encodeURIComponent(id)}/features`, { features }),
+  resetUserTutorial: (id: string) =>
+    req<UserDetail>('POST', `/dashboard/users/${encodeURIComponent(id)}/tutorial-reset`, {}),
   deleteUser: (id: string, reason?: string) =>
     req<void>('DELETE', `/dashboard/users/${encodeURIComponent(id)}`, { reason }),
   listFeaturedUsers: () => req<{ users: UserRow[] }>('GET', '/dashboard/users/features'),

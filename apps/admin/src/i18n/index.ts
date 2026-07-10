@@ -44,6 +44,7 @@ const zhHant = {
     userBanned: '帳號已停權',
     userUnbanned: '已解除停權',
     userDeleted: '帳號已刪除',
+    tutorialReset: '已重置教學狀態',
     featuresSaved: '功能開通已儲存',
     gameTerminated: '對局已強制終止',
     gameDeleted: '對局已刪除',
@@ -127,6 +128,10 @@ const zhHant = {
     deleteConfirmBody:
       '此操作無法復原。將終止此使用者所在的進行中對局(不計分、無法回放)並關閉其房間,撤銷所有登入工作階段,刪除其自訂地圖草稿,然後永久移除此帳號。已完成對局的紀錄與已發布的地圖內容會保留為封存。',
     wins: '勝場',
+    colTutorial: '教學',
+    tutorialDone: '已完成',
+    tutorialNotDone: '未完成',
+    resetTutorial: '重置教學狀態',
   },
   games: {
     title: '對局管理',
@@ -427,6 +432,7 @@ const en: typeof zhHant = {
     userBanned: 'Account disabled',
     userUnbanned: 'Account re-enabled',
     userDeleted: 'Account deleted',
+    tutorialReset: 'Tutorial status reset',
     featuresSaved: 'Feature access saved',
     gameTerminated: 'Game force-terminated',
     gameDeleted: 'Game deleted',
@@ -513,6 +519,10 @@ const en: typeof zhHant = {
       'custom-map drafts, then permanently removes the account. Completed-game history and ' +
       'published map content are kept as an archive.',
     wins: 'wins',
+    colTutorial: 'Tutorial',
+    tutorialDone: 'Completed',
+    tutorialNotDone: 'Not completed',
+    resetTutorial: 'Reset tutorial status',
   },
   games: {
     title: 'Games',
