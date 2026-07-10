@@ -351,6 +351,9 @@ export class LobbyService {
       seed,
       players,
       contentHash,
+      // Randomize who acts first so the host (always seat 0) isn't perpetually the opening player.
+      // Seeded off `config.seed` in `initGame`'s fixed RNG order, so replay stays byte-identical.
+      shuffleTurnOrder: true,
       ruleParams: {
         ...mapRules,
         unlimitedStationBorrow: s.unlimitedStationBorrow,
