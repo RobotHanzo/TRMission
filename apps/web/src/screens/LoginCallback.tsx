@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useSession } from '../store/session';
 import { useUi, readRedirectParam } from '../store/ui';
 import { MapBackdrop } from '../components/MapBackdrop';
+import { track } from '../lib/analytics';
 
 /**
  * The landing page after an OAuth round-trip. The server has already set the refresh cookie and
@@ -20,7 +21,12 @@ export function LoginCallback() {
   // (guest) session still resolves — otherwise the failure is silently swallowed and the user who
   // explicitly tried to link gets no feedback.
   useEffect(() => {
-    if (user && !errorCode) navigateAfterAuth();
+    if (user && !errorCode) {
+      // Provider + new-vs-returning aren't known on the redirect-callback path (see spec §Known
+      // limitations); emit a coarse OAuth login.
+      track('login', { method: 'oauth' });
+      navigateAfterAuth();
+    }
   }, [user, errorCode, navigateAfterAuth]);
 
   return (

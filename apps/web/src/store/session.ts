@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { UserFeature } from '@trm/shared';
 import { api, setOnTokenChange, type PublicUser, type UserPreferences } from '../net/rest';
 import { useUi } from './ui';
+import { track } from '../lib/analytics';
 
 interface SessionState {
   user: PublicUser | null;
@@ -36,12 +37,16 @@ const hydratePrefs = (user: PublicUser | null): void => {
 export const useSession = create<SessionState>()((set, get) => {
   setOnTokenChange((t) => set({ accessToken: t }));
 
-  const run = async (action: () => Promise<{ user: PublicUser }>): Promise<void> => {
+  const run = async (
+    action: () => Promise<{ user: PublicUser }>,
+    onSuccess?: () => void,
+  ): Promise<void> => {
     set({ loading: true, error: null });
     try {
       const r = await action();
       set({ user: r.user, loading: false });
       hydratePrefs(r.user);
+      onSuccess?.();
     } catch (e) {
       set({ loading: false, error: (e as Error).message });
     }
@@ -64,17 +69,25 @@ export const useSession = create<SessionState>()((set, get) => {
         set({ user: null, booting: false });
       }
     },
-    playAsGuest: (name) => run(() => api.guest(name?.trim() || undefined)),
-    login: (email, password) => run(() => api.login(email.trim(), password)),
-    loginWithGoogleCredential: (credential) => run(() => api.googleCredential(credential)),
+    playAsGuest: (name) =>
+      run(() => api.guest(name?.trim() || undefined), () => track('login', { method: 'guest' })),
+    login: (email, password) =>
+      run(() => api.login(email.trim(), password), () => track('login', { method: 'password' })),
+    loginWithGoogleCredential: (credential) =>
+      run(() => api.googleCredential(credential), () => track('login', { method: 'google' })),
     register: (email, password, displayName) =>
-      run(() => api.register(email.trim(), password, displayName.trim())),
-    upgrade: (email, password) => run(() => api.upgrade(email.trim(), password)),
+      run(
+        () => api.register(email.trim(), password, displayName.trim()),
+        () => track('sign_up', { method: 'password' }),
+      ),
+    upgrade: (email, password) =>
+      run(() => api.upgrade(email.trim(), password), () => track('guest_upgrade', {})),
     async logout() {
       // Clear local session state SYNCHRONOUSLY first: the login route's auto-redirect gates on
       // `user`, so it must see the signed-out state immediately — not after the network round-trip
       // (otherwise it briefly treats the user as still logged in and lands them on a blank home).
       set({ user: null, accessToken: null });
+      track('logout', {});
       await api.logout().catch(() => undefined);
     },
     async savePreferences(prefs) {

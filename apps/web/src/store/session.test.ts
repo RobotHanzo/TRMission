@@ -2,6 +2,9 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import type { UserFeature } from '@trm/shared';
 import { useSession } from './session';
 import { api } from '../net/rest';
+import { track } from '../lib/analytics';
+
+vi.mock('../lib/analytics', () => ({ track: vi.fn() }));
 
 const user = {
   id: 'u1',
@@ -52,5 +55,30 @@ describe('session store: loginWithGoogleCredential', () => {
 
     expect(useSession.getState().user).toBeNull();
     expect(useSession.getState().error).toBe('invalid_credential');
+  });
+});
+
+describe('session store: analytics', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.mocked(track).mockClear();
+  });
+
+  it('emits login {method:guest} on playAsGuest success', async () => {
+    vi.spyOn(api, 'guest').mockResolvedValue({ user: { ...user }, accessToken: 'tok' });
+    await useSession.getState().playAsGuest('Ada');
+    expect(track).toHaveBeenCalledWith('login', { method: 'guest' });
+  });
+
+  it('emits sign_up {method:password} on register success', async () => {
+    vi.spyOn(api, 'register').mockResolvedValue({ user: { ...user }, accessToken: 'tok' });
+    await useSession.getState().register('a@b.co', 'pw123456', 'Ada');
+    expect(track).toHaveBeenCalledWith('sign_up', { method: 'password' });
+  });
+
+  it('does not emit login on a failed sign-in', async () => {
+    vi.spyOn(api, 'login').mockRejectedValue(new Error('bad'));
+    await useSession.getState().login('a@b.co', 'nope');
+    expect(track).not.toHaveBeenCalledWith('login', { method: 'password' });
   });
 });
