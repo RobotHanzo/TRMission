@@ -291,6 +291,7 @@ const resources = {
         eventAnnounced: '預報：{{event}} 即將來臨',
         eventStarted: '{{event}} 開始',
         eventEnded: '{{event}} 結束',
+        marketRecycled: '車廂卡市場出現 3 張彩虹車頭，已重新抽取',
         eventBonus: {
           HOTSPOT: '打卡熱點 +{{points}}（{{city}}）',
           REOPEN: '重新通車 +{{points}}（{{route}}）',
@@ -865,6 +866,7 @@ const resources = {
         eventAnnounced: 'Forecast: {{event}} incoming',
         eventStarted: '{{event}} started',
         eventEnded: '{{event}} ended',
+        marketRecycled: 'Market redrawn — 3 locomotives appeared',
         eventBonus: {
           HOTSPOT: 'Hotspot +{{points}} ({{city}})',
           REOPEN: 'Reopened +{{points}} ({{route}})',

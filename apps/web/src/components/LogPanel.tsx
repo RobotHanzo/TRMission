@@ -84,6 +84,8 @@ export function LogPanel() {
           city: e.data.cityId ? cityName(String(e.data.cityId), locale) : '',
           route: e.data.routeId ? routeName(String(e.data.routeId)) : '',
         });
+      case 'marketRecycled':
+        return t('log.marketRecycled');
       case 'ticketCompleted': {
         const label = ticketLabel(String(e.data.ticketId), locale);
         return label

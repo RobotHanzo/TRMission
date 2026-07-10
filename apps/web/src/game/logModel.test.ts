@@ -42,6 +42,13 @@ describe('entriesFromEvents', () => {
     expect(out).toEqual([]);
   });
 
+  it('logs a market recycle (3 face-up locomotives)', () => {
+    const out = entriesFromEvents([ev({ case: 'marketRecycled', value: {} })]);
+    expect(out).toEqual([
+      { kind: 'marketRecycled', playerId: null, data: {}, importance: 'normal' },
+    ]);
+  });
+
   it('reads the face-up card colour but not blind draws', () => {
     const out = entriesFromEvents([
       ev({ case: 'cardTakenFaceup', value: { playerId: 'p1', slot: 0, card: CardColor.BLUE } }),

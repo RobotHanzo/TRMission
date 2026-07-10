@@ -21,7 +21,8 @@ export type LogKind =
   | 'eventAnnounced'
   | 'eventStarted'
   | 'eventEnded'
-  | 'eventBonus';
+  | 'eventBonus'
+  | 'marketRecycled';
 
 export interface LogDatum {
   kind: LogKind;
@@ -37,8 +38,9 @@ export interface LogEntry extends LogDatum {
 /**
  * Pure projection of a delivered event batch into log rows. Names + seat colours are
  * resolved later at render (so late roster names + locale changes apply); this only
- * carries ids/counts. Ambient/noisy events (market refill/recycle, deck reshuffle,
- * turn-ended, private ticket offers, double-route lock) are omitted.
+ * carries ids/counts. Ambient/noisy events (market refill, deck reshuffle, turn-ended,
+ * private ticket offers, double-route lock) are omitted; a market recycle (3 face-up
+ * locomotives) is notable enough to keep.
  */
 export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
   const out: LogDatum[] = [];
@@ -180,6 +182,9 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
           data: { ticketId: ev.value.ticketId },
           importance: 'highlight',
         });
+        break;
+      case 'marketRecycled':
+        out.push({ kind: 'marketRecycled', playerId: null, data: {}, importance: 'normal' });
         break;
       default:
         break; // omit the rest
