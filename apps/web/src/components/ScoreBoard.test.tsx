@@ -8,6 +8,8 @@ import { ScoreBoard } from './ScoreBoard';
 import { useAnimations } from '../store/animations';
 import { TICKETS, ROUTES, ticketById } from '../game/content';
 import type { RoomMember } from '../net/rest';
+import { useUi } from '../store/ui';
+import { api } from '../net/rest';
 
 const done = TICKETS[0]!.id as string;
 const failed = TICKETS[1]!.id as string;
@@ -185,5 +187,43 @@ describe('ScoreBoard rematch', () => {
   it('renders no rematch controls when members/callbacks are not provided (sandbox/replay)', () => {
     render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
     expect(screen.queryByRole('button', { name: /想再玩一局/ })).not.toBeInTheDocument();
+  });
+});
+
+describe('ScoreBoard rating + Discord', () => {
+  beforeEach(() => {
+    useAnimations.getState().reset();
+    void i18n.changeLanguage('zh-Hant');
+    localStorage.clear();
+    useUi.setState({ gameId: 'g1', roomCode: 'ABCDE' });
+  });
+
+  it('disables submit until a star is picked, then submits and shows thanks', async () => {
+    const submitRating = vi
+      .spyOn(api, 'submitRating')
+      .mockResolvedValue({ id: 'r1', stars: 4, createdAt: '2026-01-01T00:00:00.000Z' });
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+
+    const submit = screen.getByRole('button', { name: '送出評分' });
+    expect(submit).toBeDisabled();
+
+    fireEvent.click(screen.getAllByRole('radio')[3]!);
+    expect(submit).not.toBeDisabled();
+
+    fireEvent.click(submit);
+    await screen.findByText('感謝你的評分！');
+    expect(submitRating).toHaveBeenCalledWith({ gameId: 'g1', roomId: 'ABCDE', stars: 4 });
+  });
+
+  it('remembers a rated game across remounts via localStorage', () => {
+    localStorage.setItem('trm.ratedGameIds', JSON.stringify(['g1']));
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+    expect(screen.getByText('感謝你的評分！')).toBeInTheDocument();
+    expect(screen.queryAllByRole('radio')).toHaveLength(0);
+  });
+
+  it('always shows a Discord join button', () => {
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+    expect(screen.getByRole('button', { name: /加入 Discord 社群/ })).toBeInTheDocument();
   });
 });

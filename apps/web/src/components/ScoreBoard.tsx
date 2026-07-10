@@ -3,16 +3,42 @@ import { useTranslation } from 'react-i18next';
 import { Crown, Bot, Eye, Map as MapIcon, X } from 'lucide-react';
 import type { GameSnapshot, PlayerFinal } from '@trm/proto';
 import type { RoomMember } from '../net/rest';
+import { api } from '../net/rest';
 import { SEAT_COLORS } from '../theme/colors';
 import { seatByPlayer } from '../game/view';
 import { usePlayerName } from '../game/playerName';
 import { ticketById } from '../game/content';
 import { useAnimationsStore } from '../store/animations';
 import { useConfetti } from '../hooks/useConfetti';
+import { useUi } from '../store/ui';
 import { TicketCard } from './TicketCard';
+import { StarRating } from './StarRating';
+import { DiscordGlyph } from './icons/DiscordGlyph';
+import { openDiscord } from '../discord';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
 const ticketValue = (id: string): number => ticketById.get(id)?.value ?? 0;
+
+const RATED_GAMES_KEY = 'trm.ratedGameIds';
+
+function getRatedGameIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(RATED_GAMES_KEY);
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function markGameRated(gameId: string): void {
+  try {
+    const ids = getRatedGameIds();
+    ids.add(gameId);
+    localStorage.setItem(RATED_GAMES_KEY, JSON.stringify([...ids]));
+  } catch {
+    /* storage unavailable */
+  }
+}
 
 /** Completed (gains) vs failed (losses) kept tickets, with their point sums. */
 function ticketSplit(pf: PlayerFinal): {
@@ -50,10 +76,33 @@ export function ScoreBoard({
   const playerName = usePlayerName();
   const setRouteReveal = useAnimationsStore((s) => s.setRouteReveal);
   const clearRouteReveal = useAnimationsStore((s) => s.clearRouteReveal);
+  const gameId = useUi((s) => s.gameId);
+  const roomCode = useUi((s) => s.roomCode);
 
   const [ticketModal, setTicketModal] = useState<TicketModal | null>(null);
   const [viewingMap, setViewingMap] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [stars, setStars] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [ratingError, setRatingError] = useState(false);
+  const [alreadyRated, setAlreadyRated] = useState(
+    () => !!gameId && getRatedGameIds().has(gameId),
+  );
+
+  const submitRating = async (): Promise<void> => {
+    if (!gameId || !roomCode || stars === 0) return;
+    setSubmitting(true);
+    setRatingError(false);
+    try {
+      await api.submitRating({ gameId, roomId: roomCode, stars });
+      markGameRated(gameId);
+      setAlreadyRated(true);
+    } catch {
+      setRatingError(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   useConfetti(!viewingMap && !dismissed);
 
@@ -242,6 +291,31 @@ export function ScoreBoard({
             </div>
           </div>
         )}
+        {gameId && roomCode && (
+          <div className="scoreboard-rating">
+            <span className="scoreboard-rating-label">{t('rateAppPrompt')}</span>
+            {alreadyRated ? (
+              <span className="scoreboard-rating-thanks">{t('ratingThanks')}</span>
+            ) : (
+              <>
+                <StarRating value={stars} onChange={setStars} size={32} disabled={submitting} />
+                <button
+                  className="primary"
+                  disabled={stars === 0 || submitting}
+                  onClick={() => void submitRating()}
+                >
+                  {t('submitRating')}
+                </button>
+                {ratingError && <p className="error">{t('ratingSubmitError')}</p>}
+              </>
+            )}
+          </div>
+        )}
+        <div className="scoreboard-discord">
+          <button className="discord-cta" onClick={openDiscord}>
+            <DiscordGlyph size={18} /> {t('home.welcome.discordCta')}
+          </button>
+        </div>
         <div className="scoreboard-actions">
           <button onClick={() => setDismissed(true)}>
             <MapIcon size={14} aria-hidden /> {t('inspectMap')}
