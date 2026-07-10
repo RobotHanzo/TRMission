@@ -19,6 +19,7 @@ const row = (over: Partial<UserRow> = {}): UserRow => ({
   oauthProviders: [],
   hasPassword: false,
   features: [],
+  tutorialCompleted: true,
   createdAt: '2026-07-01T00:00:00.000Z',
   ...over,
 });

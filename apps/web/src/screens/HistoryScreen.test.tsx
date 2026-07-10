@@ -22,6 +22,7 @@ const signedIn = {
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
   features: ['replayReview'] as UserFeature[],
+  tutorialCompleted: true,
 } as const;
 
 const row = (over: Partial<MatchSummary> = {}): MatchSummary => ({

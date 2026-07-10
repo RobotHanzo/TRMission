@@ -29,6 +29,7 @@ const signedIn = {
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
   features: ['mapBuilder'] as UserFeature[],
+  tutorialCompleted: true,
 } as const;
 
 describe('AppHeader phone hamburger menu', () => {

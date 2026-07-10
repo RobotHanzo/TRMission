@@ -55,6 +55,7 @@ const ME = {
     boardLayout: 'rail' as const,
   },
   features: [] as UserFeature[],
+  tutorialCompleted: true,
 };
 
 const member = (userId: string, ready = false) => ({

@@ -9,6 +9,7 @@ const user = {
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
   features: [] as UserFeature[],
+  tutorialCompleted: true,
 } as const;
 
 describe('session store: logout', () => {

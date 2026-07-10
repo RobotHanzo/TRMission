@@ -29,6 +29,7 @@ const signedIn = {
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
   features: ['replayReview'] as UserFeature[],
+  tutorialCompleted: true,
 } as const;
 
 const payload = (over: Partial<ReplayPayload> = {}): ReplayPayload => ({
