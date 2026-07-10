@@ -1,4 +1,5 @@
 import type { MapGeography } from '@trm/map-data';
+import polygonClipping, { type Polygon } from 'polygon-clipping';
 import { WORLD_LAND } from './worldData';
 import { isCrudeTaiwanRing, taiwanRings } from './taiwan';
 import { WORLD_COUNTRIES, type CountryLand } from './worldCountries';
@@ -80,6 +81,31 @@ function boundsOfRings(rings: readonly Ring[]): CropBBox | null {
 }
 
 /**
+ * Merge touching/overlapping country exteriors before simplification and rendering. Admin-0
+ * polygons each include their shared border, so keeping them as independent land rings makes the
+ * live map draw two coastlines (and two sea-coloured shoreline strokes) through the middle of a
+ * contiguous selection. Polygon union removes those internal borders and leaves one coastline per
+ * connected landmass.
+ *
+ * MapGeography intentionally stores land exteriors only, just like WORLD_LAND, so inland-water
+ * holes returned by the clipping library are omitted here as they are in the vendored source data.
+ */
+export function dissolveCountryRings(rings: readonly Ring[]): Ring[] {
+  if (rings.length < 2) return rings.map((ring) => [...ring]);
+
+  const polygons: Polygon[] = rings.map((ring) => [[...ring] as [number, number][]]);
+  const dissolved = polygonClipping.union(polygons[0]!, ...polygons.slice(1));
+
+  return dissolved.flatMap((polygon) => {
+    const exterior = polygon[0];
+    if (!exterior || exterior.length < 4) return [];
+    // polygon-clipping closes every output ring; the rest of this pipeline treats closure as
+    // implicit and would otherwise simplify/render the first vertex twice.
+    return [exterior.slice(0, -1) as Ring];
+  });
+}
+
+/**
  * Turn a set of selected country ids into a MapGeography, mirroring cropToGeography but sourcing
  * rings directly from the selected countries — never clipping against WORLD_LAND — so picking
  * "France" can't drag in Belgium just because it falls inside the union bounding box. Null for an
@@ -90,5 +116,5 @@ export function countriesToGeography(ids: readonly string[]): CropResult | null 
   const rings = WORLD_COUNTRIES.filter((c) => idSet.has(c.id)).flatMap(ringsForCountry);
   const bbox = boundsOfRings(rings);
   if (!bbox || !isValidCrop(bbox)) return null;
-  return finalizeGeography(rings, bbox);
+  return finalizeGeography(dissolveCountryRings(rings), bbox);
 }
