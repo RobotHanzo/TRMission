@@ -4,6 +4,7 @@ import { useUi } from './store/ui';
 import { useHasFeature, useSession } from './store/session';
 import { AppHeader } from './components/AppHeader';
 import { useLeaveWarning } from './hooks/useLeaveWarning';
+import { usePageViewTracking } from './hooks/usePageViewTracking';
 import { HomeScreen } from './screens/HomeScreen';
 import { RoomScreen } from './screens/RoomScreen';
 import { GameScreen } from './screens/GameScreen';
@@ -38,6 +39,7 @@ export function App() {
   const goHome = useUi((s) => s.goHome);
 
   useLeaveWarning();
+  usePageViewTracking();
 
   // The map builder is feature-gated: a direct /maps URL without the grant lands home.
   // (Cosmetic only — the server 403s regardless.)

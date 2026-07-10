@@ -83,8 +83,7 @@ type GtagLike = (command: 'event', name: string, params?: Record<string, unknown
 
 function sink(): { zaraz?: ZarazLike; gtag?: GtagLike } {
   if (typeof window === 'undefined') return {};
-  const w = window as unknown as { zaraz?: ZarazLike; gtag?: GtagLike };
-  return { zaraz: w.zaraz, gtag: w.gtag };
+  return window as unknown as { zaraz?: ZarazLike; gtag?: GtagLike };
 }
 
 export function track<K extends AnalyticsEventName>(name: K, params: AnalyticsEvents[K]): void {
