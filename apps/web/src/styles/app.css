@@ -684,21 +684,28 @@
   flex: 1;
   min-width: 100px;
   max-width: 160px;
+  /* The fill lives on the track pseudo-elements (below), not the input background: WebKit's thumb
+     travels within ::-webkit-slider-runnable-track, so drawing the fill there — the same box the
+     thumb rides — is the only way the fill boundary and the thumb stay aligned across the range. */
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+/* WebKit: draw the track + fill on the runnable-track so it shares the thumb's coordinate space.
+   The thumb's centre travels from 8px (half its width) to width-8px, so the fill boundary is
+   offset to match — at 0 it sits at 8px, fully hidden under the thumb, leaving no stray nub. */
+.volume-range::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
-  /* The thumb travels within (track width - thumb width), centered 8px (half the 16px thumb) in
-     from each edge — not edge to edge — so a plain value*100% gradient stop only lines up with
-     the thumb at exactly 50%. Offsetting by that radius keeps them aligned across the whole range. */
   background: linear-gradient(
     to right,
     var(--tr-blue) calc(8px + var(--tr-range-fill, 0) * (100% - 16px)),
     var(--tr-surface-2) calc(8px + var(--tr-range-fill, 0) * (100% - 16px))
   );
-  outline: none;
-  cursor: pointer;
 }
 .volume-range::-webkit-slider-thumb {
   -webkit-appearance: none;
+  margin-top: -6px; /* centre the 16px thumb on the 4px track */
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -710,6 +717,7 @@
 .volume-range::-webkit-slider-thumb:hover {
   transform: scale(1.15);
 }
+/* Firefox fills natively via ::-moz-range-progress (already thumb-aligned), so no offset needed. */
 .volume-range::-moz-range-track {
   height: 4px;
   border-radius: 999px;
@@ -735,6 +743,11 @@
 }
 .volume-range:disabled {
   cursor: not-allowed;
+}
+.volume-range:disabled::-webkit-slider-runnable-track {
+  background: var(--tr-surface-2);
+}
+.volume-range:disabled::-moz-range-progress {
   background: var(--tr-surface-2);
 }
 .volume-range:disabled::-webkit-slider-thumb,
