@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { UserFeature } from '@trm/shared';
 import { api, type UserRow } from '../net/rest';
+import { useSession } from '../store/session';
 import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { FeatureToggles } from '../components/FeatureToggles';
 import { Drawer } from '../components/Drawer';
@@ -8,10 +10,12 @@ import { shortId } from '../lib/fmt';
 
 export function FeaturesView() {
   const { t } = useTranslation();
+  const canEditDefaults = useSession((s) => s.hasPermission('config.features'));
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [picking, setPicking] = useState(false);
   const [editing, setEditing] = useState<UserRow | null>(null);
+  const [defaults, setDefaults] = useState<UserFeature[] | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -26,9 +30,22 @@ export function FeaturesView() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (!canEditDefaults) return;
+    void api.getDefaultFeatures().then((r) => setDefaults(r.features));
+  }, [canEditDefaults]);
+
   return (
     <div>
       <h1 className="oc-page-title">{t('features.title')}</h1>
+
+      {canEditDefaults && defaults && (
+        <section>
+          <h2>{t('features.defaultsTitle')}</h2>
+          <p className="oc-muted">{t('features.defaultsDesc')}</p>
+          <FeatureToggles target={{ kind: 'defaults', onSaved: setDefaults }} initial={defaults} />
+        </section>
+      )}
 
       <div className="oc-toolbar">
         <button className="oc-btn primary" onClick={() => setPicking(true)}>
