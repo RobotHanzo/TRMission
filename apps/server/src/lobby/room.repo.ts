@@ -202,14 +202,32 @@ export class RoomRepo implements OnModuleInit {
     throw new Error('could not allocate a room code');
   }
 
-  /** Atomic join: CAS on the member-count so concurrent joiners get distinct seats. */
+  /** Atomic join: CAS on the member-count so concurrent joiners get distinct seats. A full LOBBY
+   *  room falls back to seating the joiner as a spectator (unless the room disables spectating).
+   *  join() never promotes an existing spectator to a seat, full room or not — that stays the
+   *  explicit becomePlayer/rejoin action. */
   async join(code: string, member: Omit<RoomMember, 'seat' | 'ready'>): Promise<JoinResult> {
     for (let attempt = 0; attempt < 6; attempt++) {
       const room = await this.col.findOne({ _id: code });
       if (!room) return 'not_found';
       if (room.status !== 'LOBBY') return 'started';
       if (room.members.some((m) => m.userId === member.userId)) return 'already';
-      if (room.members.length >= room.maxPlayers) return 'full';
+      if (room.spectators?.some((s) => s.userId === member.userId)) return room;
+
+      if (room.members.length >= room.maxPlayers) {
+        const settings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+        if (!settings.allowSpectating) return 'full';
+        const spectator: RoomSpectator = {
+          userId: member.userId,
+          displayName: member.displayName,
+          isGuest: member.isGuest,
+        };
+        await this.col.updateOne(
+          { _id: code, 'spectators.userId': { $ne: member.userId } },
+          { $push: { spectators: spectator }, $set: { updatedAt: new Date() } },
+        );
+        return (await this.col.findOne({ _id: code })) ?? 'not_found';
+      }
 
       const seat = room.members.length;
       const res = await this.col.updateOne(

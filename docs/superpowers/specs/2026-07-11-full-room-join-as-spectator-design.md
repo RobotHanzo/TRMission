@@ -64,18 +64,20 @@ Two call sites hit `POST /rooms/:code/join` and both need to detect and surface 
 Detection needs no new API field: after `joinRoom` resolves, if the current user is present in
 `spectators` but absent from `members`, the join fell back to spectating.
 
-Add a one-shot flag to `apps/web/src/store/ui.ts`, mirroring the existing `homeFocus` one-shot
-pattern:
+No new store field or CSS is needed — reuse the existing toast system. `RoomScreen` already imports
+`useAnimationsStore` from `store/animations.ts`, holds `pushNotification`, and renders
+`<NotificationStack />` in the lobby view (`RoomScreen.tsx:546`), which already has a self-expiring
+`'notice'` variant (see the existing `pushNotification({ variant: 'success', text: t('copied') })`
+call at `RoomScreen.tsx:255`). `useAnimations` is a plain singleton zustand store that nothing resets
+between screens (`net/connection.ts`'s connect-time reset touches `useGame`/`useLog`/`useChat`, not
+it), so a notification pushed from `HomeScreen` before navigating survives into `RoomScreen`'s mount
+and renders there once `<NotificationStack />` picks it up:
 
-- `spectateFallbackNotice: boolean`, `setSpectateFallbackNotice()`, `clearSpectateFallbackNotice()`.
-- Both call sites set it right after detecting the fallback, before navigating into the room.
-- Reset to `false` in `goHome()` alongside the other transient room fields, so it can never leak
-  into a later, unrelated room visit.
-
-`RoomScreen` renders a small info banner when the flag is set (new `.notice` CSS class in
-`apps/web/src/styles/app.css`, visually distinct from the existing `.error` paragraph style — e.g.
-neutral/blue vs. red) and clears the flag a few seconds later, matching the hold/exit timing already
-used by `NotificationChip` in `components/NotificationStack.tsx`.
+- Both call sites, right after detecting the fallback (and before navigating into the room via
+  `enterRoom`), call `pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') })`.
+  `HomeScreen.tsx` needs a new import of `useAnimationsStore` (it doesn't use the animations store
+  today); `RoomScreen.tsx` already has it wired up.
+- The chip self-expires on the existing `NotificationChip` hold/exit timing — no manual clear needed.
 
 ### i18n
 
@@ -93,7 +95,7 @@ Add `fullRoomSpectateNotice` to `apps/web/src/i18n/index.ts`:
   - A user already in `spectators` calling `join` again → idempotent, no duplicate entry, and no
     promotion to a seat even if one is open.
 - `apps/web`:
-  - `HomeScreen.test.tsx` — `joinRoom` resolving with the user only in `spectators` sets the notice
-    flag before navigating.
-  - `RoomScreen.test.tsx` — same fallback via the poll-driven auto-join path renders the notice
-    banner once, then it clears.
+  - `HomeScreen.test.tsx` — `joinRoom` resolving with the user only in `spectators` pushes the
+    `'notice'` notification before navigating.
+  - `RoomScreen.test.tsx` — same fallback via the poll-driven auto-join path renders the
+    `NotificationStack` chip with the expected text.
