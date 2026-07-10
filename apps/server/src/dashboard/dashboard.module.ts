@@ -13,12 +13,14 @@ import { DashboardService } from './dashboard.service';
 import { DashboardUsersService } from './dashboard-users.service';
 import { DashboardGamesService } from './dashboard-games.service';
 import { DashboardMaintainersService } from './dashboard-maintainers.service';
+import { DashboardFeatureDefaultsService } from './dashboard-feature-defaults.service';
 import { PurgeService } from './purge.service';
 import { DashboardMapsService } from './dashboard-maps.service';
 import { DashboardController } from './dashboard.controller';
 import { DashboardUsersController } from './dashboard-users.controller';
 import { DashboardGamesController } from './dashboard-games.controller';
 import { DashboardMaintainersController } from './dashboard-maintainers.controller';
+import { DashboardFeatureDefaultsController } from './dashboard-feature-defaults.controller';
 import { DashboardPurgeController } from './dashboard-purge.controller';
 import { DashboardMapsController } from './dashboard-maps.controller';
 import { DashboardRatingsService } from './dashboard-ratings.service';
@@ -38,6 +40,7 @@ import { RatingsModule } from '../ratings/ratings.module';
     DashboardUsersController,
     DashboardGamesController,
     DashboardMaintainersController,
+    DashboardFeatureDefaultsController,
     DashboardPurgeController,
     DashboardMapsController,
     DashboardRatingsController,
@@ -52,6 +55,7 @@ import { RatingsModule } from '../ratings/ratings.module';
     DashboardUsersService,
     DashboardGamesService,
     DashboardMaintainersService,
+    DashboardFeatureDefaultsService,
     DashboardBootstrap,
     PurgeService,
     DashboardMapsService,

@@ -126,6 +126,14 @@ export const FeaturedUsersSchema = z.object({
   users: z.array(DashboardUserRowSchema),
 });
 
+export const ConfigFeaturesSchema = z.object({
+  features: z.array(UserFeatureSchema),
+});
+export const ConfigFeaturesPutSchema = z.object({
+  features: z.array(UserFeatureSchema).max(USER_FEATURES.length),
+});
+export class ConfigFeaturesPutDto extends createZodDto(ConfigFeaturesPutSchema) {}
+
 // ---- games / rooms ------------------------------------------------------------------
 
 export const DashboardGameRowSchema = z.object({

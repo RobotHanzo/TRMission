@@ -20,7 +20,8 @@ export type DashboardAuditAction =
   | 'maintainer.revoke'
   | 'map.delete'
   | 'map.unshare'
-  | 'map.transfer';
+  | 'map.transfer'
+  | 'config.features';
 
 export interface AuditTarget {
   type: 'user' | 'game' | 'room' | 'maintainer' | 'map';
