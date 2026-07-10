@@ -158,6 +158,13 @@ export interface AdminReplayPayload {
   finalDigest?: string;
 }
 
+/** Roster (ids/seats/names/bot flags) for the ticket-authorized maintainer live-spectate route —
+ *  no normal auth involved, the ticket minted by the dashboard is the sole authority. The live
+ *  game state itself streams over the WebSocket using this same ticket. */
+export interface AdminSpectatePayload {
+  players: ReplayPlayerMeta[];
+}
+
 // --- custom maps (builder + shared/cloned + published content by hash) ---
 export interface CityDraft {
   id: string;
@@ -385,6 +392,11 @@ export const api = {
     req<AdminReplayPayload>(
       'GET',
       `/history/${encodeURIComponent(gameId)}/admin-replay?ticket=${encodeURIComponent(ticket)}`,
+    ),
+  adminSpectate: (gameId: string, ticket: string) =>
+    req<AdminSpectatePayload>(
+      'GET',
+      `/history/${encodeURIComponent(gameId)}/admin-spectate?ticket=${encodeURIComponent(ticket)}`,
     ),
 
   listMaps: () => req<MapSummary[]>('GET', '/maps'),

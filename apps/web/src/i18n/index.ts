@@ -346,6 +346,7 @@ const resources = {
         signIn: '登入',
         terminatedReplayNotice: '此對局已被管理員強制終止;回放僅顯示到終止當下的進度,無最終比分。',
         completedReplayNotice: '此為已完成對局的管理檢視。',
+        spectateEndedNotice: '已停止觀戰。',
       },
       chat: {
         heading: '聊天',
@@ -947,6 +948,7 @@ const resources = {
         terminatedReplayNotice:
           'This game was force-terminated by a maintainer — the replay only shows progress up to that point, with no final score.',
         completedReplayNotice: 'Maintainer view of a completed game.',
+        spectateEndedNotice: 'You stopped spectating.',
       },
       chat: {
         heading: 'Chat',
