@@ -199,6 +199,9 @@ interface UiState {
   /** A one-shot request to draw the eye to a control on the home screen (e.g. after the tutorial
    *  finale, spotlight the "create game" button instead of handing the learner a separate one). */
   homeFocus: 'create' | null;
+  /** Analytics only: set by the practice-vs-bots flow so `game_start` can tag the match as practice
+   *  (cleared when entering a normal room). Never affects gameplay. */
+  isPractice: boolean;
   goHome(): void;
   enterRoom(code: string): void;
   enterGame(gameId: string, ticket: string): void;
@@ -230,6 +233,7 @@ interface UiState {
   setSoundVolume(soundVolume: number): void;
   setFollowActing(followActing: boolean): void;
   setEncyclopediaOpen(open: boolean): void;
+  setPractice(isPractice: boolean): void;
   /** Adopt preferences from a signed-in account (the account is the source of truth). */
   applyPreferences(prefs: UserPreferences): void;
 }
@@ -255,6 +259,7 @@ export const useUi = create<UiState>()((set, get) => ({
   followActing: false,
   encyclopediaOpen: false,
   homeFocus: null,
+  isPractice: false,
   goHome: () => {
     disconnectGame();
     pushPath('/');
@@ -265,6 +270,7 @@ export const useUi = create<UiState>()((set, get) => ({
     set({ homeFocus: 'create' });
   },
   clearHomeFocus: () => set({ homeFocus: null }),
+  setPractice: (isPractice) => set({ isPractice }),
   enterRoom: (code) => {
     pushPath(`/room/${code}`);
     set({ view: 'room', roomCode: code, replayGameId: null });

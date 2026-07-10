@@ -6,6 +6,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
+import { CONTENT_HASH } from '@trm/map-data';
+import { track } from '../lib/analytics';
 import type { RoomMember } from '../net/rest';
 import { useGameStore, type RejectionInfo } from '../store/game';
 import { useUi } from '../store/ui';
@@ -101,6 +103,8 @@ export function GameStage({
   const locale = useUi((s) => s.locale);
   const colorBlind = useUi((s) => s.colorBlind);
   const boardLayout = useUi((s) => s.boardLayout);
+  const gameId = useUi((s) => s.gameId);
+  const isPractice = useUi((s) => s.isPractice);
 
   const rejection = useGameStore((s) => s.rejection);
   const setRejection = useGameStore((s) => s.setRejection);
@@ -175,6 +179,62 @@ export function GameStage({
   const canAct = myTurn && phase === Phase.AWAIT_ACTION;
   const canDraw = myTurn && (phase === Phase.AWAIT_ACTION || phase === Phase.DRAWING_CARDS);
 
+  // --- analytics (LIVE games only; the tutorial/encyclopedia/replay sandbox never fires these) ---
+  const startedRef = useRef<string | null>(null);
+  const completedRef = useRef<string | null>(null);
+  const firstActionRef = useRef<string | null>(null);
+  const startMsRef = useRef<number>(0);
+  const playerCounts = (): { player_count: number; human_count: number; bot_count: number } => {
+    const players = snapshot.players;
+    const bot_count = players.filter((p) => p.id.startsWith('bot:')).length;
+    return { player_count: players.length, bot_count, human_count: players.length - bot_count };
+  };
+  const mapId = snapshot.contentHash;
+  // Client-side heuristic: only the bundled Taiwan content is recognised as "official"; any other
+  // hash (custom map, or a server-official map the client doesn't bundle) reads as "custom".
+  const mapSource: 'official' | 'custom' = snapshot.contentHash === CONTENT_HASH ? 'official' : 'custom';
+  const markFirstAction = (action: string): void => {
+    if (sandbox || !gameId || firstActionRef.current === gameId) return;
+    firstActionRef.current = gameId;
+    track('game_first_action', { action });
+  };
+  // game_start — once per live gameId (a reconnect re-delivering the "first" snapshot won't refire).
+  useEffect(() => {
+    if (sandbox || !gameId || startedRef.current === gameId) return;
+    startedRef.current = gameId;
+    startMsRef.current = Date.now();
+    track('game_start', {
+      ...playerCounts(),
+      map_source: mapSource,
+      map_id: mapId,
+      events_mode: snapshot.gameSettings?.eventsMode ?? 'off',
+      is_spectator: isSpectator,
+      is_practice: isPractice,
+    });
+    // Fires once per live gameId — snapshot/derived params are intentionally not deps.
+  }, [sandbox, gameId]);
+  // game_complete — once per live gameId when the game reaches GAME_OVER.
+  useEffect(() => {
+    if (sandbox || !gameId || phase !== Phase.GAME_OVER || completedRef.current === gameId) return;
+    completedRef.current = gameId;
+    const fs = snapshot.finalScores;
+    const mine = fs?.players.find((p) => p.playerId === me);
+    const won = !!me && (fs?.ranking?.[0]?.playerIds.includes(me) ?? false);
+    track('game_complete', {
+      won,
+      final_score: mine?.total ?? 0,
+      ...playerCounts(),
+      ...(startMsRef.current
+        ? { duration_sec: Math.round((Date.now() - startMsRef.current) / 1000) }
+        : {}),
+      ...(mine?.ticketsCompleted !== undefined ? { tickets_completed: mine.ticketsCompleted } : {}),
+      longest_path: (mine?.longestBonus ?? 0) > 0,
+      is_spectator: isSpectator,
+      map_id: mapId,
+    });
+    // Fires once per live gameId at GAME_OVER — snapshot/derived params are intentionally not deps.
+  }, [sandbox, gameId, phase]);
+
   // Tutorial action gate: an `await` beat keeps only its expected affordance live; a `'locked'` gate
   // (narration / scripted / done) disables them all — so a stray click can't change phase and
   // dead-end the lesson. No gate (live game) ⇒ every affordance enabled. Claim and station are
@@ -241,9 +301,18 @@ export function GameStage({
   };
   const confirmPayment = (p: Payment) => {
     if (!commands || !claim) return;
+    markFirstAction(claim.kind === 'route' ? 'claim_route' : 'build_station');
     if (claim.kind === 'route') {
       if (claim.route.isTunnel) setTunnelBase(p);
       commands.claimRoute(claim.route.id as string, paymentToProto(p));
+      if (!sandbox) {
+        track('route_claimed', {
+          length: claim.route.length,
+          is_tunnel: !!claim.route.isTunnel,
+          is_ferry: (claim.route.ferryLocos ?? 0) > 0,
+          map_id: snapshot.contentHash,
+        });
+      }
     } else {
       commands.buildStation(claim.cityId, paymentToProto(p));
     }
@@ -255,6 +324,7 @@ export function GameStage({
     (snapshot.you?.pendingOfferTicketIds.length ?? 0) > 0;
   const confirmKeep = (ids: string[]) => {
     if (!commands) return;
+    markFirstAction(phase === Phase.SETUP_TICKETS ? 'keep_initial' : 'keep_tickets');
     if (phase === Phase.SETUP_TICKETS) commands.keepInitialTickets(ids);
     else commands.keepTickets(ids);
   };
@@ -311,15 +381,24 @@ export function GameStage({
       <CardMarket
         snapshot={snapshot}
         canDraw={marketCanDraw}
-        onDrawFaceUp={(slot) => commands?.drawFaceUp(slot)}
-        onDrawBlind={() => commands?.drawBlind()}
+        onDrawFaceUp={(slot) => {
+          markFirstAction('draw_faceup');
+          commands?.drawFaceUp(slot);
+        }}
+        onDrawBlind={() => {
+          markFirstAction('draw_blind');
+          commands?.drawBlind();
+        }}
       />
       <div className="hud-actions">
         <button
           className="accent"
           data-anim="draw-tickets"
           disabled={!canAct || snapshot.ticketDeckShortCount === 0 || !allow.tickets}
-          onClick={() => commands?.drawTickets()}
+          onClick={() => {
+            markFirstAction('draw_tickets');
+            commands?.drawTickets();
+          }}
         >
           {t('drawTickets')}
           {snapshot.ticketDeckShortCount === 0
