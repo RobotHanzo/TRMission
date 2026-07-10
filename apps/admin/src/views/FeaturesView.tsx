@@ -89,12 +89,15 @@ export function FeaturesView() {
         >
           <section>
             <FeatureToggles
-              userId={editing.id}
-              initial={editing.features}
-              onSaved={() => {
-                setEditing(null);
-                void load();
+              target={{
+                kind: 'user',
+                userId: editing.id,
+                onSaved: () => {
+                  setEditing(null);
+                  void load();
+                },
               }}
+              initial={editing.features}
             />
           </section>
         </Drawer>

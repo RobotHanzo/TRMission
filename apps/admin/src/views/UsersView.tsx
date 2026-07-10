@@ -210,9 +210,8 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               <h3>{t('features.title')}</h3>
               <FeatureToggles
                 key={detail.features.join(',')}
-                userId={detail.id}
+                target={{ kind: 'user', userId: detail.id, onSaved: setDetail }}
                 initial={detail.features}
-                onSaved={setDetail}
               />
             </section>
           )}

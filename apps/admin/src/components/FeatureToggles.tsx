@@ -4,15 +4,18 @@ import { USER_FEATURES, type UserFeature } from '@trm/shared';
 import { api, type UserDetail } from '../net/rest';
 import { useToast } from '../store/toast';
 
-/** Checkbox-per-feature editor saving via PUT /dashboard/users/:id/features. */
+export type FeatureToggleTarget =
+  | { kind: 'user'; userId: string; onSaved?: (detail: UserDetail) => void }
+  | { kind: 'defaults'; onSaved?: (features: UserFeature[]) => void };
+
+/** Checkbox-per-feature editor. Saves via PUT /dashboard/users/:id/features for a `user`
+ *  target, or PUT /dashboard/config/features for the `defaults` target. */
 export function FeatureToggles({
-  userId,
+  target,
   initial,
-  onSaved,
 }: {
-  userId: string;
+  target: FeatureToggleTarget;
   initial: UserFeature[];
-  onSaved?: (detail: UserDetail) => void;
 }) {
   const { t } = useTranslation();
   const pushToast = useToast((s) => s.push);
@@ -32,8 +35,13 @@ export function FeatureToggles({
     setBusy(true);
     setError(null);
     try {
-      const detail = await api.putUserFeatures(userId, [...selected]);
-      onSaved?.(detail);
+      if (target.kind === 'user') {
+        const detail = await api.putUserFeatures(target.userId, [...selected]);
+        target.onSaved?.(detail);
+      } else {
+        const { features } = await api.putDefaultFeatures([...selected]);
+        target.onSaved?.(features);
+      }
       pushToast('success', t('toast.featuresSaved'));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'error');

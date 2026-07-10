@@ -336,6 +336,9 @@ export const api = {
   deleteUser: (id: string, reason?: string) =>
     req<void>('DELETE', `/dashboard/users/${encodeURIComponent(id)}`, { reason }),
   listFeaturedUsers: () => req<{ users: UserRow[] }>('GET', '/dashboard/users/features'),
+  getDefaultFeatures: () => req<{ features: UserFeature[] }>('GET', '/dashboard/config/features'),
+  putDefaultFeatures: (features: UserFeature[]) =>
+    req<{ features: UserFeature[] }>('PUT', '/dashboard/config/features', { features }),
 
   listGames: (opts: { status?: string; cursor?: string } = {}) =>
     req<GamesPage>('GET', `/dashboard/games${qs(opts)}`),
