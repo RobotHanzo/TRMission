@@ -26,14 +26,14 @@ beforeAll(async () => {
 afterAll(() => t.close());
 
 describe('PublicUser.features', () => {
-  it('defaults to [] and reflects grants instantly (no re-login)', async () => {
+  it('starts at the global defaults and reflects grants instantly (no re-login)', async () => {
     const a = await registered('feat-me@example.com', 'FeatMe');
     const before = await request(server()).get('/api/v1/auth/me').set(auth(a.token)).expect(200);
-    expect(before.body.features).toEqual([]);
+    expect(before.body.features).toEqual(['randomEvents']);
 
     await grant(t.db, a.id, ['mapBuilder']);
     const after = await request(server()).get('/api/v1/auth/me').set(auth(a.token)).expect(200);
-    expect(after.body.features).toEqual(['mapBuilder']);
+    expect(after.body.features).toEqual(['mapBuilder', 'randomEvents']);
   });
 });
 
