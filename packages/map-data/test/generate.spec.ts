@@ -112,4 +112,35 @@ describe('generateTickets', () => {
     const keys = tickets.map((t) => pairKey(t.a as string, t.b as string));
     expect(new Set(keys).size).toBe(keys.length);
   });
+
+  it('shortMaxValue excludes SHORT tickets whose score is above the cap', () => {
+    const uncapped = generateTickets(cities, routes, { seed: 6, longCount: 3, shortCount: 12 });
+    const uncappedShortValues = uncapped.filter((t) => t.deck === 'SHORT').map((t) => t.value);
+    const maxShortValue = Math.max(...uncappedShortValues);
+    const cap = maxShortValue - 1;
+    expect(cap).toBeGreaterThanOrEqual(2);
+
+    const capped = generateTickets(cities, routes, {
+      seed: 6,
+      longCount: 3,
+      shortCount: 12,
+      shortMaxValue: cap,
+    });
+    for (const t of capped.filter((x) => x.deck === 'SHORT')) {
+      expect(t.value).toBeLessThanOrEqual(cap);
+    }
+  });
+
+  it('does not throw when shortMaxValue is tighter than the reachable SHORT band', () => {
+    // shortMinDistance defaults to 4, so every SHORT candidate's value is ≥ 4 — a cap of 2
+    // excludes every candidate, leaving an empty (not thrown) SHORT deck.
+    const tickets = generateTickets(cities, routes, {
+      seed: 8,
+      longCount: 3,
+      shortCount: 50,
+      shortMaxValue: 2,
+    });
+    expect(tickets.filter((t) => t.deck === 'SHORT')).toHaveLength(0);
+    expect(tickets.filter((t) => t.deck === 'LONG')).toHaveLength(3);
+  });
 });

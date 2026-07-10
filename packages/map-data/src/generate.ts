@@ -8,6 +8,8 @@ export interface GenerateTicketsOptions {
   readonly longCount?: number;
   readonly shortCount?: number;
   readonly shortMinDistance?: number;
+  /** Caps a SHORT ticket's final score (value); undefined ⇒ unbounded (today's behavior). */
+  readonly shortMaxValue?: number;
 }
 
 interface Candidate {
@@ -30,7 +32,7 @@ export function generateTickets(
   routes: readonly RouteDef[],
   opts: GenerateTicketsOptions,
 ): TicketDef[] {
-  const { seed, longCount = 6, shortCount = 36, shortMinDistance = 4 } = opts;
+  const { seed, longCount = 6, shortCount = 36, shortMinDistance = 4, shortMaxValue } = opts;
   const dist = shortestDistances(cities, routes);
   const ids = cities.map((c) => c.id as string);
 
@@ -85,7 +87,11 @@ export function generateTickets(
 
   const minLongDistance = longPicks.length > 0 ? Math.min(...longPicks.map((p) => p.d)) : Infinity;
   const remaining = candidates.filter(
-    (c) => !usedPairs.has(pairKey(c.a, c.b)) && c.d >= shortMinDistance && c.d < minLongDistance,
+    (c) =>
+      !usedPairs.has(pairKey(c.a, c.b)) &&
+      c.d >= shortMinDistance &&
+      c.d < minLongDistance &&
+      (shortMaxValue === undefined || valueOf(c.d, c.a, c.b) <= shortMaxValue),
   );
 
   let rng = makeRng(seed);
