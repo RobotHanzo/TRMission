@@ -229,6 +229,27 @@ export class DashboardGamesService {
     };
   }
 
+  /** Mint a short-lived ws-game ticket that force-joins a maintainer as a spectator on a LIVE
+   *  game — bypassing the room's allowSpectating setting and the "not already seated" check
+   *  entirely, since the maintainer is never a room member. This is literally the SAME ws-game
+   *  ticket kind (kind: 'ws-game', seat: -1) a normal spectator gets from
+   *  LobbyService.spectateTicket; the hub's ClientHello path needs no changes at all. */
+  async mintSpectateTicket(
+    actor: AuthUser,
+    gameId: string,
+  ): Promise<{ ticket: string; expiresIn: string }> {
+    const game = await this.games.findOne({ _id: gameId });
+    if (!game) throw new NotFoundException('game not found');
+    if (game.status !== 'LIVE') {
+      throw new ConflictException('spectating is only available for LIVE games');
+    }
+    await this.audit.log(actor, 'game.spectateLive', { type: 'game', id: gameId });
+    return {
+      ticket: this.tokens.signWsTicket({ gameId, playerId: actor.userId, seat: -1 }),
+      expiresIn: env.wsTicketTtl,
+    };
+  }
+
   /**
    * Replay payload with the MEMBERSHIP check bypassed — never the COMPLETED gate, which
    * stays in exactly one place for the PLAYER-FACING path (HistoryRepo.loadReplay). A

@@ -90,6 +90,19 @@ export class DashboardGamesController {
     return this.games.mintReplayTicket(actor, gameId);
   }
 
+  @Post('games/:gameId/spectate-ticket')
+  @HttpCode(200)
+  @RequirePermission('games.spectateLive')
+  @ApiOperation({
+    summary: "Mint a short-lived ticket to force-join a LIVE game's live view in apps/web",
+    description:
+      "Bypasses the room's allowSpectating setting entirely — the maintainer is never a room " +
+      'member. 409 unless the game is LIVE.',
+  })
+  mintSpectateTicket(@Param('gameId') gameId: string, @CurrentUser() actor: AuthUser) {
+    return this.games.mintSpectateTicket(actor, gameId);
+  }
+
   @Post('games/:gameId/terminate')
   @HttpCode(200)
   @RequirePermission('games.terminate')
