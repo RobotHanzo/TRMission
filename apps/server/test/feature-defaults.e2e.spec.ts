@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { createTestApp, type TestApp } from './app';
 
