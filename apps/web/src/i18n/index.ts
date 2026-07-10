@@ -11,6 +11,7 @@ const resources = {
       appName: '台鐵任務',
       tagline: '在台灣鐵道上搶占路線、完成任務卡。',
       language: '語言',
+      discord: 'Discord 社群',
       settings: '設定',
       appearance: '外觀',
       themeSystem: '跟隨系統',
@@ -58,6 +59,7 @@ const resources = {
           skipDesc: '略過教學，直接建立房間開始遊戲，邊玩邊摸索也可以。',
           skipCta: '前往首頁',
           footnote: '之後仍可從右上角「規則百科」按鈕隨時重新查看教學',
+          discordCta: '加入 Discord 社群',
         },
       },
 
@@ -568,6 +570,7 @@ const resources = {
       appName: 'TRMission',
       tagline: 'Claim railway routes across Taiwan and complete your mission tickets.',
       language: 'Language',
+      discord: 'Discord Community',
       settings: 'Settings',
       appearance: 'Appearance',
       themeSystem: 'System',
@@ -617,6 +620,7 @@ const resources = {
           skipDesc: 'Skip the tutorial and create a room right away — you can learn as you play.',
           skipCta: 'Go to homepage',
           footnote: 'You can always revisit the tutorial later from the "Rules" button up top.',
+          discordCta: 'Join our Discord',
         },
       },
 

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, CirclePlay, GraduationCap } from 'lucide-react';
 import { BrandBanner } from '../components/BrandBanner';
+import { DiscordGlyph } from '../components/icons/DiscordGlyph';
+import { openDiscord } from '../discord';
 
 interface WelcomeScreenProps {
   name: string;
@@ -74,6 +76,12 @@ export function WelcomeScreen({
             {t('home.welcome.skipCta')} →
           </button>
         </div>
+      </div>
+
+      <div className="welcome-discord">
+        <button className="welcome-discord-cta" onClick={openDiscord}>
+          <DiscordGlyph size={18} /> {t('home.welcome.discordCta')}
+        </button>
       </div>
 
       {error && <p className="welcome-error error">{error}</p>}

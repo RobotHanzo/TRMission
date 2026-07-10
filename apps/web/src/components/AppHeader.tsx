@@ -19,7 +19,9 @@ import { PHONE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
 import { SettingsModal } from './SettingsModal';
 import { ConfirmDialog } from './ConfirmDialog';
 import { BrandBanner } from './BrandBanner';
+import { DiscordGlyph } from './icons/DiscordGlyph';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { openDiscord } from '../discord';
 
 export function AppHeader() {
   const { t } = useTranslation();
@@ -176,6 +178,9 @@ export function AppHeader() {
                     <BookOpen size={16} aria-hidden /> {t('tutorial.open')}
                   </button>
                 )}
+                <button className="header-menu-item" role="menuitem" onClick={menuAct(openDiscord)}>
+                  <DiscordGlyph size={16} /> {t('discord')}
+                </button>
                 <button
                   className="header-menu-item"
                   role="menuitem"
@@ -238,6 +243,9 @@ export function AppHeader() {
                 <BookOpen size={16} aria-hidden />
               </button>
             )}
+            <button onClick={openDiscord} aria-label={t('discord')} title={t('discord')}>
+              <DiscordGlyph size={16} />
+            </button>
             <button
               onClick={() => setSettingsOpen(true)}
               aria-label={t('settings')}

@@ -372,6 +372,22 @@ button.home-side-card {
   font-weight: 600;
   font-size: 14.5px;
 }
+.welcome-discord {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--tr-space-6);
+}
+.welcome-discord-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  padding: 11px 22px;
+  font-weight: 600;
+  font-size: 14.5px;
+  background: #5865f2;
+  border-color: #5865f2;
+  color: #fff;
+}
 .welcome-footnote {
   margin: var(--tr-space-6) 0 0;
   font-size: 12.5px;
