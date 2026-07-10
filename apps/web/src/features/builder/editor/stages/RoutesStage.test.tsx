@@ -115,6 +115,27 @@ describe('RoutesStage', () => {
     expect(new Set(created.map((r) => r.doubleGroup)).size).toBe(1);
   });
 
+  it('places the parallel-tracks control before the Save/Cancel row in the new-route form', () => {
+    render(<RoutesStage />);
+    fireEvent.click(screen.getByText('city-c1'));
+    fireEvent.click(screen.getByText('city-c3')); // c1-c3 is a brand-new pair
+    const group = screen.getByRole('radiogroup', { name: '平行軌道' });
+    const saveButton = screen.getByText('儲存');
+    expect(
+      group.compareDocumentPosition(saveButton) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('places the parallel-tracks control before the Save/Cancel row in the edit-route form', () => {
+    render(<RoutesStage />);
+    fireEvent.click(screen.getByText('route-r1'));
+    const group = screen.getByRole('radiogroup', { name: '平行軌道' });
+    const saveButton = screen.getByText('儲存');
+    expect(
+      group.compareDocumentPosition(saveButton) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('selecting two cities that already have a route selects it instead of drawing a duplicate', () => {
     render(<RoutesStage />);
     fireEvent.click(screen.getByText('city-c1'));

@@ -104,37 +104,23 @@ export function RoutesStage() {
               b: cityName(selectedRoute.b),
             })}
             initial={selectedRoute}
-            hideDouble
+            parallelTracks={{
+              value: Math.min(
+                3,
+                draft.routes.filter(
+                  (r) =>
+                    (r.a === selectedRoute.a && r.b === selectedRoute.b) ||
+                    (r.a === selectedRoute.b && r.b === selectedRoute.a),
+                ).length,
+              ) as 1 | 2 | 3,
+              onChange: (v) => setPairTrackCount(selectedRoute.id, v),
+            }}
             onCancel={() => select(null)}
             onSubmit={(route) => updateRoute(selectedRoute.id, route)}
             extra={
-              <>
-                <div className="field">
-                  <span className="field-label">{t('builder.parallelTracks')}</span>
-                  <Segmented<string>
-                    options={[
-                      { value: '1', label: '1' },
-                      { value: '2', label: '2' },
-                      { value: '3', label: '3' },
-                    ]}
-                    value={String(
-                      Math.min(
-                        3,
-                        draft.routes.filter(
-                          (r) =>
-                            (r.a === selectedRoute.a && r.b === selectedRoute.b) ||
-                            (r.a === selectedRoute.b && r.b === selectedRoute.a),
-                        ).length,
-                      ),
-                    )}
-                    onChange={(v) => setPairTrackCount(selectedRoute.id, Number(v) as 1 | 2 | 3)}
-                    ariaLabel={t('builder.parallelTracks')}
-                  />
-                </div>
-                <button className="danger" onClick={() => removeRoute(selectedRoute.id)}>
-                  <Trash2 size={14} aria-hidden /> {t('builder.deleteRoute')}
-                </button>
-              </>
+              <button className="danger" onClick={() => removeRoute(selectedRoute.id)}>
+                <Trash2 size={14} aria-hidden /> {t('builder.deleteRoute')}
+              </button>
             }
           />
         ) : (
@@ -148,14 +134,14 @@ export function RoutesStage() {
 function RouteForm({
   title,
   initial,
-  hideDouble,
+  parallelTracks,
   onCancel,
   onSubmit,
   extra,
 }: {
   title: string;
   initial: RouteDraft;
-  hideDouble?: boolean;
+  parallelTracks?: { value: 1 | 2 | 3; onChange(v: 1 | 2 | 3): void };
   onCancel(): void;
   onSubmit(route: RouteDraft, trackCount: number): void;
   extra?: React.ReactNode;
@@ -232,21 +218,23 @@ function RouteForm({
           }}
         />
       </label>
-      {!hideDouble && (
-        <div className="field">
-          <span className="field-label">{t('builder.parallelTracks')}</span>
-          <Segmented<string>
-            options={[
-              { value: '1', label: '1' },
-              { value: '2', label: '2' },
-              { value: '3', label: '3' },
-            ]}
-            value={String(trackCount)}
-            onChange={(v) => setTrackCount(Number(v))}
-            ariaLabel={t('builder.parallelTracks')}
-          />
-        </div>
-      )}
+      <div className="field">
+        <span className="field-label">{t('builder.parallelTracks')}</span>
+        <Segmented<string>
+          options={[
+            { value: '1', label: '1' },
+            { value: '2', label: '2' },
+            { value: '3', label: '3' },
+          ]}
+          value={parallelTracks ? String(parallelTracks.value) : String(trackCount)}
+          onChange={(v) =>
+            parallelTracks
+              ? parallelTracks.onChange(Number(v) as 1 | 2 | 3)
+              : setTrackCount(Number(v))
+          }
+          ariaLabel={t('builder.parallelTracks')}
+        />
+      </div>
       <div className="row">
         <button
           className="primary"
