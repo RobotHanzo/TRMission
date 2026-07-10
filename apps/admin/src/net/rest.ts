@@ -224,6 +224,22 @@ export type GamesPage = { games: GameRow[]; nextCursor: string | null };
 export type RoomsPage = { rooms: RoomRow[]; nextCursor: string | null };
 export type AuditPage = { entries: AuditEntry[]; nextCursor: string | null };
 
+export interface RatingRow {
+  id: string;
+  userId: string;
+  userDisplayName?: string;
+  gameId: string;
+  roomId: string;
+  stars: number;
+  createdAt: string;
+}
+export type RatingsPage = {
+  ratings: RatingRow[];
+  nextCursor: string | null;
+  avgStars: number | null;
+  totalCount: number;
+};
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -362,6 +378,9 @@ export const api = {
 
   listAudit: (opts: { cursor?: string } = {}) =>
     req<AuditPage>('GET', `/dashboard/audit${qs(opts)}`),
+
+  listRatings: (opts: { cursor?: string } = {}) =>
+    req<RatingsPage>('GET', `/dashboard/ratings${qs(opts)}`),
 
   getPurgeStatus: () => req<PurgeStatus>('GET', '/dashboard/purge/status'),
   runPurge: () => req<PurgeRunResult>('POST', '/dashboard/purge/run', {}),

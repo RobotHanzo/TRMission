@@ -11,6 +11,7 @@ const zhHant = {
     games: '對局',
     rooms: '房間',
     maps: '地圖',
+    ratings: '評分',
     maintainers: '維護者',
     audit: '稽核',
     purge: '清理',
@@ -261,6 +262,15 @@ const zhHant = {
     transfer: '轉移擁有者',
     transferPickTitle: '選擇新擁有者',
   },
+  ratings: {
+    title: '玩家評分',
+    colStars: '星等',
+    colUser: '使用者',
+    colGame: '對局',
+    colRoom: '房間',
+    colSubmitted: '提交時間',
+    summary: '平均 {{avg}} 顆星．共 {{count}} 筆',
+  },
   maintainers: {
     title: '維護者管理',
     colUser: '使用者',
@@ -347,6 +357,7 @@ const zhHant = {
     'purge.run': '執行閒置清理',
     'maps.read': '檢視地圖',
     'maps.moderate': '管理地圖',
+    'ratings.read': '檢視玩家評分',
   },
   purge: {
     title: '閒置清理',
@@ -379,6 +390,7 @@ const en: typeof zhHant = {
     games: 'Games',
     rooms: 'Rooms',
     maps: 'Maps',
+    ratings: 'Ratings',
     maintainers: 'Maintainers',
     audit: 'Audit',
     purge: 'Purge',
@@ -635,6 +647,15 @@ const en: typeof zhHant = {
     transfer: 'Transfer Owner',
     transferPickTitle: 'Select new owner',
   },
+  ratings: {
+    title: 'Player Ratings',
+    colStars: 'Stars',
+    colUser: 'User',
+    colGame: 'Game',
+    colRoom: 'Room',
+    colSubmitted: 'Submitted',
+    summary: 'Avg {{avg}} stars · {{count}} total',
+  },
   maintainers: {
     title: 'Maintainers',
     colUser: 'User',
@@ -721,6 +742,7 @@ const en: typeof zhHant = {
     'purge.run': 'Run purge',
     'maps.read': 'View maps',
     'maps.moderate': 'Manage maps',
+    'ratings.read': 'View player ratings',
   },
   purge: {
     title: 'Inactive session purge',
