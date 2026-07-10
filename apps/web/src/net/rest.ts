@@ -91,6 +91,11 @@ export interface TicketResult {
 export interface PracticeResult extends TicketResult {
   code: string;
 }
+export interface RatingResult {
+  id: string;
+  stars: number;
+  createdAt: string;
+}
 export interface HistoryPlayer {
   userId: string;
   seat: number;
@@ -361,6 +366,8 @@ export const api = {
   sendRoomChat: (code: string, payload: { presetId: string } | { text: string }) =>
     req<RoomView>('POST', `/rooms/${code}/chat`, payload),
   rematch: (code: string) => req<RoomView>('POST', `/rooms/${code}/rematch`),
+  submitRating: (payload: { gameId: string; roomId: string; stars: number }) =>
+    req<RatingResult>('POST', '/ratings', payload),
 
   history: () => req<MatchSummary[]>('GET', '/history'),
   replay: (gameId: string) =>

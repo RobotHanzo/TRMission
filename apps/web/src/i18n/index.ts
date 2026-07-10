@@ -27,6 +27,9 @@ const resources = {
       close: '關閉',
       rateAppPrompt: '這場遊戲玩得如何？',
       starRatingValue: '{{n}} 顆星',
+      submitRating: '送出評分',
+      ratingThanks: '感謝你的評分！',
+      ratingSubmitError: '評分送出失敗，請再試一次。',
 
       guestName: '暱稱',
       playAsGuest: '以訪客身分遊玩',
@@ -588,6 +591,9 @@ const resources = {
       close: 'Close',
       rateAppPrompt: 'How was this game?',
       starRatingValue: '{{n}} star(s)',
+      submitRating: 'Submit rating',
+      ratingThanks: 'Thanks for rating!',
+      ratingSubmitError: 'Could not submit your rating — please try again.',
 
       guestName: 'Display name',
       playAsGuest: 'Play as guest',
