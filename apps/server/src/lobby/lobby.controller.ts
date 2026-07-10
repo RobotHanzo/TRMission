@@ -19,6 +19,7 @@ import {
   ChatSchema,
   RoomViewSchema,
   TicketResultSchema,
+  PracticeResultSchema,
 } from './lobby.schemas';
 import { apiSchema } from '../openapi/openapi';
 import type { AuthUser } from '../auth/auth.types';
@@ -36,6 +37,16 @@ export class LobbyController {
   @ApiResponse({ status: 201, schema: apiSchema(RoomViewSchema) })
   create(@CurrentUser() user: AuthUser, @Body() body: CreateRoomDto) {
     return this.lobby.create(user, body.maxPlayers ?? 5);
+  }
+
+  @Post('practice')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Create a solo practice game (you + an easy + a medium bot) and start it',
+  })
+  @ApiResponse({ status: 200, schema: apiSchema(PracticeResultSchema) })
+  practice(@CurrentUser() user: AuthUser) {
+    return this.lobby.startPractice(user);
   }
 
   // Declared before ':code' so the literal path is matched here, not captured as a room code.

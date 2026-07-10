@@ -74,3 +74,4 @@ export const RoomViewSchema = z.object({
   chat: z.array(RoomChatEntrySchema),
 });
 export const TicketResultSchema = z.object({ gameId: z.string(), ticket: z.string() });
+export const PracticeResultSchema = TicketResultSchema.extend({ code: z.string() });

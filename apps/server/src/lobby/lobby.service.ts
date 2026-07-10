@@ -48,6 +48,10 @@ export interface TicketResult {
   ticket: string;
 }
 
+export interface PracticeResult extends TicketResult {
+  code: string;
+}
+
 /** Display name for a map selector, when resolvable (official maps only, for now). */
 function mapNameFor(selector: MapSelector): { zh: string; en: string } | undefined {
   if (selector.source !== 'official') return undefined;
@@ -367,6 +371,22 @@ export class LobbyService {
     }
     await this.hub.createMatch(gameId, board, config, bots);
     return { gameId, ticket: this.ticketFor(gameId, user.userId, this.seatOf(room, user.userId)) };
+  }
+
+  /**
+   * One-call quick start for the welcome screen's "practice with bots": create a room, seat one
+   * EASY + one MEDIUM bot, mark the host ready, and start — all on the default map/rules. Returns
+   * the ticket plus the room `code` (the client needs it for the /room/:code URL and reconnects).
+   * Composes the existing host-only service methods, so all their validation still applies.
+   */
+  async startPractice(user: AuthUser): Promise<PracticeResult> {
+    await this.assertNotDisabled(user.userId);
+    const { code } = await this.create(user);
+    await this.addBot(code, user, 'EASY');
+    await this.addBot(code, user, 'MEDIUM');
+    await this.ready(code, user, true);
+    const ticket = await this.start(code, user);
+    return { ...ticket, code };
   }
 
   /** Host-only: reset a finished game's room back to LOBBY for another round. */
