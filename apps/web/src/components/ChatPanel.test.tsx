@@ -63,7 +63,7 @@ describe('ChatPanel', () => {
     expect(chatPresetSpy).toHaveBeenCalledWith('THANKS');
   });
 
-  it('renders a spectator (non-seated) message with their roster name and a neutral colour', () => {
+  it('tags a spectator (non-seated) message with [旁觀者] + their roster name and a neutral colour', () => {
     useRoster
       .getState()
       .setMembers([], [{ userId: 'watcher-1', displayName: 'Watcher One', isGuest: true }]);
@@ -72,8 +72,18 @@ describe('ChatPanel', () => {
       .ingest({ playerId: 'watcher-1', content: { case: 'text', value: 'hi all' } });
     const { container } = render(<ChatPanel />);
     const author = container.querySelector('.chat-author');
-    expect(author?.textContent).toBe('Watcher One');
+    expect(author?.textContent).toBe('[旁觀者] Watcher One');
     expect(author).toHaveStyle({ color: 'var(--tr-ink-soft)' });
+  });
+
+  it('tags a spectator not yet in the roster as [旁觀者] alone — never the seat-0 "P1" fallback', () => {
+    useChat
+      .getState()
+      .ingest({ playerId: 'unknown-watcher', content: { case: 'text', value: 'hi' } });
+    const { container } = render(<ChatPanel />);
+    const author = container.querySelector('.chat-author');
+    expect(author?.textContent).toBe('[旁觀者]');
+    expect(author?.textContent).not.toContain('P1');
   });
 
   it('shows an inline hint for a server chat rejection', () => {
