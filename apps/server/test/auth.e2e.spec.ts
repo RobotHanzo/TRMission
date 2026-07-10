@@ -160,6 +160,36 @@ describe('auth: display preferences round-trip', () => {
   });
 });
 
+describe('auth: tutorial completion flag', () => {
+  it('defaults to false, flips to true, and is idempotent', async () => {
+    const reg = await request(server())
+      .post('/api/v1/auth/register')
+      .send({ email: 'tut@example.com', password: 'password123', displayName: 'Tut' })
+      .expect(201);
+    expect(reg.body.user.tutorialCompleted).toBe(false);
+    const token = reg.body.accessToken;
+
+    const first = await request(server())
+      .post('/api/v1/auth/me/tutorial-completed')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(first.body.tutorialCompleted).toBe(true);
+
+    // Idempotent: calling again still returns true, no error.
+    const second = await request(server())
+      .post('/api/v1/auth/me/tutorial-completed')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(second.body.tutorialCompleted).toBe(true);
+
+    const me = await request(server())
+      .get('/api/v1/auth/me')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(me.body.tutorialCompleted).toBe(true);
+  });
+});
+
 describe('auth: guest → registered upgrade (keeps the same id)', () => {
   it('attaches credentials in place', async () => {
     const guest = await request(server())

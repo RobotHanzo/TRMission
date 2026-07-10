@@ -202,6 +202,16 @@ export class AuthController {
     return this.auth.updatePreferences(user.userId, body);
   }
 
+  @Post('me/tutorial-completed')
+  @HttpCode(200)
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Mark the guided tutorial as completed for the current user' })
+  @ApiResponse({ status: 200, schema: apiSchema(PublicUserSchema) })
+  async completeTutorial(@CurrentUser() user: AuthUser) {
+    return this.auth.completeTutorial(user.userId);
+  }
+
   // ── OAuth (browser navigations, not JSON — excluded from the OpenAPI doc) ──────────────────
   // Both routes are unguarded: the user is not yet authenticated. Identity is carried through the
   // provider in a signed `state`, bound to this browser by the `trm_oauth` nonce cookie.

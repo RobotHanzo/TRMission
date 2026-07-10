@@ -37,6 +37,7 @@ export const PublicUserSchema = z.object({
   id: z.string(),
   displayName: z.string(),
   isGuest: z.boolean(),
+  tutorialCompleted: z.boolean(),
   preferences: PreferencesSchema,
   email: z.string().optional(),
   avatarUrl: z.string().optional(),

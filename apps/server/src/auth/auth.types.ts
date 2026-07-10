@@ -74,6 +74,8 @@ export interface PublicUser {
   preferences: UserPreferences;
   /** Per-account gated features (dashboard-granted). Empty for everyone by default. */
   features: UserFeature[];
+  /** Whether this account has reached the guided tutorial's finale. */
+  tutorialCompleted: boolean;
   email?: string;
   avatarUrl?: string;
 }

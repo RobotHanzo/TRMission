@@ -100,4 +100,10 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('user not found');
     return toPublicUser(user);
   }
+
+  async completeTutorial(userId: string): Promise<PublicUser> {
+    const user = await this.users.setTutorialCompleted(userId, true);
+    if (!user) throw new UnauthorizedException('user not found');
+    return toPublicUser(user);
+  }
 }

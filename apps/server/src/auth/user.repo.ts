@@ -29,6 +29,8 @@ export interface UserDoc {
   disabledReason?: string;
   /** Dashboard-granted gated features (absent/empty = none — the default for everyone). */
   features?: UserFeature[];
+  /** Set once the user reaches the guided tutorial's finale (self-reported by the client). */
+  tutorialCompleted?: boolean;
 }
 
 export const toPublicUser = (u: UserDoc): PublicUser => ({
@@ -36,6 +38,7 @@ export const toPublicUser = (u: UserDoc): PublicUser => ({
   displayName: u.displayName,
   isGuest: u.isGuest,
   features: u.features ?? [],
+  tutorialCompleted: u.tutorialCompleted ?? false,
   // Merge stored prefs over the defaults so docs written before a field existed still get a
   // complete set; a legacy top-level `locale` is honoured when the prefs blob predates it.
   preferences: {
@@ -215,6 +218,16 @@ export class UserRepo implements OnModuleInit {
     return this.col.findOneAndUpdate(
       { _id: userId, isGuest: false },
       features.length ? { $set: { features } } : { $unset: { features: '' } },
+      { returnDocument: 'after' },
+    );
+  }
+
+  /** Set/clear the tutorial-completed flag — self-service completion (`true`), or a dashboard
+   *  reset (`false`). Available to guests too (no `isGuest` filter, unlike `setFeatures`). */
+  setTutorialCompleted(userId: string, value: boolean): Promise<UserDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: userId },
+      { $set: { tutorialCompleted: value } },
       { returnDocument: 'after' },
     );
   }
