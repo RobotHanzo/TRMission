@@ -286,10 +286,22 @@ function GenerateModal({
   const [seed, setSeed] = useState(1);
   const [longCount, setLongCount] = useState(6);
   const [shortCount, setShortCount] = useState(24);
+  const [shortMaxValue, setShortMaxValue] = useState('');
   const [preview, setPreview] = useState<TicketDraft[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const cityName = (id: string): string => draft.cities.find((c) => c.id === id)?.nameZh ?? id;
+
+  const parsedMaxValue = (() => {
+    const trimmed = shortMaxValue.trim();
+    if (trimmed === '') return undefined;
+    const n = Math.round(Number(trimmed));
+    return Number.isFinite(n) ? Math.max(2, n) : undefined;
+  })();
+
+  const shortGenerated = preview ? preview.filter((tk) => tk.deck === 'SHORT').length : null;
+  const showShortfallWarning =
+    parsedMaxValue !== undefined && shortGenerated !== null && shortGenerated < shortCount;
 
   const run = (nextSeed: number) => {
     setSeed(nextSeed);
@@ -301,6 +313,7 @@ function GenerateModal({
         seed: nextSeed,
         longCount,
         shortCount,
+        ...(parsedMaxValue !== undefined ? { shortMaxValue: parsedMaxValue } : {}),
       });
       setPreview(ticketsToDraft(tickets));
     } catch (e) {
@@ -336,6 +349,16 @@ function GenerateModal({
             onChange={(e) => setShortCount(Math.max(1, Number(e.target.value) || 1))}
           />
         </label>
+        <label>
+          {t('builder.shortMaxValue')}
+          <input
+            type="number"
+            min={2}
+            placeholder={t('builder.noLimit')}
+            value={shortMaxValue}
+            onChange={(e) => setShortMaxValue(e.target.value)}
+          />
+        </label>
         <div className="row">
           <span className="muted">{t('builder.seed', { seed })}</span>
           <button onClick={() => run(Math.floor(Math.random() * 1_000_000))}>
@@ -344,6 +367,11 @@ function GenerateModal({
           <button onClick={() => run(seed)}>{t('builder.preview')}</button>
         </div>
         {error && <p className="error">{error}</p>}
+        {showShortfallWarning && (
+          <p className="error">
+            {t('builder.shortMaxValueShortfall', { n: shortGenerated ?? 0, count: shortCount })}
+          </p>
+        )}
         {preview && (
           <div className="editor-generate-preview">
             <p className="muted">{t('builder.previewCount', { n: preview.length })}</p>
