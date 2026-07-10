@@ -1,5 +1,7 @@
 import type { CityId, RouteId, TicketId, RouteColor, RouteLength, RuleParams } from '@trm/shared';
 
+export type CityTier = 'major' | 'secondary' | 'tertiary' | 'minor';
+
 export interface CityDef {
   readonly id: CityId;
   readonly nameZh: string;
@@ -9,6 +11,11 @@ export interface CityDef {
   readonly y: number;
   readonly region: string;
   readonly isIsland: boolean;
+  /** Cartographic label tier driving the live board's progressive zoom reveal (see the web
+   *  layer's game/content.ts `cityTier` + game/lod.ts `zoomBucket`). Optional so pre-existing
+   *  authored content and test fixtures that predate this field keep hashing identically
+   *  (`stableStringify` drops absent keys) — absent reads as `'minor'` everywhere it's consumed. */
+  readonly tier?: CityTier;
 }
 
 export interface RouteDef {

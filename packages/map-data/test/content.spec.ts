@@ -44,6 +44,45 @@ describe('Taiwan map content', () => {
     expect(CONTENT_HASH).toMatch(/^[0-9a-f]{64}$/);
   });
 
+  it('assigns tier matching the retired lod.ts major/secondary/tertiary lists', () => {
+    const major = new Set([
+      'taipei',
+      'hsinchu',
+      'taichung',
+      'chiayi',
+      'tainan',
+      'kaohsiung',
+      'hualien',
+      'taitung',
+      'yilan',
+      'hengchun',
+    ]);
+    const secondary = new Set([
+      'keelung',
+      'taoyuan',
+      'miaoli',
+      'changhua',
+      'douliu',
+      'pingtung',
+      'nantou',
+      'alishan',
+      'yuli',
+      'luodong',
+    ]);
+    const tertiary = new Set(['zhunan', 'banqiao', 'shalu', 'huwei', 'zuoying', 'chaozhou']);
+    for (const city of TAIWAN_CONTENT.cities) {
+      const id = city.id as string;
+      const expected = major.has(id)
+        ? 'major'
+        : secondary.has(id)
+          ? 'secondary'
+          : tertiary.has(id)
+            ? 'tertiary'
+            : 'minor';
+      expect(city.tier ?? 'minor').toBe(expected);
+    }
+  });
+
   it('catches a broken graph (disconnected city)', () => {
     const broken = {
       ...TAIWAN_CONTENT,

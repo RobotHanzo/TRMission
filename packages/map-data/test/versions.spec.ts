@@ -88,7 +88,7 @@ describe('content version registry', () => {
   // The current (v4) hash — new games are stamped with this.
   it('pins the v4 (current) content hash', () => {
     expect(hashContent(TAIWAN_CONTENT)).toBe(
-      '45581204915bfa0d947bdacf54ec81ab07c19a7941dba82fbbe1074bef7ac581',
+      'e211b5d98bd7142b8c52e63bf681a57dfab903375c95cee4c0dbc165ecc6f4ba',
     );
   });
 });

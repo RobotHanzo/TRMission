@@ -6,7 +6,7 @@ import type { GameContent, MapGeography } from '../src/index';
  * Tripwire for the hashContent formula extension (custom maps): geography/rules enter the
  * digest ONLY when present, so every hash minted before the extension stays byte-identical.
  */
-const PINNED_HASH = '45581204915bfa0d947bdacf54ec81ab07c19a7941dba82fbbe1074bef7ac581';
+const PINNED_HASH = 'e211b5d98bd7142b8c52e63bf681a57dfab903375c95cee4c0dbc165ecc6f4ba';
 
 const GEO: MapGeography = {
   baseView: { x: 0, y: 0, w: 100, h: 100 },
