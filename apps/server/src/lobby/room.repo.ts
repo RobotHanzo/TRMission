@@ -34,7 +34,7 @@ export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   secondDrawAfterBlindRainbow: false,
   noUnfinishedTicketPenalty: false,
   doubleRouteSingleFor23: true,
-  eventsMode: 'off',
+  eventsMode: 'moderate',
   allowSpectating: true,
   visibility: 'INVITE_ONLY',
   map: { source: 'official', mapId: 'taiwan' },

@@ -30,7 +30,7 @@ describe('lobby: per-game settings', () => {
       secondDrawAfterBlindRainbow: false,
       noUnfinishedTicketPenalty: false,
       doubleRouteSingleFor23: true,
-      eventsMode: 'off',
+      eventsMode: 'moderate',
       allowSpectating: true,
       visibility: 'INVITE_ONLY',
       map: { source: 'official', mapId: 'taiwan' },

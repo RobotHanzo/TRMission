@@ -61,6 +61,11 @@ describe("lobby: random-events is gated by the host's randomEvents feature", () 
   let t: TestApp;
   beforeAll(async () => {
     t = await createTestApp();
+    // This suite tests the per-account gate boundary explicitly (grant()/no grant), so start
+    // from an empty global default — randomEvents is a real default elsewhere (feature-gating).
+    await t.db
+      .collection('featureDefaults')
+      .updateOne({ _id: 'singleton' } as never, { $set: { features: [] } }, { upsert: true });
   }, 60_000);
   afterAll(() => t.close());
 
