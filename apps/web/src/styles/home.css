@@ -398,6 +398,20 @@ button.home-side-card {
     grid-template-columns: 1fr;
   }
 }
+/* Desktop row layout: reorder so the tutorial card sits in the middle. DOM order
+   (tutorial, practice, skip) is left as-is so the phone column layout below shows
+   the tutorial card first without needing its own override. */
+@media (min-width: 701px) {
+  .welcome-options .welcome-option:nth-child(1) {
+    order: 2;
+  }
+  .welcome-options .welcome-option:nth-child(2) {
+    order: 1;
+  }
+  .welcome-options .welcome-option:nth-child(3) {
+    order: 3;
+  }
+}
 @media (max-width: 700px) {
   .welcome {
     padding: var(--tr-space-6) var(--tr-space-3);
