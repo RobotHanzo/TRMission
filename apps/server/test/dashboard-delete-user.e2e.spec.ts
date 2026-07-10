@@ -14,6 +14,7 @@ const audit = () =>
   t.db.collection<{ action: string; target?: { id: string }; params: Record<string, unknown> }>(
     'dashboardAudit',
   );
+const ratings = () => t.db.collection<{ userId: string }>('gameRatings');
 
 async function registered(email: string, displayName: string) {
   const res = await request(server())
@@ -56,6 +57,16 @@ describe('delete user', () => {
     await t.db
       .collection('matchHistory')
       .insertOne({ _id: 'mh-old', gameId: 'g-old', winners: [victim.userId], completedAt: new Date() } as never);
+
+    // A rating the victim submitted — must be dropped on account deletion.
+    await ratings().insertOne({
+      _id: 'rate-victim' as never,
+      userId: victim.userId,
+      gameId: 'g-old',
+      roomId: 'ABCDE',
+      stars: 4,
+      createdAt: new Date(),
+    } as never);
 
     // Put the victim in a LIVE game as host (mirrors dashboard-ban.e2e setup).
     const other = await request(server())
@@ -106,10 +117,14 @@ describe('delete user', () => {
     expect(await t.db.collection('customMaps').countDocuments({ ownerId: victim.userId } as never)).toBe(0);
     expect(await t.db.collection('matchHistory').countDocuments({ _id: 'mh-old' } as never)).toBe(1);
 
+    // Ratings dropped too.
+    expect(await ratings().countDocuments({ userId: victim.userId } as never)).toBe(0);
+
     // Audited with counts.
     const entry = await audit().findOne({ action: 'user.delete', 'target.id': victim.userId } as never);
     expect(entry).toBeTruthy();
     expect(entry?.params.gamesTerminated).toBe(1);
+    expect(entry?.params.ratingsDeleted).toBe(1);
   }, 60_000);
 
   it('refuses self-delete (403) and deleting a maintainer (409)', async () => {

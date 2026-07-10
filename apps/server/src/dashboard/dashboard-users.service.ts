@@ -12,6 +12,7 @@ import { SessionRepo } from '../auth/session.repo';
 import { RoomRepo } from '../lobby/room.repo';
 import { HistoryRepo } from '../history/history.repo';
 import { CustomMapRepo } from '../maps/custom-map.repo';
+import { RatingsRepo } from '../ratings/ratings.repo';
 import { DashboardAccountRepo } from './dashboard-account.repo';
 import { AuditService } from './audit.service';
 import { PurgeService } from './purge.service';
@@ -46,6 +47,7 @@ export class DashboardUsersService {
     private readonly audit: AuditService,
     private readonly maps: CustomMapRepo,
     private readonly purge: PurgeService,
+    private readonly ratings: RatingsRepo,
   ) {}
 
   async list(query: {
@@ -135,12 +137,13 @@ export class DashboardUsersService {
     );
     await this.sessions.revokeAllForUser(userId);
     await this.maps.deleteByOwner(userId);
+    const ratingsDeleted = await this.ratings.deleteByUser(userId);
     await this.users.deleteById(userId);
     await this.audit.log(
       actor,
       'user.delete',
       { type: 'user', id: userId },
-      { ...(reason ? { reason } : {}), gamesTerminated, roomsClosed },
+      { ...(reason ? { reason } : {}), gamesTerminated, roomsClosed, ratingsDeleted },
     );
   }
 
