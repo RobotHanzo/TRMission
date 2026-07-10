@@ -17,7 +17,7 @@ import {
 } from 'react-zoom-pan-pinch';
 import { Plus, Minus, LocateFixed, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
 import type { GameSnapshot, GameEvent } from '@trm/proto';
-import { CITIES, ROUTES, cityById, routeById, cityName } from '../game/content';
+import { CITIES, ROUTES, cityById, routeById, cityName, cityTier } from '../game/content';
 import {
   closedRouteIds,
   reopenBonusRouteIds,
@@ -26,7 +26,7 @@ import {
 } from '../game/events';
 import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
-import { zoomBucket, cityTier } from '../game/lod';
+import { zoomBucket } from '../game/lod';
 import {
   transformToView,
   viewToTransform,

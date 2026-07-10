@@ -1,9 +1,6 @@
-// Cartographic level-of-detail for city *labels*: which labels appear at which zoom.
-//
-// This is purely presentational and lives in the web layer on purpose — it must never
-// touch @trm/map-data, since any content change reshuffles CONTENT_HASH and breaks
-// replays. Node dots always render at every zoom; only the text labels are tiered so the
-// dense corridors (north metro, central plain) don't all pop in at once.
+// Cartographic level-of-detail: live zoom scale → level-of-detail bucket, used to gate which
+// city labels are visible at the current zoom (see game/content.ts's cityTier for the per-city
+// tier itself — authored content, not hardcoded here).
 
 export type ZoomBucket = 'far' | 'regional' | 'district' | 'local';
 
@@ -14,57 +11,3 @@ export type ZoomBucket = 'far' | 'regional' | 'district' | 'local';
  */
 export const zoomBucket = (scale: number): ZoomBucket =>
   scale < 1.25 ? 'far' : scale < 1.7 ? 'regional' : scale < 2.4 ? 'district' : 'local';
-
-export type CityTier = 'major' | 'secondary' | 'tertiary' | 'minor';
-
-// Tier 1 — hub + landmark cities whose labels survive the most zoomed-out view. Some
-// (花蓮 / 恆春 / 臺東) are low-degree endpoints but cartographically prominent, so this is a
-// hand-picked set rather than a graph-degree ranking.
-export const MAJOR_CITIES: ReadonlySet<string> = new Set([
-  'taipei',
-  'hsinchu',
-  'taichung',
-  'chiayi',
-  'tainan',
-  'kaohsiung',
-  'hualien',
-  'taitung',
-  'yilan',
-  'hengchun',
-]);
-
-// Tier 2 — prominent metros, county seats, and signature landmarks; revealed at `regional`.
-export const SECONDARY_CITIES: ReadonlySet<string> = new Set([
-  'keelung', // 基隆 — northern port city
-  'taoyuan', // 桃園 — metropolis
-  'miaoli', // 苗栗 — county seat
-  'changhua', // 彰化 — county seat / central junction
-  'douliu', // 斗六 — Yunlin county seat
-  'pingtung', // 屏東 — county seat
-  'nantou', // 南投 — county seat / central junction
-  'alishan', // 阿里山 — mountain-railway landmark
-  'yuli', // 玉里 — Rift Valley hub
-  'luodong', // 羅東 — largest Yilan town
-]);
-
-// Tier 3 — district towns and line junctions; revealed at `district` (the home view).
-export const TERTIARY_CITIES: ReadonlySet<string> = new Set([
-  'zhunan', // 竹南
-  'banqiao', // 板橋
-  'shalu', // 沙鹿
-  'huwei', // 虎尾
-  'zuoying', // 左營
-  'chaozhou', // 潮州
-]);
-// Everything else (集集, 平溪, 池上, …) is `minor` and only appears at `local`. Islands
-// (馬祖, 金門, 澎湖, 綠島, 蘭嶼, 小琉球, 龜山島) always show their label regardless of tier
-// (handled in CSS).
-
-export const cityTier = (id: string): CityTier =>
-  MAJOR_CITIES.has(id)
-    ? 'major'
-    : SECONDARY_CITIES.has(id)
-      ? 'secondary'
-      : TERTIARY_CITIES.has(id)
-        ? 'tertiary'
-        : 'minor';

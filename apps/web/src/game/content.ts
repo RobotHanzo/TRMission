@@ -1,5 +1,5 @@
 import { TAIWAN_CONTENT } from '@trm/map-data';
-import type { CityDef, GameContent, RouteDef, TicketDef } from '@trm/map-data';
+import type { CityDef, CityTier, GameContent, RouteDef, TicketDef } from '@trm/map-data';
 import type { Locale } from '../store/ui';
 
 // The active board content. Starts as Taiwan (the bundled default) and is reassigned by
@@ -30,6 +30,12 @@ export const cityName = (id: string, locale: Locale): string => {
   const c = cityById.get(id);
   return c ? (locale === 'en' ? c.nameEn : c.nameZh) : id;
 };
+
+/** Cartographic label tier for the live board's progressive zoom reveal (see game/lod.ts's
+ *  zoomBucket + the [data-zoom] CSS rules). Reads the active content's authored tier, falling
+ *  back to 'minor' for content authored before this field existed, or an id outside the active
+ *  map — the same graceful-fallback shape cityName already uses. */
+export const cityTier = (id: string): CityTier => cityById.get(id)?.tier ?? 'minor';
 
 export interface TicketLabel {
   a: string;
