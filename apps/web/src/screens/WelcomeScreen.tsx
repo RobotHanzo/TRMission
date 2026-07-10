@@ -4,9 +4,11 @@ import { Bot, CirclePlay, GraduationCap } from 'lucide-react';
 import { BrandBanner } from '../components/BrandBanner';
 import { DiscordGlyph } from '../components/icons/DiscordGlyph';
 import { openDiscord } from '../discord';
+import { TutorialRecommendDialog } from '../components/TutorialRecommendDialog';
 
 interface WelcomeScreenProps {
   name: string;
+  tutorialCompleted: boolean;
   onStartTutorial: () => void;
   onPractice: () => Promise<void>;
   onContinue: () => void;
@@ -15,6 +17,7 @@ interface WelcomeScreenProps {
 /** First entry: shown instead of the homepage while an account has 0 completed games. */
 export function WelcomeScreen({
   name,
+  tutorialCompleted,
   onStartTutorial,
   onPractice,
   onContinue,
@@ -22,6 +25,9 @@ export function WelcomeScreen({
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set when Practice/Jump-in is clicked without the tutorial completed yet — holds which action
+  // to run once the recommendation dialog is resolved (either path always runs one of the two).
+  const [pendingAction, setPendingAction] = useState<'practice' | 'continue' | null>(null);
 
   // "Practice" is the one option that fires an async API call; the other two are plain
   // navigations. On success the view switches to the game and this screen unmounts, so we only
@@ -35,6 +41,28 @@ export function WelcomeScreen({
       setError(t('home.welcome.practiceError'));
       setBusy(false);
     }
+  };
+
+  const handlePractice = () => {
+    if (!tutorialCompleted) {
+      setPendingAction('practice');
+      return;
+    }
+    void practice();
+  };
+
+  const handleContinue = () => {
+    if (!tutorialCompleted) {
+      setPendingAction('continue');
+      return;
+    }
+    onContinue();
+  };
+
+  const resolvePending = (run: 'practice' | 'continue') => {
+    setPendingAction(null);
+    if (run === 'practice') void practice();
+    else onContinue();
   };
 
   return (
@@ -61,7 +89,7 @@ export function WelcomeScreen({
           </div>
           <h3>{t('home.welcome.practiceTitle')}</h3>
           <p>{t('home.welcome.practiceDesc')}</p>
-          <button className="welcome-option-cta" disabled={busy} onClick={() => void practice()}>
+          <button className="welcome-option-cta" disabled={busy} onClick={handlePractice}>
             {busy ? t('home.welcome.practiceStarting') : `${t('home.welcome.practiceCta')} →`}
           </button>
         </div>
@@ -72,7 +100,7 @@ export function WelcomeScreen({
           </div>
           <h3>{t('home.welcome.skipTitle')}</h3>
           <p>{t('home.welcome.skipDesc')}</p>
-          <button className="welcome-option-cta" onClick={onContinue}>
+          <button className="welcome-option-cta" onClick={handleContinue}>
             {t('home.welcome.skipCta')} →
           </button>
         </div>
@@ -86,6 +114,16 @@ export function WelcomeScreen({
 
       {error && <p className="welcome-error error">{error}</p>}
       <p className="welcome-footnote muted">{t('home.welcome.footnote')}</p>
+
+      {pendingAction && (
+        <TutorialRecommendDialog
+          onGoToTutorial={() => {
+            setPendingAction(null);
+            onStartTutorial();
+          }}
+          onContinueAnyway={() => resolvePending(pendingAction)}
+        />
+      )}
     </div>
   );
 }

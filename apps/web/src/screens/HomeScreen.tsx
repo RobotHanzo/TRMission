@@ -141,6 +141,7 @@ export function HomeScreen() {
     return (
       <WelcomeScreen
         name={user.displayName}
+        tutorialCompleted={user.tutorialCompleted}
         onStartTutorial={enterTutorial}
         onPractice={startPractice}
         onContinue={() => setShowWelcome(false)}

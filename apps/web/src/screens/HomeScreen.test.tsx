@@ -39,6 +39,7 @@ const signedIn = {
   isGuest: false,
   preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
   features: [] as UserFeature[],
+  tutorialCompleted: true,
 } as const;
 
 const settings = {
@@ -178,5 +179,36 @@ describe('HomeScreen', () => {
     await waitFor(() => expect(useUi.getState().roomCode).toBe('PRAC01'));
     await waitFor(() => expect(useUi.getState().gameId).toBe('gp'));
     expect(window.location.pathname).toBe('/room/PRAC01');
+  });
+
+  it('recommends the tutorial before practicing without having completed it, but allows continuing', async () => {
+    mocked.history.mockResolvedValue([]);
+    useSession.setState({ user: { ...signedIn, tutorialCompleted: false } });
+    render(<HomeScreen />);
+    const practice = await screen.findByRole('button', { name: /開始練習/ });
+    fireEvent.click(practice);
+    expect(mocked.startPractice).not.toHaveBeenCalled();
+    const continueAnyway = await screen.findByRole('button', { name: '直接繼續' });
+    fireEvent.click(continueAnyway);
+    await waitFor(() => expect(mocked.startPractice).toHaveBeenCalled());
+  });
+
+  it('recommends the tutorial before jumping in, and can route there instead', async () => {
+    mocked.history.mockResolvedValue([]);
+    useSession.setState({ user: { ...signedIn, tutorialCompleted: false } });
+    const enterTutorial = vi.fn();
+    const original = useUi.getState().enterTutorial;
+    useUi.setState({ enterTutorial });
+    try {
+      render(<HomeScreen />);
+      const continueBtn = await screen.findByRole('button', { name: /前往首頁/ });
+      fireEvent.click(continueBtn);
+      expect(screen.queryByText('歡迎回來，Tester')).not.toBeInTheDocument();
+      const goToTutorial = await screen.findByRole('button', { name: '前往教學' });
+      fireEvent.click(goToTutorial);
+      expect(enterTutorial).toHaveBeenCalled();
+    } finally {
+      useUi.setState({ enterTutorial: original });
+    }
   });
 });

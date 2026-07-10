@@ -66,6 +66,12 @@ const resources = {
           footnote: '之後仍可從右上角「規則百科」按鈕隨時重新查看教學',
           discordCta: '加入 Discord 社群',
         },
+        tutorialRecommend: {
+          title: '要不要先看看教學？',
+          body: '你還沒完成新手教學，建議先花 5 分鐘熟悉玩法，之後也能隨時直接開始。',
+          goToTutorial: '前往教學',
+          continueAnyway: '直接繼續',
+        },
       },
 
       signIn: '登入',
@@ -635,6 +641,13 @@ const resources = {
           skipCta: 'Go to homepage',
           footnote: 'You can always revisit the tutorial later from the "Rules" button up top.',
           discordCta: 'Join our Discord',
+        },
+        tutorialRecommend: {
+          title: 'Want to try the tutorial first?',
+          body:
+            "You haven't finished the tutorial yet. We recommend spending 5 minutes on it first, but you can always start it later too.",
+          goToTutorial: 'Go to tutorial',
+          continueAnyway: 'Continue anyway',
         },
       },
 
