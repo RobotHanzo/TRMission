@@ -254,4 +254,18 @@ export class HistoryRepo {
         : {}),
     };
   }
+
+  /**
+   * Player roster (ids + seats, no hidden info) for the ticket-authorized /admin-spectate live
+   * view. No status filter: the caller already proved a valid spectator ws-game ticket scoped
+   * to this exact gameId (AdminSpectateTicketGuard), and display names/bot flags are never
+   * hidden information regardless of the game's current status.
+   */
+  async loadSpectateRoster(
+    gameId: string,
+  ): Promise<{ players: StoredConfig['players']; bots: BotProfile[] } | null> {
+    const game = await this.games.findOne({ _id: gameId });
+    if (!game) return null;
+    return { players: game.config.players, bots: game.bots ?? [] };
+  }
 }
