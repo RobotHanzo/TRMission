@@ -70,18 +70,30 @@ export const useSession = create<SessionState>()((set, get) => {
       }
     },
     playAsGuest: (name) =>
-      run(() => api.guest(name?.trim() || undefined), () => track('login', { method: 'guest' })),
+      run(
+        () => api.guest(name?.trim() || undefined),
+        () => track('login', { method: 'guest' }),
+      ),
     login: (email, password) =>
-      run(() => api.login(email.trim(), password), () => track('login', { method: 'password' })),
+      run(
+        () => api.login(email.trim(), password),
+        () => track('login', { method: 'password' }),
+      ),
     loginWithGoogleCredential: (credential) =>
-      run(() => api.googleCredential(credential), () => track('login', { method: 'google' })),
+      run(
+        () => api.googleCredential(credential),
+        () => track('login', { method: 'google' }),
+      ),
     register: (email, password, displayName) =>
       run(
         () => api.register(email.trim(), password, displayName.trim()),
         () => track('sign_up', { method: 'password' }),
       ),
     upgrade: (email, password) =>
-      run(() => api.upgrade(email.trim(), password), () => track('guest_upgrade', {})),
+      run(
+        () => api.upgrade(email.trim(), password),
+        () => track('guest_upgrade', {}),
+      ),
     async logout() {
       // Clear local session state SYNCHRONOUSLY first: the login route's auto-redirect gates on
       // `user`, so it must see the signed-out state immediately — not after the network round-trip

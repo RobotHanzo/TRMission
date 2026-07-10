@@ -192,7 +192,8 @@ export function GameStage({
   const mapId = snapshot.contentHash;
   // Client-side heuristic: only the bundled Taiwan content is recognised as "official"; any other
   // hash (custom map, or a server-official map the client doesn't bundle) reads as "custom".
-  const mapSource: 'official' | 'custom' = snapshot.contentHash === CONTENT_HASH ? 'official' : 'custom';
+  const mapSource: 'official' | 'custom' =
+    snapshot.contentHash === CONTENT_HASH ? 'official' : 'custom';
   const markFirstAction = (action: string): void => {
     if (sandbox || !gameId || firstActionRef.current === gameId) return;
     firstActionRef.current = gameId;
