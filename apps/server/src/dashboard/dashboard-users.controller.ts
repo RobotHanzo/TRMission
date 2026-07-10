@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -89,6 +90,28 @@ export class DashboardUsersController {
   @ApiResponse({ status: 200, schema: apiSchema(DashboardUserDetailSchema) })
   enable(@Param('id') id: string, @CurrentUser() actor: AuthUser) {
     return this.users.enable(actor, id);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  @RequirePermission('users.delete')
+  @ApiOperation({
+    summary: 'Permanently delete an account',
+    description:
+      'Irreversible. Terminates any LIVE game the user is seated in (no scores, not ' +
+      'replayable) and closes their rooms, revokes all sessions, deletes their owned ' +
+      'custom-map drafts, then removes the account. Completed-game match history and ' +
+      'published map content are retained as an anonymised archive. Refused (409) while ' +
+      'the target still holds dashboard access.',
+  })
+  @ApiBody({ schema: apiSchema(ModerationReasonSchema) })
+  @ApiResponse({ status: 204, description: 'Account deleted' })
+  remove(
+    @Param('id') id: string,
+    @CurrentUser() actor: AuthUser,
+    @Body() body: ModerationReasonDto,
+  ) {
+    return this.users.delete(actor, id, body.reason);
   }
 
   @Put(':id/features')

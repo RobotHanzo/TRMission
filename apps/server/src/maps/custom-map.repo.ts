@@ -82,6 +82,16 @@ export class CustomMapRepo implements OnModuleInit {
     return res.deletedCount === 1;
   }
 
+  /**
+   * Delete every draft owned by a user (account deletion). The immutable published
+   * `mapContents` store is separate and untouched — past games/replays keep resolving.
+   * Returns the number of drafts removed.
+   */
+  async deleteByOwner(ownerId: string): Promise<number> {
+    const res = await this.col.deleteMany({ ownerId });
+    return res.deletedCount;
+  }
+
   /** Mint a fresh code (retrying on the rare collision) and store it; returns the code. */
   async mintShareCode(id: string, ownerId: string): Promise<string | null> {
     for (let attempt = 0; attempt < 8; attempt++) {

@@ -194,6 +194,16 @@ export class UserRepo implements OnModuleInit {
     );
   }
 
+  /**
+   * Hard-delete an account (dashboard `users.delete`). Session revocation and owned-map
+   * cleanup are the caller's job; `matchHistory` is intentionally retained as the
+   * anonymised archive — same posture as a TTL-expired guest.
+   */
+  async deleteById(userId: string): Promise<boolean> {
+    const res = await this.col.deleteOne({ _id: userId });
+    return res.deletedCount === 1;
+  }
+
   /** Per-request feature check (projection-only point read). Used by FeatureGuard + inline gates. */
   async hasFeature(userId: string, feature: UserFeature): Promise<boolean> {
     const doc = await this.col.findOne({ _id: userId }, { projection: { features: 1 } });

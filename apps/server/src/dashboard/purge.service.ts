@@ -177,6 +177,33 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
     this.metrics.roomPurged('manual', priorStatus);
   }
 
+  /**
+   * Terminate every LIVE game and close every LOBBY room the user is currently seated in —
+   * the teardown half of a maintainer account deletion. `findActiveByMember` already returns
+   * only LOBBY rooms + STARTED rooms whose game is still LIVE. `terminateIfLive` also closes
+   * the STARTED room (via `closeByGameId`), so a STARTED entry needs no extra close here.
+   * Returns counts for the audit trail.
+   */
+  async terminateActiveForMember(
+    terminatedBy: string,
+    userId: string,
+    reason: string,
+  ): Promise<{ gamesTerminated: number; roomsClosed: number }> {
+    const active = await this.rooms.findActiveByMember(userId, 100);
+    let gamesTerminated = 0;
+    let roomsClosed = 0;
+    for (const room of active) {
+      if (room.status === 'STARTED' && room.gameId) {
+        await this.terminateIfLive(room.gameId, terminatedBy, reason);
+        gamesTerminated++;
+      } else if (room.status === 'LOBBY') {
+        await this.rooms.closeLobby(room._id);
+        roomsClosed++;
+      }
+    }
+    return { gamesTerminated, roomsClosed };
+  }
+
   async runSweep(trigger: PurgeTrigger, actor?: AuthUser): Promise<PurgeSummary> {
     if (trigger === 'manual' && !actor) throw new Error('manual sweep requires an actor');
     const terminatedBy = trigger === 'auto' ? SYSTEM_ACTOR_ID : actor!.userId;

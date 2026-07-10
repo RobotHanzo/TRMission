@@ -11,8 +11,10 @@ import { UserRepo, type UserDoc } from '../auth/user.repo';
 import { SessionRepo } from '../auth/session.repo';
 import { RoomRepo } from '../lobby/room.repo';
 import { HistoryRepo } from '../history/history.repo';
+import { CustomMapRepo } from '../maps/custom-map.repo';
 import { DashboardAccountRepo } from './dashboard-account.repo';
 import { AuditService } from './audit.service';
+import { PurgeService } from './purge.service';
 import { decodeCursor, encodeCursor } from './cursor';
 
 /**
@@ -42,6 +44,8 @@ export class DashboardUsersService {
     private readonly history: HistoryRepo,
     private readonly accounts: DashboardAccountRepo,
     private readonly audit: AuditService,
+    private readonly maps: CustomMapRepo,
+    private readonly purge: PurgeService,
   ) {}
 
   async list(query: {
@@ -108,6 +112,36 @@ export class DashboardUsersService {
     await this.users.clearDisabled(userId);
     await this.audit.log(actor, 'user.unban', { type: 'user', id: userId });
     return this.detail(userId);
+  }
+
+  /**
+   * Hard-delete an account (dashboard `users.delete`). Force-terminates any LIVE game the
+   * user is seated in and closes their rooms, revokes sessions, drops owned map drafts, then
+   * removes the `users` doc. `matchHistory` + published `mapContents` are kept as the archive.
+   * Refused while the target still holds dashboard access (mirrors the ban guard — keeps the
+   * maintainer/owner lockout protections authoritative).
+   */
+  async delete(actor: AuthUser, userId: string, reason?: string) {
+    if (userId === actor.userId) throw new ForbiddenException('you cannot delete yourself');
+    const target = await this.users.findById(userId);
+    if (!target) throw new NotFoundException('user not found');
+    if (await this.accounts.findById(userId)) {
+      throw new ConflictException('target holds dashboard access — revoke it first');
+    }
+    const { gamesTerminated, roomsClosed } = await this.purge.terminateActiveForMember(
+      actor.userId,
+      userId,
+      reason ?? 'account deleted by a maintainer',
+    );
+    await this.sessions.revokeAllForUser(userId);
+    await this.maps.deleteByOwner(userId);
+    await this.users.deleteById(userId);
+    await this.audit.log(
+      actor,
+      'user.delete',
+      { type: 'user', id: userId },
+      { ...(reason ? { reason } : {}), gamesTerminated, roomsClosed },
+    );
   }
 
   /** Replace a registered account's gated-feature set (dashboard `users.features`). */
