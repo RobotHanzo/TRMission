@@ -335,6 +335,7 @@ const resources = {
         rateLimited: '傳送太快，請稍候…',
         tooLong: '訊息過長（上限 2048 字）',
         invalidPreset: '無法辨識的預設訊息',
+        quickReplies: '快速回覆',
         spectatorTag: '[旁觀者]',
         presets: {
           GREETING: '哈囉！',
@@ -909,6 +910,7 @@ const resources = {
         rateLimited: 'Slow down a moment…',
         tooLong: 'Message too long (max 2048).',
         invalidPreset: 'Unrecognized preset message',
+        quickReplies: 'Quick replies',
         spectatorTag: '[Spectator]',
         presets: {
           GREETING: 'Hello!',

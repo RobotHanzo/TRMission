@@ -59,7 +59,8 @@ describe('ChatPanel', () => {
 
   it('sends a preset message when a preset button is clicked', () => {
     render(<ChatPanel />);
-    fireEvent.click(screen.getByRole('button', { name: '謝謝！' }));
+    fireEvent.click(screen.getByRole('button', { name: '快速回覆' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: '謝謝！' }));
     expect(chatPresetSpy).toHaveBeenCalledWith('THANKS');
   });
 

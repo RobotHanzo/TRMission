@@ -202,11 +202,47 @@
 .chat-hint--visible {
   visibility: visible;
 }
-.chat-presets {
+/* Quick-reply popover: a single trigger inside the chat-input row that reveals the canned
+   messages on demand, instead of a permanently-visible wall of a dozen pill buttons. */
+.chat-preset-picker {
+  position: relative;
+  flex: none;
+}
+.chat-preset-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--tr-line);
+  background: var(--tr-surface-2);
+  color: var(--tr-ink);
+  cursor: pointer;
+}
+.chat-preset-picker.open .chat-preset-trigger {
+  background: var(--tr-ember);
+  border-color: var(--tr-ember);
+  color: #fff;
+}
+.chat-preset-panel {
+  position: absolute;
+  bottom: calc(100% + var(--tr-space-2));
+  left: 0;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
   gap: var(--tr-space-2);
-  margin-bottom: var(--tr-space-2);
+  width: max-content;
+  max-width: min(22rem, 80vw);
+  max-height: 12rem;
+  overflow-y: auto;
+  padding: var(--tr-space-2);
+  border-radius: var(--tr-radius);
+  border: 1px solid var(--tr-line);
+  background: var(--tr-surface);
+  box-shadow: var(--tr-shadow);
 }
 .chat-preset-btn {
   font-size: 0.78rem;
@@ -223,6 +259,7 @@
 }
 .chat-input {
   display: flex;
+  align-items: center;
   gap: var(--tr-space-2);
 }
 .chat-input input {

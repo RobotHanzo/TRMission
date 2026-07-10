@@ -7,7 +7,8 @@ import { getSocket } from '../net/connection';
 import { usePlayerName } from '../game/playerName';
 import { SEAT_COLORS } from '../theme/colors';
 import { chatRejectionHintKey } from '../game/chatErrors';
-import { CHAT_PRESET_IDS, chatPresetKey } from '../game/chatPresets';
+import { chatPresetKey } from '../game/chatPresets';
+import { ChatPresetPicker } from './ChatPresetPicker';
 
 const MAX_LEN = 2048;
 const RATE_MAX = 5;
@@ -110,13 +111,6 @@ export function ChatPanel() {
         )}
       </div>
       <p className={`chat-hint${hint ? ' chat-hint--visible' : ''}`}>{hint}</p>
-      <div className="chat-presets">
-        {CHAT_PRESET_IDS.map((id) => (
-          <button key={id} type="button" className="chat-preset-btn" onClick={() => sendPreset(id)}>
-            {t(chatPresetKey(id))}
-          </button>
-        ))}
-      </div>
       <form
         className="chat-input"
         onSubmit={(e) => {
@@ -124,6 +118,7 @@ export function ChatPanel() {
           send();
         }}
       >
+        <ChatPresetPicker onSelect={sendPreset} />
         <input
           type="text"
           maxLength={MAX_LEN}

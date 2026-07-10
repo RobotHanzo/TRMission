@@ -68,6 +68,8 @@ describe('HomeScreen', () => {
     mocked.getMyRooms.mockResolvedValue([]);
     mocked.history.mockResolvedValue([{ role: 'player' }]);
     useSession.setState({ user: { ...signedIn } });
+    window.history.replaceState(null, '', '/');
+    useUi.setState({ view: 'home', roomCode: null, gameId: null, ticket: null });
   });
   afterEach(() => vi.restoreAllMocks());
 
@@ -94,6 +96,10 @@ describe('HomeScreen', () => {
     const watch = await screen.findByRole('button', { name: '觀戰' });
     fireEvent.click(watch);
     await waitFor(() => expect(mocked.spectate).toHaveBeenCalledWith('LIVEEE'));
+    // roomCode/URL must be set the same way a lobby join would set them — GameScreen's roster
+    // fetch (real player names instead of "P{seat+1}") and reload restoration both key off this.
+    await waitFor(() => expect(useUi.getState().roomCode).toBe('LIVEEE'));
+    expect(window.location.pathname).toBe('/room/LIVEEE');
   });
 
   it('spectates via the code box when the code targets a started, spectatable room', async () => {
@@ -105,6 +111,8 @@ describe('HomeScreen', () => {
     await waitFor(() => expect(mocked.getRoom).toHaveBeenCalledWith('LIVEEE'));
     await waitFor(() => expect(mocked.spectate).toHaveBeenCalledWith('LIVEEE'));
     expect(mocked.joinRoom).not.toHaveBeenCalled();
+    await waitFor(() => expect(useUi.getState().roomCode).toBe('LIVEEE'));
+    expect(window.location.pathname).toBe('/room/LIVEEE');
   });
 
   it('shows a rejoin banner for the most recent active room and re-enters it', async () => {

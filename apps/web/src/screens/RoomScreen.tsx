@@ -26,7 +26,8 @@ import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
 import type { Locale } from '../store/ui';
-import { CHAT_PRESET_IDS, chatPresetKey } from '../game/chatPresets';
+import { chatPresetKey } from '../game/chatPresets';
+import { ChatPresetPicker } from '../components/ChatPresetPicker';
 import '../styles/game.css';
 import '../styles/room.css';
 
@@ -605,18 +606,6 @@ export function RoomScreen() {
               ))
             )}
           </div>
-          <div className="chat-presets">
-            {CHAT_PRESET_IDS.map((id) => (
-              <button
-                key={id}
-                type="button"
-                className="chat-preset-btn"
-                onClick={() => sendChat(id)}
-              >
-                {t(chatPresetKey(id))}
-              </button>
-            ))}
-          </div>
           <form
             className="chat-input"
             onSubmit={(e) => {
@@ -627,6 +616,7 @@ export function RoomScreen() {
               void guard(api.sendRoomChat(code, { text }));
             }}
           >
+            <ChatPresetPicker onSelect={sendChat} />
             <input
               type="text"
               maxLength={2048}

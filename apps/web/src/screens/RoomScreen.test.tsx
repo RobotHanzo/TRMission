@@ -416,8 +416,9 @@ describe('RoomScreen preset chat', () => {
       }),
     );
     const { container } = render(<RoomScreen />);
-    const btn = await screen.findByRole('button', { name: '祝你好運，玩得開心！' });
-    fireEvent.click(btn);
+    const trigger = await screen.findByRole('button', { name: '快速回覆' });
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('menuitem', { name: '祝你好運，玩得開心！' }));
     expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', { presetId: 'GOOD_LUCK' });
     await waitFor(() =>
       expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain(

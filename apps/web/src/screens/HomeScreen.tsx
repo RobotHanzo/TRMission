@@ -146,6 +146,9 @@ export function HomeScreen() {
     try {
       const tk = await api.spectate(roomCode);
       connectGame(tk.ticket);
+      // enterRoom first: it sets roomCode + pushes /room/:code, which GameScreen's roster fetch
+      // (real names instead of "P{seat+1}") and a reload's syncFromUrl both depend on.
+      enterRoom(roomCode);
       enterGame(tk.gameId, tk.ticket); // spectator: the snapshot will carry no SelfView
     } catch (e) {
       setErr((e as Error).message);
@@ -172,6 +175,8 @@ export function HomeScreen() {
       if (r.status === 'STARTED' && r.settings.allowSpectating) {
         const tk = await api.spectate(target);
         connectGame(tk.ticket);
+        // Same as watch() above: establish roomCode + the /room/:code URL before entering.
+        enterRoom(target);
         enterGame(tk.gameId, tk.ticket);
       } else {
         enterRoom((await api.joinRoom(target)).code);
