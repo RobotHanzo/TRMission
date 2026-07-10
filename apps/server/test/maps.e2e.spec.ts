@@ -72,6 +72,32 @@ describe('maps: CRUD', () => {
     await request(server()).get(`/api/v1/maps/${id}`).set(auth(a.token)).expect(404);
   });
 
+  it('round-trips an authored station tier through update and read', async () => {
+    const a = await registered('mapowner-tier@example.com', 'OwnerTier');
+    const created = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(a.token))
+      .send({ nameZh: 'X', nameEn: 'X' })
+      .expect(201);
+    const id: string = created.body.id;
+
+    const draftWithTier = {
+      ...tinyDraft,
+      cities: [{ ...tinyDraft.cities[0], tier: 'major' }, tinyDraft.cities[1]],
+    };
+    const updated = await request(server())
+      .put(`/api/v1/maps/${id}`)
+      .set(auth(a.token))
+      .send({ draft: draftWithTier })
+      .expect(200);
+    const updatedCity = updated.body.draft.cities.find((c: { id: string }) => c.id === 'm1');
+    expect(updatedCity.tier).toBe('major');
+
+    const got = await request(server()).get(`/api/v1/maps/${id}`).set(auth(a.token)).expect(200);
+    const gotCity = got.body.draft.cities.find((c: { id: string }) => c.id === 'm1');
+    expect(gotCity.tier).toBe('major');
+  });
+
   it('404s (not 403) when a different user reads or edits someone else map', async () => {
     const a = await registered('mapowner2@example.com', 'Owner2');
     const b = await registered('mapother2@example.com', 'Other2');

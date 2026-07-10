@@ -33,6 +33,7 @@ export const CityDraftSchema = z.object({
   y: z.number().finite(),
   region: z.string().max(60),
   isIsland: z.boolean(),
+  tier: z.enum(['major', 'secondary', 'tertiary', 'minor']).optional(),
 });
 
 export const RouteDraftSchema = z.object({
@@ -154,7 +155,11 @@ function compactGeography(
  *  zod-validated at this point, so the casts are a trust boundary, not a leap of faith. */
 export function draftFromDto(dto: z.infer<typeof MapDraftSchema>): MapDraft {
   return {
-    cities: dto.cities.map((c) => ({ ...c, id: asCityId(c.id) })),
+    cities: dto.cities.map(({ tier, ...c }) => ({
+      ...c,
+      id: asCityId(c.id),
+      ...(tier !== undefined ? { tier } : {}),
+    })),
     routes: dto.routes.map((r) => ({
       id: asRouteId(r.id),
       a: asCityId(r.a),
