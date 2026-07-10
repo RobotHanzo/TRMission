@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useUi } from '../../store/ui';
 import { useSession } from '../../store/session';
 import { useGame } from '../../store/game';
+import { track } from '../../lib/analytics';
 import { resetToDefaultContent } from '../../game/catalog';
 import { GameStage } from '../../screens/GameStage';
 import { lessonsForScope } from './curriculum';
@@ -139,6 +140,7 @@ export default function TutorialScreen() {
   const createGame = useUi((s) => s.requestCreateGame);
   const completeTutorial = useSession((s) => s.completeTutorial);
   const finishTutorial = () => {
+    track('tutorial_complete', {});
     void completeTutorial();
     createGame();
   };
@@ -155,6 +157,7 @@ export default function TutorialScreen() {
     return (
       <TutorialLauncher
         onPick={(s) => {
+          track('tutorial_begin', { scope: s });
           setScope(s);
           setLessonIdx(0);
         }}

@@ -2,7 +2,7 @@
 // (config + action log), guards engine/content version skew, then mounts the standard
 // GameStage inside ISOLATED sandbox stores driven by useReplayPlayer. Never touches the
 // live game singletons or the WebSocket.
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
 import { buildBoard, ENGINE_VERSION, SCHEMA_VERSION } from '@trm/engine';
@@ -17,6 +17,7 @@ import {
 } from '../net/rest';
 import { resolveContent } from '../game/contentCache';
 import { setActiveContent, resetToDefaultContent } from '../game/catalog';
+import { track } from '../lib/analytics';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { useRoster } from '../store/roster';
@@ -45,6 +46,8 @@ export default function ReplayScreen() {
   const setMembers = useRoster((s) => s.setMembers);
   const clearRoster = useRoster((s) => s.clear);
   const [load, setLoad] = useState<LoadState>({ kind: 'loading' });
+  // Fire replay_open once per opened replay (guards against React StrictMode's double-invoke).
+  const openedRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!gameId) return;
@@ -54,6 +57,10 @@ export default function ReplayScreen() {
       .replay(gameId)
       .then(async (payload) => {
         if (cancelled) return;
+        if (openedRef.current !== gameId) {
+          openedRef.current = gameId;
+          track('replay_open', { source: useUi.getState().consumeReplaySource() });
+        }
         // The client's OWN engine must match the stored game — the server's `replayable`
         // flag is advisory; this is the authoritative check.
         if (payload.engineVersion !== ENGINE_VERSION || payload.schemaVersion !== SCHEMA_VERSION) {

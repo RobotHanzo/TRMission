@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
+import { track } from '../lib/analytics';
 import type { Theme, UserPreferences } from '../net/rest';
 import type { BoardLayout, Locale } from '../store/ui';
 import { Switch } from './ui/Switch';
@@ -70,18 +71,26 @@ export function SettingsModal({ onClose }: Props) {
   const chooseTheme = (next: Theme) => {
     setTheme(next);
     persist({ theme: next });
+    track('settings_change', { setting: 'theme', value: next });
   };
   const chooseColorBlind = (next: boolean) => {
     setColorBlind(next);
     persist({ colorBlind: next });
+    track('settings_change', { setting: 'colorblind', value: String(next) });
   };
   const chooseLocale = (next: Locale) => {
     setLocale(next);
     persist({ locale: next });
+    track('settings_change', { setting: 'locale', value: next });
   };
   const chooseLayout = (next: BoardLayout) => {
     setBoardLayout(next);
     persist({ boardLayout: next });
+    track('settings_change', { setting: 'board_layout', value: next });
+  };
+  const chooseSound = (next: boolean) => {
+    setSoundEnabled(next);
+    track('settings_change', { setting: 'sound', value: String(next) });
   };
 
   return (
@@ -155,12 +164,12 @@ export function SettingsModal({ onClose }: Props) {
               value={soundVolume}
               enabled={soundEnabled}
               onChangeValue={setSoundVolume}
-              onToggleEnabled={setSoundEnabled}
+              onToggleEnabled={chooseSound}
               rangeLabel={t('volume')}
               muteLabel={t('sound')}
             />
           </div>
-          <Switch checked={soundEnabled} onChange={setSoundEnabled} label={t('sound')} />
+          <Switch checked={soundEnabled} onChange={chooseSound} label={t('sound')} />
         </section>
       </div>
     </div>

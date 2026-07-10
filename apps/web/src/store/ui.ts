@@ -202,6 +202,9 @@ interface UiState {
   /** Analytics only: set by the practice-vs-bots flow so `game_start` can tag the match as practice
    *  (cleared when entering a normal room). Never affects gameplay. */
   isPractice: boolean;
+  /** Analytics only: how the current replay was reached — 'history' when opened in-app via
+   *  `enterReplay`, else a cold `/replay/:id` link. Consumed once by `ReplayScreen`. */
+  replaySource: 'history' | 'link' | null;
   goHome(): void;
   enterRoom(code: string): void;
   enterGame(gameId: string, ticket: string): void;
@@ -234,6 +237,8 @@ interface UiState {
   setFollowActing(followActing: boolean): void;
   setEncyclopediaOpen(open: boolean): void;
   setPractice(isPractice: boolean): void;
+  /** Read + reset the replay source (defaults to 'link' when unset). */
+  consumeReplaySource(): 'history' | 'link';
   /** Adopt preferences from a signed-in account (the account is the source of truth). */
   applyPreferences(prefs: UserPreferences): void;
 }
@@ -260,6 +265,7 @@ export const useUi = create<UiState>()((set, get) => ({
   encyclopediaOpen: false,
   homeFocus: null,
   isPractice: false,
+  replaySource: null,
   goHome: () => {
     disconnectGame();
     pushPath('/');
@@ -271,6 +277,11 @@ export const useUi = create<UiState>()((set, get) => ({
   },
   clearHomeFocus: () => set({ homeFocus: null }),
   setPractice: (isPractice) => set({ isPractice }),
+  consumeReplaySource: () => {
+    const source = get().replaySource ?? 'link';
+    set({ replaySource: null });
+    return source;
+  },
   enterRoom: (code) => {
     pushPath(`/room/${code}`);
     set({ view: 'room', roomCode: code, replayGameId: null });
@@ -290,7 +301,14 @@ export const useUi = create<UiState>()((set, get) => ({
   enterReplay: (gameId) => {
     disconnectGame();
     pushPath(`/replay/${encodeURIComponent(gameId)}`);
-    set({ view: 'replay', replayGameId: gameId, roomCode: null, gameId: null, ticket: null });
+    set({
+      view: 'replay',
+      replayGameId: gameId,
+      replaySource: 'history',
+      roomCode: null,
+      gameId: null,
+      ticket: null,
+    });
   },
   enterMaps: () => {
     disconnectGame();

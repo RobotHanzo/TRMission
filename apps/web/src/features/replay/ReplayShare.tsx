@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Link2, Lock } from 'lucide-react';
 import { api, type ReplayVisibility } from '../../net/rest';
+import { track } from '../../lib/analytics';
 
 export function ReplayShare({
   gameId,
@@ -26,6 +27,7 @@ export function ReplayShare({
     const prev = visibility;
     setFailed(false);
     setVisibility(next); // optimistic — the PATCH is a single flag flip
+    track('replay_share_change', { visibility: next });
     api.setReplayVisibility(gameId, next).catch(() => {
       setVisibility(prev);
       setFailed(true);

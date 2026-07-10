@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Copy, XCircle } from 'lucide-react';
 import { api } from '../../../../net/rest';
 import { useUi } from '../../../../store/ui';
+import { track } from '../../../../lib/analytics';
 import { useEditorStore } from '../store';
 import { useReadiness, useIssueText } from '../ValidationPanel';
 
@@ -26,6 +27,7 @@ export function ShareStage() {
 
   const createRoomWithMap = async () => {
     if (!mapId || !ready) return;
+    track('map_testplay', { map_id: mapId });
     setBusy(true);
     setErr(null);
     try {
@@ -75,7 +77,14 @@ export function ShareStage() {
               </button>
             </div>
           ) : (
-            <button onClick={() => void mintShare()}>{t('builder.mintShare')}</button>
+            <button
+              onClick={() => {
+                track('map_share_mint', { map_id: mapId ?? '' });
+                void mintShare();
+              }}
+            >
+              {t('builder.mintShare')}
+            </button>
           )}
         </section>
 

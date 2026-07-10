@@ -9,6 +9,7 @@ import {
   type SharedMapView,
 } from '../../net/rest';
 import { useUi } from '../../store/ui';
+import { track } from '../../lib/analytics';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useConfirmAction } from '../../hooks/useConfirmAction';
 import '../../styles/builder.css';
@@ -55,6 +56,7 @@ export default function MapsScreen() {
     setForking(mapId);
     try {
       const detail = await api.forkOfficialMap(mapId);
+      track('map_fork', { map_id: mapId });
       enterMapEditor(detail.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -88,6 +90,7 @@ export default function MapsScreen() {
     setCreating(true);
     try {
       const detail = await api.createMap(newNameZh.trim(), newNameEn.trim());
+      track('map_create', {});
       setNewNameZh('');
       setNewNameEn('');
       enterMapEditor(detail.id);
@@ -100,6 +103,7 @@ export default function MapsScreen() {
 
   const remove = async (id: string) => {
     await api.deleteMap(id).catch(() => undefined);
+    track('map_delete', {});
     refresh();
   };
 
@@ -118,6 +122,7 @@ export default function MapsScreen() {
     setCloning(true);
     try {
       const detail = await api.cloneSharedMap(code.trim());
+      track('map_clone', {});
       enterMapEditor(detail.id);
     } catch (e) {
       setPeekError(e instanceof Error ? e.message : String(e));
