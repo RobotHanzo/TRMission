@@ -160,6 +160,19 @@ describe('RoomScreen join-via-link', () => {
       vi.useRealTimers();
     }
   });
+
+  it('joins a full room as a spectator and shows a one-time notice', async () => {
+    mocked.getRoom.mockResolvedValue(room()); // members = [host] only — I am not in it
+    mocked.joinRoom.mockResolvedValue(
+      room({
+        members: [member('host')],
+        spectators: [{ userId: 'u-me', displayName: 'Me', isGuest: true }],
+      }),
+    );
+    render(<RoomScreen />);
+    await waitFor(() => expect(mocked.joinRoom).toHaveBeenCalledWith('ABCD'));
+    expect(await screen.findByText('房間已滿，你已加入為觀戰者。')).toBeInTheDocument();
+  });
 });
 
 describe('RoomScreen ready toggle colour', () => {

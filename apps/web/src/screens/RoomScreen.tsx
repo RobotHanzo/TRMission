@@ -146,6 +146,14 @@ export function RoomScreen() {
           if (!amSpectator) {
             r = await api.joinRoom(code);
             if (!active) return;
+            // A full room seats the joiner as a spectator instead of rejecting the join —
+            // tell them once, since they expected a seat.
+            if (
+              !r.members.some((m) => m.userId === user?.id) &&
+              r.spectators.some((s) => s.userId === user?.id)
+            ) {
+              pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') });
+            }
           }
         }
         wasPresent = true;
@@ -187,7 +195,7 @@ export function RoomScreen() {
       active = false;
       clearInterval(id);
     };
-  }, [code, user?.id, enterGame, goHome]);
+  }, [code, user?.id, enterGame, goHome, pushNotification]);
 
   if (!room)
     return (
