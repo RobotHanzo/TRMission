@@ -52,6 +52,13 @@ void i18n.use(initReactI18next).init({
           placeholder: '遊戲畫面將於 P2 實作',
           roomLabel: '房間 {{code}}',
         },
+        board: {
+          zoomIn: '放大',
+          zoomOut: '縮小',
+          resetView: '重置視圖',
+          followView: '跟隨當前玩家視角',
+          stopFollowing: '停止跟隨',
+        },
         boot: {
           updateTitle: '需要更新',
           updateBody: '請更新至最新版本以繼續遊玩。',
@@ -99,6 +106,13 @@ void i18n.use(initReactI18next).init({
           title: 'Game',
           placeholder: 'The game screen lands in P2',
           roomLabel: 'Room {{code}}',
+        },
+        board: {
+          zoomIn: 'Zoom in',
+          zoomOut: 'Zoom out',
+          resetView: 'Reset view',
+          followView: "Follow the current player's view",
+          stopFollowing: 'Stop following',
         },
         boot: {
           updateTitle: 'Update required',
