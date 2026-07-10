@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, within, act } from '@testing-library/react';
+import { render, screen, fireEvent, within, act, waitFor } from '@testing-library/react';
 import '../i18n';
 import { UsersView } from './UsersView';
 import { useUi } from '../store/ui';
@@ -148,6 +148,62 @@ describe('UsersView columns', () => {
     expect(await screen.findByTitle('密碼')).toBeInTheDocument();
     // Two dashes expected: Email column ("—") and Expires column ("—").
     expect(screen.getAllByText('—')).toHaveLength(2);
+  });
+});
+
+describe('UsersView delete account', () => {
+  it('hides the delete button without users.delete permission', async () => {
+    stubFetch({
+      '/dashboard/users/u1': { status: 200, body: USER_DETAIL },
+      '/dashboard/users?': { status: 200, body: { users: [], nextCursor: null } },
+    });
+    render(<UsersView />);
+    const drawer = await screen.findByRole('dialog', { name: 'Alice' });
+    // Disable IS available (users.ban is in the default perms); delete is NOT.
+    expect(within(drawer).getByText('停權')).toBeInTheDocument();
+    expect(within(drawer).queryByText('刪除帳號')).toBeNull();
+  });
+
+  it('deletes a user: confirm issues DELETE and closes the drawer', async () => {
+    useSession.setState({
+      phase: 'ready',
+      user: { id: 'admin1', displayName: 'Ops', isGuest: false },
+      role: 'admin',
+      permissions: new Set(['users.read', 'users.ban', 'users.delete']),
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        const method = init?.method ?? 'GET';
+        if (method === 'DELETE' && url.includes('/dashboard/users/u1')) {
+          return new Response(null, { status: 204 });
+        }
+        if (url.includes('/dashboard/users/u1')) {
+          return new Response(JSON.stringify(USER_DETAIL), { status: 200 });
+        }
+        if (url.includes('/dashboard/users?')) {
+          return new Response(JSON.stringify({ users: [], nextCursor: null }), { status: 200 });
+        }
+        return new Response(JSON.stringify({ message: 'not found' }), { status: 404 });
+      }),
+    );
+    render(
+      <>
+        <UsersView />
+        <ToastStack />
+      </>,
+    );
+    const drawer = await screen.findByRole('dialog', { name: 'Alice' });
+    fireEvent.click(within(drawer).getByText('刪除帳號'));
+    const dialog = await screen.findByRole('dialog', { name: '永久刪除此帳號?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: '刪除帳號' }));
+
+    expect(await screen.findByText('帳號已刪除')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Alice' })).toBeNull());
+    expect(
+      vi.mocked(fetch).mock.calls.some(([, i]) => (i as RequestInit | undefined)?.method === 'DELETE'),
+    ).toBe(true);
   });
 });
 

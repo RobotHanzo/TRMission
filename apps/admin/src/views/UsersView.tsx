@@ -43,10 +43,12 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const canBan = useSession((s) => s.hasPermission('users.ban'));
+  const canDelete = useSession((s) => s.hasPermission('users.delete'));
   const canFeatures = useSession((s) => s.hasPermission('users.features'));
   const pushToast = useToast((s) => s.push);
   const [detail, setDetail] = useState<UserDetail | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
@@ -76,6 +78,20 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     } finally {
       setBusy(false);
       setConfirming(false);
+    }
+  };
+
+  const removeUser = async (reason?: string) => {
+    if (!detail) return;
+    setBusy(true);
+    try {
+      await api.deleteUser(detail.id, reason);
+      pushToast('success', t('toast.userDeleted'));
+      onClose();
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+      setBusy(false);
+      setConfirmingDelete(false);
     }
   };
 
@@ -219,6 +235,18 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             </section>
           )}
 
+          {canDelete && !detail.isMaintainer && (
+            <section>
+              <button
+                className="oc-btn danger"
+                disabled={busy}
+                onClick={() => setConfirmingDelete(true)}
+              >
+                {t('users.delete')}
+              </button>
+            </section>
+          )}
+
           {confirming && (
             <ConfirmDialog
               title={t('users.disableConfirmTitle')}
@@ -229,6 +257,19 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               busy={busy}
               onConfirm={(reason) => void toggleBan(reason)}
               onCancel={() => setConfirming(false)}
+            />
+          )}
+
+          {confirmingDelete && (
+            <ConfirmDialog
+              title={t('users.deleteConfirmTitle')}
+              body={t('users.deleteConfirmBody')}
+              confirmLabel={t('users.delete')}
+              danger
+              withReason
+              busy={busy}
+              onConfirm={(reason) => void removeUser(reason)}
+              onCancel={() => setConfirmingDelete(false)}
             />
           )}
         </>
