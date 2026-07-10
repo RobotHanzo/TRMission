@@ -203,9 +203,10 @@
   visibility: visible;
 }
 /* Quick-reply popover: a single trigger inside the chat-input row that reveals the canned
-   messages on demand, instead of a permanently-visible wall of a dozen pill buttons. */
+   messages on demand, instead of a permanently-visible wall of a dozen pill buttons. The panel
+   itself anchors to `.chat-input` (below), not this trigger — spanning the full row width keeps
+   it from overflowing a narrow chat card the way anchoring to the trigger alone would. */
 .chat-preset-picker {
-  position: relative;
   flex: none;
 }
 .chat-preset-trigger {
@@ -230,12 +231,11 @@
   position: absolute;
   bottom: calc(100% + var(--tr-space-2));
   left: 0;
+  right: 0;
   z-index: 5;
   display: flex;
   flex-wrap: wrap;
   gap: var(--tr-space-2);
-  width: max-content;
-  max-width: min(22rem, 80vw);
   max-height: 12rem;
   overflow-y: auto;
   padding: var(--tr-space-2);
@@ -258,6 +258,7 @@
   cursor: default;
 }
 .chat-input {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--tr-space-2);
