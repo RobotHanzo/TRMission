@@ -8,6 +8,7 @@ import { GameModule } from './game/game.module';
 import { LobbyModule } from './lobby/lobby.module';
 import { HistoryModule } from './history/history.module';
 import { MapsModule } from './maps/maps.module';
+import { RatingsModule } from './ratings/ratings.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { OgModule } from './og/og.module';
 import { ObservabilityModule } from './observability/observability.module';
@@ -28,6 +29,7 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     GameModule,
     LobbyModule,
     HistoryModule,
+    RatingsModule,
     DashboardModule,
     OgModule,
   ],
