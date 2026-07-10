@@ -150,11 +150,20 @@ Taiwan's authored content already conforms to `MapDraftSchema` by construction (
   - `listOfficialMaps: () => req<OfficialMapSummary[]>('GET', '/maps/official')`.
   - `forkOfficialMap: (mapId: string) => req<MapDetail>('POST',
     `/maps/fork/${encodeURIComponent(mapId)}`)`.
-- **`features/builder/MapsScreen.tsx`**: a new `card` section **"Start from an official map"**
-  (placed between "My maps" and "Clone by code"). Loads `listOfficialMaps()` on mount; for each
-  official map renders name + a summary line ("N cities · M routes") and a **Fork** button that
-  calls `forkOfficialMap(mapId)` then `enterMapEditor(detail.id)` — same success path as clone. The
-  editor opens on the Stops stage with the Taiwan silhouette visible.
+- **`features/builder/MapsScreen.tsx`**: a new `card` section **"Start from an official map"**,
+  placed **side-by-side with the existing "Clone by code" card** in a two-column row below the
+  "My maps" card:
+
+  ```
+  [ My maps  +  create new ]
+  [ official map clone ][ clone by code ]
+  ```
+
+  The two cards share a flex/grid row (each `flex: 1`, wrapping to stacked on narrow viewports).
+  The fork card loads `listOfficialMaps()` on mount; for each official map it renders name + a
+  summary line ("N cities · M routes") and a **Fork** button that calls `forkOfficialMap(mapId)`
+  then `enterMapEditor(detail.id)` — same success path as clone. The editor opens on the Stops
+  stage with the Taiwan silhouette visible.
 - **i18n** (`apps/web/src/i18n/index.ts`, zh-Hant primary + en): `builder.forkOfficialTitle`,
   `builder.forkMap`, `builder.forkSummary` (interpolates city/route counts).
 
