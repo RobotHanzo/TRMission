@@ -108,8 +108,15 @@
   flex-direction: column;
   padding: var(--tr-space-3) var(--tr-space-3) 0;
 }
+.log-list-shell {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
 .log-list {
   flex: 1;
+  min-width: 0;
   min-height: 0;
   overflow-y: auto;
   display: flex;
@@ -117,6 +124,27 @@
   gap: 2px;
   scrollbar-width: thin;
   scrollbar-color: var(--tr-line) transparent;
+}
+.log-scroll-bottom {
+  position: absolute;
+  right: var(--tr-space-2);
+  bottom: var(--tr-space-2);
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--tr-line);
+  border-radius: 999px;
+  background: var(--tr-surface);
+  color: var(--tr-ink);
+  box-shadow: var(--tr-shadow);
+  cursor: pointer;
+}
+.log-scroll-bottom:hover {
+  background: var(--tr-surface-2);
 }
 .log-empty,
 .chat-empty {
@@ -1587,6 +1615,10 @@ button.ticket-card:hover {
 /* Touch-primary devices get comfortable tap targets; desktop keeps the 32px icon convention. */
 @media (pointer: coarse) {
   .map-controls button {
+    width: 40px;
+    height: 40px;
+  }
+  .log-scroll-bottom {
     width: 40px;
     height: 40px;
   }

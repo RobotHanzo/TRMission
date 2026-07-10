@@ -296,6 +296,7 @@ const resources = {
       log: {
         heading: '紀錄',
         empty: '尚無動作',
+        scrollToBottom: '捲動至最新動作',
         gameStarted: '遊戲開始',
         turnStarted: '輪到 {{name}}',
         routeClaimed: '{{name}} 鋪設了 {{route}}（+{{points}}）',
@@ -902,6 +903,7 @@ const resources = {
       log: {
         heading: 'Log',
         empty: 'No actions yet',
+        scrollToBottom: 'Scroll to latest action',
         gameStarted: 'Game started',
         turnStarted: "{{name}}'s turn",
         routeClaimed: '{{name}} built {{route}} (+{{points}})',
