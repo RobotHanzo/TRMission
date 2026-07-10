@@ -508,7 +508,8 @@ const resources = {
         shortCount: '短途任務數量',
         shortMaxValue: '短途任務上限分數',
         noLimit: '無上限',
-        shortMaxValueShortfall: '短途任務上限分數限制了產生數量，僅產生 {{n}} 張（需求 {{count}} 張）。',
+        shortMaxValueShortfall:
+          '短途任務上限分數限制了產生數量，僅產生 {{n}} 張（需求 {{count}} 張）。',
         seed: '種子：{{seed}}',
         reroll: '重新隨機',
         preview: '預覽',
