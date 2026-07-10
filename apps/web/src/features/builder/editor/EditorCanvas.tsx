@@ -4,6 +4,7 @@ import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { BOW_LIMIT } from '@trm/map-data';
 import { MapScene } from '../../../components/MapScene';
 import { buildRouteGeometryFor } from '../../../game/routeGeometry';
+import { frameHome } from '../../../game/frameHome';
 import type { RouteDraft } from '../../../net/rest';
 import { clientToBoardPoint } from './canvasProjection';
 import { bowFromPoint } from './curveMath';
@@ -105,15 +106,22 @@ export function EditorCanvas({
   return (
     <div className="editor-canvas-inner" ref={zoomVarRef}>
       <TransformWrapper
-        minScale={0.5}
-        maxScale={12}
-        initialScale={1}
+        // Same pan/zoom envelope as the live board (Board.tsx) — matching bounds keep
+        // --inv-scale/--marker-scale (so city-label size and route/track weight) identical to
+        // in-game at every zoom step, not just at rest.
+        minScale={0.8}
+        maxScale={8}
+        initialScale={1.9}
         centerOnInit
+        // Frame the geography to the viewport once measured (same as the live board), so the
+        // canvas settles at the same effective zoom the game uses — otherwise a flat initialScale
+        // leaves --inv-scale (and so city-label size) far bigger than in-game.
+        onInit={(ref) => frameHome(ref, 0)}
         wheel={{ step: 0.0022 }}
         panning={{ excluded: ['curve-handle'] }}
       >
         <ZoomVar targetRef={zoomVarRef} />
-        <CanvasControls />
+        <CanvasControls fitHome />
         {/* contentStyle overrides the library's default `width/height: fit-content` on the inner
             content div — without it the SVG's own 100%/100% resolves against an indefinite parent
             and falls back to its tiny intrinsic size instead of filling (and tracking) the viewport. */}

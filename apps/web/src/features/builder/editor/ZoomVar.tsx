@@ -11,7 +11,7 @@ export function ZoomVar({ targetRef }: { targetRef: RefObject<HTMLElement | null
     const el = targetRef.current;
     if (!el) return;
     const s = state.scale;
-    el.style.setProperty('--inv-scale', String(Math.max(0.08, Math.min(2, 1 / s))));
+    el.style.setProperty('--inv-scale', String(Math.max(0.12, Math.min(1.5, 1 / s))));
     el.style.setProperty(
       '--marker-scale',
       String(Math.max(0.34, Math.min(0.82, 1 / Math.sqrt(s)))),
