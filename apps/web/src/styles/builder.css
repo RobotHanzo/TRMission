@@ -413,6 +413,31 @@
 .editor-ticket-cell {
   min-width: 11em;
 }
+.editor-ticket-table tr.is-selected {
+  background: color-mix(in srgb, var(--tr-blue) 8%, transparent);
+}
+
+/* A sidebar preview: the table stays the primary (flexible) column, the mission card sits beside
+   it sized to its own (fixed, 150px — see .ticket-card in game.css) width, sticky so it stays in
+   view while the table scrolls. Only rendered once a row's Preview button has been clicked — see
+   MissionsStage.tsx — so it reuses the exact in-game .ticket-card/.ticket-map/.ticket-foot markup
+   instead of a bespoke builder-only preview style. */
+.editor-stage-layout--missions {
+  height: auto;
+  align-items: flex-start;
+}
+.editor-missions-main {
+  flex: 1;
+  min-width: 0;
+}
+.editor-missions-preview {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-2);
+  position: sticky;
+  top: var(--tr-space-3);
+}
 
 .editor-generate-preview ul {
   margin: 0;

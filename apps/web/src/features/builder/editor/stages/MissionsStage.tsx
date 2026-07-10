@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dices, Trash2, Wand2 } from 'lucide-react';
+import { Dices, Eye, Trash2, Wand2 } from 'lucide-react';
 import { generateTickets } from '@trm/map-data';
 import type { TicketView } from '@trm/map-data';
 import { Segmented } from '../../../../components/ui/Segmented';
@@ -106,9 +106,15 @@ export function MissionsStage() {
     setB('');
   };
 
+  const previewTicket = previewId ? draft.tickets.find((tk) => tk.id === previewId) : undefined;
+  const previewA = previewTicket && draft.cities.find((c) => c.id === previewTicket.a);
+  const previewB = previewTicket && draft.cities.find((c) => c.id === previewTicket.b);
+  const previewGeo = draft.geography;
+  const previewTone = previewTicket?.deck === 'LONG' ? 'long' : 'short';
+
   return (
-    <div className="editor-stage-layout editor-stage-layout--table">
-      <div className="card stack">
+    <div className="editor-stage-layout editor-stage-layout--missions">
+      <div className="card stack editor-missions-main">
         <div className="row between">
           <Segmented<'LONG' | 'SHORT'>
             options={[
@@ -150,15 +156,11 @@ export function MissionsStage() {
             </thead>
             <tbody>
               {rows.map((tk) => (
-                <tr
-                  key={tk.id}
-                  onClick={() => setPreviewId(tk.id)}
-                  className={previewId === tk.id ? 'is-selected' : undefined}
-                >
+                <tr key={tk.id} className={previewId === tk.id ? 'is-selected' : undefined}>
                   <td>{cityName(tk.a)}</td>
                   <td>{cityName(tk.b)}</td>
                   <td>{tk.value}</td>
-                  <td onClick={(e) => e.stopPropagation()}>
+                  <td>
                     {renderViewControl(
                       tk.view,
                       (v) => setTicketView(tk.id, v),
@@ -166,7 +168,15 @@ export function MissionsStage() {
                       t('builder.displayArea'),
                     )}
                   </td>
-                  <td>
+                  <td className="row" style={{ gap: '0.2em' }}>
+                    <button
+                      className="icon-btn"
+                      aria-pressed={previewId === tk.id}
+                      onClick={() => setPreviewId((cur) => (cur === tk.id ? null : tk.id))}
+                      aria-label={t('builder.previewTicket')}
+                    >
+                      <Eye size={14} aria-hidden />
+                    </button>
                     <button
                       className="icon-btn"
                       onClick={() => removeTicket(tk.id)}
@@ -219,33 +229,39 @@ export function MissionsStage() {
             </tbody>
           </table>
         </div>
-        {(() => {
-          const geo = draft.geography;
-          const tk = draft.tickets.find((x) => x.id === previewId) ?? rows[0];
-          const ca = tk && draft.cities.find((c) => c.id === tk.a);
-          const cb = tk && draft.cities.find((c) => c.id === tk.b);
-          if (!geo || !tk || !ca || !cb) {
-            return <p className="muted">{t('builder.selectTicketToPreview')}</p>;
-          }
-          return (
-            <div className="editor-ticket-preview">
-              <span className="muted">{t('builder.ticketPreview')}</span>
-              <div className="ticket-map">
-                <RoutePreview
-                  a={{ id: ca.id, x: ca.x, y: ca.y }}
-                  b={{ id: cb.id, x: cb.x, y: cb.y }}
-                  cities={draft.cities}
-                  routes={draft.routes}
-                  geography={geo}
-                  baseView={geo.baseView}
-                  view={tk.view}
-                  tone={tk.deck === 'LONG' ? 'long' : 'short'}
-                />
-              </div>
-            </div>
-          );
-        })()}
       </div>
+      {previewTicket && previewA && previewB && previewGeo && (
+        <aside className="editor-missions-preview">
+          <span className="muted">{t('builder.ticketPreview')}</span>
+          <div
+            className={`ticket-card tone-${previewTone}`}
+            role="img"
+            aria-label={`${previewA.nameZh} – ${previewB.nameZh}, ${previewTicket.value}`}
+          >
+            <div className="ticket-map">
+              <RoutePreview
+                a={{ id: previewA.id, x: previewA.x, y: previewA.y }}
+                b={{ id: previewB.id, x: previewB.x, y: previewB.y }}
+                cities={draft.cities}
+                routes={draft.routes}
+                geography={previewGeo}
+                baseView={previewGeo.baseView}
+                view={previewTicket.view}
+                tone={previewTone}
+              />
+              {previewTone === 'long' && <span className="ticket-flag">{t('longRoute')}</span>}
+            </div>
+            <div className="ticket-foot">
+              <span className="ticket-route">
+                <b>{previewA.nameZh}</b>
+                <span className="ticket-dash" aria-hidden />
+                <b>{previewB.nameZh}</b>
+              </span>
+              <span className="ticket-value">{previewTicket.value}</span>
+            </div>
+          </div>
+        </aside>
+      )}
       {genOpen && (
         <GenerateModal
           onClose={() => setGenOpen(false)}
