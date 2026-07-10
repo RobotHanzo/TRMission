@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useUi, roomCodeFromPath } from './ui';
+import { useUi, roomCodeFromPath, adminSpectateFromPath } from './ui';
 import { disconnectGame } from '../net/connection';
 import { goToAdmin } from '../lib/adminApp';
 
@@ -135,6 +135,21 @@ describe('ui store routing', () => {
     expect(useUi.getState().view).toBe('replay');
     expect(useUi.getState().replayGameId).toBe('game-9');
     expect(path()).toBe('/replay/game-9');
+  });
+
+  it('syncFromUrl(authed) on /admin-spectate/:id restores the adminSpectate view with the ticket', () => {
+    window.history.replaceState(null, '', '/admin-spectate/game-1?ticket=tok');
+    useUi.getState().syncFromUrl(true);
+    expect(useUi.getState().view).toBe('adminSpectate');
+    expect(useUi.getState().adminSpectateGameId).toBe('game-1');
+    expect(useUi.getState().adminSpectateTicket).toBe('tok');
+  });
+
+  it('syncFromUrl(not authed) on /admin-spectate/:id is NOT gated — the ticket is the sole authority', () => {
+    window.history.replaceState(null, '', '/admin-spectate/game-1?ticket=tok');
+    useUi.getState().syncFromUrl(false);
+    expect(useUi.getState().view).toBe('adminSpectate');
+    expect(useUi.getState().adminSpectateGameId).toBe('game-1');
   });
 
   it('enterMaps pushes /maps and sets the view', () => {
@@ -287,5 +302,24 @@ describe('roomCodeFromPath', () => {
   it('returns null when not on a room path', () => {
     window.history.replaceState(null, '', '/');
     expect(roomCodeFromPath()).toBeNull();
+  });
+});
+
+describe('adminSpectateFromPath', () => {
+  beforeEach(() => window.history.replaceState(null, '', '/'));
+
+  it('reads the game id and ticket from /admin-spectate/:id?ticket=...', () => {
+    window.history.replaceState(null, '', '/admin-spectate/game-1?ticket=tok');
+    expect(adminSpectateFromPath()).toEqual({ id: 'game-1', ticket: 'tok' });
+  });
+
+  it('returns a null ticket when the query param is missing', () => {
+    window.history.replaceState(null, '', '/admin-spectate/game-1');
+    expect(adminSpectateFromPath()).toEqual({ id: 'game-1', ticket: null });
+  });
+
+  it('returns null when not on an admin-spectate path', () => {
+    window.history.replaceState(null, '', '/');
+    expect(adminSpectateFromPath()).toBeNull();
   });
 });

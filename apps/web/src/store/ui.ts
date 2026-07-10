@@ -20,6 +20,7 @@ export type View =
   | 'history'
   | 'replay'
   | 'adminReplay'
+  | 'adminSpectate'
   | 'maps'
   | 'mapEditor';
 
@@ -37,6 +38,7 @@ const TUTORIAL_PATH = '/tutorial';
 const HISTORY_PATH = '/history';
 const REPLAY_PATH = /^\/replay\/([^/]+)$/;
 const ADMIN_REPLAY_PATH = /^\/admin-replay\/([^/]+)$/;
+const ADMIN_SPECTATE_PATH = /^\/admin-spectate\/([^/]+)$/;
 const MAPS_PATH = '/maps';
 const MAP_EDITOR_PATH = /^\/maps\/([^/]+)\/edit$/;
 
@@ -54,6 +56,16 @@ export const replayIdFromPath = (): string | null => {
  *  only by loading the URL directly (the dashboard mints it into a fresh tab). */
 export const adminReplayFromPath = (): { id: string; ticket: string | null } | null => {
   const id = ADMIN_REPLAY_PATH.exec(window.location.pathname)?.[1];
+  if (!id) return null;
+  const ticket = new URLSearchParams(window.location.search).get('ticket');
+  return { id: decodeURIComponent(id), ticket };
+};
+
+/** Parses `/admin-spectate/:gameId?ticket=...` — the ticket-authorized maintainer route for
+ *  force-joining a LIVE game as a spectator, reachable only by loading the URL directly (the
+ *  dashboard mints it into a fresh tab). */
+export const adminSpectateFromPath = (): { id: string; ticket: string | null } | null => {
+  const id = ADMIN_SPECTATE_PATH.exec(window.location.pathname)?.[1];
   if (!id) return null;
   const ticket = new URLSearchParams(window.location.search).get('ticket');
   return { id: decodeURIComponent(id), ticket };
@@ -168,6 +180,9 @@ interface UiState {
   /** The ticket-authorized /admin-replay/:gameId route — game id + ticket parsed from the URL. */
   adminReplayGameId: string | null;
   adminReplayTicket: string | null;
+  /** The ticket-authorized /admin-spectate/:gameId route — game id + ticket parsed from the URL. */
+  adminSpectateGameId: string | null;
+  adminSpectateTicket: string | null;
   /** The custom map id being edited on /maps/:id/edit. */
   editingMapId: string | null;
   locale: Locale;
@@ -227,6 +242,8 @@ export const useUi = create<UiState>()((set, get) => ({
   replayGameId: null,
   adminReplayGameId: null,
   adminReplayTicket: null,
+  adminSpectateGameId: null,
+  adminSpectateTicket: null,
   editingMapId: null,
   // Seed display prefs from localStorage so guests (and the pre-/auth/me window) persist them.
   locale: readLocale(),
@@ -376,6 +393,23 @@ export const useUi = create<UiState>()((set, get) => ({
         view: 'adminReplay',
         adminReplayGameId: adminReplay.id,
         adminReplayTicket: adminReplay.ticket,
+        roomCode: null,
+        gameId: null,
+        ticket: null,
+        replayGameId: null,
+      });
+      return;
+    }
+    // Ticket-authorized maintainer view — never auth-gated (the ticket is the sole authority),
+    // reachable from a fresh tab with no prior session in this app. Force-joins a LIVE game as
+    // a spectator, bypassing the room's allowSpectating setting.
+    const adminSpectate = adminSpectateFromPath();
+    if (adminSpectate) {
+      disconnectGame();
+      set({
+        view: 'adminSpectate',
+        adminSpectateGameId: adminSpectate.id,
+        adminSpectateTicket: adminSpectate.ticket,
         roomCode: null,
         gameId: null,
         ticket: null,
