@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { OFFICIAL_MAPS } from '@trm/map-data';
 import { createTestApp, type TestApp } from './app';
 
 let t: TestApp;
@@ -279,5 +280,42 @@ describe('maps: route bow', () => {
       .set(auth(a.token))
       .send({ draft })
       .expect(400);
+  });
+});
+
+describe('maps: fork from official', () => {
+  it('lists official maps (route not shadowed by :id) with station/route counts', async () => {
+    const a = await registered('fork-list@example.com', 'ForkList');
+    const res = await request(server()).get('/api/v1/maps/official').set(auth(a.token)).expect(200);
+    const taiwan = res.body.find((m: { mapId: string }) => m.mapId === 'taiwan');
+    expect(taiwan).toBeDefined();
+    expect(taiwan.cities).toBe(OFFICIAL_MAPS[0]!.content.cities.length);
+    expect(taiwan.routes).toBe(OFFICIAL_MAPS[0]!.content.routes.length);
+  });
+
+  it('forks an official map into a new owned draft with content + geography', async () => {
+    const a = await registered('fork-do@example.com', 'ForkDo');
+    const forked = await request(server())
+      .post('/api/v1/maps/fork/taiwan')
+      .set(auth(a.token))
+      .expect(201);
+    expect(forked.body.nameEn).toContain('Copy');
+    expect(forked.body.draft.cities).toHaveLength(OFFICIAL_MAPS[0]!.content.cities.length);
+    expect(forked.body.draft.routes).toHaveLength(OFFICIAL_MAPS[0]!.content.routes.length);
+    expect(forked.body.draft.tickets).toHaveLength(OFFICIAL_MAPS[0]!.content.tickets.length);
+    expect(forked.body.draft.geography.land.length).toBeGreaterThan(0);
+    // Owned by a: a can read it back.
+    await request(server()).get(`/api/v1/maps/${forked.body.id}`).set(auth(a.token)).expect(200);
+  });
+
+  it('404s forking an unknown official map id', async () => {
+    const a = await registered('fork-404@example.com', 'Fork404');
+    await request(server()).post('/api/v1/maps/fork/nosuchmap').set(auth(a.token)).expect(404);
+  });
+
+  it('403s the official list + fork without the mapBuilder feature (guest)', async () => {
+    const g = await guest('ForkGuest');
+    await request(server()).get('/api/v1/maps/official').set(auth(g.token)).expect(403);
+    await request(server()).post('/api/v1/maps/fork/taiwan').set(auth(g.token)).expect(403);
   });
 });

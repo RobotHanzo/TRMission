@@ -18,6 +18,7 @@ import {
   draftFromDto,
   MapDetailSchema,
   MapSummarySchema,
+  OfficialMapSummarySchema,
   ShareResultSchema,
   SharedMapViewSchema,
   UpdateMapDto,
@@ -47,6 +48,14 @@ export class MapsController {
   @ApiResponse({ status: 200, schema: apiSchema(z.array(MapSummarySchema)) })
   list(@CurrentUser() user: AuthUser) {
     return this.maps.list(user.userId);
+  }
+
+  // Declared before `@Get(':id')` so the static `official` segment is not captured as an `:id`.
+  @Get('official')
+  @ApiOperation({ summary: 'List the official maps you can fork from' })
+  @ApiResponse({ status: 200, schema: apiSchema(z.array(OfficialMapSummarySchema)) })
+  listOfficial() {
+    return this.maps.listOfficial();
   }
 
   @Post()
@@ -116,5 +125,13 @@ export class MapsController {
   @ApiResponse({ status: 201, schema: apiSchema(MapDetailSchema) })
   clone(@Param('code') code: string, @CurrentUser() user: AuthUser) {
     return this.maps.cloneByCode(code, user.userId);
+  }
+
+  @Post('fork/:mapId')
+  @UseGuards(RegisteredUserGuard)
+  @ApiOperation({ summary: 'Fork an official map into a new custom map draft' })
+  @ApiResponse({ status: 201, schema: apiSchema(MapDetailSchema) })
+  fork(@Param('mapId') mapId: string, @CurrentUser() user: AuthUser) {
+    return this.maps.forkOfficial(mapId, user.userId);
   }
 }

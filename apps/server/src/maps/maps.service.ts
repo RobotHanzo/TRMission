@@ -5,6 +5,8 @@ import type { Board } from '@trm/engine';
 import {
   assertValidContent,
   hashContent,
+  officialMapById,
+  OFFICIAL_MAPS,
   validateContent,
   validateForPlay,
   validateGeography,
@@ -32,6 +34,14 @@ export interface SharedMapView {
   nameZh: string;
   nameEn: string;
   draft: MapDraft;
+}
+
+export interface OfficialMapSummary {
+  mapId: string;
+  nameZh: string;
+  nameEn: string;
+  cities: number;
+  routes: number;
 }
 
 const toSummary = (m: CustomMapDoc): MapSummary => ({
@@ -120,6 +130,42 @@ export class MapsService {
       `${source.nameEn} (Copy)`,
     );
     const updated = await this.maps.update(doc._id, ownerId, { draft: source.draft });
+    return toDetail(updated ?? doc);
+  }
+
+  listOfficial(): OfficialMapSummary[] {
+    return OFFICIAL_MAPS.map((m) => ({
+      mapId: m.mapId,
+      nameZh: m.content.meta.nameZh,
+      nameEn: m.content.meta.nameEn,
+      cities: m.content.cities.length,
+      routes: m.content.routes.length,
+    }));
+  }
+
+  /** Fork an official map into a new custom-map draft owned by `ownerId`. Copies cities/routes/
+   *  tickets/rules straight through; geography is the map's own (world-cropped official maps) or
+   *  its generated silhouette (Taiwan's `forkGeography`). Nothing is published to `mapContents` —
+   *  that still happens only at game start. */
+  async forkOfficial(mapId: string, ownerId: string): Promise<MapDetail> {
+    const official = officialMapById(mapId);
+    if (!official) throw new NotFoundException('official map not found');
+    const { content, forkGeography } = official;
+    const doc = await this.maps.create(
+      randomUUID(),
+      ownerId,
+      `${content.meta.nameZh} (副本)`,
+      `${content.meta.nameEn} (Copy)`,
+    );
+    const geography = content.geography ?? forkGeography;
+    const draft: MapDraft = {
+      cities: [...content.cities],
+      routes: [...content.routes],
+      tickets: [...content.tickets],
+      ...(geography !== undefined ? { geography } : {}),
+      ...(content.rules !== undefined ? { rules: content.rules } : {}),
+    };
+    const updated = await this.maps.update(doc._id, ownerId, { draft });
     return toDetail(updated ?? doc);
   }
 

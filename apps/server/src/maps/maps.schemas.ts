@@ -207,6 +207,14 @@ export const MapDetailSchema = MapSummarySchema.extend({
   draft: MapDraftSchema,
 });
 
+export const OfficialMapSummarySchema = z.object({
+  mapId: z.string(),
+  nameZh: z.string(),
+  nameEn: z.string(),
+  cities: z.number(),
+  routes: z.number(),
+});
+
 export const SharedMapViewSchema = z.object({
   nameZh: z.string(),
   nameEn: z.string(),
