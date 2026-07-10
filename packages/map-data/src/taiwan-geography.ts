@@ -5,6 +5,7 @@
 // which draws it with extra viewport/pan-zoom concerns layered on top) and the server's
 // official-map social card render from, so neither can drift from the other.
 import { smoothClosedPath } from './geometry';
+import type { MapGeography } from './types';
 
 /** Home view: frames the main island plus every outlying island (Kinmen west → Orchid SE). */
 export const TAIWAN_BASE_VIEW = { x: -4, y: -2, w: 84, h: 98 };
@@ -89,3 +90,37 @@ export const TAIWAN_GRATICULE = {
 
 export const TAIWAN_LAND_PATH = smoothClosedPath(TAIWAN_OUTLINE);
 export const TAIWAN_CENTRAL_RANGE_PATH = smoothClosedPath(TAIWAN_CENTRAL_RANGE);
+
+const round2 = (n: number): number => Math.round(n * 100) / 100;
+
+/** Sample a circle (centre + radius, board units) into a closed N-gon ring, 2-dp rounded.
+ *  Deterministic (fixed angles) — no RNG, so a forked-but-untouched map re-publishes to the
+ *  same content hash. */
+function circleRing(cx: number, cy: number, r: number, segments = 16): [number, number][] {
+  const ring: [number, number][] = [];
+  for (let i = 0; i < segments; i++) {
+    const a = (2 * Math.PI * i) / segments;
+    ring.push([round2(cx + r * Math.cos(a)), round2(cy + r * Math.sin(a))]);
+  }
+  return ring;
+}
+
+/**
+ * A `MapGeography` that reproduces the official Taiwan silhouette for a CUSTOM map forked from
+ * Taiwan. `TAIWAN_CONTENT` itself carries no geography (it renders via the hand-authored
+ * `Geography` component and must keep `CONTENT_HASH` stable); this is generated separately and
+ * attached only to a forked draft. `land` = the main-island outline + one polygon ring per
+ * outlying-island blob (the central-range relief has no generic land-ring equivalent and is
+ * dropped). `crop` is a synthetic-but-plausible real-Taiwan lon/lat bbox — provenance only;
+ * `CustomGeography` never reads it at render.
+ */
+export function taiwanForkGeography(): MapGeography {
+  return {
+    baseView: { ...TAIWAN_BASE_VIEW },
+    land: [
+      TAIWAN_OUTLINE.map(([x, y]) => [round2(x), round2(y)] as [number, number]),
+      ...TAIWAN_ISLANDS.map((b) => circleRing(b.cx, b.cy, b.r)),
+    ],
+    crop: { lonMin: 118, lonMax: 122.1, latMin: 21.8, latMax: 26.4 },
+  };
+}

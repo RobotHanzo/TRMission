@@ -1,8 +1,9 @@
 import { digest } from '@trm/shared';
-import type { GameContent, MapMeta } from './types';
+import type { GameContent, MapMeta, MapGeography } from './types';
 import { CITIES } from './cities';
 import { ROUTES } from './routes';
 import { TICKETS } from './tickets';
+import { taiwanForkGeography } from './taiwan-geography';
 import { CONTENT_V2 } from './archive/v2';
 import { CONTENT_V3 } from './archive/v3';
 
@@ -74,11 +75,19 @@ export interface OfficialMap {
   readonly mapId: string;
   readonly content: GameContent;
   readonly hash: string;
+  /** Geography to seed a fork with when the content carries none (Taiwan's built-in silhouette
+   *  is not a MapGeography). Absent for world-cropped official maps — use content.geography. */
+  readonly forkGeography?: MapGeography;
 }
 
 /** Every map shipped by TRMission itself (as opposed to a user-authored custom map). */
 export const OFFICIAL_MAPS: readonly OfficialMap[] = [
-  { mapId: MAP_META.mapId, content: TAIWAN_CONTENT, hash: CONTENT_HASH },
+  {
+    mapId: MAP_META.mapId,
+    content: TAIWAN_CONTENT,
+    hash: CONTENT_HASH,
+    forkGeography: taiwanForkGeography(),
+  },
 ];
 
 export function officialMapById(mapId: string): OfficialMap | undefined {
