@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BookOpen, ChevronRight, CirclePlus, GraduationCap, RailSymbol } from 'lucide-react';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
+import { useAnimationsStore } from '../store/animations';
 import { api, type RoomView } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { WelcomeScreen } from './WelcomeScreen';
@@ -64,6 +65,7 @@ export function HomeScreen() {
   const openEncyclopedia = useUi((s) => s.setEncyclopediaOpen);
   const homeFocus = useUi((s) => s.homeFocus);
   const clearHomeFocus = useUi((s) => s.clearHomeFocus);
+  const pushNotification = useAnimationsStore((s) => s.pushNotification);
 
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
@@ -189,7 +191,16 @@ export function HomeScreen() {
         enterRoom(target);
         enterGame(tk.gameId, tk.ticket);
       } else {
-        enterRoom((await api.joinRoom(target)).code);
+        const joined = await api.joinRoom(target);
+        // A full room seats the joiner as a spectator instead of rejecting the join — tell
+        // them once, since they expected a seat.
+        if (
+          !joined.members.some((m) => m.userId === user.id) &&
+          joined.spectators.some((s) => s.userId === user.id)
+        ) {
+          pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') });
+        }
+        enterRoom(joined.code);
       }
     } catch (e) {
       setErr((e as Error).message);

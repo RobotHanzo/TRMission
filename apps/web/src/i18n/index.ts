@@ -127,6 +127,7 @@ const resources = {
       watch: '觀戰',
       spectating: '觀戰中',
       spectatingHint: '你正在觀戰，無法進行操作。',
+      fullRoomSpectateNotice: '房間已滿，你已加入為觀戰者。',
 
       createRoom: '建立房間',
       joinRoom: '加入房間',
@@ -706,6 +707,7 @@ const resources = {
       watch: 'Watch',
       spectating: 'Spectating',
       spectatingHint: "You're spectating — you can't take actions.",
+      fullRoomSpectateNotice: 'Room is full — you joined as a spectator.',
 
       createRoom: 'Create room',
       joinRoom: 'Join room',

@@ -5,6 +5,7 @@ import '../i18n';
 import { HomeScreen } from './HomeScreen';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
+import { useAnimations } from '../store/animations';
 import { api, type RoomView } from '../net/rest';
 
 vi.mock('../net/connection', () => ({ connectGame: vi.fn() }));
@@ -67,6 +68,7 @@ const pubRoom = (code: string, status: RoomView['status'], gameId?: string): Roo
 describe('HomeScreen', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useAnimations.getState().reset();
     mocked.getPublicRooms.mockResolvedValue([]);
     mocked.getMyRooms.mockResolvedValue([]);
     mocked.history.mockResolvedValue([{ role: 'player' }]);
@@ -116,6 +118,26 @@ describe('HomeScreen', () => {
     expect(mocked.joinRoom).not.toHaveBeenCalled();
     await waitFor(() => expect(useUi.getState().roomCode).toBe('LIVEEE'));
     expect(window.location.pathname).toBe('/room/LIVEEE');
+  });
+
+  it('joins a full lobby as a spectator and shows a one-time notice', async () => {
+    mocked.getRoom.mockResolvedValue(pubRoom('FULLXX', 'LOBBY'));
+    mocked.joinRoom.mockResolvedValue({
+      ...pubRoom('FULLXX', 'LOBBY'),
+      members: [{ userId: 'h', displayName: 'h', isGuest: false, seat: 0, ready: false }],
+      spectators: [{ userId: 'u1', displayName: 'Tester', isGuest: false }],
+    });
+    render(<HomeScreen />);
+    const input = await screen.findByLabelText('輸入房號');
+    fireEvent.change(input, { target: { value: 'fullxx' } });
+    fireEvent.click(screen.getByRole('button', { name: '加入' }));
+    await waitFor(() => expect(mocked.joinRoom).toHaveBeenCalledWith('FULLXX'));
+    await waitFor(() =>
+      expect(useAnimations.getState().notifications).toEqual([
+        expect.objectContaining({ variant: 'notice', text: '房間已滿，你已加入為觀戰者。' }),
+      ]),
+    );
+    expect(useUi.getState().roomCode).toBe('FULLXX');
   });
 
   it('shows a rejoin banner for the most recent active room and re-enters it', async () => {
