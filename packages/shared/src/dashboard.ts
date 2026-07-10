@@ -35,6 +35,7 @@ export const DASHBOARD_PERMISSIONS = [
   'maps.read',
   'maps.moderate',
   'ratings.read',
+  'config.features',
 ] as const;
 export type DashboardPermission = (typeof DASHBOARD_PERMISSIONS)[number];
 
@@ -70,6 +71,7 @@ const ADMIN_PERMISSIONS: readonly DashboardPermission[] = [
   'purge.read',
   'purge.run',
   'maps.moderate',
+  'config.features',
 ];
 
 /** Role → permission set. Strict escalation chain; only `owner` can manage maintainers. */

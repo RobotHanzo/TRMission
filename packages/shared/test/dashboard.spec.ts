@@ -91,4 +91,12 @@ describe('dashboard permission taxonomy', () => {
     expect(ROLE_PERMISSIONS.owner).toContain('users.delete');
     expect(DASHBOARD_PERMISSIONS).toContain('users.delete');
   });
+
+  it('config.features is admin-tier, independent of users.features', () => {
+    expect(ROLE_PERMISSIONS.viewer).not.toContain('config.features');
+    expect(ROLE_PERMISSIONS.moderator).not.toContain('config.features');
+    expect(ROLE_PERMISSIONS.admin).toContain('config.features');
+    expect(ROLE_PERMISSIONS.owner).toContain('config.features');
+    expect(DASHBOARD_PERMISSIONS).toContain('config.features');
+  });
 });
