@@ -18,6 +18,7 @@ vi.mock('../net/rest', () => ({
     getPublicRooms: vi.fn(() => Promise.resolve([])),
     getMyRooms: vi.fn(() => Promise.resolve([])),
     spectate: vi.fn(() => Promise.resolve({ gameId: 'g', ticket: 't' })),
+    startPractice: vi.fn(() => Promise.resolve({ code: 'PRAC01', gameId: 'gp', ticket: 'tp' })),
     history: vi.fn(() => Promise.resolve([{ role: 'player' }])),
   },
 }));
@@ -27,6 +28,7 @@ const mocked = api as unknown as {
   getMyRooms: ReturnType<typeof vi.fn>;
   getRoom: ReturnType<typeof vi.fn>;
   spectate: ReturnType<typeof vi.fn>;
+  startPractice: ReturnType<typeof vi.fn>;
   joinRoom: ReturnType<typeof vi.fn>;
   history: ReturnType<typeof vi.fn>;
 };
@@ -164,5 +166,17 @@ describe('HomeScreen', () => {
     const continueBtn = await screen.findByRole('button', { name: /前往首頁/ });
     fireEvent.click(continueBtn);
     await screen.findByText('歡迎回來，Tester');
+  });
+
+  it('starts a practice game with bots from the welcome screen', async () => {
+    mocked.history.mockResolvedValue([]); // brand-new account → welcome screen shows
+    render(<HomeScreen />);
+    const practice = await screen.findByRole('button', { name: /開始練習/ });
+    fireEvent.click(practice);
+    await waitFor(() => expect(mocked.startPractice).toHaveBeenCalled());
+    // Same navigation contract as watch(): roomCode + /room/:code URL, then the game view.
+    await waitFor(() => expect(useUi.getState().roomCode).toBe('PRAC01'));
+    await waitFor(() => expect(useUi.getState().gameId).toBe('gp'));
+    expect(window.location.pathname).toBe('/room/PRAC01');
   });
 });

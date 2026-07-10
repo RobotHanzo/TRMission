@@ -88,6 +88,9 @@ export interface TicketResult {
   gameId: string;
   ticket: string;
 }
+export interface PracticeResult extends TicketResult {
+  code: string;
+}
 export interface HistoryPlayer {
   userId: string;
   seat: number;
@@ -340,6 +343,7 @@ export const api = {
   kickPlayer: (code: string, userId: string) =>
     req<RoomView>('POST', `/rooms/${code}/kick/${encodeURIComponent(userId)}`),
   startRoom: (code: string) => req<TicketResult>('POST', `/rooms/${code}/start`),
+  startPractice: () => req<PracticeResult>('POST', '/rooms/practice'),
   getTicket: (code: string) => req<TicketResult>('POST', `/rooms/${code}/ticket`),
   getPublicRooms: () => req<RoomView[]>('GET', '/rooms/public'),
   /** Rooms the signed-in user is currently seated in (lobby or live game) — the rejoin banner. */

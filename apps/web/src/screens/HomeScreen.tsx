@@ -129,11 +129,20 @@ export function HomeScreen() {
   // Don't flash the homepage (or its rooms-list fetch) while it's still unknown whether this is
   // a brand-new account.
   if (showWelcome === null) return null;
+  // Welcome-screen "practice with bots": one server call spins up a started game vs bots, then we
+  // navigate exactly like watch() does (roomCode + /room/:code URL before entering the game view).
+  const startPractice = async () => {
+    const tk = await api.startPractice();
+    connectGame(tk.ticket, { roomCode: tk.code });
+    enterRoom(tk.code);
+    enterGame(tk.gameId, tk.ticket);
+  };
   if (showWelcome) {
     return (
       <WelcomeScreen
         name={user.displayName}
         onStartTutorial={enterTutorial}
+        onPractice={startPractice}
         onContinue={() => setShowWelcome(false)}
       />
     );

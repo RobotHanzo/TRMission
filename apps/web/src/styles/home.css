@@ -324,7 +324,7 @@ button.home-side-card {
   display: flex;
   gap: var(--tr-space-6);
   width: 100%;
-  max-width: 720px;
+  max-width: 1040px;
 }
 .welcome-option {
   flex: 1;
