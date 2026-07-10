@@ -173,6 +173,23 @@ export class DashboardGamesController {
     return this.games.closeRoom(actor, code, body.reason);
   }
 
+  @Post('rooms/:code/transfer/:userId')
+  @HttpCode(200)
+  @RequirePermission('rooms.transferHost')
+  @ApiOperation({
+    summary: "Reassign a LOBBY room's host to another seated, non-bot member",
+  })
+  @ApiBody({ schema: apiSchema(ModerationReasonSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(DashboardRoomRowSchema) })
+  transferHost(
+    @Param('code') code: string,
+    @Param('userId') userId: string,
+    @CurrentUser() actor: AuthUser,
+    @Body() body: ModerationReasonDto,
+  ) {
+    return this.games.transferHost(actor, code, userId, body.reason);
+  }
+
   @Delete('rooms/:code')
   @HttpCode(204)
   @RequirePermission('rooms.delete')

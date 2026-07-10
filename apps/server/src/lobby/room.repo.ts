@@ -108,6 +108,8 @@ export type BecomeSpectatorResult =
   | 'spectating_disabled';
 export type BecomePlayerResult = RoomDoc | 'not_found' | 'started' | 'not_spectator' | 'full';
 export type TransferHostResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
+/** transferHostAdmin has no caller-is-host check, so it can never produce 'forbidden'. */
+export type AdminTransferHostResult = RoomDoc | 'not_found' | 'started' | 'invalid';
 export type CloseRoomResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 
 // Room codes: 6 chars, no easily-confused glyphs (no I/O/0/1).
@@ -554,6 +556,20 @@ export class RoomRepo implements OnModuleInit {
     if (!target || target.isBot || targetId === hostId) return 'invalid';
     await this.col.updateOne(
       { _id: code, hostId, status: 'LOBBY' },
+      { $set: { hostId: targetId, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /** Maintainer force-reassignment: same target validation as transferHost, no caller-is-host check. */
+  async transferHostAdmin(code: string, targetId: string): Promise<AdminTransferHostResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    const target = room.members.find((m) => m.userId === targetId);
+    if (!target || target.isBot || targetId === room.hostId) return 'invalid';
+    await this.col.updateOne(
+      { _id: code, status: 'LOBBY' },
       { $set: { hostId: targetId, updatedAt: new Date() } },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';

@@ -1,4 +1,10 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { Db, Collection } from 'mongodb';
 import { MONGO_DB } from '../db/tokens';
 import { GameHub } from '../ws/hub';
@@ -188,6 +194,21 @@ export class DashboardGamesService {
     await this.audit.log(actor, 'room.close', { type: 'room', id: code }, reason ? { reason } : {});
     const updated = await this.rooms.get(code);
     return toRoomRow(updated ?? room);
+  }
+
+  /** Maintainer reassignment of a LOBBY room's host — not gated on being the current host. */
+  async transferHost(actor: AuthUser, code: string, targetId: string, reason?: string) {
+    const r = await this.rooms.transferHostAdmin(code, targetId);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new ConflictException('room is no longer in LOBBY');
+    if (r === 'invalid') throw new BadRequestException('cannot transfer to that player');
+    await this.audit.log(
+      actor,
+      'room.transferHost',
+      { type: 'room', id: code },
+      { targetId, ...(reason ? { reason } : {}) },
+    );
+    return toRoomRow(r);
   }
 
   /** Full ordered action log — COMPLETED games only (same hard rule as replay). */

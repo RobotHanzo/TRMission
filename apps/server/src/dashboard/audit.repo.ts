@@ -14,6 +14,7 @@ export type DashboardAuditAction =
   | 'game.viewReplay'
   | 'game.spectateLive'
   | 'room.close'
+  | 'room.transferHost'
   | 'room.delete'
   | 'purge.run'
   | 'maintainer.grant'

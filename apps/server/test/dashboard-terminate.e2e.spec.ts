@@ -240,3 +240,121 @@ describe('force-close room', () => {
       .expect(409);
   }, 60_000);
 });
+
+describe('admin transfer host', () => {
+  it('reassigns the host of a LOBBY room, keeping the old host seated, and audits it', async () => {
+    const a = await guest('Cass');
+    const b = await guest('Drew');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+
+    const res = await request(server())
+      .post(`/api/v1/dashboard/rooms/${code}/transfer/${b.userId}`)
+      .set(auth(moderator.token))
+      .send({ reason: 'host went AFK' })
+      .expect(200);
+    expect(res.body.hostId).toBe(b.userId);
+    expect(res.body.members.map((m: { userId: string }) => m.userId)).toContain(a.userId);
+    expect(
+      await t.db.collection('dashboardAudit').countDocuments({
+        action: 'room.transferHost',
+        'target.id': code,
+      } as never),
+    ).toBe(1);
+  });
+
+  it('404s an unknown room, 400s an invalid target, 409s a STARTED room', async () => {
+    const a = await guest('Ellis');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+
+    await request(server())
+      .post(`/api/v1/dashboard/rooms/nope/transfer/${a.userId}`)
+      .set(auth(moderator.token))
+      .send({})
+      .expect(404);
+
+    await request(server())
+      .post(`/api/v1/dashboard/rooms/${code}/transfer/nobody`)
+      .set(auth(moderator.token))
+      .send({})
+      .expect(400);
+
+    await request(server())
+      .post(`/api/v1/rooms/${code}/bots`)
+      .set(auth(a.token))
+      .send({ difficulty: 'EASY' })
+      .expect(200);
+    const roomDoc = await t.db.collection('rooms').findOne({ _id: code } as never);
+    const botId = (roomDoc as unknown as { members: { userId: string; isBot?: boolean }[] })
+      .members.find((m) => m.isBot)!.userId;
+    await request(server())
+      .post(`/api/v1/dashboard/rooms/${code}/transfer/${botId}`)
+      .set(auth(moderator.token))
+      .send({})
+      .expect(400);
+
+    const b = await guest('Fran');
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    for (const u of [a, b]) {
+      await request(server())
+        .post(`/api/v1/rooms/${code}/ready`)
+        .set(auth(u.token))
+        .send({ ready: true })
+        .expect(200);
+    }
+    await request(server()).post(`/api/v1/rooms/${code}/start`).set(auth(a.token)).expect(200);
+    await request(server())
+      .post(`/api/v1/dashboard/rooms/${code}/transfer/${b.userId}`)
+      .set(auth(moderator.token))
+      .send({})
+      .expect(409);
+  }, 60_000);
+
+  it('403s without the rooms.transferHost permission', async () => {
+    const viewerRes = await request(server())
+      .post('/api/v1/auth/register')
+      .send({
+        email: 'viewer-transfer@example.com',
+        password: 'password123',
+        displayName: 'Viewer',
+      })
+      .expect(201);
+    const viewer = {
+      userId: viewerRes.body.user.id as string,
+      token: viewerRes.body.accessToken as string,
+    };
+    await t.db.collection('dashboardAccounts').insertOne({
+      _id: viewer.userId,
+      role: 'viewer',
+      grantedBy: 'test',
+      grantedAt: new Date(),
+      updatedAt: new Date(),
+    } as never);
+
+    const a = await guest('Gale');
+    const b = await guest('Hart');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+
+    await request(server())
+      .post(`/api/v1/dashboard/rooms/${code}/transfer/${b.userId}`)
+      .set(auth(viewer.token))
+      .send({})
+      .expect(403);
+  });
+});
