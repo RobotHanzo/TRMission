@@ -21,7 +21,10 @@ import { DashboardGamesController } from './dashboard-games.controller';
 import { DashboardMaintainersController } from './dashboard-maintainers.controller';
 import { DashboardPurgeController } from './dashboard-purge.controller';
 import { DashboardMapsController } from './dashboard-maps.controller';
+import { DashboardRatingsService } from './dashboard-ratings.service';
+import { DashboardRatingsController } from './dashboard-ratings.controller';
 import { DashboardBootstrap } from './dashboard-bootstrap';
+import { RatingsModule } from '../ratings/ratings.module';
 
 // Maintainer dashboard: access control lives in the separate `dashboardAccounts`
 // collection (role + per-account overrides referencing users._id); every mutating
@@ -29,7 +32,7 @@ import { DashboardBootstrap } from './dashboard-bootstrap';
 // respect the hidden-information invariant: nothing about a LIVE game's hands,
 // tickets, deck order, or seed ever leaves the server.
 @Module({
-  imports: [AuthModule, GameModule, LobbyModule, HistoryModule, MapsModule],
+  imports: [AuthModule, GameModule, LobbyModule, HistoryModule, MapsModule, RatingsModule],
   controllers: [
     DashboardController,
     DashboardUsersController,
@@ -37,6 +40,7 @@ import { DashboardBootstrap } from './dashboard-bootstrap';
     DashboardMaintainersController,
     DashboardPurgeController,
     DashboardMapsController,
+    DashboardRatingsController,
   ],
   providers: [
     DashboardConfig,
@@ -51,6 +55,7 @@ import { DashboardBootstrap } from './dashboard-bootstrap';
     DashboardBootstrap,
     PurgeService,
     DashboardMapsService,
+    DashboardRatingsService,
   ],
 })
 export class DashboardModule {}

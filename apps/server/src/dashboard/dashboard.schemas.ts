@@ -352,3 +352,25 @@ export const MapAdminDetailSchema = MapAdminRowSchema.extend({
 
 export const TransferMapSchema = z.object({ newOwnerId: z.string().min(1) });
 export class TransferMapDto extends createZodDto(TransferMapSchema) {}
+
+// ---- ratings --------------------------------------------------------------------
+
+export const RatingsListQuerySchema = z.object({ limit, cursor });
+export class RatingsListQueryDto extends createZodDto(RatingsListQuerySchema) {}
+
+export const RatingRowSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  userDisplayName: z.string().optional(),
+  gameId: z.string(),
+  roomId: z.string(),
+  stars: z.number(),
+  createdAt: z.string(),
+});
+
+export const RatingsListSchema = z.object({
+  ratings: z.array(RatingRowSchema),
+  nextCursor: z.string().nullable(),
+  avgStars: z.number().nullable(),
+  totalCount: z.number(),
+});
