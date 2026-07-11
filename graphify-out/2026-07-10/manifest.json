@@ -20,28 +20,28 @@
     "semantic_hash": ""
   },
   "apps/server/src/auth/auth.controller.ts": {
-    "mtime": 1783389765.6189537,
-    "ast_hash": "001ab6469677b0a1b42eed97a9806eef",
+    "mtime": 1783698939.7292175,
+    "ast_hash": "266b4f15bacad97eb29617713568b2f6",
     "semantic_hash": ""
   },
   "apps/server/src/auth/auth.module.ts": {
-    "mtime": 1783389765.6209583,
-    "ast_hash": "651be006d59f8ef1a43e712e1fecd92b",
+    "mtime": 1783699048.8464372,
+    "ast_hash": "5a5777c3bfb127d35f6cc4feac58e16b",
     "semantic_hash": ""
   },
   "apps/server/src/auth/auth.schemas.ts": {
-    "mtime": 1783389765.6209583,
-    "ast_hash": "7928a23f13f4a9482754b3fc49567dea",
+    "mtime": 1783698927.0921073,
+    "ast_hash": "0a60c834812b87ee2292b6d253e812ca",
     "semantic_hash": ""
   },
   "apps/server/src/auth/auth.service.ts": {
-    "mtime": 1783389765.62247,
-    "ast_hash": "0671d97fde5cd335f19804453c91a8a1",
+    "mtime": 1783698933.4602354,
+    "ast_hash": "449d3c2f34f3bc299429ff070f11308a",
     "semantic_hash": ""
   },
   "apps/server/src/auth/auth.types.ts": {
-    "mtime": 1783389765.6244757,
-    "ast_hash": "220b26926bc7b3b703bb3601afc93c69",
+    "mtime": 1783698921.0778718,
+    "ast_hash": "0281936d4f24dcb08902bd4f3f0add38",
     "semantic_hash": ""
   },
   "apps/server/src/auth/current-user.decorator.ts": {
@@ -65,8 +65,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/auth/user.repo.ts": {
-    "mtime": 1783656139.2912054,
-    "ast_hash": "f72feaf2172fc0dd886b6455cfa20a5c",
+    "mtime": 1783699033.7038171,
+    "ast_hash": "d591aff4fb546a804d3800049e6f85e9",
     "semantic_hash": ""
   },
   "apps/server/src/bots/policy.ts": {
@@ -260,8 +260,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/auth.e2e.spec.ts": {
-    "mtime": 1783389765.6480887,
-    "ast_hash": "36e71d7128a38f8957485bce30f06adb",
+    "mtime": 1783698884.8124247,
+    "ast_hash": "02395e5a633cda39352ab4fd58e5e773",
     "semantic_hash": ""
   },
   "apps/server/test/bot-pacing.spec.ts": {
@@ -815,8 +815,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/index.ts": {
-    "mtime": 1783688780.997803,
-    "ast_hash": "d9921330bb44b9dbf51dc569b20e0551",
+    "mtime": 1783696049.3828838,
+    "ast_hash": "7e8279dda0b15bb2883e76bf3043f803",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/tutorial.ts": {
@@ -1865,8 +1865,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/features/builder/editor/stages/MissionsStage.tsx": {
-    "mtime": 1783690853.8322203,
-    "ast_hash": "4f1f58c9a36c13d79275c08037573ba7",
+    "mtime": 1783695683.4718614,
+    "ast_hash": "7768c168a83c633fdf3bf1973c799443",
     "semantic_hash": ""
   },
   "apps/web/src/features/builder/editor/stages/RoutesStage.tsx": {
@@ -2165,13 +2165,13 @@
     "semantic_hash": ""
   },
   "packages/shared/src/dashboard.ts": {
-    "mtime": 1783687878.741153,
-    "ast_hash": "9ba953fd80b9c5ee6212136d374ab422",
+    "mtime": 1783698899.0568912,
+    "ast_hash": "7ca1e53950a19c68b48242e49f20082b",
     "semantic_hash": ""
   },
   "packages/shared/test/dashboard.spec.ts": {
-    "mtime": 1783656056.7921748,
-    "ast_hash": "ae2f1c7b491a4f50ca7f4e1120776c45",
+    "mtime": 1783698885.9257698,
+    "ast_hash": "b995801893853705bee85d9feaf42194",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-04-maintainer-dashboard-design.md": {
@@ -2455,8 +2455,8 @@
     "semantic_hash": ""
   },
   "packages/shared/src/features.ts": {
-    "mtime": 1783247906.148695,
-    "ast_hash": "0c09a5bd6e416dcd1527a14f431c9c6a",
+    "mtime": 1783699015.7775412,
+    "ast_hash": "423bd0d0e981d770aa310b31772513c5",
     "semantic_hash": ""
   },
   "packages/shared/test/features.spec.ts": {
@@ -3817,6 +3817,36 @@
   "docs/superpowers/plans/2026-07-10-mission-generator-short-max-score.md": {
     "mtime": 1783694840.380523,
     "ast_hash": "bcb6e9089ca26898a51bcd0a4ca1eb3d",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md": {
+    "mtime": 1783697534.800845,
+    "ast_hash": "53bfac03449c6bc7aaf6c7898cd68317",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-10-tutorial-completed-flag-design.md": {
+    "mtime": 1783697792.092967,
+    "ast_hash": "4835f191b6aea3aea7fbc33081df74ec",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-10-default-feature-flags.md": {
+    "mtime": 1783698300.932573,
+    "ast_hash": "3ee558c04714c36182c30a5caf080c6a",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-10-tutorial-completed-flag.md": {
+    "mtime": 1783698725.9206955,
+    "ast_hash": "940bb970a6bd766a122ca2f3532a0185",
+    "semantic_hash": ""
+  },
+  "apps/server/test/feature-defaults.e2e.spec.ts": {
+    "mtime": 1783698988.35718,
+    "ast_hash": "ccc9ed40c3a4ece18db57035d2f0a031",
+    "semantic_hash": ""
+  },
+  "apps/server/src/auth/feature-defaults.repo.ts": {
+    "mtime": 1783699007.3716712,
+    "ast_hash": "afdd767ae07db58084c640022a07cc4d",
     "semantic_hash": ""
   }
 }
