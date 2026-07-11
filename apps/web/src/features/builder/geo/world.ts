@@ -6,6 +6,7 @@ import { WORLD_COUNTRIES, type CountryLand } from './worldCountries';
 import { buildProjection, isValidCrop, type CropBBox } from './projection';
 import { clipRingsToBBox, type Ring } from './clip';
 import { simplifyToFit } from './simplify';
+import { chooseMinimalLonRepresentation } from './antimeridian';
 
 /** Natural Earth's 1:110m Taiwan is a crude 4-point blob — swapped for the game's own detailed
  *  silhouette (see geo/taiwan.ts) so Taiwan reads correctly once the crop tool is zoomed in. */
@@ -68,24 +69,6 @@ function ringsForCountry(country: CountryLand): readonly Ring[] {
   return country.id === 'TWN' ? taiwanRings() : country.rings;
 }
 
-/** The lon/lat bounding box of a set of rings, or null for an empty input. */
-function boundsOfRings(rings: readonly Ring[]): CropBBox | null {
-  let lonMin = Infinity;
-  let lonMax = -Infinity;
-  let latMin = Infinity;
-  let latMax = -Infinity;
-  for (const ring of rings) {
-    for (const [lon, lat] of ring) {
-      if (lon < lonMin) lonMin = lon;
-      if (lon > lonMax) lonMax = lon;
-      if (lat < latMin) latMin = lat;
-      if (lat > latMax) latMax = lat;
-    }
-  }
-  if (!Number.isFinite(lonMin)) return null;
-  return { lonMin, lonMax, latMin, latMax };
-}
-
 /**
  * Merge touching/overlapping country exteriors before simplification and rendering. Admin-0
  * polygons each include their shared border, so keeping them as independent land rings makes the
@@ -120,7 +103,7 @@ export function dissolveCountryRings(rings: readonly Ring[]): Ring[] {
 export function countriesToGeography(ids: readonly string[]): CropResult | null {
   const idSet = new Set(ids);
   const rings = WORLD_COUNTRIES.filter((c) => idSet.has(c.id)).flatMap(ringsForCountry);
-  const bbox = boundsOfRings(rings);
-  if (!bbox || !isValidCrop(bbox)) return null;
-  return finalizeGeography(dissolveCountryRings(rings), bbox);
+  const chosen = chooseMinimalLonRepresentation(rings);
+  if (!chosen || !isValidCrop(chosen.bbox)) return null;
+  return finalizeGeography(dissolveCountryRings(chosen.rings), chosen.bbox);
 }

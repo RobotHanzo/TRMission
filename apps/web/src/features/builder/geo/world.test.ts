@@ -111,6 +111,26 @@ describe('countriesToGeography', () => {
     const b = countriesToGeography(['ITA']);
     expect(a).toEqual(b);
   });
+
+  it('builds seam-crossing Russia as one contiguous landmass, not two edge slivers', () => {
+    const result = countriesToGeography(['RUS']);
+    expect(result).not.toBeNull();
+    const { geography } = result!;
+    // Raw Russia spans lon -179.88°..179.49° (~359°), which split it in two. Unwrapped it is
+    // ~19°..191° (~172°): a narrower span whose lonMax is pushed past the antimeridian.
+    expect(geography.crop.lonMax - geography.crop.lonMin).toBeLessThan(200);
+    expect(geography.crop.lonMax).toBeGreaterThan(180);
+    expect(validateGeography(geography)).toEqual([]);
+  });
+
+  it('builds seam-crossing Fiji contiguously', () => {
+    const result = countriesToGeography(['FJI']);
+    expect(result).not.toBeNull();
+    const { geography } = result!;
+    expect(geography.crop.lonMax - geography.crop.lonMin).toBeLessThan(200);
+    expect(geography.crop.lonMax).toBeGreaterThan(180);
+    expect(validateGeography(geography)).toEqual([]);
+  });
 });
 
 describe('startToleranceFor', () => {
