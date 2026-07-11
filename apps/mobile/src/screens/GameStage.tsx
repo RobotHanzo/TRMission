@@ -4,7 +4,7 @@
 // the web's media queries: compact (<700dp) docks the HUD under a full-bleed board; two-pane
 // (700–999) adds the rail; three-pane (≥1000) adds a dedicated comms column. The web's
 // `boardLayout` pref is deliberately ignored — the dock/panes are the only layouts that keep the
-// (very vertical) board visible on a handheld. The sound driver mounts in Task 11.
+// (very vertical) board visible on a handheld.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -21,6 +21,7 @@ import { isChatRejectionKey } from '../game/chatErrors';
 import { eventRejectionHintKey } from '../game/events';
 import { gateFlags, type ActionGate } from '../game/actionGate';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
+import { useSoundDriver } from '../hooks/useSoundDriver';
 import { useClaimFlow } from '../game/useClaimFlow';
 import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../board/frameTarget';
@@ -85,6 +86,7 @@ export function GameStage({
   const { width, height } = useWindowDimensions();
   const tier = stageTier(width);
   useAnimationDriver();
+  useSoundDriver(sandbox);
 
   const rejection = useGameStore((s) => s.rejection);
   const setRejection = useGameStore((s) => s.setRejection);

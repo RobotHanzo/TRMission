@@ -4186,6 +4186,7 @@ __metadata:
     eslint: "npm:^9.0.0"
     expo: "npm:~56.0.0"
     expo-apple-authentication: "npm:~56.0.4"
+    expo-audio: "npm:~56.0.12"
     expo-auth-session: "npm:~56.0.15"
     expo-constants: "npm:~56.0.20"
     expo-crypto: "npm:~56.0.4"
@@ -7284,6 +7285,18 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10/2952f2bfaed26695d89dd1bd526a57fbd70a5c2eff4a516d204435a931713887ab04eeff3ef4399afb264fd840c4b20a8ac34daaa27d891d9be5f9174f64a445
+  languageName: node
+  linkType: hard
+
+"expo-audio@npm:~56.0.12":
+  version: 56.0.12
+  resolution: "expo-audio@npm:56.0.12"
+  peerDependencies:
+    expo: "*"
+    expo-asset: "*"
+    react: "*"
+    react-native: "*"
+  checksum: 10/3513159e23331ba939a80a43cab7af436e3db531f6394943d62024e4b5496757c5fab5fc84508e0083d41865a542c267aa06644934c6d5d6de8b81245d1cfb1f
   languageName: node
   linkType: hard
 
