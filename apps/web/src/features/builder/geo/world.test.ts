@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { validateGeography } from '@trm/map-data';
-import { cropToGeography, countriesToGeography, dissolveCountryRings, startToleranceFor } from './world';
+import {
+  cropToGeography,
+  countriesToGeography,
+  dissolveCountryRings,
+  startToleranceFor,
+} from './world';
 import { WORLD_COUNTRIES } from './worldCountries';
 
 describe('cropToGeography', () => {
