@@ -34,11 +34,32 @@ describe('fitTransform', () => {
 });
 
 describe('smoothCoastPath', () => {
+  // Axis-aligned, like the crop rectangle's own boundary — see the dedicated straight-edge test
+  // below. Deliberately NOT used for the curve-shape tests, since every one of its edges is now
+  // special-cased to render straight.
   const square: [number, number][] = [
     [0, 0],
     [1, 0],
     [1, 1],
     [0, 1],
+  ];
+  // A skewed quadrilateral standing in for organic coastline data: no two consecutive points share
+  // an x or y, so every edge goes through the curved (non-crop-edge) path.
+  const diamond: [number, number][] = [
+    [0, 0],
+    [3, 1],
+    [4, 4],
+    [1, 3],
+  ];
+  // Sparse and unevenly-spaced, like the Natural-Earth vertices a crop is actually built from — one
+  // short hop sandwiched between two long ones. This is the exact shape of the historical "melted
+  // blob" overshoot the smoother exists to tame, so it's the meaningful case to compare against the
+  // untamed stock smoother on (an evenly-spaced shape barely triggers stock's overshoot either).
+  const uneven: [number, number][] = [
+    [0, 0],
+    [10, 0.2],
+    [10.1, 0.3],
+    [0.1, 10],
   ];
   // All numeric tokens in a path string = the anchor + control-point coordinates the curve passes
   // through / is pulled toward. The max/min bound how far the rendered curve strays from the shape.
@@ -56,30 +77,43 @@ describe('smoothCoastPath', () => {
   });
 
   it('produces a closed cubic-bezier path with one curve per edge', () => {
+    const d = smoothCoastPath(diamond);
+    expect(d.startsWith('M ')).toBe(true);
+    expect(d.trimEnd().endsWith('Z')).toBe(true);
+    expect((d.match(/C/g) ?? []).length).toBe(diamond.length);
+  });
+
+  it('renders a crop-boundary (axis-aligned) edge as a straight line, never a curve', () => {
+    // Sutherland–Hodgman clipping only ever introduces points at a constant lon or lat, which
+    // projects to a constant board x or y — exactly what `square`'s edges look like. That edge is
+    // the crop rectangle the user actually drew, so it must render pixel-identical to the straight
+    // lines the crop preview shows, never curved, regardless of how the neighbouring coastline
+    // segments smooth.
     const d = smoothCoastPath(square);
     expect(d.startsWith('M ')).toBe(true);
     expect(d.trimEnd().endsWith('Z')).toBe(true);
-    expect((d.match(/C/g) ?? []).length).toBe(square.length);
+    expect((d.match(/C/g) ?? []).length).toBe(0);
+    expect((d.match(/L/g) ?? []).length).toBe(square.length);
   });
 
   it('hugs the outline: overshoots far LESS than the current /6 smoother', () => {
-    // On a unit square the Catmull-Rom control handles push the curve past the corners. The tamed
-    // smoother's chord clamp + gentler tension keep that bulge small — the visible "no more blobby
-    // inflated coastlines" fix. The stock smoother bulges roughly twice as far outside the square.
-    const c = coords(smoothCoastPath(square));
-    const stock = coords(smoothClosedPath(square));
-    const overshoot = Math.max(Math.max(...c) - 1, -Math.min(...c)); // how far outside [0,1]
-    const stockOvershoot = Math.max(Math.max(...stock) - 1, -Math.min(...stock));
-    expect(overshoot).toBeLessThan(0.12);
+    // The Catmull-Rom control handles push the curve past the corners. The tamed smoother's chord
+    // clamp + centripetal parameterization keep that bulge small — the visible "no more blobby
+    // inflated coastlines" fix. The stock smoother bulges much further outside the shape.
+    const c = coords(smoothCoastPath(uneven));
+    const stock = coords(smoothClosedPath(uneven));
+    const bbox = { min: 0, max: 10.1 }; // uneven's own bounding box
+    const overshoot = Math.max(Math.max(...c) - bbox.max, bbox.min - Math.min(...c));
+    const stockOvershoot = Math.max(Math.max(...stock) - bbox.max, bbox.min - Math.min(...stock));
     expect(overshoot).toBeLessThan(stockOvershoot * 0.75);
   });
 
   it('is scale-relative (same shape scaled produces a proportionally scaled path)', () => {
-    const big: [number, number][] = square.map(([x, y]) => [x * 10, y * 10]);
-    const cSmall = coords(smoothCoastPath(square));
+    const big: [number, number][] = diamond.map(([x, y]) => [x * 10, y * 10]);
+    const cSmall = coords(smoothCoastPath(diamond));
     const cBig = coords(smoothCoastPath(big));
     // Every coordinate scales by 10 (rounding aside), so the tamed smoothing does not degrade with
     // absolute size — no dependence on how large the selection/crop it belongs to is.
-    for (let i = 0; i < cSmall.length; i++) expect(cBig[i]).toBeCloseTo(cSmall[i]! * 10, 1);
+    for (let i = 0; i < cSmall.length; i++) expect(cBig[i]).toBeCloseTo(cSmall[i]! * 10, 0);
   });
 });

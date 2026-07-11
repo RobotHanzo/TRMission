@@ -69,29 +69,35 @@ export { smoothClosedPath } from '@trm/map-data';
 
 /**
  * Coastline smoothing for **custom maps** (cropped-world land rings). The stock `smoothClosedPath`
- * uses the classic Catmull–Rom tangent `(pₙ₊₁ − pₙ₋₁)/6`, which overshoots badly on the sparse,
- * unevenly-spaced Natural-Earth vertices a custom map is built from: the curve balloons outside the
- * true outline, so coastlines render as inflated "melted" blobs — and the smaller each landmass is
- * (i.e. the larger the selection), the more that inflation is all you see. This variant hugs the
- * outline instead, by (a) a gentler tangent (`/TENSION`) and (b) clamping each control handle to a
- * fraction of the segment it serves (`CLAMP`), which kills the overshoot on the long-segment /
- * short-segment junctions where the stock curve bulges worst. The result is smooth but faithful,
- * and — being purely scale-relative — identical in quality at every selection size.
+ * uses the classic Catmull–Rom tangent `(pₙ₊₁ − pₙ₋₁)/6` with *uniform* parameterization, which
+ * overshoots badly on the sparse, unevenly-spaced Natural-Earth vertices a custom map is built
+ * from: the curve balloons outside the true outline, so coastlines render as inflated "melted"
+ * blobs. A crop makes this worse in a second way — Sutherland–Hodgman clipping against the crop
+ * rectangle's straight edges routinely stitches a long, dead-straight box-edge chord right next to
+ * a short coastline segment (e.g. an island chain shaved by the crop boundary). Uniform
+ * parameterization derives that short segment's tangent from the far neighbour *across* the long
+ * chord, so even a magnitude clamp on the handle can't stop the curve from swinging past its own
+ * outline: it self-intersects into little loops/spikes, and can bulge land outside the crop box's
+ * straight edge entirely — an edge that must stay exactly as straight as the crop preview shows it.
+ *
+ * This uses **centripetal Catmull–Rom** (Barry–Goldman, knot spacing ∝ chord-length^0.5) instead of
+ * an ad hoc tangent + clamp: it scales each tangent by the *local* knot spacing, so it stays well-
+ * behaved regardless of how uneven neighbouring segments are, and is proven cusp/self-intersection-
+ * free for any 4 non-coincident points — the standard fix for exactly this failure mode. Being
+ * purely chord-length-relative, it's still identical in quality at every selection size.
  *
  * Taiwan's own hand-authored silhouette is dense and evenly sampled, so it never overshot; it keeps
  * using `smoothClosedPath` and is deliberately left untouched.
  */
 export function smoothCoastPath(pts: readonly (readonly [number, number])[]): string {
-  const TENSION = 12; // classic Catmull–Rom is 6; the gentler pull keeps the curve near the outline
-  const CLAMP = 0.5; // cap each handle at half its segment so it can't bulge past the next vertex
   const n = pts.length;
   if (n < 3) return '';
   const at = (i: number): readonly [number, number] => pts[((i % n) + n) % n]!;
   const f = (v: number): string => v.toFixed(2);
-  const clampLen = (x: number, y: number, max: number): [number, number] => {
-    const len = Math.hypot(x, y);
-    return len > max && len > 0 ? [(x * max) / len, (y * max) / len] : [x, y];
-  };
+  // Floored so three+ coincident/near-coincident points (duplicate vertices after rounding) can
+  // never produce a zero knot span and divide-by-zero — they just contribute a negligible tangent.
+  const knot = (a: readonly [number, number], b: readonly [number, number]): number =>
+    Math.max(Math.hypot(b[0] - a[0], b[1] - a[1]), 1e-6) ** 0.5;
   const start = at(0);
   let d = `M ${f(start[0])} ${f(start[1])}`;
   for (let i = 0; i < n; i++) {
@@ -99,10 +105,53 @@ export function smoothCoastPath(pts: readonly (readonly [number, number])[]): st
     const p1 = at(i);
     const p2 = at(i + 1);
     const p3 = at(i + 2);
+    // A segment whose endpoints share an exact x or y is a crop-rectangle boundary chord — Sutherland–
+    // Hodgman clipping only ever introduces points at a constant lon or lat, which projects to a
+    // constant board x or y. That edge is the box the user actually drew: it must stay exactly as
+    // straight as the crop preview shows it, never curved, no matter how short the neighbouring
+    // coastline segments are (the one real case no tangent/clamp tuning can fully rule out).
+    if (p1[0] === p2[0] || p1[1] === p2[1]) {
+      d += ` L ${f(p2[0])} ${f(p2[1])}`;
+      continue;
+    }
+    const t0 = 0;
+    const t1 = t0 + knot(p0, p1);
+    const t2 = t1 + knot(p1, p2);
+    const t3 = t2 + knot(p2, p3);
+    const m1x =
+      ((t2 - t1) * (p1[0] - p0[0])) / (t1 - t0) -
+      ((t2 - t1) * (p2[0] - p0[0])) / (t2 - t0) +
+      ((t2 - t1) * (p2[0] - p1[0])) / (t2 - t1);
+    const m1y =
+      ((t2 - t1) * (p1[1] - p0[1])) / (t1 - t0) -
+      ((t2 - t1) * (p2[1] - p0[1])) / (t2 - t0) +
+      ((t2 - t1) * (p2[1] - p1[1])) / (t2 - t1);
+    const m2x =
+      ((t2 - t1) * (p2[0] - p1[0])) / (t2 - t1) -
+      ((t2 - t1) * (p3[0] - p1[0])) / (t3 - t1) +
+      ((t2 - t1) * (p3[0] - p2[0])) / (t3 - t2);
+    const m2y =
+      ((t2 - t1) * (p2[1] - p1[1])) / (t2 - t1) -
+      ((t2 - t1) * (p3[1] - p1[1])) / (t3 - t1) +
+      ((t2 - t1) * (p3[1] - p2[1])) / (t3 - t2);
+    // Centripetal parameterization keeps any single Bezier segment cusp-free, but a closed ring
+    // with a genuinely thin neck (two coastlines pinched close together, e.g. a narrow peninsula
+    // sliced right at the crop edge) can still bulge two *non-adjacent* segments into each other.
+    // A last clamp on each handle's own magnitude — capped to a small fraction of the segment it
+    // serves — is a cheap backstop against that: it can only ever shrink the handle toward the
+    // straight chord, never change its (already well-behaved) direction.
     const seg = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
-    const [c1x, c1y] = clampLen((p2[0] - p0[0]) / TENSION, (p2[1] - p0[1]) / TENSION, seg * CLAMP);
-    const [c2x, c2y] = clampLen((p3[0] - p1[0]) / TENSION, (p3[1] - p1[1]) / TENSION, seg * CLAMP);
-    d += ` C ${f(p1[0] + c1x)} ${f(p1[1] + c1y)}, ${f(p2[0] - c2x)} ${f(p2[1] - c2y)}, ${f(p2[0])} ${f(p2[1])}`;
+    const clampLen = (x: number, y: number, max: number): [number, number] => {
+      const len = Math.hypot(x, y);
+      return len > max && len > 0 ? [(x * max) / len, (y * max) / len] : [x, y];
+    };
+    const [c1dx, c1dy] = clampLen(m1x / 3, m1y / 3, seg * 0.15);
+    const [c2dx, c2dy] = clampLen(m2x / 3, m2y / 3, seg * 0.15);
+    const c1x = p1[0] + c1dx;
+    const c1y = p1[1] + c1dy;
+    const c2x = p2[0] - c2dx;
+    const c2y = p2[1] - c2dy;
+    d += ` C ${f(c1x)} ${f(c1y)}, ${f(c2x)} ${f(c2y)}, ${f(p2[0])} ${f(p2[1])}`;
   }
   return `${d} Z`;
 }
