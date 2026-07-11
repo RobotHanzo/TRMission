@@ -206,6 +206,50 @@ describe('UsersView delete account', () => {
       vi.mocked(fetch).mock.calls.some(([, i]) => (i as RequestInit | undefined)?.method === 'DELETE'),
     ).toBe(true);
   });
+
+  it('removes the deleted user from the table without a full page reload', async () => {
+    useSession.setState({
+      phase: 'ready',
+      user: { id: 'admin1', displayName: 'Ops', isGuest: false },
+      role: 'admin',
+      permissions: new Set(['users.read', 'users.ban', 'users.delete']),
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        const method = init?.method ?? 'GET';
+        if (method === 'DELETE' && url.includes('/dashboard/users/u1')) {
+          return new Response(null, { status: 204 });
+        }
+        if (url.includes('/dashboard/users?')) {
+          return new Response(JSON.stringify({ users: [USER_DETAIL], nextCursor: null }), {
+            status: 200,
+          });
+        }
+        if (url.includes('/dashboard/users/u1')) {
+          return new Response(JSON.stringify(USER_DETAIL), { status: 200 });
+        }
+        return new Response(JSON.stringify({ message: 'not found' }), { status: 404 });
+      }),
+    );
+    render(
+      <>
+        <UsersView />
+        <ToastStack />
+      </>,
+    );
+    // Row is present in the table before deletion.
+    expect((await screen.findAllByText('Alice')).length).toBeGreaterThan(0);
+
+    const drawer = await screen.findByRole('dialog', { name: 'Alice' });
+    fireEvent.click(within(drawer).getByText('刪除帳號'));
+    const dialog = await screen.findByRole('dialog', { name: '永久刪除此帳號?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: '刪除帳號' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Alice' })).toBeNull());
+    expect(screen.queryByText('Alice')).toBeNull();
+  });
 });
 
 describe('UsersView search debounce', () => {

@@ -214,6 +214,54 @@ describe('GamesView delete toasts', () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it('removes the deleted game from the table without a full page reload', async () => {
+    const GAME_ROW = {
+      gameId: 'g1',
+      status: 'COMPLETED',
+      currentSeq: 2,
+      playerCount: 1,
+      botCount: 0,
+      engineVersion: 1,
+      contentHash: 'abc',
+      inMemory: false,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+    let call = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('/dashboard/games?')) {
+          return new Response(JSON.stringify({ games: [GAME_ROW], nextCursor: null }), {
+            status: 200,
+          });
+        }
+        if (url.includes('/dashboard/games/g1')) {
+          call += 1;
+          if (call === 1) return new Response(JSON.stringify(GAME_DETAIL), { status: 200 });
+          return new Response(null, { status: 204 });
+        }
+        return new Response(JSON.stringify({ message: 'not found' }), { status: 404 });
+      }),
+    );
+    render(
+      <>
+        <GamesView />
+        <ToastStack />
+      </>,
+    );
+    // Row is present in the table before deletion.
+    expect((await screen.findAllByText('g1')).length).toBeGreaterThan(0);
+
+    fireEvent.click(await screen.findByText('刪除對局'));
+    const dialog = await screen.findByRole('dialog', { name: '刪除此對局?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: '刪除對局' }));
+
+    expect(await screen.findByText('對局已刪除')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('g1')).toBeNull());
+  });
 });
 
 describe('GamesView view-replay button', () => {

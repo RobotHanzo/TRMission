@@ -26,7 +26,17 @@ const statusKey = (s: string): string =>
       ? 'games.statusCompleted'
       : 'games.statusTerminated';
 
-function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
+function GameDrawer({
+  id,
+  onClose,
+  onChanged,
+  onDeleted,
+}: {
+  id: string;
+  onClose: () => void;
+  onChanged: (game: GameDetail) => void;
+  onDeleted: (id: string) => void;
+}) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const canTerminate = useSession((s) => s.hasPermission('games.terminate'));
@@ -65,7 +75,9 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const terminate = async (reason?: string) => {
     setBusy(true);
     try {
-      setDetail(await api.terminateGame(id, reason));
+      const next = await api.terminateGame(id, reason);
+      setDetail(next);
+      onChanged(next);
       pushToast('success', t('toast.gameTerminated'));
     } catch (e) {
       pushToast('error', e instanceof Error ? e.message : t('common.error'));
@@ -103,6 +115,7 @@ function GameDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     setBusy(true);
     try {
       await api.deleteGame(id, reason);
+      onDeleted(id);
       pushToast('success', t('toast.gameDeleted'));
       onClose();
     } catch (e) {
@@ -348,6 +361,20 @@ export function GamesView() {
     void load(null);
   }, [load]);
 
+  const handleGameChanged = useCallback((game: GameDetail) => {
+    setRows((prev) =>
+      prev.map((r) =>
+        r.gameId === game.gameId
+          ? { ...r, status: game.status, currentSeq: game.currentSeq, updatedAt: game.updatedAt }
+          : r,
+      ),
+    );
+  }, []);
+
+  const handleGameDeleted = useCallback((id: string) => {
+    setRows((prev) => prev.filter((r) => r.gameId !== id));
+  }, []);
+
   return (
     <div>
       <h1 className="oc-page-title">{t('games.title')}</h1>
@@ -411,7 +438,14 @@ export function GamesView() {
         )}
       </div>
 
-      {param && <GameDrawer id={param} onClose={closeDetail} />}
+      {param && (
+        <GameDrawer
+          id={param}
+          onClose={closeDetail}
+          onChanged={handleGameChanged}
+          onDeleted={handleGameDeleted}
+        />
+      )}
     </div>
   );
 }

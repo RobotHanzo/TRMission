@@ -39,7 +39,17 @@ function ExpiresCell({
   );
 }
 
-function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
+function UserDrawer({
+  id,
+  onClose,
+  onChanged,
+  onDeleted,
+}: {
+  id: string;
+  onClose: () => void;
+  onChanged: (user: UserDetail) => void;
+  onDeleted: (id: string) => void;
+}) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const canBan = useSession((s) => s.hasPermission('users.ban'));
@@ -73,6 +83,7 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
         ? await api.enableUser(detail.id)
         : await api.disableUser(detail.id, reason);
       setDetail(next);
+      onChanged(next);
       pushToast('success', t(wasBanned ? 'toast.userUnbanned' : 'toast.userBanned'));
     } catch (e) {
       pushToast('error', e instanceof Error ? e.message : t('common.error'));
@@ -86,7 +97,9 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     if (!detail) return;
     setBusy(true);
     try {
-      setDetail(await api.resetUserTutorial(detail.id));
+      const next = await api.resetUserTutorial(detail.id);
+      setDetail(next);
+      onChanged(next);
       pushToast('success', t('toast.tutorialReset'));
     } catch (e) {
       pushToast('error', e instanceof Error ? e.message : t('common.error'));
@@ -100,6 +113,7 @@ function UserDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     setBusy(true);
     try {
       await api.deleteUser(detail.id, reason);
+      onDeleted(detail.id);
       pushToast('success', t('toast.userDeleted'));
       onClose();
     } catch (e) {
@@ -341,6 +355,14 @@ export function UsersView() {
     void load(null);
   }, [load]);
 
+  const handleUserChanged = useCallback((user: UserDetail) => {
+    setRows((prev) => prev.map((r) => (r.id === user.id ? user : r)));
+  }, []);
+
+  const handleUserDeleted = useCallback((id: string) => {
+    setRows((prev) => prev.filter((r) => r.id !== id));
+  }, []);
+
   return (
     <div>
       <h1 className="oc-page-title">{t('users.title')}</h1>
@@ -424,7 +446,14 @@ export function UsersView() {
         )}
       </div>
 
-      {param && <UserDrawer id={param} onClose={closeDetail} />}
+      {param && (
+        <UserDrawer
+          id={param}
+          onClose={closeDetail}
+          onChanged={handleUserChanged}
+          onDeleted={handleUserDeleted}
+        />
+      )}
     </div>
   );
 }
