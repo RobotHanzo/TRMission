@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateGeography } from '@trm/map-data';
-import { cropToGeography, countriesToGeography, dissolveCountryRings } from './world';
+import { cropToGeography, countriesToGeography, dissolveCountryRings, startToleranceFor } from './world';
 import { WORLD_COUNTRIES } from './worldCountries';
 
 describe('cropToGeography', () => {
@@ -110,5 +110,26 @@ describe('countriesToGeography', () => {
     const a = countriesToGeography(['ITA']);
     const b = countriesToGeography(['ITA']);
     expect(a).toEqual(b);
+  });
+});
+
+describe('startToleranceFor', () => {
+  // The simplification tolerance used to scale with the crop's span (finer for a small crop, up to
+  // a 0.05° ceiling for a wide one). That coupled coastline quality to selection size — the bigger
+  // the pick, the coarser the coast — which is the "geography degradation as selection enlarges"
+  // this guards against. The world's own 0.03°-sourced land fits the vertex budget whole, so the
+  // tolerance is now a fixed, size-independent value.
+  it('is independent of crop size, so enlarging a selection cannot degrade its geography', () => {
+    const tiny = { lonMin: 120, lonMax: 121, latMin: 23, latMax: 24 };
+    const huge = { lonMin: -170, lonMax: 170, latMin: -80, latMax: 80 };
+    expect(startToleranceFor(tiny)).toBe(startToleranceFor(huge));
+  });
+
+  it('stays fine enough to preserve the source data (≤ its 0.03° resolution) and positive', () => {
+    const anyCrop = { lonMin: 0, lonMax: 40, latMin: 0, latMax: 40 };
+    // Positive so simplifyToFit's over-budget safety net can still raise it; ≤ 0.03° so it never
+    // strips detail the vendored source already carries.
+    expect(startToleranceFor(anyCrop)).toBeGreaterThan(0);
+    expect(startToleranceFor(anyCrop)).toBeLessThanOrEqual(0.03);
   });
 });

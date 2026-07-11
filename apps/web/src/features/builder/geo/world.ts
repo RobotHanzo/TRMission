@@ -24,14 +24,20 @@ export interface CropResult {
   droppedRings: number;
 }
 
-/** simplifyToFit's default starting tolerance (0.05°) is tuned for a whole-world-ish crop; a
- *  tight crop around a small feature (e.g. Taiwan's outlying islands, each only ~0.03-0.06°
- *  across) needs a proportionally finer tolerance or Douglas-Peucker collapses it below the
- *  3-point floor and drops it — "too small" regardless of how small the crop itself is. Scaled
- *  to the crop's own span (clamped to the same 0.05° ceiling so a wide crop is unaffected). */
-function startToleranceFor(crop: CropBBox): number {
-  const avgSpan = (crop.lonMax - crop.lonMin + (crop.latMax - crop.latMin)) / 2;
-  return Math.max(0.002, Math.min(0.05, avgSpan / 500));
+/** The Douglas-Peucker starting tolerance for the simplify-to-fit pass.
+ *
+ *  This used to scale with the crop's span (finer for a tight crop, up to a 0.05° ceiling for a
+ *  wide one). That tied coastline quality to selection size: enlarging the pick raised the
+ *  tolerance and coarsened the coast — "geography degradation as selection enlarges". It's now a
+ *  fixed value, so every selection keeps the same detail regardless of how much it spans. That's
+ *  safe because the vendored land is already ~0.03°-simplified and the whole world fits the vertex
+ *  budget (`finalizeGeography`'s caps) intact — there's never a need to trade detail for size. The
+ *  value is finer than the source (so it strips nothing real) yet positive, so simplifyToFit's
+ *  over-budget safety net can still raise it if a future, denser dataset ever needs it. `_crop` is
+ *  kept so the call site is unchanged and to document that the tolerance is deliberately
+ *  crop-independent. Exported for the regression test that pins this invariant. */
+export function startToleranceFor(_crop: CropBBox): number {
+  return 0.002;
 }
 
 /** Shared tail for both cropToGeography and countriesToGeography: simplify to fit the engine's

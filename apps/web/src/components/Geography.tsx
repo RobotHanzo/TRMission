@@ -5,7 +5,7 @@ import {
   GRATICULE,
   TAIWAN_LAND_PATH,
   CENTRAL_RANGE_PATH,
-  smoothClosedPath,
+  smoothCoastPath,
   type View,
 } from '../game/geography';
 import { ACTIVE_GEOGRAPHY } from '../game/catalog';
@@ -59,7 +59,7 @@ export function CustomGeography({ geography, selectedRings, onRingClick }: Custo
         ))}
       </g>
       {land.map((ring, i) => {
-        const d = smoothClosedPath(ring);
+        const d = smoothCoastPath(ring);
         const selected = selectedRings?.has(i);
         return (
           <g

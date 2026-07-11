@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { MIN_SCALE, MAX_SCALE, fitTransform } from './geography';
+import { smoothClosedPath } from '@trm/map-data';
+import { MIN_SCALE, MAX_SCALE, fitTransform, smoothCoastPath } from './geography';
 
 describe('fitTransform', () => {
   // The board is tall-and-narrow inside a wide viewport, so the home/reset view fits the island
@@ -29,5 +30,56 @@ describe('fitTransform', () => {
     expect(
       fitTransform({ cx: 5000, cy: 5000, w: 100000, h: 100000 }, { w: 800, h: 600 }).scale,
     ).toBe(MIN_SCALE);
+  });
+});
+
+describe('smoothCoastPath', () => {
+  const square: [number, number][] = [
+    [0, 0],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+  ];
+  // All numeric tokens in a path string = the anchor + control-point coordinates the curve passes
+  // through / is pulled toward. The max/min bound how far the rendered curve strays from the shape.
+  const coords = (path: string): number[] => (path.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+
+  it('returns an empty string for a degenerate ring (< 3 points)', () => {
+    expect(smoothCoastPath([])).toBe('');
+    expect(smoothCoastPath([[0, 0]])).toBe('');
+    expect(
+      smoothCoastPath([
+        [0, 0],
+        [1, 1],
+      ]),
+    ).toBe('');
+  });
+
+  it('produces a closed cubic-bezier path with one curve per edge', () => {
+    const d = smoothCoastPath(square);
+    expect(d.startsWith('M ')).toBe(true);
+    expect(d.trimEnd().endsWith('Z')).toBe(true);
+    expect((d.match(/C/g) ?? []).length).toBe(square.length);
+  });
+
+  it('hugs the outline: overshoots far LESS than the current /6 smoother', () => {
+    // On a unit square the Catmull-Rom control handles push the curve past the corners. The tamed
+    // smoother's chord clamp + gentler tension keep that bulge small — the visible "no more blobby
+    // inflated coastlines" fix. The stock smoother bulges roughly twice as far outside the square.
+    const c = coords(smoothCoastPath(square));
+    const stock = coords(smoothClosedPath(square));
+    const overshoot = Math.max(Math.max(...c) - 1, -Math.min(...c)); // how far outside [0,1]
+    const stockOvershoot = Math.max(Math.max(...stock) - 1, -Math.min(...stock));
+    expect(overshoot).toBeLessThan(0.12);
+    expect(overshoot).toBeLessThan(stockOvershoot * 0.75);
+  });
+
+  it('is scale-relative (same shape scaled produces a proportionally scaled path)', () => {
+    const big: [number, number][] = square.map(([x, y]) => [x * 10, y * 10]);
+    const cSmall = coords(smoothCoastPath(square));
+    const cBig = coords(smoothCoastPath(big));
+    // Every coordinate scales by 10 (rounding aside), so the tamed smoothing does not degrade with
+    // absolute size — no dependence on how large the selection/crop it belongs to is.
+    for (let i = 0; i < cSmall.length; i++) expect(cBig[i]).toBeCloseTo(cSmall[i]! * 10, 1);
   });
 });

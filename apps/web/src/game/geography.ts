@@ -63,5 +63,46 @@ export const TAIWAN_LAND_PATH = MD_TAIWAN_LAND_PATH;
 export const CENTRAL_RANGE_PATH = TAIWAN_CENTRAL_RANGE_PATH;
 
 // Catmull–Rom coastline smoothing lives in @trm/map-data too; re-exported so existing web
-// imports (custom-map geography rendering) keep working.
+// imports keep working. The hand-authored Taiwan silhouette and the server OG card render through
+// it — it stays exactly as-is.
 export { smoothClosedPath } from '@trm/map-data';
+
+/**
+ * Coastline smoothing for **custom maps** (cropped-world land rings). The stock `smoothClosedPath`
+ * uses the classic Catmull–Rom tangent `(pₙ₊₁ − pₙ₋₁)/6`, which overshoots badly on the sparse,
+ * unevenly-spaced Natural-Earth vertices a custom map is built from: the curve balloons outside the
+ * true outline, so coastlines render as inflated "melted" blobs — and the smaller each landmass is
+ * (i.e. the larger the selection), the more that inflation is all you see. This variant hugs the
+ * outline instead, by (a) a gentler tangent (`/TENSION`) and (b) clamping each control handle to a
+ * fraction of the segment it serves (`CLAMP`), which kills the overshoot on the long-segment /
+ * short-segment junctions where the stock curve bulges worst. The result is smooth but faithful,
+ * and — being purely scale-relative — identical in quality at every selection size.
+ *
+ * Taiwan's own hand-authored silhouette is dense and evenly sampled, so it never overshot; it keeps
+ * using `smoothClosedPath` and is deliberately left untouched.
+ */
+export function smoothCoastPath(pts: readonly (readonly [number, number])[]): string {
+  const TENSION = 12; // classic Catmull–Rom is 6; the gentler pull keeps the curve near the outline
+  const CLAMP = 0.5; // cap each handle at half its segment so it can't bulge past the next vertex
+  const n = pts.length;
+  if (n < 3) return '';
+  const at = (i: number): readonly [number, number] => pts[((i % n) + n) % n]!;
+  const f = (v: number): string => v.toFixed(2);
+  const clampLen = (x: number, y: number, max: number): [number, number] => {
+    const len = Math.hypot(x, y);
+    return len > max && len > 0 ? [(x * max) / len, (y * max) / len] : [x, y];
+  };
+  const start = at(0);
+  let d = `M ${f(start[0])} ${f(start[1])}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = at(i - 1);
+    const p1 = at(i);
+    const p2 = at(i + 1);
+    const p3 = at(i + 2);
+    const seg = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+    const [c1x, c1y] = clampLen((p2[0] - p0[0]) / TENSION, (p2[1] - p0[1]) / TENSION, seg * CLAMP);
+    const [c2x, c2y] = clampLen((p3[0] - p1[0]) / TENSION, (p3[1] - p1[1]) / TENSION, seg * CLAMP);
+    d += ` C ${f(p1[0] + c1x)} ${f(p1[1] + c1y)}, ${f(p2[0] - c2x)} ${f(p2[1] - c2y)}, ${f(p2[0])} ${f(p2[1])}`;
+  }
+  return `${d} Z`;
+}
