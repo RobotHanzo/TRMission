@@ -50,12 +50,15 @@ gitignored and a drift between it and the `.proto` is a CI failure.
 ## Monorepo layout & build order
 
 ```
-packages/proto  → shared → map-data → engine → apps/{server,web,admin,mobile}
+packages/proto  → shared → map-data → engine → bots/codec → apps/{server,web,admin,mobile}
 ```
 
 - `@trm/shared` — enums, scoring/rule constants, **seeded counter PRNG**, ids, error taxonomy, digest.
 - `@trm/map-data` — the authored Taiwan content (cities/routes/tickets) + `validate()` + `CONTENT_HASH`.
 - `@trm/engine` — the **pure deterministic reducer** (rules, scoring, longest-trail, connectivity).
+- `@trm/bots` — the pure bot policy (`chooseBotAction`: ranks the engine's own `legalActions`
+  with difficulty heuristics; deterministic per state+botId). Shared by the server's bot
+  driver and the mobile app's offline games.
 - `@trm/proto` — protobuf-es wire protocol (the engine⇄wire contract).
 - `apps/server` — NestJS: WebSocket gateway + REST (auth/lobby/history/dashboard) + Mongo + OpenAPI + bots.
 - `apps/web` — React + Vite + TS: SVG board, realtime client, i18n, zustand.

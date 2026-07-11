@@ -151,12 +151,13 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   OUTSIDE the feature gate — a plain `AccessTokenGuard` route (any authenticated viewer, including
   guests, may fetch content by its hash — the hash itself is the unguessable capability); gating it
   would break live custom-map games and replays for other players.
-- `src/bots/` — a bot is an **ordinary seated player driven server-side**; the engine never knows.
-  `policy.ts` ranks moves from the engine's own `legalActions` (so a bot can never make an illegal
-  move) with difficulty-tuned heuristics; the choice is a deterministic function of `state + botId`.
-  The hub's bot driver runs each bot through the **same** prepare→persist→commit→fan-out path as a
-  human, and bot moves are logged actions, so replay/recovery are unaffected. The roster is persisted
-  on the game doc and resumes after recovery. `TRM_BOT_DELAY_MS` paces moves (0 in tests).
+- **Bots** — a bot is an **ordinary seated player driven server-side** (the engine never
+  knows). The brain lives in `packages/bots` (`@trm/bots`): `chooseBotAction` ranks moves
+  from the engine's own `legalActions` (a bot can never make an illegal move) and is a
+  deterministic function of `state + botId`. The hub's bot driver (`ws/hub.ts`) runs each
+  bot through the **same** prepare→persist→commit→fan-out path as a human, and bot moves
+  are logged actions, so replay/recovery are unaffected. The roster is persisted on the
+  game doc and resumes after recovery. `TRM_BOT_DELAY_MS` paces moves (0 in tests).
 
 ## Maintainer dashboard (`src/dashboard/`)
 
