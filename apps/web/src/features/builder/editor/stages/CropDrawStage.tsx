@@ -3,12 +3,18 @@ import { useTranslation } from 'react-i18next';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { Crop } from 'lucide-react';
 import { worldLand, cropToGeography } from '../../geo/world';
+import { normalizeCropLon } from '../../geo/antimeridian';
 import { clientToBoardPoint } from '../canvasProjection';
 import { CanvasControls } from '../CanvasControls';
 import { ZoomVar } from '../ZoomVar';
 import { useEditorStore } from '../store';
 
-const WORLD_VIEWBOX = { x: -180, y: -90, w: 360, h: 180 };
+const WORLD_VIEWBOX = { x: -540, y: -90, w: 1080, h: 180 };
+/** The world is drawn three times, at these longitude offsets, so a crop rectangle can be dragged
+ *  across the ±180° seam. Offset 0 is the normal world; ±360 are its wrap-around copies. */
+const WORLD_OFFSETS = [-360, 0, 360] as const;
+const GRATICULE_LONS = [-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150] as const;
+const GRATICULE_LATS = [-60, -30, 0, 30, 60] as const;
 
 interface CropRect {
   lonMin: number;
@@ -82,8 +88,16 @@ export function CropDrawStage() {
     : null;
   const rect = liveDragRect ?? committed;
   const latSpan = rect ? rect.latMax - rect.latMin : 0;
+  // The on-map overlay renders from the raw `rect` (wherever the user drew it, possibly at x>180),
+  // but the preview and the stored geography come from the canonicalized crop so a rectangle drawn
+  // in a wrap-around copy is stored with lonMin ∈ [-180,180). Both project to identical board space.
+  const canonicalRect = rect ? normalizeCropLon(rect) : null;
   const result =
-    rect && rect.lonMin < rect.lonMax && rect.latMin < rect.latMax ? cropToGeography(rect) : null;
+    canonicalRect &&
+    canonicalRect.lonMin < canonicalRect.lonMax &&
+    canonicalRect.latMin < canonicalRect.latMax
+      ? cropToGeography(canonicalRect)
+      : null;
 
   // Left-click is never used for panning here (that's middle-click, see below), so a left-drag
   // starting on open water/land always begins a brand new rectangle — replacing any existing one.
@@ -162,9 +176,9 @@ export function CropDrawStage() {
       <div className="editor-canvas-wrap">
         <div className="editor-canvas-inner" ref={zoomVarRef}>
           <TransformWrapper
-            minScale={1}
-            maxScale={64}
-            initialScale={1}
+            minScale={3}
+            maxScale={192}
+            initialScale={3}
             centerOnInit
             wheel={{ step: 0.0022 }}
             doubleClick={{ disabled: true }}
@@ -192,21 +206,43 @@ export function CropDrawStage() {
                 onPointerMove={onSvgPointerMove}
                 onPointerUp={onSvgPointerUp}
               >
-                <rect x={-180} y={-90} width={360} height={180} className="editor-world-sea" />
-                <g className="editor-world-graticule">
-                  {[-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150].map((lon) => (
-                    <line key={`gx${lon}`} x1={lon} y1={-90} x2={lon} y2={90} />
-                  ))}
-                  {[-60, -30, 0, 30, 60].map((lat) => (
-                    <line key={`gy${lat}`} x1={-180} y1={-lat} x2={180} y2={-lat} />
-                  ))}
-                </g>
-                {worldLand().map((ring, i) => (
-                  <path
-                    key={i}
-                    d={`M ${ring.map(([lon, lat]) => `${lon},${-lat}`).join(' L ')} Z`}
-                    className="editor-world-land"
-                  />
+                {WORLD_OFFSETS.map((off) => (
+                  <g key={`world${off}`}>
+                    <rect
+                      x={-180 + off}
+                      y={-90}
+                      width={360}
+                      height={180}
+                      className="editor-world-sea"
+                    />
+                    <g className="editor-world-graticule">
+                      {GRATICULE_LONS.map((lon) => (
+                        <line
+                          key={`gx${off}_${lon}`}
+                          x1={lon + off}
+                          y1={-90}
+                          x2={lon + off}
+                          y2={90}
+                        />
+                      ))}
+                      {GRATICULE_LATS.map((lat) => (
+                        <line
+                          key={`gy${off}_${lat}`}
+                          x1={-180 + off}
+                          y1={-lat}
+                          x2={180 + off}
+                          y2={-lat}
+                        />
+                      ))}
+                    </g>
+                    {worldLand().map((ring, i) => (
+                      <path
+                        key={`land${off}_${i}`}
+                        d={`M ${ring.map(([lon, lat]) => `${lon + off},${-lat}`).join(' L ')} Z`}
+                        className="editor-world-land"
+                      />
+                    ))}
+                  </g>
                 ))}
                 {rect && (
                   <g className="editor-crop-group">
