@@ -18,6 +18,15 @@ describe('isValidCrop', () => {
     expect(isValidCrop({ lonMin: -73.3, lonMax: -12.21, latMin: 60.04, latMax: 83.65 })).toBe(true);
     expect(isValidCrop({ lonMin: 0, lonMax: 10, latMin: 0, latMax: 84 })).toBe(true);
   });
+
+  it('rejects a crop spanning 360° or more', () => {
+    expect(isValidCrop({ lonMin: -180, lonMax: 180, latMin: 0, latMax: 10 })).toBe(false);
+    expect(isValidCrop({ lonMin: 0, lonMax: 360, latMin: 0, latMax: 10 })).toBe(false);
+  });
+
+  it('accepts a crop that wraps past +180 but stays under 360° wide', () => {
+    expect(isValidCrop({ lonMin: 160, lonMax: 200, latMin: 50, latMax: 72 })).toBe(true);
+  });
 });
 
 describe('buildProjection', () => {

@@ -35,6 +35,9 @@ export function isValidCrop(crop: CropBBox): boolean {
     Number.isFinite(crop.latMax) &&
     crop.lonMin < crop.lonMax &&
     crop.latMin < crop.latMax &&
+    // A crop can wrap past ±180 (lonMax > 180) but never span a full turn or more — that would be
+    // a degenerate whole-world selection with no meaningful projection.
+    crop.lonMax - crop.lonMin < 360 &&
     // 80° originally left no headroom for real countries: Greenland reaches 83.65°N, Canada
     // 83.23°N, Russia 81.25°N, Norway 80.66°N (all real Natural Earth extents) — widened to 84°
     // so the country-select mode (geo/world.ts's countriesToGeography) can select them. Antarctica
