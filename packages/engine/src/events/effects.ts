@@ -1,6 +1,6 @@
 import type { RouteId, CityId, PlayerId } from '@trm/shared';
 import type { GameState } from '../types/state';
-import type { RandomEventKind } from '../types/events-state';
+import type { EventResources, RandomEventKind } from '../types/events-state';
 import type { Board } from '../board';
 import type { Edge } from '../graph/connectivity';
 
@@ -30,9 +30,10 @@ export function closedRouteIds(state: GameState): ReadonlySet<string> {
   if (!ev) return EMPTY_SET;
   const out = new Set<string>();
   for (const act of ev.active) {
-    if (act.kind === 'TYPHOON_LANDFALL' && act.routeIds) {
+    if ((act.kind === 'TYPHOON_LANDFALL' || act.kind === 'SLOPE_REPAIR_ORDER') && act.routeIds) {
       for (const rid of act.routeIds) {
-        if (!state.ownership[rid as string]) out.add(rid as string);
+        if (!state.ownership[rid as string] && !ev.repairedRouteIds.includes(rid))
+          out.add(rid as string);
       }
     }
   }
@@ -45,7 +46,12 @@ export function isRouteClosed(state: GameState, routeId: RouteId): boolean {
   if (!ev) return false;
   if (state.ownership[routeId as string]) return false;
   for (const act of ev.active) {
-    if (act.kind === 'TYPHOON_LANDFALL' && act.routeIds && act.routeIds.includes(routeId)) {
+    if (
+      (act.kind === 'TYPHOON_LANDFALL' || act.kind === 'SLOPE_REPAIR_ORDER') &&
+      act.routeIds &&
+      act.routeIds.includes(routeId) &&
+      !ev.repairedRouteIds.includes(routeId)
+    ) {
       return true;
     }
   }
@@ -80,6 +86,12 @@ export function skyLanternDoubles(state: GameState, routeId: RouteId): boolean {
 /** Extra tunnel-reveal cards contributed by an active aftershock (1 while active, else 0). */
 export function tunnelRevealExtra(state: GameState): number {
   return hasActiveKind(state, 'AFTERSHOCK') ? 1 : 0;
+}
+
+/** Effective tunnel reveal count, including mutually composable event effects. */
+export function effectiveTunnelRevealCount(state: GameState): number {
+  const base = state.events?.boringMachine ? 2 : state.ruleParams.tunnelRevealCount;
+  return base + tunnelRevealExtra(state);
 }
 
 /** Extra card draws granted per turn by an active typhoon day off (1 while active, else 0). */
@@ -156,4 +168,136 @@ export function playerNetworkCities(board: Board, state: GameState, player: Play
     }
   }
   return cities;
+}
+
+// ─── expansion-event queries/resources ─────────────────────────────────────────────
+
+export const EMPTY_EVENT_RESOURCES: EventResources = Object.freeze({
+  bentoTokens: 0,
+  blessings: 0,
+  claimDiscounts: 0,
+  repairPermits: 0,
+});
+
+export function eventResources(state: GameState, player: PlayerId): EventResources {
+  return state.events?.resources[player as string] ?? EMPTY_EVENT_RESOURCES;
+}
+
+export function updateEventResources(
+  state: GameState,
+  player: PlayerId,
+  update: (current: EventResources) => EventResources,
+): GameState {
+  const ev = state.events;
+  if (!ev) return state;
+  return {
+    ...state,
+    events: {
+      ...ev,
+      resources: { ...ev.resources, [player as string]: update(eventResources(state, player)) },
+    },
+  };
+}
+
+export function activeEvent(state: GameState, kind: RandomEventKind) {
+  return state.events?.active.find((a) => a.kind === kind);
+}
+
+export function springFestivalActive(state: GameState): boolean {
+  return hasActiveKind(state, 'SPRING_FESTIVAL_RUSH');
+}
+
+export function turnDirection(state: GameState): 1 | -1 {
+  return springFestivalActive(state) ? -1 : 1;
+}
+
+export function ticketOfferCount(state: GameState): number {
+  return springFestivalActive(state) ? 4 : state.ruleParams.ticketDrawCount;
+}
+
+export function allSeatsReservedActive(state: GameState): boolean {
+  return hasActiveKind(state, 'ALL_SEATS_RESERVED');
+}
+
+export function hiveOfSparksActive(state: GameState): boolean {
+  return hasActiveKind(state, 'HIVE_OF_SPARKS');
+}
+
+export function harvestFestivalActive(state: GameState): boolean {
+  return hasActiveKind(state, 'HARVEST_FESTIVAL_EXPRESS');
+}
+
+export function activeEventCity(state: GameState, kind: RandomEventKind): CityId | null {
+  return (activeEvent(state, kind)?.cityId as CityId | undefined) ?? null;
+}
+
+export function routeTouchesCity(board: Board, routeId: RouteId, cityId: CityId): boolean {
+  const route = board.routeById.get(routeId as string);
+  return !!route && (route.a === cityId || route.b === cityId);
+}
+
+export function routeTouchesRegion(board: Board, routeId: RouteId, region: string): boolean {
+  const route = board.routeById.get(routeId as string);
+  if (!route) return false;
+  return (
+    board.cityById.get(route.a as string)?.region === region ||
+    board.cityById.get(route.b as string)?.region === region
+  );
+}
+
+export function activeBentoCity(state: GameState): CityId | null {
+  return activeEventCity(state, 'BENTO_RUSH');
+}
+
+export function activeNightMarketCity(state: GameState): CityId | null {
+  return activeEventCity(state, 'STATION_FRONT_NIGHT_MARKET');
+}
+
+/** Whether this player can currently perform at least one legal free night-market exchange. */
+export function canUseNightMarketSwap(board: Board, state: GameState, player: PlayerId): boolean {
+  const city = activeNightMarketCity(state);
+  const hand = state.players[player as string]?.hand;
+  if (
+    city === null ||
+    !hand ||
+    state.turn.nightMarketSwapUsed ||
+    !playerNetworkCities(board, state, player).has(city as string) ||
+    !Object.values(hand).some((count) => count > 0)
+  )
+    return false;
+  return state.market.some(
+    (card) => card !== null && !(card === 'LOCOMOTIVE' && allSeatsReservedActive(state)),
+  );
+}
+
+export function processionCurrentCity(state: GameState): CityId | null {
+  const act = activeEvent(state, 'GODDESS_PROCESSION');
+  if (!act?.cityPath) return null;
+  return (act.cityPath[act.position ?? 0] as CityId | undefined) ?? null;
+}
+
+export function activeHarvestRegion(state: GameState): string | null {
+  return activeEvent(state, 'HARVEST_FESTIVAL_EXPRESS')?.region ?? null;
+}
+
+/** Decrement the hidden boring-machine marker by the number of real cards drawn. */
+export function advanceBoringMarker(
+  state: GameState,
+  cardsDrawn: number,
+): { state: GameState; endedId: string | null } {
+  const ev = state.events;
+  const marker = ev?.boringMachine;
+  if (!ev || !marker || cardsDrawn <= 0) return { state, endedId: null };
+  const remaining = marker.remainingDraws - cardsDrawn;
+  if (remaining > 0) {
+    return {
+      state: {
+        ...state,
+        events: { ...ev, boringMachine: { ...marker, remainingDraws: remaining } },
+      },
+      endedId: null,
+    };
+  }
+  const { boringMachine: _omit, ...rest } = ev;
+  return { state: { ...state, events: rest }, endedId: marker.eventId };
 }

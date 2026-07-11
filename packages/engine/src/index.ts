@@ -34,6 +34,12 @@ export type {
   ActiveEvent,
   CharterContract,
   RandomEventKind,
+  EventResources,
+  LuckyContract,
+  LanternHostState,
+  LanternRelocationState,
+  EventDraftState,
+  PendingHiveDraw,
 } from './types/events-state';
 export { generateSchedule } from './events/schedule';
 export { tickRound, isQuietEndgame } from './events/runtime';
@@ -45,6 +51,7 @@ export {
   skyLanternSurcharge,
   skyLanternDoubles,
   tunnelRevealExtra,
+  effectiveTunnelRevealCount,
   dayOffExtraDraw,
   takeReopenBonus,
   hotspotLevel,
@@ -53,9 +60,24 @@ export {
   consumeFreeStation,
   playerOwnEdges,
   playerNetworkCities,
+  eventResources,
+  updateEventResources,
+  springFestivalActive,
+  turnDirection,
+  ticketOfferCount,
+  allSeatsReservedActive,
+  hiveOfSparksActive,
+  harvestFestivalActive,
+  activeBentoCity,
+  activeNightMarketCity,
+  processionCurrentCity,
+  activeHarvestRegion,
+  routeTouchesCity,
+  routeTouchesRegion,
+  advanceBoringMarker,
 } from './events/effects';
 
-export type { Action, ActionType, Payment } from './types/actions';
+export type { Action, ActionType, Payment, EventPerk } from './types/actions';
 export type { GameEvent, GameEventType, Visibility } from './types/events';
 export type {
   RedactedView,

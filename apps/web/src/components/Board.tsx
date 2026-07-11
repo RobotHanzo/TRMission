@@ -501,6 +501,51 @@ export function Board({
         }
     return set;
   }, [snapshot]);
+  const lanternCity = snapshot.randomEvents?.lanternHost?.cityId ?? null;
+  const procession = useMemo(
+    () => snapshot.randomEvents?.active.find((event) => event.kind === 'GODDESS_PROCESSION'),
+    [snapshot],
+  );
+  const processionPath = procession?.cityPath ?? [];
+  const processionCity =
+    processionPath[Math.min(procession?.position ?? 0, Math.max(0, processionPath.length - 1))] ??
+    null;
+  const bentoCities = useMemo(
+    () =>
+      new Set(
+        snapshot.randomEvents?.active
+          .filter((event) => event.kind === 'BENTO_RUSH' && event.cityId)
+          .map((event) => event.cityId) ?? [],
+      ),
+    [snapshot],
+  );
+  const nightMarketCities = useMemo(
+    () =>
+      new Set(
+        snapshot.randomEvents?.active
+          .filter((event) => event.kind === 'STATION_FRONT_NIGHT_MARKET' && event.cityId)
+          .map((event) => event.cityId) ?? [],
+      ),
+    [snapshot],
+  );
+  const harvestRoutes = useMemo(
+    () =>
+      new Set(
+        snapshot.randomEvents?.active
+          .filter((event) => event.kind === 'HARVEST_FESTIVAL_EXPRESS')
+          .flatMap((event) => event.routeIds) ?? [],
+      ),
+    [snapshot],
+  );
+  const luckyCities = useMemo(() => {
+    const set = new Set<string>();
+    for (const contract of snapshot.randomEvents?.luckyContracts ?? []) {
+      if (contract.wonByPlayerId !== '') continue;
+      set.add(contract.cityA);
+      set.add(contract.cityB);
+    }
+    return set;
+  }, [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // Transient claim/station glow + the ticket-completion path sweep (cleared on a timer).
@@ -653,6 +698,7 @@ export function Board({
                 closedRoutes.has(r.id) ? 'evt-closed' : '',
                 skyRoutes.has(r.id) ? 'evt-sky' : '',
                 reopenRoutes.has(r.id) ? 'evt-reopen' : '',
+                harvestRoutes.has(r.id) ? 'evt-harvest' : '',
               ]
                 .filter(Boolean)
                 .join(' ')
@@ -661,12 +707,19 @@ export function Board({
               'data-closed': closedRoutes.has(r.id) ? 'true' : undefined,
               'data-sky': skyRoutes.has(r.id) ? 'true' : undefined,
               'data-reopen': reopenRoutes.has(r.id) ? 'true' : undefined,
+              'data-harvest': harvestRoutes.has(r.id) ? 'true' : undefined,
             })}
             cityData={(c) => {
               const hotspot = hotspots.get(c.id);
               return {
                 'data-hotspot': hotspot !== undefined ? String(hotspot) : undefined,
                 'data-charter': charterCities.has(c.id) ? 'true' : undefined,
+                'data-lantern-host': lanternCity === c.id ? 'true' : undefined,
+                'data-procession': processionPath.includes(c.id) ? 'trail' : undefined,
+                'data-procession-current': processionCity === c.id ? 'true' : undefined,
+                'data-bento': bentoCities.has(c.id) ? 'true' : undefined,
+                'data-night-market': nightMarketCities.has(c.id) ? 'true' : undefined,
+                'data-lucky': luckyCities.has(c.id) ? 'true' : undefined,
               };
             }}
             renderRouteOverlay={(r, g) => (
@@ -695,6 +748,48 @@ export function Board({
               const hotspot = hotspots.get(c.id);
               return (
                 <>
+                  {/* Permanent/open expansion races and moving city markers. */}
+                  {luckyCities.has(c.id) && (
+                    <circle
+                      className="evt-lucky-chip"
+                      cx={c.x}
+                      cy={c.y}
+                      pointerEvents="none"
+                      aria-hidden
+                    />
+                  )}
+                  {lanternCity === c.id && (
+                    <g className="evt-city-badge evt-lantern-host" pointerEvents="none" aria-hidden>
+                      <circle cx={c.x - 2.4} cy={c.y - 2.4} />
+                      <text x={c.x - 2.4} y={c.y - 2.4}>
+                        +6
+                      </text>
+                    </g>
+                  )}
+                  {processionCity === c.id && (
+                    <g className="evt-city-badge evt-procession" pointerEvents="none" aria-hidden>
+                      <circle cx={c.x + 2.4} cy={c.y - 2.4} />
+                      <text x={c.x + 2.4} y={c.y - 2.4}>
+                        P
+                      </text>
+                    </g>
+                  )}
+                  {bentoCities.has(c.id) && (
+                    <g className="evt-city-badge evt-bento" pointerEvents="none" aria-hidden>
+                      <circle cx={c.x - 2.4} cy={c.y + 2.4} />
+                      <text x={c.x - 2.4} y={c.y + 2.4}>
+                        B
+                      </text>
+                    </g>
+                  )}
+                  {nightMarketCities.has(c.id) && (
+                    <g className="evt-city-badge evt-night-market" pointerEvents="none" aria-hidden>
+                      <circle cx={c.x + 2.4} cy={c.y + 2.4} />
+                      <text x={c.x + 2.4} y={c.y + 2.4}>
+                        N
+                      </text>
+                    </g>
+                  )}
                   {/* Charter endpoint: a small contract chip behind the marker. */}
                   {charterCities.has(c.id) && (
                     <circle
@@ -721,6 +816,40 @@ export function Board({
             onCityClick={onPickCity}
             ariaLabel="Taiwan railway map"
           >
+            {processionPath.length > 1 && (
+              <polyline
+                className="evt-procession-trail"
+                data-testid="procession-trail"
+                points={processionPath
+                  .map((id) => cityById.get(id))
+                  .filter((city) => city !== undefined)
+                  .map((city) => `${city.x},${city.y}`)
+                  .join(' ')}
+                pointerEvents="none"
+                aria-hidden
+              />
+            )}
+
+            {snapshot.randomEvents?.luckyContracts
+              .filter((contract) => contract.wonByPlayerId === '')
+              .map((contract) => {
+                const a = cityById.get(contract.cityA);
+                const b = cityById.get(contract.cityB);
+                if (!a || !b) return null;
+                return (
+                  <line
+                    key={contract.eventId}
+                    className="evt-lucky-link"
+                    x1={a.x}
+                    y1={a.y}
+                    x2={b.x}
+                    y2={b.y}
+                    pointerEvents="none"
+                    aria-hidden
+                  />
+                );
+              })}
+
             {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path. */}
             {sweeps.map((sw) => (
               <g key={sw.id} className="sweep-layer" pointerEvents="none">

@@ -6,15 +6,20 @@ import { asRouteId, asCityId, asTicketId } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
 import type { Action, Payment as EnginePayment } from '@trm/engine';
 import type { ClientEnvelope, Payment as PbPayment } from '@trm/proto';
-import { pbToTrainColorOrNull } from './enums';
+import { pbToTrainColorOrNull, pbToBentoSpend, pbToEventPerk, pbToCardColorOrNull } from './enums';
 
 type Command = ClientEnvelope['command'];
 
-const protoPayment = (p: PbPayment | undefined): EnginePayment => ({
-  color: p ? pbToTrainColorOrNull(p.color) : null,
-  colorCount: p?.colorCount ?? 0,
-  locomotives: p?.locomotives ?? 0,
-});
+const protoPayment = (p: PbPayment | undefined): EnginePayment => {
+  const bentoSpend = p ? pbToBentoSpend(p.bentoSpend) : undefined;
+  return {
+    color: p ? pbToTrainColorOrNull(p.color) : null,
+    colorCount: p?.colorCount ?? 0,
+    locomotives: p?.locomotives ?? 0,
+    ...(bentoSpend ? { bentoSpend } : {}),
+    ...(p?.useClaimDiscount ? { useClaimDiscount: true } : {}),
+  };
+};
 
 export function commandToAction(command: Command, player: PlayerId): Action | null {
   switch (command.case) {
@@ -46,6 +51,31 @@ export function commandToAction(command: Command, player: PlayerId): Action | nu
       return command.value.commit
         ? { t: 'RESOLVE_TUNNEL', player, commit: true, extra: protoPayment(command.value.extra) }
         : { t: 'RESOLVE_TUNNEL', player, commit: false };
+    case 'relocateLanternHost':
+      return { t: 'RELOCATE_LANTERN_HOST', player, cityId: asCityId(command.value.cityId) };
+    case 'repairRoute':
+      return {
+        t: 'REPAIR_ROUTE',
+        player,
+        routeId: asRouteId(command.value.routeId),
+        payment: protoPayment(command.value.payment),
+      };
+    case 'nightMarketSwap': {
+      const giveColor = pbToCardColorOrNull(command.value.giveColor);
+      return giveColor === null
+        ? null
+        : { t: 'NIGHT_MARKET_SWAP', player, giveColor, slot: command.value.slot };
+    }
+    case 'chooseEventPerk': {
+      const perk = pbToEventPerk(command.value.perk);
+      return perk === null ? null : { t: 'CHOOSE_EVENT_PERK', player, perk };
+    }
+    case 'startHiveDraw':
+      return { t: 'START_HIVE_DRAW', player };
+    case 'continueHiveDraw':
+      return { t: 'CONTINUE_HIVE_DRAW', player };
+    case 'stopHiveDraw':
+      return { t: 'STOP_HIVE_DRAW', player };
     case 'pass':
       return { t: 'PASS', player };
     default:

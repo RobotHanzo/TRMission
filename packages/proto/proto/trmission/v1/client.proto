@@ -56,6 +56,33 @@ message ResolveTunnel {
 // Pass — only legal when the player has no other move (A15 termination).
 message Pass {}
 
+// Resolve the mandatory follow-up after scoring the roaming Lantern Host marker.
+message RelocateLanternHost {
+  string city_id = 1;
+}
+
+// Repair one event-closed route, paying two matching cards or an allocation permit.
+message RepairRoute {
+  string route_id = 1;
+  Payment payment = 2;
+}
+
+// Once-per-turn free swap at the active station-front night market.
+message NightMarketSwap {
+  CardColor give_color = 1;
+  uint32 slot = 2;
+}
+
+// Mandatory Rolling-Stock Allocation Day draft pick.
+message ChooseEventPerk {
+  EventPerk perk = 1;
+}
+
+// Hive of Sparks push-your-luck flow.
+message StartHiveDraw {}
+message ContinueHiveDraw {}
+message StopHiveDraw {}
+
 // Ask the server for a fresh full snapshot (reconnect / desync recovery).
 message Resync {}
 
@@ -96,5 +123,12 @@ message ClientEnvelope {
     Chat chat = 13;
     Ping ping = 14;
     CameraUpdate camera_update = 15;
+    RelocateLanternHost relocate_lantern_host = 16;
+    RepairRoute repair_route = 17;
+    NightMarketSwap night_market_swap = 18;
+    ChooseEventPerk choose_event_perk = 19;
+    StartHiveDraw start_hive_draw = 20;
+    ContinueHiveDraw continue_hive_draw = 21;
+    StopHiveDraw stop_hive_draw = 22;
   }
 }

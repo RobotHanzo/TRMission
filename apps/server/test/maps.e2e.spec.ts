@@ -303,6 +303,7 @@ describe('maps: fork from official', () => {
     expect(forked.body.draft.cities).toHaveLength(OFFICIAL_MAPS[0]!.content.cities.length);
     expect(forked.body.draft.routes).toHaveLength(OFFICIAL_MAPS[0]!.content.routes.length);
     expect(forked.body.draft.tickets).toHaveLength(OFFICIAL_MAPS[0]!.content.tickets.length);
+    expect(forked.body.draft.auspiciousPairs).toEqual(OFFICIAL_MAPS[0]!.content.auspiciousPairs);
     expect(forked.body.draft.geography.land.length).toBeGreaterThan(0);
     // Owned by a: a can read it back.
     await request(server()).get(`/api/v1/maps/${forked.body.id}`).set(auth(a.token)).expect(200);

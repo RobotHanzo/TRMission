@@ -18,6 +18,9 @@ export type Phase =
   | 'DRAWING_CARDS'
   | 'TICKET_SELECTION'
   | 'TUNNEL_PENDING'
+  | 'LANTERN_RELOCATION'
+  | 'EVENT_DRAFT'
+  | 'HIVE_DRAW'
   | 'GAME_OVER';
 
 /** A claimed route is owned; a locked route (closed double sibling in 2–3p) has no owner. */
@@ -46,6 +49,8 @@ export interface TurnState {
   readonly phase: Phase;
   /** Cards already taken in the current DRAWING_CARDS turn (0 or 1). */
   readonly cardsDrawnThisTurn: number;
+  /** Present only after the active player used the Night Market free pre-action. */
+  readonly nightMarketSwapUsed?: true;
 }
 
 export interface PendingTunnel {
@@ -81,6 +86,8 @@ export interface PlayerFinal {
   readonly stationBonus: number;
   readonly longestTrailLength: number;
   readonly longestBonus: number;
+  /** Deferred random-event scoring; omitted when zero to preserve off-mode identity. */
+  readonly eventBonus?: number;
   readonly total: number;
 }
 
@@ -143,4 +150,6 @@ export const SCHEMA_VERSION = 1;
 // only changes *when* completedTickets is populated; a game's final scoring is unaffected
 // (evaluatePlayerTickets always re-derives completion independently, never reading this field
 // off-variant).
-export const ENGINE_VERSION = 7;
+// v8: the 13-event expansion — new event actions/phases, inventories, deck marker, and deferred
+// Goddess Procession scoring. Off-mode state remains byte-identical apart from engineVersion.
+export const ENGINE_VERSION = 8;

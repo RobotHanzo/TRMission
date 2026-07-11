@@ -7,6 +7,7 @@ import type {
   GameContent,
   MapGeography,
   MapRules,
+  AuspiciousPair,
   RouteDef,
   TicketDef,
 } from '@trm/map-data';
@@ -15,6 +16,7 @@ export interface MapDraft {
   cities: CityDef[];
   routes: RouteDef[];
   tickets: TicketDef[];
+  auspiciousPairs?: AuspiciousPair[];
   geography?: MapGeography;
   rules?: MapRules;
 }
@@ -53,6 +55,9 @@ export function assembleContent(map: CustomMapDoc): GameContent {
     cities: map.draft.cities,
     routes: map.draft.routes,
     tickets: map.draft.tickets,
+    ...(map.draft.auspiciousPairs !== undefined
+      ? { auspiciousPairs: map.draft.auspiciousPairs }
+      : {}),
     ...(map.draft.geography !== undefined ? { geography: map.draft.geography } : {}),
     ...(map.draft.rules !== undefined ? { rules: map.draft.rules } : {}),
   };

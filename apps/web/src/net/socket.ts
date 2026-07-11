@@ -11,8 +11,12 @@ import {
   type Welcome,
   type CameraView,
   type PaymentSchema,
+  CardColor as PbCardColor,
+  EventPerk as PbEventPerk,
 } from '@trm/proto';
+import type { CardColor } from '@trm/shared';
 import { SESSION_REPLACED_CLOSE_CODE } from '@trm/shared';
+import type { EventPerkChoice } from './commands';
 
 type Command = NonNullable<MessageInitShape<typeof ClientEnvelopeSchema>['command']>;
 export type PaymentInit = MessageInitShape<typeof PaymentSchema>;
@@ -39,6 +43,18 @@ export interface SocketHandlers {
 
 /** A board-space camera framing (board units), the payload of a camera update. */
 export type CameraViewInit = { cx: number; cy: number; span: number };
+
+const CARD_TO_PB: Record<CardColor, PbCardColor> = {
+  RED: PbCardColor.RED,
+  ORANGE: PbCardColor.ORANGE,
+  YELLOW: PbCardColor.YELLOW,
+  GREEN: PbCardColor.GREEN,
+  BLUE: PbCardColor.BLUE,
+  PURPLE: PbCardColor.PURPLE,
+  BLACK: PbCardColor.BLACK,
+  WHITE: PbCardColor.WHITE,
+  LOCOMOTIVE: PbCardColor.LOCOMOTIVE,
+};
 
 /**
  * Mints a fresh ws-game ticket for a reconnect. The ticket handed to the constructor is short-lived
@@ -213,6 +229,33 @@ export class GameSocket {
   }
   resolveTunnel(commit: boolean, extra?: PaymentInit): void {
     this.send({ case: 'resolveTunnel', value: commit ? { commit, extra } : { commit } });
+  }
+  relocateLanternHost(cityId: string): void {
+    this.send({ case: 'relocateLanternHost', value: { cityId } });
+  }
+  repairRoute(routeId: string, payment: PaymentInit): void {
+    this.send({ case: 'repairRoute', value: { routeId, payment } });
+  }
+  nightMarketSwap(giveColor: CardColor, slot: number): void {
+    this.send({ case: 'nightMarketSwap', value: { giveColor: CARD_TO_PB[giveColor], slot } });
+  }
+  chooseEventPerk(perk: EventPerkChoice): void {
+    const value =
+      perk === 'CLAIM_DISCOUNT'
+        ? PbEventPerk.CLAIM_DISCOUNT
+        : perk === 'DRAW_TWO'
+          ? PbEventPerk.DRAW_TWO
+          : PbEventPerk.REPAIR_PERMIT;
+    this.send({ case: 'chooseEventPerk', value: { perk: value } });
+  }
+  startHiveDraw(): void {
+    this.send({ case: 'startHiveDraw', value: {} });
+  }
+  continueHiveDraw(): void {
+    this.send({ case: 'continueHiveDraw', value: {} });
+  }
+  stopHiveDraw(): void {
+    this.send({ case: 'stopHiveDraw', value: {} });
   }
   pass(): void {
     this.send({ case: 'pass', value: {} });

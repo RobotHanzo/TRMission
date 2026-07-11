@@ -81,12 +81,26 @@ export interface RefillResult {
   rng: RngState;
   reshuffled: boolean;
   recycled: boolean;
+  recycleReason: 'THREE_LOCOS' | 'THREE_OF_COLOR' | null;
+  /** Number of real train cards removed from the draw pool while filling/recycling. */
+  drawnCount: number;
 }
 
 function countLocos(market: readonly (CardColor | null)[]): number {
   let n = 0;
   for (const c of market) if (c === 'LOCOMOTIVE') n++;
   return n;
+}
+
+function hasAnyTriple(market: readonly (CardColor | null)[]): boolean {
+  const counts = new Map<CardColor, number>();
+  for (const card of market) {
+    if (card === null) continue;
+    const count = (counts.get(card) ?? 0) + 1;
+    if (count >= 3) return true;
+    counts.set(card, count);
+  }
+  return false;
 }
 
 /**
@@ -100,6 +114,7 @@ export function refillMarket(
   discard: Readonly<CardCounts>,
   rng: RngState,
   params: RuleParams,
+  recycleAnyTriple = false,
 ): RefillResult {
   const work = market.slice();
   let workDeck = deck.slice();
@@ -107,6 +122,8 @@ export function refillMarket(
   let workRng = rng;
   let reshuffled = false;
   let recycled = false;
+  let recycleReason: 'THREE_LOCOS' | 'THREE_OF_COLOR' | null = null;
+  let drawnCount = 0;
 
   const fillEmpty = (): void => {
     for (let i = 0; i < params.marketSize; i++) {
@@ -117,6 +134,7 @@ export function refillMarket(
         workRng = d.rng;
         if (d.reshuffled) reshuffled = true;
         work[i] = d.card;
+        if (d.card !== null) drawnCount++;
       }
     }
   };
@@ -127,12 +145,14 @@ export function refillMarket(
 
   let guard = 0;
   while (
-    countLocos(work) >= params.locoRecycleThreshold &&
+    (countLocos(work) >= params.locoRecycleThreshold || (recycleAnyTriple && hasAnyTriple(work))) &&
     workDeck.length + totalCards(workDiscard) > 0 &&
     guard < 50
   ) {
     guard++;
     recycled = true;
+    recycleReason =
+      countLocos(work) >= params.locoRecycleThreshold ? 'THREE_LOCOS' : 'THREE_OF_COLOR';
     // Discard the whole market, then refill.
     for (let i = 0; i < work.length; i++) {
       const c = work[i];
@@ -142,5 +162,14 @@ export function refillMarket(
     fillEmpty();
   }
 
-  return { market: work, deck: workDeck, discard: workDiscard, rng: workRng, reshuffled, recycled };
+  return {
+    market: work,
+    deck: workDeck,
+    discard: workDiscard,
+    rng: workRng,
+    reshuffled,
+    recycled,
+    recycleReason,
+    drawnCount,
+  };
 }

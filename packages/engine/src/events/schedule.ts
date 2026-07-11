@@ -44,15 +44,27 @@ export function generateSchedule(
 
   // ── Precomputed, deterministic board facts (no draws) ──
   const sortedCityIds = [...board.cityIds].sort(cmpStr);
+  const sortedRouteIds = board.content.routes.map((r) => r.id).sort((a, b) => cmpStr(a, b));
   const regionTouching = buildRegionTouching(board); // region → sorted touching route ids
+  const allRegions = [...regionTouching.keys()].sort(cmpStr);
   const eligibleRegions = [...regionTouching.entries()]
     .filter(([, routes]) => routes.length >= 3)
     .map(([region]) => region)
     .sort(cmpStr);
   const allDist = allPairsHops(board); // cityId → (cityId → hop count)
+  const processionPaths = fiveCityPaths(board);
+  const auspiciousPairs = [...(board.content.auspiciousPairs ?? [])].sort((a, b) =>
+    cmpStr(a.id, b.id),
+  );
 
   // Per-schedule mutable target bookkeeping.
   const hotspotPicks: Record<string, number> = {};
+  const usedOneShotKinds = new Set<RandomEventKind>();
+  const usedLuckyPairIds = new Set<string>();
+
+  // Each authored pair opens at most one lucky race per game — a repeat contract would hand its
+  // +5 straight to an already-connected player at the second open.
+  const remainingLuckyPairs = () => auspiciousPairs.filter((p) => !usedLuckyPairIds.has(p.id));
 
   const hasFarPair = (): boolean => {
     for (const a of sortedCityIds) {
@@ -74,6 +86,7 @@ export function generateSchedule(
     );
 
   const kindHasTarget = (kind: RandomEventKind): boolean => {
+    if (ONE_SHOT_KINDS.has(kind) && usedOneShotKinds.has(kind)) return false;
     switch (kind) {
       case 'TYPHOON_LANDFALL':
       case 'SKY_LANTERN':
@@ -82,6 +95,18 @@ export function generateSchedule(
         return eligibleHotspotCities().length > 0;
       case 'CHARTER_SPECIAL':
         return hasFarPair();
+      case 'LANTERN_HOST_CITY':
+      case 'BENTO_RUSH':
+      case 'STATION_FRONT_NIGHT_MARKET':
+        return sortedCityIds.length > 0;
+      case 'SLOPE_REPAIR_ORDER':
+        return sortedRouteIds.length > 0;
+      case 'GODDESS_PROCESSION':
+        return processionPaths.length > 0;
+      case 'HARVEST_FESTIVAL_EXPRESS':
+        return allRegions.length > 0;
+      case 'LUCKY_TICKET_STUB':
+        return remainingLuckyPairs().length > 0;
       default:
         return true; // target-less kinds
     }
@@ -128,6 +153,9 @@ export function generateSchedule(
     let region: string | undefined;
     let cityId: CityId | undefined;
     let charter: { a: CityId; b: CityId; points: number } | undefined;
+    let cityPath: CityId[] | undefined;
+    let pair: { a: CityId; b: CityId } | undefined;
+    let markerSelector: number | undefined;
 
     if (kind === 'TYPHOON_LANDFALL' || kind === 'SKY_LANTERN') {
       const [ri, nextR] = nextInt(cur, eligibleRegions.length);
@@ -167,7 +195,42 @@ export function generateSchedule(
       const [pts, nextP] = nextInt(cur, 5);
       cur = nextP;
       if (picked) charter = { a: picked.a, b: picked.b, points: 6 + pts };
+    } else if (
+      kind === 'LANTERN_HOST_CITY' ||
+      kind === 'BENTO_RUSH' ||
+      kind === 'STATION_FRONT_NIGHT_MARKET'
+    ) {
+      const [ci, nextC] = nextInt(cur, sortedCityIds.length);
+      cur = nextC;
+      cityId = sortedCityIds[ci] as CityId;
+    } else if (kind === 'SLOPE_REPAIR_ORDER') {
+      const [ri, nextR] = nextInt(cur, sortedRouteIds.length);
+      cur = nextR;
+      routeIds = [sortedRouteIds[ri] as RouteId];
+    } else if (kind === 'GODDESS_PROCESSION') {
+      const [pi, nextP] = nextInt(cur, processionPaths.length);
+      cur = nextP;
+      cityPath = [...(processionPaths[pi] as readonly CityId[])];
+      cityId = cityPath[0];
+    } else if (kind === 'HARVEST_FESTIVAL_EXPRESS') {
+      const [ri, nextR] = nextInt(cur, allRegions.length);
+      cur = nextR;
+      region = allRegions[ri] as string;
+      routeIds = [...(regionTouching.get(region) ?? [])];
+    } else if (kind === 'LUCKY_TICKET_STUB') {
+      const candidates = remainingLuckyPairs();
+      const [pi, nextP] = nextInt(cur, candidates.length);
+      cur = nextP;
+      const picked = candidates[pi]!;
+      usedLuckyPairIds.add(picked.id);
+      pair = { a: picked.a, b: picked.b };
+    } else if (kind === 'BREAKTHROUGH_BORING_MACHINE') {
+      const [selector, nextM] = nextInt(cur, 0x10000);
+      cur = nextM;
+      markerSelector = selector;
     }
+
+    if (ONE_SHOT_KINDS.has(kind)) usedOneShotKinds.add(kind);
 
     const durationRounds = DURATIONS[kind];
     const entry: EventScheduleEntry = {
@@ -180,6 +243,9 @@ export function generateSchedule(
       ...(region !== undefined ? { region } : {}),
       ...(cityId !== undefined ? { cityId } : {}),
       ...(charter ? { charter } : {}),
+      ...(cityPath ? { cityPath } : {}),
+      ...(pair ? { pair } : {}),
+      ...(markerSelector !== undefined ? { markerSelector } : {}),
     };
     entries.push(entry);
 
@@ -199,7 +265,10 @@ export function generateSchedule(
     active: [],
     hotspots: {},
     charters: [],
+    luckyContracts: [],
     reopenBonus: [],
+    repairedRouteIds: [],
+    resources: {},
   };
   return [events, cur];
 }
@@ -216,9 +285,24 @@ type Category = 'positive' | 'mixed' | 'restrictive';
 const CATEGORY_ORDER: readonly Category[] = ['positive', 'mixed', 'restrictive'];
 
 const CATEGORY_KINDS: Record<Category, readonly RandomEventKind[]> = {
-  positive: ['VIRAL_HOTSPOT', 'CHARTER_SPECIAL', 'RAILWAY_GALA', 'STAMP_RALLY'],
-  mixed: ['SKY_LANTERN', 'AFTERSHOCK'],
-  restrictive: ['TYPHOON_LANDFALL', 'TYPHOON_DAY_OFF'],
+  positive: [
+    'VIRAL_HOTSPOT',
+    'CHARTER_SPECIAL',
+    'RAILWAY_GALA',
+    'STAMP_RALLY',
+    'LANTERN_HOST_CITY',
+    'BENTO_RUSH',
+    'STATION_FRONT_NIGHT_MARKET',
+    'GODDESS_PROCESSION',
+    'ROLLING_STOCK_ALLOCATION_DAY',
+    'HIVE_OF_SPARKS',
+    'BREAKTHROUGH_BORING_MACHINE',
+    'INTERIM_OPERATIONS_REPORT',
+    'HARVEST_FESTIVAL_EXPRESS',
+    'LUCKY_TICKET_STUB',
+  ],
+  mixed: ['SKY_LANTERN', 'AFTERSHOCK', 'SPRING_FESTIVAL_RUSH', 'ALL_SEATS_RESERVED'],
+  restrictive: ['TYPHOON_LANDFALL', 'TYPHOON_DAY_OFF', 'SLOPE_REPAIR_ORDER'],
 };
 
 const CATEGORY_OF: Record<RandomEventKind, Category> = {
@@ -230,6 +314,19 @@ const CATEGORY_OF: Record<RandomEventKind, Category> = {
   AFTERSHOCK: 'mixed',
   TYPHOON_LANDFALL: 'restrictive',
   TYPHOON_DAY_OFF: 'restrictive',
+  LANTERN_HOST_CITY: 'positive',
+  BENTO_RUSH: 'positive',
+  SLOPE_REPAIR_ORDER: 'restrictive',
+  STATION_FRONT_NIGHT_MARKET: 'positive',
+  GODDESS_PROCESSION: 'positive',
+  SPRING_FESTIVAL_RUSH: 'mixed',
+  ROLLING_STOCK_ALLOCATION_DAY: 'positive',
+  HIVE_OF_SPARKS: 'positive',
+  BREAKTHROUGH_BORING_MACHINE: 'positive',
+  INTERIM_OPERATIONS_REPORT: 'positive',
+  HARVEST_FESTIVAL_EXPRESS: 'positive',
+  ALL_SEATS_RESERVED: 'mixed',
+  LUCKY_TICKET_STUB: 'positive',
 };
 
 const DURATIONS: Record<RandomEventKind, number> = {
@@ -241,6 +338,19 @@ const DURATIONS: Record<RandomEventKind, number> = {
   STAMP_RALLY: 3,
   CHARTER_SPECIAL: 4,
   VIRAL_HOTSPOT: 0,
+  LANTERN_HOST_CITY: 0,
+  BENTO_RUSH: 3,
+  SLOPE_REPAIR_ORDER: 3,
+  STATION_FRONT_NIGHT_MARKET: 2,
+  GODDESS_PROCESSION: 5,
+  SPRING_FESTIVAL_RUSH: 2,
+  ROLLING_STOCK_ALLOCATION_DAY: 0,
+  HIVE_OF_SPARKS: 1,
+  BREAKTHROUGH_BORING_MACHINE: 0,
+  INTERIM_OPERATIONS_REPORT: 0,
+  HARVEST_FESTIVAL_EXPRESS: 3,
+  ALL_SEATS_RESERVED: 1,
+  LUCKY_TICKET_STUB: 0,
 };
 
 const TELEGRAPHED: ReadonlySet<RandomEventKind> = new Set<RandomEventKind>([
@@ -248,6 +358,15 @@ const TELEGRAPHED: ReadonlySet<RandomEventKind> = new Set<RandomEventKind>([
   'TYPHOON_DAY_OFF',
   'SKY_LANTERN',
   'AFTERSHOCK',
+  'SLOPE_REPAIR_ORDER',
+  'SPRING_FESTIVAL_RUSH',
+  'ALL_SEATS_RESERVED',
+]);
+
+const ONE_SHOT_KINDS: ReadonlySet<RandomEventKind> = new Set<RandomEventKind>([
+  'LANTERN_HOST_CITY',
+  'ROLLING_STOCK_ALLOCATION_DAY',
+  'BREAKTHROUGH_BORING_MACHINE',
 ]);
 
 const CHARTER_MIN_HOPS = 4;
@@ -329,4 +448,49 @@ function allPairsHops(board: Board): Map<string, Map<string, number>> {
     out.set(source as string, dist);
   }
   return out;
+}
+
+/**
+ * Deterministic ceiling on enumerated procession paths. A dense custom map (up to 120 cities /
+ * 300 routes) can hold millions of simple 5-city paths — unbounded enumeration would stall
+ * genesis on the server. The walk order is canonical (sorted cities, sorted neighbours), so the
+ * retained prefix is identical on every run; the official map (~1.2k paths) never hits the cap.
+ */
+export const PROCESSION_PATH_CAP = 20_000;
+
+/** Every deterministic simple five-city path, canonicalized against its reverse (capped). */
+export function fiveCityPaths(board: Board): CityId[][] {
+  const adj = new Map<string, string[]>();
+  for (const c of board.cityIds) adj.set(c as string, []);
+  for (const r of board.content.routes) {
+    adj.get(r.a as string)?.push(r.b as string);
+    adj.get(r.b as string)?.push(r.a as string);
+  }
+  for (const neighbors of adj.values()) neighbors.sort(cmpStr);
+
+  const byKey = new Map<string, CityId[]>();
+  const walk = (path: string[]): void => {
+    if (byKey.size >= PROCESSION_PATH_CAP) return;
+    if (path.length === 5) {
+      const forward = path.join('|');
+      const reverse = [...path].reverse().join('|');
+      const key = forward < reverse ? forward : reverse;
+      if (!byKey.has(key))
+        byKey.set(
+          key,
+          path.map((c) => c as CityId),
+        );
+      return;
+    }
+    const tail = path[path.length - 1] as string;
+    for (const next of adj.get(tail) ?? []) {
+      if (byKey.size >= PROCESSION_PATH_CAP) return;
+      if (!path.includes(next)) walk([...path, next]);
+    }
+  };
+  for (const city of [...board.cityIds].sort(cmpStr)) {
+    if (byKey.size >= PROCESSION_PATH_CAP) break;
+    walk([city as string]);
+  }
+  return [...byKey.entries()].sort(([a], [b]) => cmpStr(a, b)).map(([, path]) => path);
 }

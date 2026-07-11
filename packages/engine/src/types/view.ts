@@ -9,7 +9,16 @@ import type {
   EventsMode,
 } from '@trm/shared';
 import type { Phase, OwnerCell, StationPlacement, Endgame, PlayerFinal } from './state';
-import type { ActiveEvent, CharterContract, RandomEventKind } from './events-state';
+import type {
+  ActiveEvent,
+  CharterContract,
+  RandomEventKind,
+  LuckyContract,
+  LanternHostState,
+  LanternRelocationState,
+  EventDraftState,
+  PendingHiveDraw,
+} from './events-state';
 
 /**
  * A player's end-game score, enriched for display: which kept tickets are completed (gains) vs
@@ -36,6 +45,10 @@ export interface RedactedPlayer {
   readonly routePoints: number;
   readonly handCount: number;
   readonly ticketCount: number;
+  readonly bentoTokens: number;
+  readonly blessings: number;
+  readonly claimDiscounts: number;
+  readonly repairPermits: number;
   /** Own hand only (null for opponents). */
   readonly hand: Hand | null;
   /** Own kept tickets, or everyone's at GAME_OVER (null for hidden opponents). */
@@ -112,6 +125,8 @@ export interface RedactedView {
       readonly routeIds?: readonly RouteId[];
       readonly region?: string;
       readonly cityId?: CityId;
+      readonly cityPath?: readonly CityId[];
+      readonly pair?: { readonly a: CityId; readonly b: CityId };
     } | null;
     /** Permanent viral-hotspot levels, sorted by cityId. */
     readonly hotspots: readonly { readonly cityId: CityId; readonly level: number }[];
@@ -120,5 +135,13 @@ export interface RedactedView {
     /** Resolved: routeIds of active TYPHOON_LANDFALL events that are still unclaimed. */
     readonly closedRouteIds: readonly RouteId[];
     readonly freeStationAvailable: boolean;
+    readonly lanternHost: LanternHostState | null;
+    readonly lanternPendingRelocation: LanternRelocationState | null;
+    readonly luckyContracts: readonly LuckyContract[];
+    readonly repairedRouteIds: readonly RouteId[];
+    readonly eventDraft: EventDraftState | null;
+    readonly pendingHiveDraw: PendingHiveDraw | null;
+    readonly boringActive: boolean;
+    readonly nightMarketSwapAvailable: boolean;
   };
 }

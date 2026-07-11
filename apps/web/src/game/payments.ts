@@ -1,7 +1,7 @@
 import { TRAIN_COLORS, CARD_COLORS } from '@trm/shared';
 import type { CardColor, TrainColor } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
-import { CardColor as PbCardColor, type CardCounts } from '@trm/proto';
+import { BentoSpend as PbBentoSpend, CardColor as PbCardColor, type CardCounts } from '@trm/proto';
 
 export type Hand = Record<CardColor, number>;
 
@@ -9,6 +9,23 @@ export interface Payment {
   color: TrainColor | null;
   colorCount: number;
   locomotives: number;
+  /** Optional Bento Rush token use. Absent is the wire enum's UNSPECIFIED value. */
+  bentoSpend?: 'WILD' | 'POINTS';
+  /** Consume one Rolling-Stock claim-discount perk for this payment. */
+  useClaimDiscount?: true;
+  /** Presentation-only: this payment earns All Seats Reserved's +2 bonus. */
+  allSeatsBonus?: true;
+  /** Presentation-only: an empty repair payment consumes a repair permit. */
+  repairPermit?: true;
+}
+
+export interface RoutePaymentModifiers {
+  /** Number of Bento Rush tokens available to spend (only one may be spent per claim). */
+  bentoTokens?: number;
+  /** Number of one-use Rolling-Stock claim discounts available. */
+  claimDiscounts?: number;
+  /** Mark payments whose locomotive count exceeds the route's ferry minimum. */
+  allSeatsReserved?: boolean;
 }
 
 /** Proto CardCounts → a colour→count hand map. */
@@ -47,23 +64,86 @@ export function handAfterPayment(hand: Hand, payment: Payment): Hand {
  * surcharge (0 or 1): the player pays `route.length + extraCards` cards (same colour rules) but
  * still places only `route.length` cars — exactly as `validateRoutePayment` enforces server-side.
  */
-export function enumerateRoutePayments(hand: Hand, route: RouteDef, extraCards = 0): Payment[] {
+export function enumerateRoutePayments(
+  hand: Hand,
+  route: RouteDef,
+  extraCards = 0,
+  modifiers: RoutePaymentModifiers = {},
+): Payment[] {
+  return enumerateRoutePaymentsWithModifiers(hand, route, extraCards, modifiers);
+}
+
+/**
+ * Modifier-aware route-payment enumerator. It deliberately returns the normal payment alongside
+ * every optional resource-spend variant so choosing a Bento/perk is always explicit in the modal.
+ * Reductions lower the number of cards paid, never the route's train-car length or a ferry's
+ * locomotive minimum. Bento POINTS keeps the normal price and is distinguished only on the wire.
+ */
+export function enumerateRoutePaymentsWithModifiers(
+  hand: Hand,
+  route: RouteDef,
+  extraCards = 0,
+  modifiers: RoutePaymentModifiers = {},
+): Payment[] {
   const out: Payment[] = [];
-  const required = route.length + extraCards;
-  for (let loco = route.ferryLocos; loco <= required; loco++) {
-    if (hand.LOCOMOTIVE < loco) continue;
-    const colorCount = required - loco;
-    if (colorCount === 0) {
-      out.push({ color: null, colorCount: 0, locomotives: loco });
-      continue;
-    }
-    if (route.color === 'GRAY') {
-      for (const c of TRAIN_COLORS)
-        if (hand[c] >= colorCount) out.push({ color: c, colorCount, locomotives: loco });
-    } else if (hand[route.color] >= colorCount) {
-      out.push({ color: route.color, colorCount, locomotives: loco });
+  const spends: readonly {
+    reduction: number;
+    bentoSpend?: 'WILD' | 'POINTS';
+    useClaimDiscount?: true;
+  }[] = [
+    { reduction: 0 },
+    ...(modifiers.bentoTokens
+      ? ([
+          { reduction: 1, bentoSpend: 'WILD' as const },
+          { reduction: 0, bentoSpend: 'POINTS' as const },
+        ] as const)
+      : []),
+    ...(modifiers.claimDiscounts
+      ? ([{ reduction: 1, useClaimDiscount: true as const }] as const)
+      : []),
+    ...(modifiers.bentoTokens && modifiers.claimDiscounts
+      ? ([
+          { reduction: 2, bentoSpend: 'WILD' as const, useClaimDiscount: true as const },
+          { reduction: 1, bentoSpend: 'POINTS' as const, useClaimDiscount: true as const },
+        ] as const)
+      : []),
+  ];
+
+  for (const spend of spends) {
+    const required = Math.max(0, route.length + extraCards - spend.reduction);
+    // A card-count discount never waives a ferry's printed locomotive minimum.
+    if (required < route.ferryLocos) continue;
+    for (let loco = route.ferryLocos; loco <= required; loco++) {
+      if (hand.LOCOMOTIVE < loco) continue;
+      const colorCount = required - loco;
+      const flags = {
+        ...(spend.bentoSpend ? { bentoSpend: spend.bentoSpend } : {}),
+        ...(spend.useClaimDiscount ? { useClaimDiscount: true as const } : {}),
+        ...(modifiers.allSeatsReserved && loco > route.ferryLocos
+          ? { allSeatsBonus: true as const }
+          : {}),
+      };
+      if (colorCount === 0) {
+        out.push({ color: null, colorCount: 0, locomotives: loco, ...flags });
+        continue;
+      }
+      if (route.color === 'GRAY') {
+        for (const c of TRAIN_COLORS)
+          if (hand[c] >= colorCount)
+            out.push({ color: c, colorCount, locomotives: loco, ...flags });
+      } else if (hand[route.color] >= colorCount) {
+        out.push({ color: route.color, colorCount, locomotives: loco, ...flags });
+      }
     }
   }
+  return out;
+}
+
+/** Two matching cards to repair, plus an explicit empty permit option when one is held. */
+export function enumerateRepairPayments(hand: Hand, repairPermits = 0): Payment[] {
+  const out = enumerateStationPayments(hand, 2);
+  if (repairPermits > 0)
+    out.unshift({ color: null, colorCount: 0, locomotives: 0, repairPermit: true });
   return out;
 }
 
@@ -132,8 +212,21 @@ const TRAIN_TO_PB: Record<TrainColor, PbCardColor> = {
 /** Client Payment → the proto Payment init shape the socket sends. */
 export const paymentToProto = (
   p: Payment,
-): { color: PbCardColor; colorCount: number; locomotives: number } => ({
+): {
+  color: PbCardColor;
+  colorCount: number;
+  locomotives: number;
+  bentoSpend: PbBentoSpend;
+  useClaimDiscount: boolean;
+} => ({
   color: p.color ? TRAIN_TO_PB[p.color] : PbCardColor.UNSPECIFIED,
   colorCount: p.colorCount,
   locomotives: p.locomotives,
+  bentoSpend:
+    p.bentoSpend === 'WILD'
+      ? PbBentoSpend.WILD
+      : p.bentoSpend === 'POINTS'
+        ? PbBentoSpend.POINTS
+        : PbBentoSpend.UNSPECIFIED,
+  useClaimDiscount: p.useClaimDiscount ?? false,
 });

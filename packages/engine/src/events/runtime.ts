@@ -7,36 +7,16 @@ import type {
   ActiveEvent,
   CharterContract,
   EventScheduleEntry,
+  LuckyContract,
 } from '../types/events-state';
-import { drawOne } from '../deck';
+import { refillMarket } from '../deck';
 import { addCardToHand, withPlayer } from '../reducers/common';
-import { playerOwnEdges } from './effects';
 import { citiesConnected } from '../graph/connectivity';
+import { longestTrail } from '../graph/longestTrail';
+import { playerOwnEdges } from './effects';
+import { drawEventCard, applyEventRefill } from './draw';
 
-/**
- * Round tick for the random-events feature. Runs ONCE per round boundary (an `endTurn` order wrap),
- * and ONLY when `state.events` exists.
- *
- * roundIndex ownership: the CALLER (`endTurn`) increments `state.events.roundIndex` BEFORE calling
- * `tickRound`, so on entry `roundIndex` already holds the round about to be played. `tickRound` reads
- * that value and never mutates it.
- *
- * Three phases, emitted in this order (matching the endTurn batch contract):
- *   a. END      — expire actives / charters / the free-station window; typhoon routes still unclaimed
- *                 at expiry roll into `reopenBonus`. Emits EVENT_ENDED per ended active.
- *   b. START    — begin every schedule entry whose startRound === roundIndex, applying its instant
- *                 state transition (gala blind draws + free-station flag, hotspot bump, charter open
- *                 with its at-open award check, active window).
- *                 A surprise (non-telegraphed) entry is suppressed if the game is in quiet-endgame.
- *                 Emits EVENT_STARTED (+ any gala draw events) per started entry.
- *   c. ANNOUNCE — telegraph the next entry one round early (startRound === roundIndex + 1). Suppressed
- *                 if quiet-endgame; otherwise emits EVENT_ANNOUNCED. nextIdx is NOT advanced for an
- *                 announced entry — it stays put and is picked up by START next round (the announce
- *                 condition can only be true one round before start, so it is never re-announced).
- *
- * M1 lands only the schedule bookkeeping + these notifications; the rule EFFECTS (closures,
- * surcharges, bonus awards, zero-cost stations) arrive in M2/M3.
- */
+/** Advance the random-event timeline at a round boundary. */
 export function tickRound(
   board: Board,
   state: GameState,
@@ -49,9 +29,10 @@ export function tickRound(
   let ev: EventsState = ev0;
   let next: GameState = state;
 
-  // ── (a) END ──
+  // ── END / per-round movement ──
   const stillActive: ActiveEvent[] = [];
-  let reopenBonus = [...ev.reopenBonus];
+  const reopenBonus = [...ev.reopenBonus];
+  let repairedRouteIds = [...ev.repairedRouteIds];
   for (const act of ev.active) {
     if (act.endsAfterRound < roundIndex) {
       events.push({ e: 'EVENT_ENDED', id: act.id, kind: act.kind, visibility: 'PUBLIC' });
@@ -60,38 +41,62 @@ export function tickRound(
           if (!next.ownership[rid as string] && !reopenBonus.includes(rid)) reopenBonus.push(rid);
         }
       }
+      if (act.kind === 'SLOPE_REPAIR_ORDER' && act.routeIds) {
+        const ended = new Set(act.routeIds as readonly string[]);
+        repairedRouteIds = repairedRouteIds.filter((rid) => !ended.has(rid as string));
+      }
+      continue;
+    }
+
+    if (act.kind === 'GODDESS_PROCESSION' && act.cityPath && act.cityPath.length > 0) {
+      const position = Math.min((act.position ?? 0) + 1, act.cityPath.length - 1);
+      const moved = { ...act, position };
+      stillActive.push(moved);
+      const cityId = act.cityPath[position];
+      if (cityId !== undefined) {
+        events.push({
+          e: 'EVENT_MARKER_MOVED',
+          kind: 'GODDESS_PROCESSION',
+          id: act.id,
+          cityId,
+          position,
+          visibility: 'PUBLIC',
+        });
+      }
     } else {
       stillActive.push(act);
     }
   }
-  let active = stillActive;
+
   const charters: CharterContract[] = ev.charters.filter(
     (c) => c.wonBy !== null || c.expiresAfterRound >= roundIndex,
   );
   const freeStationExpired = ev.freeStation !== undefined && ev.freeStation.untilRound < roundIndex;
+  ev = { ...ev, active: stillActive, reopenBonus, repairedRouteIds, charters };
+  if (freeStationExpired) ev = stripOptional(ev, 'freeStation');
+  // Card helpers update `next.events` (for the hidden boring-machine marker). Keep the live state
+  // synchronized with the END-pass result before any start-of-round effect can draw cards;
+  // otherwise a gala/harvest draw would start from `ev0` and could resurrect an expired flag or
+  // discard a freshly-created reopen bonus.
+  next = { ...next, events: ev };
 
-  // `...ev` already carries `freeStation` when present; drop the key entirely once expired
-  // (exactOptionalPropertyTypes / digest hygiene).
-  ev = { ...ev, active, reopenBonus, charters };
-  if (freeStationExpired) ev = stripFreeStation(ev);
-
-  // ── (b) START ──
+  // ── START ──
   let nextIdx = ev.nextIdx;
   const suppressed = [...ev.suppressed];
   const quiet = isQuietEndgame(next);
-  active = [...ev.active];
-  reopenBonus = [...ev.reopenBonus];
+  const active = [...ev.active];
   let hotspots: Record<string, number> = { ...ev.hotspots };
   const openCharters: CharterContract[] = [...ev.charters];
+  const luckyContracts: LuckyContract[] = [...ev.luckyContracts];
 
   while (
     nextIdx < ev.schedule.length &&
     (ev.schedule[nextIdx] as EventScheduleEntry).startRound === roundIndex
   ) {
+    // Custom schedules may contain more than one entry at a round. Persist any stateful changes
+    // made by the previous start before this entry invokes a shared card-draw/refill helper.
+    next = { ...next, events: ev };
     const entry = ev.schedule[nextIdx] as EventScheduleEntry;
-    // Surprise (non-telegraphed) entries are quiet-endgame checked here; telegraphed ones were
-    // already checked (and either announced or suppressed) at announce time, so once they reach
-    // START they always begin.
     if (!entry.telegraphed && quiet) {
       suppressed.push(entry.id);
       nextIdx++;
@@ -108,104 +113,214 @@ export function tickRound(
       ...(entry.region !== undefined ? { region: entry.region } : {}),
       ...(entry.cityId !== undefined ? { cityId: entry.cityId } : {}),
       ...(entry.charter ? { charter: entry.charter } : {}),
+      ...(entry.cityPath ? { cityPath: entry.cityPath } : {}),
+      ...(entry.pair ? { pair: entry.pair } : {}),
       visibility: 'PUBLIC',
     });
 
-    // Instant state transitions.
     if (entry.kind === 'RAILWAY_GALA') {
-      // Every player, in turn order, draws one blind card via the shared deck helper — emitting the
-      // same CARD_DRAWN_BLIND (+ DECK_RESHUFFLED) shapes the draw reducers produce.
       for (const pid of next.turnOrder) {
-        const d = drawOne(next.deck, next.discard, next.rng);
-        if (d.card === null) break; // draw pool fully exhausted — stop dealing.
-        if (d.reshuffled) events.push({ e: 'DECK_RESHUFFLED', visibility: 'PUBLIC' });
-        next = { ...next, deck: d.deck, discard: d.discard, rng: d.rng };
-        next = addCardToHand(next, pid as PlayerId, d.card);
+        const draw = drawEventCard(next);
+        next = draw.state;
+        if (next.events) ev = next.events;
+        events.push(...draw.events);
+        if (draw.card === null) break;
+        next = addCardToHand(next, pid as PlayerId, draw.card);
         events.push({
           e: 'CARD_DRAWN_BLIND',
           player: pid as PlayerId,
-          card: d.card,
+          card: draw.card,
           visibility: { private: pid as PlayerId },
         });
       }
-    } else if (entry.kind === 'VIRAL_HOTSPOT') {
-      if (entry.cityId !== undefined) {
-        const key = entry.cityId as string;
-        hotspots = { ...hotspots, [key]: Math.min(2, (hotspots[key] ?? 0) + 1) };
-      }
-    } else if (entry.kind === 'CHARTER_SPECIAL') {
-      if (entry.charter) {
-        const contract: CharterContract = {
-          id: entry.id,
-          a: entry.charter.a,
-          b: entry.charter.b,
-          points: entry.charter.points,
-          expiresAfterRound: roundIndex + entry.durationRounds - 1,
-          wonBy: null,
+      ev = { ...ev, freeStation: { untilRound: roundIndex } };
+    } else if (entry.kind === 'VIRAL_HOTSPOT' && entry.cityId !== undefined) {
+      const key = entry.cityId as string;
+      hotspots = { ...hotspots, [key]: Math.min(2, (hotspots[key] ?? 0) + 1) };
+    } else if (entry.kind === 'CHARTER_SPECIAL' && entry.charter) {
+      const contract: CharterContract = {
+        id: entry.id,
+        a: entry.charter.a,
+        b: entry.charter.b,
+        points: entry.charter.points,
+        expiresAfterRound: roundIndex + entry.durationRounds - 1,
+        wonBy: null,
+      };
+      const winner = firstConnectedPlayer(board, next, contract.a as string, contract.b as string);
+      if (winner !== null) {
+        next = awardRoutePoints(next, winner, contract.points);
+        openCharters.push({ ...contract, wonBy: winner });
+        events.push({
+          e: 'EVENT_BONUS',
+          kind: 'CHARTER_SPECIAL',
+          reason: 'CHARTER',
+          player: winner,
+          points: contract.points,
+          visibility: 'PUBLIC',
+        });
+      } else openCharters.push(contract);
+    } else if (entry.kind === 'LANTERN_HOST_CITY' && entry.cityId !== undefined) {
+      ev = {
+        ...ev,
+        lanternHost: { eventId: entry.id, cityId: entry.cityId, points: 6 },
+      };
+    } else if (entry.kind === 'ROLLING_STOCK_ALLOCATION_DAY') {
+      const resumeOrderIndex = next.turn.orderIndex;
+      const order = [...next.turnOrder].sort((a, b) => {
+        const pa = next.players[a as string]?.routePoints ?? 0;
+        const pb = next.players[b as string]?.routePoints ?? 0;
+        if (pa !== pb) return pa - pb;
+        return next.turnOrder.indexOf(b) - next.turnOrder.indexOf(a);
+      });
+      if (order.length > 0) {
+        ev = {
+          ...ev,
+          eventDraft: { eventId: entry.id, order, pickIndex: 0, resumeOrderIndex, picks: [] },
         };
-        // At-open award: the FIRST player in turn order whose OWN network already connects a↔b
-        // (no station borrowing) wins the charter immediately — emitted right after its
-        // EVENT_STARTED. Ties break to the earlier seat (turn-order iteration).
-        let winner: PlayerId | null = null;
-        for (const pid of next.turnOrder) {
-          const edges = playerOwnEdges(board, next, pid as PlayerId);
-          if (citiesConnected(edges, contract.a as string, contract.b as string)) {
-            winner = pid as PlayerId;
-            break;
-          }
-        }
-        if (winner !== null) {
-          const wonBy = winner;
-          next = withPlayer(next, wonBy, (p) => ({
-            ...p,
-            routePoints: p.routePoints + contract.points,
-          }));
-          openCharters.push({ ...contract, wonBy });
+        next = {
+          ...next,
+          turn: {
+            orderIndex: next.turnOrder.indexOf(order[0] as PlayerId),
+            phase: 'EVENT_DRAFT',
+            cardsDrawnThisTurn: 0,
+          },
+        };
+      }
+    } else if (entry.kind === 'BREAKTHROUGH_BORING_MACHINE') {
+      if (next.deck.length > 0) {
+        const bottomThird = Math.max(1, Math.floor(next.deck.length / 3));
+        const indexFromBottom = (entry.markerSelector ?? 0) % bottomThird;
+        ev = {
+          ...ev,
+          boringMachine: {
+            eventId: entry.id,
+            remainingDraws: next.deck.length - indexFromBottom,
+          },
+        };
+      } else {
+        events.push({
+          e: 'EVENT_ENDED',
+          id: entry.id,
+          kind: entry.kind,
+          visibility: 'PUBLIC',
+        });
+      }
+    } else if (entry.kind === 'INTERIM_OPERATIONS_REPORT') {
+      const trailByPlayer = new Map<PlayerId, number>();
+      let maxTrail = 0;
+      for (const pid of next.turnOrder) {
+        const edges = ownedTrailEdges(board, next, pid);
+        const length = longestTrail(edges);
+        trailByPlayer.set(pid, length);
+        maxTrail = Math.max(maxTrail, length);
+      }
+      for (const pid of next.turnOrder) {
+        const claimed = ownedRouteCount(next, pid);
+        const routeBonus = Math.floor(claimed / 3);
+        if (routeBonus > 0) {
+          next = awardRoutePoints(next, pid, routeBonus);
           events.push({
             e: 'EVENT_BONUS',
-            kind: 'CHARTER_SPECIAL',
-            reason: 'CHARTER',
-            player: wonBy,
-            points: contract.points,
+            kind: entry.kind,
+            reason: 'INTERIM_ROUTES',
+            player: pid,
+            points: routeBonus,
             visibility: 'PUBLIC',
           });
-        } else {
-          openCharters.push(contract);
+        }
+        if (maxTrail > 0 && trailByPlayer.get(pid) === maxTrail) {
+          next = awardRoutePoints(next, pid, 3);
+          events.push({
+            e: 'EVENT_BONUS',
+            kind: entry.kind,
+            reason: 'INTERIM_TRAIL',
+            player: pid,
+            points: 3,
+            visibility: 'PUBLIC',
+          });
         }
       }
+    } else if (entry.kind === 'LUCKY_TICKET_STUB' && entry.pair) {
+      const contract: LuckyContract = {
+        id: entry.id,
+        a: entry.pair.a,
+        b: entry.pair.b,
+        points: 5,
+        wonBy: null,
+      };
+      const winner = firstConnectedPlayer(board, next, contract.a as string, contract.b as string);
+      if (winner !== null) {
+        next = awardRoutePoints(next, winner, contract.points);
+        luckyContracts.push({ ...contract, wonBy: winner });
+        events.push({
+          e: 'EVENT_BONUS',
+          kind: entry.kind,
+          reason: 'LUCKY',
+          player: winner,
+          points: contract.points,
+          visibility: 'PUBLIC',
+        });
+      } else luckyContracts.push(contract);
     }
 
-    // Windowed kinds carry an ActiveEvent for their whole duration. HOTSPOT (permanent, lives in
-    // `hotspots`) and CHARTER (lives in `charters`) are NOT ActiveEvents.
-    if (entry.kind !== 'VIRAL_HOTSPOT' && entry.kind !== 'CHARTER_SPECIAL') {
+    if (entry.kind === 'SLOPE_REPAIR_ORDER' && entry.routeIds) {
+      const targets = new Set(entry.routeIds as readonly string[]);
+      repairedRouteIds = repairedRouteIds.filter((rid) => !targets.has(rid as string));
+    }
+
+    if (entry.durationRounds > 0) {
       active.push({
         id: entry.id,
         kind: entry.kind,
         endsAfterRound: roundIndex + entry.durationRounds - 1,
         ...(entry.routeIds ? { routeIds: entry.routeIds } : {}),
         ...(entry.region !== undefined ? { region: entry.region } : {}),
+        ...(entry.cityId !== undefined ? { cityId: entry.cityId } : {}),
+        ...(entry.cityPath ? { cityPath: entry.cityPath, position: 0 } : {}),
+        ...(entry.pair ? { pair: entry.pair } : {}),
       });
     }
 
-    // Gala flags a zero-cost-station window for EXACTLY its own round (the claim RULE lives in
-    // reduce.ts). `untilRound: roundIndex` matches the gala ActiveEvent's `endsAfterRound`
-    // (= roundIndex for a 1-round duration); the END-phase drop rule (`untilRound < roundIndex`)
-    // then clears it at the next boundary.
-    if (entry.kind === 'RAILWAY_GALA') {
-      ev = { ...ev, freeStation: { untilRound: roundIndex } };
+    if (entry.kind === 'HARVEST_FESTIVAL_EXPRESS') {
+      next = { ...next, events: ev };
+      const refill = refillMarket(
+        next.market,
+        next.deck,
+        next.discard,
+        next.rng,
+        next.ruleParams,
+        true,
+      );
+      const applied = applyEventRefill(next, refill);
+      next = applied.state;
+      if (next.events) ev = next.events;
+      events.push(...applied.events);
+      if (refill.recycled) {
+        events.push({ e: 'MARKET_REFILLED', market: refill.market, visibility: 'PUBLIC' });
+      }
     }
 
     nextIdx++;
   }
 
-  ev = { ...ev, nextIdx, suppressed, active, reopenBonus, hotspots, charters: openCharters };
+  ev = {
+    ...ev,
+    nextIdx,
+    suppressed,
+    active,
+    hotspots,
+    charters: openCharters,
+    luckyContracts,
+    repairedRouteIds,
+  };
+  next = { ...next, events: ev };
 
-  // ── (c) ANNOUNCE ──
+  // ── ANNOUNCE ──
   const forecast = ev.schedule[nextIdx] as EventScheduleEntry | undefined;
   if (forecast && forecast.telegraphed && forecast.startRound === roundIndex + 1) {
     if (isQuietEndgame(next)) {
-      // Suppress a surprise-of-the-future we will never surface: skip it entirely.
       ev = { ...ev, suppressed: [...ev.suppressed, forecast.id], nextIdx: ev.nextIdx + 1 };
+      next = { ...next, events: ev };
     } else {
       events.push({
         e: 'EVENT_ANNOUNCED',
@@ -216,19 +331,16 @@ export function tickRound(
         ...(forecast.routeIds ? { routeIds: forecast.routeIds } : {}),
         ...(forecast.region !== undefined ? { region: forecast.region } : {}),
         ...(forecast.cityId !== undefined ? { cityId: forecast.cityId } : {}),
+        ...(forecast.cityPath ? { cityPath: forecast.cityPath } : {}),
+        ...(forecast.pair ? { pair: forecast.pair } : {}),
         visibility: 'PUBLIC',
       });
     }
   }
 
-  next = { ...next, events: ev };
   return { state: next, events };
 }
 
-/**
- * Quiet-endgame predicate (pure): true once the game is winding down, so no fresh surprise event is
- * introduced. `endgame.triggered` OR the lowest train-car count is within 8 of the endgame threshold.
- */
 export function isQuietEndgame(state: GameState): boolean {
   if (state.endgame.triggered) return true;
   let min = Infinity;
@@ -236,8 +348,44 @@ export function isQuietEndgame(state: GameState): boolean {
   return min <= state.ruleParams.endgameTrainThreshold + 8;
 }
 
-/** Return a copy of the events state with the `freeStation` key omitted entirely. */
-function stripFreeStation(ev: EventsState): EventsState {
-  const { freeStation: _freeStation, ...rest } = ev;
-  return rest;
+function firstConnectedPlayer(
+  board: Board,
+  state: GameState,
+  a: string,
+  b: string,
+): PlayerId | null {
+  for (const pid of state.turnOrder) {
+    if (citiesConnected(playerOwnEdges(board, state, pid), a, b)) return pid;
+  }
+  return null;
+}
+
+function awardRoutePoints(state: GameState, player: PlayerId, points: number): GameState {
+  return withPlayer(state, player, (p) => ({ ...p, routePoints: p.routePoints + points }));
+}
+
+function ownedRouteCount(state: GameState, player: PlayerId): number {
+  let count = 0;
+  for (const cell of Object.values(state.ownership)) {
+    if ('owner' in cell && cell.owner === player) count++;
+  }
+  return count;
+}
+
+function ownedTrailEdges(board: Board, state: GameState, player: PlayerId) {
+  const edges: { u: string; v: string; w: number }[] = [];
+  for (const [routeId, cell] of Object.entries(state.ownership)) {
+    if (!('owner' in cell) || cell.owner !== player) continue;
+    const route = board.routeById.get(routeId);
+    if (route) edges.push({ u: route.a as string, v: route.b as string, w: route.length });
+  }
+  return edges;
+}
+
+function stripOptional<K extends 'freeStation'>(ev: EventsState, key: K): EventsState {
+  if (key === 'freeStation') {
+    const { freeStation: _omit, ...rest } = ev;
+    return rest;
+  }
+  return ev;
 }

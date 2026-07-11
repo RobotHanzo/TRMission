@@ -40,7 +40,7 @@ export function validateRoutePayment(
   extraCards = 0,
 ): Result<PaymentPlan, RuleViolation> {
   const { color, colorCount, locomotives } = payment;
-  const requiredCards = route.length + extraCards;
+  const requiredCards = Math.max(0, route.length + extraCards);
   if (colorCount < 0 || locomotives < 0) {
     return err(violation('BAD_PAYMENT_LENGTH', 'negative card counts'));
   }

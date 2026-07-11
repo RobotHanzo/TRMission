@@ -34,7 +34,15 @@ export type RuleViolationCode =
   | 'NOTHING_TO_DRAW'
   | 'ROUTE_CLOSED_BY_EVENT'
   | 'EVENT_CLAIMS_SUSPENDED'
-  | 'EVENT_STATIONS_SUSPENDED';
+  | 'EVENT_STATIONS_SUSPENDED'
+  | 'EVENT_FACEUP_LOCO_BLOCKED'
+  | 'EVENT_REPAIR_UNAVAILABLE'
+  | 'EVENT_REPAIR_PAYMENT_INVALID'
+  | 'EVENT_NIGHT_MARKET_UNAVAILABLE'
+  | 'EVENT_LANTERN_RELOCATION_INVALID'
+  | 'EVENT_DRAFT_CHOICE_INVALID'
+  | 'EVENT_HIVE_UNAVAILABLE'
+  | 'EVENT_RESOURCE_UNAVAILABLE';
 
 export interface RuleViolation {
   readonly code: RuleViolationCode;
@@ -80,6 +88,14 @@ export const ERROR_CATALOG: Readonly<Record<RuleViolationCode, ErrorMeta>> = Obj
   ROUTE_CLOSED_BY_EVENT: { messageKey: 'errors:routeClosedByEvent' },
   EVENT_CLAIMS_SUSPENDED: { messageKey: 'errors:eventClaimsSuspended' },
   EVENT_STATIONS_SUSPENDED: { messageKey: 'errors:eventStationsSuspended' },
+  EVENT_FACEUP_LOCO_BLOCKED: { messageKey: 'errors:eventFaceupLocoBlocked' },
+  EVENT_REPAIR_UNAVAILABLE: { messageKey: 'errors:eventRepairUnavailable' },
+  EVENT_REPAIR_PAYMENT_INVALID: { messageKey: 'errors:eventRepairPaymentInvalid' },
+  EVENT_NIGHT_MARKET_UNAVAILABLE: { messageKey: 'errors:eventNightMarketUnavailable' },
+  EVENT_LANTERN_RELOCATION_INVALID: { messageKey: 'errors:eventLanternRelocationInvalid' },
+  EVENT_DRAFT_CHOICE_INVALID: { messageKey: 'errors:eventDraftChoiceInvalid' },
+  EVENT_HIVE_UNAVAILABLE: { messageKey: 'errors:eventHiveUnavailable' },
+  EVENT_RESOURCE_UNAVAILABLE: { messageKey: 'errors:eventResourceUnavailable' },
 });
 
 export function violation(

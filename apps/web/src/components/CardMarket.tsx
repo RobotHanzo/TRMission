@@ -11,9 +11,16 @@ interface Props {
   canDraw: boolean;
   onDrawFaceUp(slot: number): void;
   onDrawBlind(): void;
+  blockFaceupLocomotives?: boolean;
 }
 
-export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Props) {
+export function CardMarket({
+  snapshot,
+  canDraw,
+  onDrawFaceUp,
+  onDrawBlind,
+  blockFaceupLocomotives = false,
+}: Props) {
   const { t } = useTranslation();
   const marketFlips = useAnimationsStore((s) => s.marketFlips);
   const clearMarketFlip = useAnimationsStore((s) => s.clearMarketFlip);
@@ -57,7 +64,7 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
               data-anim="market-slot"
               data-slot={slot}
               // A face-up Locomotive may not be taken as the second draw (engine rule).
-              disabled={!canDraw || empty || (isSecondDraw && isLoco)}
+              disabled={!canDraw || empty || (isLoco && (isSecondDraw || blockFaceupLocomotives))}
               onClick={() => onDrawFaceUp(slot)}
               onAnimationEnd={() => clearMarketFlip(slot)}
               style={

@@ -1,11 +1,12 @@
-import { digest } from '@trm/shared';
-import type { GameContent, MapMeta, MapGeography } from './types';
+import { asCityId, digest } from '@trm/shared';
+import type { GameContent, MapMeta, MapGeography, AuspiciousPair } from './types';
 import { CITIES } from './cities';
 import { ROUTES } from './routes';
 import { TICKETS } from './tickets';
 import { taiwanForkGeography } from './taiwan-geography';
 import { CONTENT_V2 } from './archive/v2';
 import { CONTENT_V3 } from './archive/v3';
+import { CONTENT_V4 } from './archive/v4';
 
 export * from './types';
 export * from './cities';
@@ -21,10 +22,15 @@ export * from './render-tokens';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',
-  version: 4,
+  version: 5,
   nameZh: '台灣本島與離島',
   nameEn: 'Taiwan & Outlying Islands',
 };
+
+export const AUSPICIOUS_PAIRS: readonly AuspiciousPair[] = [
+  { id: 'taipei-kaohsiung', a: asCityId('taipei'), b: asCityId('kaohsiung') },
+  { id: 'hualien-taitung', a: asCityId('hualien'), b: asCityId('taitung') },
+];
 
 /** The canonical authored content — the single source of truth (ADR A13). */
 export const TAIWAN_CONTENT: GameContent = {
@@ -32,6 +38,7 @@ export const TAIWAN_CONTENT: GameContent = {
   cities: CITIES,
   routes: ROUTES,
   tickets: TICKETS,
+  auspiciousPairs: AUSPICIOUS_PAIRS,
 };
 
 /**
@@ -49,6 +56,7 @@ export function hashContent(content: GameContent): string {
     // identically (packages/map-data/test/versions.spec.ts pins this byte-for-byte).
     ...(content.geography !== undefined ? { geography: content.geography } : {}),
     ...(content.rules !== undefined ? { rules: content.rules } : {}),
+    ...(content.auspiciousPairs !== undefined ? { auspiciousPairs: content.auspiciousPairs } : {}),
   });
 }
 
@@ -63,7 +71,7 @@ export const CONTENT_HASH: string = hashContent(TAIWAN_CONTENT);
  * content change therefore never breaks an in-flight game's replay.
  */
 export const CONTENT_REGISTRY: ReadonlyMap<string, GameContent> = new Map(
-  [CONTENT_V2, CONTENT_V3, TAIWAN_CONTENT].map((c) => [hashContent(c), c] as const),
+  [CONTENT_V2, CONTENT_V3, CONTENT_V4, TAIWAN_CONTENT].map((c) => [hashContent(c), c] as const),
 );
 
 /** Resolve the exact content a game was created against, or undefined if its version is unknown. */

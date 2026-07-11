@@ -1,4 +1,4 @@
-import type { CardColor, TrainColor, PlayerId, RouteId } from '@trm/shared';
+import type { CardColor, TrainColor, PlayerId, RouteId, CityId } from '@trm/shared';
 import { CARD_COLORS } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import type { Board } from '../src/board';
@@ -23,7 +23,10 @@ export function emptyEvents(mode: Mode = 'light'): EventsState {
     active: [],
     hotspots: {},
     charters: [],
+    luckyContracts: [],
     reopenBonus: [],
+    repairedRouteIds: [],
+    resources: {},
   };
 }
 
@@ -69,6 +72,9 @@ export function activeEvent(
     endsAfterRound?: number;
     routeIds?: readonly RouteId[];
     region?: string;
+    cityId?: CityId;
+    cityPath?: readonly CityId[];
+    position?: number;
   } = {},
 ): ActiveEvent {
   return {
@@ -77,6 +83,9 @@ export function activeEvent(
     endsAfterRound: opts.endsAfterRound ?? 99,
     ...(opts.routeIds ? { routeIds: opts.routeIds } : {}),
     ...(opts.region !== undefined ? { region: opts.region } : {}),
+    ...(opts.cityId !== undefined ? { cityId: opts.cityId } : {}),
+    ...(opts.cityPath ? { cityPath: opts.cityPath } : {}),
+    ...(opts.position !== undefined ? { position: opts.position } : {}),
   };
 }
 
@@ -109,6 +118,7 @@ export function totalCards(state: GameState): number {
   for (const c of CARD_COLORS) n += state.discard[c];
   for (const slot of state.market) if (slot !== null) n += 1;
   if (state.pendingTunnel) n += state.pendingTunnel.revealed.length;
+  if (state.events?.pendingHiveDraw) n += state.events.pendingHiveDraw.revealed.length;
   return n;
 }
 

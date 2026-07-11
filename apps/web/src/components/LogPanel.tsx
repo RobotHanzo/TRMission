@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowDownToLine } from 'lucide-react';
-import type { GameSnapshot } from '@trm/proto';
+import { EventPerk, type GameSnapshot } from '@trm/proto';
 import { useLogStore } from '../store/log';
 import { useGameStore } from '../store/game';
 import { useUi } from '../store/ui';
@@ -120,8 +120,29 @@ export function LogPanel() {
           city: e.data.cityId ? cityName(String(e.data.cityId), locale) : '',
           route: e.data.routeId ? routeName(String(e.data.routeId)) : '',
         });
+      case 'eventMarkerMoved':
+        return t('log.eventMarkerMoved', {
+          event: t(eventNameKey(String(e.data.eventKind))),
+          city: cityName(String(e.data.cityId), locale),
+        });
+      case 'eventNightMarketSwapped':
+        return t('log.eventNightMarketSwapped', { name });
+      case 'eventPerkChosen': {
+        const perk = Number(e.data.perk);
+        const perkName =
+          perk === EventPerk.CLAIM_DISCOUNT
+            ? t('events.perkClaimDiscount')
+            : perk === EventPerk.DRAW_TWO
+              ? t('events.perkDrawTwo')
+              : t('events.perkRepairPermit');
+        return t('log.eventPerkChosen', { name, perk: perkName });
+      }
+      case 'eventHiveResolved':
+        return e.data.busted
+          ? t('log.eventHiveBusted', { name })
+          : t('log.eventHiveKept', { name, count: Number(e.data.keptCount) });
       case 'marketRecycled':
-        return t('log.marketRecycled');
+        return t(`log.marketRecycled.${String(e.data.reason || 'THREE_LOCOS')}`);
       case 'ticketCompleted': {
         const label = ticketLabel(String(e.data.ticketId), locale);
         return label

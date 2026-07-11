@@ -6,9 +6,11 @@ import {
   CardColor as PbCardColor,
   Phase as PbPhase,
   RejectionCode as PbRejectionCode,
+  BentoSpend as PbBentoSpend,
+  EventPerk as PbEventPerk,
 } from '@trm/proto';
 import type { CardColor, TrainColor, RuleViolationCode } from '@trm/shared';
-import type { Phase } from '@trm/engine';
+import type { Phase, EventPerk } from '@trm/engine';
 
 const CARD_TO_PB: Record<CardColor, PbCardColor> = {
   RED: PbCardColor.RED,
@@ -57,6 +59,9 @@ const PHASE_TO_PB: Record<Phase, PbPhase> = {
   DRAWING_CARDS: PbPhase.DRAWING_CARDS,
   TICKET_SELECTION: PbPhase.TICKET_SELECTION,
   TUNNEL_PENDING: PbPhase.TUNNEL_PENDING,
+  LANTERN_RELOCATION: PbPhase.LANTERN_RELOCATION,
+  EVENT_DRAFT: PbPhase.EVENT_DRAFT,
+  HIVE_DRAW: PbPhase.HIVE_DRAW,
   GAME_OVER: PbPhase.GAME_OVER,
 };
 
@@ -92,6 +97,40 @@ const REJECTION_TO_PB: Record<RuleViolationCode, PbRejectionCode> = {
   ROUTE_CLOSED_BY_EVENT: PbRejectionCode.ROUTE_CLOSED_BY_EVENT,
   EVENT_CLAIMS_SUSPENDED: PbRejectionCode.EVENT_CLAIMS_SUSPENDED,
   EVENT_STATIONS_SUSPENDED: PbRejectionCode.EVENT_STATIONS_SUSPENDED,
+  EVENT_FACEUP_LOCO_BLOCKED: PbRejectionCode.EVENT_FACEUP_LOCO_BLOCKED,
+  EVENT_REPAIR_UNAVAILABLE: PbRejectionCode.EVENT_REPAIR_UNAVAILABLE,
+  EVENT_REPAIR_PAYMENT_INVALID: PbRejectionCode.EVENT_REPAIR_PAYMENT_INVALID,
+  EVENT_NIGHT_MARKET_UNAVAILABLE: PbRejectionCode.EVENT_NIGHT_MARKET_UNAVAILABLE,
+  EVENT_LANTERN_RELOCATION_INVALID: PbRejectionCode.EVENT_LANTERN_RELOCATION_INVALID,
+  EVENT_DRAFT_CHOICE_INVALID: PbRejectionCode.EVENT_DRAFT_CHOICE_INVALID,
+  EVENT_HIVE_UNAVAILABLE: PbRejectionCode.EVENT_HIVE_UNAVAILABLE,
+  EVENT_RESOURCE_UNAVAILABLE: PbRejectionCode.EVENT_RESOURCE_UNAVAILABLE,
 };
 
+export const pbToCardColorOrNull = (c: PbCardColor): CardColor | null => PB_TO_CARD[c] ?? null;
+
 export const rejectionToPb = (code: RuleViolationCode): PbRejectionCode => REJECTION_TO_PB[code];
+
+export const pbToBentoSpend = (value: PbBentoSpend): 'WILD' | 'POINTS' | undefined =>
+  value === PbBentoSpend.WILD ? 'WILD' : value === PbBentoSpend.POINTS ? 'POINTS' : undefined;
+
+const PERK_TO_PB: Record<EventPerk, PbEventPerk> = {
+  CLAIM_DISCOUNT: PbEventPerk.CLAIM_DISCOUNT,
+  DRAW_TWO: PbEventPerk.DRAW_TWO,
+  REPAIR_PERMIT: PbEventPerk.REPAIR_PERMIT,
+};
+
+export const eventPerkToPb = (perk: EventPerk): PbEventPerk => PERK_TO_PB[perk];
+
+export const pbToEventPerk = (perk: PbEventPerk): EventPerk | null => {
+  switch (perk) {
+    case PbEventPerk.CLAIM_DISCOUNT:
+      return 'CLAIM_DISCOUNT';
+    case PbEventPerk.DRAW_TWO:
+      return 'DRAW_TWO';
+    case PbEventPerk.REPAIR_PERMIT:
+      return 'REPAIR_PERMIT';
+    default:
+      return null;
+  }
+};

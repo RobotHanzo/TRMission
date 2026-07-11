@@ -5,14 +5,16 @@
 // No network I/O. Learner commands are mapped through the codec's `commandToAction`, so they travel
 // the identical command→action path as the wire.
 import { create, type MessageInitShape } from '@bufbuild/protobuf';
-import { ClientEnvelopeSchema } from '@trm/proto';
+import { ClientEnvelopeSchema, EventPerk as PbEventPerk } from '@trm/proto';
 import type { GameSnapshot, GameEvent as PbGameEvent } from '@trm/proto';
 import { initGame, reduce, redactFor } from '@trm/engine';
 import type { Action, Board, GameConfig, GameState, GameEvent, ReduceOutput } from '@trm/engine';
 import type { PlayerId } from '@trm/shared';
-import { viewToSnapshot, eventToProto, commandToAction } from '@trm/codec';
+import { viewToSnapshot, eventToProto, commandToAction, cardToPb } from '@trm/codec';
 import type { PaymentInit, CameraViewInit } from './socket';
 import type { GameCommands } from './commands';
+import type { EventPerkChoice } from './commands';
+import type { CardColor } from '@trm/shared';
 import type { RejectionInfo } from '../store/game';
 
 type CommandInit = NonNullable<MessageInitShape<typeof ClientEnvelopeSchema>['command']>;
@@ -114,6 +116,33 @@ export class SandboxSocket implements GameCommands {
   }
   resolveTunnel(commit: boolean, extra?: PaymentInit): void {
     this.send({ case: 'resolveTunnel', value: commit ? { commit, extra } : { commit } });
+  }
+  relocateLanternHost(cityId: string): void {
+    this.send({ case: 'relocateLanternHost', value: { cityId } });
+  }
+  repairRoute(routeId: string, payment: PaymentInit): void {
+    this.send({ case: 'repairRoute', value: { routeId, payment } });
+  }
+  nightMarketSwap(giveColor: CardColor, slot: number): void {
+    this.send({ case: 'nightMarketSwap', value: { giveColor: cardToPb(giveColor), slot } });
+  }
+  chooseEventPerk(perk: EventPerkChoice): void {
+    const value =
+      perk === 'CLAIM_DISCOUNT'
+        ? PbEventPerk.CLAIM_DISCOUNT
+        : perk === 'DRAW_TWO'
+          ? PbEventPerk.DRAW_TWO
+          : PbEventPerk.REPAIR_PERMIT;
+    this.send({ case: 'chooseEventPerk', value: { perk: value } });
+  }
+  startHiveDraw(): void {
+    this.send({ case: 'startHiveDraw', value: {} });
+  }
+  continueHiveDraw(): void {
+    this.send({ case: 'continueHiveDraw', value: {} });
+  }
+  stopHiveDraw(): void {
+    this.send({ case: 'stopHiveDraw', value: {} });
   }
   pass(): void {
     this.send({ case: 'pass', value: {} });

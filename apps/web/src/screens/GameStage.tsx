@@ -4,21 +4,24 @@
 // plus the global display prefs; an optional `overlay` slot carries the tutorial coachmark/spotlight.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Phase, type GameSnapshot } from '@trm/proto';
+import { CardColor as PbCardColor, Phase, type GameSnapshot } from '@trm/proto';
+import { CARD_COLORS, type CardColor } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import { CONTENT_HASH } from '@trm/map-data';
 import { track } from '../lib/analytics';
 import type { RoomMember } from '../net/rest';
 import { useGameStore, type RejectionInfo } from '../store/game';
 import { useUi } from '../store/ui';
-import { routeById, ticketById } from '../game/content';
+import { routeById, ticketById, cityById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
+import { pbToCard } from '../game/cards';
 import { isMyTurn } from '../game/view';
 import {
   handFromCounts,
   handAfterPayment,
   enumerateRoutePayments,
   enumerateStationPayments,
+  enumerateRepairPayments,
   routeShortfall,
   stationShortfall,
   paymentToProto,
@@ -26,7 +29,12 @@ import {
 } from '../game/payments';
 import { enumerateTunnelExtra } from '../game/tunnel';
 import { isChatRejectionKey } from '../game/chatErrors';
-import { skyLanternSurcharge, freeStationAvailable, eventRejectionHintKey } from '../game/events';
+import {
+  skyLanternSurcharge,
+  freeStationAvailable,
+  eventRejectionHintKey,
+  hasActiveEvent,
+} from '../game/events';
 import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../game/boardView';
 import { gateFlags, type ActionGate } from '../features/tutorial/types';
@@ -34,6 +42,7 @@ import { Board } from '../components/Board';
 import { EventsPanel } from '../components/EventsPanel';
 import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
+import { TrainCarCard } from '../components/TrainCarCard';
 import { PlayerTrackers } from '../components/PlayerTrackers';
 import { TicketPanel } from '../components/TicketPanel';
 import { PaymentModal } from '../components/PaymentModal';
@@ -51,7 +60,8 @@ import '../styles/animations.css';
 
 type Claim =
   | { kind: 'route'; route: RouteDef; payments: Payment[] }
-  | { kind: 'station'; cityId: string; payments: Payment[] };
+  | { kind: 'station'; cityId: string; payments: Payment[] }
+  | { kind: 'repair'; routeId: string; payments: Payment[] };
 
 /** Phone bottom-dock panels: the rail's sections plus the log/chat, one visible at a time. */
 type DockTab = 'hand' | 'draw' | 'missions' | 'events' | 'players' | 'comms';
@@ -117,11 +127,13 @@ export function GameStage({
   // Tutorial: let the coachmark know a payment choice just opened (or closed), so it can redirect
   // its spotlight + copy to the dialog instead of the map target that opened it.
   useEffect(() => {
-    onPendingClaim?.(claim?.kind ?? null);
+    onPendingClaim?.(claim?.kind === 'repair' ? null : (claim?.kind ?? null));
   }, [claim, onPendingClaim]);
   // The base payment committed to a pending tunnel claim. Its cards stay in hand until the tunnel
   // resolves, so the surcharge must be enumerated against the hand minus this.
   const [tunnelBase, setTunnelBase] = useState<Payment | null>(null);
+  const [nightGive, setNightGive] = useState<CardColor>('RED');
+  const [nightSlot, setNightSlot] = useState(0);
   const pushNotification = useAnimationsStore((s) => s.pushNotification);
   // Tracks the last rejection object already turned into a chip, so the push effect below can
   // list its true dependencies (rejection, pushNotification, t) without re-pushing the same
@@ -249,6 +261,27 @@ export function GameStage({
   // Random-events payment mirrors — derived exclusively from the snapshot so the offered options
   // agree with the server's validation (sky-lantern +1-card surcharge; gala zero-cost station).
   const randomEvents = snapshot.randomEvents;
+  const allSeatsReserved = hasActiveEvent(randomEvents, 'ALL_SEATS_RESERVED');
+  const cityLabel = (id: string): string => {
+    const city = cityById.get(id);
+    if (!city) return id;
+    return locale === 'zh-Hant' ? city.nameZh : city.nameEn;
+  };
+  const slopeRoutes =
+    randomEvents?.active
+      .filter((event) => event.kind === 'SLOPE_REPAIR_ORDER')
+      .flatMap((event) => event.routeIds)
+      .filter(
+        (routeId) =>
+          randomEvents.closedRouteIds.includes(routeId) &&
+          !randomEvents.repairedRouteIds.includes(routeId),
+      ) ?? [];
+  const nightColors = CARD_COLORS.filter((color) => hand[color] > 0);
+  const nightSlots = snapshot.market.flatMap((card, slot) =>
+    card && !(allSeatsReserved && card === PbCardColor.LOCOMOTIVE) ? [slot] : [],
+  );
+  const selectedNightColor = nightColors.includes(nightGive) ? nightGive : nightColors[0];
+  const selectedNightSlot = nightSlots.includes(nightSlot) ? nightSlot : nightSlots[0];
   const pickRoute = (routeId: string) => {
     // Tutorial: while an await beat is active, only a CLAIM_ROUTE beat accepts a route click at
     // all, and — when it names a specific route — only THAT route. Everything else (a different
@@ -261,7 +294,11 @@ export function GameStage({
     const route = routeById.get(routeId);
     if (!route) return;
     const extra = skyLanternSurcharge(randomEvents, routeId);
-    const payments = enumerateRoutePayments(hand, route, extra);
+    const payments = enumerateRoutePayments(hand, route, extra, {
+      bentoTokens: myPub?.bentoTokens ?? 0,
+      claimDiscounts: myPub?.claimDiscounts ?? 0,
+      allSeatsReserved,
+    });
     if (payments.length) {
       setClaim({ kind: 'route', route, payments });
       return;
@@ -302,7 +339,13 @@ export function GameStage({
   };
   const confirmPayment = (p: Payment) => {
     if (!commands || !claim) return;
-    markFirstAction(claim.kind === 'route' ? 'claim_route' : 'build_station');
+    markFirstAction(
+      claim.kind === 'route'
+        ? 'claim_route'
+        : claim.kind === 'station'
+          ? 'build_station'
+          : 'repair_route',
+    );
     if (claim.kind === 'route') {
       if (claim.route.isTunnel) setTunnelBase(p);
       commands.claimRoute(claim.route.id as string, paymentToProto(p));
@@ -314,8 +357,10 @@ export function GameStage({
           map_id: snapshot.contentHash,
         });
       }
-    } else {
+    } else if (claim.kind === 'station') {
       commands.buildStation(claim.cityId, paymentToProto(p));
+    } else {
+      commands.repairRoute(claim.routeId, paymentToProto(p));
     }
     setClaim(null);
   };
@@ -350,6 +395,84 @@ export function GameStage({
         )
       : [];
 
+  const lanternPending = randomEvents?.lanternPendingRelocation;
+  const draft = randomEvents?.eventDraft;
+  const hive = randomEvents?.pendingHiveDraw;
+  const eventPhaseControls =
+    phase === Phase.LANTERN_RELOCATION && lanternPending ? (
+      <section
+        className="event-action-bar"
+        role="group"
+        aria-label={t('events.lanternRelocationRequired')}
+      >
+        <strong>{t('events.lanternRelocationRequired')}</strong>
+        {lanternPending.candidateCityIds.map((cityId) => (
+          <button
+            type="button"
+            key={cityId}
+            disabled={lanternPending.playerId !== me || !commands}
+            onClick={() => commands?.relocateLanternHost(cityId)}
+          >
+            {cityLabel(cityId)}
+          </button>
+        ))}
+      </section>
+    ) : phase === Phase.EVENT_DRAFT && draft ? (
+      <section
+        className="event-action-bar"
+        role="group"
+        aria-label={t('events.ROLLING_STOCK_ALLOCATION_DAY.name')}
+      >
+        <strong>{t('events.ROLLING_STOCK_ALLOCATION_DAY.name')}</strong>
+        {[
+          ['CLAIM_DISCOUNT', t('events.perkClaimDiscount'), t('events.perkClaimDiscountDesc')],
+          ['DRAW_TWO', t('events.perkDrawTwo'), t('events.perkDrawTwoDesc')],
+          ['REPAIR_PERMIT', t('events.perkRepairPermit'), t('events.perkRepairPermitDesc')],
+        ].map(([perk, label, description]) => (
+          <button
+            type="button"
+            key={perk}
+            title={description}
+            disabled={draft.currentPlayerId !== me || !commands}
+            onClick={() =>
+              commands?.chooseEventPerk(perk as 'CLAIM_DISCOUNT' | 'DRAW_TWO' | 'REPAIR_PERMIT')
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </section>
+    ) : phase === Phase.HIVE_DRAW && hive ? (
+      <section className="event-action-bar" role="group" aria-label={t('events.hiveTitle')}>
+        <strong>{t('events.hiveTitle')}</strong>
+        <span>
+          {hive.revealed.length}/{hive.maxDraws}
+        </span>
+        <span className="event-hive-cards" aria-label={t('events.hiveTitle')}>
+          {hive.revealed.map((card, index) => {
+            const color = pbToCard(card);
+            return color ? (
+              <TrainCarCard key={`${card}-${index}`} color={color} count={1} size={42} />
+            ) : null;
+          })}
+        </span>
+        <button
+          type="button"
+          disabled={hive.playerId !== me || !commands}
+          onClick={() => commands?.continueHiveDraw()}
+        >
+          {t('events.hiveContinue')}
+        </button>
+        <button
+          type="button"
+          disabled={hive.playerId !== me || !commands}
+          onClick={() => commands?.stopHiveDraw()}
+        >
+          {t('events.hiveStop')}
+        </button>
+      </section>
+    ) : null;
+
   // Merge the tutorial's spotlight cities with any ticket-endpoint glow.
   const highlightCities =
     spotlightCities && spotlightCities.length
@@ -358,6 +481,7 @@ export function GameStage({
 
   const boardPanel = (
     <div className="game-board">
+      {eventPhaseControls}
       <Board
         snapshot={snapshot}
         locale={locale}
@@ -382,6 +506,7 @@ export function GameStage({
       <CardMarket
         snapshot={snapshot}
         canDraw={marketCanDraw}
+        blockFaceupLocomotives={allSeatsReserved}
         onDrawFaceUp={(slot) => {
           markFirstAction('draw_faceup');
           commands?.drawFaceUp(slot);
@@ -406,6 +531,66 @@ export function GameStage({
             ? ` (${t('deckEmpty')})`
             : ` (${snapshot.ticketDeckShortCount})`}
         </button>
+        {canAct && hasActiveEvent(randomEvents, 'HIVE_OF_SPARKS') && (
+          <button type="button" onClick={() => commands?.startHiveDraw()}>
+            {t('events.hiveStart')}
+          </button>
+        )}
+        {canAct && randomEvents?.nightMarketSwapAvailable && (
+          <div className="event-inline-action">
+            <select
+              aria-label={t('events.nightMarketSwap')}
+              value={selectedNightColor ?? ''}
+              onChange={(event) => setNightGive(event.target.value as CardColor)}
+            >
+              {nightColors.map((color) => (
+                <option key={color} value={color}>
+                  {color}
+                </option>
+              ))}
+            </select>
+            <select
+              aria-label={t('drawFaceUp')}
+              value={selectedNightSlot ?? ''}
+              onChange={(event) => setNightSlot(Number(event.target.value))}
+            >
+              {nightSlots.map((slot) => (
+                <option key={slot} value={slot}>
+                  {slot + 1}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              disabled={selectedNightColor === undefined || selectedNightSlot === undefined}
+              onClick={() => {
+                if (selectedNightColor !== undefined && selectedNightSlot !== undefined)
+                  commands?.nightMarketSwap(selectedNightColor, selectedNightSlot);
+              }}
+            >
+              {t('events.nightMarketSwap')}
+            </button>
+          </div>
+        )}
+        {canAct &&
+          slopeRoutes.map((routeId) => {
+            const route = routeById.get(routeId);
+            const endpoints = route
+              ? `${cityLabel(route.a as string)}–${cityLabel(route.b as string)}`
+              : routeId;
+            return (
+              <button
+                type="button"
+                key={routeId}
+                onClick={() => {
+                  const payments = enumerateRepairPayments(hand, myPub?.repairPermits ?? 0);
+                  if (payments.length > 0) setClaim({ kind: 'repair', routeId, payments });
+                }}
+              >
+                {t('events.repairRouteNamed', { route: endpoints })}
+              </button>
+            );
+          })}
       </div>
     </div>
   );
@@ -591,7 +776,13 @@ export function GameStage({
 
       {claim && (
         <PaymentModal
-          title={claim.kind === 'route' ? t('claimRoute') : t('buildStation')}
+          title={
+            claim.kind === 'route'
+              ? t('claimRoute')
+              : claim.kind === 'station'
+                ? t('buildStation')
+                : t('events.repairRoute')
+          }
           options={claim.payments}
           onPick={confirmPayment}
           onCancel={() => setClaim(null)}

@@ -66,7 +66,18 @@ describe('Board', () => {
       randomEvents: {
         mode: 'intense',
         roundIndex: 1,
-        active: [{ id: 'e1', kind: 'SKY_LANTERN', routeIds: ['R3'] }],
+        active: [
+          { id: 'e1', kind: 'SKY_LANTERN', routeIds: ['R3'] },
+          {
+            id: 'e2',
+            kind: 'GODDESS_PROCESSION',
+            cityPath: ['taipei', 'banqiao', 'taoyuan', 'hsinchu', 'miaoli'],
+            position: 1,
+          },
+          { id: 'e3', kind: 'BENTO_RUSH', cityId: 'taipei' },
+          { id: 'e4', kind: 'STATION_FRONT_NIGHT_MARKET', cityId: 'kaohsiung' },
+          { id: 'e5', kind: 'HARVEST_FESTIVAL_EXPRESS', routeIds: ['R5'] },
+        ],
         hotspots: [{ cityId: 'taipei', level: 2 }],
         charters: [
           {
@@ -80,6 +91,16 @@ describe('Board', () => {
         ],
         reopenBonusRouteIds: ['R4'],
         closedRouteIds: ['R2'],
+        lanternHost: { eventId: 'lantern', cityId: 'taipei', points: 6 },
+        luckyContracts: [
+          {
+            eventId: 'lucky',
+            cityA: 'taipei',
+            cityB: 'kaohsiung',
+            points: 5,
+            wonByPlayerId: '',
+          },
+        ],
       },
     });
     const { container } = render(
@@ -97,12 +118,26 @@ describe('Board', () => {
     expect(container.querySelector('[data-route-id="R2"][data-closed="true"]')).toBeTruthy();
     expect(container.querySelector('[data-route-id="R3"][data-sky="true"]')).toBeTruthy();
     expect(container.querySelector('[data-route-id="R4"][data-reopen="true"]')).toBeTruthy();
+    expect(container.querySelector('[data-route-id="R5"][data-harvest="true"]')).toBeTruthy();
     expect(container.querySelector('.evt-typhoon')).toBeTruthy();
     expect(container.querySelector('.evt-reopen-chip')).toBeTruthy();
     // Hotspot badge on the city, and charter chips on BOTH endpoints of the open charter.
     expect(container.querySelector('[data-city-id="taipei"][data-hotspot="2"]')).toBeTruthy();
     expect(container.querySelector('[data-city-id="taipei"][data-charter="true"]')).toBeTruthy();
     expect(container.querySelector('[data-city-id="kaohsiung"][data-charter="true"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-city-id="taipei"][data-lantern-host="true"]'),
+    ).toBeTruthy();
+    expect(container.querySelector('[data-city-id="taipei"][data-bento="true"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-city-id="kaohsiung"][data-night-market="true"]'),
+    ).toBeTruthy();
+    expect(
+      container.querySelector('[data-city-id="banqiao"][data-procession-current="true"]'),
+    ).toBeTruthy();
+    expect(container.querySelector('[data-city-id="taipei"][data-lucky="true"]')).toBeTruthy();
+    expect(container.querySelector('[data-testid="procession-trail"]')).toBeTruthy();
+    expect(container.querySelector('.evt-lucky-link')).toBeTruthy();
   });
 
   it('tags routes and cities with data attributes for the tutorial spotlight', () => {

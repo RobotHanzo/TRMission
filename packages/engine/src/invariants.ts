@@ -23,6 +23,8 @@ export function checkInvariants(board: Board, state: GameState): string[] {
   for (const c of CARD_COLORS) totals[c] += state.discard[c];
   for (const slot of state.market) if (slot !== null) totals[slot] += 1;
   if (state.pendingTunnel) for (const c of state.pendingTunnel.revealed) totals[c] += 1;
+  if (state.events?.pendingHiveDraw)
+    for (const c of state.events.pendingHiveDraw.revealed) totals[c] += 1;
 
   for (const c of CARD_COLORS) {
     const expected =
@@ -99,6 +101,26 @@ export function checkInvariants(board: Board, state: GameState): string[] {
       if (c.wonBy !== null && !playerIds.has(c.wonBy as string)) {
         problems.push(`charter ${c.id} wonBy is not a valid player: ${c.wonBy as string}`);
       }
+    }
+    for (const [playerId, resources] of Object.entries(ev.resources)) {
+      if (!playerIds.has(playerId))
+        problems.push(`event resources for unknown player: ${playerId}`);
+      for (const [kind, value] of Object.entries(resources)) {
+        if (!Number.isInteger(value) || value < 0)
+          problems.push(`event resource ${playerId}.${kind} is invalid: ${value}`);
+      }
+    }
+    if ((state.turn.phase === 'HIVE_DRAW') !== (ev.pendingHiveDraw !== undefined)) {
+      problems.push('HIVE_DRAW phase/pending state mismatch');
+    }
+    if (
+      (state.turn.phase === 'LANTERN_RELOCATION') !==
+      (ev.lanternPendingRelocation !== undefined)
+    ) {
+      problems.push('LANTERN_RELOCATION phase/pending state mismatch');
+    }
+    if ((state.turn.phase === 'EVENT_DRAFT') !== (ev.eventDraft !== undefined)) {
+      problems.push('EVENT_DRAFT phase/pending state mismatch');
     }
     for (let i = 1; i < ev.schedule.length; i++) {
       const prev = ev.schedule[i - 1]!;

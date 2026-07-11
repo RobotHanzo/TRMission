@@ -37,6 +37,7 @@ const snap = create(GameSnapshotSchema, {
         stationBonus: 8,
         longestTrailLength: 18,
         longestBonus: 11,
+        eventBonus: 4,
         total: 137,
         keptTicketIds: [done, failed],
         completedTicketIds: [done],
@@ -78,11 +79,37 @@ describe('ScoreBoard', () => {
     expect(screen.getByText(/未完成任務/)).toBeInTheDocument();
     expect(screen.getByText(/車站獎勵/)).toBeInTheDocument();
     expect(screen.getByText(/最長路線/)).toBeInTheDocument();
+    expect(screen.getByText(/事件獎勵/)).toBeInTheDocument();
     // Gains (+) and losses (−) are broken out (p0 is first by total), plus longest + total.
     expect(container.querySelector('td.gain')!.textContent).toContain(`+${gain}`);
     expect(container.querySelector('td.loss')!.textContent).toContain(`−${loss}`);
     expect(screen.getByText('18 節車廂（+11 分）')).toBeInTheDocument();
+    expect(screen.getByText('+4')).toBeInTheDocument();
     expect(screen.getByText('137')).toBeInTheDocument();
+  });
+
+  it('hides the event-bonus column entirely for a game played without random events', () => {
+    const offSnap = create(GameSnapshotSchema, {
+      stateVersion: 1,
+      phase: Phase.GAME_OVER,
+      players: [{ id: 'p0', seat: 0, routePoints: 50 }],
+      you: { playerId: 'p0' },
+      finalScores: {
+        players: [
+          {
+            playerId: 'p0',
+            routePoints: 50,
+            total: 50,
+            keptTicketIds: [],
+            completedTicketIds: [],
+            longestTrailRouteIds: [],
+          },
+        ],
+        ranking: [{ playerIds: ['p0'] }],
+      },
+    });
+    render(<ScoreBoard snapshot={offSnap} onLeave={() => {}} />);
+    expect(screen.queryByText(/事件獎勵/)).not.toBeInTheDocument();
   });
 
   it('opens a ticket-card list for the completed (gains) tickets', () => {

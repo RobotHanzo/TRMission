@@ -7,7 +7,7 @@ import { CardColor as PbCardColor } from '@trm/proto';
 import { GameEventSchema, type GameEvent as PbGameEvent } from '@trm/proto';
 import type { PlayerId } from '@trm/shared';
 import type { GameEvent } from '@trm/engine';
-import { cardToPb, cardOrNullToPb } from './enums';
+import { cardToPb, cardOrNullToPb, eventPerkToPb } from './enums';
 import { announcedToInfo, startedToInfo } from './random-events';
 
 /** Returns null when this recipient must not receive the event at all. */
@@ -54,7 +54,7 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
         value: { market: ev.market.map((c) => cardOrNullToPb(c)) },
       });
     case 'MARKET_RECYCLED':
-      return wrap({ case: 'marketRecycled', value: {} });
+      return wrap({ case: 'marketRecycled', value: { reason: ev.reason } });
     case 'DECK_RESHUFFLED':
       return wrap({ case: 'deckReshuffled', value: {} });
     case 'ROUTE_CLAIMED':
@@ -121,7 +121,7 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
         value: { playerId: ev.player as string, ticketId: ev.ticket as string },
       });
     case 'EVENT_ANNOUNCED':
-      // All four random-events engine events are PUBLIC — the feature carries no per-recipient
+      // Random-events engine events are PUBLIC — the feature carries no per-recipient
       // hidden info (unlike ticket offers / blind draws above).
       return wrap({ case: 'randomEventAnnounced', value: { info: announcedToInfo(ev) } });
     case 'EVENT_STARTED':
@@ -139,6 +139,42 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
           routeId: (ev.routeId as string | undefined) ?? '',
           cityId: (ev.cityId as string | undefined) ?? '',
         },
+      });
+    case 'EVENT_MARKER_MOVED':
+      return wrap({
+        case: 'eventMarkerMoved',
+        value: {
+          kind: ev.kind,
+          id: ev.id,
+          cityId: ev.cityId as string,
+          playerId: (ev.player as string | undefined) ?? '',
+          position: ev.position ?? 0,
+        },
+      });
+    case 'EVENT_NIGHT_MARKET_SWAPPED':
+      return wrap({
+        case: 'eventNightMarketSwapped',
+        value: {
+          playerId: ev.player as string,
+          slot: ev.slot,
+          gave: cardToPb(ev.gave),
+          took: cardToPb(ev.took),
+        },
+      });
+    case 'EVENT_PERK_CHOSEN':
+      return wrap({
+        case: 'eventPerkChosen',
+        value: { playerId: ev.player as string, perk: eventPerkToPb(ev.perk) },
+      });
+    case 'EVENT_HIVE_CARD_REVEALED':
+      return wrap({
+        case: 'eventHiveCardRevealed',
+        value: { playerId: ev.player as string, card: cardToPb(ev.card), count: ev.count },
+      });
+    case 'EVENT_HIVE_RESOLVED':
+      return wrap({
+        case: 'eventHiveResolved',
+        value: { playerId: ev.player as string, busted: ev.busted, keptCount: ev.keptCount },
       });
   }
 }

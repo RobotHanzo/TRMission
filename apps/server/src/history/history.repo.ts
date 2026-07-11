@@ -57,9 +57,10 @@ export interface AdminReplayData extends ReplayData {
  * `stateDigest` at exactly the points a ticket completes — a v6 game replayed under v7 would
  * digest-mismatch at that step. So v7 stands alone rather than extending the allowlist. Only
  * extend this list for a new version when the change is provably inert for the versions already
- * listed.
+ * listed. v8 adds stateful future-event actions/phases and therefore cannot replay a v7 action
+ * log byte-identically; the current major stands alone.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [7];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [8];
 
 @Injectable()
 export class HistoryRepo {

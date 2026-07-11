@@ -53,7 +53,9 @@ message MarketRefilled {
   repeated CardColor market = 1;
 }
 
-message MarketRecycled {} // triggered by three face-up locomotives
+message MarketRecycled {
+  string reason = 1; // "THREE_LOCOS" | "THREE_OF_COLOR"
+}
 
 message DeckReshuffled {}
 
@@ -145,6 +147,38 @@ message RandomEventBonus {
   string city_id = 6;   // "" when not applicable
 }
 
+message EventMarkerMoved {
+  string kind = 1;
+  string id = 2;
+  string city_id = 3;
+  string player_id = 4;
+  uint32 position = 5;
+}
+
+message EventNightMarketSwapped {
+  string player_id = 1;
+  uint32 slot = 2;
+  CardColor gave = 3;
+  CardColor took = 4;
+}
+
+message EventPerkChosen {
+  string player_id = 1;
+  EventPerk perk = 2;
+}
+
+message EventHiveCardRevealed {
+  string player_id = 1;
+  CardColor card = 2;
+  uint32 count = 3;
+}
+
+message EventHiveResolved {
+  string player_id = 1;
+  bool busted = 2;
+  uint32 kept_count = 3;
+}
+
 message GameEvent {
   oneof event {
     GameStarted game_started = 1;
@@ -172,6 +206,11 @@ message GameEvent {
     RandomEventEnded random_event_ended = 23;
     RandomEventBonus random_event_bonus = 24;
     TicketCompleted ticket_completed = 25;
+    EventMarkerMoved event_marker_moved = 26;
+    EventNightMarketSwapped event_night_market_swapped = 27;
+    EventPerkChosen event_perk_chosen = 28;
+    EventHiveCardRevealed event_hive_card_revealed = 29;
+    EventHiveResolved event_hive_resolved = 30;
   }
 }
 

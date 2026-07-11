@@ -1,4 +1,4 @@
-import type { PlayerId, RouteId, CityId, TicketId, TrainColor } from '@trm/shared';
+import type { PlayerId, RouteId, CityId, TicketId, TrainColor, CardColor } from '@trm/shared';
 
 /**
  * Payment for claiming a route / building a station: `colorCount` cards of a single
@@ -9,7 +9,13 @@ export interface Payment {
   readonly color: TrainColor | null;
   readonly colorCount: number;
   readonly locomotives: number;
+  /** Spend one Bento Rush token either as a one-card wild or for +2 points. */
+  readonly bentoSpend?: 'WILD' | 'POINTS';
+  /** Consume one Rolling-Stock Allocation claim-discount perk. */
+  readonly useClaimDiscount?: boolean;
 }
+
+export type EventPerk = 'CLAIM_DISCOUNT' | 'DRAW_TWO' | 'REPAIR_PERMIT';
 
 export type Action =
   /** SETUP_TICKETS: each player simultaneously keeps ≥ minKeepInitial of their initial offer. */
@@ -47,6 +53,28 @@ export type Action =
       readonly commit: boolean;
       readonly extra?: Payment;
     }
+  /** Mandatory follow-up after claiming at the roaming Lantern Host city. */
+  | { readonly t: 'RELOCATE_LANTERN_HOST'; readonly player: PlayerId; readonly cityId: CityId }
+  /** Spend a turn repairing a route closed by Slope Repair Order. */
+  | {
+      readonly t: 'REPAIR_ROUTE';
+      readonly player: PlayerId;
+      readonly routeId: RouteId;
+      readonly payment: Payment;
+    }
+  /** Free once-per-turn swap at an active station-front night market. */
+  | {
+      readonly t: 'NIGHT_MARKET_SWAP';
+      readonly player: PlayerId;
+      readonly giveColor: CardColor;
+      readonly slot: number;
+    }
+  /** Mandatory Rolling-Stock Allocation draft choice. */
+  | { readonly t: 'CHOOSE_EVENT_PERK'; readonly player: PlayerId; readonly perk: EventPerk }
+  /** Begin / continue / stop a Hive of Sparks push-your-luck draw. */
+  | { readonly t: 'START_HIVE_DRAW'; readonly player: PlayerId }
+  | { readonly t: 'CONTINUE_HIVE_DRAW'; readonly player: PlayerId }
+  | { readonly t: 'STOP_HIVE_DRAW'; readonly player: PlayerId }
   /** Pass — only legal when the player has no other legal move (A15 termination). */
   | { readonly t: 'PASS'; readonly player: PlayerId };
 

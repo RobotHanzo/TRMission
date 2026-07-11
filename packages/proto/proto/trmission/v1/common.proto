@@ -38,6 +38,9 @@ enum Phase {
   PHASE_TICKET_SELECTION = 4;
   PHASE_TUNNEL_PENDING = 5;
   PHASE_GAME_OVER = 6;
+  PHASE_LANTERN_RELOCATION = 7;
+  PHASE_EVENT_DRAFT = 8;
+  PHASE_HIVE_DRAW = 9;
 }
 
 // Rejection reasons. 1..99 = protocol/transport layer; 100+ mirror every engine
@@ -84,6 +87,29 @@ enum RejectionCode {
   REJECTION_CODE_ROUTE_CLOSED_BY_EVENT = 126;
   REJECTION_CODE_EVENT_CLAIMS_SUSPENDED = 127;
   REJECTION_CODE_EVENT_STATIONS_SUSPENDED = 128;
+  REJECTION_CODE_EVENT_FACEUP_LOCO_BLOCKED = 129;
+  REJECTION_CODE_EVENT_REPAIR_UNAVAILABLE = 130;
+  REJECTION_CODE_EVENT_REPAIR_PAYMENT_INVALID = 131;
+  REJECTION_CODE_EVENT_NIGHT_MARKET_UNAVAILABLE = 132;
+  REJECTION_CODE_EVENT_LANTERN_RELOCATION_INVALID = 133;
+  REJECTION_CODE_EVENT_DRAFT_CHOICE_INVALID = 134;
+  REJECTION_CODE_EVENT_HIVE_UNAVAILABLE = 135;
+  REJECTION_CODE_EVENT_RESOURCE_UNAVAILABLE = 136;
+}
+
+// Optional event resource spent alongside a route payment.
+enum BentoSpend {
+  BENTO_SPEND_UNSPECIFIED = 0;
+  BENTO_SPEND_WILD = 1;
+  BENTO_SPEND_POINTS = 2;
+}
+
+// Perks drafted during Rolling-Stock Allocation Day.
+enum EventPerk {
+  EVENT_PERK_UNSPECIFIED = 0;
+  EVENT_PERK_CLAIM_DISCOUNT = 1;
+  EVENT_PERK_DRAW_TWO = 2;
+  EVENT_PERK_REPAIR_PERMIT = 3;
 }
 
 // A colour-count multiset (a hand or the discard pile). Fixed fields in canonical
@@ -107,6 +133,8 @@ message Payment {
   CardColor color = 1;
   uint32 color_count = 2;
   uint32 locomotives = 3;
+  BentoSpend bento_spend = 4;
+  bool use_claim_discount = 5;
 }
 
 // A viewer's camera framing, expressed in BOARD units (the same 0–100 space as
@@ -173,6 +201,10 @@ message PublicPlayerState {
   uint32 route_points = 5;
   uint32 hand_count = 6;
   uint32 ticket_count = 7;
+  uint32 bento_tokens = 8;
+  uint32 blessings = 9;
+  uint32 claim_discounts = 10;
+  uint32 repair_permits = 11;
 }
 
 // The viewer's own private state. Embedded ONLY in a snapshot addressed to this
@@ -203,6 +235,7 @@ message PlayerFinal {
   repeated string completed_ticket_ids = 12;
   // Route ids of one optimal longest trail for this player (to highlight on the map).
   repeated string longest_trail_route_ids = 13;
+  int32 event_bonus = 14;
 }
 
 // Final ranking as equivalence groups; a group of >1 = tied co-winners/places.
@@ -241,6 +274,11 @@ message CharterContract {
   string won_by_player_id = 6; // "" = open
 }
 
+message CityPair {
+  string city_a = 1;
+  string city_b = 2;
+}
+
 // Generic random-event payload shared by forecast entries, active entries, and event frames
 // (forward-compatible with future event kinds via the string `kind` — no per-kind messages).
 message RandomEventInfo {
@@ -253,6 +291,48 @@ message RandomEventInfo {
   string region = 7;
   string city_id = 8;
   CharterContract charter = 9;  // unset unless CHARTER_SPECIAL
+  repeated string city_path = 10;
+  uint32 position = 11;
+  CityPair pair = 12;
+}
+
+message LanternHostState {
+  string event_id = 1;
+  string city_id = 2;
+  uint32 points = 3;
+}
+
+message LanternRelocationState {
+  string player_id = 1;
+  repeated string candidate_city_ids = 2;
+}
+
+message LuckyContract {
+  string event_id = 1;
+  string city_a = 2;
+  string city_b = 3;
+  uint32 points = 4;
+  string won_by_player_id = 5; // "" = open
+}
+
+message EventPerkPick {
+  string player_id = 1;
+  EventPerk perk = 2;
+}
+
+message EventDraftState {
+  repeated string order = 1;
+  uint32 pick_index = 2;
+  string current_player_id = 3;
+  repeated EventPerk available_perks = 4;
+  repeated EventPerkPick picks = 5;
+}
+
+message HiveDrawState {
+  string player_id = 1;
+  repeated CardColor revealed = 2;
+  bool busted = 3;
+  uint32 max_draws = 4;
 }
 
 // Random-events projection (absent from GameSnapshot when the feature is off). Mirrors the
@@ -269,6 +349,14 @@ message RandomEventsState {
   repeated string reopen_bonus_route_ids = 7;
   repeated string closed_route_ids = 8;
   bool free_station_available = 9;
+  LanternHostState lantern_host = 10;
+  LanternRelocationState lantern_pending_relocation = 11;
+  repeated LuckyContract lucky_contracts = 12;
+  repeated string repaired_route_ids = 13;
+  EventDraftState event_draft = 14;
+  HiveDrawState pending_hive_draw = 15;
+  bool boring_active = 16;
+  bool night_market_swap_available = 17;
 }
 
 // Per-viewer authoritative projection of the whole game (maps from the engine's

@@ -2,6 +2,7 @@
 
 **Date:** 2026-07-04
 **Status:** Approved
+**Expansion implemented:** 2026-07-11 (the 13-event future catalog)
 
 ## Goal
 
@@ -29,8 +30,9 @@ description, and visual is original TRMission content — no wording or art is c
 3. **Forecast + surprises** — restrictive/mixed events (typhoons, sky lantern, aftershock) are
    telegraphed one full round ahead; purely positive events (hotspot, charter, gala, stamp rally) fire
    as surprises at round start with no warning.
-4. **V1 = 8 no-new-action events**, none adding a player action, phase, or proto command. All 21
-   researched events (8 v1 + 13 future) are documented; only the 8 land in code.
+4. **The initial v1 slice contained 8 no-new-action events**, none adding a player action, phase, or
+   proto command. The remaining 13 researched events were subsequently implemented as the expansion
+   described below, bringing the playable catalog to all 21 events.
 5. **Seeded schedule at genesis, engine-internal architecture** — `initGame` draws the whole event
    timeline from the seeded PRNG onto `GameState` once, at genesis; rounds tick inside `endTurn`; the
    forecast is purely a redaction window. The realtime hub (`ws/hub.ts`) needed zero changes — it
@@ -68,7 +70,7 @@ described.
 | --- | ------------------------ | ------------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | Typhoon Landfall         | 颱風登陸     | Telegraphed (1 round ahead) | Picks one eligible region (≥3 touching routes) and `2 + nextInt(2)` (2 or 3) of its touching routes, shuffled; those **unclaimed** routes close for 2 rounds (`claimPreconditions` rejects with `ROUTE_CLOSED_BY_EVENT`). Already-claimed routes in the set are simply untouched. On expiry, any of those routes still unclaimed rolls into `reopenBonus`; the **first** claim of a reopened route (including a tunnel commit) earns a separate itemized `EVENT_BONUS{kind:TYPHOON_LANDFALL, reason:REOPEN, points:2}`, consumed idempotently (a second claimer of its double-route sibling earns nothing). |
 | 2   | Typhoon Day Off          | 颱風假       | Telegraphed                 | 1 round: **all** route claims and station builds are suspended (`EVENT_CLAIMS_SUSPENDED` / `EVENT_STATIONS_SUSPENDED`); a drawing player's turn-ending limit becomes 3 picks instead of 2 (`dayOffExtraDraw` adds +1) — a first-pick blind locomotive still ends the draw immediately (existing variant), and a face-up locomotive is still legal only as the first pick.                                                                                                                                                                                                                                   |
-| 3   | Sky Lantern Night        | 天燈之夜     | Telegraphed                 | Picks one eligible region and `3 + nextInt(2)` (3 or 4) of its touching routes, shuffled — a random subset, mirroring Typhoon Landfall's mechanic (never the whole touching set). Affected for 2 rounds: claiming one costs `route.length + 1` cards (locomotives still wild; the extra card, not an extra train car — `validateRoutePayment`'s `extraCards` param), and its `pointsAwarded` is doubled (`skyLanternDoubles`). A tunnel's reveal-phase surcharge (`extraRequired`) is unaffected — only the base payment carries the +1.                                                                                                                                                                        |
+| 3   | Sky Lantern Night        | 天燈之夜     | Telegraphed                 | Picks one eligible region and `3 + nextInt(2)` (3 or 4) of its touching routes, shuffled — a random subset, mirroring Typhoon Landfall's mechanic (never the whole touching set). Affected for 2 rounds: claiming one costs `route.length + 1` cards (locomotives still wild; the extra card, not an extra train car — `validateRoutePayment`'s `extraCards` param), and its `pointsAwarded` is doubled (`skyLanternDoubles`). A tunnel's reveal-phase surcharge (`extraRequired`) is unaffected — only the base payment carries the +1.                                                                    |
 | 4   | Aftershock Advisory      | 餘震特報     | Telegraphed                 | 1 round: `beginTunnel` reveals `ruleParams.tunnelRevealCount + 1` = 4 cards instead of 3. Aborting (not committing) the tunnel draws one blind consolation card for the aborting player (silently skipped if deck + discard are both empty) before the turn ends.                                                                                                                                                                                                                                                                                                                                           |
 | 5   | Viral Hotspot            | 爆紅打卡站   | Surprise                    | Picks one city with ≥2 incident routes (drawable at most twice across the whole schedule). Permanent, instant (`durationRounds: 0`): each claim touching the city adds `+level` (the marker's current level) to the claimer, one itemized `EVENT_BONUS{reason:HOTSPOT}` per marked endpoint; the marker itself bumps by 1 on each schedule firing, capped at level 2 (`Math.min(2, …)`).                                                                                                                                                                                                                    |
 | 6   | Charter Special          | 觀光專開列車 | Surprise                    | Picks the first (sorted-then-shuffled) city pair with a BFS hop distance ≥ 4 on the route graph; reward is `6 + nextInt(5)` = 6–10 points. Open for 4 rounds. At the moment it opens, if any player's **own** route network (no station borrowing) already connects the pair, the earliest-seated such player wins it immediately. Otherwise it's first-come: the first claim/tunnel-commit that connects the pair via the claimer's own network wins it (one claim can win several open charters at once, awarded in schedule order); an unclaimed charter simply expires.                                 |
@@ -359,6 +361,14 @@ readonly events?: {
   readonly reopenBonusRouteIds: readonly RouteId[];
   readonly closedRouteIds: readonly RouteId[];   // resolved: unclaimed routes of active typhoons only
   readonly freeStationAvailable: boolean;
+  readonly lanternHost: LanternHostState | null;
+  readonly lanternPendingRelocation: LanternRelocationState | null;
+  readonly luckyContracts: readonly LuckyContract[];
+  readonly repairedRouteIds: readonly RouteId[];
+  readonly eventDraft: EventDraftState | null;
+  readonly pendingHiveDraw: PendingHiveDraw | null;
+  readonly boringActive: boolean;                // marker depth remains hidden
+  readonly nightMarketSwapAvailable: boolean;
 };
 ```
 
@@ -372,8 +382,9 @@ surface identically for every viewer.
 
 ### Wire shapes
 
-`packages/proto/proto/trmission/v1/common.proto` — generic, forward-compatible messages (a string
-`kind`, not one message per event, so the 13 future events need no proto changes to add):
+`packages/proto/proto/trmission/v1/common.proto` — generic, forward-compatible event identity (a
+string `kind`, not one message per event). The expansion retained that generic event envelope while
+adding the phase/action/resource messages required by its genuinely new interactions:
 
 ```proto
 message GameSettings {
@@ -596,6 +607,9 @@ landed keys:
   reveal/abort/legal-move cases.
 - `events-hotspot.spec.ts`, `events-charter.spec.ts`, `events-gala.spec.ts`,
   `events-stamprally.spec.ts` — the four positive rules, each with award/edge-case/legal-move cases.
+- `events-expansion.spec.ts` — direct mechanics coverage for all 13 expansion events, including the
+  three mandatory phases, draft-resume/forced-ticket interaction, tunnel-base locomotive scoring,
+  hidden marker expiry, public resources, and deferred procession scoring.
 - `events-property.spec.ts` — greedy games to `GAME_OVER` at every intensity × 2/3/4 players, asserting
   at every `AWAIT_ACTION`: `legalActions` non-empty, and `PASS ∈ legalActions ⟺ !hasAnyLegalMove` (and
   PASS is the sole legal action when true) — the top risk (bot/legal-move divergence) covered
@@ -608,8 +622,8 @@ landed keys:
 
 **Wire** (`packages/codec/test/codec.spec.ts`, `apps/server/test/codec.spec.ts`): a full-events-block
 snapshot round-trip through `toBinary`/`fromBinary`; a no-events-block (`off`) case; all four event
-frames round-tripped (incl. a charter sub-message and an instant `ends_after_round: 0` case, and all
-five `EVENT_BONUS` reasons); the 126–128 rejection-code mapping; a byte-level leak test in
+frames round-tripped (incl. a charter sub-message, instant `ends_after_round: 0`, the expansion
+follow-up frames, and every `EVENT_BONUS` reason); the 126–136 rejection-code mapping; a byte-level leak test in
 `apps/server/test/codec.spec.ts` that serializes a schedule with a distinctive future, non-telegraphed
 entry and asserts none of its ids/city/route strings appear in any recipient's serialized bytes, while
 confirming live effects still do surface.
@@ -619,22 +633,23 @@ flag-flip start-time downgrade); `wire-game-events.e2e.spec.ts` (an intense game
 players + a spectator — every recipient gets the event frames, and a byte-level leak check on hidden
 schedule entries derived from live session state); `bots-events.e2e.spec.ts` (an all-bot intense game
 runs to `GAME_OVER` without stalling, undowngraded `events.mode`, and a pure digit-for-digit replay);
-`history-replay-compat.spec.ts` (the `[4, 5]` allowlist: v4 replayable, v3 not).
+`history-replay-compat.spec.ts` (the current-major-only `[8]` allowlist; stateful expansion phases make
+v7 logs intentionally non-replayable under v8).
 
-**Web** (`apps/web/src/`): `game/events.test.ts`, `game/payments.test.ts` (surcharge + free-station
-cases), `game/logModel.test.ts` (announce/start/end + all 5 bonus reasons), `components/EventsPanel.
-test.tsx`, `components/Board.test.tsx` (overlay data-attributes), `screens/RoomScreen.test.tsx`
+**Web** (`apps/web/src/`): `game/events.test.ts` (all names, descriptions, bonus reasons, recycle
+reasons, and rejection keys), `game/payments.test.ts` (all payment modifiers), `game/logModel.test.ts`
+(generic and expansion-specific frames), `components/EventsPanel.test.tsx`, `components/Board.test.tsx`
+(persistent markers, procession trail, lucky pair, and region/route overlays), `screens/RoomScreen.test.tsx`
 (picker hidden/shown, host-editable, read-only non-host). Replay smoke: the existing
 `features/replay/useReplayPlayer.test.ts` passes unchanged (the shared logModel/banner path needed no
 replay-specific fix); a dedicated events-mode replay fixture was not built (noted as a gap, not a bug —
 see Concerns in the M6 task report).
 
-## Future catalog (documented, not implemented)
+## Expansion catalog (implemented 2026-07-11)
 
-The remaining 13 researched events. None are scheduled for a future milestone; each sketch below
-includes the extra machinery it would need beyond what v1 already built (proto/reducer/phase/bot
-surface), phrased against the landed architecture (string `kind` + `RandomEventKind` union, the generic
-wire messages, `events/effects.ts` query helpers).
+These are the 13 events originally retained as a future catalog. The table preserves the research
+sketch and the cross-layer machinery that guided implementation; the resolved rules immediately below
+are authoritative where a sketch was ambiguous.
 
 | Event                        | 中文           | Mechanic sketch                                                                                                                                         | Extra machinery needed                                                                                                                                                                                          |
 | ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -652,9 +667,49 @@ wire messages, `events/effects.ts` query helpers).
 | All Seats Reserved           | 全車對號入座   | 1 round: face-up locomotives become untakeable; playing an extra locomotive into a claim scores +2.                                                     | A face-up-card validation flag (mirrors the day-off suspension pattern) + a surcharge/bonus branch in `applyClaimRoute`. Feasible as a near-v1 slice.                                                           |
 | Lucky Ticket Stub            | 吉祥票根       | First player to connect an authored "auspicious" city pair with their own network scores +5.                                                            | The pair must be authored content, not derived — a new field in `@trm/map-data` (bumps `CONTENT_HASH`), unlike every v1 target which is derived from existing `region`/graph data. Feasible as a near-v1 slice. |
 
+### Resolved expansion rules
+
+- **Lantern Host City** is a one-per-game positive surprise. Claiming a route touching the current
+  host awards +6, then pauses turn completion for a mandatory relocation to a different city in the
+  claimant's post-claim network. The public marker remains in play for the rest of the game.
+- **Bento Rush** is a 3-round positive city event. A claim touching the event city gains one public
+  bento token. One token may be spent in a later claim either as a one-card wild or, with the normal
+  payment still made, for +2 points.
+- **Slope Repair Order** is telegraphed and closes one route for 3 rounds. A player may spend their
+  turn and two matching cards to reopen it for +3; a saved repair permit substitutes for both cards.
+- **Station-Front Night Market** is a 2-round positive city event. A player whose own network reaches
+  that city may, once before their main action each turn, exchange one hand card directly with one
+  face-up market slot.
+- **Goddess Procession** follows a seeded contiguous five-city path for 5 rounds, advancing once per
+  round. A claim touching its current city draws one blind card and gains one public blessing. At game
+  end, every tied blessing leader (when the maximum is nonzero) scores +4. Path enumeration at genesis
+  is capped at a deterministic 20,000 canonical paths (`PROCESSION_PATH_CAP`) so a dense custom map
+  cannot stall game start; the official map (~1.2k paths) never hits the cap.
+- **Spring Festival Rush** is telegraphed for 2 rounds. Turn-index traversal reverses while it is live,
+  and every destination-ticket draw offers up to four cards with a minimum keep of one.
+- **Rolling-Stock Allocation Day** is a one-per-game positive surprise. Players draft in ascending
+  route-score order (later turn-order position breaks ties) and choose one perk: a one-use one-card
+  claim discount, two immediate blind draws, or a one-use card-free event repair permit.
+- **Hive of Sparks** is a 1-round positive action option. Starting it reveals one card; the player may
+  stop or continue up to four. Two consecutive cards of the same colour bust the attempt to the first
+  card only; stopping, reaching four, or exhausting the draw pool keeps every revealed card.
+- **Breakthrough Boring Machine** is a one-per-game positive surprise. Tunnels reveal two cards while
+  it is live. A hidden marker is deterministically buried in the bottom third of the current deck; the
+  effect ends when that many real cards have been drawn, and the marker never enters card counts.
+- **Interim Operations Report** is an instant scheduled scoring pulse. Each player scores +1 per three
+  claimed routes; every tied current longest-trail leader with a nonzero trail also scores +3.
+- **Harvest Festival Express** lasts 3 rounds in a seeded region. Claims touching that region score
+  +1, and a face-up market containing any three cards of one colour recycles immediately.
+- **All Seats Reserved** is telegraphed for 1 round. Face-up locomotives cannot be taken. A claim whose
+  base payment uses more locomotives than the route's printed ferry minimum scores +2; tunnel reveal
+  surcharge cards do not count toward this test.
+- **Lucky Ticket Stub** opens a permanent first-to-connect race for a seeded pair from the map's
+  authored `auspiciousPairs`. Own-route connectivity only is used; the first connector scores +5.
+  Each authored pair opens at most one race per game — once every pair has been drawn, the kind
+  leaves the schedule pool (a repeat would hand its +5 to an already-connected player for free).
+
 ## Out of scope
 
-- The 13 future-catalog events above (documented only).
 - Bot bonus-chasing heuristics — bots stay legal-move-only under every event (`legalActions` already
   reflects every gate/candidate), with no event-aware scoring tuned into `policy.ts`.
 - Maintainer dashboard event views (a LIVE game's `events` state is not surfaced to `apps/admin` beyond

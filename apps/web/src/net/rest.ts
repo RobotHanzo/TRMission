@@ -217,6 +217,7 @@ export interface MapDraft {
   cities: CityDraft[];
   routes: RouteDraft[];
   tickets: TicketDraft[];
+  auspiciousPairs?: { id: string; a: string; b: string }[];
   geography?: MapGeographyDraft;
   rules?: MapRulesDraft;
 }
@@ -249,6 +250,7 @@ export interface MapContentDto {
   cities: CityDraft[];
   routes: RouteDraft[];
   tickets: TicketDraft[];
+  auspiciousPairs?: { id: string; a: string; b: string }[];
   geography?: MapGeographyDraft;
   rules?: MapRulesDraft;
 }
