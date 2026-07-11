@@ -123,7 +123,8 @@ describe('GameStage expansion-event controls', () => {
     fireEvent.click(screen.getByRole('button', { name: '開始試膽' }));
     expect(commands.startHiveDraw).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(screen.getByRole('button', { name: '搶修封閉路線' }));
+    // The repair button names its route by endpoints (R1 = 臺北–板橋).
+    fireEvent.click(screen.getByRole('button', { name: '搶修 臺北–板橋' }));
     fireEvent.click(document.querySelector('.payment-card')!);
     expect(commands.repairRoute).toHaveBeenCalledWith(
       'R1',

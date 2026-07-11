@@ -161,9 +161,13 @@ describe('viewToSnapshot — random-events wire leak test (risk #1, byte-level)'
       city: asCityId('SECRET_WIRE_CITY_C'),
       charterA: asCityId('SECRET_WIRE_CITY_A'),
       charterB: asCityId('SECRET_WIRE_CITY_B'),
+      pathCity: asCityId('SECRET_WIRE_PATH_CITY'),
+      pairA: asCityId('SECRET_WIRE_PAIR_A'),
+      pairB: asCityId('SECRET_WIRE_PAIR_B'),
     };
     // Far-off, non-telegraphed → nothing about it may ever be projected. It carries every hidden
-    // field (routeIds, cityId, charter) so the leak check below is exhaustive.
+    // field (routeIds, cityId, charter, cityPath, pair) so the leak check below is exhaustive
+    // across the expansion's new target shapes too.
     const future: EventScheduleEntry = {
       id: SECRET.id,
       kind: 'CHARTER_SPECIAL',
@@ -173,6 +177,9 @@ describe('viewToSnapshot — random-events wire leak test (risk #1, byte-level)'
       routeIds: [SECRET.route],
       cityId: SECRET.city,
       charter: { a: SECRET.charterA, b: SECRET.charterB, points: 20 },
+      cityPath: [SECRET.pathCity, SECRET.charterA, SECRET.charterB],
+      pair: { a: SECRET.pairA, b: SECRET.pairB },
+      markerSelector: 54321,
     };
     const events: EventsState = {
       mode: 'light',
@@ -203,6 +210,9 @@ describe('viewToSnapshot — random-events wire leak test (risk #1, byte-level)'
         SECRET.city as string,
         SECRET.charterA as string,
         SECRET.charterB as string,
+        SECRET.pathCity as string,
+        SECRET.pairA as string,
+        SECRET.pairB as string,
       ]) {
         expect(raw.includes(secret)).toBe(false);
       }

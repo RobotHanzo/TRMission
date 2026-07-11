@@ -29,6 +29,7 @@ import {
   stationsSuspended,
   skyLanternSurcharge,
   skyLanternDoubles,
+  tunnelRevealExtra,
   effectiveTunnelRevealCount,
   dayOffExtraDraw,
   takeReopenBonus,
@@ -867,10 +868,7 @@ function applyResolveTunnel(
     ];
     // Aftershock consolation: an aborting player draws one blind card (a real draw from the shared
     // deck helper). Silently skipped when deck + discard are both empty.
-    if (
-      effectiveTunnelRevealCount(state) >
-      (state.events?.boringMachine ? 2 : state.ruleParams.tunnelRevealCount)
-    ) {
+    if (tunnelRevealExtra(state) > 0) {
       const d = drawEventCard(cleared);
       abortEvents.push(...d.events);
       if (d.card !== null) {
@@ -1532,10 +1530,15 @@ export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId
       });
       if (ownsGroupMember) continue;
       if (p.trainCars < route.length) continue;
-      const reductions =
+      // Try every reduction level, not just the deepest one: a ferry's locomotive floor can make
+      // the fully-reduced requirement unpayable while a shallower reduction (or none) still
+      // affords a payment — the exact mirror of enumerateClaimPayments' per-variant floor skip.
+      const maxReduction =
         (resources.bentoTokens > 0 ? 1 : 0) + (resources.claimDiscounts > 0 ? 1 : 0);
-      if (canAffordRoute(p.hand, route, skyLanternSurcharge(state, route.id) - reductions))
-        return true;
+      const surcharge = skyLanternSurcharge(state, route.id);
+      for (let reduction = 0; reduction <= maxReduction; reduction++) {
+        if (canAffordRoute(p.hand, route, surcharge - reduction)) return true;
+      }
     }
   }
   return false;

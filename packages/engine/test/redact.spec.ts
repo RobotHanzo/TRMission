@@ -166,6 +166,10 @@ describe('redactFor — random events projection', () => {
     city: asCityId('SECRET_CITY_C'),
     charterA: asCityId('SECRET_CITY_A'),
     charterB: asCityId('SECRET_CITY_B'),
+    pathCity: asCityId('SECRET_PATH_CITY'),
+    pairA: asCityId('SECRET_PAIR_A'),
+    pairB: asCityId('SECRET_PAIR_B'),
+    markerSelector: 54321,
   };
 
   function baseState(seed: string): {
@@ -185,7 +189,8 @@ describe('redactFor — random events projection', () => {
     const board = taiwanBoard();
     const { state, live } = baseState('redact-events-future');
     // Future surprise entry: far off, not telegraphed → nothing about it may be projected. It carries
-    // every hidden field (routeIds, cityId, charter) so the leak test is exhaustive.
+    // every hidden field (routeIds, cityId, charter, cityPath, pair, markerSelector) so the leak
+    // test is exhaustive across the expansion's new target shapes too.
     const future: EventScheduleEntry = {
       id: SECRET.id,
       kind: 'CHARTER_SPECIAL',
@@ -195,6 +200,9 @@ describe('redactFor — random events projection', () => {
       routeIds: [SECRET.route],
       cityId: SECRET.city,
       charter: { a: SECRET.charterA, b: SECRET.charterB, points: 20 },
+      cityPath: [SECRET.pathCity, SECRET.charterA, SECRET.charterB],
+      pair: { a: SECRET.pairA, b: SECRET.pairB },
+      markerSelector: SECRET.markerSelector,
     };
     const events: EventsState = {
       mode: 'light',
@@ -237,6 +245,10 @@ describe('redactFor — random events projection', () => {
         SECRET.city as string,
         SECRET.charterA as string,
         SECRET.charterB as string,
+        SECRET.pathCity as string,
+        SECRET.pairA as string,
+        SECRET.pairB as string,
+        String(SECRET.markerSelector),
       ]) {
         expect(json.includes(secret)).toBe(false);
       }

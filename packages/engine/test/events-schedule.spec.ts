@@ -5,7 +5,7 @@ import type { GameContent, CityDef, RouteDef } from '@trm/map-data';
 import { taiwanBoard, CONTENT_HASH } from '../src/taiwan';
 import { buildBoard } from '../src/board';
 import type { Board } from '../src/board';
-import { generateSchedule } from '../src/events/schedule';
+import { generateSchedule, fiveCityPaths, PROCESSION_PATH_CAP } from '../src/events/schedule';
 import { initGame } from '../src/setup';
 import { makeConfig } from './helpers';
 import type { EventScheduleEntry, RandomEventKind } from '../src/types/events-state';
@@ -290,5 +290,66 @@ describe('generateSchedule — determinism & structure', () => {
   it('keeps CONTENT_HASH-pinned Taiwan content intact (sanity)', () => {
     expect(board.content.meta).toBeDefined();
     expect(typeof CONTENT_HASH).toBe('string');
+  });
+
+  it('never schedules the same auspicious pair twice in one game', () => {
+    // The official map authors only two pairs; a 300-round schedule draws many positive events,
+    // so without per-pair dedup the same pair would recur and hand its +5 to an already-connected
+    // player for free at the second open.
+    for (let seed = 0; seed < 40; seed++) {
+      const [ev] = gen('intense', `lucky-dedup-${seed}`);
+      const pairKeys = ev!.schedule
+        .filter((entry) => entry.kind === 'LUCKY_TICKET_STUB')
+        .map((entry) => `${entry.pair!.a as string}|${entry.pair!.b as string}`);
+      expect(new Set(pairKeys).size).toBe(pairKeys.length);
+    }
+  });
+
+  it('caps procession-path enumeration deterministically on a dense custom map', () => {
+    // A 12-city clique (66 routes — well inside the 300-route custom-map limit) holds
+    // 12·11·10·9·8/2 = 47,520 canonical simple 5-city paths; unbounded enumeration on maps
+    // like this is a genesis-time DoS. The walk order is canonical, so the capped prefix is
+    // identical on every run.
+    const city = (id: string, x: number): CityDef => ({
+      id: asCityId(id),
+      nameZh: id,
+      nameEn: id,
+      x,
+      y: 0,
+      region: 'X',
+      isIsland: false,
+    });
+    const cities = Array.from({ length: 12 }, (_, i) => city(`d${String(i).padStart(2, '0')}`, i));
+    const routes: RouteDef[] = [];
+    for (let i = 0; i < cities.length; i++) {
+      for (let j = i + 1; j < cities.length; j++) {
+        routes.push({
+          id: asRouteId(`dr${i}-${j}`),
+          a: cities[i]!.id,
+          b: cities[j]!.id,
+          color: 'GRAY',
+          length: 2,
+          ferryLocos: 0,
+          isTunnel: false,
+        });
+      }
+    }
+    const dense = buildBoard({
+      meta: { mapId: 'dense', version: 1, nameZh: 'd', nameEn: 'd' },
+      cities,
+      routes,
+      tickets: [],
+    });
+
+    const capped = fiveCityPaths(dense);
+    expect(capped.length).toBe(PROCESSION_PATH_CAP);
+    for (const path of capped.slice(0, 50)) {
+      expect(new Set(path).size).toBe(5);
+    }
+    const again = fiveCityPaths(dense);
+    expect(again).toEqual(capped);
+
+    // The official map sits far below the cap — its path set is never truncated.
+    expect(fiveCityPaths(board).length).toBeLessThan(PROCESSION_PATH_CAP);
   });
 });

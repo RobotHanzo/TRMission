@@ -554,13 +554,11 @@ export function GameStage({
               value={selectedNightSlot ?? ''}
               onChange={(event) => setNightSlot(Number(event.target.value))}
             >
-              {snapshot.market.map((card, slot) =>
-                card ? (
-                  <option key={slot} value={slot}>
-                    {slot + 1}
-                  </option>
-                ) : null,
-              )}
+              {nightSlots.map((slot) => (
+                <option key={slot} value={slot}>
+                  {slot + 1}
+                </option>
+              ))}
             </select>
             <button
               type="button"
@@ -575,18 +573,24 @@ export function GameStage({
           </div>
         )}
         {canAct &&
-          slopeRoutes.map((routeId) => (
-            <button
-              type="button"
-              key={routeId}
-              onClick={() => {
-                const payments = enumerateRepairPayments(hand, myPub?.repairPermits ?? 0);
-                if (payments.length > 0) setClaim({ kind: 'repair', routeId, payments });
-              }}
-            >
-              {t('events.repairRoute', { route: routeId })}
-            </button>
-          ))}
+          slopeRoutes.map((routeId) => {
+            const route = routeById.get(routeId);
+            const endpoints = route
+              ? `${cityLabel(route.a as string)}–${cityLabel(route.b as string)}`
+              : routeId;
+            return (
+              <button
+                type="button"
+                key={routeId}
+                onClick={() => {
+                  const payments = enumerateRepairPayments(hand, myPub?.repairPermits ?? 0);
+                  if (payments.length > 0) setClaim({ kind: 'repair', routeId, payments });
+                }}
+              >
+                {t('events.repairRouteNamed', { route: endpoints })}
+              </button>
+            );
+          })}
       </div>
     </div>
   );

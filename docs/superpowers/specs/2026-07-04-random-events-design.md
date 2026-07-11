@@ -682,7 +682,9 @@ are authoritative where a sketch was ambiguous.
   face-up market slot.
 - **Goddess Procession** follows a seeded contiguous five-city path for 5 rounds, advancing once per
   round. A claim touching its current city draws one blind card and gains one public blessing. At game
-  end, every tied blessing leader (when the maximum is nonzero) scores +4.
+  end, every tied blessing leader (when the maximum is nonzero) scores +4. Path enumeration at genesis
+  is capped at a deterministic 20,000 canonical paths (`PROCESSION_PATH_CAP`) so a dense custom map
+  cannot stall game start; the official map (~1.2k paths) never hits the cap.
 - **Spring Festival Rush** is telegraphed for 2 rounds. Turn-index traversal reverses while it is live,
   and every destination-ticket draw offers up to four cards with a minimum keep of one.
 - **Rolling-Stock Allocation Day** is a one-per-game positive surprise. Players draft in ascending
@@ -703,6 +705,8 @@ are authoritative where a sketch was ambiguous.
   surcharge cards do not count toward this test.
 - **Lucky Ticket Stub** opens a permanent first-to-connect race for a seeded pair from the map's
   authored `auspiciousPairs`. Own-route connectivity only is used; the first connector scores +5.
+  Each authored pair opens at most one race per game — once every pair has been drawn, the kind
+  leaves the schedule pool (a repeat would hand its +5 to an already-connected player for free).
 
 ## Out of scope
 

@@ -4,6 +4,7 @@ import type { RouteColor, RouteLength } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import {
   enumerateRoutePayments,
+  enumerateRepairPayments,
   enumerateStationPayments,
   routeShortfall,
   stationShortfall,
@@ -63,6 +64,111 @@ describe('route payments', () => {
     const h = emptyHand();
     h.BLUE = 1;
     expect(enumerateRoutePayments(h, route('BLUE', 3))).toHaveLength(0);
+  });
+});
+
+describe('payment modifiers (Bento Rush / claim discount / All Seats Reserved)', () => {
+  it('offers WILD (−1 card), POINTS (normal size), and plain variants side by side', () => {
+    const h = emptyHand();
+    h.BLUE = 3;
+    const ps = enumerateRoutePayments(h, route('BLUE', 3), 0, { bentoTokens: 1 });
+    expect(ps).toContainEqual({ color: 'BLUE', colorCount: 3, locomotives: 0 });
+    expect(ps).toContainEqual({
+      color: 'BLUE',
+      colorCount: 2,
+      locomotives: 0,
+      bentoSpend: 'WILD',
+    });
+    expect(ps).toContainEqual({
+      color: 'BLUE',
+      colorCount: 3,
+      locomotives: 0,
+      bentoSpend: 'POINTS',
+    });
+  });
+
+  it('stacks a bento wild with a claim discount for a −2 payment', () => {
+    const h = emptyHand();
+    h.BLUE = 1;
+    const ps = enumerateRoutePayments(h, route('BLUE', 3), 0, {
+      bentoTokens: 1,
+      claimDiscounts: 1,
+    });
+    expect(ps).toContainEqual({
+      color: 'BLUE',
+      colorCount: 1,
+      locomotives: 0,
+      bentoSpend: 'WILD',
+      useClaimDiscount: true,
+    });
+    // Neither resource alone reaches a 1-card payment on a 3-length route.
+    expect(ps.some((p) => p.colorCount + p.locomotives === 2)).toBe(false);
+  });
+
+  it('never lets a reduction dip below a ferry’s locomotive floor', () => {
+    const h = emptyHand();
+    h.LOCOMOTIVE = 1;
+    // Length-2 ferry with a 1-loco floor: the −2 stack would need 0 cards (< floor) and must be
+    // skipped, while the −1 bento wild still yields the legal all-locomotive payment.
+    const ps = enumerateRoutePayments(h, route('GRAY', 2, 1), 0, {
+      bentoTokens: 1,
+      claimDiscounts: 1,
+    });
+    expect(ps).toContainEqual({
+      color: null,
+      colorCount: 0,
+      locomotives: 1,
+      bentoSpend: 'WILD',
+    });
+    expect(ps.some((p) => p.colorCount + p.locomotives === 0)).toBe(false);
+  });
+
+  it('tags only payments spending more locomotives than the ferry minimum with the reserved bonus', () => {
+    const h = emptyHand();
+    h.BLUE = 2;
+    h.LOCOMOTIVE = 2;
+    const ps = enumerateRoutePayments(h, route('BLUE', 2), 0, { allSeatsReserved: true });
+    expect(ps).toContainEqual({ color: 'BLUE', colorCount: 2, locomotives: 0 });
+    expect(ps).toContainEqual({
+      color: 'BLUE',
+      colorCount: 1,
+      locomotives: 1,
+      allSeatsBonus: true,
+    });
+    expect(ps).toContainEqual({
+      color: null,
+      colorCount: 0,
+      locomotives: 2,
+      allSeatsBonus: true,
+    });
+  });
+});
+
+describe('repair payments (Slope Repair Order)', () => {
+  it('offers two matching cards, with locomotives as wild', () => {
+    const h = emptyHand();
+    h.RED = 2;
+    h.LOCOMOTIVE = 1;
+    const ps = enumerateRepairPayments(h);
+    expect(ps).toContainEqual({ color: 'RED', colorCount: 2, locomotives: 0 });
+    expect(ps).toContainEqual({ color: 'RED', colorCount: 1, locomotives: 1 });
+  });
+
+  it('prepends the zero-card permit option only when a permit is held', () => {
+    const h = emptyHand();
+    h.RED = 2;
+    expect(
+      enumerateRepairPayments(h, 0).some((p) => p.colorCount === 0 && p.locomotives === 0),
+    ).toBe(false);
+    const withPermit = enumerateRepairPayments(h, 1);
+    expect(withPermit[0]).toEqual({
+      color: null,
+      colorCount: 0,
+      locomotives: 0,
+      repairPermit: true,
+    });
+    // A permit still lets a cardless hand repair.
+    expect(enumerateRepairPayments(emptyHand(), 1)).toHaveLength(1);
   });
 });
 

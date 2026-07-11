@@ -6,7 +6,7 @@ import type { Board } from '../src/board';
 import type { Payment } from '../src/types/actions';
 import type { EventResources, EventScheduleEntry } from '../src/types/events-state';
 import type { GameState } from '../src/types/state';
-import { reduce } from '../src/reduce';
+import { reduce, hasAnyLegalMove } from '../src/reduce';
 import { legalActions } from '../src/selectors';
 import { computeFinalScores } from '../src/scoring';
 import { currentPlayerId, endTurn } from '../src/turn';
@@ -775,5 +775,49 @@ describe('future-event expansion mechanics', () => {
         .map((action) => action.t)
         .sort(),
     ).toEqual(['CONTINUE_HIVE_DRAW', 'STOP_HIVE_DRAW']);
+  });
+
+  it('keeps PASS illegal when only a partially-reduced ferry payment is affordable', () => {
+    const base = afterSetup(2, 'future-ferry-reduction');
+    // A ferry one card longer than its locomotive minimum: the full bento+discount reduction
+    // (−2) would drop the card requirement below the ferry floor, but spending only the bento
+    // as a one-card wild (−1) leaves a legal all-locomotive payment.
+    const ferry = base.board.content.routes.find(
+      (route) =>
+        !route.isTunnel &&
+        route.doubleGroup === undefined &&
+        route.ferryLocos === 1 &&
+        route.length === 2,
+    )!;
+    // Strip every other option: all other routes taken, draw piles/market/tickets empty, no
+    // stations left — the ferry claim is the sole legal move.
+    const ownership = Object.fromEntries(
+      base.board.content.routes
+        .filter((route) => route.id !== ferry.id)
+        .map((route) => [route.id as string, { owner: p1 }]),
+    );
+    const state = setPlayer(
+      withEvents(
+        {
+          ...base.state,
+          ownership,
+          deck: [],
+          discard: handOf({}),
+          market: [null, null, null, null, null],
+          ticketDeckShort: [],
+        },
+        {
+          ...emptyEvents(),
+          resources: { p0: resources({ bentoTokens: 1, claimDiscounts: 1 }) },
+        },
+      ),
+      p0,
+      { hand: handOf({ LOCOMOTIVE: 1 }), trainCars: 45, stationsRemaining: 0 },
+    );
+
+    expect(hasAnyLegalMove(base.board, state, p0)).toBe(true);
+    const legal = legalActions(base.board, state, p0);
+    expect(legal.some((action) => action.t === 'CLAIM_ROUTE')).toBe(true);
+    expect(legal.some((action) => action.t === 'PASS')).toBe(false);
   });
 });

@@ -88,6 +88,30 @@ describe('ScoreBoard', () => {
     expect(screen.getByText('137')).toBeInTheDocument();
   });
 
+  it('hides the event-bonus column entirely for a game played without random events', () => {
+    const offSnap = create(GameSnapshotSchema, {
+      stateVersion: 1,
+      phase: Phase.GAME_OVER,
+      players: [{ id: 'p0', seat: 0, routePoints: 50 }],
+      you: { playerId: 'p0' },
+      finalScores: {
+        players: [
+          {
+            playerId: 'p0',
+            routePoints: 50,
+            total: 50,
+            keptTicketIds: [],
+            completedTicketIds: [],
+            longestTrailRouteIds: [],
+          },
+        ],
+        ranking: [{ playerIds: ['p0'] }],
+      },
+    });
+    render(<ScoreBoard snapshot={offSnap} onLeave={() => {}} />);
+    expect(screen.queryByText(/事件獎勵/)).not.toBeInTheDocument();
+  });
+
   it('opens a ticket-card list for the completed (gains) tickets', () => {
     render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
     // Two "查看" (view) buttons exist (completed + failed for p0); the first is the gains list.

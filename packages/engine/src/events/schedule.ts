@@ -60,6 +60,11 @@ export function generateSchedule(
   // Per-schedule mutable target bookkeeping.
   const hotspotPicks: Record<string, number> = {};
   const usedOneShotKinds = new Set<RandomEventKind>();
+  const usedLuckyPairIds = new Set<string>();
+
+  // Each authored pair opens at most one lucky race per game — a repeat contract would hand its
+  // +5 straight to an already-connected player at the second open.
+  const remainingLuckyPairs = () => auspiciousPairs.filter((p) => !usedLuckyPairIds.has(p.id));
 
   const hasFarPair = (): boolean => {
     for (const a of sortedCityIds) {
@@ -101,7 +106,7 @@ export function generateSchedule(
       case 'HARVEST_FESTIVAL_EXPRESS':
         return allRegions.length > 0;
       case 'LUCKY_TICKET_STUB':
-        return auspiciousPairs.length > 0;
+        return remainingLuckyPairs().length > 0;
       default:
         return true; // target-less kinds
     }
@@ -213,9 +218,11 @@ export function generateSchedule(
       region = allRegions[ri] as string;
       routeIds = [...(regionTouching.get(region) ?? [])];
     } else if (kind === 'LUCKY_TICKET_STUB') {
-      const [pi, nextP] = nextInt(cur, auspiciousPairs.length);
+      const candidates = remainingLuckyPairs();
+      const [pi, nextP] = nextInt(cur, candidates.length);
       cur = nextP;
-      const picked = auspiciousPairs[pi]!;
+      const picked = candidates[pi]!;
+      usedLuckyPairIds.add(picked.id);
       pair = { a: picked.a, b: picked.b };
     } else if (kind === 'BREAKTHROUGH_BORING_MACHINE') {
       const [selector, nextM] = nextInt(cur, 0x10000);
@@ -443,8 +450,16 @@ function allPairsHops(board: Board): Map<string, Map<string, number>> {
   return out;
 }
 
-/** Every deterministic simple five-city path, canonicalized against its reverse. */
-function fiveCityPaths(board: Board): CityId[][] {
+/**
+ * Deterministic ceiling on enumerated procession paths. A dense custom map (up to 120 cities /
+ * 300 routes) can hold millions of simple 5-city paths — unbounded enumeration would stall
+ * genesis on the server. The walk order is canonical (sorted cities, sorted neighbours), so the
+ * retained prefix is identical on every run; the official map (~1.2k paths) never hits the cap.
+ */
+export const PROCESSION_PATH_CAP = 20_000;
+
+/** Every deterministic simple five-city path, canonicalized against its reverse (capped). */
+export function fiveCityPaths(board: Board): CityId[][] {
   const adj = new Map<string, string[]>();
   for (const c of board.cityIds) adj.set(c as string, []);
   for (const r of board.content.routes) {
@@ -455,6 +470,7 @@ function fiveCityPaths(board: Board): CityId[][] {
 
   const byKey = new Map<string, CityId[]>();
   const walk = (path: string[]): void => {
+    if (byKey.size >= PROCESSION_PATH_CAP) return;
     if (path.length === 5) {
       const forward = path.join('|');
       const reverse = [...path].reverse().join('|');
@@ -468,9 +484,13 @@ function fiveCityPaths(board: Board): CityId[][] {
     }
     const tail = path[path.length - 1] as string;
     for (const next of adj.get(tail) ?? []) {
+      if (byKey.size >= PROCESSION_PATH_CAP) return;
       if (!path.includes(next)) walk([...path, next]);
     }
   };
-  for (const city of [...board.cityIds].sort(cmpStr)) walk([city as string]);
+  for (const city of [...board.cityIds].sort(cmpStr)) {
+    if (byKey.size >= PROCESSION_PATH_CAP) break;
+    walk([city as string]);
+  }
   return [...byKey.entries()].sort(([a], [b]) => cmpStr(a, b)).map(([, path]) => path);
 }
