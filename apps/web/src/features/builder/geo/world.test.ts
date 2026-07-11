@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateGeography } from '@trm/map-data';
-import { cropToGeography, countriesToGeography } from './world';
+import { cropToGeography, countriesToGeography, dissolveCountryRings } from './world';
 import { WORLD_COUNTRIES } from './worldCountries';
 
 describe('cropToGeography', () => {
@@ -32,6 +32,26 @@ describe('cropToGeography', () => {
 });
 
 describe('countriesToGeography', () => {
+  it('dissolves touching or overlapping country polygons into one landmass', () => {
+    const rings = dissolveCountryRings([
+      [
+        [0, 0],
+        [2, 0],
+        [2, 2],
+        [0, 2],
+      ],
+      [
+        [1, 0],
+        [3, 0],
+        [3, 2],
+        [1, 2],
+      ],
+    ]);
+
+    expect(rings).toHaveLength(1);
+    expect(rings[0]).toHaveLength(4);
+  });
+
   it('returns null for an empty selection', () => {
     expect(countriesToGeography([])).toBeNull();
   });
@@ -47,6 +67,16 @@ describe('countriesToGeography', () => {
     expect(geography.land.length).toBeGreaterThan(0);
     expect(droppedRings).toBe(0);
     expect(validateGeography(geography)).toEqual([]);
+  });
+
+  it('removes the internal border between neighbouring selected countries', () => {
+    const selected = WORLD_COUNTRIES.filter((country) => ['FRA', 'DEU'].includes(country.id));
+    const inputRingCount = selected.reduce((sum, country) => sum + country.rings.length, 0);
+    const result = countriesToGeography(selected.map((country) => country.id));
+
+    expect(result).not.toBeNull();
+    expect(result!.geography.land.length).toBeLessThan(inputRingCount);
+    expect(validateGeography(result!.geography)).toEqual([]);
   });
 
   it('excludes a neighbour that falls inside the union bbox but was not selected', () => {

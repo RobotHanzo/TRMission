@@ -23,6 +23,7 @@
     "i18next": "^24.2.0",
     "immer": "^10.1.1",
     "lucide-react": "^0.468.0",
+    "polygon-clipping": "^0.15.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^15.4.0",

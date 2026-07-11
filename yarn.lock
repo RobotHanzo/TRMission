@@ -2228,6 +2228,7 @@ __metadata:
     immer: "npm:^10.1.1"
     jsdom: "npm:^25.0.1"
     lucide-react: "npm:^0.468.0"
+    polygon-clipping: "npm:^0.15.7"
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
     react-i18next: "npm:^15.4.0"
@@ -5548,6 +5549,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"polygon-clipping@npm:^0.15.7":
+  version: 0.15.7
+  resolution: "polygon-clipping@npm:0.15.7"
+  dependencies:
+    robust-predicates: "npm:^3.0.2"
+    splaytree: "npm:^3.1.0"
+  checksum: 10/0210e6f6621510a1e216a39db0c72c5886782244ddf6149417ae54ce3efc4b3d27cad43f9f53224b85c08881255749477e2337c483a957329a29a87d6e79b306
+  languageName: node
+  linkType: hard
+
 "postcss@npm:^8.4.43":
   version: 8.5.15
   resolution: "postcss@npm:8.5.15"
@@ -5751,6 +5762,13 @@ __metadata:
   version: 4.0.0
   resolution: "resolve-from@npm:4.0.0"
   checksum: 10/91eb76ce83621eea7bbdd9b55121a5c1c4a39e54a9ce04a9ad4517f102f8b5131c2cf07622c738a6683991bf54f2ce178f5a42803ecbd527ddc5105f362cc9e3
+  languageName: node
+  linkType: hard
+
+"robust-predicates@npm:^3.0.2":
+  version: 3.0.3
+  resolution: "robust-predicates@npm:3.0.3"
+  checksum: 10/38464ec7a839b366e039410fa375ec9ea6d365f30eb38dab1c33c0269160ffa682c552a4c2f0098d89aff085fd51023db0cf039e7e6d24f87b4fc4b74ac5e89b
   languageName: node
   linkType: hard
 
@@ -6067,6 +6085,13 @@ __metadata:
   dependencies:
     memory-pager: "npm:^1.0.2"
   checksum: 10/174da88dbbcc783d5dbd26921931cc83830280b8055fb05333786ebe6fc015b9601b24972b3d55920dd2d9f5fb120576fbfa2469b08e5222c9cadf3f05210aab
+  languageName: node
+  linkType: hard
+
+"splaytree@npm:^3.1.0":
+  version: 3.2.3
+  resolution: "splaytree@npm:3.2.3"
+  checksum: 10/8c5ff49a1eb2e4797e22a15f3cf10d7be22c2313ec5f0e8e5d7e5d7c5c1aacd29db1714a9f5ef6e4c4bf433783ddbb90756b565193024af00853226598ef8575
   languageName: node
   linkType: hard
 
