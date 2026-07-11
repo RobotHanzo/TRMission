@@ -29,6 +29,18 @@ describe('cropToGeography', () => {
     const b = cropToGeography(crop);
     expect(a).toEqual(b);
   });
+
+  it('crops a region straddling the antimeridian, capturing land on both sides of the seam', () => {
+    // 160°E..200°E (= 160°E..160°W): the Russian Far East sits at native lon (<180) and Alaska
+    // sits past the seam (Alaska's ~-165° lands at 195° once shifted +360). A plain 160..180 crop
+    // reaches only the Russian side, so the wrapping crop must yield strictly more land.
+    const wrapped = cropToGeography({ lonMin: 160, lonMax: 200, latMin: 50, latMax: 72 });
+    const eastOnly = cropToGeography({ lonMin: 160, lonMax: 180, latMin: 50, latMax: 72 });
+    expect(wrapped).not.toBeNull();
+    expect(eastOnly).not.toBeNull();
+    expect(wrapped!.geography.land.length).toBeGreaterThan(eastOnly!.geography.land.length);
+    expect(validateGeography(wrapped!.geography)).toEqual([]);
+  });
 });
 
 describe('countriesToGeography', () => {

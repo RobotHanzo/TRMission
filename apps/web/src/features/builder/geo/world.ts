@@ -6,7 +6,7 @@ import { WORLD_COUNTRIES, type CountryLand } from './worldCountries';
 import { buildProjection, isValidCrop, type CropBBox } from './projection';
 import { clipRingsToBBox, type Ring } from './clip';
 import { simplifyToFit } from './simplify';
-import { chooseMinimalLonRepresentation } from './antimeridian';
+import { chooseMinimalLonRepresentation, shiftLon } from './antimeridian';
 
 /** Natural Earth's 1:110m Taiwan is a crude 4-point blob — swapped for the game's own detailed
  *  silhouette (see geo/taiwan.ts) so Taiwan reads correctly once the crop tool is zoomed in. */
@@ -55,11 +55,23 @@ function finalizeGeography(rings: readonly Ring[], crop: CropBBox): CropResult {
   return { geography: { baseView, land, crop }, droppedRings };
 }
 
-/** Full crop pipeline: clip the world to the bbox, simplify to fit the engine's caps
- *  (validateGeography's limits), then project into board space. Null on an invalid crop. */
+/** Clip world land to a crop that may wrap past the antimeridian (lonMax > 180 or lonMin < -180):
+ *  clip the native land AND a ±360-shifted copy, so land on the far side of the seam is captured.
+ *  The Natural Earth source splits seam features into separate per-side rings, so no single ring is
+ *  torn by the shift. A non-wrapping crop skips both extra clips and behaves exactly as before. */
+function clipWrapped(rings: readonly Ring[], crop: CropBBox): Ring[] {
+  const out = clipRingsToBBox(rings, crop);
+  if (crop.lonMax > 180) out.push(...clipRingsToBBox(shiftLon(rings, 360), crop));
+  if (crop.lonMin < -180) out.push(...clipRingsToBBox(shiftLon(rings, -360), crop));
+  return out;
+}
+
+/** Full crop pipeline: clip the world to the bbox (wrap-aware; see clipWrapped), simplify to fit
+ *  the engine's caps (validateGeography's limits), then project into board space. Null on an
+ *  invalid crop. */
 export function cropToGeography(crop: CropBBox): CropResult | null {
   if (!isValidCrop(crop)) return null;
-  const clipped = clipRingsToBBox(WORLD_LAND_DETAILED, crop);
+  const clipped = clipWrapped(WORLD_LAND_DETAILED, crop);
   return finalizeGeography(clipped, crop);
 }
 
