@@ -5,17 +5,24 @@ import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-na
 import type { RootStackParamList } from '../navigation';
 import { api, type RoomView } from '../net/rest';
 import { useSession } from '../store/session';
+import { useOnline } from '../hooks/useOnline';
+import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
+import { OfflineHomeSection } from '../offline/OfflineHomeSection';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
-/** The lobby home: rejoin an active room, create/join a room, or (P3) play offline vs bots. */
+/** The lobby home: play offline vs bots, rejoin an active room, or create/join a room. */
 export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const user = useSession((s) => s.user);
   const signOut = useSession((s) => s.signOut);
+  const online = useOnline();
   const [rooms, setRooms] = useState<RoomView[]>([]);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
+  // Bumped on focus so the offline section remounts and reloads its resume list (a finished or
+  // abandoned game must drop off it when the user navigates back here).
+  const [focusKey, setFocusKey] = useState(0);
 
   const refresh = useCallback(async () => {
     try {
@@ -26,7 +33,10 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   }, []);
 
   useEffect(() => {
-    const unsub = navigation.addListener('focus', () => void refresh());
+    const unsub = navigation.addListener('focus', () => {
+      void refresh();
+      setFocusKey((k) => k + 1);
+    });
     return unsub;
   }, [navigation, refresh]);
 
@@ -61,6 +71,15 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     <View style={styles.container}>
       <Text style={styles.greeting}>{t('home.greeting', { name: user?.displayName ?? '' })}</Text>
 
+      {!online && <OfflineHomeBanner />}
+
+      {/* Offline play never gates on connectivity (Apple 4.2 posture). */}
+      <OfflineHomeSection
+        key={focusKey}
+        onNewGame={() => navigation.navigate('OfflineSetup')}
+        onResume={(gameId) => navigation.navigate('OfflineGame', { mode: 'resume', gameId })}
+      />
+
       {rooms.length > 0 && (
         <>
           <Text style={styles.section}>{t('home.myRooms')}</Text>
@@ -84,25 +103,28 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
 
       <View style={styles.joinRow}>
         <TextInput
-          style={styles.joinInput}
+          style={[styles.joinInput, !online && styles.disabled]}
           placeholder={t('home.joinPlaceholder')}
           autoCapitalize="characters"
           value={code}
           onChangeText={setCode}
-          editable={!busy}
+          editable={!busy && online}
         />
-        <Pressable style={styles.secondary} onPress={() => void joinRoom()} disabled={busy}>
+        <Pressable
+          style={[styles.secondary, !online && styles.disabled]}
+          onPress={() => void joinRoom()}
+          disabled={busy || !online}
+        >
           <Text style={styles.secondaryText}>{t('home.join')}</Text>
         </Pressable>
       </View>
 
-      <Pressable style={styles.primary} onPress={() => void createRoom()} disabled={busy}>
+      <Pressable
+        style={[styles.primary, !online && styles.disabled]}
+        onPress={() => void createRoom()}
+        disabled={busy || !online}
+      >
         <Text style={styles.primaryText}>{t('home.create')}</Text>
-      </Pressable>
-
-      {/* P3 wires offline bot play here. */}
-      <Pressable style={[styles.secondary, styles.disabled]} disabled>
-        <Text style={styles.secondaryText}>{t('home.playBots')}</Text>
       </Pressable>
 
       <Pressable onPress={() => void signOut()}>
