@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 7 (TICKET_COMPLETED/completedTickets lock now fires off-variant too)', () => {
-    expect(ENGINE_VERSION).toBe(7);
+  it('is engine version 8 (the full random-event expansion)', () => {
+    expect(ENGINE_VERSION).toBe(8);
   });
 
   it('replays byte-identically under each variant', () => {

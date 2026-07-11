@@ -28,6 +28,8 @@
   min-width: 0;
   min-height: 0;
   display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-2);
 }
 .game-rail {
   grid-area: rail;
@@ -505,9 +507,13 @@
    width/x control the tie's long axis (crossing the track at 45°); height/y control its thickness. */
 .tunnel-tie {
   x: calc(var(--m-tie-w) / -2 * 1px * var(--inv-scale)); /* centred: extends tie-w/2 each way */
-  width: calc(var(--m-tie-w) * 1px * var(--inv-scale)); /* spans bed + a little past each rail edge */
+  width: calc(
+    var(--m-tie-w) * 1px * var(--inv-scale)
+  ); /* spans bed + a little past each rail edge */
   y: calc(var(--m-tie-h) / -2 * 1px * var(--inv-scale));
-  height: calc(var(--m-tie-h) * 1px * var(--inv-scale)); /* thin: each tie reads as a crisp diagonal slat */
+  height: calc(
+    var(--m-tie-h) * 1px * var(--inv-scale)
+  ); /* thin: each tie reads as a crisp diagonal slat */
   fill: var(--m-tie-ink);
   fill-opacity: var(--m-tie-o);
 }
@@ -714,6 +720,35 @@
 }
 .hud-actions button {
   flex: 1;
+}
+.event-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border: 1px solid color-mix(in srgb, var(--tr-accent) 55%, var(--tr-line));
+  border-radius: var(--tr-radius);
+  background: color-mix(in srgb, var(--tr-accent) 12%, var(--tr-surface));
+  box-shadow: var(--tr-shadow);
+}
+.event-action-bar strong {
+  margin-right: var(--tr-space-2);
+}
+.event-hive-cards {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.event-inline-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tr-space-1);
+}
+.event-inline-action select {
+  min-width: 72px;
 }
 
 .trackers {
@@ -1352,6 +1387,8 @@ button.ticket-card:hover {
   gap: var(--tr-space-3);
 }
 .card-options .payment-card {
+  position: relative;
+  flex-wrap: wrap;
   justify-content: center;
   gap: var(--tr-space-3);
   padding: var(--tr-space-3);
@@ -1747,6 +1784,29 @@ button.ticket-card:hover {
 .route.evt-sky .bed {
   filter: drop-shadow(0 0 calc(1.4px * var(--inv-scale)) rgba(240, 165, 40, 0.95));
 }
+.payment-free-label {
+  font-weight: 800;
+  color: var(--tr-ok);
+}
+.payment-modifiers {
+  display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+.payment-modifier {
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tr-accent) 15%, var(--tr-surface));
+  color: var(--tr-ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+/* Harvest bonus corridors: a green edge glow without obscuring the authored route colour. */
+.route.evt-harvest .bed {
+  filter: drop-shadow(0 0 calc(1.2px * var(--inv-scale)) rgba(42, 151, 91, 0.9));
+}
 /* Reopened-route +2 first-claim chip. */
 .evt-reopen-chip circle {
   fill: var(--tr-ok);
@@ -1780,10 +1840,56 @@ button.ticket-card:hover {
   stroke-dasharray: calc(0.9px * var(--inv-scale)) calc(0.7px * var(--inv-scale));
   r: calc(2.6px * var(--marker-scale));
 }
+.evt-lucky-chip {
+  fill: none;
+  stroke: #d49a18;
+  stroke-width: calc(0.48px * var(--inv-scale));
+  stroke-dasharray: calc(0.7px * var(--inv-scale)) calc(0.45px * var(--inv-scale));
+  r: calc(3.1px * var(--marker-scale));
+}
+.evt-city-badge circle {
+  r: calc(1.8px * var(--inv-scale));
+  stroke: #fff;
+  stroke-width: calc(0.2px * var(--inv-scale));
+}
+.evt-city-badge text {
+  fill: #fff;
+  font-size: calc(1.9px * var(--inv-scale));
+  font-weight: 850;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.evt-lantern-host circle {
+  fill: #d96c24;
+}
+.evt-procession circle {
+  fill: #8b4eb5;
+}
+.evt-bento circle {
+  fill: #b8643a;
+}
+.evt-night-market circle {
+  fill: #314d92;
+}
+.evt-procession-trail {
+  fill: none;
+  stroke: #9a62bd;
+  stroke-width: calc(0.65px * var(--inv-scale));
+  stroke-dasharray: calc(1.2px * var(--inv-scale)) calc(0.8px * var(--inv-scale));
+  opacity: 0.72;
+}
+.evt-lucky-link {
+  stroke: #d49a18;
+  stroke-width: calc(0.45px * var(--inv-scale));
+  stroke-dasharray: calc(0.9px * var(--inv-scale)) calc(0.8px * var(--inv-scale));
+  opacity: 0.58;
+}
 /* Keep dense route markers out of the two most zoomed-out tiers (mirror the CB-badge rule). */
 .board-viewport[data-zoom='far'] .evt-typhoon,
 .board-viewport[data-zoom='far'] .evt-reopen-chip,
 .board-viewport[data-zoom='far'] .evt-hotspot,
+.board-viewport[data-zoom='far'] .evt-city-badge,
+.board-viewport[data-zoom='far'] .evt-lucky-chip,
 .board-viewport[data-zoom='regional'] .evt-hotspot {
   display: none;
 }
@@ -1835,6 +1941,15 @@ button.ticket-card:hover {
   background: rgba(58, 157, 92, 0.16);
   color: var(--tr-ok);
   font-weight: 600;
+}
+.event-persistent {
+  border-left: 3px solid var(--tr-accent);
+}
+.event-lucky {
+  border-left-color: #d49a18;
+}
+.event-resources {
+  background: color-mix(in srgb, var(--tr-accent) 8%, var(--tr-surface-2));
 }
 .event-forecast {
   opacity: 0.74;

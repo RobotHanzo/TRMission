@@ -22,6 +22,10 @@ export type LogKind =
   | 'eventStarted'
   | 'eventEnded'
   | 'eventBonus'
+  | 'eventMarkerMoved'
+  | 'eventNightMarketSwapped'
+  | 'eventPerkChosen'
+  | 'eventHiveResolved'
   | 'marketRecycled';
 
 export interface LogDatum {
@@ -175,6 +179,38 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
           importance: 'highlight',
         });
         break;
+      case 'eventMarkerMoved':
+        out.push({
+          kind: 'eventMarkerMoved',
+          playerId: ev.value.playerId || null,
+          data: { eventKind: ev.value.kind, cityId: ev.value.cityId },
+          importance: 'highlight',
+        });
+        break;
+      case 'eventNightMarketSwapped':
+        out.push({
+          kind: 'eventNightMarketSwapped',
+          playerId: ev.value.playerId,
+          data: {},
+          importance: 'normal',
+        });
+        break;
+      case 'eventPerkChosen':
+        out.push({
+          kind: 'eventPerkChosen',
+          playerId: ev.value.playerId,
+          data: { perk: ev.value.perk },
+          importance: 'highlight',
+        });
+        break;
+      case 'eventHiveResolved':
+        out.push({
+          kind: 'eventHiveResolved',
+          playerId: ev.value.playerId,
+          data: { busted: ev.value.busted, keptCount: ev.value.keptCount },
+          importance: ev.value.busted ? 'alert' : 'highlight',
+        });
+        break;
       case 'ticketCompleted':
         out.push({
           kind: 'ticketCompleted',
@@ -184,7 +220,12 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
         });
         break;
       case 'marketRecycled':
-        out.push({ kind: 'marketRecycled', playerId: null, data: {}, importance: 'normal' });
+        out.push({
+          kind: 'marketRecycled',
+          playerId: null,
+          data: { reason: ev.value.reason || 'THREE_LOCOS' },
+          importance: 'normal',
+        });
         break;
       default:
         break; // omit the rest

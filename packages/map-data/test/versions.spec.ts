@@ -9,6 +9,7 @@ import {
 } from '../src/index';
 import { CONTENT_V2 } from '../src/archive/v2';
 import { CONTENT_V3 } from '../src/archive/v3';
+import { CONTENT_V4 } from '../src/archive/v4';
 
 describe('content version registry', () => {
   it('keys every registered version by its own content hash', () => {
@@ -25,19 +26,21 @@ describe('content version registry', () => {
   it('resolves each archived version by its hash', () => {
     const v2Hash = hashContent(CONTENT_V2);
     const v3Hash = hashContent(CONTENT_V3);
+    const v4Hash = hashContent(CONTENT_V4);
     expect(v2Hash).not.toBe(CONTENT_HASH);
     expect(v3Hash).not.toBe(CONTENT_HASH);
     expect(v2Hash).not.toBe(v3Hash);
     expect(resolveContentByHash(v2Hash)).toBe(CONTENT_V2);
     expect(resolveContentByHash(v3Hash)).toBe(CONTENT_V3);
+    expect(resolveContentByHash(v4Hash)).toBe(CONTENT_V4);
   });
 
   it('returns undefined for an unknown hash', () => {
     expect(resolveContentByHash('0'.repeat(64))).toBeUndefined();
   });
 
-  it('current content is map version 4 (the tw2.1 network)', () => {
-    expect(TAIWAN_CONTENT.meta.version).toBe(4);
+  it('current content is map version 5 (tw2.1 plus authored auspicious pairs)', () => {
+    expect(TAIWAN_CONTENT.meta.version).toBe(5);
     expect(TAIWAN_CONTENT.cities.length).toBe(36);
     expect(TAIWAN_CONTENT.routes.length).toBe(75);
   });
@@ -85,10 +88,15 @@ describe('content version registry', () => {
     );
   });
 
-  // The current (v4) hash — new games are stamped with this.
-  it('pins the v4 (current) content hash', () => {
-    expect(hashContent(TAIWAN_CONTENT)).toBe(
+  it('pins the archived v4 content hash', () => {
+    expect(hashContent(CONTENT_V4)).toBe(
       'e211b5d98bd7142b8c52e63bf681a57dfab903375c95cee4c0dbc165ecc6f4ba',
+    );
+  });
+
+  it('pins the v5 current content hash', () => {
+    expect(hashContent(TAIWAN_CONTENT)).toBe(
+      '6e06eb39c90aa6c82db20638f84b200d9a46bbd4f6777e883e6bab4840dbf26f',
     );
   });
 });

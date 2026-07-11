@@ -33,7 +33,13 @@ describe('command codec — action ⇄ proto round-trip', () => {
       t: 'CLAIM_ROUTE',
       player: p1,
       routeId: asRouteId('R50'),
-      payment: { color: 'GREEN', colorCount: 6, locomotives: 2 },
+      payment: {
+        color: 'GREEN',
+        colorCount: 5,
+        locomotives: 2,
+        bentoSpend: 'WILD',
+        useClaimDiscount: true,
+      },
     },
     { t: 'DRAW_FACEUP', player: p1, slot: 3 },
     { t: 'DRAW_BLIND', player: p1 },
@@ -53,6 +59,18 @@ describe('command codec — action ⇄ proto round-trip', () => {
       extra: { color: 'GREEN', colorCount: 1, locomotives: 0 },
     },
     { t: 'RESOLVE_TUNNEL', player: p1, commit: false },
+    { t: 'RELOCATE_LANTERN_HOST', player: p1, cityId: asCityId('KAOHSIUNG') },
+    {
+      t: 'REPAIR_ROUTE',
+      player: p1,
+      routeId: asRouteId('R7'),
+      payment: { color: 'BLUE', colorCount: 2, locomotives: 0 },
+    },
+    { t: 'NIGHT_MARKET_SWAP', player: p1, giveColor: 'RED', slot: 2 },
+    { t: 'CHOOSE_EVENT_PERK', player: p1, perk: 'REPAIR_PERMIT' },
+    { t: 'START_HIVE_DRAW', player: p1 },
+    { t: 'CONTINUE_HIVE_DRAW', player: p1 },
+    { t: 'STOP_HIVE_DRAW', player: p1 },
     { t: 'PASS', player: p1 },
   ];
 
@@ -165,7 +183,10 @@ describe('viewToSnapshot — random-events wire leak test (risk #1, byte-level)'
       active: [{ id: 'evTy', kind: 'TYPHOON_LANDFALL', endsAfterRound: 99, routeIds: [closed] }],
       hotspots: { [hot as string]: 2 },
       charters: [{ id: 'evCh', a: liveA, b: liveB, points: 8, expiresAfterRound: 99, wonBy: null }],
+      luckyContracts: [],
       reopenBonus: [],
+      repairedRouteIds: [],
+      resources: {},
     };
     const withEvents: GameState = { ...state, events };
 

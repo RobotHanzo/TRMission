@@ -87,6 +87,55 @@ describe('EventsPanel', () => {
     expect(screen.getByText(/完成觀光專列/)).toBeInTheDocument();
   });
 
+  it('renders persistent expansion markers, mandatory progress, and public resources', () => {
+    useGame.setState({
+      snapshot: create(GameSnapshotSchema, {
+        stateVersion: 1,
+        phase: Phase.EVENT_DRAFT,
+        currentPlayerId: 'p2',
+        turnOrder: ['p1', 'p2'],
+        players: [
+          {
+            id: 'p1',
+            seat: 0,
+            trainCars: 45,
+            stationsRemaining: 3,
+            bentoTokens: 2,
+            blessings: 1,
+            claimDiscounts: 1,
+          },
+          { id: 'p2', seat: 1, trainCars: 45, stationsRemaining: 3, repairPermits: 1 },
+        ],
+        randomEvents: {
+          mode: 'intense',
+          roundIndex: 4,
+          lanternHost: { eventId: 'lantern', cityId: 'taipei', points: 6 },
+          boringActive: true,
+          luckyContracts: [
+            {
+              eventId: 'lucky',
+              cityA: 'taipei',
+              cityB: 'kaohsiung',
+              points: 5,
+              wonByPlayerId: '',
+            },
+          ],
+          eventDraft: { order: ['p2', 'p1'], pickIndex: 0, currentPlayerId: 'p2' },
+          pendingHiveDraw: { playerId: 'p1', revealed: [1], maxDraws: 4 },
+        },
+      }),
+    });
+    render(<EventsPanel />);
+
+    expect(screen.getByTestId('lantern-host-row')).toHaveTextContent('主辦城：臺北（+6）');
+    expect(screen.getByText('潛盾機施工中：隧道只翻 2 張')).toBeInTheDocument();
+    expect(screen.getByText(/連接 臺北–高雄 得 5 分/)).toBeInTheDocument();
+    expect(screen.getByText('尚有 2 人待選')).toBeInTheDocument();
+    expect(screen.getByText(/\(1\/4\)/)).toBeInTheDocument();
+    expect(screen.getByText(/便當 2 · 香火 1 · 佔領折扣 1/)).toBeInTheDocument();
+    expect(screen.getByText('搶修許可 1')).toBeInTheDocument();
+  });
+
   it('renders nothing when the snapshot carries no random_events block', () => {
     useGame.setState({ snapshot: snapshot() });
     render(<EventsPanel />);

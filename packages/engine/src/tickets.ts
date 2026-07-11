@@ -5,6 +5,7 @@ import type { GameState } from './types/state';
 import type { GameEvent } from './types/events';
 import { ownConnectedTicketIds } from './graph/connectivity';
 import { withPlayer } from './reducers/common';
+import { ticketOfferCount } from './events/effects';
 
 /**
  * Draw up to `ticketDrawCount` tickets off the short deck as an offer for `player`, moving the turn
@@ -17,7 +18,7 @@ export function offerTickets(
   player: PlayerId,
 ): { state: GameState; events: GameEvent[] } | null {
   if (state.ticketDeckShort.length === 0) return null;
-  const count = Math.min(state.ruleParams.ticketDrawCount, state.ticketDeckShort.length);
+  const count = Math.min(ticketOfferCount(state), state.ticketDeckShort.length);
   const short = [...state.ticketDeckShort];
   const offered: TicketId[] = [];
   for (let i = 0; i < count; i++) {

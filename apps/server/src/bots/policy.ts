@@ -123,6 +123,20 @@ function scoreAction(a: Action, ctx: Ctx): number {
     case 'KEEP_INITIAL_TICKETS':
     case 'KEEP_TICKETS':
       return scoreKeep(a.keep, ctx);
+    case 'RELOCATE_LANTERN_HOST':
+      return 100;
+    case 'REPAIR_ROUTE':
+      return 7 - a.payment.locomotives * ctx.knobs.locoPenalty;
+    case 'NIGHT_MARKET_SWAP':
+      return 4;
+    case 'CHOOSE_EVENT_PERK':
+      return a.perk === 'DRAW_TWO' ? 9 : a.perk === 'CLAIM_DISCOUNT' ? 8 : 6;
+    case 'START_HIVE_DRAW':
+      return 5;
+    case 'CONTINUE_HIVE_DRAW':
+      return (ctx.state.events?.pendingHiveDraw?.revealed.length ?? 0) < 3 ? 6 : 1;
+    case 'STOP_HIVE_DRAW':
+      return (ctx.state.events?.pendingHiveDraw?.revealed.length ?? 0) >= 3 ? 7 : 2;
     case 'PASS':
       return -1000; // only ever chosen when it is the sole legal action
   }

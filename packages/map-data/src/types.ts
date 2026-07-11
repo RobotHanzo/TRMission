@@ -58,6 +58,13 @@ export interface TicketDef {
   readonly view?: TicketView;
 }
 
+/** An authored city pair eligible for the Lucky Ticket Stub random event. */
+export interface AuspiciousPair {
+  readonly id: string;
+  readonly a: CityId;
+  readonly b: CityId;
+}
+
 export interface MapMeta {
   readonly mapId: string;
   readonly version: number;
@@ -104,6 +111,8 @@ export interface GameContent {
   readonly cities: readonly CityDef[];
   readonly routes: readonly RouteDef[];
   readonly tickets: readonly TicketDef[];
+  /** Optional authored targets for Lucky Ticket Stub. Absent keeps pre-v5 content hashes stable. */
+  readonly auspiciousPairs?: readonly AuspiciousPair[];
   /** Custom-map cartography; absent for maps that render via hand-authored geography (Taiwan). */
   readonly geography?: MapGeography;
   /** Custom-map rule defaults; absent means the engine's DEFAULT_RULE_PARAMS apply. */

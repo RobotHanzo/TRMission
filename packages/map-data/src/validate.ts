@@ -71,6 +71,14 @@ export function formatIssue(issue: ValidationIssue): string {
       return `ticket ${p.ticketId}: endpoints identical`;
     case 'ticketValueNotPositive':
       return `ticket ${p.ticketId}: value must be positive`;
+    case 'duplicateAuspiciousPairId':
+      return `duplicate auspicious pair id ${p.pairId}`;
+    case 'auspiciousPairUnknownCityA':
+      return `auspicious pair ${p.pairId}: unknown city A ${p.cityId}`;
+    case 'auspiciousPairUnknownCityB':
+      return `auspicious pair ${p.pairId}: unknown city B ${p.cityId}`;
+    case 'auspiciousPairEndpointsIdentical':
+      return `auspicious pair ${p.pairId}: endpoints identical`;
     case 'graphNotConnected':
       return `graph is not connected: ${p.components} components`;
     case 'ticketViewInvalidMode':
@@ -240,6 +248,18 @@ export function validateContent(content: GameContent): ValidationResult {
     if ((t.a as string) === (t.b as string)) push('ticketEndpointsIdentical', { ticketId: tid });
     if (t.value <= 0) push('ticketValueNotPositive', { ticketId: tid });
     if (t.view) for (const issue of ticketViewIssues(t.view, tid)) issues.push(issue);
+  }
+
+  // --- authored Lucky Ticket Stub targets ---
+  const auspiciousIds = new Set<string>();
+  for (const pair of content.auspiciousPairs ?? []) {
+    if (auspiciousIds.has(pair.id)) push('duplicateAuspiciousPairId', { pairId: pair.id });
+    auspiciousIds.add(pair.id);
+    if (!cityIds.has(pair.a as string))
+      push('auspiciousPairUnknownCityA', { pairId: pair.id, cityId: pair.a as string });
+    if (!cityIds.has(pair.b as string))
+      push('auspiciousPairUnknownCityB', { pairId: pair.id, cityId: pair.b as string });
+    if (pair.a === pair.b) push('auspiciousPairEndpointsIdentical', { pairId: pair.id });
   }
 
   // --- connectivity (union-find over all routes; every city reachable) ---

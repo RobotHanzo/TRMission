@@ -39,6 +39,10 @@ function publicPlayer(p: RedactedPlayer) {
     routePoints: p.routePoints,
     handCount: p.handCount,
     ticketCount: p.ticketCount,
+    bentoTokens: p.bentoTokens,
+    blessings: p.blessings,
+    claimDiscounts: p.claimDiscounts,
+    repairPermits: p.repairPermits,
   };
 }
 
@@ -53,6 +57,7 @@ function finalProto(pf: RedactedPlayerFinal, keptTicketIds: readonly string[]) {
     stationBonus: pf.stationBonus,
     longestTrailLength: pf.longestTrailLength,
     longestBonus: pf.longestBonus,
+    eventBonus: pf.eventBonus ?? 0,
     total: pf.total,
     keptTicketIds: [...keptTicketIds],
     completedTicketIds: pf.completedTicketIds.map((id) => id as string),

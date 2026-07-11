@@ -144,14 +144,35 @@ describe('@trm/codec viewToSnapshot — random events (M4)', () => {
           routeIds: [closedRoute],
           region: 'North',
         },
+        {
+          id: 'procession',
+          kind: 'GODDESS_PROCESSION',
+          endsAfterRound: 7,
+          cityPath: [hotCity, charterA, charterB],
+          position: 1,
+        },
       ],
       hotspots: { [hotCity as string]: 2 },
       charters: [
         { id: 'evChOpen', a: charterA, b: charterB, points: 8, expiresAfterRound: 9, wonBy: null },
         { id: 'evChWon', a: wonA, b: wonB, points: 12, expiresAfterRound: 9, wonBy: p1 },
       ],
+      luckyContracts: [{ id: 'lucky', a: charterA, b: wonB, points: 5, wonBy: null }],
       reopenBonus: [reopenRoute],
+      repairedRouteIds: [forecastRoute],
+      resources: {
+        p1: { bentoTokens: 2, blessings: 3, claimDiscounts: 1, repairPermits: 1 },
+      },
       freeStation: { untilRound: 3 },
+      lanternHost: { eventId: 'lantern', cityId: hotCity, points: 6 },
+      eventDraft: {
+        eventId: 'draft',
+        order: [p2, p1],
+        pickIndex: 1,
+        resumeOrderIndex: 0,
+        picks: [{ playerId: p2, perk: 'DRAW_TWO' }],
+      },
+      boringMachine: { eventId: 'boring', remainingDraws: 12 },
     };
     const withEvents: GameState = {
       ...state,
@@ -169,7 +190,7 @@ describe('@trm/codec viewToSnapshot — random events (M4)', () => {
     expect(re?.mode).toBe('intense');
     expect(re?.roundIndex).toBe(3);
 
-    expect(re?.active.length).toBe(1);
+    expect(re?.active.length).toBe(2);
     expect(re?.active[0]?.id).toBe('evTy');
     expect(re?.active[0]?.kind).toBe('TYPHOON_LANDFALL');
     expect(re?.active[0]?.endsAfterRound).toBe(9);
@@ -208,6 +229,28 @@ describe('@trm/codec viewToSnapshot — random events (M4)', () => {
     expect(re?.reopenBonusRouteIds).toEqual([reopenRoute as string]);
     expect(re?.closedRouteIds).toContain(closedRoute as string);
     expect(re?.freeStationAvailable).toBe(true);
+    expect(decoded.players.find((player) => player.id === 'p1')).toMatchObject({
+      bentoTokens: 2,
+      blessings: 3,
+      claimDiscounts: 1,
+      repairPermits: 1,
+    });
+    expect(re?.active[1]?.cityPath).toEqual([
+      hotCity as string,
+      charterA as string,
+      charterB as string,
+    ]);
+    expect(re?.active[1]?.position).toBe(1);
+    expect(re?.lanternHost?.cityId).toBe(hotCity as string);
+    expect(re?.luckyContracts[0]).toMatchObject({
+      eventId: 'lucky',
+      cityA: charterA as string,
+      cityB: wonB as string,
+      points: 5,
+    });
+    expect(re?.repairedRouteIds).toEqual([forecastRoute as string]);
+    expect(re?.eventDraft?.currentPlayerId).toBe('p1');
+    expect(re?.boringActive).toBe(true);
   });
 
   it('leaves random_events unset and events_mode "off" when the view carries no events block', () => {
@@ -404,6 +447,69 @@ describe('@trm/codec eventToProto — random events (M4)', () => {
     expect(v.cityId).toBe('KAOHSIUNG');
     expect(v.points).toBe(0);
   });
+
+  it('maps every expansion follow-up event and the harvest recycle reason', () => {
+    const moved = roundTrip({
+      e: 'EVENT_MARKER_MOVED',
+      kind: 'LANTERN_HOST_CITY',
+      id: 'lantern',
+      cityId: asCityId('TAIPEI'),
+      player: p1,
+      visibility: 'PUBLIC',
+    });
+    expect(moved.event.case).toBe('eventMarkerMoved');
+    if (moved.event.case !== 'eventMarkerMoved') throw new Error('unreachable');
+    expect(moved.event.value).toMatchObject({
+      kind: 'LANTERN_HOST_CITY',
+      cityId: 'TAIPEI',
+      playerId: 'p1',
+    });
+
+    const swap = roundTrip({
+      e: 'EVENT_NIGHT_MARKET_SWAPPED',
+      player: p1,
+      slot: 2,
+      gave: 'RED',
+      took: 'BLUE',
+      visibility: 'PUBLIC',
+    });
+    expect(swap.event.case).toBe('eventNightMarketSwapped');
+
+    const perk = roundTrip({
+      e: 'EVENT_PERK_CHOSEN',
+      player: p1,
+      perk: 'DRAW_TWO',
+      visibility: 'PUBLIC',
+    });
+    expect(perk.event.case).toBe('eventPerkChosen');
+
+    const reveal = roundTrip({
+      e: 'EVENT_HIVE_CARD_REVEALED',
+      player: p1,
+      card: 'GREEN',
+      count: 3,
+      visibility: 'PUBLIC',
+    });
+    expect(reveal.event.case).toBe('eventHiveCardRevealed');
+
+    const hive = roundTrip({
+      e: 'EVENT_HIVE_RESOLVED',
+      player: p1,
+      busted: false,
+      keptCount: 3,
+      visibility: 'PUBLIC',
+    });
+    expect(hive.event.case).toBe('eventHiveResolved');
+
+    const recycled = roundTrip({
+      e: 'MARKET_RECYCLED',
+      reason: 'THREE_OF_COLOR',
+      visibility: 'PUBLIC',
+    });
+    expect(recycled.event.case).toBe('marketRecycled');
+    if (recycled.event.case !== 'marketRecycled') throw new Error('unreachable');
+    expect(recycled.event.value.reason).toBe('THREE_OF_COLOR');
+  });
 });
 
 describe('@trm/codec rejectionToPb — random-events rule violations (M1/M4)', () => {
@@ -414,5 +520,16 @@ describe('@trm/codec rejectionToPb — random-events rule violations (M1/M4)', (
     expect(RejectionCode.EVENT_CLAIMS_SUSPENDED).toBe(127);
     expect(rejectionToPb('EVENT_STATIONS_SUSPENDED')).toBe(RejectionCode.EVENT_STATIONS_SUSPENDED);
     expect(RejectionCode.EVENT_STATIONS_SUSPENDED).toBe(128);
+  });
+
+  it('maps every expansion rejection to its stable wire code', () => {
+    expect(rejectionToPb('EVENT_FACEUP_LOCO_BLOCKED')).toBe(129);
+    expect(rejectionToPb('EVENT_REPAIR_UNAVAILABLE')).toBe(130);
+    expect(rejectionToPb('EVENT_REPAIR_PAYMENT_INVALID')).toBe(131);
+    expect(rejectionToPb('EVENT_NIGHT_MARKET_UNAVAILABLE')).toBe(132);
+    expect(rejectionToPb('EVENT_LANTERN_RELOCATION_INVALID')).toBe(133);
+    expect(rejectionToPb('EVENT_DRAFT_CHOICE_INVALID')).toBe(134);
+    expect(rejectionToPb('EVENT_HIVE_UNAVAILABLE')).toBe(135);
+    expect(rejectionToPb('EVENT_RESOURCE_UNAVAILABLE')).toBe(136);
   });
 });

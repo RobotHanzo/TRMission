@@ -1,14 +1,6 @@
-import type { RouteId, CityId, PlayerId, EventsMode } from '@trm/shared';
+import type { RouteId, CityId, PlayerId, EventsMode, CardColor } from '@trm/shared';
+import type { EventPerk } from './actions';
 
-/**
- * Random-events state model (feature is OFF when `GameState.events` is absent).
- *
- * A seeded {@link EventScheduleEntry} list is drawn once at genesis (see `events/schedule.ts`) and
- * plays out at round boundaries (see `events/runtime.ts`). The schedule itself is HIDDEN information
- * — only a one-round "forecast" of the next telegraphed entry and the currently-live effects are
- * ever projected to a viewer (see `redactFor`). M1 lands the skeleton (schedule, round ticking,
- * redaction) only; the rule EFFECTS (route closures, claim surcharges, bonuses) arrive in M2/M3.
- */
 export type RandomEventKind =
   | 'TYPHOON_LANDFALL'
   | 'TYPHOON_DAY_OFF'
@@ -17,31 +9,56 @@ export type RandomEventKind =
   | 'SKY_LANTERN'
   | 'AFTERSHOCK'
   | 'RAILWAY_GALA'
-  | 'STAMP_RALLY';
+  | 'STAMP_RALLY'
+  | 'LANTERN_HOST_CITY'
+  | 'BENTO_RUSH'
+  | 'SLOPE_REPAIR_ORDER'
+  | 'STATION_FRONT_NIGHT_MARKET'
+  | 'GODDESS_PROCESSION'
+  | 'SPRING_FESTIVAL_RUSH'
+  | 'ROLLING_STOCK_ALLOCATION_DAY'
+  | 'HIVE_OF_SPARKS'
+  | 'BREAKTHROUGH_BORING_MACHINE'
+  | 'INTERIM_OPERATIONS_REPORT'
+  | 'HARVEST_FESTIVAL_EXPRESS'
+  | 'ALL_SEATS_RESERVED'
+  | 'LUCKY_TICKET_STUB';
 
-/** A single scheduled event. Part of the HIDDEN schedule — never projected wholesale. */
-export interface EventScheduleEntry {
-  readonly id: string; // 'ev1', 'ev2', … in schedule order
-  readonly kind: RandomEventKind;
-  readonly startRound: number;
-  readonly durationRounds: number; // 0 = instant/permanent (VIRAL_HOTSPOT)
-  readonly telegraphed: boolean; // true: TYPHOON_*, SKY_LANTERN, AFTERSHOCK
-  readonly routeIds?: readonly RouteId[]; // typhoon picks / sky-lantern resolved region routes
-  readonly region?: string;
-  readonly cityId?: CityId; // hotspot
-  readonly charter?: { readonly a: CityId; readonly b: CityId; readonly points: number };
+export interface CityPair {
+  readonly a: CityId;
+  readonly b: CityId;
 }
 
-/** A currently-live windowed event (public — surfaced to every viewer). */
+/** A single seeded schedule entry. The full list is hidden from every projection. */
+export interface EventScheduleEntry {
+  readonly id: string;
+  readonly kind: RandomEventKind;
+  readonly startRound: number;
+  readonly durationRounds: number;
+  readonly telegraphed: boolean;
+  readonly routeIds?: readonly RouteId[];
+  readonly region?: string;
+  readonly cityId?: CityId;
+  readonly charter?: { readonly a: CityId; readonly b: CityId; readonly points: number };
+  readonly cityPath?: readonly CityId[];
+  readonly pair?: CityPair;
+  /** Seeded selector resolved against the live deck size when the boring machine starts. */
+  readonly markerSelector?: number;
+}
+
+/** A currently-live, round-windowed event. */
 export interface ActiveEvent {
   readonly id: string;
   readonly kind: RandomEventKind;
-  readonly endsAfterRound: number; // last round it is active
+  readonly endsAfterRound: number;
   readonly routeIds?: readonly RouteId[];
   readonly region?: string;
+  readonly cityId?: CityId;
+  readonly cityPath?: readonly CityId[];
+  readonly position?: number;
+  readonly pair?: CityPair;
 }
 
-/** An open (or already-won) charter mission, live until its expiry round. */
 export interface CharterContract {
   readonly id: string;
   readonly a: CityId;
@@ -51,16 +68,69 @@ export interface CharterContract {
   readonly wonBy: PlayerId | null;
 }
 
-/** Runtime state for the random-events feature; present on `GameState.events` only when ON. */
+export interface LuckyContract {
+  readonly id: string;
+  readonly a: CityId;
+  readonly b: CityId;
+  readonly points: number;
+  readonly wonBy: PlayerId | null;
+}
+
+export interface EventResources {
+  readonly bentoTokens: number;
+  readonly blessings: number;
+  readonly claimDiscounts: number;
+  readonly repairPermits: number;
+}
+
+export interface LanternHostState {
+  readonly eventId: string;
+  readonly cityId: CityId;
+  readonly points: number;
+}
+
+export interface LanternRelocationState {
+  readonly playerId: PlayerId;
+  readonly candidateCityIds: readonly CityId[];
+}
+
+export interface EventDraftState {
+  readonly eventId: string;
+  readonly order: readonly PlayerId[];
+  readonly pickIndex: number;
+  readonly resumeOrderIndex: number;
+  readonly picks: readonly { readonly playerId: PlayerId; readonly perk: EventPerk }[];
+}
+
+export interface PendingHiveDraw {
+  readonly playerId: PlayerId;
+  readonly revealed: readonly CardColor[];
+  readonly maxDraws: number;
+}
+
+export interface BoringMachineState {
+  readonly eventId: string;
+  /** Number of real card draws remaining before the hidden marker surfaces. */
+  readonly remainingDraws: number;
+}
+
 export interface EventsState {
   readonly mode: Exclude<EventsMode, 'off'>;
-  readonly roundIndex: number; // 1 when play begins; +1 per orderIndex wrap in endTurn
-  readonly nextIdx: number; // next unprocessed schedule entry
-  readonly schedule: readonly EventScheduleEntry[]; // HIDDEN info — never projected wholesale
-  readonly suppressed: readonly string[]; // entry ids skipped by quiet-endgame
+  readonly roundIndex: number;
+  readonly nextIdx: number;
+  readonly schedule: readonly EventScheduleEntry[];
+  readonly suppressed: readonly string[];
   readonly active: readonly ActiveEvent[];
-  readonly hotspots: Readonly<Record<string, number>>; // cityId → 1|2, permanent
-  readonly charters: readonly CharterContract[]; // open + won, until expiry
-  readonly reopenBonus: readonly RouteId[]; // typhoon routes carrying +2 first-claim
+  readonly hotspots: Readonly<Record<string, number>>;
+  readonly charters: readonly CharterContract[];
+  readonly luckyContracts: readonly LuckyContract[];
+  readonly reopenBonus: readonly RouteId[];
+  readonly repairedRouteIds: readonly RouteId[];
+  readonly resources: Readonly<Record<string, EventResources>>;
   readonly freeStation?: { readonly untilRound: number };
+  readonly lanternHost?: LanternHostState;
+  readonly lanternPendingRelocation?: LanternRelocationState;
+  readonly eventDraft?: EventDraftState;
+  readonly pendingHiveDraw?: PendingHiveDraw;
+  readonly boringMachine?: BoringMachineState;
 }

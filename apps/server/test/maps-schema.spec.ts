@@ -37,4 +37,13 @@ describe('MapDraftSchema keeps display-area fields', () => {
     });
     expect(parsed.geography?.defaultTicketView).toEqual({ mode: 'zoom', level: 0.3 });
   });
+  it('keeps authored auspicious pairs instead of stripping them', () => {
+    const parsed = MapDraftSchema.parse({
+      cities: [],
+      routes: [],
+      tickets: [],
+      auspiciousPairs: [{ id: 'lucky-1', a: 'TAIPEI', b: 'KAOHSIUNG' }],
+    });
+    expect(parsed.auspiciousPairs).toEqual([{ id: 'lucky-1', a: 'TAIPEI', b: 'KAOHSIUNG' }]);
+  });
 });

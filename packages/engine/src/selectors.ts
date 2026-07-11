@@ -8,7 +8,13 @@ import type { RedactedView, RedactedPlayer, RedactedFinalScoreboard } from './ty
 import { reduce, hasAnyLegalMove } from './reduce';
 import { currentPlayerId } from './turn';
 import { getPlayer } from './reducers/common';
-import { skyLanternSurcharge, freeStationAvailable } from './events/effects';
+import {
+  skyLanternSurcharge,
+  freeStationAvailable,
+  eventResources,
+  hiveOfSparksActive,
+  canUseNightMarketSwap,
+} from './events/effects';
 import { ownConnectedTicketIds } from './graph/connectivity';
 import { evaluatePlayerTickets, longestTrailRouteIdsFor } from './scoring';
 import type { TicketId } from '@trm/shared';
@@ -28,10 +34,43 @@ export function enumerateClaimPayments(
   // legalActions still offers the (surcharged) claim (mirror of validateRoutePayment's extraCards).
   if (p.trainCars < route.length) return [];
   const extraCards = skyLanternSurcharge(state, route.id);
-  return enumeratePayments(p.hand, route.length + extraCards, {
-    ferryLocos: route.ferryLocos,
-    specific: route.color === 'GRAY' ? null : route.color,
-  });
+  const resources = eventResources(state, player);
+  const variants: readonly {
+    reduction: number;
+    bentoSpend?: 'WILD' | 'POINTS';
+    useClaimDiscount?: boolean;
+  }[] = [
+    { reduction: 0 },
+    ...(resources.bentoTokens > 0
+      ? [
+          { reduction: 1, bentoSpend: 'WILD' as const },
+          { reduction: 0, bentoSpend: 'POINTS' as const },
+        ]
+      : []),
+    ...(resources.claimDiscounts > 0 ? [{ reduction: 1, useClaimDiscount: true }] : []),
+    ...(resources.bentoTokens > 0 && resources.claimDiscounts > 0
+      ? [
+          { reduction: 2, bentoSpend: 'WILD' as const, useClaimDiscount: true },
+          { reduction: 1, bentoSpend: 'POINTS' as const, useClaimDiscount: true },
+        ]
+      : []),
+  ];
+  const out: Payment[] = [];
+  for (const variant of variants) {
+    const needed = Math.max(0, route.length + extraCards - variant.reduction);
+    if (needed < route.ferryLocos) continue;
+    for (const payment of enumeratePayments(p.hand, needed, {
+      ferryLocos: route.ferryLocos,
+      specific: route.color === 'GRAY' ? null : route.color,
+    })) {
+      out.push({
+        ...payment,
+        ...(variant.bentoSpend ? { bentoSpend: variant.bentoSpend } : {}),
+        ...(variant.useClaimDiscount ? { useClaimDiscount: true } : {}),
+      });
+    }
+  }
+  return out;
 }
 
 function enumeratePayments(
@@ -115,6 +154,29 @@ export function legalActions(board: Board, state: GameState, player: PlayerId): 
       for (const payment of allStationPayments)
         candidates.push({ t: 'BUILD_STATION', player, cityId: city, payment });
     }
+    const resources = eventResources(state, player);
+    for (const active of state.events?.active ?? []) {
+      if (active.kind !== 'SLOPE_REPAIR_ORDER' || !active.routeIds) continue;
+      const payments = enumeratePayments(p.hand, 2, { ferryLocos: 0, specific: null });
+      const repairPayments =
+        resources.repairPermits > 0
+          ? [{ color: null, colorCount: 0, locomotives: 0 } as Payment, ...payments]
+          : payments;
+      for (const routeId of active.routeIds) {
+        for (const payment of repairPayments) {
+          candidates.push({ t: 'REPAIR_ROUTE', player, routeId, payment });
+        }
+      }
+    }
+    if (canUseNightMarketSwap(board, state, player)) {
+      for (const giveColor of CARD_COLORS) {
+        if (p.hand[giveColor] <= 0) continue;
+        state.market.forEach((card, slot) => {
+          if (card !== null) candidates.push({ t: 'NIGHT_MARKET_SWAP', player, giveColor, slot });
+        });
+      }
+    }
+    if (hiveOfSparksActive(state)) candidates.push({ t: 'START_HIVE_DRAW', player });
     candidates.push({ t: 'PASS', player });
   } else if (phase === 'DRAWING_CARDS') {
     candidates.push({ t: 'DRAW_BLIND', player });
@@ -135,6 +197,19 @@ export function legalActions(board: Board, state: GameState, player: PlayerId): 
         candidates.push({ t: 'RESOLVE_TUNNEL', player, commit: true, extra });
       }
     }
+  } else if (phase === 'LANTERN_RELOCATION') {
+    const pending = state.events?.lanternPendingRelocation;
+    if (pending?.playerId === player) {
+      for (const cityId of pending.candidateCityIds) {
+        candidates.push({ t: 'RELOCATE_LANTERN_HOST', player, cityId });
+      }
+    }
+  } else if (phase === 'EVENT_DRAFT') {
+    for (const perk of ['CLAIM_DISCOUNT', 'DRAW_TWO', 'REPAIR_PERMIT'] as const) {
+      candidates.push({ t: 'CHOOSE_EVENT_PERK', player, perk });
+    }
+  } else if (phase === 'HIVE_DRAW') {
+    candidates.push({ t: 'CONTINUE_HIVE_DRAW', player }, { t: 'STOP_HIVE_DRAW', player });
   }
 
   return candidates.filter((a) => reduce(board, state, a).ok);
@@ -168,7 +243,7 @@ function handCount(hand: Readonly<Hand>): number {
  */
 export function redactFor(board: Board, state: GameState, viewer: PlayerId | null): RedactedView {
   const gameOver = state.turn.phase === 'GAME_OVER';
-  const eventsBlock = projectEvents(state);
+  const eventsBlock = projectEvents(board, state);
 
   // Finished tickets are public (own-track completion). Computed once for every player; the
   // result is viewer-independent, so the same list reaches everyone.
@@ -206,6 +281,7 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
     const p = state.players[id as string];
     const isSelf = id === viewer;
     const keptVisible = isSelf || gameOver;
+    const resources = eventResources(state, id);
     return {
       id,
       seat: p?.seat ?? 0,
@@ -214,6 +290,10 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
       routePoints: p?.routePoints ?? 0,
       handCount: p ? handCount(p.hand) : 0,
       ticketCount: p?.keptTickets.length ?? 0,
+      bentoTokens: resources.bentoTokens,
+      blessings: resources.blessings,
+      claimDiscounts: resources.claimDiscounts,
+      repairPermits: resources.repairPermits,
       hand: isSelf && p ? { ...p.hand } : null,
       keptTickets: keptVisible && p ? [...p.keptTickets] : null,
       pendingTicketOffer: isSelf && p?.pendingTicketOffer ? [...p.pendingTicketOffer] : null,
@@ -280,7 +360,7 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
  * leak: only currently-live effects plus a one-round `forecast` of the next telegraphed entry
  * (exactly its announced window) reach a viewer.
  */
-function projectEvents(state: GameState): RedactedView['events'] {
+function projectEvents(board: Board, state: GameState): RedactedView['events'] {
   const ev = state.events;
   if (!ev) return undefined;
   const roundIndex = ev.roundIndex;
@@ -299,6 +379,8 @@ function projectEvents(state: GameState): RedactedView['events'] {
           ...(entry.routeIds ? { routeIds: entry.routeIds } : {}),
           ...(entry.region !== undefined ? { region: entry.region } : {}),
           ...(entry.cityId !== undefined ? { cityId: entry.cityId } : {}),
+          ...(entry.cityPath ? { cityPath: entry.cityPath } : {}),
+          ...(entry.pair ? { pair: entry.pair } : {}),
         }
       : null;
 
@@ -308,12 +390,19 @@ function projectEvents(state: GameState): RedactedView['events'] {
 
   const closedRouteIds: RouteId[] = [];
   for (const act of ev.active) {
-    if (act.kind === 'TYPHOON_LANDFALL' && act.routeIds) {
+    if ((act.kind === 'TYPHOON_LANDFALL' || act.kind === 'SLOPE_REPAIR_ORDER') && act.routeIds) {
       for (const rid of act.routeIds) {
-        if (!state.ownership[rid as string]) closedRouteIds.push(rid);
+        if (!state.ownership[rid as string] && !ev.repairedRouteIds.includes(rid))
+          closedRouteIds.push(rid);
       }
     }
   }
+
+  const actor = state.turnOrder[state.turn.orderIndex] as PlayerId | undefined;
+  const nightMarketSwapAvailable =
+    actor !== undefined &&
+    state.turn.phase === 'AWAIT_ACTION' &&
+    canUseNightMarketSwap(board, state, actor);
 
   return {
     mode: ev.mode,
@@ -325,5 +414,13 @@ function projectEvents(state: GameState): RedactedView['events'] {
     reopenBonusRouteIds: [...ev.reopenBonus],
     closedRouteIds,
     freeStationAvailable: ev.freeStation !== undefined,
+    lanternHost: ev.lanternHost ?? null,
+    lanternPendingRelocation: ev.lanternPendingRelocation ?? null,
+    luckyContracts: [...ev.luckyContracts],
+    repairedRouteIds: [...ev.repairedRouteIds],
+    eventDraft: ev.eventDraft ?? null,
+    pendingHiveDraw: ev.pendingHiveDraw ?? null,
+    boringActive: ev.boringMachine !== undefined,
+    nightMarketSwapAvailable,
   };
 }

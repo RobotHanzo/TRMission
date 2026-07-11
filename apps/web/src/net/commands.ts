@@ -1,4 +1,7 @@
 import type { PaymentInit, CameraViewInit } from './socket';
+import type { CardColor } from '@trm/shared';
+
+export type EventPerkChoice = 'CLAIM_DISCOUNT' | 'DRAW_TWO' | 'REPAIR_PERMIT';
 
 /**
  * The command surface the in-game board + HUD (`GameStage`) drive. The live `GameSocket` (sends
@@ -15,6 +18,13 @@ export interface GameCommands {
   claimRoute(routeId: string, payment: PaymentInit): void;
   buildStation(cityId: string, payment: PaymentInit): void;
   resolveTunnel(commit: boolean, extra?: PaymentInit): void;
+  relocateLanternHost(cityId: string): void;
+  repairRoute(routeId: string, payment: PaymentInit): void;
+  nightMarketSwap(giveColor: CardColor, slot: number): void;
+  chooseEventPerk(perk: EventPerkChoice): void;
+  startHiveDraw(): void;
+  continueHiveDraw(): void;
+  stopHiveDraw(): void;
   pass(): void;
   /** Cosmetic camera-framing broadcast; a no-op in the local sandbox. */
   cameraUpdate(view: CameraViewInit): void;

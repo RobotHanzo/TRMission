@@ -34,6 +34,15 @@ export function draftToContent(
       a: asCityId(t.a),
       b: asCityId(t.b),
     })),
+    ...(draft.auspiciousPairs !== undefined
+      ? {
+          auspiciousPairs: draft.auspiciousPairs.map((pair) => ({
+            id: pair.id,
+            a: asCityId(pair.a),
+            b: asCityId(pair.b),
+          })),
+        }
+      : {}),
     ...(draft.geography !== undefined ? { geography: draft.geography } : {}),
     ...(draft.rules !== undefined ? { rules: draft.rules } : {}),
   };

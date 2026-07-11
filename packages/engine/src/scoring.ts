@@ -162,6 +162,10 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
   const { stationsPerPlayer, stationBonus, longestPathBonus } = state.ruleParams;
 
   const trailLengths = new Map<string, number>();
+  const blessingCounts = state.turnOrder.map(
+    (id) => state.events?.resources[id as string]?.blessings ?? 0,
+  );
+  const maxBlessings = Math.max(0, ...blessingCounts);
   const partials: Omit<PlayerFinal, 'longestBonus' | 'total' | 'longestTrailLength'>[] = [];
 
   for (const playerId of state.turnOrder) {
@@ -176,6 +180,8 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
     const stationsUsed = stationsPerPlayer - player.stationsRemaining;
     const unusedStations = player.stationsRemaining;
 
+    const blessings = state.events?.resources[playerId as string]?.blessings ?? 0;
+    const eventBonus = maxBlessings > 0 && blessings === maxBlessings ? 4 : 0;
     partials.push({
       playerId,
       routePoints: player.routePoints,
@@ -184,6 +190,7 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
       stationsUsed,
       unusedStations,
       stationBonus: unusedStations * stationBonus,
+      ...(eventBonus > 0 ? { eventBonus } : {}),
     });
   }
 
@@ -195,7 +202,7 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
       ...p,
       longestTrailLength,
       longestBonus,
-      total: p.routePoints + p.ticketNet + p.stationBonus + longestBonus,
+      total: p.routePoints + p.ticketNet + p.stationBonus + longestBonus + (p.eventBonus ?? 0),
     };
   });
 

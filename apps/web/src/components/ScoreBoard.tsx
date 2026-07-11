@@ -86,9 +86,7 @@ export function ScoreBoard({
   const [stars, setStars] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [ratingError, setRatingError] = useState(false);
-  const [alreadyRated, setAlreadyRated] = useState(
-    () => !!gameId && getRatedGameIds().has(gameId),
-  );
+  const [alreadyRated, setAlreadyRated] = useState(() => !!gameId && getRatedGameIds().has(gameId));
 
   const submitRating = async (): Promise<void> => {
     if (!gameId || !roomCode || stars === 0) return;
@@ -195,6 +193,7 @@ export function ScoreBoard({
                 <th title={t('failedTickets')}>❌ {t('failedTickets')}</th>
                 <th title={t('stationBonus')}>🚉 {t('stationBonus')}</th>
                 <th title={t('longestPath')}>📏 {t('longestPath')}</th>
+                <th title={t('eventScoreBonus')}>✨ {t('eventScoreBonus')}</th>
                 <th>{t('totalScore')}</th>
               </tr>
             </thead>
@@ -265,6 +264,7 @@ export function ScoreBoard({
                         )}
                       </span>
                     </td>
+                    <td className="num">+{pf.eventBonus}</td>
                     <td className="num total">
                       <b>{pf.total}</b>
                     </td>

@@ -1,12 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { TAIWAN_CONTENT, CONTENT_HASH, hashContent } from '../src/index';
 import type { GameContent, MapGeography } from '../src/index';
+import { CONTENT_V4 } from '../src/archive/v4';
 
 /**
  * Tripwire for the hashContent formula extension (custom maps): geography/rules enter the
  * digest ONLY when present, so every hash minted before the extension stays byte-identical.
  */
-const PINNED_HASH = 'e211b5d98bd7142b8c52e63bf681a57dfab903375c95cee4c0dbc165ecc6f4ba';
+const PINNED_HASH = '6e06eb39c90aa6c82db20638f84b200d9a46bbd4f6777e883e6bab4840dbf26f';
+const V4_HASH = 'e211b5d98bd7142b8c52e63bf681a57dfab903375c95cee4c0dbc165ecc6f4ba';
 
 const GEO: MapGeography = {
   baseView: { x: 0, y: 0, w: 100, h: 100 },
@@ -21,12 +23,20 @@ const GEO: MapGeography = {
 };
 
 describe('hashContent extension', () => {
-  it('pins the current Taiwan (v4) hash', () => {
+  it('pins the current Taiwan (v5) hash', () => {
     expect(CONTENT_HASH).toBe(PINNED_HASH);
   });
 
   it('hashes content without geography/rules exactly as before the extension', () => {
     expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
+  });
+
+  it('keeps v4 content byte-identical when auspiciousPairs is absent', () => {
+    expect(hashContent(CONTENT_V4)).toBe(V4_HASH);
+  });
+
+  it('authored auspicious pairs change the hash', () => {
+    expect(hashContent(TAIWAN_CONTENT)).not.toBe(hashContent(CONTENT_V4));
   });
 
   it('geography changes the hash', () => {

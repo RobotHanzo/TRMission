@@ -25,7 +25,10 @@ function emptyEvents(mode: Mode = 'light'): EventsState {
     active: [],
     hotspots: {},
     charters: [],
+    luckyContracts: [],
     reopenBonus: [],
+    repairedRouteIds: [],
+    resources: {},
   };
 }
 

@@ -1,5 +1,6 @@
 import type { PlayerId, RouteId, CityId, TicketId, CardColor } from '@trm/shared';
 import type { RandomEventKind } from './events-state';
+import type { EventPerk } from './actions';
 
 /**
  * Events emitted by the reducer. The gateway turns these into protobuf and applies
@@ -50,7 +51,11 @@ export type GameEvent =
       readonly market: readonly (CardColor | null)[];
       readonly visibility: 'PUBLIC';
     }
-  | { readonly e: 'MARKET_RECYCLED'; readonly reason: 'THREE_LOCOS'; readonly visibility: 'PUBLIC' }
+  | {
+      readonly e: 'MARKET_RECYCLED';
+      readonly reason: 'THREE_LOCOS' | 'THREE_OF_COLOR';
+      readonly visibility: 'PUBLIC';
+    }
   | { readonly e: 'DECK_RESHUFFLED'; readonly visibility: 'PUBLIC' }
   | {
       readonly e: 'ROUTE_CLAIMED';
@@ -118,6 +123,8 @@ export type GameEvent =
       readonly routeIds?: readonly RouteId[];
       readonly region?: string;
       readonly cityId?: CityId;
+      readonly cityPath?: readonly CityId[];
+      readonly pair?: { readonly a: CityId; readonly b: CityId };
       readonly visibility: Visibility;
     }
   | {
@@ -130,6 +137,8 @@ export type GameEvent =
       readonly region?: string;
       readonly cityId?: CityId;
       readonly charter?: { readonly a: CityId; readonly b: CityId; readonly points: number };
+      readonly cityPath?: readonly CityId[];
+      readonly pair?: { readonly a: CityId; readonly b: CityId };
       readonly visibility: Visibility;
     }
   | {
@@ -141,12 +150,65 @@ export type GameEvent =
   | {
       readonly e: 'EVENT_BONUS';
       readonly kind: RandomEventKind;
-      readonly reason: 'HOTSPOT' | 'REOPEN' | 'STAMP' | 'CHARTER' | 'FREE_STATION';
+      readonly reason:
+        | 'HOTSPOT'
+        | 'REOPEN'
+        | 'STAMP'
+        | 'CHARTER'
+        | 'FREE_STATION'
+        | 'LANTERN'
+        | 'BENTO_COLLECT'
+        | 'BENTO_POINTS'
+        | 'REPAIR'
+        | 'BLESSING'
+        | 'PROCESSION'
+        | 'INTERIM_TRAIL'
+        | 'INTERIM_ROUTES'
+        | 'HARVEST'
+        | 'RESERVED_LOCO'
+        | 'LUCKY';
       readonly player: PlayerId;
       readonly points: number;
       readonly routeId?: RouteId;
       readonly cityId?: CityId;
       readonly visibility: Visibility;
+    }
+  | {
+      readonly e: 'EVENT_MARKER_MOVED';
+      readonly kind: 'LANTERN_HOST_CITY' | 'GODDESS_PROCESSION';
+      readonly id: string;
+      readonly cityId: CityId;
+      readonly player?: PlayerId;
+      readonly position?: number;
+      readonly visibility: 'PUBLIC';
+    }
+  | {
+      readonly e: 'EVENT_NIGHT_MARKET_SWAPPED';
+      readonly player: PlayerId;
+      readonly slot: number;
+      readonly gave: CardColor;
+      readonly took: CardColor;
+      readonly visibility: 'PUBLIC';
+    }
+  | {
+      readonly e: 'EVENT_PERK_CHOSEN';
+      readonly player: PlayerId;
+      readonly perk: EventPerk;
+      readonly visibility: 'PUBLIC';
+    }
+  | {
+      readonly e: 'EVENT_HIVE_CARD_REVEALED';
+      readonly player: PlayerId;
+      readonly card: CardColor;
+      readonly count: number;
+      readonly visibility: 'PUBLIC';
+    }
+  | {
+      readonly e: 'EVENT_HIVE_RESOLVED';
+      readonly player: PlayerId;
+      readonly busted: boolean;
+      readonly keptCount: number;
+      readonly visibility: 'PUBLIC';
     };
 
 export type GameEventType = GameEvent['e'];

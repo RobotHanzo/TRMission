@@ -1,7 +1,8 @@
 // Random-events wire mapping, shared by `snapshot.ts` (RedactedView.events → GameSnapshot.random_events)
-// and `events.ts` (the four EVENT_* engine events → their GameEvent oneof cases). All of this is
+// and `events.ts` (the generic and expansion EVENT_* engine events → their GameEvent oneof cases).
+// All of this is
 // PUBLIC information: `RedactedView.events` is already viewer-independent (spectators see the same
-// block), and the engine's four random-event GameEvents are all `visibility: 'PUBLIC'`. The hidden
+// block), and the engine's random-event GameEvents are all `visibility: 'PUBLIC'`. The hidden
 // schedule/nextIdx/suppressed never reach this module — it only ever sees what `redactFor` already
 // decided is safe to project.
 import { create } from '@bufbuild/protobuf';
@@ -15,11 +16,19 @@ import {
   HotspotMarkerSchema,
   RandomEventInfoSchema,
   RandomEventsStateSchema,
+  CityPairSchema,
+  LanternHostStateSchema,
+  LanternRelocationStateSchema,
+  LuckyContractSchema,
+  EventDraftStateSchema,
+  EventPerkPickSchema,
+  HiveDrawStateSchema,
   type CharterContract as PbCharterContract,
   type HotspotMarker as PbHotspotMarker,
   type RandomEventInfo as PbRandomEventInfo,
   type RandomEventsState as PbRandomEventsState,
 } from '@trm/proto';
+import { cardToPb, eventPerkToPb } from './enums';
 
 type EventsBlock = NonNullable<RedactedView['events']>;
 type ForecastEntry = NonNullable<EventsBlock['forecast']>;
@@ -56,6 +65,12 @@ export function activeEventToInfo(a: ActiveEvent): PbRandomEventInfo {
     endsAfterRound: a.endsAfterRound,
     routeIds: (a.routeIds ?? []).map((r) => r as string),
     region: a.region ?? '',
+    cityId: (a.cityId as string | undefined) ?? '',
+    cityPath: (a.cityPath ?? []).map((city) => city as string),
+    position: a.position ?? 0,
+    pair: a.pair
+      ? create(CityPairSchema, { cityA: a.pair.a as string, cityB: a.pair.b as string })
+      : undefined,
   });
 }
 
@@ -69,6 +84,10 @@ export function forecastToInfo(f: ForecastEntry): PbRandomEventInfo {
     routeIds: (f.routeIds ?? []).map((r) => r as string),
     region: f.region ?? '',
     cityId: (f.cityId as string | undefined) ?? '',
+    cityPath: (f.cityPath ?? []).map((city) => city as string),
+    pair: f.pair
+      ? create(CityPairSchema, { cityA: f.pair.a as string, cityB: f.pair.b as string })
+      : undefined,
   });
 }
 
@@ -86,6 +105,57 @@ export function randomEventsToPb(events: EventsBlock): PbRandomEventsState {
     reopenBonusRouteIds: events.reopenBonusRouteIds.map((r) => r as string),
     closedRouteIds: events.closedRouteIds.map((r) => r as string),
     freeStationAvailable: events.freeStationAvailable,
+    lanternHost: events.lanternHost
+      ? create(LanternHostStateSchema, {
+          eventId: events.lanternHost.eventId,
+          cityId: events.lanternHost.cityId as string,
+          points: events.lanternHost.points,
+        })
+      : undefined,
+    lanternPendingRelocation: events.lanternPendingRelocation
+      ? create(LanternRelocationStateSchema, {
+          playerId: events.lanternPendingRelocation.playerId as string,
+          candidateCityIds: events.lanternPendingRelocation.candidateCityIds.map(String),
+        })
+      : undefined,
+    luckyContracts: events.luckyContracts.map((contract) =>
+      create(LuckyContractSchema, {
+        eventId: contract.id,
+        cityA: contract.a as string,
+        cityB: contract.b as string,
+        points: contract.points,
+        wonByPlayerId: (contract.wonBy as string | null) ?? '',
+      }),
+    ),
+    repairedRouteIds: events.repairedRouteIds.map(String),
+    eventDraft: events.eventDraft
+      ? create(EventDraftStateSchema, {
+          order: events.eventDraft.order.map(String),
+          pickIndex: events.eventDraft.pickIndex,
+          currentPlayerId:
+            (events.eventDraft.order[events.eventDraft.pickIndex] as string | undefined) ?? '',
+          availablePerks: [
+            eventPerkToPb('CLAIM_DISCOUNT'),
+            eventPerkToPb('DRAW_TWO'),
+            eventPerkToPb('REPAIR_PERMIT'),
+          ],
+          picks: events.eventDraft.picks.map((pick) =>
+            create(EventPerkPickSchema, {
+              playerId: pick.playerId as string,
+              perk: eventPerkToPb(pick.perk),
+            }),
+          ),
+        })
+      : undefined,
+    pendingHiveDraw: events.pendingHiveDraw
+      ? create(HiveDrawStateSchema, {
+          playerId: events.pendingHiveDraw.playerId as string,
+          revealed: events.pendingHiveDraw.revealed.map(cardToPb),
+          maxDraws: events.pendingHiveDraw.maxDraws,
+        })
+      : undefined,
+    boringActive: events.boringActive,
+    nightMarketSwapAvailable: events.nightMarketSwapAvailable,
   });
 }
 
@@ -98,6 +168,8 @@ export function announcedToInfo(ev: {
   readonly routeIds?: readonly string[];
   readonly region?: string;
   readonly cityId?: string;
+  readonly cityPath?: readonly string[];
+  readonly pair?: { readonly a: string; readonly b: string };
 }): PbRandomEventInfo {
   return create(RandomEventInfoSchema, {
     id: ev.id,
@@ -107,6 +179,8 @@ export function announcedToInfo(ev: {
     routeIds: (ev.routeIds ?? []).map((r) => r),
     region: ev.region ?? '',
     cityId: ev.cityId ?? '',
+    cityPath: [...(ev.cityPath ?? [])],
+    pair: ev.pair ? create(CityPairSchema, { cityA: ev.pair.a, cityB: ev.pair.b }) : undefined,
   });
 }
 
@@ -121,6 +195,8 @@ export function startedToInfo(ev: {
   readonly region?: string;
   readonly cityId?: string;
   readonly charter?: { readonly a: string; readonly b: string; readonly points: number };
+  readonly cityPath?: readonly string[];
+  readonly pair?: { readonly a: string; readonly b: string };
 }): PbRandomEventInfo {
   return create(RandomEventInfoSchema, {
     id: ev.id,
@@ -131,6 +207,8 @@ export function startedToInfo(ev: {
     routeIds: (ev.routeIds ?? []).map((r) => r),
     region: ev.region ?? '',
     cityId: ev.cityId ?? '',
+    cityPath: [...(ev.cityPath ?? [])],
+    pair: ev.pair ? create(CityPairSchema, { cityA: ev.pair.a, cityB: ev.pair.b }) : undefined,
     // The engine's EVENT_STARTED payload carries only {a, b, points} for a fresh charter — the
     // resolved contract (expiry round, and any immediate winner) is runtime-computed state that
     // rides separately (RandomEventsState.charters; an immediate win arrives as a same-tick

@@ -5,6 +5,7 @@ import type { GameEvent } from './types/events';
 import { computeFinalScores } from './scoring';
 import { offerTickets, allKeptTicketsCompleted } from './tickets';
 import { tickRound } from './events/runtime';
+import { turnDirection } from './events/effects';
 
 export function currentPlayerId(state: GameState): PlayerId {
   return state.turnOrder[state.turn.orderIndex] as PlayerId;
@@ -64,8 +65,8 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
     return { state: { ...ended, finalScores }, events };
   }
 
-  const nextIdx = (curIdx + 1) % n;
-  const nextPlayer = state.turnOrder[nextIdx] as PlayerId;
+  const direction = turnDirection(state);
+  const nextIdx = (curIdx + direction + n) % n;
   let next: GameState = {
     ...state,
     consecutivePasses,
@@ -89,14 +90,21 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
     events.push(...tick.events);
   }
 
-  events.push({ e: 'TURN_STARTED', player: nextPlayer, orderIndex: nextIdx, visibility: 'PUBLIC' });
+  const actualIdx = next.turn.orderIndex;
+  const nextPlayer = state.turnOrder[actualIdx] as PlayerId;
+  events.push({
+    e: 'TURN_STARTED',
+    player: nextPlayer,
+    orderIndex: actualIdx,
+    visibility: 'PUBLIC',
+  });
 
   // Rule 7.5 — forced ticket re-draw: a player whose every kept ticket is already complete (own
   // track, or — under unlimitedStationBorrow — already locked via station-borrow completion) has
   // no objective left, so their turn opens straight into a fresh ticket draw instead of
   // AWAIT_ACTION. Skipped (a normal turn) when the short ticket deck is exhausted — an impossible
   // draw can't be forced.
-  if (allKeptTicketsCompleted(board, next, nextPlayer)) {
+  if (next.turn.phase === 'AWAIT_ACTION' && allKeptTicketsCompleted(board, next, nextPlayer)) {
     const forced = offerTickets(next, nextPlayer);
     if (forced) {
       events.push(...forced.events);

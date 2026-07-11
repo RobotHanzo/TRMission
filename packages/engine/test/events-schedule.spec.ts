@@ -21,18 +21,37 @@ const DURATIONS: Record<RandomEventKind, number> = {
   STAMP_RALLY: 3,
   CHARTER_SPECIAL: 4,
   VIRAL_HOTSPOT: 0,
+  LANTERN_HOST_CITY: 0,
+  BENTO_RUSH: 3,
+  SLOPE_REPAIR_ORDER: 3,
+  STATION_FRONT_NIGHT_MARKET: 2,
+  GODDESS_PROCESSION: 5,
+  SPRING_FESTIVAL_RUSH: 2,
+  ROLLING_STOCK_ALLOCATION_DAY: 0,
+  HIVE_OF_SPARKS: 1,
+  BREAKTHROUGH_BORING_MACHINE: 0,
+  INTERIM_OPERATIONS_REPORT: 0,
+  HARVEST_FESTIVAL_EXPRESS: 3,
+  ALL_SEATS_RESERVED: 1,
+  LUCKY_TICKET_STUB: 0,
 };
 const TELEGRAPHED = new Set<RandomEventKind>([
   'TYPHOON_LANDFALL',
   'TYPHOON_DAY_OFF',
   'SKY_LANTERN',
   'AFTERSHOCK',
+  'SLOPE_REPAIR_ORDER',
+  'SPRING_FESTIVAL_RUSH',
+  'ALL_SEATS_RESERVED',
 ]);
 const RESTRICTIVE_OR_MIXED = new Set<RandomEventKind>([
   'TYPHOON_LANDFALL',
   'TYPHOON_DAY_OFF',
   'SKY_LANTERN',
   'AFTERSHOCK',
+  'SLOPE_REPAIR_ORDER',
+  'SPRING_FESTIVAL_RUSH',
+  'ALL_SEATS_RESERVED',
 ]);
 const FIRST_BASE: Record<Exclude<EventsMode, 'off'>, number> = {
   light: 4,
@@ -41,6 +60,21 @@ const FIRST_BASE: Record<Exclude<EventsMode, 'off'>, number> = {
 };
 const GAP_SPAN: Record<Exclude<EventsMode, 'off'>, number> = { light: 6, moderate: 4, intense: 2 };
 const SCHEDULE_ROUND_CAP = 300;
+const FUTURE_KINDS = new Set<RandomEventKind>([
+  'LANTERN_HOST_CITY',
+  'BENTO_RUSH',
+  'SLOPE_REPAIR_ORDER',
+  'STATION_FRONT_NIGHT_MARKET',
+  'GODDESS_PROCESSION',
+  'SPRING_FESTIVAL_RUSH',
+  'ROLLING_STOCK_ALLOCATION_DAY',
+  'HIVE_OF_SPARKS',
+  'BREAKTHROUGH_BORING_MACHINE',
+  'INTERIM_OPERATIONS_REPORT',
+  'HARVEST_FESTIVAL_EXPRESS',
+  'ALL_SEATS_RESERVED',
+  'LUCKY_TICKET_STUB',
+]);
 
 function gen(mode: EventsMode, seed: string) {
   const rp: RuleParams = { ...DEFAULT_RULE_PARAMS, eventsMode: mode };
@@ -170,6 +204,15 @@ describe('generateSchedule — determinism & structure', () => {
         }
       }
     }
+  });
+
+  it('keeps every expansion kind reachable from seeded schedule generation', () => {
+    const seen = new Set<RandomEventKind>();
+    for (let seed = 0; seed < 80 && seen.size < FUTURE_KINDS.size; seed++) {
+      const [ev] = gen('intense', `future-kind-${seed}`);
+      for (const entry of ev!.schedule) if (FUTURE_KINDS.has(entry.kind)) seen.add(entry.kind);
+    }
+    expect(seen).toEqual(FUTURE_KINDS);
   });
 
   it('gives charter pairs ≥ 4 hops apart and typhoon routes that touch the drawn region', () => {

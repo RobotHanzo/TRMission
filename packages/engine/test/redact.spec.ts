@@ -221,7 +221,10 @@ describe('redactFor — random events projection', () => {
           wonBy: null,
         },
       ],
+      luckyContracts: [],
       reopenBonus: [],
+      repairedRouteIds: [],
+      resources: {},
     };
     const withEv: GameState = { ...state, events };
 
@@ -265,7 +268,10 @@ describe('redactFor — random events projection', () => {
       active: [],
       hotspots: {},
       charters: [],
+      luckyContracts: [],
       reopenBonus: [],
+      repairedRouteIds: [],
+      resources: {},
     };
     const view = redactFor(board, { ...state, events }, asPlayerId('p0'));
     expect(view.events!.forecast).not.toBeNull();

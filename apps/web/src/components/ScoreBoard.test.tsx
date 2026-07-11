@@ -37,6 +37,7 @@ const snap = create(GameSnapshotSchema, {
         stationBonus: 8,
         longestTrailLength: 18,
         longestBonus: 11,
+        eventBonus: 4,
         total: 137,
         keptTicketIds: [done, failed],
         completedTicketIds: [done],
@@ -78,10 +79,12 @@ describe('ScoreBoard', () => {
     expect(screen.getByText(/未完成任務/)).toBeInTheDocument();
     expect(screen.getByText(/車站獎勵/)).toBeInTheDocument();
     expect(screen.getByText(/最長路線/)).toBeInTheDocument();
+    expect(screen.getByText(/事件獎勵/)).toBeInTheDocument();
     // Gains (+) and losses (−) are broken out (p0 is first by total), plus longest + total.
     expect(container.querySelector('td.gain')!.textContent).toContain(`+${gain}`);
     expect(container.querySelector('td.loss')!.textContent).toContain(`−${loss}`);
     expect(screen.getByText('18 節車廂（+11 分）')).toBeInTheDocument();
+    expect(screen.getByText('+4')).toBeInTheDocument();
     expect(screen.getByText('137')).toBeInTheDocument();
   });
 

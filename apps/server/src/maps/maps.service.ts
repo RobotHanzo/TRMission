@@ -162,6 +162,9 @@ export class MapsService {
       cities: [...content.cities],
       routes: [...content.routes],
       tickets: [...content.tickets],
+      ...(content.auspiciousPairs !== undefined
+        ? { auspiciousPairs: [...content.auspiciousPairs] }
+        : {}),
       ...(geography !== undefined ? { geography } : {}),
       ...(content.rules !== undefined ? { rules: content.rules } : {}),
     };

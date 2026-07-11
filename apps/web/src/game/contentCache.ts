@@ -35,6 +35,15 @@ function contentFromDto(dto: MapContentDto): GameContent {
       a: asCityId(t.a),
       b: asCityId(t.b),
     })),
+    ...(dto.auspiciousPairs !== undefined
+      ? {
+          auspiciousPairs: dto.auspiciousPairs.map((pair) => ({
+            id: pair.id,
+            a: asCityId(pair.a),
+            b: asCityId(pair.b),
+          })),
+        }
+      : {}),
     ...(dto.geography !== undefined ? { geography: dto.geography } : {}),
     ...(dto.rules !== undefined ? { rules: dto.rules } : {}),
   };

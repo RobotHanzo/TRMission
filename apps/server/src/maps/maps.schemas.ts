@@ -57,6 +57,12 @@ export const TicketDraftSchema = z.object({
   view: TicketViewSchema.optional(),
 });
 
+export const AuspiciousPairDraftSchema = z.object({
+  id: idString,
+  a: idString,
+  b: idString,
+});
+
 const ringSchema = z.array(z.tuple([z.number().finite(), z.number().finite()])).min(3);
 export const MapGeographyDraftSchema = z.object({
   baseView: z.object({
@@ -124,6 +130,7 @@ export const MapDraftSchema = z.object({
   cities: z.array(CityDraftSchema).max(MAX_CITIES),
   routes: z.array(RouteDraftSchema).max(MAX_ROUTES),
   tickets: z.array(TicketDraftSchema).max(MAX_TICKETS),
+  auspiciousPairs: z.array(AuspiciousPairDraftSchema).max(MAX_TICKETS).optional(),
   geography: MapGeographyDraftSchema.optional(),
   rules: MapRulesDraftSchema.optional(),
 });
@@ -178,6 +185,15 @@ export function draftFromDto(dto: z.infer<typeof MapDraftSchema>): MapDraft {
       b: asCityId(t.b),
       ...(view !== undefined ? { view } : {}),
     })),
+    ...(dto.auspiciousPairs !== undefined
+      ? {
+          auspiciousPairs: dto.auspiciousPairs.map((pair) => ({
+            id: pair.id,
+            a: asCityId(pair.a),
+            b: asCityId(pair.b),
+          })),
+        }
+      : {}),
     ...(dto.geography !== undefined ? { geography: compactGeography(dto.geography) } : {}),
     ...(dto.rules !== undefined ? { rules: compactRules(dto.rules) } : {}),
   };
@@ -228,6 +244,7 @@ export const MapContentResponseSchema = z.object({
   cities: z.array(CityDraftSchema),
   routes: z.array(RouteDraftSchema),
   tickets: z.array(TicketDraftSchema),
+  auspiciousPairs: z.array(AuspiciousPairDraftSchema).optional(),
   geography: MapGeographyDraftSchema.optional(),
   rules: MapRulesDraftSchema.optional(),
 });

@@ -7,14 +7,14 @@ import { getRoute, groupMembersOf } from './board';
 import { openTrackCount } from './config';
 import type { GameState } from './types/state';
 import type { CharterContract } from './types/events-state';
-import type { Action, Payment } from './types/actions';
+import type { Action, Payment, EventPerk } from './types/actions';
 import type { GameEvent } from './types/events';
-import { drawOne, refillMarket } from './deck';
+import { refillMarket } from './deck';
 import { emptyHand, totalCards } from './hand';
 import type { CardCounts } from './hand';
 import { validateRoutePayment, validateStationPayment } from './payments';
 import { currentPlayerId, endTurn } from './turn';
-import { offerTickets } from './tickets';
+import { offerTickets, allKeptTicketsCompleted } from './tickets';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
 import {
   borrowConnectedTicketIds,
@@ -29,7 +29,7 @@ import {
   stationsSuspended,
   skyLanternSurcharge,
   skyLanternDoubles,
-  tunnelRevealExtra,
+  effectiveTunnelRevealCount,
   dayOffExtraDraw,
   takeReopenBonus,
   hotspotLevel,
@@ -38,7 +38,20 @@ import {
   consumeFreeStation,
   playerOwnEdges,
   playerNetworkCities,
+  eventResources,
+  updateEventResources,
+  allSeatsReservedActive,
+  hiveOfSparksActive,
+  harvestFestivalActive,
+  activeBentoCity,
+  activeNightMarketCity,
+  canUseNightMarketSwap,
+  processionCurrentCity,
+  activeHarvestRegion,
+  routeTouchesCity,
+  routeTouchesRegion,
 } from './events/effects';
+import { drawEventCard, applyEventRefill } from './events/draw';
 
 export interface ReduceOutput {
   readonly state: GameState;
@@ -84,6 +97,12 @@ function dispatch(board: Board, state: GameState, action: Action): ReduceResult 
           return applyClaimRoute(board, state, action.player, action.routeId, action.payment);
         case 'BUILD_STATION':
           return applyBuildStation(board, state, action.player, action.cityId, action.payment);
+        case 'REPAIR_ROUTE':
+          return applyRepairRoute(board, state, action.player, action.routeId, action.payment);
+        case 'NIGHT_MARKET_SWAP':
+          return applyNightMarketSwap(board, state, action.player, action.giveColor, action.slot);
+        case 'START_HIVE_DRAW':
+          return applyStartHiveDraw(board, state, action.player);
         case 'PASS':
           return applyPass(board, state, action.player);
         default:
@@ -102,6 +121,19 @@ function dispatch(board: Board, state: GameState, action: Action): ReduceResult 
       if (action.t === 'RESOLVE_TUNNEL')
         return applyResolveTunnel(board, state, action.player, action.commit, action.extra);
       return err(violation('WRONG_PHASE', 'must resolve tunnel'));
+    case 'LANTERN_RELOCATION':
+      if (action.t === 'RELOCATE_LANTERN_HOST')
+        return applyRelocateLanternHost(board, state, action.player, action.cityId);
+      return err(violation('WRONG_PHASE', 'must relocate the lantern host'));
+    case 'EVENT_DRAFT':
+      if (action.t === 'CHOOSE_EVENT_PERK')
+        return applyChooseEventPerk(board, state, action.player, action.perk);
+      return err(violation('WRONG_PHASE', 'must choose an event perk'));
+    case 'HIVE_DRAW':
+      if (action.t === 'CONTINUE_HIVE_DRAW')
+        return applyContinueHiveDraw(board, state, action.player);
+      if (action.t === 'STOP_HIVE_DRAW') return applyStopHiveDraw(board, state, action.player);
+      return err(violation('WRONG_PHASE', 'must continue or stop the hive draw'));
     default:
       return err(violation('WRONG_PHASE', 'unknown phase'));
   }
@@ -256,17 +288,17 @@ function hasSecondDrawAvailable(state: GameState): boolean {
 }
 
 function applyDrawBlind(board: Board, state: GameState, player: PlayerId): ReduceResult {
-  const d = drawOne(state.deck, state.discard, state.rng);
+  const d = drawEventCard(state);
   const isFirst = state.turn.phase === 'AWAIT_ACTION';
+
   if (d.card === null) {
     if (isFirst) return err(violation('NOTHING_TO_DRAW', 'no cards to draw'));
     // Stuck mid-draw with nothing left: end the turn with the one card already taken.
     const out = endTurn(board, state, { wasPass: false });
     return ok({ state: out.state, events: out.events });
   }
-  const events: GameEvent[] = [];
-  if (d.reshuffled) events.push({ e: 'DECK_RESHUFFLED', visibility: 'PUBLIC' });
-  let next: GameState = { ...state, deck: d.deck, discard: d.discard, rng: d.rng };
+  const events: GameEvent[] = [...d.events];
+  let next: GameState = d.state;
   next = addCardToHand(next, player, d.card);
   events.push({ e: 'CARD_DRAWN_BLIND', player, card: d.card, visibility: { private: player } });
 
@@ -309,6 +341,12 @@ function applyDrawFaceup(
     return err(violation('MARKET_SLOT_EMPTY', 'empty market slot'));
   const isFirst = state.turn.phase === 'AWAIT_ACTION';
 
+  if (card === 'LOCOMOTIVE' && allSeatsReservedActive(state)) {
+    return err(
+      violation('EVENT_FACEUP_LOCO_BLOCKED', 'face-up locomotives are reserved during this event'),
+    );
+  }
+
   // A face-up Locomotive may not be taken as the SECOND draw.
   if (card === 'LOCOMOTIVE' && !isFirst) {
     return err(
@@ -318,23 +356,22 @@ function applyDrawFaceup(
 
   const newMarket = state.market.slice();
   newMarket[slot] = null;
-  const refill = refillMarket(newMarket, state.deck, state.discard, state.rng, state.ruleParams);
-
-  let next: GameState = {
-    ...state,
-    market: refill.market,
-    deck: refill.deck,
-    discard: refill.discard,
-    rng: refill.rng,
-  };
+  const refill = refillMarket(
+    newMarket,
+    state.deck,
+    state.discard,
+    state.rng,
+    state.ruleParams,
+    harvestFestivalActive(state),
+  );
+  const applied = applyEventRefill(state, refill);
+  let next: GameState = applied.state;
   next = addCardToHand(next, player, card);
 
   const events: GameEvent[] = [
     { e: 'CARD_TAKEN_FACEUP', player, slot, card, visibility: 'PUBLIC' },
+    ...applied.events,
   ];
-  if (refill.reshuffled) events.push({ e: 'DECK_RESHUFFLED', visibility: 'PUBLIC' });
-  if (refill.recycled)
-    events.push({ e: 'MARKET_RECYCLED', reason: 'THREE_LOCOS', visibility: 'PUBLIC' });
   events.push({ e: 'MARKET_REFILLED', market: refill.market, visibility: 'PUBLIC' });
 
   // Draw-limit: 2 picks per turn, +1 while a typhoon day off is active.
@@ -389,12 +426,41 @@ function claimPreconditions(
   return ok(route);
 }
 
+function validateClaimEventResources(
+  state: GameState,
+  player: PlayerId,
+  payment: Payment,
+): RuleViolation | null {
+  const resources = eventResources(state, player);
+  if (payment.bentoSpend && resources.bentoTokens <= 0) {
+    return violation('EVENT_RESOURCE_UNAVAILABLE', 'no Bento Rush token available');
+  }
+  if (payment.useClaimDiscount && resources.claimDiscounts <= 0) {
+    return violation('EVENT_RESOURCE_UNAVAILABLE', 'no claim-discount perk available');
+  }
+  return null;
+}
+
+function consumeClaimEventResources(
+  state: GameState,
+  player: PlayerId,
+  payment: Payment,
+): GameState {
+  if (!payment.bentoSpend && !payment.useClaimDiscount) return state;
+  return updateEventResources(state, player, (resources) => ({
+    ...resources,
+    bentoTokens: resources.bentoTokens - (payment.bentoSpend ? 1 : 0),
+    claimDiscounts: resources.claimDiscounts - (payment.useClaimDiscount ? 1 : 0),
+  }));
+}
+
 /** Apply ownership/sibling-lock/trains/points for a claim (does NOT spend cards or end the turn). */
 function applyClaimEffects(
   board: Board,
   state: GameState,
   player: PlayerId,
   route: RouteDef,
+  payment: Payment,
 ): { state: GameState; events: GameEvent[] } {
   // Stamp-rally counts cities NEW to the claimer's network, so snapshot it BEFORE the claim (from
   // pre-claim ownership). Null when no stamp-rally window is active (off mode / feature absent).
@@ -509,6 +575,91 @@ function applyClaimEffects(
     }
   }
 
+  if (payment.bentoSpend === 'POINTS') {
+    next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + 2 }));
+    events.push({
+      e: 'EVENT_BONUS',
+      kind: 'BENTO_RUSH',
+      reason: 'BENTO_POINTS',
+      player,
+      points: 2,
+      routeId: route.id,
+      visibility: 'PUBLIC',
+    });
+  }
+
+  const bentoCity = activeBentoCity(next);
+  if (bentoCity !== null && routeTouchesCity(board, route.id, bentoCity)) {
+    next = updateEventResources(next, player, (r) => ({
+      ...r,
+      bentoTokens: r.bentoTokens + 1,
+    }));
+    events.push({
+      e: 'EVENT_BONUS',
+      kind: 'BENTO_RUSH',
+      reason: 'BENTO_COLLECT',
+      player,
+      points: 0,
+      cityId: bentoCity,
+      routeId: route.id,
+      visibility: 'PUBLIC',
+    });
+  }
+
+  const harvestRegion = activeHarvestRegion(next);
+  if (harvestRegion !== null && routeTouchesRegion(board, route.id, harvestRegion)) {
+    next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + 1 }));
+    events.push({
+      e: 'EVENT_BONUS',
+      kind: 'HARVEST_FESTIVAL_EXPRESS',
+      reason: 'HARVEST',
+      player,
+      points: 1,
+      routeId: route.id,
+      visibility: 'PUBLIC',
+    });
+  }
+
+  if (allSeatsReservedActive(next) && payment.locomotives > route.ferryLocos) {
+    next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + 2 }));
+    events.push({
+      e: 'EVENT_BONUS',
+      kind: 'ALL_SEATS_RESERVED',
+      reason: 'RESERVED_LOCO',
+      player,
+      points: 2,
+      routeId: route.id,
+      visibility: 'PUBLIC',
+    });
+  }
+
+  const processionCity = processionCurrentCity(next);
+  if (processionCity !== null && routeTouchesCity(board, route.id, processionCity)) {
+    const draw = drawEventCard(next);
+    next = draw.state;
+    events.push(...draw.events);
+    if (draw.card !== null) {
+      next = addCardToHand(next, player, draw.card);
+      events.push({
+        e: 'CARD_DRAWN_BLIND',
+        player,
+        card: draw.card,
+        visibility: { private: player },
+      });
+    }
+    next = updateEventResources(next, player, (r) => ({ ...r, blessings: r.blessings + 1 }));
+    events.push({
+      e: 'EVENT_BONUS',
+      kind: 'GODDESS_PROCESSION',
+      reason: 'BLESSING',
+      player,
+      points: 0,
+      cityId: processionCity,
+      routeId: route.id,
+      visibility: 'PUBLIC',
+    });
+  }
+
   // (4) CHARTER — every open, un-won charter whose endpoints the claimer's OWN network now joins
   // (no station borrowing). One claim can win several; award each in charters-array order.
   const evc = next.events;
@@ -536,6 +687,65 @@ function applyClaimEffects(
     if (anyWon) next = { ...next, events: { ...evc, charters: updated } };
   }
 
+  const evLucky = next.events;
+  if (evLucky && evLucky.luckyContracts.length > 0) {
+    const ownEdges = playerOwnEdges(board, next, player);
+    let anyWon = false;
+    const updated = evLucky.luckyContracts.map((contract) => {
+      if (
+        contract.wonBy === null &&
+        citiesConnected(ownEdges, contract.a as string, contract.b as string)
+      ) {
+        anyWon = true;
+        next = withPlayer(next, player, (p) => ({
+          ...p,
+          routePoints: p.routePoints + contract.points,
+        }));
+        events.push({
+          e: 'EVENT_BONUS',
+          kind: 'LUCKY_TICKET_STUB',
+          reason: 'LUCKY',
+          player,
+          points: contract.points,
+          visibility: 'PUBLIC',
+        });
+        return { ...contract, wonBy: player };
+      }
+      return contract;
+    });
+    if (anyWon) next = { ...next, events: { ...evLucky, luckyContracts: updated } };
+  }
+
+  const host = next.events?.lanternHost;
+  if (host && routeTouchesCity(board, route.id, host.cityId)) {
+    const candidateCityIds = [...playerNetworkCities(board, next, player)]
+      .filter((city) => city !== (host.cityId as string))
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+      .map((city) => city as CityId);
+    if (candidateCityIds.length > 0 && next.events) {
+      const currentEvents = next.events;
+      next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + host.points }));
+      next = {
+        ...next,
+        events: {
+          ...currentEvents,
+          lanternPendingRelocation: { playerId: player, candidateCityIds },
+        },
+        turn: { ...next.turn, phase: 'LANTERN_RELOCATION' },
+      };
+      events.push({
+        e: 'EVENT_BONUS',
+        kind: 'LANTERN_HOST_CITY',
+        reason: 'LANTERN',
+        player,
+        points: host.points,
+        cityId: host.cityId,
+        routeId: route.id,
+        visibility: 'PUBLIC',
+      });
+    }
+  }
+
   events.push(...lockedEvents);
   return { state: next, events };
 }
@@ -555,7 +765,10 @@ function applyClaimRoute(
   const p = getPlayer(state, player);
   if (!p) return err(violation('NOT_YOUR_TURN', 'unknown player'));
 
-  const extraCards = skyLanternSurcharge(state, routeId);
+  const resourceError = validateClaimEventResources(state, player, payment);
+  if (resourceError) return err(resourceError);
+  const reduction = (payment.bentoSpend === 'WILD' ? 1 : 0) + (payment.useClaimDiscount ? 1 : 0);
+  const extraCards = skyLanternSurcharge(state, routeId) - reduction;
   const pay = validateRoutePayment(route, payment, p, extraCards);
   if (!pay.ok) return pay;
 
@@ -563,10 +776,14 @@ function applyClaimRoute(
 
   // Normal claim: spend, apply, lock newly-completed tickets, end turn.
   let next = spendCards(state, player, pay.value.spent);
-  const eff = applyClaimEffects(board, next, player, route);
+  next = consumeClaimEventResources(next, player, payment);
+  const eff = applyClaimEffects(board, next, player, route, payment);
   next = eff.state;
   const lock = lockCompletedTickets(board, next);
   next = lock.state;
+  if (next.turn.phase === 'LANTERN_RELOCATION') {
+    return ok({ state: next, events: [...eff.events, ...lock.events] });
+  }
   const out = endTurn(board, next, { wasPass: false });
   return ok({ state: out.state, events: [...eff.events, ...lock.events, ...out.events] });
 }
@@ -581,19 +798,15 @@ function beginTunnel(
   // Reveal top up-to-N cards (reshuffling if needed). Base cards stay in hand (abort is free).
   // An active aftershock adds one extra reveal. Sky-lantern's base surcharge is already baked into
   // `payment` (validated as length+1), so the pendingTunnel needs no extra bookkeeping for it.
-  const revealCount = state.ruleParams.tunnelRevealCount + tunnelRevealExtra(state);
+  const revealCount = effectiveTunnelRevealCount(state);
   const revealed: CardColor[] = [];
-  let deck = state.deck;
-  let discard = state.discard;
-  let rng = state.rng;
-  let reshuffled = false;
+  let nextState = state;
+  const drawEvents: GameEvent[] = [];
   for (let i = 0; i < revealCount; i++) {
-    const d = drawOne(deck, discard, rng);
+    const d = drawEventCard(nextState);
+    nextState = d.state;
+    drawEvents.push(...d.events);
     if (d.card === null) break;
-    deck = d.deck;
-    discard = d.discard;
-    rng = d.rng;
-    if (d.reshuffled) reshuffled = true;
     revealed.push(d.card);
   }
   const extraRequired = revealed.filter(
@@ -601,10 +814,7 @@ function beginTunnel(
   ).length;
 
   const next: GameState = {
-    ...state,
-    deck,
-    discard,
-    rng,
+    ...nextState,
     pendingTunnel: {
       playerId: player,
       routeId: route.id,
@@ -615,8 +825,7 @@ function beginTunnel(
     },
     turn: { ...state.turn, phase: 'TUNNEL_PENDING' },
   };
-  const events: GameEvent[] = [];
-  if (reshuffled) events.push({ e: 'DECK_RESHUFFLED', visibility: 'PUBLIC' });
+  const events: GameEvent[] = [...drawEvents];
   events.push({
     e: 'TUNNEL_REVEALED',
     player,
@@ -658,11 +867,14 @@ function applyResolveTunnel(
     ];
     // Aftershock consolation: an aborting player draws one blind card (a real draw from the shared
     // deck helper). Silently skipped when deck + discard are both empty.
-    if (tunnelRevealExtra(state) > 0) {
-      const d = drawOne(cleared.deck, cleared.discard, cleared.rng);
+    if (
+      effectiveTunnelRevealCount(state) >
+      (state.events?.boringMachine ? 2 : state.ruleParams.tunnelRevealCount)
+    ) {
+      const d = drawEventCard(cleared);
+      abortEvents.push(...d.events);
       if (d.card !== null) {
-        if (d.reshuffled) abortEvents.push({ e: 'DECK_RESHUFFLED', visibility: 'PUBLIC' });
-        cleared = { ...cleared, deck: d.deck, discard: d.discard, rng: d.rng };
+        cleared = d.state;
         cleared = addCardToHand(cleared, player, d.card);
         abortEvents.push({
           e: 'CARD_DRAWN_BLIND',
@@ -678,6 +890,8 @@ function applyResolveTunnel(
 
   // Commit: validate the extra payment.
   const ex = extra ?? { color: null, colorCount: 0, locomotives: 0 };
+  if (ex.bentoSpend || ex.useClaimDiscount)
+    return err(violation('TUNNEL_BAD_EXTRA', 'event resources may only modify the base payment'));
   if (ex.colorCount < 0 || ex.locomotives < 0)
     return err(violation('TUNNEL_BAD_EXTRA', 'negative extra'));
   if (ex.colorCount + ex.locomotives !== pt.extraRequired) {
@@ -707,10 +921,27 @@ function applyResolveTunnel(
 
   let next: GameState = { ...state, discard: discardAfterReveal, pendingTunnel: null };
   next = spendCards(next, player, totalSpent);
-  const eff = applyClaimEffects(board, next, player, route);
+  next = consumeClaimEventResources(next, player, pt.payment);
+  const eff = applyClaimEffects(board, next, player, route, pt.payment);
   next = eff.state;
   const lock = lockCompletedTickets(board, next);
   next = lock.state;
+  if (next.turn.phase === 'LANTERN_RELOCATION') {
+    return ok({
+      state: next,
+      events: [
+        {
+          e: 'TUNNEL_RESOLVED',
+          player,
+          routeId: pt.routeId,
+          committed: true,
+          visibility: 'PUBLIC',
+        },
+        ...eff.events,
+        ...lock.events,
+      ],
+    });
+  }
   const out = endTurn(board, next, { wasPass: false });
   return ok({
     state: out.state,
@@ -780,6 +1011,396 @@ function applyBuildStation(
   return ok({
     state: out.state,
     events: [...buildEvents, ...lock.events, ...out.events],
+  });
+}
+
+// ───────────────────────────────── expansion event actions ────────────────────────────────
+
+function applyRelocateLanternHost(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  cityId: CityId,
+): ReduceResult {
+  const ev = state.events;
+  const pending = ev?.lanternPendingRelocation;
+  const host = ev?.lanternHost;
+  if (
+    !ev ||
+    !pending ||
+    !host ||
+    pending.playerId !== player ||
+    !pending.candidateCityIds.includes(cityId) ||
+    cityId === host.cityId
+  ) {
+    return err(
+      violation('EVENT_LANTERN_RELOCATION_INVALID', 'invalid lantern-host relocation city'),
+    );
+  }
+  const { lanternPendingRelocation: _omit, ...rest } = ev;
+  const moved: GameState = {
+    ...state,
+    events: { ...rest, lanternHost: { ...host, cityId } },
+    turn: { ...state.turn, phase: 'AWAIT_ACTION' },
+  };
+  const out = endTurn(board, moved, { wasPass: false });
+  return ok({
+    state: out.state,
+    events: [
+      {
+        e: 'EVENT_MARKER_MOVED',
+        kind: 'LANTERN_HOST_CITY',
+        id: host.eventId,
+        cityId,
+        player,
+        visibility: 'PUBLIC',
+      },
+      ...out.events,
+    ],
+  });
+}
+
+function applyRepairRoute(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  routeId: RouteId,
+  payment: Payment,
+): ReduceResult {
+  const ev = state.events;
+  const repairable = ev?.active.some(
+    (active) =>
+      active.kind === 'SLOPE_REPAIR_ORDER' &&
+      active.routeIds?.includes(routeId) &&
+      !ev.repairedRouteIds.includes(routeId),
+  );
+  if (!ev || !repairable || state.ownership[routeId as string]) {
+    return err(violation('EVENT_REPAIR_UNAVAILABLE', 'route is not open for event repair'));
+  }
+  if (!board.routeById.has(routeId as string))
+    return err(violation('UNKNOWN_ROUTE', 'unknown route'));
+  if (payment.bentoSpend || payment.useClaimDiscount) {
+    return err(
+      violation('EVENT_REPAIR_PAYMENT_INVALID', 'claim resources cannot modify a repair payment'),
+    );
+  }
+
+  const resources = eventResources(state, player);
+  const empty = payment.colorCount === 0 && payment.locomotives === 0;
+  let next = state;
+  if (empty) {
+    if (resources.repairPermits <= 0) {
+      return err(violation('EVENT_RESOURCE_UNAVAILABLE', 'no event-repair permit available'));
+    }
+    next = updateEventResources(next, player, (r) => ({
+      ...r,
+      repairPermits: r.repairPermits - 1,
+    }));
+  } else {
+    const p = getPlayer(state, player);
+    if (!p) return err(violation('NOT_YOUR_TURN', 'unknown player'));
+    const validated = validateStationPayment(2, payment, p);
+    if (!validated.ok) {
+      return err(violation('EVENT_REPAIR_PAYMENT_INVALID', 'repair requires two matching cards'));
+    }
+    next = spendCards(next, player, validated.value.spent);
+  }
+
+  next = withPlayer(next, player, (p) => ({ ...p, routePoints: p.routePoints + 3 }));
+  next = {
+    ...next,
+    events: { ...next.events!, repairedRouteIds: [...next.events!.repairedRouteIds, routeId] },
+  };
+  const out = endTurn(board, next, { wasPass: false });
+  return ok({
+    state: out.state,
+    events: [
+      {
+        e: 'EVENT_BONUS',
+        kind: 'SLOPE_REPAIR_ORDER',
+        reason: 'REPAIR',
+        player,
+        points: 3,
+        routeId,
+        visibility: 'PUBLIC',
+      },
+      ...out.events,
+    ],
+  });
+}
+
+function applyNightMarketSwap(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  giveColor: CardColor,
+  slot: number,
+): ReduceResult {
+  const city = activeNightMarketCity(state);
+  const p = getPlayer(state, player);
+  const took = state.market[slot];
+  if (took === 'LOCOMOTIVE' && allSeatsReservedActive(state)) {
+    return err(
+      violation('EVENT_FACEUP_LOCO_BLOCKED', 'face-up locomotives are reserved during this event'),
+    );
+  }
+  if (
+    city === null ||
+    !p ||
+    !canUseNightMarketSwap(board, state, player) ||
+    slot < 0 ||
+    slot >= state.market.length ||
+    took === null ||
+    took === undefined ||
+    p.hand[giveColor] <= 0
+  ) {
+    return err(violation('EVENT_NIGHT_MARKET_UNAVAILABLE', 'night-market swap is not available'));
+  }
+
+  let next = withPlayer(state, player, (pl) => {
+    const hand = { ...pl.hand };
+    hand[giveColor] -= 1;
+    hand[took] += 1;
+    return { ...pl, hand };
+  });
+  const market = [...next.market];
+  market[slot] = giveColor;
+  next = { ...next, market, turn: { ...next.turn, nightMarketSwapUsed: true } };
+  const refill = refillMarket(
+    next.market,
+    next.deck,
+    next.discard,
+    next.rng,
+    next.ruleParams,
+    harvestFestivalActive(next),
+  );
+  const applied = applyEventRefill(next, refill);
+  next = applied.state;
+  const events: GameEvent[] = [
+    {
+      e: 'EVENT_NIGHT_MARKET_SWAPPED',
+      player,
+      slot,
+      gave: giveColor,
+      took,
+      visibility: 'PUBLIC',
+    },
+    ...applied.events,
+  ];
+  if (refill.recycled) {
+    events.push({ e: 'MARKET_REFILLED', market: refill.market, visibility: 'PUBLIC' });
+  }
+  return ok({ state: next, events });
+}
+
+function applyChooseEventPerk(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  perk: EventPerk,
+): ReduceResult {
+  const ev = state.events;
+  const draft = ev?.eventDraft;
+  if (!ev || !draft || draft.order[draft.pickIndex] !== player) {
+    return err(violation('EVENT_DRAFT_CHOICE_INVALID', "not this player's event draft pick"));
+  }
+  if (!(['CLAIM_DISCOUNT', 'DRAW_TWO', 'REPAIR_PERMIT'] as const).includes(perk)) {
+    return err(violation('EVENT_DRAFT_CHOICE_INVALID', 'unknown event perk'));
+  }
+
+  let next = state;
+  const events: GameEvent[] = [{ e: 'EVENT_PERK_CHOSEN', player, perk, visibility: 'PUBLIC' }];
+  if (perk === 'CLAIM_DISCOUNT') {
+    next = updateEventResources(next, player, (r) => ({
+      ...r,
+      claimDiscounts: r.claimDiscounts + 1,
+    }));
+  } else if (perk === 'REPAIR_PERMIT') {
+    next = updateEventResources(next, player, (r) => ({
+      ...r,
+      repairPermits: r.repairPermits + 1,
+    }));
+  } else {
+    for (let i = 0; i < 2; i++) {
+      const draw = drawEventCard(next);
+      next = draw.state;
+      events.push(...draw.events);
+      if (draw.card === null) break;
+      next = addCardToHand(next, player, draw.card);
+      events.push({
+        e: 'CARD_DRAWN_BLIND',
+        player,
+        card: draw.card,
+        visibility: { private: player },
+      });
+    }
+  }
+
+  const currentEvents = next.events;
+  const currentDraft = currentEvents?.eventDraft;
+  if (!currentEvents || !currentDraft) {
+    return err(violation('EVENT_DRAFT_CHOICE_INVALID', 'event draft disappeared'));
+  }
+  const picks = [...currentDraft.picks, { playerId: player, perk }];
+  const pickIndex = currentDraft.pickIndex + 1;
+  if (pickIndex < currentDraft.order.length) {
+    const nextPlayer = currentDraft.order[pickIndex] as PlayerId;
+    next = {
+      ...next,
+      events: { ...currentEvents, eventDraft: { ...currentDraft, pickIndex, picks } },
+      turn: {
+        orderIndex: next.turnOrder.indexOf(nextPlayer),
+        phase: 'EVENT_DRAFT',
+        cardsDrawnThisTurn: 0,
+      },
+    };
+    events.push({
+      e: 'TURN_STARTED',
+      player: nextPlayer,
+      orderIndex: next.turn.orderIndex,
+      visibility: 'PUBLIC',
+    });
+  } else {
+    const { eventDraft: _omit, ...rest } = currentEvents;
+    next = {
+      ...next,
+      events: rest,
+      turn: {
+        orderIndex: currentDraft.resumeOrderIndex,
+        phase: 'AWAIT_ACTION',
+        cardsDrawnThisTurn: 0,
+      },
+    };
+    const resumePlayer = next.turnOrder[currentDraft.resumeOrderIndex] as PlayerId;
+    events.push({
+      e: 'TURN_STARTED',
+      player: resumePlayer,
+      orderIndex: currentDraft.resumeOrderIndex,
+      visibility: 'PUBLIC',
+    });
+    // The round-boundary turn start was paused by the draft, so endTurn deliberately skipped its
+    // forced-ticket check. Re-run that start-of-turn rule now that the draft has released the
+    // resumed player; otherwise a player whose objectives are all complete can incorrectly take a
+    // normal action here.
+    if (allKeptTicketsCompleted(board, next, resumePlayer)) {
+      const forced = offerTickets(next, resumePlayer);
+      if (forced) {
+        next = forced.state;
+        events.push(...forced.events);
+      }
+    }
+  }
+  return ok({ state: next, events });
+}
+
+function blindPoolAvailable(state: GameState): boolean {
+  return state.deck.length > 0 || totalCards(state.discard) > 0;
+}
+
+function applyStartHiveDraw(board: Board, state: GameState, player: PlayerId): ReduceResult {
+  if (!hiveOfSparksActive(state) || !state.events || !blindPoolAvailable(state)) {
+    return err(violation('EVENT_HIVE_UNAVAILABLE', 'Hive of Sparks draw is not available'));
+  }
+  const draw = drawEventCard(state);
+  if (draw.card === null) return err(violation('EVENT_HIVE_UNAVAILABLE', 'nothing to reveal'));
+  const pending = { playerId: player, revealed: [draw.card], maxDraws: 4 } as const;
+  const next: GameState = {
+    ...draw.state,
+    events: { ...draw.state.events!, pendingHiveDraw: pending },
+    turn: { ...state.turn, phase: 'HIVE_DRAW' },
+  };
+  const prefix: GameEvent[] = [
+    ...draw.events,
+    {
+      e: 'EVENT_HIVE_CARD_REVEALED',
+      player,
+      card: draw.card,
+      count: 1,
+      visibility: 'PUBLIC',
+    },
+  ];
+  return blindPoolAvailable(next)
+    ? ok({ state: next, events: prefix })
+    : resolveHive(board, next, false, prefix);
+}
+
+function applyContinueHiveDraw(board: Board, state: GameState, player: PlayerId): ReduceResult {
+  const pending = state.events?.pendingHiveDraw;
+  if (!pending || pending.playerId !== player) {
+    return err(violation('EVENT_HIVE_UNAVAILABLE', 'no Hive of Sparks draw is pending'));
+  }
+  const draw = drawEventCard(state);
+  if (draw.card === null) return resolveHive(board, state, false, []);
+  const revealed = [...pending.revealed, draw.card];
+  const previous = pending.revealed[pending.revealed.length - 1];
+  const busted = previous === draw.card;
+  const next: GameState = {
+    ...draw.state,
+    events: {
+      ...draw.state.events!,
+      pendingHiveDraw: { ...pending, revealed },
+    },
+  };
+  const prefix: GameEvent[] = [
+    ...draw.events,
+    {
+      e: 'EVENT_HIVE_CARD_REVEALED',
+      player,
+      card: draw.card,
+      count: revealed.length,
+      visibility: 'PUBLIC',
+    },
+  ];
+  if (busted) return resolveHive(board, next, true, prefix);
+  if (revealed.length >= pending.maxDraws || !blindPoolAvailable(next)) {
+    return resolveHive(board, next, false, prefix);
+  }
+  return ok({ state: next, events: prefix });
+}
+
+function applyStopHiveDraw(board: Board, state: GameState, player: PlayerId): ReduceResult {
+  const pending = state.events?.pendingHiveDraw;
+  if (!pending || pending.playerId !== player) {
+    return err(violation('EVENT_HIVE_UNAVAILABLE', 'no Hive of Sparks draw is pending'));
+  }
+  return resolveHive(board, state, false, []);
+}
+
+function resolveHive(
+  board: Board,
+  state: GameState,
+  busted: boolean,
+  prefix: GameEvent[],
+): ReduceResult {
+  const ev = state.events;
+  const pending = ev?.pendingHiveDraw;
+  if (!ev || !pending) return err(violation('EVENT_HIVE_UNAVAILABLE', 'no hive draw pending'));
+  const kept = busted ? pending.revealed.slice(0, 1) : pending.revealed;
+  const discarded = busted ? pending.revealed.slice(1) : [];
+  const { pendingHiveDraw: _omit, ...rest } = ev;
+  const discard = { ...state.discard };
+  for (const card of discarded) discard[card] += 1;
+  let next: GameState = {
+    ...state,
+    events: rest,
+    discard,
+    turn: { ...state.turn, phase: 'AWAIT_ACTION' },
+  };
+  for (const card of kept) next = addCardToHand(next, pending.playerId, card);
+  const out = endTurn(board, next, { wasPass: false });
+  return ok({
+    state: out.state,
+    events: [
+      ...prefix,
+      {
+        e: 'EVENT_HIVE_RESOLVED',
+        player: pending.playerId,
+        busted,
+        keptCount: kept.length,
+        visibility: 'PUBLIC',
+      },
+      ...out.events,
+    ],
   });
 }
 
@@ -860,7 +1481,10 @@ export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId
   // Draw cards: any card available anywhere?
   const discardTotal = totalDiscard(state.discard);
   if (state.deck.length + discardTotal > 0) return true;
-  if (state.market.some((c) => c !== null)) return true;
+  if (
+    state.market.some((c) => c !== null && !(c === 'LOCOMOTIVE' && allSeatsReservedActive(state)))
+  )
+    return true;
   // Draw tickets.
   if (state.ticketDeckShort.length > 0) return true;
   // Build a station — suspended entirely during a typhoon day off (mirror of applyBuildStation).
@@ -876,6 +1500,25 @@ export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId
     const cost = built + 1;
     if (canAffordCount(p.hand, cost)) return true;
   }
+  // Hive of Sparks is a main-action draw option while its one-round window is active.
+  if (hiveOfSparksActive(state) && state.deck.length + discardTotal > 0) return true;
+  // Slope repair is a main action when the player can pay two matching cards or owns a permit.
+  const resources = eventResources(state, player);
+  if (
+    state.events?.active.some(
+      (active) =>
+        active.kind === 'SLOPE_REPAIR_ORDER' &&
+        active.routeIds?.some(
+          (rid) => !state.ownership[rid as string] && !state.events?.repairedRouteIds.includes(rid),
+        ),
+    ) &&
+    (resources.repairPermits > 0 || canAffordCount(p.hand, 2))
+  )
+    return true;
+  // A free night-market swap can change the hand before the main action, so it is itself a legal
+  // non-pass continuation. Once used, the normal main-action checks below decide whether PASS is
+  // required.
+  if (canUseNightMarketSwap(board, state, player)) return true;
   // Claim a route — suspended entirely during a day off; otherwise skip closed routes and price
   // sky-lantern routes at length + surcharge (exact mirror of the applyClaimRoute gates).
   if (!claimsSuspended(state)) {
@@ -889,7 +1532,10 @@ export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId
       });
       if (ownsGroupMember) continue;
       if (p.trainCars < route.length) continue;
-      if (canAffordRoute(p.hand, route, skyLanternSurcharge(state, route.id))) return true;
+      const reductions =
+        (resources.bentoTokens > 0 ? 1 : 0) + (resources.claimDiscounts > 0 ? 1 : 0);
+      if (canAffordRoute(p.hand, route, skyLanternSurcharge(state, route.id) - reductions))
+        return true;
     }
   }
   return false;
@@ -916,8 +1562,9 @@ function canAffordRoute(
 ): boolean {
   // Sky-lantern surcharge adds cards, not trains: the caller already checked `trainCars` against
   // the BASE length, so here we only inflate the CARD requirement.
-  const L = route.length + extraCards;
+  const L = Math.max(0, route.length + extraCards);
   const F = route.ferryLocos;
+  if (L < F) return false;
   if (hand.LOCOMOTIVE < F) return false;
   if (hand.LOCOMOTIVE >= L) return true; // all-locomotive payment
   if (route.color === 'GRAY') {

@@ -55,13 +55,31 @@ export function EventsPanel() {
   const seatOf = (id: string): number => snapshot?.players.find((p) => p.id === id)?.seat ?? 0;
   const forecast = ev.forecast;
 
-  // The affected-target summary for one active entry: a city (hotspot) or a route count (typhoon /
-  // sky-lantern), resolved by id — never a hardcoded name.
+  // The affected-target summary for one active entry, resolved from public projection data.
   const affected = (info: RandomEventInfo): string | null => {
     if (info.kind === 'VIRAL_HOTSPOT' && info.cityId) return cityName(info.cityId, locale);
+    if (info.kind === 'BENTO_RUSH' && info.cityId)
+      return t('events.bentoCity', { city: cityName(info.cityId, locale) });
+    if (info.kind === 'STATION_FRONT_NIGHT_MARKET' && info.cityId)
+      return t('events.nightMarketCity', { city: cityName(info.cityId, locale) });
+    if (info.kind === 'GODDESS_PROCESSION' && info.cityPath.length > 0) {
+      const current = info.cityPath[Math.min(info.position, info.cityPath.length - 1)];
+      if (current) return t('events.processionAt', { city: cityName(current, locale) });
+    }
+    if (info.kind === 'HARVEST_FESTIVAL_EXPRESS' && info.region) return info.region;
+    if (info.kind === 'SPRING_FESTIVAL_RUSH') return t('events.reversedDirection');
     if (info.routeIds.length > 0) return t('events.affectedRoutes', { n: info.routeIds.length });
     return null;
   };
+
+  const resourcePlayers =
+    snapshot?.players.filter(
+      (player) =>
+        player.bentoTokens > 0 ||
+        player.blessings > 0 ||
+        player.claimDiscounts > 0 ||
+        player.repairPermits > 0,
+    ) ?? [];
 
   return (
     <section className="events-panel tray-section" data-testid="events-panel">
@@ -72,6 +90,40 @@ export function EventsPanel() {
       <div className="events-body">
         {ev.freeStationAvailable && (
           <div className="event-row event-free">{t('events.freeStation')}</div>
+        )}
+
+        {ev.lanternHost && (
+          <div className="event-row event-persistent" data-testid="lantern-host-row">
+            <span className="event-name">{t(eventNameKey('LANTERN_HOST_CITY'))}</span>
+            <span className="event-summary">
+              {t('events.hostCity', { city: cityName(ev.lanternHost.cityId, locale) })}
+            </span>
+            <button
+              type="button"
+              className="cell-view"
+              aria-label={t('view')}
+              title={t('view')}
+              onClick={() => setInfoKind('LANTERN_HOST_CITY')}
+            >
+              <Info size={13} aria-hidden />
+            </button>
+          </div>
+        )}
+
+        {ev.boringActive && (
+          <div className="event-row event-persistent">
+            <span className="event-name">{t(eventNameKey('BREAKTHROUGH_BORING_MACHINE'))}</span>
+            <span className="event-summary">{t('events.boringActive')}</span>
+            <button
+              type="button"
+              className="cell-view"
+              aria-label={t('view')}
+              title={t('view')}
+              onClick={() => setInfoKind('BREAKTHROUGH_BORING_MACHINE')}
+            >
+              <Info size={13} aria-hidden />
+            </button>
+          </div>
         )}
 
         {ev.active.map((info) => {
@@ -128,6 +180,85 @@ export function EventsPanel() {
             </button>
           </div>
         ))}
+
+        {ev.luckyContracts.map((contract) => (
+          <div key={contract.eventId} className="event-row event-persistent event-lucky">
+            <span className="event-name">
+              {t('events.luckyPair', {
+                a: cityName(contract.cityA, locale),
+                b: cityName(contract.cityB, locale),
+              })}
+            </span>
+            {contract.wonByPlayerId !== '' && (
+              <span className="event-won">
+                {t('events.charterWon', {
+                  name: nameOf({
+                    id: contract.wonByPlayerId,
+                    seat: seatOf(contract.wonByPlayerId),
+                    isMe: contract.wonByPlayerId === me,
+                  }),
+                })}
+              </span>
+            )}
+            <button
+              type="button"
+              className="cell-view"
+              aria-label={t('view')}
+              title={t('view')}
+              onClick={() => setInfoKind('LUCKY_TICKET_STUB')}
+            >
+              <Info size={13} aria-hidden />
+            </button>
+          </div>
+        ))}
+
+        {ev.eventDraft && (
+          <div className="event-row event-persistent">
+            <span className="event-name">{t('events.draftTitle')}</span>
+            <span className="event-summary">
+              {t('events.draftProgress', {
+                n: Math.max(0, ev.eventDraft.order.length - ev.eventDraft.pickIndex),
+              })}
+            </span>
+          </div>
+        )}
+
+        {ev.pendingHiveDraw && (
+          <div className="event-row event-persistent">
+            <span className="event-name">{t('events.hiveTitle')}</span>
+            <span className="event-summary">
+              {t('events.hiveWaiting', {
+                name: nameOf({
+                  id: ev.pendingHiveDraw.playerId,
+                  seat: seatOf(ev.pendingHiveDraw.playerId),
+                  isMe: ev.pendingHiveDraw.playerId === me,
+                }),
+              })}{' '}
+              ({ev.pendingHiveDraw.revealed.length}/{ev.pendingHiveDraw.maxDraws})
+            </span>
+          </div>
+        )}
+
+        {resourcePlayers.map((player) => {
+          const counts = [
+            player.bentoTokens > 0 ? t('events.bentoTokens', { n: player.bentoTokens }) : null,
+            player.blessings > 0 ? t('events.blessings', { n: player.blessings }) : null,
+            player.claimDiscounts > 0
+              ? t('events.claimDiscounts', { n: player.claimDiscounts })
+              : null,
+            player.repairPermits > 0
+              ? t('events.repairPermits', { n: player.repairPermits })
+              : null,
+          ].filter((value): value is string => value !== null);
+          return (
+            <div key={player.id} className="event-row event-resources">
+              <span className="event-name">
+                {nameOf({ id: player.id, seat: player.seat, isMe: player.id === me })}
+              </span>
+              <span className="event-summary">{counts.join(' · ')}</span>
+            </div>
+          );
+        })}
 
         {forecast && (
           <div className="event-row event-forecast">

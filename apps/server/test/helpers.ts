@@ -6,6 +6,8 @@ import {
   ServerEnvelopeSchema,
   type ClientEnvelope,
   type ServerEnvelope,
+  BentoSpend,
+  EventPerk,
 } from '@trm/proto';
 import { legalActions } from '@trm/engine';
 import type { Action, Payment, Board, GameState } from '@trm/engine';
@@ -18,6 +20,13 @@ const paymentToPb = (p: Payment) => ({
   color: cardOrNullToPb(p.color),
   colorCount: p.colorCount,
   locomotives: p.locomotives,
+  bentoSpend:
+    p.bentoSpend === 'WILD'
+      ? BentoSpend.WILD
+      : p.bentoSpend === 'POINTS'
+        ? BentoSpend.POINTS
+        : BentoSpend.UNSPECIFIED,
+  useClaimDiscount: p.useClaimDiscount ?? false,
 });
 
 export function actionToCommand(action: Action): Command {
@@ -52,6 +61,36 @@ export function actionToCommand(action: Action): Command {
             },
           }
         : { case: 'resolveTunnel', value: { commit: false } };
+    case 'RELOCATE_LANTERN_HOST':
+      return { case: 'relocateLanternHost', value: { cityId: action.cityId as string } };
+    case 'REPAIR_ROUTE':
+      return {
+        case: 'repairRoute',
+        value: { routeId: action.routeId as string, payment: paymentToPb(action.payment) },
+      };
+    case 'NIGHT_MARKET_SWAP':
+      return {
+        case: 'nightMarketSwap',
+        value: { giveColor: cardOrNullToPb(action.giveColor), slot: action.slot },
+      };
+    case 'CHOOSE_EVENT_PERK':
+      return {
+        case: 'chooseEventPerk',
+        value: {
+          perk:
+            action.perk === 'CLAIM_DISCOUNT'
+              ? EventPerk.CLAIM_DISCOUNT
+              : action.perk === 'DRAW_TWO'
+                ? EventPerk.DRAW_TWO
+                : EventPerk.REPAIR_PERMIT,
+        },
+      };
+    case 'START_HIVE_DRAW':
+      return { case: 'startHiveDraw', value: {} };
+    case 'CONTINUE_HIVE_DRAW':
+      return { case: 'continueHiveDraw', value: {} };
+    case 'STOP_HIVE_DRAW':
+      return { case: 'stopHiveDraw', value: {} };
     case 'PASS':
       return { case: 'pass', value: {} };
   }
