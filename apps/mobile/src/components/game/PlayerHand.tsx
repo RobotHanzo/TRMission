@@ -8,16 +8,25 @@ import type { CardCounts } from '@trm/proto';
 import { handFromCounts } from '../../game/payments';
 import { useUi } from '../../store/ui';
 import { registerAnimTarget } from './animTargets';
+import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
 import { TrainCarCard } from './TrainCarCard';
 
 export function PlayerHand({ hand }: { hand: CardCounts | undefined }) {
   const { t } = useTranslation();
   const colorBlind = useUi((s) => s.colorBlind);
+  const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.hand);
   const h = handFromCounts(hand);
   const present = CARD_COLORS.filter((c) => h[c] > 0);
   return (
-    // The wrapper (registered even while empty) is the card-flight destination for your own draws.
-    <View ref={(v) => registerAnimTarget('hand', v)} collapsable={false}>
+    // The wrapper (registered even while empty) is the card-flight destination for your own draws
+    // and the tutorial's hand spotlight anchor.
+    <View
+      ref={(v) => {
+        registerAnimTarget('hand', v);
+        anchor.ref(v);
+      }}
+      collapsable={false}
+    >
       {present.length === 0 ? (
         <Text style={styles.muted}>{t('noCards')}</Text>
       ) : (

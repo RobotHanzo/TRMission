@@ -1,7 +1,8 @@
 // The player's kept mission cards, each with a route-preview mini-map (ports the web
 // TicketPanel). Completed missions sink to the bottom of the deck; otherwise server order.
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
 import { TicketCard } from './TicketCard';
 
 interface Props {
@@ -12,21 +13,28 @@ interface Props {
 
 export function TicketPanel({ ticketIds, completedIds }: Props) {
   const { t } = useTranslation();
-  if (ticketIds.length === 0) return <Text style={styles.muted}>{t('noTickets')}</Text>;
+  // The anchor wraps the empty state too — the web's tickets tray exists regardless.
+  const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.tickets);
 
   const isDone = (id: string): boolean => completedIds?.has(id) ?? false;
   const ordered = [...ticketIds].sort((a, b) => Number(isDone(a)) - Number(isDone(b)));
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.row}
-    >
-      {ordered.map((id) => (
-        <TicketCard key={id} ticketId={id} completed={isDone(id)} />
-      ))}
-    </ScrollView>
+    <View {...anchor}>
+      {ticketIds.length === 0 ? (
+        <Text style={styles.muted}>{t('noTickets')}</Text>
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.row}
+        >
+          {ordered.map((id) => (
+            <TicketCard key={id} ticketId={id} completed={isDone(id)} />
+          ))}
+        </ScrollView>
+      )}
+    </View>
   );
 }
 

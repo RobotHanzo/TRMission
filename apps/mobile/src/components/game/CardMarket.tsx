@@ -1,6 +1,7 @@
 // The face-up market + draw deck (ports the web CardMarket 1:1, incl. the draw-pool gate and the
 // no-loco-second-draw engine rule). Slots and the deck register themselves as flight targets
 // (`market-slot-{i}` / `deck`) for the Task 10 card-flight animations.
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,6 +11,11 @@ import { tokenForPb } from '../../game/cards';
 import { handFromCounts, handTotal } from '../../game/payments';
 import { LIVERY_GRADIENT_COLORS } from '../../theme/colors';
 import { useAnimationsStore } from '../../store/animations';
+import {
+  TUTORIAL_ANCHORS,
+  useTutorialAnchor,
+  useTutorialTargets,
+} from '../../features/tutorial/targets';
 import { registerAnimTarget } from './animTargets';
 
 interface Props {
@@ -22,6 +28,13 @@ interface Props {
 export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Props) {
   const { t } = useTranslation();
   const coveredSlots = useAnimationsStore((s) => s.coveredMarketSlots);
+  // Tutorial spotlight anchors (no-ops outside the tutorial provider). The five slots share ONE
+  // anchor id, so they register straight into the registry with per-slot cleanups — a single
+  // useTutorialAnchor instance would unregister slot N when slot N+1's ref fires.
+  const marketAnchor = useTutorialAnchor(TUTORIAL_ANCHORS.market);
+  const deckAnchor = useTutorialAnchor(TUTORIAL_ANCHORS.deck);
+  const targets = useTutorialTargets();
+  const slotAnchorCleanups = useRef(new Map<number, () => void>()).current;
   // A blind draw is legal while ANY card remains in the draw pool: an empty deck reshuffles the
   // discard back in. Gating on deckCount alone hard-locks a player late-game (deck spent, discard
   // full of claimed cards). The engine guarantees DRAWING_CARDS is never entered unless a second
@@ -30,10 +43,14 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
   const isSecondDraw = snapshot.phase === Phase.DRAWING_CARDS;
 
   return (
-    <View style={styles.market}>
+    <View {...marketAnchor} style={styles.market}>
       <Pressable
         testID="market-deck"
-        ref={(v) => registerAnimTarget('deck', v)}
+        ref={(v) => {
+          registerAnimTarget('deck', v);
+          deckAnchor.ref(v);
+        }}
+        collapsable={false}
         style={({ pressed }) => [styles.deck, pressed && styles.pressed]}
         disabled={!canDraw || drawPool === 0}
         onPress={onDrawBlind}
@@ -66,7 +83,14 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
             <Pressable
               key={slot}
               testID={`market-slot-${slot}`}
-              ref={(v) => registerAnimTarget(`market-slot-${slot}`, v)}
+              ref={(v) => {
+                registerAnimTarget(`market-slot-${slot}`, v);
+                slotAnchorCleanups.get(slot)?.();
+                if (v)
+                  slotAnchorCleanups.set(slot, targets.register(TUTORIAL_ANCHORS.marketSlot, v));
+                else slotAnchorCleanups.delete(slot);
+              }}
+              collapsable={false}
               style={({ pressed }) => [
                 styles.slot,
                 covered && styles.slotCovered,

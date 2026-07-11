@@ -21,6 +21,7 @@ import { useGameStore } from '../store/game';
 import { useAnimationsStore } from '../store/animations';
 import { useUi } from '../store/ui';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../features/tutorial/targets';
 import type { Locale } from '../net/rest';
 import { frameDurationMs, type BoardFrameTarget } from './frameTarget';
 import {
@@ -64,6 +65,8 @@ export interface BoardViewProps {
  *  seed from the home framing, which needs a real viewport before the first render. */
 export function BoardView(props: BoardViewProps): React.JSX.Element {
   const [vp, setVp] = useState<Viewport | null>(null);
+  // The tutorial spotlights the whole board through this container (web `.board-viewport`).
+  const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.board);
   const onLayout = (e: LayoutChangeEvent): void => {
     const { width, height } = e.nativeEvent.layout;
     setVp((prev) =>
@@ -71,7 +74,7 @@ export function BoardView(props: BoardViewProps): React.JSX.Element {
     );
   };
   return (
-    <View style={styles.viewport} onLayout={onLayout}>
+    <View {...anchor} style={styles.viewport} onLayout={onLayout}>
       {vp && vp.w > 0 && vp.h > 0 ? <BoardInner {...props} vp={vp} /> : null}
     </View>
   );

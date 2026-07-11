@@ -9,6 +9,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ChevronDown, ChevronRight } from 'lucide-react-native';
 import type { CardCounts } from '@trm/proto';
 import { ticketById } from '../../game/content';
+import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
 import { TicketCard } from './TicketCard';
 import { PlayerHand } from './PlayerHand';
 import { TicketPanel } from './TicketPanel';
@@ -43,6 +44,7 @@ export function TicketChooser({
   onConfirm,
 }: Props) {
   const { t } = useTranslation();
+  const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.ticketChooser);
   const locked = lockLong
     ? new Set(offered.filter((id) => ticketById.get(id)?.deck === 'LONG'))
     : new Set<string>();
@@ -63,7 +65,7 @@ export function TicketChooser({
   const disabled = kept.size < minKeep || confirmDisabled === true;
 
   return (
-    <View style={styles.chooser} accessibilityLabel={t('chooseTickets')}>
+    <View {...anchor} style={styles.chooser} accessibilityLabel={t('chooseTickets')}>
       <View style={styles.head}>
         <Text style={styles.title}>{t('chooseTickets')}</Text>
         <Text style={styles.count}>{kept.size}</Text>

@@ -20,6 +20,7 @@ import { isMyTurn } from '../game/view';
 import { isChatRejectionKey } from '../game/chatErrors';
 import { eventRejectionHintKey } from '../game/events';
 import { gateFlags, type ActionGate } from '../game/actionGate';
+import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../features/tutorial/targets';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import { useSoundDriver } from '../hooks/useSoundDriver';
 import { useClaimFlow } from '../game/useClaimFlow';
@@ -87,6 +88,8 @@ export function GameStage({
   const tier = stageTier(width);
   useAnimationDriver();
   useSoundDriver(sandbox);
+  // Tutorial spotlight anchor for the draw-tickets button (a no-op outside the tutorial provider).
+  const drawTicketsAnchor = useTutorialAnchor(TUTORIAL_ANCHORS.drawTickets);
 
   const rejection = useGameStore((s) => s.rejection);
   const setRejection = useGameStore((s) => s.setRejection);
@@ -198,6 +201,7 @@ export function GameStage({
         onDrawBlind={() => commands?.drawBlind()}
       />
       <Pressable
+        {...drawTicketsAnchor}
         style={({ pressed }) => [
           styles.drawTicketsBtn,
           (!canAct || snapshot.ticketDeckShortCount === 0 || !allow.tickets) &&

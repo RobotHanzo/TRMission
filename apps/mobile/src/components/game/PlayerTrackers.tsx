@@ -12,6 +12,7 @@ import { useAnimationsStore } from '../../store/animations';
 import { playerLiveTotal } from '../../game/tickets';
 import { usePlayerName } from '../../game/playerName';
 import { registerAnimTarget } from './animTargets';
+import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
 const STAT_ICON = 12;
@@ -22,6 +23,7 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
   const nameOf = usePlayerName();
   const turnCue = useAnimationsStore((s) => s.turnCue);
   const clearTurnCue = useAnimationsStore((s) => s.clearTurnCue);
+  const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.trackers);
 
   useEffect(() => {
     if (!turnCue) return;
@@ -30,7 +32,7 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
   }, [turnCue, clearTurnCue]);
 
   return (
-    <View style={styles.trackers} accessibilityRole="list">
+    <View {...anchor} style={styles.trackers} accessibilityRole="list">
       {snapshot.players.map((p) => {
         const current = p.id === snapshot.currentPlayerId;
         const isMe = p.id === snapshot.you?.playerId;
