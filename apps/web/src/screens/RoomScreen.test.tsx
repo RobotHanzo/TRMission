@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { UserFeature } from '@trm/shared';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import '../i18n';
 import { RoomScreen } from './RoomScreen';
 import { useUi } from '../store/ui';
@@ -380,8 +380,14 @@ describe('RoomScreen kick', () => {
         .mockResolvedValueOnce(room({ members: [member('host'), member('u-me')] })) // seated
         .mockResolvedValue(room({ members: [member('host')] })); // kicked — roster drops us
       render(<RoomScreen />);
-      await vi.advanceTimersByTimeAsync(100); // first poll: we are a member
-      await vi.advanceTimersByTimeAsync(2100); // next poll: gone → kicked modal
+      // Wrapped in act(): setKicked(true) lands from the polling promise chain, not a React
+      // event, so without an explicit flush the DOM assertion below can race the commit.
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(100); // first poll: we are a member
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2100); // next poll: gone → kicked modal
+      });
       expect(mocked.joinRoom).not.toHaveBeenCalled();
       // Still mounted with a modal, not silently bounced; acknowledging returns home.
       expect(useUi.getState().view).toBe('room');
