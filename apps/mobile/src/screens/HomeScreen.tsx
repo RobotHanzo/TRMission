@@ -108,12 +108,6 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       <Pressable onPress={() => void signOut()}>
         <Text style={styles.signOut}>{t('home.signOut')}</Text>
       </Pressable>
-
-      {__DEV__ && (
-        <Pressable onPress={() => navigation.navigate('BoardSpike')}>
-          <Text style={styles.devLink}>▶ board spike (dev)</Text>
-        </Pressable>
-      )}
     </View>
   );
 }
@@ -155,5 +149,4 @@ const styles = StyleSheet.create({
   secondaryText: { fontSize: 16, fontWeight: '500' },
   disabled: { opacity: 0.4 },
   signOut: { textAlign: 'center', color: '#d33', marginTop: 8 },
-  devLink: { textAlign: 'center', color: '#888', marginTop: 12, fontSize: 12 },
 });

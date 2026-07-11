@@ -43,6 +43,45 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
 3. Engine `cloneState` (in `@trm/engine`) has a `structuredClone`→JSON fallback for Hermes; the JSON
    path stays byte-identical so golden-replay digests hold.
 
+## Board & game stage (P2)
+
+- **Span-based camera** (`src/board/camera.ts` + `useBoardCamera.ts`): the camera IS the wire
+  descriptor `{cx, cy, span}` (board units; span = visible board-width) — identical to the
+  protobuf `CameraView`, so the myTurn camera broadcast and opponent camera-follow need zero
+  projection math. Reanimated shared values drive a single Skia `<Group transform>`; gestures
+  (pan/pinch, gesture-handler) mutate `cx/cy/span` on the UI thread.
+- **Quantized LOD, not per-frame styles**: continuous zoom only moves the GPU transform. The
+  React tree re-renders solely when the zoom crosses a quantized bucket
+  (`cam.lod.{bucket,inv,marker}`), which resizes track weights / markers / label tiers.
+  `HOME_SCALE_EQUIV = 2.4` anchors the span→scale-equivalent mapping the buckets are derived
+  from. Never write JS-side styles per frame (the web's known jank source).
+- **Manual hit-testing** (`src/board/hitTest.ts`, pure + unit-tested): Skia children aren't
+  touch targets; a tap projects screen→board through the current camera and hit-tests routes
+  (segment distance) and cities (radius) against the shared geometry.
+- **One map scene** (`src/board/MapSceneSkia.tsx`): geography → routes → cities → labels →
+  sweep overlays, purely presentational (mirrors web `MapScene.tsx`); every board surface
+  renders through it. `BoardView` owns the Canvas, camera, glow/sweep timers, camera
+  sync/follow, and the framers.
+- **GameStage prop contract is the P3/P4 seam** (`src/screens/GameStage.tsx`): web-compatible
+  `snapshot`/`commands` (`GameCommands` — live `GameSocket` or the offline/tutorial sandbox)
+  plus `sandbox`/`frameTarget`/`overlay`/`spotlightCities`/`actionGate`. Adaptive tiers by
+  width (`stageLayout.ts`): compact <700dp docks the HUD under a full-bleed board; 700–999
+  two-pane (rail ↔ comms tabs); ≥1000 three-pane (dedicated comms column). Don't change this
+  surface without checking the offline (P3) and tutorial (P4) callers.
+- **Drivers**: `useAnimationDriver` (store→store; card flights/sweeps/floats/banners render in
+  `components/game/AnimationLayer.tsx` via the measured `animTargets` registry) and
+  `useSoundDriver` (expo-audio port — SDK 56 removed expo-av; same `SoundPlayer` interface as
+  web) both mount once in GameStage.
+- **jest mocks**: hand-rolled `__mocks__` for `@shopify/react-native-skia` (component stubs +
+  truthy `SkPath`) and `lucide-react-native` (Proxy stubs — it ships `.mjs` outside the
+  transform), the official `react-native-reanimated/mock`, and a composed `jest.resolver.js`
+  (worklets `.native`-extension strip + the RN resolver) so reanimated 4 imports run under
+  jest-expo. gesture-handler is covered by jest-expo's own setup.
+- **react-native-svg fallback stance**: the P2 Task 1 device spike returned **GO** for Skia.
+  The documented NO-GO fallback (react-native-svg under a single root transform) is
+  _documented, not planned_ — see the P2 plan (Task 1) before ever revisiting renderers; do
+  not silently switch.
+
 ## Net layer — deltas from `apps/web`
 
 - `net/rest.ts` — port of the web REST client with two changes: an **absolute** `API_BASE` (no

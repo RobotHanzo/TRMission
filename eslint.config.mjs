@@ -17,6 +17,9 @@ export default tseslint.config(
       '**/src/gen/**',
       '.yarn/**',
       '**/*.config.{js,mjs,cjs}',
+      // jest infrastructure is CommonJS by necessity (loaded by jest itself, not the app).
+      '**/__mocks__/**',
+      '**/jest.resolver.js',
     ],
   },
   eslint.configs.recommended,
