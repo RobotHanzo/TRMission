@@ -4,7 +4,7 @@
 // the web's media queries: compact (<700dp) docks the HUD under a full-bleed board; two-pane
 // (700–999) adds the rail; three-pane (≥1000) adds a dedicated comms column. The web's
 // `boardLayout` pref is deliberately ignored — the dock/panes are the only layouts that keep the
-// (very vertical) board visible on a handheld. Animation/sound drivers mount in Tasks 10/11.
+// (very vertical) board visible on a handheld. The sound driver mounts in Task 11.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -20,6 +20,7 @@ import { isMyTurn } from '../game/view';
 import { isChatRejectionKey } from '../game/chatErrors';
 import { eventRejectionHintKey } from '../game/events';
 import { gateFlags, type ActionGate } from '../game/actionGate';
+import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import { useClaimFlow } from '../game/useClaimFlow';
 import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../board/frameTarget';
@@ -34,6 +35,7 @@ import { TicketChooser } from '../components/game/TicketChooser';
 import { TunnelModal } from '../components/game/TunnelModal';
 import { ScoreBoard } from '../components/game/ScoreBoard';
 import { CommsPanel } from '../components/game/CommsPanel';
+import { AnimationLayer } from '../components/game/AnimationLayer';
 import { dockTabs, stageTier, type DockTabKey } from './stageLayout';
 
 export interface GameStageProps {
@@ -82,6 +84,7 @@ export function GameStage({
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const tier = stageTier(width);
+  useAnimationDriver();
 
   const rejection = useGameStore((s) => s.rejection);
   const setRejection = useGameStore((s) => s.setRejection);
@@ -299,6 +302,7 @@ export function GameStage({
         />
       )}
       {overlay}
+      <AnimationLayer />
     </>
   );
 

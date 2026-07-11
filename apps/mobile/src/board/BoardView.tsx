@@ -270,6 +270,7 @@ function BoardInner({
   frameTarget,
   vp,
 }: BoardViewProps & { vp: Viewport }): React.JSX.Element {
+  const reducedMotion = useReducedMotion();
   // ── Derivations from the snapshot (ports Board.tsx's pure useMemos) ──
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const stationCities = useMemo(() => {
@@ -446,6 +447,7 @@ function BoardInner({
               marker={cam.lod.marker}
               sweeps={sweeps}
               routeReveal={routeReveal}
+              reducedMotion={reducedMotion}
             />
           </Group>
         </Canvas>

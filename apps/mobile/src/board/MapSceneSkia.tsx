@@ -3,9 +3,11 @@
 // the online board, the offline board (P3), and the tutorial (P4) all render THROUGH it and none can
 // drift. Purely presentational: content + game state + LOD arrive as props; no stores, no i18n. This
 // is a Skia <Group>, NOT its own <Canvas> — the Board (Task 5) owns the Canvas + camera transform.
-import { useMemo } from 'react';
-import { Group } from '@shopify/react-native-skia';
+import { useEffect, useMemo } from 'react';
+import { Group, Path, type SkPath } from '@shopify/react-native-skia';
+import { Easing, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import type { MapGeography, RouteGeometry } from '@trm/map-data';
+import { seatColor } from '../theme/colors';
 import type { ZoomBucket } from './camera';
 import { GeographyLayer, type BoardView } from './GeographyLayer';
 import { RouteLayer } from './RouteLayer';
@@ -65,9 +67,11 @@ export interface MapSceneSkiaProps {
   inv: number;
   marker: number;
 
-  /* ── sweep overlays (ticket completion / longest-trail reveal) — animated in Task 10 ── */
+  /* ── sweep overlays (ticket completion / longest-trail reveal) ── */
   sweeps?: readonly { id: number; seat: number; path: string[] }[] | undefined;
   routeReveal?: { seat: number; path: string[] } | null | undefined;
+  /** Reduced motion snaps the sweep trims to fully drawn (mirrors the web's CSS media block). */
+  reducedMotion?: boolean | undefined;
 }
 
 export function MapSceneSkia({
@@ -89,8 +93,12 @@ export function MapSceneSkia({
   bucket,
   inv,
   marker,
+  sweeps,
+  routeReveal,
+  reducedMotion,
 }: MapSceneSkiaProps) {
   const model = useMemo(() => buildRouteRenderModel(routes, geometry), [routes, geometry]);
+  const modelById = useMemo(() => new Map(model.map((m) => [m.id, m])), [model]);
 
   return (
     <Group>
@@ -119,8 +127,85 @@ export function MapSceneSkia({
         inv={inv}
         marker={marker}
       />
-      {/* Sweep / trail-reveal overlays (Task 10) draw above the cities; wired with the animation
-          driver there. The props are accepted now so the Board/GameStage contract stays stable. */}
+      {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path, one
+          segment after another (ports the web's --delay: i*0.32s stagger). Removal timers live in
+          the Board (path.length*320 + 900ms). */}
+      {sweeps?.map((sw) => (
+        <Group key={sw.id}>
+          {sw.path.map((rid, i) => {
+            const m = modelById.get(rid);
+            if (!m) return null;
+            return (
+              <SweepSegment
+                key={`${sw.id}:${rid}`}
+                path={m.bed}
+                color={seatColor(sw.seat)}
+                width={5 * inv}
+                delayMs={i * 320}
+                reduced={!!reducedMotion}
+              />
+            );
+          })}
+        </Group>
+      ))}
+      {/* Longest-trail review: a persistent seat-colour sweep along the player's longest route
+          (cleared by the scoreboard, not a timer). */}
+      {routeReveal && (
+        <Group>
+          {routeReveal.path.map((rid, i) => {
+            const m = modelById.get(rid);
+            if (!m) return null;
+            return (
+              <SweepSegment
+                key={rid}
+                path={m.bed}
+                color={seatColor(routeReveal.seat)}
+                width={5 * inv}
+                delayMs={i * 120}
+                reduced={!!reducedMotion}
+              />
+            );
+          })}
+        </Group>
+      )}
     </Group>
+  );
+}
+
+/** One sweep segment: the route's bed path stroked in the seat colour, trim-animated 0→1 after its
+ *  stagger delay (the Skia `end` prop drives the draw-on; reduced motion renders it fully drawn). */
+function SweepSegment({
+  path,
+  color,
+  width,
+  delayMs,
+  reduced,
+}: {
+  path: SkPath;
+  color: string;
+  width: number;
+  delayMs: number;
+  reduced: boolean;
+}) {
+  const end = useSharedValue(reduced ? 1 : 0);
+  useEffect(() => {
+    if (!reduced) {
+      end.value = withDelay(
+        delayMs,
+        withTiming(1, { duration: 900, easing: Easing.out(Easing.cubic) }),
+      );
+    }
+  }, [reduced, delayMs, end]);
+  return (
+    <Path
+      path={path}
+      style="stroke"
+      strokeWidth={width}
+      strokeCap="round"
+      color={color}
+      opacity={0.95}
+      start={0}
+      end={end}
+    />
   );
 }
