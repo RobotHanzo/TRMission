@@ -1,25 +1,23 @@
 // Live-game shell (ports the web GameScreen): owns the socket lifecycle (useGameConnection), the
-// roster fetch, and the game-over rematch poll, then delegates rendering to the board. Until the
-// GameStage (Task 9) lands, the board fills the screen behind a minimal room-code strip so the
-// connect/resync/offline machinery is independently verifiable on device.
-import { useEffect } from 'react';
+// room/roster fetch, and the game-over rematch poll, then delegates the board + HUD to the
+// presentational GameStage (shared with the offline/tutorial sandbox in P3/P4).
+import { useEffect, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Phase } from '@trm/proto';
 import type { RootStackParamList } from '../navigation';
-import { api } from '../net/rest';
+import { api, type RoomView } from '../net/rest';
+import { getSocket } from '../net/connection';
 import { useGameConnection } from '../net/useGameConnection';
 import { useGame } from '../store/game';
 import { useRoster } from '../store/roster';
-import { useUi } from '../store/ui';
+import { useSession } from '../store/session';
 import { useActiveContent } from '../game/useActiveContent';
-import { BoardView } from '../board/BoardView';
+import { GameStage } from './GameStage';
 import { OfflineBanner } from '../components/OfflineBanner';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
-
-const noop = (): void => {};
 
 export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
@@ -27,19 +25,21 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   const { sessionReplaced } = useGameConnection(roomCode);
   const snapshot = useGame((s) => s.snapshot);
   const setRoster = useRoster((s) => s.setMembers);
-  const locale = useUi((s) => s.locale);
-  const colorBlind = useUi((s) => s.colorBlind);
+  const user = useSession((s) => s.user);
   const contentStatus = useActiveContent(snapshot?.contentHash);
+  const [room, setRoom] = useState<RoomView | null>(null);
 
-  // Pull the room's members (real account names / bot labels) so the trackers, scoreboard and
-  // turn banner can show them instead of "P{seat+1}". Snapshots carry ids only — names are
-  // lobby data. (The full RoomView — host/rematch tally — wires into GameStage in Task 9.)
+  // Pull the room (member names / bot labels for the trackers + scoreboard, host id and rematch
+  // votes for the post-game flow). Snapshots carry ids only — names are lobby data.
   useEffect(() => {
     let cancelled = false;
     api
       .getRoom(roomCode)
       .then((r) => {
-        if (!cancelled) setRoster(r.members);
+        if (!cancelled) {
+          setRoster(r.members);
+          setRoom(r);
+        }
       })
       .catch(() => undefined);
     return () => {
@@ -47,10 +47,10 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
     };
   }, [roomCode, setRoster]);
 
-  // Once the game is over, poll the room every 2s: the moment the host resets it to LOBBY, carry
-  // this client back into the room — the same way starting a game carried everyone out of it.
-  // Spectators are excluded: they were never room members, and the room screen's own poll would
-  // otherwise auto-join a non-member landing on a LOBBY room.
+  // Once the game is over, poll the room every 2s: refresh the rematch vote tally, and the moment
+  // the host resets it to LOBBY, carry this client back into the room — the same way starting a
+  // game carried everyone out of it. Spectators are excluded: they were never room members, and
+  // the room screen's own poll would otherwise auto-join a non-member landing on a LOBBY room.
   const phase = snapshot?.phase;
   const isSpectator = !snapshot?.you;
   useEffect(() => {
@@ -66,6 +66,7 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
           return;
         }
         setRoster(r.members);
+        setRoom(r);
       } catch {
         // transient — next tick retries; this is a convenience poll, not a critical path
       }
@@ -83,6 +84,38 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
       clearInterval(id);
     };
   }, [roomCode, phase, isSpectator, navigation, setRoster]);
+
+  // Leaving tears down the socket (unmount → useGameConnection cleanup). Nothing is at stake
+  // before the first snapshot arrives, so only confirm once there's an actual game to abandon.
+  const leave = (): void => {
+    if (!snapshot) {
+      navigation.popToTop();
+      return;
+    }
+    Alert.alert(t('leaveConfirmTitle'), t('leaveConfirmBody'), [
+      { text: t('abort'), style: 'cancel' },
+      { text: t('confirm'), style: 'destructive', onPress: () => navigation.popToTop() },
+    ]);
+  };
+
+  const voteRematch = async (wantsRematch: boolean): Promise<void> => {
+    try {
+      const r = await api.voteRematch(roomCode, wantsRematch);
+      setRoster(r.members);
+      setRoom(r);
+    } catch {
+      // transient — the next poll tick resyncs
+    }
+  };
+
+  const playAgain = async (): Promise<void> => {
+    try {
+      await api.rematch(roomCode);
+      navigation.replace('Room', { code: roomCode });
+    } catch {
+      // e.g. a race with another rematch call — the button stays put for a retry
+    }
+  };
 
   // Another connection took over this seat — the socket is closed and will not reconnect. This
   // takes priority over every state below; none of them are recoverable once the seat is gone.
@@ -135,18 +168,15 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
 
   return (
     <View style={styles.fill}>
-      <BoardView
+      <GameStage
         snapshot={snapshot}
-        locale={locale}
-        colorBlind={colorBlind}
-        canAct={false}
-        onPickRoute={noop}
-        onPickCity={noop}
+        commands={getSocket()}
+        onLeave={leave}
+        isHost={room?.hostId === user?.id}
+        rematchMembers={room?.members}
+        onVoteRematch={(wants) => void voteRematch(wants)}
+        onPlayAgain={() => void playAgain()}
       />
-      {/* Placeholder strip — GameStage (Task 9) replaces it with the real HUD. */}
-      <View style={styles.roomStrip} pointerEvents="none">
-        <Text style={styles.roomStripText}>{t('game.roomLabel', { code: roomCode })}</Text>
-      </View>
       <OfflineBanner />
     </View>
   );
@@ -176,14 +206,4 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   primaryText: { color: '#fff', fontWeight: '600' },
-  roomStrip: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    paddingVertical: 4,
-    backgroundColor: 'rgba(255,253,248,0.75)',
-  },
-  roomStripText: { fontSize: 12, opacity: 0.7 },
 });

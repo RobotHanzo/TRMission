@@ -285,6 +285,9 @@ export const api = {
     req<TicketResult>('POST', `/rooms/${code}/start`),
   getTicket: (code: string): Promise<TicketResult> =>
     req<TicketResult>('POST', `/rooms/${code}/ticket`),
+  voteRematch: (code: string, wantsRematch: boolean): Promise<RoomView> =>
+    req<RoomView>('POST', `/rooms/${code}/rematch-vote`, { wantsRematch }),
+  rematch: (code: string): Promise<RoomView> => req<RoomView>('POST', `/rooms/${code}/rematch`),
   mapContent: (hash: string): Promise<MapContentDto> =>
     req<MapContentDto>('GET', `/maps/content/${encodeURIComponent(hash)}`),
 

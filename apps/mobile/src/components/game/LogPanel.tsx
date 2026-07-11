@@ -1,0 +1,164 @@
+// The action log (ports the web LogPanel): entries from the log store rendered through
+// logModel's line taxonomy, names via the roster, colours by seat, auto-scrolled to the tail.
+import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import type { GameSnapshot } from '@trm/proto';
+import type { CardColor } from '@trm/shared';
+import { useLogStore } from '../../store/log';
+import { useGameStore } from '../../store/game';
+import { useUi } from '../../store/ui';
+import { usePlayerName } from '../../game/playerName';
+import { CARD_COLOR_TOKENS, seatColor } from '../../theme/colors';
+import { cityName, routeById, ticketLabel } from '../../game/content';
+import { eventNameKey } from '../../game/events';
+import type { LogEntry } from '../../game/logModel';
+
+const seatOf = (snapshot: GameSnapshot | null, playerId: string | null): number | null => {
+  if (!snapshot || !playerId) return null;
+  return snapshot.players.find((p) => p.id === playerId)?.seat ?? null;
+};
+
+export function LogPanel() {
+  const { t } = useTranslation();
+  const entries = useLogStore((s) => s.entries);
+  const snapshot = useGameStore((s) => s.snapshot);
+  const locale = useUi((s) => s.locale);
+  const nameOf = usePlayerName();
+  const me = snapshot?.you?.playerId ?? null;
+  const listRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    listRef.current?.scrollToEnd({ animated: false });
+  }, [entries.length]);
+
+  const routeName = (id: string): string => {
+    const r = routeById.get(id);
+    return r ? `${cityName(r.a as string, locale)}–${cityName(r.b as string, locale)}` : id;
+  };
+
+  const lineText = (e: LogEntry): string => {
+    const seat = seatOf(snapshot, e.playerId);
+    const name =
+      e.playerId === null
+        ? ''
+        : nameOf({ id: e.playerId, seat: seat ?? 0, isMe: e.playerId === me });
+    switch (e.kind) {
+      case 'gameStarted':
+        return t('log.gameStarted');
+      case 'gameEnded':
+        return t('log.gameEnded');
+      case 'turnStarted':
+        return t('log.turnStarted', { name });
+      case 'routeClaimed':
+        return t('log.routeClaimed', {
+          name,
+          route: routeName(String(e.data.routeId)),
+          points: e.data.points,
+        });
+      case 'stationBuilt':
+        return t('log.stationBuilt', { name, city: cityName(String(e.data.cityId), locale) });
+      case 'tunnelRevealed':
+        return t('log.tunnelRevealed', { name, route: routeName(String(e.data.routeId)) });
+      case 'tunnelCommitted':
+        return t('log.tunnelCommitted', { name, route: routeName(String(e.data.routeId)) });
+      case 'tunnelAborted':
+        return t('log.tunnelAborted', { name, route: routeName(String(e.data.routeId)) });
+      case 'drewBlind':
+        return t('log.drewBlind', { name });
+      case 'tookFaceup':
+        return t('log.tookFaceup', { name });
+      case 'ticketsKept':
+        return t('log.ticketsKept', { name, count: Number(e.data.count) });
+      case 'passed':
+        return t('log.passed', { name });
+      case 'endgame':
+        return t('log.endgame', { turns: e.data.turns });
+      case 'eventAnnounced':
+        return t('log.eventAnnounced', { event: t(eventNameKey(String(e.data.eventKind))) });
+      case 'eventStarted':
+        return t('log.eventStarted', { event: t(eventNameKey(String(e.data.eventKind))) });
+      case 'eventEnded':
+        return t('log.eventEnded', { event: t(eventNameKey(String(e.data.eventKind))) });
+      case 'eventBonus':
+        return t(`log.eventBonus.${String(e.data.reason)}`, {
+          points: Number(e.data.points),
+          city: e.data.cityId ? cityName(String(e.data.cityId), locale) : '',
+          route: e.data.routeId ? routeName(String(e.data.routeId)) : '',
+        });
+      case 'ticketCompleted': {
+        const label = ticketLabel(String(e.data.ticketId), locale);
+        return label
+          ? t('log.ticketCompleted', {
+              name,
+              from: label.a,
+              to: label.b,
+              points: label.value,
+            })
+          : '';
+      }
+    }
+  };
+
+  return (
+    <View style={styles.panel}>
+      <Text style={styles.heading}>{t('log.heading')}</Text>
+      <ScrollView ref={listRef} style={styles.list}>
+        {entries.length === 0 ? (
+          <Text style={styles.empty}>{t('log.empty')}</Text>
+        ) : (
+          entries.map((e) => {
+            const seat = seatOf(snapshot, e.playerId);
+            const color = e.data.color as CardColor | null | undefined;
+            return (
+              <View key={e.id} style={styles.line}>
+                {seat !== null && (
+                  <View style={[styles.dot, { backgroundColor: seatColor(seat) }]} />
+                )}
+                <Text
+                  style={[
+                    styles.text,
+                    e.importance === 'highlight' && styles.highlight,
+                    e.importance === 'alert' && styles.alert,
+                  ]}
+                >
+                  {lineText(e)}
+                </Text>
+                {e.kind === 'tookFaceup' && color && (
+                  <View
+                    style={[styles.chip, { backgroundColor: CARD_COLOR_TOKENS[color].hex }]}
+                    accessibilityLabel={CARD_COLOR_TOKENS[color].nameZh}
+                  />
+                )}
+              </View>
+            );
+          })
+        )}
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  panel: { flex: 1, gap: 4, minHeight: 80 },
+  heading: { fontSize: 13, fontWeight: '700' },
+  list: { flex: 1 },
+  empty: { fontSize: 12, opacity: 0.55, paddingVertical: 4 },
+  line: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 2,
+  },
+  dot: { width: 7, height: 7, borderRadius: 4 },
+  text: { flexShrink: 1, fontSize: 12, color: '#374151' },
+  highlight: { fontWeight: '700', color: '#1f2328' },
+  alert: { fontWeight: '700', color: '#b3261e' },
+  chip: {
+    width: 12,
+    height: 12,
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.25)',
+  },
+});
