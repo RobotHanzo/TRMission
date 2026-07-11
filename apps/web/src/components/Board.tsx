@@ -480,6 +480,7 @@ export function Board({
   sandbox,
   frameTarget,
 }: BoardProps) {
+  const { t } = useTranslation();
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const stationCities = useMemo(() => {
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
@@ -500,6 +501,19 @@ export function Board({
           set.add(c.cityB);
         }
     return set;
+  }, [snapshot]);
+  // cityId → the open charter pair it anchors, for the map badge's hover tooltip.
+  const charterPairs = useMemo(() => {
+    const map = new Map<string, { a: string; b: string; pts: number }>();
+    const rev = snapshot.randomEvents;
+    if (rev)
+      for (const c of rev.charters)
+        if (c.wonByPlayerId === '') {
+          const info = { a: c.cityA, b: c.cityB, pts: c.points };
+          map.set(c.cityA, info);
+          map.set(c.cityB, info);
+        }
+    return map;
   }, [snapshot]);
   const lanternCity = snapshot.randomEvents?.lanternHost?.cityId ?? null;
   const procession = useMemo(
@@ -545,6 +559,17 @@ export function Board({
       set.add(contract.cityB);
     }
     return set;
+  }, [snapshot]);
+  // cityId → the open lucky-ticket pair it anchors, for the map badge's hover tooltip.
+  const luckyPairs = useMemo(() => {
+    const map = new Map<string, { a: string; b: string }>();
+    for (const contract of snapshot.randomEvents?.luckyContracts ?? []) {
+      if (contract.wonByPlayerId !== '') continue;
+      const info = { a: contract.cityA, b: contract.cityB };
+      map.set(contract.cityA, info);
+      map.set(contract.cityB, info);
+    }
+    return map;
   }, [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -735,9 +760,11 @@ export function Board({
                 )}
                 {/* Reopened route: a subtle +2 first-claim bonus chip. */}
                 {reopenRoutes.has(r.id) && !owned.get(r.id) && (
-                  <g className="evt-chip evt-reopen-chip" pointerEvents="none" aria-hidden>
-                    <circle cx={g.mid.x} cy={g.mid.y} />
-                    <text x={g.mid.x} y={g.mid.y}>
+                  <g className="evt-chip evt-reopen-chip" pointerEvents="none">
+                    <circle cx={g.mid.x} cy={g.mid.y} pointerEvents="auto">
+                      <title>{t('events.reopenBonus')}</title>
+                    </circle>
+                    <text x={g.mid.x} y={g.mid.y} aria-hidden="true">
                       +2
                     </text>
                   </g>
@@ -746,65 +773,100 @@ export function Board({
             )}
             renderCityOverlay={(c) => {
               const hotspot = hotspots.get(c.id);
+              const charterPair = charterPairs.get(c.id);
+              const luckyPair = luckyPairs.get(c.id);
               return (
                 <>
                   {/* Permanent/open expansion races and moving city markers. */}
                   {luckyCities.has(c.id) && (
-                    <circle
-                      className="evt-lucky-chip"
-                      cx={c.x}
-                      cy={c.y}
-                      pointerEvents="none"
-                      aria-hidden
-                    />
+                    <circle className="evt-lucky-chip" cx={c.x} cy={c.y} pointerEvents="auto">
+                      {luckyPair && (
+                        <title>
+                          {t('events.luckyPair', {
+                            a: cityName(luckyPair.a, locale),
+                            b: cityName(luckyPair.b, locale),
+                          })}
+                        </title>
+                      )}
+                    </circle>
                   )}
+                  {/* Badges below all attach via `transform: translate(c.x, c.y)` + a quadrant
+                      class (evt-badge-n[ew]/s[ew]) whose cx/cy·x/y come from CSS `calc(px *
+                      var(--inv-scale))`, so the badge stays hugging the station marker at every
+                      zoom level instead of drifting away as you zoom in. */}
                   {lanternCity === c.id && (
-                    <g className="evt-city-badge evt-lantern-host" pointerEvents="none" aria-hidden>
-                      <circle cx={c.x - 2.4} cy={c.y - 2.4} />
-                      <text x={c.x - 2.4} y={c.y - 2.4}>
-                        +6
-                      </text>
+                    <g
+                      className="evt-city-badge evt-lantern-host evt-badge-nw"
+                      transform={`translate(${c.x} ${c.y})`}
+                      pointerEvents="none"
+                    >
+                      <circle pointerEvents="auto">
+                        <title>{t('events.hostCity', { city: cityName(c.id, locale) })}</title>
+                      </circle>
+                      <text aria-hidden="true">+6</text>
                     </g>
                   )}
                   {processionCity === c.id && (
-                    <g className="evt-city-badge evt-procession" pointerEvents="none" aria-hidden>
-                      <circle cx={c.x + 2.4} cy={c.y - 2.4} />
-                      <text x={c.x + 2.4} y={c.y - 2.4}>
-                        P
-                      </text>
+                    <g
+                      className="evt-city-badge evt-procession evt-badge-ne"
+                      transform={`translate(${c.x} ${c.y})`}
+                      pointerEvents="none"
+                    >
+                      <circle pointerEvents="auto">
+                        <title>{t('events.processionAt', { city: cityName(c.id, locale) })}</title>
+                      </circle>
+                      <text aria-hidden="true">P</text>
                     </g>
                   )}
                   {bentoCities.has(c.id) && (
-                    <g className="evt-city-badge evt-bento" pointerEvents="none" aria-hidden>
-                      <circle cx={c.x - 2.4} cy={c.y + 2.4} />
-                      <text x={c.x - 2.4} y={c.y + 2.4}>
-                        B
-                      </text>
+                    <g
+                      className="evt-city-badge evt-bento evt-badge-sw"
+                      transform={`translate(${c.x} ${c.y})`}
+                      pointerEvents="none"
+                    >
+                      <circle pointerEvents="auto">
+                        <title>{t('events.bentoCity', { city: cityName(c.id, locale) })}</title>
+                      </circle>
+                      <text aria-hidden="true">B</text>
                     </g>
                   )}
                   {nightMarketCities.has(c.id) && (
-                    <g className="evt-city-badge evt-night-market" pointerEvents="none" aria-hidden>
-                      <circle cx={c.x + 2.4} cy={c.y + 2.4} />
-                      <text x={c.x + 2.4} y={c.y + 2.4}>
-                        N
-                      </text>
+                    <g
+                      className="evt-city-badge evt-night-market evt-badge-se"
+                      transform={`translate(${c.x} ${c.y})`}
+                      pointerEvents="none"
+                    >
+                      <circle pointerEvents="auto">
+                        <title>{t('events.nightMarketCity', { city: cityName(c.id, locale) })}</title>
+                      </circle>
+                      <text aria-hidden="true">N</text>
                     </g>
                   )}
                   {/* Charter endpoint: a small contract chip behind the marker. */}
                   {charterCities.has(c.id) && (
-                    <circle
-                      className="evt-charter-chip"
-                      cx={c.x}
-                      cy={c.y}
-                      pointerEvents="none"
-                      aria-hidden
-                    />
+                    <circle className="evt-charter-chip" cx={c.x} cy={c.y} pointerEvents="auto">
+                      {charterPair && (
+                        <title>
+                          {t('events.charterOpen', {
+                            a: cityName(charterPair.a, locale),
+                            b: cityName(charterPair.b, locale),
+                            pts: charterPair.pts,
+                          })}
+                        </title>
+                      )}
+                    </circle>
                   )}
                   {/* Viral hotspot: a +1/+2 badge above the station. */}
                   {hotspot !== undefined && (
-                    <g className="evt-hotspot" pointerEvents="none" aria-hidden>
-                      <circle className="evt-badge-bg" cx={c.x + 2.2} cy={c.y - 2.2} />
-                      <text className="evt-hotspot-text" x={c.x + 2.2} y={c.y - 2.2}>
+                    <g
+                      className="evt-hotspot evt-badge-ne"
+                      transform={`translate(${c.x} ${c.y})`}
+                      pointerEvents="none"
+                    >
+                      <circle className="evt-badge-bg" pointerEvents="auto">
+                        <title>{t('events.hotspotLevel', { n: hotspot })}</title>
+                      </circle>
+                      <text className="evt-hotspot-text" aria-hidden="true">
                         +{hotspot}
                       </text>
                     </g>
