@@ -30,3 +30,4 @@ jobs:
       - run: yarn workspace @trm/mobile typecheck
       - run: yarn workspace @trm/mobile lint
       - run: yarn workspace @trm/mobile test
+      - run: yarn workspace @trm/mobile test:pure

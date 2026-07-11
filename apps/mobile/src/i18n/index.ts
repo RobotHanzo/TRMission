@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { tutorialZh, tutorialEn } from './tutorial';
 
 // Traditional Chinese is primary; English is the fallback (ADR: zh-Hant first). This is a minimal
 // seed — screens add their own keys as they land. compatibilityJSON 'v4' pairs with the
@@ -12,6 +13,7 @@ void i18n.use(initReactI18next).init({
   resources: {
     'zh-Hant': {
       translation: {
+        tutorial: tutorialZh,
         home: {
           title: '台鐵任務',
           greeting: '嗨，{{name}}',
@@ -249,6 +251,7 @@ void i18n.use(initReactI18next).init({
     },
     en: {
       translation: {
+        tutorial: tutorialEn,
         home: {
           title: 'TRMission',
           greeting: 'Hi, {{name}}',

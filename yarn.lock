@@ -4214,6 +4214,7 @@ __metadata:
     react-native-worklets: "npm:0.8.3"
     react-test-renderer: "npm:19.2.3"
     typescript: "npm:^5.7.3"
+    vitest: "npm:^2.1.8"
     zustand: "npm:^5.0.2"
   languageName: unknown
   linkType: soft
