@@ -191,3 +191,75 @@ describe('RoomsView detail drawer', () => {
     expect(await screen.findByText('房間詳情 · ABCD')).toBeInTheDocument();
   });
 });
+
+describe('RoomsView transfer host', () => {
+  const ROOM_DETAIL_TWO = {
+    code: 'ABCD',
+    hostId: 'h1',
+    hostName: 'Hostie',
+    status: 'LOBBY',
+    visibility: 'PUBLIC',
+    maxPlayers: 5,
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    members: [
+      { userId: 'h1', displayName: 'Hostie', seat: 0, isBot: false, isGuest: false, ready: true },
+      { userId: 'p2', displayName: 'Payton', seat: 1, isBot: false, isGuest: false, ready: false },
+    ],
+    spectators: [],
+    settings: {
+      map: { source: 'official', id: 'taiwan' },
+      allowSpectating: true,
+      eventsMode: 'off',
+      unlimitedStationBorrow: true,
+      secondDrawAfterBlindRainbow: false,
+      noUnfinishedTicketPenalty: false,
+      doubleRouteSingleFor23: true,
+    },
+  };
+
+  beforeEach(() => {
+    useToast.getState().reset();
+    useSession.setState({
+      phase: 'ready',
+      user: { id: 'u1', displayName: 'Ops', isGuest: false },
+      role: 'admin',
+      permissions: new Set(['rooms.read', 'rooms.transferHost']),
+    });
+  });
+
+  it('reassigns the host from the member list and closes the drawer', async () => {
+    stubFetch({
+      '/dashboard/rooms/ABCD/transfer/p2': { status: 200, body: { ...ROOM_ROW, hostId: 'p2' } },
+      '/dashboard/rooms/ABCD': { status: 200, body: ROOM_DETAIL_TWO },
+      '/dashboard/rooms?': { status: 200, body: { rooms: [ROOM_ROW], nextCursor: null } },
+    });
+    render(
+      <>
+        <RoomsView />
+        <ToastStack />
+      </>,
+    );
+    fireEvent.click(await screen.findByText('ABCD'));
+    fireEvent.click(await screen.findByText('設為房主'));
+    // The room drawer (role="dialog", aria-label = the room detail title) is still open
+    // behind the confirm dialog, so scope by the confirm dialog's own aria-label (its title)
+    // to avoid an ambiguous match against either "dialog" role element.
+    const dialog = await screen.findByRole('dialog', { name: '將房主轉移給此成員？' });
+    fireEvent.click(within(dialog).getByRole('button', { name: '設為房主' }));
+    expect(await screen.findByText('房主已轉移')).toBeInTheDocument();
+    expect(screen.queryByText('房間詳情 · ABCD')).not.toBeInTheDocument();
+  });
+
+  it('hides the make-owner action without the permission', async () => {
+    useSession.setState({ permissions: new Set(['rooms.read']) });
+    stubFetch({
+      '/dashboard/rooms/ABCD': { status: 200, body: ROOM_DETAIL_TWO },
+      '/dashboard/rooms?': { status: 200, body: { rooms: [ROOM_ROW], nextCursor: null } },
+    });
+    render(<RoomsView />);
+    fireEvent.click(await screen.findByText('ABCD'));
+    await screen.findByText(/Payton/);
+    expect(screen.queryByText('設為房主')).toBeNull();
+  });
+});

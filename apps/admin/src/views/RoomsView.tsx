@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { DoorClosed, Info, Trash2 } from 'lucide-react';
+import { Crown, DoorClosed, Info, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api, type RoomDetail, type RoomRow } from '../net/rest';
 import { useSession } from '../store/session';
@@ -30,16 +30,19 @@ function RoomDrawer({
   onClose,
   onRequestClose,
   onRequestDelete,
+  onRequestTransfer,
 }: {
   row: RoomRow;
   onClose: () => void;
   onRequestClose: (code: string) => void;
   onRequestDelete: (code: string) => void;
+  onRequestTransfer: (code: string, userId: string) => void;
 }) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const canClose = useSession((s) => s.hasPermission('rooms.close'));
   const canDelete = useSession((s) => s.hasPermission('rooms.delete'));
+  const canTransferHost = useSession((s) => s.hasPermission('rooms.transferHost'));
   const [detail, setDetail] = useState<RoomDetail | null>(null);
 
   useEffect(() => {
@@ -133,6 +136,19 @@ function RoomDrawer({
                   <span className="oc-muted">
                     {m.ready ? t('rooms.ready') : t('rooms.notReady')}
                   </span>
+                  {canTransferHost &&
+                    row.status === 'LOBBY' &&
+                    !m.isBot &&
+                    m.userId !== detail.hostId && (
+                      <button
+                        className="oc-btn"
+                        style={{ marginLeft: 6 }}
+                        onClick={() => onRequestTransfer(row.code, m.userId)}
+                      >
+                        <Crown size={14} aria-hidden />
+                        {t('rooms.transferHost')}
+                      </button>
+                    )}
                 </span>
               </div>
             ))}
@@ -218,6 +234,7 @@ export function RoomsView() {
   const [loading, setLoading] = useState(true);
   const [closing, setClosing] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [transferring, setTransferring] = useState<{ code: string; userId: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(
@@ -249,6 +266,21 @@ export function RoomsView() {
     } finally {
       setBusy(false);
       setClosing(null);
+    }
+  };
+
+  const transferHost = async (code: string, userId: string, reason?: string) => {
+    setBusy(true);
+    try {
+      const updated = await api.transferRoomHost(code, userId, reason);
+      setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
+      if (param === code) closeDetail();
+      pushToast('success', t('toast.roomHostTransferred'));
+    } catch (e) {
+      pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    } finally {
+      setBusy(false);
+      setTransferring(null);
     }
   };
 
@@ -370,6 +402,7 @@ export function RoomsView() {
           onClose={closeDetail}
           onRequestClose={setClosing}
           onRequestDelete={setDeleting}
+          onRequestTransfer={(code, userId) => setTransferring({ code, userId })}
         />
       )}
 
@@ -399,6 +432,17 @@ export function RoomsView() {
           busy={busy}
           onConfirm={(reason) => void del(deleting, reason)}
           onCancel={() => setDeleting(null)}
+        />
+      )}
+      {transferring && (
+        <ConfirmDialog
+          title={t('rooms.transferConfirmTitle')}
+          body={t('rooms.transferConfirmBody')}
+          confirmLabel={t('rooms.transferHost')}
+          withReason
+          busy={busy}
+          onConfirm={(reason) => void transferHost(transferring.code, transferring.userId, reason)}
+          onCancel={() => setTransferring(null)}
         />
       )}
     </div>

@@ -372,6 +372,12 @@ export const api = {
     req<RoomsPage>('GET', `/dashboard/rooms${qs(opts)}`),
   closeRoom: (code: string, reason?: string) =>
     req<RoomRow>('POST', `/dashboard/rooms/${encodeURIComponent(code)}/close`, { reason }),
+  transferRoomHost: (code: string, userId: string, reason?: string) =>
+    req<RoomRow>(
+      'POST',
+      `/dashboard/rooms/${encodeURIComponent(code)}/transfer/${encodeURIComponent(userId)}`,
+      { reason },
+    ),
   deleteRoom: (code: string, reason?: string) =>
     req<void>('DELETE', `/dashboard/rooms/${encodeURIComponent(code)}`, { reason }),
   getRoom: (code: string) => req<RoomDetail>('GET', `/dashboard/rooms/${encodeURIComponent(code)}`),
