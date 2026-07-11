@@ -403,9 +403,9 @@ export function GameStage({
       <section
         className="event-action-bar"
         role="group"
-        aria-label={t('events.lanternRelocationRequired')}
+        aria-label={t('events.relocationRequired')}
       >
-        <strong>{t('events.lanternRelocationRequired')}</strong>
+        <strong>{t('events.relocationRequired')}</strong>
         {lanternPending.candidateCityIds.map((cityId) => (
           <button
             type="button"
