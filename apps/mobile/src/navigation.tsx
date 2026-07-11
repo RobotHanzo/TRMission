@@ -5,6 +5,9 @@ import { GameScreen } from './screens/GameScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { RoomScreen } from './screens/RoomScreen';
 import { LoginScreen } from './screens/LoginScreen';
+import { OfflineSetupScreen } from './screens/OfflineSetupScreen';
+import { OfflineGameScreen } from './screens/OfflineGameScreen';
+import type { LocalGameInput } from './offline/useLocalGame';
 import { useSession } from './store/session';
 
 export type RootStackParamList = {
@@ -14,6 +17,9 @@ export type RootStackParamList = {
   Room: { code: string };
   /** The live game (Skia board + the adaptive GameStage HUD). */
   Game: { roomCode: string };
+  /** Offline vs-bots: new-game setup, then the sandboxed GameStage. */
+  OfflineSetup: undefined;
+  OfflineGame: LocalGameInput;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -36,6 +42,16 @@ export function RootNavigator(): React.JSX.Element {
           <Stack.Screen name="Home" component={HomeScreen} options={{ title: t('home.title') }} />
           <Stack.Screen name="Room" component={RoomScreen} options={{ title: t('room.title') }} />
           <Stack.Screen name="Game" component={GameScreen} options={{ title: t('game.title') }} />
+          <Stack.Screen
+            name="OfflineSetup"
+            component={OfflineSetupScreen}
+            options={{ title: t('offline.newGame') }}
+          />
+          <Stack.Screen
+            name="OfflineGame"
+            component={OfflineGameScreen}
+            options={{ title: t('game.title') }}
+          />
         </>
       ) : (
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
