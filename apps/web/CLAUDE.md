@@ -35,10 +35,15 @@ that can disagree with the server.
 
 ## Net layer
 
-- `net/rest.ts` — typed REST client. Access token lives in memory; the refresh token is an httpOnly
-  cookie sent with `credentials: 'include'`. A 401 triggers **one** silent `/auth/refresh` + retry.
-- `net/socket.ts` — the protobuf WS client (`GameSocket`): `create`/`toBinary`/`fromBinary` from
-  protobuf-es, heartbeat, backoff reconnect, `ClientHello` handshake with the ws-game ticket.
+The REST client, `GameSocket`, `SandboxSocket`, and the game/chat/log/animations stores live in
+**`@trm/client-core`** (shared with mobile); the app-side files are the web transport + re-export
+shims:
+
+- `net/rest.ts` — builds the shared client with the web `RestTransport`: same-origin base, access
+  token in memory (inside the core), refresh token as an httpOnly cookie sent with
+  `credentials: 'include'`. A 401 triggers **one** silent `/auth/refresh` + retry (single-flight).
+- `net/socket.ts` — re-exports the shared protobuf WS client (`GameSocket`: heartbeat, backoff
+  reconnect + per-attempt ticket re-mint, `ClientHello` handshake) plus web's `defaultWsUrl()`.
 - `net/connection.ts` — bridges the socket to the game store.
 - `net/google.ts` — loads Google Identity Services (GSI) once per page; `LoginScreen` uses it to
   render Google's own sign-in button + fire One Tap, falling back to the legacy redirect button if
