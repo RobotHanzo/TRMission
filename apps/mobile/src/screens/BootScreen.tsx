@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
+import { BrandWordmark, Card, MutedText, Screen } from '../theme/chrome';
 import { BUILD_NUMBER } from '../config';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
@@ -45,24 +46,28 @@ export function BootScreen(): React.JSX.Element {
 
   if (mustUpdate) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>{t('boot.updateTitle')}</Text>
-        <Text style={styles.body}>{t('boot.updateBody')}</Text>
-      </View>
+      <Screen centered style={styles.container}>
+        <Card style={styles.updateCard}>
+          <Text style={styles.title}>{t('boot.updateTitle')}</Text>
+          <MutedText center>{t('boot.updateBody')}</MutedText>
+        </Card>
+      </Screen>
     );
   }
 
+  // The native splash is still covering this in the normal path — content only shows if hide
+  // raced ahead; keep it on-brand rather than a bare app title.
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t('home.title')}</Text>
+    <Screen centered style={styles.container}>
+      <BrandWordmark size="hero" />
       <ActivityIndicator style={styles.spinner} />
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
-  title: { fontSize: 28, fontWeight: '700' },
-  body: { fontSize: 15, textAlign: 'center', opacity: 0.75 },
+  container: { alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
+  updateCard: { maxWidth: 420, alignItems: 'center' },
+  title: { fontSize: 22, fontWeight: '700', textAlign: 'center' },
   spinner: { marginTop: 8 },
 });

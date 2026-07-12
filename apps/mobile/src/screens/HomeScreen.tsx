@@ -1,7 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { RootStackParamList } from '../navigation';
 import { api, type RoomView } from '../net/rest';
 import { useSession } from '../store/session';
@@ -10,12 +10,22 @@ import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
 import { OfflineHomeSection } from '../offline/OfflineHomeSection';
 import { getTutorialCompletion } from '../features/tutorial/progress';
 import { useCanBuild } from './BuilderScreen';
+import {
+  BrandWordmark,
+  Field,
+  PrimaryButton,
+  Screen,
+  SecondaryButton,
+  SectionLabel,
+} from '../theme/chrome';
+import { RADIUS, SPACE, useTheme } from '../theme/useTheme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 /** The lobby home: play offline vs bots, rejoin an active room, or create/join a room. */
 export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const user = useSession((s) => s.user);
   const signOut = useSession((s) => s.signOut);
   const online = useOnline();
@@ -73,9 +83,20 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     }
   };
 
+  const rowStyle = ({ pressed }: { pressed: boolean }) => [
+    styles.roomRow,
+    { backgroundColor: tokens.surface, borderColor: tokens.line },
+    pressed && styles.pressed,
+  ];
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.greeting}>{t('home.greeting', { name: user?.displayName ?? '' })}</Text>
+    <Screen style={styles.container}>
+      <View style={styles.header}>
+        <BrandWordmark />
+        <Text style={[styles.greeting, { color: tokens.ink }]}>
+          {t('home.greeting', { name: user?.displayName ?? '' })}
+        </Text>
+      </View>
 
       {!online && <OfflineHomeBanner />}
 
@@ -90,15 +111,19 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       <Pressable
         accessibilityRole="button"
         testID="home-tutorial"
-        style={styles.roomRow}
+        style={rowStyle}
         onPress={() => navigation.navigate('Tutorial')}
       >
         <View style={styles.tutorialText}>
-          <Text style={styles.roomCode}>{t('home.play.tutorialTitle')}</Text>
-          <Text style={styles.roomMeta}>{t('home.play.tutorialDesc')}</Text>
+          <Text style={[styles.roomCode, { color: tokens.ink }]}>
+            {t('home.play.tutorialTitle')}
+          </Text>
+          <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
+            {t('home.play.tutorialDesc')}
+          </Text>
         </View>
         {tutorialDone && (
-          <Text testID="home-tutorial-done" style={styles.tutorialDone}>
+          <Text testID="home-tutorial-done" style={[styles.tutorialDone, { color: tokens.ok }]}>
             ✓
           </Text>
         )}
@@ -106,17 +131,17 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
 
       {rooms.length > 0 && (
         <>
-          <Text style={styles.section}>{t('home.myRooms')}</Text>
+          <SectionLabel>{t('home.myRooms')}</SectionLabel>
           <FlatList
             data={rooms}
             keyExtractor={(r) => r.code}
             renderItem={({ item }) => (
               <Pressable
-                style={styles.roomRow}
+                style={rowStyle}
                 onPress={() => navigation.navigate('Room', { code: item.code })}
               >
-                <Text style={styles.roomCode}>{item.code}</Text>
-                <Text style={styles.roomMeta}>
+                <Text style={[styles.roomCode, { color: tokens.ink }]}>{item.code}</Text>
+                <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
                   {t('home.playersCount', { n: item.members.length, max: item.maxPlayers })}
                 </Text>
               </Pressable>
@@ -126,7 +151,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       )}
 
       <View style={styles.joinRow}>
-        <TextInput
+        <Field
           style={[styles.joinInput, !online && styles.disabled]}
           placeholder={t('home.joinPlaceholder')}
           autoCapitalize="characters"
@@ -134,34 +159,25 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
           onChangeText={setCode}
           editable={!busy && online}
         />
-        <Pressable
-          style={[styles.secondary, !online && styles.disabled]}
-          onPress={() => void joinRoom()}
-          disabled={busy || !online}
-        >
-          <Text style={styles.secondaryText}>{t('home.join')}</Text>
-        </Pressable>
+        <View style={!online && styles.disabled}>
+          <SecondaryButton title={t('home.join')} onPress={() => void joinRoom()} disabled={busy || !online} />
+        </View>
       </View>
 
-      <Pressable
-        style={[styles.primary, !online && styles.disabled]}
+      <PrimaryButton
+        title={t('home.create')}
         onPress={() => void createRoom()}
         disabled={busy || !online}
-      >
-        <Text style={styles.primaryText}>{t('home.create')}</Text>
-      </Pressable>
+      />
 
       {/* Feature-gated (mapBuilder), hidden entirely without the grant — mirrors web AppHeader. */}
       {canBuild && (
-        <Pressable
+        <SecondaryButton
           testID="home-builder"
-          accessibilityRole="button"
-          style={[styles.secondary, !online && styles.disabled]}
+          title={t('builder.entry')}
           onPress={() => navigation.navigate('Builder')}
           disabled={!online}
-        >
-          <Text style={styles.secondaryText}>{t('builder.entry')}</Text>
-        </Pressable>
+        />
       )}
 
       <Pressable
@@ -169,54 +185,37 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         accessibilityRole="button"
         onPress={() => navigation.navigate('Settings')}
       >
-        <Text style={styles.settingsLink}>{t('settings.title')}</Text>
+        <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('settings.title')}</Text>
       </Pressable>
 
       <Pressable onPress={() => void signOut()}>
-        <Text style={styles.signOut}>{t('home.signOut')}</Text>
+        <Text style={[styles.signOut, { color: tokens.danger }]}>{t('home.signOut')}</Text>
       </Pressable>
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, gap: 12 },
-  greeting: { fontSize: 22, fontWeight: '700' },
-  section: { fontSize: 13, fontWeight: '600', opacity: 0.6, marginTop: 8 },
+  container: { padding: SPACE[4], gap: SPACE[3] },
+  header: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  greeting: { fontSize: 18, fontWeight: '700', flexShrink: 1, textAlign: 'right' },
   roomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 14,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 8,
+    borderRadius: RADIUS.md,
+    marginBottom: SPACE[2],
   },
   roomCode: { fontSize: 16, fontWeight: '700' },
-  roomMeta: { fontSize: 14, opacity: 0.6 },
-  joinRow: { flexDirection: 'row', gap: 8 },
-  joinInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  primary: { backgroundColor: '#0f5fa6', borderRadius: 8, padding: 14, alignItems: 'center' },
-  primaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  secondary: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryText: { fontSize: 16, fontWeight: '500' },
+  roomMeta: { fontSize: 14 },
+  joinRow: { flexDirection: 'row', gap: SPACE[2], alignItems: 'stretch' },
+  joinInput: { flex: 1 },
   disabled: { opacity: 0.4 },
-  settingsLink: { textAlign: 'center', color: '#0f5fa6', marginTop: 8 },
-  signOut: { textAlign: 'center', color: '#d33', marginTop: 8 },
+  pressed: { opacity: 0.85 },
+  settingsLink: { textAlign: 'center', marginTop: SPACE[2], fontWeight: '500' },
+  signOut: { textAlign: 'center', marginTop: SPACE[1] },
   tutorialText: { gap: 2, flexShrink: 1 },
-  tutorialDone: { color: '#2e7d32', fontSize: 18, fontWeight: '700' },
+  tutorialDone: { fontSize: 18, fontWeight: '700' },
 });
