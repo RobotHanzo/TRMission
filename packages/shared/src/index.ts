@@ -10,3 +10,4 @@ export * from './dashboard';
 export * from './features';
 export * from './ws';
 export * from './chat-presets';
+export * from './reports';
