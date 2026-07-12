@@ -10,6 +10,7 @@ import { OfflineSetupScreen } from './screens/OfflineSetupScreen';
 import { OfflineGameScreen } from './screens/OfflineGameScreen';
 import TutorialScreen from './features/tutorial/TutorialScreen';
 import BuilderScreen from './screens/BuilderScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
 import type { LocalGameInput } from './offline/useLocalGame';
 import { useSession } from './store/session';
 
@@ -27,6 +28,8 @@ export type RootStackParamList = {
   Tutorial: undefined;
   /** The map-builder WebView (mapBuilder feature; authed stack only). */
   Builder: undefined;
+  /** Device settings + account controls (push/haptics toggles, account deletion). */
+  Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -71,6 +74,11 @@ export function RootNavigator(): React.JSX.Element {
             name="Builder"
             component={BuilderScreen}
             options={{ title: t('builder.title') }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{ title: t('settings.title') }}
           />
         </>
       ) : (

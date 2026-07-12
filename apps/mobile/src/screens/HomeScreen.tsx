@@ -164,6 +164,14 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         </Pressable>
       )}
 
+      <Pressable
+        testID="home-settings"
+        accessibilityRole="button"
+        onPress={() => navigation.navigate('Settings')}
+      >
+        <Text style={styles.settingsLink}>{t('settings.title')}</Text>
+      </Pressable>
+
       <Pressable onPress={() => void signOut()}>
         <Text style={styles.signOut}>{t('home.signOut')}</Text>
       </Pressable>
@@ -207,6 +215,7 @@ const styles = StyleSheet.create({
   },
   secondaryText: { fontSize: 16, fontWeight: '500' },
   disabled: { opacity: 0.4 },
+  settingsLink: { textAlign: 'center', color: '#1f6feb', marginTop: 8 },
   signOut: { textAlign: 'center', color: '#d33', marginTop: 8 },
   tutorialText: { gap: 2, flexShrink: 1 },
   tutorialDone: { color: '#2e7d32', fontSize: 18, fontWeight: '700' },
