@@ -110,6 +110,9 @@ export type GameEvent =
       readonly e: 'ENDGAME_TRIGGERED';
       readonly player: PlayerId;
       readonly finalTurnsRemaining: number;
+      /** Why the final round began: a player ran their trains down, or the table deadlocked (the
+       *  card pool is dead and no one can claim a route). */
+      readonly reason: 'FINAL_TRAINS' | 'DEADLOCK';
       readonly visibility: 'PUBLIC';
     }
   | { readonly e: 'GAME_ENDED'; readonly visibility: 'PUBLIC' }

@@ -152,4 +152,7 @@ export const SCHEMA_VERSION = 1;
 // off-variant).
 // v8: the 13-event expansion — new event actions/phases, inventories, deck marker, and deferred
 // Goddess Procession scoring. Off-mode state remains byte-identical apart from engineVersion.
-export const ENGINE_VERSION = 8;
+// v9: deadlock end-sequence — a player with no productive move in a dead card pool must PASS
+// (futile ticket draws are no longer forced), and the endgame is triggered when the pool is dead
+// and no one can claim a route (ENDGAME_TRIGGERED gains `reason`). Off-path play is unchanged.
+export const ENGINE_VERSION = 9;

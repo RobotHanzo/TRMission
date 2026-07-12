@@ -6,6 +6,7 @@ import { computeFinalScores } from './scoring';
 import { offerTickets, allKeptTicketsCompleted } from './tickets';
 import { tickRound } from './events/runtime';
 import { turnDirection } from './events/effects';
+import { hasAnyLegalMove, poolDead, noPlayerCanClaimRoute } from './legality';
 
 export function currentPlayerId(state: GameState): PlayerId {
   return state.turnOrder[state.turn.orderIndex] as PlayerId;
@@ -32,16 +33,19 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
 
   let endgame = state.endgame;
   let triggeredNow = false;
-  if (
-    !endgame.triggered &&
-    (player?.trainCars ?? Infinity) <= state.ruleParams.endgameTrainThreshold
-  ) {
+  const trainsTrigger =
+    (player?.trainCars ?? Infinity) <= state.ruleParams.endgameTrainThreshold;
+  // Deadlock: the card pool is dead and no one can claim a route, so no player's trains will ever
+  // drop to the threshold. Begin the end sequence anyway so the game does not stall.
+  const deadlockTrigger = !trainsTrigger && poolDead(state) && noPlayerCanClaimRoute(board, state);
+  if (!endgame.triggered && (trainsTrigger || deadlockTrigger)) {
     endgame = { triggered: true, triggerPlayerIndex: curIdx, finalTurnsRemaining: n };
     triggeredNow = true;
     events.push({
       e: 'ENDGAME_TRIGGERED',
       player: curPlayer,
       finalTurnsRemaining: n,
+      reason: trainsTrigger ? 'FINAL_TRAINS' : 'DEADLOCK',
       visibility: 'PUBLIC',
     });
   } else if (endgame.triggered) {
@@ -104,7 +108,13 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
   // no objective left, so their turn opens straight into a fresh ticket draw instead of
   // AWAIT_ACTION. Skipped (a normal turn) when the short ticket deck is exhausted — an impossible
   // draw can't be forced.
-  if (next.turn.phase === 'AWAIT_ACTION' && allKeptTicketsCompleted(board, next, nextPlayer)) {
+  // ...but never force it on a stuck player (dead pool, no productive move): they must PASS, not be
+  // dragged into a futile ticket draw (the deadlock fix). hasAnyLegalMove excludes ticket draws.
+  if (
+    next.turn.phase === 'AWAIT_ACTION' &&
+    hasAnyLegalMove(board, next, nextPlayer) &&
+    allKeptTicketsCompleted(board, next, nextPlayer)
+  ) {
     const forced = offerTickets(next, nextPlayer);
     if (forced) {
       events.push(...forced.events);

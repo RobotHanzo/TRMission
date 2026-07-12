@@ -1,6 +1,6 @@
 import type { PlayerId, RouteId, CityId, TicketId, CardColor, TrainColor } from '@trm/shared';
 import type { Result, RuleViolation } from '@trm/shared';
-import { ok, err, violation, asTicketId, TRAIN_COLORS } from '@trm/shared';
+import { ok, err, violation, asTicketId } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
 import { getRoute, groupMembersOf } from './board';
@@ -24,7 +24,6 @@ import {
 import { stationBorrowEdges } from './scoring';
 import {
   isRouteClosed,
-  closedRouteIds,
   claimsSuspended,
   stationsSuspended,
   skyLanternSurcharge,
@@ -53,6 +52,7 @@ import {
   routeTouchesRegion,
 } from './events/effects';
 import { drawEventCard, applyEventRefill } from './events/draw';
+import { hasAnyLegalMove } from './legality';
 
 export interface ReduceOutput {
   readonly state: GameState;
@@ -93,7 +93,7 @@ function dispatch(board: Board, state: GameState, action: Action): ReduceResult 
         case 'DRAW_FACEUP':
           return applyDrawFaceup(board, state, action.player, action.slot);
         case 'DRAW_TICKETS':
-          return applyDrawTickets(state, action.player);
+          return applyDrawTickets(board, state, action.player);
         case 'CLAIM_ROUTE':
           return applyClaimRoute(board, state, action.player, action.routeId, action.payment);
         case 'BUILD_STATION':
@@ -273,7 +273,11 @@ function applyKeepTickets(
   });
 }
 
-function applyDrawTickets(state: GameState, player: PlayerId): ReduceResult {
+function applyDrawTickets(board: Board, state: GameState, player: PlayerId): ReduceResult {
+  // A stuck player (dead pool, no productive move) may not draw futile tickets — PASS is their sole
+  // legal move (A15, the deadlock fix). Otherwise draw as before; an empty short deck stays an error.
+  if (!hasAnyLegalMove(board, state, player))
+    return err(violation('NOTHING_TO_DRAW', 'no productive move — must pass'));
   // Shared with the forced re-draw (rule 7.5); here an empty short deck is an explicit error.
   const offer = offerTickets(state, player);
   if (!offer) return err(violation('NOTHING_TO_DRAW', 'ticket deck empty'));
@@ -1472,107 +1476,8 @@ function lockCompletedTickets(
   return { state: next, events };
 }
 
-// Whether the player has ANY legal non-pass move (used by PASS validation and legalActions).
-export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId): boolean {
-  const p = getPlayer(state, player);
-  if (!p) return false;
-  // Draw cards: any card available anywhere?
-  const discardTotal = totalDiscard(state.discard);
-  if (state.deck.length + discardTotal > 0) return true;
-  if (
-    state.market.some((c) => c !== null && !(c === 'LOCOMOTIVE' && allSeatsReservedActive(state)))
-  )
-    return true;
-  // Draw tickets.
-  if (state.ticketDeckShort.length > 0) return true;
-  // Build a station — suspended entirely during a typhoon day off (mirror of applyBuildStation).
-  if (
-    !stationsSuspended(state) &&
-    p.stationsRemaining > 0 &&
-    state.stations.length < board.cityIds.length
-  ) {
-    // Gala free-station: buildable with zero cards while the flag is up (mirror of the empty-payment
-    // branch in applyBuildStation). Day-off suspension above already wins over the flag.
-    if (freeStationAvailable(state)) return true;
-    const built = state.ruleParams.stationsPerPlayer - p.stationsRemaining;
-    const cost = built + 1;
-    if (canAffordCount(p.hand, cost)) return true;
-  }
-  // Hive of Sparks is a main-action draw option while its one-round window is active.
-  if (hiveOfSparksActive(state) && state.deck.length + discardTotal > 0) return true;
-  // Slope repair is a main action when the player can pay two matching cards or owns a permit.
-  const resources = eventResources(state, player);
-  if (
-    state.events?.active.some(
-      (active) =>
-        active.kind === 'SLOPE_REPAIR_ORDER' &&
-        active.routeIds?.some(
-          (rid) => !state.ownership[rid as string] && !state.events?.repairedRouteIds.includes(rid),
-        ),
-    ) &&
-    (resources.repairPermits > 0 || canAffordCount(p.hand, 2))
-  )
-    return true;
-  // A free night-market swap can change the hand before the main action, so it is itself a legal
-  // non-pass continuation. Once used, the normal main-action checks below decide whether PASS is
-  // required.
-  if (canUseNightMarketSwap(board, state, player)) return true;
-  // Claim a route — suspended entirely during a day off; otherwise skip closed routes and price
-  // sky-lantern routes at length + surcharge (exact mirror of the applyClaimRoute gates).
-  if (!claimsSuspended(state)) {
-    const closed = closedRouteIds(state);
-    for (const route of board.content.routes) {
-      if (state.ownership[route.id as string]) continue;
-      if (closed.has(route.id as string)) continue;
-      const ownsGroupMember = groupMembersOf(board, route.id).some((other) => {
-        const sc = state.ownership[other as string];
-        return sc && 'owner' in sc && sc.owner === player;
-      });
-      if (ownsGroupMember) continue;
-      if (p.trainCars < route.length) continue;
-      // Try every reduction level, not just the deepest one: a ferry's locomotive floor can make
-      // the fully-reduced requirement unpayable while a shallower reduction (or none) still
-      // affords a payment — the exact mirror of enumerateClaimPayments' per-variant floor skip.
-      const maxReduction =
-        (resources.bentoTokens > 0 ? 1 : 0) + (resources.claimDiscounts > 0 ? 1 : 0);
-      const surcharge = skyLanternSurcharge(state, route.id);
-      for (let reduction = 0; reduction <= maxReduction; reduction++) {
-        if (canAffordRoute(p.hand, route, surcharge - reduction)) return true;
-      }
-    }
-  }
-  return false;
-}
-
-function totalDiscard(discard: Readonly<CardCounts>): number {
-  let n = 0;
-  for (const k of Object.keys(discard) as (keyof CardCounts)[]) n += discard[k];
-  return n;
-}
-
-function canAffordCount(hand: Readonly<Record<CardColor, number>>, count: number): boolean {
-  if (hand.LOCOMOTIVE >= count) return true;
-  for (const c of TRAIN_COLORS) {
-    if (hand[c] + hand.LOCOMOTIVE >= count) return true;
-  }
-  return false;
-}
-
-function canAffordRoute(
-  hand: Readonly<Record<CardColor, number>>,
-  route: RouteDef,
-  extraCards = 0,
-): boolean {
-  // Sky-lantern surcharge adds cards, not trains: the caller already checked `trainCars` against
-  // the BASE length, so here we only inflate the CARD requirement.
-  const L = Math.max(0, route.length + extraCards);
-  const F = route.ferryLocos;
-  if (L < F) return false;
-  if (hand.LOCOMOTIVE < F) return false;
-  if (hand.LOCOMOTIVE >= L) return true; // all-locomotive payment
-  if (route.color === 'GRAY') {
-    for (const c of TRAIN_COLORS) if (hand[c] + hand.LOCOMOTIVE >= L) return true;
-    return false;
-  }
-  return hand[route.color] + hand.LOCOMOTIVE >= L;
-}
+// hasAnyLegalMove and the affordability predicates now live in ./legality — shared with the turn
+// sequencer's deadlock trigger without a reduce↔turn import cycle. Re-exported for existing callers
+// (index.ts, selectors.ts, tests). NOTE: the old standalone "draw tickets" clause is intentionally
+// gone: a stuck player in a dead pool must PASS rather than draw a futile ticket.
+export { hasAnyLegalMove };
