@@ -139,7 +139,8 @@ as Sign in with Apple identity-token audiences — enables `POST /auth/oauth/app
 deep link; unset ⇒ 404). A client sending `x-trm-client: mobile` receives its refresh
 token in the response body (Keychain/Keystore storage) instead of the Strict cookie, and
 `POST /auth/refresh`/`logout` accept `{refreshToken}` in the body. Guest TTLs slide
-forward on refresh. Push (`src/push/`, direct — no relay): Android via
+forward on refresh. The builder WebView converts a carry code into a web cookie session via
+`GET /auth/mobile-web-handoff` (302 → `/maps`). Push (`src/push/`, direct — no relay): Android via
 `FCM_PROJECT_ID`+`FCM_CLIENT_EMAIL`+`FCM_PRIVATE_KEY`, iOS via
 `APNS_TEAM_ID`+`APNS_KEY_ID`+`APNS_PRIVATE_KEY`+`APNS_BUNDLE_ID` (+`APNS_SANDBOX=1`);
 a platform is enabled only when ALL its credentials are set. `PUSH_YOUR_TURN_DELAY_MS`

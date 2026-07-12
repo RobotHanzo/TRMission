@@ -107,6 +107,11 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   a signed-in guest is carried via `POST /auth/mobile/carry` → `?carry=` (the cookie-free
   analogue of the refresh-cookie peek). Google ID tokens verify against
   `AuthConfig.googleAudiences()` (web + `GOOGLE_MOBILE_CLIENT_IDS`).
+  The builder WebView's session handoff is `GET /api/v1/auth/mobile-web-handoff?code=` —
+  it redeems the same single-use carry code (`POST /auth/mobile/carry` over Bearer), mints a
+  NEW web session family, sets the normal Strict refresh cookie, and 302s to `/maps`
+  (errors 302 to `/login/callback?error=…`, never a 500 on a top-level navigation). It is
+  the one sanctioned way a native session becomes a web cookie session.
   **Sign in with Apple** is credential-only: `POST /auth/oauth/apple/credential`
   (`{identityToken, fullName?, refreshToken?}`) verifies against Apple's JWKS
   (`apple-id-token.verifier.ts`, audiences = `APPLE_CLIENT_IDS`) and converges on

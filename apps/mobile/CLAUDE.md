@@ -107,6 +107,10 @@ Strings are `x-trm-client: mobile`, deep-link scheme `trmission://`, OAuth retur
   Gradle `bundleRelease` signed via AGP injected-signing properties → `.aab` artifact.
 - **`.github/workflows/mobile-ios.yml`** — **macos-latest** (billed ~10x, so release-gated):
   `expo prebuild` → `pod install` → `fastlane ios beta` (match + gym + pilot → TestFlight).
+- **`.github/workflows/mobile-ota.yml`** — JS-only OTA publish to the self-hosted
+  expo-open-ota server (`eoas publish`; runbook + forced-update interplay in
+  `docs/mobile/ota.md`). Native changes are fenced automatically by
+  `runtimeVersion: fingerprint` — old binaries just never see the update.
 
 ### Required CI secrets / variables
 
@@ -114,6 +118,11 @@ Repo **variables**: `TRM_SERVER_ORIGIN`, `TRM_GOOGLE_WEB_CLIENT_ID`, `TRM_GOOGLE
 `TRM_GOOGLE_IOS_URL_SCHEME` (the reversed iOS OAuth client id, `com.googleusercontent.apps.*` — the
 google-signin config plugin validates it at every config eval, so `expo prebuild`/`run:android` need
 it set or fall back to a format-valid placeholder; see `app.config.ts`).
+
+OTA lane: repo variable `TRM_OTA_URL` (the deployment's full `/manifest` URL) + secret
+`EXPO_TOKEN` (Expo robot token — eoas auth/channel mapping only; there is **no** signing
+secret in CI, manifests are signed at serve time by the OTA server's mounted key, and
+`apps/mobile/certs/keys/` must never be committed).
 
 Android **secrets**: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
 `ANDROID_KEY_PASSWORD`.
@@ -154,3 +163,60 @@ internals). The scrim is a Skia even-odd path (`scrim.ts` + `TutorialSpotlight`)
 persists to AsyncStorage (`progress.ts`, key `trm.tutorial.completed.v1`); the Home entry and
 the whole flow work with no account and no network. Pure logic tests are vitest `*.spec.ts`;
 RN components are jest-expo `*.test.tsx` — keep the globs disjoint.
+
+## Map builder (`src/screens/BuilderScreen.tsx`)
+
+Feature-gated by `user.features` containing `mapBuilder` (`useCanBuild`). The builder itself is
+the web app inside a `react-native-webview` (`sharedCookiesEnabled` + `thirdPartyCookiesEnabled`):
+the screen fetches a single-use carry code (`api.mobileCarry()`) and points the WebView at
+`GET ${SERVER_ORIGIN}/api/v1/auth/mobile-web-handoff?code=…`, which converts it into a normal
+Strict-cookie web session and 302s to `/maps` — the one sanctioned native→web session handoff.
+Offline/error/loading states have testIDs `builder-offline`/`builder-error`.
+
+## Push (`src/push/`)
+
+`register.ts` owns the token lifecycle — its module path is load-bearing (the session store's
+tests mock it): `ensurePushRegistration()` is permission-GATED and **never requests** permission
+itself (that only happens from an explicit user gesture in `PushPrompt`/`NotificationsRow`);
+`registerDeviceForPush()` adds the `settings.notifications` gate (the session-start hook);
+`unregisterDeviceForPush()` runs before logout; `watchTokenRotation()` re-registers on FCM/APNs
+rotation. Payload contract is exactly `{kind, gameId, roomCode?}`. `notifications.ts`: the
+foreground handler suppresses banners for the game you're looking at (`setActiveGameId`, fed
+from `RoomView.gameId` by GameScreen); `navigateForPush` is async because the nav route is
+`Game {roomCode}` while `your_turn`/`game_over` carry only `gameId` — it resolves via
+`api.getMyRooms()` (vanished room = no-op). `PushPrompt` is the one-shot contextual card at
+game-over (`pushPromptSeen`).
+
+## Haptics (`src/game/haptics.ts` + `useHaptics.ts`)
+
+`cuesForEvents` is a pure event→cue map (routeClaimed / tunnelRevealed / ticketCompleted /
+gameEnded) so it stays vitest-testable; `useHaptics` fires expo-haptics behind
+`settings.haptics`, mounted in GameStage next to the sound driver with the same
+`lastBatch.seq` once-per-batch idiom.
+
+## Settings (`src/store/settings.ts` + `src/screens/SettingsScreen.tsx`)
+
+Zustand persist key `trm-settings` (haptics **on**, notifications **off**, `pushPromptSeen`
+false by default). `NotificationsRow` toggle ON = OS permission request (permanently denied ⇒
+alert → `Linking.openSettings()`) then `ensurePushRegistration`; OFF = unregister the device.
+Account deletion (hidden for guests, store-compliance requirement): two-step confirm →
+`performAccountDeletion` (`src/account/deleteAccount.ts`) — fresh SIWA authorization code when
+available (cancel proceeds without), push unregister, `DELETE /auth/me`, local session clear.
+
+## OTA updates (expo-updates + self-hosted expo-open-ota)
+
+`app.config.ts` pins `runtimeVersion: { policy: 'fingerprint' }` and code-signing against the
+committed `certs/certificate.pem` (`fallbackToCacheTimeout: 0` — stale-while-revalidate; the
+forced-update gate `GET /version/mobile` is independent and still runs every boot).
+`updates.url` comes from `TRM_OTA_URL` (default: the local compose `ota` service,
+`http://localhost:3005/manifest`); the channel is baked at build time via the
+`expo-channel-name` request header (`TRM_OTA_CHANNEL`, default `production`). Full contract,
+runbook, rollback, and fallbacks: `docs/mobile/ota.md`. The private key in `certs/keys/` is
+gitignored and must never be committed.
+
+## Orientation & layout tiers (`src/app/useOrientationPolicy.ts`)
+
+Phones (smallest window side < 600dp) lock PORTRAIT_UP; tablets stay unlocked — and Android 16+
+ignores lock requests on ≥600dp anyway, so every screen must survive free rotation/resize.
+`stageTier` (compact < 700dp ≤ two-pane < 1000dp ≤ three-pane) is measured from live window
+width, never device type.
