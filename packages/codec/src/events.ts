@@ -111,7 +111,11 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
     case 'ENDGAME_TRIGGERED':
       return wrap({
         case: 'endgameTriggered',
-        value: { playerId: ev.player as string, finalTurnsRemaining: ev.finalTurnsRemaining },
+        value: {
+          playerId: ev.player as string,
+          finalTurnsRemaining: ev.finalTurnsRemaining,
+          reason: ev.reason,
+        },
       });
     case 'GAME_ENDED':
       return wrap({ case: 'gameEnded', value: {} });

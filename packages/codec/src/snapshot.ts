@@ -154,6 +154,7 @@ export function viewToSnapshot(
             hand: handToCardCounts(self.hand),
             keptTicketIds: (self.keptTickets ?? []).map((id) => id as string),
             pendingOfferTicketIds: (self.pendingTicketOffer ?? []).map((id) => id as string),
+            youMustPass: view.youMustPass,
           },
     finalScores,
   });

@@ -39,6 +39,32 @@ describe('@trm/codec viewToSnapshot', () => {
     expect(opp).not.toHaveProperty('hand');
     expect(opp).not.toHaveProperty('keptTicketIds');
   });
+
+  it('forwards youMustPass onto the self view', () => {
+    const board = taiwanBoard();
+    const state = initGame(board, config);
+    const stuck = { ...redactFor(board, state, p1), youMustPass: true };
+    expect(viewToSnapshot(stuck, 1, p1).you?.youMustPass).toBe(true);
+    const free = { ...redactFor(board, state, p1), youMustPass: false };
+    expect(viewToSnapshot(free, 1, p1).you?.youMustPass).toBe(false);
+  });
+});
+
+describe('@trm/codec eventToProto — endgame reason', () => {
+  it('carries the deadlock reason on the endgame event', () => {
+    const ev = eventToProto(
+      {
+        e: 'ENDGAME_TRIGGERED',
+        player: p1,
+        finalTurnsRemaining: 2,
+        reason: 'DEADLOCK',
+        visibility: 'PUBLIC',
+      },
+      p1,
+    );
+    expect(ev?.event.case).toBe('endgameTriggered');
+    expect(ev?.event.case === 'endgameTriggered' ? ev.event.value.reason : '').toBe('DEADLOCK');
+  });
 });
 
 describe('@trm/codec eventToProto', () => {
