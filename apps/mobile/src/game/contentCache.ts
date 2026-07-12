@@ -29,6 +29,15 @@ function contentFromDto(dto: MapContentDto): GameContent {
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
       ...(r.bow !== undefined ? { bow: r.bow } : {}),
     })),
+    ...(dto.auspiciousPairs !== undefined
+      ? {
+          auspiciousPairs: dto.auspiciousPairs.map((pair) => ({
+            id: pair.id,
+            a: asCityId(pair.a),
+            b: asCityId(pair.b),
+          })),
+        }
+      : {}),
     tickets: dto.tickets.map((t) => ({
       ...t,
       id: asTicketId(t.id),
