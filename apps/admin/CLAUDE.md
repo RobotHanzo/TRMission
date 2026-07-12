@@ -59,8 +59,9 @@ dashboard permissions gate _this app_, user features gate capabilities in the _g
 A hand-rolled router, not a library — same pattern as the game web app's `store/ui.ts`, smaller.
 All paths live under the `/admin` base (`vite.config.ts` `base: '/admin/'`; nginx must serve the
 same prefix). `parsePath`/`pathFor` are the only place that encodes the URL shape:
-`/admin/{view}` for the seven `AdminView`s, plus an optional `/:param` segment used as a **detail
-drawer id** (Users/Games) — pushed to the URL so refresh or a shared link reopens the same drawer.
+`/admin/{view}` for each `AdminView` (incl. the P6 `reports` UGC-moderation queue), plus an
+optional `/:param` segment used as a **detail drawer id** (Users/Games) — pushed to the URL so
+refresh or a shared link reopens the same drawer.
 `gateToLogin`/`leaveLogin` (called from `store/session.ts`) use `replaceState`, not `pushState`, so
 the auth redirect doesn't pollute browser history.
 

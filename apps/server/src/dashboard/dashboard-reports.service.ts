@@ -32,7 +32,11 @@ export class DashboardReportsService {
     private readonly audit: AuditService,
   ) {}
 
-  async list(query: { status: 'open' | 'resolved' | 'all'; limit: number; cursor?: string }) {
+  async list(query: {
+    status: 'open' | 'resolved' | 'all';
+    limit: number;
+    cursor?: string | undefined;
+  }) {
     // Fetch one extra row to learn whether a next page exists (audit-list idiom).
     const docs = await this.reports.list(query.status, query.limit + 1, query.cursor);
     const page = docs.slice(0, query.limit);

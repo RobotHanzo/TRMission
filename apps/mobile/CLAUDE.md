@@ -99,6 +99,18 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
 Strings are `x-trm-client: mobile`, deep-link scheme `trmission://`, OAuth return path `/m/callback`
 — all matching the landed P0 server.
 
+## Moderation (`src/store/moderation.ts` — Apple 1.2 / Play UGC)
+
+The account's client-side mute list mirrored locally (hydrated on sign-in/restore, `reset()` on
+sign-out; optimistic block/unblock with rollback via `PUT/DELETE /me/blocks/:userId`). Blocking is
+display-only: `ChatPanel` filters blocked authors' messages (text AND presets) and
+`usePlayerName` masks their UGC display name back to `P{seat+1}` — game state is never touched.
+Long-press on a tracker row or chat message opens `PlayerActionSheet` (report with the 7
+`REPORT_CATEGORIES` from `@trm/shared` + block/unblock; never for yourself or `bot:` ids — gate
+with its `canModerate`). Reports POST `/reports/player` with `gameId`/`roomCode` context read from
+`game/activeRoom.ts` (set by GameScreen alongside the push-suppression id; display-only, never
+authorization).
+
 ## CI lanes (self-managed signing, no EAS)
 
 - **`.github/workflows/mobile-ci.yml`** — ubuntu, PRs touching `apps/mobile/**`/`packages/**`:
