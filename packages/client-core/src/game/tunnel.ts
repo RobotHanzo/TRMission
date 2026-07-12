@@ -1,9 +1,10 @@
 import type { TrainColor } from '@trm/shared';
 import type { Hand, Payment } from './payments';
 
-// Reveal timing, kept in step with `.tunnel-reveal-card` in animations.css (0.5s stagger, 0.6s flip).
-const REVEAL_STAGGER_MS = 500;
-const REVEAL_FLIP_MS = 600;
+// Reveal timing — web's `.tunnel-reveal-card` (animations.css) and mobile's flip-in both key
+// off these (0.5s stagger, 0.6s flip), so the per-card sound ticks stay in sync on both.
+export const REVEAL_STAGGER_MS = 500;
+export const REVEAL_FLIP_MS = 600;
 
 /** How long (ms) `TunnelModal` takes to flip in `revealedCount` cards and show the surcharge
  *  result — 0 under reduced motion, where the result appears instantly. Shared with the replay

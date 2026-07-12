@@ -1,18 +1,56 @@
 // The tunnel reveal + surcharge modal (ports the web TunnelModal). The reveal is public, so
 // everyone watches the drawn cards; only the claimant gets interactive payment options (their
 // hand stays secret) — spectators see a read-only colour-only surcharge combination. The result
-// is held back for the reveal duration so the outcome isn't spoiled (flip animation lands in
-// Task 10; the tunnelDraw/success sound cues land in Task 11).
-import { useEffect, useState } from 'react';
+// is held back for the reveal duration so the outcome isn't spoiled; each card flips in on the
+// shared stagger with a tunnelDraw tick, then tunnelSuccess/tunnelPayment lands with the result.
+import { useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { CardColor as PbCardColor } from '@trm/proto';
+import { REVEAL_FLIP_MS, REVEAL_STAGGER_MS } from '@trm/client-core/game/tunnel';
 import { CARD_COLOR_TOKENS } from '../../theme/colors';
 import { pbToCard } from '../../game/cards';
 import type { Payment } from '../../game/payments';
 import { tunnelRevealMs } from '../../game/tunnel';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { soundPlayer } from '../../sound/player';
 import { TrainCarCard } from './TrainCarCard';
+
+/** One revealed card flipping in on the shared stagger (web `.tunnel-reveal-card`): a rotateY
+ *  swing from face-down with a fade, slow for suspense. Plain RN Animated — low-frequency UI. */
+function FlipInCard({ index, reduced, children }: PropsWithChildren<{ index: number; reduced: boolean }>) {
+  const progress = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduced) return;
+    const anim = Animated.timing(progress, {
+      toValue: 1,
+      duration: REVEAL_FLIP_MS,
+      delay: index * REVEAL_STAGGER_MS,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    });
+    anim.start();
+    return () => anim.stop();
+  }, [progress, index, reduced]);
+  return (
+    <Animated.View
+      style={{
+        opacity: progress,
+        transform: [
+          { perspective: 800 },
+          {
+            rotateY: progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: ['80deg', '0deg'],
+            }),
+          },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
 
 interface Props {
   revealed: PbCardColor[];
@@ -52,6 +90,8 @@ export function TunnelModal({
   // outcome isn't spoiled before the cards have (visually) arrived.
   const [showResult, setShowResult] = useState(reduced);
 
+  const resultCuePlayed = useRef(false);
+
   useEffect(() => {
     if (reduced) {
       setShowResult(true);
@@ -62,16 +102,41 @@ export function TunnelModal({
     return () => clearTimeout(timer);
   }, [revealed, reduced]);
 
+  // Card-placement tick per revealed tunnel card, synced to the flip stagger.
+  useEffect(() => {
+    if (reduced) {
+      soundPlayer.play('tunnelDraw');
+      return;
+    }
+    const timers = revealed.map((_, i) =>
+      setTimeout(() => soundPlayer.play('tunnelDraw'), i * REVEAL_STAGGER_MS),
+    );
+    return () => timers.forEach((id) => clearTimeout(id));
+  }, [revealed, reduced]);
+
+  // Result cue once the surcharge outcome is shown.
+  useEffect(() => {
+    if (showResult && !resultCuePlayed.current) {
+      resultCuePlayed.current = true;
+      soundPlayer.play(extraRequired === 0 ? 'tunnelSuccess' : 'tunnelPayment');
+    }
+  }, [showResult, extraRequired]);
+
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onAbort}>
       <View style={styles.backdrop}>
         <View style={styles.modal}>
           <Text style={styles.title}>{t('tunnel')}</Text>
+          {/* The drawn cards flip in one at a time (slow, for suspense). */}
           <View style={styles.reveal}>
             {revealed.map((c, i) => {
               const color = pbToCard(c);
               if (!color) return null;
-              return <TrainCarCard key={i} color={color} size={CARD_SIZE} />;
+              return (
+                <FlipInCard key={i} index={i} reduced={reduced}>
+                  <TrainCarCard color={color} size={CARD_SIZE} />
+                </FlipInCard>
+              );
             })}
           </View>
 
