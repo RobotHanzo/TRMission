@@ -245,6 +245,14 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
   const gameOver = state.turn.phase === 'GAME_OVER';
   const eventsBlock = projectEvents(board, state);
 
+  // Surface a Pass control only for the stuck current player (deadlock fix). hasAnyLegalMove
+  // excludes futile ticket draws, so this is true exactly when PASS is the sole legal move.
+  const youMustPass =
+    state.turn.phase === 'AWAIT_ACTION' &&
+    viewer !== null &&
+    viewer === (state.turnOrder[state.turn.orderIndex] as PlayerId) &&
+    !hasAnyLegalMove(board, state, viewer);
+
   // Finished tickets are public (own-track completion). Computed once for every player; the
   // result is viewer-independent, so the same list reaches everyone.
   const completedTickets: { player: PlayerId; ticket: TicketId }[] = [];
@@ -322,6 +330,7 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
     phase: state.turn.phase,
     orderIndex: state.turn.orderIndex,
     currentPlayer: gameOver ? null : (state.turnOrder[state.turn.orderIndex] as PlayerId),
+    youMustPass,
     turnOrder: state.turnOrder,
     market: [...state.market],
     deckCount: state.deck.length,

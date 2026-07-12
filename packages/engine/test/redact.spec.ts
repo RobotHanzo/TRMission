@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { asPlayerId, asCityId, asRouteId } from '@trm/shared';
+import { asPlayerId, asCityId, asRouteId, emptyHand } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
 import { makeConfig, playGreedyGame, taiwanBoard } from './helpers';
 import { initGame } from '../src/setup';
@@ -290,5 +290,32 @@ describe('redactFor — random events projection', () => {
     expect(view.events!.forecast!.id).toBe('evNext');
     // A spectator sees the identical block.
     expect(redactFor(board, { ...state, events }, null).events).toEqual(view.events);
+  });
+});
+
+describe('redactFor — youMustPass', () => {
+  it('is true only for the stuck current player, false for others and spectators', () => {
+    const board = taiwanBoard();
+    const base = afterSetup(2, 'redact-stuck');
+    // Dead pool + empty hands ⇒ the current player (p0) is stuck; PASS is their only move.
+    const state: GameState = {
+      ...base,
+      deck: [],
+      discard: emptyHand(),
+      market: base.market.map(() => null),
+      players: {
+        p0: { ...base.players['p0']!, hand: emptyHand(), trainCars: 40 },
+        p1: { ...base.players['p1']!, hand: emptyHand(), trainCars: 40 },
+      },
+    };
+    expect(redactFor(board, state, asPlayerId('p0')).youMustPass).toBe(true);
+    expect(redactFor(board, state, asPlayerId('p1')).youMustPass).toBe(false);
+    expect(redactFor(board, state, null).youMustPass).toBe(false);
+  });
+
+  it('is false in a normal mid-game state (the current player can act)', () => {
+    const board = taiwanBoard();
+    const normal = afterSetup(2, 'redact-normal');
+    expect(redactFor(board, normal, asPlayerId('p0')).youMustPass).toBe(false);
   });
 });

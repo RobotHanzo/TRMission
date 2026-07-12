@@ -63,6 +63,10 @@ export interface RedactedView {
   readonly phase: Phase;
   readonly orderIndex: number;
   readonly currentPlayer: PlayerId | null;
+  /** True iff `viewer` is the current player in AWAIT_ACTION with no legal move — surface a Pass
+   *  control. Always false for opponents/spectators (the client cannot derive it from a redacted
+   *  snapshot, so the server computes it here). */
+  readonly youMustPass: boolean;
   readonly turnOrder: readonly PlayerId[];
 
   readonly market: readonly (CardColor | null)[];
