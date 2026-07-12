@@ -163,6 +163,14 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   bot through the **same** prepare→persist→commit→fan-out path as a human, and bot moves
   are logged actions, so replay/recovery are unaffected. The roster is persisted on the
   game doc and resumes after recovery. `TRM_BOT_DELAY_MS` paces moves (0 in tests).
+- `src/moderation/` — the UGC compliance surface (Apple 1.2 / Play UGC): `GET/PUT/DELETE
+/me/blocks[/:userId]` maintains a capped **client-side mute list** on `UserDoc.blockedUserIds`
+  (display filtering only — never touches seating or game state), and `POST /reports/player` +
+  `POST /reports/map` (by share code, deliberately OUTSIDE the mapBuilder gate — the code is the
+  capability) append to the `reports` collection with denormalized names (guests TTL-expire; the
+  record stays self-contained). Moderators work the queue at `GET /dashboard/reports` /
+  `POST /dashboard/reports/:id/resolve` (`reports.read`/`reports.resolve`, moderator+), resolution
+  is a one-way open→resolved CAS audited as `report.resolve`.
 
 ## Maintainer dashboard (`src/dashboard/`)
 

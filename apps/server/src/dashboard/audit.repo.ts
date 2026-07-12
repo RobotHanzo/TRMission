@@ -18,10 +18,11 @@ export type DashboardAuditAction =
   | 'maintainer.revoke'
   | 'map.delete'
   | 'map.unshare'
-  | 'map.transfer';
+  | 'map.transfer'
+  | 'report.resolve';
 
 export interface AuditTarget {
-  type: 'user' | 'game' | 'room' | 'maintainer' | 'map';
+  type: 'user' | 'game' | 'room' | 'maintainer' | 'map' | 'report';
   id: string;
 }
 
