@@ -552,6 +552,9 @@
   "550": "PlayerTrackers.tsx",
   "551": "ToastState",
   "552": "lobby-chat.e2e.spec.ts",
+  "553": "lobby-events.e2e.spec.ts",
+  "554": ".close",
+  "555": "bot-pacing.ts",
   "566": "account-delete.e2e.spec.ts",
   "567": "push-devices.e2e.spec.ts"
 }

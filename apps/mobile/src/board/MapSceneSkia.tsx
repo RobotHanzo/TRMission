@@ -4,7 +4,7 @@
 // drift. Purely presentational: content + game state + LOD arrive as props; no stores, no i18n. This
 // is a Skia <Group>, NOT its own <Canvas> — the Board (Task 5) owns the Canvas + camera transform.
 import { useEffect, useMemo } from 'react';
-import { Group, Path, type SkPath } from '@shopify/react-native-skia';
+import { Group, Path, Picture, type SkPath, type SkRect } from '@shopify/react-native-skia';
 import { Easing, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import type { MapGeography, RouteGeometry } from '@trm/map-data';
 import { seatColor } from '../theme/colors';
@@ -13,7 +13,8 @@ import { GeographyLayer, type BoardView } from './GeographyLayer';
 import { RouteLayer } from './RouteLayer';
 import { CityLayer } from './CityLayer';
 import { LabelLayer } from './LabelLayer';
-import { buildRouteRenderModel } from './scenePaths';
+import { buildRouteRenderModel, type RouteRenderModel } from './scenePaths';
+import { useStaticMapPicture } from './useStaticMapPicture';
 
 /** The minimal city/route shapes the scene needs — satisfied by the live content's branded
  *  CityDef/RouteDef and by any plain-string draft (same as the web SceneCity/SceneRoute). */
@@ -74,10 +75,33 @@ export interface MapSceneSkiaProps {
   reducedMotion?: boolean | undefined;
 }
 
-export function MapSceneSkia({
+/** The board's static layers — everything that doesn't animate on its own. Factored out so it can
+ *  be recorded once into a cached Picture (see useStaticMapPicture) instead of replayed shape-by-
+ *  shape on every camera frame; the sweep/reveal overlays below stay live JSX since they genuinely
+ *  animate every frame on their own timers. */
+interface MapSceneStaticProps {
+  model: readonly RouteRenderModel[];
+  cities: readonly SceneCity[];
+  hubs: ReadonlySet<string>;
+  geography: MapGeography | null;
+  view: BoardView;
+  owned?: ReadonlyMap<string, RouteOwnership> | undefined;
+  stations?: ReadonlyMap<string, number> | undefined;
+  glowingRoutes?: ReadonlyMap<string, number> | undefined;
+  glowingStations?: ReadonlyMap<string, number> | undefined;
+  highlightCities?: ReadonlySet<string> | undefined;
+  colorBlind?: boolean | undefined;
+  showFerryLocos?: boolean | undefined;
+  cityLabel?: ((city: SceneCity) => string) | undefined;
+  cityTier?: ((cityId: string) => string) | undefined;
+  bucket: ZoomBucket;
+  inv: number;
+  marker: number;
+}
+
+function MapSceneStatic({
+  model,
   cities,
-  routes,
-  geometry,
   hubs,
   geography,
   view,
@@ -93,13 +117,7 @@ export function MapSceneSkia({
   bucket,
   inv,
   marker,
-  sweeps,
-  routeReveal,
-  reducedMotion,
-}: MapSceneSkiaProps) {
-  const model = useMemo(() => buildRouteRenderModel(routes, geometry), [routes, geometry]);
-  const modelById = useMemo(() => new Map(model.map((m) => [m.id, m])), [model]);
-
+}: MapSceneStaticProps) {
   return (
     <Group>
       <GeographyLayer geography={geography} view={view} inv={inv} />
@@ -127,6 +145,87 @@ export function MapSceneSkia({
         inv={inv}
         marker={marker}
       />
+    </Group>
+  );
+}
+
+export function MapSceneSkia({
+  cities,
+  routes,
+  geometry,
+  hubs,
+  geography,
+  view,
+  owned,
+  stations,
+  glowingRoutes,
+  glowingStations,
+  highlightCities,
+  colorBlind,
+  showFerryLocos,
+  cityLabel,
+  cityTier,
+  bucket,
+  inv,
+  marker,
+  sweeps,
+  routeReveal,
+  reducedMotion,
+}: MapSceneSkiaProps) {
+  const model = useMemo(() => buildRouteRenderModel(routes, geometry), [routes, geometry]);
+  const modelById = useMemo(() => new Map(model.map((m) => [m.id, m])), [model]);
+
+  const staticElement = useMemo(
+    () => (
+      <MapSceneStatic
+        model={model}
+        cities={cities}
+        hubs={hubs}
+        geography={geography}
+        view={view}
+        owned={owned}
+        stations={stations}
+        glowingRoutes={glowingRoutes}
+        glowingStations={glowingStations}
+        highlightCities={highlightCities}
+        colorBlind={colorBlind}
+        showFerryLocos={showFerryLocos}
+        cityLabel={cityLabel}
+        cityTier={cityTier}
+        bucket={bucket}
+        inv={inv}
+        marker={marker}
+      />
+    ),
+    [
+      model,
+      cities,
+      hubs,
+      geography,
+      view,
+      owned,
+      stations,
+      glowingRoutes,
+      glowingStations,
+      highlightCities,
+      colorBlind,
+      showFerryLocos,
+      cityLabel,
+      cityTier,
+      bucket,
+      inv,
+      marker,
+    ],
+  );
+  const bounds = useMemo<SkRect>(
+    () => ({ x: view.x - 40, y: view.y - 40, width: view.w + 80, height: view.h + 80 }),
+    [view.x, view.y, view.w, view.h],
+  );
+  const picture = useStaticMapPicture(staticElement, bounds, [staticElement, bounds]);
+
+  return (
+    <Group>
+      {picture ? <Picture picture={picture} /> : staticElement}
       {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path, one
           segment after another (ports the web's --delay: i*0.32s stagger). Removal timers live in
           the Board (path.length*320 + 900ms). */}

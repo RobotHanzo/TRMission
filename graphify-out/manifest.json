@@ -4075,8 +4075,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/board/MapSceneSkia.tsx": {
-    "mtime": 1783869478.444273,
-    "ast_hash": "9c4f8302779be1a702c6583a93dac74f",
+    "mtime": 1783889454.5333557,
+    "ast_hash": "49630bee982c71aa2fd8de417417f9a1",
     "semantic_hash": ""
   },
   "apps/mobile/src/board/RouteLayer.tsx": {
@@ -4425,8 +4425,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/useSpotlightRects.ts": {
-    "mtime": 1783869478.4764702,
-    "ast_hash": "fb6c8bcf2f56719cb38d7563a34f1ad2",
+    "mtime": 1783889645.5056984,
+    "ast_hash": "fae7c3ef18602b41b662a6d8e4b9123c",
     "semantic_hash": ""
   },
   "apps/mobile/src/game/actionGate.ts": {
@@ -5582,6 +5582,11 @@
   "apps/mobile/src/push/expoNotifications.ts": {
     "mtime": 1783887960.2084668,
     "ast_hash": "7d1ea221e58b242ada14136afecb129a",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/board/useStaticMapPicture.ts": {
+    "mtime": 1783889658.5394597,
+    "ast_hash": "bce993c732c4a345c9a033dc2e06dc3f",
     "semantic_hash": ""
   }
 }

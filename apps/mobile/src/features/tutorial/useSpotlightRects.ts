@@ -14,6 +14,21 @@ import { cityById, routeById } from '../../game/content';
 /** How long after a beat change to keep re-measuring (web: rAF window of the same length). */
 const TRACK_MS = 700;
 const TRACK_INTERVAL_MS = 80;
+/** Stop polling early once this many consecutive measurements agree — the camera glide (or a
+ *  static HUD target that never moves) has settled, so further native measureInWindow round-trips
+ *  and their downstream re-renders (the scrim path, the coachmark's own caret re-measure) would be
+ *  pure waste for the rest of the tracking window. */
+const SETTLE_STREAK = 2;
+
+function rectsEqual(a: readonly FlatRect[], b: readonly FlatRect[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const ra = a[i]!;
+    const rb = b[i]!;
+    if (ra.x !== rb.x || ra.y !== rb.y || ra.w !== rb.w || ra.h !== rb.h) return false;
+  }
+  return true;
+}
 
 export function useSpotlightRects(
   spotlight: Spotlight | undefined,
@@ -35,6 +50,8 @@ export function useSpotlightRects(
       return;
     }
     let alive = true;
+    let last: FlatRect[] | null = null;
+    let settledStreak = 0;
     const started = Date.now();
 
     const measure = async (): Promise<void> => {
@@ -46,7 +63,18 @@ export function useSpotlightRects(
         const cam = read();
         if (board && cam) next = boardAnchorRects(spotlight, cityById, routeById, cam, board);
       }
-      if (alive) setRects(next);
+      if (!alive) return;
+      // Skip the state update (and the re-renders it would cascade into) when the measurement
+      // didn't actually move anything — the common case once a glide settles, or for the whole
+      // duration of a static HUD spotlight.
+      if (last && rectsEqual(last, next)) {
+        settledStreak++;
+        if (settledStreak >= SETTLE_STREAK) clearInterval(id);
+        return;
+      }
+      settledStreak = 0;
+      last = next;
+      setRects(next);
     };
 
     void measure();
