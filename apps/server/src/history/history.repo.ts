@@ -58,9 +58,11 @@ export interface AdminReplayData extends ReplayData {
  * digest-mismatch at that step. So v7 stands alone rather than extending the allowlist. Only
  * extend this list for a new version when the change is provably inert for the versions already
  * listed. v8 adds stateful future-event actions/phases and therefore cannot replay a v7 action
- * log byte-identically; the current major stands alone.
+ * log byte-identically. v9 changes the deadlock rule: a dead-pool `DRAW_TICKETS` with no productive
+ * move is now rejected (and the endgame can trigger on a deadlock), so a v8 log containing such an
+ * action would diverge or become illegal under v9 — the current major stands alone.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [8];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9];
 
 @Injectable()
 export class HistoryRepo {

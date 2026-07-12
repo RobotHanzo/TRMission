@@ -11,7 +11,7 @@ beforeAll(async () => {
 afterAll(() => t.close());
 
 describe('history: replay-compat engine-version allowlist (plan risk R1)', () => {
-  it('marks a v8-stamped game replayable and a v7-stamped game not (on a resolvable map)', async () => {
+  it('marks a v9-stamped game replayable and a v8-stamped game not (on a resolvable map)', async () => {
     const userId = 'u-compat';
     const now = Date.now();
     const base = {
@@ -23,19 +23,19 @@ describe('history: replay-compat engine-version allowlist (plan risk R1)', () =>
       winners: [] as string[],
     };
     await t.db.collection<MatchHistoryDoc>('matchHistory').insertMany([
-      { _id: 'g-v8', ...base, engineVersion: 8, completedAt: new Date(now - 1000) },
-      { _id: 'g-v7', ...base, engineVersion: 7, completedAt: new Date(now - 2000) },
+      { _id: 'g-v9', ...base, engineVersion: 9, completedAt: new Date(now - 1000) },
+      { _id: 'g-v8', ...base, engineVersion: 8, completedAt: new Date(now - 2000) },
     ]);
 
     const rows = await t.app.get(HistoryRepo).listForUser(userId);
     const byId = new Map(rows.map((r) => [r.gameId, r]));
-    // v8 is in the allowlist AND its map still builds → replayable.
-    expect(byId.get('g-v8')?.replayable).toBe(true);
-    // v7 predates the stateful future-event actions/phases → not replayable under v8.
-    expect(byId.get('g-v7')?.replayable).toBe(false);
+    // v9 is in the allowlist AND its map still builds → replayable.
+    expect(byId.get('g-v9')?.replayable).toBe(true);
+    // v8 predates the v9 deadlock rule change → not replayable under v9.
+    expect(byId.get('g-v8')?.replayable).toBe(false);
   });
 
   it('allowlists only the current engine major — this fix is not provably inert for older majors', () => {
-    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toEqual([8]);
+    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toEqual([9]);
   });
 });
