@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
   },
-  primary: { backgroundColor: '#1f6feb', borderRadius: 8, padding: 14, alignItems: 'center' },
+  primary: { backgroundColor: '#0f5fa6', borderRadius: 8, padding: 14, alignItems: 'center' },
   primaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   secondary: {
     borderWidth: 1,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   },
   secondaryText: { fontSize: 16, fontWeight: '500' },
   disabled: { opacity: 0.4 },
-  settingsLink: { textAlign: 'center', color: '#1f6feb', marginTop: 8 },
+  settingsLink: { textAlign: 'center', color: '#0f5fa6', marginTop: 8 },
   signOut: { textAlign: 'center', color: '#d33', marginTop: 8 },
   tutorialText: { gap: 2, flexShrink: 1 },
   tutorialDone: { color: '#2e7d32', fontSize: 18, fontWeight: '700' },

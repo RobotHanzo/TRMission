@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   secondaryText: { fontSize: 16, fontWeight: '500' },
-  primary: { backgroundColor: '#1f6feb', borderRadius: 8, padding: 14, alignItems: 'center' },
+  primary: { backgroundColor: '#0f5fa6', borderRadius: 8, padding: 14, alignItems: 'center' },
   primaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   disabled: { opacity: 0.4 },
   leave: { textAlign: 'center', color: '#d33', marginTop: 8 },

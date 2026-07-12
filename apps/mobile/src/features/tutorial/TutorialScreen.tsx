@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  btnAccent: { borderWidth: 0, backgroundColor: '#1f6feb' },
+  btnAccent: { borderWidth: 0, backgroundColor: '#0f5fa6' },
   btnText: { fontWeight: '600' },
   btnAccentText: { fontWeight: '700', color: '#fff' },
   link: { textDecorationLine: 'underline', textAlign: 'center', marginTop: 6 },

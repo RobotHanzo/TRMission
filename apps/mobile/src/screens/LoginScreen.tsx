@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 32, fontWeight: '700', textAlign: 'center' },
   tagline: { fontSize: 14, textAlign: 'center', opacity: 0.7, marginBottom: 12 },
   input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, fontSize: 16 },
-  primary: { backgroundColor: '#1f6feb', borderRadius: 8, padding: 14, alignItems: 'center' },
+  primary: { backgroundColor: '#0f5fa6', borderRadius: 8, padding: 14, alignItems: 'center' },
   primaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   secondary: {
     borderWidth: 1,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   secondaryText: { fontSize: 16, fontWeight: '500' },
   appleButton: { height: 48, width: '100%' },
-  link: { textAlign: 'center', color: '#1f6feb', paddingVertical: 6 },
+  link: { textAlign: 'center', color: '#0f5fa6', paddingVertical: 6 },
   or: { textAlign: 'center', opacity: 0.5, marginVertical: 4 },
   spinner: { marginTop: 8 },
   error: { color: '#d33', textAlign: 'center', marginTop: 4 },
