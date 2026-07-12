@@ -13,12 +13,13 @@
     "@trm/shared": "workspace:*"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc7 --noEmit",
     "test": "vitest run",
     "lint": "eslint src"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
+    "@trm/tsc7": "workspace:*",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^2.1.8"
   }
 }

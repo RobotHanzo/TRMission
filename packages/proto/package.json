@@ -16,14 +16,15 @@
   "devDependencies": {
     "@bufbuild/buf": "^1.71.0",
     "@bufbuild/protoc-gen-es": "^2.12.1",
-    "typescript": "^5.7.3",
+    "@trm/tsc7": "workspace:*",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^2.1.8"
   },
   "scripts": {
     "generate": "buf generate",
     "build": "buf generate",
     "lint:proto": "buf lint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc7 --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src"

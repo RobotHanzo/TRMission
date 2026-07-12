@@ -1,0 +1,9 @@
+{
+  "name": "@trm/tsc7",
+  "version": "0.0.0",
+  "private": true,
+  "bin": "./bin/tsc7.js",
+  "dependencies": {
+    "@typescript/native": "npm:typescript@^7.0.2"
+  }
+}

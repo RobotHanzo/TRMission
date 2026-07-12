@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node --env-file=.env --watch --import @swc-node/register/esm-register src/main.ts",
     "start": "node --import @swc-node/register/esm-register src/main.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc7 --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src test",
@@ -45,6 +45,7 @@
     "@nestjs/testing": "^11.0.0",
     "@swc-node/register": "^1.10.9",
     "@swc/core": "^1.15.43",
+    "@trm/tsc7": "workspace:*",
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.5",
@@ -53,7 +54,7 @@
     "mongodb-memory-server": "^10.1.4",
     "supertest": "^7.2.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "unplugin-swc": "^1.5.9",
     "vitest": "^2.1.8"
   }
