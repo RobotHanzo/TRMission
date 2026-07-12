@@ -131,40 +131,8 @@ These mirror the ADRs in the development plan; treat them as binding.
 
 ## Server env vars
 
-`PORT`, `MONGO_URL`, `MONGO_DB`, `JWT_SECRET` (set in prod), `CORS_ORIGINS` (comma list),
-`COOKIE_SECURE`, `TRM_PERSISTENCE` (`0` = in-memory, no auth/lobby), `TRM_DEV_GAME` (`1` = seed a
-demo game on boot), `TRM_BOT_DELAY_MS` (pause between bot moves; `0` in tests),
-`JWT_ACCESS_TTL`, `WS_TICKET_TTL`, `REFRESH_TTL_MS`, `GUEST_TTL_MS`,
-`DASHBOARD_OWNER_EMAILS` (comma list of registered emails granted the `owner` dashboard role at
-every boot; other maintainers are managed from the dashboard itself).
-
-Mobile clients: `MOBILE_MIN_BUILD` (forced-update floor served at `GET /version/mobile`),
-`GOOGLE_MOBILE_CLIENT_IDS` (comma list — extra ID-token audiences for the iOS/Android
-Google Sign-In apps), `APPLE_CLIENT_IDS` (comma list of bundle ids / Services IDs accepted
-as Sign in with Apple identity-token audiences — enables `POST /auth/oauth/apple/credential`),
-`APPLE_TEAM_ID` + `APPLE_KEY_ID` + `APPLE_PRIVATE_KEY` (SIWA token revocation during
-`DELETE /auth/me` account deletion; revocation is best-effort per TN3194),
-`APPLE_APP_ID` + `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256`
-(serve `/.well-known/apple-app-site-association` + `assetlinks.json` for the `/m/callback`
-deep link; unset ⇒ 404). A client sending `x-trm-client: mobile` receives its refresh
-token in the response body (Keychain/Keystore storage) instead of the Strict cookie, and
-`POST /auth/refresh`/`logout` accept `{refreshToken}` in the body. Guest TTLs slide
-forward on refresh. The builder WebView converts a carry code into a web cookie session via
-`GET /auth/mobile-web-handoff` (302 → `/maps`). Push (`src/push/`, direct — no relay): Android via
-`FCM_PROJECT_ID`+`FCM_CLIENT_EMAIL`+`FCM_PRIVATE_KEY`, iOS via
-`APNS_TEAM_ID`+`APNS_KEY_ID`+`APNS_PRIVATE_KEY`+`APNS_BUNDLE_ID` (+`APNS_SANDBOX=1`);
-a platform is enabled only when ALL its credentials are set. `PUSH_YOUR_TURN_DELAY_MS`
-debounces the your-turn reminder (default 15s).
-
-**Auth methods** (each independently switchable; the web reads `GET /auth/config`, the server
-enforces): `AUTH_PASSWORD_LOGIN_ENABLED` (`0` disables email/password login+register+upgrade),
-`AUTH_GUEST_ENABLED` (`0` disables guest sessions). **OAuth** (bound by _verified_ email — same
-email = same account across providers + password): `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`,
-`DISCORD_CLIENT_ID`/`DISCORD_CLIENT_SECRET` (a provider is enabled only when both are set),
-`OAUTH_REDIRECT_BASE` (public base URL — builds the provider `redirect_uri` and the post-callback
-web redirect; **must be the same origin that serves the SPA** so the Strict refresh cookie survives
-the callback), `OAUTH_STATE_TTL_MS` (signed-state + nonce-cookie lifetime, ms). OAuth carries the
-provider avatar URL onto the account for display.
+The full env-var reference (core, mobile/push, auth/OAuth) lives in `apps/server/CLAUDE.md` —
+read it before configuring or running the server.
 
 ## graphify
 
