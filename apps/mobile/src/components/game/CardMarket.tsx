@@ -1,9 +1,9 @@
 // The face-up market + draw deck (ports the web CardMarket 1:1, incl. the draw-pool gate and the
 // no-loco-second-draw engine rule). Slots and the deck register themselves as flight targets
 // (`market-slot-{i}` / `deck`) for the Task 10 card-flight animations.
-import { useRef } from 'react';
+import { useEffect, useRef, type PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Layers } from 'lucide-react-native';
 import { CardColor as PbCardColor, Phase, type GameSnapshot } from '@trm/proto';
@@ -16,7 +16,42 @@ import {
   useTutorialAnchor,
   useTutorialTargets,
 } from '../../features/tutorial/targets';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { registerAnimTarget } from './animTargets';
+
+/** A refilled slot's face flips in (web `.market-slot.is-flipping`, 0.45s). */
+function SlotFlip({
+  flipping,
+  reduced,
+  children,
+}: PropsWithChildren<{ flipping: boolean; reduced: boolean }>) {
+  const progress = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (!flipping || reduced) return;
+    progress.setValue(0);
+    const anim = Animated.timing(progress, {
+      toValue: 1,
+      duration: 450,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    });
+    anim.start();
+    return () => anim.stop();
+  }, [flipping, reduced, progress]);
+  return (
+    <Animated.View
+      style={{
+        opacity: progress,
+        transform: [
+          { perspective: 600 },
+          { rotateY: progress.interpolate({ inputRange: [0, 1], outputRange: ['80deg', '0deg'] }) },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
 
 interface Props {
   snapshot: GameSnapshot;
@@ -36,6 +71,8 @@ export function CardMarket({
 }: Props) {
   const { t } = useTranslation();
   const coveredSlots = useAnimationsStore((s) => s.coveredMarketSlots);
+  const marketFlips = useAnimationsStore((s) => s.marketFlips);
+  const reduced = useReducedMotion();
   // Tutorial spotlight anchors (no-ops outside the tutorial provider). The five slots share ONE
   // anchor id, so they register straight into the registry with per-slot cleanups — a single
   // useTutorialAnchor instance would unregister slot N when slot N+1's ref fires.
@@ -121,7 +158,9 @@ export function CardMarket({
                   style={StyleSheet.absoluteFill}
                 />
               )}
-              {face}
+              <SlotFlip flipping={marketFlips.has(slot)} reduced={reduced}>
+                {face}
+              </SlotFlip>
             </Pressable>
           );
         })}
