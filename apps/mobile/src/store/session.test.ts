@@ -47,6 +47,7 @@ const guest: PublicUser = {
   isGuest: true,
   preferences: prefs,
   features: [],
+      tutorialCompleted: false,
 };
 const registered: PublicUser = { ...guest, id: 'u1', isGuest: false, displayName: 'Nate' };
 

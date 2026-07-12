@@ -2,4 +2,6 @@
 // Logic only: no react-dom, no react-native, no expo-*. See CLAUDE.md.
 export * from './game/chatPresets';
 export * from './net/commands';
+export * from './net/rest';
+export * from './net/restTypes';
 export * from './net/socket';

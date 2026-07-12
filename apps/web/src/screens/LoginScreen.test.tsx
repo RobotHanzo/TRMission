@@ -19,7 +19,7 @@ describe('LoginScreen', () => {
     vi.spyOn(api, 'config').mockResolvedValue({
       passwordLogin: false,
       guest: true,
-      providers: { google: true, discord: false },
+      providers: { google: true, discord: false, apple: false },
     });
     render(<LoginScreen />);
 
@@ -33,7 +33,7 @@ describe('LoginScreen', () => {
     vi.spyOn(api, 'config').mockResolvedValue({
       passwordLogin: true,
       guest: true,
-      providers: { google: true, discord: true },
+      providers: { google: true, discord: true, apple: false },
     });
     render(<LoginScreen />);
 
@@ -48,7 +48,7 @@ describe('LoginScreen', () => {
     vi.spyOn(api, 'config').mockResolvedValue({
       passwordLogin: false,
       guest: false,
-      providers: { google: true, discord: false },
+      providers: { google: true, discord: false, apple: false },
     });
     render(<LoginScreen />);
 
@@ -60,7 +60,7 @@ describe('LoginScreen', () => {
     vi.spyOn(api, 'config').mockResolvedValue({
       passwordLogin: false,
       guest: false,
-      providers: { google: false, discord: false },
+      providers: { google: false, discord: false, apple: false },
     });
     render(<LoginScreen />);
 
@@ -74,7 +74,7 @@ describe('LoginScreen', () => {
     vi.spyOn(api, 'config').mockResolvedValue({
       passwordLogin: false,
       guest: false,
-      providers: { google: true, discord: false },
+      providers: { google: true, discord: false, apple: false },
       googleClientId: 'test-client-id',
     });
     render(<LoginScreen />);
@@ -94,7 +94,7 @@ describe('LoginScreen', () => {
     vi.spyOn(api, 'config').mockResolvedValue({
       passwordLogin: false,
       guest: false,
-      providers: { google: true, discord: false },
+      providers: { google: true, discord: false, apple: false },
       googleClientId: 'test-client-id',
     });
     render(<LoginScreen />);

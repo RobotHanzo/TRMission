@@ -98,7 +98,7 @@ export function LoginScreen() {
           setConfig({
             passwordLogin: true,
             guest: true,
-            providers: { google: false, discord: false },
+            providers: { google: false, discord: false, apple: false },
           }),
       );
     return () => {
