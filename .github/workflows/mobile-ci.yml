@@ -27,6 +27,8 @@ jobs:
           cache: yarn
       - run: corepack enable
       - run: yarn install --immutable
+      # Generated protobuf sources are gitignored and must exist before mobile imports @trm/proto.
+      - run: yarn workspace @trm/proto generate
       - run: yarn workspace @trm/mobile typecheck
       - run: yarn workspace @trm/mobile lint
       - run: yarn workspace @trm/mobile test
