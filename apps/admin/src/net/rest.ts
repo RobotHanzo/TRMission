@@ -188,10 +188,34 @@ export interface PurgeStatus {
   }[];
 }
 
+export type ReportStatusFilter = 'open' | 'resolved' | 'all';
+export interface ReportRow {
+  id: string;
+  kind: 'player' | 'map';
+  status: 'open' | 'resolved';
+  category: string;
+  reporterId: string;
+  reporterName: string;
+  message?: string;
+  reportedUserId?: string;
+  reportedName?: string;
+  gameId?: string;
+  roomCode?: string;
+  mapId?: string;
+  shareCode?: string;
+  mapNameZh?: string;
+  mapNameEn?: string;
+  resolvedByName?: string;
+  resolutionNote?: string;
+  resolvedAt?: string;
+  createdAt: string;
+}
+
 export type UsersPage = { users: UserRow[]; nextCursor: string | null };
 export type GamesPage = { games: GameRow[]; nextCursor: string | null };
 export type RoomsPage = { rooms: RoomRow[]; nextCursor: string | null };
 export type AuditPage = { entries: AuditEntry[]; nextCursor: string | null };
+export type ReportsPage = { reports: ReportRow[]; nextCursor: string | null };
 
 export class ApiError extends Error {
   constructor(
@@ -328,6 +352,11 @@ export const api = {
 
   listAudit: (opts: { cursor?: string } = {}) =>
     req<AuditPage>('GET', `/dashboard/audit${qs(opts)}`),
+
+  listReports: (opts: { status?: ReportStatusFilter; cursor?: string } = {}) =>
+    req<ReportsPage>('GET', `/dashboard/reports${qs(opts)}`),
+  resolveReport: (id: string, note?: string) =>
+    req<ReportRow>('POST', `/dashboard/reports/${encodeURIComponent(id)}/resolve`, { note }),
 
   getPurgeStatus: () => req<PurgeStatus>('GET', '/dashboard/purge/status'),
   runPurge: () => req<PurgeRunResult>('POST', '/dashboard/purge/run', {}),
