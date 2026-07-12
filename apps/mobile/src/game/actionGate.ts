@@ -51,3 +51,17 @@ export function gateFlags(gate: ActionGate | null | undefined): GateFlags {
     tunnel: t === 'RESOLVE_TUNNEL',
   };
 }
+
+/** Whether a gate permits acting on this specific board target. An `await` beat that names a
+ *  route/city accepts ONLY that target; the wrong affordance kind — or a `'locked'` gate —
+ *  accepts nothing. No gate (live game) accepts every target. */
+export function gateAllowsTarget(
+  gate: ActionGate | null | undefined,
+  kind: 'route' | 'city',
+  id: string,
+): boolean {
+  if (gate == null) return true;
+  if (gate === 'locked') return false;
+  if (kind === 'route') return gate.t === 'CLAIM_ROUTE' && (!gate.routeId || gate.routeId === id);
+  return gate.t === 'BUILD_STATION' && (!gate.cityId || gate.cityId === id);
+}

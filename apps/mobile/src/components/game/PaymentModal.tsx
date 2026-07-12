@@ -48,7 +48,7 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
   ];
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={styles.backdrop} onPress={onCancel}>
+      <Pressable testID="payment-backdrop" style={styles.backdrop} onPress={onCancel}>
         <Pressable style={styles.modal} onPress={() => undefined}>
           <Text style={styles.title}>{title}</Text>
           {options.length === 0 ? (

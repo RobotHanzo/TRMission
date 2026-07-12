@@ -53,7 +53,11 @@ export interface BoardViewProps {
   snapshot: GameSnapshot;
   locale: Locale;
   colorBlind: boolean;
-  canAct: boolean;
+  /** Route taps resolve only while true. Split from `canBuildStation` so the tutorial can gate
+   *  claiming and station-building independently (a CLAIM_ROUTE beat must not leave cities live). */
+  canClaim: boolean;
+  /** City taps resolve only while true. */
+  canBuildStation: boolean;
   onPickRoute(routeId: string): void;
   onPickCity(cityId: string): void;
   /** Cities to softly highlight (the offered tickets' endpoints, while choosing tickets). */
@@ -268,7 +272,8 @@ function BoardInner({
   snapshot,
   locale,
   colorBlind,
-  canAct,
+  canClaim,
+  canBuildStation,
   onPickRoute,
   onPickCity,
   highlightCities,
@@ -303,8 +308,10 @@ function BoardInner({
   // rebuilds on viewport/content changes, not every snapshot render).
   const snapshotRef = useRef(snapshot);
   snapshotRef.current = snapshot;
-  const canActRef = useRef(canAct);
-  canActRef.current = canAct;
+  const canClaimRef = useRef(canClaim);
+  canClaimRef.current = canClaim;
+  const canBuildStationRef = useRef(canBuildStation);
+  canBuildStationRef.current = canBuildStation;
   const ownedRef = useRef(owned);
   ownedRef.current = owned;
   const closedRef = useRef(closedRoutes);
@@ -329,17 +336,22 @@ function BoardInner({
   }, []);
 
   // Tap → manual hit-test → pick handlers. Ports MapScene's claimable gate + Board's claimFilter:
-  // routes resolve only while the viewer can act and the route is still open + unclaimed.
+  // routes resolve only while the viewer can claim and the route is still open + unclaimed;
+  // cities only while station-building is live (the two are gated independently — tutorial).
   const onTap = useCallback(
     (screen: { x: number; y: number }, tapCam: CameraState) => {
-      if (!canActRef.current) return;
+      if (!canClaimRef.current && !canBuildStationRef.current) return;
       const hit = hitTest(screen, tapCam, vp, scene);
       if (!hit) return;
       if (hit.kind === 'city') {
-        onPickCityRef.current(hit.id);
+        if (canBuildStationRef.current) onPickCityRef.current(hit.id);
         return;
       }
-      if (!closedRef.current.has(hit.id) && !ownedRef.current.has(hit.id)) {
+      if (
+        canClaimRef.current &&
+        !closedRef.current.has(hit.id) &&
+        !ownedRef.current.has(hit.id)
+      ) {
         onPickRouteRef.current(hit.id);
       }
     },
