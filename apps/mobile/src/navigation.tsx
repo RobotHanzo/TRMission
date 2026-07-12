@@ -7,6 +7,7 @@ import { RoomScreen } from './screens/RoomScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { OfflineSetupScreen } from './screens/OfflineSetupScreen';
 import { OfflineGameScreen } from './screens/OfflineGameScreen';
+import TutorialScreen from './features/tutorial/TutorialScreen';
 import type { LocalGameInput } from './offline/useLocalGame';
 import { useSession } from './store/session';
 
@@ -20,6 +21,8 @@ export type RootStackParamList = {
   /** Offline vs-bots: new-game setup, then the sandboxed GameStage. */
   OfflineSetup: undefined;
   OfflineGame: LocalGameInput;
+  /** The offline interactive tutorial — registered in BOTH auth branches (no-account reachable). */
+  Tutorial: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -52,9 +55,21 @@ export function RootNavigator(): React.JSX.Element {
             component={OfflineGameScreen}
             options={{ title: t('game.title') }}
           />
+          <Stack.Screen
+            name="Tutorial"
+            component={TutorialScreen}
+            options={{ headerShown: false }}
+          />
         </>
       ) : (
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen
+            name="Tutorial"
+            component={TutorialScreen}
+            options={{ headerShown: false }}
+          />
+        </>
       )}
     </Stack.Navigator>
   );

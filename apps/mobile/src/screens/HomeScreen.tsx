@@ -8,6 +8,7 @@ import { useSession } from '../store/session';
 import { useOnline } from '../hooks/useOnline';
 import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
 import { OfflineHomeSection } from '../offline/OfflineHomeSection';
+import { getTutorialCompletion } from '../features/tutorial/progress';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -23,6 +24,8 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   // Bumped on focus so the offline section remounts and reloads its resume list (a finished or
   // abandoned game must drop off it when the user navigates back here).
   const [focusKey, setFocusKey] = useState(0);
+  // Loaded on focus: returning from the tutorial's finale must light the badge immediately.
+  const [tutorialDone, setTutorialDone] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -36,6 +39,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     const unsub = navigation.addListener('focus', () => {
       void refresh();
       setFocusKey((k) => k + 1);
+      void getTutorialCompletion().then((c) => setTutorialDone(c !== null));
     });
     return unsub;
   }, [navigation, refresh]);
@@ -79,6 +83,24 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         onNewGame={() => navigation.navigate('OfflineSetup')}
         onResume={(gameId) => navigation.navigate('OfflineGame', { mode: 'resume', gameId })}
       />
+
+      {/* The tutorial is fully offline too — never gated on connectivity or an account. */}
+      <Pressable
+        accessibilityRole="button"
+        testID="home-tutorial"
+        style={styles.roomRow}
+        onPress={() => navigation.navigate('Tutorial')}
+      >
+        <View style={styles.tutorialText}>
+          <Text style={styles.roomCode}>{t('home.play.tutorialTitle')}</Text>
+          <Text style={styles.roomMeta}>{t('home.play.tutorialDesc')}</Text>
+        </View>
+        {tutorialDone && (
+          <Text testID="home-tutorial-done" style={styles.tutorialDone}>
+            ✓
+          </Text>
+        )}
+      </Pressable>
 
       {rooms.length > 0 && (
         <>
@@ -171,4 +193,6 @@ const styles = StyleSheet.create({
   secondaryText: { fontSize: 16, fontWeight: '500' },
   disabled: { opacity: 0.4 },
   signOut: { textAlign: 'center', color: '#d33', marginTop: 8 },
+  tutorialText: { gap: 2, flexShrink: 1 },
+  tutorialDone: { color: '#2e7d32', fontSize: 18, fontWeight: '700' },
 });

@@ -25,6 +25,10 @@ void i18n.use(initReactI18next).init({
           playBots: '離線對戰電腦',
           resumeOffline: '繼續離線對局',
           signOut: '登出',
+          play: {
+            tutorialTitle: '重新查看教學',
+            tutorialDesc: '5 分鐘互動教學',
+          },
         },
         offline: {
           newGame: '新離線對局',
@@ -263,6 +267,10 @@ void i18n.use(initReactI18next).init({
           playBots: 'Play vs Bots',
           resumeOffline: 'Resume offline games',
           signOut: 'Sign out',
+          play: {
+            tutorialTitle: 'Revisit the tutorial',
+            tutorialDesc: 'A 5-minute interactive walkthrough',
+          },
         },
         offline: {
           newGame: 'New offline game',
