@@ -25,8 +25,12 @@ export interface Bounds {
 
 /** Closest-up zoom: ~3–4 stations across a phone. Mirrors the web's MAX_SCALE=8 head-room. */
 export const SPAN_MIN = 8;
-/** Widest zoom: a little beyond the full base view (web MIN_SCALE=0.8 ⇒ content at 125%). */
-export const spanMax = (view: Bounds): number => 1.25 * view.w;
+/** Widest zoom: a little beyond the full base view (web MIN_SCALE=0.8 ⇒ content at 125%).
+ *  Worklet: called synchronously from the pinch gesture's UI-thread `onChange` via clampSpan. */
+export const spanMax = (view: Bounds): number => {
+  'worklet';
+  return 1.25 * view.w;
+};
 
 /** Board units spanned when auto-framing a bot's action POI (ports verbatim from Board.tsx —
  *  it was already screen-independent board units on the web). */
@@ -34,8 +38,11 @@ export const BOT_FOLLOW_SPAN = 34;
 
 export const pxPerUnit = (cam: CameraState, vp: Viewport): number => vp.w / cam.span;
 
-export const clampSpan = (span: number, view: Bounds): number =>
-  Math.min(spanMax(view), Math.max(SPAN_MIN, span));
+/** Worklet: called synchronously from the pinch gesture's UI-thread `onChange` (useBoardCamera). */
+export const clampSpan = (span: number, view: Bounds): number => {
+  'worklet';
+  return Math.min(spanMax(view), Math.max(SPAN_MIN, span));
+};
 
 export function boardToScreen(
   p: { x: number; y: number },
