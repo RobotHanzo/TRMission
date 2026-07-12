@@ -22,6 +22,7 @@ import { useAnimationsStore } from '../store/animations';
 import { useUi } from '../store/ui';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../features/tutorial/targets';
+import { registerBoardCameraSource } from '../features/tutorial/cameraBridge';
 import type { Locale } from '../net/rest';
 import { frameDurationMs, type BoardFrameTarget } from './frameTarget';
 import {
@@ -343,6 +344,14 @@ function BoardInner({
 
   const camOpts = useMemo(() => ({ onTap, onGesture: onManualCamera }), [onTap, onManualCamera]);
   const cam = useBoardCamera(vp, ACTIVE_BASE_VIEW, home, camOpts);
+
+  // Publish the live camera to the tutorial's spotlight bridge while this board is mounted
+  // (unconditional — the tutorial runs in sandbox mode, where CameraSync never mounts).
+  const { currentCamera } = cam;
+  useEffect(
+    () => registerBoardCameraSource(() => ({ camera: currentCamera(), vp })),
+    [currentCamera, vp],
+  );
 
   // ── Claim glow: armed (store) → started (visible) → cleared (ports Board.tsx's timers) ──
   const armedGlowRoutes = useAnimationsStore((s) => s.glowingRoutes);
