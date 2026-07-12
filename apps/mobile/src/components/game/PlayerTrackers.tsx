@@ -2,9 +2,9 @@
 // hand/ticket/train/station counts, current-turn ring, bot badge. Rows register as flight
 // targets (`player-{id}`) for the Task 10 card-flight animations; the turn cue flashes the row
 // for 2.2s when the animation driver announces a handover.
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Bot, Building2, Layers, Ticket, Train, Trophy } from 'lucide-react-native';
 import type { GameSnapshot } from '@trm/proto';
 import { seatColor } from '../../theme/colors';
@@ -13,6 +13,7 @@ import { playerLiveTotal } from '../../game/tickets';
 import { usePlayerName } from '../../game/playerName';
 import { registerAnimTarget } from './animTargets';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
+import { PlayerActionSheet, canModerate } from './PlayerActionSheet';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
 const STAT_ICON = 12;
@@ -24,6 +25,8 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
   const turnCue = useAnimationsStore((s) => s.turnCue);
   const clearTurnCue = useAnimationsStore((s) => s.clearTurnCue);
   const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.trackers);
+  const [sheetTarget, setSheetTarget] = useState<{ id: string; name: string } | null>(null);
+  const me = snapshot.you?.playerId ?? null;
 
   useEffect(() => {
     if (!turnCue) return;
@@ -38,11 +41,15 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
         const isMe = p.id === snapshot.you?.playerId;
         const cued = turnCue?.playerId === p.id;
         return (
-          <View
+          <Pressable
             key={p.id}
             testID={`tracker-${p.id}`}
             ref={(v) => registerAnimTarget(`player-${p.id}`, v)}
             accessibilityState={{ selected: current }}
+            onLongPress={() => {
+              if (!canModerate(p.id, me)) return;
+              setSheetTarget({ id: p.id, name: nameOf({ id: p.id, seat: p.seat }) });
+            }}
             style={[
               styles.row,
               current && styles.rowCurrent,
@@ -85,9 +92,12 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
                 value={p.stationsRemaining}
               />
             </View>
-          </View>
+          </Pressable>
         );
       })}
+      {sheetTarget && (
+        <PlayerActionSheet target={sheetTarget} onClose={() => setSheetTarget(null)} />
+      )}
     </View>
   );
 }

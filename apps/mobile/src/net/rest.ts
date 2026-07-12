@@ -2,7 +2,7 @@
 //   1. an ABSOLUTE base (API_BASE) — the app is not served same-origin, so there is no cookie jar;
 //   2. token-in-body refresh transport (P0-a `x-trm-client: mobile`): the access token lives in
 //      memory, the refresh token in the OS keystore (secureStore), and a 401 rotates via the body.
-import type { EventsMode, UserFeature } from '@trm/shared';
+import type { EventsMode, ReportCategory, UserFeature } from '@trm/shared';
 import { API_BASE } from '../config';
 import { clearRefreshToken, getRefreshToken, setRefreshToken } from './secureStore';
 
@@ -222,6 +222,10 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
 }
 
 /** Capture an issuance result: access token to memory, refresh token to the keystore. */
+export interface BlockList {
+  blockedUserIds: string[];
+}
+
 async function captureAuth(r: AuthResult): Promise<AuthResult> {
   setAccessToken(r.accessToken);
   if (r.refreshToken) await setRefreshToken(r.refreshToken);
@@ -294,6 +298,20 @@ export const api = {
   registerDevice: (platform: 'ios' | 'android', token: string): Promise<void> =>
     req<void>('POST', '/me/devices', { platform, token }),
   removeDevice: (token: string): Promise<void> => req<void>('DELETE', '/me/devices', { token }),
+
+  // UGC compliance (Apple 1.2 / Play UGC): the client-side mute list + abuse reports.
+  myBlocks: (): Promise<BlockList> => req<BlockList>('GET', '/me/blocks'),
+  blockUser: (userId: string): Promise<void> =>
+    req<void>('PUT', `/me/blocks/${encodeURIComponent(userId)}`, {}),
+  unblockUser: (userId: string): Promise<void> =>
+    req<void>('DELETE', `/me/blocks/${encodeURIComponent(userId)}`),
+  reportPlayer: (body: {
+    userId: string;
+    category: ReportCategory;
+    message?: string;
+    gameId?: string;
+    roomCode?: string;
+  }): Promise<{ id: string }> => req<{ id: string }>('POST', '/reports/player', body),
 };
 
 export { req };

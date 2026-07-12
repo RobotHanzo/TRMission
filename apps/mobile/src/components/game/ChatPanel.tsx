@@ -6,11 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useChat } from '../../store/chat';
 import { useGame } from '../../store/game';
+import { useModeration } from '../../store/moderation';
 import { getSocket } from '../../net/connection';
 import { usePlayerName } from '../../game/playerName';
 import { seatColor } from '../../theme/colors';
 import { chatRejectionHintKey } from '../../game/chatErrors';
 import { CHAT_PRESET_IDS, chatPresetKey } from '../../game/chatPresets';
+import { PlayerActionSheet, canModerate } from './PlayerActionSheet';
 
 const MAX_LEN = 2048;
 const RATE_MAX = 5;
@@ -23,14 +25,19 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
   const rejection = useGame((s) => s.rejection);
   const nameOf = usePlayerName();
   const me = snapshot?.you?.playerId ?? null;
+  const blocked = useModeration((s) => s.blocked);
   const [draft, setDraft] = useState('');
   const [hint, setHint] = useState<string | null>(null);
+  const [sheetTarget, setSheetTarget] = useState<{ id: string; name: string } | null>(null);
   const sentAt = useRef<number[]>([]);
   const listRef = useRef<ScrollView>(null);
 
+  // Blocked authors are muted client-side: their free text AND presets never render.
+  const visible = messages.filter((m) => !blocked.has(m.playerId));
+
   useEffect(() => {
     listRef.current?.scrollToEnd({ animated: false });
-  }, [messages.length]);
+  }, [visible.length]);
 
   // Surface a server-side chat rejection (length / rate limit / unknown preset) as inline chat
   // feedback instead of the generic action toast. Client guards usually prevent it ever firing.
@@ -73,11 +80,21 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
     <View style={styles.panel}>
       <Text style={styles.heading}>{t('chat.heading')}</Text>
       <ScrollView ref={listRef} style={styles.messages}>
-        {messages.length === 0 ? (
+        {visible.length === 0 ? (
           <Text style={styles.empty}>{t('chat.empty')}</Text>
         ) : (
-          messages.map((m) => (
-            <View key={m.id} style={styles.msg}>
+          visible.map((m) => (
+            <Pressable
+              key={m.id}
+              style={styles.msg}
+              onLongPress={() => {
+                if (!canModerate(m.playerId, me)) return;
+                setSheetTarget({
+                  id: m.playerId,
+                  name: nameOf({ id: m.playerId, seat: seatOf(m.playerId) }),
+                });
+              }}
+            >
               <Text style={[styles.author, { color: seatColor(seatOf(m.playerId)) }]}>
                 {nameOf({ id: m.playerId, seat: seatOf(m.playerId), isMe: m.playerId === me })}
               </Text>
@@ -86,10 +103,13 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
                   ? t(chatPresetKey(m.content.value))
                   : m.content.value}
               </Text>
-            </View>
+            </Pressable>
           ))
         )}
       </ScrollView>
+      {sheetTarget && (
+        <PlayerActionSheet target={sheetTarget} onClose={() => setSheetTarget(null)} />
+      )}
       {hint !== null && <Text style={styles.hint}>{hint}</Text>}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presets}>
         {CHAT_PRESET_IDS.map((id) => (

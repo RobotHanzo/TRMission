@@ -17,6 +17,7 @@ import { useActiveContent } from '../game/useActiveContent';
 import { GameStage } from './GameStage';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { setActiveGameId } from '../push/notifications';
+import { setActiveRoomContext } from '../game/activeRoom';
 import PushPrompt from '../push/PushPrompt';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
@@ -50,12 +51,16 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   }, [roomCode, setRoster]);
 
   // While this game is on screen, its foreground push banners are suppressed (the snapshot has
-  // no game id — the room view carries it).
+  // no game id — the room view carries it). The same identity feeds abuse-report context.
   const activeGameId = room?.gameId ?? null;
   useEffect(() => {
     setActiveGameId(activeGameId);
-    return () => setActiveGameId(null);
-  }, [activeGameId]);
+    setActiveRoomContext({ ...(activeGameId ? { gameId: activeGameId } : {}), roomCode });
+    return () => {
+      setActiveGameId(null);
+      setActiveRoomContext({});
+    };
+  }, [activeGameId, roomCode]);
 
   // Once the game is over, poll the room every 2s: refresh the rematch vote tally, and the moment
   // the host resets it to LOBBY, carry this client back into the room — the same way starting a

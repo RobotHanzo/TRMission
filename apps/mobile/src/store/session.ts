@@ -9,6 +9,7 @@ import {
 } from '../net/rest';
 import { clearRefreshToken, getRefreshToken } from '../net/secureStore';
 import { registerDeviceForPush, unregisterDeviceForPush } from '../push/register';
+import { useModeration } from './moderation';
 import { useUi } from './ui';
 
 /** How the current session was established — P5's account-deletion flow branches on `apple`. */
@@ -61,6 +62,8 @@ export const useSession = create<SessionState>()((set, get) => {
       hydratePrefs(r.user);
       // Register for push after a successful auth (fire-and-forget; never blocks sign-in).
       void registerDeviceForPush().catch(() => undefined);
+      // Mirror the account's block list so chat filtering works from the first game.
+      void useModeration.getState().hydrate();
     } catch (e) {
       set({ loading: false, error: (e as Error).message });
     }
@@ -70,6 +73,7 @@ export const useSession = create<SessionState>()((set, get) => {
     setAccessToken(null);
     await clearRefreshToken();
     set({ user: null, accessToken: null, signInMethod: null });
+    useModeration.getState().reset();
   };
 
   return {
@@ -94,6 +98,7 @@ export const useSession = create<SessionState>()((set, get) => {
         hydratePrefs(user);
         // Re-sync push after a boot-time restore too (settings-gated; never blocks boot).
         void registerDeviceForPush().catch(() => undefined);
+        void useModeration.getState().hydrate();
       } catch {
         await clearLocalSession();
         set({ booting: false });
