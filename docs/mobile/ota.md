@@ -96,7 +96,62 @@ curl -si http://localhost:3005/manifest \
 # Expect an expo-updates-protocol response; connection refused or an HTML error page is not OK.
 ```
 
-Verified behaviour without real Expo credentials:
+What this proves without real Expo credentials is recorded in the appendix at the bottom.
+
+## CI publish lane (.github/workflows/mobile-ota.yml)
+
+Triggers: manual dispatch (channel choice `production`/`preview`) or a `mobile-ota-v*` tag
+(always `production`). The pinned publish command as it runs in CI:
+
+```bash
+npx --yes eoas publish --branch <channel> --nonInteractive --outputDir dist --message "<ref>"
+```
+
+- `EXPO_TOKEN` (repo **secret**): Expo robot token — eoas auth + channel→branch mapping.
+- `TRM_OTA_URL` (repo **variable**): the deployment's full manifest URL; eoas derives the OTA
+  server origin from the app config's `updates.url`, so this must be set for the publish step.
+- There is **no code-signing secret in CI** — signing happens at serve time on the OTA server.
+- eoas runs its own `expo export`; the workflow keeps the exported `dist/` plus the recorded
+  `fingerprint.json` (the runtime version the update targets) as a 30-day artifact.
+
+## Forced-update gate vs OTA (who wins, and why both exist)
+
+Two independent mechanisms, deliberately non-overlapping:
+
+1. `GET /version/mobile` → `{minBuild, commitHash}` — checked at EVERY boot before anything
+   else. `nativeBuildVersion < minBuild` ⇒ the forced-update screen (store link). OTA can
+   NEVER satisfy this gate: an OTA update changes the JS bundle, never the native
+   buildNumber/versionCode. Raise `MOBILE_MIN_BUILD` only when old binaries must die
+   (breaking wire/native change).
+2. expo-updates + fingerprint runtimeVersion — delivers JS fixes to COMPATIBLE binaries
+   only. A bundle exported from a tree with a different native fingerprint is invisible to
+   the installed app; there is no override. OTA is an optimization, never a compatibility
+   escape hatch.
+
+Decision table:
+
+- JS-only bugfix → OTA (this workflow), optionally also a store release later.
+- Native change (new module / SDK / config plugin) → store lanes; OTA lane will no-op for
+  old binaries by construction.
+- Old binaries must be forced off (server contract break) → store release + raise
+  MOBILE_MIN_BUILD after propagation.
+
+## Rollback
+
+Publish the previous known-good export to the same channel (updates are immutable;
+"rollback" = publish an older bundle as the newest update). The signed manifest prevents
+anyone else from doing this to our users.
+
+## Fallbacks (spec §10)
+
+- **custom-expo-updates-server** (Expo's reference implementation): same protocol, static
+  directory storage, publish = copy `dist/` into `updates/<runtimeVersion>/<timestamp>/`.
+  Swap the compose image + the workflow publish step (an `rsync` of `dist/` replaces
+  `eoas publish`); app config unchanged.
+- **Store-only**: set `updates.enabled: false` in app.config.ts and ship through the store
+  lanes exclusively. The forced-update gate works regardless — OTA was never load-bearing.
+
+## Appendix: probe results without real Expo credentials (2026-07-12)
 
 - `EXPO_ACCESS_TOKEN` unset ⇒ the container **exits at boot** (crash-loop) — it is genuinely
   required, not optional.

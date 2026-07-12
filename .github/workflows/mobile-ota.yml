@@ -1,0 +1,62 @@
+# Publishes a JS-ONLY over-the-air update to the self-hosted expo-open-ota server.
+# Never used for native changes: runtimeVersion=fingerprint means a bundle exported from a
+# tree whose native fingerprint differs from the installed binary is simply ignored by it.
+# Store binaries ship via mobile-android.yml / mobile-ios.yml (P6).
+# Runbook: docs/mobile/ota.md
+name: mobile-ota
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Update channel (expo-open-ota branch)'
+        type: choice
+        options: [production, preview]
+        default: preview
+  push:
+    tags: ['mobile-ota-v*']
+
+concurrency:
+  group: mobile-ota-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: corepack enable
+      - run: yarn install --immutable
+      # proto codegen must exist before any workspace build (src/gen is gitignored).
+      - run: yarn workspace @trm/proto generate
+      - run: yarn typecheck
+      - name: Record the fingerprint runtime version (traceability)
+        working-directory: apps/mobile
+        run: npx @expo/fingerprint . | tee fingerprint.json
+      - name: Publish to the OTA server
+        working-directory: apps/mobile
+        env:
+          # eoas resolves the OTA server from the app config's updates.url origin, so this
+          # must be the real deployment's manifest URL (repo variable), not the localhost default.
+          TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          # Expo robot token — authenticates eoas + the channel→branch mapping. Updates are
+          # signed at SERVE time by the OTA server's mounted private key; CI holds no
+          # signing material (there is deliberately no code-signing secret here).
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        # eoas runs its own `expo export` (both platforms) before uploading — no separate
+        # export step; --outputDir retains the exported bundle for the artifact below.
+        # Tag pushes have no inputs → production.
+        run: >-
+          npx --yes eoas publish
+          --branch ${{ inputs.channel || 'production' }}
+          --nonInteractive
+          --outputDir dist
+          --message "${{ github.ref_name }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ota-bundle-${{ github.run_number }}
+          path: |
+            apps/mobile/dist
+            apps/mobile/fingerprint.json
+          retention-days: 30
