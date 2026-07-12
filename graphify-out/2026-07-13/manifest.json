@@ -4045,8 +4045,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/package.json": {
-    "mtime": 1783869478.4367578,
-    "ast_hash": "0a992e17e684f4298a2ad646e2cd1b13",
+    "mtime": 1783877332.9909506,
+    "ast_hash": "037850abf48274c97b77c40d885876b0",
     "semantic_hash": ""
   },
   "apps/mobile/src/account/deleteAccount.test.ts": {

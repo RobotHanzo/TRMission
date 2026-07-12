@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8c37d28f`
+- Built from commit: `bf343c1e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -2002,7 +2002,7 @@ Cohesion: 0.36
 Nodes (5): CUE_BY_CASE, cuesForEvents(), HapticCue, FIRE, useHaptics()
 
 ## Knowledge Gaps
-- **2671 isolated node(s):** `name`, `version`, `private`, `main`, `start` (+2666 more)
+- **2671 isolated node(s):** `Commands`, `Git workflow`, `Monorepo layout & build order`, `The big picture`, `Load-bearing decisions (these bite if you don't know them)` (+2666 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **181 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -2013,9 +2013,9 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.020) - this node is a cross-community bridge._
 - **Why does `ws` connect `MapsContentController` to `Root Package Manifest & Tooling`?**
   _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Why does `AnimState` connect `Metrics Hooks & Controller` to `history.repo.ts`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
-- **What connects `name`, `version`, `private` to the rest of the system?**
+- **Why does `AuthUser` connect `socket.test.ts` to `Contextual Log Store (Task 5)`, `rules.spec.ts`, `Server Bootstrap & Zod Validation (ADR A3)`, `Web Package Manifest`, `MapsContentController`, `Deck & Hand Management`, `render-og-cards.ts`, `animationModel.ts`, `curriculum.ts`, `Server Test/Build Dev Dependencies`, `events-rounds.spec.ts`, `ReplayScreen.test.tsx`, `useSoundDriver.test.tsx`, `TutorialOverlayProps`, `lobby-spectate.e2e.spec.ts`, `oauth.http.ts`, `types.ts`, `dashboard.ts`, `MetricsService`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **What connects `Commands`, `Git workflow`, `Monorepo layout & build order` to the rest of the system?**
   _2692 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Command Queue & Game Registry` be split into smaller, more focused modules?**
   _Cohesion score 0.04878048780487805 - nodes in this community are weakly interconnected._
