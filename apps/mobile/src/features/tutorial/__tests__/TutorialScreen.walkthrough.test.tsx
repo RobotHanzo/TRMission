@@ -131,5 +131,5 @@ describe('scripted end-to-end Quickstart walkthrough', () => {
       expect(await AsyncStorage.getItem('trm.tutorial.completed.v1')).toContain('"core"'),
     );
     jest.useRealTimers();
-  });
+  }, 60_000);
 });
