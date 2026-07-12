@@ -65,7 +65,7 @@ const config: ExpoConfig = {
     ['expo-build-properties', { android: { targetSdkVersion: 36, compileSdkVersion: 36 } }],
   ],
   extra: {
-    serverOrigin: process.env.TRM_SERVER_ORIGIN ?? 'http://localhost:3001',
+    serverOrigin: process.env.TRM_SERVER_ORIGIN ?? 'https://trmission.robothanzo.dev',
     buildNumber: BUILD_NUMBER,
     // Google Sign-In client ids (native app + the server "web" audience). Real values are
     // provisioned at store-setup time (P6); the server accepts the native ids via

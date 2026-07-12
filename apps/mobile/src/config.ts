@@ -8,7 +8,7 @@ const extra = (Constants.expoConfig?.extra ?? {}) as {
 };
 
 /** Absolute origin of the TRMission server (the app is not served same-origin). */
-export const SERVER_ORIGIN = extra.serverOrigin ?? 'http://localhost:3001';
+export const SERVER_ORIGIN = extra.serverOrigin ?? 'https://trmission.robothanzo.dev';
 /** REST base — every control-plane call hangs off this. */
 export const API_BASE = `${SERVER_ORIGIN}/api/v1`;
 /** Realtime WebSocket endpoint (protobuf frames). */
