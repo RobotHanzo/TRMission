@@ -22,6 +22,8 @@ export default tseslint.config(
       '**/jest.resolver.js',
       // plain CommonJS bin script (no build step, run directly by node).
       'tooling/tsc7/bin/**',
+      // brand-asset generator (plain node script, run manually; see apps/mobile/assets/*.png).
+      'apps/mobile/scripts/gen-brand-assets.js',
     ],
   },
   eslint.configs.recommended,
