@@ -30,6 +30,14 @@ void i18n.use(initReactI18next).init({
             tutorialDesc: '5 分鐘互動教學',
           },
         },
+        builder: {
+          title: '地圖工房',
+          entry: '地圖工房',
+          offlineTitle: '需要網路連線',
+          offlineBody: '地圖工房在線上網頁中編輯，離線時無法使用。',
+          errorTitle: '無法開啟地圖工房',
+          errorBody: '登入交接失敗，請稍後再試。',
+        },
         offline: {
           newGame: '新離線對局',
           map: '地圖',
@@ -271,6 +279,14 @@ void i18n.use(initReactI18next).init({
             tutorialTitle: 'Revisit the tutorial',
             tutorialDesc: 'A 5-minute interactive walkthrough',
           },
+        },
+        builder: {
+          title: 'Map Studio',
+          entry: 'Map Studio',
+          offlineTitle: 'You are offline',
+          offlineBody: 'The map studio runs on the live website and needs a connection.',
+          errorTitle: 'Could not open the map studio',
+          errorBody: 'The session handoff failed — please try again.',
         },
         offline: {
           newGame: 'New offline game',

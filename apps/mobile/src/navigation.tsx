@@ -8,6 +8,7 @@ import { LoginScreen } from './screens/LoginScreen';
 import { OfflineSetupScreen } from './screens/OfflineSetupScreen';
 import { OfflineGameScreen } from './screens/OfflineGameScreen';
 import TutorialScreen from './features/tutorial/TutorialScreen';
+import BuilderScreen from './screens/BuilderScreen';
 import type { LocalGameInput } from './offline/useLocalGame';
 import { useSession } from './store/session';
 
@@ -23,6 +24,8 @@ export type RootStackParamList = {
   OfflineGame: LocalGameInput;
   /** The offline interactive tutorial — registered in BOTH auth branches (no-account reachable). */
   Tutorial: undefined;
+  /** The map-builder WebView (mapBuilder feature; authed stack only). */
+  Builder: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -59,6 +62,11 @@ export function RootNavigator(): React.JSX.Element {
             name="Tutorial"
             component={TutorialScreen}
             options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Builder"
+            component={BuilderScreen}
+            options={{ title: t('builder.title') }}
           />
         </>
       ) : (

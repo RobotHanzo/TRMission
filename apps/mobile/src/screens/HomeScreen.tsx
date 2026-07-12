@@ -9,6 +9,7 @@ import { useOnline } from '../hooks/useOnline';
 import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
 import { OfflineHomeSection } from '../offline/OfflineHomeSection';
 import { getTutorialCompletion } from '../features/tutorial/progress';
+import { useCanBuild } from './BuilderScreen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -18,6 +19,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const user = useSession((s) => s.user);
   const signOut = useSession((s) => s.signOut);
   const online = useOnline();
+  const canBuild = useCanBuild();
   const [rooms, setRooms] = useState<RoomView[]>([]);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
@@ -148,6 +150,19 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       >
         <Text style={styles.primaryText}>{t('home.create')}</Text>
       </Pressable>
+
+      {/* Feature-gated (mapBuilder), hidden entirely without the grant — mirrors web AppHeader. */}
+      {canBuild && (
+        <Pressable
+          testID="home-builder"
+          accessibilityRole="button"
+          style={[styles.secondary, !online && styles.disabled]}
+          onPress={() => navigation.navigate('Builder')}
+          disabled={!online}
+        >
+          <Text style={styles.secondaryText}>{t('builder.entry')}</Text>
+        </Pressable>
+      )}
 
       <Pressable onPress={() => void signOut()}>
         <Text style={styles.signOut}>{t('home.signOut')}</Text>
