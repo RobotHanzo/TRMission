@@ -306,6 +306,8 @@ export const api = {
   updatePreferences: (prefs: UserPreferences) =>
     req<PublicUser>('PATCH', '/auth/me/preferences', prefs),
   logout: () => req<void>('POST', '/auth/logout').then(() => setAccessToken(null)),
+  /** Irreversible. 204 on success; 409 while the account still holds dashboard access. */
+  deleteAccount: () => req<void>('DELETE', '/auth/me', {}).then(() => setAccessToken(null)),
 
   createRoom: (maxPlayers?: number) => req<RoomView>('POST', '/rooms', { maxPlayers }),
   getRoom: (code: string) => req<RoomView>('GET', `/rooms/${code}`),

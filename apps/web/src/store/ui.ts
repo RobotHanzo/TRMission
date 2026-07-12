@@ -21,7 +21,9 @@ export type View =
   | 'replay'
   | 'adminReplay'
   | 'maps'
-  | 'mapEditor';
+  | 'mapEditor'
+  | 'deleteAccount'
+  | 'privacy';
 
 // --- URL routing -----------------------------------------------------------
 // The browser path is the durable source of truth for *where* the user is:
@@ -39,6 +41,8 @@ const REPLAY_PATH = /^\/replay\/([^/]+)$/;
 const ADMIN_REPLAY_PATH = /^\/admin-replay\/([^/]+)$/;
 const MAPS_PATH = '/maps';
 const MAP_EDITOR_PATH = /^\/maps\/([^/]+)\/edit$/;
+const DELETE_ACCOUNT_PATH = '/account/delete';
+const PRIVACY_PATH = '/privacy';
 
 export const roomCodeFromPath = (): string | null => {
   const code = ROOM_PATH.exec(window.location.pathname)?.[1];
@@ -323,6 +327,17 @@ export const useUi = create<UiState>()((set, get) => ({
       set({ view: 'mapEditor', editingMapId: id, roomCode: null, gameId: null, ticket: null });
       return;
     }
+    if (target === DELETE_ACCOUNT_PATH) {
+      replacePath(DELETE_ACCOUNT_PATH);
+      set({
+        view: 'deleteAccount',
+        roomCode: null,
+        gameId: null,
+        ticket: null,
+        replayGameId: null,
+      });
+      return;
+    }
     replacePath('/');
     set({ view: 'home', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
@@ -417,6 +432,28 @@ export const useUi = create<UiState>()((set, get) => ({
       }
       disconnectGame();
       set({ view: 'mapEditor', editingMapId, roomCode: null, gameId: null, ticket: null });
+      return;
+    }
+    // Public privacy policy — reachable signed out (store listings link straight here).
+    if (path === PRIVACY_PATH) {
+      disconnectGame();
+      set({ view: 'privacy', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    // Account deletion (Play Data-safety URL): the login gate is the re-auth for cold visits.
+    if (path === DELETE_ACCOUNT_PATH) {
+      if (!authed) {
+        get().navigateLogin(DELETE_ACCOUNT_PATH);
+        return;
+      }
+      disconnectGame();
+      set({
+        view: 'deleteAccount',
+        roomCode: null,
+        gameId: null,
+        ticket: null,
+        replayGameId: null,
+      });
       return;
     }
     // Entering a room needs an authenticated session; otherwise gate to /login and remember it.

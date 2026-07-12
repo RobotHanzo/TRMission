@@ -288,6 +288,20 @@ const resources = {
           FREE_STATION: '免費車站（{{city}}）',
         },
       },
+      deleteAccount: {
+        title: '刪除帳號',
+        signedInAs: '目前登入身分：{{name}}',
+        consequence1: '你的帳號、登入方式與所有工作階段將被永久移除。',
+        consequence2: '你的自訂地圖草稿將被刪除（已開始過對局的地圖內容仍會保留供重播）。',
+        consequence3: '已完成對局的紀錄會匿名化保留（其他玩家的戰績不受影響）。',
+        consequence4: '此動作無法復原。',
+        typeName: '請輸入你的顯示名稱「{{name}}」以確認：',
+        cancel: '取消',
+        confirm: '永久刪除帳號',
+        maintainerBlocked: '此帳號仍具有維護者權限，請先在管理後台撤銷後再刪除。',
+        doneTitle: '帳號已刪除',
+        doneBody: '你的帳號與個人資料已移除。感謝你搭乘台鐵任務。',
+      },
       history: {
         title: '對局紀錄',
         empty: '尚無完成的對局',
@@ -818,6 +832,24 @@ const resources = {
           CHARTER: 'Charter completed +{{points}}',
           FREE_STATION: 'Free station ({{city}})',
         },
+      },
+      deleteAccount: {
+        title: 'Delete account',
+        signedInAs: 'Signed in as {{name}}',
+        consequence1:
+          'Your account, sign-in methods, and all sessions will be permanently removed.',
+        consequence2:
+          'Your custom map drafts will be deleted (published content of already-played games is kept for replays).',
+        consequence3:
+          'Finished-game records are kept anonymized (other players keep their history).',
+        consequence4: 'This cannot be undone.',
+        typeName: 'Type your display name "{{name}}" to confirm:',
+        cancel: 'Cancel',
+        confirm: 'Delete account permanently',
+        maintainerBlocked:
+          'This account still holds maintainer access. Revoke it from the dashboard first, then delete.',
+        doneTitle: 'Account deleted',
+        doneBody: 'Your account and personal data have been removed. Thanks for riding TRMission.',
       },
       history: {
         title: 'Game history',
