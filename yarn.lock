@@ -4286,10 +4286,8 @@ __metadata:
     "@trm/proto": "workspace:*"
     "@trm/shared": "workspace:*"
     "@trm/tsc7": "workspace:*"
-    react: "npm:^19.2.0"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vitest: "npm:^2.1.8"
-    zustand: "npm:^5.0.2"
   peerDependencies:
     i18next: ^24.2.0
     react: ^19.2.0
@@ -4509,8 +4507,8 @@ __metadata:
     jsdom: "npm:^25.0.1"
     lucide-react: "npm:^0.468.0"
     polygon-clipping: "npm:^0.15.7"
-    react: "npm:^19.2.0"
-    react-dom: "npm:^19.2.0"
+    react: "npm:19.2.3"
+    react-dom: "npm:19.2.3"
     react-i18next: "npm:^15.4.0"
     react-zoom-pan-pinch: "npm:^4.0.3"
     typescript: "npm:@typescript/typescript6@^6.0.2"
@@ -11882,6 +11880,17 @@ __metadata:
     shell-quote: "npm:^1.6.1"
     ws: "npm:^7"
   checksum: 10/0323f1d006979374b79ac83fced5bb10c04f2817d7bd4338074ead815ff441b943290d563d7796233767dd973787116a4b3c62040de4d770e0ae5b207fc8d480
+  languageName: node
+  linkType: hard
+
+"react-dom@npm:19.2.3":
+  version: 19.2.3
+  resolution: "react-dom@npm:19.2.3"
+  dependencies:
+    scheduler: "npm:^0.27.0"
+  peerDependencies:
+    react: ^19.2.3
+  checksum: 10/5780f6d4c8e8ece09f82c5500ba2d55e01c30b5273f9281734d7d3b65013cd1fa52ec4e4436e5248c0a9e5bc340836044051168bbad8d7eac4d33ee6c2a867a1
   languageName: node
   linkType: hard
 
