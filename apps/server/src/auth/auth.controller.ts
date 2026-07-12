@@ -237,7 +237,10 @@ export class AuthController {
   @Post('mobile/carry')
   @UseGuards(AccessTokenGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Mint a single-use carry code so mobile OAuth can upgrade this guest' })
+  @ApiOperation({
+    summary:
+      'Mint a single-use carry code: mobile OAuth guest-upgrade, or the builder-WebView web-session handoff',
+  })
   @ApiResponse({ status: 201, schema: apiSchema(MobileCarryResultSchema) })
   async mobileCarry(@CurrentUser() user: AuthUser) {
     return { code: await this.mobileCodes.mint('carry', user.userId, env.oauthStateTtlMs) };
@@ -259,6 +262,35 @@ export class AuthController {
       accessToken: issued.accessToken,
       refreshToken: issued.refreshToken,
     };
+  }
+
+  /**
+   * Builder-WebView session handoff (browser navigation, not JSON). The app minted a
+   * single-use carry code over Bearer (POST /auth/mobile/carry); redeeming it here mints a
+   * NEW web session family and sets the normal Strict refresh cookie, then lands on /maps.
+   * The app's own body-token family is never touched. Errors redirect (never 500 a
+   * top-level navigation) with no cookie.
+   */
+  @Get('mobile-web-handoff')
+  @ApiExcludeEndpoint()
+  async mobileWebHandoff(
+    @Query('code') code: string | undefined,
+    @Res() res: Response,
+  ): Promise<void> {
+    const userId = await this.mobileCodes.redeem('carry', code);
+    const user = userId ? await this.users.findById(userId) : null;
+    if (!user) {
+      res.redirect(this.authConfig.webCallback({ error: 'invalid_code' }));
+      return;
+    }
+    try {
+      const issued = await this.auth.issueFor(user);
+      this.setRefresh(res, issued.refreshToken);
+      res.redirect(`${this.authConfig.redirectBase}/maps`);
+    } catch {
+      // e.g. account disabled between mint and redeem.
+      res.redirect(this.authConfig.webCallback({ error: 'server_error' }));
+    }
   }
 
   @Post('refresh')
