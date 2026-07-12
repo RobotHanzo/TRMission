@@ -35,7 +35,12 @@ const mApi = api as jest.Mocked<typeof api>;
 const mGetRefresh = getRefreshToken as jest.Mock;
 const mClearRefresh = clearRefreshToken as jest.Mock;
 
-const prefs = { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' } as const;
+const prefs = {
+  theme: 'system',
+  colorBlind: false,
+  locale: 'zh-Hant',
+  boardLayout: 'rail',
+} as const;
 const guest: PublicUser = {
   id: 'g1',
   displayName: '旅客',
@@ -87,7 +92,11 @@ describe('session store', () => {
   });
 
   it('loginWithAppleCredential records the apple method (P5 branches on it)', async () => {
-    mApi.appleCredential.mockResolvedValue({ user: registered, accessToken: 'a', refreshToken: 'r' });
+    mApi.appleCredential.mockResolvedValue({
+      user: registered,
+      accessToken: 'a',
+      refreshToken: 'r',
+    });
     await useSession.getState().loginWithAppleCredential('id-token', 'Nate');
     expect(mApi.appleCredential).toHaveBeenCalledWith('id-token', 'Nate');
     expect(useSession.getState().signInMethod).toBe('apple');

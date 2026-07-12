@@ -30,12 +30,14 @@
 ### Task 1: `@trm/shared` — report categories + `reports.*` dashboard permissions
 
 **Files:**
+
 - Create: `packages/shared/src/reports.ts`
 - Modify: `packages/shared/src/index.ts`
 - Modify: `packages/shared/src/dashboard.ts`
 - Create: `packages/shared/test/reports.spec.ts`
 
 **Interfaces:**
+
 - Consumes: nothing new.
 - Produces: `REPORT_CATEGORIES: readonly [...]` (7-element const tuple), `type ReportCategory`, `isReportCategory(v: string): v is ReportCategory`; `DASHBOARD_PERMISSIONS` gains `'reports.read'` and `'reports.resolve'`; `MODERATOR_PERMISSIONS` includes both (and therefore admin/owner do too via escalation).
 
@@ -149,6 +151,7 @@ git commit -m "feat(shared): UGC report categories + reports.* dashboard permiss
 ### Task 2: Server — block list (client-side mute) on the account
 
 **Files:**
+
 - Modify: `apps/server/src/auth/user.repo.ts` (`UserDoc` + three methods after `extendGuestExpiry`)
 - Create: `apps/server/src/moderation/moderation.schemas.ts`
 - Create: `apps/server/src/moderation/blocks.controller.ts`
@@ -157,6 +160,7 @@ git commit -m "feat(shared): UGC report categories + reports.* dashboard permiss
 - Create: `apps/server/test/moderation.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `AccessTokenGuard`, `CurrentUser`, `UserRepo.findById`, `apiSchema()`.
 - Produces:
   - `UserDoc.blockedUserIds?: string[]`
@@ -426,12 +430,14 @@ git commit -m "feat(server): account-level block list for client-side muting"
 ### Task 3: Server — reports collection + report-player / report-map endpoints
 
 **Files:**
+
 - Create: `apps/server/src/moderation/report.repo.ts`
 - Create: `apps/server/src/moderation/reports.controller.ts`
 - Modify: `apps/server/src/moderation/moderation.module.ts`
 - Test: `apps/server/test/moderation.e2e.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `UserRepo.findById`, `CustomMapRepo.findByShareCode` (exported by `MapsModule`), Task 1's `ReportCategory`, Task 2's schemas file.
 - Produces:
   - `reports` Mongo collection (`ReportDoc`; index `{ status: 1, _id: -1 }`)
@@ -803,6 +809,7 @@ git commit -m "feat(server): UGC report endpoints for players and shared custom 
 ### Task 4: Server — dashboard reports surface (+ audit + docs)
 
 **Files:**
+
 - Modify: `apps/server/src/dashboard/audit.repo.ts` (action + target unions)
 - Modify: `apps/server/src/dashboard/dashboard.schemas.ts`
 - Create: `apps/server/src/dashboard/dashboard-reports.service.ts`
@@ -812,6 +819,7 @@ git commit -m "feat(server): UGC report endpoints for players and shared custom 
 - Create: `apps/server/test/dashboard-reports.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `ReportRepo` (Task 3, exported by `ModerationModule`), `DashboardGuard` + `RequirePermission`, `AuditService.log`, Task 1's permissions.
 - Produces:
   - `GET /api/v1/dashboard/reports?status=open|resolved|all&limit&cursor` → `{ reports: ReportRow[], nextCursor }` (permission `reports.read`)
@@ -1132,7 +1140,7 @@ In `apps/server/CLAUDE.md`, append a bullet to "Auth, lobby, bots" (after the `s
 
 ```markdown
 - `src/moderation/` — the UGC compliance surface (Apple 1.2 / Play UGC): `GET/PUT/DELETE
-  /me/blocks[/:userId]` maintains a capped **client-side mute list** on `UserDoc.blockedUserIds`
+/me/blocks[/:userId]` maintains a capped **client-side mute list** on `UserDoc.blockedUserIds`
   (display filtering only — never touches seating or game state), and `POST /reports/player` +
   `POST /reports/map` (by share code, deliberately OUTSIDE the mapBuilder gate — the code is the
   capability) append to the `reports` collection with denormalized names (guests TTL-expire; the
@@ -1153,6 +1161,7 @@ git commit -m "feat(server): dashboard reports queue with audited resolution"
 ### Task 5: Admin — Reports view
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts`
 - Modify: `apps/admin/src/store/ui.ts` (`AdminView` + `parsePath` regex)
 - Modify: `apps/admin/src/App.tsx` (NAV + `ActiveView`)
@@ -1161,6 +1170,7 @@ git commit -m "feat(server): dashboard reports queue with audited resolution"
 - Create: `apps/admin/src/views/ReportsView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: Task 4's endpoints; `SignalBadge`, `ConfirmDialog` (`withReason` passes the note), `useSession.hasPermission`, `fmtDateTime`/`shortId`, the `stubFetch` test idiom.
 - Produces: `api.listReports({status?, cursor?})`, `api.resolveReport(id, note?)`, `ReportRow`/`ReportsPage` types, nav entry `reports` gated on `reports.read`.
 
@@ -1220,7 +1230,9 @@ beforeEach(() => {
 
 describe('ReportsView', () => {
   it('renders an open report row with target, category, and context', async () => {
-    stubFetch({ '/dashboard/reports?': { status: 200, body: { reports: [OPEN_ROW], nextCursor: null } } });
+    stubFetch({
+      '/dashboard/reports?': { status: 200, body: { reports: [OPEN_ROW], nextCursor: null } },
+    });
     render(<ReportsView />);
     expect(await screen.findByText('Menace')).toBeInTheDocument();
     expect(screen.getByText('騷擾')).toBeInTheDocument(); // category_HARASSMENT zh-Hant
@@ -1245,7 +1257,9 @@ describe('ReportsView', () => {
 
   it('hides the resolve button without reports.resolve', async () => {
     useSession.setState({ permissions: new Set(['reports.read']) });
-    stubFetch({ '/dashboard/reports?': { status: 200, body: { reports: [OPEN_ROW], nextCursor: null } } });
+    stubFetch({
+      '/dashboard/reports?': { status: 200, body: { reports: [OPEN_ROW], nextCursor: null } },
+    });
     render(<ReportsView />);
     expect(await screen.findByText('Menace')).toBeInTheDocument();
     expect(screen.queryByText('標記已處理')).not.toBeInTheDocument();
@@ -1298,9 +1312,8 @@ export type ReportsPage = { reports: ReportRow[]; nextCursor: string | null };
 `apps/admin/src/store/ui.ts` — add `'reports'` to the `AdminView` union and to the `parsePath` regex alternation:
 
 ```ts
-  const m = /^\/(users|features|games|rooms|maintainers|audit|purge|maps|reports)(?:\/([^/]+))?\/?$/.exec(
-    p,
-  );
+const m =
+  /^\/(users|features|games|rooms|maintainers|audit|purge|maps|reports)(?:\/([^/]+))?\/?$/.exec(p);
 ```
 
 `apps/admin/src/App.tsx` — import `Flag` from `lucide-react` and `ReportsView`; add to `NAV` after the `maps` entry:
@@ -1552,6 +1565,7 @@ git commit -m "feat(admin): UGC reports queue view with audited resolution"
 ### Task 6: Web — public account-deletion page + privacy-policy page
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts` (`api.deleteAccount`)
 - Modify: `apps/web/src/store/ui.ts` (two routes)
 - Modify: `apps/web/src/App.tsx` (render both screens)
@@ -1561,6 +1575,7 @@ git commit -m "feat(admin): UGC reports queue view with audited resolution"
 - Create: `apps/web/src/screens/DeleteAccountScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `DELETE /api/v1/auth/me` (P0-c, landed: 204, clears the refresh cookie, 409 while the account still holds dashboard access), the hand-rolled router (`syncFromUrl`/`navigateAfterAuth`), `useSession`.
 - Produces: `https://<origin>/account/delete` (the URL for Play's Data-safety form) and `https://<origin>/privacy` (the privacy-policy URL both stores require). `/privacy` is public; `/account/delete` is auth-gated through `/login?redirect=/account/delete` — **the login gate IS the re-auth** for a cold visit from the store listing, and a same-session visitor must additionally re-type their display name.
 
@@ -1669,44 +1684,44 @@ const PRIVACY_PATH = '/privacy';
 3. In `syncFromUrl`, insert BEFORE the room-code check (public page first, then the gated one):
 
 ```ts
-    // Public privacy policy — reachable signed out (store listings link straight here).
-    if (path === PRIVACY_PATH) {
-      disconnectGame();
-      set({ view: 'privacy', roomCode: null, gameId: null, ticket: null, replayGameId: null });
-      return;
-    }
-    // Account deletion (Play Data-safety URL): the login gate is the re-auth for cold visits.
-    if (path === DELETE_ACCOUNT_PATH) {
-      if (!authed) {
-        get().navigateLogin(DELETE_ACCOUNT_PATH);
-        return;
-      }
-      disconnectGame();
-      set({
-        view: 'deleteAccount',
-        roomCode: null,
-        gameId: null,
-        ticket: null,
-        replayGameId: null,
-      });
-      return;
-    }
+// Public privacy policy — reachable signed out (store listings link straight here).
+if (path === PRIVACY_PATH) {
+  disconnectGame();
+  set({ view: 'privacy', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  return;
+}
+// Account deletion (Play Data-safety URL): the login gate is the re-auth for cold visits.
+if (path === DELETE_ACCOUNT_PATH) {
+  if (!authed) {
+    get().navigateLogin(DELETE_ACCOUNT_PATH);
+    return;
+  }
+  disconnectGame();
+  set({
+    view: 'deleteAccount',
+    roomCode: null,
+    gameId: null,
+    ticket: null,
+    replayGameId: null,
+  });
+  return;
+}
 ```
 
 4. In `navigateAfterAuth`, insert before the final home fallback:
 
 ```ts
-    if (target === DELETE_ACCOUNT_PATH) {
-      replacePath(DELETE_ACCOUNT_PATH);
-      set({
-        view: 'deleteAccount',
-        roomCode: null,
-        gameId: null,
-        ticket: null,
-        replayGameId: null,
-      });
-      return;
-    }
+if (target === DELETE_ACCOUNT_PATH) {
+  replacePath(DELETE_ACCOUNT_PATH);
+  set({
+    view: 'deleteAccount',
+    roomCode: null,
+    gameId: null,
+    ticket: null,
+    replayGameId: null,
+  });
+  return;
+}
 ```
 
 - [ ] **Step 5: Screens + i18n + App wiring**
@@ -1846,8 +1861,12 @@ Create `apps/web/src/screens/PrivacyScreen.tsx` — a static, deliberately bilin
 Wire `apps/web/src/App.tsx`: import both screens (eager — they are tiny) and render them:
 
 ```tsx
-            {view === 'deleteAccount' && <DeleteAccountScreen />}
-            {view === 'privacy' && <PrivacyScreen />}
+{
+  view === 'deleteAccount' && <DeleteAccountScreen />;
+}
+{
+  view === 'privacy' && <PrivacyScreen />;
+}
 ```
 
 - [ ] **Step 6: Run tests**
@@ -1873,12 +1892,14 @@ git commit -m "feat(web): public account-deletion and privacy-policy pages"
 The `POST /reports/map` entry point belongs where share codes circulate: the builder's clone-by-code peek. The mobile app embeds this same web surface (builder WebView), so one implementation covers both platforms.
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Modify: `apps/web/src/features/builder/MapsScreen.tsx`
 - Modify: `apps/web/src/i18n/index.ts`
 - Create: `apps/web/src/features/builder/MapsScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: Task 3's `POST /api/v1/reports/map`, `REPORT_CATEGORIES` from `@trm/shared`, the existing peek state in `MapsScreen` (`peek`, `code`).
 - Produces: `api.reportSharedMap(shareCode, category, message?)`; a "report this map" affordance inside the peek result block.
 
@@ -1975,54 +1996,56 @@ And a top-level `report` section in BOTH tables with the same 7 category keys us
 `apps/web/src/features/builder/MapsScreen.tsx` — extend the peek block (`{peek && (…)}`, currently ending with the clone button around line 151–166). Add state at the top of the component:
 
 ```ts
-  const [reportOpen, setReportOpen] = useState(false);
-  const [reportCategory, setReportCategory] = useState<ReportCategory>('INAPPROPRIATE_CONTENT');
-  const [reportMsg, setReportMsg] = useState('');
-  const [reportState, setReportState] = useState<'idle' | 'sent' | 'failed'>('idle');
+const [reportOpen, setReportOpen] = useState(false);
+const [reportCategory, setReportCategory] = useState<ReportCategory>('INAPPROPRIATE_CONTENT');
+const [reportMsg, setReportMsg] = useState('');
+const [reportState, setReportState] = useState<'idle' | 'sent' | 'failed'>('idle');
 ```
 
 with imports `import { REPORT_CATEGORIES, type ReportCategory } from '@trm/shared';` and `Flag` from `lucide-react`. Inside the peek block, after the clone button:
 
 ```tsx
-            {reportState === 'sent' ? (
-              <p className="muted">{t('builder.reportDone')}</p>
-            ) : reportOpen ? (
-              <div className="stack">
-                <label htmlFor="report-category">{t('builder.reportReason')}</label>
-                <select
-                  id="report-category"
-                  value={reportCategory}
-                  onChange={(e) => setReportCategory(e.target.value as ReportCategory)}
-                >
-                  {REPORT_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {t(`report.category_${c}`)}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  placeholder={t('builder.reportMessage')}
-                  value={reportMsg}
-                  maxLength={1000}
-                  onChange={(e) => setReportMsg(e.target.value)}
-                />
-                {reportState === 'failed' && <p className="error">{t('builder.reportFailed')}</p>}
-                <button
-                  onClick={() =>
-                    void api
-                      .reportSharedMap(code.trim(), reportCategory, reportMsg.trim() || undefined)
-                      .then(() => setReportState('sent'))
-                      .catch(() => setReportState('failed'))
-                  }
-                >
-                  {t('builder.reportSubmit')}
-                </button>
-              </div>
-            ) : (
-              <button className="ghost" onClick={() => setReportOpen(true)}>
-                <Flag size={14} aria-hidden /> {t('builder.reportMap')}
-              </button>
-            )}
+{
+  reportState === 'sent' ? (
+    <p className="muted">{t('builder.reportDone')}</p>
+  ) : reportOpen ? (
+    <div className="stack">
+      <label htmlFor="report-category">{t('builder.reportReason')}</label>
+      <select
+        id="report-category"
+        value={reportCategory}
+        onChange={(e) => setReportCategory(e.target.value as ReportCategory)}
+      >
+        {REPORT_CATEGORIES.map((c) => (
+          <option key={c} value={c}>
+            {t(`report.category_${c}`)}
+          </option>
+        ))}
+      </select>
+      <input
+        placeholder={t('builder.reportMessage')}
+        value={reportMsg}
+        maxLength={1000}
+        onChange={(e) => setReportMsg(e.target.value)}
+      />
+      {reportState === 'failed' && <p className="error">{t('builder.reportFailed')}</p>}
+      <button
+        onClick={() =>
+          void api
+            .reportSharedMap(code.trim(), reportCategory, reportMsg.trim() || undefined)
+            .then(() => setReportState('sent'))
+            .catch(() => setReportState('failed'))
+        }
+      >
+        {t('builder.reportSubmit')}
+      </button>
+    </div>
+  ) : (
+    <button className="ghost" onClick={() => setReportOpen(true)}>
+      <Flag size={14} aria-hidden /> {t('builder.reportMap')}
+    </button>
+  );
+}
 ```
 
 (If the `ghost` class does not exist in `styles/builder.css`, reuse whatever secondary-button class the file already defines — check before inventing one.)
@@ -2048,6 +2071,7 @@ git commit -m "feat(web): report shared custom maps from the builder peek"
 > **Contract task.** `apps/mobile` was built in P1–P5 and its exact file layout is not knowable from this plan's vantage point. Everything below is an exact behavioral contract with reground verification commands; the REST/store code is real (it depends only on the ported client's `req` idiom, which mirrors `apps/web/src/net/rest.ts`).
 
 **Files (verify names at reground — these are the P1-plan contracts):**
+
 - Modify: `apps/mobile/src/net/rest.ts` (the ported REST client)
 - Create: `apps/mobile/src/store/moderation.ts`
 - Create: `apps/mobile/src/store/moderation.test.ts`
@@ -2057,6 +2081,7 @@ git commit -m "feat(web): report shared custom maps from the builder peek"
 - Verify/modify: the Settings screen's account-deletion flow (P0-c server + P1 screens)
 
 **Interfaces:**
+
 - Consumes: Tasks 2–3 endpoints; the ported `req`/`api` client; the ported chat store (entries carry `playerId` — verify: `rg -n "playerId" apps/mobile/src/store/chat.ts`); the roster/display-name helper (web pattern: names come from the lobby REST view, bots detected by the `bot:` id prefix).
 - Produces: `api.myBlocks/blockUser/unblockUser/reportPlayer`, `useModeration` store, filtered chat + masked names, report sheet, verified in-app deletion.
 
@@ -2184,6 +2209,7 @@ git commit -m "feat(mobile): report/block players, blocked-chat filtering, in-ap
 ### Task 9: Store listings — metadata, screenshots, ratings, data safety, DSA
 
 **Files (fastlane's conventional layout — verify the P1/P5 lanes' `Deliverfile`/`Supplyfile` paths at reground with `ls apps/mobile/fastlane`):**
+
 - Create: `apps/mobile/fastlane/metadata/android/zh-TW/{title.txt,short_description.txt,full_description.txt}`
 - Create: `apps/mobile/fastlane/metadata/android/en-US/{title.txt,short_description.txt,full_description.txt}`
 - Create: `apps/mobile/fastlane/metadata/ios/zh-Hant/{name.txt,subtitle.txt,description.txt,keywords.txt,privacy_url.txt,support_url.txt}`
@@ -2258,16 +2284,16 @@ Capture from real devices/simulators in BOTH locales, from real games (bots make
 
 Declare exactly this — no more, no less (matches what the server stores; see `apps/server/src/auth/user.repo.ts`, `src/push/device.repo.ts`, `src/persistence/`):
 
-| Data | Collected? | Linked to identity | Purpose | Shared with third parties |
-|---|---|---|---|---|
-| Email address | Yes (registered accounts only) | Yes | Account management | No |
-| Display name | Yes | Yes | App functionality | No |
-| Avatar URL | Yes (OAuth accounts only) | Yes | App functionality | No |
-| User ID | Yes | Yes | App functionality | No |
-| Device push token | Yes (opt-in) | Yes | App functionality (turn reminders) | No |
-| Game history (matches, scores, action logs) | Yes | Yes | App functionality | No |
-| In-game chat / UGC (custom maps, reports) | Yes | Yes | App functionality + moderation | No |
-| Location, contacts, ad identifiers, analytics, tracking | **Not collected** | — | — | — |
+| Data                                                    | Collected?                     | Linked to identity | Purpose                            | Shared with third parties |
+| ------------------------------------------------------- | ------------------------------ | ------------------ | ---------------------------------- | ------------------------- |
+| Email address                                           | Yes (registered accounts only) | Yes                | Account management                 | No                        |
+| Display name                                            | Yes                            | Yes                | App functionality                  | No                        |
+| Avatar URL                                              | Yes (OAuth accounts only)      | Yes                | App functionality                  | No                        |
+| User ID                                                 | Yes                            | Yes                | App functionality                  | No                        |
+| Device push token                                       | Yes (opt-in)                   | Yes                | App functionality (turn reminders) | No                        |
+| Game history (matches, scores, action logs)             | Yes                            | Yes                | App functionality                  | No                        |
+| In-game chat / UGC (custom maps, reports)               | Yes                            | Yes                | App functionality + moderation     | No                        |
+| Location, contacts, ad identifiers, analytics, tracking | **Not collected**              | —                  | —                                  | —                         |
 
 - [ ] Apple: data **not** used for tracking; no third-party advertising/analytics SDKs
 - [ ] Play: data encrypted in transit; deletion path = in-app + `https://<origin>/account/delete` (Task 6 — this URL goes in the form's "account deletion" field)
@@ -2289,6 +2315,7 @@ git commit -m "chore(web): real support/moderation contact on the privacy page"
 ### Task 10: Release engineering — signing, versioning, test tracks, rollout
 
 **Files:**
+
 - Create: `docs/release/mobile-versioning.md`
 
 - [ ] **Step 1: Commit the versioning scheme (this doc is the contract `MOBILE_MIN_BUILD` points into)**
@@ -2360,8 +2387,8 @@ Every box below must be checked in the release PR. Items marked **(cmd)** have a
 **Server / infra**
 
 - [ ] **(cmd)** `.well-known` files live with real ids:
-  `curl -s https://<origin>/.well-known/apple-app-site-association | jq .applinks.details[0].appIDs` → the real `TEAMID.bundle.id`;
-  `curl -s https://<origin>/.well-known/assetlinks.json | jq '.[0].target.sha256_cert_fingerprints'` → includes the **Play app-signing** fingerprint (Task 10 Step 2)
+      `curl -s https://<origin>/.well-known/apple-app-site-association | jq .applinks.details[0].appIDs` → the real `TEAMID.bundle.id`;
+      `curl -s https://<origin>/.well-known/assetlinks.json | jq '.[0].target.sha256_cert_fingerprints'` → includes the **Play app-signing** fingerprint (Task 10 Step 2)
 - [ ] **(cmd)** Android statement list check: `curl -s "https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://<origin>&relation=delegate_permission/common.handle_all_urls" | jq .`
 - [ ] Prod env set and non-empty: `MOBILE_MIN_BUILD` (0 at launch), `GOOGLE_MOBILE_CLIENT_IDS`, `APPLE_CLIENT_IDS`, `APPLE_APP_ID`, `ANDROID_PACKAGE_NAME`, `ANDROID_CERT_SHA256`, plus the push credentials — **(cmd)** enumerate the exact push env names with `rg -n "process.env" apps/server/src/config/env.ts | rg -i "apns|fcm|firebase|push"` and check each in the prod secret store
 - [ ] `OAUTH_REDIRECT_BASE` is the SPA's production origin (Strict-cookie + `/m/callback` handoff both depend on it) and the SPA serves `/m/callback`, `/account/delete`, `/privacy` (deep-link + store URLs) — **(cmd)** `curl -sI https://<origin>/account/delete | head -1` → 200 (SPA fallback)
@@ -2392,7 +2419,7 @@ Every box below must be checked in the release PR. Items marked **(cmd)** have a
 ```markdown
 # IP-risk acknowledgment — mobile store release
 
-TRMission is a clean-room reimplementation of the *mechanics* of a well-known train
+TRMission is a clean-room reimplementation of the _mechanics_ of a well-known train
 board game, re-themed onto Taiwan's railways. Mechanics are not copyrightable; all map
 content, artwork, names, colour palette, and rules wording are original. Commercial
 storefronts nonetheless provide low-friction takedown channels (App Store dispute,
@@ -2402,7 +2429,7 @@ cannot be engineered away (spec: Risks & mitigations).
 By signing below, the business owner acknowledges this risk and approves submission to
 the Apple App Store and Google Play under the TRMission name and current art.
 
-- Owner: ______________________  Date: __________
+- Owner: \***\*\*\*\*\***\_\_\***\*\*\*\*\*** Date: \***\*\_\_\*\***
 - Reviewed defenses: original content audit ✔ · no reserved terms in store copy/keywords ✔
   (verified: `rg -ri "ticket to ride|days of wonder" apps/mobile/fastlane docs/release` → no hits)
 ```

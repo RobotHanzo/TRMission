@@ -5,11 +5,9 @@ import * as SecureStore from 'expo-secure-store';
 // alphanumeric plus '.', '-', '_'.
 const REFRESH_KEY = 'trm.refresh';
 
-export const getRefreshToken = (): Promise<string | null> =>
-  SecureStore.getItemAsync(REFRESH_KEY);
+export const getRefreshToken = (): Promise<string | null> => SecureStore.getItemAsync(REFRESH_KEY);
 
 export const setRefreshToken = (token: string): Promise<void> =>
   SecureStore.setItemAsync(REFRESH_KEY, token);
 
-export const clearRefreshToken = (): Promise<void> =>
-  SecureStore.deleteItemAsync(REFRESH_KEY);
+export const clearRefreshToken = (): Promise<void> => SecureStore.deleteItemAsync(REFRESH_KEY);

@@ -29,6 +29,7 @@
 ### Task 1: Board rendering spike (risk retirement gate) — camera math, hit-testing, full-map render on device
 
 **Files:**
+
 - Create: `apps/mobile/src/board/camera.ts`
 - Create: `apps/mobile/src/board/camera.test.ts`
 - Create: `apps/mobile/src/board/hitTest.ts`
@@ -38,6 +39,7 @@
 - Modify: the P1 navigator (add a dev-only `BoardSpike` route — re-verify the navigator file path, expected `apps/mobile/src/App.tsx` or `src/navigation/index.tsx`)
 
 **Interfaces:**
+
 - Consumes: `@trm/map-data` (`TAIWAN_CONTENT`, `buildRouteGeometryFor`, `TAIWAN_LAND_PATH`, `TAIWAN_BASE_VIEW`, `smoothClosedPath`, `RouteGeometry`), P1's jest-expo config.
 - Produces (used by every later board task):
   - `interface Viewport { w: number; h: number }`
@@ -373,11 +375,7 @@ describe('hitTest', () => {
     const g1 = geometry.get(r1!.id as string)!;
     const slot = g1.slots[0]!;
     // Bias the tap toward r1's own perp side.
-    const px = boardToScreen(
-      { x: slot.x + g1.perp.x * 1.2, y: slot.y + g1.perp.y * 1.2 },
-      cam,
-      vp,
-    );
+    const px = boardToScreen({ x: slot.x + g1.perp.x * 1.2, y: slot.y + g1.perp.y * 1.2 }, cam, vp);
     expect(hitTest(px, cam, vp, scene)).toEqual({ kind: 'route', id: r1!.id });
   });
   it('open sea is a miss', () => {
@@ -450,7 +448,12 @@ const distToSegment = (
 
 export type Hit = { kind: 'city'; id: string } | { kind: 'route'; id: string } | null;
 
-export function hitTest(ptPx: { x: number; y: number }, cam: CameraState, vp: Viewport, scene: HitScene): Hit {
+export function hitTest(
+  ptPx: { x: number; y: number },
+  cam: CameraState,
+  vp: Viewport,
+  scene: HitScene,
+): Hit {
   const p = screenToBoard(ptPx, cam, vp);
   const s = pxPerUnit(cam, vp);
   const cityTol = Math.max(CITY_MIN_TOL, TAP_SLOP_PX / s);
@@ -612,6 +615,7 @@ Register the screen behind a dev-only route in the P1 navigator (re-verify the f
 Run: `yarn workspace @trm/mobile exec npx expo run:android` (P1's Android dev loop; use a physical mid-range device if available, else the emulator + a TestFlight/dev build on any available iPhone later).
 
 Acceptance checklist (record results in the commit message body):
+
 1. Full map (68 routes ≈ 250 car slots + geography + 39 cities) renders correctly (curves, double-pair separation, ferry/tunnel routes present).
 2. Sustained pan and pinch stay visually smooth (target ≥ 50fps on the perf monitor — `adb shell dumpsys gfxinfo` or the RN perf overlay; no gesture-locked stutter).
 3. 20/20 taps on routes in the dense Taipei corridor at home zoom resolve to the intended route or its double twin; city taps beat route taps at junctions.
@@ -632,6 +636,7 @@ git commit -m "feat(mobile): board spike — Skia full-map render + camera/hit-t
 ### Task 2: Port the pure game-view logic, theme, and content catalog
 
 **Files:**
+
 - Create (ported): `apps/mobile/src/theme/colors.ts` ← `apps/web/src/theme/colors.ts`
 - Create (ported): `apps/mobile/src/game/content.ts` ← `apps/web/src/game/content.ts`
 - Create (ported): `apps/mobile/src/game/catalog.ts` ← `apps/web/src/game/catalog.ts`
@@ -642,12 +647,14 @@ git commit -m "feat(mobile): board spike — Skia full-map render + camera/hit-t
 - Create (ported tests): `apps/mobile/src/game/{payments,tickets,events,lod,logModel}.test.ts` ← web test files of the same names
 
 **Interfaces:**
+
 - Consumes: `@trm/map-data`, `@trm/shared`, `@trm/proto` (TS source through Metro — P1 shims already installed), P1's `src/net/rest.ts` (`api.mapContent(hash)` — **verify P1 ported this method**; if absent, add it exactly as `apps/web/src/net/rest.ts:365` does), P1's locale type.
 - Produces: the same module surface the web has — `CITIES/ROUTES/TICKETS/cityById/routeById/ticketById/cityName/ticketLabel`, `setActiveContent/resetToDefaultContent/ACTIVE_BASE_VIEW/ACTIVE_GEOGRAPHY`, `ROUTE_GEOMETRY/HUB_CITIES/rebuildRouteGeometry`, `resolveContent`, `useActiveContent(hash)`, `handFromCounts/enumerateRoutePayments/enumerateStationPayments/routeShortfall/stationShortfall/handAfterPayment/paymentToProto`, `enumerateTunnelExtra`, `completedByPlayer/pathForTicket`, `closedRouteIds/reopenBonusRouteIds/skyLanternRouteIds/hotspotLevels/skyLanternSurcharge/freeStationAvailable/eventRejectionHintKey`, `ownershipMap/isMyTurn/turnStatus/seatByPlayer`, `CARD_COLOR_TOKENS/GRAY_TOKEN/LIVERY_COLORS/SEAT_COLORS/seatColor` (+ colour-blind `glyph`s), `cityTier/zoomBucket`.
 
 - [ ] **Step 1: Copy the web tests first (they are the failing tests)**
 
 Copy `apps/web/src/game/payments.test.ts`, `tickets.test.ts`, `events.test.ts`, `lod.test.ts`, `logModel.test.ts` to `apps/mobile/src/game/`, changing only:
+
 - delete `import { describe, it, expect } from 'vitest';` (jest-expo provides globals),
 - fix relative import paths if any differ.
 
@@ -657,6 +664,7 @@ Expected: FAIL — modules under test don't exist yet.
 - [ ] **Step 2: Port the modules**
 
 Copy each listed web file. These are DOM-free and port with ONLY these deltas:
+
 - `theme/colors.ts`: verbatim (it imports only `@trm/shared` + `@trm/map-data`). **PURPLE stays PURPLE.**
 - `game/content.ts`: `import type { Locale } from '../store/ui'` → P1's locale source (re-verify; expected `../i18n` or `../store/prefs`). Everything else verbatim, including the live-binding `let` exports.
 - `game/catalog.ts`, `game/routeGeometry.ts`: verbatim, except `catalog.ts` imports `BASE_VIEW`/`View` — mobile has no `game/geography.ts`; inline instead:
@@ -692,6 +700,7 @@ git commit -m "feat(mobile): port game-view helpers, theme tokens, and the conte
 ### Task 3: Port the stores and the socket→store bridge
 
 **Files:**
+
 - Create (ported): `apps/mobile/src/store/game.ts` ← `apps/web/src/store/game.ts`
 - Create (ported): `apps/mobile/src/store/animations.ts` ← `apps/web/src/store/animations.ts`
 - Create (ported): `apps/mobile/src/store/log.ts` ← `apps/web/src/store/log.ts`
@@ -704,6 +713,7 @@ git commit -m "feat(mobile): port game-view helpers, theme tokens, and the conte
 - Create (ported tests): `apps/mobile/src/store/{game,animations}.test.ts` ← web tests
 
 **Interfaces:**
+
 - Consumes: P1's `src/net/socket.ts` (`GameSocket`, `SocketStatus`, `PaymentInit`, `CameraViewInit`, `ChatContent` — the web-class port; **verify its export names match `apps/web/src/net/socket.ts`**, and that P1 parameterized the ws URL off the server origin config instead of `location`).
 - Produces: `useGame/createGameStore/GameStoreProvider/useGameStore/useGameStoreApi` (P3/P4 sandbox isolation depends on the provider pattern), `useAnimations/createAnimationsStore/AnimationsStoreProvider/useAnimationsStore`, `useLog`, `useChat`, `useRoster`, `useUi` (`locale`, `colorBlind`, `followActing`, `soundEnabled`, `soundVolume` + setters, persisted), `connectGame(ticket)/getSocket()/disconnectGame()`, `GameCommands`, `intentsFromEvents/AnimIntent`.
 
@@ -715,6 +725,7 @@ Expected: FAIL — modules missing.
 - [ ] **Step 2: Port the stores**
 
 `store/game.ts`, `store/animations.ts`, `store/log.ts`, `store/chat.ts`, `store/roster.ts`, `net/commands.ts`, `net/connection.ts`, `game/animationModel.ts`: copy verbatim with these deltas only:
+
 - `store/game.ts`: `import type { ViewDescriptor } from '../game/boardView'` → `import type { CameraState as ViewDescriptor } from '../board/camera'` (same `{cx, cy, span}` shape).
 - `store/animations.ts`: `import type { BoardFrameTarget } from '../game/boardView'` → define/import from `../board/frameTarget.ts` — create that tiny file now, porting the `BoardFrameTarget` interface + `frameDurationMs` verbatim from `apps/web/src/game/boardView.ts:17-28`.
 - `net/connection.ts`: socket import path → P1's socket module.
@@ -780,6 +791,7 @@ git commit -m "feat(mobile): port game/animation/log/chat/roster stores and the 
 ### Task 4: MapSceneSkia — geography, routes, cities, overlays, labels
 
 **Files:**
+
 - Create: `apps/mobile/src/board/scenePaths.ts` (+ `scenePaths.test.ts`)
 - Create: `apps/mobile/src/board/MapSceneSkia.tsx`
 - Create: `apps/mobile/src/board/GeographyLayer.tsx`
@@ -789,16 +801,17 @@ git commit -m "feat(mobile): port game/animation/log/chat/roster stores and the 
 - Modify: `apps/mobile/jest.config.js` / `jest.setup.js` (Skia + reanimated + gesture-handler jest mocks)
 
 **Interfaces:**
+
 - Consumes: Task 1 camera exports, Task 2 catalog/theme, `@trm/map-data` (`RouteGeometry`, `mapCssVars` NOT used — mobile resolves the `--m-*` dimension tokens directly, see Step 3), Skia (`Skia.Path.MakeFromSVGString`, Paragraph API).
 - Produces: `MapSceneSkia` — a Skia `<Group>` subtree (NOT its own Canvas; the Board owns the Canvas) mirroring the web `MapScene` prop contract, minus DOM-specific hooks:
 
 ```ts
 export interface MapSceneSkiaProps {
-  cities: readonly SceneCity[];          // same shape as web MapScene.tsx SceneCity
-  routes: readonly SceneRoute[];         // same shape as web SceneRoute
+  cities: readonly SceneCity[]; // same shape as web MapScene.tsx SceneCity
+  routes: readonly SceneRoute[]; // same shape as web SceneRoute
   geometry: ReadonlyMap<string, RouteGeometry>;
   hubs: ReadonlySet<string>;
-  geography: MapGeography | null;        // null → hand-authored Taiwan coast
+  geography: MapGeography | null; // null → hand-authored Taiwan coast
   owned?: ReadonlyMap<string, RouteOwnership>;
   stations?: ReadonlyMap<string, number>;
   glowingRoutes?: ReadonlyMap<string, number>;
@@ -815,8 +828,8 @@ export interface MapSceneSkiaProps {
   charterCities?: ReadonlySet<string>;
   /** LOD inputs (quantized React state from the Board — see Task 5): */
   bucket: ZoomBucket;
-  inv: number;      // counter-scale for labels/track weight/perp nudge
-  marker: number;   // marker growth clamp
+  inv: number; // counter-scale for labels/track weight/perp nudge
+  marker: number; // marker growth clamp
   /** Sweep overlays (ticket completion / longest-trail reveal), drawn above cities: */
   sweeps?: readonly { id: number; seat: number; path: string[] }[];
   routeReveal?: { seat: number; path: string[] } | null;
@@ -933,6 +946,7 @@ export function ferryLocoBlock(length: number, locos: number): { start: number; 
 Dimension tokens: the web resolves `--m-*` CSS vars from `mapCssVars()`. Mobile reads the SAME source values directly — import `MAP_DIMS` from `@trm/map-data` (re-verify the export name in `packages/map-data/src/render-tokens.ts`; it holds car thickness, bed width, marker radii, label sizes as board-unit numbers) and use them as constants in the layers. **Never hardcode a dimension literal that exists in `MAP_DIMS`** — that's the anti-drift rule the web enforces through CSS vars.
 
 Layer components (all pure props → Skia elements; no stores):
+
 - `GeographyLayer` — ports `Geography.tsx`: sea rect (`view` padded ±40), graticule lines, `TAIWAN_LAND_PATH` land + `TAIWAN_CENTRAL_RANGE_PATH` relief when `geography === null`; else one `smoothClosedPath(ring)` → `Skia.Path.MakeFromSVGString` per land ring (memoized on `geography`). Colours from `MAP_PALETTE_LIGHT`/`MAP_INKS` (`@trm/map-data` render tokens). Compass/islands port as simple circles/paths.
 - `RouteLayer` — ports `RouteShape.tsx`/`MapScene.tsx` route branch exactly: per route, `<Group transform={[{translateX: m.perp.x * inv}, {translateY: m.perp.y * inv}]}>` (the counter-scaled double-pair nudge — `inv` is the quantized prop, matching the web's `calc(px * var(--inv-scale))`); inside: tunnel-bg wide stroke → bed stroke → ties (rotated rects at `angle + 45°`) or ferry line + pips (rainbow loco pips use a Skia `LinearGradient` over `LIVERY_COLORS`) or car slots (rotated rounded rects). Fill selection ports MapScene's: owner seat colour / locked grey `#9aa0a6` / route colour via `CARD_COLOR_TOKENS`/`GRAY_TOKEN`. Glow: when `glowingRoutes.has(id)`, draw the bed stroke again wider with the seat colour at low alpha (the CSS bloom's Skia equivalent). Colour-blind: when `colorBlind && !owned.get(id)`, a circle chip + glyph text at `m.mid` (glyph from `CARD_COLOR_TOKENS[color].glyph`). Event dressing ports Board.tsx's `renderRouteOverlay`: closed → desaturate (draw slots at 40% alpha) + 🌀 badge at mid; reopen (+ unowned) → `+2` chip; sky → tint the bed stroke.
 - `CityLayer` — ports MapScene's city branch: hub → rect, else circle, sized by `MAP_DIMS` × `marker`; station overlay (seat colour) when `stations.has(id)`; just-built ring when `glowingStations.has(id)`; ticket-target halo when `highlightCities.has(id)`; hotspot `+N` badge / charter chip from the events props.
@@ -940,7 +954,10 @@ Layer components (all pure props → Skia elements; no stores):
   ```ts
   const fonts = Skia.FontMgr.System();
   // Paragraph per city label, cached by (text, sizeBucket):
-  const para = Skia.ParagraphBuilder.Make({ textStyle: { color: Skia.Color(ink), fontSize } }, fonts)
+  const para = Skia.ParagraphBuilder.Make(
+    { textStyle: { color: Skia.Color(ink), fontSize } },
+    fonts,
+  )
     .addText(label)
     .build();
   ```
@@ -979,12 +996,14 @@ git commit -m "feat(mobile): MapSceneSkia — geography/route/city/label layers 
 ### Task 5: BoardView — gestures, camera follow, glow gate, spotlight framers, controls
 
 **Files:**
+
 - Create: `apps/mobile/src/board/useBoardCamera.ts`
 - Create: `apps/mobile/src/board/BoardView.tsx`
 - Create: `apps/mobile/src/board/followModel.ts` (+ `followModel.test.ts`)
 - Create: `apps/mobile/src/board/BoardControls.tsx`
 
 **Interfaces:**
+
 - Consumes: Tasks 1–4, `useUi.followActing`, `useGameStore` (`actingCamera`, `recentEvents`), `getSocket()` (`cameraUpdate`), `useAnimationsStore` (`glowingRoutes`, `routeReveal`, `eventSpotlight`), `frameDurationMs`.
 - Produces:
   - `useBoardCamera(vp, view, home)` → `{ cx, cy, span (SharedValues), transform (DerivedValue for the Skia Group), bucket, inv, marker (quantized React state), gesture (composed GestureType), animateTo(cam, ms), snapTo(cam), currentCamera(): CameraState }`
@@ -998,8 +1017,8 @@ git commit -m "feat(mobile): MapSceneSkia — geography/route/city/label layers 
       onPickRoute(routeId: string): void;
       onPickCity(cityId: string): void;
       highlightCities?: ReadonlySet<string> | undefined;
-      sandbox?: boolean | undefined;          // P3/P4: suppress camera broadcast + follow
-      frameTarget?: BoardFrameTarget | null;  // P4 tutorial auto-pan
+      sandbox?: boolean | undefined; // P3/P4: suppress camera broadcast + follow
+      frameTarget?: BoardFrameTarget | null; // P4 tutorial auto-pan
     }
     ```
   - `latestActionPoi(events, playerId)` in `followModel.ts` (ported verbatim from `Board.tsx:154-172`, minus DOM).
@@ -1063,6 +1082,7 @@ Run: `yarn workspace @trm/mobile test followModel` — Expected: PASS.
 - [ ] **Step 3: Implement `useBoardCamera.ts`**
 
 Promote the spike's gesture/transform code into the hook, adding:
+
 - shared values `cx/cy/span` seeded from `home`; `transform` derived value (spike Step 7 shape);
 - **quantized LOD state**: a `useAnimatedReaction` watching `span` computes `webScaleEquiv` → `{bucket, inv, marker}`; `runOnJS(setLod)` fires only when the bucket changes OR `inv` moves by >5% — the discrete re-render replaces the web's per-frame CSS-var writes (and dodges the very jank noted in docs/TODO.md for the web);
 - `animateTo({cx, cy, span}, ms)`: `withTiming` on each shared value (easing `Easing.out(Easing.cubic)` ≈ the web's `easeOut`), `snapTo` = direct assignment;
@@ -1100,12 +1120,14 @@ git commit -m "feat(mobile): BoardView — gestures, camera follow, glow gate, f
 ### Task 6: Game screen shell — WS connect, AppState reconnect, NetInfo offline banner
 
 **Files:**
+
 - Create: `apps/mobile/src/screens/GameScreen.tsx`
 - Create: `apps/mobile/src/net/useGameConnection.ts` (+ `useGameConnection.test.ts`)
 - Create: `apps/mobile/src/components/OfflineBanner.tsx`
 - Modify: P1 navigator (register `Game` route; Room's start flow navigates here with `{ roomCode }`)
 
 **Interfaces:**
+
 - Consumes: P1 `api.getTicket(code)` (web rest.ts:323 — verify P1 ported it), P1 `GameSocket`, Task 3 `connectGame/disconnectGame/getSocket`, `useGame` store, `@react-native-community/netinfo`, RN `AppState`.
 - Produces: `GameScreen` (route `Game`, params `{ roomCode: string }`), `useGameConnection(roomCode)` → `{ status, sessionReplaced, retry() }`, `useActiveContent` gating (loading veil until `'ready'`).
 
@@ -1147,7 +1169,7 @@ describe('useGameConnection', () => {
 });
 ```
 
-(Re-verify how the current jest-expo/RN version exposes AppState event emission in tests — `AppState.emit` vs an `addEventListener` capture; adapt the *test*, keep the contract: background→active ⇒ fresh ticket + reconnect.)
+(Re-verify how the current jest-expo/RN version exposes AppState event emission in tests — `AppState.emit` vs an `addEventListener` capture; adapt the _test_, keep the contract: background→active ⇒ fresh ticket + reconnect.)
 
 Run: `yarn workspace @trm/mobile test useGameConnection` — Expected: FAIL.
 
@@ -1229,6 +1251,7 @@ git commit -m "feat(mobile): game screen shell — ticket connect, AppState reco
 ### Task 7: HUD panels — hand, market, trackers, missions, events
 
 **Files:**
+
 - Create: `apps/mobile/src/components/game/PlayerHand.tsx`
 - Create: `apps/mobile/src/components/game/CardMarket.tsx`
 - Create: `apps/mobile/src/components/game/PlayerTrackers.tsx`
@@ -1238,6 +1261,7 @@ git commit -m "feat(mobile): game screen shell — ticket connect, AppState reco
 - Create: `apps/mobile/src/components/game/__tests__/panels.test.tsx`
 
 **Interfaces:**
+
 - Consumes: web components of the same names (READ each before porting — the render logic, ordering, and a11y semantics port; DOM/CSS becomes RN `View`/`Text`/`Pressable` + `StyleSheet`), Task 2 helpers, Task 3 stores, `CARD_COLOR_TOKENS`/`LOCOMOTIVE_GRADIENT` (RN: `expo-linear-gradient` — `npx expo install expo-linear-gradient`), i18n.
 - Produces: prop-compatible RN ports:
   - `PlayerHand({ hand })` — 9 colour counts as chips, colour-blind glyphs when `useUi.colorBlind`, `LOCOMOTIVE` chip with the livery gradient;
@@ -1246,6 +1270,7 @@ git commit -m "feat(mobile): game screen shell — ticket connect, AppState reco
   - `TicketPanel({ ticketIds, completedIds })`, `TicketCard({ ticketId })` — names from catalog by id (content, not i18n);
   - `EventsPanel()` — ports the web panel: current/forecast random events from `snapshot.randomEvents`, tapping an affected-routes row calls `useAnimationsStore.setEventSpotlight({ kind: 'route', ids })` (drives the Task 5 framer). Renders null when the game has no random events.
 - **Flight-target registry** (needed here so Task 10 can measure): create `apps/mobile/src/components/game/animTargets.ts`:
+
   ```ts
   import type { View } from 'react-native';
   const targets = new Map<string, View | null>();
@@ -1282,6 +1307,7 @@ git commit -m "feat(mobile): HUD panels — hand, market, trackers, missions, ev
 ### Task 8: Claim flow — payment/tunnel modals, ticket chooser, scoreboard
 
 **Files:**
+
 - Create: `apps/mobile/src/game/useClaimFlow.ts` (+ `useClaimFlow.test.ts`)
 - Create: `apps/mobile/src/components/game/PaymentModal.tsx`
 - Create: `apps/mobile/src/components/game/TunnelModal.tsx`
@@ -1289,6 +1315,7 @@ git commit -m "feat(mobile): HUD panels — hand, market, trackers, missions, ev
 - Create: `apps/mobile/src/components/game/ScoreBoard.tsx`
 
 **Interfaces:**
+
 - Consumes: `enumerateRoutePayments/enumerateStationPayments/routeShortfall/stationShortfall/handAfterPayment/paymentToProto`, `enumerateTunnelExtra`, `skyLanternSurcharge/freeStationAvailable`, `GameCommands`, `useAnimationsStore.pushNotification`.
 - Produces: `useClaimFlow(snapshot, commands)` → `{ claim, pickRoute(id), pickCity(id), confirmPayment(p), cancelClaim(), tunnelExtras, tunnelMine, onTunnelCommit(p), onTunnelAbort() }` — the extracted, testable form of `GameStage.tsx:108-254`'s claim/tunnel state (web keeps it inline; mobile extracts it so the logic is device-independent and P3/P4 reuse it). Modal components mirror the web components' props verbatim.
 
@@ -1314,12 +1341,14 @@ git commit -m "feat(mobile): claim flow — payment/tunnel modals, ticket choose
 ### Task 9: GameStage — adaptive tiers (dock / two-pane / three-pane), comms
 
 **Files:**
+
 - Create: `apps/mobile/src/screens/GameStage.tsx`
 - Create: `apps/mobile/src/screens/stageLayout.ts` (+ `stageLayout.test.ts`)
 - Create: `apps/mobile/src/components/game/CommsPanel.tsx` (+ `LogPanel.tsx`, `ChatPanel.tsx`)
 - Modify: `apps/mobile/src/screens/GameScreen.tsx` (swap the placeholder for `GameStage`)
 
 **Interfaces:**
+
 - Consumes: everything from Tasks 5–8, `useWindowDimensions`, web `GameStage.tsx` (the binding structural reference), web `CommsPanel/ChatPanel/LogPanel` (chat presets via `chatPresets.ts`; spectator chat disabled).
 - Produces:
   - `stageTier(widthDp): 'compact' | 'two-pane' | 'three-pane'` — `< 700` / `700–999` / `≥ 1000`.
@@ -1333,14 +1362,14 @@ git commit -m "feat(mobile): claim flow — payment/tunnel modals, ticket choose
       rematchMembers?: RoomMember[] | undefined;
       onVoteRematch?: ((wantsRematch: boolean) => void) | undefined;
       onPlayAgain?: (() => void) | undefined;
-      overlay?: ReactNode;                          // P4 tutorial coachmarks
-      spotlightCities?: string[] | undefined;       // P4
-      sandbox?: boolean | undefined;                // P3/P4
+      overlay?: ReactNode; // P4 tutorial coachmarks
+      spotlightCities?: string[] | undefined; // P4
+      sandbox?: boolean | undefined; // P3/P4
       frameTarget?: BoardFrameTarget | null | undefined; // P4
-      actionGate?: ActionGate | null | undefined;   // P4 — port the gateFlags helper + type
+      actionGate?: ActionGate | null | undefined; // P4 — port the gateFlags helper + type
     }
     ```
-  - Dock tab semantics ported from web `GameStage.tsx:376-430`: tabs `hand | draw | missions | events? | players | comms` (events tab only when `snapshot.randomEvents` exists), counts on hand/missions tabs, one panel visible at a time, **the ticket chooser takes over the whole dock** (`needKeep`), and the tutorial-gate effect (an `await` DRAW_* beat forces the `draw` tab — port it now; it's dead until P4 passes a gate).
+  - Dock tab semantics ported from web `GameStage.tsx:376-430`: tabs `hand | draw | missions | events? | players | comms` (events tab only when `snapshot.randomEvents` exists), counts on hand/missions tabs, one panel visible at a time, **the ticket chooser takes over the whole dock** (`needKeep`), and the tutorial-gate effect (an `await` DRAW\_\* beat forces the `draw` tab — port it now; it's dead until P4 passes a gate).
 
 - [ ] **Step 1: Failing layout tests** — `stageLayout.test.ts`:
 
@@ -1357,7 +1386,13 @@ describe('stageTier', () => {
 });
 describe('dockTabs', () => {
   it('omits the events tab when the game has no random events', () => {
-    expect(dockTabs(false).map((t) => t.key)).toEqual(['hand', 'draw', 'missions', 'players', 'comms']);
+    expect(dockTabs(false).map((t) => t.key)).toEqual([
+      'hand',
+      'draw',
+      'missions',
+      'players',
+      'comms',
+    ]);
     expect(dockTabs(true).map((t) => t.key)).toContain('events');
   });
 });
@@ -1368,6 +1403,7 @@ Run: `yarn workspace @trm/mobile test stageLayout` — Expected: FAIL.
 - [ ] **Step 2: Implement `stageLayout.ts`** (the two pure functions above; `dockTabs(hasEvents)` returns `{key, labelKey, countSource}` descriptors) and **`GameStage.tsx`**:
 
 Structure (mirror web `GameStage.tsx` top-to-bottom; port `useAnimationDriver()`/`useSoundDriver()` mounts in Task 10/11 — leave TODO-free stubs OUT until then, mount them in those tasks):
+
 - derive `me/isSpectator/myPub/hand/phase/myTurn/canAct/canDraw/allow` exactly as web lines 159-176 (port `gateFlags` + `ActionGate` type from `apps/web/src/features/tutorial/types.ts` into `apps/mobile/src/game/actionGate.ts` — it's a pure type + function);
 - `useClaimFlow` for board taps; `needKeep`/`ticketEndpoints`/`highlightCities` port from web lines 227-260;
 - rejection handling ports web lines 140-157 (auto-clear on version change, 3s timeout, `pushNotification` on non-chat rejections);
@@ -1396,6 +1432,7 @@ git commit -m "feat(mobile): GameStage — dock/two-pane/three-pane tiers, comms
 ### Task 10: Animations — driver, card flights, floats, cues, sweeps, banners
 
 **Files:**
+
 - Create (ported): `apps/mobile/src/hooks/useAnimationDriver.ts` ← `apps/web/src/hooks/useAnimationDriver.ts`
 - Create: `apps/mobile/src/components/game/AnimationLayer.tsx`
 - Create: `apps/mobile/src/components/game/{FlightMover,NotificationStack,EndgameWarning,EventBanner,TicketFanfare}.tsx`
@@ -1403,6 +1440,7 @@ git commit -m "feat(mobile): GameStage — dock/two-pane/three-pane tiers, comms
 - Modify: `apps/mobile/src/board/MapSceneSkia.tsx` (animated sweep trim)
 
 **Interfaces:**
+
 - Consumes: Task 3 `useAnimations` store + `intentsFromEvents` (ported unchanged — the intent vocabulary is the seam), Task 7 `measureAnimTarget`, Reanimated.
 - Produces: `AnimationLayer` (absolute-fill overlay inside GameStage), animated sweeps in the board.
 - **Scope (binding):** high-value set = card flights (deck/slot → hand/tracker), route-claim glow (already in Task 5), station ring, score floats, ticket-completion sweep (Skia path trim), opponent ticket cues, endgame warning, event banner, notification chips, and a SIMPLIFIED own-ticket fanfare (modal card + spring-in; no confetti). Deferred (do NOT build): market 3D flip (crossfade instead — `marketFlips` consumed as an opacity pulse), FlyingCard art parity, fanfare particles.
@@ -1413,7 +1451,7 @@ Run: `yarn workspace @trm/mobile test useAnimationDriver` — write first, expec
 
 - [ ] **Step 2: `AnimationLayer` + movers**
 
-- `FlightMover`: on mount, `await measureAnimTarget(src)`/`(dst)` where `src = flight.slot !== null ? \`market-slot-${flight.slot}\` : 'deck'`, `dst = flight.toPlayerId === me ? 'hand' : \`player-${flight.toPlayerId}\``; missing target or reduce-motion → finish immediately (ports web fallback); else animate an absolutely-positioned card (120×~84, colour face via `CardSwatch` or cover) with Reanimated `withTiming` translate+scale over 600ms, `runOnJS(removeFlight)` on completion + a 1s failsafe timeout (ports `AnimationLayer.tsx:31-78`).
+- `FlightMover`: on mount, `await measureAnimTarget(src)`/`(dst)` where `src = flight.slot !== null ? \`market-slot-${flight.slot}\` : 'deck'`, `dst = flight.toPlayerId === me ? 'hand' : \`player-${flight.toPlayerId}\``; missing target or reduce-motion → finish immediately (ports web fallback); else animate an absolutely-positioned card (120×~84, colour face via `CardSwatch`or cover) with Reanimated`withTiming`translate+scale over 600ms,`runOnJS(removeFlight)`on completion + a 1s failsafe timeout (ports`AnimationLayer.tsx:31-78`).
 - `FloatMover`/`TicketCueView`: measure `player-{id}`, absolute-position the `+N`/mini ticket card, fade/rise via Reanimated, self-remove on end (timings port: 1300ms / 2800ms).
 - `NotificationStack`: top-inset stack of chips from `useAnimationsStore.notifications`, resolving `announced`/`bonus` copy at render via i18n (port the web component's key mapping) — self-expire 4s.
 - `EndgameWarning`/`EventBanner`: full-width banner ports (tap to dismiss, auto-dismiss; reduced-motion snaps).
@@ -1436,18 +1474,21 @@ git commit -m "feat(mobile): animation layer — card flights, sweeps, floats, b
 ### Task 11: Sounds — expo-av player port + sound driver
 
 **Files:**
+
 - Create: `apps/mobile/src/sound/cues.ts` (ported), `apps/mobile/src/sound/player.ts` (rebuilt on expo-av), `apps/mobile/src/sound/soundModel.ts` (ported ← `apps/web/src/sound/soundModel.ts`, + its test)
 - Create (ported): `apps/mobile/src/hooks/useSoundDriver.ts` ← `apps/web/src/hooks/useSoundDriver.ts`
 - Create: `apps/mobile/assets/sounds/*.mp3` (copied from `apps/web/public/sounds/`)
 - Modify: `apps/mobile/src/screens/GameStage.tsx` (mount `useSoundDriver(sandbox)`)
 
 **Interfaces:**
+
 - Consumes: web `sound/{cues,player,soundModel}.ts` + `hooks/useSoundDriver.ts`, `useUi.soundEnabled/soundVolume`.
 - Produces: the SAME `SoundPlayer` interface the web exports — this is the binding contract; only the factory internals differ:
+
   ```ts
   export interface SoundPlayer {
     preload(): Promise<void>;
-    unlock(): void;           // no-op on native (no autoplay policy)
+    unlock(): void; // no-op on native (no autoplay policy)
     play(cue: Cue, gainScale?: number): void;
     setEnabled(on: boolean): void;
     setVolume(v: number): void;
@@ -1497,6 +1538,7 @@ git commit -m "feat(mobile): sound cues — expo-av player port + event/snapshot
 ### Task 12: Full regression, tablet pass, docs
 
 **Files:**
+
 - Modify: `apps/mobile/CLAUDE.md` (create if P1 didn't; board + stage architecture section)
 - Delete: `apps/mobile/src/screens/BoardSpikeScreen.tsx` + its navigator route (superseded by BoardView)
 

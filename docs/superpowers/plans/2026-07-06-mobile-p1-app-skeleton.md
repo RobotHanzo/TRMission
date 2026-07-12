@@ -16,7 +16,7 @@
 - **Metro package-exports ON** (default RN ≥ 0.79 / Metro ≥ 0.82) — the `@trm/*` packages and `@bufbuild/protobuf` publish `exports` maps with no `main` fallback, so exports resolution is mandatory. Do not disable `resolver.unstable_enablePackageExports`.
 - **Three runtime shims are load-bearing** (audit-verified): a UTF-8 `TextDecoder` polyfill (protobuf-es binary codec needs it on Hermes), `@formatjs/intl-pluralrules` (i18next zh/en plurals — Hermes `Intl.PluralRules` is incomplete), and `ws.binaryType = 'arraybuffer'` (RN defaults it to `undefined`). Plus the engine `cloneState` `structuredClone` fallback.
 - **Mobile client header is `x-trm-client: mobile`**; the OAuth deep-link path is exactly **`/m/callback`**; custom scheme is **`trmission://`** — these strings match the landed P0 server.
-- **No EAS, no Expo push service, no SaaS** — builds via GitHub Actions + fastlane match; OTA (P5) is self-hosted; push (P0 server) is direct FCM/APNs. The app only *registers native device tokens*.
+- **No EAS, no Expo push service, no SaaS** — builds via GitHub Actions + fastlane match; OTA (P5) is self-hosted; push (P0 server) is direct FCM/APNs. The app only _registers native device tokens_.
 - **6th card colour is PURPLE** everywhere (never PINK). Seat colours are abstract indices 0–4, coloured client-side. **zh-Hant primary + en fallback.**
 - Never `git add -A` — stage only the files each task lists (this worktree is shared).
 - Engine purity holds: no `Date`/`Math.random`/unseeded randomness reaches `@trm/engine`; the `cloneState` fallback must keep golden-replay digests byte-identical.
@@ -26,11 +26,13 @@
 ### Task 1: Workspace scaffold + turbo wiring
 
 **Files:**
+
 - Create: `apps/mobile/package.json`, `apps/mobile/app.config.ts`, `apps/mobile/tsconfig.json`, `apps/mobile/babel.config.js`, `apps/mobile/index.ts`, `apps/mobile/App.tsx`, `apps/mobile/.gitignore`
 - Modify: `package.json` (root — confirm `apps/*` is in `workspaces`), `turbo.json` (ensure `test`/`typecheck`/`lint` pipelines reach the new workspace)
 - Modify: `.gitignore` (root — ignore `apps/mobile/{android,ios,.expo}`)
 
 **Interfaces:**
+
 - Produces: workspace **`@trm/mobile`** with scripts `start`/`android`/`ios`/`typecheck`/`lint`/`test`; `expo.extra.serverOrigin` + `expo.extra.buildNumber` read via `expo-constants` in Task 3.
 
 - [ ] **Step 1: Confirm the workspace glob + create the package manifest**
@@ -211,10 +213,12 @@ git commit -m "feat(mobile): scaffold the Expo app workspace"
 ### Task 2: Metro monorepo config + runtime shims + engine clone fallback
 
 **Files:**
+
 - Create: `apps/mobile/metro.config.js`, `apps/mobile/src/shims.ts`, `apps/mobile/src/shims.test.ts`
 - Modify: `packages/engine/src/serialize.ts` (`cloneState` structuredClone fallback)
 
 **Interfaces:**
+
 - Produces: a Metro config that resolves `@trm/*` TS source from the repo root; `src/shims.ts` (side-effecting) installing `TextDecoder` + `Intl.PluralRules`; `cloneState` that runs on Hermes.
 - Consumes: `@trm/engine`'s `cloneState`, `@bufbuild/protobuf` binary codec.
 
@@ -325,9 +329,11 @@ git commit -m "feat(mobile): Metro monorepo config + Hermes runtime shims"
 ### Task 3: Config module + i18n bootstrap
 
 **Files:**
+
 - Create: `apps/mobile/src/config.ts`, `apps/mobile/src/i18n/index.ts`, `apps/mobile/src/i18n/index.test.ts`
 
 **Interfaces:**
+
 - Produces: `SERVER_ORIGIN: string`, `API_BASE = ${SERVER_ORIGIN}/api/v1`, `WS_URL = ${ws-scheme}://…/ws`, `BUILD_NUMBER: number` (from `expo-constants` extra); `i18n` initialized with zh-Hant primary + en, `compatibilityJSON` set for the pluralrules shim. **P2 consumes `SERVER_ORIGIN`; P5 consumes `SERVER_ORIGIN`.**
 
 - [ ] **Step 1: Config module**
@@ -335,7 +341,10 @@ git commit -m "feat(mobile): Metro monorepo config + Hermes runtime shims"
 ```ts
 import Constants from 'expo-constants';
 
-const extra = (Constants.expoConfig?.extra ?? {}) as { serverOrigin?: string; buildNumber?: number };
+const extra = (Constants.expoConfig?.extra ?? {}) as {
+  serverOrigin?: string;
+  buildNumber?: number;
+};
 
 /** Absolute origin of the TRMission server (the app is not served same-origin). */
 export const SERVER_ORIGIN = extra.serverOrigin ?? 'http://localhost:3001';
@@ -384,9 +393,11 @@ export default i18n;
 ### Task 4: REST client port (token transport + secure store)
 
 **Files:**
+
 - Create: `apps/mobile/src/net/rest.ts`, `apps/mobile/src/net/rest.test.ts`, `apps/mobile/src/net/secureStore.ts`
 
 **Interfaces:**
+
 - Consumes: `API_BASE` (Task 3); `expo-secure-store`.
 - Produces: **`api`** object (`config`, `guest`, `login`, `register`, `upgrade`, `me`, `googleCredential`, `appleCredential`, `mobileCarry`, `mobileExchange`, `deleteAccount`, `getRoom(code)`, `getMyRooms`, `getTicket(code)`, `mapContent(hash)`, `registerDevice`, `removeDevice`, `logout`), `setAccessToken`, `setOnTokenChange`, `req<T>`, `ApiError`, and the types `PublicUser`, `UserPreferences`, `AuthResult`, `AuthConfig`. **P2 consumes `api.getTicket`/`api.getRoom`/`api.mapContent` + `req`; P5 consumes `req`/`api.mobileCarry`/`api.registerDevice`/`api.removeDevice`/`api.deleteAccount`.**
 
@@ -419,9 +430,11 @@ async function captureAuth(r: AuthResult): Promise<AuthResult> {
 ### Task 5: WebSocket client port
 
 **Files:**
+
 - Create: `apps/mobile/src/net/socket.ts`, `apps/mobile/src/net/socket.test.ts`
 
 **Interfaces:**
+
 - Consumes: `WS_URL` (Task 3), `@trm/proto`, `@trm/shared`.
 - Produces: **`GameSocket`** (ctor `(ticket, handlers, url?)`, `connect`/`close`/command senders), **`SocketStatus`**, **`SocketHandlers`**, **`ChatContent`**, **`PaymentInit`**, **`CameraViewInit`**. **P2 consumes all of these.**
 
@@ -439,9 +452,11 @@ async function captureAuth(r: AuthResult): Promise<AuthResult> {
 ### Task 6: Session store + boot restore
 
 **Files:**
+
 - Create: `apps/mobile/src/store/session.ts`, `apps/mobile/src/store/ui.ts`, `apps/mobile/src/store/session.test.ts`
 
 **Interfaces:**
+
 - Consumes: `api` + `setOnTokenChange` (Task 4).
 - Produces: **`useSession`** (`user`, `accessToken`, `loading`, `booting`, `error`, `restore`, `playAsGuest`, `login`, `register`, `upgrade`, `loginWithGoogleCredential`, `loginWithAppleCredential`, `signInMethod`, `signOut`, `savePreferences`, `clearError`, `clearLocalSession`) and **`useUi`** (locale + prefs). **P5 consumes `user.features`, `signOut`, `signInMethod`, `clearLocalSession`.**
 
@@ -456,9 +471,11 @@ async function captureAuth(r: AuthResult): Promise<AuthResult> {
 ### Task 7: Auth screens (all five methods)
 
 **Files:**
+
 - Create: `apps/mobile/src/screens/LoginScreen.tsx`, `apps/mobile/src/auth/google.ts`, `apps/mobile/src/auth/discord.ts`, `apps/mobile/src/auth/discord.test.ts`
 
 **Interfaces:**
+
 - Consumes: `useSession` (Task 6), `api.mobileCarry`/`api.mobileExchange` (Task 4), `expo-auth-session`, `expo-apple-authentication`, `@react-native-google-signin/google-signin`, `expo-linking`.
 - Produces: `LoginScreen` (guest, email/password login+register toggle, Google button, Apple button on iOS, Discord button); `signInWithDiscord()` (the carry→system-browser→deep-link→exchange flow).
 
@@ -476,10 +493,12 @@ async function captureAuth(r: AuthResult): Promise<AuthResult> {
 ### Task 8: Navigation + version-gate boot + lobby screens
 
 **Files:**
+
 - Create: `apps/mobile/src/navigation.tsx`, `apps/mobile/src/screens/BootScreen.tsx`, `apps/mobile/src/screens/HomeScreen.tsx`, `apps/mobile/src/screens/RoomScreen.tsx`, `apps/mobile/src/screens/GamePlaceholderScreen.tsx`, `apps/mobile/src/version.ts`, `apps/mobile/src/version.test.ts`
 - Modify: `apps/mobile/App.tsx` (mount navigation + boot)
 
 **Interfaces:**
+
 - Consumes: `useSession`, `api` (`getMyRooms`, `getRoom`, room create/join/ready/start — confirm the exact route helpers exist from Task 4), `BUILD_NUMBER`, `SERVER_ORIGIN`.
 - Produces: **`RootNavigator`** with routes `Boot`, `Login`, `Home`, `Room` (params `{ code }`), `Game` (params `{ roomCode }` — a placeholder screen P2 replaces); `checkForcedUpdate()`. **P2 registers the real `Game` screen; P2/P3/P4 add routes to this navigator.**
 
@@ -499,10 +518,12 @@ async function captureAuth(r: AuthResult): Promise<AuthResult> {
 ### Task 9: Push device registration on login
 
 **Files:**
+
 - Create: `apps/mobile/src/push/register.ts`, `apps/mobile/src/push/register.test.ts`
 - Modify: `apps/mobile/src/store/session.ts` (register on auth, unregister on sign-out)
 
 **Interfaces:**
+
 - Consumes: `api.registerDevice`/`removeDevice` (Task 4), `expo-notifications`.
 - Produces: `registerDeviceForPush()` (permission → `getDevicePushTokenAsync()` → `POST /me/devices {platform, token}`), `unregisterDeviceForPush()`. **P5 owns the full push-client lifecycle (contextual prompt timing, foreground suppression, tap deep-links); P1 only ensures a logged-in device is registered so the P0 server can reach it.**
 
@@ -517,10 +538,12 @@ async function captureAuth(r: AuthResult): Promise<AuthResult> {
 ### Task 10: GitHub Actions build lanes (self-managed signing, no EAS)
 
 **Files:**
+
 - Create: `.github/workflows/mobile-ci.yml`, `.github/workflows/mobile-android.yml`, `.github/workflows/mobile-ios.yml`, `apps/mobile/fastlane/Fastfile`, `apps/mobile/fastlane/Matchfile`, `apps/mobile/fastlane/Appfile`
 - Modify: `apps/server/CLAUDE.md` or a new `apps/mobile/CLAUDE.md` (document the lanes + required secrets)
 
 **Interfaces:**
+
 - Produces: three CI lanes; **P5 adds `mobile-ota.yml`; P6 uses the Android/iOS lanes for store submission.**
 
 - [ ] **Step 1: CI lane** (`mobile-ci.yml`, ubuntu) — on PRs touching `apps/mobile/**` or `packages/**`: checkout, setup-node 22 + Corepack/Yarn, `yarn install --immutable`, then `yarn workspace @trm/mobile typecheck && lint && test`. (No device build — fast gate.)

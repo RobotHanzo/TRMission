@@ -1,7 +1,4 @@
-import {
-  GoogleSignin,
-  isSuccessResponse,
-} from '@react-native-google-signin/google-signin';
+import { GoogleSignin, isSuccessResponse } from '@react-native-google-signin/google-signin';
 import { GOOGLE_IOS_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from '../config';
 import { useSession } from '../store/session';
 

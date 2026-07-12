@@ -21,7 +21,9 @@ export class DevicesController {
 
   @Post()
   @HttpCode(204)
-  @ApiOperation({ summary: 'Register this device for push (idempotent; token follows the account)' })
+  @ApiOperation({
+    summary: 'Register this device for push (idempotent; token follows the account)',
+  })
   @ApiBody({ schema: apiSchema(RegisterDeviceSchema) })
   async register(@CurrentUser() user: AuthUser, @Body() body: RegisterDeviceDto): Promise<void> {
     await this.devices.upsert(user.userId, body.platform, body.token);

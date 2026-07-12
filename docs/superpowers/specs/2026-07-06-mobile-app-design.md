@@ -20,7 +20,7 @@ fallback should the native path stall.
 - **Map builder is in v1 as an embedded WebView** of the live web builder; a native rebuild
   is deferred to v2 pending mobile-authoring usage data ("WebView now, native later").
 - **No paid SaaS in the delivery chain**: GitHub Actions for CI/builds/submission,
-  self-hosted OTA update server, direct APNs/FCM push. Expo the *framework* is allowed;
+  self-hosted OTA update server, direct APNs/FCM push. Expo the _framework_ is allowed;
   EAS Build, EAS Update, and the Expo Push Service are not used.
 - Replay viewer deferred to v1.1; native builder rebuild deferred to v2; spectating and
   pass-and-play out of scope.
@@ -49,7 +49,7 @@ Full digest lives with the session research; load-bearing verified facts:
   UGC → chat and shared custom maps need report/block/moderation affordances. iPadOS 26
   ignores `UIRequiresFullScreen` (apps must survive live window resizing); Android 16
   (target API 36 mandatory by 2026-08-31) ignores orientation/resizability locks on
-  ≥600dp screens. New *personal* Play accounts need a 12-tester × 14-day closed test before
+  ≥600dp screens. New _personal_ Play accounts need a 12-tester × 14-day closed test before
   production access; organization accounts (D-U-N-S) are exempt.
 - Expo SDK 56 (RN 0.85, React 19.2, New Architecture mandatory, Hermes v1 default) is the
   current baseline. `@shopify/react-native-skia` 2.x needs RN ≥ 0.79 / React ≥ 19; SVG-based
@@ -277,15 +277,15 @@ updates — OTA is an optimization, and the forced-update gate works regardless.
 
 ## Phases (overlapping; ~5–7.5 months to both stores)
 
-| Phase | Work | Duration |
-|---|---|---|
-| P0 | Server foundation: auth variants, SIWA, deletion, push (FCM/APNs), version gate, guest TTL — parallel with P1 | 4–6 wks |
-| P1 | Expo skeleton: workspace, shims, CI workflows, auth screens, lobby | 3–4 wks |
-| P2 | Skia board + native game stage (long pole) | 6–8 wks |
-| P3 | Offline vs bots | 2–3 wks |
-| P4 | Tutorial rebuild | 2–3 wks |
-| P5 | Builder WebView, push wiring, haptics, tablet polish, OTA server | 3–4 wks |
-| P6 | Compliance, store assets, closed test, signing/release lanes, submission | 2–4 wks |
+| Phase | Work                                                                                                          | Duration |
+| ----- | ------------------------------------------------------------------------------------------------------------- | -------- |
+| P0    | Server foundation: auth variants, SIWA, deletion, push (FCM/APNs), version gate, guest TTL — parallel with P1 | 4–6 wks  |
+| P1    | Expo skeleton: workspace, shims, CI workflows, auth screens, lobby                                            | 3–4 wks  |
+| P2    | Skia board + native game stage (long pole)                                                                    | 6–8 wks  |
+| P3    | Offline vs bots                                                                                               | 2–3 wks  |
+| P4    | Tutorial rebuild                                                                                              | 2–3 wks  |
+| P5    | Builder WebView, push wiring, haptics, tablet polish, OTA server                                              | 3–4 wks  |
+| P6    | Compliance, store assets, closed test, signing/release lanes, submission                                      | 2–4 wks  |
 
 Play closed test (if personal account) runs during P4–P6. Store accounts, D-U-N-S decision,
 and DSA declaration start at P0.

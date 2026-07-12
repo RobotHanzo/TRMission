@@ -30,6 +30,7 @@ No commit. Every later task assumes the artifacts below; confirm them (and recor
 **Files:** none created.
 
 **Interfaces:**
+
 - Consumes (P1): workspace `@trm/mobile` at `apps/mobile`; `src/store/game.ts` exporting `useGame` with `applySnapshot`/`applyEvents`/`setRejection`/`reset` (web-identical store API); `src/i18n/index.ts` (side-effect i18next init, zh-Hant + en); React Navigation 7 native-stack with `RootStackParamList` (`src/navigation/types.ts`) and `src/screens/HomeScreen.tsx`; the two test lanes from Global Constraints.
 - Consumes (P2): `src/screens/GameStage.tsx` with the web-mirrored props `snapshot, commands, onLeave, overlay, spotlightCities, frameTarget, actionGate, sandbox`; `src/game/content.ts` (`cityById`, `routeById`, `ticketById`, `cityName`); `src/game/boardView.ts` (`BoardFrameTarget`, `BoardTransform`, `BoardProjection`); `src/game/catalog.ts` (`resetToDefaultContent`); `src/net/commands.ts` (`GameCommands`); `src/net/socket.ts` (`PaymentInit`, `CameraViewInit` types); native `TrainCarCard` + `TicketCard` components; a reusable route-track painter (the board necessarily factors per-route painting — same "specimens cannot drift" rationale as web); a live-camera read seam (see Task 6); jest-expo config with the Skia mock in `setupFiles` (P2's own board tests need it).
 - Consumes (P3): the local-simulation seam is proven (`LocalGameSession` feeding the store via `redactFor` → `viewToSnapshot`); P3 may or may not have ported `src/net/sandboxSocket.ts` — Task 3 reuses it if present.
@@ -80,6 +81,7 @@ plus `"test:pure": "vitest run"` in `apps/mobile/package.json` scripts, and rest
 ### Task 2: Port the pure tutorial core verbatim (parity-gated)
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/types.ts` (copy of `apps/web/src/features/tutorial/types.ts`)
 - Create: `apps/mobile/src/features/tutorial/curriculum.ts` (copy of `apps/web/src/features/tutorial/curriculum.ts`)
 - Create: `apps/mobile/src/features/tutorial/focus.ts` (copy of `apps/web/src/features/tutorial/focus.ts`)
@@ -90,6 +92,7 @@ plus `"test:pure": "vitest run"` in `apps/mobile/package.json` scripts, and rest
 - Create: `apps/mobile/src/features/tutorial/focus.spec.ts` (content of web `focus.test.ts`)
 
 **Interfaces:**
+
 - Consumes: `apps/mobile/src/game/boardView.ts` → `BoardFrameTarget` (Task 1), `@trm/engine`, `@trm/shared`.
 - Produces: `Lesson`/`Beat`/`Spotlight`/`SpecimenSpec`/`ExpectSpec`/`ActionGate`/`gateFlags`/`expectMatches` (types.ts); `LESSONS`/`lessonsForScope`/`encyclopediaEntries` (curriculum.ts); `HUD_SPOTLIGHT_SELECTORS`/`isAllowedHudSelector`/`selectorsForSpotlight`/`FlatRect`/`CoachPos`/`coachPosition`/`spotlightCentre`/`spotlightBounds` (focus.ts); `tutorialZh`/`tutorialEn` (i18n). All byte-identical to web — later phases and the web itself can treat these as one artifact.
 
@@ -173,12 +176,14 @@ git commit -m "feat(mobile): port the tutorial beat model + curriculum, web-pari
 ### Task 3: Local simulation — SandboxSocket + scenario player + engine walkthrough
 
 **Files:**
+
 - Create: `apps/mobile/src/net/sandboxSocket.ts` (copy of `apps/web/src/net/sandboxSocket.ts`) — **skip if P3 already ported it** (Task 1 grep); then only verify its path matches the imports below.
 - Create: `apps/mobile/src/features/tutorial/useScenarioPlayer.ts` (copy of `apps/web/src/features/tutorial/useScenarioPlayer.ts`)
 - Create: `apps/mobile/src/features/tutorial/scenarios.spec.ts` (content of web `scenarios.test.ts`)
 - Create: `apps/mobile/src/net/sandboxSocket.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `@trm/engine` (`initGame`/`reduce`/`redactFor`/`taiwanBoard`/`CONTENT_HASH`/`enumerateClaimPayments`), `@trm/codec` (`viewToSnapshot`/`eventToProto`/`commandToAction`), `@trm/proto`, `apps/mobile/src/net/commands.ts` (`GameCommands`), `apps/mobile/src/net/socket.ts` (`PaymentInit`, `CameraViewInit`), `apps/mobile/src/store/game.ts` (`useGame`, `RejectionInfo`), `apps/mobile/src/game/content.ts` (`cityById`/`routeById`/`ticketById`).
 - Produces: `SandboxSocket` (mobile) — the tutorial's offline engine driver; `useScenarioPlayer(lesson, store, autoplay?)` → `ScenarioPlayer { beat, index, total, done, commands, next(), restart(), seek() }`; the full-curriculum engine walkthrough as a CI gate.
 
@@ -267,12 +272,14 @@ git commit -m "feat(mobile): port the tutorial sandbox driver + scenario player 
 ### Task 4: TutorialTargetRegistry + anchor instrumentation of P2's components
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/targets.tsx`
 - Create: `apps/mobile/src/features/tutorial/targets.spec.ts` (pure registry, vitest)
 - Create: `apps/mobile/src/features/tutorial/__tests__/targets.test.tsx` (hook + provider, jest)
 - Modify: the P2 components that render the HUD anchors (exact files per Task 1 grep; expected candidates under `apps/mobile/src/components/` and `apps/mobile/src/screens/`)
 
 **Interfaces:**
+
 - Consumes: `FlatRect` from `./focus`; P2's HUD components (market, trackers, ticket chooser, board viewport container, draw-tickets button, hand, deck, market slots).
 - Produces: `TUTORIAL_ANCHORS` (semantic name → web selector string), `MeasurableNode`, `TutorialTargets { register, measure }`, `createTutorialTargets()`, `TutorialTargetsProvider`, `useTutorialTargets()`, `useTutorialAnchor(anchorId)` → `{ ref, collapsable: false }`. Outside a provider everything is a no-op, so instrumented components behave identically in live games.
 
@@ -452,7 +459,9 @@ const TutorialTargetsContext = createContext<TutorialTargets>(NOOP_TARGETS);
 
 export function TutorialTargetsProvider({ children }: { children: ReactNode }) {
   const targets = useMemo(createTutorialTargets, []);
-  return <TutorialTargetsContext.Provider value={targets}>{children}</TutorialTargetsContext.Provider>;
+  return (
+    <TutorialTargetsContext.Provider value={targets}>{children}</TutorialTargetsContext.Provider>
+  );
 }
 
 export function useTutorialTargets(): TutorialTargets {
@@ -529,10 +538,12 @@ git commit -m "feat(mobile): tutorial target registry with web-parity anchor ids
 The Skia board has no per-element nodes to measure, so city/route spotlights are computed: board-space bbox (the same endpoint-bbox the web's `SpotlightFramer` uses, `apps/web/src/components/Board.tsx:382-409`) projected through the camera affine (the same formula as web `boardView.ts` `visibleFraction`: `screen = viewportOrigin + position + (k·board + e|f) · scale`).
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/boardRects.ts`
 - Create: `apps/mobile/src/features/tutorial/boardRects.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `BoardTransform`, `BoardProjection` from `../../game/boardView` (P2); `Spotlight`, `FlatRect` from the ported core.
 - Produces: `BoardCameraSample { transform, proj }`; `boardSpaceRect(spotlight, cityById, routeById)`; `projectBoardRect(rect, cam, viewport)`; `boardAnchorRects(spotlight, cityById, routeById, cam, viewport): FlatRect[]`.
 
@@ -592,8 +603,12 @@ describe('boardAnchorRects', () => {
     expect(rects[0]).toEqual({ x: 164, y: 104, w: 12, h: 12 });
   });
   it('a route produces a single union rect; unresolved ids produce none', () => {
-    expect(boardAnchorRects({ kind: 'route', ids: ['R16'] }, cities, routes, cam, viewport)).toHaveLength(1);
-    expect(boardAnchorRects({ kind: 'route', ids: ['R999'] }, cities, routes, cam, viewport)).toEqual([]);
+    expect(
+      boardAnchorRects({ kind: 'route', ids: ['R16'] }, cities, routes, cam, viewport),
+    ).toHaveLength(1);
+    expect(
+      boardAnchorRects({ kind: 'route', ids: ['R999'] }, cities, routes, cam, viewport),
+    ).toEqual([]);
   });
 });
 ```
@@ -717,11 +732,13 @@ git commit -m "feat(mobile): pure board-anchor spotlight rect math (camera-proje
 ### Task 6: Camera bridge + the mobile `useSpotlightRects`
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/cameraBridge.ts`
 - Create: `apps/mobile/src/features/tutorial/useSpotlightRects.ts`
 - Create: `apps/mobile/src/features/tutorial/__tests__/useSpotlightRects.test.tsx`
 
 **Interfaces:**
+
 - Consumes: **P2 camera contract** — the board exposes its live pan/zoom readable on the JS thread as `BoardTransform` (`positionX`/`positionY` px, `scale`) plus the static board→content-pixel `BoardProjection` `{k,e,f}` (the shapes `game/boardView.ts` defines). Verify the export site: `grep -rn "positionX\|BoardProjection" apps/mobile/src/game apps/mobile/src/components | grep -v test`. Whether P2 mirrors the transform into zustand or reads Reanimated shared values via `.value`, **`cameraBridge.ts` is the only file allowed to touch it.**
 - Consumes: `createTutorialTargets` registry (Task 4), `boardAnchorRects` (Task 5), `cityById`/`routeById` from `../../game/content` (P2).
 - Produces: `ReadBoardCamera = () => BoardCameraSample | null`; `useBoardCameraReader(): ReadBoardCamera`; `useSpotlightRects(spotlight, readCamera?): FlatRect[]` — same semantics as web: empty until resolved, re-measures for ~700 ms after a beat change (tracks the auto-pan glide) and on window-dimension changes.
@@ -925,6 +942,7 @@ git commit -m "feat(mobile): native spotlight measurement via target registry + 
 ### Task 7: Skia spotlight scrim + reduced-motion hook
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/scrim.ts` (pure path builder)
 - Create: `apps/mobile/src/features/tutorial/scrim.spec.ts`
 - Create: `apps/mobile/src/hooks/useReducedMotion.ts` (**skip if P1/P2 already ported one** — `grep -rn "useReducedMotion" apps/mobile/src`; then import theirs)
@@ -932,6 +950,7 @@ git commit -m "feat(mobile): native spotlight measurement via target registry + 
 - Create: `apps/mobile/src/features/tutorial/__tests__/TutorialSpotlight.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `@shopify/react-native-skia` (`Canvas`, `Path`, `RoundedRect`) + P2's jest Skia mock; `FlatRect`.
 - Produces: `scrimPath(w, h, holes)` (SVG path string, even-odd fill punches the holes), `SPOT_PAD = 10`, `SPOT_RADIUS = 14` (web values); `<TutorialSpotlight rects reducedMotion dimAll?>` with the web's exact semantics: no holes + no `dimAll` → renders nothing (never dim the taught element while its rect resolves); `pointerEvents="none"` always (non-blocking focus); `useReducedMotion(): boolean`.
 
@@ -1139,10 +1158,12 @@ git commit -m "feat(mobile): Skia tutorial spotlight scrim with masked dimming +
 ### Task 8: Specimens — the visual glossary as RN views
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/Specimens.tsx`
 - Create: `apps/mobile/src/features/tutorial/__tests__/Specimens.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `SpecimenSpec` (ported types); `SCORING_TABLE`, `TRAIN_COLORS`, `CardColor` from `@trm/shared`; `straightRouteGeometry`, `STRAIGHT_PITCH` from `@trm/map-data` (pure, direct import); P2's native `TrainCarCard` (`{color, size, showGlyph?, count?, showCount?}` — web-mirrored signature, verify: `grep -n "TrainCarCardProps\|function TrainCarCard" apps/mobile/src/components/TrainCarCard.tsx`), `TicketCard` (`{ticketId}`), and P2's **route-track painter** — the reusable per-route Skia renderer the board factors out (verify: `grep -rn "RouteTrack\|paintRoute\|RouteShape" apps/mobile/src/components`; adapt the exact import/props to what P2 shipped — the specimen must reuse the board's painter so it cannot visually drift, same rule as web); `cityName` from `../../game/content`; `useReducedMotion` (Task 7); `SEAT_COLORS`, `CARD_COLOR_TOKENS`, `GRAY_TOKEN` from P2's theme port (verify: `grep -rn "SEAT_COLORS" apps/mobile/src/theme`).
 - Produces: `Specimen({spec})` dispatcher + `RouteSpecimen`, `RouteCompareSpecimen`, `CardRowSpecimen`, `LocoCardSpecimen`, `StationSpecimen`, `StationCostSpecimen`, `ScoreTableSpecimen`, `ClaimCostSpecimen`, `TicketSpecimen` — one per `SpecimenSpec.kind`, mirroring `apps/web/src/features/tutorial/Specimens.tsx` (read it side-by-side while porting; the web file is the behavioural reference for palettes, counts, and cycling logic).
 
@@ -1241,10 +1262,12 @@ git commit -m "feat(mobile): tutorial visual glossary specimens as RN views"
 ### Task 9: The coachmark — TutorialOverlay (RN)
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/TutorialOverlay.tsx`
 - Create: `apps/mobile/src/features/tutorial/__tests__/TutorialOverlay.test.tsx`
 
 **Interfaces:**
+
 - Consumes: ported `focus.ts` (`coachPosition`, `spotlightBounds`, `spotlightCentre`), `Specimen` (Task 8), i18n `tutorial.*` keys, `useWindowDimensions`.
 - Produces: `TutorialOverlay(props: TutorialOverlayProps)` with the **web-identical props contract** (`beat, done, index, total, lessonTitleKey, lessonNo, lessonCount, isLastLesson, specimen?, spotRects?, onAdvance, onReplay, onPrevLesson, onNextLesson, onExit, onCreateGame?`) — Task 11's runner threads them 1:1. testIDs: `tut-coach`, `tut-next`, `tut-next-lesson`, `tut-prev-lesson`, `tut-replay`, `tut-exit`, `tut-yourturn`, `tut-watching`, `tut-finale-cta`.
 
@@ -1298,9 +1321,7 @@ describe('TutorialOverlay', () => {
 
   it('last beat of a non-final lesson hands off to the next lesson', () => {
     const onNextLesson = jest.fn();
-    const r = render(
-      <TutorialOverlay {...base} index={4} total={5} onNextLesson={onNextLesson} />,
-    );
+    const r = render(<TutorialOverlay {...base} index={4} total={5} onNextLesson={onNextLesson} />);
     fireEvent.press(r.getByTestId('tut-next-lesson'));
     expect(onNextLesson).toHaveBeenCalledTimes(1);
   });
@@ -1356,11 +1377,13 @@ git commit -m "feat(mobile): native tutorial coachmark with dodge, caret, progre
 ### Task 10: Completion persistence (AsyncStorage)
 
 **Files:**
+
 - Modify: `apps/mobile/package.json` (+ lockfile) — add `@react-native-async-storage/async-storage`
 - Create: `apps/mobile/src/features/tutorial/progress.ts`
 - Create: `apps/mobile/src/features/tutorial/__tests__/progress.test.ts`
 
 **Interfaces:**
+
 - Produces: storage key `trm.tutorial.completed.v1`; `TutorialCompletion { scope: Scope; completedAt: string }`; `getTutorialCompletion(): Promise<TutorialCompletion | null>`; `markTutorialCompleted(scope: Scope): Promise<void>`. Both swallow storage failures (completion is a convenience — never block or crash the tutorial; same posture as the spec's offline storage-full handling).
 
 - [ ] **Step 1: Add the dependency**
@@ -1466,12 +1489,14 @@ git commit -m "feat(mobile): tutorial completion persistence in AsyncStorage"
 ### Task 11: TutorialScreen, navigation route, Home entry, gate threading
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/TutorialScreen.tsx`
 - Modify: `apps/mobile/src/navigation/types.ts` (+ the stack registration file P1 owns)
 - Modify: `apps/mobile/src/screens/HomeScreen.tsx`
 - Verify/Modify: `apps/mobile/src/screens/GameStage.tsx` (gate + overlay threading)
 
 **Interfaces:**
+
 - Consumes: everything from Tasks 2–10; P2 `GameStage` props (`snapshot, commands, onLeave, overlay, spotlightCities, frameTarget, actionGate, sandbox`); P1 navigation + HomeScreen; `resetToDefaultContent` from `../../game/catalog`.
 - Produces: route `Tutorial: undefined` in `RootStackParamList`; a Home entry (`testID="home-tutorial"`) with a completion badge (`testID="home-tutorial-done"`), reachable **without auth and without network** (spec §4 airplane-mode posture: Home offers Tutorial offline).
 
@@ -1742,10 +1767,12 @@ git commit -m "feat(mobile): tutorial screen, route and offline Home entry with 
 ### Task 12: Scripted end-to-end walkthrough + full validation + docs
 
 **Files:**
+
 - Create: `apps/mobile/src/features/tutorial/__tests__/TutorialScreen.walkthrough.test.tsx`
 - Modify: `apps/mobile/CLAUDE.md` (tutorial architecture note; create the section if P1's file lacks one)
 
 **Interfaces:**
+
 - Consumes: everything above. The walkthrough drives the REAL curriculum + REAL SandboxSocket (the P3-proven local-simulation seam: engine `reduce` → `redactFor` → `viewToSnapshot` → the standard store) with only the Skia-heavy `GameStage` stubbed — jest cannot host the board, and the board is P2's own test surface.
 - Produces: a CI gate that a learner can travel the entire Quickstart curriculum beat-by-beat to the finale and that completion persists.
 

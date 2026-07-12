@@ -93,7 +93,10 @@ export function LoginScreen(): React.JSX.Element {
           {mode === 'login' ? t('login.signIn') : t('login.register')}
         </Text>
       </Pressable>
-      <Pressable onPress={() => setMode(mode === 'login' ? 'register' : 'login')} disabled={loading}>
+      <Pressable
+        onPress={() => setMode(mode === 'login' ? 'register' : 'login')}
+        disabled={loading}
+      >
         <Text style={styles.link}>
           {mode === 'login' ? t('login.toRegister') : t('login.toLogin')}
         </Text>

@@ -84,9 +84,9 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   an injectable `AuthConfig` (derived from env; tests override it via `new AuthConfig(overrides)`);
   the controller enforces the flags (`/auth/config` is only a UI hint). **OAuth** (`oauth.service` +
   `oauth.http`, hand-rolled with global `fetch`, no passport): authorization-code + PKCE; the profile
-  comes from the provider's userinfo endpoint (no id_token signature work) for that redirect flow.
+  comes from the provider's userinfo endpoint (no id*token signature work) for that redirect flow.
   Google also has a second entry point, `POST /auth/oauth/google/credential`, for a Google Identity
-  Services (One Tap / rendered button) ID-token credential — the one place that _does_ verify a JWT
+  Services (One Tap / rendered button) ID-token credential — the one place that \_does* verify a JWT
   signature, via `google-auth-library` (`google-id-token.verifier.ts`, injected behind
   `GOOGLE_ID_TOKEN_VERIFIER` the same way `OAUTH_HTTP` is). Both entry points converge on the same
   `resolveAccount` logic. Bound by **verified

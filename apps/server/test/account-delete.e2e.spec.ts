@@ -15,7 +15,11 @@ const server = () => t.app.getHttpServer();
 
 beforeAll(async () => {
   revoker = new FakeAppleTokenRevoker();
-  t = await createTestApp({ mongod: sharedMongod, dbName: 'trm-test-delete', appleRevoker: revoker });
+  t = await createTestApp({
+    mongod: sharedMongod,
+    dbName: 'trm-test-delete',
+    appleRevoker: revoker,
+  });
 }, 60_000);
 afterAll(() => t.close());
 
@@ -45,8 +49,12 @@ describe('DELETE /auth/me: basic deletion', () => {
       .get('/api/v1/auth/me')
       .set('Authorization', `Bearer ${reg.body.accessToken}`)
       .expect(401); // token cryptographically valid ≤15min, but the user doc is gone
-    expect(await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never })).toBe(0);
-    expect(await t.db.collection('authSessions').countDocuments({ userId: reg.body.user.id })).toBe(0);
+    expect(await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never })).toBe(
+      0,
+    );
+    expect(await t.db.collection('authSessions').countDocuments({ userId: reg.body.user.id })).toBe(
+      0,
+    );
   });
 
   it('deletes a mobile guest via the body-token transport', async () => {
@@ -137,9 +145,9 @@ describe('DELETE /auth/me: cascade', () => {
       .delete('/api/v1/auth/me')
       .set('Authorization', `Bearer ${reg.body.accessToken}`)
       .expect(409);
-    expect(
-      await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never }),
-    ).toBe(1);
+    expect(await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never })).toBe(
+      1,
+    );
   });
 });
 
@@ -181,8 +189,8 @@ describe('DELETE /auth/me: Apple token revocation', () => {
       .send({ appleAuthorizationCode: 'ac-3' })
       .expect(204);
     revoker.result = true;
-    expect(
-      await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never }),
-    ).toBe(0);
+    expect(await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never })).toBe(
+      0,
+    );
   });
 });
