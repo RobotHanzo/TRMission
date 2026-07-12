@@ -183,6 +183,7 @@ const resources = {
 
       drawBlind: '抽牌堆',
       drawTickets: '抽任務卡',
+      passTurn: '略過回合（無法行動）',
       deckEmpty: '已抽完',
       forcedTicketRedraw: '任務全部達成，系統發給你新任務！',
       pass: '跳過',
@@ -929,6 +930,7 @@ const resources = {
 
       drawBlind: 'Draw from deck',
       drawTickets: 'Draw tickets',
+      passTurn: 'Skip turn (no moves)',
       deckEmpty: 'Out of cards',
       forcedTicketRedraw: 'All your tickets are complete — here are new ones!',
       pass: 'Pass',

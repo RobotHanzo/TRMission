@@ -591,6 +591,19 @@ export function GameStage({
               </button>
             );
           })}
+        {canAct && snapshot.you?.youMustPass && (
+          <button
+            type="button"
+            className="accent"
+            data-anim="pass-turn"
+            onClick={() => {
+              markFirstAction('pass');
+              commands?.pass();
+            }}
+          >
+            {t('passTurn')}
+          </button>
+        )}
       </div>
     </div>
   );

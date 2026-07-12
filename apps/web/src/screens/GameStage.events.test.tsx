@@ -132,3 +132,28 @@ describe('GameStage expansion-event controls', () => {
     );
   });
 });
+
+describe('GameStage Pass button', () => {
+  it('shows a Pass button only when youMustPass and dispatches pass()', () => {
+    const commands = { pass: vi.fn() } as unknown as GameCommands;
+    const stuck = snap(Phase.AWAIT_ACTION, undefined, {
+      hand: {
+        playerId: 'p0',
+        hand: {},
+        keptTicketIds: [],
+        pendingOfferTicketIds: [],
+        youMustPass: true,
+      },
+    });
+    const { unmount } = render(
+      <GameStage snapshot={stuck} commands={commands} onLeave={() => {}} sandbox />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: i18n.t('passTurn') }));
+    expect(commands.pass).toHaveBeenCalledTimes(1);
+    unmount();
+
+    const free = snap(Phase.AWAIT_ACTION, undefined);
+    render(<GameStage snapshot={free} commands={commandSpies()} onLeave={() => {}} sandbox />);
+    expect(screen.queryByRole('button', { name: i18n.t('passTurn') })).toBeNull();
+  });
+});
