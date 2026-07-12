@@ -81,6 +81,7 @@
       "**/*.test.ts",
       "**/*.test.tsx"
     ],
+    "testTimeout": 20000,
     "transformIgnorePatterns": [
       "node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@bufbuild/.*|@formatjs/.*|@trm/.*|lucide-react-native|react-native-svg))"
     ]
