@@ -1,0 +1,12 @@
+TRMission is a multiplayer railway strategy board game set on Taiwan's railways. Collect train cards, claim routes, connect cities into your own rail network, and complete secret mission tickets for the highest score.
+
+Features:
+• Online multiplayer for 2–5 players, with bot seats to fill a table
+• Offline solo play against bots — no connection needed
+• A five-minute interactive tutorial
+• Custom map workshop: build and share your own maps
+• Turn push reminders so you never miss a move
+• Traditional Chinese and English interface
+• Layouts optimized for both phones and tablets
+
+Play instantly as a guest, or register to keep your match history and settings across devices.
