@@ -27,7 +27,7 @@ import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
 import type { Locale } from '../store/ui';
-import { chatPresetKey } from '../game/chatPresets';
+import { chatPresetKey } from '@trm/client-core';
 import { ChatPresetPicker } from '../components/ChatPresetPicker';
 import '../styles/game.css';
 import '../styles/room.css';

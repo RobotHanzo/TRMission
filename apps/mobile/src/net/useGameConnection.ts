@@ -30,7 +30,9 @@ export function useGameConnection(roomCode: string): GameConnection {
       connecting.current = true;
       try {
         const { ticket } = await api.getTicket(roomCode);
-        if (!cancelled) connectGame(ticket);
+        // The room code rides along so the shared socket can re-mint a fresh ticket on every
+        // in-socket reconnect attempt (the seed one expires within seconds of a drop).
+        if (!cancelled) connectGame(ticket, { roomCode });
       } catch {
         // REST failure (offline / room gone): surfaces as the socket status staying 'closed';
         // the OfflineBanner + retry() cover it.

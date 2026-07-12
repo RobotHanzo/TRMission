@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessageSquarePlus } from 'lucide-react';
-import { CHAT_PRESET_IDS, chatPresetKey } from '../game/chatPresets';
+import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core';
 
 interface Props {
   onSelect(id: string): void;

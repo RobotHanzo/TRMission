@@ -35,7 +35,7 @@ describe('useGameConnection', () => {
 
   it('fetches a ticket and connects on mount', async () => {
     renderHook(() => useGameConnection('ABCD'));
-    await waitFor(() => expect(connectGame).toHaveBeenCalledWith('T1'));
+    await waitFor(() => expect(connectGame).toHaveBeenCalledWith('T1', { roomCode: 'ABCD' }));
     expect(api.getTicket).toHaveBeenCalledWith('ABCD');
   });
 

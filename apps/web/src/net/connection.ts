@@ -1,4 +1,4 @@
-import { GameSocket, type SocketStatus } from './socket';
+import { defaultWsUrl, GameSocket, type SocketStatus } from './socket';
 import { api } from './rest';
 import { useGame } from '../store/game';
 import { useLog } from '../store/log';
@@ -57,7 +57,7 @@ export function connectGame(ticket: string, ticketSource?: TicketSource): GameSo
       onCameraMoved: (playerId, view) => useGame.getState().applyCameraMoved(playerId, view),
       onSessionReplaced: () => useGame.getState().setSessionReplaced(true),
     },
-    undefined,
+    defaultWsUrl(),
     refreshTicket,
   );
   socket.connect();

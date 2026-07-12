@@ -1,0 +1,41 @@
+{
+  "name": "@trm/client-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc7 --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@trm/codec": "workspace:*",
+    "@trm/engine": "workspace:*",
+    "@trm/map-data": "workspace:*",
+    "@trm/proto": "workspace:*",
+    "@trm/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "i18next": "^24.2.0",
+    "react": "^19.2.0",
+    "react-i18next": "^15.4.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@trm/tsc7": "workspace:*",
+    "react": "^19.2.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vitest": "^2.1.8",
+    "zustand": "^5.0.2"
+  }
+}

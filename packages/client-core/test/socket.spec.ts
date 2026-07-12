@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { create, toBinary, fromBinary } from '@bufbuild/protobuf';
 import { ServerEnvelopeSchema, ClientEnvelopeSchema } from '@trm/proto';
 import { SESSION_REPLACED_CLOSE_CODE } from '@trm/shared';
-import { GameSocket } from './socket';
+import { GameSocket } from '../src/net/socket';
 
 function deliver(
   socket: GameSocket,
@@ -40,8 +40,8 @@ class FakeWebSocket {
   static instances: FakeWebSocket[] = [];
   static readonly OPEN = 1;
   onopen: (() => void) | null = null;
-  onclose: ((ev: CloseEvent) => void) | null = null;
-  onmessage: ((ev: MessageEvent) => void) | null = null;
+  onclose: ((ev: { code: number; reason?: string }) => void) | null = null;
+  onmessage: ((ev: { data: ArrayBuffer }) => void) | null = null;
   onerror: (() => void) | null = null;
   binaryType = '';
   readyState = 1;
@@ -81,7 +81,7 @@ describe('GameSocket forced close (session replaced)', () => {
     socket.connect();
     const ws = FakeWebSocket.instances[0];
     if (!ws) throw new Error('unreachable');
-    ws.onclose?.({ code: SESSION_REPLACED_CLOSE_CODE, reason: 'session_replaced' } as CloseEvent);
+    ws.onclose?.({ code: SESSION_REPLACED_CLOSE_CODE, reason: 'session_replaced' });
     expect(onSessionReplaced).toHaveBeenCalledTimes(1);
     expect(onStatus).not.toHaveBeenCalledWith('reconnecting');
   });
@@ -95,7 +95,7 @@ describe('GameSocket forced close (session replaced)', () => {
       socket.connect();
       const ws = FakeWebSocket.instances[0];
       if (!ws) throw new Error('unreachable');
-      ws.onclose?.({ code: 1006, reason: '' } as CloseEvent);
+      ws.onclose?.({ code: 1006, reason: '' });
       expect(onSessionReplaced).not.toHaveBeenCalled();
       expect(onStatus).toHaveBeenCalledWith('reconnecting');
     } finally {
@@ -127,7 +127,7 @@ describe('GameSocket reconnect re-mints the ws ticket', () => {
       ws1.onopen?.();
       expect(helloTicketOf(ws1)).toBe('stale-ticket'); // first connect uses the seed ticket
 
-      ws1.onclose?.({ code: 1006, reason: '' } as CloseEvent);
+      ws1.onclose?.({ code: 1006, reason: '' });
       expect(refreshTicket).not.toHaveBeenCalled(); // deferred until the backoff elapses
 
       await vi.advanceTimersByTimeAsync(500);
@@ -153,7 +153,7 @@ describe('GameSocket reconnect re-mints the ws ticket', () => {
       if (!ws1) throw new Error('unreachable');
       ws1.onopen?.();
 
-      ws1.onclose?.({ code: 1006, reason: '' } as CloseEvent);
+      ws1.onclose?.({ code: 1006, reason: '' });
       await vi.advanceTimersByTimeAsync(500);
       expect(refreshTicket).toHaveBeenCalledTimes(1);
       // Even though minting failed, a socket is still opened so the close→backoff→retry loop
