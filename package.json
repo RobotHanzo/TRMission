@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "TRMission (台鐵任務) — multiplayer Taiwan-railway route game",
-  "packageManager": "yarn@4.9.1",
+  "packageManager": "yarn@4.17.1",
   "engines": {
     "node": ">=20"
   },
