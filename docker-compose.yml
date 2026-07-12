@@ -115,8 +115,38 @@ services:
       - '8080:80'
     restart: unless-stopped
 
+  # Self-hosted expo-updates server for the mobile app (spec §10, expo-open-ota — see
+  # docs/mobile/ota.md for the pinned upstream contract). JS/asset updates only (Apple 3.3.2);
+  # native changes ship through the stores and are fenced by runtimeVersion=fingerprint.
+  # Updates are SIGNED AT SERVE TIME: the code-signing private key is mounted read-only here
+  # and must never be committed (apps/mobile/certs/keys/ is gitignored).
+  ota:
+    profiles: ['full']
+    image: ghcr.io/axelmarciano/expo-open-ota:latest
+    environment:
+      # Public origin clients reach this server at (updates.url = <BASE_URL>/manifest).
+      BASE_URL: ${TRM_OTA_BASE_URL:-http://localhost:3005}
+      JWT_SECRET: ${TRM_OTA_JWT_SECRET:-dev-insecure-change-me}
+      # Expo API is used only for publish auth + channel→branch mapping (npx eoas publish);
+      # the update serving itself is fully self-hosted.
+      EXPO_APP_ID: ${EXPO_APP_ID:-}
+      EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
+      CACHE_MODE: local
+      STORAGE_MODE: local
+      LOCAL_BUCKET_BASE_PATH: /updates
+      KEYS_STORAGE_TYPE: local
+      PUBLIC_LOCAL_EXPO_KEY_PATH: /keys/public-key.pem
+      PRIVATE_LOCAL_EXPO_KEY_PATH: /keys/private-key.pem
+    volumes:
+      - trm-ota-data:/updates
+      - ./apps/mobile/certs/keys:/keys:ro
+    ports:
+      - '3005:3000'
+    restart: unless-stopped
+
 volumes:
   trm-mongo-data:
   trm-node-modules:
   trm-yarn-state:
   trm-proto-gen:
+  trm-ota-data:

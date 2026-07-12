@@ -6,16 +6,22 @@ import { api } from '../../net/rest';
 import type * as Rest from '../../net/rest';
 import { useUi } from '../../store/ui';
 
+vi.mock('../../net/connection', () => ({ disconnectGame: vi.fn(), connectGame: vi.fn() }));
 vi.mock('../../net/rest', async () => {
   const actual = await vi.importActual<typeof Rest>('../../net/rest');
   return {
     ...actual,
+    setOnTokenChange: vi.fn(),
+    setAccessToken: vi.fn(),
     api: {
       ...actual.api,
       listMaps: vi.fn(),
       listOfficialMaps: vi.fn(),
       forkOfficialMap: vi.fn(),
       deleteMap: vi.fn(),
+      peekSharedMap: vi.fn(),
+      reportSharedMap: vi.fn(),
+      cloneSharedMap: vi.fn(),
     },
   };
 });
@@ -73,7 +79,9 @@ describe('MapsScreen: delete confirmation', () => {
     fireEvent.click(deleteBtn);
     expect(api.deleteMap).not.toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('確定要刪除「測試地圖 (Test Map)」嗎？此動作無法復原。')).toBeInTheDocument();
+    expect(
+      screen.getByText('確定要刪除「測試地圖 (Test Map)」嗎？此動作無法復原。'),
+    ).toBeInTheDocument();
   });
 
   it('deletes and refreshes on confirm', async () => {
@@ -96,5 +104,38 @@ describe('MapsScreen: delete confirmation', () => {
     fireEvent.click(screen.getByRole('button', { name: '取消' }));
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(api.deleteMap).not.toHaveBeenCalled();
+  });
+});
+
+describe('MapsScreen: report a shared map', () => {
+  beforeEach(() => {
+    window.history.replaceState(null, '', '/maps');
+    asMock(api.peekSharedMap).mockResolvedValue({
+      nameZh: '可疑地圖',
+      nameEn: 'Sus Map',
+      draft: { cities: [], routes: [], tickets: [] },
+    });
+  });
+
+  it('peek reveals a report affordance that submits code + category', async () => {
+    asMock(api.reportSharedMap).mockResolvedValue({ id: 'r1' });
+    render(<MapsScreen />);
+    fireEvent.change(screen.getByPlaceholderText(/分享代碼/), { target: { value: 'ABCD1234' } });
+    fireEvent.click(screen.getByRole('button', { name: /預覽/ }));
+    expect(await screen.findByText(/可疑地圖/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /檢舉此地圖/ }));
+    fireEvent.change(screen.getByLabelText(/檢舉原因/), {
+      target: { value: 'INAPPROPRIATE_CONTENT' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /送出檢舉/ }));
+    await waitFor(() =>
+      expect(api.reportSharedMap).toHaveBeenCalledWith(
+        'ABCD1234',
+        'INAPPROPRIATE_CONTENT',
+        undefined,
+      ),
+    );
+    expect(await screen.findByText(/已收到你的檢舉/)).toBeInTheDocument();
   });
 });

@@ -4,7 +4,7 @@ import type { OauthProfile } from './oauth.http';
 
 /** Verifies a Google Identity Services credential (ID token JWT) and normalizes its payload. */
 export interface GoogleIdTokenVerifier {
-  verify(idToken: string, audience: string): Promise<OauthProfile>;
+  verify(idToken: string, audience: string | string[]): Promise<OauthProfile>;
 }
 
 export const GOOGLE_ID_TOKEN_VERIFIER = Symbol('GOOGLE_ID_TOKEN_VERIFIER');
@@ -22,7 +22,7 @@ const truthy = (v: unknown): boolean => v === true || v === 'true';
 export class GoogleAuthLibraryVerifier implements GoogleIdTokenVerifier {
   private readonly client = new OAuth2Client();
 
-  async verify(idToken: string, audience: string): Promise<OauthProfile> {
+  async verify(idToken: string, audience: string | string[]): Promise<OauthProfile> {
     const ticket = await this.client.verifyIdToken({ idToken, audience });
     const payload = ticket.getPayload();
     if (!payload) throw new Error('google id token carried no payload');

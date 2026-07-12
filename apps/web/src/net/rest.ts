@@ -1,7 +1,7 @@
 // Typed REST client for the control plane. The access token lives in memory; the
 // refresh token is an httpOnly cookie sent automatically (credentials: 'include').
 // A 401 triggers one silent refresh + retry.
-import type { EventsMode, UserFeature } from '@trm/shared';
+import type { EventsMode, ReportCategory, UserFeature } from '@trm/shared';
 import type { TicketView } from '@trm/map-data';
 
 export type Theme = 'system' | 'light' | 'dark';
@@ -346,6 +346,8 @@ export const api = {
     req<PublicUser>('PATCH', '/auth/me/preferences', prefs),
   markTutorialCompleted: () => req<PublicUser>('POST', '/auth/me/tutorial-completed'),
   logout: () => req<void>('POST', '/auth/logout').then(() => setAccessToken(null)),
+  /** Irreversible. 204 on success; 409 while the account still holds dashboard access. */
+  deleteAccount: () => req<void>('DELETE', '/auth/me', {}).then(() => setAccessToken(null)),
 
   createRoom: (maxPlayers?: number) => req<RoomView>('POST', '/rooms', { maxPlayers }),
   getRoom: (code: string) => req<RoomView>('GET', `/rooms/${code}`),
@@ -416,6 +418,8 @@ export const api = {
   unshareMap: (id: string) => req<void>('DELETE', `/maps/${encodeURIComponent(id)}/share`),
   peekSharedMap: (code: string) =>
     req<SharedMapView>('GET', `/maps/shared/${encodeURIComponent(code)}`),
+  reportSharedMap: (shareCode: string, category: ReportCategory, message?: string) =>
+    req<{ id: string }>('POST', '/reports/map', { shareCode, category, message }),
   cloneSharedMap: (code: string) =>
     req<MapDetail>('POST', `/maps/shared/${encodeURIComponent(code)}/clone`),
   mapContent: (hash: string) =>

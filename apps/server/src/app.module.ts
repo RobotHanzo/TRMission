@@ -10,9 +10,14 @@ import { HistoryModule } from './history/history.module';
 import { MapsModule } from './maps/maps.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { AccountModule } from './account/account.module';
+import { PushModule } from './push/push.module';
+import { ModerationModule } from './moderation/moderation.module';
 import { OgModule } from './og/og.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { HealthController } from './health/health.controller';
+import { WellKnownController } from './health/well-known.controller';
+import { MobileLinksConfig } from './config/mobile-links.config';
 import { DocsController } from './openapi/docs.controller';
 import { OpenApiHolder } from './openapi/openapi.holder';
 
@@ -31,11 +36,15 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     HistoryModule,
     RatingsModule,
     DashboardModule,
+    AccountModule,
+    PushModule,
+    ModerationModule,
     OgModule,
   ],
-  controllers: [HealthController, DocsController],
+  controllers: [HealthController, DocsController, WellKnownController],
   providers: [
     OpenApiHolder,
+    MobileLinksConfig,
     { provide: APP_PIPE, useClass: ZodValidationPipe },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],

@@ -13,6 +13,10 @@
     "test": {
       "dependsOn": ["^build", "build"],
       "outputs": ["coverage/**", "test-results/**"]
+    },
+    "test:pure": {
+      "dependsOn": ["^build", "build"],
+      "outputs": []
     }
   }
 }

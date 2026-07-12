@@ -16,7 +16,7 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "eslint .",
-    "test": "turbo run test",
+    "test": "turbo run test test:pure",
     "test:engine": "yarn workspace @trm/engine test",
     "format": "prettier --write \"**/*.{ts,tsx,mjs,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,mjs,json,md}\""

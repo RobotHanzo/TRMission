@@ -15,7 +15,16 @@ import {
   GOOGLE_ID_TOKEN_VERIFIER,
   type GoogleIdTokenVerifier,
 } from '../src/auth/google-id-token.verifier';
+import {
+  APPLE_ID_TOKEN_VERIFIER,
+  type AppleIdTokenVerifier,
+} from '../src/auth/apple-id-token.verifier';
+import { APPLE_TOKEN_REVOKER, type AppleTokenRevoker } from '../src/account/apple-token-revoker';
 import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
+import {
+  MobileLinksConfig,
+  type MobileLinksConfigOverrides,
+} from '../src/config/mobile-links.config';
 
 export interface TestApp {
   app: INestApplication;
@@ -30,8 +39,14 @@ export interface TestAppOptions {
   oauthHttp?: OauthHttp;
   /** Stub Google ID-token verification (One Tap / rendered-button credential flow). */
   googleVerifier?: GoogleIdTokenVerifier;
+  /** Stub Apple identity-token verification (Sign in with Apple credential flow). */
+  appleVerifier?: AppleIdTokenVerifier;
+  /** Stub Apple token revocation (account deletion). */
+  appleRevoker?: AppleTokenRevoker;
   /** Override DashboardConfig (owner-email bootstrap) without touching env. */
   dashboardConfig?: DashboardConfigOverrides;
+  /** Override MobileLinksConfig (deep-link verification files) without touching env. */
+  mobileLinks?: MobileLinksConfigOverrides;
   /**
    * Reuse an already-running MongoMemoryServer instead of spawning a new `mongod` process.
    * Specs that boot several TestApps (e.g. one per auth-config variant) should share one —
@@ -58,10 +73,18 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
   if (opts.oauthHttp) builder = builder.overrideProvider(OAUTH_HTTP).useValue(opts.oauthHttp);
   if (opts.googleVerifier)
     builder = builder.overrideProvider(GOOGLE_ID_TOKEN_VERIFIER).useValue(opts.googleVerifier);
+  if (opts.appleVerifier)
+    builder = builder.overrideProvider(APPLE_ID_TOKEN_VERIFIER).useValue(opts.appleVerifier);
+  if (opts.appleRevoker)
+    builder = builder.overrideProvider(APPLE_TOKEN_REVOKER).useValue(opts.appleRevoker);
   if (opts.dashboardConfig)
     builder = builder
       .overrideProvider(DashboardConfig)
       .useValue(new DashboardConfig(opts.dashboardConfig));
+  if (opts.mobileLinks)
+    builder = builder
+      .overrideProvider(MobileLinksConfig)
+      .useValue(new MobileLinksConfig(opts.mobileLinks));
 
   const moduleRef = await builder.compile();
 
@@ -95,9 +118,33 @@ export class FakeOauthHttp implements OauthHttp {
 export class FakeGoogleIdTokenVerifier implements GoogleIdTokenVerifier {
   profile: OauthProfile | null = null;
   fail = false;
-  async verify(): Promise<OauthProfile> {
+  lastAudience: string | string[] | null = null;
+  async verify(_idToken: string, audience: string | string[]): Promise<OauthProfile> {
+    this.lastAudience = audience;
     if (this.fail || !this.profile) throw new Error('fake google verify failed');
     return this.profile;
+  }
+}
+
+/** A controllable stand-in for Apple identity-token verification. */
+export class FakeAppleIdTokenVerifier implements AppleIdTokenVerifier {
+  profile: OauthProfile | null = null;
+  fail = false;
+  lastAudience: string[] | null = null;
+  async verify(_idToken: string, audience: string[]): Promise<OauthProfile> {
+    this.lastAudience = audience;
+    if (this.fail || !this.profile) throw new Error('fake apple verify failed');
+    return this.profile;
+  }
+}
+
+/** A controllable stand-in for Apple token revocation. */
+export class FakeAppleTokenRevoker implements AppleTokenRevoker {
+  calls: string[] = [];
+  result = true;
+  async revoke(code: string): Promise<boolean> {
+    this.calls.push(code);
+    return this.result;
   }
 }
 

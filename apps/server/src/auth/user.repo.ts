@@ -6,7 +6,7 @@ import { MONGO_DB } from '../db/tokens';
 import { env } from '../config/env';
 import type { Locale, PublicUser, UserPreferences } from './auth.types';
 import { DEFAULT_PREFERENCES } from './auth.types';
-import type { OauthProvider } from './auth-config';
+import type { IdentityProvider } from './auth-config';
 import { FeatureDefaultsRepo } from './feature-defaults.repo';
 
 export interface UserDoc {
@@ -18,7 +18,7 @@ export interface UserDoc {
   email?: string;
   passwordHash?: string;
   /** Linked OAuth identities: provider → the provider's subject id. Binding key stays `email`. */
-  oauth?: Partial<Record<OauthProvider, string>>;
+  oauth?: Partial<Record<IdentityProvider, string>>;
   /** Avatar URL carried over from an OAuth provider (refreshed on each OAuth sign-in). */
   avatarUrl?: string;
   tokenVersion: number;
@@ -32,7 +32,12 @@ export interface UserDoc {
   features?: UserFeature[];
   /** Set once the user reaches the guided tutorial's finale (self-reported by the client). */
   tutorialCompleted?: boolean;
+  /** Client-side mute list: ids whose chat/name this account chooses not to see. Capped. */
+  blockedUserIds?: string[];
 }
+
+/** Upper bound on the mute list so the user doc stays small (compliance UX, not social graph). */
+const BLOCK_LIST_MAX = 500;
 
 export const toPublicUser = (u: UserDoc): PublicUser => ({
   id: u._id,
@@ -139,7 +144,7 @@ export class UserRepo implements OnModuleInit {
   async attachOauthToGuest(
     userId: string,
     email: string,
-    provider: OauthProvider,
+    provider: IdentityProvider,
     sub: string,
     avatarUrl: string | null,
   ): Promise<UserDoc | null> {
@@ -159,10 +164,47 @@ export class UserRepo implements OnModuleInit {
     );
   }
 
+  /**
+   * Sliding guest lifetime: re-anchor the TTL on activity so an ACTIVE guest is never
+   * hard-deleted mid-use (mobile installs live on guest accounts for a long time).
+   * No-op for registered accounts (the filter excludes them).
+   */
+  async extendGuestExpiry(userId: string): Promise<void> {
+    await this.col.updateOne(
+      { _id: userId, isGuest: true },
+      { $set: { guestExpiresAt: new Date(Date.now() + env.guestTtlMs) } },
+    );
+  }
+
+  async listBlockedUsers(userId: string): Promise<string[]> {
+    const doc = await this.col.findOne({ _id: userId }, { projection: { blockedUserIds: 1 } });
+    return doc?.blockedUserIds ?? [];
+  }
+
+  /**
+   * Adds to the mute list ($addToSet: idempotent). Returns false only when the cap is hit
+   * for a NEW entry — re-blocking an existing entry at the cap still reports success.
+   */
+  async addBlockedUser(userId: string, targetId: string): Promise<boolean> {
+    const res = await this.col.updateOne(
+      {
+        _id: userId,
+        $expr: { $lt: [{ $size: { $ifNull: ['$blockedUserIds', []] } }, BLOCK_LIST_MAX] },
+      },
+      { $addToSet: { blockedUserIds: targetId } },
+    );
+    if (res.matchedCount > 0) return true;
+    return (await this.listBlockedUsers(userId)).includes(targetId);
+  }
+
+  async removeBlockedUser(userId: string, targetId: string): Promise<void> {
+    await this.col.updateOne({ _id: userId }, { $pull: { blockedUserIds: targetId } });
+  }
+
   /** Record a provider identity on an existing account (idempotent re-link); refresh the avatar. */
   linkOauthIdentity(
     userId: string,
-    provider: OauthProvider,
+    provider: IdentityProvider,
     sub: string,
     avatarUrl: string | null,
   ): Promise<UserDoc | null> {
@@ -295,7 +337,7 @@ export class UserRepo implements OnModuleInit {
   async createOauthUser(
     email: string,
     displayName: string,
-    provider: OauthProvider,
+    provider: IdentityProvider,
     sub: string,
     locale: Locale,
     avatarUrl: string | null,

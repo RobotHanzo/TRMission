@@ -1,0 +1,283 @@
+// The rail network — one Skia subtree per route, a faithful port of the web RouteShape.tsx + the
+// MapScene route branch (apps/web/src/components/{RouteShape,MapScene}.tsx) drawn with the shared
+// MAP_DIMS/MAP_INKS tokens (the same numbers game.css resolves through its --m-* vars, so the
+// mobile board can never drift from the web board). Stack per route:
+//   glow bloom → tunnel glint → paper roadbed → ties / ferry pips / car slots → colour-blind chip.
+// Across-track thicknesses counter-scale by `inv` (web --inv-scale) so the network keeps a constant
+// on-screen weight; along-path positions/lengths are map-bound (from the geometry).
+import { Fragment } from 'react';
+import {
+  Circle,
+  DashPathEffect,
+  Group,
+  LinearGradient,
+  Path,
+  Rect,
+  RoundedRect,
+  vec,
+} from '@shopify/react-native-skia';
+import { MAP_DIMS, MAP_INKS, MAP_PALETTE_LIGHT, LIVERY_COLORS } from '@trm/map-data';
+import { CARD_COLOR_TOKENS, GRAY_TOKEN, seatColor } from '../theme/colors';
+import { BoardText } from './skiaText';
+import { ferryLocoBlock, type RouteRenderModel } from './scenePaths';
+import type { RouteOwnership } from './MapSceneSkia';
+
+const D = MAP_DIMS;
+const PALETTE = MAP_PALETTE_LIGHT;
+const DEG = Math.PI / 180;
+/** Muted grey for a locked (unclaimable double-sibling) route — mirrors web MapScene.tsx. */
+const LOCKED_GREY = '#9aa0a6';
+
+const colorOf = (rc: string): string =>
+  rc === 'GRAY'
+    ? GRAY_TOKEN.hex
+    : (CARD_COLOR_TOKENS[rc as keyof typeof CARD_COLOR_TOKENS]?.hex ?? '#888');
+const glyphOf = (rc: string): string =>
+  rc === 'GRAY'
+    ? GRAY_TOKEN.glyph
+    : (CARD_COLOR_TOKENS[rc as keyof typeof CARD_COLOR_TOKENS]?.glyph ?? GRAY_TOKEN.glyph);
+
+function hexToRgb(h: string): [number, number, number] {
+  const s = h.replace('#', '');
+  const v =
+    s.length === 3
+      ? s
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : s;
+  return [parseInt(v.slice(0, 2), 16), parseInt(v.slice(2, 4), 16), parseInt(v.slice(4, 6), 16)];
+}
+/** sRGB blend a→b by t (the owned route's roadbed wash = CSS `color-mix(in srgb, seat 50%, surface)`). */
+function mixHex(a: string, b: string, t: number): string {
+  const pa = hexToRgb(a);
+  const pb = hexToRgb(b);
+  const m = (i: number) => Math.round(pa[i] + (pb[i] - pa[i]) * t);
+  return `rgb(${m(0)}, ${m(1)}, ${m(2)})`;
+}
+
+export interface RouteLayerProps {
+  model: readonly RouteRenderModel[];
+  owned?: ReadonlyMap<string, RouteOwnership> | undefined;
+  glowingRoutes?: ReadonlyMap<string, number> | undefined;
+  colorBlind?: boolean | undefined;
+  /** Draw required-loco rainbow pips on unclaimed ferries (default true). */
+  showFerryLocos?: boolean | undefined;
+  /** Track-weight counter-scale (web --inv-scale). */
+  inv: number;
+}
+
+export function RouteLayer({
+  model,
+  owned,
+  glowingRoutes,
+  colorBlind,
+  showFerryLocos = true,
+  inv,
+}: RouteLayerProps) {
+  return (
+    <>
+      {model.map((m) => {
+        const o = owned?.get(m.id);
+        const isOwned = !!o;
+        // Unclaimed → route colour; claimed → owner's seat colour; locked → muted grey.
+        const fill =
+          o?.ownerSeat !== undefined
+            ? seatColor(o.ownerSeat)
+            : o?.locked
+              ? LOCKED_GREY
+              : colorOf(m.color);
+        const carOpacity = o?.locked ? 0.45 : 1;
+        // A claimed route washes its roadbed with 50% of the owner's seat colour; others stay paper.
+        const bedColor =
+          o?.ownerSeat !== undefined
+            ? mixHex(seatColor(o.ownerSeat), PALETTE.surface, 0.5)
+            : PALETTE.surface;
+        const bedW = (isOwned ? D.bedOwnedW : D.bedW) * inv;
+        const slotStrokeW = (isOwned ? D.slotOwnedStrokeW : D.slotStrokeW) * inv;
+        const slotH = D.slotH * inv;
+        const slotRx = D.slotRx * inv;
+        const glowSeat = glowingRoutes?.get(m.id);
+        // Once owned, ferry pips take the owner's colour (no rainbow); the backdrop hides them too.
+        const ferryLocos = isOwned || showFerryLocos === false ? 0 : m.ferryLocos;
+        const loco = ferryLocoBlock(m.length, ferryLocos);
+
+        return (
+          <Group
+            key={m.id}
+            transform={[{ translateX: m.perp.x * inv }, { translateY: m.perp.y * inv }]}
+          >
+            {glowSeat !== undefined && (
+              <Path
+                path={m.bed}
+                style="stroke"
+                strokeWidth={D.bedOwnedW * 2.4 * inv}
+                strokeCap="round"
+                color={seatColor(glowSeat)}
+                opacity={0.3}
+              />
+            )}
+            {m.isTunnel && (
+              <Path
+                path={m.bed}
+                style="stroke"
+                strokeWidth={D.tunnelBgW * inv}
+                strokeCap="round"
+                color={MAP_INKS.tunnelBg}
+                opacity={MAP_INKS.tunnelBgOpacity}
+              />
+            )}
+            <Path
+              path={m.bed}
+              style="stroke"
+              strokeWidth={bedW}
+              strokeCap="round"
+              color={bedColor}
+              opacity={isOwned ? 1 : D.bedOpacity}
+            />
+
+            {m.isTunnel &&
+              m.ties.map((t, i) => (
+                <Group
+                  key={`tie${i}`}
+                  transform={[
+                    { translateX: t.x },
+                    { translateY: t.y },
+                    { rotate: (t.angle + 45) * DEG },
+                  ]}
+                >
+                  <Rect
+                    x={(-D.tieW / 2) * inv}
+                    y={(-D.tieH / 2) * inv}
+                    width={D.tieW * inv}
+                    height={D.tieH * inv}
+                    color={MAP_INKS.tie}
+                    opacity={MAP_INKS.tieOpacity}
+                  />
+                </Group>
+              ))}
+
+            {m.isFerry ? (
+              <>
+                <Path
+                  path={m.bed}
+                  style="stroke"
+                  strokeWidth={D.ferryLineW * inv}
+                  strokeCap="round"
+                  color={MAP_INKS.ferryLine}
+                >
+                  <DashPathEffect intervals={[0.1, 2.55]} />
+                </Path>
+                {m.slots.map((s, i) => {
+                  const isLoco = ferryLocos > 0 && i >= loco.start && i < loco.end;
+                  return isLoco ? (
+                    <Group
+                      key={`p${i}`}
+                      transform={[
+                        { translateX: s.x },
+                        { translateY: s.y },
+                        { rotate: s.angle * DEG },
+                      ]}
+                    >
+                      <RoundedRect
+                        x={-s.len / 2}
+                        y={-slotH / 2}
+                        width={s.len}
+                        height={slotH}
+                        r={slotRx}
+                        opacity={carOpacity}
+                      >
+                        <LinearGradient
+                          start={vec(-s.len / 2, 0)}
+                          end={vec(s.len / 2, 0)}
+                          colors={LIVERY_COLORS as string[]}
+                        />
+                      </RoundedRect>
+                      <RoundedRect
+                        x={-s.len / 2}
+                        y={-slotH / 2}
+                        width={s.len}
+                        height={slotH}
+                        r={slotRx}
+                        style="stroke"
+                        strokeWidth={D.ferryLocoStrokeW * inv}
+                        color={MAP_INKS.ferryLocoEdge}
+                      />
+                    </Group>
+                  ) : (
+                    <Fragment key={`p${i}`}>
+                      <Circle
+                        cx={s.x}
+                        cy={s.y}
+                        r={D.ferryPipR * inv}
+                        color={fill}
+                        opacity={carOpacity}
+                      />
+                      <Circle
+                        cx={s.x}
+                        cy={s.y}
+                        r={D.ferryPipR * inv}
+                        style="stroke"
+                        strokeWidth={D.ferryPipStrokeW * inv}
+                        color={MAP_INKS.carEdge}
+                      />
+                    </Fragment>
+                  );
+                })}
+              </>
+            ) : (
+              m.slots.map((s, i) => (
+                <Group
+                  key={`c${i}`}
+                  transform={[{ translateX: s.x }, { translateY: s.y }, { rotate: s.angle * DEG }]}
+                >
+                  <RoundedRect
+                    x={-s.len / 2}
+                    y={-slotH / 2}
+                    width={s.len}
+                    height={slotH}
+                    r={slotRx}
+                    color={fill}
+                    opacity={carOpacity}
+                  />
+                  <RoundedRect
+                    x={-s.len / 2}
+                    y={-slotH / 2}
+                    width={s.len}
+                    height={slotH}
+                    r={slotRx}
+                    style="stroke"
+                    strokeWidth={slotStrokeW}
+                    color={MAP_INKS.carEdge}
+                  />
+                </Group>
+              ))
+            )}
+
+            {colorBlind && !isOwned && (
+              <>
+                <Circle cx={m.mid.x} cy={m.mid.y} r={D.glyphR * inv} color={PALETTE.surface} />
+                <Circle
+                  cx={m.mid.x}
+                  cy={m.mid.y}
+                  r={D.glyphR * inv}
+                  style="stroke"
+                  strokeWidth={D.glyphStrokeW * inv}
+                  color={PALETTE.ink}
+                />
+                <BoardText
+                  text={glyphOf(m.color)}
+                  x={m.mid.x}
+                  y={m.mid.y - 1.15 * inv}
+                  size={2.3 * inv}
+                  color={PALETTE.ink}
+                  maxWidth={8}
+                />
+              </>
+            )}
+          </Group>
+        );
+      })}
+    </>
+  );
+}

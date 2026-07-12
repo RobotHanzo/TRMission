@@ -39,6 +39,8 @@ export const DASHBOARD_PERMISSIONS = [
   'maps.moderate',
   'ratings.read',
   'config.features',
+  'reports.read',
+  'reports.resolve',
 ] as const;
 export type DashboardPermission = (typeof DASHBOARD_PERMISSIONS)[number];
 
@@ -64,6 +66,8 @@ const MODERATOR_PERMISSIONS: readonly DashboardPermission[] = [
   'games.terminate',
   'rooms.close',
   'rooms.transferHost',
+  'reports.read',
+  'reports.resolve',
 ];
 
 const ADMIN_PERMISSIONS: readonly DashboardPermission[] = [

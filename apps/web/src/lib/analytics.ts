@@ -109,6 +109,8 @@ const SCREEN_TO_PATH: Record<View, string> = {
   adminSpectate: '/admin-spectate/:gameId',
   maps: '/maps',
   mapEditor: '/maps/:id/edit',
+  deleteAccount: '/account/delete',
+  privacy: '/privacy',
 };
 
 export function trackPageView(screen: View): void {

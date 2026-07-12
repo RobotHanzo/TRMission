@@ -14,7 +14,12 @@ export function stateDigest(state: GameState): string {
 
 /** Deep clone of a (JSON-safe) game state. */
 export function cloneState(state: GameState): GameState {
-  return structuredClone(state) as GameState;
+  // structuredClone is absent on Hermes (React Native). GameState is JSON-safe by construction, so
+  // a JSON round-trip is an exact clone there; on Node it still uses structuredClone. The clone must
+  // stay byte-identical either way — the golden-replay stateDigest gate depends on it.
+  return typeof structuredClone === 'function'
+    ? (structuredClone(state) as GameState)
+    : (JSON.parse(JSON.stringify(state)) as GameState);
 }
 
 export interface ReplayResult {

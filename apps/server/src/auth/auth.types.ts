@@ -65,6 +65,8 @@ export interface OauthStatePayload {
   nonce: string;
   codeVerifier: string;
   guestUserId?: string;
+  /** Set when the flow started with ?client=mobile: the callback hands off via /m/callback. */
+  mobile?: boolean;
 }
 
 export interface PublicUser {

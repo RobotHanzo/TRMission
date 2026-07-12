@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Edit3, Plus, Trash2 } from 'lucide-react';
+import { Edit3, Flag, Plus, Trash2 } from 'lucide-react';
+import { REPORT_CATEGORIES, type ReportCategory } from '@trm/shared';
 import {
   api,
   ApiError,
@@ -36,6 +37,12 @@ export default function MapsScreen() {
     confirm: confirmDelete,
     cancel: cancelDelete,
   } = useConfirmAction();
+  // Report-a-shared-map (Apple 1.2 / Play UGC): the peek is where share codes circulate,
+  // and the mobile builder WebView embeds this same surface.
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportCategory, setReportCategory] = useState<ReportCategory>('INAPPROPRIATE_CONTENT');
+  const [reportMsg, setReportMsg] = useState('');
+  const [reportState, setReportState] = useState<'idle' | 'sent' | 'failed'>('idle');
 
   const refresh = () => {
     api
@@ -230,6 +237,45 @@ export default function MapsScreen() {
               <button className="primary" disabled={cloning} onClick={() => void doClone()}>
                 {t('builder.cloneMap')}
               </button>
+              {reportState === 'sent' ? (
+                <p className="muted">{t('builder.reportDone')}</p>
+              ) : reportOpen ? (
+                <div className="stack">
+                  <label htmlFor="report-category">{t('builder.reportReason')}</label>
+                  <select
+                    id="report-category"
+                    value={reportCategory}
+                    onChange={(e) => setReportCategory(e.target.value as ReportCategory)}
+                  >
+                    {REPORT_CATEGORIES.map((c) => (
+                      <option key={c} value={c}>
+                        {t(`report.category_${c}`)}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    placeholder={t('builder.reportMessage')}
+                    value={reportMsg}
+                    maxLength={1000}
+                    onChange={(e) => setReportMsg(e.target.value)}
+                  />
+                  {reportState === 'failed' && <p className="error">{t('builder.reportFailed')}</p>}
+                  <button
+                    onClick={() =>
+                      void api
+                        .reportSharedMap(code.trim(), reportCategory, reportMsg.trim() || undefined)
+                        .then(() => setReportState('sent'))
+                        .catch(() => setReportState('failed'))
+                    }
+                  >
+                    {t('builder.reportSubmit')}
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setReportOpen(true)}>
+                  <Flag size={14} aria-hidden /> {t('builder.reportMap')}
+                </button>
+              )}
             </div>
           )}
         </div>

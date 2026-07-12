@@ -11,6 +11,8 @@ import { AuthModule } from '../auth/auth.module';
 import { MetricsService } from '../observability/metrics.service';
 import { MapsModule } from '../maps/maps.module';
 import { MapContentRepo } from '../maps/map-content.repo';
+import { PushModule } from '../push/push.module';
+import { PushService } from '../push/push.service';
 import { env } from '../config/env';
 
 /** Static registry first (official maps, zero I/O); fall back to Mongo for custom-map content
@@ -30,7 +32,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
 // Provides the WebSocket hub through DI (verifier = JWT ws-ticket, metrics wired), so
 // the lobby can start games and main can attach it to the raw ws server.
 @Module({
-  imports: [AuthModule, MapsModule],
+  imports: [AuthModule, MapsModule, PushModule],
   providers: [
     GameRegistry,
     {
@@ -41,6 +43,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
         tokens: TokenService,
         metrics: MetricsService,
         mapContents: MapContentRepo,
+        push: PushService,
       ) =>
         new GameHub(registry, {
           store,
@@ -48,8 +51,14 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
           metrics,
           botMoveDelayMs: env.botMoveDelayMs,
           boardResolver: makeBoardResolver(mapContents),
+          // The hub stays framework-free: adapt the Nest service into the plain sink.
+          push: {
+            yourTurn: (gameId, playerId) => push.notifyYourTurn(gameId, playerId),
+            gameOver: (gameId, playerIds) => push.notifyGameOver(gameId, playerIds),
+          },
+          yourTurnDelayMs: env.pushYourTurnDelayMs,
         }),
-      inject: [GameRegistry, GAME_STORE, TokenService, MetricsService, MapContentRepo],
+      inject: [GameRegistry, GAME_STORE, TokenService, MetricsService, MapContentRepo, PushService],
     },
   ],
   exports: [GameHub, GameRegistry],

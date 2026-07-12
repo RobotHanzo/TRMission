@@ -4,6 +4,9 @@ import { env } from '../config/env';
 export type OauthProvider = 'google' | 'discord';
 export const OAUTH_PROVIDERS: readonly OauthProvider[] = ['google', 'discord'];
 
+/** Providers an account identity can be linked under. Apple is credential-only (no redirect flow). */
+export type IdentityProvider = OauthProvider | 'apple';
+
 /** Everything needed to drive one provider's authorization-code + PKCE flow. */
 export interface ProviderConfig {
   provider: OauthProvider;
@@ -44,6 +47,8 @@ export interface AuthConfigOverrides {
   guest?: boolean;
   redirectBase?: string;
   providers?: Partial<Record<OauthProvider, { clientId: string; clientSecret: string }>>;
+  googleMobileClientIds?: string[];
+  appleClientIds?: string[];
 }
 
 /**
@@ -56,6 +61,8 @@ export class AuthConfig {
   readonly passwordLogin: boolean;
   readonly guest: boolean;
   readonly redirectBase: string;
+  readonly googleMobileClientIds: string[];
+  readonly appleClientIds: string[];
   private readonly providers: Record<OauthProvider, ProviderConfig | null>;
 
   // @Optional so Nest injects `undefined` for the real provider (env-driven); tests pass overrides
@@ -64,6 +71,8 @@ export class AuthConfig {
     this.passwordLogin = overrides?.passwordLogin ?? env.authPasswordLogin;
     this.guest = overrides?.guest ?? env.authGuest;
     this.redirectBase = (overrides?.redirectBase ?? env.oauthRedirectBase).replace(/\/+$/, '');
+    this.googleMobileClientIds = overrides?.googleMobileClientIds ?? env.googleMobileClientIds;
+    this.appleClientIds = overrides?.appleClientIds ?? env.appleClientIds;
     const g = overrides?.providers?.google;
     const d = overrides?.providers?.discord;
     this.providers = {
@@ -85,6 +94,17 @@ export class AuthConfig {
     return this.providers[p] ?? null;
   }
 
+  /** Sign in with Apple is credential-only: enabled iff at least one audience is configured. */
+  get appleEnabled(): boolean {
+    return this.appleClientIds.length > 0;
+  }
+
+  /** Every audience a Google ID token may carry: web client id + native app client ids. */
+  googleAudiences(): string[] {
+    const g = this.providers.google;
+    return g ? [g.clientId, ...this.googleMobileClientIds] : [];
+  }
+
   /** The provider `redirect_uri` — must byte-match the value registered in the provider console. */
   callbackUrl(p: OauthProvider): string {
     return `${this.redirectBase}/api/v1/auth/oauth/${p}/callback`;
@@ -99,17 +119,30 @@ export class AuthConfig {
     return `${this.redirectBase}/login/callback${qs ? `?${qs}` : ''}`;
   }
 
+  /** Mobile deep-link landing (Universal/App Link): carries a one-time exchange code or error. */
+  mobileCallback(params: { code?: string; error?: string }): string {
+    const q = new URLSearchParams();
+    if (params.code) q.set('code', params.code);
+    if (params.error) q.set('error', params.error);
+    const qs = q.toString();
+    return `${this.redirectBase}/m/callback${qs ? `?${qs}` : ''}`;
+  }
+
   /** The UI hint sent to the web app so it renders only the available entry methods. */
   publicConfig(): {
     passwordLogin: boolean;
     guest: boolean;
-    providers: { google: boolean; discord: boolean };
+    providers: { google: boolean; discord: boolean; apple: boolean };
     googleClientId?: string;
   } {
     return {
       passwordLogin: this.passwordLogin,
       guest: this.guest,
-      providers: { google: !!this.providers.google, discord: !!this.providers.discord },
+      providers: {
+        google: !!this.providers.google,
+        discord: !!this.providers.discord,
+        apple: this.appleEnabled,
+      },
       ...(this.providers.google ? { googleClientId: this.providers.google.clientId } : {}),
     };
   }

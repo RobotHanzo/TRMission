@@ -4,7 +4,7 @@ import type { GameState } from '@trm/engine';
 import { asPlayerId, type SeatIndex } from '@trm/shared';
 import { GameRegistry } from '../src/game/game-registry';
 import { GameHub } from '../src/ws/hub';
-import type { BotProfile } from '../src/bots/types';
+import type { BotProfile } from '@trm/bots';
 import type { MetricsHooks } from '../src/observability/hooks';
 import type { ChatEntry, GameStorePort } from '../src/persistence/types';
 

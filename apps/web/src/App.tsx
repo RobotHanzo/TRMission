@@ -11,6 +11,8 @@ import { GameScreen } from './screens/GameScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { LoginCallback } from './screens/LoginCallback';
 import { HistoryScreen } from './screens/HistoryScreen';
+import { DeleteAccountScreen } from './screens/DeleteAccountScreen';
+import { PrivacyScreen } from './screens/PrivacyScreen';
 import './styles/app.css';
 import './styles/home.css';
 
@@ -117,6 +119,8 @@ export function App() {
             {view === 'home' && <HomeScreen />}
             {view === 'room' && <RoomScreen />}
             {view === 'history' && <HistoryScreen />}
+            {view === 'deleteAccount' && <DeleteAccountScreen />}
+            {view === 'privacy' && <PrivacyScreen />}
             {view === 'maps' && (
               <Suspense fallback={<div className="card">{t('connecting')}</div>}>
                 <MapsScreen />

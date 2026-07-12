@@ -54,12 +54,15 @@ gitignored and a drift between it and the `.proto` is a CI failure.
 ## Monorepo layout & build order
 
 ```
-packages/proto  → shared → map-data → engine → apps/{server,web,admin}
+packages/proto  → shared → map-data → engine → bots/codec → apps/{server,web,admin,mobile}
 ```
 
 - `@trm/shared` — enums, scoring/rule constants, **seeded counter PRNG**, ids, error taxonomy, digest.
 - `@trm/map-data` — the authored Taiwan content (cities/routes/tickets) + `validate()` + `CONTENT_HASH`.
 - `@trm/engine` — the **pure deterministic reducer** (rules, scoring, longest-trail, connectivity).
+- `@trm/bots` — the pure bot policy (`chooseBotAction`: ranks the engine's own `legalActions`
+  with difficulty heuristics; deterministic per state+botId). Shared by the server's bot
+  driver and the mobile app's offline games.
 - `@trm/proto` — protobuf-es wire protocol (the engine⇄wire contract).
 - `apps/server` — NestJS: WebSocket gateway + REST (auth/lobby/history/dashboard) + Mongo + OpenAPI + bots.
 - `apps/web` — React + Vite + TS: SVG board, realtime client, i18n, zustand.
@@ -67,6 +70,10 @@ packages/proto  → shared → map-data → engine → apps/{server,web,admin}
   `/admin/`). Dashboard access lives in the `dashboardAccounts` collection (role + per-account
   permission overrides referencing `users._id`); the permission taxonomy is in `@trm/shared`.
   A LIVE game's hidden info (state, action log, even the seed) never reaches this surface.
+- `apps/mobile` — React Native + Expo client (`@trm/mobile`); reuses the TS packages and
+  authenticates against the P0 mobile server surface (guest/password/Google/Apple/Discord). Point it
+  at a server with `TRM_SERVER_ORIGIN` (the app is not served same-origin — absolute API/WS base +
+  token-in-body refresh). Builds via GitHub Actions + fastlane (no EAS). See its `CLAUDE.md`.
 
 Internal packages export **TS source** (no per-lib build step) except `proto` (codegen). Each area
 has its own `CLAUDE.md` with the local architecture — read it before working there.
@@ -124,6 +131,24 @@ demo game on boot), `TRM_BOT_DELAY_MS` (pause between bot moves; `0` in tests),
 `JWT_ACCESS_TTL`, `WS_TICKET_TTL`, `REFRESH_TTL_MS`, `GUEST_TTL_MS`,
 `DASHBOARD_OWNER_EMAILS` (comma list of registered emails granted the `owner` dashboard role at
 every boot; other maintainers are managed from the dashboard itself).
+
+Mobile clients: `MOBILE_MIN_BUILD` (forced-update floor served at `GET /version/mobile`),
+`GOOGLE_MOBILE_CLIENT_IDS` (comma list — extra ID-token audiences for the iOS/Android
+Google Sign-In apps), `APPLE_CLIENT_IDS` (comma list of bundle ids / Services IDs accepted
+as Sign in with Apple identity-token audiences — enables `POST /auth/oauth/apple/credential`),
+`APPLE_TEAM_ID` + `APPLE_KEY_ID` + `APPLE_PRIVATE_KEY` (SIWA token revocation during
+`DELETE /auth/me` account deletion; revocation is best-effort per TN3194),
+`APPLE_APP_ID` + `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256`
+(serve `/.well-known/apple-app-site-association` + `assetlinks.json` for the `/m/callback`
+deep link; unset ⇒ 404). A client sending `x-trm-client: mobile` receives its refresh
+token in the response body (Keychain/Keystore storage) instead of the Strict cookie, and
+`POST /auth/refresh`/`logout` accept `{refreshToken}` in the body. Guest TTLs slide
+forward on refresh. The builder WebView converts a carry code into a web cookie session via
+`GET /auth/mobile-web-handoff` (302 → `/maps`). Push (`src/push/`, direct — no relay): Android via
+`FCM_PROJECT_ID`+`FCM_CLIENT_EMAIL`+`FCM_PRIVATE_KEY`, iOS via
+`APNS_TEAM_ID`+`APNS_KEY_ID`+`APNS_PRIVATE_KEY`+`APNS_BUNDLE_ID` (+`APNS_SANDBOX=1`);
+a platform is enabled only when ALL its credentials are set. `PUSH_YOUR_TURN_DELAY_MS`
+debounces the your-turn reminder (default 15s).
 
 **Auth methods** (each independently switchable; the web reads `GET /auth/config`, the server
 enforces): `AUTH_PASSWORD_LOGIN_ENABLED` (`0` disables email/password login+register+upgrade),

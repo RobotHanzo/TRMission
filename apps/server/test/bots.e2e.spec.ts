@@ -11,7 +11,7 @@ import { asPlayerId, type PlayerId, type SeatIndex } from '@trm/shared';
 import { GameRegistry } from '../src/game/game-registry';
 import { GameHub } from '../src/ws/hub';
 import { makeDevTicket } from '../src/ws/ticket';
-import type { BotProfile, BotDifficulty } from '../src/bots/types';
+import type { BotProfile, BotDifficulty } from '@trm/bots';
 import { encodeClient, actionToCommand, pickAction } from './helpers';
 
 const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 0));

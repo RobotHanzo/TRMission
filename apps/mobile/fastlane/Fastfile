@@ -1,0 +1,31 @@
+# Self-managed iOS signing + TestFlight delivery — no EAS. `match` pulls certs/profiles from a
+# private git repo; `gym` builds the .ipa; `pilot` uploads to TestFlight. An App Store Connect API
+# key (ASC_KEY_*) authenticates all three, so no Apple ID password / 2FA is needed in CI.
+default_platform(:ios)
+
+platform :ios do
+  desc "Build the app and upload it to TestFlight"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_content: ENV["ASC_KEY_P8"],
+      is_key_content_base64: true
+    )
+
+    # Read-only in CI: certs/profiles are provisioned once locally with `fastlane match appstore`.
+    match(type: "appstore", readonly: true, api_key: api_key)
+
+    # NOTE (reground): confirm the scheme/workspace names `expo prebuild` generates for this app.
+    gym(
+      workspace: "ios/TRMission.xcworkspace",
+      scheme: "TRMission",
+      export_method: "app-store"
+    )
+
+    pilot(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

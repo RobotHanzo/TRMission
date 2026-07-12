@@ -13,6 +13,20 @@ export const env = {
   devGame: process.env.TRM_DEV_GAME === '1',
   /** Delay between consecutive bot moves (ms) so humans can follow the play. */
   botMoveDelayMs: Number(process.env.TRM_BOT_DELAY_MS ?? 600),
+  /** Force-update floor for the mobile app: builds below this are told to update. 0 = off. */
+  mobileMinBuild: Number(process.env.MOBILE_MIN_BUILD ?? 0),
+
+  // Mobile push (src/push). Each platform enables only when ALL of its credentials are set.
+  fcmProjectId: process.env.FCM_PROJECT_ID ?? '',
+  fcmClientEmail: process.env.FCM_CLIENT_EMAIL ?? '',
+  fcmPrivateKey: (process.env.FCM_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
+  apnsTeamId: process.env.APNS_TEAM_ID ?? '',
+  apnsKeyId: process.env.APNS_KEY_ID ?? '',
+  apnsPrivateKey: (process.env.APNS_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
+  apnsBundleId: process.env.APNS_BUNDLE_ID ?? '',
+  apnsSandbox: process.env.APNS_SANDBOX === '1',
+  /** Debounce before a your-turn push to a socketless player (ms; 0 = immediate). */
+  pushYourTurnDelayMs: Number(process.env.PUSH_YOUR_TURN_DELAY_MS ?? 15_000),
 
   // Auth (Step C). The default secret is for local dev only — set JWT_SECRET in prod.
   jwtSecret: process.env.JWT_SECRET ?? 'dev-insecure-secret-change-me',
@@ -40,6 +54,27 @@ export const env = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
   discordClientId: process.env.DISCORD_CLIENT_ID ?? '',
   discordClientSecret: process.env.DISCORD_CLIENT_SECRET ?? '',
+  /** Extra Google OAuth client ids (iOS/Android apps) accepted as ID-token audiences. */
+  googleMobileClientIds: (process.env.GOOGLE_MOBILE_CLIENT_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+  /** Sign in with Apple audiences: bundle ids / Services IDs accepted as identity-token `aud`. */
+  appleClientIds: (process.env.APPLE_CLIENT_IDS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+  /** Sign in with Apple token revocation (account deletion). All three + a client id required. */
+  appleTeamId: process.env.APPLE_TEAM_ID ?? '',
+  appleKeyId: process.env.APPLE_KEY_ID ?? '',
+  applePrivateKey: (process.env.APPLE_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
+  /** Universal/App Link verification (served under /.well-known when set). */
+  appleAppId: process.env.APPLE_APP_ID ?? '', // "TEAMID.bundle.id"
+  androidPackageName: process.env.ANDROID_PACKAGE_NAME ?? '',
+  androidCertSha256: (process.env.ANDROID_CERT_SHA256 ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
   /**
    * Public base URL the browser uses to reach this app. Builds both the provider `redirect_uri`
    * (`${base}/api/v1/auth/oauth/:provider/callback`) and the post-callback web redirect

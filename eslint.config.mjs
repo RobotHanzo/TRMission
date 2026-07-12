@@ -17,6 +17,9 @@ export default tseslint.config(
       '**/src/gen/**',
       '.yarn/**',
       '**/*.config.{js,mjs,cjs}',
+      // jest infrastructure is CommonJS by necessity (loaded by jest itself, not the app).
+      '**/__mocks__/**',
+      '**/jest.resolver.js',
     ],
   },
   eslint.configs.recommended,
@@ -66,6 +69,26 @@ export default tseslint.config(
       'no-restricted-syntax': [
         'error',
         { selector: "NewExpression[callee.name='Date']", message: 'No wall-clock in the engine.' },
+      ],
+    },
+  },
+  // Bot policy determinism: a pick must be a pure function of state + botId (the server
+  // logs the chosen action, so replay/recovery must reproduce it byte-identically).
+  {
+    files: ['packages/bots/src/**/*.ts'],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'Math',
+          property: 'random',
+          message: 'Bot picks must be deterministic — seed from state.actionSeq (see rngFor).',
+        },
+        {
+          object: 'Date',
+          property: 'now',
+          message: 'Bot picks must be deterministic — no wall-clock.',
+        },
       ],
     },
   },

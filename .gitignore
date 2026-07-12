@@ -9,6 +9,11 @@ build/
 # generated code
 packages/proto/src/gen/
 
+# mobile — Continuous Native Generation (expo prebuild output) + local dev cache
+apps/mobile/android/
+apps/mobile/ios/
+apps/mobile/.expo/
+
 # test / coverage
 coverage/
 .vitest/
@@ -49,3 +54,6 @@ yarn-error.log*
 *.local
 te_rules_2015_en.pdf
 .playwright-mcp/
+
+# OTA code-signing PRIVATE key (cert is committed; key lives on the OTA server secret mount)
+apps/mobile/certs/keys/

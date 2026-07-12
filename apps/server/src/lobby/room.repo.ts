@@ -3,7 +3,7 @@ import { randomInt } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
 import type { EventsMode, ChatPresetId } from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
-import type { BotDifficulty } from '../bots/types';
+import type { BotDifficulty } from '@trm/bots';
 
 export type RoomStatus = 'LOBBY' | 'STARTED' | 'CLOSED';
 export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';

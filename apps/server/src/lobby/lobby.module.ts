@@ -6,9 +6,10 @@ import { RoomRepo } from './room.repo';
 import { GameModule } from '../game/game.module';
 import { AuthModule } from '../auth/auth.module';
 import { MapsModule } from '../maps/maps.module';
+import { PushModule } from '../push/push.module';
 
 @Module({
-  imports: [GameModule, AuthModule, MapsModule],
+  imports: [GameModule, AuthModule, MapsModule, PushModule],
   // Public controller first so `GET /rooms/public` is not captured by the guarded `/rooms/:code`.
   controllers: [LobbyPublicController, LobbyController],
   providers: [LobbyService, RoomRepo],

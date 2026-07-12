@@ -1,0 +1,4 @@
+source "https://rubygems.org"
+
+# fastlane drives self-managed iOS signing (match) + TestFlight delivery (gym/pilot) in mobile-ios.yml.
+gem "fastlane"

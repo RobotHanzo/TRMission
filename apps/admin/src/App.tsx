@@ -3,6 +3,7 @@ import {
   Activity,
   ClipboardList,
   DoorOpen,
+  Flag,
   Languages,
   LogOut,
   Map as MapIcon,
@@ -30,6 +31,7 @@ import { RatingsView } from './views/RatingsView';
 import { MaintainersView } from './views/MaintainersView';
 import { AuditView } from './views/AuditView';
 import { PurgeView } from './views/PurgeView';
+import { ReportsView } from './views/ReportsView';
 import { ToastStack } from './components/ToastStack';
 
 const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof Users }[] = [
@@ -40,6 +42,7 @@ const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof User
   { view: 'rooms', permission: 'rooms.read', icon: DoorOpen },
   { view: 'maps', permission: 'maps.read', icon: MapIcon },
   { view: 'ratings', permission: 'ratings.read', icon: Star },
+  { view: 'reports', permission: 'reports.read', icon: Flag },
   { view: 'maintainers', permission: 'maintainers.read', icon: ShieldCheck },
   { view: 'audit', permission: 'audit.read', icon: ClipboardList },
   { view: 'purge', permission: 'purge.read', icon: Trash2 },
@@ -72,6 +75,8 @@ function ActiveView({ view }: { view: AdminView }) {
       return <AuditView />;
     case 'purge':
       return <PurgeView />;
+    case 'reports':
+      return <ReportsView />;
     default:
       return <OverviewView />;
   }

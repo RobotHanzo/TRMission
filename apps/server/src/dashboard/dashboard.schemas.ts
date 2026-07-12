@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { DASHBOARD_PERMISSIONS, DASHBOARD_ROLES, USER_FEATURES } from '@trm/shared';
+import {
+  DASHBOARD_PERMISSIONS,
+  DASHBOARD_ROLES,
+  REPORT_CATEGORIES,
+  USER_FEATURES,
+} from '@trm/shared';
 
 // zod is the single source for both validation (ZodValidationPipe + DTOs) and the
 // OpenAPI schemas (apiSchema()), per the auth/maps modules.
@@ -382,4 +387,43 @@ export const RatingsListSchema = z.object({
   nextCursor: z.string().nullable(),
   avgStars: z.number().nullable(),
   totalCount: z.number(),
+});
+
+// ---- reports (UGC moderation) ---------------------------------------------------------
+
+export const ReportsListQuerySchema = z.object({
+  status: z.enum(['open', 'resolved', 'all']).default('open'),
+  limit,
+  cursor,
+});
+export class ReportsListQueryDto extends createZodDto(ReportsListQuerySchema) {}
+
+export const ResolveReportSchema = z.object({ note: z.string().trim().max(500).optional() });
+export class ResolveReportDto extends createZodDto(ResolveReportSchema) {}
+
+export const ReportRowSchema = z.object({
+  id: z.string(),
+  kind: z.enum(['player', 'map']),
+  status: z.enum(['open', 'resolved']),
+  category: z.enum(REPORT_CATEGORIES),
+  reporterId: z.string(),
+  reporterName: z.string(),
+  message: z.string().optional(),
+  reportedUserId: z.string().optional(),
+  reportedName: z.string().optional(),
+  gameId: z.string().optional(),
+  roomCode: z.string().optional(),
+  mapId: z.string().optional(),
+  shareCode: z.string().optional(),
+  mapNameZh: z.string().optional(),
+  mapNameEn: z.string().optional(),
+  resolvedByName: z.string().optional(),
+  resolutionNote: z.string().optional(),
+  resolvedAt: z.string().optional(),
+  createdAt: z.string(),
+});
+
+export const ReportsListSchema = z.object({
+  reports: z.array(ReportRowSchema),
+  nextCursor: z.string().nullable(),
 });

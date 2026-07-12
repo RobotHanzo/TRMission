@@ -10,7 +10,7 @@ import {
 import { asPlayerId, type SeatIndex } from '@trm/shared';
 import { GameRegistry } from '../src/game/game-registry';
 import { GameHub } from '../src/ws/hub';
-import type { BotProfile, BotDifficulty } from '../src/bots/types';
+import type { BotProfile, BotDifficulty } from '@trm/bots';
 
 const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
 

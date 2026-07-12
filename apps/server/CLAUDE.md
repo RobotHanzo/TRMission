@@ -99,6 +99,40 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   the SPA's origin. A logged-in guest's id is read from the refresh cookie at `/oauth/:p/start`
   (`SessionRepo.peekUserId`, no rotation) and carried in the signed `state`, because the callback
   arrives cross-site without the cookie.
+  **Mobile transport** (no SameSite cookie can reach a native app): `x-trm-client: mobile`
+  on any issuance route returns the refresh token in the body; `/auth/refresh` + `/auth/logout`
+  take `{refreshToken}` in the body (body-in → body-out, never a cookie). The OAuth redirect
+  flow with `?client=mobile` ends at `/m/callback?code=<single-use exchange code>` (minted in
+  `mobile-code.repo.ts`, redeemed by `POST /auth/mobile/exchange` for a fresh token pair);
+  a signed-in guest is carried via `POST /auth/mobile/carry` → `?carry=` (the cookie-free
+  analogue of the refresh-cookie peek). Google ID tokens verify against
+  `AuthConfig.googleAudiences()` (web + `GOOGLE_MOBILE_CLIENT_IDS`).
+  The builder WebView's session handoff is `GET /api/v1/auth/mobile-web-handoff?code=` —
+  it redeems the same single-use carry code (`POST /auth/mobile/carry` over Bearer), mints a
+  NEW web session family, sets the normal Strict refresh cookie, and 302s to `/maps`
+  (errors 302 to `/login/callback?error=…`, never a 500 on a top-level navigation). It is
+  the one sanctioned way a native session becomes a web cookie session.
+  **Sign in with Apple** is credential-only: `POST /auth/oauth/apple/credential`
+  (`{identityToken, fullName?, refreshToken?}`) verifies against Apple's JWKS
+  (`apple-id-token.verifier.ts`, audiences = `APPLE_CLIENT_IDS`) and converges on
+  `resolveAccount` under the `'apple'` identity — Hide My Email relay addresses are
+  treated as verified emails and simply don't cross-link with other providers. There is
+  no `/oauth/apple/start`; Apple never enters the redirect flow.
+  **Account deletion**: `DELETE /auth/me` (Bearer; optional `{appleAuthorizationCode}` from a
+  fresh SIWA re-auth for token revocation, best-effort). Cascade in `src/account/`: deletes
+  users/authSessions/customMaps drafts, leaves LOBBY rooms via `RoomRepo.leave`, `$pull`s
+  matchHistory spectators; the event-sourced game log, `mapContents`, and `dashboardAudit`
+  stay (dangling opaque ids = the same posture as guest TTL expiry). Maintainers get 409
+  until dashboard access is revoked.
+  **Push** (`src/push/`): `POST/DELETE /me/devices` registers native device tokens
+  (`userDevices`, token = `_id`, re-registering moves it to the new account); `PushService`
+  speaks FCM HTTP v1 and APNs HTTP/2 token-auth directly (no relay; empty credentials =
+  disabled no-op), localizes zh-Hant/en from account preferences, and prunes dead tokens
+  (FCM 404, APNs 410). The hub's `push?: PushSink` option (metrics-hooks idiom) drives
+  **your-turn** (debounced `PUSH_YOUR_TURN_DELAY_MS`, only when the current player has no
+  live socket, re-checked at fire time) and **game-over** (absent humans only) off the same
+  `broadcast` fan-out bots share; **game-started** fires from `LobbyService.start`. Metrics:
+  `trm_push_sent_total`/`trm_push_failed_total` by kind.
 - `src/lobby/` — rooms lifecycle with atomic seat CAS; `RoomSettings.map` selects
   `{source:'official', mapId}` or `{source:'custom', customMapId}` (default: official Taiwan).
   `start` resolves the selector via `MapsService.resolveForStart` (validates a custom draft, hashes
@@ -122,12 +156,21 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   OUTSIDE the feature gate — a plain `AccessTokenGuard` route (any authenticated viewer, including
   guests, may fetch content by its hash — the hash itself is the unguessable capability); gating it
   would break live custom-map games and replays for other players.
-- `src/bots/` — a bot is an **ordinary seated player driven server-side**; the engine never knows.
-  `policy.ts` ranks moves from the engine's own `legalActions` (so a bot can never make an illegal
-  move) with difficulty-tuned heuristics; the choice is a deterministic function of `state + botId`.
-  The hub's bot driver runs each bot through the **same** prepare→persist→commit→fan-out path as a
-  human, and bot moves are logged actions, so replay/recovery are unaffected. The roster is persisted
-  on the game doc and resumes after recovery. `TRM_BOT_DELAY_MS` paces moves (0 in tests).
+- **Bots** — a bot is an **ordinary seated player driven server-side** (the engine never
+  knows). The brain lives in `packages/bots` (`@trm/bots`): `chooseBotAction` ranks moves
+  from the engine's own `legalActions` (a bot can never make an illegal move) and is a
+  deterministic function of `state + botId`. The hub's bot driver (`ws/hub.ts`) runs each
+  bot through the **same** prepare→persist→commit→fan-out path as a human, and bot moves
+  are logged actions, so replay/recovery are unaffected. The roster is persisted on the
+  game doc and resumes after recovery. `TRM_BOT_DELAY_MS` paces moves (0 in tests).
+- `src/moderation/` — the UGC compliance surface (Apple 1.2 / Play UGC): `GET/PUT/DELETE
+/me/blocks[/:userId]` maintains a capped **client-side mute list** on `UserDoc.blockedUserIds`
+  (display filtering only — never touches seating or game state), and `POST /reports/player` +
+  `POST /reports/map` (by share code, deliberately OUTSIDE the mapBuilder gate — the code is the
+  capability) append to the `reports` collection with denormalized names (guests TTL-expire; the
+  record stays self-contained). Moderators work the queue at `GET /dashboard/reports` /
+  `POST /dashboard/reports/:id/resolve` (`reports.read`/`reports.resolve`, moderator+), resolution
+  is a one-way open→resolved CAS audited as `report.resolve`.
 
 ## Maintainer dashboard (`src/dashboard/`)
 

@@ -11,7 +11,7 @@ import type {
   StoredConfig,
 } from '../persistence/types';
 import type { UserDoc } from '../auth/user.repo';
-import type { BotProfile } from '../bots/types';
+import type { BotProfile } from '@trm/bots';
 import type { MapContentDoc } from '../maps/maps.types';
 
 export interface HistoryPlayer {
@@ -120,6 +120,11 @@ export class HistoryRepo {
       .find({ _id: { $in: humans } }, { projection: { displayName: 1 } })
       .toArray();
     return new Map(docs.map((u) => [u._id, u.displayName]));
+  }
+
+  /** Account deletion: remove the user's spectator references (player rows keep opaque ids). */
+  async pullSpectator(userId: string): Promise<void> {
+    await this.col.updateMany({ spectators: userId }, { $pull: { spectators: userId } });
   }
 
   /** Finished games the user played in or spectated, newest first. */

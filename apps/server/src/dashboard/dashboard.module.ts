@@ -27,6 +27,9 @@ import { DashboardRatingsService } from './dashboard-ratings.service';
 import { DashboardRatingsController } from './dashboard-ratings.controller';
 import { DashboardBootstrap } from './dashboard-bootstrap';
 import { RatingsModule } from '../ratings/ratings.module';
+import { ModerationModule } from '../moderation/moderation.module';
+import { DashboardReportsService } from './dashboard-reports.service';
+import { DashboardReportsController } from './dashboard-reports.controller';
 
 // Maintainer dashboard: access control lives in the separate `dashboardAccounts`
 // collection (role + per-account overrides referencing users._id); every mutating
@@ -34,7 +37,15 @@ import { RatingsModule } from '../ratings/ratings.module';
 // respect the hidden-information invariant: nothing about a LIVE game's hands,
 // tickets, deck order, or seed ever leaves the server.
 @Module({
-  imports: [AuthModule, GameModule, LobbyModule, HistoryModule, MapsModule, RatingsModule],
+  imports: [
+    AuthModule,
+    GameModule,
+    LobbyModule,
+    HistoryModule,
+    MapsModule,
+    RatingsModule,
+    ModerationModule,
+  ],
   controllers: [
     DashboardController,
     DashboardUsersController,
@@ -44,6 +55,7 @@ import { RatingsModule } from '../ratings/ratings.module';
     DashboardPurgeController,
     DashboardMapsController,
     DashboardRatingsController,
+    DashboardReportsController,
   ],
   providers: [
     DashboardConfig,
@@ -60,6 +72,10 @@ import { RatingsModule } from '../ratings/ratings.module';
     PurgeService,
     DashboardMapsService,
     DashboardRatingsService,
+    DashboardReportsService,
   ],
+  // AccountModule's deletion flow checks maintainer status (the same "revoke access first"
+  // protection the ban flow uses) — the repo is the only export; services stay internal.
+  exports: [DashboardAccountRepo],
 })
 export class DashboardModule {}

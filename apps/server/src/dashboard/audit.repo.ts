@@ -23,10 +23,11 @@ export type DashboardAuditAction =
   | 'map.delete'
   | 'map.unshare'
   | 'map.transfer'
-  | 'config.features';
+  | 'config.features'
+  | 'report.resolve';
 
 export interface AuditTarget {
-  type: 'user' | 'game' | 'room' | 'maintainer' | 'map';
+  type: 'user' | 'game' | 'room' | 'maintainer' | 'map' | 'report';
   id: string;
 }
 

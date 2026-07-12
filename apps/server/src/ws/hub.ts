@@ -29,8 +29,7 @@ import { Connection, type CloseFn, type Sink } from './connection';
 import { DevTicketVerifier, type TicketVerifier } from './ticket';
 import type { GameStorePort } from '../persistence/types';
 import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
-import { chooseBotAction } from '../bots/policy';
-import type { BotProfile } from '../bots/types';
+import { chooseBotAction, isBotId, type BotProfile } from '@trm/bots';
 import { botStepDelayMs } from './bot-pacing';
 import {
   rejectionToPb,
@@ -48,6 +47,12 @@ import {
 } from '@trm/codec';
 import type { ChatEntry, ChatContent } from '../persistence/types';
 
+/** Framework-free push seam (the Nest PushService is adapted into this by game.module). */
+export interface PushSink {
+  yourTurn(gameId: string, playerId: string): void;
+  gameOver(gameId: string, playerIds: string[]): void;
+}
+
 export interface GameHubOptions {
   verifier?: TicketVerifier;
   store?: GameStorePort;
@@ -62,6 +67,10 @@ export interface GameHubOptions {
   botPersistRetryDelayMs?: number;
   /** Delay before re-driving a game whose persist kept failing, ms (default 15s; small in tests). */
   botDriverRescheduleMs?: number;
+  /** Push sink for turn/game notifications (absent = no pushes). */
+  push?: PushSink;
+  /** Debounce before a your-turn push to a socketless player, ms (default 15s; 0 = next tick). */
+  yourTurnDelayMs?: number;
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
@@ -103,6 +112,10 @@ export class GameHub {
   private readonly lastCamera = new Map<string, { playerId: string; view: CameraView }>();
   /** gameId → ordered chat lines (replayed in HistoryReplay; persisted via the store). */
   private readonly chatLog = new Map<string, ChatEntry[]>();
+  private readonly push: PushSink | undefined;
+  private readonly yourTurnDelayMs: number;
+  /** gameId → pending your-turn reminder (one per game — there is one current player). */
+  private readonly pushTimers = new Map<string, NodeJS.Timeout>();
 
   constructor(
     private readonly registry: GameRegistry,
@@ -118,6 +131,8 @@ export class GameHub {
     this.botPersistRetryDelayMs =
       options.botPersistRetryDelayMs ?? DEFAULT_BOT_PERSIST_RETRY_DELAY_MS;
     this.botDriverRescheduleMs = options.botDriverRescheduleMs ?? DEFAULT_BOT_DRIVER_RESCHEDULE_MS;
+    this.push = options.push;
+    this.yourTurnDelayMs = options.yourTurnDelayMs ?? 15_000;
   }
 
   async createMatch(
@@ -199,6 +214,7 @@ export class GameHub {
     this.bots.delete(gameId);
     this.chatLog.delete(gameId);
     this.lastCamera.delete(gameId);
+    this.clearYourTurnTimer(gameId);
     // After removal the bot driver's next registry.get() misses and its loop exits;
     // stragglers' commands take the existing NOT_IN_GAME path.
     this.registry.remove(gameId);
@@ -756,12 +772,55 @@ export class GameHub {
     conn.send(historyReplayFrame(events, chat, match.session.stateVersion));
   }
 
+  private clearYourTurnTimer(gameId: string): void {
+    const timer = this.pushTimers.get(gameId);
+    if (timer) {
+      clearTimeout(timer);
+      this.pushTimers.delete(gameId);
+    }
+  }
+
+  /**
+   * Push triggers, fed by the same commit fan-out humans and bots share. TURN_STARTED
+   * schedules a debounced your-turn reminder for a socketless human (re-checked at fire
+   * time — a reconnect or superseding turn cancels it); GAME_ENDED notifies absent humans.
+   */
+  private maybeNotify(match: Match, events: readonly GameEvent[]): void {
+    if (!this.push) return;
+    const push = this.push;
+    const gameId = match.session.gameId;
+    for (const ev of events) {
+      if (ev.e === 'TURN_STARTED') {
+        this.clearYourTurnTimer(gameId); // a new turn supersedes any pending reminder
+        const player = ev.player as string;
+        if (isBotId(player)) continue;
+        if (this.members.get(gameId)?.has(player)) continue;
+        const timer = setTimeout(() => {
+          this.pushTimers.delete(gameId);
+          // Fire-time re-check: still their turn, still no socket.
+          if (match.session.currentPlayer !== ev.player) return;
+          if (this.members.get(gameId)?.has(player)) return;
+          push.yourTurn(gameId, player);
+        }, this.yourTurnDelayMs);
+        timer.unref?.();
+        this.pushTimers.set(gameId, timer);
+      } else if (ev.e === 'GAME_ENDED') {
+        this.clearYourTurnTimer(gameId);
+        const absent = match.session.turnOrder
+          .map((p) => p as string)
+          .filter((p) => !isBotId(p) && !this.members.get(gameId)?.has(p));
+        if (absent.length > 0) push.gameOver(gameId, absent);
+      }
+    }
+  }
+
   private broadcast(
     match: Match,
     events: readonly GameEvent[],
     actor: Connection | null,
     ackClientSeq: number,
   ): void {
+    this.maybeNotify(match, events);
     const members = this.members.get(match.session.gameId);
     if (!members) return;
     const version = match.session.stateVersion;
