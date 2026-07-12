@@ -4,7 +4,7 @@
 // this; here the camera IS the board-space view descriptor, so every framing consumes/produces
 // {cx, cy, span} directly. Purely snapshot-driven: no store writes besides the animation expiries.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { PixelRatio, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
@@ -30,14 +30,16 @@ import {
   boundsOfContent,
   homeCamera,
   pinchTo,
+  rasterSpec,
   visibleFraction,
+  type Bounds,
   type CameraState,
   type Viewport,
 } from './camera';
 import { buildHitScene, hitTest } from './hitTest';
 import { latestActionPoi, shouldDisengageFollow } from './followModel';
 import { useBoardCamera, type BoardCamera } from './useBoardCamera';
-import { MapSceneSkia } from './MapSceneSkia';
+import { MapSceneSkia, SCENE_OVERSCAN } from './MapSceneSkia';
 import { BoardControls } from './BoardControls';
 
 /** A claimed route glows for this long once it actually comes into view. */
@@ -347,6 +349,23 @@ function BoardInner({
   const camOpts = useMemo(() => ({ onTap, onGesture: onManualCamera }), [onTap, onManualCamera]);
   const cam = useBoardCamera(vp, ACTIVE_BASE_VIEW, home, camOpts);
 
+  // The gesture-time raster snapshot's region + resolution, re-derived at every camera settle
+  // (cam.settled only changes identity when the camera actually moved). The scene bounds match
+  // MapSceneSkia's picture bounds exactly, so the snapshot never covers un-drawn space.
+  const sceneBounds = useMemo<Bounds>(
+    () => ({
+      x: ACTIVE_BASE_VIEW.x - SCENE_OVERSCAN,
+      y: ACTIVE_BASE_VIEW.y - SCENE_OVERSCAN,
+      w: ACTIVE_BASE_VIEW.w + SCENE_OVERSCAN * 2,
+      h: ACTIVE_BASE_VIEW.h + SCENE_OVERSCAN * 2,
+    }),
+    [],
+  );
+  const raster = useMemo(
+    () => rasterSpec(cam.settled, vp, sceneBounds, PixelRatio.get()),
+    [cam.settled, vp, sceneBounds],
+  );
+
   // Publish the live camera to the tutorial's spotlight bridge while this board is mounted
   // (unconditional — the tutorial runs in sandbox mode, where CameraSync never mounts).
   const { currentCamera } = cam;
@@ -462,6 +481,8 @@ function BoardInner({
               sweeps={sweeps}
               routeReveal={routeReveal}
               reducedMotion={reducedMotion}
+              motion={cam.moving}
+              raster={raster}
             />
           </Group>
         </Canvas>

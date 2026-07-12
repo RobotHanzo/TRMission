@@ -152,6 +152,49 @@ export const invScale = (scale: number): number => Math.max(0.12, Math.min(1.5, 
 export const markerScale = (scale: number): number =>
   Math.max(0.34, Math.min(0.82, 1 / Math.sqrt(scale)));
 
+// ── Gesture-time raster cache ────────────────────────────────────────────────
+// While the camera moves, the board draws a pre-rasterized snapshot of the static scene (one
+// textured quad per frame) instead of replaying the full vector picture — the native analogue of
+// the browser compositing the web board's SVG layer, which is why the web build pans at full FPS
+// on the same hardware. The snapshot is re-rendered at every camera settle, so at rest the crisp
+// vector picture is always what's on screen and the texture only ever shows mid-motion.
+
+/** Cover this many viewports (per axis, centred on the settle camera) so a whole gesture — a
+ *  full-screen drag or a 3× pinch-out — stays inside the snapshot before the next settle. */
+const RASTER_PAD = 3;
+/** Texture dimension cap (device px): keeps the worst-case snapshot ≤ a few dozen MB and inside
+ *  every GPU's max-texture-size. Past the cap the snapshot just gets softer mid-gesture. */
+export const RASTER_MAX_DIM = 4096;
+
+export interface RasterSpec {
+  /** Board-space region the snapshot covers. */
+  rect: Bounds;
+  /** Device pixels per board unit the snapshot is rendered at. */
+  pxPerUnit: number;
+}
+
+/** The snapshot region + resolution for a settled camera: the visible box padded to RASTER_PAD
+ *  viewports per axis, clamped to the scene, rendered 1:1 with device pixels up to the cap. */
+export function rasterSpec(
+  cam: CameraState,
+  vp: Viewport,
+  scene: Bounds,
+  pixelRatio: number,
+  maxDim = RASTER_MAX_DIM,
+): RasterSpec | null {
+  if (vp.w <= 0 || vp.h <= 0 || cam.span <= 0) return null;
+  const visW = cam.span;
+  const visH = cam.span * (vp.h / vp.w);
+  const x = Math.max(scene.x, cam.cx - (visW * RASTER_PAD) / 2);
+  const y = Math.max(scene.y, cam.cy - (visH * RASTER_PAD) / 2);
+  const w = Math.min(scene.x + scene.w, cam.cx + (visW * RASTER_PAD) / 2) - x;
+  const h = Math.min(scene.y + scene.h, cam.cy + (visH * RASTER_PAD) / 2) - y;
+  if (w <= 0 || h <= 0) return null;
+  const pxPerUnit = Math.min((pixelRatio * vp.w) / cam.span, maxDim / w, maxDim / h);
+  if (!Number.isFinite(pxPerUnit) || pxPerUnit <= 0) return null;
+  return { rect: { x, y, w, h }, pxPerUnit };
+}
+
 /** Fraction of board-space points inside the viewport (ports boardView.ts visibleFraction
  *  through the analytic projection — gates the claim glow, Task 5). */
 export function visibleFraction(

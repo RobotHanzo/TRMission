@@ -4,17 +4,36 @@
 // drift. Purely presentational: content + game state + LOD arrive as props; no stores, no i18n. This
 // is a Skia <Group>, NOT its own <Canvas> — the Board (Task 5) owns the Canvas + camera transform.
 import { useEffect, useMemo } from 'react';
-import { Group, Path, Picture, type SkPath, type SkRect } from '@shopify/react-native-skia';
+import {
+  FilterMode,
+  Group,
+  Image as SkiaImage,
+  MipmapMode,
+  Path,
+  Picture,
+  type SkPath,
+  type SkRect,
+} from '@shopify/react-native-skia';
 import { Easing, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
 import type { MapGeography, RouteGeometry } from '@trm/map-data';
 import { seatColor } from '../theme/colors';
-import type { ZoomBucket } from './camera';
+import type { RasterSpec, ZoomBucket } from './camera';
 import { GeographyLayer, type BoardView } from './GeographyLayer';
 import { RouteLayer } from './RouteLayer';
 import { CityLayer } from './CityLayer';
 import { LabelLayer } from './LabelLayer';
 import { buildRouteRenderModel, type RouteRenderModel } from './scenePaths';
-import { useStaticMapPicture } from './useStaticMapPicture';
+import { useStaticMapImage, useStaticMapPicture } from './useStaticMapPicture';
+
+/** Board units of sea drawn beyond the base view on every side, so panning never shows an edge.
+ *  Shared with BoardView's raster-region clamp — the snapshot never covers more than the scene. */
+export const SCENE_OVERSCAN = 40;
+
+// Mip-mapped sampling stops the snapshot shimmering while a pinch-out minifies it. The enums are
+// absent from the jest mock (where no snapshot is ever produced) — guarded like everything Skia.
+const RASTER_SAMPLING = (FilterMode as unknown)
+  ? { filter: FilterMode.Linear, mipmap: MipmapMode.Linear }
+  : undefined;
 
 /** The minimal city/route shapes the scene needs — satisfied by the live content's branded
  *  CityDef/RouteDef and by any plain-string draft (same as the web SceneCity/SceneRoute). */
@@ -73,6 +92,13 @@ export interface MapSceneSkiaProps {
   routeReveal?: { seat: number; path: string[] } | null | undefined;
   /** Reduced motion snaps the sweep trims to fully drawn (mirrors the web's CSS media block). */
   reducedMotion?: boolean | undefined;
+
+  /* ── gesture-time raster snapshot (see useStaticMapImage) ── */
+  /** TRUE while the camera is moving — draw the rasterized snapshot instead of the vectors. */
+  motion?: boolean | undefined;
+  /** Snapshot region + resolution for the settled camera (camera.ts rasterSpec). Omitted (the
+   *  tutorial specimens, tests) the scene simply always draws vectors. */
+  raster?: RasterSpec | null | undefined;
 }
 
 /** The board's static layers — everything that doesn't animate on its own. Factored out so it can
@@ -171,6 +197,8 @@ export function MapSceneSkia({
   sweeps,
   routeReveal,
   reducedMotion,
+  motion,
+  raster,
 }: MapSceneSkiaProps) {
   const model = useMemo(() => buildRouteRenderModel(routes, geometry), [routes, geometry]);
   const modelById = useMemo(() => new Map(model.map((m) => [m.id, m])), [model]);
@@ -218,14 +246,37 @@ export function MapSceneSkia({
     ],
   );
   const bounds = useMemo<SkRect>(
-    () => ({ x: view.x - 40, y: view.y - 40, width: view.w + 80, height: view.h + 80 }),
+    () => ({
+      x: view.x - SCENE_OVERSCAN,
+      y: view.y - SCENE_OVERSCAN,
+      width: view.w + SCENE_OVERSCAN * 2,
+      height: view.h + SCENE_OVERSCAN * 2,
+    }),
     [view.x, view.y, view.w, view.h],
   );
   const picture = useStaticMapPicture(staticElement, bounds, [staticElement, bounds]);
+  const snapshot = useStaticMapImage(picture, raster);
+
+  // The snapshot draws UNDER the vectors at rest (fully hidden — the picture's sea rect is opaque
+  // and covers the whole scene) so its GPU texture stays uploaded/warm, then carries the frame
+  // alone while the camera moves. No snapshot yet (first record still in flight, or an
+  // environment without offscreen surfaces) → the vectors keep drawing through motion as before.
+  const snapshotElement = snapshot ? (
+    <SkiaImage
+      image={snapshot.image}
+      x={snapshot.rect.x}
+      y={snapshot.rect.y}
+      width={snapshot.rect.w}
+      height={snapshot.rect.h}
+      fit="fill"
+      sampling={RASTER_SAMPLING}
+    />
+  ) : null;
 
   return (
     <Group>
-      {picture ? <Picture picture={picture} /> : staticElement}
+      {snapshotElement}
+      {motion && snapshotElement ? null : picture ? <Picture picture={picture} /> : staticElement}
       {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path, one
           segment after another (ports the web's --delay: i*0.32s stagger). Removal timers live in
           the Board (path.length*320 + 900ms). */}

@@ -3,7 +3,7 @@
 // bar, a connector caret toward the spotlighted target, and the right control for the beat mode.
 // coachPosition dodges it to the top / a side dock when a target would sit under the bottom-
 // anchored bubble. (The web's finale confetti has no native counterpart — the badge carries it.)
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, PartyPopper, RotateCcw, X } from 'lucide-react-native';
@@ -72,34 +72,38 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
     return { marginRight: Math.round(Math.max(GAP, Math.min(width - bounds.x + GAP, maxStart))) };
   })();
 
-  // The caret rides the edge of the coach that faces the spotlight target and points at it —
-  // coach-relative (via measureInWindow) so it survives any window size. Hidden until laid out.
+  // The caret rides the edge of the coach that faces the spotlight target and points at it. The
+  // coach's window rect is captured only when its LAYOUT changes; the caret pixel then derives in
+  // render from whatever spotRects the tracking hook hands over — so a camera glide that updates
+  // the rects every frame moves the caret smoothly without a native measure round-trip per tick.
   const coachRef = useRef<View>(null);
-  const [caret, setCaret] = useState<{ axis: 'x' | 'y'; px: number } | null>(null);
-  // Keyed on the rect VALUES: the measuring hook hands over a fresh array every poll.
-  const spotKey = JSON.stringify(spotRects);
-  const measureCaret = useCallback(() => {
-    const centre = spotlightCentre(spotRects);
+  const [coachRect, setCoachRect] = useState<{ x: number; y: number; w: number; h: number } | null>(
+    null,
+  );
+  const measureCoach = useCallback(() => {
     const coach = coachRef.current;
-    if (!centre || !coach) {
-      setCaret(null);
-      return;
-    }
+    if (!coach) return;
     coach.measureInWindow((x, y, w, h) => {
       if (!w || !h) {
-        setCaret(null); // no layout yet (or a test renderer) — skip the caret
+        setCoachRect(null); // no layout yet (or a test renderer) — skip the caret
         return;
       }
-      const pad = 24; // keeps the caret off the rounded corners
-      if (sideDocked) {
-        setCaret({ axis: 'y', px: Math.max(pad, Math.min(h - pad, centre.y - y)) });
-      } else {
-        setCaret({ axis: 'x', px: Math.max(pad, Math.min(w - pad, centre.x - x)) });
-      }
+      setCoachRect((prev) =>
+        prev && prev.x === x && prev.y === y && prev.w === w && prev.h === h
+          ? prev
+          : { x, y, w, h },
+      );
     });
-    // `spotKey` stands in for `spotRects` (fresh identity each poll would loop the effect).
-  }, [spotKey, sideDocked]);
-  useEffect(measureCaret, [measureCaret]);
+  }, []);
+
+  const centre = spotlightCentre(spotRects);
+  const pad = 24; // keeps the caret off the rounded corners
+  const caret: { axis: 'x' | 'y'; px: number } | null =
+    centre && coachRect
+      ? sideDocked
+        ? { axis: 'y', px: Math.max(pad, Math.min(coachRect.h - pad, centre.y - coachRect.y)) }
+        : { axis: 'x', px: Math.max(pad, Math.min(coachRect.w - pad, centre.x - coachRect.x)) }
+      : null;
 
   const caretStyle =
     caret &&
@@ -119,7 +123,7 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
     <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, wrapperStyles[pos]]}>
       <View
         ref={coachRef}
-        onLayout={measureCaret}
+        onLayout={measureCoach}
         collapsable={false}
         accessibilityViewIsModal={false}
         accessibilityLabel={t('tutorial.title')}

@@ -14,7 +14,14 @@
 // fallback renders — this is a performance cache, never a correctness dependency.
 import { useEffect, useState } from 'react';
 import type { ReactElement } from 'react';
-import { Skia, drawAsPicture, type SkPicture, type SkRect } from '@shopify/react-native-skia';
+import {
+  Skia,
+  drawAsPicture,
+  type SkImage,
+  type SkPicture,
+  type SkRect,
+} from '@shopify/react-native-skia';
+import type { RasterSpec } from './camera';
 
 export function useStaticMapPicture(
   element: ReactElement,
@@ -40,4 +47,68 @@ export function useStaticMapPicture(
   }, deps);
 
   return picture;
+}
+
+/** A rasterized snapshot of the static map picture + the board-space rect it covers. The rect is
+ *  captured WITH the image (not read from the live spec) so a snapshot that hasn't caught up with
+ *  a newer spec yet still draws exactly where it was rendered for. */
+export interface StaticMapRaster {
+  image: SkImage;
+  rect: RasterSpec['rect'];
+}
+
+/**
+ * Rasterizes the cached static Picture into an offscreen GPU texture snapshot, re-rendered only
+ * at camera settles (the spec changes) or when the scene content re-records (the picture
+ * changes) — never mid-motion. While the camera moves the board draws THIS image as a single
+ * textured quad per frame instead of re-rasterizing the whole vector scene at up to 120Hz; the
+ * crisp vector picture takes back over the moment the camera settles. This is the same
+ * texture-compositing trick the browser gives the web board for free, which is why the same
+ * device pans the web version smoothly. Guarded like the picture cache above: environments
+ * without `Skia.Surface.MakeOffscreen` (the jest mock) simply never produce a snapshot and the
+ * caller keeps drawing vectors — a performance cache, never a correctness dependency.
+ */
+export function useStaticMapImage(
+  picture: SkPicture | null,
+  spec: RasterSpec | null | undefined,
+): StaticMapRaster | null {
+  const [raster, setRaster] = useState<StaticMapRaster | null>(null);
+
+  useEffect(() => {
+    if (!picture || !spec) return;
+    if (typeof Skia.Surface?.MakeOffscreen !== 'function') return; // no offscreen GPU — stay live
+    let cancelled = false;
+    // Deferred a tick so the settle re-render (and its picture re-record) commits first — the
+    // raster is one blocking JS pass, taken while the user is idle and the vectors are on screen.
+    const id = setTimeout(() => {
+      if (cancelled) return;
+      try {
+        const w = Math.max(1, Math.round(spec.rect.w * spec.pxPerUnit));
+        const h = Math.max(1, Math.round(spec.rect.h * spec.pxPerUnit));
+        const surface = Skia.Surface.MakeOffscreen(w, h);
+        if (!surface) return;
+        const canvas = surface.getCanvas();
+        canvas.scale(spec.pxPerUnit, spec.pxPerUnit);
+        canvas.translate(-spec.rect.x, -spec.rect.y);
+        canvas.drawPicture(picture);
+        surface.flush();
+        // makeNonTextureImage: the offscreen surface has its own GPU context, so hand the
+        // renderer a context-free copy (RNSkia's drawAsImageFromPicture does the same).
+        const snap = surface.makeImageSnapshot();
+        const image = snap.makeNonTextureImage();
+        snap.dispose();
+        surface.dispose();
+        if (image && !cancelled) setRaster({ image, rect: spec.rect });
+      } catch {
+        // Rasterizing is a cache, not a dependency — on failure the caller keeps the previous
+        // snapshot (or draws the vector picture during motion if none was ever produced).
+      }
+    }, 0);
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
+  }, [picture, spec]);
+
+  return raster;
 }
