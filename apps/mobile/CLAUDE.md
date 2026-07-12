@@ -138,3 +138,19 @@ refuse cross-version resume. Randomness (seed/gameId) comes from `expo-crypto` i
 `seed.ts` ONLY — never inside game logic. Bundled official maps only (custom-map offline
 is deferred — docs/TODO.md). Pure core (no RN imports) → jest-testable off-device;
 `inMemoryStore.ts` is the port double.
+
+## Tutorial (`src/features/tutorial/`)
+
+The interactive tutorial is fully offline: lessons are scripted scenarios over a REAL local
+`@trm/engine` game (`net/sandboxSocket.ts` → engine `reduce` → `redactFor` → `viewToSnapshot`
+→ the standard game store → GameStage). `types.ts`, `curriculum.ts`, `focus.ts`, and
+`i18n/tutorial.ts` are **byte-identical copies of `apps/web`** (enforced by `parity.spec.ts`)
+— the anchor-id strings inside them are simultaneously the web's CSS selectors and this app's
+`TutorialTargetRegistry` anchor ids (`targets.tsx`); change them on web first, then re-copy.
+HUD spotlights measure ref-registered Views via `measureInWindow` (`useTutorialAnchor`, keep
+`collapsable={false}`); city/route spotlights are computed from board geometry projected
+through the camera (`boardRects.ts`; `cameraBridge.ts` is the only file that may touch camera
+internals). The scrim is a Skia even-odd path (`scrim.ts` + `TutorialSpotlight`). Completion
+persists to AsyncStorage (`progress.ts`, key `trm.tutorial.completed.v1`); the Home entry and
+the whole flow work with no account and no network. Pure logic tests are vitest `*.spec.ts`;
+RN components are jest-expo `*.test.tsx` — keep the globs disjoint.
