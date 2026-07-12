@@ -226,6 +226,15 @@ export function GameStage({
             : ` (${snapshot.ticketDeckShortCount})`}
         </Text>
       </Pressable>
+      {canAct && snapshot.you?.youMustPass && (
+        <Pressable
+          style={({ pressed }) => [styles.drawTicketsBtn, pressed && styles.pressed]}
+          accessibilityRole="button"
+          onPress={() => commands?.pass()}
+        >
+          <Text style={styles.drawTicketsText}>{t('passTurn')}</Text>
+        </Pressable>
+      )}
       <EventTurnActions
         snapshot={snapshot}
         commands={commands}

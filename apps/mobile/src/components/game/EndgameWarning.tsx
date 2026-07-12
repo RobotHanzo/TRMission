@@ -55,9 +55,15 @@ export function EndgameWarning({ cue, reducedMotion, onDone }: Props) {
         </View>
         <Text style={styles.title}>{t('endgameTitle')}</Text>
         <Text style={styles.sub}>
-          {cue.triggeredByYou ? t('endgameByYou') : t('endgameByOther')}
+          {cue.deadlock
+            ? t('endgameByDeadlock')
+            : cue.triggeredByYou
+              ? t('endgameByYou')
+              : t('endgameByOther')}
         </Text>
-        <Text style={styles.note}>{t('endgameNote')}</Text>
+        <Text style={styles.note}>
+          {cue.deadlock ? t('endgameNoteDeadlock') : t('endgameNote')}
+        </Text>
         <Text style={styles.skip}>{t('skip')}</Text>
       </Animated.View>
     </Pressable>

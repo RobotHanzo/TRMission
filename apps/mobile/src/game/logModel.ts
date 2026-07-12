@@ -135,7 +135,7 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
         out.push({
           kind: 'endgame',
           playerId: ev.value.playerId,
-          data: { turns: ev.value.finalTurnsRemaining },
+          data: { turns: ev.value.finalTurnsRemaining, reason: ev.value.reason || 'FINAL_TRAINS' },
           importance: 'alert',
         });
         break;

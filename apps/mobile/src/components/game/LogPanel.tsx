@@ -73,7 +73,9 @@ export function LogPanel() {
       case 'passed':
         return t('log.passed', { name });
       case 'endgame':
-        return t('log.endgame', { turns: e.data.turns });
+        return e.data.reason === 'DEADLOCK'
+          ? t('log.endgameDeadlock')
+          : t('log.endgame', { turns: e.data.turns });
       case 'eventAnnounced':
         return t('log.eventAnnounced', { event: t(eventNameKey(String(e.data.eventKind))) });
       case 'eventStarted':
