@@ -19,6 +19,12 @@ const config: ExpoConfig = {
   scheme: 'trmission', // trmission:// OAuth deep-link fallback (P0 accepts it)
   version: '0.1.0',
   orientation: 'default', // tablets unlock; phone default is portrait (enforced per-screen in P2)
+  // Original brand mark (a car-slot route between two station hubs — the game's own atom, in the
+  // shared chrome palette; generated in-repo, no copied assets). Full-bleed square: the OS
+  // applies its own mask.
+  icon: './assets/icon.png',
+  // Chrome theming follows the OS + the in-app theme setting (theme/useTheme.ts).
+  userInterfaceStyle: 'automatic',
   // New Architecture is the default (and only) mode in RN 0.85 / SDK 56 — no flag needed.
   ios: {
     bundleIdentifier: 'tw.trmission.app',
@@ -27,6 +33,12 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'tw.trmission.app',
+    adaptiveIcon: {
+      foregroundImage: './assets/adaptive-icon.png',
+      // Android 13+ themed icons tint this white-alpha variant to the wallpaper palette.
+      monochromeImage: './assets/adaptive-icon-monochrome.png',
+      backgroundColor: '#f6f1e7', // warm paper (LIGHT_TOKENS.paper)
+    },
     intentFilters: [
       {
         action: 'VIEW',
@@ -63,6 +75,20 @@ const config: ExpoConfig = {
     'expo-notifications',
     // Android 16 = target API 36, mandatory for Play updates from 2026-08-31 (P5 Task 8 pin).
     ['expo-build-properties', { android: { targetSdkVersion: 36, compileSdkVersion: 36 } }],
+    [
+      'expo-splash-screen',
+      {
+        // Mark + bilingual wordmark lockup; App.tsx holds the splash until the boot chain
+        // (forced-update check → prefs hydrate → session restore) finishes.
+        image: './assets/splash-icon.png',
+        imageWidth: 360,
+        backgroundColor: '#f6f1e7', // warm paper
+        dark: {
+          image: './assets/splash-icon-dark.png',
+          backgroundColor: '#1a1c1f', // DARK_TOKENS.paper
+        },
+      },
+    ],
   ],
   extra: {
     serverOrigin: process.env.TRM_SERVER_ORIGIN ?? 'https://trmission.robothanzo.dev',

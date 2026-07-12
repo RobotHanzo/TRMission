@@ -1,9 +1,15 @@
 import { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import './src/i18n'; // initialise the i18n singleton before any screen uses useTranslation
+
+// Hold the native splash through the boot chain (forced-update check → prefs hydrate → session
+// restore) — BootScreen releases it once it knows what to show. `.catch`: already-hidden /
+// jest-mocked environments must not crash the module load.
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 import { navigationRef, RootNavigator } from './src/navigation';
 import { watchTokenRotation } from './src/push/register';
 import {

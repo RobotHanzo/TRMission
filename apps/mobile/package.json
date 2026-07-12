@@ -43,6 +43,7 @@
     "expo-notifications": "~56.0.19",
     "expo-screen-orientation": "~56.0.5",
     "expo-secure-store": "~56.0.4",
+    "expo-splash-screen": "~56.0.12",
     "expo-sqlite": "~56.0.5",
     "expo-status-bar": "~56.0.4",
     "expo-updates": "~56.0.21",
