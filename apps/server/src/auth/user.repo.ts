@@ -29,7 +29,12 @@ export interface UserDoc {
   disabledReason?: string;
   /** Dashboard-granted gated features (absent/empty = none — the default for everyone). */
   features?: UserFeature[];
+  /** Client-side mute list: ids whose chat/name this account chooses not to see. Capped. */
+  blockedUserIds?: string[];
 }
+
+/** Upper bound on the mute list so the user doc stays small (compliance UX, not social graph). */
+const BLOCK_LIST_MAX = 500;
 
 export const toPublicUser = (u: UserDoc): PublicUser => ({
   id: u._id,
@@ -162,6 +167,31 @@ export class UserRepo implements OnModuleInit {
       { _id: userId, isGuest: true },
       { $set: { guestExpiresAt: new Date(Date.now() + env.guestTtlMs) } },
     );
+  }
+
+  async listBlockedUsers(userId: string): Promise<string[]> {
+    const doc = await this.col.findOne({ _id: userId }, { projection: { blockedUserIds: 1 } });
+    return doc?.blockedUserIds ?? [];
+  }
+
+  /**
+   * Adds to the mute list ($addToSet: idempotent). Returns false only when the cap is hit
+   * for a NEW entry — re-blocking an existing entry at the cap still reports success.
+   */
+  async addBlockedUser(userId: string, targetId: string): Promise<boolean> {
+    const res = await this.col.updateOne(
+      {
+        _id: userId,
+        $expr: { $lt: [{ $size: { $ifNull: ['$blockedUserIds', []] } }, BLOCK_LIST_MAX] },
+      },
+      { $addToSet: { blockedUserIds: targetId } },
+    );
+    if (res.matchedCount > 0) return true;
+    return (await this.listBlockedUsers(userId)).includes(targetId);
+  }
+
+  async removeBlockedUser(userId: string, targetId: string): Promise<void> {
+    await this.col.updateOne({ _id: userId }, { $pull: { blockedUserIds: targetId } });
   }
 
   /** Hard-delete an account doc (account deletion). Cascade is AccountDeletionService's job. */
