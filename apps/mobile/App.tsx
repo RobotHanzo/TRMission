@@ -10,6 +10,7 @@ import {
   installNotificationHandler,
   installNotificationTapHandling,
 } from './src/push/notifications';
+import { useOrientationPolicy } from './src/app/useOrientationPolicy';
 
 // Registering the deep-link prefixes lets a cold-start OAuth return (/m/callback) or a
 // trmission:// link resolve. The active OAuth flow is handled in-process by openAuthSessionAsync.
@@ -25,6 +26,8 @@ export default function App() {
     installNotificationHandler();
     return installNotificationTapHandling(navigationRef);
   }, []);
+  // Phones lock portrait; tablets rotate freely (and must survive live resizing regardless).
+  useOrientationPolicy();
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

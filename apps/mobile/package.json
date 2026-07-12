@@ -33,6 +33,7 @@
     "expo-apple-authentication": "~56.0.4",
     "expo-audio": "~56.0.12",
     "expo-auth-session": "~56.0.15",
+    "expo-build-properties": "~56.0.22",
     "expo-constants": "~56.0.20",
     "expo-crypto": "~56.0.4",
     "expo-haptics": "~56.0.3",

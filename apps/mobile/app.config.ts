@@ -41,6 +41,8 @@ const config: ExpoConfig = {
     'expo-apple-authentication',
     ['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }],
     'expo-notifications',
+    // Android 16 = target API 36, mandatory for Play updates from 2026-08-31 (P5 Task 8 pin).
+    ['expo-build-properties', { android: { targetSdkVersion: 36, compileSdkVersion: 36 } }],
   ],
   extra: {
     serverOrigin: process.env.TRM_SERVER_ORIGIN ?? 'http://localhost:3001',
