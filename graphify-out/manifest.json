@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/tutorial.ts": {
-    "mtime": 1783583094.3045578,
-    "ast_hash": "5615e455ab655874057bf41b4c5ebef2",
+    "mtime": 1783888556.5584812,
+    "ast_hash": "79a72ea840112cead1463988eb2c90f6",
     "semantic_hash": ""
   },
   "apps/web/src/main.tsx": {
@@ -1075,7 +1075,7 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1783879066.6606784,
+    "mtime": 1783882530.1622968,
     "ast_hash": "f4ad83b55039c5834546e95800026374",
     "semantic_hash": ""
   },
@@ -1703,56 +1703,6 @@
     "mtime": 1782994410.799335,
     "ast_hash": "1024e76bc0c3b2c81c378232d1c856ad",
     "semantic_hash": "1024e76bc0c3b2c81c378232d1c856ad"
-  },
-  ".claude/CLAUDE.md": {
-    "mtime": 1783276375.4470882,
-    "ast_hash": "8952e4afcee7fb12f6bb79a3f5650669",
-    "semantic_hash": ""
-  },
-  ".claude/skills/graphify/SKILL.md": {
-    "mtime": 1783276375.6111145,
-    "ast_hash": "70256ec45bb6d70c0cb54ad13cefbefa",
-    "semantic_hash": ""
-  },
-  ".claude/skills/graphify/references/add-watch.md": {
-    "mtime": 1783276375.4880924,
-    "ast_hash": "2b5fa3940c7f9f18a9417b85872b6044",
-    "semantic_hash": ""
-  },
-  ".claude/skills/graphify/references/exports.md": {
-    "mtime": 1783276375.5082371,
-    "ast_hash": "4b446d58348589cf8485b47d9c1937a8",
-    "semantic_hash": ""
-  },
-  ".claude/skills/graphify/references/extraction-spec.md": {
-    "mtime": 1782979720.4723027,
-    "ast_hash": "42fef56a01698118f7fd722acdadea34",
-    "semantic_hash": "42fef56a01698118f7fd722acdadea34"
-  },
-  ".claude/skills/graphify/references/github-and-merge.md": {
-    "mtime": 1783276375.5181794,
-    "ast_hash": "cc5805806709f8a762f85f5e1854323d",
-    "semantic_hash": ""
-  },
-  ".claude/skills/graphify/references/hooks.md": {
-    "mtime": 1782979720.4818175,
-    "ast_hash": "3f545db6ce646650bb9de588f5512a27",
-    "semantic_hash": "3f545db6ce646650bb9de588f5512a27"
-  },
-  ".claude/skills/graphify/references/query.md": {
-    "mtime": 1783276375.5396414,
-    "ast_hash": "775987e84e3d447b399609f71d582b70",
-    "semantic_hash": ""
-  },
-  ".claude/skills/graphify/references/transcribe.md": {
-    "mtime": 1783276375.5469475,
-    "ast_hash": "59c9d76a7995fca690b73acce12dca2c",
-    "semantic_hash": ""
-  },
-  ".claude/skills/graphify/references/update.md": {
-    "mtime": 1783276375.5544674,
-    "ast_hash": "a274078f1ab1886e56afe8865a6a059c",
-    "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-02-replay-camera-follow.md": {
     "mtime": 1783276381.0946505,
@@ -4020,8 +3970,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/app.config.ts": {
-    "mtime": 1783869478.412476,
-    "ast_hash": "04c6779d61956fb5c20b9b041d8555a3",
+    "mtime": 1783886390.5381887,
+    "ast_hash": "0247a47327bdd4041452b14d21540bca",
     "semantic_hash": ""
   },
   "apps/mobile/babel.config.js": {
@@ -4045,8 +3995,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/package.json": {
-    "mtime": 1783879079.5605805,
-    "ast_hash": "fb70cd455298dfdc3a9b018e2fa6e307",
+    "mtime": 1783886061.23239,
+    "ast_hash": "21b9eedae739b911c53c1e156168768b",
     "semantic_hash": ""
   },
   "apps/mobile/src/account/deleteAccount.test.ts": {
@@ -4085,8 +4035,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/auth/google.ts": {
-    "mtime": 1783876140.00446,
-    "ast_hash": "1f531b671761f6f21c5412b072625729",
+    "mtime": 1783887973.5264192,
+    "ast_hash": "805ef0e8502852bed6f09882dd1477a2",
     "semantic_hash": ""
   },
   "apps/mobile/src/board/BoardControls.tsx": {
@@ -4140,8 +4090,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/board/camera.ts": {
-    "mtime": 1783869478.4461586,
-    "ast_hash": "2b4e3c59011a2d18b49ce2122fd06e49",
+    "mtime": 1783887310.6549568,
+    "ast_hash": "b07355919b541e2ee4ddbe3ee07beabb",
     "semantic_hash": ""
   },
   "apps/mobile/src/board/followModel.test.ts": {
@@ -4335,8 +4285,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/config.ts": {
-    "mtime": 1783869478.4644666,
-    "ast_hash": "bde67cc7da6dec701c729e0e16085bc7",
+    "mtime": 1783886386.565971,
+    "ast_hash": "4ccdee1c053a88ace1df3c9fa59f4877",
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/Specimens.tsx": {
@@ -4670,8 +4620,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/tutorial.ts": {
-    "mtime": 1783870598.3517914,
-    "ast_hash": "5615e455ab655874057bf41b4c5ebef2",
+    "mtime": 1783888546.6571984,
+    "ast_hash": "79a72ea840112cead1463988eb2c90f6",
     "semantic_hash": ""
   },
   "apps/mobile/src/navigation.tsx": {
@@ -4825,8 +4775,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/push/PushPrompt.tsx": {
-    "mtime": 1783869478.5080256,
-    "ast_hash": "f4f66f23a8c5b84f9d26896a80b718bb",
+    "mtime": 1783887691.4449978,
+    "ast_hash": "6422e410b763e4bd1564ec16a9770228",
     "semantic_hash": ""
   },
   "apps/mobile/src/push/notifications.test.ts": {
@@ -4835,8 +4785,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/push/notifications.ts": {
-    "mtime": 1783869478.5095296,
-    "ast_hash": "7a7783b2d66269666a96d7814f2efdd9",
+    "mtime": 1783887684.1324291,
+    "ast_hash": "15636963fd8e809e4456e4f8b9509661",
     "semantic_hash": ""
   },
   "apps/mobile/src/push/register.test.ts": {
@@ -4845,8 +4795,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/push/register.ts": {
-    "mtime": 1783869478.5105348,
-    "ast_hash": "57c5bc8e8918435a98bad1b8cd40466b",
+    "mtime": 1783887677.0147355,
+    "ast_hash": "2c5378549c6b5283639bfbf550768bc3",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/BootScreen.tsx": {
@@ -4910,8 +4860,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/settings/NotificationsRow.tsx": {
-    "mtime": 1783869478.516534,
-    "ast_hash": "1b772af8360425e80b5386bd27e9ab6f",
+    "mtime": 1783887694.8134959,
+    "ast_hash": "7ed4a8a6093c5a266864961a5409e22f",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/stageLayout.test.ts": {
@@ -5060,8 +5010,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/tsconfig.json": {
-    "mtime": 1783869478.530889,
-    "ast_hash": "4b482054a1692ec1b16c97093086ace1",
+    "mtime": 1783880201.1907122,
+    "ast_hash": "ecfe6b21556f9de3456ecd634075f416",
     "semantic_hash": ""
   },
   "apps/mobile/vitest.config.ts": {
@@ -5325,8 +5275,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/CLAUDE.md": {
-    "mtime": 1783869478.40796,
-    "ast_hash": "44e25ab6ac17375ef23bfbb68a6f002e",
+    "mtime": 1783888073.3640115,
+    "ast_hash": "4cceb1578981e05504de83664c71b41a",
     "semantic_hash": ""
   },
   "apps/mobile/assets/sounds/CREDITS.md": {
@@ -5612,6 +5562,26 @@
   "tooling/tsc7/package.json": {
     "mtime": 1783879079.5650926,
     "ast_hash": "0b530f4ffe55a49988241a5640e89479",
+    "semantic_hash": ""
+  },
+  "apps/mobile/eas.json": {
+    "mtime": 1783882736.5648286,
+    "ast_hash": "a7de31baecebf481b8eb9991419f7842",
+    "semantic_hash": ""
+  },
+  "apps/mobile/__mocks__/expo.js": {
+    "mtime": 1783888035.1164742,
+    "ast_hash": "a468b7092028ece03b9bfa127dd3ba7d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/auth/googleSigninModule.ts": {
+    "mtime": 1783887962.6791074,
+    "ast_hash": "945af46573fa211757944ea5e46e15a7",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/push/expoNotifications.ts": {
+    "mtime": 1783887960.2084668,
+    "ast_hash": "7d1ea221e58b242ada14136afecb129a",
     "semantic_hash": ""
   }
 }
