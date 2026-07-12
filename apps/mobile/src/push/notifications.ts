@@ -1,7 +1,7 @@
-import * as Notifications from 'expo-notifications';
 import type { NavigationContainerRefWithCurrent } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation';
 import { api } from '../net/rest';
+import { Notifications } from './expoNotifications';
 
 /** Server payload contract (apps/server/src/push/push.service.ts): data = {kind, gameId, roomCode?}. */
 export interface PushData {
@@ -18,6 +18,7 @@ export const setActiveGameId = (id: string | null): void => {
 
 /** Foreground policy: never banner the game the player is already looking at. */
 export function installNotificationHandler(): void {
+  if (!Notifications) return;
   Notifications.setNotificationHandler({
     handleNotification: (n) => {
       const data = (n.request.content.data ?? {}) as PushData;
@@ -58,6 +59,7 @@ export async function navigateForPush(nav: Nav, data: PushData): Promise<void> {
 
 /** Warm-start taps + the cold-start tap (the response that launched the process). */
 export function installNotificationTapHandling(nav: Nav): () => void {
+  if (!Notifications) return () => {};
   const sub = Notifications.addNotificationResponseReceivedListener((resp) => {
     void navigateForPush(nav, (resp.notification.request.content.data ?? {}) as PushData);
   });

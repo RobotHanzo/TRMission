@@ -1,8 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../store/settings';
 import { registerDeviceForPush } from './register';
+import { Notifications } from './expoNotifications';
 
 /**
  * Contextual permission ask (spec §5): shown in the game-over panel after the player's
@@ -18,6 +18,7 @@ export default function PushPrompt(): React.JSX.Element | null {
 
   const accept = async (): Promise<void> => {
     markSeen();
+    if (!Notifications) return; // Expo Go: push unavailable until a real dev/production build
     const perm = await Notifications.requestPermissionsAsync();
     if (!perm.granted) return; // fully functional without push; alerts stay in-app only
     setNotifications(true);

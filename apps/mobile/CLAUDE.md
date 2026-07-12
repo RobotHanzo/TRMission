@@ -199,6 +199,19 @@ from `RoomView.gameId` by GameScreen); `navigateForPush` is async because the na
 `api.getMyRooms()` (vanished room = no-op). `PushPrompt` is the one-shot contextual card at
 game-over (`pushPromptSeen`).
 
+**Expo Go gotcha:** never `import * as Notifications from 'expo-notifications'` directly —
+`expo-notifications`'s own auto-registration side effect calls `addPushTokenListener` at IMPORT
+time, which throws under Expo Go on Android (SDK 53 dropped remote push from Expo Go). All 4
+call sites (`register.ts`, `notifications.ts`, `PushPrompt.tsx`, `NotificationsRow.tsx`) import
+the lazy, `isRunningInExpoGo()`-gated `Notifications` from `push/expoNotifications.ts` instead —
+`null` under Expo Go (push no-ops), the real module in dev/production builds. Same pattern in
+`auth/googleSigninModule.ts` for `@react-native-google-signin/google-signin` (a third-party
+native module never bundled in Expo Go at all, unlike `expo-*` packages). Both are backed by
+`apps/mobile/__mocks__/expo.js`, which forces `isRunningInExpoGo()` false under jest (jest-expo's
+own native-module automock otherwise reports `ExpoGo` present) while delegating every other
+export to the real `expo` package — don't narrow that mock further without checking who else
+imports from `expo` (e.g. `expo-sqlite` pulls `requireNativeModule` through it).
+
 ## Haptics (`src/game/haptics.ts` + `useHaptics.ts`)
 
 `cuesForEvents` is a pure event→cue map (routeClaimed / tunnelRevealed / ticketCompleted /

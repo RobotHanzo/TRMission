@@ -1,7 +1,7 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { api } from '../net/rest';
 import { useSettings } from '../store/settings';
+import { Notifications } from './expoNotifications';
 
 // The last native token we registered, so sign-out can unregister exactly it.
 let registeredToken: string | null = null;
@@ -10,7 +10,7 @@ const platform = (): 'ios' | 'android' => (Platform.OS === 'ios' ? 'ios' : 'andr
 
 /** Android 8+ requires a channel before any notification can display. */
 async function ensureAndroidChannel(): Promise<void> {
-  if (Platform.OS !== 'android') return;
+  if (Platform.OS !== 'android' || !Notifications) return;
   await Notifications.setNotificationChannelAsync('default', {
     name: 'TRMission',
     importance: Notifications.AndroidImportance.DEFAULT,
@@ -24,6 +24,7 @@ async function ensureAndroidChannel(): Promise<void> {
  * settings toggle, never implicitly from here.
  */
 export async function ensurePushRegistration(): Promise<boolean> {
+  if (!Notifications) return false;
   const perms = await Notifications.getPermissionsAsync();
   if (!perms.granted) return false;
   await ensureAndroidChannel();
@@ -54,6 +55,7 @@ export async function unregisterDeviceForPush(): Promise<void> {
 
 /** FCM/APNs rotate tokens; keep the server registry current. Returns the unsubscribe. */
 export function watchTokenRotation(): () => void {
+  if (!Notifications) return () => {};
   const sub = Notifications.addPushTokenListener((t) => {
     void (async () => {
       const value = String(t.data);

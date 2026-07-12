@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Alert, Linking, StyleSheet, Switch, Text, View } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../store/settings';
 import { ensurePushRegistration, unregisterDeviceForPush } from '../../push/register';
+import { Notifications } from '../../push/expoNotifications';
 
 /** The push toggle: ON asks the OS (or routes to system settings when permanently denied),
  *  then registers the native token; OFF deregisters it. The setting only flips on success. */
@@ -17,6 +17,7 @@ export default function NotificationsRow(): React.JSX.Element {
     setBusy(true);
     try {
       if (next) {
+        if (!Notifications) return; // Expo Go: push unavailable until a real dev/production build
         const perm = await Notifications.requestPermissionsAsync();
         if (!perm.granted) {
           if (perm.canAskAgain === false) {
