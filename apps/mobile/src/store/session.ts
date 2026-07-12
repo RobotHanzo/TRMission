@@ -92,6 +92,8 @@ export const useSession = create<SessionState>()((set, get) => {
         const user = await api.me();
         set({ user, booting: false, signInMethod: user.isGuest ? 'guest' : get().signInMethod });
         hydratePrefs(user);
+        // Re-sync push after a boot-time restore too (settings-gated; never blocks boot).
+        void registerDeviceForPush().catch(() => undefined);
       } catch {
         await clearLocalSession();
         set({ booting: false });

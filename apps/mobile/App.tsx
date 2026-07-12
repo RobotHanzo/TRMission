@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import './src/i18n'; // initialise the i18n singleton before any screen uses useTranslation
 import { RootNavigator } from './src/navigation';
+import { watchTokenRotation } from './src/push/register';
 
 // Registering the deep-link prefixes lets a cold-start OAuth return (/m/callback) or a
 // trmission:// link resolve. The active OAuth flow is handled in-process by openAuthSessionAsync.
@@ -12,6 +14,8 @@ const linking = {
 };
 
 export default function App() {
+  // FCM/APNs rotate device tokens; keep the server registry current for the app's lifetime.
+  useEffect(() => watchTokenRotation(), []);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
