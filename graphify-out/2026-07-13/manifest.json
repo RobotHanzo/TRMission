@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/history/history.repo.ts": {
-    "mtime": 1783869478.5575666,
-    "ast_hash": "179fc05f0fcf43a3adcdeb70416a950f",
+    "mtime": 1783877077.3856528,
+    "ast_hash": "092fd7a2a2ee51cdb2efc2ac00f5ca3e",
     "semantic_hash": ""
   },
   "apps/server/src/history/history.schemas.ts": {
@@ -420,9 +420,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/EndgameWarning.tsx": {
-    "mtime": 1782649095.266387,
-    "ast_hash": "0094a01a4ec2361aa048cd1322e01ce9",
-    "semantic_hash": "0094a01a4ec2361aa048cd1322e01ce9"
+    "mtime": 1783876187.9708633,
+    "ast_hash": "3b96afa2dc3832b3bcc5f93fcec96b2d",
+    "semantic_hash": ""
   },
   "apps/web/src/components/FlyingCard.tsx": {
     "mtime": 1782636858.3459134,
@@ -715,8 +715,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/game/logModel.test.ts": {
-    "mtime": 1783809759.656927,
-    "ast_hash": "fb989752b15609831cba0331b25a3634",
+    "mtime": 1783876247.9678218,
+    "ast_hash": "01c2a478374479b446ad74ede8c83f5b",
     "semantic_hash": ""
   },
   "apps/web/src/game/logModel.ts": {
@@ -775,8 +775,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/hooks/useAnimationDriver.ts": {
-    "mtime": 1783227085.5999236,
-    "ast_hash": "dbbfd308a62d80cdb84a41976bc97dbd",
+    "mtime": 1783876180.7341857,
+    "ast_hash": "a6b1deb4fe43d1024ed80c8b82ffb313",
     "semantic_hash": ""
   },
   "apps/web/src/hooks/useConfetti.ts": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/index.ts": {
-    "mtime": 1783876039.9644241,
-    "ast_hash": "6fdee1e3e68fa0d6b667a137b93e9c3d",
+    "mtime": 1783876220.0031838,
+    "ast_hash": "08449dfe45cbb41a8324264d4f44557e",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/tutorial.ts": {
@@ -1075,8 +1075,8 @@
     "semantic_hash": ""
   },
   "package.json": {
-    "mtime": 1783871820.7627587,
-    "ast_hash": "202d1f7452a3e5e8d7f3799bd451054d",
+    "mtime": 1783877158.051238,
+    "ast_hash": "7b45a10288a3d87319676b74aeaf00b9",
     "semantic_hash": ""
   },
   "packages/codec/package.json": {
@@ -1490,8 +1490,8 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1783869478.4009602,
-    "ast_hash": "9ea8ef4cd3a1d718ebb388466b79baa3",
+    "mtime": 1783876514.493253,
+    "ast_hash": "2fbce36d0d46d7a62af4c01ecf6c48c1",
     "semantic_hash": ""
   },
   "README.md": {
@@ -2780,8 +2780,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/history-replay-compat.spec.ts": {
-    "mtime": 1783809759.643058,
-    "ast_hash": "acb1026757f022dab05c5859a7357ba0",
+    "mtime": 1783877097.892897,
+    "ast_hash": "abdce708adfcdbd5d2d820e02f061dc8",
     "semantic_hash": ""
   },
   "apps/server/test/lobby-events.e2e.spec.ts": {
@@ -4225,8 +4225,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/EndgameWarning.tsx": {
-    "mtime": 1783869478.4538414,
-    "ast_hash": "320b5b63ee8a0f503e29694f5aa63adf",
+    "mtime": 1783876597.9432156,
+    "ast_hash": "b63f941a97b378537cb427b9ba23c5ea",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/EventBanner.tsx": {
@@ -4245,8 +4245,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/LogPanel.tsx": {
-    "mtime": 1783874501.0343769,
-    "ast_hash": "8e11825c4e8d1613a4d5ceabe2563981",
+    "mtime": 1783876533.6766272,
+    "ast_hash": "97532f687f853dcd58deb7892434ff3d",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/NotificationStack.tsx": {
@@ -4565,13 +4565,13 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/game/logModel.test.ts": {
-    "mtime": 1783875041.4782026,
-    "ast_hash": "13b4dd98d027e8bf3cff750e0ef944c9",
+    "mtime": 1783876692.3476565,
+    "ast_hash": "3a7029ce7413ec0a3d40508f6cbf1af4",
     "semantic_hash": ""
   },
   "apps/mobile/src/game/logModel.ts": {
-    "mtime": 1783872171.8737814,
-    "ast_hash": "3bc8cdd43ac913b2b93ed4ab88bb0bc8",
+    "mtime": 1783876528.601786,
+    "ast_hash": "726674accf37fb29350ed87b426a6c28",
     "semantic_hash": ""
   },
   "apps/mobile/src/game/payments.test.ts": {
@@ -4640,8 +4640,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/hooks/useAnimationDriver.ts": {
-    "mtime": 1783869478.4910061,
-    "ast_hash": "8352c60e2511bcf9f41c4e3c1c971d56",
+    "mtime": 1783876591.4008691,
+    "ast_hash": "6dfffc073fe525799b4a22f6f1754830",
     "semantic_hash": ""
   },
   "apps/mobile/src/hooks/useOnline.ts": {
@@ -4665,8 +4665,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/index.ts": {
-    "mtime": 1783874857.951511,
-    "ast_hash": "273139e3021ac4e21f514cc85534d468",
+    "mtime": 1783876660.4695272,
+    "ast_hash": "135ac5225b14945e25117382e4db3f06",
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/tutorial.ts": {
@@ -4870,8 +4870,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/GameStage.tsx": {
-    "mtime": 1783875262.667065,
-    "ast_hash": "0c7b848e288a2ec25c89a07243a979f1",
+    "mtime": 1783876520.4093728,
+    "ast_hash": "9ef17944bc56029d3455b38f79427897",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/HomeScreen.tsx": {
@@ -4965,8 +4965,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/store/animations.ts": {
-    "mtime": 1783869478.5218906,
-    "ast_hash": "0876ce680d51c4ad71a3f2905eeace71",
+    "mtime": 1783876558.560266,
+    "ast_hash": "4d7bcf3d6630569944825b08bebea0f6",
     "semantic_hash": ""
   },
   "apps/mobile/src/store/chat.ts": {

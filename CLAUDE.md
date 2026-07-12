@@ -78,6 +78,12 @@ packages/proto  → shared → map-data → engine → bots/codec → apps/{serv
 Internal packages export **TS source** (no per-lib build step) except `proto` (codegen). Each area
 has its own `CLAUDE.md` with the local architecture — read it before working there.
 
+**`apps/web` and `apps/mobile` are two clients over the same game.** They duplicate UI/UX rather
+than sharing components, so a frontend change to one (rules text, i18n string, game-flow screen,
+notification copy, endgame/pass handling, etc.) usually has an equivalent gap on the other. When
+you land a frontend change, check whether the other client needs the same change before calling
+the work done — don't assume fixing one side is sufficient.
+
 ## The big picture
 
 **Server-authoritative + deterministic.** Every game is hidden-information (each hand and ticket is
