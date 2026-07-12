@@ -1490,8 +1490,8 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1783876514.493253,
-    "ast_hash": "2fbce36d0d46d7a62af4c01ecf6c48c1",
+    "mtime": 1783879620.837575,
+    "ast_hash": "a22c79d5a7ec8fa58e2063b96ca75e1e",
     "semantic_hash": ""
   },
   "README.md": {
@@ -1500,8 +1500,8 @@
     "semantic_hash": "d2a522bf9b8d28da12e103cb589e0d37"
   },
   "apps/server/CLAUDE.md": {
-    "mtime": 1783876140.0084593,
-    "ast_hash": "67671785aa82ac897a7a376c74f51f99",
+    "mtime": 1783879634.3104894,
+    "ast_hash": "736259368ed6e9c71524acf31ada5ac4",
     "semantic_hash": ""
   },
   "apps/web/CLAUDE.md": {
@@ -1690,8 +1690,8 @@
     "semantic_hash": "019aa8592b5cdd00eefdecf6a567fcbd"
   },
   ".claude/settings.json": {
-    "mtime": 1783276375.4663355,
-    "ast_hash": "0a2b25a294cc4d5a9f66132402015dda",
+    "mtime": 1783879871.6544259,
+    "ast_hash": "4051aaf0654e56c40e55e117dfb34539",
     "semantic_hash": ""
   },
   "apps/web/src/features/replay/frameTarget.test.ts": {
