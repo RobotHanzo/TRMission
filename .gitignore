@@ -51,3 +51,6 @@ yarn-error.log*
 *.local
 te_rules_2015_en.pdf
 .playwright-mcp/
+
+# OTA code-signing PRIVATE key (cert is committed; key lives on the OTA server secret mount)
+apps/mobile/certs/keys/

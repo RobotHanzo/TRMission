@@ -36,6 +36,26 @@ const config: ExpoConfig = {
       },
     ],
   },
+  updates: {
+    // Self-hosted expo-open-ota manifest endpoint (docs/mobile/ota.md). The origin is a
+    // deploy-time repo variable so dev builds can point at the local compose container.
+    // NEVER an EAS URL — no EAS anywhere in this project.
+    url: process.env.TRM_OTA_URL ?? 'http://localhost:3005/manifest',
+    enabled: true,
+    checkAutomatically: 'ON_LOAD',
+    // Launch waits 0ms for the check: stale-while-revalidate. A downloaded update applies on
+    // the NEXT cold start. The forced-update gate (GET /version/mobile) still runs every boot.
+    fallbackToCacheTimeout: 0,
+    // Installed apps only accept bundles signed by our certificate; expo-open-ota signs at
+    // SERVE time with the private key mounted on the server (never in CI, never committed).
+    codeSigningCertificate: './certs/certificate.pem',
+    codeSigningMetadata: { keyid: 'main', alg: 'rsa-v1_5-sha256' },
+    // expo-open-ota resolves the update branch from this channel header (production|preview).
+    requestHeaders: { 'expo-channel-name': process.env.TRM_OTA_CHANNEL ?? 'production' },
+  },
+  // An OTA can never land on an incompatible native build: the fingerprint hashes the whole
+  // native surface (modules, SDK, config plugins), so mismatched binaries ignore the update.
+  runtimeVersion: { policy: 'fingerprint' },
   plugins: [
     'expo-secure-store',
     'expo-apple-authentication',
