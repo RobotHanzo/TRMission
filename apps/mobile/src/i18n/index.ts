@@ -30,6 +30,12 @@ void i18n.use(initReactI18next).init({
             tutorialDesc: '5 分鐘互動教學',
           },
         },
+        push: {
+          promptTitle: '輪到你時通知你？',
+          promptBody: '開啟通知後，即使離開遊戲畫面，也會在輪到你、對局開始或結束時提醒你。',
+          promptAccept: '開啟通知',
+          promptDismiss: '先不用',
+        },
         builder: {
           title: '地圖工房',
           entry: '地圖工房',
@@ -279,6 +285,13 @@ void i18n.use(initReactI18next).init({
             tutorialTitle: 'Revisit the tutorial',
             tutorialDesc: 'A 5-minute interactive walkthrough',
           },
+        },
+        push: {
+          promptTitle: 'Get turn reminders?',
+          promptBody:
+            "We'll notify you when it's your turn, or when a game starts or ends — even when the app is in the background.",
+          promptAccept: 'Enable notifications',
+          promptDismiss: 'Not now',
         },
         builder: {
           title: 'Map Studio',

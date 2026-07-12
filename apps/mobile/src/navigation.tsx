@@ -1,3 +1,4 @@
+import { createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { BootScreen } from './screens/BootScreen';
@@ -29,6 +30,9 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+/** Imperative navigation handle for non-component callers (push notification taps). */
+export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 /**
  * A declarative auth gate: which screens exist depends on session state, so a login/logout swaps

@@ -16,6 +16,8 @@ import { useSession } from '../store/session';
 import { useActiveContent } from '../game/useActiveContent';
 import { GameStage } from './GameStage';
 import { OfflineBanner } from '../components/OfflineBanner';
+import { setActiveGameId } from '../push/notifications';
+import PushPrompt from '../push/PushPrompt';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
@@ -46,6 +48,14 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
       cancelled = true;
     };
   }, [roomCode, setRoster]);
+
+  // While this game is on screen, its foreground push banners are suppressed (the snapshot has
+  // no game id — the room view carries it).
+  const activeGameId = room?.gameId ?? null;
+  useEffect(() => {
+    setActiveGameId(activeGameId);
+    return () => setActiveGameId(null);
+  }, [activeGameId]);
 
   // Once the game is over, poll the room every 2s: refresh the rematch vote tally, and the moment
   // the host resets it to LOBBY, carry this client back into the room — the same way starting a
@@ -178,12 +188,19 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
         onPlayAgain={() => void playAgain()}
       />
       <OfflineBanner />
+      {/* Contextual push ask after the player's FIRST finished game (one-shot; online games only). */}
+      {phase === Phase.GAME_OVER && !isSpectator && (
+        <View style={styles.promptDock} pointerEvents="box-none">
+          <PushPrompt />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
+  promptDock: { position: 'absolute', left: 12, right: 12, bottom: 12 },
   veil: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
   veilText: { fontSize: 15, opacity: 0.75 },
   linkBtn: { padding: 8 },
