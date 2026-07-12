@@ -9,6 +9,7 @@ import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
 import { routeById } from './content';
 import {
+  enumerateRepairPayments,
   enumerateRoutePayments,
   enumerateStationPayments,
   handAfterPayment,
@@ -19,18 +20,21 @@ import {
   type Payment,
 } from './payments';
 import { enumerateTunnelExtra } from './tunnel';
-import { freeStationAvailable, skyLanternSurcharge } from './events';
+import { freeStationAvailable, hasActiveEvent, skyLanternSurcharge } from './events';
 import { useAnimationsStore } from '../store/animations';
 import type { GameCommands } from '../net/commands';
 
 export type Claim =
   | { kind: 'route'; route: RouteDef; payments: Payment[] }
-  | { kind: 'station'; cityId: string; payments: Payment[] };
+  | { kind: 'station'; cityId: string; payments: Payment[] }
+  | { kind: 'repair'; routeId: string; payments: Payment[] };
 
 export interface ClaimFlow {
   claim: Claim | null;
   pickRoute(routeId: string): void;
   pickCity(cityId: string): void;
+  /** Open the payment picker for repairing a slope-closed route (2 matching cards / a permit). */
+  startRepair(routeId: string): void;
   confirmPayment(p: Payment): void;
   cancelClaim(): void;
   /** The pending tunnel belongs to this viewer (interactive); false = spectate the reveal. */
@@ -60,7 +64,11 @@ export function useClaimFlow(snapshot: GameSnapshot, commands: GameCommands | nu
     const route = routeById.get(routeId);
     if (!route) return;
     const extra = skyLanternSurcharge(randomEvents, routeId);
-    const payments = enumerateRoutePayments(hand, route, extra);
+    const payments = enumerateRoutePayments(hand, route, extra, {
+      bentoTokens: myPub?.bentoTokens ?? 0,
+      claimDiscounts: myPub?.claimDiscounts ?? 0,
+      allSeatsReserved: hasActiveEvent(randomEvents, 'ALL_SEATS_RESERVED'),
+    });
     if (payments.length) {
       setClaim({ kind: 'route', route, payments });
       return;
@@ -95,13 +103,20 @@ export function useClaimFlow(snapshot: GameSnapshot, commands: GameCommands | nu
     });
   };
 
+  const startRepair = (routeId: string): void => {
+    const payments = enumerateRepairPayments(hand, myPub?.repairPermits ?? 0);
+    if (payments.length > 0) setClaim({ kind: 'repair', routeId, payments });
+  };
+
   const confirmPayment = (p: Payment): void => {
     if (!commands || !claim) return;
     if (claim.kind === 'route') {
       if (claim.route.isTunnel) setTunnelBase(p);
       commands.claimRoute(claim.route.id as string, paymentToProto(p));
-    } else {
+    } else if (claim.kind === 'station') {
       commands.buildStation(claim.cityId, paymentToProto(p));
+    } else {
+      commands.repairRoute(claim.routeId, paymentToProto(p));
     }
     setClaim(null);
   };
@@ -130,6 +145,7 @@ export function useClaimFlow(snapshot: GameSnapshot, commands: GameCommands | nu
     claim,
     pickRoute,
     pickCity,
+    startRepair,
     confirmPayment,
     cancelClaim: () => setClaim(null),
     tunnelMine,

@@ -1,5 +1,5 @@
 import { create, type MessageInitShape } from '@bufbuild/protobuf';
-import { GameEventSchema, CardColor } from '@trm/proto';
+import { GameEventSchema, CardColor, EventPerk } from '@trm/proto';
 import { entriesFromEvents } from './logModel';
 
 const ev = (event: NonNullable<MessageInitShape<typeof GameEventSchema>['event']>) =>
@@ -39,6 +39,62 @@ describe('entriesFromEvents', () => {
       ev({ case: 'initialTicketsOffered', value: { playerId: 'p1', ticketIds: ['L1'] } }),
     ]);
     expect(out).toEqual([]);
+  });
+
+  it('logs the reason for a market recycle', () => {
+    const out = entriesFromEvents([
+      ev({ case: 'marketRecycled', value: { reason: 'THREE_OF_COLOR' } }),
+    ]);
+    expect(out).toEqual([
+      {
+        kind: 'marketRecycled',
+        playerId: null,
+        data: { reason: 'THREE_OF_COLOR' },
+        importance: 'normal',
+      },
+    ]);
+  });
+
+  it('maps expansion follow-up frames into readable log entries', () => {
+    const out = entriesFromEvents([
+      ev({
+        case: 'eventMarkerMoved',
+        value: { kind: 'LANTERN_HOST_CITY', id: 'e1', cityId: 'taipei', playerId: 'p1' },
+      }),
+      ev({
+        case: 'eventNightMarketSwapped',
+        value: { playerId: 'p1', slot: 0, gave: CardColor.RED, took: CardColor.BLUE },
+      }),
+      ev({
+        case: 'eventPerkChosen',
+        value: { playerId: 'p2', perk: EventPerk.DRAW_TWO },
+      }),
+      ev({
+        case: 'eventHiveResolved',
+        value: { playerId: 'p1', busted: true, keptCount: 1 },
+      }),
+    ]);
+    expect(out).toEqual([
+      {
+        kind: 'eventMarkerMoved',
+        playerId: 'p1',
+        data: { eventKind: 'LANTERN_HOST_CITY', cityId: 'taipei' },
+        importance: 'highlight',
+      },
+      { kind: 'eventNightMarketSwapped', playerId: 'p1', data: {}, importance: 'normal' },
+      {
+        kind: 'eventPerkChosen',
+        playerId: 'p2',
+        data: { perk: EventPerk.DRAW_TWO },
+        importance: 'highlight',
+      },
+      {
+        kind: 'eventHiveResolved',
+        playerId: 'p1',
+        data: { busted: true, keptCount: 1 },
+        importance: 'alert',
+      },
+    ]);
   });
 
   it('reads the face-up card colour but not blind draws', () => {

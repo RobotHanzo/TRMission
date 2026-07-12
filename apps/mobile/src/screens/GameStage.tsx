@@ -18,7 +18,7 @@ import { ticketById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
 import { isMyTurn } from '../game/view';
 import { isChatRejectionKey } from '../game/chatErrors';
-import { eventRejectionHintKey } from '../game/events';
+import { eventRejectionHintKey, hasActiveEvent } from '../game/events';
 import { gateFlags, type ActionGate } from '../game/actionGate';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../features/tutorial/targets';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
@@ -29,6 +29,7 @@ import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../board/frameTarget';
 import { BoardView } from '../board/BoardView';
 import { EventsPanel } from '../components/game/EventsPanel';
+import { EventPhaseBar, EventTurnActions } from '../components/game/EventActions';
 import { CardMarket } from '../components/game/CardMarket';
 import { PlayerHand } from '../components/game/PlayerHand';
 import { PlayerTrackers } from '../components/game/PlayerTrackers';
@@ -194,6 +195,9 @@ export function GameStage({
   );
 
   const trackers = <PlayerTrackers snapshot={snapshot} />;
+  // The blocking event-phase prompt sits above the board in every tier so a required
+  // lantern/draft/hive choice is never buried inside an unselected dock tab.
+  const eventPhaseBar = <EventPhaseBar snapshot={snapshot} commands={commands} locale={locale} />;
   const market = (
     <View style={styles.marketBlock}>
       <CardMarket
@@ -201,6 +205,7 @@ export function GameStage({
         canDraw={marketCanDraw}
         onDrawFaceUp={(slot) => commands?.drawFaceUp(slot)}
         onDrawBlind={() => commands?.drawBlind()}
+        blockFaceupLocomotives={hasActiveEvent(snapshot.randomEvents, 'ALL_SEATS_RESERVED')}
       />
       <Pressable
         {...drawTicketsAnchor}
@@ -221,6 +226,13 @@ export function GameStage({
             : ` (${snapshot.ticketDeckShortCount})`}
         </Text>
       </Pressable>
+      <EventTurnActions
+        snapshot={snapshot}
+        commands={commands}
+        canAct={canAct}
+        locale={locale}
+        onRepair={flow.startRepair}
+      />
     </View>
   );
   const handSection = (
@@ -280,7 +292,13 @@ export function GameStage({
     <>
       {flow.claim && (
         <PaymentModal
-          title={flow.claim.kind === 'route' ? t('claimRoute') : t('buildStation')}
+          title={
+            flow.claim.kind === 'route'
+              ? t('claimRoute')
+              : flow.claim.kind === 'station'
+                ? t('buildStation')
+                : t('events.repairRoute')
+          }
           options={flow.claim.payments}
           onPick={flow.confirmPayment}
           onCancel={flow.cancelClaim}
@@ -331,6 +349,7 @@ export function GameStage({
     return (
       <View style={styles.fill}>
         {spectatorBanner}
+        {eventPhaseBar}
         <View style={styles.fill}>{board}</View>
         <View
           style={[styles.dock, { height: Math.round(height * 0.45), paddingBottom: insets.bottom }]}
@@ -391,6 +410,7 @@ export function GameStage({
     return (
       <View style={styles.fill}>
         {spectatorBanner}
+        {eventPhaseBar}
         <View style={styles.row}>
           <View style={styles.fill}>{board}</View>
           <ScrollView style={styles.rail} contentContainerStyle={styles.railContent}>
@@ -409,6 +429,7 @@ export function GameStage({
   return (
     <View style={styles.fill}>
       {spectatorBanner}
+      {eventPhaseBar}
       <View style={styles.row}>
         <View style={styles.fill}>{board}</View>
         <View style={styles.rail}>

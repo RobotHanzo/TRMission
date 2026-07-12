@@ -17,8 +17,14 @@ interface Props {
 
 const CARD_SIZE = 96;
 
-/** A fully-empty payment is the gala zero-cost station (offered only while its window is up). */
-const isFree = (p: Payment): boolean => p.colorCount === 0 && p.locomotives === 0;
+/** A truly empty, unmodified payment is the gala zero-cost station. A token-only Bento WILD or
+ *  empty repair-permit payment must never be mislabeled as a free station. */
+const isFree = (p: Payment): boolean =>
+  p.colorCount === 0 &&
+  p.locomotives === 0 &&
+  !p.bentoSpend &&
+  !p.useClaimDiscount &&
+  !p.repairPermit;
 
 /** Describes a spend option for assistive tech, e.g. "藍 ×2 + 彩虹車頭 ×1". */
 const describe = (p: Payment): string => {
@@ -32,6 +38,14 @@ const describe = (p: Payment): string => {
 export function PaymentModal({ title, options, onPick, onCancel }: Props) {
   const { t } = useTranslation();
   const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.paymentOptions);
+  // Event-resource labels riding on a payment option (Bento token, claim discount, +2 bonus, …).
+  const modifierLabels = (p: Payment): string[] => [
+    ...(p.bentoSpend === 'WILD' ? [t('events.bentoWild')] : []),
+    ...(p.bentoSpend === 'POINTS' ? [t('events.bentoPoints')] : []),
+    ...(p.useClaimDiscount ? [t('events.perkClaimDiscount')] : []),
+    ...(p.allSeatsBonus ? [t('events.allSeatsBonus')] : []),
+    ...(p.repairPermit ? [t('events.repairWithPermit')] : []),
+  ];
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onCancel}>
       <Pressable style={styles.backdrop} onPress={onCancel}>
@@ -42,27 +56,40 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
           ) : (
             <View {...anchor} style={styles.optionsScroll}>
               <ScrollView contentContainerStyle={styles.options}>
-                {options.map((p, i) => (
-                  <Pressable
-                    key={i}
-                    style={({ pressed }) => [
-                      styles.option,
-                      isFree(p) && styles.optionFree,
-                      pressed && styles.pressed,
-                    ]}
-                    accessibilityRole="button"
-                    accessibilityLabel={isFree(p) ? t('events.freeStation') : describe(p)}
-                    onPress={() => onPick(p)}
-                  >
-                    {isFree(p) && <Text style={styles.freeLabel}>{t('events.freeStation')}</Text>}
-                    {p.color && p.colorCount > 0 && (
-                      <TrainCarCard color={p.color} count={p.colorCount} size={CARD_SIZE} />
-                    )}
-                    {p.locomotives > 0 && (
-                      <TrainCarCard color="LOCOMOTIVE" count={p.locomotives} size={CARD_SIZE} />
-                    )}
-                  </Pressable>
-                ))}
+                {options.map((p, i) => {
+                  const modifiers = modifierLabels(p);
+                  const aria = [describe(p), ...modifiers].filter(Boolean).join(' · ');
+                  return (
+                    <Pressable
+                      key={i}
+                      style={({ pressed }) => [
+                        styles.option,
+                        isFree(p) && styles.optionFree,
+                        pressed && styles.pressed,
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel={isFree(p) ? t('events.freeStation') : aria}
+                      onPress={() => onPick(p)}
+                    >
+                      {isFree(p) && <Text style={styles.freeLabel}>{t('events.freeStation')}</Text>}
+                      {modifiers.length > 0 && (
+                        <View style={styles.modifiers}>
+                          {modifiers.map((label) => (
+                            <Text key={label} style={styles.modifier}>
+                              {label}
+                            </Text>
+                          ))}
+                        </View>
+                      )}
+                      {p.color && p.colorCount > 0 && (
+                        <TrainCarCard color={p.color} count={p.colorCount} size={CARD_SIZE} />
+                      )}
+                      {p.locomotives > 0 && (
+                        <TrainCarCard color="LOCOMOTIVE" count={p.locomotives} size={CARD_SIZE} />
+                      )}
+                    </Pressable>
+                  );
+                })}
               </ScrollView>
             </View>
           )}
@@ -111,6 +138,17 @@ const styles = StyleSheet.create({
   },
   optionFree: { borderColor: '#2e7d32', backgroundColor: 'rgba(46,125,50,0.08)' },
   freeLabel: { color: '#2e7d32', fontWeight: '700', fontSize: 13 },
+  modifiers: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, maxWidth: 120 },
+  modifier: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#7c2d12',
+    backgroundColor: 'rgba(238,107,31,0.14)',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    overflow: 'hidden',
+  },
   pressed: { opacity: 0.75 },
   row: { flexDirection: 'row', justifyContent: 'flex-end' },
   cancelBtn: { paddingHorizontal: 14, paddingVertical: 10 },

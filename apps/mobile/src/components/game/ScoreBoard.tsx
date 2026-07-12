@@ -70,6 +70,10 @@ export function ScoreBoard({
   const seats = seatByPlayer(snapshot);
   const winners = new Set(fs.ranking[0]?.playerIds ?? []);
   const sorted = [...fs.players].sort((a, b) => b.total - a.total);
+  // Only games played with random events carry the ✨ stat — an events-off (or pre-events)
+  // game would otherwise show an all-zero column.
+  const showEventBonus =
+    snapshot.randomEvents !== undefined || fs.players.some((pf) => pf.eventBonus > 0);
   const seatOf = (id: string): number => seats.get(id) ?? 0;
   const nameOf = (id: string): string =>
     playerName({ id, seat: seatOf(id), isMe: id === snapshot.you?.playerId });
@@ -193,6 +197,7 @@ export function ScoreBoard({
                       )}
                     </View>
                     <Text style={styles.stat}>🚉 +{pf.stationBonus}</Text>
+                    {showEventBonus && <Text style={styles.stat}>✨ +{pf.eventBonus}</Text>}
                     <View style={styles.statGroup}>
                       <Text style={styles.stat}>
                         📏{' '}

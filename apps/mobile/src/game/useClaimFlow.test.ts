@@ -21,6 +21,13 @@ const commandsMock = (): jest.Mocked<GameCommands> => ({
   claimRoute: jest.fn(),
   buildStation: jest.fn(),
   resolveTunnel: jest.fn(),
+  relocateLanternHost: jest.fn(),
+  repairRoute: jest.fn(),
+  nightMarketSwap: jest.fn(),
+  chooseEventPerk: jest.fn(),
+  startHiveDraw: jest.fn(),
+  continueHiveDraw: jest.fn(),
+  stopHiveDraw: jest.fn(),
   pass: jest.fn(),
   cameraUpdate: jest.fn(),
 });

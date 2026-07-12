@@ -14,8 +14,24 @@ export const EVENT_KINDS = [
   'AFTERSHOCK',
   'RAILWAY_GALA',
   'STAMP_RALLY',
+  'LANTERN_HOST_CITY',
+  'BENTO_RUSH',
+  'SLOPE_REPAIR_ORDER',
+  'STATION_FRONT_NIGHT_MARKET',
+  'GODDESS_PROCESSION',
+  'SPRING_FESTIVAL_RUSH',
+  'ROLLING_STOCK_ALLOCATION_DAY',
+  'HIVE_OF_SPARKS',
+  'BREAKTHROUGH_BORING_MACHINE',
+  'INTERIM_OPERATIONS_REPORT',
+  'HARVEST_FESTIVAL_EXPRESS',
+  'ALL_SEATS_RESERVED',
+  'LUCKY_TICKET_STUB',
 ] as const;
 export type EventKind = (typeof EVENT_KINDS)[number];
+
+export const hasActiveEvent = (ev: RandomEventsState | undefined, kind: EventKind): boolean =>
+  ev?.active.some((active) => active.kind === kind) ?? false;
 
 const EMPTY_SET: ReadonlySet<string> = new Set<string>();
 
@@ -88,6 +104,14 @@ const EVENT_ERROR_KEYS: Readonly<Record<string, string>> = {
   'errors:routeClosedByEvent': 'errors.routeClosedByEvent',
   'errors:eventClaimsSuspended': 'errors.eventClaimsSuspended',
   'errors:eventStationsSuspended': 'errors.eventStationsSuspended',
+  'errors:eventFaceupLocoBlocked': 'errors.eventFaceupLocoBlocked',
+  'errors:eventRepairUnavailable': 'errors.eventRepairUnavailable',
+  'errors:eventRepairPaymentInvalid': 'errors.eventRepairPaymentInvalid',
+  'errors:eventNightMarketUnavailable': 'errors.eventNightMarketUnavailable',
+  'errors:eventLanternRelocationInvalid': 'errors.eventLanternRelocationInvalid',
+  'errors:eventDraftChoiceInvalid': 'errors.eventDraftChoiceInvalid',
+  'errors:eventHiveUnavailable': 'errors.eventHiveUnavailable',
+  'errors:eventResourceUnavailable': 'errors.eventResourceUnavailable',
 };
 
 /** The `errors.*` i18n key for an event rejection messageKey, or null if it isn't one. */

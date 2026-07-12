@@ -3,11 +3,11 @@
 // commandToAction, so they travel the identical command→action mapping as the wire, then
 // land in the offline session via the callback (which owns apply + projection + bots).
 import { create, type MessageInitShape } from '@bufbuild/protobuf';
-import { ClientEnvelopeSchema } from '@trm/proto';
-import { commandToAction } from '@trm/codec';
+import { ClientEnvelopeSchema, EventPerk as PbEventPerk } from '@trm/proto';
+import { commandToAction, cardToPb } from '@trm/codec';
 import type { Action } from '@trm/engine';
-import type { PlayerId } from '@trm/shared';
-import type { GameCommands } from '../net/commands';
+import type { CardColor, PlayerId } from '@trm/shared';
+import type { EventPerkChoice, GameCommands } from '../net/commands';
 import type { PaymentInit, CameraViewInit } from '../net/socket';
 
 type CommandInit = NonNullable<MessageInitShape<typeof ClientEnvelopeSchema>['command']>;
@@ -47,6 +47,33 @@ export class LocalSocket implements GameCommands {
   }
   resolveTunnel(commit: boolean, extra?: PaymentInit): void {
     this.send({ case: 'resolveTunnel', value: commit ? { commit, extra } : { commit } });
+  }
+  relocateLanternHost(cityId: string): void {
+    this.send({ case: 'relocateLanternHost', value: { cityId } });
+  }
+  repairRoute(routeId: string, payment: PaymentInit): void {
+    this.send({ case: 'repairRoute', value: { routeId, payment } });
+  }
+  nightMarketSwap(giveColor: CardColor, slot: number): void {
+    this.send({ case: 'nightMarketSwap', value: { giveColor: cardToPb(giveColor), slot } });
+  }
+  chooseEventPerk(perk: EventPerkChoice): void {
+    const value =
+      perk === 'CLAIM_DISCOUNT'
+        ? PbEventPerk.CLAIM_DISCOUNT
+        : perk === 'DRAW_TWO'
+          ? PbEventPerk.DRAW_TWO
+          : PbEventPerk.REPAIR_PERMIT;
+    this.send({ case: 'chooseEventPerk', value: { perk: value } });
+  }
+  startHiveDraw(): void {
+    this.send({ case: 'startHiveDraw', value: {} });
+  }
+  continueHiveDraw(): void {
+    this.send({ case: 'continueHiveDraw', value: {} });
+  }
+  stopHiveDraw(): void {
+    this.send({ case: 'stopHiveDraw', value: {} });
   }
   pass(): void {
     this.send({ case: 'pass', value: {} });

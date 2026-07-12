@@ -23,9 +23,17 @@ interface Props {
   canDraw: boolean;
   onDrawFaceUp(slot: number): void;
   onDrawBlind(): void;
+  /** All Seats Reserved: face-up locomotives may not be taken at all while it's active. */
+  blockFaceupLocomotives?: boolean;
 }
 
-export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Props) {
+export function CardMarket({
+  snapshot,
+  canDraw,
+  onDrawFaceUp,
+  onDrawBlind,
+  blockFaceupLocomotives = false,
+}: Props) {
   const { t } = useTranslation();
   const coveredSlots = useAnimationsStore((s) => s.coveredMarketSlots);
   // Tutorial spotlight anchors (no-ops outside the tutorial provider). The five slots share ONE
@@ -71,7 +79,8 @@ export function CardMarket({ snapshot, canDraw, onDrawFaceUp, onDrawBlind }: Pro
           // A covered slot has a real (refilled) card underneath but stays face-down until the
           // active draw resolves — still drawable, just not yet revealed.
           const covered = coveredSlots.has(slot);
-          const disabled = !canDraw || empty || (isSecondDraw && isLoco);
+          const disabled =
+            !canDraw || empty || (isLoco && (isSecondDraw || blockFaceupLocomotives));
           const face = covered ? (
             <Layers size={16} color="#fff" />
           ) : (

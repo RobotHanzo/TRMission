@@ -281,9 +281,11 @@ function BoardInner({
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
     return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
   }, [snapshot]);
-  // A typhoon-closed route can't be claimed (the server rejects it) → not tappable either.
-  // The web's other random-event derivations (reopen/sky/hotspot/charter overlays) wire in
-  // when MapSceneSkia grows its event-overlay props — nothing here can consume them yet.
+  // A closed route (typhoon landfall / slope repair order) can't be claimed (the server rejects
+  // it) → not tappable either. The web's other random-event derivations (reopen/sky/hotspot/
+  // charter, and the expansion's lantern-host/procession/bento/night-market/lucky/harvest badges)
+  // wire in when MapSceneSkia grows its event-overlay props — nothing here can consume them yet;
+  // the EventsPanel's route list + camera spotlight is the mobile surface for that info.
   const closedRoutes = useMemo(() => closedRouteIds(snapshot.randomEvents), [snapshot]);
 
   // The active catalog is stable while a board is mounted (screens gate on useActiveContent

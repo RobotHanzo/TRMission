@@ -1,5 +1,6 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { legalActions, taiwanBoard } from '@trm/engine';
+import type { Payment as EnginePayment } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
 import '../../../i18n';
 import type { SandboxSocket } from '../../../net/sandboxSocket';
@@ -35,6 +36,11 @@ jest.mock('@react-navigation/native', () => ({
 
 import TutorialScreen from '../TutorialScreen';
 
+/** The tutorial sandbox is events-off, so an engine payment never carries the event-only flags
+ *  (bentoSpend / useClaimDiscount) — drop them to satisfy the client Payment's stricter types. */
+const toWirePayment = (p: EnginePayment) =>
+  paymentToProto({ color: p.color, colorCount: p.colorCount, locomotives: p.locomotives });
+
 /** Perform an await beat's expected move through the live sandbox (mirrors scenarios.spec.ts). */
 function performAwait(sandbox: SandboxSocket, beat: Extract<Beat, { mode: 'await' }>): void {
   const s = sandbox.getState();
@@ -63,7 +69,7 @@ function performAwait(sandbox: SandboxSocket, beat: Extract<Beat, { mode: 'await
       );
       if (!a || a.t !== 'CLAIM_ROUTE')
         throw new Error(`no legal CLAIM_ROUTE for ${want ?? '(any)'}`);
-      sandbox.claimRoute(a.routeId as string, paymentToProto(a.payment));
+      sandbox.claimRoute(a.routeId as string, toWirePayment(a.payment));
       break;
     }
     case 'BUILD_STATION': {
@@ -73,7 +79,7 @@ function performAwait(sandbox: SandboxSocket, beat: Extract<Beat, { mode: 'await
       );
       if (!a || a.t !== 'BUILD_STATION')
         throw new Error(`no legal BUILD_STATION for ${want ?? '(any)'}`);
-      sandbox.buildStation(a.cityId as string, paymentToProto(a.payment));
+      sandbox.buildStation(a.cityId as string, toWirePayment(a.payment));
       break;
     }
     default:

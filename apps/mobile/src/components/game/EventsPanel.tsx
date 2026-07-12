@@ -48,9 +48,28 @@ export function EventsPanel() {
 
   const affected = (info: RandomEventInfo): string | null => {
     if (info.kind === 'VIRAL_HOTSPOT' && info.cityId) return cityName(info.cityId, locale);
+    if (info.kind === 'BENTO_RUSH' && info.cityId)
+      return t('events.bentoCity', { city: cityName(info.cityId, locale) });
+    if (info.kind === 'STATION_FRONT_NIGHT_MARKET' && info.cityId)
+      return t('events.nightMarketCity', { city: cityName(info.cityId, locale) });
+    if (info.kind === 'GODDESS_PROCESSION' && info.cityPath.length > 0) {
+      const current = info.cityPath[Math.min(info.position, info.cityPath.length - 1)];
+      if (current) return t('events.processionAt', { city: cityName(current, locale) });
+    }
+    if (info.kind === 'HARVEST_FESTIVAL_EXPRESS' && info.region) return info.region;
+    if (info.kind === 'SPRING_FESTIVAL_RUSH') return t('events.reversedDirection');
     if (info.routeIds.length > 0) return t('events.affectedRoutes', { n: info.routeIds.length });
     return null;
   };
+
+  const resourcePlayers =
+    snapshot?.players.filter(
+      (player) =>
+        player.bentoTokens > 0 ||
+        player.blessings > 0 ||
+        player.claimDiscounts > 0 ||
+        player.repairPermits > 0,
+    ) ?? [];
 
   const infoButton = (kind: string) => (
     <Pressable
@@ -75,6 +94,24 @@ export function EventsPanel() {
       {ev.freeStationAvailable && (
         <View style={[styles.row, styles.rowFree]}>
           <Text style={styles.rowName}>{t('events.freeStation')}</Text>
+        </View>
+      )}
+
+      {ev.lanternHost && (
+        <View style={[styles.row, styles.rowActive]} testID="lantern-host-row">
+          <Text style={styles.rowName}>{t(eventNameKey('LANTERN_HOST_CITY'))}</Text>
+          <Text style={styles.rowSummary}>
+            {t('events.hostCity', { city: cityName(ev.lanternHost.cityId, locale) })}
+          </Text>
+          {infoButton('LANTERN_HOST_CITY')}
+        </View>
+      )}
+
+      {ev.boringActive && (
+        <View style={[styles.row, styles.rowActive]}>
+          <Text style={styles.rowName}>{t(eventNameKey('BREAKTHROUGH_BORING_MACHINE'))}</Text>
+          <Text style={styles.rowSummary}>{t('events.boringActive')}</Text>
+          {infoButton('BREAKTHROUGH_BORING_MACHINE')}
         </View>
       )}
 
@@ -116,6 +153,75 @@ export function EventsPanel() {
           {infoButton('CHARTER_SPECIAL')}
         </View>
       ))}
+
+      {ev.luckyContracts.map((contract) => (
+        <View key={contract.eventId} style={[styles.row, styles.rowCharter]}>
+          <Text style={styles.rowName}>
+            {t('events.luckyPair', {
+              a: cityName(contract.cityA, locale),
+              b: cityName(contract.cityB, locale),
+            })}
+          </Text>
+          {contract.wonByPlayerId !== '' && (
+            <Text style={styles.rowSummary}>
+              {t('events.charterWon', {
+                name: nameOf({
+                  id: contract.wonByPlayerId,
+                  seat: seatOf(contract.wonByPlayerId),
+                  isMe: contract.wonByPlayerId === me,
+                }),
+              })}
+            </Text>
+          )}
+          {infoButton('LUCKY_TICKET_STUB')}
+        </View>
+      ))}
+
+      {ev.eventDraft && (
+        <View style={[styles.row, styles.rowActive]}>
+          <Text style={styles.rowName}>{t('events.draftTitle')}</Text>
+          <Text style={styles.rowSummary}>
+            {t('events.draftProgress', {
+              n: Math.max(0, ev.eventDraft.order.length - ev.eventDraft.pickIndex),
+            })}
+          </Text>
+        </View>
+      )}
+
+      {ev.pendingHiveDraw && (
+        <View style={[styles.row, styles.rowActive]}>
+          <Text style={styles.rowName}>{t('events.hiveTitle')}</Text>
+          <Text style={styles.rowSummary}>
+            {t('events.hiveWaiting', {
+              name: nameOf({
+                id: ev.pendingHiveDraw.playerId,
+                seat: seatOf(ev.pendingHiveDraw.playerId),
+                isMe: ev.pendingHiveDraw.playerId === me,
+              }),
+            })}{' '}
+            ({ev.pendingHiveDraw.revealed.length}/{ev.pendingHiveDraw.maxDraws})
+          </Text>
+        </View>
+      )}
+
+      {resourcePlayers.map((player) => {
+        const counts = [
+          player.bentoTokens > 0 ? t('events.bentoTokens', { n: player.bentoTokens }) : null,
+          player.blessings > 0 ? t('events.blessings', { n: player.blessings }) : null,
+          player.claimDiscounts > 0
+            ? t('events.claimDiscounts', { n: player.claimDiscounts })
+            : null,
+          player.repairPermits > 0 ? t('events.repairPermits', { n: player.repairPermits }) : null,
+        ].filter((value): value is string => value !== null);
+        return (
+          <View key={player.id} style={[styles.row, styles.rowForecast]}>
+            <Text style={styles.rowName}>
+              {nameOf({ id: player.id, seat: player.seat, isMe: player.id === me })}
+            </Text>
+            <Text style={styles.rowSummary}>{counts.join(' · ')}</Text>
+          </View>
+        );
+      })}
 
       {forecast && (
         <View style={[styles.row, styles.rowForecast]}>
