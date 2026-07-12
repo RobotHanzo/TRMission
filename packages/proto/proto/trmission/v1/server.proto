@@ -108,6 +108,7 @@ message TurnEnded {
 message EndgameTriggered {
   string player_id = 1;
   uint32 final_turns_remaining = 2;
+  string reason = 3; // "FINAL_TRAINS" | "DEADLOCK" (mirrors engine ENDGAME_TRIGGERED.reason)
 }
 
 message GameEnded {}

@@ -214,6 +214,7 @@ message SelfView {
   CardCounts hand = 2;
   repeated string kept_ticket_ids = 3;
   repeated string pending_offer_ticket_ids = 4;
+  bool you_must_pass = 5; // true ⇒ show a Pass control (current player, AWAIT_ACTION, no legal move)
 }
 
 // One player's end-of-game score breakdown. `kept_ticket_ids` are revealed here
