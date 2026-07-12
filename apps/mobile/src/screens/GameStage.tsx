@@ -20,6 +20,7 @@ import { isMyTurn } from '../game/view';
 import { isChatRejectionKey } from '../game/chatErrors';
 import { eventRejectionHintKey, hasActiveEvent } from '../game/events';
 import { gateAllowsTarget, gateFlags, type ActionGate } from '../game/actionGate';
+import { TurnBanner } from '../components/game/TurnBanner';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../features/tutorial/targets';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import { useSoundDriver } from '../hooks/useSoundDriver';
@@ -224,6 +225,8 @@ export function GameStage({
   // The blocking event-phase prompt sits above the board in every tier so a required
   // lantern/draft/hive choice is never buried inside an unselected dock tab.
   const eventPhaseBar = <EventPhaseBar snapshot={snapshot} commands={commands} locale={locale} />;
+  // Whose turn + connection state, persistent across every tier (web's AppHeader equivalent).
+  const turnBanner = <TurnBanner snapshot={snapshot} sandbox={sandbox} />;
   const market = (
     <View style={styles.marketBlock}>
       <CardMarket
@@ -384,6 +387,7 @@ export function GameStage({
     return (
       <View style={styles.fill}>
         {spectatorBanner}
+        {turnBanner}
         {eventPhaseBar}
         <View style={styles.fill}>{board}</View>
         <View
@@ -445,6 +449,7 @@ export function GameStage({
     return (
       <View style={styles.fill}>
         {spectatorBanner}
+        {turnBanner}
         {eventPhaseBar}
         <View style={styles.row}>
           <View style={styles.fill}>{board}</View>
@@ -464,6 +469,7 @@ export function GameStage({
   return (
     <View style={styles.fill}>
       {spectatorBanner}
+      {turnBanner}
       {eventPhaseBar}
       <View style={styles.row}>
         <View style={styles.fill}>{board}</View>
