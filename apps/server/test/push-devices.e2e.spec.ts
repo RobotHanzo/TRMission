@@ -76,14 +76,18 @@ describe('device registry', () => {
       .set('Authorization', `Bearer ${b.token}`)
       .send({ token: 'fcm-tok-2' })
       .expect(204);
-    expect(await t.db.collection('userDevices').countDocuments({ _id: 'fcm-tok-2' as never })).toBe(1);
+    expect(await t.db.collection('userDevices').countDocuments({ _id: 'fcm-tok-2' as never })).toBe(
+      1,
+    );
     // …but A can.
     await request(server())
       .delete('/api/v1/me/devices')
       .set('Authorization', `Bearer ${a.token}`)
       .send({ token: 'fcm-tok-2' })
       .expect(204);
-    expect(await t.db.collection('userDevices').countDocuments({ _id: 'fcm-tok-2' as never })).toBe(0);
+    expect(await t.db.collection('userDevices').countDocuments({ _id: 'fcm-tok-2' as never })).toBe(
+      0,
+    );
   });
 
   it('rejects unauthenticated and invalid bodies', async () => {

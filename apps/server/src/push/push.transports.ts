@@ -22,10 +22,7 @@ export interface PushTransport {
 export const PUSH_TRANSPORTS = Symbol('PUSH_TRANSPORTS');
 
 /** FCM v1 request body (exported pure for tests). */
-export const fcmBody = (
-  token: string,
-  msg: PushMessage,
-): { message: Record<string, unknown> } => ({
+export const fcmBody = (token: string, msg: PushMessage): { message: Record<string, unknown> } => ({
   message: { token, notification: { title: msg.title, body: msg.body }, data: msg.data },
 });
 
@@ -123,7 +120,8 @@ export class ApnsTransport implements PushTransport {
         req.on('close', () => {
           session.close();
           if (status === 200) resolve('ok');
-          else if (status === 410) resolve('prune'); // Unregistered
+          else if (status === 410)
+            resolve('prune'); // Unregistered
           else {
             this.log.warn(`apns send failed: ${status}`);
             resolve('error');

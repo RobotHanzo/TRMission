@@ -22,6 +22,7 @@
 ### Task 1: `DELETE /auth/me` — cascade + Apple revocation
 
 **Files:**
+
 - Create: `apps/server/src/account/apple-token-revoker.ts`
 - Create: `apps/server/src/account/account-deletion.service.ts`
 - Create: `apps/server/src/account/account.controller.ts`
@@ -39,6 +40,7 @@
 - Modify: `apps/server/test/app.ts` (`FakeAppleTokenRevoker` + `appleRevoker` option)
 
 **Interfaces:**
+
 - Consumes: `RoomRepo.findActiveByMember(userId)/leave(code, userId)`, `DashboardAccountRepo.findById(userId)`, `SessionRepo`, `UserRepo`, P0-a/b auth transports, `AuthUser` from `@CurrentUser()`.
 - Produces:
   - `interface AppleTokenRevoker { revoke(authorizationCode: string): Promise<boolean> }` (never throws; false = unconfigured/failed), symbol `APPLE_TOKEN_REVOKER`, `FetchAppleTokenRevoker` (jose client secret + `fetch` to `appleid.apple.com`).
@@ -67,7 +69,11 @@ const server = () => t.app.getHttpServer();
 
 beforeAll(async () => {
   revoker = new FakeAppleTokenRevoker();
-  t = await createTestApp({ mongod: sharedMongod, dbName: 'trm-test-delete', appleRevoker: revoker });
+  t = await createTestApp({
+    mongod: sharedMongod,
+    dbName: 'trm-test-delete',
+    appleRevoker: revoker,
+  });
 }, 60_000);
 afterAll(() => t.close());
 
@@ -97,8 +103,12 @@ describe('DELETE /auth/me: basic deletion', () => {
       .get('/api/v1/auth/me')
       .set('Authorization', `Bearer ${reg.body.accessToken}`)
       .expect(401); // token cryptographically valid ≤15min, but the user doc is gone
-    expect(await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never })).toBe(0);
-    expect(await t.db.collection('authSessions').countDocuments({ userId: reg.body.user.id })).toBe(0);
+    expect(await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never })).toBe(
+      0,
+    );
+    expect(await t.db.collection('authSessions').countDocuments({ userId: reg.body.user.id })).toBe(
+      0,
+    );
   });
 
   it('deletes a mobile guest via the body-token transport', async () => {
@@ -181,9 +191,9 @@ describe('DELETE /auth/me: cascade', () => {
       .delete('/api/v1/auth/me')
       .set('Authorization', `Bearer ${reg.body.accessToken}`)
       .expect(409);
-    expect(
-      await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never }),
-    ).toBe(1);
+    expect(await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never })).toBe(
+      1,
+    );
   });
 });
 
@@ -225,9 +235,9 @@ describe('DELETE /auth/me: Apple token revocation', () => {
       .send({ appleAuthorizationCode: 'ac-3' })
       .expect(204);
     revoker.result = true;
-    expect(
-      await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never }),
-    ).toBe(0);
+    expect(await t.db.collection('users').countDocuments({ _id: reg.body.user.id as never })).toBe(
+      0,
+    );
   });
 });
 ```
@@ -527,8 +537,8 @@ import { APPLE_TOKEN_REVOKER, type AppleTokenRevoker } from '../src/account/appl
 ```
 
 ```ts
-  if (opts.appleRevoker)
-    builder = builder.overrideProvider(APPLE_TOKEN_REVOKER).useValue(opts.appleRevoker);
+if (opts.appleRevoker)
+  builder = builder.overrideProvider(APPLE_TOKEN_REVOKER).useValue(opts.appleRevoker);
 ```
 
 ```ts
@@ -562,6 +572,7 @@ git commit -m "feat(server): in-app account deletion with Apple token revocation
 ### Task 2: Full-suite regression + docs
 
 **Files:**
+
 - Modify: `CLAUDE.md`, `apps/server/CLAUDE.md`, `docs/TODO.md`
 
 - [x] **Step 1: Gates**
@@ -580,12 +591,12 @@ Root `CLAUDE.md` mobile paragraph — append after the `APPLE_CLIENT_IDS` clause
 `apps/server/CLAUDE.md` — append to the Mobile transport block:
 
 ```markdown
-  **Account deletion**: `DELETE /auth/me` (Bearer; optional `{appleAuthorizationCode}` from a
-  fresh SIWA re-auth for token revocation, best-effort). Cascade in `src/account/`: deletes
-  users/authSessions/customMaps drafts, leaves LOBBY rooms via `RoomRepo.leave`, `$pull`s
-  matchHistory spectators; the event-sourced game log, `mapContents`, and `dashboardAudit`
-  stay (dangling opaque ids = the same posture as guest TTL expiry). Maintainers get 409
-  until dashboard access is revoked.
+**Account deletion**: `DELETE /auth/me` (Bearer; optional `{appleAuthorizationCode}` from a
+fresh SIWA re-auth for token revocation, best-effort). Cascade in `src/account/`: deletes
+users/authSessions/customMaps drafts, leaves LOBBY rooms via `RoomRepo.leave`, `$pull`s
+matchHistory spectators; the event-sourced game log, `mapContents`, and `dashboardAudit`
+stay (dangling opaque ids = the same posture as guest TTL expiry). Maintainers get 409
+until dashboard access is revoked.
 ```
 
 `docs/TODO.md` — add under "Mobile — deferred from v1":

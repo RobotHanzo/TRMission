@@ -14,7 +14,7 @@
 
 - **Monorepo pins:** Yarn 4 via Corepack with the **node-modules linker** (required by Metro); server runs via **swc, never tsx/esbuild**; `apps/web` stays on **Vite ^5**; the 6th card colour is **PURPLE, never PINK**; engine purity rules are untouchable (nothing in this plan touches `@trm/engine`).
 - **Never `git add -A` / `git add .`** — stage only files this plan touches (other agents may share the worktree).
-- **zh-Hant primary + en** for every user-facing string (app UI and push interactions). Push notification *content* is localized server-side already — do not re-localize it client-side.
+- **zh-Hant primary + en** for every user-facing string (app UI and push interactions). Push notification _content_ is localized server-side already — do not re-localize it client-side.
 - Server work follows the P0 idioms exactly: zod DTOs + `apiSchema()` (one zod source for validation AND OpenAPI), e2e via `createTestApp` (`apps/server/test/app.ts`), run with `yarn workspace @trm/server test --run <substring>`.
 - Load-bearing strings (must byte-match across plans): header `x-trm-client: mobile`, deep-link path `/m/callback`, handoff route `/api/v1/auth/mobile-web-handoff`, web builder path `/maps`, device routes `POST/DELETE /api/v1/me/devices`, version gate `GET /version/mobile`.
 - Mobile tests run with jest-expo: `yarn workspace @trm/mobile test <pattern>` (jest path-regex filter). Native modules (`expo-notifications`, `expo-haptics`, `react-native-webview`, `@react-native-community/netinfo`, `expo-screen-orientation`, `expo-apple-authentication`) are always `jest.mock`ed — device-only behavior is covered by the manual matrix, logic is covered by tests.
@@ -22,22 +22,22 @@
 
 ### Assumed P1–P4 artifacts (verify each at reground; every one has a verification command)
 
-| Consumed name | Contract | Verify |
-|---|---|---|
-| `@trm/mobile` workspace | Expo app at `apps/mobile`, jest-expo configured, `test` script | `yarn workspace @trm/mobile test --listTests` |
-| `apps/mobile/src/net/rest.ts` | Port of web `net/rest.ts`: `req<T>(method, path, body?)` against `/api/v1`, Bearer + single-flight refresh, `api.*` methods incl. `api.mobileCarry(): Promise<{code:string}>` (P1 OAuth flow uses it) | `rg "mobileCarry|function req" apps/mobile/src/net` |
-| `SERVER_ORIGIN` | The API/web origin constant the app targets (P1 config) | `rg "SERVER_ORIGIN|serverOrigin" apps/mobile/src` |
-| `apps/mobile/src/store/session.ts` | zustand session: `user: PublicUser & { features?: UserFeature[] }`, `accessToken`, `signOut()` | `rg "features" apps/mobile/src/store/session.ts` |
-| `apps/mobile/src/store/game.ts` | P2 port of web `store/game.ts` — includes `lastBatch: EventBatch` (`{seq, events: GameEvent[]}`) and `useGameStore` | `rg "lastBatch" apps/mobile/src/store/game.ts` |
-| React Navigation root | `navigationRef` (createNavigationContainerRef) + route names `Home`, `Room` (`{code}`), `Game` (`{gameId}`), `Settings` | `rg "navigationRef|createNavigationContainerRef" apps/mobile/src` |
-| `apps/mobile/src/screens/SettingsScreen.tsx` | P1 settings screen (rows list) | `ls apps/mobile/src/screens` |
-| Layout tier helper | P2 pure function mapping width→`'compact'|'twoPane'|'threePane'` (<700 / 700–1000 / ≥1000 dp) | `rg -n "700" apps/mobile/src --glob '*.ts*'` |
-| Expo config | `apps/mobile/app.config.ts` (or `app.json`) with `ios.supportsTablet: true` | `ls apps/mobile/app.*` |
-| SIWA sign-in | P1 uses `expo-apple-authentication`; session records the entry method (`signInMethod`) | `rg "signInMethod|apple-authentication" apps/mobile/src` |
-| i18n | P1 i18next setup `apps/mobile/src/i18n/` with `zh-Hant` + `en` resource tables | `ls apps/mobile/src/i18n` |
-| Game-over UI | P2/P3 game-over panel inside the native GameStage (mount point for the push prompt) | `rg -il "gameEnded|GameOver" apps/mobile/src` |
+| Consumed name                                | Contract                                                                                                                                                                                              | Verify                                           |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------- | -------------------------------------------- |
+| `@trm/mobile` workspace                      | Expo app at `apps/mobile`, jest-expo configured, `test` script                                                                                                                                        | `yarn workspace @trm/mobile test --listTests`    |
+| `apps/mobile/src/net/rest.ts`                | Port of web `net/rest.ts`: `req<T>(method, path, body?)` against `/api/v1`, Bearer + single-flight refresh, `api.*` methods incl. `api.mobileCarry(): Promise<{code:string}>` (P1 OAuth flow uses it) | `rg "mobileCarry                                 | function req" apps/mobile/src/net`             |
+| `SERVER_ORIGIN`                              | The API/web origin constant the app targets (P1 config)                                                                                                                                               | `rg "SERVER_ORIGIN                               | serverOrigin" apps/mobile/src`                 |
+| `apps/mobile/src/store/session.ts`           | zustand session: `user: PublicUser & { features?: UserFeature[] }`, `accessToken`, `signOut()`                                                                                                        | `rg "features" apps/mobile/src/store/session.ts` |
+| `apps/mobile/src/store/game.ts`              | P2 port of web `store/game.ts` — includes `lastBatch: EventBatch` (`{seq, events: GameEvent[]}`) and `useGameStore`                                                                                   | `rg "lastBatch" apps/mobile/src/store/game.ts`   |
+| React Navigation root                        | `navigationRef` (createNavigationContainerRef) + route names `Home`, `Room` (`{code}`), `Game` (`{gameId}`), `Settings`                                                                               | `rg "navigationRef                               | createNavigationContainerRef" apps/mobile/src` |
+| `apps/mobile/src/screens/SettingsScreen.tsx` | P1 settings screen (rows list)                                                                                                                                                                        | `ls apps/mobile/src/screens`                     |
+| Layout tier helper                           | P2 pure function mapping width→`'compact'                                                                                                                                                             | 'twoPane'                                        | 'threePane'` (<700 / 700–1000 / ≥1000 dp)      | `rg -n "700" apps/mobile/src --glob '*.ts*'` |
+| Expo config                                  | `apps/mobile/app.config.ts` (or `app.json`) with `ios.supportsTablet: true`                                                                                                                           | `ls apps/mobile/app.*`                           |
+| SIWA sign-in                                 | P1 uses `expo-apple-authentication`; session records the entry method (`signInMethod`)                                                                                                                | `rg "signInMethod                                | apple-authentication" apps/mobile/src`         |
+| i18n                                         | P1 i18next setup `apps/mobile/src/i18n/` with `zh-Hant` + `en` resource tables                                                                                                                        | `ls apps/mobile/src/i18n`                        |
+| Game-over UI                                 | P2/P3 game-over panel inside the native GameStage (mount point for the push prompt)                                                                                                                   | `rg -il "gameEnded                               | GameOver" apps/mobile/src`                     |
 
-If an assumed name moved, adapt the import path — the *contract* is binding, the path is not.
+If an assumed name moved, adapt the import path — the _contract_ is binding, the path is not.
 
 ---
 
@@ -46,10 +46,12 @@ If an assumed name moved, adapt the import path — the *contract* is binding, t
 The builder WebView needs the app's native session to become a normal web cookie session on the same origin. The mint side already exists: `POST /api/v1/auth/mobile/carry` (Bearer) mints a single-use `'carry'` code in `MobileCodeRepo` (`apps/server/src/auth/mobile-code.repo.ts`). We add the redeem side: a top-level browser navigation that redeems the carry code, sets the normal Strict `trm_refresh` cookie (a **new** session family — the app's body-token family is untouched), and 302s to `/maps`. Reusing kind `'carry'` keeps this to exactly one new endpoint and zero repo changes: both mint paths are Bearer-authenticated self-issuance, both are single-use `findOneAndDelete`, and a code spent on one surface is dead on the other.
 
 **Files:**
+
 - Modify: `apps/server/src/auth/auth.controller.ts` (add one GET route after `mobileExchange`, ~line 262; update the `mobile/carry` `@ApiOperation` summary)
 - Create: `apps/server/test/mobile-web-handoff.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `MobileCodeRepo.redeem('carry', code)` (single-use), `UserRepo.findById`, `AuthService.issueFor(user)`, `AuthConfig.redirectBase` / `webCallback({error})`, `setRefresh(res, token)` (all already injected into `AuthController` — no constructor/module change).
 - Produces: `GET /api/v1/auth/mobile-web-handoff?code=<carry code>` → on success `Set-Cookie: trm_refresh=…` (Strict, path `/api/v1/auth`) + `302 ${redirectBase}/maps`; on invalid/expired/replayed code `302 ${redirectBase}/login/callback?error=invalid_code` (no cookie); on issuance failure (e.g. account disabled mid-flight) `302 …/login/callback?error=server_error`. Excluded from OpenAPI (browser navigation, not JSON — same as the OAuth routes).
 
@@ -224,11 +226,13 @@ git commit -m "feat(server): builder-WebView session handoff via single-use carr
 Foundation for Tasks 3–8: install the P5 native modules with `expo install` (it pins SDK-56-compatible versions — never hand-pin these), and add the persisted settings store the push/haptics toggles live on.
 
 **Files:**
+
 - Modify: `apps/mobile/package.json` (via `expo install`, not by hand)
 - Create: `apps/mobile/src/store/settings.ts`
 - Create: `apps/mobile/src/store/settings.test.ts`
 
 **Interfaces:**
+
 - Consumes: nothing from P1 beyond the workspace itself.
 - Produces: `useSettings` zustand store, persisted to AsyncStorage under key `trm-settings`:
   `{ haptics: boolean (default true); notifications: boolean (default false); pushPromptSeen: boolean (default false); setHaptics(v); setNotifications(v); markPushPromptSeen() }`. Consumed by Tasks 4–7.
@@ -343,6 +347,7 @@ git commit -m "feat(mobile): P5 native deps + persisted device settings store"
 `react-native-webview` loading the **live web origin's** `/maps` through the Task 1 handoff. Entry is hidden without the `mapBuilder` feature (`user.features` from `/auth/me` — cosmetic; the server 403s regardless, same posture as web). The builder requires network by design — offline shows the branded banner, never a broken WebView.
 
 **Files:**
+
 - Create: `apps/mobile/src/screens/BuilderScreen.tsx`
 - Create: `apps/mobile/src/screens/BuilderScreen.test.tsx`
 - Modify: `apps/mobile/src/navigation/RootNavigator.tsx` (register the `Builder` route — reground for the actual navigator file)
@@ -350,6 +355,7 @@ git commit -m "feat(mobile): P5 native deps + persisted device settings store"
 - Modify: `apps/mobile/src/i18n/` resource tables (keys below)
 
 **Interfaces:**
+
 - Consumes: `api.mobileCarry(): Promise<{code: string}>` (P1), `SERVER_ORIGIN` (P1), `useSession` `user.features` (P1), Task 1's handoff URL contract, `@react-native-community/netinfo`, i18n `t()`.
 - Produces: route `Builder` (no params); helper `useCanBuild(): boolean` exported from `BuilderScreen.tsx` for the entry gate.
 
@@ -523,11 +529,13 @@ Home entry (feature-gated, hidden entirely without the grant — mirror web AppH
 ```tsx
 const canBuild = useCanBuild();
 // …in the secondary-actions block:
-{canBuild ? (
-  <Pressable onPress={() => navigation.navigate('Builder')} accessibilityRole="button">
-    <Text>{t('builder.entry')}</Text>
-  </Pressable>
-) : null}
+{
+  canBuild ? (
+    <Pressable onPress={() => navigation.navigate('Builder')} accessibilityRole="button">
+      <Text>{t('builder.entry')}</Text>
+    </Pressable>
+  ) : null;
+}
 ```
 
 i18n keys (add to both locale tables; zh-Hant is primary):
@@ -580,12 +588,14 @@ git commit -m "feat(mobile): map-builder WebView with web-session handoff and fe
 The server contract is live and tested: `POST /api/v1/me/devices {platform:'ios'|'android', token}` (204, idempotent, token follows the account) and `DELETE /api/v1/me/devices {token}` (204). The client registers the **native** device token (`getDevicePushTokenAsync` — never the Expo push token; there is no Expo Push Service in this stack), re-registers on token rotation, and deregisters **before** logout revokes the Bearer.
 
 **Files:**
+
 - Create: `apps/mobile/src/push/registration.ts`
 - Create: `apps/mobile/src/push/registration.test.ts`
 - Modify: `apps/mobile/src/net/rest.ts` (add `registerDevice`/`removeDevice` — P1 file, reground)
 - Modify: `apps/mobile/src/store/session.ts` (call sites: after sign-in restore, before sign-out — reground)
 
 **Interfaces:**
+
 - Consumes: `expo-notifications` (`getPermissionsAsync`, `getDevicePushTokenAsync`, `addPushTokenListener`, `setNotificationChannelAsync`, `AndroidImportance`), P1 `req` helper, `useSettings.notifications` (Task 2).
 - Produces:
   - `api.registerDevice(platform: 'ios' | 'android', token: string): Promise<void>` → `POST /me/devices`
@@ -622,11 +632,7 @@ jest.mock('../net/rest', () => ({
 }));
 jest.mock('react-native', () => ({ Platform: { OS: 'android' } }));
 
-import {
-  registerDeviceForPush,
-  unregisterDeviceForPush,
-  watchTokenRotation,
-} from './registration';
+import { registerDeviceForPush, unregisterDeviceForPush, watchTokenRotation } from './registration';
 
 describe('push registration lifecycle', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -760,6 +766,7 @@ export async function syncPushRegistration(): Promise<void> {
 ```
 
 Wire the session lifecycle in `apps/mobile/src/store/session.ts` (P1 file — reground exact shape):
+
 - after a successful sign-in **and** after a successful boot-time session restore: `void syncPushRegistration();`
 - in `signOut()`, **before** calling `api.logout(...)`: `await unregisterDeviceForPush();`
 - at app root (where P1 mounts AppState/NetInfo listeners): `useEffect(() => watchTokenRotation(), [])`.
@@ -785,6 +792,7 @@ git commit -m "feat(mobile): native push token registration lifecycle"
 Three behaviors: (a) the OS permission prompt fires **contextually after the player's first finished game**, never at boot (spec §5); (b) a foreground notification for the game currently on screen is suppressed; (c) tapping a notification deep-links into the room/game (warm and cold start).
 
 **Files:**
+
 - Create: `apps/mobile/src/push/notifications.ts`
 - Create: `apps/mobile/src/push/notifications.test.ts`
 - Create: `apps/mobile/src/push/PushPrompt.tsx`
@@ -794,6 +802,7 @@ Three behaviors: (a) the OS permission prompt fires **contextually after the pla
 - Modify: `apps/mobile/src/i18n/` (keys below)
 
 **Interfaces:**
+
 - Consumes: server push payload contract `data: { kind: 'your_turn' | 'game_started' | 'game_over', gameId: string, roomCode?: string }` (`apps/server/src/push/push.service.ts` — `game_started` is the only kind carrying `roomCode`); P1 `navigationRef` + routes `Room {code}` / `Game {gameId}`; Task 2 `useSettings`; Task 4 `registerDeviceForPush`.
 - Produces:
   - `setActiveGameId(id: string | null)` — GameScreen focus/blur hook point.
@@ -824,8 +833,7 @@ import {
   type PushData,
 } from './notifications';
 
-const notif = (data: Record<string, unknown>) =>
-  ({ request: { content: { data } } }) as never;
+const notif = (data: Record<string, unknown>) => ({ request: { content: { data } } }) as never;
 
 describe('foreground display policy', () => {
   it('suppresses the banner for the game currently on screen, shows it otherwise', async () => {
@@ -834,10 +842,19 @@ describe('foreground display policy', () => {
       handleNotification: (n: unknown) => Promise<{ shouldShowBanner: boolean }>;
     };
     setActiveGameId('g1');
-    expect((await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g1' }))).shouldShowBanner).toBe(false);
-    expect((await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g2' }))).shouldShowBanner).toBe(true);
+    expect(
+      (await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g1' })))
+        .shouldShowBanner,
+    ).toBe(false);
+    expect(
+      (await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g2' })))
+        .shouldShowBanner,
+    ).toBe(true);
     setActiveGameId(null);
-    expect((await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g1' }))).shouldShowBanner).toBe(true);
+    expect(
+      (await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g1' })))
+        .shouldShowBanner,
+    ).toBe(true);
   });
 });
 
@@ -846,7 +863,10 @@ describe('navigateForPush', () => {
   beforeEach(() => nav.navigate.mockClear());
 
   it('game_started goes to the room (the game screen needs the room ticket flow)', () => {
-    navigateForPush(nav as never, { kind: 'game_started', gameId: 'g1', roomCode: 'ABCD' } as PushData);
+    navigateForPush(
+      nav as never,
+      { kind: 'game_started', gameId: 'g1', roomCode: 'ABCD' } as PushData,
+    );
     expect(nav.navigate).toHaveBeenCalledWith('Room', { code: 'ABCD' });
   });
 
@@ -952,7 +972,10 @@ export function installNotificationHandler(): void {
   });
 }
 
-type Nav = Pick<NavigationContainerRefWithCurrent<Record<string, object | undefined>>, 'navigate' | 'isReady'>;
+type Nav = Pick<
+  NavigationContainerRefWithCurrent<Record<string, object | undefined>>,
+  'navigate' | 'isReady'
+>;
 
 /**
  * Tap → screen. game_started lands on the ROOM (its screen owns the join/ticket flow);
@@ -1087,12 +1110,14 @@ git commit -m "feat(mobile): contextual push prompt, foreground suppression, tap
 Spec §5 list, exactly: **route claim, tunnel reveal, ticket completion, game end**. Pure mapping from the game store's `lastBatch` event channel (the same once-per-batch `seq` idiom web animations use), fired through `expo-haptics`, gated on `useSettings.haptics`.
 
 **Files:**
+
 - Create: `apps/mobile/src/game/haptics.ts`
 - Create: `apps/mobile/src/game/haptics.test.ts`
 - Create: `apps/mobile/src/game/useHaptics.ts`
 - Modify: P2's GameStage root component (one `useHaptics()` call — reground the file)
 
 **Interfaces:**
+
 - Consumes: `GameEvent` from `@trm/proto` (protobuf-es oneof: `event.case` ∈ `'routeClaimed' | 'tunnelRevealed' | 'ticketCompleted' | 'gameEnded' | …`), P2 `useGameStore` + `EventBatch` (`lastBatch`), Task 2 `useSettings`.
 - Produces: `cuesForEvents(events): HapticCue[]` (pure), `useHaptics(): void` (subscribe-and-fire hook).
 
@@ -1232,6 +1257,7 @@ git commit -m "feat(mobile): haptic cues for the four game beats behind a settin
 The settings screen grows three rows. Notifications ON requests permission (opening OS settings if permanently denied), registers, and flips the setting; OFF deregisters the token. Deletion drives `DELETE /api/v1/auth/me` with a fresh SIWA `authorizationCode` when the account signed in with Apple (Apple 5.1.1(v)/TN3194 — revocation is best-effort server-side).
 
 **Files:**
+
 - Create: `apps/mobile/src/account/deleteAccount.ts`
 - Create: `apps/mobile/src/account/deleteAccount.test.ts`
 - Create: `apps/mobile/src/screens/settings/NotificationsRow.tsx`
@@ -1241,6 +1267,7 @@ The settings screen grows three rows. Notifications ON requests permission (open
 - Modify: `apps/mobile/src/i18n/` (keys below)
 
 **Interfaces:**
+
 - Consumes: `DELETE /api/v1/auth/me` `{appleAuthorizationCode?}` (P0-c, live); `expo-apple-authentication` (`signInAsync`, `isAvailableAsync`); P1 session store (`signOut`, and the recorded `signInMethod` — if P1 did not record it, add `signInMethod: 'guest' | 'password' | 'google' | 'discord' | 'apple' | null` to the session store as part of this task, set at each sign-in call site); Tasks 2/4 stores + registration.
 - Produces: `api.deleteAccount(appleAuthorizationCode?: string): Promise<void>`; `deleteAccountFlow(): Promise<'deleted' | 'cancelled' | 'failed'>`; `<NotificationsRow />`, haptics `Switch` row, destructive deletion row.
 
@@ -1256,14 +1283,18 @@ jest.mock('expo-apple-authentication', () => ({
   isAvailableAsync: (...a: unknown[]) => isAvailableAsync(...a),
 }));
 const deleteAccount = jest.fn().mockResolvedValue(undefined);
-jest.mock('../net/rest', () => ({ api: { deleteAccount: (...a: unknown[]) => deleteAccount(...a) } }));
+jest.mock('../net/rest', () => ({
+  api: { deleteAccount: (...a: unknown[]) => deleteAccount(...a) },
+}));
 const unregisterDeviceForPush = jest.fn().mockResolvedValue(undefined);
 jest.mock('../push/registration', () => ({
   unregisterDeviceForPush: (...a: unknown[]) => unregisterDeviceForPush(...a),
 }));
 const signOutLocal = jest.fn().mockResolvedValue(undefined);
 jest.mock('../store/session', () => ({
-  useSession: { getState: () => ({ signInMethod: currentMethod, clearLocalSession: signOutLocal }) },
+  useSession: {
+    getState: () => ({ signInMethod: currentMethod, clearLocalSession: signOutLocal }),
+  },
 }));
 let currentMethod: string | null = 'password';
 
@@ -1290,7 +1321,9 @@ describe('performAccountDeletion', () => {
 
   it('Apple re-auth cancelled → server deletion still proceeds without the code (best-effort revocation)', async () => {
     currentMethod = 'apple';
-    signInAsync.mockRejectedValue(Object.assign(new Error('cancelled'), { code: 'ERR_REQUEST_CANCELED' }));
+    signInAsync.mockRejectedValue(
+      Object.assign(new Error('cancelled'), { code: 'ERR_REQUEST_CANCELED' }),
+    );
     await expect(performAccountDeletion()).resolves.toBe('deleted');
     expect(deleteAccount).toHaveBeenCalledWith(undefined);
   });
@@ -1399,7 +1432,11 @@ export type DeletionOutcome = 'deleted' | 'cancelled' | 'failed';
 export async function performAccountDeletion(): Promise<DeletionOutcome> {
   let appleAuthorizationCode: string | undefined;
   const method = useSession.getState().signInMethod;
-  if (method === 'apple' && Platform.OS === 'ios' && (await AppleAuthentication.isAvailableAsync())) {
+  if (
+    method === 'apple' &&
+    Platform.OS === 'ios' &&
+    (await AppleAuthentication.isAvailableAsync())
+  ) {
     try {
       const cred = await AppleAuthentication.signInAsync();
       appleAuthorizationCode = cred.authorizationCode ?? undefined;
@@ -1446,7 +1483,10 @@ export default function NotificationsRow(): React.JSX.Element {
             // Permanently denied: the only path is the OS settings screen.
             Alert.alert(t('settings.pushDeniedTitle'), t('settings.pushDeniedBody'), [
               { text: t('common.cancel'), style: 'cancel' },
-              { text: t('settings.openSystemSettings'), onPress: () => void Linking.openSettings() },
+              {
+                text: t('settings.openSystemSettings'),
+                onPress: () => void Linking.openSettings(),
+              },
             ]);
           }
           return; // toggle stays off
@@ -1463,7 +1503,10 @@ export default function NotificationsRow(): React.JSX.Element {
   };
 
   return (
-    <View accessibilityRole="switch" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+    <View
+      accessibilityRole="switch"
+      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+    >
       <Text>{t('settings.notifications')}</Text>
       <Switch
         testID="notifications-switch"
@@ -1477,6 +1520,7 @@ export default function NotificationsRow(): React.JSX.Element {
 ```
 
 In `SettingsScreen.tsx` add (following the P1 row idiom):
+
 - `<NotificationsRow />`;
 - a haptics row — plain `Switch` bound to `useSettings` `haptics`/`setHaptics` (`testID="haptics-switch"`, label `t('settings.haptics')`);
 - a destructive "delete account" row (hidden for guests — a guest has nothing to delete that TTL won't reap; reground: `user.isGuest`): two-step `Alert.alert` confirm (`settings.deleteConfirmTitle` / `Body`, destructive style), then `performAccountDeletion()`; on `'failed'` show `settings.deleteFailed`.
@@ -1537,6 +1581,7 @@ git commit -m "feat(mobile): settings toggles for push/haptics and store-complia
 iPadOS 26 ignores `UIRequiresFullScreen` and Android 16 ignores orientation/resizability locks on ≥600dp screens — layouts must tolerate **live resizing** and the tier logic must be pure width math. This task pins the config, adds the phone-only portrait lock, locks the tier thresholds with tests at real device dimensions, and produces the screenshot-prep checklist P6 will consume.
 
 **Files:**
+
 - Create: `apps/mobile/src/app/useOrientationPolicy.ts`
 - Create: `apps/mobile/src/app/orientationPolicy.test.ts`
 - Create: `apps/mobile/src/app/layoutTiers.test.ts`
@@ -1545,6 +1590,7 @@ iPadOS 26 ignores `UIRequiresFullScreen` and Android 16 ignores orientation/resi
 - Create: `docs/mobile/store-screenshots.md`
 
 **Interfaces:**
+
 - Consumes: P2 layout tier helper (assumed `layoutTier(width: number)`, thresholds <700 / 700–1000 / ≥1000 — reground the real export), `expo-screen-orientation`, `useWindowDimensions`.
 - Produces: `useOrientationPolicy(): void` (phones <600dp smallest-side lock portrait; tablets unlocked); config pins; the P6 screenshot checklist.
 
@@ -1669,13 +1715,13 @@ Create `docs/mobile/store-screenshots.md`:
 
 ## Required sets
 
-| Store | Set | Size/device | Notes |
-|---|---|---|---|
-| App Store | iPhone 6.9" | 1320×2868 (iPhone 17 Pro Max class) | portrait |
-| App Store | iPad 13" | 2064×2752 | landscape + portrait |
-| Play | Phone | 1080×1920 min | portrait |
-| Play | 7" tablet | per current Play console spec | required for tablet listing quality |
-| Play | 10" tablet | per current Play console spec | required for tablet listing quality |
+| Store     | Set         | Size/device                         | Notes                               |
+| --------- | ----------- | ----------------------------------- | ----------------------------------- |
+| App Store | iPhone 6.9" | 1320×2868 (iPhone 17 Pro Max class) | portrait                            |
+| App Store | iPad 13"    | 2064×2752                           | landscape + portrait                |
+| Play      | Phone       | 1080×1920 min                       | portrait                            |
+| Play      | 7" tablet   | per current Play console spec       | required for tablet listing quality |
+| Play      | 10" tablet  | per current Play console spec       | required for tablet listing quality |
 
 ## Capture matrix (run before P6)
 
@@ -1724,6 +1770,7 @@ git commit -m "feat(mobile): tablet polish - orientation policy, tier pins, targ
 Self-hosted `expo-updates` per spec §10: an **expo-open-ota** container beside the existing compose stack, our own code-signing certificate embedded in the binary (installed apps only accept bundles we signed), `runtimeVersion: fingerprint` so an OTA can never land on an incompatible native build. **No EAS anywhere.** Apple 3.3.2-compliant: JS/assets only.
 
 **Files:**
+
 - Modify: `docker-compose.yml` (new `ota` service + volume)
 - Modify: `apps/mobile/app.config.ts` (`updates` + `runtimeVersion` blocks)
 - Create: `apps/mobile/certs/` (certificate committed; private key **never** committed)
@@ -1731,6 +1778,7 @@ Self-hosted `expo-updates` per spec §10: an **expo-open-ota** container beside 
 - Create: `docs/mobile/ota.md` (runbook — grows in Task 10)
 
 **Interfaces:**
+
 - Consumes: the expo-open-ota published Docker image + its documented env contract (pinned in Step 1 — upstream moves faster than this plan); `expo-updates` config schema (`updates.url`, `updates.codeSigningCertificate`, `updates.codeSigningMetadata`, `runtimeVersion.policy`).
 - Produces: `ota` compose service (profile `full`) serving the expo-updates protocol; certificate at `apps/mobile/certs/certificate.pem` referenced from app config; runbook.
 
@@ -1792,23 +1840,23 @@ In `apps/mobile/app.config.ts` (the `codesigning:configure` command from Step 2 
 Add to `docker-compose.yml` (fill image/port/env names from Step 1's pinned record — the shape below is binding, the names come from upstream):
 
 ```yaml
-  # Self-hosted expo-updates server (spec §10). JS/asset updates only (Apple 3.3.2);
-  # native changes ship through the stores and are fenced by runtimeVersion=fingerprint.
-  ota:
-    profiles: ['full']
-    image: <IMAGE_REF_FROM_STEP_1>
-    environment:
-      # From the Step-1 pinned env contract:
-      #  - public base URL  = ${TRM_OTA_URL origin}
-      #  - storage backend  = local filesystem on /data (the named volume below)
-      #  - code-signing key = /run/secrets mount below (only if upstream signs at serve time)
-      #  - channels         = production, preview
-      <ENV_FROM_STEP_1>: <VALUE>
-    volumes:
-      - trm-ota-data:/data
-    ports:
-      - '3005:<CONTAINER_PORT_FROM_STEP_1>'
-    restart: unless-stopped
+# Self-hosted expo-updates server (spec §10). JS/asset updates only (Apple 3.3.2);
+# native changes ship through the stores and are fenced by runtimeVersion=fingerprint.
+ota:
+  profiles: ['full']
+  image: <IMAGE_REF_FROM_STEP_1>
+  environment:
+    # From the Step-1 pinned env contract:
+    #  - public base URL  = ${TRM_OTA_URL origin}
+    #  - storage backend  = local filesystem on /data (the named volume below)
+    #  - code-signing key = /run/secrets mount below (only if upstream signs at serve time)
+    #  - channels         = production, preview
+    <ENV_FROM_STEP_1>: <VALUE>
+  volumes:
+    - trm-ota-data:/data
+  ports:
+    - '3005:<CONTAINER_PORT_FROM_STEP_1>'
+  restart: unless-stopped
 ```
 
 …and `trm-ota-data:` under the top-level `volumes:` key.
@@ -1833,13 +1881,15 @@ git commit -m "feat(ops): self-hosted expo-open-ota service with signed updates 
 
 ### Task 10: CI — `mobile-ota.yml` publish lane + OTA runbook (forced-update interplay, fallbacks)
 
-The publish lane exports the JS bundle and pushes it to the OTA server on demand — **JS-only releases**. Anything that changes the native fingerprint (new native module, SDK bump, config-plugin change) is *automatically* fenced: the update's fingerprint runtime version won't match older binaries, so they ignore it and pick the change up via the store lanes (P6's `mobile-android.yml` / `mobile-ios.yml`).
+The publish lane exports the JS bundle and pushes it to the OTA server on demand — **JS-only releases**. Anything that changes the native fingerprint (new native module, SDK bump, config-plugin change) is _automatically_ fenced: the update's fingerprint runtime version won't match older binaries, so they ignore it and pick the change up via the store lanes (P6's `mobile-android.yml` / `mobile-ios.yml`).
 
 **Files:**
+
 - Create: `.github/workflows/mobile-ota.yml`
 - Modify: `docs/mobile/ota.md` (complete the runbook)
 
 **Interfaces:**
+
 - Consumes: Step-1-of-Task-9 pinned publish mechanism; repo variable `TRM_OTA_URL`; secrets `OTA_CODE_SIGNING_PRIVATE_KEY` (+ whatever auth the pinned upload needs, e.g. an OTA server admin token).
 - Produces: workflow `mobile-ota.yml` (manual dispatch + `mobile-ota-v*` tags); the complete OTA runbook.
 
@@ -1933,6 +1983,7 @@ Two independent mechanisms, deliberately non-overlapping:
    escape hatch.
 
 Decision table:
+
 - JS-only bugfix → OTA (this workflow), optionally also a store release later.
 - Native change (new module / SDK / config plugin) → store lanes; OTA lane will no-op for
   old binaries by construction.
@@ -1969,6 +2020,7 @@ git commit -m "ci(mobile): self-hosted OTA publish lane + forced-update/OTA runb
 ### Task 11: Full regression + docs sweep
 
 **Files:**
+
 - Modify: `CLAUDE.md` (root — mobile paragraph)
 - Modify: `apps/server/CLAUDE.md` (auth section — handoff sentence)
 - Modify: `docs/TODO.md` (only if a P5 item was consciously deferred — otherwise untouched)
@@ -1989,11 +2041,11 @@ Expected: PASS across all workspaces (proto codegen runs first via turbo).
 `apps/server/CLAUDE.md` — append to the **Mobile transport** passage in the `src/auth/` bullet:
 
 ```markdown
-  The builder WebView's session handoff is `GET /api/v1/auth/mobile-web-handoff?code=` —
-  it redeems the same single-use carry code (`POST /auth/mobile/carry` over Bearer), mints a
-  NEW web session family, sets the normal Strict refresh cookie, and 302s to `/maps`
-  (errors 302 to `/login/callback?error=…`, never a 500 on a top-level navigation). It is
-  the one sanctioned way a native session becomes a web cookie session.
+The builder WebView's session handoff is `GET /api/v1/auth/mobile-web-handoff?code=` —
+it redeems the same single-use carry code (`POST /auth/mobile/carry` over Bearer), mints a
+NEW web session family, sets the normal Strict refresh cookie, and 302s to `/maps`
+(errors 302 to `/login/callback?error=…`, never a 500 on a top-level navigation). It is
+the one sanctioned way a native session becomes a web cookie session.
 ```
 
 Root `CLAUDE.md` — in the "Server env vars" mobile paragraph, append one sentence:

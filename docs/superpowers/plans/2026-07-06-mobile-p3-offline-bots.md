@@ -32,17 +32,17 @@
 
 ## Consumes (exact names assumed from prior phases — re-verify each)
 
-| Artifact | From | Verify with |
-| --- | --- | --- |
-| `apps/mobile` workspace `@trm/mobile`, jest-expo, shims, React Navigation 7 native-stack | P1 | `node -p "require('./apps/mobile/package.json').name"` |
-| `apps/mobile/src/navigation/types.ts` exporting `RootStackParamList`; `apps/mobile/src/screens/HomeScreen.tsx` | P1 | `Grep RootStackParamList apps/mobile/src` |
-| `apps/mobile/src/i18n/index.ts` (zh-Hant + en resource tables, web idiom) | P1 | open the file |
-| `apps/mobile/src/store/game.ts`: `createGameStore`, `GameStoreApi`, `GameStoreProvider`, `useGameStoreApi`, actions `applySnapshot/applyEvents/setRejection/reset` (web parity with `apps/web/src/store/game.ts`) | P2 | `Grep createGameStore apps/mobile/src/store` |
-| `apps/mobile/src/store/log.ts`: `createLogStore`, `LogStoreApi`, `LogStoreProvider`, `useLogStoreApi`, actions `ingestHistory/ingestLive/reset` | P2 | `Grep createLogStore apps/mobile/src/store` |
-| `apps/mobile/src/store/sandboxProvider.tsx` (port of `apps/web/src/store/sandboxProvider.tsx`) — **if P2 did not port it, Task 5 creates it** | P2 | `Glob apps/mobile/src/store/sandboxProvider.tsx` |
-| `apps/mobile/src/net/commands.ts` exporting `GameCommands` (verbatim port of `apps/web/src/net/commands.ts`); `apps/mobile/src/net/socket.ts` exporting `PaymentInit`, `CameraViewInit` | P2 | `Grep "interface GameCommands" apps/mobile/src/net` |
-| `apps/mobile/src/screens/GameStage.tsx` accepting `commands: GameCommands`, `sandbox?: boolean`, rendering the final ScoreBoard on `Phase.GAME_OVER` (web parity: `apps/web/src/screens/GameStage.tsx:513`) — this IS the "victory UI" P3 reuses | P2 | `Grep "sandbox" apps/mobile/src/screens/GameStage.tsx` |
-| Server P0 mobile surface (auth/push/version) — **not used by offline play**; no new server endpoints in this plan | P0 | — |
+| Artifact                                                                                                                                                                                                                                         | From | Verify with                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- | ------------------------------------------------------ |
+| `apps/mobile` workspace `@trm/mobile`, jest-expo, shims, React Navigation 7 native-stack                                                                                                                                                         | P1   | `node -p "require('./apps/mobile/package.json').name"` |
+| `apps/mobile/src/navigation/types.ts` exporting `RootStackParamList`; `apps/mobile/src/screens/HomeScreen.tsx`                                                                                                                                   | P1   | `Grep RootStackParamList apps/mobile/src`              |
+| `apps/mobile/src/i18n/index.ts` (zh-Hant + en resource tables, web idiom)                                                                                                                                                                        | P1   | open the file                                          |
+| `apps/mobile/src/store/game.ts`: `createGameStore`, `GameStoreApi`, `GameStoreProvider`, `useGameStoreApi`, actions `applySnapshot/applyEvents/setRejection/reset` (web parity with `apps/web/src/store/game.ts`)                                | P2   | `Grep createGameStore apps/mobile/src/store`           |
+| `apps/mobile/src/store/log.ts`: `createLogStore`, `LogStoreApi`, `LogStoreProvider`, `useLogStoreApi`, actions `ingestHistory/ingestLive/reset`                                                                                                  | P2   | `Grep createLogStore apps/mobile/src/store`            |
+| `apps/mobile/src/store/sandboxProvider.tsx` (port of `apps/web/src/store/sandboxProvider.tsx`) — **if P2 did not port it, Task 5 creates it**                                                                                                    | P2   | `Glob apps/mobile/src/store/sandboxProvider.tsx`       |
+| `apps/mobile/src/net/commands.ts` exporting `GameCommands` (verbatim port of `apps/web/src/net/commands.ts`); `apps/mobile/src/net/socket.ts` exporting `PaymentInit`, `CameraViewInit`                                                          | P2   | `Grep "interface GameCommands" apps/mobile/src/net`    |
+| `apps/mobile/src/screens/GameStage.tsx` accepting `commands: GameCommands`, `sandbox?: boolean`, rendering the final ScoreBoard on `Phase.GAME_OVER` (web parity: `apps/web/src/screens/GameStage.tsx:513`) — this IS the "victory UI" P3 reuses | P2   | `Grep "sandbox" apps/mobile/src/screens/GameStage.tsx` |
+| Server P0 mobile surface (auth/push/version) — **not used by offline play**; no new server endpoints in this plan                                                                                                                                | P0   | —                                                      |
 
 If a Consumes name moved, adapt the **call site** in this plan's files; never fork a P2 component.
 
@@ -50,7 +50,7 @@ If a Consumes name moved, adapt the **call site** in this plan's files; never fo
 
 ### Task 1: Extract `@trm/bots` from `apps/server` (server import swap included)
 
-The policy and types move verbatim (git mv — history preserved). The package gets its own determinism spec (there were no pure policy unit tests to move — the five bot e2e specs test the *driver* and stay in `apps/server/test`, with their type imports swapped to the package). ESLint gains a determinism guard for the package; turbo needs nothing.
+The policy and types move verbatim (git mv — history preserved). The package gets its own determinism spec (there were no pure policy unit tests to move — the five bot e2e specs test the _driver_ and stay in `apps/server/test`, with their type imports swapped to the package). ESLint gains a determinism guard for the package; turbo needs nothing.
 
 **Files:**
 
@@ -227,15 +227,15 @@ Expected: PASS (2 tests; the full-game drive takes a few seconds — `legalActio
 
 Exact import swaps (server src — NestJS files keep value-import style; the server eslint block already disables `consistent-type-imports`):
 
-| File | Old | New |
-| --- | --- | --- |
-| `apps/server/src/ws/hub.ts` | `import { chooseBotAction } from '../bots/policy';`<br>`import { isBotId, type BotProfile } from '../bots/types';` | `import { chooseBotAction, isBotId, type BotProfile } from '@trm/bots';` |
-| `apps/server/src/push/push.service.ts` | `import { isBotId } from '../bots/types';` | `import { isBotId } from '@trm/bots';` |
-| `apps/server/src/persistence/types.ts` | `import type { BotProfile } from '../bots/types';` | `import type { BotProfile } from '@trm/bots';` |
-| `apps/server/src/persistence/game-store.ts` | `import type { BotProfile } from '../bots/types';` | `import type { BotProfile } from '@trm/bots';` |
-| `apps/server/src/history/history.repo.ts` | `import type { BotProfile } from '../bots/types';` | `import type { BotProfile } from '@trm/bots';` |
-| `apps/server/src/lobby/lobby.service.ts` | `import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '../bots/types';` | `import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '@trm/bots';` |
-| `apps/server/src/lobby/room.repo.ts` | `import type { BotDifficulty } from '../bots/types';` | `import type { BotDifficulty } from '@trm/bots';` |
+| File                                        | Old                                                                                                                | New                                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `apps/server/src/ws/hub.ts`                 | `import { chooseBotAction } from '../bots/policy';`<br>`import { isBotId, type BotProfile } from '../bots/types';` | `import { chooseBotAction, isBotId, type BotProfile } from '@trm/bots';`          |
+| `apps/server/src/push/push.service.ts`      | `import { isBotId } from '../bots/types';`                                                                         | `import { isBotId } from '@trm/bots';`                                            |
+| `apps/server/src/persistence/types.ts`      | `import type { BotProfile } from '../bots/types';`                                                                 | `import type { BotProfile } from '@trm/bots';`                                    |
+| `apps/server/src/persistence/game-store.ts` | `import type { BotProfile } from '../bots/types';`                                                                 | `import type { BotProfile } from '@trm/bots';`                                    |
+| `apps/server/src/history/history.repo.ts`   | `import type { BotProfile } from '../bots/types';`                                                                 | `import type { BotProfile } from '@trm/bots';`                                    |
+| `apps/server/src/lobby/lobby.service.ts`    | `import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '../bots/types';`                              | `import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '@trm/bots';` |
+| `apps/server/src/lobby/room.repo.ts`        | `import type { BotDifficulty } from '../bots/types';`                                                              | `import type { BotDifficulty } from '@trm/bots';`                                 |
 
 Test files — replace `from '../src/bots/types'` with `from '@trm/bots'` in: `apps/server/test/bots.e2e.spec.ts`, `bots-events.e2e.spec.ts`, `bots-5p.e2e.spec.ts`, `bot-driver-resilience.e2e.spec.ts`, `push-hub.e2e.spec.ts`.
 
@@ -496,9 +496,7 @@ export interface LocalGameStorePort {
   appendAction(gameId: string, row: StoredActionRow): Promise<void>;
   markCompleted(gameId: string): Promise<void>;
   discardTail(gameId: string, fromSeq: number): Promise<void>;
-  loadGame(
-    gameId: string,
-  ): Promise<{ setup: OfflineGameSetup; actions: StoredActionRow[] } | null>;
+  loadGame(gameId: string): Promise<{ setup: OfflineGameSetup; actions: StoredActionRow[] } | null>;
   listGames(): Promise<OfflineGameListEntry[]>;
   deleteGame(gameId: string): Promise<void>;
 }
@@ -1175,8 +1173,7 @@ export async function loadOfflineGame(
 ): Promise<LoadOfflineResult> {
   const loaded = await store.loadGame(gameId);
   if (!loaded) return { ok: false, reason: 'not_found' };
-  if (loaded.setup.engineVersion !== ENGINE_VERSION)
-    return { ok: false, reason: 'engine_version' };
+  if (loaded.setup.engineVersion !== ENGINE_VERSION) return { ok: false, reason: 'engine_version' };
   let board: Board;
   try {
     // The official-content registry (archived versions included). Throws on unknown hash —
@@ -1383,10 +1380,7 @@ export interface BotBurstPorts {
   isCancelled(): boolean;
 }
 
-export async function runBotBurst(
-  session: LocalGameSession,
-  ports: BotBurstPorts,
-): Promise<void> {
+export async function runBotBurst(session: LocalGameSession, ports: BotBurstPorts): Promise<void> {
   for (let guard = 0; guard < 10_000; guard++) {
     if (ports.isCancelled() || session.isGameOver) return;
     if (!session.nextActableBot()) return; // waiting on the human
@@ -1681,7 +1675,15 @@ type Props = NativeStackScreenProps<RootStackParamList, 'OfflineSetup'>;
 
 const BOT_COUNTS = [1, 2, 3, 4] as const;
 
-function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+function Choice({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -1720,7 +1722,12 @@ export function OfflineSetupScreen({ navigation }: Props) {
       <Text style={styles.label}>{t('offline.botCount')}</Text>
       <View style={styles.row}>
         {BOT_COUNTS.map((n) => (
-          <Choice key={n} label={String(n)} selected={botCount === n} onPress={() => setBotCount(n)} />
+          <Choice
+            key={n}
+            label={String(n)}
+            selected={botCount === n}
+            onPress={() => setBotCount(n)}
+          />
         ))}
       </View>
 
@@ -1739,7 +1746,9 @@ export function OfflineSetupScreen({ navigation }: Props) {
       <Pressable
         accessibilityRole="button"
         style={styles.start}
-        onPress={() => navigation.replace('OfflineGame', { mode: 'new', mapId, botCount, difficulty })}
+        onPress={() =>
+          navigation.replace('OfflineGame', { mode: 'new', mapId, botCount, difficulty })
+        }
       >
         <Text style={styles.startText}>{t('offline.start')}</Text>
       </Pressable>
@@ -1752,11 +1761,23 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
   label: { fontSize: 14, opacity: 0.7, marginTop: 12 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
-  choice: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, borderWidth: 1, borderColor: '#8884' },
+  choice: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#8884',
+  },
   choiceSelected: { borderColor: '#4a7', backgroundColor: '#4a72' },
   choiceText: { fontSize: 15 },
   choiceTextSelected: { fontWeight: '700' },
-  start: { marginTop: 24, padding: 14, borderRadius: 10, alignItems: 'center', backgroundColor: '#4a7' },
+  start: {
+    marginTop: 24,
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    backgroundColor: '#4a7',
+  },
   startText: { fontSize: 16, fontWeight: '700', color: '#fff' },
 });
 ```
@@ -1800,7 +1821,11 @@ function OfflineGameView({ route, navigation }: Props) {
             ? t('offline.incompatible')
             : t('offline.loadFailed')}
         </Text>
-        <Pressable accessibilityRole="button" style={styles.cta} onPress={() => navigation.popToTop()}>
+        <Pressable
+          accessibilityRole="button"
+          style={styles.cta}
+          onPress={() => navigation.popToTop()}
+        >
           <Text style={styles.ctaText}>{t('offline.backHome')}</Text>
         </Pressable>
       </View>
@@ -1832,7 +1857,11 @@ function OfflineGameView({ route, navigation }: Props) {
           >
             <Text style={styles.ctaText}>{t('offline.playAgain')}</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" style={styles.cta} onPress={() => navigation.popToTop()}>
+          <Pressable
+            accessibilityRole="button"
+            style={styles.cta}
+            onPress={() => navigation.popToTop()}
+          >
             <Text style={styles.ctaText}>{t('offline.backHome')}</Text>
           </Pressable>
         </View>
@@ -2095,28 +2124,28 @@ const styles = StyleSheet.create({
 
 In `apps/mobile/src/i18n/index.ts`, add to BOTH locale tables using the file's existing shape (P1 ported the web idiom — nested objects keyed without dots):
 
-| key | zh-Hant | en |
-| --- | --- | --- |
-| `home.playBots` | `離線對戰電腦` | `Play vs Bots` |
-| `home.resumeOffline` | `繼續離線對局` | `Resume offline games` |
-| `offline.newGame` | `新離線對局` | `New offline game` |
-| `offline.map` | `地圖` | `Map` |
-| `offline.botCount` | `電腦玩家數` | `Bots` |
-| `offline.difficulty` | `難度` | `Difficulty` |
-| `offline.difficultyEASY` | `簡單` | `Easy` |
-| `offline.difficultyMEDIUM` | `普通` | `Medium` |
-| `offline.difficultyHARD` | `困難` | `Hard` |
-| `offline.start` | `開始對局` | `Start game` |
-| `offline.botsN` | `{{count}} 名電腦玩家` | `{{count}} bot(s)` |
-| `offline.inProgress` | `進行中` | `In progress` |
-| `offline.delete` | `刪除` | `Delete` |
-| `offline.playAgain` | `再來一局` | `Play again` |
-| `offline.backHome` | `回到首頁` | `Back to home` |
-| `offline.cantSave` | `無法儲存進度——對局仍可繼續,但關閉 App 後將遺失。` | `Progress can't be saved — you can keep playing, but this game will be lost when the app closes.` |
-| `offline.resumeTruncated` | `偵測到損毀的存檔,已回復到最後一個完好的回合。` | `Corrupted save detected — restored to the last intact turn.` |
-| `offline.incompatible` | `此存檔由不相容的版本建立,無法繼續。` | `This save was created by an incompatible app version and can't be resumed.` |
-| `offline.loadFailed` | `無法載入離線對局。` | `Couldn't load this offline game.` |
-| `offline.banner` | `目前離線——線上功能已暫停;離線對戰與教學仍可使用。` | `You're offline — online features are paused; offline play and the tutorial still work.` |
+| key                        | zh-Hant                                             | en                                                                                                |
+| -------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `home.playBots`            | `離線對戰電腦`                                      | `Play vs Bots`                                                                                    |
+| `home.resumeOffline`       | `繼續離線對局`                                      | `Resume offline games`                                                                            |
+| `offline.newGame`          | `新離線對局`                                        | `New offline game`                                                                                |
+| `offline.map`              | `地圖`                                              | `Map`                                                                                             |
+| `offline.botCount`         | `電腦玩家數`                                        | `Bots`                                                                                            |
+| `offline.difficulty`       | `難度`                                              | `Difficulty`                                                                                      |
+| `offline.difficultyEASY`   | `簡單`                                              | `Easy`                                                                                            |
+| `offline.difficultyMEDIUM` | `普通`                                              | `Medium`                                                                                          |
+| `offline.difficultyHARD`   | `困難`                                              | `Hard`                                                                                            |
+| `offline.start`            | `開始對局`                                          | `Start game`                                                                                      |
+| `offline.botsN`            | `{{count}} 名電腦玩家`                              | `{{count}} bot(s)`                                                                                |
+| `offline.inProgress`       | `進行中`                                            | `In progress`                                                                                     |
+| `offline.delete`           | `刪除`                                              | `Delete`                                                                                          |
+| `offline.playAgain`        | `再來一局`                                          | `Play again`                                                                                      |
+| `offline.backHome`         | `回到首頁`                                          | `Back to home`                                                                                    |
+| `offline.cantSave`         | `無法儲存進度——對局仍可繼續,但關閉 App 後將遺失。`  | `Progress can't be saved — you can keep playing, but this game will be lost when the app closes.` |
+| `offline.resumeTruncated`  | `偵測到損毀的存檔,已回復到最後一個完好的回合。`     | `Corrupted save detected — restored to the last intact turn.`                                     |
+| `offline.incompatible`     | `此存檔由不相容的版本建立,無法繼續。`               | `This save was created by an incompatible app version and can't be resumed.`                      |
+| `offline.loadFailed`       | `無法載入離線對局。`                                | `Couldn't load this offline game.`                                                                |
+| `offline.banner`           | `目前離線——線上功能已暫停;離線對戰與教學仍可使用。` | `You're offline — online features are paused; offline play and the tutorial still work.`          |
 
 - [ ] **Step 4: Wire into HomeScreen (P1 file — minimal, surgical diff)**
 

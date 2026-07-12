@@ -23,11 +23,13 @@
 ### Task 1: Sliding guest TTL (extend on refresh)
 
 **Files:**
+
 - Modify: `apps/server/src/auth/user.repo.ts` (after `attachOauthToGuest`, ~line 153)
 - Modify: `apps/server/src/auth/auth.service.ts:80-85` (`refresh`)
 - Create: `apps/server/test/auth-mobile.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `UserRepo.col` (users collection), `env.guestTtlMs`.
 - Produces: `UserRepo.extendGuestExpiry(userId: string): Promise<void>` — no-op for non-guests. Called by `AuthService.refresh` after a successful rotation.
 
@@ -103,7 +105,7 @@ In `apps/server/src/auth/user.repo.ts`, add after `attachOauthToGuest`:
 In `apps/server/src/auth/auth.service.ts`, inside `refresh(...)`, after the `disabledAt` check and before the `return`:
 
 ```ts
-    if (user.isGuest) await this.users.extendGuestExpiry(user._id);
+if (user.isGuest) await this.users.extendGuestExpiry(user._id);
 ```
 
 - [x] **Step 4: Run test to verify it passes**
@@ -123,11 +125,13 @@ git commit -m "feat(server): slide guest TTL forward on refresh"
 ### Task 2: Mobile token issuance + body-token refresh/logout
 
 **Files:**
+
 - Modify: `apps/server/src/auth/auth.schemas.ts`
 - Modify: `apps/server/src/auth/auth.controller.ts`
 - Test: `apps/server/test/auth-mobile.e2e.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `AuthService.refresh/logout` (already token-in, token-out), `IssuedAuth.refreshToken`.
 - Produces: header contract `x-trm-client: mobile` → issuance responses include `refreshToken`, no `Set-Cookie`. `POST /api/v1/auth/refresh` with body `{refreshToken}` → `{accessToken, refreshToken}`, no cookie. `POST /api/v1/auth/logout` with body `{refreshToken}` revokes it. `GoogleCredentialSchema` gains optional `refreshToken` (mobile guest-upgrade carry).
 
@@ -147,7 +151,7 @@ describe('mobile issuance: x-trm-client header returns the refresh token in the 
     expect(refreshCookie(res)).toBe('');
   });
 
-  it('web guest (no header) keeps today\'s behavior: cookie set, no body token', async () => {
+  it("web guest (no header) keeps today's behavior: cookie set, no body token", async () => {
     const res = await request(server()).post('/api/v1/auth/guest').send({}).expect(201);
     expect(res.body.refreshToken).toBeUndefined();
     expect(refreshCookie(res)).toContain('trm_refresh=');
@@ -291,10 +295,10 @@ Every `finish(res, …)` call site becomes `finish(req, res, …)`; add `@Req() 
 `googleCredential` also honors the body carry token for the guest-upgrade path:
 
 ```ts
-    const guestUserId = await this.oauth.guestIdFromRefresh(
-      body.refreshToken ?? req.cookies?.[REFRESH_COOKIE],
-    );
-    return this.finish(req, res, await this.oauth.handleCredential(body.credential, guestUserId));
+const guestUserId = await this.oauth.guestIdFromRefresh(
+  body.refreshToken ?? req.cookies?.[REFRESH_COOKIE],
+);
+return this.finish(req, res, await this.oauth.handleCredential(body.credential, guestUserId));
 ```
 
 Replace `refresh` and `logout`:
@@ -353,6 +357,7 @@ git commit -m "feat(server): token-in-body auth transport for mobile clients"
 ### Task 3: Google credential verification accepts mobile audiences
 
 **Files:**
+
 - Modify: `apps/server/src/config/env.ts` (OAuth section, after `discordClientSecret`)
 - Modify: `apps/server/src/auth/auth-config.ts`
 - Modify: `apps/server/src/auth/google-id-token.verifier.ts`
@@ -361,6 +366,7 @@ git commit -m "feat(server): token-in-body auth transport for mobile clients"
 - Test: `apps/server/test/auth-mobile.e2e.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `AuthConfigOverrides` test-override pattern.
 - Produces: env `GOOGLE_MOBILE_CLIENT_IDS` (comma list) → `AuthConfig.googleAudiences(): string[]` (`[webClientId, ...mobileIds]`, `[]` when Google unconfigured); `GoogleIdTokenVerifier.verify(idToken, audience: string | string[])`; `FakeGoogleIdTokenVerifier.lastAudience` for assertions.
 
@@ -436,7 +442,7 @@ Add a readonly field + method on `AuthConfig` (field initialized in the construc
 ```
 
 ```ts
-    this.googleMobileClientIds = overrides?.googleMobileClientIds ?? env.googleMobileClientIds;
+this.googleMobileClientIds = overrides?.googleMobileClientIds ?? env.googleMobileClientIds;
 ```
 
 ```ts
@@ -463,7 +469,7 @@ export interface GoogleIdTokenVerifier {
 `apps/server/src/auth/oauth.service.ts`, in `handleCredential`, replace the verify call:
 
 ```ts
-      profile = await this.verifier.verify(idToken, this.authConfig.googleAudiences());
+profile = await this.verifier.verify(idToken, this.authConfig.googleAudiences());
 ```
 
 `apps/server/test/app.ts` — record the audience on the fake:
@@ -500,11 +506,13 @@ git commit -m "feat(server): accept iOS/Android Google client ids as credential 
 ### Task 4: Mobile version gate endpoint
 
 **Files:**
+
 - Modify: `apps/server/src/config/env.ts` (top section, after `botMoveDelayMs`)
 - Modify: `apps/server/src/health/health.controller.ts`
 - Test: `apps/server/test/auth-mobile.e2e.spec.ts` (extend)
 
 **Interfaces:**
+
 - Produces: `GET /version/mobile` → `{ minBuild: number; commitHash: string }` (env `MOBILE_MIN_BUILD`, default 0 = never forces an update). The mobile app (P1 plan) blocks boot when its build number < `minBuild`.
 
 - [x] **Step 1: Write the failing test**
@@ -561,6 +569,7 @@ git commit -m "feat(server): mobile forced-update version gate endpoint"
 ### Task 5: Mobile OAuth handoff (one-time exchange code + carry code)
 
 **Files:**
+
 - Create: `apps/server/src/auth/mobile-code.repo.ts`
 - Modify: `apps/server/src/auth/auth.types.ts` (`OauthStatePayload`)
 - Modify: `apps/server/src/auth/auth-config.ts` (`mobileCallback`)
@@ -571,6 +580,7 @@ git commit -m "feat(server): mobile forced-update version gate endpoint"
 - Test: `apps/server/test/auth-mobile.e2e.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `AuthService.issueFor(user: UserDoc)`, `UserRepo.findById`, `TokenService.signOauthState`, Task 2's `finish`-style token-in-body result shape.
 - Produces:
   - `MobileCodeRepo.mint(kind: 'exchange' | 'carry', userId: string, ttlMs: number): Promise<string>`
@@ -817,14 +827,14 @@ export class MobileCodeRepo implements OnModuleInit {
 ```
 
 ```ts
-    const state = this.tokens.signOauthState({
-      provider,
-      redirect: safeRedirect(redirect),
-      nonce,
-      codeVerifier,
-      ...(guestUserId ? { guestUserId } : {}),
-      ...(mobile ? { mobile: true } : {}),
-    });
+const state = this.tokens.signOauthState({
+  provider,
+  redirect: safeRedirect(redirect),
+  nonce,
+  codeVerifier,
+  ...(guestUserId ? { guestUserId } : {}),
+  ...(mobile ? { mobile: true } : {}),
+});
 ```
 
 2. New guest-carry resolver beside `guestIdFromRefresh`. Add the import and constructor entry:
@@ -858,19 +868,19 @@ export type CallbackResult =
 In `handleCallback`: after `const redirect = safeRedirect(payload.redirect);` add `const mobile = !!payload.mobile;`, then add `, mobile` to each of the four post-parse failure returns — the nonce-mismatch `invalid_state`, `provider_disabled`, `exchange_failed`, and `email_unverified` returns (the two failures ABOVE the state parse — missing code/state and bad-signature `invalid_state` — keep no `mobile`: the flag is unknowable there and they fall back to the web callback) — and replace the success tail:
 
 ```ts
-    try {
-      const user = await this.resolveAccount(
-        provider,
-        profile.email,
-        profile.sub,
-        profile.displayName,
-        profile.avatarUrl,
-        payload.guestUserId,
-      );
-      return { ok: true, user, redirect, mobile };
-    } catch {
-      return { ok: false, error: 'server_error', redirect, mobile };
-    }
+try {
+  const user = await this.resolveAccount(
+    provider,
+    profile.email,
+    profile.sub,
+    profile.displayName,
+    profile.avatarUrl,
+    payload.guestUserId,
+  );
+  return { ok: true, user, redirect, mobile };
+} catch {
+  return { ok: false, error: 'server_error', redirect, mobile };
+}
 ```
 
 - [x] **Step 5: Controller wiring + the two new endpoints**
@@ -943,38 +953,38 @@ const EXCHANGE_CODE_TTL_MS = 60_000;
 `oauthCallback` — split issuance by transport:
 
 ```ts
-    const result = await this.oauth.handleCallback(
-      provider,
-      code,
-      state,
-      req.cookies?.[OAUTH_NONCE_COOKIE],
-    );
-    if (!result.ok) {
-      res.redirect(
-        result.mobile
-          ? this.authConfig.mobileCallback({ error: result.error })
-          : this.authConfig.webCallback({ redirect: result.redirect, error: result.error }),
-      );
-      return;
-    }
-    if (result.mobile) {
-      // No cookie can survive the system-browser → app hop; hand off a single-use code instead.
-      const exchangeCode = await this.mobileCodes.mint(
-        'exchange',
-        result.user._id,
-        EXCHANGE_CODE_TTL_MS,
-      );
-      res.redirect(this.authConfig.mobileCallback({ code: exchangeCode }));
-      return;
-    }
-    try {
-      const issued = await this.auth.issueFor(result.user);
-      this.setRefresh(res, issued.refreshToken);
-      res.redirect(this.authConfig.webCallback({ redirect: result.redirect }));
-    } catch {
-      // e.g. account disabled between resolution and issuance — never 500 a top-level navigation.
-      res.redirect(this.authConfig.webCallback({ redirect: result.redirect, error: 'server_error' }));
-    }
+const result = await this.oauth.handleCallback(
+  provider,
+  code,
+  state,
+  req.cookies?.[OAUTH_NONCE_COOKIE],
+);
+if (!result.ok) {
+  res.redirect(
+    result.mobile
+      ? this.authConfig.mobileCallback({ error: result.error })
+      : this.authConfig.webCallback({ redirect: result.redirect, error: result.error }),
+  );
+  return;
+}
+if (result.mobile) {
+  // No cookie can survive the system-browser → app hop; hand off a single-use code instead.
+  const exchangeCode = await this.mobileCodes.mint(
+    'exchange',
+    result.user._id,
+    EXCHANGE_CODE_TTL_MS,
+  );
+  res.redirect(this.authConfig.mobileCallback({ code: exchangeCode }));
+  return;
+}
+try {
+  const issued = await this.auth.issueFor(result.user);
+  this.setRefresh(res, issued.refreshToken);
+  res.redirect(this.authConfig.webCallback({ redirect: result.redirect }));
+} catch {
+  // e.g. account disabled between resolution and issuance — never 500 a top-level navigation.
+  res.redirect(this.authConfig.webCallback({ redirect: result.redirect, error: 'server_error' }));
+}
 ```
 
 New endpoints (place after `googleCredential`):
@@ -1025,6 +1035,7 @@ git commit -m "feat(server): mobile OAuth handoff via single-use exchange codes"
 ### Task 6: Deep-link verification files (/.well-known)
 
 **Files:**
+
 - Create: `apps/server/src/config/mobile-links.config.ts`
 - Create: `apps/server/src/health/well-known.controller.ts`
 - Modify: `apps/server/src/config/env.ts` (after `googleMobileClientIds`)
@@ -1033,6 +1044,7 @@ git commit -m "feat(server): mobile OAuth handoff via single-use exchange codes"
 - Create: `apps/server/test/well-known.e2e.spec.ts`
 
 **Interfaces:**
+
 - Produces: `GET /.well-known/apple-app-site-association` and `GET /.well-known/assetlinks.json`, both 404 until configured. `MobileLinksConfig` (injectable, `@Optional()` overrides — same pattern as `AuthConfig`): `{ appleAppId: string; androidPackageName: string; androidCertSha256: string[] }`. Env: `APPLE_APP_ID` (`TEAMID.bundle.id`), `ANDROID_PACKAGE_NAME`, `ANDROID_CERT_SHA256` (comma list of colon-hex fingerprints).
 
 - [x] **Step 1: Write the failing tests**
@@ -1238,14 +1250,17 @@ then change the module arrays:
 with the import and the builder branch (beside the `dashboardConfig` one):
 
 ```ts
-import { MobileLinksConfig, type MobileLinksConfigOverrides } from '../src/config/mobile-links.config';
+import {
+  MobileLinksConfig,
+  type MobileLinksConfigOverrides,
+} from '../src/config/mobile-links.config';
 ```
 
 ```ts
-  if (opts.mobileLinks)
-    builder = builder
-      .overrideProvider(MobileLinksConfig)
-      .useValue(new MobileLinksConfig(opts.mobileLinks));
+if (opts.mobileLinks)
+  builder = builder
+    .overrideProvider(MobileLinksConfig)
+    .useValue(new MobileLinksConfig(opts.mobileLinks));
 ```
 
 - [x] **Step 4: Run tests**
@@ -1265,6 +1280,7 @@ git commit -m "feat(server): serve Universal/App Link verification files"
 ### Task 7: Full-suite regression + docs
 
 **Files:**
+
 - Modify: `CLAUDE.md` (root — server env vars section)
 - Modify: `apps/server/CLAUDE.md` (auth section)
 
@@ -1295,14 +1311,14 @@ forward on refresh.
 In `apps/server/CLAUDE.md`, at the end of the `src/auth/` bullet in "Auth, lobby, bots", append:
 
 ```markdown
-  **Mobile transport** (no SameSite cookie can reach a native app): `x-trm-client: mobile`
-  on any issuance route returns the refresh token in the body; `/auth/refresh` + `/auth/logout`
-  take `{refreshToken}` in the body (body-in → body-out, never a cookie). The OAuth redirect
-  flow with `?client=mobile` ends at `/m/callback?code=<single-use exchange code>` (minted in
-  `mobile-code.repo.ts`, redeemed by `POST /auth/mobile/exchange` for a fresh token pair);
-  a signed-in guest is carried via `POST /auth/mobile/carry` → `?carry=` (the cookie-free
-  analogue of the refresh-cookie peek). Google ID tokens verify against
-  `AuthConfig.googleAudiences()` (web + `GOOGLE_MOBILE_CLIENT_IDS`).
+**Mobile transport** (no SameSite cookie can reach a native app): `x-trm-client: mobile`
+on any issuance route returns the refresh token in the body; `/auth/refresh` + `/auth/logout`
+take `{refreshToken}` in the body (body-in → body-out, never a cookie). The OAuth redirect
+flow with `?client=mobile` ends at `/m/callback?code=<single-use exchange code>` (minted in
+`mobile-code.repo.ts`, redeemed by `POST /auth/mobile/exchange` for a fresh token pair);
+a signed-in guest is carried via `POST /auth/mobile/carry` → `?carry=` (the cookie-free
+analogue of the refresh-cookie peek). Google ID tokens verify against
+`AuthConfig.googleAudiences()` (web + `GOOGLE_MOBILE_CLIENT_IDS`).
 ```
 
 - [x] **Step 3: Commit**

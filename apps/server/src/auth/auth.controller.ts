@@ -315,7 +315,9 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Revoke the refresh family (cookie or body token) and clear the cookie' })
+  @ApiOperation({
+    summary: 'Revoke the refresh family (cookie or body token) and clear the cookie',
+  })
   @ApiBody({ schema: apiSchema(LogoutSchema) })
   async logout(
     @Body() body: LogoutDto,

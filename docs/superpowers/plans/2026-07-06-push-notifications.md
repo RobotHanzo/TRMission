@@ -21,6 +21,7 @@
 ### Task 1: Device registry + account-deletion cleanup
 
 **Files:**
+
 - Create: `apps/server/src/push/device.repo.ts`, `apps/server/src/push/push.schemas.ts`, `apps/server/src/push/devices.controller.ts`, `apps/server/src/push/push.module.ts` (skeleton: repo + controller only, service lands in Task 2)
 - Create: `apps/server/test/push-devices.e2e.spec.ts`
 - Modify: `apps/server/src/app.module.ts` (register `PushModule`)
@@ -28,6 +29,7 @@
 - Modify: `apps/server/test/account-delete.e2e.spec.ts` (extend the cascade test with a device row)
 
 **Interfaces:**
+
 - Produces: collection `userDevices` `{ _id: token, userId, platform: 'ios'|'android', createdAt, lastSeenAt }` (index `{userId:1}`); `DeviceRepo.upsert(userId, platform, token)`, `.removeForUser(userId, token)`, `.listForUsers(userIds): Promise<DeviceDoc[]>`, `.prune(token)`, `.deleteAllForUser(userId)`; `POST /api/v1/me/devices` `{platform, token}` → 204 (re-registering a token moves it to the new account); `DELETE /api/v1/me/devices` `{token}` → 204 (scoped to own user).
 
 - [x] Failing e2e first (`push-devices.e2e.spec.ts`): register/list-through-db/upsert-idempotent/account-move/delete-scoped tests + extend the account-delete cascade test to seed a `userDevices` row and assert it is gone after `DELETE /auth/me`. Run `--run push-devices` → FAIL (404). Implement repo/schemas/controller/module (AccessTokenGuard from AuthModule; controller `@Controller('api/v1/me/devices')`, both routes `@HttpCode(204)`), `AccountModule` imports `PushModule` and the deletion service calls `devices.deleteAllForUser`. Run `--run push-devices` and `--run account-delete` → PASS. Commit: `feat(server): mobile push device registry`.
@@ -35,6 +37,7 @@
 ### Task 2: PushService + FCM/APNs transports + metrics
 
 **Files:**
+
 - Create: `apps/server/src/push/push.transports.ts` (seam + `FcmTransport` + `ApnsTransport` + `buildTransportsFromEnv()`)
 - Create: `apps/server/src/push/push.service.ts`
 - Create: `apps/server/test/push-service.spec.ts`
@@ -43,6 +46,7 @@
 - Modify: `apps/server/src/push/push.module.ts` (provide `PUSH_TRANSPORTS` via `buildTransportsFromEnv`, export `PushService` + `DeviceRepo`)
 
 **Interfaces:**
+
 - Produces:
   - `type PushKind = 'your_turn' | 'game_started' | 'game_over'`
   - `interface PushMessage { title: string; body: string; data: Record<string, string> }`
@@ -55,6 +59,7 @@
 ### Task 3: Hub + lobby triggers, regression, docs
 
 **Files:**
+
 - Modify: `apps/server/src/ws/hub.ts` (`PushSink`, `push`/`yourTurnDelayMs` options, `maybeNotify` in `broadcast`, timer cleanup in `evictMatch`)
 - Modify: `apps/server/src/game/game.module.ts` (inject `PushService`, adapt into the options bag; `GameModule` imports `PushModule`)
 - Modify: `apps/server/src/lobby/lobby.service.ts` + `lobby.module.ts` (game-started push after `hub.createMatch`, humans only)
@@ -62,6 +67,7 @@
 - Modify: `CLAUDE.md`, `apps/server/CLAUDE.md` (env + architecture notes)
 
 **Interfaces:**
+
 - Produces in hub.ts:
   ```ts
   export interface PushSink {

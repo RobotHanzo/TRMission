@@ -25,12 +25,14 @@
 ### Task 1: Advertise Apple in AuthConfig + `/auth/config`
 
 **Files:**
+
 - Modify: `apps/server/src/config/env.ts` (OAuth section, after `googleMobileClientIds`)
 - Modify: `apps/server/src/auth/auth-config.ts`
 - Modify: `apps/server/src/auth/auth.schemas.ts` (`AuthConfigSchema`)
 - Modify: `apps/server/test/auth.e2e.spec.ts` (three provider-equality assertions ONLY)
 
 **Interfaces:**
+
 - Produces: env `APPLE_CLIENT_IDS` → `AuthConfig.appleClientIds: string[]`, `AuthConfig.appleEnabled: boolean` (getter, true iff non-empty), `AuthConfigOverrides.appleClientIds?: string[]`, and `publicConfig().providers.apple: boolean`. Task 2 consumes `appleClientIds` as the verification audiences.
 
 - [x] **Step 1: Update the three existing `/auth/config` assertions to expect `apple: false` (failing tests)**
@@ -40,27 +42,27 @@ In `apps/server/test/auth.e2e.spec.ts`:
 1. In `describe('auth: /config endpoint')` (~line 46):
 
 ```ts
-    expect(res.body).toEqual({
-      passwordLogin: true,
-      guest: true,
-      providers: { google: false, discord: false, apple: false },
-    });
+expect(res.body).toEqual({
+  passwordLogin: true,
+  guest: true,
+  providers: { google: false, discord: false, apple: false },
+});
 ```
 
 2. In `describe('auth: method gating ...')` → `'advertises everything off via /config'` (~line 202):
 
 ```ts
-    expect(res.body).toEqual({
-      passwordLogin: false,
-      guest: false,
-      providers: { google: false, discord: false, apple: false },
-    });
+expect(res.body).toEqual({
+  passwordLogin: false,
+  guest: false,
+  providers: { google: false, discord: false, apple: false },
+});
 ```
 
 3. In `describe('auth: OAuth (Google + Discord, bound by email)')` → `'advertises both providers via /config'` (~line 262):
 
 ```ts
-    expect(res.body.providers).toEqual({ google: true, discord: true, apple: false });
+expect(res.body.providers).toEqual({ google: true, discord: true, apple: false });
 ```
 
 - [x] **Step 2: Run to verify they fail**
@@ -93,7 +95,7 @@ Add the field (beside `googleMobileClientIds`), its constructor line, and a gett
 ```
 
 ```ts
-    this.appleClientIds = overrides?.appleClientIds ?? env.appleClientIds;
+this.appleClientIds = overrides?.appleClientIds ?? env.appleClientIds;
 ```
 
 ```ts
@@ -136,6 +138,7 @@ git commit -m "feat(server): advertise Sign in with Apple via auth config"
 ### Task 2: Apple identity-token verification + credential route
 
 **Files:**
+
 - Create: `apps/server/src/auth/apple-id-token.verifier.ts`
 - Create: `apps/server/test/auth-apple.e2e.spec.ts`
 - Modify: `apps/server/package.json` (add `jose` via yarn)
@@ -148,6 +151,7 @@ git commit -m "feat(server): advertise Sign in with Apple via auth config"
 - Modify: `apps/server/test/app.ts` (`FakeAppleIdTokenVerifier` + `appleVerifier` option)
 
 **Interfaces:**
+
 - Consumes: `AuthConfig.appleClientIds`/`appleEnabled` (Task 1), P0-a's `finish` mobile-header contract and `guestIdFromRefresh(bodyToken ?? cookie)` pattern, `OauthProfile` shape from `oauth.http.ts`.
 - Produces:
   - `type IdentityProvider = OauthProvider | 'apple'` (exported from `auth-config.ts`)
@@ -438,10 +442,7 @@ export class AppleCredentialDto extends createZodDto(AppleCredentialSchema) {}
 `apps/server/src/auth/oauth.service.ts` — inject the verifier (constructor, beside the Google one):
 
 ```ts
-import {
-  APPLE_ID_TOKEN_VERIFIER,
-  type AppleIdTokenVerifier,
-} from './apple-id-token.verifier';
+import { APPLE_ID_TOKEN_VERIFIER, type AppleIdTokenVerifier } from './apple-id-token.verifier';
 ```
 
 ```ts
@@ -515,10 +516,7 @@ and add the handler after `handleCredential`:
 `apps/server/src/auth/auth.module.ts` — import and register the provider (beside the Google verifier):
 
 ```ts
-import {
-  APPLE_ID_TOKEN_VERIFIER,
-  JoseAppleIdTokenVerifier,
-} from './apple-id-token.verifier';
+import { APPLE_ID_TOKEN_VERIFIER, JoseAppleIdTokenVerifier } from './apple-id-token.verifier';
 ```
 
 ```ts
@@ -540,10 +538,8 @@ import {
 ```
 
 ```ts
-  if (opts.appleVerifier)
-    builder = builder
-      .overrideProvider(APPLE_ID_TOKEN_VERIFIER)
-      .useValue(opts.appleVerifier);
+if (opts.appleVerifier)
+  builder = builder.overrideProvider(APPLE_ID_TOKEN_VERIFIER).useValue(opts.appleVerifier);
 ```
 
 ```ts
@@ -581,6 +577,7 @@ git commit -m "feat(server): Sign in with Apple credential route"
 ### Task 3: Full-suite regression + docs
 
 **Files:**
+
 - Modify: `CLAUDE.md` (root — mobile env-var paragraph from P0-a)
 - Modify: `apps/server/CLAUDE.md` (auth section — mobile transport paragraph from P0-a)
 
@@ -605,12 +602,12 @@ identity-token audiences — enables `POST /auth/oauth/apple/credential`),
 `apps/server/CLAUDE.md`, at the end of the **Mobile transport** block added by P0-a, append:
 
 ```markdown
-  **Sign in with Apple** is credential-only: `POST /auth/oauth/apple/credential`
-  (`{identityToken, fullName?, refreshToken?}`) verifies against Apple's JWKS
-  (`apple-id-token.verifier.ts`, audiences = `APPLE_CLIENT_IDS`) and converges on
-  `resolveAccount` under the `'apple'` identity — Hide My Email relay addresses are
-  treated as verified emails and simply don't cross-link with other providers. There is
-  no `/oauth/apple/start`; Apple never enters the redirect flow.
+**Sign in with Apple** is credential-only: `POST /auth/oauth/apple/credential`
+(`{identityToken, fullName?, refreshToken?}`) verifies against Apple's JWKS
+(`apple-id-token.verifier.ts`, audiences = `APPLE_CLIENT_IDS`) and converges on
+`resolveAccount` under the `'apple'` identity — Hide My Email relay addresses are
+treated as verified emails and simply don't cross-link with other providers. There is
+no `/oauth/apple/start`; Apple never enters the redirect flow.
 ```
 
 - [x] **Step 3: Commit**

@@ -11,7 +11,11 @@ import { PUSH_TRANSPORTS, buildTransportsFromEnv } from './push.transports';
 @Module({
   imports: [AuthModule, ObservabilityModule],
   controllers: [DevicesController],
-  providers: [DeviceRepo, PushService, { provide: PUSH_TRANSPORTS, useFactory: buildTransportsFromEnv }],
+  providers: [
+    DeviceRepo,
+    PushService,
+    { provide: PUSH_TRANSPORTS, useFactory: buildTransportsFromEnv },
+  ],
   exports: [DeviceRepo, PushService],
 })
 export class PushModule {}
