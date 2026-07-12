@@ -9,6 +9,7 @@ export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).m
 export const ReadySchema = z.object({ ready: z.boolean() });
 export const AddBotSchema = z.object({ difficulty: botDifficulty });
 export const RematchVoteSchema = z.object({ wantsRematch: z.boolean() });
+export const EndVoteSchema = z.object({ wantsEnd: z.boolean() });
 export const ChatSchema = z.object({
   presetId: z.enum(CHAT_PRESET_IDS).optional(),
   text: z.string().max(ROOM_CHAT_MAX_LEN).optional(),
@@ -36,6 +37,7 @@ export class ReadyDto extends createZodDto(ReadySchema) {}
 export class AddBotDto extends createZodDto(AddBotSchema) {}
 export class UpdateSettingsDto extends createZodDto(UpdateSettingsSchema) {}
 export class RematchVoteDto extends createZodDto(RematchVoteSchema) {}
+export class EndVoteDto extends createZodDto(EndVoteSchema) {}
 export class ChatDto extends createZodDto(ChatSchema) {}
 
 export const RoomMemberSchema = z.object({
@@ -47,6 +49,7 @@ export const RoomMemberSchema = z.object({
   isBot: z.boolean().optional(),
   difficulty: botDifficulty.optional(),
   wantsRematch: z.boolean().optional(),
+  wantsEnd: z.boolean().optional(),
 });
 export const RoomChatEntrySchema = z.object({
   userId: z.string(),

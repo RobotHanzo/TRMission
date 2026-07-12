@@ -49,8 +49,8 @@ export interface AdminReplayData extends ReplayData {
 }
 
 /**
- * Engine major versions whose persisted action logs the current server can still replay
- * byte-identically. v5 replayed a v4 log identically (v5 only added inert genesis fields), but v6
+ * Engine major versions whose persisted action logs the current code can replay without action-
+ * semantic divergence. v5 replayed a v4 log equivalently (v5 only added inert genesis fields), but v6
  * is NOT provably inert for v4/v5 games (see history in git blame), and v7 is not provably inert
  * for v6 either: v7 locks own-track ticket completions into `completedTickets` (and emits
  * TICKET_COMPLETED) mid-game for every ruleset, not just unlimitedStationBorrow, which changes
@@ -60,9 +60,11 @@ export interface AdminReplayData extends ReplayData {
  * listed. v8 adds stateful future-event actions/phases and therefore cannot replay a v7 action
  * log byte-identically. v9 changes the deadlock rule: a dead-pool `DRAW_TICKETS` with no productive
  * move is now rejected (and the endgame can trigger on a deadlock), so a v8 log containing such an
- * action would diverge or become illegal under v9 — the current major stands alone.
+ * action would diverge or become illegal under v9. v10 only adds the terminal END_GAME action;
+ * every existing v9 action retains identical behavior, so the current interpreter supports v9
+ * and v10 logs.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10];
 
 @Injectable()
 export class HistoryRepo {

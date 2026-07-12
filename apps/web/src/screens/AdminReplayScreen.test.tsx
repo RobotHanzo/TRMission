@@ -58,6 +58,12 @@ describe('AdminReplayScreen', () => {
     expect(await screen.findByText('此為已完成對局的管理檢視。')).toBeInTheDocument();
   });
 
+  it('loads an engine 9 replay under the current engine', async () => {
+    vi.mocked(api.adminReplay).mockResolvedValue(loadable({ engineVersion: 9 }));
+    render(<AdminReplayScreen />);
+    expect(await screen.findByRole('slider')).toBeInTheDocument();
+  });
+
   it('shows the terminated-replay notice for a TERMINATED game', async () => {
     vi.mocked(api.adminReplay).mockResolvedValue(loadable({ status: 'TERMINATED' }));
     render(<AdminReplayScreen />);

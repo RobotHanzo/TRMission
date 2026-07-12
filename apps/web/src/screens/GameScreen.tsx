@@ -30,6 +30,8 @@ export function GameScreen() {
   const setRoster = useRoster((s) => s.setMembers);
   const contentStatus = useActiveContent(snapshot?.contentHash);
   const [room, setRoom] = useState<RoomView | null>(null);
+  const [endVotePending, setEndVotePending] = useState(false);
+  const [endVoteError, setEndVoteError] = useState(false);
 
   useEffect(() => {
     // Fallback connect (normal paths connect via RoomScreen before entering the game, including the
@@ -59,21 +61,20 @@ export function GameScreen() {
     };
   }, [roomCode, setRoster]);
 
-  // Once the game is over, poll the room every 2s: refresh the rematch vote tally, and the moment
-  // the host resets it to LOBBY, carry this client back into the room — the same way starting a
-  // game already carries everyone from the room into it. Spectators are excluded: they were never
-  // room members, and RoomScreen's own poll would otherwise auto-join a non-member landing on a
-  // LOBBY room, which is right for an invite link but wrong for someone who was only ever watching.
+  // Poll room-only state every 2s. During live play this keeps the end-game vote tally synchronized
+  // across clients; after game-over it does the same for rematch votes and carries players back to
+  // the lobby once the host resets it. Spectators have neither vote and must not be auto-joined.
   const phase = snapshot?.phase;
+  const gameOver = phase === Phase.GAME_OVER;
   const isSpectator = !snapshot?.you;
   useEffect(() => {
-    if (!roomCode || phase !== Phase.GAME_OVER || isSpectator) return;
+    if (!roomCode || isSpectator) return;
     let active = true;
     const poll = async () => {
       try {
         const r = await api.getRoom(roomCode);
         if (!active) return;
-        if (r.status === 'LOBBY') {
+        if (gameOver && r.status === 'LOBBY') {
           active = false;
           enterRoom(roomCode);
           return;
@@ -84,7 +85,7 @@ export function GameScreen() {
         // transient — next tick retries; this is a convenience poll, not a critical path
       }
     };
-    void poll();
+    if (gameOver) void poll();
     const id = setInterval(() => {
       if (!active) {
         clearInterval(id);
@@ -96,7 +97,7 @@ export function GameScreen() {
       active = false;
       clearInterval(id);
     };
-  }, [roomCode, phase, isSpectator, enterRoom, setRoster]);
+  }, [roomCode, gameOver, isSpectator, enterRoom, setRoster]);
 
   const {
     open: leaveOpen,
@@ -120,6 +121,22 @@ export function GameScreen() {
       setRoom(r);
     } catch {
       // transient — the next poll tick resyncs
+    }
+  };
+
+  const voteEnd = async (wantsEnd: boolean) => {
+    if (!roomCode || endVotePending) return;
+    setEndVotePending(true);
+    setEndVoteError(false);
+    try {
+      const r = await api.voteEnd(roomCode, wantsEnd);
+      setRoster(r.members, r.spectators);
+      setRoom(r);
+      track('end_game_vote', { wants: wantsEnd, is_host: r.hostId === user?.id });
+    } catch {
+      setEndVoteError(true);
+    } finally {
+      setEndVotePending(false);
     }
   };
 
@@ -179,7 +196,10 @@ export function GameScreen() {
         commands={getSocket()}
         onLeave={leave}
         isHost={room?.hostId === user?.id}
-        rematchMembers={room?.members}
+        roomMembers={room?.members}
+        endVotePending={endVotePending}
+        endVoteError={endVoteError}
+        onVoteEnd={voteEnd}
         onVoteRematch={voteRematch}
         onPlayAgain={playAgain}
       />

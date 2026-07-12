@@ -48,6 +48,7 @@ export interface RoomMember {
   isBot?: boolean;
   difficulty?: BotDifficulty;
   wantsRematch?: boolean;
+  wantsEnd?: boolean;
 }
 export interface RoomSpectator {
   userId: string;
@@ -377,6 +378,8 @@ export const api = {
   closeRoom: (code: string) => req<RoomView>('POST', `/rooms/${code}/close`),
   voteRematch: (code: string, wantsRematch: boolean) =>
     req<RoomView>('POST', `/rooms/${code}/rematch-vote`, { wantsRematch }),
+  voteEnd: (code: string, wantsEnd: boolean) =>
+    req<RoomView>('POST', `/rooms/${code}/end-vote`, { wantsEnd }),
   sendRoomChat: (code: string, payload: { presetId: string } | { text: string }) =>
     req<RoomView>('POST', `/rooms/${code}/chat`, payload),
   rematch: (code: string) => req<RoomView>('POST', `/rooms/${code}/rematch`),

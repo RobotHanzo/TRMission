@@ -44,6 +44,7 @@ export interface AnalyticsEvents {
   };
   route_claimed: { length: number; is_tunnel: boolean; is_ferry: boolean; map_id?: string };
   chat_send: { kind: 'text' | 'preset'; context: 'lobby' | 'game' };
+  end_game_vote: { wants: boolean; is_host: boolean };
   reconnect: Record<string, never>;
   session_replaced: Record<string, never>;
   // end-of-game

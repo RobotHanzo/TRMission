@@ -31,6 +31,8 @@ const paymentToPb = (p: Payment) => ({
 
 export function actionToCommand(action: Action): Command {
   switch (action.t) {
+    case 'END_GAME':
+      throw new Error('END_GAME is server-authorized and has no client protobuf command');
     case 'KEEP_INITIAL_TICKETS':
       return { case: 'keepInitialTickets', value: { ticketIds: action.keep.map(String) } };
     case 'DRAW_BLIND':

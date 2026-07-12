@@ -106,7 +106,10 @@ export class MongoGameStore implements GameStorePort {
         { writeConcern: { w: 'majority' } },
       );
     }
-    await this.games.updateOne({ _id: gameId }, { $set: { currentSeq: seq, updatedAt: now } });
+    await this.games.updateOne(
+      { _id: gameId },
+      { $set: { currentSeq: seq, engineVersion: state.engineVersion, updatedAt: now } },
+    );
   }
 
   async recordCompletion(gameId: string, finalState: GameState): Promise<void> {

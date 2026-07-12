@@ -155,4 +155,7 @@ export const SCHEMA_VERSION = 1;
 // v9: deadlock end-sequence — a player with no productive move in a dead card pool must PASS
 // (futile ticket draws are no longer forced), and the endgame is triggered when the pool is dead
 // and no one can claim a route (ENDGAME_TRIGGERED gains `reason`). Off-path play is unchanged.
-export const ENGINE_VERSION = 9;
+// v10: server-authorized END_GAME is a new persisted action grammar. Existing v9 action behavior
+// is unchanged and remains replay-compatible, but a recovered v9 game that applies END_GAME
+// upgrades its terminal state/game document to v10 so older interpreters never receive it.
+export const ENGINE_VERSION = 10;

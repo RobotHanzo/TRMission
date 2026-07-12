@@ -10,12 +10,14 @@ import {
   AddBotDto,
   UpdateSettingsDto,
   RematchVoteDto,
+  EndVoteDto,
   ChatDto,
   CreateRoomSchema,
   ReadySchema,
   AddBotSchema,
   UpdateSettingsSchema,
   RematchVoteSchema,
+  EndVoteSchema,
   ChatSchema,
   RoomViewSchema,
   TicketResultSchema,
@@ -120,6 +122,17 @@ export class LobbyController {
     @Body() body: RematchVoteDto,
   ) {
     return this.lobby.voteRematch(code.toUpperCase(), user, body.wantsRematch);
+  }
+
+  @Post(':code/end-vote')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Vote to end the active game now (host alone, otherwise all but one human player)',
+  })
+  @ApiBody({ schema: apiSchema(EndVoteSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  endVote(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: EndVoteDto) {
+    return this.lobby.voteEnd(code.toUpperCase(), user, body.wantsEnd);
   }
 
   @Post(':code/watch')
