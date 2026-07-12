@@ -50,7 +50,7 @@ export const tutorialZh = {
     blurb: '支付對應顏色的牌來占下路線並立即得分。',
     intro:
       '宣告路線的方法：在地圖上點選一段路線，付出與它「等長、同一種顏色」的火車牌（彩色車頭可當任意顏色；灰色路線可用任一種顏色）即可蓋上鐵軌。每段路線各花一個火車車廂。',
-    try: '換你了：點選地圖上標出的「新竹—竹南」路線（灰色，長度 1）來宣告它。',
+    try: '換你了：點選地圖上標出的「屏東—潮州」路線（灰色，長度 1）來宣告它。',
     scored: '完成的路線立即依長度得分，並顯示為你的座位顏色。',
     table: '長度越長分數越高：1→1、2→2、3→4、4→7、6→15、8→21 分。',
   },
@@ -170,7 +170,7 @@ export const tutorialEn = {
     blurb: 'Pay matching cards to take a route and score at once.',
     intro:
       'To claim a route: click it on the map, then pay train cards equal to its length, all of one colour (locomotives are wild). Gray routes accept any single colour. Each segment costs one train car.',
-    try: 'Your turn: click the highlighted Hsinchu–Zhunan route on the map to claim it.',
+    try: 'Your turn: click the highlighted Pingdong–Chaozhou route on the map to claim it.',
     scored: 'A claimed route scores immediately by length and shows in your seat colour.',
     table: 'Longer routes score far more: 1→1, 2→2, 3→4, 4→7, 6→15, 8→21 points.',
   },
