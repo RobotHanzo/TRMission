@@ -48,7 +48,8 @@ jobs:
         run: yarn workspace @trm/server warm-mongo
 
       - name: Test
-        run: yarn test -- --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+        # Heavy workspace suites spawn their own workers; cap Turbo tasks to avoid CI contention.
+        run: yarn test --concurrency=2 -- --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
 
       - name: Report test results
         uses: mikepenz/action-junit-report@v4
