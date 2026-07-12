@@ -22,7 +22,12 @@ describe('entriesFromEvents', () => {
         importance: 'highlight',
       },
       { kind: 'stationBuilt', playerId: 'p2', data: { cityId: 'C9' }, importance: 'highlight' },
-      { kind: 'endgame', playerId: 'p1', data: { turns: 2 }, importance: 'alert' },
+      {
+        kind: 'endgame',
+        playerId: 'p1',
+        data: { turns: 2, reason: 'FINAL_TRAINS' },
+        importance: 'alert',
+      },
       {
         kind: 'ticketCompleted',
         playerId: 'p1',
@@ -30,6 +35,16 @@ describe('entriesFromEvents', () => {
         importance: 'highlight',
       },
     ]);
+  });
+
+  it('carries the endgame reason into the log datum', () => {
+    const deadlock = entriesFromEvents([
+      ev({
+        case: 'endgameTriggered',
+        value: { playerId: 'p1', finalTurnsRemaining: 2, reason: 'DEADLOCK' },
+      }),
+    ]);
+    expect(deadlock[0]).toMatchObject({ kind: 'endgame', data: { reason: 'DEADLOCK' } });
   });
 
   it('omits noisy ambient events', () => {

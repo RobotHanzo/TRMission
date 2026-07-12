@@ -56,6 +56,8 @@ export interface EndgameCue {
   finalTurns: number;
   /** Whether the local player is the one who ran their trains down and triggered it. */
   triggeredByYou: boolean;
+  /** true ⇒ the end sequence began because the table deadlocked (no routes claimable). */
+  deadlock: boolean;
 }
 /** The prominent (skippable) banner shown when a random event STARTS. Carries the raw event `kind`;
  *  the banner component resolves the localized name/desc at render. */
@@ -134,7 +136,7 @@ interface AnimState {
   /** Flip every covered slot into view (called when a draw completes). */
   revealMarketSlots(): void;
   dismissFanfare(): void;
-  showEndgameWarning(finalTurns: number, triggeredByYou: boolean): void;
+  showEndgameWarning(finalTurns: number, triggeredByYou: boolean, deadlock: boolean): void;
   dismissEndgameWarning(): void;
   showEventBanner(kind: string): void;
   dismissEventBanner(): void;
@@ -285,8 +287,8 @@ const creator: StateCreator<AnimState> = (set) => ({
       const [next, ...rest] = s.fanfareQueue;
       return { fanfare: next ?? null, fanfareQueue: rest };
     }),
-  showEndgameWarning: (finalTurns, triggeredByYou) =>
-    set({ endgameCue: { id: nextId(), finalTurns, triggeredByYou } }),
+  showEndgameWarning: (finalTurns, triggeredByYou, deadlock) =>
+    set({ endgameCue: { id: nextId(), finalTurns, triggeredByYou, deadlock } }),
   dismissEndgameWarning: () => set({ endgameCue: null }),
   showEventBanner: (kind) => set({ eventBanner: { id: nextId(), kind } }),
   dismissEventBanner: () => set({ eventBanner: null }),

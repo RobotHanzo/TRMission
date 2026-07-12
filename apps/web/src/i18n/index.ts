@@ -250,7 +250,9 @@ const resources = {
       endgameTitle: '最終回合',
       endgameByYou: '你的列車即將用盡——由你觸發了終局！',
       endgameByOther: '終局倒數開始——列車即將用盡！',
+      endgameByDeadlock: '已無人能再鋪設路線——終局開始！',
       endgameNote: '每位玩家還有最後一回合',
+      endgameNoteDeadlock: '無法行動的玩家將自動跳過',
       skip: '略過',
 
       events: {
@@ -420,8 +422,9 @@ const resources = {
         tookFaceup: '{{name}} 拿取一張車廂卡',
         ticketsKept: '{{name}} 保留了 {{count}} 張任務卡',
         ticketCompleted: '{{name}} 完成任務 {{from}}–{{to}}（+{{points}}）',
-        passed: '{{name}} 跳過',
+        passed: '{{name}} 無法行動，跳過',
         endgame: '最終回合：剩餘 {{turns}} 輪',
+        endgameDeadlock: '最終回合：已無法再鋪設任何路線',
         gameEnded: '遊戲結束',
         eventAnnounced: '預報：{{event}} 即將來臨',
         eventStarted: '{{event}} 開始',
@@ -998,7 +1001,9 @@ const resources = {
       endgameTitle: 'Final Round',
       endgameByYou: 'Your trains are running out — you triggered the final round!',
       endgameByOther: 'The final round has begun — trains are running low!',
+      endgameByDeadlock: 'No more routes can be built — the final round begins!',
       endgameNote: 'Everyone takes one last turn',
+      endgameNoteDeadlock: 'Players with no possible moves are skipped',
       skip: 'Skip',
 
       events: {
@@ -1186,8 +1191,9 @@ const resources = {
         tookFaceup: '{{name}} took a train-car card',
         ticketsKept: '{{name}} kept {{count}} ticket(s)',
         ticketCompleted: '{{name}} completed the {{from}}–{{to}} mission (+{{points}})',
-        passed: '{{name}} passed',
+        passed: '{{name}} skipped — no possible moves',
         endgame: 'Final round — {{turns}} turns left',
+        endgameDeadlock: 'Final round — no more routes can be built',
         gameEnded: 'Game over',
         eventAnnounced: 'Forecast: {{event}} incoming',
         eventStarted: '{{event}} started',

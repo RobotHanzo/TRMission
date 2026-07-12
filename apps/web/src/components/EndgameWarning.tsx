@@ -46,9 +46,15 @@ export function EndgameWarning({ cue, reducedMotion, onDone }: Props) {
         </div>
         <div className="endgame-title">{t('endgameTitle')}</div>
         <div className="endgame-sub">
-          {cue.triggeredByYou ? t('endgameByYou') : t('endgameByOther')}
+          {cue.deadlock
+            ? t('endgameByDeadlock')
+            : cue.triggeredByYou
+              ? t('endgameByYou')
+              : t('endgameByOther')}
         </div>
-        <div className="endgame-note">{t('endgameNote')}</div>
+        <div className="endgame-note">
+          {cue.deadlock ? t('endgameNoteDeadlock') : t('endgameNote')}
+        </div>
         <div className="endgame-skip">{t('skip')}</div>
       </div>
     </div>

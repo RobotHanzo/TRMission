@@ -32,6 +32,9 @@ export function useAnimationDriver(): void {
   // null until the first snapshot seeds the baseline, so reconnecting into an already-triggered
   // final round never re-pops the warning (mirrors the ticket-completion seeding above).
   const prevEndgame = useRef<boolean | null>(null);
+  // Reason of the most recent endgameTriggered event, read when the state-driven warning below fires
+  // so a deadlock final round shows its own copy. Best-effort; defaults to FINAL_TRAINS on a resync.
+  const endgameReasonRef = useRef<'FINAL_TRAINS' | 'DEADLOCK'>('FINAL_TRAINS');
 
   // Event-driven intents (claim glow, draws, turn cue, market flip, score floats) + random-event
   // cues (start banner, forecast + bonus toasts). Both ride the live batch only — a reconnect's
@@ -110,6 +113,17 @@ export function useAnimationDriver(): void {
     prevCompleted.current = curr;
   }, [snapshot, pushIntent]);
 
+  // Track the reason of the latest endgameTriggered event so the (state-driven) warning below can
+  // distinguish a deadlock final round from the trains-ran-out one.
+  useEffect(() => {
+    for (const e of lastBatch?.events ?? []) {
+      if (e.event.case === 'endgameTriggered') {
+        endgameReasonRef.current =
+          e.event.value.reason === 'DEADLOCK' ? 'DEADLOCK' : 'FINAL_TRAINS';
+      }
+    }
+  }, [lastBatch]);
+
   // Final-round warning: fire once when `endgame.triggered` flips false→true. The trigger's
   // turn-order index resolves to a player id so we can tell the viewer if it was their own doing.
   useEffect(() => {
@@ -124,7 +138,11 @@ export function useAnimationDriver(): void {
     const eg = snapshot.endgame!;
     const me = snapshot.you?.playerId ?? null;
     const triggerId = snapshot.turnOrder[eg.triggerPlayerIndex];
-    showEndgameWarning(eg.finalTurnsRemaining, !!me && triggerId === me);
+    showEndgameWarning(
+      eg.finalTurnsRemaining,
+      !!me && triggerId === me,
+      endgameReasonRef.current === 'DEADLOCK',
+    );
   }, [snapshot, showEndgameWarning]);
 
   // When a draw resolves (phase leaves DRAWING_CARDS), reveal any market slots held face-down.
