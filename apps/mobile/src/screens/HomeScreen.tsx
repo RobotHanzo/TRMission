@@ -424,6 +424,14 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         />
       )}
 
+      <Pressable
+        testID="home-encyclopedia"
+        accessibilityRole="button"
+        onPress={() => navigation.navigate('Encyclopedia')}
+      >
+        <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('tutorial.open')}</Text>
+      </Pressable>
+
       {online && (
         <Pressable
           testID="home-history"

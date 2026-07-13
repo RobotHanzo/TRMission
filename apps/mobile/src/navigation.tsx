@@ -13,6 +13,7 @@ import BuilderScreen from './screens/BuilderScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
 import ReplayScreen from './screens/ReplayScreen';
+import EncyclopediaScreen from './screens/EncyclopediaScreen';
 import type { LocalGameInput } from './offline/useLocalGame';
 import { useSession } from './store/session';
 
@@ -36,6 +37,8 @@ export type RootStackParamList = {
   History: undefined;
   /** Client-side replay of a finished game through the sandbox GameStage. */
   Replay: { gameId: string };
+  /** The rules encyclopedia: chapter-grouped topics with auto-playing sandbox demos. */
+  Encyclopedia: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -95,6 +98,11 @@ export function RootNavigator(): React.JSX.Element {
             name="Replay"
             component={ReplayScreen}
             options={{ title: t('history.watchReplay') }}
+          />
+          <Stack.Screen
+            name="Encyclopedia"
+            component={EncyclopediaScreen}
+            options={{ title: t('tutorial.open') }}
           />
         </>
       ) : (

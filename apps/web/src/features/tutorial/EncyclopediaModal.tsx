@@ -4,127 +4,29 @@
 // bar. Unlike the full-screen tutorial it has NO dim scrim and NO floating coachmark — the demo is a
 // quiet clip contained entirely inside the modal. It runs on its OWN isolated sandbox stores (via
 // SandboxProvider), so the live game underneath keeps running untouched.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward, X } from 'lucide-react';
-import { asPlayerId } from '@trm/shared';
-import { legalActions } from '@trm/engine';
 import { useGameStore, useGameStoreApi } from '../../store/game';
 import { SandboxProvider } from '../../store/sandboxProvider';
 import { GameStage } from '../../screens/GameStage';
 import { Specimen } from './Specimens';
 import { encyclopediaEntries } from './curriculum';
-import { useScenarioPlayer, type PerformAwait, type ScenarioPlayer } from './useScenarioPlayer';
-import type { ExpectSpec, Lesson } from './types';
-import type { SandboxSocket } from '../../net/sandboxSocket';
+import { useEncyclopediaDemo } from '@trm/client-core/tutorial/encyclopedia';
+import type { Lesson } from './types';
 import '../../styles/tutorial.css';
-
-// Calm auto-advance pacing for the read-first demo (ms). `info` beats linger long enough to read
-// the caption unhurried; `await` beats are auto-performed after a short pause; the finished clip
-// loops back. (The viewer can also pause and step through beats with the back/forward controls.)
-const INFO_MS = 4200;
-const AWAIT_MS = 1600;
-const LOOP_PAUSE_MS = 3400;
-
-/** Perform an `await` beat on the viewer's behalf (the encyclopedia demo has no learner, so it plays
- *  the highlighted move for them). CLAIM_ROUTE/BUILD_STATION pick the first legal payment for the
- *  beat's target (mirrors what the guided tutorial's real learner would click); RESOLVE_TUNNEL stays
- *  unsupported — that demo is authored as an `auto` beat instead (its payment isn't a single pick). */
-function performAwait(cmd: SandboxSocket, expect: ExpectSpec, viewer: string): void {
-  const state = cmd.getState();
-  const player = asPlayerId(viewer);
-  switch (expect.t) {
-    case 'DRAW_ANY':
-    case 'DRAW_BLIND':
-      return cmd.drawBlind();
-    case 'DRAW_FACEUP':
-      return cmd.drawFaceUp(
-        Math.max(
-          0,
-          state.market.findIndex((c) => c !== null),
-        ),
-      );
-    case 'DRAW_TICKETS':
-      return cmd.drawTickets();
-    case 'PASS':
-      return cmd.pass();
-    case 'KEEP_INITIAL_TICKETS':
-      return cmd.keepInitialTickets([...(state.players[viewer]?.pendingTicketOffer ?? [])]);
-    case 'KEEP_TICKETS':
-      return cmd.keepTickets([...(state.players[viewer]?.pendingTicketOffer ?? [])].slice(0, 1));
-    case 'CLAIM_ROUTE': {
-      const action = legalActions(cmd.getBoard(), state, player).find(
-        (a) => a.t === 'CLAIM_ROUTE' && (!expect.routeId || a.routeId === expect.routeId),
-      );
-      if (action) cmd.auto(action);
-      return;
-    }
-    case 'BUILD_STATION': {
-      const action = legalActions(cmd.getBoard(), state, player).find(
-        (a) => a.t === 'BUILD_STATION' && (!expect.cityId || a.cityId === expect.cityId),
-      );
-      if (action) cmd.auto(action);
-      return;
-    }
-    default:
-      return; // unsupported await mechanism — leave to the manual replay control
-  }
-}
 
 function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
   const { t } = useTranslation();
   const store = useGameStoreApi(); // the isolated store provided by SandboxProvider
-  const [playing, setPlaying] = useState(true);
-  // Paused → `auto` beats hold their frame too (so stepping/pausing freezes the whole demo).
-  const player = useScenarioPlayer(entry, store, playing);
+  // The calm auto-play/step/loop machine is shared with mobile (client-core encyclopedia).
+  const { player, playing, setPlaying, stepTo, restartAndPlay } = useEncyclopediaDemo(entry, store);
   const snapshot = useGameStore((s) => s.snapshot);
   const beat = player.beat;
   const spotlight = beat?.spotlight;
   // No dim scrim here; a gentle on-board city glow is the only emphasis a calm clip needs.
   const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
   const frameTarget = beat?.frame ?? null;
-  // A stable ref so the single timer effect always acts on the latest player API without having to
-  // re-subscribe (and re-time) on every parent render.
-  const playerRef = useRef<ScenarioPlayer>(player);
-  playerRef.current = player;
-
-  // Replays an `await` beat for the viewer when a manual seek lands past it.
-  const performAwaitBeat = useCallback<PerformAwait>(
-    (cmd, b) => {
-      if (b.mode === 'await') performAwait(cmd, b.expect, entry.viewer);
-    },
-    [entry.viewer],
-  );
-  // Step controls: pause, then rebuild-and-replay to the neighbouring beat.
-  const stepTo = (target: number): void => {
-    setPlaying(false);
-    playerRef.current.seek(target, performAwaitBeat);
-  };
-
-  // The one calm driver. While playing: an `info` beat waits a readable moment then advances; an
-  // `await` beat is performed for the viewer; an `auto` beat is already advanced inside the scenario
-  // player. When the clip finishes it loops back to the start after a gentle pause.
-  useEffect(() => {
-    if (!playing) return;
-    const p = playerRef.current;
-    if (p.done) {
-      const id = setTimeout(() => playerRef.current.restart(), LOOP_PAUSE_MS);
-      return () => clearTimeout(id);
-    }
-    const b = p.beat;
-    if (!b) return;
-    if (b.mode === 'info') {
-      const id = setTimeout(() => playerRef.current.next(), INFO_MS);
-      return () => clearTimeout(id);
-    }
-    if (b.mode === 'await') {
-      const cmd = p.commands;
-      if (!cmd) return;
-      const id = setTimeout(() => performAwait(cmd, b.expect, entry.viewer), AWAIT_MS);
-      return () => clearTimeout(id);
-    }
-    return; // 'auto' beats self-advance in useScenarioPlayer
-  }, [playing, player.index, player.done, entry.viewer]);
 
   if (!snapshot) return <div className="card">{t('connecting')}</div>;
 
@@ -190,14 +92,7 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
           >
             <SkipForward size={16} aria-hidden />
           </button>
-          <button
-            className="link enc-replay"
-            onClick={() => {
-              player.restart();
-              setPlaying(true);
-            }}
-            title={t('tutorial.replay')}
-          >
+          <button className="link enc-replay" onClick={restartAndPlay} title={t('tutorial.replay')}>
             <RotateCcw size={14} aria-hidden /> {t('tutorial.replay')}
           </button>
         </div>
