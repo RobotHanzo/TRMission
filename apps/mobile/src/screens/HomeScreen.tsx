@@ -424,6 +424,16 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         />
       )}
 
+      {online && (
+        <Pressable
+          testID="home-history"
+          accessibilityRole="button"
+          onPress={() => navigation.navigate('History')}
+        >
+          <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('history.title')}</Text>
+        </Pressable>
+      )}
+
       <Pressable
         testID="home-settings"
         accessibilityRole="button"

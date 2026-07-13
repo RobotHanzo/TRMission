@@ -11,6 +11,8 @@ import { OfflineGameScreen } from './screens/OfflineGameScreen';
 import TutorialScreen from './features/tutorial/TutorialScreen';
 import BuilderScreen from './screens/BuilderScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { HistoryScreen } from './screens/HistoryScreen';
+import ReplayScreen from './screens/ReplayScreen';
 import type { LocalGameInput } from './offline/useLocalGame';
 import { useSession } from './store/session';
 
@@ -30,6 +32,10 @@ export type RootStackParamList = {
   Builder: undefined;
   /** Device settings + account controls (push/haptics toggles, account deletion). */
   Settings: undefined;
+  /** Finished games (players + spectated) — each replayable row opens the Replay player. */
+  History: undefined;
+  /** Client-side replay of a finished game through the sandbox GameStage. */
+  Replay: { gameId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -79,6 +85,16 @@ export function RootNavigator(): React.JSX.Element {
             name="Settings"
             component={SettingsScreen}
             options={{ title: t('settings.title') }}
+          />
+          <Stack.Screen
+            name="History"
+            component={HistoryScreen}
+            options={{ title: t('history.title') }}
+          />
+          <Stack.Screen
+            name="Replay"
+            component={ReplayScreen}
+            options={{ title: t('history.watchReplay') }}
           />
         </>
       ) : (
