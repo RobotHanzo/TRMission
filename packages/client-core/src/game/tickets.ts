@@ -8,6 +8,9 @@ import { routeById, ticketById } from './content';
  * completion — and add the geometry the animation layer needs (the route path to sweep).
  */
 
+/** Ticket-offer deal-in cadence (per-card flip stagger + its sound tick), shared web+mobile. */
+export const TICKET_DEAL_STAGGER_MS = 120;
+
 /** completed ticket ids grouped by owner player id. */
 export function completedByPlayer(snapshot: GameSnapshot): Map<string, Set<string>> {
   const m = new Map<string, Set<string>>();

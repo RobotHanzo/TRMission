@@ -1,7 +1,7 @@
-// Full-screen celebration for the local player's own ticket completion — the plan-mandated
-// SIMPLIFIED port of the web TicketFanfare: the centred ticket card springs in over a seat-colour
-// backdrop with instant points; no confetti particles. Skippable by tap, auto-dismissed under the
-// same 7s cap, reduced motion → a static banner.
+// Full-screen celebration for the local player's own ticket completion (ports the web
+// TicketFanfare): the centred ticket card springs in over a seat-colour backdrop with instant
+// points, confetti bursting behind it. Skippable by tap, auto-dismissed under the same 7s cap,
+// reduced motion → a static banner with no confetti.
 import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -15,6 +15,7 @@ import { ticketById } from '../../game/content';
 import { seatColor } from '../../theme/colors';
 import { rgba } from '../../theme/shade';
 import type { Fanfare } from '../../store/animations';
+import { Confetti } from '../celebration/Confetti';
 import { TicketCard } from './TicketCard';
 
 interface Props {
@@ -61,6 +62,7 @@ export function TicketFanfare({ fanfare, reducedMotion, onDone }: Props) {
       onPress={finish}
       accessibilityRole="alert"
     >
+      <Confetti active={!reducedMotion} />
       <Animated.View style={[styles.panel, { borderColor: color }, anim]}>
         <Text style={[styles.title, { color }]}>{t('fanfareTitle')}</Text>
         {fanfare.long && <Text style={styles.sub}>{t('fanfareLong')}</Text>}

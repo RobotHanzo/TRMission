@@ -59,5 +59,16 @@ export const LOCOMOTIVE_GRADIENT = `linear-gradient(135deg, ${LIVERY_COLORS.join
 /** Seat colours — deliberately distinct from the 8 card colours (ADR A11). */
 export const SEAT_COLORS = ['#0E8C8C', '#C0398B', '#E8A33D', '#5A6B7B', '#7CB342'] as const;
 
+/** Celebration confetti palette + burst cadence (endgame scoreboard, ticket fanfare, finale). */
+export const CONFETTI_COLORS = [
+  '#e8732c',
+  '#0f4c81',
+  '#ffd76a',
+  '#4caf50',
+  '#9c27b0',
+  '#e91e63',
+] as const;
+export const CONFETTI_INTERVAL_MS = 1800;
+
 /** A seat index's display colour (wraps past 5 seats defensively). */
 export const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';

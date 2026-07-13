@@ -19,6 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, PartyPopper, RotateCcw, X } from 'lucide-react-native';
 import type { Beat, SpecimenSpec } from './types';
+import { Confetti } from '../../components/celebration/Confetti';
 import { Specimen } from './Specimens';
 import { coachPosition, spotlightBounds, spotlightCentre, type FlatRect } from './focus';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
@@ -270,6 +271,9 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
 
   return (
     <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, wrapperStyles[pos]]}>
+      {/* Whole-tutorial finale: screen-wide celebration behind the coach card — the same shared
+          confetti as the endgame scoreboard. */}
+      <Confetti active={finished} />
       <Animated.View
         ref={coachRef}
         onLayout={measureCoach}

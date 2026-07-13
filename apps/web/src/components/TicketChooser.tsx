@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { CardCounts } from '@trm/proto';
 import { ticketById } from '../game/content';
+import { TICKET_DEAL_STAGGER_MS } from '../game/tickets';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { soundPlayer } from '../sound/player';
 import { TicketCard } from './TicketCard';
@@ -10,7 +11,7 @@ import { PlayerHand } from './PlayerHand';
 import { TicketPanel } from './TicketPanel';
 
 // Deal-in tick cadence, kept in step with `.ticket-deal-in` in animations.css (0.12s stagger).
-const DEAL_STAGGER_MS = 120;
+const DEAL_STAGGER_MS = TICKET_DEAL_STAGGER_MS;
 
 interface Props {
   offered: string[];
