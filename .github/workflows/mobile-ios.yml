@@ -29,6 +29,11 @@ jobs:
       - run: corepack enable
       - run: yarn install --immutable
 
+      # apps/mobile imports @trm/proto, whose src/gen/** is buf-generated and gitignored (see
+      # root CLAUDE.md) — without this, Metro fails to resolve the generated *_pb modules when
+      # the Xcode build phase bundles the release JS.
+      - run: yarn workspace @trm/proto generate
+
       # Same BUILD_NUMBER axis as mobile-android.yml (docs/release/mobile-versioning.md) — keeps
       # CFBundleVersion in lockstep with versionCode so a `v<semver>+<build>` tag ships one build
       # number to both stores. Branch pushes stay at the fallback (1); TestFlight will reject a

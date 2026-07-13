@@ -32,6 +32,11 @@ jobs:
       - run: corepack enable
       - run: yarn install --immutable
 
+      # apps/mobile imports @trm/proto, whose src/gen/** is buf-generated and gitignored (see
+      # root CLAUDE.md) — without this, Metro fails to resolve the generated *_pb modules when
+      # Gradle's createBundleReleaseJsAndAssets task bundles the release JS.
+      - run: yarn workspace @trm/proto generate
+
       # BUILD_NUMBER is versionCode/CFBundleVersion (docs/release/mobile-versioning.md): only a
       # `v<semver>+<build>` tag carries a real one — branch pushes stay at the dev fallback (1) and
       # are never published to Play (see the publish step's `if:` below).
