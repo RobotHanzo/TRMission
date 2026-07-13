@@ -48,10 +48,17 @@ module.exports = {
   rect: (x, y, width, height) => ({ x, y, width, height }),
   rrect: (r, rx, ry) => ({ rect: r, rx, ry }),
   TextAlign: { Left: 0, Right: 1, Center: 2, Justify: 3, Start: 4, End: 5 },
+  // Runtime enums referenced as plain values in the board tree (e.g. LabelLayer's `weight` prop),
+  // so they must exist even though the mock draws no real text — an undefined enum would throw
+  // before BoardText's Paragraph guard is ever reached.
+  FontWeight: { Normal: 400, Medium: 500, SemiBold: 600, Bold: 700 },
+  PaintStyle: { Fill: 0, Stroke: 1 },
+  StrokeJoin: { Miter: 0, Round: 1, Bevel: 2 },
   Skia: {
     Path: { MakeFromSVGString: () => fakePath(), Make: () => fakePath() },
     Color: (c) => c,
-    // FontMgr / ParagraphBuilder are intentionally omitted: BoardText guards on their absence and
-    // renders no text in jest (labels are a device-only progressive enhancement over the markers).
+    // FontMgr / ParagraphBuilder / Paint / PathBuilder are intentionally omitted: BoardText and the
+    // tutorial scrim guard on their absence and render no text / fall back in jest (labels and the
+    // halo are a device-only progressive enhancement over the always-visible markers).
   },
 };

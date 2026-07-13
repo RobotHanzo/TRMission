@@ -19,9 +19,9 @@ const config: ExpoConfig = {
   scheme: 'trmission', // trmission:// OAuth deep-link fallback (P0 accepts it)
   version: '0.1.0',
   orientation: 'default', // tablets unlock; phone default is portrait (enforced per-screen in P2)
-  // Original brand mark (a car-slot route between two station hubs — the game's own atom, in the
-  // shared chrome palette; generated in-repo, no copied assets). Full-bleed square: the OS
-  // applies its own mask.
+  // The shared TRMission rail-ticket mark — the same logo as the web favicon
+  // (apps/web/public/icon.svg), ported to the native sizes/masks by scripts/gen-brand-assets.js.
+  // Full-bleed square: the OS applies its own mask.
   icon: './assets/icon.png',
   // Chrome theming follows the OS + the in-app theme setting (theme/useTheme.ts).
   userInterfaceStyle: 'automatic',
@@ -37,7 +37,7 @@ const config: ExpoConfig = {
       foregroundImage: './assets/adaptive-icon.png',
       // Android 13+ themed icons tint this white-alpha variant to the wallpaper palette.
       monochromeImage: './assets/adaptive-icon-monochrome.png',
-      backgroundColor: '#f6f1e7', // warm paper (LIGHT_TOKENS.paper)
+      backgroundColor: '#E55509', // EMU orange — the tile behind the white ticket foreground
     },
     intentFilters: [
       {

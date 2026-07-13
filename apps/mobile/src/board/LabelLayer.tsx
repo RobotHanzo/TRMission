@@ -4,6 +4,7 @@
 // drawn through the guarded system-font BoardText (CJK-capable), so a build without the Paragraph
 // API simply shows no labels rather than crashing — the markers/routes stay fully visible.
 import { MAP_DIMS, MAP_PALETTE_LIGHT } from '@trm/map-data';
+import { FontWeight } from '@shopify/react-native-skia';
 import { BoardText } from './skiaText';
 import type { ZoomBucket } from './camera';
 import type { CityTier } from '../game/lod';
@@ -21,8 +22,12 @@ export function tierVisible(tier: string, bucket: ZoomBucket): boolean {
   return BUCKET_RANK[bucket] >= rank;
 }
 
-/** Label size in board units at base zoom; * inv holds a constant on-screen size, like the web. */
-const LABEL_SIZE = 2.6;
+// Mirror the web `.city-label` (game.css): bold ink text with a land/sea-tinted stroke halo, sat
+// just above the marker. All three sizes are board units at base zoom (× inv holds a constant
+// on-screen size, exactly like the web's --inv-scale multipliers).
+const LABEL_SIZE = 4; // web font-size: calc(4px * var(--inv-scale))
+const HALO_WIDTH = 1.1; // web stroke-width: calc(1.1px * var(--inv-scale))
+const LABEL_GAP = 0.4; // clearance between the marker edge and the label box
 
 export interface LabelLayerProps {
   cities: readonly SceneCity[];
@@ -50,9 +55,12 @@ export function LabelLayer({ cities, cityLabel, cityTier, bucket, inv, marker }:
             key={c.id}
             text={label}
             x={c.x}
-            y={c.y + markerR + 0.4}
+            y={c.y - markerR - LABEL_GAP}
+            anchorBottom
             size={LABEL_SIZE * inv}
+            weight={FontWeight.Bold}
             color={P.ink}
+            halo={{ color: c.isIsland ? P.sea : P.land, width: HALO_WIDTH * inv }}
           />
         );
       })}

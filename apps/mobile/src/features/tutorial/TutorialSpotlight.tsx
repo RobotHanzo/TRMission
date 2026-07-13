@@ -9,14 +9,15 @@ import type { FlatRect } from './focus';
 
 /** The even-odd scrim path, built as a native SkPath ONCE per rects change. Handing <Path> a
  *  ready SkPath (instead of the SVG string) skips RNSkia's per-render string re-parse — during a
- *  spotlight glide the rects change every frame, so that parse used to run at frame rate. Falls
- *  back to the (spec-tested) SVG string where the Path API is absent (the jest Skia mock). */
+ *  spotlight glide the rects change every frame, so that parse used to run at frame rate. Built
+ *  through the PathBuilder API (SkPath.addRect/addRRect are deprecated in RNSkia 2.6). Falls back
+ *  to the (spec-tested) SVG string where the Path API is absent (the jest Skia mock). */
 function buildScrimPath(w: number, h: number, holes: FlatRect[]): SkPath | string {
   try {
-    const p = Skia.Path.Make();
-    p.addRect(Skia.XYWHRect(0, 0, w, h));
+    const b = Skia.PathBuilder.Make();
+    b.addRect(Skia.XYWHRect(0, 0, w, h));
     for (const r of holes) {
-      p.addRRect(
+      b.addRRect(
         Skia.RRectXY(
           Skia.XYWHRect(r.x - SPOT_PAD, r.y - SPOT_PAD, r.w + SPOT_PAD * 2, r.h + SPOT_PAD * 2),
           SPOT_RADIUS,
@@ -24,7 +25,7 @@ function buildScrimPath(w: number, h: number, holes: FlatRect[]): SkPath | strin
         ),
       );
     }
-    return p;
+    return b.detach();
   } catch {
     return scrimPath(w, h, holes);
   }
