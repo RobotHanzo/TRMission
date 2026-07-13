@@ -24,7 +24,9 @@ import {
 } from 'react-native-reanimated';
 import { MAP_DIMS, type MapGeography, type RouteGeometry } from '@trm/map-data';
 import { seatColor } from '../theme/colors';
+import type { BoardEventOverlays } from '../game/events';
 import type { RasterSpec, ZoomBucket } from './camera';
+import { EventOverlayLayer } from './EventOverlayLayer';
 import { GeographyLayer, type BoardView } from './GeographyLayer';
 import { RouteLayer } from './RouteLayer';
 import { CityLayer } from './CityLayer';
@@ -93,6 +95,9 @@ export interface MapSceneSkiaProps {
   bucket: ZoomBucket;
   inv: number;
   marker: number;
+
+  /* ── random-events overlays (client-core `boardEventOverlays`; omitted → events-off) ── */
+  events?: BoardEventOverlays | undefined;
 
   /* ── sweep overlays (ticket completion / longest-trail reveal) ── */
   sweeps?: readonly { id: number; seat: number; path: string[] }[] | undefined;
@@ -195,6 +200,7 @@ export function MapSceneSkia({
   bucket,
   inv,
   marker,
+  events,
   sweeps,
   routeReveal,
   reducedMotion,
@@ -275,6 +281,19 @@ export function MapSceneSkia({
     <Group>
       {snapshotElement}
       {motion && snapshotElement ? null : picture ? <Picture picture={picture} /> : staticElement}
+      {/* Random-events overlays: live JSX over the picture — the event slice changes per round
+          and must never force a static-scene re-record. */}
+      {events && (
+        <EventOverlayLayer
+          events={events}
+          modelById={modelById}
+          cityById={cityById}
+          owned={owned}
+          bucket={bucket}
+          inv={inv}
+          marker={marker}
+        />
+      )}
       {/* Claim glow: the just-claimed route blooms in the owner's seat colour then settles (web
           `.route.just-claimed`, anim-glow-bloom 1.2s). Live JSX — deliberately OUTSIDE the cached
           Picture, so arming/clearing a glow animates without re-recording the static scene. */}

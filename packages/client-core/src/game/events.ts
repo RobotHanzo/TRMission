@@ -98,6 +98,110 @@ export function roundsLeft(info: RandomEventInfo, roundIndex: number): number | 
 /** Whether a charter is still open (nobody has completed it yet). */
 export const isCharterOpen = (c: { wonByPlayerId: string }): boolean => c.wonByPlayerId === '';
 
+/** Everything the board draws for the random-events mode, derived in one pass — the single
+ *  source for the web Board's SVG overlays AND the mobile Skia overlays (they must agree). */
+export interface BoardEventOverlays {
+  closedRoutes: ReadonlySet<string>;
+  reopenRoutes: ReadonlySet<string>;
+  skyRoutes: ReadonlySet<string>;
+  harvestRoutes: ReadonlySet<string>;
+  /** cityId → hotspot level (1 or 2). */
+  hotspots: ReadonlyMap<string, number>;
+  charterCities: ReadonlySet<string>;
+  /** cityId → the open charter pair it anchors (both endpoints map to the same pair). */
+  charterPairs: ReadonlyMap<string, { a: string; b: string; pts: number }>;
+  luckyCities: ReadonlySet<string>;
+  /** cityId → the open lucky-ticket pair it anchors. */
+  luckyPairs: ReadonlyMap<string, { a: string; b: string }>;
+  /** One entry per OPEN lucky contract, for the dashed A–B link line. */
+  luckyLinks: readonly { id: string; a: string; b: string }[];
+  lanternCity: string | null;
+  processionPath: readonly string[];
+  /** The procession's current city (clamped to the path tail), or null when inactive. */
+  processionCity: string | null;
+  bentoCities: ReadonlySet<string>;
+  nightMarketCities: ReadonlySet<string>;
+}
+
+const EMPTY_OVERLAYS: BoardEventOverlays = {
+  closedRoutes: EMPTY_SET,
+  reopenRoutes: EMPTY_SET,
+  skyRoutes: EMPTY_SET,
+  harvestRoutes: EMPTY_SET,
+  hotspots: new Map(),
+  charterCities: EMPTY_SET,
+  charterPairs: new Map(),
+  luckyCities: EMPTY_SET,
+  luckyPairs: new Map(),
+  luckyLinks: [],
+  lanternCity: null,
+  processionPath: [],
+  processionCity: null,
+  bentoCities: EMPTY_SET,
+  nightMarketCities: EMPTY_SET,
+};
+
+/** Derive the full board-overlay projection from `snapshot.randomEvents` (undefined → all empty:
+ *  events-off games, sandboxes, and replays before the feature render nothing). */
+export function boardEventOverlays(ev: RandomEventsState | undefined): BoardEventOverlays {
+  if (!ev) return EMPTY_OVERLAYS;
+
+  const charterCities = new Set<string>();
+  const charterPairs = new Map<string, { a: string; b: string; pts: number }>();
+  for (const c of ev.charters)
+    if (isCharterOpen(c)) {
+      const info = { a: c.cityA, b: c.cityB, pts: c.points };
+      charterCities.add(c.cityA).add(c.cityB);
+      charterPairs.set(c.cityA, info);
+      charterPairs.set(c.cityB, info);
+    }
+
+  const luckyCities = new Set<string>();
+  const luckyPairs = new Map<string, { a: string; b: string }>();
+  const luckyLinks: { id: string; a: string; b: string }[] = [];
+  for (const contract of ev.luckyContracts)
+    if (contract.wonByPlayerId === '') {
+      const info = { a: contract.cityA, b: contract.cityB };
+      luckyCities.add(contract.cityA).add(contract.cityB);
+      luckyPairs.set(contract.cityA, info);
+      luckyPairs.set(contract.cityB, info);
+      luckyLinks.push({ id: contract.eventId, ...info });
+    }
+
+  const procession = ev.active.find((a) => a.kind === 'GODDESS_PROCESSION');
+  const processionPath = procession?.cityPath ?? [];
+  const processionCity =
+    processionPath[Math.min(procession?.position ?? 0, Math.max(0, processionPath.length - 1))] ??
+    null;
+
+  const bentoCities = new Set<string>();
+  const nightMarketCities = new Set<string>();
+  const harvestRoutes = new Set<string>();
+  for (const a of ev.active) {
+    if (a.kind === 'BENTO_RUSH' && a.cityId) bentoCities.add(a.cityId);
+    if (a.kind === 'STATION_FRONT_NIGHT_MARKET' && a.cityId) nightMarketCities.add(a.cityId);
+    if (a.kind === 'HARVEST_FESTIVAL_EXPRESS') for (const r of a.routeIds) harvestRoutes.add(r);
+  }
+
+  return {
+    closedRoutes: closedRouteIds(ev),
+    reopenRoutes: reopenBonusRouteIds(ev),
+    skyRoutes: skyLanternRouteIds(ev),
+    harvestRoutes,
+    hotspots: hotspotLevels(ev),
+    charterCities,
+    charterPairs,
+    luckyCities,
+    luckyPairs,
+    luckyLinks,
+    lanternCity: ev.lanternHost?.cityId ?? null,
+    processionPath,
+    processionCity,
+    bentoCities,
+    nightMarketCities,
+  };
+}
+
 // Rejection messageKeys the server sends for event-specific rejections (from the shared
 // ERROR_CATALOG) → the nested i18n key the client resolves for a meaningful inline message.
 const EVENT_ERROR_KEYS: Readonly<Record<string, string>> = {

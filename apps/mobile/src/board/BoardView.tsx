@@ -11,7 +11,7 @@ import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
 import type { GameSnapshot } from '@trm/proto';
 import { MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { CITIES, ROUTES, cityById, cityName, routeById } from '../game/content';
-import { closedRouteIds } from '../game/events';
+import { boardEventOverlays } from '../game/events';
 import { HUB_CITIES, ROUTE_GEOMETRY } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
 import { cityTier } from '../game/lod';
@@ -288,12 +288,11 @@ function BoardInner({
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
     return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
   }, [snapshot]);
-  // A closed route (typhoon landfall / slope repair order) can't be claimed (the server rejects
-  // it) → not tappable either. The web's other random-event derivations (reopen/sky/hotspot/
-  // charter, and the expansion's lantern-host/procession/bento/night-market/lucky/harvest badges)
-  // wire in when MapSceneSkia grows its event-overlay props — nothing here can consume them yet;
-  // the EventsPanel's route list + camera spotlight is the mobile surface for that info.
-  const closedRoutes = useMemo(() => closedRouteIds(snapshot.randomEvents), [snapshot]);
+  // The full random-events board projection (shared with the web Board via client-core). A
+  // closed route (typhoon landfall / slope repair order) can't be claimed (the server rejects
+  // it) → not tappable either; everything else renders through MapSceneSkia's EventOverlayLayer.
+  const events = useMemo(() => boardEventOverlays(snapshot.randomEvents), [snapshot]);
+  const closedRoutes = events.closedRoutes;
 
   // The active catalog is stable while a board is mounted (screens gate on useActiveContent
   // readiness before rendering), so content-derived structures build once.
@@ -347,11 +346,7 @@ function BoardInner({
         if (canBuildStationRef.current) onPickCityRef.current(hit.id);
         return;
       }
-      if (
-        canClaimRef.current &&
-        !closedRef.current.has(hit.id) &&
-        !ownedRef.current.has(hit.id)
-      ) {
+      if (canClaimRef.current && !closedRef.current.has(hit.id) && !ownedRef.current.has(hit.id)) {
         onPickRouteRef.current(hit.id);
       }
     },
@@ -490,6 +485,7 @@ function BoardInner({
               bucket={cam.lod.bucket}
               inv={cam.lod.inv}
               marker={cam.lod.marker}
+              events={snapshot.randomEvents ? events : undefined}
               sweeps={sweeps}
               routeReveal={routeReveal}
               reducedMotion={reducedMotion}

@@ -17,12 +17,7 @@ import {
 import { Plus, Minus, LocateFixed, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
 import type { GameSnapshot, GameEvent } from '@trm/proto';
 import { CITIES, ROUTES, cityById, routeById, cityName, cityTier } from '../game/content';
-import {
-  closedRouteIds,
-  reopenBonusRouteIds,
-  skyLanternRouteIds,
-  hotspotLevels,
-} from '../game/events';
+import { boardEventOverlays } from '../game/events';
 import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
 import { zoomBucket } from '../game/lod';
@@ -486,91 +481,25 @@ export function Board({
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
     return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
   }, [snapshot]);
-  // Random-events overlays — all derived purely from the authoritative `random_events` projection.
-  const closedRoutes = useMemo(() => closedRouteIds(snapshot.randomEvents), [snapshot]);
-  const reopenRoutes = useMemo(() => reopenBonusRouteIds(snapshot.randomEvents), [snapshot]);
-  const skyRoutes = useMemo(() => skyLanternRouteIds(snapshot.randomEvents), [snapshot]);
-  const hotspots = useMemo(() => hotspotLevels(snapshot.randomEvents), [snapshot]);
-  const charterCities = useMemo(() => {
-    const set = new Set<string>();
-    const rev = snapshot.randomEvents;
-    if (rev)
-      for (const c of rev.charters)
-        if (c.wonByPlayerId === '') {
-          set.add(c.cityA);
-          set.add(c.cityB);
-        }
-    return set;
-  }, [snapshot]);
-  // cityId → the open charter pair it anchors, for the map badge's hover tooltip.
-  const charterPairs = useMemo(() => {
-    const map = new Map<string, { a: string; b: string; pts: number }>();
-    const rev = snapshot.randomEvents;
-    if (rev)
-      for (const c of rev.charters)
-        if (c.wonByPlayerId === '') {
-          const info = { a: c.cityA, b: c.cityB, pts: c.points };
-          map.set(c.cityA, info);
-          map.set(c.cityB, info);
-        }
-    return map;
-  }, [snapshot]);
-  const lanternCity = snapshot.randomEvents?.lanternHost?.cityId ?? null;
-  const procession = useMemo(
-    () => snapshot.randomEvents?.active.find((event) => event.kind === 'GODDESS_PROCESSION'),
-    [snapshot],
-  );
-  const processionPath = procession?.cityPath ?? [];
-  const processionCity =
-    processionPath[Math.min(procession?.position ?? 0, Math.max(0, processionPath.length - 1))] ??
-    null;
-  const bentoCities = useMemo(
-    () =>
-      new Set(
-        snapshot.randomEvents?.active
-          .filter((event) => event.kind === 'BENTO_RUSH' && event.cityId)
-          .map((event) => event.cityId) ?? [],
-      ),
-    [snapshot],
-  );
-  const nightMarketCities = useMemo(
-    () =>
-      new Set(
-        snapshot.randomEvents?.active
-          .filter((event) => event.kind === 'STATION_FRONT_NIGHT_MARKET' && event.cityId)
-          .map((event) => event.cityId) ?? [],
-      ),
-    [snapshot],
-  );
-  const harvestRoutes = useMemo(
-    () =>
-      new Set(
-        snapshot.randomEvents?.active
-          .filter((event) => event.kind === 'HARVEST_FESTIVAL_EXPRESS')
-          .flatMap((event) => event.routeIds) ?? [],
-      ),
-    [snapshot],
-  );
-  const luckyCities = useMemo(() => {
-    const set = new Set<string>();
-    for (const contract of snapshot.randomEvents?.luckyContracts ?? []) {
-      if (contract.wonByPlayerId !== '') continue;
-      set.add(contract.cityA);
-      set.add(contract.cityB);
-    }
-    return set;
-  }, [snapshot]);
-  // cityId → the open lucky-ticket pair it anchors, for the map badge's hover tooltip.
-  const luckyPairs = useMemo(() => {
-    const map = new Map<string, { a: string; b: string }>();
-    for (const contract of snapshot.randomEvents?.luckyContracts ?? []) {
-      if (contract.wonByPlayerId !== '') continue;
-      const info = { a: contract.cityA, b: contract.cityB };
-      map.set(contract.cityA, info);
-      map.set(contract.cityB, info);
-    }
-    return map;
-  }, [snapshot]);
+  // Random-events overlays — all derived purely from the authoritative `random_events` projection,
+  // in one pass shared with the mobile Skia board (client-core `boardEventOverlays`).
+  const {
+    closedRoutes,
+    reopenRoutes,
+    skyRoutes,
+    harvestRoutes,
+    hotspots,
+    charterCities,
+    charterPairs,
+    luckyCities,
+    luckyPairs,
+    luckyLinks,
+    lanternCity,
+    processionPath,
+    processionCity,
+    bentoCities,
+    nightMarketCities,
+  } = useMemo(() => boardEventOverlays(snapshot.randomEvents), [snapshot]);
   const viewportRef = useRef<HTMLDivElement>(null);
 
   // Transient claim/station glow + the ticket-completion path sweep (cleared on a timer).
@@ -837,7 +766,9 @@ export function Board({
                       pointerEvents="none"
                     >
                       <circle pointerEvents="auto">
-                        <title>{t('events.nightMarketCity', { city: cityName(c.id, locale) })}</title>
+                        <title>
+                          {t('events.nightMarketCity', { city: cityName(c.id, locale) })}
+                        </title>
                       </circle>
                       <text aria-hidden="true">N</text>
                     </g>
@@ -892,25 +823,23 @@ export function Board({
               />
             )}
 
-            {snapshot.randomEvents?.luckyContracts
-              .filter((contract) => contract.wonByPlayerId === '')
-              .map((contract) => {
-                const a = cityById.get(contract.cityA);
-                const b = cityById.get(contract.cityB);
-                if (!a || !b) return null;
-                return (
-                  <line
-                    key={contract.eventId}
-                    className="evt-lucky-link"
-                    x1={a.x}
-                    y1={a.y}
-                    x2={b.x}
-                    y2={b.y}
-                    pointerEvents="none"
-                    aria-hidden
-                  />
-                );
-              })}
+            {luckyLinks.map((link) => {
+              const a = cityById.get(link.a);
+              const b = cityById.get(link.b);
+              if (!a || !b) return null;
+              return (
+                <line
+                  key={link.id}
+                  className="evt-lucky-link"
+                  x1={a.x}
+                  y1={a.y}
+                  x2={b.x}
+                  y2={b.y}
+                  pointerEvents="none"
+                  aria-hidden
+                />
+              );
+            })}
 
             {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path. */}
             {sweeps.map((sw) => (

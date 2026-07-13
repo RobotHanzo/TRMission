@@ -15,6 +15,7 @@ import {
   roundsLeft,
   isCharterOpen,
   hasActiveEvent,
+  boardEventOverlays,
 } from './events';
 
 const state = (over: MessageInitShape<typeof RandomEventsStateSchema>) =>
@@ -54,6 +55,59 @@ const EVENT_REJECTION_KEYS = [
   'errors:eventHiveUnavailable',
   'errors:eventResourceUnavailable',
 ] as const;
+
+describe('boardEventOverlays (the one board-overlay projection, shared web+mobile)', () => {
+  it('is all-empty for undefined (events-off games, sandboxes)', () => {
+    const o = boardEventOverlays(undefined);
+    expect(o.closedRoutes.size).toBe(0);
+    expect(o.hotspots.size).toBe(0);
+    expect(o.luckyLinks).toEqual([]);
+    expect(o.lanternCity).toBeNull();
+    expect(o.processionCity).toBeNull();
+  });
+
+  it('derives every overlay slice in one pass', () => {
+    const o = boardEventOverlays(
+      state({
+        closedRouteIds: ['C1'],
+        reopenBonusRouteIds: ['B1'],
+        hotspots: [{ cityId: 'tpe', level: 2 }],
+        charters: [
+          { id: 'ch1', cityA: 'tpe', cityB: 'khh', points: 8, wonByPlayerId: '' },
+          { id: 'ch2', cityA: 'txg', cityB: 'tnn', points: 6, wonByPlayerId: 'p1' }, // won → hidden
+        ],
+        luckyContracts: [
+          { eventId: 'l1', cityA: 'hsz', cityB: 'ttt', points: 4, wonByPlayerId: '' },
+          { eventId: 'l2', cityA: 'kee', cityB: 'cyi', points: 4, wonByPlayerId: 'p2' },
+        ],
+        lanternHost: { cityId: 'ila' },
+        active: [
+          { id: 's', kind: 'SKY_LANTERN', routeIds: ['S1'] },
+          { id: 'h', kind: 'HARVEST_FESTIVAL_EXPRESS', routeIds: ['H1', 'H2'] },
+          { id: 'g', kind: 'GODDESS_PROCESSION', cityPath: ['a', 'b', 'c'], position: 7 },
+          { id: 'bn', kind: 'BENTO_RUSH', cityId: 'bento-city' },
+          { id: 'nm', kind: 'STATION_FRONT_NIGHT_MARKET', cityId: 'night-city' },
+        ],
+      }),
+    );
+    expect([...o.closedRoutes]).toEqual(['C1']);
+    expect([...o.reopenRoutes]).toEqual(['B1']);
+    expect([...o.skyRoutes]).toEqual(['S1']);
+    expect([...o.harvestRoutes].sort()).toEqual(['H1', 'H2']);
+    expect(o.hotspots.get('tpe')).toBe(2);
+    expect([...o.charterCities].sort()).toEqual(['khh', 'tpe']);
+    expect(o.charterPairs.get('khh')).toEqual({ a: 'tpe', b: 'khh', pts: 8 });
+    expect([...o.luckyCities].sort()).toEqual(['hsz', 'ttt']);
+    expect(o.luckyPairs.get('ttt')).toEqual({ a: 'hsz', b: 'ttt' });
+    expect(o.luckyLinks).toEqual([{ id: 'l1', a: 'hsz', b: 'ttt' }]);
+    expect(o.lanternCity).toBe('ila');
+    expect(o.processionPath).toEqual(['a', 'b', 'c']);
+    // position past the path tail clamps to the last stop.
+    expect(o.processionCity).toBe('c');
+    expect([...o.bentoCities]).toEqual(['bento-city']);
+    expect([...o.nightMarketCities]).toEqual(['night-city']);
+  });
+});
 
 describe('random-events derivations', () => {
   it('sky-lantern surcharge is +1 only for a route listed by an active SKY_LANTERN', () => {
