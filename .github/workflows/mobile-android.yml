@@ -16,6 +16,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # ubuntu-latest ships ~70GB of preinstalled tooling this JS/Android/Ruby pipeline never
+      # touches (.NET, Haskell, CodeQL, Docker images, ...), leaving only ~14GB free. Compiling
+      # react-native-skia's native code for all 4 ABIs plus the release bundling step exhausts
+      # that, failing packageReleaseBundle with "No space left on device". Reclaim space up
+      # front rather than dropping build architectures (a product-facing device-support call).
+      - name: Free up disk space for the native build
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /opt/hostedtoolcache/CodeQL
+          docker image prune -af || true
+          df -h /
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
