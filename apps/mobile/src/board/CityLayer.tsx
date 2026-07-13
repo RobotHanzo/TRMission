@@ -1,8 +1,10 @@
 // City + station markers — a Skia port of the MapScene city branch (apps/web/src/components/
 // MapScene.tsx). Hub junctions read as a wider slot; ordinary stops are round dots. A player's
-// station sits inside the marker in their seat colour; a just-built station wears a ring; an
-// offered-ticket endpoint gets a soft halo. Markers size off `marker` (web --marker-scale), so they
-// GROW as you zoom in (easier to aim at) while still shrinking on the whole-island view.
+// station sits inside the marker in their seat colour; an offered-ticket endpoint gets a soft
+// halo. Markers size off `marker` (web --marker-scale), so they GROW as you zoom in (easier to
+// aim at) while still shrinking on the whole-island view. (The just-built station pop is a LIVE
+// overlay in MapSceneSkia — this layer is recorded into the cached static Picture and must stay
+// animation-free.)
 import { Circle, Group, RoundedRect } from '@shopify/react-native-skia';
 import { MAP_DIMS, MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { seatColor } from '../theme/colors';
@@ -15,27 +17,18 @@ export interface CityLayerProps {
   cities: readonly SceneCity[];
   hubs: ReadonlySet<string>;
   stations?: ReadonlyMap<string, number> | undefined;
-  glowingStations?: ReadonlyMap<string, number> | undefined;
   highlightCities?: ReadonlySet<string> | undefined;
   /** Marker growth (web --marker-scale). */
   marker: number;
 }
 
-export function CityLayer({
-  cities,
-  hubs,
-  stations,
-  glowingStations,
-  highlightCities,
-  marker,
-}: CityLayerProps) {
+export function CityLayer({ cities, hubs, stations, highlightCities, marker }: CityLayerProps) {
   return (
     <>
       {cities.map((c) => {
         const isHub = hubs.has(c.id);
         const stationSeat = stations?.get(c.id);
         const hasStation = stationSeat !== undefined;
-        const builtSeat = glowingStations?.get(c.id);
         const isTarget = highlightCities?.has(c.id) ?? false;
         const r = (c.isIsland ? D.islandR : D.cityR) * marker;
         const dotStroke = c.isIsland ? P.blue : P.ink;
@@ -104,18 +97,6 @@ export function CityLayer({
                   />
                 </>
               ))}
-
-            {builtSeat !== undefined && (
-              <Circle
-                cx={c.x}
-                cy={c.y}
-                r={D.cityR * marker * 1.7}
-                style="stroke"
-                strokeWidth={0.3 * marker}
-                color={seatColor(builtSeat)}
-                opacity={0.7}
-              />
-            )}
           </Group>
         );
       })}

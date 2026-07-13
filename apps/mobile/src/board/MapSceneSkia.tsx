@@ -5,6 +5,7 @@
 // is a Skia <Group>, NOT its own <Canvas> — the Board (Task 5) owns the Canvas + camera transform.
 import { useEffect, useMemo } from 'react';
 import {
+  Circle as SkiaCircle,
   FilterMode,
   Group,
   Image as SkiaImage,
@@ -14,8 +15,14 @@ import {
   type SkPath,
   type SkRect,
 } from '@shopify/react-native-skia';
-import { Easing, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
-import type { MapGeography, RouteGeometry } from '@trm/map-data';
+import {
+  Easing,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import { MAP_DIMS, type MapGeography, type RouteGeometry } from '@trm/map-data';
 import { seatColor } from '../theme/colors';
 import type { RasterSpec, ZoomBucket } from './camera';
 import { GeographyLayer, type BoardView } from './GeographyLayer';
@@ -113,8 +120,6 @@ interface MapSceneStaticProps {
   view: BoardView;
   owned?: ReadonlyMap<string, RouteOwnership> | undefined;
   stations?: ReadonlyMap<string, number> | undefined;
-  glowingRoutes?: ReadonlyMap<string, number> | undefined;
-  glowingStations?: ReadonlyMap<string, number> | undefined;
   highlightCities?: ReadonlySet<string> | undefined;
   colorBlind?: boolean | undefined;
   showFerryLocos?: boolean | undefined;
@@ -133,8 +138,6 @@ function MapSceneStatic({
   view,
   owned,
   stations,
-  glowingRoutes,
-  glowingStations,
   highlightCities,
   colorBlind,
   showFerryLocos,
@@ -150,7 +153,6 @@ function MapSceneStatic({
       <RouteLayer
         model={model}
         owned={owned}
-        glowingRoutes={glowingRoutes}
         colorBlind={colorBlind}
         showFerryLocos={showFerryLocos}
         inv={inv}
@@ -159,7 +161,6 @@ function MapSceneStatic({
         cities={cities}
         hubs={hubs}
         stations={stations}
-        glowingStations={glowingStations}
         highlightCities={highlightCities}
         marker={marker}
       />
@@ -202,6 +203,7 @@ export function MapSceneSkia({
 }: MapSceneSkiaProps) {
   const model = useMemo(() => buildRouteRenderModel(routes, geometry), [routes, geometry]);
   const modelById = useMemo(() => new Map(model.map((m) => [m.id, m])), [model]);
+  const cityById = useMemo(() => new Map(cities.map((c) => [c.id, c])), [cities]);
 
   const staticElement = useMemo(
     () => (
@@ -213,8 +215,6 @@ export function MapSceneSkia({
         view={view}
         owned={owned}
         stations={stations}
-        glowingRoutes={glowingRoutes}
-        glowingStations={glowingStations}
         highlightCities={highlightCities}
         colorBlind={colorBlind}
         showFerryLocos={showFerryLocos}
@@ -233,8 +233,6 @@ export function MapSceneSkia({
       view,
       owned,
       stations,
-      glowingRoutes,
-      glowingStations,
       highlightCities,
       colorBlind,
       showFerryLocos,
@@ -277,6 +275,45 @@ export function MapSceneSkia({
     <Group>
       {snapshotElement}
       {motion && snapshotElement ? null : picture ? <Picture picture={picture} /> : staticElement}
+      {/* Claim glow: the just-claimed route blooms in the owner's seat colour then settles (web
+          `.route.just-claimed`, anim-glow-bloom 1.2s). Live JSX — deliberately OUTSIDE the cached
+          Picture, so arming/clearing a glow animates without re-recording the static scene. */}
+      {glowingRoutes &&
+        [...glowingRoutes].map(([rid, seat]) => {
+          const m = modelById.get(rid);
+          if (!m) return null;
+          return (
+            <Group
+              key={`glow:${rid}`}
+              transform={[{ translateX: m.perp.x * inv }, { translateY: m.perp.y * inv }]}
+            >
+              <GlowBloom
+                path={m.bed}
+                color={seatColor(seat)}
+                width={MAP_DIMS.bedOwnedW * 2.4 * inv}
+                reduced={!!reducedMotion}
+              />
+            </Group>
+          );
+        })}
+      {/* Station build: a radiating seat-colour ring pops out of the city, then a sustained halo
+          holds until the store clears it (web anim-station-pop + .station-ring, 0.9s). */}
+      {glowingStations &&
+        [...glowingStations].map(([cid, seat]) => {
+          const c = cityById.get(cid);
+          if (!c) return null;
+          return (
+            <StationPop
+              key={`pop:${cid}`}
+              cx={c.x}
+              cy={c.y}
+              baseR={MAP_DIMS.cityR * marker}
+              strokeW={0.3 * marker}
+              color={seatColor(seat)}
+              reduced={!!reducedMotion}
+            />
+          );
+        })}
       {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path, one
           segment after another (ports the web's --delay: i*0.32s stagger). Removal timers live in
           the Board (path.length*320 + 900ms). */}
@@ -357,5 +394,94 @@ function SweepSegment({
       start={0}
       end={end}
     />
+  );
+}
+
+/** The claim glow's bloom: flare bright over the route, then settle to the sustained halo the
+ *  glow holds until the Board's GLOW_MS timer clears it (web anim-glow-bloom's brightness spike
+ *  at 35%). Reduced motion renders the sustained halo directly. */
+function GlowBloom({
+  path,
+  color,
+  width,
+  reduced,
+}: {
+  path: SkPath;
+  color: string;
+  width: number;
+  reduced: boolean;
+}) {
+  const opacity = useSharedValue(reduced ? 0.3 : 0);
+  useEffect(() => {
+    if (!reduced) {
+      opacity.value = withSequence(
+        withTiming(0.55, { duration: 420, easing: Easing.out(Easing.cubic) }),
+        withTiming(0.3, { duration: 780, easing: Easing.out(Easing.cubic) }),
+      );
+    }
+  }, [reduced, opacity]);
+  return (
+    <Path
+      path={path}
+      style="stroke"
+      strokeWidth={width}
+      strokeCap="round"
+      color={color}
+      opacity={opacity}
+    />
+  );
+}
+
+/** The station-build pop: a ring radiates outward and fades (web .station-ring) while the
+ *  sustained halo pops in with overshoot and holds (web anim-station-pop's 1.35→1 settle).
+ *  Reduced motion renders the sustained halo directly, no radiating ring. */
+function StationPop({
+  cx,
+  cy,
+  baseR,
+  strokeW,
+  color,
+  reduced,
+}: {
+  cx: number;
+  cy: number;
+  baseR: number;
+  strokeW: number;
+  color: string;
+  reduced: boolean;
+}) {
+  const haloR = useSharedValue(reduced ? baseR * 1.7 : baseR * 0.4);
+  const ringR = useSharedValue(baseR * 0.4);
+  const ringO = useSharedValue(reduced ? 0 : 0.7);
+  useEffect(() => {
+    if (reduced) return;
+    haloR.value = withSequence(
+      withTiming(baseR * 2.2, { duration: 540, easing: Easing.out(Easing.cubic) }),
+      withTiming(baseR * 1.7, { duration: 360, easing: Easing.inOut(Easing.cubic) }),
+    );
+    ringR.value = withTiming(baseR * 3, { duration: 900, easing: Easing.out(Easing.cubic) });
+    ringO.value = withTiming(0, { duration: 900, easing: Easing.out(Easing.cubic) });
+  }, [reduced, baseR, haloR, ringR, ringO]);
+  return (
+    <Group>
+      <SkiaCircle
+        cx={cx}
+        cy={cy}
+        r={ringR}
+        style="stroke"
+        strokeWidth={strokeW}
+        color={color}
+        opacity={ringO}
+      />
+      <SkiaCircle
+        cx={cx}
+        cy={cy}
+        r={haloR}
+        style="stroke"
+        strokeWidth={strokeW}
+        color={color}
+        opacity={0.7}
+      />
+    </Group>
   );
 }
