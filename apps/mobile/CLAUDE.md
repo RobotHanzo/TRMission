@@ -120,10 +120,15 @@ authorization).
 
 - **`.github/workflows/mobile-ci.yml`** — ubuntu, PRs touching `apps/mobile/**`/`packages/**`:
   `typecheck` + `lint` + `test` (fast JS gate; the whole-repo CI also covers mobile via turbo).
-- **`.github/workflows/mobile-android.yml`** — ubuntu, `release/**` + tags: `expo prebuild` →
-  Gradle `bundleRelease` signed via AGP injected-signing properties → `.aab` artifact.
-- **`.github/workflows/mobile-ios.yml`** — **macos-latest** (billed ~10x, so release-gated):
-  `expo prebuild` → `pod install` → `fastlane ios beta` (match + gym + pilot → TestFlight).
+- **`.github/workflows/mobile-android.yml`** — ubuntu, `release/**` + tags: derives `BUILD_NUMBER`
+  from a `v<semver>+<build>` tag (branch pushes fall back to 1) → `expo prebuild` → Gradle
+  `bundleRelease` signed via AGP injected-signing properties → `.aab` artifact → on a real tag only,
+  `fastlane android internal` publishes to Play's **internal testing track** (never production —
+  promote locally with `fastlane android promote`). One-time Play Console + service-account setup:
+  `docs/release/play-console-setup.md`.
+- **`.github/workflows/mobile-ios.yml`** — **macos-latest** (billed ~10x, so release-gated): same
+  tag-derived `BUILD_NUMBER` → `expo prebuild` → `pod install` → `fastlane ios beta` (match + gym +
+  pilot → TestFlight).
 - **`.github/workflows/mobile-ota.yml`** — JS-only OTA publish to the self-hosted
   expo-open-ota server (`eoas publish`; runbook + forced-update interplay in
   `docs/mobile/ota.md`). Native changes are fenced automatically by
@@ -142,7 +147,9 @@ secret in CI, manifests are signed at serve time by the OTA server's mounted key
 `apps/mobile/certs/keys/` must never be committed).
 
 Android **secrets**: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
-`ANDROID_KEY_PASSWORD`.
+`ANDROID_KEY_PASSWORD` (signing), `PLAY_JSON_KEY_BASE64` (base64 Play service-account JSON —
+Play Developer API access for `fastlane android internal`; provisioning steps in
+`docs/release/play-console-setup.md`).
 
 iOS **secrets**: `MATCH_GIT_URL`, `MATCH_PASSWORD`, `MATCH_GIT_BASIC_AUTHORIZATION` (fastlane match
 repo), `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (base64 App Store Connect API key).

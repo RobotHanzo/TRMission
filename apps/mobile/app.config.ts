@@ -1,8 +1,10 @@
 import type { ExpoConfig } from 'expo/config';
 
-// Build number is the forced-update gate axis (compared against GET /version/mobile.minBuild).
-// Bump it on every store submission; keep it in lockstep with versionCode/buildNumber in P6.
-const BUILD_NUMBER = 1;
+// Build number is the forced-update gate axis (compared against GET /version/mobile.minBuild) AND
+// the native versionCode/CFBundleVersion (docs/release/mobile-versioning.md). The release workflows
+// derive it from the release tag (`v<semver>+<build>`) and inject it via this env var at
+// `expo prebuild` time; local/dev builds fall back to 1 and are never shipped.
+const BUILD_NUMBER = Number(process.env.BUILD_NUMBER ?? 1);
 
 // The google-signin config plugin (without-Firebase mode) VALIDATES `iosUrlScheme` at every config
 // eval — for `expo run:android`/`prebuild` too, not just iOS — and rejects anything not prefixed
@@ -28,11 +30,13 @@ const config: ExpoConfig = {
   // New Architecture is the default (and only) mode in RN 0.85 / SDK 56 — no flag needed.
   ios: {
     bundleIdentifier: 'dev.robothanzo.trmission',
+    buildNumber: String(BUILD_NUMBER),
     supportsTablet: true, // iPad; requireFullScreen deliberately unset (iPadOS 26 ignores it)
     associatedDomains: ['applinks:trmission.example'], // real origin filled in P6
   },
   android: {
     package: 'dev.robothanzo.trmission',
+    versionCode: BUILD_NUMBER,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       // Android 13+ themed icons tint this white-alpha variant to the wallpaper palette.

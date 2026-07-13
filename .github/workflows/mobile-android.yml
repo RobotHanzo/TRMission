@@ -24,8 +24,25 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: apps/mobile
       - run: corepack enable
       - run: yarn install --immutable
+
+      # BUILD_NUMBER is versionCode/CFBundleVersion (docs/release/mobile-versioning.md): only a
+      # `v<semver>+<build>` tag carries a real one — branch pushes stay at the dev fallback (1) and
+      # are never published to Play (see the publish step's `if:` below).
+      - name: Derive BUILD_NUMBER from the release tag
+        id: build_number
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$ ]]; then
+            echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=1" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Prebuild the Android native project
         working-directory: apps/mobile
@@ -34,6 +51,7 @@ jobs:
           TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
 
       - name: Decode the release keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
@@ -53,4 +71,16 @@ jobs:
           path: apps/mobile/android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
 
-# P6 flips the final step to `fastlane supply` (Play internal track) instead of uploading an artifact.
+      # Only a real release tag publishes — see docs/release/play-console-setup.md for the one-time
+      # Play Console + service-account setup this depends on. Always the internal track only; promote
+      # to production locally with `fastlane android promote` once the track is verified.
+      - name: Decode the Play service account key
+        if: github.ref_type == 'tag'
+        run: echo "${{ secrets.PLAY_JSON_KEY_BASE64 }}" | base64 -d > "$RUNNER_TEMP/play-key.json"
+
+      - name: Upload to Play's internal testing track
+        if: github.ref_type == 'tag'
+        working-directory: apps/mobile
+        run: bundle exec fastlane android internal
+        env:
+          PLAY_JSON_KEY_FILE: ${{ runner.temp }}/play-key.json

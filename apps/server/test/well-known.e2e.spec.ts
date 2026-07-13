@@ -29,7 +29,7 @@ describe('/.well-known: configured payloads', () => {
       mongod: sharedMongod,
       dbName: 'trm-test-wk-on',
       mobileLinks: {
-        appleAppId: 'ABCDE12345.dev.robothanzo.trmission',
+        appleAppId: 'FJX3SGU9AL.dev.robothanzo.trmission',
         androidPackageName: 'dev.robothanzo.trmission',
         androidCertSha256: ['AA:BB:CC'],
       },
@@ -45,7 +45,7 @@ describe('/.well-known: configured payloads', () => {
     expect(res.body).toEqual({
       applinks: {
         details: [
-          { appIDs: ['ABCDE12345.dev.robothanzo.trmission'], components: [{ '/': '/m/callback*' }] },
+          { appIDs: ['FJX3SGU9AL.dev.robothanzo.trmission'], components: [{ '/': '/m/callback*' }] },
         ],
       },
     });

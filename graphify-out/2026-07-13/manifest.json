@@ -3945,8 +3945,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/__mocks__/@shopify/react-native-skia.js": {
-    "mtime": 1783869478.4094663,
-    "ast_hash": "f5d0231362b4f27ca11a33007002ad5a",
+    "mtime": 1783929927.151298,
+    "ast_hash": "8399892caa21942307562b1d173753a8",
     "semantic_hash": ""
   },
   "apps/mobile/__mocks__/lucide-react-native.js": {
@@ -3960,8 +3960,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/app.config.ts": {
-    "mtime": 1783899695.721054,
-    "ast_hash": "7b3289e1f01bbc9b070c4272816e8396",
+    "mtime": 1783936759.6662564,
+    "ast_hash": "7b6f98e8c9c3939fc3cfd08a66a661f2",
     "semantic_hash": ""
   },
   "apps/mobile/babel.config.js": {
@@ -4055,8 +4055,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/board/LabelLayer.tsx": {
-    "mtime": 1783869478.443274,
-    "ast_hash": "e10907bc8723bffba7764064bc8712d7",
+    "mtime": 1783929153.5294242,
+    "ast_hash": "f4598f23fe52a90b4d1041c8d8cd032f",
     "semantic_hash": ""
   },
   "apps/mobile/src/board/MapSceneSkia.test.tsx": {
@@ -4120,8 +4120,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/board/skiaText.tsx": {
-    "mtime": 1783869478.449679,
-    "ast_hash": "9d1804d96144dd7dde4c8d12d8445527",
+    "mtime": 1783929865.6877341,
+    "ast_hash": "feb649f8f299e791f339f1513f75e4e5",
     "semantic_hash": ""
   },
   "apps/mobile/src/board/useBoardCamera.ts": {
@@ -4180,13 +4180,13 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/FlightMover.tsx": {
-    "mtime": 1783869478.4558413,
-    "ast_hash": "54cec1c455287b74ec73496de684cf6a",
+    "mtime": 1783935809.072259,
+    "ast_hash": "50963243759f97aa796da047e1e5874f",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/LogPanel.tsx": {
-    "mtime": 1783876533.6766272,
-    "ast_hash": "97532f687f853dcd58deb7892434ff3d",
+    "mtime": 1783927754.3392081,
+    "ast_hash": "a32bce2c43fad452e1408678346da689",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/NotificationStack.tsx": {
@@ -4280,8 +4280,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/Specimens.tsx": {
-    "mtime": 1783869478.4654672,
-    "ast_hash": "f541c24446e3bfc29d7689d3b9c5253d",
+    "mtime": 1783935884.8348453,
+    "ast_hash": "81fd219b74f81f3d74d0a0e055c9b8b9",
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/TutorialOverlay.tsx": {
@@ -4295,8 +4295,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/TutorialSpotlight.tsx": {
-    "mtime": 1783869478.4664664,
-    "ast_hash": "7682be68e643d2368f690096b031cc03",
+    "mtime": 1783929096.50649,
+    "ast_hash": "19b6682f68f34bf3f052e76b8f112227",
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/__tests__/Specimens.test.tsx": {
@@ -4595,8 +4595,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/index.ts": {
-    "mtime": 1783926900.2915409,
-    "ast_hash": "eca93c25d1001b6da31b897aa9ec2e87",
+    "mtime": 1783927726.404841,
+    "ast_hash": "331da52c2744e3ea5bb09347217faebb",
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/tutorial.ts": {
@@ -4605,8 +4605,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/navigation.tsx": {
-    "mtime": 1783927414.2084904,
-    "ast_hash": "e6fd54226be99c366714ef1f575da3c7",
+    "mtime": 1783935773.192129,
+    "ast_hash": "453616e9437df49ef47e41b16f605637",
     "semantic_hash": ""
   },
   "apps/mobile/src/net/commands.ts": {
@@ -4800,8 +4800,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/GameStage.tsx": {
-    "mtime": 1783900294.6670008,
-    "ast_hash": "7a03bf92b9968dec241c74f0c35b70e6",
+    "mtime": 1783935795.7366598,
+    "ast_hash": "f8e7c0e66429226b4e386ca826cc5d93",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/HomeScreen.tsx": {
@@ -5105,8 +5105,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/auth-apple.e2e.spec.ts": {
-    "mtime": 1783869478.5730531,
-    "ast_hash": "01ee2f50f574b06e5f5e8c074e515f22",
+    "mtime": 1783936792.9006667,
+    "ast_hash": "ccfc3c8be0da4fa7ce68e6017b5307df",
     "semantic_hash": ""
   },
   "apps/server/test/auth-mobile.e2e.spec.ts": {
@@ -5145,8 +5145,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/well-known.e2e.spec.ts": {
-    "mtime": 1783869478.5811691,
-    "ast_hash": "1b9af876f31d1290ee0559421c8f137d",
+    "mtime": 1783936780.6677628,
+    "ast_hash": "03f5d9669a9a8a43cdc922c6d9f2fa40",
     "semantic_hash": ""
   },
   "apps/web/src/features/builder/geo/antimeridian.test.ts": {
@@ -5565,8 +5565,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/board/useStaticMapPicture.ts": {
-    "mtime": 1783891187.9762537,
-    "ast_hash": "6d853cfa6da47277b5bc458aa9534683",
+    "mtime": 1783927552.6004536,
+    "ast_hash": "d49b7351c1aa51f250b2ee406f27db00",
     "semantic_hash": ""
   },
   "apps/mobile/src/game/actionGate.test.ts": {
@@ -5760,33 +5760,33 @@
     "semantic_hash": ""
   },
   "apps/mobile/scripts/gen-brand-assets.js": {
-    "mtime": 1783899794.0533872,
-    "ast_hash": "1828e9402559a11f540a60dac5e38f4a",
+    "mtime": 1783930059.6093588,
+    "ast_hash": "44d56476f628b0db9cf1a4c9c4f29205",
     "semantic_hash": ""
   },
   "apps/mobile/assets/adaptive-icon-monochrome.png": {
-    "mtime": 1783899623.2774184,
-    "ast_hash": "bbc92d93981048b9765d7e9adbae186f",
+    "mtime": 1783930068.4492905,
+    "ast_hash": "e50d8336f6a60da23c1c139df61359cf",
     "semantic_hash": ""
   },
   "apps/mobile/assets/adaptive-icon.png": {
-    "mtime": 1783899623.2764103,
-    "ast_hash": "4f6f97b4f837bf7d0416f78b68d7a79f",
+    "mtime": 1783930068.149969,
+    "ast_hash": "f7bb3cdce0bed5fabae25d04e3cbce13",
     "semantic_hash": ""
   },
   "apps/mobile/assets/icon.png": {
-    "mtime": 1783899623.2754116,
-    "ast_hash": "8081bda2b0708df790ed72f274815aca",
+    "mtime": 1783930067.8651981,
+    "ast_hash": "2f97b0453e866e112bcad8be44bf004d",
     "semantic_hash": ""
   },
   "apps/mobile/assets/splash-icon-dark.png": {
-    "mtime": 1783899623.2794178,
-    "ast_hash": "65bd4f344b69b6bdff4a91b1565ea742",
+    "mtime": 1783930069.0951304,
+    "ast_hash": "c5dc6c63e7560d3f2d26421d7435238a",
     "semantic_hash": ""
   },
   "apps/mobile/assets/splash-icon.png": {
-    "mtime": 1783899623.2784178,
-    "ast_hash": "df0f3f8015f39b2e0f512f4c6bd8cc4f",
+    "mtime": 1783930068.78289,
+    "ast_hash": "1f94cc83c0a5d262607d9d8cb610c1fd",
     "semantic_hash": ""
   },
   "apps/mobile/src/theme/chrome.tsx": {
