@@ -1,9 +1,10 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { signInWithDiscord } from '../auth/discord';
 import { signInWithGoogle } from '../auth/google';
+import { api, type AuthConfig } from '../net/rest';
 import { useSession } from '../store/session';
 import {
   BrandWordmark,
@@ -34,6 +35,26 @@ export function LoginScreen(): React.JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [guestName, setGuestName] = useState('');
+
+  // Only the server-enabled sign-in methods render (ports the web auth-config gate). An
+  // unreachable server keeps everything visible — the buttons themselves surface the failure.
+  const [config, setConfig] = useState<AuthConfig | null>(null);
+  useEffect(() => {
+    let live = true;
+    api
+      .config()
+      .then((c) => live && setConfig(c))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
+  const passwordOn = config?.passwordLogin ?? true;
+  const guestOn = config?.guest ?? true;
+  const googleOn = config?.providers.google ?? true;
+  const discordOn = config?.providers.discord ?? true;
+  const appleOn = (config?.providers.apple ?? true) && Platform.OS === 'ios';
 
   const submitPassword = (): void => {
     if (mode === 'login') void login(email, password);
@@ -68,42 +89,44 @@ export function LoginScreen(): React.JSX.Element {
         <MutedText center>{t('login.tagline')}</MutedText>
       </View>
 
-      <Card style={styles.form}>
-        <Field
-          placeholder={t('login.email')}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-          value={email}
-          onChangeText={setEmail}
-          editable={!loading}
-        />
-        {mode === 'register' && (
+      {passwordOn && (
+        <Card style={styles.form}>
           <Field
-            placeholder={t('login.displayName')}
-            value={displayName}
-            onChangeText={setDisplayName}
+            placeholder={t('login.email')}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            value={email}
+            onChangeText={setEmail}
             editable={!loading}
           />
-        )}
-        <Field
-          placeholder={t('login.password')}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          editable={!loading}
-        />
-        <PrimaryButton
-          title={mode === 'login' ? t('login.signIn') : t('login.register')}
-          onPress={submitPassword}
-          disabled={loading}
-        />
-        <LinkButton
-          title={mode === 'login' ? t('login.toRegister') : t('login.toLogin')}
-          onPress={() => setMode(mode === 'login' ? 'register' : 'login')}
-          disabled={loading}
-        />
-      </Card>
+          {mode === 'register' && (
+            <Field
+              placeholder={t('login.displayName')}
+              value={displayName}
+              onChangeText={setDisplayName}
+              editable={!loading}
+            />
+          )}
+          <Field
+            placeholder={t('login.password')}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            editable={!loading}
+          />
+          <PrimaryButton
+            title={mode === 'login' ? t('login.signIn') : t('login.register')}
+            onPress={submitPassword}
+            disabled={loading}
+          />
+          <LinkButton
+            title={mode === 'login' ? t('login.toRegister') : t('login.toLogin')}
+            onPress={() => setMode(mode === 'login' ? 'register' : 'login')}
+            disabled={loading}
+          />
+        </Card>
+      )}
 
       {/* "or" — the route glyph carries the divider: chrome quoting the board. */}
       <View style={styles.divider}>
@@ -111,22 +134,37 @@ export function LoginScreen(): React.JSX.Element {
       </View>
 
       <View style={styles.providers}>
-        <SecondaryButton
-          title={t('login.guest')}
-          onPress={() => void playAsGuest()}
-          disabled={loading}
-        />
-        <SecondaryButton
-          title={t('login.google')}
-          onPress={() => void signInWithGoogle()}
-          disabled={loading}
-        />
-        <SecondaryButton
-          title={t('login.discord')}
-          onPress={() => void signInWithDiscord()}
-          disabled={loading}
-        />
-        {Platform.OS === 'ios' && (
+        {guestOn && (
+          <>
+            <Field
+              placeholder={t('login.guestName')}
+              value={guestName}
+              maxLength={24}
+              onChangeText={setGuestName}
+              editable={!loading}
+            />
+            <SecondaryButton
+              title={t('login.guest')}
+              onPress={() => void playAsGuest(guestName)}
+              disabled={loading}
+            />
+          </>
+        )}
+        {googleOn && (
+          <SecondaryButton
+            title={t('login.google')}
+            onPress={() => void signInWithGoogle()}
+            disabled={loading}
+          />
+        )}
+        {discordOn && (
+          <SecondaryButton
+            title={t('login.discord')}
+            onPress={() => void signInWithDiscord()}
+            disabled={loading}
+          />
+        )}
+        {appleOn && (
           <AppleAuthentication.AppleAuthenticationButton
             buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
             buttonStyle={

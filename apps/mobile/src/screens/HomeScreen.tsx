@@ -1,9 +1,11 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RootStackParamList } from '../navigation';
 import { api, type RoomView } from '../net/rest';
+import { openDiscord } from '../discord';
 import { useSession } from '../store/session';
 import { useOnline } from '../hooks/useOnline';
 import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
@@ -22,6 +24,149 @@ import { RADIUS, SPACE, useTheme } from '../theme/useTheme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
+// First-entry gate (mobile adaptation of the web's 0-completed-games check, offline-friendly):
+// the welcome takes over the homepage until the user picks a path or finishes the tutorial.
+const WELCOME_SEEN_KEY = 'trm.welcome.seen.v1';
+
+/** First entry: shown instead of the homepage (ports the web WelcomeScreen — learn / practice /
+ *  jump in, with the tutorial-recommendation nudge on the skip paths). */
+function WelcomeCard({
+  name,
+  tutorialDone,
+  onStartTutorial,
+  onPractice,
+  onContinue,
+}: {
+  name: string;
+  tutorialDone: boolean;
+  onStartTutorial(): void;
+  onPractice(): void;
+  onContinue(): void;
+}): React.JSX.Element {
+  const { t } = useTranslation();
+  const { tokens } = useTheme();
+
+  // Practice/jump-in without the tutorial completed → recommend it once (native dialog).
+  const recommend = (proceed: () => void): void => {
+    if (tutorialDone) {
+      proceed();
+      return;
+    }
+    Alert.alert(t('home.tutorialRecommend.title'), t('home.tutorialRecommend.body'), [
+      { text: t('home.tutorialRecommend.goToTutorial'), onPress: onStartTutorial },
+      { text: t('home.tutorialRecommend.continueAnyway'), onPress: proceed },
+    ]);
+  };
+
+  const option = (
+    title: string,
+    desc: string,
+    cta: string,
+    onPress: () => void,
+    primary = false,
+  ): React.JSX.Element => (
+    <View
+      style={[styles.welcomeOption, { backgroundColor: tokens.surface, borderColor: tokens.line }]}
+    >
+      <Text style={[styles.roomCode, { color: tokens.ink }]}>{title}</Text>
+      <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>{desc}</Text>
+      {primary ? (
+        <PrimaryButton title={cta} onPress={onPress} />
+      ) : (
+        <SecondaryButton title={cta} onPress={onPress} />
+      )}
+    </View>
+  );
+
+  return (
+    <ScrollView contentContainerStyle={styles.welcome}>
+      <View style={styles.welcomeBrand}>
+        <BrandWordmark size="hero" />
+      </View>
+      <Text style={[styles.welcomeTitle, { color: tokens.ink }]}>
+        {t('home.welcome.title', { name })}
+      </Text>
+      <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>{t('home.welcome.subtitle')}</Text>
+      {option(
+        t('home.welcome.learnTitle'),
+        t('home.welcome.learnDesc'),
+        t('home.welcome.learnCta'),
+        onStartTutorial,
+        true,
+      )}
+      {option(
+        t('home.welcome.practiceTitle'),
+        t('home.welcome.practiceDesc'),
+        t('home.welcome.practiceCta'),
+        () => recommend(onPractice),
+      )}
+      {option(
+        t('home.welcome.skipTitle'),
+        t('home.welcome.skipDesc'),
+        t('home.welcome.skipCta'),
+        () => recommend(onContinue),
+      )}
+      <SecondaryButton title={t('home.welcome.discordCta')} onPress={openDiscord} />
+      <Text style={[styles.roomMeta, styles.welcomeFootnote, { color: tokens.inkSoft }]}>
+        {t('home.welcome.footnote')}
+      </Text>
+    </ScrollView>
+  );
+}
+
+/** The guest nudge: a one-line notice that expands into the upgrade form in place (ports the
+ *  web GuestUpgradeCard). A successful upgrade flips `user.isGuest` and the card disappears. */
+function GuestUpgradeCard(): React.JSX.Element {
+  const { t } = useTranslation();
+  const { tokens } = useTheme();
+  const loading = useSession((s) => s.loading);
+  const error = useSession((s) => s.error);
+  const upgrade = useSession((s) => s.upgrade);
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    <View
+      style={[styles.guestCard, { backgroundColor: tokens.surface, borderColor: tokens.line }]}
+      testID="guest-upgrade-card"
+    >
+      <Text style={[styles.roomMeta, { color: tokens.ink }]}>{t('login.guestNotice')}</Text>
+      {!open ? (
+        <SecondaryButton title={t('login.createAccount')} onPress={() => setOpen(true)} />
+      ) : (
+        <View style={styles.guestForm}>
+          <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
+            {t('login.upgradeBlurb')}
+          </Text>
+          <Field
+            placeholder={t('login.email')}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            value={email}
+            onChangeText={setEmail}
+            editable={!loading}
+          />
+          <Field
+            placeholder={t('login.password')}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            editable={!loading}
+          />
+          <PrimaryButton
+            title={t('login.createAccount')}
+            disabled={loading || !email || password.length < 8}
+            onPress={() => void upgrade(email, password)}
+          />
+          {error && <Text style={[styles.roomMeta, { color: tokens.danger }]}>{error}</Text>}
+        </View>
+      )}
+    </View>
+  );
+}
+
 /** The lobby home: play offline vs bots, rejoin an active room, or create/join a room. */
 export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
@@ -39,6 +184,8 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const [focusKey, setFocusKey] = useState(0);
   // Loaded on focus: returning from the tutorial's finale must light the badge immediately.
   const [tutorialDone, setTutorialDone] = useState(false);
+  // First-entry welcome takeover: null while unknown (no flash either way).
+  const [showWelcome, setShowWelcome] = useState<boolean | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -57,10 +204,24 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     const unsub = navigation.addListener('focus', () => {
       void refresh();
       setFocusKey((k) => k + 1);
-      void getTutorialCompletion().then((c) => setTutorialDone(c !== null));
+      void getTutorialCompletion().then((c) => {
+        setTutorialDone(c !== null);
+        // A finished tutorial is a resolved onboarding — never re-show the welcome.
+        if (c !== null) setShowWelcome(false);
+        else
+          AsyncStorage.getItem(WELCOME_SEEN_KEY).then(
+            (seen) => setShowWelcome(seen === null),
+            () => setShowWelcome(false),
+          );
+      });
     });
     return unsub;
   }, [navigation, refresh]);
+
+  const dismissWelcome = useCallback(() => {
+    setShowWelcome(false);
+    void AsyncStorage.setItem(WELCOME_SEEN_KEY, '1').catch(() => undefined);
+  }, []);
 
   // The public-rooms list stays fresh while the screen is up (web polls the same 5s cadence).
   useEffect(() => {
@@ -102,6 +263,26 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     pressed && styles.pressed,
   ];
 
+  if (showWelcome) {
+    return (
+      <Screen style={styles.container}>
+        <WelcomeCard
+          name={user?.displayName ?? ''}
+          tutorialDone={tutorialDone}
+          onStartTutorial={() => {
+            dismissWelcome();
+            navigation.navigate('Tutorial');
+          }}
+          onPractice={() => {
+            dismissWelcome();
+            navigation.navigate('OfflineSetup');
+          }}
+          onContinue={dismissWelcome}
+        />
+      </Screen>
+    );
+  }
+
   return (
     <Screen style={styles.container}>
       <View style={styles.header}>
@@ -112,6 +293,9 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       </View>
 
       {!online && <OfflineHomeBanner />}
+
+      {/* Guests get the keep-your-progress nudge (hidden once upgraded or offline). */}
+      {online && user?.isGuest === true && <GuestUpgradeCard />}
 
       {/* Offline play never gates on connectivity (Apple 4.2 posture). */}
       <OfflineHomeSection
@@ -279,4 +463,11 @@ const styles = StyleSheet.create({
   tutorialText: { gap: 2, flexShrink: 1 },
   tutorialDone: { fontSize: 18, fontWeight: '700' },
   publicInfo: { gap: 2, flexShrink: 1 },
+  guestCard: { borderWidth: 1, borderRadius: RADIUS.md, padding: 14, gap: 10 },
+  guestForm: { gap: 8 },
+  welcome: { gap: SPACE[3], paddingBottom: SPACE[8] },
+  welcomeBrand: { alignItems: 'center', marginTop: SPACE[4] },
+  welcomeTitle: { fontSize: 22, fontWeight: '800' },
+  welcomeOption: { borderWidth: 1, borderRadius: RADIUS.md, padding: 14, gap: 8 },
+  welcomeFootnote: { textAlign: 'center', marginTop: SPACE[2] },
 });
