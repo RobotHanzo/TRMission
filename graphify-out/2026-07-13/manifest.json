@@ -3960,8 +3960,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/app.config.ts": {
-    "mtime": 1783936759.6662564,
-    "ast_hash": "7b6f98e8c9c3939fc3cfd08a66a661f2",
+    "mtime": 1783937939.698419,
+    "ast_hash": "67f5ae6b937706b14fd4ce63867023a6",
     "semantic_hash": ""
   },
   "apps/mobile/babel.config.js": {
@@ -3985,8 +3985,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/package.json": {
-    "mtime": 1783899654.0211496,
-    "ast_hash": "80ec2f7303af5ca5044dfbc3910dd6ae",
+    "mtime": 1783939624.972053,
+    "ast_hash": "75e768330ceae38791bccd351d46d6fc",
     "semantic_hash": ""
   },
   "apps/mobile/src/account/deleteAccount.test.ts": {
@@ -4805,13 +4805,13 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/HomeScreen.tsx": {
-    "mtime": 1783927417.751708,
-    "ast_hash": "00b057fadf1c802f840571de5dc620ed",
+    "mtime": 1783939906.598936,
+    "ast_hash": "a4f6f9f01526a68ef9e771c7832ffde6",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/LoginScreen.tsx": {
-    "mtime": 1783926623.196259,
-    "ast_hash": "8aa7a7af1e0b60982e2d9caea306db42",
+    "mtime": 1783939577.2717564,
+    "ast_hash": "7de96113a52c4dcb9d65626930945cb4",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/OfflineGameScreen.tsx": {
@@ -4975,8 +4975,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/types/assets.d.ts": {
-    "mtime": 1783869478.5298903,
-    "ast_hash": "658382720704ca0e039143e772120b36",
+    "mtime": 1783939937.446804,
+    "ast_hash": "e7a8b164488f664aee06351872b63e55",
     "semantic_hash": ""
   },
   "apps/mobile/src/version.test.ts": {
@@ -5145,8 +5145,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/well-known.e2e.spec.ts": {
-    "mtime": 1783936780.6677628,
-    "ast_hash": "03f5d9669a9a8a43cdc922c6d9f2fa40",
+    "mtime": 1783939933.0164642,
+    "ast_hash": "0b62eeab23287283d70d9d5d220f3d7e",
     "semantic_hash": ""
   },
   "apps/web/src/features/builder/geo/antimeridian.test.ts": {
@@ -5175,8 +5175,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/screens/PrivacyScreen.tsx": {
-    "mtime": 1783869478.587167,
-    "ast_hash": "e9188df817c4c2ecbea59df1812d3d24",
+    "mtime": 1783938570.7210472,
+    "ast_hash": "ebb70abab610ddf7663adbf0d2f4dae8",
     "semantic_hash": ""
   },
   "packages/bots/package.json": {
@@ -5235,8 +5235,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-android.yml": {
-    "mtime": 1783869478.3976421,
-    "ast_hash": "eb0006f7120e7f5772f0d7d3acef4d28",
+    "mtime": 1783937961.9013653,
+    "ast_hash": "6ced6f5589c5da80d5598568e2896656",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ci.yml": {
@@ -5245,8 +5245,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ios.yml": {
-    "mtime": 1783869478.3986418,
-    "ast_hash": "6a1295ac1a8bbe8bd89a425c48425ddb",
+    "mtime": 1783937973.428027,
+    "ast_hash": "b4c1ac74f6a2a41b676d01a895338c8e",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ota.yml": {
@@ -5255,8 +5255,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/CLAUDE.md": {
-    "mtime": 1783899087.9460943,
-    "ast_hash": "307e8cb77b6af884163de5bbf3fb0a2d",
+    "mtime": 1783937988.4623973,
+    "ast_hash": "1f0e61c1152dc3944fb147cddc64635e",
     "semantic_hash": ""
   },
   "apps/mobile/assets/sounds/CREDITS.md": {
@@ -5385,8 +5385,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-06-mobile-auth-foundation.md": {
-    "mtime": 1783876140.0154853,
-    "ast_hash": "12982d03afe87b1e30f0721341c46ab7",
+    "mtime": 1783939933.0164642,
+    "ast_hash": "40934e971f106344a080f89e1784108d",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-06-mobile-p1-app-skeleton.md": {
@@ -5760,38 +5760,38 @@
     "semantic_hash": ""
   },
   "apps/mobile/scripts/gen-brand-assets.js": {
-    "mtime": 1783930059.6093588,
-    "ast_hash": "44d56476f628b0db9cf1a4c9c4f29205",
+    "mtime": 1783938477.131083,
+    "ast_hash": "31fdb5a2276b3111dda248b93752ede5",
     "semantic_hash": ""
   },
   "apps/mobile/assets/adaptive-icon-monochrome.png": {
-    "mtime": 1783930068.4492905,
+    "mtime": 1783938484.3267725,
     "ast_hash": "e50d8336f6a60da23c1c139df61359cf",
     "semantic_hash": ""
   },
   "apps/mobile/assets/adaptive-icon.png": {
-    "mtime": 1783930068.149969,
+    "mtime": 1783938484.0487275,
     "ast_hash": "f7bb3cdce0bed5fabae25d04e3cbce13",
     "semantic_hash": ""
   },
   "apps/mobile/assets/icon.png": {
-    "mtime": 1783930067.8651981,
+    "mtime": 1783938483.757218,
     "ast_hash": "2f97b0453e866e112bcad8be44bf004d",
     "semantic_hash": ""
   },
   "apps/mobile/assets/splash-icon-dark.png": {
-    "mtime": 1783930069.0951304,
-    "ast_hash": "c5dc6c63e7560d3f2d26421d7435238a",
+    "mtime": 1783938484.9321003,
+    "ast_hash": "c41307c48ec7f8d360d4b595ee0c4fcd",
     "semantic_hash": ""
   },
   "apps/mobile/assets/splash-icon.png": {
-    "mtime": 1783930068.78289,
-    "ast_hash": "1f94cc83c0a5d262607d9d8cb610c1fd",
+    "mtime": 1783938484.6209292,
+    "ast_hash": "c41307c48ec7f8d360d4b595ee0c4fcd",
     "semantic_hash": ""
   },
   "apps/mobile/src/theme/chrome.tsx": {
-    "mtime": 1783899957.9572208,
-    "ast_hash": "e3755a5dbda109e70794a20d84a76055",
+    "mtime": 1783939944.2764683,
+    "ast_hash": "46e66eff8dd46f20be17c034d6d313d5",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/TurnBanner.tsx": {
@@ -5810,8 +5810,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/components/celebration/Confetti.tsx": {
-    "mtime": 1783920661.6421072,
-    "ast_hash": "75f22a8836e88672b83d708f1a4479ef",
+    "mtime": 1783939676.7150319,
+    "ast_hash": "205e1464b2978be2fee6248e5436ac56",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/StarRating.tsx": {
@@ -5887,6 +5887,21 @@
   "packages/client-core/src/tutorial/encyclopedia.ts": {
     "mtime": 1783927224.6050477,
     "ast_hash": "860710cf1a1edd3ba64554f80c73569b",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/theme/brandIcons.tsx": {
+    "mtime": 1783939539.0474677,
+    "ast_hash": "6bd60c131a2831746757b703f5791860",
+    "semantic_hash": ""
+  },
+  "docs/release/app-store-connect-setup.md": {
+    "mtime": 1783939750.0468044,
+    "ast_hash": "0bbcb46767617ccf0f8bead694199cdf",
+    "semantic_hash": ""
+  },
+  "docs/release/play-console-setup.md": {
+    "mtime": 1783939445.410383,
+    "ast_hash": "bf4a9b14d5762802a61dc1ac76d126bc",
     "semantic_hash": ""
   }
 }
