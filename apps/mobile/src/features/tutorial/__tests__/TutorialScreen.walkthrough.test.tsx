@@ -94,49 +94,60 @@ function performAwait(sandbox: SandboxSocket, beat: Extract<Beat, { mode: 'await
   }
 }
 
-describe('scripted end-to-end Quickstart walkthrough', () => {
-  it('travels every core lesson to the finale and persists completion', async () => {
-    jest.useFakeTimers();
-    const r = render(<TutorialScreen />);
-    fireEvent.press(r.getByTestId('tut-scope-core'));
+// This one test drives EVERY beat of every core lesson through the real engine and re-renders the
+// whole game tree after each — an order of magnitude more work than any other suite here. It runs
+// in well under a second on a fast dev box but ~9s on a Linux CI runner, and the shared jest
+// `testTimeout` (20s) is not a safe margin once N workers contend for a 4-core runner. Budget it
+// explicitly rather than raising the timeout for all 300+ tests.
+const WALKTHROUGH_TIMEOUT_MS = 120_000;
 
-    const lessons = lessonsForScope('core');
-    for (let li = 0; li < lessons.length; li++) {
-      const lesson = lessons[li]!;
-      const isLastLesson = li === lessons.length - 1;
-      for (let bi = 0; bi < lesson.beats.length; bi++) {
-        const beat = lesson.beats[bi]!;
-        const isLastBeat = bi === lesson.beats.length - 1;
-        if (beat.mode === 'info') {
-          // The last info beat of a non-final lesson hands off via "next lesson".
-          const btn =
-            isLastBeat && !isLastLesson
-              ? r.getByTestId('tut-next-lesson')
-              : r.getByTestId('tut-next');
-          fireEvent.press(btn);
-        } else if (beat.mode === 'await') {
-          const sandbox = mockStageProps!.commands as SandboxSocket;
-          act(() => performAwait(sandbox, beat));
-        } else {
-          // auto beat: the player fires its scripted action on a timer.
-          act(() => {
-            jest.advanceTimersByTime((beat.delayMs ?? 900) + 50);
-          });
-        }
-        await act(async () => {}); // flush projections/re-renders
-        // A done lesson (last beat consumed) rolls into the next one via the done-state button.
-        if (isLastBeat && beat.mode !== 'info' && !isLastLesson) {
-          fireEvent.press(r.getByTestId('tut-next-lesson'));
-          await act(async () => {});
+describe('scripted end-to-end Quickstart walkthrough', () => {
+  it(
+    'travels every core lesson to the finale and persists completion',
+    async () => {
+      jest.useFakeTimers();
+      const r = render(<TutorialScreen />);
+      fireEvent.press(r.getByTestId('tut-scope-core'));
+
+      const lessons = lessonsForScope('core');
+      for (let li = 0; li < lessons.length; li++) {
+        const lesson = lessons[li]!;
+        const isLastLesson = li === lessons.length - 1;
+        for (let bi = 0; bi < lesson.beats.length; bi++) {
+          const beat = lesson.beats[bi]!;
+          const isLastBeat = bi === lesson.beats.length - 1;
+          if (beat.mode === 'info') {
+            // The last info beat of a non-final lesson hands off via "next lesson".
+            const btn =
+              isLastBeat && !isLastLesson
+                ? r.getByTestId('tut-next-lesson')
+                : r.getByTestId('tut-next');
+            fireEvent.press(btn);
+          } else if (beat.mode === 'await') {
+            const sandbox = mockStageProps!.commands as SandboxSocket;
+            act(() => performAwait(sandbox, beat));
+          } else {
+            // auto beat: the player fires its scripted action on a timer.
+            act(() => {
+              jest.advanceTimersByTime((beat.delayMs ?? 900) + 50);
+            });
+          }
+          await act(async () => {}); // flush projections/re-renders
+          // A done lesson (last beat consumed) rolls into the next one via the done-state button.
+          if (isLastBeat && beat.mode !== 'info' && !isLastLesson) {
+            fireEvent.press(r.getByTestId('tut-next-lesson'));
+            await act(async () => {});
+          }
         }
       }
-    }
 
-    // Whole-tutorial finale: celebratory CTA on screen, completion persisted.
-    await waitFor(() => expect(r.getByTestId('tut-finale-cta')).toBeTruthy());
-    await waitFor(async () =>
-      expect(await AsyncStorage.getItem('trm.tutorial.completed.v1')).toContain('"core"'),
-    );
-    jest.useRealTimers();
-  });
+      // Whole-tutorial finale: celebratory CTA on screen, completion persisted.
+      await waitFor(() => expect(r.getByTestId('tut-finale-cta')).toBeTruthy());
+      await waitFor(async () =>
+        expect(await AsyncStorage.getItem('trm.tutorial.completed.v1')).toContain('"core"'),
+      );
+      jest.useRealTimers();
+    },
+    WALKTHROUGH_TIMEOUT_MS,
+  );
 });
