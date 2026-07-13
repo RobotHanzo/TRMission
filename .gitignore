@@ -13,6 +13,8 @@ packages/proto/src/gen/
 apps/mobile/android/
 apps/mobile/ios/
 apps/mobile/.expo/
+# jest's babel transform cache, pinned here (instead of the default tmpdir) so CI can cache it
+apps/mobile/.jest-cache/
 
 # test / coverage
 coverage/
