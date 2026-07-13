@@ -16,6 +16,7 @@ import ReplayScreen from './screens/ReplayScreen';
 import EncyclopediaScreen from './screens/EncyclopediaScreen';
 import type { LocalGameInput } from './offline/useLocalGame';
 import { useSession } from './store/session';
+import { useTheme } from './theme/useTheme';
 
 export type RootStackParamList = {
   Boot: undefined;
@@ -52,16 +53,28 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>();
  */
 export function RootNavigator(): React.JSX.Element {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const booting = useSession((s) => s.booting);
   const user = useSession((s) => s.user);
 
   return (
-    <Stack.Navigator>
+    // The native-stack header is themed to the app palette (paper/dark), not the OS default white,
+    // so sub-screen headers read as part of the app in both themes. Home hides it entirely — its
+    // own BrandWordmark is the header, so the OS bar would only duplicate it as a bare white strip.
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: tokens.surface },
+        headerTintColor: tokens.ink,
+        headerTitleStyle: { color: tokens.ink, fontWeight: '700' },
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: tokens.paper },
+      }}
+    >
       {booting ? (
         <Stack.Screen name="Boot" component={BootScreen} options={{ headerShown: false }} />
       ) : user ? (
         <>
-          <Stack.Screen name="Home" component={HomeScreen} options={{ title: t('home.title') }} />
+          <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Room" component={RoomScreen} options={{ title: t('room.title') }} />
           <Stack.Screen name="Game" component={GameScreen} options={{ title: t('game.title') }} />
           <Stack.Screen

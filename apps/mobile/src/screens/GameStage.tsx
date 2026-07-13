@@ -41,6 +41,7 @@ import { TunnelModal } from '../components/game/TunnelModal';
 import { ScoreBoard } from '../components/game/ScoreBoard';
 import { CommsPanel } from '../components/game/CommsPanel';
 import { AnimationLayer } from '../components/game/AnimationLayer';
+import { registerAnimTarget } from '../components/game/animTargets';
 import { dockTabs, stageTier, type DockTabKey } from './stageLayout';
 
 export interface GameStageProps {
@@ -391,6 +392,11 @@ export function GameStage({
         {eventPhaseBar}
         <View style={styles.fill}>{board}</View>
         <View
+          // The dock is the only always-mounted HUD surface on phones (its panels swap by tab).
+          // Registering it as a flight anchor gives card draws a destination even while the Hand
+          // tab is inactive — otherwise the flight has no `hand` target and silently no-ops.
+          ref={(v) => registerAnimTarget('dock', v)}
+          collapsable={false}
           style={[styles.dock, { height: Math.round(height * 0.45), paddingBottom: insets.bottom }]}
         >
           {needKeep ? (
