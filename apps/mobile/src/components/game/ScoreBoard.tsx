@@ -303,10 +303,7 @@ export function ScoreBoard({
                   <View style={styles.ratingRow}>
                     <StarRating value={stars} onChange={setStars} size={28} disabled={submitting} />
                     <Pressable
-                      style={[
-                        styles.primaryBtn,
-                        (stars === 0 || submitting) && styles.btnDisabled,
-                      ]}
+                      style={[styles.primaryBtn, (stars === 0 || submitting) && styles.btnDisabled]}
                       accessibilityRole="button"
                       accessibilityState={{ disabled: stars === 0 || submitting }}
                       disabled={stars === 0 || submitting}
