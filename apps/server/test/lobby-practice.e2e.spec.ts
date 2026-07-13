@@ -37,7 +37,10 @@ describe('lobby: practice with bots (one-call quick start)', () => {
     expect(room.body.members).toHaveLength(3);
 
     const bots = room.body.members.filter((m: { isBot?: boolean }) => m.isBot);
-    expect(bots.map((b: { difficulty: string }) => b.difficulty).sort()).toEqual(['EASY', 'MEDIUM']);
+    expect(bots.map((b: { difficulty: string }) => b.difficulty).sort()).toEqual([
+      'EASY',
+      'MEDIUM',
+    ]);
 
     const humans = room.body.members.filter((m: { isBot?: boolean }) => !m.isBot);
     expect(humans).toHaveLength(1);

@@ -1,1 +1,287 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_md", "label": "2026-07-11-admin-force-spectate-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "label": "Admin dashboard: force-spectate a live game", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_problem", "label": "Problem", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_why_this_is_simpler_than_replay_not_harder", "label": "Why this is simpler than replay, not harder", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_non_goals", "label": "Non-goals", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L26"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes", "label": "Server changes", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L39"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_1_new_permission", "label": "1. New permission", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L41"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_2_mint_endpoint", "label": "2. Mint endpoint", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L49"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_3_roster_endpoint", "label": "3. Roster endpoint", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L75"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_admin_changes", "label": "`apps/admin` changes", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L101"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes", "label": "`apps/web` changes", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L110"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_routing_store_ui_ts", "label": "Routing (`store/ui.ts`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L112"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_screens_adminspectatescreen_tsx_new", "label": "`screens/AdminSpectateScreen.tsx` (new)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L122"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_app_tsx", "label": "`App.tsx`", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L140"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_data_flow_end_to_end", "label": "Data flow (end to end)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L147"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_error_handling", "label": "Error handling", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L160"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_testing", "label": "Testing", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L171"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_self_review_notes", "label": "Self-review notes", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L182"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_problem", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_why_this_is_simpler_than_replay_not_harder", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_non_goals", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L26", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L39", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_1_new_permission", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L41", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_2_mint_endpoint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L49", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_3_roster_endpoint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L75", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_admin_changes", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L101", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L110", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_routing_store_ui_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L112", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_screens_adminspectatescreen_tsx_new", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L122", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_app_tsx", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L140", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_data_flow_end_to_end", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L147", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_error_handling", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L160", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_testing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L171", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_self_review_notes", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md", "source_location": "L182", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_md",
+      "label": "2026-07-11-admin-force-spectate-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "label": "Admin dashboard: force-spectate a live game",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_why_this_is_simpler_than_replay_not_harder",
+      "label": "Why this is simpler than replay, not harder",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_non_goals",
+      "label": "Non-goals",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L26"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes",
+      "label": "Server changes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L39"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_1_new_permission",
+      "label": "1. New permission",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L41"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_2_mint_endpoint",
+      "label": "2. Mint endpoint",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L49"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_3_roster_endpoint",
+      "label": "3. Roster endpoint",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L75"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_admin_changes",
+      "label": "`apps/admin` changes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L101"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes",
+      "label": "`apps/web` changes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L110"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_routing_store_ui_ts",
+      "label": "Routing (`store/ui.ts`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L112"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_screens_adminspectatescreen_tsx_new",
+      "label": "`screens/AdminSpectateScreen.tsx` (new)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L122"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_app_tsx",
+      "label": "`App.tsx`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L140"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_data_flow_end_to_end",
+      "label": "Data flow (end to end)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L147"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_error_handling",
+      "label": "Error handling",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L160"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L171"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_self_review_notes",
+      "label": "Self-review notes",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L182"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_why_this_is_simpler_than_replay_not_harder",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_non_goals",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_1_new_permission",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_2_mint_endpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_server_changes",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_3_roster_endpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_admin_changes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L110",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_routing_store_ui_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_screens_adminspectatescreen_tsx_new",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L122",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_apps_web_changes",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_app_tsx",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L140",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_data_flow_end_to_end",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L147",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_error_handling",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L160",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_admin_dashboard_force_spectate_a_live_game",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_admin_force_spectate_design_self_review_notes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md",
+      "source_location": "L182",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

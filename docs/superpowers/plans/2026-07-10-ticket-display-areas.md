@@ -24,9 +24,11 @@
 ### Task 1: `TicketView` type on `@trm/map-data`
 
 **Files:**
+
 - Modify: `packages/map-data/src/types.ts`
 
 **Interfaces:**
+
 - Produces: `TicketView = { mode: 'full' } | { mode: 'auto' } | { mode: 'zoom'; level: number }`; `TicketDef.view?: TicketView`; `MapGeography.defaultTicketView?: TicketView`. (Consumed by every later task.)
 
 There is no behavior to test yet (types only); this task's deliverable is verified by `yarn workspace @trm/map-data typecheck` staying green and later tasks compiling against it.
@@ -86,11 +88,13 @@ git commit -m "feat(map-data): TicketView type + optional ticket/geography displ
 ### Task 2: Display-area resolver (`ticket-view.ts`)
 
 **Files:**
+
 - Create: `packages/map-data/src/ticket-view.ts`
 - Modify: `packages/map-data/src/index.ts` (add `export * from './ticket-view';`)
 - Test: `packages/map-data/test/ticket-view.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `TicketView`, `TicketDef`, `MapGeography` from `./types` (Task 1).
 - Produces:
   - `interface ViewRect { x: number; y: number; w: number; h: number }`
@@ -114,7 +118,12 @@ const b = { x: 50, y: 50 };
 
 describe('ticketViewSpec (precedence)', () => {
   it('uses the ticket view when present', () => {
-    expect(ticketViewSpec({ view: { mode: 'zoom', level: 0.3 } }, { defaultTicketView: { mode: 'auto' } })).toEqual({
+    expect(
+      ticketViewSpec(
+        { view: { mode: 'zoom', level: 0.3 } },
+        { defaultTicketView: { mode: 'auto' } },
+      ),
+    ).toEqual({
       mode: 'zoom',
       level: 0.3,
     });
@@ -144,7 +153,12 @@ describe('ticketViewRect', () => {
   });
   it('zoom level 1 → tight box centered on the midpoint', () => {
     // w = 100 * 0.18 = 18, centered on (45,45)
-    expect(ticketViewRect({ mode: 'zoom', level: 1 }, a, b, base)).toEqual({ x: 36, y: 36, w: 18, h: 18 });
+    expect(ticketViewRect({ mode: 'zoom', level: 1 }, a, b, base)).toEqual({
+      x: 36,
+      y: 36,
+      w: 18,
+      h: 18,
+    });
   });
   it('zoom clamps an out-of-range level into [0,1]', () => {
     expect(ticketViewRect({ mode: 'zoom', level: 5 }, a, b, base)).toEqual(
@@ -278,10 +292,12 @@ git commit -m "feat(map-data): ticket display-area resolver (full/auto/zoom → 
 ### Task 3: Validation + hash tripwire
 
 **Files:**
+
 - Modify: `packages/map-data/src/validate.ts`
 - Test: `packages/map-data/test/ticket-view.spec.ts` (append), `packages/map-data/test/hash-extension.spec.ts` (append)
 
 **Interfaces:**
+
 - Produces: `ticketViewIssues(view: TicketView, where: string): ValidationIssue[]`; new issue codes `ticketViewInvalidMode` (params `{ where, mode }`) and `ticketViewLevelOutOfRange` (params `{ where, level }`), wired into `validateContent` (per-ticket `view`) and `validateGeographyIssues` (geography `defaultTicketView`) and `formatIssue`.
 
 - [ ] **Step 1: Write the failing tests**
@@ -308,10 +324,12 @@ describe('ticketViewIssues', () => {
     expect(ticketViewIssues(bad, 'T1')[0]?.code).toBe('ticketViewInvalidMode');
   });
   it('formats the new codes in English', () => {
-    expect(formatIssue({ code: 'ticketViewLevelOutOfRange', params: { where: 'T1', level: 2 } })).toContain(
-      '[0, 1]',
-    );
-    expect(formatIssue({ code: 'ticketViewInvalidMode', params: { where: 'T1', mode: 'wat' } })).toContain('wat');
+    expect(
+      formatIssue({ code: 'ticketViewLevelOutOfRange', params: { where: 'T1', level: 2 } }),
+    ).toContain('[0, 1]');
+    expect(
+      formatIssue({ code: 'ticketViewInvalidMode', params: { where: 'T1', mode: 'wat' } }),
+    ).toContain('wat');
   });
 });
 ```
@@ -319,23 +337,25 @@ describe('ticketViewIssues', () => {
 Append to `packages/map-data/test/hash-extension.spec.ts` (inside the existing `describe`):
 
 ```ts
-  it('a ticket view changes the hash; content without one hashes exactly as before', () => {
-    const withView: GameContent = {
-      ...TAIWAN_CONTENT,
-      tickets: TAIWAN_CONTENT.tickets.map((t, i) => (i === 0 ? { ...t, view: { mode: 'auto' as const } } : t)),
-    };
-    expect(hashContent(withView)).not.toBe(PINNED_HASH);
-    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
-  });
+it('a ticket view changes the hash; content without one hashes exactly as before', () => {
+  const withView: GameContent = {
+    ...TAIWAN_CONTENT,
+    tickets: TAIWAN_CONTENT.tickets.map((t, i) =>
+      i === 0 ? { ...t, view: { mode: 'auto' as const } } : t,
+    ),
+  };
+  expect(hashContent(withView)).not.toBe(PINNED_HASH);
+  expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
+});
 
-  it('a geography defaultTicketView changes the hash vs geography alone', () => {
-    const geoOnly: GameContent = { ...TAIWAN_CONTENT, geography: GEO };
-    const geoWithDefault: GameContent = {
-      ...TAIWAN_CONTENT,
-      geography: { ...GEO, defaultTicketView: { mode: 'auto' as const } },
-    };
-    expect(hashContent(geoWithDefault)).not.toBe(hashContent(geoOnly));
-  });
+it('a geography defaultTicketView changes the hash vs geography alone', () => {
+  const geoOnly: GameContent = { ...TAIWAN_CONTENT, geography: GEO };
+  const geoWithDefault: GameContent = {
+    ...TAIWAN_CONTENT,
+    geography: { ...GEO, defaultTicketView: { mode: 'auto' as const } },
+  };
+  expect(hashContent(geoWithDefault)).not.toBe(hashContent(geoOnly));
+});
 ```
 
 - [ ] **Step 2: Run tests to verify they fail**
@@ -388,15 +408,16 @@ export function ticketViewIssues(view: TicketView, where: string): ValidationIss
 In `validateContent`, inside the existing `for (const t of tickets)` loop, after the `ticketValueNotPositive` check, add:
 
 ```ts
-    if (t.view) for (const issue of ticketViewIssues(t.view, tid)) issues.push(issue);
+if (t.view) for (const issue of ticketViewIssues(t.view, tid)) issues.push(issue);
 ```
 
 In `validateGeographyIssues`, before the final `return issues;`, add:
 
 ```ts
-  if (geo.defaultTicketView) {
-    for (const issue of ticketViewIssues(geo.defaultTicketView, 'defaultTicketView')) push(issue.code, issue.params);
-  }
+if (geo.defaultTicketView) {
+  for (const issue of ticketViewIssues(geo.defaultTicketView, 'defaultTicketView'))
+    push(issue.code, issue.params);
+}
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -421,22 +442,30 @@ git commit -m "feat(map-data): validate ticket display-area specs; hash tripwire
 ### Task 4: `RoutePreview` → presentational, and rewire `TicketCard`
 
 **Files:**
+
 - Modify: `apps/web/src/components/RoutePreview.tsx`
 - Modify: `apps/web/src/components/TicketCard.tsx`
 - Test: `apps/web/src/components/RoutePreview.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `ticketRect`, `smoothClosedPath`, `TicketView`, `MapGeography` from `@trm/map-data`; `ISLANDS`, `TAIWAN_LAND_PATH`, `CENTRAL_RANGE_PATH` from `../game/geography`; `CITIES`, `ROUTES`, `cityById` from `../game/content`; `ACTIVE_GEOGRAPHY`, `ACTIVE_BASE_VIEW` from `../game/catalog`.
 - Produces: `RoutePreview(props: RoutePreviewProps)` where
+
   ```ts
-  interface PreviewCity { id: string; x: number; y: number }
+  interface PreviewCity {
+    id: string;
+    x: number;
+    y: number;
+  }
   interface RoutePreviewProps {
-    a: PreviewCity; b: PreviewCity;
+    a: PreviewCity;
+    b: PreviewCity;
     cities: readonly PreviewCity[];
     routes: readonly { a: string; b: string }[];
-    geography: MapGeography | null;               // null ⇒ draw the Taiwan silhouette
+    geography: MapGeography | null; // null ⇒ draw the Taiwan silhouette
     baseView: { x: number; y: number; w: number; h: number };
-    view?: TicketView;                            // per-ticket override
+    view?: TicketView; // per-ticket override
     tone: 'long' | 'short';
   }
   ```
@@ -460,7 +489,15 @@ const base = { x: 0, y: 0, w: 100, h: 100 };
 describe('RoutePreview', () => {
   it('draws the Taiwan silhouette (relief) when geography is null', () => {
     const { container } = render(
-      <RoutePreview a={cities[0]} b={cities[1]} cities={cities} routes={routes} geography={null} baseView={base} tone="short" />,
+      <RoutePreview
+        a={cities[0]}
+        b={cities[1]}
+        cities={cities}
+        routes={routes}
+        geography={null}
+        baseView={base}
+        tone="short"
+      />,
     );
     expect(container.querySelector('.rp-relief')).not.toBeNull();
     expect(container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 100 100');
@@ -470,10 +507,25 @@ describe('RoutePreview', () => {
     const geography = {
       baseView: base,
       crop: { lonMin: 0, lonMax: 1, latMin: 0, latMax: 1 },
-      land: [[[0, 0], [20, 0], [20, 20], [0, 20]] as [number, number][]],
+      land: [
+        [
+          [0, 0],
+          [20, 0],
+          [20, 20],
+          [0, 20],
+        ] as [number, number][],
+      ],
     };
     const { container } = render(
-      <RoutePreview a={cities[0]} b={cities[1]} cities={cities} routes={routes} geography={geography} baseView={base} tone="short" />,
+      <RoutePreview
+        a={cities[0]}
+        b={cities[1]}
+        cities={cities}
+        routes={routes}
+        geography={geography}
+        baseView={base}
+        tone="short"
+      />,
     );
     expect(container.querySelector('.rp-relief')).toBeNull();
     expect(container.querySelectorAll('.rp-geo .rp-land').length).toBe(1);
@@ -611,9 +663,7 @@ export function RoutePreview({ a, b, cities, routes, geography, baseView, view, 
 
       <g className="rp-cities">
         {cities.map((c) =>
-          c.id === a.id || c.id === b.id ? null : (
-            <circle key={c.id} cx={c.x} cy={c.y} r="0.5" />
-          ),
+          c.id === a.id || c.id === b.id ? null : <circle key={c.id} cx={c.x} cy={c.y} r="0.5" />,
         )}
       </g>
     </svg>
@@ -684,11 +734,13 @@ git commit -m "feat(web): ticket mini-map follows active geography + per-ticket 
 ### Task 5: Web draft types + editor store setters
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Modify: `apps/web/src/features/builder/editor/store.ts`
 - Test: `apps/web/src/features/builder/editor/store.test.ts`
 
 **Interfaces:**
+
 - Consumes: `TicketView` from `@trm/map-data`.
 - Produces: `TicketDraft.view?: TicketView`; `MapGeographyDraft.defaultTicketView?: TicketView`; store actions `setTicketView(id: string, view?: TicketView): void` and `setDefaultTicketView(view?: TicketView): void` (both undo/autosave-tracked; `undefined` **removes** the key).
 
@@ -704,7 +756,11 @@ describe('display-area setters', () => {
     const s = useEditorStore.getState();
     // assumes a helper `ticket(...)` exists in this file; otherwise seed a draft directly:
     useEditorStore.setState({
-      draft: { cities: [], routes: [], tickets: [{ id: 't1', a: 'a', b: 'b', value: 2, deck: 'SHORT' }] },
+      draft: {
+        cities: [],
+        routes: [],
+        tickets: [{ id: 't1', a: 'a', b: 'b', value: 2, deck: 'SHORT' }],
+      },
       undoStack: [],
       redoStack: [],
     });
@@ -730,7 +786,11 @@ describe('display-area setters', () => {
         cities: [],
         routes: [],
         tickets: [],
-        geography: { baseView: { x: 0, y: 0, w: 10, h: 10 }, land: [], crop: { lonMin: 0, lonMax: 1, latMin: 0, latMax: 1 } },
+        geography: {
+          baseView: { x: 0, y: 0, w: 10, h: 10 },
+          land: [],
+          crop: { lonMin: 0, lonMax: 1, latMin: 0, latMax: 1 },
+        },
       },
       undoStack: [],
       redoStack: [],
@@ -850,10 +910,12 @@ git commit -m "feat(web/builder): draft fields + store setters for ticket displa
 ### Task 6: Server zod schema
 
 **Files:**
+
 - Modify: `apps/server/src/maps/maps.schemas.ts`
 - Test: `apps/server/test/maps-schema.spec.ts`
 
 **Interfaces:**
+
 - Produces: `TicketViewSchema` (discriminated union on `mode`; `zoom.level` finite in `[0,1]`); `.view` optional on `TicketDraftSchema` and `MapContentResponseSchema`'s ticket shape; `.defaultTicketView` optional on `MapGeographyDraftSchema`. `draftFromDto` needs no change (its `...t` ticket spread and whole-`geography` passthrough carry the new fields); `assembleContent`/`resolveForStart` (`maps.service.ts`) need no change.
 
 - [ ] **Step 1: Write the failing test**
@@ -976,10 +1038,12 @@ git commit -m "feat(server): accept ticket display-area fields on custom-map dra
 ### Task 7: Builder Missions-stage authoring UI + live preview
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/editor/stages/MissionsStage.tsx`
 - Modify: `apps/web/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Consumes: store `setTicketView`/`setDefaultTicketView` (Task 5); `RoutePreview` + `PreviewCity` (Task 4); `TicketView` from `@trm/map-data`.
 - Produces: per-ticket + map-default display-area controls and a live preview in the Missions stage. No new exported symbols.
 
@@ -1065,71 +1129,71 @@ const toView = (mode: ViewMode, level: number): TicketView | undefined => {
 In the `MissionsStage` component body, pull the new store actions and preview selection state (add next to the existing `const … = useEditorStore(...)` lines and `useState`s):
 
 ```tsx
-  const setTicketView = useEditorStore((s) => s.setTicketView);
-  const setDefaultTicketView = useEditorStore((s) => s.setDefaultTicketView);
-  const [previewId, setPreviewId] = useState<string | null>(null);
+const setTicketView = useEditorStore((s) => s.setTicketView);
+const setDefaultTicketView = useEditorStore((s) => s.setDefaultTicketView);
+const [previewId, setPreviewId] = useState<string | null>(null);
 ```
 
 Add a reusable per-ticket control renderer inside the component (before the `return`):
 
 ```tsx
-  const viewOptions: DropdownOption<ViewMode>[] = [
-    { value: 'inherit', label: t('builder.displayInherit') },
-    { value: 'full', label: t('builder.displayFull') },
-    { value: 'auto', label: t('builder.displayAuto') },
-    { value: 'zoom', label: t('builder.displayZoom') },
-  ];
-  // Map-default control shares the option list minus "inherit" (the default IS the fallback).
-  const defaultViewOptions = viewOptions.filter((o) => o.value !== 'inherit');
+const viewOptions: DropdownOption<ViewMode>[] = [
+  { value: 'inherit', label: t('builder.displayInherit') },
+  { value: 'full', label: t('builder.displayFull') },
+  { value: 'auto', label: t('builder.displayAuto') },
+  { value: 'zoom', label: t('builder.displayZoom') },
+];
+// Map-default control shares the option list minus "inherit" (the default IS the fallback).
+const defaultViewOptions = viewOptions.filter((o) => o.value !== 'inherit');
 
-  const defaultMode = modeOf(draft.geography?.defaultTicketView);
-  const defaultLevel = levelOf(draft.geography?.defaultTicketView);
+const defaultMode = modeOf(draft.geography?.defaultTicketView);
+const defaultLevel = levelOf(draft.geography?.defaultTicketView);
 
-  const renderViewControl = (
-    current: TicketView | undefined,
-    onChange: (v: TicketView | undefined) => void,
-    options: DropdownOption<ViewMode>[],
-    ariaLabel: string,
-  ) => {
-    const mode = modeOf(current);
-    const level = levelOf(current);
-    return (
-      <div className="row" style={{ gap: '0.4em', alignItems: 'center' }}>
-        <Dropdown<ViewMode>
-          options={options}
-          value={mode}
-          onChange={(m) => onChange(toView(m, level))}
-          ariaLabel={ariaLabel}
+const renderViewControl = (
+  current: TicketView | undefined,
+  onChange: (v: TicketView | undefined) => void,
+  options: DropdownOption<ViewMode>[],
+  ariaLabel: string,
+) => {
+  const mode = modeOf(current);
+  const level = levelOf(current);
+  return (
+    <div className="row" style={{ gap: '0.4em', alignItems: 'center' }}>
+      <Dropdown<ViewMode>
+        options={options}
+        value={mode}
+        onChange={(m) => onChange(toView(m, level))}
+        ariaLabel={ariaLabel}
+      />
+      {mode === 'zoom' && (
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.05}
+          value={level}
+          aria-label={t('builder.zoomLevel')}
+          onChange={(e) => onChange({ mode: 'zoom', level: Number(e.target.value) })}
         />
-        {mode === 'zoom' && (
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
-            value={level}
-            aria-label={t('builder.zoomLevel')}
-            onChange={(e) => onChange({ mode: 'zoom', level: Number(e.target.value) })}
-          />
-        )}
-      </div>
-    );
-  };
+      )}
+    </div>
+  );
+};
 ```
 
 Add the map-default control inside the first `.card` div, just after the `row between` block that holds the Segmented + auto-generate button:
 
 ```tsx
-        <div className="row between">
-          <span className="muted">{t('builder.mapDefaultFraming')}</span>
-          {draft.geography &&
-            renderViewControl(
-              draft.geography.defaultTicketView,
-              (v) => setDefaultTicketView(v),
-              defaultViewOptions,
-              t('builder.mapDefaultFraming'),
-            )}
-        </div>
+<div className="row between">
+  <span className="muted">{t('builder.mapDefaultFraming')}</span>
+  {draft.geography &&
+    renderViewControl(
+      draft.geography.defaultTicketView,
+      (v) => setDefaultTicketView(v),
+      defaultViewOptions,
+      t('builder.mapDefaultFraming'),
+    )}
+</div>
 ```
 
 Add a header cell to the table `<thead>` row (before the empty `<th />`):
@@ -1143,34 +1207,36 @@ Add a header cell to the table `<thead>` row (before the empty `<th />`):
 Add the matching per-row cell in the `rows.map(...)` `<tr>` (after the value `<td>`, before the delete `<td>`), and make the row click select it for preview:
 
 ```tsx
-              {rows.map((tk) => (
-                <tr
-                  key={tk.id}
-                  onClick={() => setPreviewId(tk.id)}
-                  className={previewId === tk.id ? 'is-selected' : undefined}
-                >
-                  <td>{cityName(tk.a)}</td>
-                  <td>{cityName(tk.b)}</td>
-                  <td>{tk.value}</td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    {renderViewControl(
-                      tk.view,
-                      (v) => setTicketView(tk.id, v),
-                      viewOptions,
-                      t('builder.displayArea'),
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      className="icon-btn"
-                      onClick={() => removeTicket(tk.id)}
-                      aria-label={t('builder.deleteTicket')}
-                    >
-                      <Trash2 size={14} aria-hidden />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+{
+  rows.map((tk) => (
+    <tr
+      key={tk.id}
+      onClick={() => setPreviewId(tk.id)}
+      className={previewId === tk.id ? 'is-selected' : undefined}
+    >
+      <td>{cityName(tk.a)}</td>
+      <td>{cityName(tk.b)}</td>
+      <td>{tk.value}</td>
+      <td onClick={(e) => e.stopPropagation()}>
+        {renderViewControl(
+          tk.view,
+          (v) => setTicketView(tk.id, v),
+          viewOptions,
+          t('builder.displayArea'),
+        )}
+      </td>
+      <td>
+        <button
+          className="icon-btn"
+          onClick={() => removeTicket(tk.id)}
+          aria-label={t('builder.deleteTicket')}
+        >
+          <Trash2 size={14} aria-hidden />
+        </button>
+      </td>
+    </tr>
+  ));
+}
 ```
 
 (The new input-row `<tr>` at the bottom of `<tbody>` needs one extra empty `<td />` so its column count matches — add a `<td />` after the value input cell and before the add-button cell.)
@@ -1178,32 +1244,34 @@ Add the matching per-row cell in the `rows.map(...)` `<tr>` (after the value `<t
 Add the live preview panel after the closing `</table>`'s wrapping `.editor-table-scroll` div (still inside the `.card`):
 
 ```tsx
-        {(() => {
-          const geo = draft.geography;
-          const tk = draft.tickets.find((x) => x.id === previewId) ?? rows[0];
-          const a = tk && draft.cities.find((c) => c.id === tk.a);
-          const b = tk && draft.cities.find((c) => c.id === tk.b);
-          if (!geo || !tk || !a || !b) {
-            return <p className="muted">{t('builder.selectTicketToPreview')}</p>;
-          }
-          return (
-            <div className="editor-ticket-preview">
-              <span className="muted">{t('builder.ticketPreview')}</span>
-              <div className="ticket-map">
-                <RoutePreview
-                  a={{ id: a.id, x: a.x, y: a.y }}
-                  b={{ id: b.id, x: b.x, y: b.y }}
-                  cities={draft.cities}
-                  routes={draft.routes}
-                  geography={geo}
-                  baseView={geo.baseView}
-                  view={tk.view}
-                  tone={tk.deck === 'LONG' ? 'long' : 'short'}
-                />
-              </div>
-            </div>
-          );
-        })()}
+{
+  (() => {
+    const geo = draft.geography;
+    const tk = draft.tickets.find((x) => x.id === previewId) ?? rows[0];
+    const a = tk && draft.cities.find((c) => c.id === tk.a);
+    const b = tk && draft.cities.find((c) => c.id === tk.b);
+    if (!geo || !tk || !a || !b) {
+      return <p className="muted">{t('builder.selectTicketToPreview')}</p>;
+    }
+    return (
+      <div className="editor-ticket-preview">
+        <span className="muted">{t('builder.ticketPreview')}</span>
+        <div className="ticket-map">
+          <RoutePreview
+            a={{ id: a.id, x: a.x, y: a.y }}
+            b={{ id: b.id, x: b.x, y: b.y }}
+            cities={draft.cities}
+            routes={draft.routes}
+            geography={geo}
+            baseView={geo.baseView}
+            view={tk.view}
+            tone={tk.deck === 'LONG' ? 'long' : 'short'}
+          />
+        </div>
+      </div>
+    );
+  })();
+}
 ```
 
 (`draft.cities` are `CityDraft` (`id`/`x`/`y` strings/numbers) — assignable to `readonly PreviewCity[]`; `draft.routes` provide `{a,b}`. `geo` is `MapGeographyDraft`, structurally a `MapGeography`.)
@@ -1264,6 +1332,7 @@ git commit -m "chore: formatting + graphify refresh for ticket display areas"
 ## Self-Review
 
 **Spec coverage:**
+
 - Correctness (custom geography on tickets) → Task 4 (RoutePreview presentational + TicketCard). ✓
 - `TicketView` model (`full`/`auto`/`zoom`) + `defaultTicketView` → Task 1 (types), Task 2 (resolver). ✓
 - Resolution precedence + whole-map fallback → Task 2 (`ticketViewSpec`/`ticketRect`) + tests. ✓

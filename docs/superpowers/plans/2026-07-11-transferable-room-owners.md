@@ -12,7 +12,7 @@
 
 - LOBBY-only on both surfaces — no transfer once a game has started.
 - Transfer targets are seated, non-bot members only, on both surfaces — no promoting spectators, no bot hosts.
-- No new transfer *semantics* — both surfaces validate against the same rules the existing player-facing `transferHost` already enforces.
+- No new transfer _semantics_ — both surfaces validate against the same rules the existing player-facing `transferHost` already enforces.
 - `rooms.transferHost` is a new dashboard permission at the **moderator** tier (same tier as `rooms.close`).
 - The admin `reason` field is **optional**, matching every other `ModerationReasonDto`-based moderation endpoint (`rooms.close`, `rooms.delete`, ...) — never hard-required.
 - Follow existing patterns exactly: the admin transfer action reuses `ConfirmDialog withReason` (not a new dialog type); the player transfer action reuses `useConfirmAction` + `ConfirmDialog` (not a new dialog type).
@@ -22,10 +22,12 @@
 ### Task 1: `rooms.transferHost` dashboard permission
 
 **Files:**
+
 - Modify: `packages/shared/src/dashboard.ts`
 - Test: `packages/shared/src/dashboard.test.ts`
 
 **Interfaces:**
+
 - Produces: `'rooms.transferHost'` as a member of `DashboardPermission` (used by Task 2's `@RequirePermission('rooms.transferHost')` and Task 4's `hasPermission('rooms.transferHost')`).
 
 - [ ] **Step 1: Write the failing test**
@@ -33,11 +35,11 @@
 Add to `packages/shared/src/dashboard.test.ts`:
 
 ```ts
-  it('includes rooms.transferHost as a known permission, granted at the moderator tier', () => {
-    expect(DASHBOARD_PERMISSIONS).toContain('rooms.transferHost');
-    expect(ROLE_PERMISSIONS.moderator).toContain('rooms.transferHost');
-    expect(effectivePermissions('moderator').has('rooms.transferHost')).toBe(true);
-  });
+it('includes rooms.transferHost as a known permission, granted at the moderator tier', () => {
+  expect(DASHBOARD_PERMISSIONS).toContain('rooms.transferHost');
+  expect(ROLE_PERMISSIONS.moderator).toContain('rooms.transferHost');
+  expect(effectivePermissions('moderator').has('rooms.transferHost')).toBe(true);
+});
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -110,6 +112,7 @@ git commit -m "feat(shared): add rooms.transferHost dashboard permission"
 ### Task 2: Server — admin host-reassignment endpoint
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts` (add `transferHostAdmin`)
 - Modify: `apps/server/src/dashboard/audit.repo.ts` (add `'room.transferHost'` audit action)
 - Modify: `apps/server/src/dashboard/dashboard-games.service.ts` (add `transferHost`)
@@ -117,6 +120,7 @@ git commit -m "feat(shared): add rooms.transferHost dashboard permission"
 - Test: `apps/server/test/dashboard-terminate.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `TransferHostResult` (`RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid'`, already exported from `room.repo.ts:110`), `ModerationReasonDto` / `ModerationReasonSchema` (`dashboard.schemas.ts:42-45`), `RequirePermission` decorator, `AuditService.log`.
 - Produces: `RoomRepo.transferHostAdmin(code: string, targetId: string): Promise<TransferHostResult>`; `DashboardGamesService.transferHost(actor: AuthUser, code: string, targetId: string, reason?: string): Promise<ReturnType<typeof toRoomRow>>`; route `POST /api/v1/dashboard/rooms/:code/transfer/:userId`.
 
@@ -179,8 +183,9 @@ describe('admin transfer host', () => {
       .send({ difficulty: 'EASY' })
       .expect(200);
     const roomDoc = await t.db.collection('rooms').findOne({ _id: code } as never);
-    const botId = (roomDoc as unknown as { members: { userId: string; isBot?: boolean }[] })
-      .members.find((m) => m.isBot)!.userId;
+    const botId = (
+      roomDoc as unknown as { members: { userId: string; isBot?: boolean }[] }
+    ).members.find((m) => m.isBot)!.userId;
     await request(server())
       .post(`/api/v1/dashboard/rooms/${code}/transfer/${botId}`)
       .set(auth(moderator.token))
@@ -213,7 +218,10 @@ describe('admin transfer host', () => {
         displayName: 'Viewer',
       })
       .expect(201);
-    const viewer = { userId: viewerRes.body.user.id as string, token: viewerRes.body.accessToken as string };
+    const viewer = {
+      userId: viewerRes.body.user.id as string,
+      token: viewerRes.body.accessToken as string,
+    };
     await t.db.collection('dashboardAccounts').insertOne({
       _id: viewer.userId,
       role: 'viewer',
@@ -300,7 +308,13 @@ In `apps/server/src/lobby/room.repo.ts`, add right after `transferHost` (after l
 In `apps/server/src/dashboard/dashboard-games.service.ts`, add right after `closeRoom` (after line 191). It needs `BadRequestException` — check the existing import at line 1 and extend it:
 
 ```ts
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 ```
 
 ```ts
@@ -363,11 +377,13 @@ git commit -m "feat(server): let a maintainer reassign a LOBBY room's host"
 ### Task 3: Web — standalone "make owner" while staying in the room
 
 **Files:**
+
 - Modify: `apps/web/src/screens/RoomScreen.tsx`
 - Modify: `apps/web/src/i18n/index.ts`
 - Test: `apps/web/src/screens/RoomScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `api.transferOwnership(code: string, userId: string): Promise<RoomView>` (already exists, `net/rest.ts:371`); `useConfirmAction()` (`hooks/useConfirmAction.ts`); `ConfirmDialog` (`components/ConfirmDialog.tsx`).
 - Produces: no new exports — this is a leaf UI change.
 
@@ -452,44 +468,48 @@ import { Bot, Crown, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-re
 Add a fourth `useConfirmAction` instance, right after the `closeOpen` one (after line 83):
 
 ```tsx
-  const {
-    open: transferOpen,
-    request: requestTransfer,
-    confirm: confirmTransfer,
-    cancel: cancelTransfer,
-  } = useConfirmAction();
+const {
+  open: transferOpen,
+  request: requestTransfer,
+  confirm: confirmTransfer,
+  cancel: cancelTransfer,
+} = useConfirmAction();
 ```
 
 Add the handler next to `kick` (after line 256):
 
 ```tsx
-  const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
-  const transferHost = (userId: string) => void guard(api.transferOwnership(code, userId));
+const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
+const transferHost = (userId: string) => void guard(api.transferOwnership(code, userId));
 ```
 
 Add the button in the member row, right after the existing kick button (after line 352, still inside the `<li>`):
 
 ```tsx
-              {isHost && !m.isBot && m.userId !== room.hostId && (
-                <button
-                  className="icon-btn"
-                  aria-label={t('makeOwner')}
-                  title={t('makeOwner')}
-                  onClick={() => requestTransfer(() => transferHost(m.userId))}
-                >
-                  <Crown size={14} aria-hidden />
-                </button>
-              )}
-              {isHost && !m.isBot && m.userId !== room.hostId && (
-                <button
-                  className="icon-btn"
-                  aria-label={t('kickPlayer')}
-                  title={t('kickPlayer')}
-                  onClick={() => kick(m.userId)}
-                >
-                  <UserMinus size={14} aria-hidden />
-                </button>
-              )}
+{
+  isHost && !m.isBot && m.userId !== room.hostId && (
+    <button
+      className="icon-btn"
+      aria-label={t('makeOwner')}
+      title={t('makeOwner')}
+      onClick={() => requestTransfer(() => transferHost(m.userId))}
+    >
+      <Crown size={14} aria-hidden />
+    </button>
+  );
+}
+{
+  isHost && !m.isBot && m.userId !== room.hostId && (
+    <button
+      className="icon-btn"
+      aria-label={t('kickPlayer')}
+      title={t('kickPlayer')}
+      onClick={() => kick(m.userId)}
+    >
+      <UserMinus size={14} aria-hidden />
+    </button>
+  );
+}
 ```
 
 (This replaces the single existing kick-button block — the make-owner button goes first, the existing kick button block stays exactly as-is right after it.)
@@ -497,14 +517,16 @@ Add the button in the member row, right after the existing kick button (after li
 Add the dialog, right after the `closeOpen` dialog block (after line 589):
 
 ```tsx
-        {transferOpen && (
-          <ConfirmDialog
-            title={t('transferConfirmTitle')}
-            message={t('transferConfirmBody')}
-            onConfirm={confirmTransfer}
-            onCancel={cancelTransfer}
-          />
-        )}
+{
+  transferOpen && (
+    <ConfirmDialog
+      title={t('transferConfirmTitle')}
+      message={t('transferConfirmBody')}
+      onConfirm={confirmTransfer}
+      onCancel={cancelTransfer}
+    />
+  );
+}
 ```
 
 - [ ] **Step 5: Run test to verify it passes**
@@ -527,12 +549,14 @@ git commit -m "feat(web): let the host make another player the owner without lea
 ### Task 4: Admin — dashboard host reassignment
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts`
 - Modify: `apps/admin/src/views/RoomsView.tsx`
 - Modify: `apps/admin/src/i18n/index.ts`
 - Test: `apps/admin/src/views/RoomsView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `POST /dashboard/rooms/:code/transfer/:userId` (Task 2); `RoomRow`/`RoomDetail` (`net/rest.ts:113-155`); `useSession().hasPermission('rooms.transferHost')`; `ConfirmDialog` (`components/ConfirmDialog.tsx`, `withReason` prop).
 - Produces: `api.transferRoomHost(code: string, userId: string, reason?: string): Promise<RoomRow>`.
 
@@ -696,91 +720,93 @@ function RoomDrawer({
 Inside `RoomDrawer`, add the permission check next to `canClose`/`canDelete` (after line 42):
 
 ```tsx
-  const canClose = useSession((s) => s.hasPermission('rooms.close'));
-  const canDelete = useSession((s) => s.hasPermission('rooms.delete'));
-  const canTransferHost = useSession((s) => s.hasPermission('rooms.transferHost'));
+const canClose = useSession((s) => s.hasPermission('rooms.close'));
+const canDelete = useSession((s) => s.hasPermission('rooms.delete'));
+const canTransferHost = useSession((s) => s.hasPermission('rooms.transferHost'));
 ```
 
 Add the button inside the members-list render loop, right after the ready/not-ready badge span and still inside the enclosing `<span className="v">` (i.e. immediately before its closing tag at line 136):
 
 ```tsx
-                <span className="v">
-                  {m.isBot
-                    ? `${t('rooms.bot')}${m.difficulty ? ` · ${m.difficulty}` : ''}`
-                    : m.isGuest
-                      ? t('rooms.guest')
-                      : ''}{' '}
-                  <span className="oc-muted">
-                    {m.ready ? t('rooms.ready') : t('rooms.notReady')}
-                  </span>
-                  {canTransferHost && row.status === 'LOBBY' && !m.isBot && m.userId !== detail.hostId && (
-                    <button
-                      className="oc-btn"
-                      style={{ marginLeft: 6 }}
-                      onClick={() => onRequestTransfer(row.code, m.userId)}
-                    >
-                      <Crown size={14} aria-hidden />
-                      {t('rooms.transferHost')}
-                    </button>
-                  )}
-                </span>
+<span className="v">
+  {m.isBot
+    ? `${t('rooms.bot')}${m.difficulty ? ` · ${m.difficulty}` : ''}`
+    : m.isGuest
+      ? t('rooms.guest')
+      : ''}{' '}
+  <span className="oc-muted">{m.ready ? t('rooms.ready') : t('rooms.notReady')}</span>
+  {canTransferHost && row.status === 'LOBBY' && !m.isBot && m.userId !== detail.hostId && (
+    <button
+      className="oc-btn"
+      style={{ marginLeft: 6 }}
+      onClick={() => onRequestTransfer(row.code, m.userId)}
+    >
+      <Crown size={14} aria-hidden />
+      {t('rooms.transferHost')}
+    </button>
+  )}
+</span>
 ```
 
 At the top-level `RoomsView` component, add state for the pending transfer, right after `deleting` (after line 220):
 
 ```tsx
-  const [closing, setClosing] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
-  const [transferring, setTransferring] = useState<{ code: string; userId: string } | null>(null);
+const [closing, setClosing] = useState<string | null>(null);
+const [deleting, setDeleting] = useState<string | null>(null);
+const [transferring, setTransferring] = useState<{ code: string; userId: string } | null>(null);
 ```
 
 Add the handler, right after `close` (after line 253):
 
 ```tsx
-  const transferHost = async (code: string, userId: string, reason?: string) => {
-    setBusy(true);
-    try {
-      const updated = await api.transferRoomHost(code, userId, reason);
-      setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
-      if (param === code) closeDetail();
-      pushToast('success', t('toast.roomHostTransferred'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-      setTransferring(null);
-    }
-  };
+const transferHost = async (code: string, userId: string, reason?: string) => {
+  setBusy(true);
+  try {
+    const updated = await api.transferRoomHost(code, userId, reason);
+    setRows((prev) => prev.map((r) => (r.code === code ? updated : r)));
+    if (param === code) closeDetail();
+    pushToast('success', t('toast.roomHostTransferred'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+    setTransferring(null);
+  }
+};
 ```
 
 Wire the new prop at the `RoomDrawer` render site (lines 367-374):
 
 ```tsx
-      {openRow && (
-        <RoomDrawer
-          row={openRow}
-          onClose={closeDetail}
-          onRequestClose={setClosing}
-          onRequestDelete={setDeleting}
-          onRequestTransfer={(code, userId) => setTransferring({ code, userId })}
-        />
-      )}
+{
+  openRow && (
+    <RoomDrawer
+      row={openRow}
+      onClose={closeDetail}
+      onRequestClose={setClosing}
+      onRequestDelete={setDeleting}
+      onRequestTransfer={(code, userId) => setTransferring({ code, userId })}
+    />
+  );
+}
 ```
 
 Add the confirm dialog, right after the `deleting` dialog block (after line 403):
 
 ```tsx
-      {transferring && (
-        <ConfirmDialog
-          title={t('rooms.transferConfirmTitle')}
-          body={t('rooms.transferConfirmBody')}
-          confirmLabel={t('rooms.transferHost')}
-          withReason
-          busy={busy}
-          onConfirm={(reason) => void transferHost(transferring.code, transferring.userId, reason)}
-          onCancel={() => setTransferring(null)}
-        />
-      )}
+{
+  transferring && (
+    <ConfirmDialog
+      title={t('rooms.transferConfirmTitle')}
+      body={t('rooms.transferConfirmBody')}
+      confirmLabel={t('rooms.transferHost')}
+      withReason
+      busy={busy}
+      onConfirm={(reason) => void transferHost(transferring.code, transferring.userId, reason)}
+      onCancel={() => setTransferring(null)}
+    />
+  );
+}
 ```
 
 - [ ] **Step 6: Run test to verify it passes**

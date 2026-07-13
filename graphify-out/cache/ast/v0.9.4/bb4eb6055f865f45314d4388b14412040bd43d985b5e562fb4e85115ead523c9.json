@@ -1,1 +1,209 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_md", "label": "2026-07-07-lobby-spectating-and-chat-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "label": "Lobby spectating + spectator chat + lobby chat layout \u2014 design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_decisions_load_bearing", "label": "Decisions (load-bearing)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L26"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_data_model_apps_server_src_lobby_room_repo_ts", "label": "Data model (`apps/server/src/lobby/room.repo.ts`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L70"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_server_changes_lobby_apps_server_src_lobby", "label": "Server changes \u2014 lobby (`apps/server/src/lobby/`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L85"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_server_changes_in_game_chat_apps_server_src_ws_hub_ts", "label": "Server changes \u2014 in-game chat (`apps/server/src/ws/hub.ts`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L113"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_client_changes_in_game_apps_web_src", "label": "Client changes \u2014 in-game (`apps/web/src/`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L126"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_client_changes_lobby_apps_web_src_screens_roomscreen_tsx_new_styles_room_css", "label": "Client changes \u2014 lobby (`apps/web/src/screens/RoomScreen.tsx` + new `styles/room.css`)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L145"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_error_handling_edge_cases", "label": "Error handling & edge cases", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L185"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L204"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_testing_verification", "label": "Testing & verification", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L215"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_md", "relation": "references", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L8", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_md", "relation": "references", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L9", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_decisions_load_bearing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L26", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_data_model_apps_server_src_lobby_room_repo_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L70", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_server_changes_lobby_apps_server_src_lobby", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L85", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_server_changes_in_game_chat_apps_server_src_ws_hub_ts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L113", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_client_changes_in_game_apps_web_src", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L126", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_client_changes_lobby_apps_web_src_screens_roomscreen_tsx_new_styles_room_css", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L145", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_error_handling_edge_cases", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L185", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L204", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_testing_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md", "source_location": "L215", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_md",
+      "label": "2026-07-07-lobby-spectating-and-chat-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "label": "Lobby spectating + spectator chat + lobby chat layout \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_decisions_load_bearing",
+      "label": "Decisions (load-bearing)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L26"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_data_model_apps_server_src_lobby_room_repo_ts",
+      "label": "Data model (`apps/server/src/lobby/room.repo.ts`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L70"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_server_changes_lobby_apps_server_src_lobby",
+      "label": "Server changes \u2014 lobby (`apps/server/src/lobby/`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L85"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_server_changes_in_game_chat_apps_server_src_ws_hub_ts",
+      "label": "Server changes \u2014 in-game chat (`apps/server/src/ws/hub.ts`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L113"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_client_changes_in_game_apps_web_src",
+      "label": "Client changes \u2014 in-game (`apps/web/src/`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L126"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_client_changes_lobby_apps_web_src_screens_roomscreen_tsx_new_styles_room_css",
+      "label": "Client changes \u2014 lobby (`apps/web/src/screens/RoomScreen.tsx` + new `styles/room.css`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L145"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_error_handling_edge_cases",
+      "label": "Error handling & edge cases",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L185"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L204"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_testing_verification",
+      "label": "Testing & verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L215"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_06_29_action_log_and_chat_design_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_05_preset_chat_messages_design_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_decisions_load_bearing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_data_model_apps_server_src_lobby_room_repo_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L70",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_server_changes_lobby_apps_server_src_lobby",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_server_changes_in_game_chat_apps_server_src_ws_hub_ts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L113",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_client_changes_in_game_apps_web_src",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L126",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_client_changes_lobby_apps_web_src_screens_roomscreen_tsx_new_styles_room_css",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L145",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_error_handling_edge_cases",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L185",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L204",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_lobby_spectating_spectator_chat_lobby_chat_layout_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_07_lobby_spectating_and_chat_design_testing_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-07-lobby-spectating-and-chat-design.md",
+      "source_location": "L215",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

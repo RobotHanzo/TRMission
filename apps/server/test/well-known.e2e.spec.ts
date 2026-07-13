@@ -45,7 +45,10 @@ describe('/.well-known: configured payloads', () => {
     expect(res.body).toEqual({
       applinks: {
         details: [
-          { appIDs: ['FJX3SGU9AL.dev.robothanzo.trmission'], components: [{ '/': '/m/callback*' }] },
+          {
+            appIDs: ['FJX3SGU9AL.dev.robothanzo.trmission'],
+            components: [{ '/': '/m/callback*' }],
+          },
         ],
       },
     });

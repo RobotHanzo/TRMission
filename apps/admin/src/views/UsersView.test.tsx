@@ -203,7 +203,9 @@ describe('UsersView delete account', () => {
     expect(await screen.findByText('帳號已刪除')).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Alice' })).toBeNull());
     expect(
-      vi.mocked(fetch).mock.calls.some(([, i]) => (i as RequestInit | undefined)?.method === 'DELETE'),
+      vi
+        .mocked(fetch)
+        .mock.calls.some(([, i]) => (i as RequestInit | undefined)?.method === 'DELETE'),
     ).toBe(true);
   });
 

@@ -129,7 +129,13 @@ type FeatureToggleTarget =
   | { kind: 'user'; userId: string; onSaved?: (detail: UserDetail) => void }
   | { kind: 'defaults'; onSaved?: (features: UserFeature[]) => void };
 
-function FeatureToggles({ target, initial }: { target: FeatureToggleTarget; initial: UserFeature[] })
+function FeatureToggles({
+  target,
+  initial,
+}: {
+  target: FeatureToggleTarget;
+  initial: UserFeature[];
+});
 ```
 
 `save()` branches on `target.kind` to call `api.putUserFeatures`/`api.putDefaultFeatures` and
@@ -142,13 +148,15 @@ invoke the correspondingly-typed `onSaved`. Both existing callers update to the 
 `hasPermission('config.features')`:
 
 ```tsx
-{canEditDefaults && (
-  <section>
-    <h2>{t('features.defaultsTitle')}</h2>
-    <p className="oc-muted">{t('features.defaultsDesc')}</p>
-    <FeatureToggles target={{ kind: 'defaults', onSaved: setDefaults }} initial={defaults} />
-  </section>
-)}
+{
+  canEditDefaults && (
+    <section>
+      <h2>{t('features.defaultsTitle')}</h2>
+      <p className="oc-muted">{t('features.defaultsDesc')}</p>
+      <FeatureToggles target={{ kind: 'defaults', onSaved: setDefaults }} initial={defaults} />
+    </section>
+  );
+}
 ```
 
 loading `defaults` via `api.getDefaultFeatures()` in the view's existing `load()`/`useEffect`.

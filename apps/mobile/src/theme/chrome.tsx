@@ -40,11 +40,7 @@ export function Screen({
     return (
       <ScrollView
         style={[{ flex: 1, backgroundColor: tokens.paper }, pad]}
-        contentContainerStyle={[
-          styles.scrollContent,
-          centered && styles.centeredContent,
-          style,
-        ]}
+        contentContainerStyle={[styles.scrollContent, centered && styles.centeredContent, style]}
         keyboardShouldPersistTaps="handled"
       >
         {children}
@@ -125,10 +121,7 @@ export function RouteGlyph({ color, slots = 3 }: { color?: string; slots?: numbe
 }
 
 /** Surface card: the timetable sheet everything sits on. */
-export function Card({
-  children,
-  style,
-}: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
+export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
   const { tokens } = useTheme();
   return (
     <View
@@ -278,7 +271,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   secondaryButton: { borderWidth: 1 },
-  secondaryButtonContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  secondaryButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
   primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   secondaryButtonText: { fontSize: 16, fontWeight: '500' },
   link: { textAlign: 'center', paddingVertical: 6, fontWeight: '500' },

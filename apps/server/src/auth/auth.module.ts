@@ -37,6 +37,13 @@ import { APPLE_ID_TOKEN_VERIFIER, JoseAppleIdTokenVerifier } from './apple-id-to
   // Exported so the lobby can sign ws-game tickets and guard its routes; SessionRepo
   // for the dashboard's per-user session counts + ban-time revocation; FeatureDefaultsRepo
   // for the dashboard's default-flags endpoint (Task 5).
-  exports: [TokenService, AccessTokenGuard, FeatureGuard, UserRepo, FeatureDefaultsRepo, SessionRepo],
+  exports: [
+    TokenService,
+    AccessTokenGuard,
+    FeatureGuard,
+    UserRepo,
+    FeatureDefaultsRepo,
+    SessionRepo,
+  ],
 })
 export class AuthModule {}

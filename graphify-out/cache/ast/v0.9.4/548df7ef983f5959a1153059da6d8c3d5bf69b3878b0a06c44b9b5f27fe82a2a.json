@@ -1,1 +1,207 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_md", "label": "p2-task-4-report.md", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "label": "Task 4 Report: apps/web \u2014 AdminReplayScreen", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_what_was_implemented", "label": "What was implemented", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_tdd_evidence", "label": "TDD Evidence", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L16"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_typecheck_lint_step_10", "label": "Typecheck + Lint (Step 10)", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L35"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_full_apps_web_test_suite_step_11", "label": "Full apps/web test suite (Step 11)", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L42"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_files_changed_staged_in_commit_92a7a7a", "label": "Files changed (staged in commit `92a7a7a`)", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L53"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_self_review_findings", "label": "Self-review findings", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L63"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_i18n_index_ts_overlap_handled_via_partial_staging_not_a_whole_file_sweep", "label": "i18n/index.ts overlap \u2014 handled via partial staging, not a whole-file sweep", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L70"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_other_notes", "label": "Other notes", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L81"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_follow_up_review_fixes_commit_583bd42", "label": "Follow-up: review fixes (commit `583bd42`)", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L86"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_verification", "label": "Verification", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L113"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_commit_scope", "label": "Commit scope", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L121"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_md", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_what_was_implemented", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_tdd_evidence", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L16", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_typecheck_lint_step_10", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L35", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_full_apps_web_test_suite_step_11", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L42", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_files_changed_staged_in_commit_92a7a7a", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L53", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_self_review_findings", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L63", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_i18n_index_ts_overlap_handled_via_partial_staging_not_a_whole_file_sweep", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L70", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_other_notes", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L81", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_follow_up_review_fixes_commit_583bd42", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L86", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_follow_up_review_fixes_commit_583bd42", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L113", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_follow_up_review_fixes_commit_583bd42", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_commit_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-4-report.md", "source_location": "L121", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_md",
+      "label": "p2-task-4-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "label": "Task 4 Report: apps/web \u2014 AdminReplayScreen",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_what_was_implemented",
+      "label": "What was implemented",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_tdd_evidence",
+      "label": "TDD Evidence",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L16"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_typecheck_lint_step_10",
+      "label": "Typecheck + Lint (Step 10)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L35"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_full_apps_web_test_suite_step_11",
+      "label": "Full apps/web test suite (Step 11)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L42"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_files_changed_staged_in_commit_92a7a7a",
+      "label": "Files changed (staged in commit `92a7a7a`)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L53"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_self_review_findings",
+      "label": "Self-review findings",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L63"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_i18n_index_ts_overlap_handled_via_partial_staging_not_a_whole_file_sweep",
+      "label": "i18n/index.ts overlap \u2014 handled via partial staging, not a whole-file sweep",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L70"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_other_notes",
+      "label": "Other notes",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L81"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_follow_up_review_fixes_commit_583bd42",
+      "label": "Follow-up: review fixes (commit `583bd42`)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L86"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_verification",
+      "label": "Verification",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L113"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_commit_scope",
+      "label": "Commit scope",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L121"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_what_was_implemented",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_tdd_evidence",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_typecheck_lint_step_10",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_full_apps_web_test_suite_step_11",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_files_changed_staged_in_commit_92a7a7a",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_self_review_findings",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_i18n_index_ts_overlap_handled_via_partial_staging_not_a_whole_file_sweep",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L70",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_other_notes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L81",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_task_4_report_apps_web_adminreplayscreen",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_follow_up_review_fixes_commit_583bd42",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_follow_up_review_fixes_commit_583bd42",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L113",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_follow_up_review_fixes_commit_583bd42",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_4_report_commit_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-4-report.md",
+      "source_location": "L121",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

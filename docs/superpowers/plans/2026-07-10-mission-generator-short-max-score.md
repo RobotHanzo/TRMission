@@ -22,10 +22,12 @@
 ### Task 1: `@trm/map-data` — `shortMaxValue` option and candidate filter
 
 **Files:**
+
 - Modify: `packages/map-data/src/generate.ts`
 - Test: `packages/map-data/test/generate.spec.ts`
 
 **Interfaces:**
+
 - Consumes: existing `generateTickets(cities, routes, opts)` and `GenerateTicketsOptions` (`seed`, `longCount?`, `shortCount?`, `shortMinDistance?`), the fixture helpers `ringCities(n)` / `ringRoutes(n)` from `./fixtures` (already imported in the test file).
 - Produces: `GenerateTicketsOptions.shortMaxValue?: number` — an optional cap on a SHORT ticket's `value`. Consumed by Task 2 (`apps/web`'s `GenerateModal`), which passes it straight through to `generateTickets`.
 
@@ -34,36 +36,36 @@
 Add these two `it` blocks inside the existing `describe('generateTickets', ...)` block in `packages/map-data/test/generate.spec.ts`, right after the `'caps output at the available pair count instead of looping forever'` test (i.e. just before the closing `});` of the `describe` block):
 
 ```ts
-  it('shortMaxValue excludes SHORT tickets whose score is above the cap', () => {
-    const uncapped = generateTickets(cities, routes, { seed: 6, longCount: 3, shortCount: 12 });
-    const uncappedShortValues = uncapped.filter((t) => t.deck === 'SHORT').map((t) => t.value);
-    const maxShortValue = Math.max(...uncappedShortValues);
-    const cap = maxShortValue - 1;
-    expect(cap).toBeGreaterThanOrEqual(2);
+it('shortMaxValue excludes SHORT tickets whose score is above the cap', () => {
+  const uncapped = generateTickets(cities, routes, { seed: 6, longCount: 3, shortCount: 12 });
+  const uncappedShortValues = uncapped.filter((t) => t.deck === 'SHORT').map((t) => t.value);
+  const maxShortValue = Math.max(...uncappedShortValues);
+  const cap = maxShortValue - 1;
+  expect(cap).toBeGreaterThanOrEqual(2);
 
-    const capped = generateTickets(cities, routes, {
-      seed: 6,
-      longCount: 3,
-      shortCount: 12,
-      shortMaxValue: cap,
-    });
-    for (const t of capped.filter((x) => x.deck === 'SHORT')) {
-      expect(t.value).toBeLessThanOrEqual(cap);
-    }
+  const capped = generateTickets(cities, routes, {
+    seed: 6,
+    longCount: 3,
+    shortCount: 12,
+    shortMaxValue: cap,
   });
+  for (const t of capped.filter((x) => x.deck === 'SHORT')) {
+    expect(t.value).toBeLessThanOrEqual(cap);
+  }
+});
 
-  it('does not throw when shortMaxValue is tighter than the reachable SHORT band', () => {
-    // shortMinDistance defaults to 4, so every SHORT candidate's value is ≥ 4 — a cap of 2
-    // excludes every candidate, leaving an empty (not thrown) SHORT deck.
-    const tickets = generateTickets(cities, routes, {
-      seed: 8,
-      longCount: 3,
-      shortCount: 50,
-      shortMaxValue: 2,
-    });
-    expect(tickets.filter((t) => t.deck === 'SHORT')).toHaveLength(0);
-    expect(tickets.filter((t) => t.deck === 'LONG')).toHaveLength(3);
+it('does not throw when shortMaxValue is tighter than the reachable SHORT band', () => {
+  // shortMinDistance defaults to 4, so every SHORT candidate's value is ≥ 4 — a cap of 2
+  // excludes every candidate, leaving an empty (not thrown) SHORT deck.
+  const tickets = generateTickets(cities, routes, {
+    seed: 8,
+    longCount: 3,
+    shortCount: 50,
+    shortMaxValue: 2,
   });
+  expect(tickets.filter((t) => t.deck === 'SHORT')).toHaveLength(0);
+  expect(tickets.filter((t) => t.deck === 'LONG')).toHaveLength(3);
+});
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -71,6 +73,7 @@ Add these two `it` blocks inside the existing `describe('generateTickets', ...)`
 Run: `yarn workspace @trm/map-data test --run generate`
 
 Expected: the two new tests FAIL —
+
 - `'shortMaxValue excludes SHORT tickets...'` fails a `toBeLessThanOrEqual(cap)` assertion (today's code ignores `shortMaxValue` entirely, since the extra option is never read).
 - `'does not throw when shortMaxValue is tighter...'` fails the `toHaveLength(0)` assertion (today's SHORT deck is populated regardless of `shortMaxValue`).
 
@@ -107,13 +110,13 @@ export interface GenerateTicketsOptions {
 Then replace the options destructuring line (current line 33):
 
 ```ts
-  const { seed, longCount = 6, shortCount = 36, shortMinDistance = 4 } = opts;
+const { seed, longCount = 6, shortCount = 36, shortMinDistance = 4 } = opts;
 ```
 
 with:
 
 ```ts
-  const { seed, longCount = 6, shortCount = 36, shortMinDistance = 4, shortMaxValue } = opts;
+const { seed, longCount = 6, shortCount = 36, shortMinDistance = 4, shortMaxValue } = opts;
 ```
 
 - [ ] **Step 4: Filter the SHORT candidate pool by score**
@@ -121,23 +124,23 @@ with:
 Replace the `remaining` candidate filter (current lines 86-89):
 
 ```ts
-  const minLongDistance = longPicks.length > 0 ? Math.min(...longPicks.map((p) => p.d)) : Infinity;
-  const remaining = candidates.filter(
-    (c) => !usedPairs.has(pairKey(c.a, c.b)) && c.d >= shortMinDistance && c.d < minLongDistance,
-  );
+const minLongDistance = longPicks.length > 0 ? Math.min(...longPicks.map((p) => p.d)) : Infinity;
+const remaining = candidates.filter(
+  (c) => !usedPairs.has(pairKey(c.a, c.b)) && c.d >= shortMinDistance && c.d < minLongDistance,
+);
 ```
 
 with:
 
 ```ts
-  const minLongDistance = longPicks.length > 0 ? Math.min(...longPicks.map((p) => p.d)) : Infinity;
-  const remaining = candidates.filter(
-    (c) =>
-      !usedPairs.has(pairKey(c.a, c.b)) &&
-      c.d >= shortMinDistance &&
-      c.d < minLongDistance &&
-      (shortMaxValue === undefined || valueOf(c.d, c.a, c.b) <= shortMaxValue),
-  );
+const minLongDistance = longPicks.length > 0 ? Math.min(...longPicks.map((p) => p.d)) : Infinity;
+const remaining = candidates.filter(
+  (c) =>
+    !usedPairs.has(pairKey(c.a, c.b)) &&
+    c.d >= shortMinDistance &&
+    c.d < minLongDistance &&
+    (shortMaxValue === undefined || valueOf(c.d, c.a, c.b) <= shortMaxValue),
+);
 ```
 
 This reuses the same `valueOf` already computed above (`generate.ts:44-45`) for the final ticket score — no new scoring logic. Every other part of the function (LONG selection, weighted sampling, ticket construction) is untouched.
@@ -166,10 +169,12 @@ git commit -m "feat(map-data): add shortMaxValue cap to generateTickets"
 ### Task 2: `apps/web` — Auto Generate modal field, shortfall message, i18n
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/editor/stages/MissionsStage.tsx`
 - Modify: `apps/web/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Consumes: `GenerateTicketsOptions.shortMaxValue?: number` from Task 1 (imported transitively via `generateTickets` from `@trm/map-data`, already imported in `MissionsStage.tsx:4`); existing `GenerateModal` local state (`seed`, `longCount`, `shortCount`, `preview`, `error`) and its `run(nextSeed: number)` closure.
 - Produces: nothing consumed by a later task — this is the final integration point.
 
@@ -178,7 +183,7 @@ git commit -m "feat(map-data): add shortMaxValue cap to generateTickets"
 In `apps/web/src/features/builder/editor/stages/MissionsStage.tsx`, inside `GenerateModal`, add a new state hook right after the existing `shortCount` state (current line 288, `const [shortCount, setShortCount] = useState(24);`):
 
 ```tsx
-  const [shortMaxValue, setShortMaxValue] = useState('');
+const [shortMaxValue, setShortMaxValue] = useState('');
 ```
 
 Blank string means "no cap" — matches the "unset = unbounded" default from Task 1.
@@ -188,16 +193,16 @@ Blank string means "no cap" — matches the "unset = unbounded" default from Tas
 Still inside `GenerateModal`, right after the `cityName` helper (current lines 292, before `const run = ...`), add:
 
 ```tsx
-  const parsedMaxValue = (() => {
-    const trimmed = shortMaxValue.trim();
-    if (trimmed === '') return undefined;
-    const n = Math.round(Number(trimmed));
-    return Number.isFinite(n) ? Math.max(2, n) : undefined;
-  })();
+const parsedMaxValue = (() => {
+  const trimmed = shortMaxValue.trim();
+  if (trimmed === '') return undefined;
+  const n = Math.round(Number(trimmed));
+  return Number.isFinite(n) ? Math.max(2, n) : undefined;
+})();
 
-  const shortGenerated = preview ? preview.filter((tk) => tk.deck === 'SHORT').length : null;
-  const showShortfallWarning =
-    parsedMaxValue !== undefined && shortGenerated !== null && shortGenerated < shortCount;
+const shortGenerated = preview ? preview.filter((tk) => tk.deck === 'SHORT').length : null;
+const showShortfallWarning =
+  parsedMaxValue !== undefined && shortGenerated !== null && shortGenerated < shortCount;
 ```
 
 `parsedMaxValue` is recomputed on every render from the current field text (no extra effect needed); `showShortfallWarning` is derived the same way, matching the design's "no extra state" approach.
@@ -207,22 +212,22 @@ Still inside `GenerateModal`, right after the `cityName` helper (current lines 2
 Replace the `generateTickets` call inside `run()` (current lines 300-304):
 
 ```tsx
-      const tickets = generateTickets(content.cities, content.routes, {
-        seed: nextSeed,
-        longCount,
-        shortCount,
-      });
+const tickets = generateTickets(content.cities, content.routes, {
+  seed: nextSeed,
+  longCount,
+  shortCount,
+});
 ```
 
 with:
 
 ```tsx
-      const tickets = generateTickets(content.cities, content.routes, {
-        seed: nextSeed,
-        longCount,
-        shortCount,
-        ...(parsedMaxValue !== undefined ? { shortMaxValue: parsedMaxValue } : {}),
-      });
+const tickets = generateTickets(content.cities, content.routes, {
+  seed: nextSeed,
+  longCount,
+  shortCount,
+  ...(parsedMaxValue !== undefined ? { shortMaxValue: parsedMaxValue } : {}),
+});
 ```
 
 The spread-if-defined form is required — `GenerateTicketsOptions.shortMaxValue` is an optional `number` under `exactOptionalPropertyTypes`, so assigning it `undefined` explicitly is a type error.
@@ -232,16 +237,16 @@ The spread-if-defined form is required — `GenerateTicketsOptions.shortMaxValue
 In the JSX, right after the `shortCount` `<label>` block (current lines 330-338, ending `</label>`) and before the seed/reroll `<div className="row">` (current line 339), add:
 
 ```tsx
-        <label>
-          {t('builder.shortMaxValue')}
-          <input
-            type="number"
-            min={2}
-            placeholder={t('builder.noLimit')}
-            value={shortMaxValue}
-            onChange={(e) => setShortMaxValue(e.target.value)}
-          />
-        </label>
+<label>
+  {t('builder.shortMaxValue')}
+  <input
+    type="number"
+    min={2}
+    placeholder={t('builder.noLimit')}
+    value={shortMaxValue}
+    onChange={(e) => setShortMaxValue(e.target.value)}
+  />
+</label>
 ```
 
 - [ ] **Step 5: Add the shortfall message to the JSX**
@@ -249,11 +254,13 @@ In the JSX, right after the `shortCount` `<label>` block (current lines 330-338,
 Right after the existing error paragraph (current line 346, `{error && <p className="error">{error}</p>}`), add:
 
 ```tsx
-        {showShortfallWarning && (
-          <p className="error">
-            {t('builder.shortMaxValueShortfall', { n: shortGenerated ?? 0, count: shortCount })}
-          </p>
-        )}
+{
+  showShortfallWarning && (
+    <p className="error">
+      {t('builder.shortMaxValueShortfall', { n: shortGenerated ?? 0, count: shortCount })}
+    </p>
+  );
+}
 ```
 
 `shortGenerated ?? 0` is defensive only — `showShortfallWarning` already guarantees `shortGenerated` is non-null whenever this renders, but TypeScript doesn't narrow one derived variable through a boolean held in another, so the fallback keeps this a clean `number` without needing a type assertion.

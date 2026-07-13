@@ -1,1 +1,159 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_md", "label": "task-9-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "label": "Task 9 Report \u2014 Web: Replay screen, perspective switcher, control bar", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_summary", "label": "Summary", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_files_changed", "label": "Files changed", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L14"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_api_shape_adjustments_vs_the_brief", "label": "API-shape adjustments vs. the brief", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L30"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_tdd_evidence", "label": "TDD evidence", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L62"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_full_validation", "label": "Full validation", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L77"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_self_review", "label": "Self-review", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L91"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_concerns", "label": "Concerns", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L121"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_9_report_commit", "label": "Commit", "file_type": "document", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L135"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_md", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_summary", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_files_changed", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L14", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_api_shape_adjustments_vs_the_brief", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L30", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_tdd_evidence", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L62", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_full_validation", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L77", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_self_review", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L91", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L121", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar", "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_commit", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-9-report.md", "source_location": "L135", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_md",
+      "label": "task-9-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "label": "Task 9 Report \u2014 Web: Replay screen, perspective switcher, control bar",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_summary",
+      "label": "Summary",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_files_changed",
+      "label": "Files changed",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L14"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_api_shape_adjustments_vs_the_brief",
+      "label": "API-shape adjustments vs. the brief",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L30"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_tdd_evidence",
+      "label": "TDD evidence",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L62"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_full_validation",
+      "label": "Full validation",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L77"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_self_review",
+      "label": "Self-review",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L91"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_concerns",
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L121"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_9_report_commit",
+      "label": "Commit",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L135"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_summary",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_files_changed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_api_shape_adjustments_vs_the_brief",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_tdd_evidence",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L62",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_full_validation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_self_review",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L91",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_9_report_task_9_report_web_replay_screen_perspective_switcher_control_bar",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_9_report_commit",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-9-report.md",
+      "source_location": "L135",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

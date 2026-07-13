@@ -23,12 +23,14 @@
 ### Task 1: Engine — extract legality predicates; a stuck player's sole move is PASS
 
 **Files:**
+
 - Create: `packages/engine/src/legality.ts`
 - Modify: `packages/engine/src/reduce.ts` (remove the moved helpers + the ticket clause; guard `applyDrawTickets`; re-export `hasAnyLegalMove`)
 - Modify: `packages/engine/src/turn.ts` (guard the rule-7.5 forced re-draw)
 - Test: `packages/engine/test/deadlock.spec.ts` (new)
 
 **Interfaces:**
+
 - Produces:
   - `poolDead(state: GameState): boolean` — no drawable card anywhere (deck+discard empty AND no takeable market slot).
   - `canClaimAnyRoute(board: Board, state: GameState, player: PlayerId): boolean` — extracted from the current claim loop, byte-identical logic.
@@ -211,17 +213,17 @@ In `turn.ts`, add the import and guard the forced re-draw so a stuck player is n
 ```typescript
 import { hasAnyLegalMove, poolDead, noPlayerCanClaimRoute } from './legality';
 // ...
-  if (
-    next.turn.phase === 'AWAIT_ACTION' &&
-    hasAnyLegalMove(board, next, nextPlayer) &&
-    allKeptTicketsCompleted(board, next, nextPlayer)
-  ) {
-    const forced = offerTickets(next, nextPlayer);
-    if (forced) {
-      events.push(...forced.events);
-      return { state: forced.state, events };
-    }
+if (
+  next.turn.phase === 'AWAIT_ACTION' &&
+  hasAnyLegalMove(board, next, nextPlayer) &&
+  allKeptTicketsCompleted(board, next, nextPlayer)
+) {
+  const forced = offerTickets(next, nextPlayer);
+  if (forced) {
+    events.push(...forced.events);
+    return { state: forced.state, events };
   }
+}
 ```
 
 (`poolDead`/`noPlayerCanClaimRoute` are imported now; they are used in Task 2.)
@@ -313,12 +315,14 @@ git commit -m "feat(engine): a stuck player in a dead pool must PASS (no futile 
 ### Task 2: Engine — deadlock endgame trigger + `reason` on the event + version bump
 
 **Files:**
+
 - Modify: `packages/engine/src/types/events.ts` (add `reason` to `ENDGAME_TRIGGERED`)
 - Modify: `packages/engine/src/turn.ts` (extend the trigger; emit `reason`)
 - Modify: `packages/engine/src/types/state.ts` (`ENGINE_VERSION` 8 → 9 + comment)
 - Test: `packages/engine/test/deadlock.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `poolDead`, `noPlayerCanClaimRoute` (Task 1); the existing `Endgame`/countdown machinery.
 - Produces: `ENDGAME_TRIGGERED` now carries `reason: 'FINAL_TRAINS' | 'DEADLOCK'`.
 
@@ -341,27 +345,25 @@ In `packages/engine/src/types/events.ts`, extend the `ENDGAME_TRIGGERED` member:
 Replace the trigger block at `turn.ts:33-49`:
 
 ```typescript
-  let endgame = state.endgame;
-  let triggeredNow = false;
-  const trainsTrigger =
-    (player?.trainCars ?? Infinity) <= state.ruleParams.endgameTrainThreshold;
-  // Deadlock: the card pool is dead and no one can claim a route, so no one's trains will ever
-  // drop to the threshold. Begin the end sequence anyway.
-  const deadlockTrigger =
-    !trainsTrigger && poolDead(state) && noPlayerCanClaimRoute(board, state);
-  if (!endgame.triggered && (trainsTrigger || deadlockTrigger)) {
-    endgame = { triggered: true, triggerPlayerIndex: curIdx, finalTurnsRemaining: n };
-    triggeredNow = true;
-    events.push({
-      e: 'ENDGAME_TRIGGERED',
-      player: curPlayer,
-      finalTurnsRemaining: n,
-      reason: trainsTrigger ? 'FINAL_TRAINS' : 'DEADLOCK',
-      visibility: 'PUBLIC',
-    });
-  } else if (endgame.triggered) {
-    endgame = { ...endgame, finalTurnsRemaining: endgame.finalTurnsRemaining - 1 };
-  }
+let endgame = state.endgame;
+let triggeredNow = false;
+const trainsTrigger = (player?.trainCars ?? Infinity) <= state.ruleParams.endgameTrainThreshold;
+// Deadlock: the card pool is dead and no one can claim a route, so no one's trains will ever
+// drop to the threshold. Begin the end sequence anyway.
+const deadlockTrigger = !trainsTrigger && poolDead(state) && noPlayerCanClaimRoute(board, state);
+if (!endgame.triggered && (trainsTrigger || deadlockTrigger)) {
+  endgame = { triggered: true, triggerPlayerIndex: curIdx, finalTurnsRemaining: n };
+  triggeredNow = true;
+  events.push({
+    e: 'ENDGAME_TRIGGERED',
+    player: curPlayer,
+    finalTurnsRemaining: n,
+    reason: trainsTrigger ? 'FINAL_TRAINS' : 'DEADLOCK',
+    visibility: 'PUBLIC',
+  });
+} else if (endgame.triggered) {
+  endgame = { ...endgame, finalTurnsRemaining: endgame.finalTurnsRemaining - 1 };
+}
 ```
 
 - [ ] **Step 3: Bump `ENGINE_VERSION`**
@@ -446,11 +448,13 @@ git commit -m "feat(engine): begin the end sequence on a dead-pool deadlock (ENG
 ### Task 3: Engine projection — `youMustPass` on `RedactedView`
 
 **Files:**
+
 - Modify: `packages/engine/src/types/view.ts` (add `youMustPass`)
 - Modify: `packages/engine/src/selectors.ts` (compute it in `redactFor`)
 - Test: `packages/engine/test/redact.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `hasAnyLegalMove` (Task 1), `RedactedView` (existing).
 - Produces: `RedactedView.youMustPass: boolean` — true iff the viewer is the current player, in `AWAIT_ACTION`, with no legal move.
 
@@ -470,11 +474,11 @@ In `packages/engine/src/types/view.ts`, add to `RedactedView` (near `currentPlay
 In `packages/engine/src/selectors.ts`, `redactFor` already imports `hasAnyLegalMove` and `currentPlayerId`. Add before the `return {`:
 
 ```typescript
-  const youMustPass =
-    state.turn.phase === 'AWAIT_ACTION' &&
-    viewer !== null &&
-    viewer === (state.turnOrder[state.turn.orderIndex] as PlayerId) &&
-    !hasAnyLegalMove(board, state, viewer);
+const youMustPass =
+  state.turn.phase === 'AWAIT_ACTION' &&
+  viewer !== null &&
+  viewer === (state.turnOrder[state.turn.orderIndex] as PlayerId) &&
+  !hasAnyLegalMove(board, state, viewer);
 ```
 
 Add `youMustPass,` to the returned object (next to `currentPlayer`).
@@ -513,10 +517,12 @@ git commit -m "feat(engine): surface youMustPass on the redacted view"
 ### Task 4: Proto — `SelfView.you_must_pass` + `EndgameTriggered.reason`; regenerate
 
 **Files:**
+
 - Modify: `packages/proto/proto/trmission/v1/common.proto` (`SelfView`)
 - Modify: `packages/proto/proto/trmission/v1/server.proto` (`EndgameTriggered`)
 
 **Interfaces:**
+
 - Produces: generated `SelfView.youMustPass: boolean` and `EndgameTriggered.reason: string` (protobuf-es camelCases the field names).
 
 - [ ] **Step 1: Add the SelfView field**
@@ -562,11 +568,13 @@ git commit -m "feat(proto): SelfView.you_must_pass + EndgameTriggered.reason"
 ### Task 5: Codec — map `youMustPass` and endgame `reason`
 
 **Files:**
+
 - Modify: `packages/codec/src/snapshot.ts` (`you` block)
 - Modify: `packages/codec/src/events.ts` (`endgameTriggered` case)
 - Test: `packages/codec/test/codec.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `RedactedView.youMustPass` (Task 3), `GameEvent` `ENDGAME_TRIGGERED.reason` (Task 2), generated proto fields (Task 4).
 
 - [ ] **Step 1: Map `youMustPass` in the snapshot codec**
@@ -614,7 +622,13 @@ it('carries youMustPass on the self view and reason on the endgame event', () =>
   expect(snap.you?.youMustPass).toBe(true);
 
   const ev = eventToProto(
-    { e: 'ENDGAME_TRIGGERED', player: p0, finalTurnsRemaining: 2, reason: 'DEADLOCK', visibility: 'PUBLIC' },
+    {
+      e: 'ENDGAME_TRIGGERED',
+      player: p0,
+      finalTurnsRemaining: 2,
+      reason: 'DEADLOCK',
+      visibility: 'PUBLIC',
+    },
     p0,
   );
   expect(ev?.event.case).toBe('endgameTriggered');
@@ -641,11 +655,13 @@ git commit -m "feat(codec): map youMustPass + endgame reason"
 ### Task 6: Web — Pass/Skip button gated on `youMustPass`
 
 **Files:**
+
 - Modify: `apps/web/src/screens/GameStage.tsx` (add the button in `hud-actions`)
 - Modify: `apps/web/src/i18n/index.ts` (`passTurn` label, both locales)
 - Test: `apps/web/src/screens/GameStage.events.test.tsx` (extend)
 
 **Interfaces:**
+
 - Consumes: `snapshot.you?.youMustPass` (Task 5), `commands.pass()` (existing on `GameCommands`).
 
 - [ ] **Step 1: Add the button**
@@ -653,19 +669,21 @@ git commit -m "feat(codec): map youMustPass + endgame reason"
 In `apps/web/src/screens/GameStage.tsx`, inside the `hud-actions` div (right before its closing `</div>` at line 594):
 
 ```tsx
-        {canAct && snapshot.you?.youMustPass && (
-          <button
-            type="button"
-            className="accent"
-            data-anim="pass-turn"
-            onClick={() => {
-              markFirstAction('pass');
-              commands?.pass();
-            }}
-          >
-            {t('passTurn')}
-          </button>
-        )}
+{
+  canAct && snapshot.you?.youMustPass && (
+    <button
+      type="button"
+      className="accent"
+      data-anim="pass-turn"
+      onClick={() => {
+        markFirstAction('pass');
+        commands?.pass();
+      }}
+    >
+      {t('passTurn')}
+    </button>
+  );
+}
 ```
 
 - [ ] **Step 2: Add the i18n label (both locales)**
@@ -684,7 +702,13 @@ describe('GameStage Pass button', () => {
   it('shows a Pass button only when youMustPass and dispatches pass()', () => {
     const commands = { pass: vi.fn() } as unknown as GameCommands;
     const stuck = snap(Phase.AWAIT_ACTION, undefined, {
-      hand: { playerId: 'p0', hand: {}, keptTicketIds: [], pendingOfferTicketIds: [], youMustPass: true },
+      hand: {
+        playerId: 'p0',
+        hand: {},
+        keptTicketIds: [],
+        pendingOfferTicketIds: [],
+        youMustPass: true,
+      },
     });
     const { unmount } = render(
       <GameStage snapshot={stuck} commands={commands} onLeave={() => {}} sandbox />,
@@ -718,6 +742,7 @@ git commit -m "feat(web): Pass/Skip button when the player has no legal moves"
 ### Task 7: Web — "skipped" + deadlock-endgame notifications
 
 **Files:**
+
 - Modify: `apps/web/src/game/logModel.ts` (thread `reason` into the `endgame` datum)
 - Modify: `apps/web/src/components/LogPanel.tsx` (deadlock endgame line)
 - Modify: `apps/web/src/store/animations.ts` (`EndgameCue.reason`; `showEndgameWarning` param)
@@ -727,6 +752,7 @@ git commit -m "feat(web): Pass/Skip button when the player has no legal moves"
 - Test: `apps/web/src/game/logModel.test.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: proto `EndgameTriggered.reason` (Task 4), the existing `passed`/`endgame` log kinds and `showEndgameWarning`.
 - Produces: `showEndgameWarning(finalTurns: number, triggeredByYou: boolean, deadlock: boolean)`; `EndgameCue.reason: 'FINAL_TRAINS' | 'DEADLOCK'`.
 
@@ -780,30 +806,30 @@ export interface EndgameCue {
 In `apps/web/src/hooks/useAnimationDriver.ts`, add a ref that a `lastBatch` effect keeps updated, and pass it into the (state-driven) endgame effect. Add near the other refs:
 
 ```typescript
-  const endgameReasonRef = useRef<'FINAL_TRAINS' | 'DEADLOCK'>('FINAL_TRAINS');
+const endgameReasonRef = useRef<'FINAL_TRAINS' | 'DEADLOCK'>('FINAL_TRAINS');
 ```
 
 Add an effect (declared BEFORE the endgame-warning effect) that records the reason from the delivered batch:
 
 ```typescript
-  useEffect(() => {
-    const events = lastBatch?.events ?? [];
-    for (const e of events) {
-      if (e.event.case === 'endgameTriggered') {
-        endgameReasonRef.current = e.event.value.reason === 'DEADLOCK' ? 'DEADLOCK' : 'FINAL_TRAINS';
-      }
+useEffect(() => {
+  const events = lastBatch?.events ?? [];
+  for (const e of events) {
+    if (e.event.case === 'endgameTriggered') {
+      endgameReasonRef.current = e.event.value.reason === 'DEADLOCK' ? 'DEADLOCK' : 'FINAL_TRAINS';
     }
-  }, [lastBatch]);
+  }
+}, [lastBatch]);
 ```
 
 Update the endgame-warning call (line 127):
 
 ```typescript
-    showEndgameWarning(
-      eg.finalTurnsRemaining,
-      !!me && triggerId === me,
-      endgameReasonRef.current === 'DEADLOCK',
-    );
+showEndgameWarning(
+  eg.finalTurnsRemaining,
+  !!me && triggerId === me,
+  endgameReasonRef.current === 'DEADLOCK',
+);
 ```
 
 - [ ] **Step 5: Render the deadlock sub-note in `EndgameWarning`**
@@ -826,22 +852,28 @@ In `apps/web/src/components/EndgameWarning.tsx`, use the cue's `deadlock` flag f
 In `apps/web/src/i18n/index.ts`:
 
 zh-Hant — update `log.passed` (line 422) and add keys:
+
 ```typescript
         passed: '{{name}} 無法行動，跳過',
         endgameDeadlock: '最終回合：已無法再鋪設任何路線',
 ```
+
 zh-Hant banner block (near line 252):
+
 ```typescript
       endgameByDeadlock: '已無人能再鋪設路線——終局開始！',
       endgameNoteDeadlock: '無法行動的玩家將自動跳過',
 ```
 
 en — update `log.passed` (line 1187) and add keys:
+
 ```typescript
         passed: '{{name}} skipped — no possible moves',
         endgameDeadlock: 'Final round — no more routes can be built',
 ```
+
 en banner block (near line 999):
+
 ```typescript
       endgameByDeadlock: 'No more routes can be built — the final round begins!',
       endgameNoteDeadlock: 'Players with no possible moves are skipped',
@@ -854,12 +886,18 @@ Add to `apps/web/src/game/logModel.test.ts`:
 ```typescript
 it('carries the endgame reason into the log datum', () => {
   const deadlock = entriesFromEvents([
-    ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2, reason: 'DEADLOCK' } }),
+    ev({
+      case: 'endgameTriggered',
+      value: { playerId: 'p1', finalTurnsRemaining: 2, reason: 'DEADLOCK' },
+    }),
   ]);
   expect(deadlock[0]).toMatchObject({ kind: 'endgame', data: { reason: 'DEADLOCK' } });
 
   const trains = entriesFromEvents([
-    ev({ case: 'endgameTriggered', value: { playerId: 'p1', finalTurnsRemaining: 2, reason: 'FINAL_TRAINS' } }),
+    ev({
+      case: 'endgameTriggered',
+      value: { playerId: 'p1', finalTurnsRemaining: 2, reason: 'FINAL_TRAINS' },
+    }),
   ]);
   expect(trains[0]).toMatchObject({ kind: 'endgame', data: { reason: 'FINAL_TRAINS' } });
 });
@@ -886,7 +924,7 @@ git commit -m "feat(web): skipped + deadlock end-sequence notifications"
 - [ ] **Step 1: Typecheck + lint + test across the monorepo**
 
 Run: `yarn typecheck && yarn lint && yarn test`
-Expected: all PASS. Pay attention to `apps/server` e2e specs (`bots.e2e`, `bots-5p.e2e`, `wire-game.e2e`, `codec.spec`, `history-replay-compat`) — they consume the engine + codec; the version bump and new fields must not break the wire round-trip or the leak test. `history-replay-compat.spec` intentionally stores an `engineVersion: 8` fixture as *old* data — it should still pass under current version 9.
+Expected: all PASS. Pay attention to `apps/server` e2e specs (`bots.e2e`, `bots-5p.e2e`, `wire-game.e2e`, `codec.spec`, `history-replay-compat`) — they consume the engine + codec; the version bump and new fields must not break the wire round-trip or the leak test. `history-replay-compat.spec` intentionally stores an `engineVersion: 8` fixture as _old_ data — it should still pass under current version 9.
 
 - [ ] **Step 2: Drive the change end-to-end (verify skill)**
 

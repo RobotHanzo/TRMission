@@ -9,7 +9,7 @@ Vite SPA that means every screen after the landing page is invisible.
 
 Add a small, typed analytics layer plus call sites that emit a curated set of events spanning the
 whole funnel — acquisition → activation → engagement → retention — including gameplay/balance
-signals. Naming is **hybrid**: GA4 *recommended* event names where the semantics match 1:1
+signals. Naming is **hybrid**: GA4 _recommended_ event names where the semantics match 1:1
 (`login`, `sign_up`, `tutorial_begin`, `tutorial_complete`), readable custom `snake_case` for
 everything else. All three taxonomy tiers are wired in this slice.
 
@@ -36,9 +36,9 @@ The system is built around hidden information and a single `redactFor` egress ch
 analytics layer is another egress surface and is held to the same standard.**
 
 1. **No secret game state in any param** — never a hand, held ticket id/value, deck/market card
-   identity, `seed`, opponent secret, or per-action card colours. Enforced *structurally*: event
+   identity, `seed`, opponent secret, or per-action card colours. Enforced _structurally_: event
    params are a typed map of safe primitives (counts, enums, booleans, already-public ids), so a
-   caller *cannot* pass game state — the types don't permit it.
+   caller _cannot_ pass game state — the types don't permit it.
 2. **No PII / no free text** — never an email, display name, or **chat message text**. Chat emits
    only `{ kind, context }`. IDs appear only where already public to the client (e.g. `map_id`).
 3. **Bounded volume** — no per-turn events (see Non-goals).
@@ -148,12 +148,12 @@ Zaraz's automatic pageview fires only on hard navigation; this app is a `pushSta
 
 - An effect in `App.tsx` calls `track('page_view', …)` whenever the `useUi` `view` changes (initial
   mount included).
-- **`page_path` is the route *template*, not the live URL** — `/room/:code` and `/replay/:gameId`
+- **`page_path` is the route _template_, not the live URL** — `/room/:code` and `/replay/:gameId`
   are normalized so room codes / game ids never enter page paths (cardinality + those ids ride on
   `game_start` / `replay_open` instead). A `screen → template` map (derived from the `View` enum,
   mirroring the path map in `store/ui.ts:27-43`) lives in `analytics.ts` as a `trackPageView(view)`
   helper. `screen` (the raw view enum) is the intended reporting dimension.
-- **Ops note (external, one toggle):** disable Zaraz's *automatic* GA4 pageview in the Cloudflare
+- **Ops note (external, one toggle):** disable Zaraz's _automatic_ GA4 pageview in the Cloudflare
   Zaraz GA4 tool config so the landing page isn't double-counted; the effect then owns all
   pageviews. Code is correct with or without this — the toggle only dedupes the first hit.
 
@@ -172,44 +172,44 @@ All ~36 events, with the trigger the exploration located. Store-level **choke po
 where one call site catches every UI entry (auth in `session.ts`; game start/end derived from the
 snapshot); everything else is a one-liner in the existing handler.
 
-| Event | GA4 name? | Trigger (`file:line`) | Params |
-|---|---|---|---|
-| `page_view` | recommended | `App.tsx` effect on `view` change | screen, page_path, page_title |
-| `login` | recommended | `store/session.ts:67/68/69` + `screens/LoginCallback.tsx:23` | method |
-| `sign_up` | recommended | `store/session.ts:70` (register) | method: password |
-| `guest_upgrade` | custom | `store/session.ts:72` (`screens/HomeScreen.tsx:48`) | — |
-| `logout` | custom | `store/session.ts:73` | — |
-| `room_create` | custom | `screens/HomeScreen.tsx:170` | — |
-| `room_join` | custom | `screens/HomeScreen.tsx:181` / `:299` / `:240` | via |
-| `spectate_start` | custom | `screens/HomeScreen.tsx:301` (watch) | — |
-| `practice_start` | custom | `screens/HomeScreen.tsx:136` | — |
-| `bot_add` | custom | `screens/RoomScreen.tsx:509` | difficulty |
-| `room_leave` | custom | `screens/RoomScreen.tsx:291` (`onLeaveClick`) | — |
-| `game_start` | custom | derived, `store/game.ts` first live snapshot (once per `gameId`) | counts, map_*, events_mode, is_spectator, is_practice |
-| `game_first_action` | custom | first local command in `screens/GameStage.tsx` (once, `!sandbox`) | action |
-| `game_complete` | custom | `screens/GameStage.tsx` effect on `Phase.GAME_OVER` (once, `!sandbox`) | won, score, counts, duration_sec, tickets_completed, longest_path, is_spectator, map_id |
-| `route_claimed` | custom | `screens/GameStage.tsx:246` (`confirmPayment`, CLAIM_ROUTE, `!sandbox`) | length, is_tunnel, is_ferry, map_id |
-| `chat_send` | custom | `components/ChatPanel.tsx:58/67` (game, `!sandbox`); `screens/RoomScreen.tsx:624/627` (lobby) | kind, context |
-| `reconnect` | custom | `net/connection.ts:25` (resync after drop) | — |
-| `session_replaced` | custom | `screens/GameScreen.tsx:135` | — |
-| `rating_submit` | custom | `components/ScoreBoard.tsx:305` | stars |
-| `rematch_vote` | custom | `components/ScoreBoard.tsx:282` | wants |
-| `play_again` | custom | `components/ScoreBoard.tsx:287` | — |
-| `discord_click` | custom | `components/ScoreBoard.tsx:315` / `screens/WelcomeScreen.tsx:110` / `components/AppHeader.tsx:246` | source |
-| `tutorial_begin` | recommended | `features/tutorial/TutorialScreen.tsx:27/31` | scope |
-| `tutorial_complete` | recommended | `features/tutorial/TutorialScreen.tsx:141` | — |
-| `welcome_shown` | custom | `screens/WelcomeScreen.tsx` render (once) | — |
-| `encyclopedia_open` | custom | `components/AppHeader.tsx:239/176`, `screens/HomeScreen.tsx:310` | — |
-| `replay_open` | custom | `screens/ReplayScreen.tsx` load effect, once — `source` from entry | source |
-| `replay_share_change` | custom | `features/replay/ReplayShare.tsx:50/55` | visibility |
-| `map_create` | custom | `features/builder/MapsScreen.tsx:86` | — |
-| `map_fork` | custom | `features/builder/MapsScreen.tsx:54` | map_id |
-| `map_clone` | custom | `features/builder/MapsScreen.tsx:117` | — |
-| `map_share_mint` | custom | `features/builder/editor/stages/ShareStage.tsx:78` | map_id |
-| `map_testplay` | custom | `features/builder/editor/stages/ShareStage.tsx:87` | map_id |
-| `map_delete` | custom | `features/builder/MapsScreen.tsx:150` | — |
-| `settings_change` | custom | `components/SettingsModal.tsx:114/124/137/148/163` | setting, value |
-| `room_settings_change` | custom | `screens/RoomScreen.tsx:454` (+ map/events/visibility segmenteds) | setting |
+| Event                  | GA4 name?   | Trigger (`file:line`)                                                                              | Params                                                                                  |
+| ---------------------- | ----------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `page_view`            | recommended | `App.tsx` effect on `view` change                                                                  | screen, page_path, page_title                                                           |
+| `login`                | recommended | `store/session.ts:67/68/69` + `screens/LoginCallback.tsx:23`                                       | method                                                                                  |
+| `sign_up`              | recommended | `store/session.ts:70` (register)                                                                   | method: password                                                                        |
+| `guest_upgrade`        | custom      | `store/session.ts:72` (`screens/HomeScreen.tsx:48`)                                                | —                                                                                       |
+| `logout`               | custom      | `store/session.ts:73`                                                                              | —                                                                                       |
+| `room_create`          | custom      | `screens/HomeScreen.tsx:170`                                                                       | —                                                                                       |
+| `room_join`            | custom      | `screens/HomeScreen.tsx:181` / `:299` / `:240`                                                     | via                                                                                     |
+| `spectate_start`       | custom      | `screens/HomeScreen.tsx:301` (watch)                                                               | —                                                                                       |
+| `practice_start`       | custom      | `screens/HomeScreen.tsx:136`                                                                       | —                                                                                       |
+| `bot_add`              | custom      | `screens/RoomScreen.tsx:509`                                                                       | difficulty                                                                              |
+| `room_leave`           | custom      | `screens/RoomScreen.tsx:291` (`onLeaveClick`)                                                      | —                                                                                       |
+| `game_start`           | custom      | derived, `store/game.ts` first live snapshot (once per `gameId`)                                   | counts, map\_\*, events_mode, is_spectator, is_practice                                 |
+| `game_first_action`    | custom      | first local command in `screens/GameStage.tsx` (once, `!sandbox`)                                  | action                                                                                  |
+| `game_complete`        | custom      | `screens/GameStage.tsx` effect on `Phase.GAME_OVER` (once, `!sandbox`)                             | won, score, counts, duration_sec, tickets_completed, longest_path, is_spectator, map_id |
+| `route_claimed`        | custom      | `screens/GameStage.tsx:246` (`confirmPayment`, CLAIM_ROUTE, `!sandbox`)                            | length, is_tunnel, is_ferry, map_id                                                     |
+| `chat_send`            | custom      | `components/ChatPanel.tsx:58/67` (game, `!sandbox`); `screens/RoomScreen.tsx:624/627` (lobby)      | kind, context                                                                           |
+| `reconnect`            | custom      | `net/connection.ts:25` (resync after drop)                                                         | —                                                                                       |
+| `session_replaced`     | custom      | `screens/GameScreen.tsx:135`                                                                       | —                                                                                       |
+| `rating_submit`        | custom      | `components/ScoreBoard.tsx:305`                                                                    | stars                                                                                   |
+| `rematch_vote`         | custom      | `components/ScoreBoard.tsx:282`                                                                    | wants                                                                                   |
+| `play_again`           | custom      | `components/ScoreBoard.tsx:287`                                                                    | —                                                                                       |
+| `discord_click`        | custom      | `components/ScoreBoard.tsx:315` / `screens/WelcomeScreen.tsx:110` / `components/AppHeader.tsx:246` | source                                                                                  |
+| `tutorial_begin`       | recommended | `features/tutorial/TutorialScreen.tsx:27/31`                                                       | scope                                                                                   |
+| `tutorial_complete`    | recommended | `features/tutorial/TutorialScreen.tsx:141`                                                         | —                                                                                       |
+| `welcome_shown`        | custom      | `screens/WelcomeScreen.tsx` render (once)                                                          | —                                                                                       |
+| `encyclopedia_open`    | custom      | `components/AppHeader.tsx:239/176`, `screens/HomeScreen.tsx:310`                                   | —                                                                                       |
+| `replay_open`          | custom      | `screens/ReplayScreen.tsx` load effect, once — `source` from entry                                 | source                                                                                  |
+| `replay_share_change`  | custom      | `features/replay/ReplayShare.tsx:50/55`                                                            | visibility                                                                              |
+| `map_create`           | custom      | `features/builder/MapsScreen.tsx:86`                                                               | —                                                                                       |
+| `map_fork`             | custom      | `features/builder/MapsScreen.tsx:54`                                                               | map_id                                                                                  |
+| `map_clone`            | custom      | `features/builder/MapsScreen.tsx:117`                                                              | —                                                                                       |
+| `map_share_mint`       | custom      | `features/builder/editor/stages/ShareStage.tsx:78`                                                 | map_id                                                                                  |
+| `map_testplay`         | custom      | `features/builder/editor/stages/ShareStage.tsx:87`                                                 | map_id                                                                                  |
+| `map_delete`           | custom      | `features/builder/MapsScreen.tsx:150`                                                              | —                                                                                       |
+| `settings_change`      | custom      | `components/SettingsModal.tsx:114/124/137/148/163`                                                 | setting, value                                                                          |
+| `room_settings_change` | custom      | `screens/RoomScreen.tsx:454` (+ map/events/visibility segmenteds)                                  | setting                                                                                 |
 
 **`game_start` / `game_complete` param sourcing.** Both derive from the authoritative snapshot in
 `store/game.ts`: `player_count`/`human_count`/`bot_count` from the snapshot's players (bots via the
@@ -261,34 +261,14 @@ app. The wrapper adds no second consent mechanism.
 ## Implementation surface (`apps/web` only)
 
 **New**
+
 1. `src/lib/analytics.ts` — `track`, `trackPageView`, `AnalyticsEvents`, ambient `window` types.
 2. `src/lib/analytics.test.ts`.
 
-**Edited (call sites — mostly one line each)**
-3. `src/App.tsx` — `page_view` effect on view change.
-4. `src/store/session.ts` — auth events (`login`/`sign_up`/`guest_upgrade`/`logout`).
-5. `src/screens/LoginCallback.tsx` — OAuth `login { method: 'oauth' }`.
-6. `src/store/game.ts` — `game_start` derivation (first live snapshot) + capture start timestamp.
-7. `src/screens/GameStage.tsx` — `game_complete`, `game_first_action`, `route_claimed` (all
-   `!sandbox`).
-8. `src/screens/HomeScreen.tsx` — `room_create`, `room_join`, `spectate_start`, `practice_start`,
-   `encyclopedia_open`.
-9. `src/screens/RoomScreen.tsx` — `bot_add`, `room_leave`, `room_settings_change`, lobby `chat_send`.
-10. `src/components/ChatPanel.tsx` — in-game `chat_send` (`!sandbox`).
-11. `src/net/connection.ts` — `reconnect`.
-12. `src/screens/GameScreen.tsx` — `session_replaced`.
-13. `src/components/ScoreBoard.tsx` — `rating_submit`, `rematch_vote`, `play_again`, `discord_click`.
-14. `src/screens/WelcomeScreen.tsx` — `welcome_shown`, `discord_click { source: 'welcome' }`.
-15. `src/components/AppHeader.tsx` — `encyclopedia_open`, `discord_click { source: 'header' }`.
-16. `src/features/tutorial/TutorialScreen.tsx` — `tutorial_begin`, `tutorial_complete`.
-17. `src/store/ui.ts` — `is_practice` flag (set by the `startPractice` flow, read by `game_start`)
-    and a transient `replaySource` flag set by `enterReplay`.
-18. `src/screens/ReplayScreen.tsx` — `replay_open` (once, `source` from `replaySource` else `link`).
-19. `src/features/replay/ReplayShare.tsx` — `replay_share_change`.
-20. `src/features/builder/MapsScreen.tsx` — `map_create`/`map_fork`/`map_clone`/`map_delete`.
-21. `src/features/builder/editor/stages/ShareStage.tsx` — `map_share_mint`, `map_testplay`.
-22. `src/components/SettingsModal.tsx` — `settings_change`.
-23. Representative wiring tests alongside the touched files (session, GameStage sandbox-gating).
+**Edited (call sites — mostly one line each)** 3. `src/App.tsx` — `page_view` effect on view change. 4. `src/store/session.ts` — auth events (`login`/`sign_up`/`guest_upgrade`/`logout`). 5. `src/screens/LoginCallback.tsx` — OAuth `login { method: 'oauth' }`. 6. `src/store/game.ts` — `game_start` derivation (first live snapshot) + capture start timestamp. 7. `src/screens/GameStage.tsx` — `game_complete`, `game_first_action`, `route_claimed` (all
+`!sandbox`). 8. `src/screens/HomeScreen.tsx` — `room_create`, `room_join`, `spectate_start`, `practice_start`,
+`encyclopedia_open`. 9. `src/screens/RoomScreen.tsx` — `bot_add`, `room_leave`, `room_settings_change`, lobby `chat_send`. 10. `src/components/ChatPanel.tsx` — in-game `chat_send` (`!sandbox`). 11. `src/net/connection.ts` — `reconnect`. 12. `src/screens/GameScreen.tsx` — `session_replaced`. 13. `src/components/ScoreBoard.tsx` — `rating_submit`, `rematch_vote`, `play_again`, `discord_click`. 14. `src/screens/WelcomeScreen.tsx` — `welcome_shown`, `discord_click { source: 'welcome' }`. 15. `src/components/AppHeader.tsx` — `encyclopedia_open`, `discord_click { source: 'header' }`. 16. `src/features/tutorial/TutorialScreen.tsx` — `tutorial_begin`, `tutorial_complete`. 17. `src/store/ui.ts` — `is_practice` flag (set by the `startPractice` flow, read by `game_start`)
+and a transient `replaySource` flag set by `enterReplay`. 18. `src/screens/ReplayScreen.tsx` — `replay_open` (once, `source` from `replaySource` else `link`). 19. `src/features/replay/ReplayShare.tsx` — `replay_share_change`. 20. `src/features/builder/MapsScreen.tsx` — `map_create`/`map_fork`/`map_clone`/`map_delete`. 21. `src/features/builder/editor/stages/ShareStage.tsx` — `map_share_mint`, `map_testplay`. 22. `src/components/SettingsModal.tsx` — `settings_change`. 23. Representative wiring tests alongside the touched files (session, GameStage sandbox-gating).
 
 ## Success criteria
 

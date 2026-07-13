@@ -1,1 +1,223 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_md", "label": "task-1-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "label": "Task 1 Report: `maps.read` / `maps.moderate` Permission Taxonomy", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_summary", "label": "Implementation Summary", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_files_changed", "label": "Files Changed", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L7"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_tdd_evidence", "label": "TDD Evidence", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L18"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_red_failing_test", "label": "RED (Failing Test)", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L20"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_green_passing_tests", "label": "GREEN (Passing Tests)", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L39"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_details", "label": "Implementation Details", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L56"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_permission_placement_in_escalation_chain", "label": "Permission Placement in Escalation Chain", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L58"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_test_coverage", "label": "Test Coverage", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L65"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_commit_information", "label": "Commit Information", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L77"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_self_review_checklist", "label": "Self-Review Checklist", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L87"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_notes", "label": "Notes", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L100"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_1_report_status", "label": "Status", "file_type": "document", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L108"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_md", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_summary", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_files_changed", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L7", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_tdd_evidence", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L18", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_tdd_evidence", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_red_failing_test", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L20", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_tdd_evidence", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_green_passing_tests", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L39", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_details", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L56", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_details", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_permission_placement_in_escalation_chain", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L58", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_details", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_test_coverage", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L65", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_commit_information", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L77", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_self_review_checklist", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L87", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_notes", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L100", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy", "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_status", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-1-report.md", "source_location": "L108", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_md",
+      "label": "task-1-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "label": "Task 1 Report: `maps.read` / `maps.moderate` Permission Taxonomy",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_summary",
+      "label": "Implementation Summary",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_files_changed",
+      "label": "Files Changed",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L7"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_tdd_evidence",
+      "label": "TDD Evidence",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L18"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_red_failing_test",
+      "label": "RED (Failing Test)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L20"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_green_passing_tests",
+      "label": "GREEN (Passing Tests)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L39"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_details",
+      "label": "Implementation Details",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L56"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_permission_placement_in_escalation_chain",
+      "label": "Permission Placement in Escalation Chain",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L58"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_test_coverage",
+      "label": "Test Coverage",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L65"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_commit_information",
+      "label": "Commit Information",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L77"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_self_review_checklist",
+      "label": "Self-Review Checklist",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L87"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_notes",
+      "label": "Notes",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L100"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_1_report_status",
+      "label": "Status",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L108"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_summary",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_files_changed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_tdd_evidence",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_tdd_evidence",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_red_failing_test",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_tdd_evidence",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_green_passing_tests",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_details",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_details",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_permission_placement_in_escalation_chain",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_implementation_details",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_test_coverage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L65",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_commit_information",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_self_review_checklist",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_notes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_1_report_task_1_report_maps_read_maps_moderate_permission_taxonomy",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_1_report_status",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-1-report.md",
+      "source_location": "L108",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -476,7 +476,10 @@ export interface MapCardData {
 
 /** One 車站數/路線數/任務數-style row: CN label, EN caption, right-aligned mono value,
  *  divider above. Rows stack at a fixed 92px pitch starting at `y0`. */
-function statLedger(y0: number, rows: { labelZh: string; labelEn: string; color: string; value: number }[]): string {
+function statLedger(
+  y0: number,
+  rows: { labelZh: string; labelEn: string; color: string; value: number }[],
+): string {
   return rows
     .map((row, i) => {
       const y = y0 + i * 92;
@@ -565,10 +568,17 @@ export function replayCardSvg(d: ReplayCardData): string {
       const crown = isWin
         ? `<rect x="${crownX}" y="${cy - 19}" width="86" height="36" rx="18" fill="${EMBER}"/>${text(crownX + 43, cy + 6, 22, SURFACE, '冠軍', { anchor: 'middle', font: F_SANS })}`
         : '';
-      const score = text(1128, cy + 13, isWin ? 46 : 44, isWin ? EMBER : BLUE, String(p.score ?? 0), {
-        anchor: 'end',
-        font: F_MONO,
-      });
+      const score = text(
+        1128,
+        cy + 13,
+        isWin ? 46 : 44,
+        isWin ? EMBER : BLUE,
+        String(p.score ?? 0),
+        {
+          anchor: 'end',
+          font: F_MONO,
+        },
+      );
       const highlight = isWin
         ? `<rect x="60" y="${cy - 33}" width="1080" height="66" rx="10" fill="${EMBER}" opacity="0.12"/>`
         : '';

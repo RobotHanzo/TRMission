@@ -36,7 +36,7 @@ generates is a snapshot of whatever capabilities are enabled at that moment.
 
 ## 3. Register the app in App Store Connect
 
-[appstoreconnect.apple.com](https://appstoreconnect.apple.com) → **My Apps → +  → New App**:
+[appstoreconnect.apple.com](https://appstoreconnect.apple.com) → **My Apps → + → New App**:
 
 - Platform: iOS
 - Name: `TRMission 台鐵任務` (matches `fastlane/metadata/ios/*/name.txt`)
@@ -69,7 +69,7 @@ that only you seed, read-only. Do this from a machine with Xcode/fastlane instal
    This prompts for your Apple ID (2FA required), creates a Distribution certificate + an
    App Store provisioning profile for `dev.robothanzo.trmission`, and pushes both (encrypted with
    `MATCH_PASSWORD`) into the certs repo. CI (`mobile-ios.yml`) later runs `match(..., readonly:
-   true)` — it can read these but never creates or rotates them.
+true)` — it can read these but never creates or rotates them.
 4. Save `MATCH_PASSWORD` in the team password manager — it's the only way to decrypt the repo
    later (rotating certs, onboarding a second machine).
 
@@ -176,7 +176,7 @@ Content is already spec'd in
 improvising in App Store Connect:
 
 - **Listing text**: `apps/mobile/fastlane/metadata/ios/{zh-Hant,en-US}/{name,subtitle,description,
-  keywords,privacy_url,support_url}.txt` are already committed. Enter them once by hand in App
+keywords,privacy_url,support_url}.txt` are already committed. Enter them once by hand in App
   Store Connect, or push via a local `fastlane deliver` run once a `Deliverfile`/lane exists (not
   set up yet — App Store Connect's own UI is the fastest path for a first submission).
 - **Screenshots**: `docs/mobile/store-screenshots.md` — iPhone 6.9" portrait + iPad 13"
@@ -201,8 +201,7 @@ improvising in App Store Connect:
 - **Internal testing** (App Store Connect → TestFlight → Internal Group): add team members by
   Apple ID email — no review, builds appear within minutes of a successful `mobile-ios.yml` run.
   This is what CI publishes to already (`fastlane ios beta` → `pilot`).
-- **External testing**: needs **Beta App Review** (submit the same compliance metadata as Step
-  11) — budget ≥1 week per Task 10 Step 3. Only move to this once internal builds are stable.
+- **External testing**: needs **Beta App Review** (submit the same compliance metadata as Step 11) — budget ≥1 week per Task 10 Step 3. Only move to this once internal builds are stable.
 - Sign In with Apple must work end-to-end on a real TestFlight build before submission, including
   **Hide My Email** (Apple guideline 4.8) — test this explicitly, it's a common review rejection.
 

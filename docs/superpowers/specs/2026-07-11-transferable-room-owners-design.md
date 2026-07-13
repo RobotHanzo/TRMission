@@ -3,7 +3,7 @@
 ## Goal
 
 Room ownership transfer already exists (`2026-07-10` design), but only as a forced choice inside
-the host's *leave* flow — a host who wants to stay in the room can't hand off ownership. Two
+the host's _leave_ flow — a host who wants to stay in the room can't hand off ownership. Two
 additive gaps to close, both reusing the existing `hostId` / `transferHost` machinery:
 
 1. **Standalone transfer (player-facing).** The host picks a new owner without leaving the room.
@@ -19,7 +19,7 @@ additive gaps to close, both reusing the existing `hostId` / `transferHost` mach
   (`apps/server/src/lobby/lobby.controller.ts:83`) already works outside the leave flow — this is
   purely a new web UI call site.
 - **Admin surface needs a host-agnostic repo path.** The existing `RoomRepo.transferHost(code,
-  hostId, targetId)` (`apps/server/src/lobby/room.repo.ts:548`) CASes on the *caller* already being
+hostId, targetId)` (`apps/server/src/lobby/room.repo.ts:548`) CASes on the _caller_ already being
   the current host — that's wrong for a moderator, who isn't a room member. A new
   `RoomRepo.transferHostAdmin(code, targetId)` skips the caller-is-host check but keeps every other
   validation (LOBBY status, seated/non-bot target, target ≠ current host), CASing only on
@@ -76,7 +76,7 @@ additive gaps to close, both reusing the existing `hostId` / `transferHost` mach
 - `DashboardGamesService.transferHost(actor, code, targetId, reason?)` — mirrors `closeRoom`
   (`dashboard-games.service.ts:178`): 404 if room missing, 409 if not LOBBY, 400 if target invalid,
   then `audit.log(actor, 'room.transferHost', { type: 'room', id: code }, { targetId, ...(reason ?
-  { reason } : {}) })`, returns the updated room row.
+{ reason } : {}) })`, returns the updated room row.
 - `POST /dashboard/rooms/:code/transfer/:userId` on the controller
   (`dashboard-games.controller.ts`, alongside `closeRoom` at line 160): `@HttpCode(200)`,
   `@RequirePermission('rooms.transferHost')`, body `ModerationReasonDto`.

@@ -32,10 +32,12 @@
 ### Task 1: Analytics wrapper module
 
 **Files:**
+
 - Create: `apps/web/src/lib/analytics.ts`
 - Test: `apps/web/src/lib/analytics.test.ts`
 
 **Interfaces:**
+
 - Produces: `track<K extends keyof AnalyticsEvents>(name: K, params: AnalyticsEvents[K]): void`; `trackPageView(screen: View): void`; `interface AnalyticsEvents` (see below); `type AnalyticsEventName = keyof AnalyticsEvents`.
 
 - [ ] **Step 1: Write the failing test** — `apps/web/src/lib/analytics.test.ts`
@@ -236,11 +238,13 @@ git commit -m "feat(web): add typed analytics wrapper over zaraz.track"
 ### Task 2: SPA page_view on route change
 
 **Files:**
+
 - Create: `apps/web/src/hooks/usePageViewTracking.ts`
 - Test: `apps/web/src/hooks/usePageViewTracking.test.ts`
 - Modify: `apps/web/src/App.tsx`
 
 **Interfaces:**
+
 - Consumes: `trackPageView` (Task 1), `useUi` `view` field.
 - Produces: `usePageViewTracking(): void`.
 
@@ -315,7 +319,7 @@ import { usePageViewTracking } from './hooks/usePageViewTracking';
 ```
 
 ```ts
-  usePageViewTracking();
+usePageViewTracking();
 ```
 
 - [ ] **Step 6: Typecheck + lint**
@@ -335,11 +339,13 @@ git commit -m "feat(web): fire GA page_view on SPA route changes"
 ### Task 3: Auth events (login / sign_up / guest_upgrade / logout)
 
 **Files:**
+
 - Modify: `apps/web/src/store/session.ts`
 - Modify: `apps/web/src/screens/LoginCallback.tsx`
 - Test: `apps/web/src/store/session.test.ts`
 
 **Interfaces:**
+
 - Consumes: `track` (Task 1).
 
 - [ ] **Step 1: Write the failing test** — add to `apps/web/src/store/session.test.ts`
@@ -378,20 +384,20 @@ import { track } from '../lib/analytics';
 Give `run` an optional success hook and fire it inside the try (only on success):
 
 ```ts
-  const run = async (
-    action: () => Promise<{ user: PublicUser }>,
-    onSuccess?: () => void,
-  ): Promise<void> => {
-    set({ loading: true, error: null });
-    try {
-      const r = await action();
-      set({ user: r.user, loading: false });
-      hydratePrefs(r.user);
-      onSuccess?.();
-    } catch (e) {
-      set({ loading: false, error: (e as Error).message });
-    }
-  };
+const run = async (
+  action: () => Promise<{ user: PublicUser }>,
+  onSuccess?: () => void,
+): Promise<void> => {
+  set({ loading: true, error: null });
+  try {
+    const r = await action();
+    set({ user: r.user, loading: false });
+    hydratePrefs(r.user);
+    onSuccess?.();
+  } catch (e) {
+    set({ loading: false, error: (e as Error).message });
+  }
+};
 ```
 
 Pass the event per method:
@@ -431,8 +437,8 @@ import { track } from '../lib/analytics';
 ```
 
 ```ts
-      track('login', { method: 'oauth' });
-      navigateAfterAuth();
+track('login', { method: 'oauth' });
+navigateAfterAuth();
 ```
 
 - [ ] **Step 5: Run tests + typecheck**
@@ -452,11 +458,13 @@ git commit -m "feat(web): track auth events (login/sign_up/guest_upgrade/logout)
 ### Task 4: Game lifecycle events + sandbox gating
 
 **Files:**
+
 - Modify: `apps/web/src/store/ui.ts` (add `isPractice` flag + setter)
 - Modify: `apps/web/src/screens/GameStage.tsx`
 - Test: `apps/web/src/screens/GameStage.gate.test.tsx` (or the nearest existing `GameStage.*.test.tsx`)
 
 **Interfaces:**
+
 - Consumes: `track` (Task 1); `GameSnapshot` fields `players[]` (`{id,seat,...}`), `you`, `gameSettings.eventsMode`, `phase`, `finalScores` (`players[].total/ticketsCompleted/longestBonus`, `ranking[].playerIds`), `contentHash`.
 - Produces (from `ui.ts`): `isPractice: boolean`, `setPractice(v: boolean): void` (consumed by Task 5's `startPractice`).
 
@@ -516,85 +524,111 @@ Note: for `map_source`/`map_id`, use whatever the file already has to resolve `s
 Add a helper and effects near the top of the component body (after the existing hooks). `gameId` from `useUi` is the once-per-game key:
 
 ```ts
-  const gameId = useUi((s) => s.gameId);
-  const isPractice = useUi((s) => s.isPractice);
-  const startedRef = useRef<string | null>(null);
-  const completedRef = useRef<string | null>(null);
-  const startMsRef = useRef<number>(0);
+const gameId = useUi((s) => s.gameId);
+const isPractice = useUi((s) => s.isPractice);
+const startedRef = useRef<string | null>(null);
+const completedRef = useRef<string | null>(null);
+const startMsRef = useRef<number>(0);
 
-  // Player-count + spectator derivation shared by start/complete.
-  const counts = () => {
-    const players = snapshot.players ?? [];
-    const bot_count = players.filter((p) => p.id.startsWith('bot:')).length;
-    return { player_count: players.length, bot_count, human_count: players.length - bot_count };
-  };
-  const isSpectator = !snapshot.you;
-  const mapId = snapshot.contentHash; // refine to official mapId when resolvable (see note)
-  const mapSource: 'official' | 'custom' = 'custom'; // set 'official' when contentCache says so
+// Player-count + spectator derivation shared by start/complete.
+const counts = () => {
+  const players = snapshot.players ?? [];
+  const bot_count = players.filter((p) => p.id.startsWith('bot:')).length;
+  return { player_count: players.length, bot_count, human_count: players.length - bot_count };
+};
+const isSpectator = !snapshot.you;
+const mapId = snapshot.contentHash; // refine to official mapId when resolvable (see note)
+const mapSource: 'official' | 'custom' = 'custom'; // set 'official' when contentCache says so
 
-  // game_start — once per live gameId.
-  useEffect(() => {
-    if (sandbox || !gameId || startedRef.current === gameId) return;
-    startedRef.current = gameId;
-    startMsRef.current = Date.now();
-    track('game_start', {
-      ...counts(),
-      map_source: mapSource,
-      map_id: mapId,
-      events_mode: snapshot.gameSettings?.eventsMode ?? 'off',
-      is_spectator: isSpectator,
-      is_practice: isPractice,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sandbox, gameId]);
+// game_start — once per live gameId.
+useEffect(() => {
+  if (sandbox || !gameId || startedRef.current === gameId) return;
+  startedRef.current = gameId;
+  startMsRef.current = Date.now();
+  track('game_start', {
+    ...counts(),
+    map_source: mapSource,
+    map_id: mapId,
+    events_mode: snapshot.gameSettings?.eventsMode ?? 'off',
+    is_spectator: isSpectator,
+    is_practice: isPractice,
+  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [sandbox, gameId]);
 
-  // game_complete — once per live gameId when the game reaches GAME_OVER.
-  useEffect(() => {
-    if (sandbox || !gameId || snapshot.phase !== Phase.GAME_OVER || completedRef.current === gameId)
-      return;
-    completedRef.current = gameId;
-    const me = snapshot.you?.playerId;
-    const fs = snapshot.finalScores;
-    const mine = fs?.players.find((p) => p.playerId === me);
-    const won = !!me && !!fs?.ranking?.[0]?.playerIds.includes(me);
-    track('game_complete', {
-      won,
-      final_score: mine?.total ?? 0,
-      ...counts(),
-      duration_sec: startMsRef.current ? Math.round((Date.now() - startMsRef.current) / 1000) : undefined,
-      tickets_completed: mine?.ticketsCompleted,
-      longest_path: (mine?.longestBonus ?? 0) > 0,
-      is_spectator: isSpectator,
-      map_id: mapId,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sandbox, gameId, snapshot.phase]);
+// game_complete — once per live gameId when the game reaches GAME_OVER.
+useEffect(() => {
+  if (sandbox || !gameId || snapshot.phase !== Phase.GAME_OVER || completedRef.current === gameId)
+    return;
+  completedRef.current = gameId;
+  const me = snapshot.you?.playerId;
+  const fs = snapshot.finalScores;
+  const mine = fs?.players.find((p) => p.playerId === me);
+  const won = !!me && !!fs?.ranking?.[0]?.playerIds.includes(me);
+  track('game_complete', {
+    won,
+    final_score: mine?.total ?? 0,
+    ...counts(),
+    duration_sec: startMsRef.current
+      ? Math.round((Date.now() - startMsRef.current) / 1000)
+      : undefined,
+    tickets_completed: mine?.ticketsCompleted,
+    longest_path: (mine?.longestBonus ?? 0) > 0,
+    is_spectator: isSpectator,
+    map_id: mapId,
+  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [sandbox, gameId, snapshot.phase]);
 ```
 
 For **game_first_action**, wrap the incoming commands once so the first live move fires it. Change the destructured prop from `commands` to `commands: rawCommands`, then build a memoized wrapper that all existing `commands?.…()` call sites transparently use:
 
 ```ts
-  const firstActionRef = useRef<string | null>(null);
-  const commands = useMemo(() => {
-    if (sandbox || !rawCommands) return rawCommands;
-    const fire = (action: string) => {
-      if (firstActionRef.current === gameId) return;
-      firstActionRef.current = gameId;
-      track('game_first_action', { action });
-    };
-    return {
-      ...rawCommands,
-      drawBlind: () => { fire('draw_blind'); return rawCommands.drawBlind(); },
-      drawFaceUp: (slot: number) => { fire('draw_faceup'); return rawCommands.drawFaceUp(slot); },
-      drawTickets: () => { fire('draw_tickets'); return rawCommands.drawTickets(); },
-      keepInitialTickets: (ids: string[]) => { fire('keep_initial'); return rawCommands.keepInitialTickets(ids); },
-      keepTickets: (ids: string[]) => { fire('keep_tickets'); return rawCommands.keepTickets(ids); },
-      claimRoute: (routeId: string, payment) => { fire('claim_route'); return rawCommands.claimRoute(routeId, payment); },
-      buildStation: (cityId: string, payment) => { fire('build_station'); return rawCommands.buildStation(cityId, payment); },
-      resolveTunnel: (commit: boolean, extra?) => { fire('resolve_tunnel'); return rawCommands.resolveTunnel(commit, extra); },
-    } as typeof rawCommands;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rawCommands, sandbox, gameId]);
+const firstActionRef = useRef<string | null>(null);
+const commands = useMemo(() => {
+  if (sandbox || !rawCommands) return rawCommands;
+  const fire = (action: string) => {
+    if (firstActionRef.current === gameId) return;
+    firstActionRef.current = gameId;
+    track('game_first_action', { action });
+  };
+  return {
+    ...rawCommands,
+    drawBlind: () => {
+      fire('draw_blind');
+      return rawCommands.drawBlind();
+    },
+    drawFaceUp: (slot: number) => {
+      fire('draw_faceup');
+      return rawCommands.drawFaceUp(slot);
+    },
+    drawTickets: () => {
+      fire('draw_tickets');
+      return rawCommands.drawTickets();
+    },
+    keepInitialTickets: (ids: string[]) => {
+      fire('keep_initial');
+      return rawCommands.keepInitialTickets(ids);
+    },
+    keepTickets: (ids: string[]) => {
+      fire('keep_tickets');
+      return rawCommands.keepTickets(ids);
+    },
+    claimRoute: (routeId: string, payment) => {
+      fire('claim_route');
+      return rawCommands.claimRoute(routeId, payment);
+    },
+    buildStation: (cityId: string, payment) => {
+      fire('build_station');
+      return rawCommands.buildStation(cityId, payment);
+    },
+    resolveTunnel: (commit: boolean, extra?) => {
+      fire('resolve_tunnel');
+      return rawCommands.resolveTunnel(commit, extra);
+    },
+  } as typeof rawCommands;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [rawCommands, sandbox, gameId]);
 ```
 
 (Match the exact method signatures in `net/commands.ts` `GameCommands`; the spread preserves `chat`/`chatPreset`/`cameraUpdate`/`pass` unwrapped so only real moves trigger `game_first_action`.)
@@ -602,14 +636,14 @@ For **game_first_action**, wrap the incoming commands once so the first live mov
 For **route_claimed**, in the existing `confirmPayment` handler (~line 246), where a route claim commits and the `claim.route` `RouteDef` is in scope, add (live only):
 
 ```ts
-      if (!sandbox && claim.kind === 'route') {
-        track('route_claimed', {
-          length: claim.route.length,
-          is_tunnel: !!claim.route.isTunnel,
-          is_ferry: (claim.route.ferryLocos ?? 0) > 0,
-          map_id: snapshot.contentHash,
-        });
-      }
+if (!sandbox && claim.kind === 'route') {
+  track('route_claimed', {
+    length: claim.route.length,
+    is_tunnel: !!claim.route.isTunnel,
+    is_ferry: (claim.route.ferryLocos ?? 0) > 0,
+    map_id: snapshot.contentHash,
+  });
+}
 ```
 
 (Confirm the `RouteDef` field names `length`/`isTunnel`/`ferryLocos` against `@trm/map-data`; adjust if the local `claim.route` uses different accessors.)
@@ -636,14 +670,17 @@ git commit -m "feat(web): track game lifecycle (start/first-action/complete/rout
 ### Task 5: Lobby & matchmaking events
 
 **Files:**
+
 - Modify: `apps/web/src/screens/HomeScreen.tsx`, `apps/web/src/screens/RoomScreen.tsx`
 
 **Interfaces:**
+
 - Consumes: `track` (Task 1); `useUi().setPractice` (Task 4).
 
 - [ ] **Step 1: Add the calls** (each is one line inside the named handler; `import { track } from '../lib/analytics';` at the top of each file, and `useUi`'s `setPractice` where noted)
 
 `HomeScreen.tsx`:
+
 - In `create()` (~:170), after `createRoom` succeeds, before/at `enterRoom(code)`: `track('room_create', {});`
 - In `join()` (~:181), on a successful join: `track('room_join', { via: 'code' });`
 - Public-list open (~:299) `onClick`: `track('room_join', { via: 'public_list' });`
@@ -653,6 +690,7 @@ git commit -m "feat(web): track game lifecycle (start/first-action/complete/rout
 - Encyclopedia open (~:310): `track('encyclopedia_open', {});`
 
 `RoomScreen.tsx`:
+
 - `addBot(d)` (~:509): `track('bot_add', { difficulty: d });`
 - `onLeaveClick` (~:291): `track('room_leave', {});`
 - Each settings mutation (`setSetting` at map/rules/events/visibility, ~:397/:454/:468/:493): `track('room_settings_change', { setting: '<field>' });` where `<field>` is the setting key being changed (`'map'`, `'unlimitedStationBorrow'`, `'eventsMode'`, `'visibility'`, …).
@@ -683,9 +721,11 @@ git commit -m "feat(web): track lobby/matchmaking events"
 ### Task 6: In-game comms & connection events
 
 **Files:**
+
 - Modify: `apps/web/src/components/ChatPanel.tsx`, `apps/web/src/net/connection.ts`, `apps/web/src/screens/GameScreen.tsx`
 
 **Interfaces:**
+
 - Consumes: `track` (Task 1). `ChatPanel` gates on the same sandbox notion used elsewhere in-game.
 
 - [ ] **Step 1: Add the calls**
@@ -718,24 +758,29 @@ git commit -m "feat(web): track in-game chat, reconnect, session-replaced"
 ### Task 7: End-of-game & app-chrome events
 
 **Files:**
+
 - Modify: `apps/web/src/components/ScoreBoard.tsx`, `apps/web/src/screens/WelcomeScreen.tsx`, `apps/web/src/components/AppHeader.tsx`
 
 **Interfaces:**
+
 - Consumes: `track` (Task 1).
 
 - [ ] **Step 1: Add the calls** (each file gets `import { track } from '...';`)
 
 `ScoreBoard.tsx`:
+
 - `submitRating()` success (~:305 button → the `submitRating` fn ~:92, after `api.submitRating` resolves): `track('rating_submit', { stars });`
 - Rematch vote (~:282) `onVote(!myVote)`: `track('rematch_vote', { wants: !myVote });`
 - Play again (~:287) `onPlayAgain`: `track('play_again', {});`
 - Discord CTA (~:315) `openDiscord`: `track('discord_click', { source: 'endgame' });`
 
 `WelcomeScreen.tsx`:
+
 - On mount, once (impression): `track('welcome_shown', {});` (a `useEffect(() => { track('welcome_shown', {}); }, [])`).
 - Discord CTA (~:110): `track('discord_click', { source: 'welcome' });`
 
 `AppHeader.tsx`:
+
 - Encyclopedia open (desktop ~:239 / phone ~:176): `track('encyclopedia_open', {});`
 - Discord (~:246): `track('discord_click', { source: 'header' });`
 
@@ -761,9 +806,11 @@ git commit -m "feat(web): track end-of-game and app-chrome events"
 ### Task 8: Onboarding, replay, builder & settings events
 
 **Files:**
+
 - Modify: `apps/web/src/features/tutorial/TutorialScreen.tsx`, `apps/web/src/store/ui.ts`, `apps/web/src/screens/ReplayScreen.tsx`, `apps/web/src/features/replay/ReplayShare.tsx`, `apps/web/src/features/builder/MapsScreen.tsx`, `apps/web/src/features/builder/editor/stages/ShareStage.tsx`, `apps/web/src/components/SettingsModal.tsx`
 
 **Interfaces:**
+
 - Consumes: `track` (Task 1). `ui.ts` gains a transient `replaySource` set by `enterReplay`, read+cleared by `ReplayScreen`.
 
 - [ ] **Step 1: `ui.ts` — replay source flag**
@@ -773,26 +820,32 @@ Add state `replaySource: 'history' | 'link' | null` (initial `null`) with `set({
 - [ ] **Step 2: Add the call sites** (each file: `import { track } from '...';`)
 
 `TutorialScreen.tsx`:
+
 - Scope pick (~:27 full / :31 core): `track('tutorial_begin', { scope: 'full' });` / `{ scope: 'core' }`.
 - `finishTutorial` (~:141): `track('tutorial_complete', {});`
 
 `ReplayScreen.tsx`:
+
 - On successful replay load (once, in the load effect): `const source = useUi.getState().consumeReplaySource() ?? 'link'; track('replay_open', { source });`
 
 `ReplayShare.tsx`:
+
 - Visibility change (~:50/:55) `change()`: `track('replay_share_change', { visibility });` (the new value).
 
 `MapsScreen.tsx`:
+
 - `create()` (~:86): `track('map_create', {});`
 - `doFork` (~:54): `track('map_fork', { map_id: mapId });`
 - `doClone` (~:117) success: `track('map_clone', {});`
 - Delete (~:150 → `remove` ~:101) success: `track('map_delete', {});`
 
 `ShareStage.tsx`:
+
 - `mintShare` (~:78) success: `track('map_share_mint', { map_id: id });`
 - `createRoomWithMap` (~:87): `track('map_testplay', { map_id: id });`
 
 `SettingsModal.tsx`:
+
 - `chooseTheme` (~:114): `track('settings_change', { setting: 'theme', value: theme });`
 - `chooseLocale` (~:124): `track('settings_change', { setting: 'locale', value: locale });`
 - `chooseLayout` (~:137): `track('settings_change', { setting: 'board_layout', value: layout });`
@@ -802,7 +855,7 @@ Add state `replaySource: 'history' | 'link' | null` (initial `null`) with `set({
 - [ ] **Step 3: Typecheck + lint (verify builder stays lazy)**
 
 Run: `yarn typecheck && yarn lint`
-Expected: PASS. Confirm no new eager import of `MapsScreen`/`ShareStage` was introduced (they must stay in the lazy chunk — `track` is imported *inside* those already-lazy files, which is fine).
+Expected: PASS. Confirm no new eager import of `MapsScreen`/`ShareStage` was introduced (they must stay in the lazy chunk — `track` is imported _inside_ those already-lazy files, which is fine).
 
 - [ ] **Step 4: Run affected suites**
 

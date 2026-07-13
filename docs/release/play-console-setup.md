@@ -120,6 +120,7 @@ touching CI or the service account:
    falls back to the same debug-signing behavior. Use an absolute path for the keystore file.
    Before uploading, confirm the signer: `keytool -printcert -jarfile app-release.aab` — the
    `Owner:`/`Issuer:` line must be your release cert, not `CN=Android Debug`.
+
 2. Play Console → your app → **Testing → Internal testing → Create new release**, upload that
    `.aab`, add release notes, save + roll out to internal testing.
 
@@ -144,7 +145,7 @@ Play Console → **Setup → API access**:
 2. Under **Service accounts**, click **Create new service account** — this opens the Google Cloud
    Console's IAM page in a new tab, pre-scoped to the right project.
 3. In Google Cloud Console: **IAM & Admin → Service Accounts → Create service account**. Name it
-   something like `trmission-play-ci`. No roles need to be granted *in GCP* — permissions are
+   something like `trmission-play-ci`. No roles need to be granted _in GCP_ — permissions are
    granted back in Play Console (next step).
 4. On the new service account, **Keys → Add key → Create new key → JSON**. This downloads the
    JSON key file once — it cannot be re-downloaded, only re-created. Treat it like a password.

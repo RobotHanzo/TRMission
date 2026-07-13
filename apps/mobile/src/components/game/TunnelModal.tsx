@@ -5,7 +5,16 @@
 // shared stagger with a tunnelDraw tick, then tunnelSuccess/tunnelPayment lands with the result.
 import { useEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Easing,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import type { CardColor as PbCardColor } from '@trm/proto';
 import { REVEAL_FLIP_MS, REVEAL_STAGGER_MS } from '@trm/client-core/game/tunnel';
 import { CARD_COLOR_TOKENS } from '../../theme/colors';
@@ -18,7 +27,11 @@ import { TrainCarCard } from './TrainCarCard';
 
 /** One revealed card flipping in on the shared stagger (web `.tunnel-reveal-card`): a rotateY
  *  swing from face-down with a fade, slow for suspense. Plain RN Animated — low-frequency UI. */
-function FlipInCard({ index, reduced, children }: PropsWithChildren<{ index: number; reduced: boolean }>) {
+function FlipInCard({
+  index,
+  reduced,
+  children,
+}: PropsWithChildren<{ index: number; reduced: boolean }>) {
   const progress = useRef(new Animated.Value(reduced ? 1 : 0)).current;
   useEffect(() => {
     if (reduced) return;

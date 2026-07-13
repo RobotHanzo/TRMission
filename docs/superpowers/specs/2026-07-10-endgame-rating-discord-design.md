@@ -100,6 +100,7 @@ totalCount }` using the existing `encodeCursor`/`decodeCursor` helpers (`src/das
 - Registered in `dashboard.module.ts` alongside the other dashboard sub-controllers/services.
 
 **`apps/admin`**:
+
 - `src/views/RatingsView.tsx` (new) — modeled on `AuditView.tsx` (the simplest existing list view:
   no drawer, no destructive actions): a one-line stat (`avgStars` formatted to 1 decimal +
   `totalCount`) above a cursor-paginated `oc-table` (columns: stars — rendered as `★×N`, user,
@@ -130,6 +131,7 @@ Five `lucide-react` `Star` buttons in a row; filled (`fill="currentColor"`) for 
 access (`aria-label={t('starRatingValue', {n})}`), not a bare `<svg onClick>`.
 
 **`ScoreBoard.tsx` changes**:
+
 - Reads `gameId`/`roomCode` straight from `useUiStore` (both already tracked there for the
   duration of a game — `enterGame(gameId, ticket)` sets `gameId` and leaves `roomCode` from the
   prior room entry untouched, so both are populated through `GAME_OVER`). No new props needed.
@@ -219,6 +221,7 @@ to the in-game scoreboard, not the welcome screen):
 ## Implementation surface
 
 **`apps/server`**:
+
 1. `src/ratings/ratings.types.ts`, `ratings.repo.ts`, `ratings.controller.ts`, `ratings.module.ts`
    (new).
 2. `src/app.module.ts` — register `RatingsModule`.
@@ -231,6 +234,7 @@ to the in-game scoreboard, not the welcome screen):
    deletion removes the user's rating rows.
 
 **`apps/web`**:
+
 1. `src/components/StarRating.tsx` (new) + a small `StarRating.test.tsx`.
 2. `src/components/ScoreBoard.tsx` — rating section + Discord button + `submitRating` wiring.
 3. `src/net/rest.ts` — `submitRating(...)` method.
@@ -244,6 +248,7 @@ to the in-game scoreboard, not the welcome screen):
    `localStorage`, Discord button always present.
 
 **`apps/admin`**:
+
 1. `src/views/RatingsView.tsx` (new) + `RatingsView.test.tsx`.
 2. `src/App.tsx`, `src/store/ui.ts` — nav entry + routing.
 3. `src/net/rest.ts` — `listRatings(...)`.

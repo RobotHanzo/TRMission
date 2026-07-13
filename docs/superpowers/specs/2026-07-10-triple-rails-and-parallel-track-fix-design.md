@@ -8,19 +8,19 @@
 Two reported symptoms, one root cause:
 
 1. **Bug — "4 rails built."** In the map builder, building a double (or converting a route to a
-   double) on a city pair that **already has a double** creates a *second* `doubleGroup` on the same
+   double) on a city pair that **already has a double** creates a _second_ `doubleGroup` on the same
    pair. Confirmed by reproduction: a pair that already had group `A` (`r1`,`r2`) plus a new "make
    double" produced group `B` (two more routes). `computeRouteOffsetsFor` offsets each group
    independently and centered on the chord, so both pairs land on the **same** offsets
    (`-1.35 / +1.35`) — four route objects stacked into two visually-overlapping tracks. Broken.
 
 2. **Feature — triple rails.** Authors want three parallel tracks between a city pair. Today the
-   model is hardcoded to *exactly two*: `validateContent` rejects any `doubleGroup` whose member
+   model is hardcoded to _exactly two_: `validateContent` rejects any `doubleGroup` whose member
    count ≠ 2, and the engine's `doubleSibling` map is built **only** for 2-member groups, so a
    3-member group would get no double-route rules at all.
 
 Both come from the same hardcoded assumption: **a parallel group is exactly a pair.** The fix
-generalizes it to **a parallel group of 2 *or* 3 routes, one group per city pair, capped at 3.**
+generalizes it to **a parallel group of 2 _or_ 3 routes, one group per city pair, capped at 3.**
 
 Evidence this is live: the in-progress (uncommitted) Taiwan **v4** map already contains a
 half-formed triple — `taipei–banqiao` has `R1` (ORANGE, len 1, ungrouped) + `R2`/`R70` (GREEN/GRAY,
@@ -39,18 +39,19 @@ len 1, group `H`), i.e. an author trying to make a triple and getting a double p
      singleFor23 ? min(groupSize, max(1, playerCount - 2)) : groupSize
    ```
 
-   | group  | 2p | 3p | 4p | 5p | setting off |
-   |--------|----|----|----|----|-------------|
-   | double | 1  | 1  | 2  | 2  | 2           |
-   | triple | 1  | 1  | 2  | 3  | 3           |
+   | group  | 2p  | 3p  | 4p  | 5p  | setting off |
+   | ------ | --- | --- | --- | --- | ----------- |
+   | double | 1   | 1   | 2   | 2   | 2           |
+   | triple | 1   | 1   | 2   | 3   | 3           |
 
    This is **exactly backward-compatible** for doubles (the double column matches today's
    `SINGLE_ONLY`/`BOTH` behavior), so existing golden replays are unchanged. Triples get the
    author-requested behavior: full 3 only at 5p, 2 at 4p, 1 at 2–3p (all by default; the setting off
    opens every track).
+
 3. **Builder UX = a "Parallel tracks [1] [2] [3]" segmented control** on the route inspector (and
    the new-route form), replacing the "Convert to double" button and the "make double" switch. It
-   operates on *the pair's single group*, so a second overlapping group can never be authored.
+   operates on _the pair's single group_, so a second overlapping group can never be authored.
 4. **v4 content: mechanism only.** Do **not** edit the uncommitted v4 authored content
    (`routes.ts`) or its pinned hash (`versions.spec.ts`) — those belong to the parallel v4-migration
    session. Validation stays backward-compatible so `content.spec` remains green (see §6); the author
@@ -170,7 +171,7 @@ disappears once the one-group-per-pair invariant holds. No test change beyond a 
   existing v4 `taipei-banqiao` (one group `H` + one ungrouped, 3 total) still validates and
   `content.spec` stays green.
 - `formatIssue` gains English strings for the new/renamed codes. **Keep** `ContentStats.doublePairCount`
-  as-is — it already counts *distinct groups* regardless of size, so no math or name change is needed
+  as-is — it already counts _distinct groups_ regardless of size, so no math or name change is needed
   (avoids churn in any stats consumer).
 
 ## 6. i18n
@@ -201,7 +202,7 @@ disappears once the one-group-per-pair invariant holds. No test change beyond a 
 
 - Editing v4 authored content or its pinned hash (per Decision 4).
 - Groups larger than 3.
-- Typhoon/charter/event interactions *specifically with triples* (pairwise behavior retained; no new
+- Typhoon/charter/event interactions _specifically with triples_ (pairwise behavior retained; no new
   tests) — see §2e.
 - Renaming the `doubleGroup` field or the `doubleRouteSingleFor23` setting.
 - Converting two ungrouped overlapping routes on a pair (a milder, separate pre-existing case) — the

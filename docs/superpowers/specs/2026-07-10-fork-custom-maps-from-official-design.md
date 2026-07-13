@@ -81,7 +81,7 @@ registry.
     before hashing/storage" contract on `MapGeography.land`, so re-publishing a forked-but-untouched
     map is hash-stable).
   - `crop` = synthetic real-Taiwan lon/lat bbox: `{ lonMin: 118, lonMax: 122.1, latMin: 21.8,
-    latMax: 26.4 }` (approx bounds incl. outlying islands). Provenance only; must be a valid bbox.
+latMax: 26.4 }` (approx bounds incl. outlying islands). Provenance only; must be a valid bbox.
   - Central-range relief is intentionally excluded.
 - **`OfficialMap`** gains an optional field:
 
@@ -110,7 +110,7 @@ adds `RegisteredUserGuard`, matching create/clone.
 
 - **`GET /api/v1/maps/official`** → `OfficialMapSummary[]`.
   - `OfficialMapSummary = { mapId: string; nameZh: string; nameEn: string; cities: number;
-    routes: number }` — counts drive the picker card (mirrors the clone `peek` summary line).
+routes: number }` — counts drive the picker card (mirrors the clone `peek` summary line).
   - `MapsService.listOfficial()` maps `OFFICIAL_MAPS` to summaries.
   - **Must be declared before `@Get(':id')`** in the controller so `official` is not captured as an
     `:id` path param.
@@ -125,7 +125,7 @@ adds `RegisteredUserGuard`, matching create/clone.
          cities: [...official.content.cities],
          routes: [...official.content.routes],
          tickets: [...official.content.tickets],
-         ...(geo !== undefined ? { geography: geo } : {}),        // geo = content.geography ?? official.forkGeography
+         ...(geo !== undefined ? { geography: geo } : {}), // geo = content.geography ?? official.forkGeography
          ...(official.content.rules !== undefined ? { rules: official.content.rules } : {}),
        };
        ```
@@ -146,10 +146,10 @@ Taiwan's authored content already conforms to `MapDraftSchema` by construction (
 
 - **`net/rest.ts`**:
   - `export interface OfficialMapSummary { mapId: string; nameZh: string; nameEn: string;
-    cities: number; routes: number }`.
+cities: number; routes: number }`.
   - `listOfficialMaps: () => req<OfficialMapSummary[]>('GET', '/maps/official')`.
   - `forkOfficialMap: (mapId: string) => req<MapDetail>('POST',
-    `/maps/fork/${encodeURIComponent(mapId)}`)`.
+`/maps/fork/${encodeURIComponent(mapId)}`)`.
 - **`features/builder/MapsScreen.tsx`**: a new `card` section **"Start from an official map"**,
   placed **side-by-side with the existing "Clone by code" card** in a two-column row below the
   "My maps" card:
@@ -164,6 +164,7 @@ Taiwan's authored content already conforms to `MapDraftSchema` by construction (
   summary line ("N cities · M routes") and a **Fork** button that calls `forkOfficialMap(mapId)`
   then `enterMapEditor(detail.id)` — same success path as clone. The editor opens on the Stops
   stage with the Taiwan silhouette visible.
+
 - **i18n** (`apps/web/src/i18n/index.ts`, zh-Hant primary + en): `builder.forkOfficialTitle`,
   `builder.forkMap`, `builder.forkSummary` (interpolates city/route counts).
 

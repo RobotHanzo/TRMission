@@ -1,1 +1,143 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_md", "label": "task-7-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "label": "Task 7 Report: Admin UI \u2014 delete, unshare, transfer actions for custom maps", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_what_i_implemented", "label": "What I implemented", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_one_test_mechanics_fix_not_in_the_brief_but_required_to_pass", "label": "One test-mechanics fix (not in the brief, but required to pass)", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L22"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_tdd_evidence", "label": "TDD Evidence", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L39"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_full_verification_sweep_step_7", "label": "Full verification sweep (Step 7)", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L59"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_files_changed", "label": "Files changed", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L73"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_self_review_findings", "label": "Self-review findings", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L85"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_7_report_concerns", "label": "Concerns", "file_type": "document", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L98"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_task_7_report_md", "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_what_i_implemented", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_one_test_mechanics_fix_not_in_the_brief_but_required_to_pass", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L22", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_tdd_evidence", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L39", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_full_verification_sweep_step_7", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L59", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_files_changed", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L73", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_self_review_findings", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L85", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps", "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-7-report.md", "source_location": "L98", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_md",
+      "label": "task-7-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "label": "Task 7 Report: Admin UI \u2014 delete, unshare, transfer actions for custom maps",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_what_i_implemented",
+      "label": "What I implemented",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_one_test_mechanics_fix_not_in_the_brief_but_required_to_pass",
+      "label": "One test-mechanics fix (not in the brief, but required to pass)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L22"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_tdd_evidence",
+      "label": "TDD Evidence",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L39"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_full_verification_sweep_step_7",
+      "label": "Full verification sweep (Step 7)",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L59"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_files_changed",
+      "label": "Files changed",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L73"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_self_review_findings",
+      "label": "Self-review findings",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L85"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_7_report_concerns",
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L98"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_7_report_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_what_i_implemented",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_one_test_mechanics_fix_not_in_the_brief_but_required_to_pass",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_tdd_evidence",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_full_verification_sweep_step_7",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_files_changed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L73",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_self_review_findings",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_7_report_task_7_report_admin_ui_delete_unshare_transfer_actions_for_custom_maps",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_7_report_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-7-report.md",
+      "source_location": "L98",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

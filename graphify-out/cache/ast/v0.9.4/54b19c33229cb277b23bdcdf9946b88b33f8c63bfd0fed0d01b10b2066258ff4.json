@@ -1,1 +1,191 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_md", "label": "2026-07-10-default-feature-flags-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default", "label": "Default feature flags + events-on-by-default", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_problem", "label": "Problem", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L6"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_decisions_from_brainstorming", "label": "Decisions (from brainstorming)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L18"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture", "label": "Architecture", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L34"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_trm_shared_permission_taxonomy", "label": "`@trm/shared` \u2014 permission taxonomy", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L36"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_apps_server_storage_effective_features_computation_endpoint", "label": "`apps/server` \u2014 storage, effective-features computation, endpoint", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L46"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_apps_admin_ui", "label": "`apps/admin` \u2014 UI", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L114"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_i18n_apps_admin_src_i18n_index_ts_both_zh_hant_and_en_tables", "label": "i18n (`apps/admin/src/i18n/index.ts`, both zh-Hant and en tables)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L156"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_events_default", "label": "Events default", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L165"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_testing", "label": "Testing", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L176"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_out_of_scope_yagni", "label": "Out of scope (YAGNI)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L196"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_problem", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L6", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_decisions_from_brainstorming", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L18", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L34", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_trm_shared_permission_taxonomy", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L36", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_apps_server_storage_effective_features_computation_endpoint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L46", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_apps_admin_ui", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L114", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_i18n_apps_admin_src_i18n_index_ts_both_zh_hant_and_en_tables", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L156", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_events_default", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L165", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_testing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L176", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_out_of_scope_yagni", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md", "source_location": "L196", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_md",
+      "label": "2026-07-10-default-feature-flags-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default",
+      "label": "Default feature flags + events-on-by-default",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_decisions_from_brainstorming",
+      "label": "Decisions (from brainstorming)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L18"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture",
+      "label": "Architecture",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L34"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_trm_shared_permission_taxonomy",
+      "label": "`@trm/shared` \u2014 permission taxonomy",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L36"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_apps_server_storage_effective_features_computation_endpoint",
+      "label": "`apps/server` \u2014 storage, effective-features computation, endpoint",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L46"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_apps_admin_ui",
+      "label": "`apps/admin` \u2014 UI",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L114"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_i18n_apps_admin_src_i18n_index_ts_both_zh_hant_and_en_tables",
+      "label": "i18n (`apps/admin/src/i18n/index.ts`, both zh-Hant and en tables)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L156"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_events_default",
+      "label": "Events default",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L165"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L176"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_out_of_scope_yagni",
+      "label": "Out of scope (YAGNI)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L196"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_decisions_from_brainstorming",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_trm_shared_permission_taxonomy",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_apps_server_storage_effective_features_computation_endpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_apps_admin_ui",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L114",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_i18n_apps_admin_src_i18n_index_ts_both_zh_hant_and_en_tables",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L156",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_events_default",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L165",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L176",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_default_feature_flags_events_on_by_default",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_default_feature_flags_design_out_of_scope_yagni",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md",
+      "source_location": "L196",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

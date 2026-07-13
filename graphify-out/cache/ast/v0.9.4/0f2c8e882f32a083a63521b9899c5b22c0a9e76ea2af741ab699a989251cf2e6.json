@@ -1,1 +1,31 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_release_mobile_versioning_md", "label": "mobile-versioning.md", "file_type": "document", "source_file": "docs/release/mobile-versioning.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_release_mobile_versioning_mobile_build_number_scheme", "label": "Mobile build-number scheme", "file_type": "document", "source_file": "docs/release/mobile-versioning.md", "source_location": "L1"}], "edges": [{"source": "d_web_projects_trmission_docs_release_mobile_versioning_md", "target": "d_web_projects_trmission_docs_release_mobile_versioning_mobile_build_number_scheme", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/mobile-versioning.md", "source_location": "L1", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_release_mobile_versioning_md",
+      "label": "mobile-versioning.md",
+      "file_type": "document",
+      "source_file": "docs/release/mobile-versioning.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_mobile_versioning_mobile_build_number_scheme",
+      "label": "Mobile build-number scheme",
+      "file_type": "document",
+      "source_file": "docs/release/mobile-versioning.md",
+      "source_location": "L1"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_release_mobile_versioning_md",
+      "target": "d_web_projects_trmission_docs_release_mobile_versioning_mobile_build_number_scheme",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/mobile-versioning.md",
+      "source_location": "L1",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

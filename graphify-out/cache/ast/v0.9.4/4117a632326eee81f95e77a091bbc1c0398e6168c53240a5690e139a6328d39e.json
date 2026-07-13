@@ -1,1 +1,207 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_md", "label": "2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_admin_panel_room_detail_drawer_auto_purge_no_op_audit_skip", "label": "Admin panel: room detail drawer + auto-purge no-op audit skip", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip", "label": "Part 1 \u2014 Auto-purge no-op audit skip", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L15"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_current_behaviour", "label": "Current behaviour", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L17"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_change", "label": "Change", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L35"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_tests", "label": "Tests", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L54"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer", "label": "Part 2 \u2014 Room detail drawer", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L67"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L69"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_hidden_information_rule", "label": "Hidden-information rule", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L75"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_server", "label": "Server", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L81"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_client", "label": "Client", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L136"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_tests_161", "label": "Tests", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L161"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_scope_guard", "label": "Scope guard", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L171"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_admin_panel_room_detail_drawer_auto_purge_no_op_audit_skip", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_admin_panel_room_detail_drawer_auto_purge_no_op_audit_skip", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L15", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_current_behaviour", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L17", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_change", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L35", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_tests", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L54", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_admin_panel_room_detail_drawer_auto_purge_no_op_audit_skip", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L67", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L69", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_hidden_information_rule", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L75", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_server", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L81", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_client", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L136", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_tests_161", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L161", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_scope_guard", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md", "source_location": "L171", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_md",
+      "label": "2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_admin_panel_room_detail_drawer_auto_purge_no_op_audit_skip",
+      "label": "Admin panel: room detail drawer + auto-purge no-op audit skip",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip",
+      "label": "Part 1 \u2014 Auto-purge no-op audit skip",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_current_behaviour",
+      "label": "Current behaviour",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L17"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_change",
+      "label": "Change",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L35"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_tests",
+      "label": "Tests",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L54"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer",
+      "label": "Part 2 \u2014 Room detail drawer",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L67"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L69"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_hidden_information_rule",
+      "label": "Hidden-information rule",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L75"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_server",
+      "label": "Server",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L81"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_client",
+      "label": "Client",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L136"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_tests_161",
+      "label": "Tests",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L161"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_scope_guard",
+      "label": "Scope guard",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L171"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_admin_panel_room_detail_drawer_auto_purge_no_op_audit_skip",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_admin_panel_room_detail_drawer_auto_purge_no_op_audit_skip",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_current_behaviour",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_change",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_1_auto_purge_no_op_audit_skip",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_tests",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_admin_panel_room_detail_drawer_auto_purge_no_op_audit_skip",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_hidden_information_rule",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_server",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L81",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_client",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L136",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_tests_161",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L161",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_part_2_room_detail_drawer",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_10_admin_rooms_detail_and_purge_audit_design_scope_guard",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-10-admin-rooms-detail-and-purge-audit-design.md",
+      "source_location": "L171",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,1 +1,79 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_mobile_store_screenshots_md", "label": "store-screenshots.md", "file_type": "document", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6", "label": "Store screenshot prep (consumed by P6)", "file_type": "document", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_mobile_store_screenshots_required_sets", "label": "Required sets", "file_type": "document", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_docs_mobile_store_screenshots_capture_matrix_run_before_p6", "label": "Capture matrix (run before P6)", "file_type": "document", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_docs_mobile_store_screenshots_manual_large_screen_audit_checklist_p5_exit_criteria", "label": "Manual large-screen audit checklist (P5 exit criteria)", "file_type": "document", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L24"}], "edges": [{"source": "d_web_projects_trmission_docs_mobile_store_screenshots_md", "target": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6", "target": "d_web_projects_trmission_docs_mobile_store_screenshots_required_sets", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6", "target": "d_web_projects_trmission_docs_mobile_store_screenshots_capture_matrix_run_before_p6", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6", "target": "d_web_projects_trmission_docs_mobile_store_screenshots_manual_large_screen_audit_checklist_p5_exit_criteria", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/mobile/store-screenshots.md", "source_location": "L24", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_mobile_store_screenshots_md",
+      "label": "store-screenshots.md",
+      "file_type": "document",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6",
+      "label": "Store screenshot prep (consumed by P6)",
+      "file_type": "document",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_mobile_store_screenshots_required_sets",
+      "label": "Required sets",
+      "file_type": "document",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_mobile_store_screenshots_capture_matrix_run_before_p6",
+      "label": "Capture matrix (run before P6)",
+      "file_type": "document",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_mobile_store_screenshots_manual_large_screen_audit_checklist_p5_exit_criteria",
+      "label": "Manual large-screen audit checklist (P5 exit criteria)",
+      "file_type": "document",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L24"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_mobile_store_screenshots_md",
+      "target": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6",
+      "target": "d_web_projects_trmission_docs_mobile_store_screenshots_required_sets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6",
+      "target": "d_web_projects_trmission_docs_mobile_store_screenshots_capture_matrix_run_before_p6",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_mobile_store_screenshots_store_screenshot_prep_consumed_by_p6",
+      "target": "d_web_projects_trmission_docs_mobile_store_screenshots_manual_large_screen_audit_checklist_p5_exit_criteria",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/mobile/store-screenshots.md",
+      "source_location": "L24",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

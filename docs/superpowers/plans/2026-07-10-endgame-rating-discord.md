@@ -249,7 +249,12 @@ export class RatingsRepo implements OnModuleInit {
     await this.col.createIndex({ createdAt: -1 });
   }
 
-  async insert(userId: string, gameId: string, roomId: string, stars: number): Promise<GameRatingDoc> {
+  async insert(
+    userId: string,
+    gameId: string,
+    roomId: string,
+    stars: number,
+  ): Promise<GameRatingDoc> {
     const doc: GameRatingDoc = {
       _id: randomUUID(),
       userId,
@@ -266,10 +271,7 @@ export class RatingsRepo implements OnModuleInit {
   listPage(cursor: { t: Date; id: string } | null, limit: number): Promise<GameRatingDoc[]> {
     const filter = cursor
       ? {
-          $or: [
-            { createdAt: { $lt: cursor.t } },
-            { createdAt: cursor.t, _id: { $lt: cursor.id } },
-          ],
+          $or: [{ createdAt: { $lt: cursor.t } }, { createdAt: cursor.t, _id: { $lt: cursor.id } }],
         }
       : {};
     return this.col.find(filter).sort({ createdAt: -1, _id: -1 }).limit(limit).toArray();
@@ -277,9 +279,11 @@ export class RatingsRepo implements OnModuleInit {
 
   async summary(): Promise<{ avgStars: number | null; totalCount: number }> {
     const [agg] = await this.col
-      .aggregate<{ _id: null; avg: number; count: number }>([
-        { $group: { _id: null, avg: { $avg: '$stars' }, count: { $sum: 1 } } },
-      ])
+      .aggregate<{
+        _id: null;
+        avg: number;
+        count: number;
+      }>([{ $group: { _id: null, avg: { $avg: '$stars' }, count: { $sum: 1 } } }])
       .toArray();
     return { avgStars: agg ? agg.avg : null, totalCount: agg ? agg.count : 0 };
   }
@@ -729,32 +733,32 @@ Then, inside the `'hard-deletes an account: ...'` test, add a rating for the vic
 the `customMaps` insert:
 
 ```ts
-    // A rating the victim submitted — must be dropped on account deletion.
-    await ratings().insertOne({
-      _id: 'rate-victim' as never,
-      userId: victim.userId,
-      gameId: 'g-old',
-      roomId: 'ABCDE',
-      stars: 4,
-      createdAt: new Date(),
-    } as never);
+// A rating the victim submitted — must be dropped on account deletion.
+await ratings().insertOne({
+  _id: 'rate-victim' as never,
+  userId: victim.userId,
+  gameId: 'g-old',
+  roomId: 'ABCDE',
+  stars: 4,
+  createdAt: new Date(),
+} as never);
 ```
 
 And after the existing `customMaps`/`matchHistory` assertions (right before the audit assertion),
 add:
 
 ```ts
-    // Ratings dropped too.
-    expect(await ratings().countDocuments({ userId: victim.userId } as never)).toBe(0);
+// Ratings dropped too.
+expect(await ratings().countDocuments({ userId: victim.userId } as never)).toBe(0);
 ```
 
 Finally, extend the audit assertion to also check the new count:
 
 ```ts
-    const entry = await audit().findOne({ action: 'user.delete', 'target.id': victim.userId } as never);
-    expect(entry).toBeTruthy();
-    expect(entry?.params.gamesTerminated).toBe(1);
-    expect(entry?.params.ratingsDeleted).toBe(1);
+const entry = await audit().findOne({ action: 'user.delete', 'target.id': victim.userId } as never);
+expect(entry).toBeTruthy();
+expect(entry?.params.gamesTerminated).toBe(1);
+expect(entry?.params.ratingsDeleted).toBe(1);
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -1303,35 +1307,33 @@ Inside the `ScoreBoard` function body, add these hooks right after the existing
 `const clearRouteReveal = useAnimationsStore((s) => s.clearRouteReveal);` line:
 
 ```ts
-  const gameId = useUi((s) => s.gameId);
-  const roomCode = useUi((s) => s.roomCode);
+const gameId = useUi((s) => s.gameId);
+const roomCode = useUi((s) => s.roomCode);
 ```
 
 And add this state + handler right after the existing `const [dismissed, setDismissed] =
 useState(false);` line:
 
 ```ts
-  const [stars, setStars] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [ratingError, setRatingError] = useState(false);
-  const [alreadyRated, setAlreadyRated] = useState(
-    () => !!gameId && getRatedGameIds().has(gameId),
-  );
+const [stars, setStars] = useState(0);
+const [submitting, setSubmitting] = useState(false);
+const [ratingError, setRatingError] = useState(false);
+const [alreadyRated, setAlreadyRated] = useState(() => !!gameId && getRatedGameIds().has(gameId));
 
-  const submitRating = async (): Promise<void> => {
-    if (!gameId || !roomCode || stars === 0) return;
-    setSubmitting(true);
-    setRatingError(false);
-    try {
-      await api.submitRating({ gameId, roomId: roomCode, stars });
-      markGameRated(gameId);
-      setAlreadyRated(true);
-    } catch {
-      setRatingError(true);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+const submitRating = async (): Promise<void> => {
+  if (!gameId || !roomCode || stars === 0) return;
+  setSubmitting(true);
+  setRatingError(false);
+  try {
+    await api.submitRating({ gameId, roomId: roomCode, stars });
+    markGameRated(gameId);
+    setAlreadyRated(true);
+  } catch {
+    setRatingError(true);
+  } finally {
+    setSubmitting(false);
+  }
+};
 ```
 
 Finally, insert the new render block between the existing rematch-row block and the
@@ -1655,10 +1657,8 @@ export type AdminView =
 And update the path regex in `parsePath`:
 
 ```ts
-  const m =
-    /^\/(users|features|games|rooms|maintainers|audit|purge|maps|ratings)(?:\/([^/]+))?\/?$/.exec(
-      p,
-    );
+const m =
+  /^\/(users|features|games|rooms|maintainers|audit|purge|maps|ratings)(?:\/([^/]+))?\/?$/.exec(p);
 ```
 
 (`RatingsView` has no drawer, so `openDetail`'s view union and `closeDetail`'s check are left

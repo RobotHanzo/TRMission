@@ -48,7 +48,16 @@ describe('resolveContent', () => {
     const dto = {
       ...customDto(hash),
       cities: [
-        { id: 'c1', nameZh: '甲', nameEn: 'C1', x: 10, y: 10, region: 'r', isIsland: false, tier: 'major' },
+        {
+          id: 'c1',
+          nameZh: '甲',
+          nameEn: 'C1',
+          x: 10,
+          y: 10,
+          region: 'r',
+          isIsland: false,
+          tier: 'major',
+        },
         { id: 'c2', nameZh: '乙', nameEn: 'C2', x: 20, y: 10, region: 'r', isIsland: false },
       ],
     };

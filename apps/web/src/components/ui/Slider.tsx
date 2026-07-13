@@ -13,7 +13,15 @@ interface Props {
 /** The restyled native `<input type="range">` shared by the settings volume control and the
  *  map builder's ticket-view zoom level — same fill-track look wherever a 0..1 (or custom-range)
  *  slider is needed. */
-export function Slider({ value, onChange, ariaLabel, min = 0, max = 1, step = 0.05, disabled }: Props) {
+export function Slider({
+  value,
+  onChange,
+  ariaLabel,
+  min = 0,
+  max = 1,
+  step = 0.05,
+  disabled,
+}: Props) {
   const fill = (value - min) / (max - min);
   return (
     <input

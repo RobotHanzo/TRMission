@@ -1,1 +1,399 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_md", "label": "2026-07-06-mobile-app-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "label": "TRMission native mobile app (Android + iOS, phones + tablets) \u2014 design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_problem", "label": "Problem", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L5"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_confirmed_decisions", "label": "Confirmed decisions", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_research_grounding_fact_checked_mid_2026", "label": "Research grounding (fact-checked mid-2026)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L28"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_scope", "label": "Scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L61"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_architecture", "label": "Architecture", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L70"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_toolchain", "label": "Toolchain", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L84"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "label": "Components", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L98"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_1_board_skia_canvas_the_core_new_component", "label": "1. Board \u2014 Skia canvas (the core new component)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L100"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_2_screens_layout_tablets", "label": "2. Screens, layout, tablets", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L118"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_3_auth_networking_server_foundation_benefits_web_too", "label": "3. Auth & networking (server foundation \u2014 benefits web too)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L127"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_4_offline_vs_bots", "label": "4. Offline vs bots", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L154"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_5_push_haptics_direct_platform_apis_no_saas_relay", "label": "5. Push & haptics (direct platform APIs, no SaaS relay)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L168"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_6_tutorial_native_rebuild", "label": "6. Tutorial (native rebuild)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L179"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_7_builder_embedded_webview", "label": "7. Builder (embedded WebView)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L185"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_8_ops_lifecycle_compliance", "label": "8. Ops, lifecycle, compliance", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L194"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_9_build_release_github_actions_self_managed_signing_no_eas", "label": "9. Build & release \u2014 GitHub Actions, self-managed signing (no EAS)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L209"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_10_ota_self_hosted_expo_updates_server_no_eas_update", "label": "10. OTA \u2014 self-hosted expo-updates server (no EAS Update)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L225"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_data_flow_deltas_only_server_flow_unchanged", "label": "Data flow (deltas only \u2014 server flow unchanged)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L236"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_error_handling_edge_cases", "label": "Error handling & edge cases", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L248"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_testing", "label": "Testing", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L266"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_phases_overlapping_5_7_5_months_to_both_stores", "label": "Phases (overlapping; ~5\u20137.5 months to both stores)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L278"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_risks_mitigations", "label": "Risks & mitigations", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L293"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L311"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_problem", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L5", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_confirmed_decisions", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_research_grounding_fact_checked_mid_2026", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L28", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L61", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_architecture", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L70", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_architecture", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_toolchain", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L84", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L98", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_1_board_skia_canvas_the_core_new_component", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L100", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_2_screens_layout_tablets", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L118", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_3_auth_networking_server_foundation_benefits_web_too", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L127", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_4_offline_vs_bots", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L154", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_5_push_haptics_direct_platform_apis_no_saas_relay", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L168", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_6_tutorial_native_rebuild", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L179", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_7_builder_embedded_webview", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L185", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_8_ops_lifecycle_compliance", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L194", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_9_build_release_github_actions_self_managed_signing_no_eas", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L209", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_10_ota_self_hosted_expo_updates_server_no_eas_update", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L225", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_data_flow_deltas_only_server_flow_unchanged", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L236", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_error_handling_edge_cases", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L248", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_testing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L266", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_phases_overlapping_5_7_5_months_to_both_stores", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L278", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_risks_mitigations", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L293", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md", "source_location": "L311", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_md",
+      "label": "2026-07-06-mobile-app-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "label": "TRMission native mobile app (Android + iOS, phones + tablets) \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_problem",
+      "label": "Problem",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L5"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_confirmed_decisions",
+      "label": "Confirmed decisions",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_research_grounding_fact_checked_mid_2026",
+      "label": "Research grounding (fact-checked mid-2026)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L28"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_scope",
+      "label": "Scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L61"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_architecture",
+      "label": "Architecture",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L70"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_toolchain",
+      "label": "Toolchain",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L84"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "label": "Components",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L98"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_1_board_skia_canvas_the_core_new_component",
+      "label": "1. Board \u2014 Skia canvas (the core new component)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L100"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_2_screens_layout_tablets",
+      "label": "2. Screens, layout, tablets",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L118"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_3_auth_networking_server_foundation_benefits_web_too",
+      "label": "3. Auth & networking (server foundation \u2014 benefits web too)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L127"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_4_offline_vs_bots",
+      "label": "4. Offline vs bots",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L154"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_5_push_haptics_direct_platform_apis_no_saas_relay",
+      "label": "5. Push & haptics (direct platform APIs, no SaaS relay)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L168"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_6_tutorial_native_rebuild",
+      "label": "6. Tutorial (native rebuild)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L179"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_7_builder_embedded_webview",
+      "label": "7. Builder (embedded WebView)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L185"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_8_ops_lifecycle_compliance",
+      "label": "8. Ops, lifecycle, compliance",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L194"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_9_build_release_github_actions_self_managed_signing_no_eas",
+      "label": "9. Build & release \u2014 GitHub Actions, self-managed signing (no EAS)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L209"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_10_ota_self_hosted_expo_updates_server_no_eas_update",
+      "label": "10. OTA \u2014 self-hosted expo-updates server (no EAS Update)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L225"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_data_flow_deltas_only_server_flow_unchanged",
+      "label": "Data flow (deltas only \u2014 server flow unchanged)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L236"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_error_handling_edge_cases",
+      "label": "Error handling & edge cases",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L248"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_testing",
+      "label": "Testing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L266"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_phases_overlapping_5_7_5_months_to_both_stores",
+      "label": "Phases (overlapping; ~5\u20137.5 months to both stores)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L278"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_risks_mitigations",
+      "label": "Risks & mitigations",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L293"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L311"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_problem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_confirmed_decisions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_research_grounding_fact_checked_mid_2026",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_architecture",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L70",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_architecture",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_toolchain",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_1_board_skia_canvas_the_core_new_component",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_2_screens_layout_tablets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_3_auth_networking_server_foundation_benefits_web_too",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L127",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_4_offline_vs_bots",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L154",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_5_push_haptics_direct_platform_apis_no_saas_relay",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_6_tutorial_native_rebuild",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_7_builder_embedded_webview",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L185",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_8_ops_lifecycle_compliance",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L194",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_9_build_release_github_actions_self_managed_signing_no_eas",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L209",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_components",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_10_ota_self_hosted_expo_updates_server_no_eas_update",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L225",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_data_flow_deltas_only_server_flow_unchanged",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L236",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_error_handling_edge_cases",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L248",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_testing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L266",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_phases_overlapping_5_7_5_months_to_both_stores",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L278",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_risks_mitigations",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L293",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_trmission_native_mobile_app_android_ios_phones_tablets_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-06-mobile-app-design.md",
+      "source_location": "L311",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

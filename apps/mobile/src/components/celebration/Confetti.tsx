@@ -29,7 +29,12 @@ function Burst({ onDone }: { onDone(): void }) {
         fadeOut
         onAnimationEnd={onDone}
       />
-      <ConfettiCannon count={PARTICLES_PER_SIDE} origin={{ x: width + 20, y }} colors={colors} fadeOut />
+      <ConfettiCannon
+        count={PARTICLES_PER_SIDE}
+        origin={{ x: width + 20, y }}
+        colors={colors}
+        fadeOut
+      />
     </>
   );
 }

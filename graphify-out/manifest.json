@@ -1,7 +1,7 @@
 {
   ".claude/settings.local.json": {
-    "mtime": 1783889878.7735915,
-    "ast_hash": "a67885ddc6bcaf24bee5456bc40b4137",
+    "mtime": 1783971636.7711673,
+    "ast_hash": "11202ccd288eb356bec5d04c9716b9c3",
     "semantic_hash": ""
   },
   "apps/server/package.json": {
@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/auth/auth.module.ts": {
-    "mtime": 1783869478.542524,
-    "ast_hash": "a08a5742f246f8a6083f5772d1ceb29e",
+    "mtime": 1783971639.451558,
+    "ast_hash": "973ddea53ed795fd793a53c3c805aa70",
     "semantic_hash": ""
   },
   "apps/server/src/auth/auth.schemas.ts": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/history/history.repo.ts": {
-    "mtime": 1783877077.3856528,
-    "ast_hash": "092fd7a2a2ee51cdb2efc2ac00f5ca3e",
+    "mtime": 1783971424.6409047,
+    "ast_hash": "6ce65acc706095089a598b2760b9faf5",
     "semantic_hash": ""
   },
   "apps/server/src/history/history.schemas.ts": {
@@ -170,8 +170,8 @@
     "semantic_hash": "de54bde2061ef57284883b1465c3ca06"
   },
   "apps/server/src/observability/hooks.ts": {
-    "mtime": 1783156013.0865781,
-    "ast_hash": "b9232bac62573c670360dc76417cff4d",
+    "mtime": 1783971495.6859748,
+    "ast_hash": "eeb72969a46f6ae2047ff3ae75d902f5",
     "semantic_hash": ""
   },
   "apps/server/src/observability/metrics.controller.ts": {
@@ -180,8 +180,8 @@
     "semantic_hash": "b7b2b04c30be3b2c035ec7efdd3853c4"
   },
   "apps/server/src/observability/metrics.service.ts": {
-    "mtime": 1783869478.5645661,
-    "ast_hash": "db011cd4ea143fb79a443ff11521967c",
+    "mtime": 1783971517.6544797,
+    "ast_hash": "2f7b86ec6cd296a72669ec1d3f9bb2e5",
     "semantic_hash": ""
   },
   "apps/server/src/observability/observability.module.ts": {
@@ -205,13 +205,13 @@
     "semantic_hash": "85570b2a2502df5b79a0090115d9fef6"
   },
   "apps/server/src/persistence/game-store.ts": {
-    "mtime": 1783869478.5655637,
-    "ast_hash": "bb1d8c19551718fdf51d2363b5df24fc",
+    "mtime": 1783971436.867965,
+    "ast_hash": "bb0339f6f9e1710106503a05dff43e10",
     "semantic_hash": ""
   },
   "apps/server/src/persistence/types.ts": {
-    "mtime": 1783869478.5665631,
-    "ast_hash": "6e7f4240238316b38a6c9957a121d325",
+    "mtime": 1783971431.62921,
+    "ast_hash": "78bfc16a2be39abf9035131feffdb02a",
     "semantic_hash": ""
   },
   "apps/server/src/ws/bot-pacing.ts": {
@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/ws/hub.ts": {
-    "mtime": 1783869478.5710769,
-    "ast_hash": "66a8fa6042f77caf81eb292a6bade18b",
+    "mtime": 1783971640.0646276,
+    "ast_hash": "a9245a11145fe38a03f0756530aed827",
     "semantic_hash": ""
   },
   "apps/server/src/ws/jwt-ticket.ts": {
@@ -240,8 +240,8 @@
     "semantic_hash": "1c052e5c144c689d124e01e6a1383ce3"
   },
   "apps/server/src/ws/ws-server.ts": {
-    "mtime": 1783159223.687615,
-    "ast_hash": "639618e4a4d7b5f7bd3f3a737729f5f8",
+    "mtime": 1783971529.0788176,
+    "ast_hash": "be04f6eaf8a58b8020cae4508a41e384",
     "semantic_hash": ""
   },
   "apps/server/test/app.ts": {
@@ -1215,8 +1215,8 @@
     "semantic_hash": ""
   },
   "packages/engine/src/turn.ts": {
-    "mtime": 1783875540.6227999,
-    "ast_hash": "98ec513bd278e55b4a6514b5b539d91a",
+    "mtime": 1783971666.480716,
+    "ast_hash": "ea36667564a3d7c2021a0b841438cbb3",
     "semantic_hash": ""
   },
   "packages/engine/src/types/actions.ts": {
@@ -1885,8 +1885,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/game/contentCache.test.ts": {
-    "mtime": 1783654973.4129157,
-    "ast_hash": "9fc437bd25daed2167eca97905eb4164",
+    "mtime": 1783971641.857621,
+    "ast_hash": "afb2749f44a31e8e1492536a66189aa9",
     "semantic_hash": ""
   },
   "apps/web/src/game/contentCache.ts": {
@@ -1945,8 +1945,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/features/builder/editor/CanvasControls.tsx": {
-    "mtime": 1783714601.2328858,
-    "ast_hash": "dcad64ceae0b425209cf70a70ff1dc8c",
+    "mtime": 1783971641.0491908,
+    "ast_hash": "94ae9c59ad6e22f5c410d3ba7e644c83",
     "semantic_hash": ""
   },
   "apps/web/src/features/builder/editor/ZoomVar.tsx": {
@@ -2005,8 +2005,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/og/card-svg.ts": {
-    "mtime": 1783611930.1384885,
-    "ast_hash": "52c1189f1d5fcd4d941f4a74ebbb8298",
+    "mtime": 1783971639.9266593,
+    "ast_hash": "b13bfde0febddbffa27258b09b38e55c",
     "semantic_hash": ""
   },
   "apps/server/src/og/og.controller.ts": {
@@ -2205,8 +2205,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/dashboard-read.e2e.spec.ts": {
-    "mtime": 1783622143.9688392,
-    "ast_hash": "2ebd179cd49931b2cbdf029ea7bad30e",
+    "mtime": 1783971640.2850645,
+    "ast_hash": "8751a746522c7d74536efe97b65ebf01",
     "semantic_hash": ""
   },
   "apps/server/test/dashboard-ban.e2e.spec.ts": {
@@ -2215,8 +2215,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/dashboard-terminate.e2e.spec.ts": {
-    "mtime": 1783720086.4911795,
-    "ast_hash": "cabddd269c23d6feb9947af8290d9368",
+    "mtime": 1783971640.3113234,
+    "ast_hash": "8dc0bef85ba3fb2c10a34bee3bbf16da",
     "semantic_hash": ""
   },
   "apps/server/src/dashboard/dashboard-maintainers.controller.ts": {
@@ -2620,8 +2620,8 @@
     "semantic_hash": ""
   },
   "packages/engine/test/golden/off-mode.json": {
-    "mtime": 1783626567.3642926,
-    "ast_hash": "5c1aaafe8857207849527a88903d77f3",
+    "mtime": 1783971666.704852,
+    "ast_hash": "ad26769289eaa9ccecb49a2e349bbf65",
     "semantic_hash": ""
   },
   "packages/engine/test/off-mode-identity.spec.ts": {
@@ -2905,8 +2905,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/MapScene.tsx": {
-    "mtime": 1783582902.7776601,
-    "ast_hash": "1c0fcbff02586fb5cfad3508373d1ae6",
+    "mtime": 1783971640.8830833,
+    "ast_hash": "25593e5eba230c6b2a31f195a1992c5e",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-05-unified-notification-chips-design.md": {
@@ -3115,8 +3115,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/views/UsersView.test.tsx": {
-    "mtime": 1783765549.3332796,
-    "ast_hash": "e8f4c3e46597cbe18ac51beec4645d32",
+    "mtime": 1783971638.0112493,
+    "ast_hash": "4d53b107daeb274e70855d3db5a0fba7",
     "semantic_hash": ""
   },
   "apps/admin/src/components/FeatureToggles.test.tsx": {
@@ -3385,13 +3385,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-07-double-ferries.md": {
-    "mtime": 1783579943.1696596,
-    "ast_hash": "838b45889b3f5ff5aa9b006074246bec",
+    "mtime": 1783971645.606592,
+    "ast_hash": "14fbd3a3a08b05c72cc475a618f078ea",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-07-double-ferries-design.md": {
-    "mtime": 1783408814.3817956,
-    "ast_hash": "8386e8cdfce5711ce8e3ac1e8a8794bc",
+    "mtime": 1783971647.362874,
+    "ast_hash": "cc731ad12ddbe367ec0b9e8c043a3e83",
     "semantic_hash": ""
   },
   "packages/map-data/test/double-tunnel.spec.ts": {
@@ -3450,13 +3450,13 @@
     "semantic_hash": ""
   },
   "packages/map-data/tw2.1.json": {
-    "mtime": 1783624930.241063,
-    "ast_hash": "28bdfbf713ffb93a4e57105ff68d0fed",
+    "mtime": 1783971666.992115,
+    "ast_hash": "8bf729216df5fedf536120731552e2b7",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-taiwan-map-v4-tw2.1-design.md": {
-    "mtime": 1783626567.3632932,
-    "ast_hash": "71d7febc486bdd8222b4fc6ce050429c",
+    "mtime": 1783971647.5282526,
+    "ast_hash": "773eac8f06f7d25558f6760b2a305d30",
     "semantic_hash": ""
   },
   "packages/map-data/src/archive/v3.ts": {
@@ -3470,8 +3470,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md": {
-    "mtime": 1783621843.9709551,
-    "ast_hash": "212bfe6631cbb5088548de8e9d0ca3ee",
+    "mtime": 1783971645.81361,
+    "ast_hash": "34b9c3245c9bb465743798a6a89e77a4",
     "semantic_hash": ""
   },
   "apps/server/test/purge-audit-skip.e2e.spec.ts": {
@@ -3480,13 +3480,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-room-ownership-and-lobby-chat-design.md": {
-    "mtime": 1783622256.1795762,
-    "ast_hash": "ca1f4bff56ee264bdf5b7ad23b0b8909",
+    "mtime": 1783971647.5175853,
+    "ast_hash": "b30308d40257274e016772d23aee4152",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-room-ownership-and-lobby-chat.md": {
-    "mtime": 1783622957.9683883,
-    "ast_hash": "c477ee377f459a5fd2a50bc3be7216cb",
+    "mtime": 1783971646.2331152,
+    "ast_hash": "49c45b1675c43ec1ffb79373cb788b1a",
     "semantic_hash": ""
   },
   "apps/web/src/components/OwnerLeaveDialog.tsx": {
@@ -3495,13 +3495,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-triple-rails-and-parallel-track-fix-design.md": {
-    "mtime": 1783624930.178015,
-    "ast_hash": "c6518458a3f0ca29e9a3ad26dbb9eca5",
+    "mtime": 1783971647.5647252,
+    "ast_hash": "07223cf9e52c60b2ee7b892c5faa7ab8",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-triple-rails-and-parallel-track-fix.md": {
-    "mtime": 1783625051.3882687,
-    "ast_hash": "824d7d2c7aea5a80441d0585edc204b5",
+    "mtime": 1783971646.3875296,
+    "ast_hash": "6cff73972bea558223a3f38586d3f53d",
     "semantic_hash": ""
   },
   "packages/map-data/test/parallel-groups.spec.ts": {
@@ -3530,23 +3530,23 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-builder-station-priority-and-parallel-track-position-design.md": {
-    "mtime": 1783630264.7664325,
-    "ast_hash": "1241bb2d2767fb804d4cec6b6330847c",
+    "mtime": 1783971647.4293177,
+    "ast_hash": "effbea59277fef1be5a3a2bad5841fd3",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-ticket-display-areas-design.md": {
-    "mtime": 1783629862.4148905,
-    "ast_hash": "bd9926361a692f07131ebfab57848aab",
+    "mtime": 1783971647.5452557,
+    "ast_hash": "b188281cd325ea1cd462a0d96844204b",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-ticket-display-areas.md": {
-    "mtime": 1783630599.3745737,
-    "ast_hash": "c8c95cc257b5335f48abcfe768223a19",
+    "mtime": 1783971646.310018,
+    "ast_hash": "409d0059c48fb62945c9bc2e7e72dafa",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-builder-station-priority-and-parallel-track-position.md": {
-    "mtime": 1783630697.6645768,
-    "ast_hash": "8b3eb78a0d668c22c24bf6206af53b2d",
+    "mtime": 1783971645.8627284,
+    "ast_hash": "3167f6da72b24c717109652719bf2293",
     "semantic_hash": ""
   },
   "packages/map-data/src/ticket-view.ts": {
@@ -3575,28 +3575,28 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-admin-delete-user-design.md": {
-    "mtime": 1783655474.387101,
-    "ast_hash": "9a79d8e97557db91ada1ccc2550c58e3",
+    "mtime": 1783971647.4003308,
+    "ast_hash": "ff0131bc0f69f8467f8d8a129b8cdeec",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-admin-delete-user.md": {
-    "mtime": 1783655918.6084497,
-    "ast_hash": "12969b34a18f9383a4a2e5aaad4ad00a",
+    "mtime": 1783971645.7610934,
+    "ast_hash": "f3a77569c76fbc3014c15ed0b39e38db",
     "semantic_hash": ""
   },
   "apps/server/test/dashboard-delete-user.e2e.spec.ts": {
-    "mtime": 1783688230.9711776,
-    "ast_hash": "712a2d7342f03354089c64afb2401e34",
+    "mtime": 1783971640.2233827,
+    "ast_hash": "2060fb673e7f9d9073d7c41b14762e8b",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-fork-custom-maps-from-official-design.md": {
-    "mtime": 1783656215.5938444,
-    "ast_hash": "0a4f5f9772fa201e4d4aa96238639a19",
+    "mtime": 1783971647.4827242,
+    "ast_hash": "9c3166494b81e8ea9844e4282e640987",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-fork-custom-maps-from-official.md": {
-    "mtime": 1783656654.5105822,
-    "ast_hash": "3d70293dbd86c4d6ca611414b6a0bea4",
+    "mtime": 1783971646.1009264,
+    "ast_hash": "d999d668111cf957f15e8a5a00215bce",
     "semantic_hash": ""
   },
   "packages/map-data/test/fork-geography.spec.ts": {
@@ -3610,13 +3610,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-volume-slider-redesign-design.md": {
-    "mtime": 1783676208.5237803,
-    "ast_hash": "0c9419f4822d9555cdcafea7da9a36de",
+    "mtime": 1783971647.5859306,
+    "ast_hash": "f0e4d6e3bfa1d479df82bebd023347b5",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-volume-slider-redesign.md": {
-    "mtime": 1783676438.93384,
-    "ast_hash": "cd63cd03e08482e9dca3ae689a491b99",
+    "mtime": 1783971646.4701717,
+    "ast_hash": "eaef206a0082ccc757d01a9df948ccb7",
     "semantic_hash": ""
   },
   "apps/web/src/components/ui/VolumeSlider.tsx": {
@@ -3630,18 +3630,18 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-practice-with-bots-design.md": {
-    "mtime": 1783683028.8280375,
-    "ast_hash": "feb19a85dfdbe66735899199cd2ee3f5",
+    "mtime": 1783971647.5040746,
+    "ast_hash": "5b3fd37054ebcc25e2e2d2d9a720b625",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-practice-with-bots.md": {
-    "mtime": 1783683312.4564087,
-    "ast_hash": "c5d294440aa5d71b9fb53366fde40232",
+    "mtime": 1783971646.163921,
+    "ast_hash": "3afc2845d3274c96e5a4f9a5c287d3a8",
     "semantic_hash": ""
   },
   "apps/server/test/lobby-practice.e2e.spec.ts": {
-    "mtime": 1783683912.357932,
-    "ast_hash": "68365ffaebbab2a28790e5042542b6bd",
+    "mtime": 1783971640.4564488,
+    "ast_hash": "9dc8201fe63af2b8c5d280f97e7c057f",
     "semantic_hash": ""
   },
   "apps/web/src/components/icons/DiscordGlyph.tsx": {
@@ -3655,13 +3655,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-endgame-rating-discord-design.md": {
-    "mtime": 1783686642.5063505,
-    "ast_hash": "39ac6aae897f0b27cde972f80ceb58e4",
+    "mtime": 1783971647.4657173,
+    "ast_hash": "17802417c22e6e43355dd1a4f7b686a2",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-endgame-rating-discord.md": {
-    "mtime": 1783687695.6747217,
-    "ast_hash": "0dec85298c0a4d4beae3cf0c53a6b088",
+    "mtime": 1783971646.0549033,
+    "ast_hash": "0689717769f02801e2011d9b3773f196",
     "semantic_hash": ""
   },
   "apps/server/src/ratings/ratings.controller.ts": {
@@ -3675,8 +3675,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/ratings/ratings.repo.ts": {
-    "mtime": 1783687931.9071722,
-    "ast_hash": "5b13ddbb1d08481417605778c1dacb89",
+    "mtime": 1783971640.024852,
+    "ast_hash": "5922a92bdd156c630078b9af453fdee9",
     "semantic_hash": ""
   },
   "apps/server/src/ratings/ratings.schemas.ts": {
@@ -3735,23 +3735,23 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/ui/Slider.tsx": {
-    "mtime": 1783690810.21679,
-    "ast_hash": "93efb751209ba48e156bc2b0b038a3f2",
+    "mtime": 1783971641.038192,
+    "ast_hash": "71fe1cb45e2a1282699104833c9d0e19",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-mission-generator-short-max-score-design.md": {
-    "mtime": 1783692586.249988,
-    "ast_hash": "2536fec3bc2d6bc8ff3da54d1fae00e4",
+    "mtime": 1783971647.4934878,
+    "ast_hash": "1224c2a63b778659dd66bd371820f592",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-mission-generator-short-max-score.md": {
-    "mtime": 1783694840.380523,
-    "ast_hash": "bcb6e9089ca26898a51bcd0a4ca1eb3d",
+    "mtime": 1783971646.1280227,
+    "ast_hash": "9e92e86f8c00a4738f5a840d8486b5e3",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-default-feature-flags-design.md": {
-    "mtime": 1783697534.800845,
-    "ast_hash": "53bfac03449c6bc7aaf6c7898cd68317",
+    "mtime": 1783971647.445434,
+    "ast_hash": "ef862c718639dad48aebd7bb4c3a5763",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-10-tutorial-completed-flag-design.md": {
@@ -3760,13 +3760,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-default-feature-flags.md": {
-    "mtime": 1783698300.932573,
-    "ast_hash": "3ee558c04714c36182c30a5caf080c6a",
+    "mtime": 1783971645.9361634,
+    "ast_hash": "f0e2196273dd42af5b997e1e76c867d8",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-10-tutorial-completed-flag.md": {
-    "mtime": 1783698725.9206955,
-    "ast_hash": "940bb970a6bd766a122ca2f3532a0185",
+    "mtime": 1783971646.452134,
+    "ast_hash": "9c44bcbc218a94d595f5ae2a1a832bdd",
     "semantic_hash": ""
   },
   "apps/server/test/feature-defaults.e2e.spec.ts": {
@@ -3790,8 +3790,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/dashboard-config-features.e2e.spec.ts": {
-    "mtime": 1783699310.7172515,
-    "ast_hash": "ab033bd8ef5a5404a774f801fe8d94ba",
+    "mtime": 1783971640.2158656,
+    "ast_hash": "01a40b219e243aadb9464df0fc74e8ad",
     "semantic_hash": ""
   },
   "apps/server/test/dashboard-tutorial-reset.e2e.spec.ts": {
@@ -3815,8 +3815,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md": {
-    "mtime": 1783704086.09382,
-    "ast_hash": "dc4f53ef46040f04f8c601103adefb7b",
+    "mtime": 1783971646.5593493,
+    "ast_hash": "867db7f43b638a7140737828a15de8f0",
     "semantic_hash": ""
   },
   "apps/server/test/lobby-full-join-spectate.e2e.spec.ts": {
@@ -3825,8 +3825,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-11-admin-force-spectate-design.md": {
-    "mtime": 1783714381.6041777,
-    "ast_hash": "55eef2a6623241ed223643352a71c855",
+    "mtime": 1783971647.6009345,
+    "ast_hash": "9616b9195941fef8d3ceebb76730ff96",
     "semantic_hash": ""
   },
   "apps/web/src/game/frameHome.ts": {
@@ -3835,8 +3835,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-11-admin-force-spectate.md": {
-    "mtime": 1783715041.6927764,
-    "ast_hash": "8d230916864b064d42148cebcc742a7d",
+    "mtime": 1783971646.5319078,
+    "ast_hash": "801f5e30c78534f6eb36f2ab61d21c76",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-11-map-builder-delete-confirmation-design.md": {
@@ -3855,8 +3855,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/history/admin-spectate.controller.ts": {
-    "mtime": 1783715509.7485535,
-    "ast_hash": "851068735da40157bd222fa0b32db844",
+    "mtime": 1783971639.7149596,
+    "ast_hash": "0bbf2ef0f56e5efaa43b8c5962908f42",
     "semantic_hash": ""
   },
   "apps/server/src/history/admin-spectate.guard.ts": {
@@ -3865,8 +3865,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-11-map-builder-delete-confirmation.md": {
-    "mtime": 1783715765.188925,
-    "ast_hash": "ba10ef7be82abc95629cd8f42710b57d",
+    "mtime": 1783971646.6700177,
+    "ast_hash": "d5dca4fc7cb78d46c307615f81445c30",
     "semantic_hash": ""
   },
   "apps/web/src/screens/AdminSpectateScreen.test.tsx": {
@@ -3880,13 +3880,13 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-11-ga-analytics-events-design.md": {
-    "mtime": 1783717906.8308306,
-    "ast_hash": "161c02b0b30cf74d01e7c7b4dc46db61",
+    "mtime": 1783971647.6363153,
+    "ast_hash": "65fb346705ef754f15dc425d5d2478db",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-11-ga-analytics-events.md": {
-    "mtime": 1783718429.715823,
-    "ast_hash": "7c859d539d56c685d9a07929bfd407b6",
+    "mtime": 1783971646.6118882,
+    "ast_hash": "4630065a119313e55cba1bde4831d71c",
     "semantic_hash": ""
   },
   "apps/web/src/lib/analytics.test.ts": {
@@ -3910,18 +3910,18 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md": {
-    "mtime": 1783718873.030543,
-    "ast_hash": "b59918761f20fc468d4cf2558b6b304d",
+    "mtime": 1783971647.6777282,
+    "ast_hash": "104cf47945a3ce0be997048f0c6f3b57",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-11-transferable-room-owners.md": {
-    "mtime": 1783719651.047612,
-    "ast_hash": "a761b282ccce819ea9913b3bd6002c27",
+    "mtime": 1783971646.713809,
+    "ast_hash": "c2c9011383fcba6638ebf607f8b182a9",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-11-map-builder-antimeridian-design.md": {
-    "mtime": 1783763801.464614,
-    "ast_hash": "2addc1a64387b0eddc838ba4e94a08f9",
+    "mtime": 1783971647.6565268,
+    "ast_hash": "feb6e8ebac5006f5afeeec43b1e7c408",
     "semantic_hash": ""
   },
   "apps/admin/src/views/ReportsView.test.tsx": {
@@ -3960,8 +3960,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/app.config.ts": {
-    "mtime": 1783937939.698419,
-    "ast_hash": "67f5ae6b937706b14fd4ce63867023a6",
+    "mtime": 1783956685.0205724,
+    "ast_hash": "e19394df594ca5f5cfd7de8452254d9d",
     "semantic_hash": ""
   },
   "apps/mobile/babel.config.js": {
@@ -3985,8 +3985,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/package.json": {
-    "mtime": 1783939624.972053,
-    "ast_hash": "75e768330ceae38791bccd351d46d6fc",
+    "mtime": 1783956704.8822608,
+    "ast_hash": "a6302fff1c650339cdc65ccb7d59aa14",
     "semantic_hash": ""
   },
   "apps/mobile/src/account/deleteAccount.test.ts": {
@@ -4255,8 +4255,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/TunnelModal.tsx": {
-    "mtime": 1783900489.0826912,
-    "ast_hash": "c42f1ee89d774f60484faaa811bde9e6",
+    "mtime": 1783971638.5754044,
+    "ast_hash": "948bf13ac7ce782ae7460d9684c53683",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/__tests__/moderation-ui.test.tsx": {
@@ -4310,8 +4310,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/__tests__/TutorialScreen.walkthrough.test.tsx": {
-    "mtime": 1783874975.7372918,
-    "ast_hash": "ec9f7ea658ff3cad4b7a2a31a88e5121",
+    "mtime": 1783974390.2758188,
+    "ast_hash": "d344b55787581dbf932817a6a3699cb0",
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/__tests__/TutorialSpotlight.test.tsx": {
@@ -4805,8 +4805,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/HomeScreen.tsx": {
-    "mtime": 1783939906.598936,
-    "ast_hash": "a4f6f9f01526a68ef9e771c7832ffde6",
+    "mtime": 1783971639.1344752,
+    "ast_hash": "938dec356dab0692f40fe08ad8cdb104",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/LoginScreen.tsx": {
@@ -4940,8 +4940,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/store/session.test.ts": {
-    "mtime": 1783898075.7364125,
-    "ast_hash": "44c9f9b9b862b81fd9e06d392f1f3a02",
+    "mtime": 1783971639.297385,
+    "ast_hash": "63ee706b0090d32d5841af6b52419af8",
     "semantic_hash": ""
   },
   "apps/mobile/src/store/session.ts": {
@@ -5145,8 +5145,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/well-known.e2e.spec.ts": {
-    "mtime": 1783939933.0164642,
-    "ast_hash": "0b62eeab23287283d70d9d5d220f3d7e",
+    "mtime": 1783971640.624916,
+    "ast_hash": "09393cc63b8fa974e9728becf9859f8c",
     "semantic_hash": ""
   },
   "apps/web/src/features/builder/geo/antimeridian.test.ts": {
@@ -5235,8 +5235,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-android.yml": {
-    "mtime": 1783937961.9013653,
-    "ast_hash": "6ced6f5589c5da80d5598568e2896656",
+    "mtime": 1783959230.7251852,
+    "ast_hash": "8f18c1f4480dd9609c32c66c2ef6e22c",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ci.yml": {
@@ -5245,8 +5245,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ios.yml": {
-    "mtime": 1783937973.428027,
-    "ast_hash": "b4c1ac74f6a2a41b676d01a895338c8e",
+    "mtime": 1783942090.2994134,
+    "ast_hash": "e641180aac9e27996937d3ab28ad02e4",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ota.yml": {
@@ -5370,8 +5370,8 @@
     "semantic_hash": ""
   },
   "docs/release/ip-risk-acknowledgment.md": {
-    "mtime": 1783869478.5906813,
-    "ast_hash": "e6417309a27719145c49982470efe986",
+    "mtime": 1783971642.4722104,
+    "ast_hash": "17083dc66475f67d9f73229c10cc9ca0",
     "semantic_hash": ""
   },
   "docs/release/mobile-versioning.md": {
@@ -5430,8 +5430,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-11-map-builder-antimeridian.md": {
-    "mtime": 1783764885.185254,
-    "ast_hash": "eab2ebab76742c00338ef4f17bf04220",
+    "mtime": 1783971646.6549897,
+    "ast_hash": "cd47efe2b06559f15dfcbed4e6205064",
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-06-mobile-app-design.md": {
@@ -5440,8 +5440,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-07-12-deadlock-end-sequence-design.md": {
-    "mtime": 1783867517.5338516,
-    "ast_hash": "1e81d8b085ec110fb0cdee169025503d",
+    "mtime": 1783971647.6951916,
+    "ast_hash": "272ac955c0c9a4c990a3e60215a37abc",
     "semantic_hash": ""
   },
   "packages/bots/CLAUDE.md": {
@@ -5515,8 +5515,8 @@
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-12-deadlock-end-sequence.md": {
-    "mtime": 1783874998.4026709,
-    "ast_hash": "c1ae3d1294582741c3e3b332fdc873cd",
+    "mtime": 1783971646.7646375,
+    "ast_hash": "9ed6115e95ca194f4750c6507d116b1c",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/__tests__/eventActions.test.tsx": {
@@ -5620,8 +5620,8 @@
     "semantic_hash": ""
   },
   "packages/client-core/src/net/rest.ts": {
-    "mtime": 1783898029.9365604,
-    "ast_hash": "93ef10a8267843c0349ce0b479044460",
+    "mtime": 1783971666.0733783,
+    "ast_hash": "d88f39d0dcedbed2ab918b2e4daa10e7",
     "semantic_hash": ""
   },
   "packages/client-core/src/net/restTypes.ts": {
@@ -5790,8 +5790,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/theme/chrome.tsx": {
-    "mtime": 1783939944.2764683,
-    "ast_hash": "46e66eff8dd46f20be17c034d6d313d5",
+    "mtime": 1783971639.3278236,
+    "ast_hash": "d004db6a8e58d4d70b7cd6326f4bd307",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/TurnBanner.tsx": {
@@ -5810,8 +5810,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/components/celebration/Confetti.tsx": {
-    "mtime": 1783939676.7150319,
-    "ast_hash": "205e1464b2978be2fee6248e5436ac56",
+    "mtime": 1783971638.3130627,
+    "ast_hash": "626d10ca1d7629cd34124f8f4ee82b94",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/StarRating.tsx": {
@@ -5895,13 +5895,23 @@
     "semantic_hash": ""
   },
   "docs/release/app-store-connect-setup.md": {
-    "mtime": 1783939750.0468044,
-    "ast_hash": "0bbcb46767617ccf0f8bead694199cdf",
+    "mtime": 1783971642.4692092,
+    "ast_hash": "160ab5784fed1a0ee15eb42a7443b24c",
     "semantic_hash": ""
   },
   "docs/release/play-console-setup.md": {
-    "mtime": 1783939445.410383,
-    "ast_hash": "bf4a9b14d5762802a61dc1ac76d126bc",
+    "mtime": 1783971642.4937255,
+    "ast_hash": "92f94040899f5d22f8ab9df0597a8be2",
+    "semantic_hash": ""
+  },
+  "apps/server/src/persistence/engine-compat.ts": {
+    "mtime": 1783971403.0308006,
+    "ast_hash": "0322ce6699b881998a5a7b6e14e0179f",
+    "semantic_hash": ""
+  },
+  "apps/server/test/recovery-engine-compat.e2e.spec.ts": {
+    "mtime": 1783971640.6054006,
+    "ast_hash": "407389d5d4a11c38cf4057527c9d6203",
     "semantic_hash": ""
   }
 }

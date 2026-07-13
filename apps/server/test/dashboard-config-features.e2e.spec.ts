@@ -75,9 +75,14 @@ describe('dashboard config: default feature flags', () => {
       .get('/api/v1/dashboard/audit')
       .set(auth(owner.token))
       .expect(200);
-    const entry = audit.body.entries.find((e: { action: string }) => e.action === 'config.features');
+    const entry = audit.body.entries.find(
+      (e: { action: string }) => e.action === 'config.features',
+    );
     expect(entry).toBeDefined();
-    expect(entry.params).toEqual({ before: ['randomEvents'], after: ['mapBuilder', 'replayReview'] });
+    expect(entry.params).toEqual({
+      before: ['randomEvents'],
+      after: ['mapBuilder', 'replayReview'],
+    });
 
     // Unknown feature name is rejected by validation.
     await request(server())

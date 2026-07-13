@@ -1,7 +1,15 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RootStackParamList } from '../navigation';
 import { api, type RoomView } from '../net/rest';
@@ -324,9 +332,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       onPress={() => navigation.navigate('Tutorial')}
     >
       <View style={styles.tutorialText}>
-        <Text style={[styles.roomCode, { color: tokens.ink }]}>
-          {t('home.play.tutorialTitle')}
-        </Text>
+        <Text style={[styles.roomCode, { color: tokens.ink }]}>{t('home.play.tutorialTitle')}</Text>
         <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
           {t('home.play.tutorialDesc')}
         </Text>
@@ -362,9 +368,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     <>
       <SectionLabel>{t('home.publicRooms')}</SectionLabel>
       {publicRooms.length === 0 ? (
-        <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
-          {t('home.noPublicRooms')}
-        </Text>
+        <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>{t('home.noPublicRooms')}</Text>
       ) : (
         publicRooms.map((r) => (
           <View

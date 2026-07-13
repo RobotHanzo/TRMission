@@ -36,10 +36,12 @@ engine, or `@trm/map-data` changes.
 ### Task 1: `geo/antimeridian.ts` — pure longitude-unwrap helpers
 
 **Files:**
+
 - Create: `apps/web/src/features/builder/geo/antimeridian.ts`
 - Test: `apps/web/src/features/builder/geo/antimeridian.test.ts`
 
 **Interfaces:**
+
 - Consumes: `Ring`, `Point` from `./clip`; `CropBBox` from `./projection`.
 - Produces (relied on by Tasks 2, 3, 5):
   - `lonSpan(bbox: CropBBox): number`
@@ -297,12 +299,14 @@ git commit -m "feat(web): add antimeridian longitude-unwrap geometry helpers"
 ### Task 2: Country-pick auto-unwraps seam-crossing countries
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/geo/world.ts` (imports at `:1-8`; delete private
   `boundsOfRings` at `:65-81`; rewrite `countriesToGeography` at `:114-120`)
 - Test: `apps/web/src/features/builder/geo/world.test.ts` (extend the `countriesToGeography`
   describe block)
 
 **Interfaces:**
+
 - Consumes: `chooseMinimalLonRepresentation` from `./antimeridian` (Task 1).
 - Produces: `countriesToGeography(ids: readonly string[]): CropResult | null` (signature unchanged;
   behavior now contiguous for seam crossers).
@@ -314,25 +318,25 @@ Add these cases inside the existing `describe('countriesToGeography', ...)` bloc
 `countriesToGeography`):
 
 ```ts
-  it('builds seam-crossing Russia as one contiguous landmass, not two edge slivers', () => {
-    const result = countriesToGeography(['RUS']);
-    expect(result).not.toBeNull();
-    const { geography } = result!;
-    // Raw Russia spans lon -179.88°..179.49° (~359°), which split it in two. Unwrapped it is
-    // ~19°..191° (~172°): a narrower span whose lonMax is pushed past the antimeridian.
-    expect(geography.crop.lonMax - geography.crop.lonMin).toBeLessThan(200);
-    expect(geography.crop.lonMax).toBeGreaterThan(180);
-    expect(validateGeography(geography)).toEqual([]);
-  });
+it('builds seam-crossing Russia as one contiguous landmass, not two edge slivers', () => {
+  const result = countriesToGeography(['RUS']);
+  expect(result).not.toBeNull();
+  const { geography } = result!;
+  // Raw Russia spans lon -179.88°..179.49° (~359°), which split it in two. Unwrapped it is
+  // ~19°..191° (~172°): a narrower span whose lonMax is pushed past the antimeridian.
+  expect(geography.crop.lonMax - geography.crop.lonMin).toBeLessThan(200);
+  expect(geography.crop.lonMax).toBeGreaterThan(180);
+  expect(validateGeography(geography)).toEqual([]);
+});
 
-  it('builds seam-crossing Fiji contiguously', () => {
-    const result = countriesToGeography(['FJI']);
-    expect(result).not.toBeNull();
-    const { geography } = result!;
-    expect(geography.crop.lonMax - geography.crop.lonMin).toBeLessThan(200);
-    expect(geography.crop.lonMax).toBeGreaterThan(180);
-    expect(validateGeography(geography)).toEqual([]);
-  });
+it('builds seam-crossing Fiji contiguously', () => {
+  const result = countriesToGeography(['FJI']);
+  expect(result).not.toBeNull();
+  const { geography } = result!;
+  expect(geography.crop.lonMax - geography.crop.lonMin).toBeLessThan(200);
+  expect(geography.crop.lonMax).toBeGreaterThan(180);
+  expect(validateGeography(geography)).toEqual([]);
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -394,12 +398,14 @@ git commit -m "feat(web): country-pick renders seam-crossing countries as one pi
 ### Task 3: `cropToGeography` clips across the antimeridian
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/geo/world.ts` (import `shiftLon`; add `clipWrapped`;
   rewrite `cropToGeography` at `:53-57`)
 - Test: `apps/web/src/features/builder/geo/world.test.ts` (extend the `cropToGeography` describe
   block)
 
 **Interfaces:**
+
 - Consumes: `shiftLon` from `./antimeridian` (Task 1); `clipRingsToBBox` from `./clip` (existing).
 - Produces: `cropToGeography(crop: CropBBox): CropResult | null` (signature unchanged; now
   wrap-aware when `crop.lonMax > 180` or `crop.lonMin < -180`).
@@ -410,17 +416,17 @@ Add this case inside the existing `describe('cropToGeography', ...)` block in
 `apps/web/src/features/builder/geo/world.test.ts`:
 
 ```ts
-  it('crops a region straddling the antimeridian, capturing land on both sides of the seam', () => {
-    // 160°E..200°E (= 160°E..160°W): the Russian Far East sits at native lon (<180) and Alaska
-    // sits past the seam (Alaska's ~-165° lands at 195° once shifted +360). A plain 160..180 crop
-    // reaches only the Russian side, so the wrapping crop must yield strictly more land.
-    const wrapped = cropToGeography({ lonMin: 160, lonMax: 200, latMin: 50, latMax: 72 });
-    const eastOnly = cropToGeography({ lonMin: 160, lonMax: 180, latMin: 50, latMax: 72 });
-    expect(wrapped).not.toBeNull();
-    expect(eastOnly).not.toBeNull();
-    expect(wrapped!.geography.land.length).toBeGreaterThan(eastOnly!.geography.land.length);
-    expect(validateGeography(wrapped!.geography)).toEqual([]);
-  });
+it('crops a region straddling the antimeridian, capturing land on both sides of the seam', () => {
+  // 160°E..200°E (= 160°E..160°W): the Russian Far East sits at native lon (<180) and Alaska
+  // sits past the seam (Alaska's ~-165° lands at 195° once shifted +360). A plain 160..180 crop
+  // reaches only the Russian side, so the wrapping crop must yield strictly more land.
+  const wrapped = cropToGeography({ lonMin: 160, lonMax: 200, latMin: 50, latMax: 72 });
+  const eastOnly = cropToGeography({ lonMin: 160, lonMax: 180, latMin: 50, latMax: 72 });
+  expect(wrapped).not.toBeNull();
+  expect(eastOnly).not.toBeNull();
+  expect(wrapped!.geography.land.length).toBeGreaterThan(eastOnly!.geography.land.length);
+  expect(validateGeography(wrapped!.geography)).toEqual([]);
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -485,10 +491,12 @@ git commit -m "feat(web): clip world crops across the antimeridian"
 ### Task 4: `isValidCrop` rejects a ≥360°-wide crop
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/geo/projection.ts` (`isValidCrop` at `:30-46`)
 - Test: `apps/web/src/features/builder/geo/projection.test.ts` (extend the `isValidCrop` block)
 
 **Interfaces:**
+
 - Produces: `isValidCrop(crop: CropBBox): boolean` (signature unchanged; now also rejects a crop
   whose longitude span is ≥ 360°). A wrapping crop under 360° wide (e.g. 160→200) still passes.
 
@@ -498,14 +506,14 @@ Add these cases inside the existing `describe('isValidCrop', ...)` block in
 `apps/web/src/features/builder/geo/projection.test.ts`:
 
 ```ts
-  it('rejects a crop spanning 360° or more', () => {
-    expect(isValidCrop({ lonMin: -180, lonMax: 180, latMin: 0, latMax: 10 })).toBe(false);
-    expect(isValidCrop({ lonMin: 0, lonMax: 360, latMin: 0, latMax: 10 })).toBe(false);
-  });
+it('rejects a crop spanning 360° or more', () => {
+  expect(isValidCrop({ lonMin: -180, lonMax: 180, latMin: 0, latMax: 10 })).toBe(false);
+  expect(isValidCrop({ lonMin: 0, lonMax: 360, latMin: 0, latMax: 10 })).toBe(false);
+});
 
-  it('accepts a crop that wraps past +180 but stays under 360° wide', () => {
-    expect(isValidCrop({ lonMin: 160, lonMax: 200, latMin: 50, latMax: 72 })).toBe(true);
-  });
+it('accepts a crop that wraps past +180 but stays under 360° wide', () => {
+  expect(isValidCrop({ lonMin: 160, lonMax: 200, latMin: 50, latMax: 72 })).toBe(true);
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -552,15 +560,18 @@ git commit -m "feat(web): reject a 360°-or-wider crop bbox"
 ### Task 5: Crop-draw panorama — draw a rectangle across the seam
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/editor/stages/CropDrawStage.tsx`
 - Test: `apps/web/src/features/builder/editor/stages/CropDrawStage.test.tsx` (extend)
 
 **Interfaces:**
+
 - Consumes: `normalizeCropLon` from `../../geo/antimeridian` (Task 1); `cropToGeography` (Task 3).
 - Produces: no exported API change — `CropDrawStage` is a route component. Its stored
   `draft.geography.crop` may now have `lonMax > 180` for a seam-crossing crop.
 
 **Notes for the implementer:**
+
 - The world map is drawn in the SVG's own user space where `x = lon`, `y = -lat`. Rendering the
   land/graticule/sea at longitude offsets `[-360, 0, +360]` creates three side-by-side world copies
   spanning user-space x ∈ [-540, 540]. `react-zoom-pan-pinch` shows one world at `initialScale=3`,
@@ -638,12 +649,14 @@ Change the `latSpan` + `result` derivation (currently `:84-86`) to project throu
 crop while keeping the raw `rect` for the overlay:
 
 ```ts
-  const latSpan = rect ? rect.latMax - rect.latMin : 0;
-  const canonicalRect = rect ? normalizeCropLon(rect) : null;
-  const result =
-    canonicalRect && canonicalRect.lonMin < canonicalRect.lonMax && canonicalRect.latMin < canonicalRect.latMax
-      ? cropToGeography(canonicalRect)
-      : null;
+const latSpan = rect ? rect.latMax - rect.latMin : 0;
+const canonicalRect = rect ? normalizeCropLon(rect) : null;
+const result =
+  canonicalRect &&
+  canonicalRect.lonMin < canonicalRect.lonMax &&
+  canonicalRect.latMin < canonicalRect.latMax
+    ? cropToGeography(canonicalRect)
+    : null;
 ```
 
 Update the `TransformWrapper` props (currently `:164-173`) so one world fills the frame at the base
@@ -666,38 +679,28 @@ Replace the SVG's static sea + graticule + land block (currently `:195-210`, the
 with the three-copy panorama:
 
 ```tsx
-                {WORLD_OFFSETS.map((off) => (
-                  <g key={`world${off}`}>
-                    <rect
-                      x={-180 + off}
-                      y={-90}
-                      width={360}
-                      height={180}
-                      className="editor-world-sea"
-                    />
-                    <g className="editor-world-graticule">
-                      {GRATICULE_LONS.map((lon) => (
-                        <line key={`gx${off}_${lon}`} x1={lon + off} y1={-90} x2={lon + off} y2={90} />
-                      ))}
-                      {GRATICULE_LATS.map((lat) => (
-                        <line
-                          key={`gy${off}_${lat}`}
-                          x1={-180 + off}
-                          y1={-lat}
-                          x2={180 + off}
-                          y2={-lat}
-                        />
-                      ))}
-                    </g>
-                    {worldLand().map((ring, i) => (
-                      <path
-                        key={`land${off}_${i}`}
-                        d={`M ${ring.map(([lon, lat]) => `${lon + off},${-lat}`).join(' L ')} Z`}
-                        className="editor-world-land"
-                      />
-                    ))}
-                  </g>
-                ))}
+{
+  WORLD_OFFSETS.map((off) => (
+    <g key={`world${off}`}>
+      <rect x={-180 + off} y={-90} width={360} height={180} className="editor-world-sea" />
+      <g className="editor-world-graticule">
+        {GRATICULE_LONS.map((lon) => (
+          <line key={`gx${off}_${lon}`} x1={lon + off} y1={-90} x2={lon + off} y2={90} />
+        ))}
+        {GRATICULE_LATS.map((lat) => (
+          <line key={`gy${off}_${lat}`} x1={-180 + off} y1={-lat} x2={180 + off} y2={-lat} />
+        ))}
+      </g>
+      {worldLand().map((ring, i) => (
+        <path
+          key={`land${off}_${i}`}
+          d={`M ${ring.map(([lon, lat]) => `${lon + off},${-lat}`).join(' L ')} Z`}
+          className="editor-world-land"
+        />
+      ))}
+    </g>
+  ));
+}
 ```
 
 Leave the crop-rectangle `<g className="editor-crop-group">` block (the `rect` + handles, currently
@@ -749,6 +752,7 @@ yarn workspace @trm/web dev
 ```
 
 Verify in the builder (`/maps/:id/edit`, Crop stage), with the `mapBuilder` feature granted:
+
 1. **Pick-countries mode → Russia**: select Russia; the preview shows one contiguous landmass (no
    two slivers hugging opposite edges). Repeat for Fiji.
 2. **Draw mode → normal crop**: draw a rectangle over Taiwan/Japan — initial framing and behavior

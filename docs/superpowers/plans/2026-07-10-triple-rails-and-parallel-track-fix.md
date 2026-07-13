@@ -23,10 +23,12 @@
 ### Task 1: map-data validation — allow 2–3 member groups, cap parallelism per pair
 
 **Files:**
+
 - Modify: `packages/map-data/src/validate.ts`
 - Test: `packages/map-data/test/parallel-groups.spec.ts` (create)
 
 **Interfaces:**
+
 - Consumes: existing `validateContent(content): ValidationResult`, `pairKey`, `formatIssue`.
 - Produces: `validateContent` now emits issue codes `doubleGroupInvalidSize` `{group,count}`, `tooManyParallelRoutes` `{pair,count}`, `multipleGroupsOnPair` `{pair,groups}` (in addition to the retained `doubleGroupDifferentPairs`/`doubleGroupLengthMismatch`). `ContentStats.doublePairCount` unchanged (counts distinct groups).
 
@@ -42,7 +44,15 @@ import type { GameContent } from '../src/types';
 import type { RouteColor } from '@trm/shared';
 
 const city = (id: string, x = 0, y = 0) =>
-  ({ id, nameZh: id, nameEn: id, x, y, region: 'r', isIsland: false }) as GameContent['cities'][number];
+  ({
+    id,
+    nameZh: id,
+    nameEn: id,
+    x,
+    y,
+    region: 'r',
+    isIsland: false,
+  }) as GameContent['cities'][number];
 const route = (
   id: string,
   a: string,
@@ -51,7 +61,16 @@ const route = (
   doubleGroup?: string,
   length = 1,
 ) =>
-  ({ id, a, b, color, length, ferryLocos: 0, isTunnel: false, ...(doubleGroup ? { doubleGroup } : {}) }) as GameContent['routes'][number];
+  ({
+    id,
+    a,
+    b,
+    color,
+    length,
+    ferryLocos: 0,
+    isTunnel: false,
+    ...(doubleGroup ? { doubleGroup } : {}),
+  }) as GameContent['routes'][number];
 const content = (routes: GameContent['routes'][number][]): GameContent => ({
   meta: { mapId: 'm', version: 1, nameZh: 'm', nameEn: 'm' },
   // two cities connected + a third so the graph is connected regardless of parallel edges
@@ -177,54 +196,54 @@ with these three cases (keep the two after them):
 Then replace the `// --- double-route pairs ---` loop:
 
 ```ts
-  // --- double-route pairs ---
-  for (const [group, members] of doubleGroups) {
-    if (members.length !== 2) {
-      push('doubleGroupWrongCount', { group, count: members.length });
-      continue;
-    }
-    const [m0, m1] = members as [RouteDef, RouteDef];
-    if (pairKey(m0.a as string, m0.b as string) !== pairKey(m1.a as string, m1.b as string)) {
-      push('doubleGroupDifferentPairs', { group });
-    }
-    if (m0.length !== m1.length) {
-      push('doubleGroupLengthMismatch', { group });
-    }
+// --- double-route pairs ---
+for (const [group, members] of doubleGroups) {
+  if (members.length !== 2) {
+    push('doubleGroupWrongCount', { group, count: members.length });
+    continue;
   }
+  const [m0, m1] = members as [RouteDef, RouteDef];
+  if (pairKey(m0.a as string, m0.b as string) !== pairKey(m1.a as string, m1.b as string)) {
+    push('doubleGroupDifferentPairs', { group });
+  }
+  if (m0.length !== m1.length) {
+    push('doubleGroupLengthMismatch', { group });
+  }
+}
 ```
 
 with the generalized version + a per-pair cap:
 
 ```ts
-  // --- parallel-route groups (2 or 3 members between one city pair) ---
-  for (const [group, members] of doubleGroups) {
-    if (members.length < 2 || members.length > 3) {
-      push('doubleGroupInvalidSize', { group, count: members.length });
-      continue;
-    }
-    const first = members[0] as RouteDef;
-    const firstPair = pairKey(first.a as string, first.b as string);
-    if (members.some((m) => pairKey(m.a as string, m.b as string) !== firstPair)) {
-      push('doubleGroupDifferentPairs', { group });
-    }
-    if (members.some((m) => m.length !== first.length)) {
-      push('doubleGroupLengthMismatch', { group });
-    }
+// --- parallel-route groups (2 or 3 members between one city pair) ---
+for (const [group, members] of doubleGroups) {
+  if (members.length < 2 || members.length > 3) {
+    push('doubleGroupInvalidSize', { group, count: members.length });
+    continue;
   }
+  const first = members[0] as RouteDef;
+  const firstPair = pairKey(first.a as string, first.b as string);
+  if (members.some((m) => pairKey(m.a as string, m.b as string) !== firstPair)) {
+    push('doubleGroupDifferentPairs', { group });
+  }
+  if (members.some((m) => m.length !== first.length)) {
+    push('doubleGroupLengthMismatch', { group });
+  }
+}
 
-  // --- per-pair parallelism cap: at most 3 routes and at most 1 group per city pair ---
-  const routesByPair = new Map<string, RouteDef[]>();
-  for (const r of routes) {
-    const k = pairKey(r.a as string, r.b as string);
-    const arr = routesByPair.get(k) ?? [];
-    arr.push(r);
-    routesByPair.set(k, arr);
-  }
-  for (const [pair, rs] of routesByPair) {
-    if (rs.length > 3) push('tooManyParallelRoutes', { pair, count: rs.length });
-    const groups = new Set(rs.map((r) => r.doubleGroup).filter(Boolean));
-    if (groups.size > 1) push('multipleGroupsOnPair', { pair, groups: [...groups].join(',') });
-  }
+// --- per-pair parallelism cap: at most 3 routes and at most 1 group per city pair ---
+const routesByPair = new Map<string, RouteDef[]>();
+for (const r of routes) {
+  const k = pairKey(r.a as string, r.b as string);
+  const arr = routesByPair.get(k) ?? [];
+  arr.push(r);
+  routesByPair.set(k, arr);
+}
+for (const [pair, rs] of routesByPair) {
+  if (rs.length > 3) push('tooManyParallelRoutes', { pair, count: rs.length });
+  const groups = new Set(rs.map((r) => r.doubleGroup).filter(Boolean));
+  if (groups.size > 1) push('multipleGroupsOnPair', { pair, groups: [...groups].join(',') });
+}
 ```
 
 - [ ] **Step 4: Run the new + existing map-data tests**
@@ -244,10 +263,12 @@ git commit -m "feat(map-data): validate parallel groups of 2 or 3; cap 3 routes 
 ### Task 2: engine board — parallel-group membership
 
 **Files:**
+
 - Modify: `packages/engine/src/board.ts`, `packages/engine/src/index.ts`
 - Test: `packages/engine/test/board-group.spec.ts` (create)
 
 **Interfaces:**
+
 - Consumes: `buildBoard(content): Board`.
 - Produces: `Board.parallelGroup: ReadonlyMap<string, readonly RouteId[]>` (route id → other members of its 2–3 group); helpers `groupMembersOf(board, id): readonly RouteId[]` and `groupSizeOf(board, id): number`; existing `siblingOf`/`doubleSibling` retained (pairwise, size-2 only). All exported from `index.ts`.
 
@@ -261,8 +282,15 @@ import { asCityId, asRouteId } from '@trm/shared';
 import type { GameContent } from '@trm/map-data';
 import { buildBoard, groupMembersOf, groupSizeOf, siblingOf } from '../src/board';
 
-const c = (id: string, x = 0) =>
-  ({ id: asCityId(id), nameZh: id, nameEn: id, x, y: 0, region: 't', isIsland: false });
+const c = (id: string, x = 0) => ({
+  id: asCityId(id),
+  nameZh: id,
+  nameEn: id,
+  x,
+  y: 0,
+  region: 't',
+  isIsland: false,
+});
 const r = (id: string, a: string, b: string, doubleGroup?: string) => ({
   id: asRouteId(id),
   a: asCityId(a),
@@ -327,39 +355,39 @@ Add to the `Board` interface (after the `doubleSibling` line):
 In `buildBoard`, add next to the other maps:
 
 ```ts
-  const parallelGroup = new Map<string, readonly RouteId[]>();
+const parallelGroup = new Map<string, readonly RouteId[]>();
 ```
 
 Replace the `for (const members of byGroup.values())` loop:
 
 ```ts
-  for (const members of byGroup.values()) {
-    if (members.length === 2) {
-      const [m0, m1] = members as [RouteDef, RouteDef];
-      doubleSibling.set(m0.id as string, m1.id);
-      doubleSibling.set(m1.id as string, m0.id);
-    }
+for (const members of byGroup.values()) {
+  if (members.length === 2) {
+    const [m0, m1] = members as [RouteDef, RouteDef];
+    doubleSibling.set(m0.id as string, m1.id);
+    doubleSibling.set(m1.id as string, m0.id);
   }
+}
 ```
 
 with:
 
 ```ts
-  for (const members of byGroup.values()) {
-    if (members.length < 2 || members.length > 3) continue;
-    for (const m of members) {
-      parallelGroup.set(
-        m.id as string,
-        members.filter((x) => x.id !== m.id).map((x) => x.id),
-      );
-    }
-    // Retain the pairwise sibling map for size-2 groups (used by legacy event-effect helpers).
-    if (members.length === 2) {
-      const [m0, m1] = members as [RouteDef, RouteDef];
-      doubleSibling.set(m0.id as string, m1.id);
-      doubleSibling.set(m1.id as string, m0.id);
-    }
+for (const members of byGroup.values()) {
+  if (members.length < 2 || members.length > 3) continue;
+  for (const m of members) {
+    parallelGroup.set(
+      m.id as string,
+      members.filter((x) => x.id !== m.id).map((x) => x.id),
+    );
   }
+  // Retain the pairwise sibling map for size-2 groups (used by legacy event-effect helpers).
+  if (members.length === 2) {
+    const [m0, m1] = members as [RouteDef, RouteDef];
+    doubleSibling.set(m0.id as string, m1.id);
+    doubleSibling.set(m1.id as string, m0.id);
+  }
+}
 ```
 
 Add `parallelGroup` to the returned object, then add the two helpers after `siblingOf`:
@@ -410,10 +438,12 @@ git commit -m "feat(engine): add parallelGroup membership (2-3) to Board"
 ### Task 3: engine config — `openTrackCount` scaling helper
 
 **Files:**
+
 - Modify: `packages/engine/src/config.ts`, `packages/engine/src/index.ts`
 - Test: `packages/engine/test/open-track-count.spec.ts` (create)
 
 **Interfaces:**
+
 - Produces: `openTrackCount(groupSize: number, playerCount: number, singleFor23: boolean): number` = `singleFor23 ? min(groupSize, max(1, playerCount − 2)) : groupSize`. Removes `variantForPlayerCount` / `DoubleRouteVariant` (engine-internal; only `reduce.ts` + index re-export used them).
 
 - [ ] **Step 1: Write the failing test**
@@ -493,10 +523,12 @@ git commit -m "feat(engine): replace variantForPlayerCount with openTrackCount s
 ### Task 4: engine reduce + invariants — generalized claim guard, lock, exclusivity
 
 **Files:**
+
 - Modify: `packages/engine/src/reduce.ts`, `packages/engine/src/invariants.ts`
 - Test: `packages/engine/test/rules.spec.ts` (add a `describe('triple routes', …)` block)
 
 **Interfaces:**
+
 - Consumes: `groupMembersOf`, `groupSizeOf` (Task 2), `openTrackCount` (Task 3).
 - Produces: claiming a track locks all remaining group members once the group's owned count reaches `openTrackCount(...)`; owning two members of a group is rejected with `DOUBLE_ROUTE_OWN_BOTH`; invariant forbids a player owning two members of a group. Doubles behave identically to before.
 
@@ -511,13 +543,56 @@ describe('triple routes', () => {
   const tripleContent: GameContent = {
     meta: { mapId: 'test-triple', version: 1, nameZh: '三軌測試', nameEn: 'Triple Test' },
     cities: [
-      { id: asCityId('x1'), nameZh: '甲', nameEn: 'X1', x: 0, y: 0, region: 'test', isIsland: false },
-      { id: asCityId('x2'), nameZh: '乙', nameEn: 'X2', x: 10, y: 0, region: 'test', isIsland: false },
+      {
+        id: asCityId('x1'),
+        nameZh: '甲',
+        nameEn: 'X1',
+        x: 0,
+        y: 0,
+        region: 'test',
+        isIsland: false,
+      },
+      {
+        id: asCityId('x2'),
+        nameZh: '乙',
+        nameEn: 'X2',
+        x: 10,
+        y: 0,
+        region: 'test',
+        isIsland: false,
+      },
     ],
     routes: [
-      { id: asRouteId('T1'), a: asCityId('x1'), b: asCityId('x2'), color: 'RED', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
-      { id: asRouteId('T2'), a: asCityId('x1'), b: asCityId('x2'), color: 'BLUE', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
-      { id: asRouteId('T3'), a: asCityId('x1'), b: asCityId('x2'), color: 'GREEN', length: 1, ferryLocos: 0, isTunnel: false, doubleGroup: 'A' },
+      {
+        id: asRouteId('T1'),
+        a: asCityId('x1'),
+        b: asCityId('x2'),
+        color: 'RED',
+        length: 1,
+        ferryLocos: 0,
+        isTunnel: false,
+        doubleGroup: 'A',
+      },
+      {
+        id: asRouteId('T2'),
+        a: asCityId('x1'),
+        b: asCityId('x2'),
+        color: 'BLUE',
+        length: 1,
+        ferryLocos: 0,
+        isTunnel: false,
+        doubleGroup: 'A',
+      },
+      {
+        id: asRouteId('T3'),
+        a: asCityId('x1'),
+        b: asCityId('x2'),
+        color: 'GREEN',
+        length: 1,
+        ferryLocos: 0,
+        isTunnel: false,
+        doubleGroup: 'A',
+      },
     ],
     tickets: [],
   };
@@ -563,17 +638,24 @@ describe('triple routes', () => {
   it('opens all 3 tracks in a 5-player game', () => {
     const p1 = asPlayerId('p1');
     const p2 = asPlayerId('p2');
-    const state = st({ numPlayers: 5, hands: { p0: { RED: 1 }, p1: { BLUE: 1 }, p2: { GREEN: 1 } } });
+    const state = st({
+      numPlayers: 5,
+      hands: { p0: { RED: 1 }, p1: { BLUE: 1 }, p2: { GREEN: 1 } },
+    });
     const r1 = applyT(state, claim('T1', 'RED'));
     if (!r1.ok) throw new Error('r1');
     const r2 = applyT(r1.value.state, {
-      t: 'CLAIM_ROUTE', player: p1, routeId: asRouteId('T2'),
+      t: 'CLAIM_ROUTE',
+      player: p1,
+      routeId: asRouteId('T2'),
       payment: { color: 'BLUE', colorCount: 1, locomotives: 0 },
     });
     if (!r2.ok) throw new Error('r2');
     expect(r2.value.state.ownership['T3']).toBeUndefined(); // still open
     const r3 = applyT(r2.value.state, {
-      t: 'CLAIM_ROUTE', player: p2, routeId: asRouteId('T3'),
+      t: 'CLAIM_ROUTE',
+      player: p2,
+      routeId: asRouteId('T3'),
       payment: { color: 'GREEN', colorCount: 1, locomotives: 0 },
     });
     expect(r3.ok).toBe(true);
@@ -641,94 +723,94 @@ export { openTrackCount } from './config';
 In `validateClaim`, replace the sibling guard:
 
 ```ts
-  const sib = siblingOf(board, routeId);
-  if (sib) {
-    const sibCell = state.ownership[sib as string];
-    if (sibCell && 'owner' in sibCell && sibCell.owner === player) {
-      return err(violation('DOUBLE_ROUTE_OWN_BOTH', 'cannot own both of a double route'));
-    }
+const sib = siblingOf(board, routeId);
+if (sib) {
+  const sibCell = state.ownership[sib as string];
+  if (sibCell && 'owner' in sibCell && sibCell.owner === player) {
+    return err(violation('DOUBLE_ROUTE_OWN_BOTH', 'cannot own both of a double route'));
   }
-  return ok(route);
+}
+return ok(route);
 ```
 
 with:
 
 ```ts
-  for (const other of groupMembersOf(board, routeId)) {
-    const oc = state.ownership[other as string];
-    if (oc && 'owner' in oc && oc.owner === player) {
-      return err(violation('DOUBLE_ROUTE_OWN_BOTH', 'cannot own two tracks of a parallel route'));
-    }
+for (const other of groupMembersOf(board, routeId)) {
+  const oc = state.ownership[other as string];
+  if (oc && 'owner' in oc && oc.owner === player) {
+    return err(violation('DOUBLE_ROUTE_OWN_BOTH', 'cannot own two tracks of a parallel route'));
   }
-  return ok(route);
+}
+return ok(route);
 ```
 
 In `applyClaimEffects`, replace the lock block:
 
 ```ts
-  // Sibling lock is emitted AFTER the claim/bonus events; buffer it here.
-  const lockedEvents: GameEvent[] = [];
-  const variant = variantForPlayerCount(
-    state.turnOrder.length,
-    state.ruleParams.doubleRouteSingleFor23,
-  );
-  if (variant === 'SINGLE_ONLY') {
-    const sib = siblingOf(board, route.id);
-    if (sib && !next.ownership[sib as string]) {
-      next = setOwnership(next, sib as string, { locked: true });
-      lockedEvents.push({ e: 'DOUBLE_ROUTE_LOCKED', routeId: sib, visibility: 'PUBLIC' });
-    }
+// Sibling lock is emitted AFTER the claim/bonus events; buffer it here.
+const lockedEvents: GameEvent[] = [];
+const variant = variantForPlayerCount(
+  state.turnOrder.length,
+  state.ruleParams.doubleRouteSingleFor23,
+);
+if (variant === 'SINGLE_ONLY') {
+  const sib = siblingOf(board, route.id);
+  if (sib && !next.ownership[sib as string]) {
+    next = setOwnership(next, sib as string, { locked: true });
+    lockedEvents.push({ e: 'DOUBLE_ROUTE_LOCKED', routeId: sib, visibility: 'PUBLIC' });
   }
+}
 ```
 
 with:
 
 ```ts
-  // Parallel-group lock is emitted AFTER the claim/bonus events; buffer it here. Once the group's
-  // owned tracks reach the open-track count, every remaining track locks. For a 2-member group at
-  // 2–3p this reduces to the historical "lock the one sibling."
-  const lockedEvents: GameEvent[] = [];
-  const groupMembers = groupMembersOf(board, route.id);
-  if (groupMembers.length > 0) {
-    const open = openTrackCount(
-      groupMembers.length + 1,
-      state.turnOrder.length,
-      state.ruleParams.doubleRouteSingleFor23,
-    );
-    let owned = 1; // the route just claimed
+// Parallel-group lock is emitted AFTER the claim/bonus events; buffer it here. Once the group's
+// owned tracks reach the open-track count, every remaining track locks. For a 2-member group at
+// 2–3p this reduces to the historical "lock the one sibling."
+const lockedEvents: GameEvent[] = [];
+const groupMembers = groupMembersOf(board, route.id);
+if (groupMembers.length > 0) {
+  const open = openTrackCount(
+    groupMembers.length + 1,
+    state.turnOrder.length,
+    state.ruleParams.doubleRouteSingleFor23,
+  );
+  let owned = 1; // the route just claimed
+  for (const other of groupMembers) {
+    const oc = next.ownership[other as string];
+    if (oc && 'owner' in oc) owned++;
+  }
+  if (owned >= open) {
     for (const other of groupMembers) {
-      const oc = next.ownership[other as string];
-      if (oc && 'owner' in oc) owned++;
-    }
-    if (owned >= open) {
-      for (const other of groupMembers) {
-        if (!next.ownership[other as string]) {
-          next = setOwnership(next, other as string, { locked: true });
-          lockedEvents.push({ e: 'DOUBLE_ROUTE_LOCKED', routeId: other, visibility: 'PUBLIC' });
-        }
+      if (!next.ownership[other as string]) {
+        next = setOwnership(next, other as string, { locked: true });
+        lockedEvents.push({ e: 'DOUBLE_ROUTE_LOCKED', routeId: other, visibility: 'PUBLIC' });
       }
     }
   }
+}
 ```
 
 In the `legalActions`/`hasClaimMove` availability scan (the `for (const route of board.content.routes)` loop), replace:
 
 ```ts
-      const sib = siblingOf(board, route.id);
-      if (sib) {
-        const sc = state.ownership[sib as string];
-        if (sc && 'owner' in sc && sc.owner === player) continue;
-      }
+const sib = siblingOf(board, route.id);
+if (sib) {
+  const sc = state.ownership[sib as string];
+  if (sc && 'owner' in sc && sc.owner === player) continue;
+}
 ```
 
 with:
 
 ```ts
-      const ownsGroupMember = groupMembersOf(board, route.id).some((other) => {
-        const sc = state.ownership[other as string];
-        return sc && 'owner' in sc && sc.owner === player;
-      });
-      if (ownsGroupMember) continue;
+const ownsGroupMember = groupMembersOf(board, route.id).some((other) => {
+  const sc = state.ownership[other as string];
+  return sc && 'owner' in sc && sc.owner === player;
+});
+if (ownsGroupMember) continue;
 ```
 
 - [ ] **Step 4: Update `invariants.ts`**
@@ -736,38 +818,38 @@ with:
 Replace the exclusivity block:
 
 ```ts
-  // 3. Ownership exclusivity: no player owns both edges of a double-route pair.
-  for (const [routeId, cell] of Object.entries(state.ownership)) {
-    if ('owner' in cell) {
-      const sib = board.doubleSibling.get(routeId);
-      if (sib) {
-        const sc = state.ownership[sib as string];
-        if (sc && 'owner' in sc && sc.owner === cell.owner) {
-          problems.push(
-            `double-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${sib as string}`,
-          );
-        }
+// 3. Ownership exclusivity: no player owns both edges of a double-route pair.
+for (const [routeId, cell] of Object.entries(state.ownership)) {
+  if ('owner' in cell) {
+    const sib = board.doubleSibling.get(routeId);
+    if (sib) {
+      const sc = state.ownership[sib as string];
+      if (sc && 'owner' in sc && sc.owner === cell.owner) {
+        problems.push(
+          `double-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${sib as string}`,
+        );
       }
     }
   }
+}
 ```
 
 with:
 
 ```ts
-  // 3. Ownership exclusivity: no player owns two members of a parallel group.
-  for (const [routeId, cell] of Object.entries(state.ownership)) {
-    if ('owner' in cell) {
-      for (const other of board.parallelGroup.get(routeId) ?? []) {
-        const sc = state.ownership[other as string];
-        if (sc && 'owner' in sc && sc.owner === cell.owner) {
-          problems.push(
-            `parallel-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${other as string}`,
-          );
-        }
+// 3. Ownership exclusivity: no player owns two members of a parallel group.
+for (const [routeId, cell] of Object.entries(state.ownership)) {
+  if ('owner' in cell) {
+    for (const other of board.parallelGroup.get(routeId) ?? []) {
+      const sc = state.ownership[other as string];
+      if (sc && 'owner' in sc && sc.owner === cell.owner) {
+        problems.push(
+          `parallel-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${other as string}`,
+        );
       }
     }
   }
+}
 ```
 
 - [ ] **Step 5: Run the full engine suite (triples + regression + goldens)**
@@ -787,10 +869,12 @@ git commit -m "feat(engine): generalize double-route claim/lock/exclusivity to 2
 ### Task 5: builder store — `setPairTrackCount` replaces `convertToDouble`
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/editor/store.ts`
 - Test: `apps/web/src/features/builder/editor/store.test.ts` (replace the `convertToDouble` cases)
 
 **Interfaces:**
+
 - Consumes: `mutate`, `newRouteId`, `nextDoubleGroupLetter`, `RouteDraft`.
 - Produces: `setPairTrackCount(id: string, count: 1 | 2 | 3): void` on `EditorState` — normalizes all routes on the target's city pair into a single group of `count` (mint/drop siblings, one shared letter, equal length = target's, minted siblings recoloured). One undo step. `convertToDouble` removed.
 
@@ -799,115 +883,115 @@ git commit -m "feat(engine): generalize double-route claim/lock/exclusivity to 2
 In `apps/web/src/features/builder/editor/store.test.ts`, delete the six `convertToDouble …` `it(...)` blocks and the `reverts convertToDouble …` block, and add:
 
 ```ts
-  describe('setPairTrackCount', () => {
-    it('1→2 mints a sibling, one group, alternate colour, equal length', () => {
-      const s = useEditorStore.getState();
-      s.placeCity(city('c1'));
-      s.placeCity(city('c2', 10));
-      s.addRoute(route('r1', 'c1', 'c2', { color: 'RED', length: 3 }));
+describe('setPairTrackCount', () => {
+  it('1→2 mints a sibling, one group, alternate colour, equal length', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2', 10));
+    s.addRoute(route('r1', 'c1', 'c2', { color: 'RED', length: 3 }));
 
-      s.setPairTrackCount('r1', 2);
+    s.setPairTrackCount('r1', 2);
 
-      const routes = useEditorStore.getState().draft.routes;
-      expect(routes).toHaveLength(2);
-      const group = routes.find((r) => r.id === 'r1')!.doubleGroup;
-      expect(group).toBe('A');
-      const sibling = routes.find((r) => r.id !== 'r1')!;
-      expect(sibling).toMatchObject({ a: 'c1', b: 'c2', length: 3, color: 'BLUE', doubleGroup: 'A' });
-    });
-
-    it('2→3 mints a third track, all one group, equal length', () => {
-      const s = useEditorStore.getState();
-      s.placeCity(city('c1'));
-      s.placeCity(city('c2', 10));
-      s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
-      s.addRoute(route('r2', 'c1', 'c2', { color: 'BLUE', doubleGroup: 'A' }));
-
-      s.setPairTrackCount('r1', 3);
-
-      const routes = useEditorStore.getState().draft.routes;
-      expect(routes).toHaveLength(3);
-      expect(new Set(routes.map((r) => r.doubleGroup))).toEqual(new Set(['A']));
-      expect(routes.every((r) => r.a === 'c1' && r.b === 'c2' && r.length === 2)).toBe(true);
-    });
-
-    it('3→2 drops one track', () => {
-      const s = useEditorStore.getState();
-      s.placeCity(city('c1'));
-      s.placeCity(city('c2', 10));
-      s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
-      s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
-      s.addRoute(route('r3', 'c1', 'c2', { doubleGroup: 'A' }));
-
-      s.setPairTrackCount('r1', 2);
-
-      const routes = useEditorStore.getState().draft.routes;
-      expect(routes).toHaveLength(2);
-      expect(routes.map((r) => r.id).sort()).toEqual(['r1', 'r2']);
-    });
-
-    it('2→1 strips the group, leaving a single plain route', () => {
-      const s = useEditorStore.getState();
-      s.placeCity(city('c1'));
-      s.placeCity(city('c2', 10));
-      s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
-      s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
-
-      s.setPairTrackCount('r1', 1);
-
-      const routes = useEditorStore.getState().draft.routes;
-      expect(routes).toHaveLength(1);
-      expect(routes[0]).toMatchObject({ id: 'r1' });
-      expect(routes[0]!.doubleGroup).toBeUndefined();
-    });
-
-    it('picks the next free group letter when others exist', () => {
-      const s = useEditorStore.getState();
-      s.placeCity(city('c1'));
-      s.placeCity(city('c2', 10));
-      s.placeCity(city('c3', 20));
-      s.addRoute(route('x1', 'c1', 'c2', { doubleGroup: 'A' }));
-      s.addRoute(route('x2', 'c1', 'c2', { doubleGroup: 'A' }));
-      s.addRoute(route('r3', 'c2', 'c3'));
-
-      s.setPairTrackCount('r3', 2);
-
-      const routes = useEditorStore.getState().draft.routes;
-      expect(routes.find((r) => r.id === 'r3')!.doubleGroup).toBe('B');
-    });
-
-    it('normalizes a messy pair (two groups on one pair) into a single clean group', () => {
-      const s = useEditorStore.getState();
-      s.placeCity(city('c1'));
-      s.placeCity(city('c2', 10));
-      s.addRoute(route('a1', 'c1', 'c2', { doubleGroup: 'A' }));
-      s.addRoute(route('a2', 'c1', 'c2', { doubleGroup: 'A' }));
-      s.addRoute(route('b1', 'c1', 'c2', { doubleGroup: 'B' }));
-      s.addRoute(route('b2', 'c1', 'c2', { doubleGroup: 'B' }));
-
-      s.setPairTrackCount('a1', 2);
-
-      const routes = useEditorStore.getState().draft.routes;
-      expect(routes).toHaveLength(2);
-      expect(new Set(routes.map((r) => r.doubleGroup))).toEqual(new Set(['A']));
-    });
-
-    it('reverts a track-count change in a single undo step', () => {
-      const s = useEditorStore.getState();
-      s.placeCity(city('c1'));
-      s.placeCity(city('c2', 10));
-      s.addRoute(route('r1', 'c1', 'c2'));
-
-      s.setPairTrackCount('r1', 2);
-      expect(useEditorStore.getState().draft.routes).toHaveLength(2);
-
-      useEditorStore.getState().undo();
-
-      const routes = useEditorStore.getState().draft.routes;
-      expect(routes).toHaveLength(1);
-      expect(routes[0]!.doubleGroup).toBeUndefined();
-    });
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(2);
+    const group = routes.find((r) => r.id === 'r1')!.doubleGroup;
+    expect(group).toBe('A');
+    const sibling = routes.find((r) => r.id !== 'r1')!;
+    expect(sibling).toMatchObject({ a: 'c1', b: 'c2', length: 3, color: 'BLUE', doubleGroup: 'A' });
   });
+
+  it('2→3 mints a third track, all one group, equal length', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2', 10));
+    s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r2', 'c1', 'c2', { color: 'BLUE', doubleGroup: 'A' }));
+
+    s.setPairTrackCount('r1', 3);
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(3);
+    expect(new Set(routes.map((r) => r.doubleGroup))).toEqual(new Set(['A']));
+    expect(routes.every((r) => r.a === 'c1' && r.b === 'c2' && r.length === 2)).toBe(true);
+  });
+
+  it('3→2 drops one track', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2', 10));
+    s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r3', 'c1', 'c2', { doubleGroup: 'A' }));
+
+    s.setPairTrackCount('r1', 2);
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(2);
+    expect(routes.map((r) => r.id).sort()).toEqual(['r1', 'r2']);
+  });
+
+  it('2→1 strips the group, leaving a single plain route', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2', 10));
+    s.addRoute(route('r1', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
+
+    s.setPairTrackCount('r1', 1);
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(1);
+    expect(routes[0]).toMatchObject({ id: 'r1' });
+    expect(routes[0]!.doubleGroup).toBeUndefined();
+  });
+
+  it('picks the next free group letter when others exist', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2', 10));
+    s.placeCity(city('c3', 20));
+    s.addRoute(route('x1', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('x2', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('r3', 'c2', 'c3'));
+
+    s.setPairTrackCount('r3', 2);
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes.find((r) => r.id === 'r3')!.doubleGroup).toBe('B');
+  });
+
+  it('normalizes a messy pair (two groups on one pair) into a single clean group', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2', 10));
+    s.addRoute(route('a1', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('a2', 'c1', 'c2', { doubleGroup: 'A' }));
+    s.addRoute(route('b1', 'c1', 'c2', { doubleGroup: 'B' }));
+    s.addRoute(route('b2', 'c1', 'c2', { doubleGroup: 'B' }));
+
+    s.setPairTrackCount('a1', 2);
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(2);
+    expect(new Set(routes.map((r) => r.doubleGroup))).toEqual(new Set(['A']));
+  });
+
+  it('reverts a track-count change in a single undo step', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1'));
+    s.placeCity(city('c2', 10));
+    s.addRoute(route('r1', 'c1', 'c2'));
+
+    s.setPairTrackCount('r1', 2);
+    expect(useEditorStore.getState().draft.routes).toHaveLength(2);
+
+    useEditorStore.getState().undo();
+
+    const routes = useEditorStore.getState().draft.routes;
+    expect(routes).toHaveLength(1);
+    expect(routes[0]!.doubleGroup).toBeUndefined();
+  });
+});
 ```
 
 - [ ] **Step 2: Run to verify it fails**
@@ -999,11 +1083,13 @@ git commit -m "feat(builder): setPairTrackCount normalizes a pair into one 1-3 t
 ### Task 6: builder UI + i18n — `[1][2][3]` track control, no duplicate-pair draws
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/editor/stages/RoutesStage.tsx`
 - Modify: `apps/web/src/i18n/index.ts` (builder label + validation code strings)
 - Test: `apps/web/src/features/builder/editor/stages/RoutesStage.test.tsx` (rewrite the double cases)
 
 **Interfaces:**
+
 - Consumes: `setPairTrackCount` (Task 5), `Segmented`, `useEditorStore`, `validateContent` codes (Task 1) via i18n keys.
 - Produces: inspector shows a `Parallel tracks [1][2][3]` control bound to the selected route's pair; the new-route form has the same selector; clicking a second city that already has a route between the pair selects that route instead of drawing a duplicate.
 
@@ -1135,13 +1221,13 @@ In the **en** `validation` block, replace the `doubleGroupWrongCount` line with:
 Change the store-hook imports at the top of the component — replace:
 
 ```ts
-  const convertToDouble = useEditorStore((s) => s.convertToDouble);
+const convertToDouble = useEditorStore((s) => s.convertToDouble);
 ```
 
 with:
 
 ```ts
-  const setPairTrackCount = useEditorStore((s) => s.setPairTrackCount);
+const setPairTrackCount = useEditorStore((s) => s.setPairTrackCount);
 ```
 
 and remove the now-unused `nextDoubleGroupLetter` import (keep `newRouteId`):
@@ -1159,31 +1245,30 @@ import { Segmented } from '../../../../components/ui/Segmented';
 Replace the `onCityClick` handler's second-click branch. Change:
 
 ```ts
-            if (id === pendingFrom) {
-              setPendingFrom(null);
-              return;
-            }
-            setDraftPair({ a: pendingFrom, b: id });
-            setPendingFrom(null);
+if (id === pendingFrom) {
+  setPendingFrom(null);
+  return;
+}
+setDraftPair({ a: pendingFrom, b: id });
+setPendingFrom(null);
 ```
 
 to (select an existing route instead of drawing a duplicate pair):
 
 ```ts
-            if (id === pendingFrom) {
-              setPendingFrom(null);
-              return;
-            }
-            const existing = draft.routes.find(
-              (r) =>
-                (r.a === pendingFrom && r.b === id) || (r.a === id && r.b === pendingFrom),
-            );
-            setPendingFrom(null);
-            if (existing) {
-              select({ kind: 'route', id: existing.id });
-              return;
-            }
-            setDraftPair({ a: pendingFrom, b: id });
+if (id === pendingFrom) {
+  setPendingFrom(null);
+  return;
+}
+const existing = draft.routes.find(
+  (r) => (r.a === pendingFrom && r.b === id) || (r.a === id && r.b === pendingFrom),
+);
+setPendingFrom(null);
+if (existing) {
+  select({ kind: 'route', id: existing.id });
+  return;
+}
+setDraftPair({ a: pendingFrom, b: id });
 ```
 
 Replace the whole `draftPair ? ( <RouteForm … /> )` block's `onSubmit` and drop `existingDoubleGroups`:
@@ -1214,45 +1299,45 @@ Replace the whole `draftPair ? ( <RouteForm … /> )` block's `onSubmit` and dro
 Replace the `selectedRoute` branch's `<RouteForm … />` (drop `existingDoubleGroups`, replace `extra`):
 
 ```tsx
-          <RouteForm
-            title={t('builder.editRoute', {
-              a: cityName(selectedRoute.a),
-              b: cityName(selectedRoute.b),
-            })}
-            initial={selectedRoute}
-            hideDouble
-            onCancel={() => select(null)}
-            onSubmit={(route) => updateRoute(selectedRoute.id, route)}
-            extra={
-              <>
-                <label className="field">
-                  <span className="field-label">{t('builder.parallelTracks')}</span>
-                  <Segmented<string>
-                    options={[
-                      { value: '1', label: '1' },
-                      { value: '2', label: '2' },
-                      { value: '3', label: '3' },
-                    ]}
-                    value={String(
-                      Math.min(
-                        3,
-                        draft.routes.filter(
-                          (r) =>
-                            (r.a === selectedRoute.a && r.b === selectedRoute.b) ||
-                            (r.a === selectedRoute.b && r.b === selectedRoute.a),
-                        ).length,
-                      ),
-                    )}
-                    onChange={(v) => setPairTrackCount(selectedRoute.id, Number(v) as 1 | 2 | 3)}
-                    ariaLabel={t('builder.parallelTracks')}
-                  />
-                </label>
-                <button className="danger" onClick={() => removeRoute(selectedRoute.id)}>
-                  <Trash2 size={14} aria-hidden /> {t('builder.deleteRoute')}
-                </button>
-              </>
-            }
-          />
+<RouteForm
+  title={t('builder.editRoute', {
+    a: cityName(selectedRoute.a),
+    b: cityName(selectedRoute.b),
+  })}
+  initial={selectedRoute}
+  hideDouble
+  onCancel={() => select(null)}
+  onSubmit={(route) => updateRoute(selectedRoute.id, route)}
+  extra={
+    <>
+      <label className="field">
+        <span className="field-label">{t('builder.parallelTracks')}</span>
+        <Segmented<string>
+          options={[
+            { value: '1', label: '1' },
+            { value: '2', label: '2' },
+            { value: '3', label: '3' },
+          ]}
+          value={String(
+            Math.min(
+              3,
+              draft.routes.filter(
+                (r) =>
+                  (r.a === selectedRoute.a && r.b === selectedRoute.b) ||
+                  (r.a === selectedRoute.b && r.b === selectedRoute.a),
+              ).length,
+            ),
+          )}
+          onChange={(v) => setPairTrackCount(selectedRoute.id, Number(v) as 1 | 2 | 3)}
+          ariaLabel={t('builder.parallelTracks')}
+        />
+      </label>
+      <button className="danger" onClick={() => removeRoute(selectedRoute.id)}>
+        <Trash2 size={14} aria-hidden /> {t('builder.deleteRoute')}
+      </button>
+    </>
+  }
+/>
 ```
 
 Now update `RouteForm` itself. Change its props type — replace:
@@ -1275,44 +1360,48 @@ with:
 and its destructured params — remove `existingDoubleGroups`. Replace the `makeDouble` state:
 
 ```ts
-  const [makeDouble, setMakeDouble] = useState(false);
+const [makeDouble, setMakeDouble] = useState(false);
 ```
 
 with:
 
 ```ts
-  const [trackCount, setTrackCount] = useState(1);
+const [trackCount, setTrackCount] = useState(1);
 ```
 
 Replace the make-double Switch block:
 
 ```tsx
-      {!hideDouble && (
-        <div className="row between setting-row">
-          <span className="field-label">{t('builder.makeDouble')}</span>
-          <Switch checked={makeDouble} onChange={setMakeDouble} label={t('builder.makeDouble')} />
-        </div>
-      )}
+{
+  !hideDouble && (
+    <div className="row between setting-row">
+      <span className="field-label">{t('builder.makeDouble')}</span>
+      <Switch checked={makeDouble} onChange={setMakeDouble} label={t('builder.makeDouble')} />
+    </div>
+  );
+}
 ```
 
 with a track selector:
 
 ```tsx
-      {!hideDouble && (
-        <label className="field">
-          <span className="field-label">{t('builder.parallelTracks')}</span>
-          <Segmented<string>
-            options={[
-              { value: '1', label: '1' },
-              { value: '2', label: '2' },
-              { value: '3', label: '3' },
-            ]}
-            value={String(trackCount)}
-            onChange={(v) => setTrackCount(Number(v))}
-            ariaLabel={t('builder.parallelTracks')}
-          />
-        </label>
-      )}
+{
+  !hideDouble && (
+    <label className="field">
+      <span className="field-label">{t('builder.parallelTracks')}</span>
+      <Segmented<string>
+        options={[
+          { value: '1', label: '1' },
+          { value: '2', label: '2' },
+          { value: '3', label: '3' },
+        ]}
+        value={String(trackCount)}
+        onChange={(v) => setTrackCount(Number(v))}
+        ariaLabel={t('builder.parallelTracks')}
+      />
+    </label>
+  );
+}
 ```
 
 Replace the submit `onClick` (remove the `doubleGroup` spread and pass `trackCount`):
@@ -1398,6 +1487,7 @@ git commit -m "chore: format/lint fixups for parallel-track feature"
 ## Self-Review
 
 **Spec coverage:**
+
 - §Model (doubleGroup = 2–3, one per pair) → Tasks 1 (validation), 2 (board), 5 (store normalization).
 - §1 Rendering (no change; 3 tracks) → Task 1 Step 1 geometry test.
 - §2 Engine (board, config, reduce, invariants, events) → Tasks 2, 3, 4. Event-effect (typhoon/charter) pairwise behavior retained via `siblingOf`/`doubleSibling` (untouched) — matches spec §2e out-of-scope note.

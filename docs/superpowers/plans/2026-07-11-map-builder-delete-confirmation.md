@@ -30,6 +30,7 @@ behind an explicit confirm step.
 ### Task 1: Confirm dialog before deleting a map
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/MapsScreen.tsx:1-12` (imports), `:14-29` (component
   state), `:92-95` (unchanged `remove()`, referenced not edited), `:140-146` (delete button),
   `:219-220` (add dialog render before the closing root `</div>`)
@@ -38,12 +39,13 @@ behind an explicit confirm step.
 - Test: `apps/web/src/features/builder/MapsScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useConfirmAction()` from `apps/web/src/hooks/useConfirmAction.ts` — returns
   `{ open: boolean; request: (action: () => void) => void; confirm: () => void; cancel: () => void }`.
   `<ConfirmDialog>` from `apps/web/src/components/ConfirmDialog.tsx` — props
   `{ title: string; message: string; confirmLabel?: string; cancelLabel?: string; onConfirm: () => void; onCancel: () => void }`.
   Existing `api.deleteMap(id: string): Promise<void>` and `MapSummary { id, nameZh, nameEn,
-  revision, shareCode?, updatedAt }` from `apps/web/src/net/rest.ts`.
+revision, shareCode?, updatedAt }` from `apps/web/src/net/rest.ts`.
 - Produces: nothing consumed by later tasks — this is the only task in the plan.
 
 - [ ] **Step 1: Add the two new i18n keys (zh-Hant + en)**
@@ -157,51 +159,53 @@ Add state, right after the existing `const [forking, setForking] = useState<stri
 line (currently line 28):
 
 ```tsx
-  const [deleteLabel, setDeleteLabel] = useState('');
-  const {
-    open: deleteOpen,
-    request: requestDelete,
-    confirm: confirmDelete,
-    cancel: cancelDelete,
-  } = useConfirmAction();
+const [deleteLabel, setDeleteLabel] = useState('');
+const {
+  open: deleteOpen,
+  request: requestDelete,
+  confirm: confirmDelete,
+  cancel: cancelDelete,
+} = useConfirmAction();
 ```
 
 Leave `remove()` (currently lines 92-95) exactly as-is:
 
 ```tsx
-  const remove = async (id: string) => {
-    await api.deleteMap(id).catch(() => undefined);
-    refresh();
-  };
+const remove = async (id: string) => {
+  await api.deleteMap(id).catch(() => undefined);
+  refresh();
+};
 ```
 
 Replace the delete button's `onClick` (currently lines 140-146):
 
 ```tsx
-              <button
-                className="danger icon-btn"
-                onClick={() => {
-                  setDeleteLabel(`${m.nameZh} (${m.nameEn})`);
-                  requestDelete(() => void remove(m.id));
-                }}
-                aria-label={t('delete')}
-              >
-                <Trash2 size={14} aria-hidden />
-              </button>
+<button
+  className="danger icon-btn"
+  onClick={() => {
+    setDeleteLabel(`${m.nameZh} (${m.nameEn})`);
+    requestDelete(() => void remove(m.id));
+  }}
+  aria-label={t('delete')}
+>
+  <Trash2 size={14} aria-hidden />
+</button>
 ```
 
 Render the dialog just before the root `</div>` that closes the component's return (currently the
 `</div>` on line 220, right after the `maps-columns` row `</div>`):
 
 ```tsx
-      {deleteOpen && (
-        <ConfirmDialog
-          title={t('builder.deleteMapConfirmTitle')}
-          message={t('builder.deleteMapConfirmBody', { name: deleteLabel })}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      )}
+{
+  deleteOpen && (
+    <ConfirmDialog
+      title={t('builder.deleteMapConfirmTitle')}
+      message={t('builder.deleteMapConfirmBody', { name: deleteLabel })}
+      onConfirm={confirmDelete}
+      onCancel={cancelDelete}
+    />
+  );
+}
 ```
 
 - [ ] **Step 5: Run the tests to verify they pass**

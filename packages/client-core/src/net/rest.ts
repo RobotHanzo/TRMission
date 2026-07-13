@@ -198,9 +198,7 @@ function buildApi(
     },
     /** Irreversible. 204 on success; 409 while the account still holds dashboard access. */
     deleteAccount: (appleAuthorizationCode?: string) =>
-      req<void>('DELETE', '/auth/me', { appleAuthorizationCode }).then(() =>
-        setAccessToken(null),
-      ),
+      req<void>('DELETE', '/auth/me', { appleAuthorizationCode }).then(() => setAccessToken(null)),
 
     // ── rooms / lobby ───────────────────────────────────────────────────────
     createRoom: (maxPlayers?: number) => req<RoomView>('POST', '/rooms', { maxPlayers }),
@@ -287,7 +285,8 @@ function buildApi(
     removeDevice: (token: string) => req<void>('DELETE', '/me/devices', { token }),
     myBlocks: () => req<BlockList>('GET', '/me/blocks'),
     blockUser: (userId: string) => req<void>('PUT', `/me/blocks/${encodeURIComponent(userId)}`, {}),
-    unblockUser: (userId: string) => req<void>('DELETE', `/me/blocks/${encodeURIComponent(userId)}`),
+    unblockUser: (userId: string) =>
+      req<void>('DELETE', `/me/blocks/${encodeURIComponent(userId)}`),
     reportPlayer: (body: {
       userId: string;
       category: ReportCategory;

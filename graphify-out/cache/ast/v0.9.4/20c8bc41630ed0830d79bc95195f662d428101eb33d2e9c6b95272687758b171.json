@@ -1,1 +1,239 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_md", "label": "2026-07-06-mobile-p5-builder-push-polish.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_mobile_p5_builder_webview_push_client_haptics_tablet_polish_self_hosted_ota", "label": "Mobile P5 \u2014 Builder WebView, Push Client, Haptics, Tablet Polish, Self-Hosted OTA", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_assumed_p1_p4_artifacts_verify_each_at_reground_every_one_has_a_verification_command", "label": "Assumed P1\u2013P4 artifacts (verify each at reground; every one has a verification command)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L23"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_1_server_get_api_v1_auth_mobile_web_handoff_the_only_new_server_endpoint", "label": "Task 1: Server \u2014 `GET /api/v1/auth/mobile-web-handoff` (the only new server endpoint)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L44"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_2_mobile_dependencies_persisted_settings_store", "label": "Task 2: Mobile \u2014 dependencies + persisted settings store", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L224"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_3_mobile_builder_webview_screen_feature_gate_offline_banner", "label": "Task 3: Mobile \u2014 Builder WebView screen, feature gate, offline banner", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L345"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_4_mobile_push_registration_lifecycle_token_me_devices", "label": "Task 4: Mobile \u2014 push registration lifecycle (token \u2194 `/me/devices`)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L586"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_5_mobile_notification_handling_contextual_prompt_foreground_suppression_tap_deep_link", "label": "Task 5: Mobile \u2014 notification handling: contextual prompt, foreground suppression, tap deep-link", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L790"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_6_mobile_haptics_on_game_beats_behind_the_settings_toggle", "label": "Task 6: Mobile \u2014 haptics on game beats (behind the settings toggle)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1108"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_7_mobile_settings_screen_notifications_toggle_haptics_toggle_account_deletion", "label": "Task 7: Mobile \u2014 Settings screen: notifications toggle, haptics toggle, account deletion", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1255"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_8_mobile_tablet_large_screen_polish_ipados_26_android_16", "label": "Task 8: Mobile \u2014 tablet & large-screen polish (iPadOS 26 / Android 16)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1579"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_9_ops_self_hosted_ota_server_expo_open_ota_update_code_signing", "label": "Task 9: Ops \u2014 self-hosted OTA server (expo-open-ota) + update code signing", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1768"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_10_ci_mobile_ota_yml_publish_lane_ota_runbook_forced_update_interplay_fallbacks", "label": "Task 10: CI \u2014 `mobile-ota.yml` publish lane + OTA runbook (forced-update interplay, fallbacks)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1882"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_11_full_regression_docs_sweep", "label": "Task 11: Full regression + docs sweep", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L2020"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_mobile_p5_builder_webview_push_client_haptics_tablet_polish_self_hosted_ota", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_mobile_p5_builder_webview_push_client_haptics_tablet_polish_self_hosted_ota", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_assumed_p1_p4_artifacts_verify_each_at_reground_every_one_has_a_verification_command", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L23", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_1_server_get_api_v1_auth_mobile_web_handoff_the_only_new_server_endpoint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L44", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_2_mobile_dependencies_persisted_settings_store", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L224", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_3_mobile_builder_webview_screen_feature_gate_offline_banner", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L345", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_4_mobile_push_registration_lifecycle_token_me_devices", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L586", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_5_mobile_notification_handling_contextual_prompt_foreground_suppression_tap_deep_link", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L790", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_6_mobile_haptics_on_game_beats_behind_the_settings_toggle", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1108", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_7_mobile_settings_screen_notifications_toggle_haptics_toggle_account_deletion", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1255", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_8_mobile_tablet_large_screen_polish_ipados_26_android_16", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1579", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_9_ops_self_hosted_ota_server_expo_open_ota_update_code_signing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1768", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_10_ci_mobile_ota_yml_publish_lane_ota_runbook_forced_update_interplay_fallbacks", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L1882", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_11_full_regression_docs_sweep", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md", "source_location": "L2020", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_md",
+      "label": "2026-07-06-mobile-p5-builder-push-polish.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_mobile_p5_builder_webview_push_client_haptics_tablet_polish_self_hosted_ota",
+      "label": "Mobile P5 \u2014 Builder WebView, Push Client, Haptics, Tablet Polish, Self-Hosted OTA",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_assumed_p1_p4_artifacts_verify_each_at_reground_every_one_has_a_verification_command",
+      "label": "Assumed P1\u2013P4 artifacts (verify each at reground; every one has a verification command)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L23"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_1_server_get_api_v1_auth_mobile_web_handoff_the_only_new_server_endpoint",
+      "label": "Task 1: Server \u2014 `GET /api/v1/auth/mobile-web-handoff` (the only new server endpoint)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L44"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_2_mobile_dependencies_persisted_settings_store",
+      "label": "Task 2: Mobile \u2014 dependencies + persisted settings store",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L224"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_3_mobile_builder_webview_screen_feature_gate_offline_banner",
+      "label": "Task 3: Mobile \u2014 Builder WebView screen, feature gate, offline banner",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L345"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_4_mobile_push_registration_lifecycle_token_me_devices",
+      "label": "Task 4: Mobile \u2014 push registration lifecycle (token \u2194 `/me/devices`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L586"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_5_mobile_notification_handling_contextual_prompt_foreground_suppression_tap_deep_link",
+      "label": "Task 5: Mobile \u2014 notification handling: contextual prompt, foreground suppression, tap deep-link",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L790"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_6_mobile_haptics_on_game_beats_behind_the_settings_toggle",
+      "label": "Task 6: Mobile \u2014 haptics on game beats (behind the settings toggle)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1108"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_7_mobile_settings_screen_notifications_toggle_haptics_toggle_account_deletion",
+      "label": "Task 7: Mobile \u2014 Settings screen: notifications toggle, haptics toggle, account deletion",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1255"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_8_mobile_tablet_large_screen_polish_ipados_26_android_16",
+      "label": "Task 8: Mobile \u2014 tablet & large-screen polish (iPadOS 26 / Android 16)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1579"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_9_ops_self_hosted_ota_server_expo_open_ota_update_code_signing",
+      "label": "Task 9: Ops \u2014 self-hosted OTA server (expo-open-ota) + update code signing",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1768"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_10_ci_mobile_ota_yml_publish_lane_ota_runbook_forced_update_interplay_fallbacks",
+      "label": "Task 10: CI \u2014 `mobile-ota.yml` publish lane + OTA runbook (forced-update interplay, fallbacks)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1882"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_11_full_regression_docs_sweep",
+      "label": "Task 11: Full regression + docs sweep",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L2020"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_mobile_p5_builder_webview_push_client_haptics_tablet_polish_self_hosted_ota",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_mobile_p5_builder_webview_push_client_haptics_tablet_polish_self_hosted_ota",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_assumed_p1_p4_artifacts_verify_each_at_reground_every_one_has_a_verification_command",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_1_server_get_api_v1_auth_mobile_web_handoff_the_only_new_server_endpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_2_mobile_dependencies_persisted_settings_store",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L224",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_3_mobile_builder_webview_screen_feature_gate_offline_banner",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L345",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_4_mobile_push_registration_lifecycle_token_me_devices",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L586",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_5_mobile_notification_handling_contextual_prompt_foreground_suppression_tap_deep_link",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L790",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_6_mobile_haptics_on_game_beats_behind_the_settings_toggle",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1108",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_7_mobile_settings_screen_notifications_toggle_haptics_toggle_account_deletion",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1255",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_8_mobile_tablet_large_screen_polish_ipados_26_android_16",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1579",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_9_ops_self_hosted_ota_server_expo_open_ota_update_code_signing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1768",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_10_ci_mobile_ota_yml_publish_lane_ota_runbook_forced_update_interplay_fallbacks",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L1882",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_mobile_p5_builder_push_polish_task_11_full_regression_docs_sweep",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-mobile-p5-builder-push-polish.md",
+      "source_location": "L2020",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
