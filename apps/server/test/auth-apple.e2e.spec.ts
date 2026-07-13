@@ -24,7 +24,7 @@ beforeAll(async () => {
   t = await createTestApp({
     mongod: sharedMongod,
     dbName: 'trm-test-apple',
-    authConfig: { ...OAUTH_TEST_CONFIG, appleClientIds: ['tw.trmission.app'] },
+    authConfig: { ...OAUTH_TEST_CONFIG, appleClientIds: ['dev.robothanzo.trmission'] },
     appleVerifier: verifier,
   });
 }, 60_000);
@@ -56,7 +56,7 @@ describe('apple credential sign-in', () => {
     expect(res.body.user.displayName).toBe('Apple Person');
     expect(res.body.accessToken).toBeTruthy();
     expect(refreshCookie(res)).toContain('trm_refresh='); // web transport by default
-    expect(verifier.lastAudience).toEqual(['tw.trmission.app']);
+    expect(verifier.lastAudience).toEqual(['dev.robothanzo.trmission']);
   });
 
   it('falls back to the email local part when Apple provides no name', async () => {

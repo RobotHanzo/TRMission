@@ -27,12 +27,12 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   // New Architecture is the default (and only) mode in RN 0.85 / SDK 56 — no flag needed.
   ios: {
-    bundleIdentifier: 'tw.trmission.app',
+    bundleIdentifier: 'dev.robothanzo.trmission',
     supportsTablet: true, // iPad; requireFullScreen deliberately unset (iPadOS 26 ignores it)
     associatedDomains: ['applinks:trmission.example'], // real origin filled in P6
   },
   android: {
-    package: 'tw.trmission.app',
+    package: 'dev.robothanzo.trmission',
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       // Android 13+ themed icons tint this white-alpha variant to the wallpaper palette.
