@@ -1,3 +1,4 @@
+import { withGradleProperties } from '@expo/config-plugins';
 import type { ExpoConfig } from 'expo/config';
 
 // Build number is the forced-update gate axis (compared against GET /version/mobile.minBuild) AND
@@ -105,4 +106,18 @@ const config: ExpoConfig = {
   },
 };
 
-export default config;
+// `expo prebuild`'s template caps the Gradle daemon at -XX:MaxMetaspaceSize=512m, which OOMs
+// `lintVitalAnalyzeRelease` on this app's large autolinked module graph (skia, reanimated,
+// worklets, ...) on release builds. Raise the budget — CI runners have plenty of headroom.
+export default withGradleProperties(config, (modConfig) => {
+  const jvmArgs = modConfig.modResults.find(
+    (item) => item.type === 'property' && item.key === 'org.gradle.jvmargs',
+  );
+  const value = '-Xmx4096m -XX:MaxMetaspaceSize=1536m';
+  if (jvmArgs?.type === 'property') {
+    jvmArgs.value = value;
+  } else {
+    modConfig.modResults.push({ type: 'property', key: 'org.gradle.jvmargs', value });
+  }
+  return modConfig;
+});
