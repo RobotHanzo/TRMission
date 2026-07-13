@@ -48,7 +48,7 @@ import {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Room'>;
 
-const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
+const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD', 'HELL'];
 
 /** A row of exclusive chips (the RN stand-in for the web Segmented control). */
 function Chips<T extends string>({

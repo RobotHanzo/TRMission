@@ -32,7 +32,7 @@ import { ChatPresetPicker } from '../components/ChatPresetPicker';
 import '../styles/game.css';
 import '../styles/room.css';
 
-const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
+const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD', 'HELL'];
 
 /** Best-effort display name for the room's selected map. The server resolves this for official
  *  maps (`mapName`); for a custom map it falls back to the viewer's own map list, which only

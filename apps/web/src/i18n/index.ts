@@ -96,6 +96,7 @@ const resources = {
       difficulty_EASY: '簡單',
       difficulty_MEDIUM: '普通',
       difficulty_HARD: '困難',
+      difficulty_HELL: '地獄',
 
       gameSettings: '遊戲設定',
       mapLabel: '地圖',
@@ -843,6 +844,7 @@ const resources = {
       difficulty_EASY: 'Easy',
       difficulty_MEDIUM: 'Medium',
       difficulty_HARD: 'Hard',
+      difficulty_HELL: 'Hell',
 
       gameSettings: 'Game settings',
       mapLabel: 'Map',

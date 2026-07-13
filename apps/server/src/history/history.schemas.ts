@@ -26,7 +26,7 @@ export const MatchSummarySchema = z.object({
 
 export const ReplayPlayerSchema = HistoryPlayerSchema.extend({
   isBot: z.boolean().optional(),
-  difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).optional(),
+  difficulty: z.enum(['EASY', 'MEDIUM', 'HARD', 'HELL']).optional(),
 });
 
 export const ReplayPayloadSchema = z.object({

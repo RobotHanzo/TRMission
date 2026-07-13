@@ -39,7 +39,7 @@ export interface AuthConfig {
   googleClientId?: string;
 }
 export type OauthProvider = 'google' | 'discord';
-export type BotDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
+export type BotDifficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'HELL';
 
 export interface RoomMember {
   userId: string;
