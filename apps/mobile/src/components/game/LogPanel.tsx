@@ -1,8 +1,10 @@
 // The action log (ports the web LogPanel): entries from the log store rendered through
-// logModel's line taxonomy, names via the roster, colours by seat, auto-scrolled to the tail.
-import { useEffect, useRef } from 'react';
+// logModel's line taxonomy, names via the roster, colours by seat. Sticks to the tail while
+// the reader is at the bottom; scrolling up detaches and offers a jump-to-latest chip instead
+// (a virtualized FlatList, so long games don't render their whole log).
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { EventPerk, type GameSnapshot } from '@trm/proto';
 import type { CardColor } from '@trm/shared';
 import { useLogStore } from '../../store/log';
@@ -26,10 +28,15 @@ export function LogPanel() {
   const locale = useUi((s) => s.locale);
   const nameOf = usePlayerName();
   const me = snapshot?.you?.playerId ?? null;
-  const listRef = useRef<ScrollView>(null);
+  const listRef = useRef<FlatList<LogEntry>>(null);
+  // Stick to the latest entry only while the reader is AT the bottom — scrolling up to re-read
+  // must never be yanked back down. A detached reader gets the jump-to-latest chip instead.
+  const atBottom = useRef(true);
+  const [showJump, setShowJump] = useState(false);
 
   useEffect(() => {
-    listRef.current?.scrollToEnd({ animated: false });
+    if (atBottom.current) listRef.current?.scrollToEnd({ animated: false });
+    else setShowJump(true);
   }, [entries.length]);
 
   const routeName = (id: string): string => {
@@ -125,41 +132,66 @@ export function LogPanel() {
     }
   };
 
+  const renderLine = ({ item: e }: { item: LogEntry }): React.JSX.Element => {
+    const seat = seatOf(snapshot, e.playerId);
+    const color = e.data.color as CardColor | null | undefined;
+    return (
+      <View style={styles.line}>
+        {seat !== null && <View style={[styles.dot, { backgroundColor: seatColor(seat) }]} />}
+        <Text
+          style={[
+            styles.text,
+            e.importance === 'highlight' && styles.highlight,
+            e.importance === 'alert' && styles.alert,
+          ]}
+        >
+          {lineText(e)}
+        </Text>
+        {e.kind === 'tookFaceup' && color && (
+          <View
+            style={[styles.chip, { backgroundColor: CARD_COLOR_TOKENS[color].hex }]}
+            accessibilityLabel={CARD_COLOR_TOKENS[color].nameZh}
+          />
+        )}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.panel}>
       <Text style={styles.heading}>{t('log.heading')}</Text>
-      <ScrollView ref={listRef} style={styles.list}>
-        {entries.length === 0 ? (
-          <Text style={styles.empty}>{t('log.empty')}</Text>
-        ) : (
-          entries.map((e) => {
-            const seat = seatOf(snapshot, e.playerId);
-            const color = e.data.color as CardColor | null | undefined;
-            return (
-              <View key={e.id} style={styles.line}>
-                {seat !== null && (
-                  <View style={[styles.dot, { backgroundColor: seatColor(seat) }]} />
-                )}
-                <Text
-                  style={[
-                    styles.text,
-                    e.importance === 'highlight' && styles.highlight,
-                    e.importance === 'alert' && styles.alert,
-                  ]}
-                >
-                  {lineText(e)}
-                </Text>
-                {e.kind === 'tookFaceup' && color && (
-                  <View
-                    style={[styles.chip, { backgroundColor: CARD_COLOR_TOKENS[color].hex }]}
-                    accessibilityLabel={CARD_COLOR_TOKENS[color].nameZh}
-                  />
-                )}
-              </View>
-            );
-          })
-        )}
-      </ScrollView>
+      {entries.length === 0 ? (
+        <Text style={styles.empty}>{t('log.empty')}</Text>
+      ) : (
+        <FlatList
+          ref={listRef}
+          style={styles.list}
+          data={entries}
+          keyExtractor={(e) => String(e.id)}
+          renderItem={renderLine}
+          onScroll={(ev) => {
+            const { contentOffset, contentSize, layoutMeasurement } = ev.nativeEvent;
+            const stuck = contentOffset.y + layoutMeasurement.height >= contentSize.height - 24;
+            atBottom.current = stuck;
+            if (stuck) setShowJump(false);
+          }}
+          scrollEventThrottle={64}
+        />
+      )}
+      {showJump && (
+        <Pressable
+          testID="log-jump-latest"
+          accessibilityRole="button"
+          style={styles.jumpChip}
+          onPress={() => {
+            atBottom.current = true;
+            setShowJump(false);
+            listRef.current?.scrollToEnd({ animated: true });
+          }}
+        >
+          <Text style={styles.jumpText}>{t('log.jumpToLatest')}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -186,4 +218,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.25)',
   },
+  jumpChip: {
+    position: 'absolute',
+    bottom: 6,
+    alignSelf: 'center',
+    backgroundColor: '#0f5fa6',
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  jumpText: { color: '#fff', fontSize: 12, fontWeight: '700' },
 });

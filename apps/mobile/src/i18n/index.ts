@@ -373,6 +373,7 @@ void i18n.use(initReactI18next).init({
         log: {
           heading: '紀錄',
           empty: '尚無動作',
+          jumpToLatest: '跳到最新',
           gameStarted: '遊戲開始',
           turnStarted: '輪到 {{name}}',
           routeClaimed: '{{name}} 鋪設了 {{route}}（+{{points}}）',
@@ -933,6 +934,7 @@ void i18n.use(initReactI18next).init({
         log: {
           heading: 'Log',
           empty: 'No actions yet',
+          jumpToLatest: 'Jump to latest',
           gameStarted: 'Game started',
           turnStarted: "{{name}}'s turn",
           routeClaimed: '{{name}} built {{route}} (+{{points}})',

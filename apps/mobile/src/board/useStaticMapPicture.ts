@@ -12,7 +12,7 @@
 // resolution. Guarded exactly like BoardText's Paragraph usage: an environment without
 // `Skia.PictureRecorder` (the jest mock) simply never produces a picture, so the caller's live
 // fallback renders — this is a performance cache, never a correctness dependency.
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import {
   Skia,
@@ -35,7 +35,11 @@ export function useStaticMapPicture(
     let cancelled = false;
     drawAsPicture(element, bounds)
       .then((pic) => {
-        if (!cancelled) setPicture(pic);
+        if (cancelled) {
+          pic.dispose?.();
+          return;
+        }
+        setPicture(pic);
       })
       .catch(() => {
         // Recording is a cache, not a dependency — on failure the caller keeps showing the live
@@ -45,6 +49,21 @@ export function useStaticMapPicture(
       cancelled = true;
     };
   }, deps);
+
+  // Release the REPLACED picture's native command buffer once the swap has committed (the old
+  // one is out of the sksg tree by the time this effect runs); the final one on unmount.
+  const prevPicture = useRef<SkPicture | null>(null);
+  useEffect(() => {
+    if (prevPicture.current && prevPicture.current !== picture) prevPicture.current.dispose?.();
+    prevPicture.current = picture;
+  }, [picture]);
+  useEffect(
+    () => () => {
+      prevPicture.current?.dispose?.();
+      prevPicture.current = null;
+    },
+    [],
+  );
 
   return picture;
 }
@@ -74,6 +93,22 @@ export function useStaticMapImage(
 ): StaticMapRaster | null {
   const [raster, setRaster] = useState<StaticMapRaster | null>(null);
 
+  // Release the REPLACED snapshot's pixels once the swap has committed — each snapshot is a
+  // full-resolution RGBA bitmap (tens of MB at settle), and without an explicit dispose the
+  // native memory piles up per settle until GC catches up (the observed ~67MB/settle growth).
+  const prevRaster = useRef<StaticMapRaster | null>(null);
+  useEffect(() => {
+    if (prevRaster.current && prevRaster.current !== raster) prevRaster.current.image.dispose?.();
+    prevRaster.current = raster;
+  }, [raster]);
+  useEffect(
+    () => () => {
+      prevRaster.current?.image.dispose?.();
+      prevRaster.current = null;
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!picture || !spec) return;
     if (typeof Skia.Surface?.MakeOffscreen !== 'function') return; // no offscreen GPU — stay live
@@ -99,6 +134,7 @@ export function useStaticMapImage(
         snap.dispose();
         surface.dispose();
         if (image && !cancelled) setRaster({ image, rect: spec.rect });
+        else image?.dispose?.(); // unmounted (or spec changed) mid-raster — don't leak the copy
       } catch {
         // Rasterizing is a cache, not a dependency — on failure the caller keeps the previous
         // snapshot (or draws the vector picture during motion if none was ever produced).
