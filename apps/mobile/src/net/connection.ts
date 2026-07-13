@@ -16,6 +16,8 @@ let socket: GameSocket | null = null;
  */
 export interface TicketSource {
   roomCode: string;
+  /** A watcher's ticket re-mints through /spectate (a seated player's /ticket 403s for them). */
+  spectator?: boolean;
 }
 
 export function connectGame(ticket: string, ticketSource?: TicketSource): GameSocket {
@@ -24,7 +26,11 @@ export function connectGame(ticket: string, ticketSource?: TicketSource): GameSo
   useLog.getState().reset();
   useChat.getState().reset();
   const refreshTicket = ticketSource
-    ? () => api.getTicket(ticketSource.roomCode).then((r) => r.ticket)
+    ? () =>
+        (ticketSource.spectator
+          ? api.spectate(ticketSource.roomCode)
+          : api.getTicket(ticketSource.roomCode)
+        ).then((r) => r.ticket)
     : undefined;
   socket = new GameSocket(
     ticket,

@@ -20,8 +20,15 @@ import { useOrientationPolicy } from './src/app/useOrientationPolicy';
 
 // Registering the deep-link prefixes lets a cold-start OAuth return (/m/callback) or a
 // trmission:// link resolve. The active OAuth flow is handled in-process by openAuthSessionAsync.
+// `trmission://room/CODE` (and the web share URL's /room/CODE path) lands straight in that
+// room's lobby — the RoomScreen's shared poll joins/spectates exactly like a web link visit.
 const linking = {
   prefixes: ['trmission://', 'https://trmission.example'],
+  config: {
+    screens: {
+      Room: 'room/:code',
+    },
+  },
 };
 
 export default function App() {

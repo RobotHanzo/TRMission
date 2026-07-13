@@ -19,8 +19,8 @@ export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
   Room: { code: string };
-  /** The live game (Skia board + the adaptive GameStage HUD). */
-  Game: { roomCode: string };
+  /** The live game (Skia board + the adaptive GameStage HUD). Spectators mint via /spectate. */
+  Game: { roomCode: string; spectator?: boolean };
   /** Offline vs-bots: new-game setup, then the sandboxed GameStage. */
   OfflineSetup: undefined;
   OfflineGame: LocalGameInput;
