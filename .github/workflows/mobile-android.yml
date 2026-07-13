@@ -37,6 +37,13 @@ jobs:
       # Gradle's createBundleReleaseJsAndAssets task bundles the release JS.
       - run: yarn workspace @trm/proto generate
 
+      # Yarn 4 defaults enableScripts to false, so @shopify/react-native-skia's postinstall
+      # (which copies its prebuilt libskia.a et al into libs/android) never runs — CMake then
+      # fails with "Skia prebuilt binaries not found". Run its bin script manually instead of
+      # flipping enableScripts repo-wide (that would also re-enable every other dependency's
+      # postinstall).
+      - run: npx install-skia
+
       # BUILD_NUMBER is versionCode/CFBundleVersion (docs/release/mobile-versioning.md): only a
       # `v<semver>+<build>` tag carries a real one — branch pushes stay at the dev fallback (1) and
       # are never published to Play (see the publish step's `if:` below).

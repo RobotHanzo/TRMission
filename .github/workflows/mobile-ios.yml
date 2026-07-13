@@ -34,6 +34,12 @@ jobs:
       # the Xcode build phase bundles the release JS.
       - run: yarn workspace @trm/proto generate
 
+      # Yarn 4 defaults enableScripts to false, so @shopify/react-native-skia's postinstall
+      # (which copies its prebuilt xcframeworks into libs/ios) never runs — the Xcode build
+      # then fails to find the Skia binaries. Run its bin script manually instead of flipping
+      # enableScripts repo-wide (that would also re-enable every other dependency's postinstall).
+      - run: npx install-skia
+
       # Same BUILD_NUMBER axis as mobile-android.yml (docs/release/mobile-versioning.md) — keeps
       # CFBundleVersion in lockstep with versionCode so a `v<semver>+<build>` tag ships one build
       # number to both stores. Branch pushes stay at the fallback (1); TestFlight will reject a
