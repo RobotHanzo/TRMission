@@ -14,6 +14,13 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 );
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// The coachmark's RN `Animated` motion (entrance/fade/pulse/progress-glide) is driven by the RN
+// jest preset's own real-timer rAF polyfill, NOT `jest.useFakeTimers()` — left running, dozens of
+// beats' worth of loops blow well past this test's fixed per-test timeout. All motion is designed
+// to go inert under reduced motion, which is the sanctioned way to keep this scripted walkthrough
+// fast and deterministic.
+jest.mock('../../../hooks/useReducedMotion', () => ({ useReducedMotion: () => true }));
+
 // The Skia game stage is P2's test surface; here it is a pass-through that surfaces the overlay
 // and captures `commands` so the test can play the learner's moves through the REAL sandbox.
 let mockStageProps: Record<string, unknown> | null = null;
