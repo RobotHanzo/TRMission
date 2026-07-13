@@ -4388,6 +4388,7 @@ __metadata:
     react: "npm:19.2.3"
     react-i18next: "npm:^15.4.0"
     react-native: "npm:0.85.3"
+    react-native-confetti-cannon: "npm:^1.5.2"
     react-native-gesture-handler: "npm:~2.31.1"
     react-native-reanimated: "npm:4.3.1"
     react-native-safe-area-context: "npm:~5.7.0"
@@ -11974,6 +11975,13 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 10/73b36281e58eeb27c9cc6031301b6ae19ecdc9f18ae2d518bdb39b0ac564e65c5779405d623f1df9abf378a13858b79442480244bd579968afc1faf9a2ce5e05
+  languageName: node
+  linkType: hard
+
+"react-native-confetti-cannon@npm:^1.5.2":
+  version: 1.5.2
+  resolution: "react-native-confetti-cannon@npm:1.5.2"
+  checksum: 10/0ca5d56eef9763e891d228017708c340b54cc87d46d1c38d7aff5b46d511d78b52d884b9492aa1022cdd4772ef974c0e2175831516b1aafda93208e97e5098a1
   languageName: node
   linkType: hard
 

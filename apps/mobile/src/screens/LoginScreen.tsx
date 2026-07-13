@@ -18,6 +18,7 @@ import {
   Screen,
   SecondaryButton,
 } from '../theme/chrome';
+import { DiscordIcon, GoogleIcon } from '../theme/brandIcons';
 import { SPACE, useTheme } from '../theme/useTheme';
 
 /** The five sign-in methods P0 exposes: guest, email/password, Google, Apple (iOS), Discord. */
@@ -153,6 +154,7 @@ export function LoginScreen(): React.JSX.Element {
         {googleOn && (
           <SecondaryButton
             title={t('login.google')}
+            icon={<GoogleIcon />}
             onPress={() => void signInWithGoogle()}
             disabled={loading}
           />
@@ -160,6 +162,7 @@ export function LoginScreen(): React.JSX.Element {
         {discordOn && (
           <SecondaryButton
             title={t('login.discord')}
+            icon={<DiscordIcon />}
             onPress={() => void signInWithDiscord()}
             disabled={loading}
           />

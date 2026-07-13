@@ -1,7 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RootStackParamList } from '../navigation';
 import { api, type RoomView } from '../net/rest';
@@ -12,6 +12,7 @@ import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
 import { OfflineHomeSection } from '../offline/OfflineHomeSection';
 import { getTutorialCompletion } from '../features/tutorial/progress';
 import { useCanBuild } from './BuilderScreen';
+import { stageTier } from './stageLayout';
 import {
   BrandWordmark,
   Field,
@@ -45,6 +46,8 @@ function WelcomeCard({
 }): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const { width } = useWindowDimensions();
+  const wide = stageTier(width) !== 'compact';
 
   // Practice/jump-in without the tutorial completed → recommend it once (native dialog).
   const recommend = (proceed: () => void): void => {
@@ -66,7 +69,11 @@ function WelcomeCard({
     primary = false,
   ): React.JSX.Element => (
     <View
-      style={[styles.welcomeOption, { backgroundColor: tokens.surface, borderColor: tokens.line }]}
+      style={[
+        styles.welcomeOption,
+        wide && styles.welcomeOptionWide,
+        { backgroundColor: tokens.surface, borderColor: tokens.line },
+      ]}
     >
       <Text style={[styles.roomCode, { color: tokens.ink }]}>{title}</Text>
       <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>{desc}</Text>
@@ -87,25 +94,27 @@ function WelcomeCard({
         {t('home.welcome.title', { name })}
       </Text>
       <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>{t('home.welcome.subtitle')}</Text>
-      {option(
-        t('home.welcome.learnTitle'),
-        t('home.welcome.learnDesc'),
-        t('home.welcome.learnCta'),
-        onStartTutorial,
-        true,
-      )}
-      {option(
-        t('home.welcome.practiceTitle'),
-        t('home.welcome.practiceDesc'),
-        t('home.welcome.practiceCta'),
-        () => recommend(onPractice),
-      )}
-      {option(
-        t('home.welcome.skipTitle'),
-        t('home.welcome.skipDesc'),
-        t('home.welcome.skipCta'),
-        () => recommend(onContinue),
-      )}
+      <View style={[styles.welcomeOptions, wide && styles.welcomeOptionsWide]}>
+        {option(
+          t('home.welcome.learnTitle'),
+          t('home.welcome.learnDesc'),
+          t('home.welcome.learnCta'),
+          onStartTutorial,
+          true,
+        )}
+        {option(
+          t('home.welcome.practiceTitle'),
+          t('home.welcome.practiceDesc'),
+          t('home.welcome.practiceCta'),
+          () => recommend(onPractice),
+        )}
+        {option(
+          t('home.welcome.skipTitle'),
+          t('home.welcome.skipDesc'),
+          t('home.welcome.skipCta'),
+          () => recommend(onContinue),
+        )}
+      </View>
       <SecondaryButton title={t('home.welcome.discordCta')} onPress={openDiscord} />
       <Text style={[styles.roomMeta, styles.welcomeFootnote, { color: tokens.inkSoft }]}>
         {t('home.welcome.footnote')}
@@ -175,6 +184,8 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const signOut = useSession((s) => s.signOut);
   const online = useOnline();
   const canBuild = useCanBuild();
+  const { width } = useWindowDimensions();
+  const wide = stageTier(width) !== 'compact';
   const [rooms, setRooms] = useState<RoomView[]>([]);
   const [publicRooms, setPublicRooms] = useState<RoomView[]>([]);
   const [code, setCode] = useState('');
@@ -283,176 +294,222 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     );
   }
 
-  return (
-    <Screen style={styles.container}>
-      <View style={styles.header}>
-        <BrandWordmark />
-        <Text style={[styles.greeting, { color: tokens.ink }]}>
-          {t('home.greeting', { name: user?.displayName ?? '' })}
+  const header = (
+    <View style={styles.header}>
+      <BrandWordmark />
+      <Text style={[styles.greeting, { color: tokens.ink }]}>
+        {t('home.greeting', { name: user?.displayName ?? '' })}
+      </Text>
+    </View>
+  );
+
+  // Guests get the keep-your-progress nudge (hidden once upgraded or offline).
+  const guestCard = online && user?.isGuest === true && <GuestUpgradeCard />;
+
+  // Offline play never gates on connectivity (Apple 4.2 posture).
+  const offlineSection = (
+    <OfflineHomeSection
+      key={focusKey}
+      onNewGame={() => navigation.navigate('OfflineSetup')}
+      onResume={(gameId) => navigation.navigate('OfflineGame', { mode: 'resume', gameId })}
+    />
+  );
+
+  // The tutorial is fully offline too — never gated on connectivity or an account.
+  const tutorialRow = (
+    <Pressable
+      accessibilityRole="button"
+      testID="home-tutorial"
+      style={rowStyle}
+      onPress={() => navigation.navigate('Tutorial')}
+    >
+      <View style={styles.tutorialText}>
+        <Text style={[styles.roomCode, { color: tokens.ink }]}>
+          {t('home.play.tutorialTitle')}
+        </Text>
+        <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
+          {t('home.play.tutorialDesc')}
         </Text>
       </View>
-
-      {!online && <OfflineHomeBanner />}
-
-      {/* Guests get the keep-your-progress nudge (hidden once upgraded or offline). */}
-      {online && user?.isGuest === true && <GuestUpgradeCard />}
-
-      {/* Offline play never gates on connectivity (Apple 4.2 posture). */}
-      <OfflineHomeSection
-        key={focusKey}
-        onNewGame={() => navigation.navigate('OfflineSetup')}
-        onResume={(gameId) => navigation.navigate('OfflineGame', { mode: 'resume', gameId })}
-      />
-
-      {/* The tutorial is fully offline too — never gated on connectivity or an account. */}
-      <Pressable
-        accessibilityRole="button"
-        testID="home-tutorial"
-        style={rowStyle}
-        onPress={() => navigation.navigate('Tutorial')}
-      >
-        <View style={styles.tutorialText}>
-          <Text style={[styles.roomCode, { color: tokens.ink }]}>
-            {t('home.play.tutorialTitle')}
-          </Text>
-          <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
-            {t('home.play.tutorialDesc')}
-          </Text>
-        </View>
-        {tutorialDone && (
-          <Text testID="home-tutorial-done" style={[styles.tutorialDone, { color: tokens.ok }]}>
-            ✓
-          </Text>
-        )}
-      </Pressable>
-
-      {rooms.length > 0 && (
-        <>
-          <SectionLabel>{t('home.myRooms')}</SectionLabel>
-          <FlatList
-            data={rooms}
-            keyExtractor={(r) => r.code}
-            renderItem={({ item }) => (
-              <Pressable
-                style={rowStyle}
-                onPress={() => navigation.navigate('Room', { code: item.code })}
-              >
-                <Text style={[styles.roomCode, { color: tokens.ink }]}>{item.code}</Text>
-                <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
-                  {t('home.playersCount', { n: item.members.length, max: item.maxPlayers })}
-                </Text>
-              </Pressable>
-            )}
-          />
-        </>
+      {tutorialDone && (
+        <Text testID="home-tutorial-done" style={[styles.tutorialDone, { color: tokens.ok }]}>
+          ✓
+        </Text>
       )}
+    </Pressable>
+  );
 
-      {/* Public rooms: join a lobby, or watch a game already underway (spectate). */}
-      {online && (
-        <>
-          <SectionLabel>{t('home.publicRooms')}</SectionLabel>
-          {publicRooms.length === 0 ? (
-            <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
-              {t('home.noPublicRooms')}
-            </Text>
-          ) : (
-            publicRooms.map((r) => (
-              <View
-                key={r.code}
-                style={[
-                  styles.roomRow,
-                  { backgroundColor: tokens.surface, borderColor: tokens.line },
-                ]}
-              >
-                <View style={styles.publicInfo}>
-                  <Text style={[styles.roomCode, { color: tokens.ink }]}>{r.code}</Text>
-                  <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
-                    {t('home.playersCount', { n: r.members.length, max: r.maxPlayers })} ·{' '}
-                    {r.status === 'LOBBY' ? t('home.statusLobby') : t('home.statusPlaying')}
-                  </Text>
-                </View>
-                {r.status === 'LOBBY' ? (
-                  <SecondaryButton
-                    title={t('home.join')}
-                    onPress={() => navigation.navigate('Room', { code: r.code })}
-                  />
-                ) : (
-                  <SecondaryButton
-                    title={t('home.watch')}
-                    onPress={() =>
-                      navigation.navigate('Game', { roomCode: r.code, spectator: true })
-                    }
-                  />
-                )}
-              </View>
-            ))
-          )}
-        </>
-      )}
-
-      <View style={styles.joinRow}>
-        <Field
-          style={[styles.joinInput, !online && styles.disabled]}
-          placeholder={t('home.joinPlaceholder')}
-          autoCapitalize="characters"
-          value={code}
-          onChangeText={setCode}
-          editable={!busy && online}
-        />
-        <View style={!online && styles.disabled}>
-          <SecondaryButton
-            title={t('home.join')}
-            onPress={() => void joinRoom()}
-            disabled={busy || !online}
-          />
-        </View>
-      </View>
-
-      <PrimaryButton
-        title={t('home.create')}
-        onPress={() => void createRoom()}
-        disabled={busy || !online}
-      />
-
-      {/* Feature-gated (mapBuilder), hidden entirely without the grant — mirrors web AppHeader. */}
-      {canBuild && (
-        <SecondaryButton
-          testID="home-builder"
-          title={t('builder.entry')}
-          onPress={() => navigation.navigate('Builder')}
-          disabled={!online}
-        />
-      )}
-
-      <Pressable
-        testID="home-encyclopedia"
-        accessibilityRole="button"
-        onPress={() => navigation.navigate('Encyclopedia')}
-      >
-        <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('tutorial.open')}</Text>
-      </Pressable>
-
-      {online && (
+  const myRoomsSection = rooms.length > 0 && (
+    <>
+      <SectionLabel>{t('home.myRooms')}</SectionLabel>
+      {rooms.map((item) => (
         <Pressable
-          testID="home-history"
-          accessibilityRole="button"
-          onPress={() => navigation.navigate('History')}
+          key={item.code}
+          style={rowStyle}
+          onPress={() => navigation.navigate('Room', { code: item.code })}
         >
-          <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('history.title')}</Text>
+          <Text style={[styles.roomCode, { color: tokens.ink }]}>{item.code}</Text>
+          <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
+            {t('home.playersCount', { n: item.members.length, max: item.maxPlayers })}
+          </Text>
         </Pressable>
+      ))}
+    </>
+  );
+
+  // Public rooms: join a lobby, or watch a game already underway (spectate).
+  const publicRoomsSection = online && (
+    <>
+      <SectionLabel>{t('home.publicRooms')}</SectionLabel>
+      {publicRooms.length === 0 ? (
+        <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
+          {t('home.noPublicRooms')}
+        </Text>
+      ) : (
+        publicRooms.map((r) => (
+          <View
+            key={r.code}
+            style={[styles.roomRow, { backgroundColor: tokens.surface, borderColor: tokens.line }]}
+          >
+            <View style={styles.publicInfo}>
+              <Text style={[styles.roomCode, { color: tokens.ink }]}>{r.code}</Text>
+              <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
+                {t('home.playersCount', { n: r.members.length, max: r.maxPlayers })} ·{' '}
+                {r.status === 'LOBBY' ? t('home.statusLobby') : t('home.statusPlaying')}
+              </Text>
+            </View>
+            {r.status === 'LOBBY' ? (
+              <SecondaryButton
+                title={t('home.join')}
+                onPress={() => navigation.navigate('Room', { code: r.code })}
+              />
+            ) : (
+              <SecondaryButton
+                title={t('home.watch')}
+                onPress={() => navigation.navigate('Game', { roomCode: r.code, spectator: true })}
+              />
+            )}
+          </View>
+        ))
       )}
+    </>
+  );
 
-      <Pressable
-        testID="home-settings"
-        accessibilityRole="button"
-        onPress={() => navigation.navigate('Settings')}
-      >
-        <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('settings.title')}</Text>
-      </Pressable>
+  const joinRow = (
+    <View style={styles.joinRow}>
+      <Field
+        style={[styles.joinInput, !online && styles.disabled]}
+        placeholder={t('home.joinPlaceholder')}
+        autoCapitalize="characters"
+        value={code}
+        onChangeText={setCode}
+        editable={!busy && online}
+      />
+      <View style={!online && styles.disabled}>
+        <SecondaryButton
+          title={t('home.join')}
+          onPress={() => void joinRoom()}
+          disabled={busy || !online}
+        />
+      </View>
+    </View>
+  );
 
-      <Pressable onPress={() => void signOut()}>
-        <Text style={[styles.signOut, { color: tokens.danger }]}>{t('home.signOut')}</Text>
-      </Pressable>
+  const createButton = (
+    <PrimaryButton
+      title={t('home.create')}
+      onPress={() => void createRoom()}
+      disabled={busy || !online}
+    />
+  );
+
+  // Feature-gated (mapBuilder), hidden entirely without the grant — mirrors web AppHeader.
+  const builderLink = canBuild && (
+    <SecondaryButton
+      testID="home-builder"
+      title={t('builder.entry')}
+      onPress={() => navigation.navigate('Builder')}
+      disabled={!online}
+    />
+  );
+
+  const encyclopediaLink = (
+    <Pressable
+      testID="home-encyclopedia"
+      accessibilityRole="button"
+      onPress={() => navigation.navigate('Encyclopedia')}
+    >
+      <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('tutorial.open')}</Text>
+    </Pressable>
+  );
+
+  const historyLink = online && (
+    <Pressable
+      testID="home-history"
+      accessibilityRole="button"
+      onPress={() => navigation.navigate('History')}
+    >
+      <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('history.title')}</Text>
+    </Pressable>
+  );
+
+  const settingsLink = (
+    <Pressable
+      testID="home-settings"
+      accessibilityRole="button"
+      onPress={() => navigation.navigate('Settings')}
+    >
+      <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('settings.title')}</Text>
+    </Pressable>
+  );
+
+  const signOutLink = (
+    <Pressable onPress={() => void signOut()}>
+      <Text style={[styles.signOut, { color: tokens.danger }]}>{t('home.signOut')}</Text>
+    </Pressable>
+  );
+
+  // Phones stay a single scrolling column (unchanged); tablets/desktops split into a web-style
+  // two-pane grid — primary room-joining flow on the left, secondary links on the right.
+  return (
+    <Screen scroll style={styles.container}>
+      {header}
+      {!online && <OfflineHomeBanner />}
+      {!wide && guestCard}
+      {wide ? (
+        <View style={styles.grid}>
+          <View style={styles.gridMain}>
+            {offlineSection}
+            {myRoomsSection}
+            {publicRoomsSection}
+            {joinRow}
+            {createButton}
+          </View>
+          <View style={styles.gridSide}>
+            {tutorialRow}
+            {guestCard}
+            {encyclopediaLink}
+            {builderLink}
+            {historyLink}
+            {settingsLink}
+            {signOutLink}
+          </View>
+        </View>
+      ) : (
+        <>
+          {offlineSection}
+          {tutorialRow}
+          {myRoomsSection}
+          {publicRoomsSection}
+          {joinRow}
+          {createButton}
+          {builderLink}
+          {encyclopediaLink}
+          {historyLink}
+          {settingsLink}
+          {signOutLink}
+        </>
+      )}
     </Screen>
   );
 }
@@ -483,9 +540,33 @@ const styles = StyleSheet.create({
   publicInfo: { gap: 2, flexShrink: 1 },
   guestCard: { borderWidth: 1, borderRadius: RADIUS.md, padding: 14, gap: 10 },
   guestForm: { gap: 8 },
+  // Two-pane tablet/desktop layout (stageTier !== 'compact', ≥700dp): mirrors web's
+  // `.home-grid` (1.6fr rooms/1fr side rail), capped so it doesn't stretch edge-to-edge on
+  // large screens (web caps `.app-main.app-main--home` at 980px the same way).
+  grid: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 900,
+    gap: SPACE[4],
+  },
+  gridMain: { flex: 1.6, gap: SPACE[3] },
+  gridSide: { flex: 1, gap: SPACE[3] },
   welcome: { gap: SPACE[3], paddingBottom: SPACE[8] },
   welcomeBrand: { alignItems: 'center', marginTop: SPACE[4] },
   welcomeTitle: { fontSize: 22, fontWeight: '800' },
+  welcomeOptions: { gap: SPACE[3] },
+  // Row layout on tablet/desktop (mirrors web's `.welcome-options` ≥701px row), capped to a
+  // comfortable reading width instead of stretching three cards edge-to-edge.
+  welcomeOptionsWide: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: 900,
+    gap: SPACE[4],
+  },
   welcomeOption: { borderWidth: 1, borderRadius: RADIUS.md, padding: 14, gap: 8 },
+  welcomeOptionWide: { flex: 1 },
   welcomeFootnote: { textAlign: 'center', marginTop: SPACE[2] },
 });

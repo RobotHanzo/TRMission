@@ -19,8 +19,6 @@ const ORANGE = '#E55509'; // EMU orange tile + ticket accents
 const SHADOW = '#AE3C04'; // ticket drop-shadow
 const WHITE = '#FFFFFF';
 const DARK = '#410200'; // train baseline rule
-const NAVY = '#17346f'; // splash wordmark (light)
-const NAVY_DARK = '#5b9bd5'; // splash wordmark (dark)
 
 // The web mark lives in a 120-unit box; scale it up to fill the 1024 master.
 const S = (OUT / 120).toFixed(5);
@@ -92,15 +90,14 @@ const renderPng = (markup) =>
 // (below) sidesteps that. The badge has no text of its own, so it rasterises cleanly alone.
 const badgeDataUri = `data:image/png;base64,${renderPng(svg(badge(230))).toString('base64')}`;
 
-// Splash: the rounded badge above the bilingual wordmark, on a transparent field (app.config
-// supplies the paper/dark background).
-function splash(wordmarkHex) {
-  const size = 430;
+// Splash: just the badge mark, centred on a transparent field (app.config supplies the
+// paper/dark background). Light and dark variants are identical — the mark itself doesn't
+// change with theme, only the backgroundColor app.config sets behind it.
+function splash() {
+  const size = 512;
   const x = (OUT - size) / 2;
-  return svg(`
-    <image href="${badgeDataUri}" x="${x}" y="140" width="${size}" height="${size}"/>
-    <text x="512" y="726" text-anchor="middle" font-family="Microsoft JhengHei" font-weight="700" font-size="128" letter-spacing="14" fill="${ORANGE}">台鐵任務</text>
-    <text x="530" y="820" text-anchor="middle" font-family="Segoe UI" font-weight="700" font-size="58" letter-spacing="26" fill="${wordmarkHex}">TRMISSION</text>`);
+  const y = (OUT - size) / 2;
+  return svg(`<image href="${badgeDataUri}" x="${x}" y="${y}" width="${size}" height="${size}"/>`);
 }
 
 const jobs = [
@@ -115,9 +112,9 @@ const jobs = [
     'adaptive-icon-monochrome.png',
     svg(safeZone(0.8, `<g transform="scale(${S})">${monoMark()}</g>`)),
   ],
-  // Splash lockups (light + dark wordmark).
-  ['splash-icon.png', splash(NAVY)],
-  ['splash-icon-dark.png', splash(NAVY_DARK)],
+  // Splash lockups — logo mark only, no wordmark text (light/dark are the same artwork).
+  ['splash-icon.png', splash()],
+  ['splash-icon-dark.png', splash()],
 ];
 
 for (const [name, markup] of jobs) {
