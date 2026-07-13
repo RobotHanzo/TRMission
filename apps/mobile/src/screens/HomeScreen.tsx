@@ -31,6 +31,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const online = useOnline();
   const canBuild = useCanBuild();
   const [rooms, setRooms] = useState<RoomView[]>([]);
+  const [publicRooms, setPublicRooms] = useState<RoomView[]>([]);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   // Bumped on focus so the offline section remounts and reloads its resume list (a finished or
@@ -45,6 +46,11 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     } catch {
       /* ignore — the rejoin list is best-effort */
     }
+    try {
+      setPublicRooms(await api.getPublicRooms());
+    } catch {
+      /* best-effort too */
+    }
   }, []);
 
   useEffect(() => {
@@ -55,6 +61,13 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     });
     return unsub;
   }, [navigation, refresh]);
+
+  // The public-rooms list stays fresh while the screen is up (web polls the same 5s cadence).
+  useEffect(() => {
+    if (!online) return;
+    const id = setInterval(() => void refresh(), 5000);
+    return () => clearInterval(id);
+  }, [online, refresh]);
 
   const createRoom = async (): Promise<void> => {
     setBusy(true);
@@ -150,6 +163,49 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         </>
       )}
 
+      {/* Public rooms: join a lobby, or watch a game already underway (spectate). */}
+      {online && (
+        <>
+          <SectionLabel>{t('home.publicRooms')}</SectionLabel>
+          {publicRooms.length === 0 ? (
+            <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
+              {t('home.noPublicRooms')}
+            </Text>
+          ) : (
+            publicRooms.map((r) => (
+              <View
+                key={r.code}
+                style={[
+                  styles.roomRow,
+                  { backgroundColor: tokens.surface, borderColor: tokens.line },
+                ]}
+              >
+                <View style={styles.publicInfo}>
+                  <Text style={[styles.roomCode, { color: tokens.ink }]}>{r.code}</Text>
+                  <Text style={[styles.roomMeta, { color: tokens.inkSoft }]}>
+                    {t('home.playersCount', { n: r.members.length, max: r.maxPlayers })} ·{' '}
+                    {r.status === 'LOBBY' ? t('home.statusLobby') : t('home.statusPlaying')}
+                  </Text>
+                </View>
+                {r.status === 'LOBBY' ? (
+                  <SecondaryButton
+                    title={t('home.join')}
+                    onPress={() => navigation.navigate('Room', { code: r.code })}
+                  />
+                ) : (
+                  <SecondaryButton
+                    title={t('home.watch')}
+                    onPress={() =>
+                      navigation.navigate('Game', { roomCode: r.code, spectator: true })
+                    }
+                  />
+                )}
+              </View>
+            ))
+          )}
+        </>
+      )}
+
       <View style={styles.joinRow}>
         <Field
           style={[styles.joinInput, !online && styles.disabled]}
@@ -160,7 +216,11 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
           editable={!busy && online}
         />
         <View style={!online && styles.disabled}>
-          <SecondaryButton title={t('home.join')} onPress={() => void joinRoom()} disabled={busy || !online} />
+          <SecondaryButton
+            title={t('home.join')}
+            onPress={() => void joinRoom()}
+            disabled={busy || !online}
+          />
         </View>
       </View>
 
@@ -218,4 +278,5 @@ const styles = StyleSheet.create({
   signOut: { textAlign: 'center', marginTop: SPACE[1] },
   tutorialText: { gap: 2, flexShrink: 1 },
   tutorialDone: { fontSize: 18, fontWeight: '700' },
+  publicInfo: { gap: 2, flexShrink: 1 },
 });
