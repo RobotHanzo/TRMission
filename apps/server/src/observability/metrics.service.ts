@@ -13,6 +13,8 @@ export class MetricsService implements MetricsHooks {
   private readonly connections: Gauge;
   private readonly leaks: Counter;
   private readonly botStalls: Counter<'reason'>;
+  private readonly recoveryFailures: Counter;
+  private readonly internalErrors: Counter;
   private readonly roomsPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly gamesPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly pushesSent: Counter<'kind'>;
@@ -51,6 +53,16 @@ export class MetricsService implements MetricsHooks {
       name: 'trm_bot_driver_stalled_total',
       help: 'Bot driver made no progress on a bot turn (should stay 0)',
       labelNames: ['reason'],
+      registers: [this.registry],
+    });
+    this.recoveryFailures = new Counter({
+      name: 'trm_game_recovery_failed_total',
+      help: 'Persisted games that could not be rehydrated (incompatible engine major or failed replay)',
+      registers: [this.registry],
+    });
+    this.internalErrors = new Counter({
+      name: 'trm_ws_internal_errors_total',
+      help: 'Inbound WS frames that threw unexpectedly (should stay 0)',
       registers: [this.registry],
     });
     this.roomsPurged = new Counter({
@@ -99,6 +111,12 @@ export class MetricsService implements MetricsHooks {
   }
   botDriverStalled(reason: 'no_legal_action' | 'persist_failed'): void {
     this.botStalls.inc({ reason });
+  }
+  recoveryFailed(): void {
+    this.recoveryFailures.inc();
+  }
+  internalError(): void {
+    this.internalErrors.inc();
   }
   roomPurged(trigger: 'auto' | 'manual', priorStatus: string): void {
     this.roomsPurged.inc({ trigger, priorStatus });

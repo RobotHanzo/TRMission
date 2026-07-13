@@ -21,8 +21,9 @@ import {
   SESSION_REPLACED_CLOSE_CODE,
 } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
-import { boardForContentHash } from '@trm/engine';
+import { boardForContentHash, ENGINE_VERSION } from '@trm/engine';
 import type { Action, Board, GameConfig, GameEvent } from '@trm/engine';
+import { isEngineVersionSupported } from '../persistence/engine-compat';
 import type { GameRegistry, Match } from '../game/game-registry';
 import { GameSession, type Prepared } from '../game/game-session';
 import { Connection, type CloseFn, type Sink } from './connection';
@@ -72,6 +73,23 @@ export interface GameHubOptions {
   /** Debounce before a your-turn push to a socketless player, ms (default 15s; 0 = next tick). */
   yourTurnDelayMs?: number;
 }
+
+/**
+ * A persisted game that can never be brought back to life (incompatible engine major, or a
+ * snapshot+tail that no longer replays). Distinct from an infrastructure failure: the client is
+ * told the game is unavailable rather than being left to retry forever.
+ */
+export class GameUnrecoverableError extends Error {
+  constructor(
+    readonly gameId: string,
+    reason: string,
+  ) {
+    super(`game ${gameId} is unrecoverable: ${reason}`);
+    this.name = 'GameUnrecoverableError';
+  }
+}
+
+const describeError = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
@@ -159,19 +177,39 @@ export class GameHub {
     return match;
   }
 
-  /** Rehydrate a persisted game into memory (crash recovery / lazy load on reconnect). */
+  /**
+   * Rehydrate a persisted game into memory (crash recovery / lazy load on reconnect).
+   *
+   * Throws `GameUnrecoverableError` when the game cannot be resumed — an engine major the current
+   * engine can't run, or a snapshot+tail that fails to replay. Callers must handle it: it means
+   * "this game is dead", not "the server is broken".
+   */
   async recoverMatch(gameId: string): Promise<Match | null> {
     if (!this.store) return null;
     const data = await this.store.loadForRecovery(gameId);
     if (!data) return null;
+    // A game written by an older engine major carries an older `GameState` SHAPE. Splicing it into
+    // the current reducer is what used to crash the process (a pre-v8 `events` blob has no
+    // `luckyContracts`/`resources`), and its stored digests could never re-verify anyway.
+    if (!isEngineVersionSupported(data.engineVersion)) {
+      throw new GameUnrecoverableError(
+        gameId,
+        `engine v${data.engineVersion ?? 'unstamped'} game cannot run on v${ENGINE_VERSION}`,
+      );
+    }
     const board = await this.boardResolver(data.config);
-    const session = GameSession.restore(
-      gameId,
-      board,
-      data.config,
-      data.snapshot?.state ?? null,
-      data.tail,
-    );
+    let session: GameSession;
+    try {
+      session = GameSession.restore(
+        gameId,
+        board,
+        data.config,
+        data.snapshot?.state ?? null,
+        data.tail,
+      );
+    } catch (err) {
+      throw new GameUnrecoverableError(gameId, `replay failed: ${describeError(err)}`);
+    }
     const match = this.registry.adopt(gameId, session);
     if (!this.members.has(gameId)) this.members.set(gameId, new Map());
     if (this.store && !this.chatLog.has(gameId)) {
@@ -253,7 +291,27 @@ export class GameHub {
     this.metrics.connectionClosed();
   }
 
+  /**
+   * Entry point for every inbound frame. It NEVER rejects: an unexpected throw anywhere downstream
+   * would otherwise surface as an unhandled rejection and take the whole process down (the socket
+   * layer dispatches it fire-and-forget). One bad frame — or one corrupt persisted game — must cost
+   * that one client its command, not every game on the server.
+   */
   async receive(connId: string, bytes: Uint8Array): Promise<void> {
+    try {
+      await this.dispatch(connId, bytes);
+    } catch (err) {
+      this.log.error(`unhandled error while processing a frame: ${describeError(err)}`);
+      this.metrics.internalError?.();
+      this.connections
+        .get(connId)
+        ?.send(
+          rejectionFrame(0, RejectionCode.INTERNAL, 'errors:internal', 'internal server error'),
+        );
+    }
+  }
+
+  private async dispatch(connId: string, bytes: Uint8Array): Promise<void> {
     const conn = this.connections.get(connId);
     if (!conn) return;
 
@@ -315,8 +373,24 @@ export class GameHub {
     }
     let match = this.registry.get(binding.gameId);
     if (!match) {
-      const recovered = await this.recoverMatch(binding.gameId);
-      if (recovered) match = recovered;
+      try {
+        const recovered = await this.recoverMatch(binding.gameId);
+        if (recovered) match = recovered;
+      } catch (err) {
+        if (!(err instanceof GameUnrecoverableError)) throw err;
+        // The game is dead, the server is fine. Say so instead of dying (issues #22, #26).
+        this.log.error(err.message);
+        this.metrics.recoveryFailed?.();
+        conn.send(
+          rejectionFrame(
+            clientSeq,
+            RejectionCode.NOT_IN_GAME,
+            'errors:gameUnavailable',
+            'this game can no longer be resumed',
+          ),
+        );
+        return;
+      }
     }
     if (!match) {
       conn.send(

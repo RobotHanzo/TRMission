@@ -78,6 +78,10 @@ export interface RecoveryData {
   snapshot: { seq: number; state: GameState } | null;
   tail: { seq: number; action: Action; stateDigest: string }[];
   bots: BotProfile[];
+  /** The engine major that wrote this game. Recovery refuses anything the current engine can't
+   *  run — the persisted `GameState` is the engine's own shape, and an older major's shape can be
+   *  missing fields the current reducer dereferences. `undefined` = predates the stamp. */
+  engineVersion: number | undefined;
 }
 
 /** Who may fetch a finished game's replay: members only, or anyone holding the link. */

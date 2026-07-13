@@ -192,6 +192,7 @@ export class MongoGameStore implements GameStorePort {
       snapshot: snap ? { seq: snap.seq, state: snap.state } : null,
       tail: tail.map((e) => ({ seq: e.seq, action: e.action, stateDigest: e.stateDigest })),
       bots: game.bots ?? [],
+      engineVersion: game.engineVersion,
     };
   }
 }
