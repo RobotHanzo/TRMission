@@ -34,6 +34,7 @@ import { EventPhaseBar, EventTurnActions } from '../components/game/EventActions
 import { CardMarket } from '../components/game/CardMarket';
 import { PlayerHand } from '../components/game/PlayerHand';
 import { PlayerTrackers } from '../components/game/PlayerTrackers';
+import { TurnCountdown } from '../components/game/TurnCountdown';
 import { TicketPanel } from '../components/game/TicketPanel';
 import { PaymentModal } from '../components/game/PaymentModal';
 import { TicketChooser } from '../components/game/TicketChooser';
@@ -222,7 +223,12 @@ export function GameStage({
     />
   );
 
-  const trackers = <PlayerTrackers snapshot={snapshot} />;
+  const trackers = (
+    <View style={{ gap: 6 }}>
+      <TurnCountdown />
+      <PlayerTrackers snapshot={snapshot} />
+    </View>
+  );
   // The blocking event-phase prompt sits above the board in every tier so a required
   // lantern/draft/hive choice is never buried inside an unselected dock tab.
   const eventPhaseBar = <EventPhaseBar snapshot={snapshot} commands={commands} locale={locale} />;

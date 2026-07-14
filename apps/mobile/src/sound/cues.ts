@@ -14,6 +14,8 @@ import stationBuilt from '../../assets/sounds/station-built.mp3';
 import railwayBuilt from '../../assets/sounds/railway-built.mp3';
 import eventStart from '../../assets/sounds/event-start.mp3';
 import chatMessage from '../../assets/sounds/chat-message.mp3';
+import countdownWarning from '../../assets/sounds/countdown-warning.mp3';
+import countdownLapsed from '../../assets/sounds/countdown-lapsed.mp3';
 
 export type Cue =
   | 'cardDraw'
@@ -27,7 +29,9 @@ export type Cue =
   | 'stationBuilt'
   | 'railwayBuilt'
   | 'eventStart'
-  | 'chatMessage';
+  | 'chatMessage'
+  | 'countdownWarning'
+  | 'countdownLapsed';
 
 export interface CueDef {
   /** Base playback gain (0–1), multiplied by the master volume. */
@@ -49,6 +53,9 @@ export const CUES: Record<Cue, CueDef> = {
   railwayBuilt: { gain: 0.9, throttleMs: 70 },
   eventStart: { gain: 1.0, throttleMs: 300 },
   chatMessage: { gain: 0.7, throttleMs: 200 },
+  // Per-turn countdown (issue #13): a tick each of the final seconds, a distinct tone when it lapses.
+  countdownWarning: { gain: 0.7, throttleMs: 500 },
+  countdownLapsed: { gain: 0.9, throttleMs: 500 },
 };
 
 /** Bundled audio assets, one per cue (each import resolves to a Metro asset module id). */
@@ -65,6 +72,8 @@ export const CUE_ASSETS: Record<Cue, number> = {
   railwayBuilt,
   eventStart,
   chatMessage,
+  countdownWarning,
+  countdownLapsed,
 };
 
 /** Gain multiplier for a cue triggered by an opponent's action (vs the local player's). */

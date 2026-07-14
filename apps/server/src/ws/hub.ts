@@ -32,6 +32,7 @@ import type { GameStorePort } from '../persistence/types';
 import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
 import { chooseBotAction, isBotId, type BotProfile } from '@trm/bots';
 import { botStepDelayMs } from './bot-pacing';
+import { chooseTimeoutAction, turnActor } from './turn-timeout';
 import {
   rejectionToPb,
   viewToSnapshot,
@@ -46,6 +47,7 @@ import {
   cameraMovedFrame,
   pongFrame,
   playerConnectionChangedFrame,
+  turnTimerFrame,
 } from '@trm/codec';
 import type { ChatEntry, ChatContent } from '../persistence/types';
 
@@ -71,6 +73,9 @@ export interface GameHubOptions {
   metrics?: MetricsHooks;
   /** Pause between consecutive bot moves so humans can follow the action (0 in tests). */
   botMoveDelayMs?: number;
+  /** Per-turn time limit (ms); on lapse the server auto-plays a default action for the current
+   *  human player (issue #13). Default 75s; 0 disables the timer entirely (used in tests). */
+  turnTimeoutMs?: number;
   /** In-process retries for a transient bot-move persist failure before a delayed re-drive (default 3). */
   botPersistRetries?: number;
   /** Delay between in-process persist retries, ms (default 500; 0 in tests). */
@@ -119,6 +124,7 @@ const CHAT_RATE_WINDOW_MS = 5000;
 const DEFAULT_BOT_PERSIST_RETRIES = 3;
 const DEFAULT_BOT_PERSIST_RETRY_DELAY_MS = 500;
 const DEFAULT_BOT_DRIVER_RESCHEDULE_MS = 15_000;
+const DEFAULT_TURN_TIMEOUT_MS = 75_000;
 
 type BotMoveOutcome = 'moved' | 'noLegalAction' | 'persistFailed';
 
@@ -134,6 +140,12 @@ export class GameHub {
   private readonly boardResolver: (config: GameConfig) => Board | Promise<Board>;
   private readonly metrics: MetricsHooks;
   private readonly botMoveDelayMs: number;
+  private readonly turnTimeoutMs: number;
+  /** gameId → pending per-turn timeout (one per game — there is one player on the clock). */
+  private readonly turnTimers = new Map<string, NodeJS.Timeout>();
+  /** gameId → the active turn's absolute wall-clock deadline, so a (re)connecting client can be
+   *  handed the CURRENT remaining time rather than a fresh full budget. */
+  private readonly turnDeadlines = new Map<string, { player: string; at: number }>();
   private readonly botPersistRetries: number;
   private readonly botPersistRetryDelayMs: number;
   private readonly botDriverRescheduleMs: number;
@@ -176,6 +188,7 @@ export class GameHub {
       options.boardResolver ?? ((config: GameConfig) => boardForContentHash(config.contentHash));
     this.metrics = options.metrics ?? NOOP_METRICS;
     this.botMoveDelayMs = options.botMoveDelayMs ?? 600;
+    this.turnTimeoutMs = options.turnTimeoutMs ?? DEFAULT_TURN_TIMEOUT_MS;
     this.botPersistRetries = options.botPersistRetries ?? DEFAULT_BOT_PERSIST_RETRIES;
     this.botPersistRetryDelayMs =
       options.botPersistRetryDelayMs ?? DEFAULT_BOT_PERSIST_RETRY_DELAY_MS;
@@ -292,6 +305,7 @@ export class GameHub {
     this.leftNotice.delete(gameId);
     this.lastCamera.delete(gameId);
     this.clearYourTurnTimer(gameId);
+    this.clearTurnTimer(gameId);
     // After removal the bot driver's next registry.get() misses and its loop exits;
     // stragglers' commands take the existing NOT_IN_GAME path.
     this.registry.remove(gameId);
@@ -549,6 +563,7 @@ export class GameHub {
       this.sendProjected(conn, match, null, clientSeq);
       this.sendHistory(conn, match, null);
       this.sendCachedCamera(conn);
+      this.sendTurnTimer(conn, match);
       return;
     }
 
@@ -592,6 +607,7 @@ export class GameHub {
     this.sendSnapshot(conn, match);
     this.sendHistory(conn, match, player);
     this.sendCachedCamera(conn);
+    this.sendTurnTimer(conn, match);
   }
 
   private onResync(conn: Connection): void {
@@ -605,6 +621,7 @@ export class GameHub {
     if (match) {
       this.sendSnapshot(conn, match);
       this.sendCachedCamera(conn);
+      this.sendTurnTimer(conn, match);
     }
   }
 
@@ -1003,6 +1020,113 @@ export class GameHub {
     }
   }
 
+  // ── per-turn timeout (issue #13) ─────────────────────────────────────────────
+
+  private clearTurnTimer(gameId: string): void {
+    const timer = this.turnTimers.get(gameId);
+    if (timer) {
+      clearTimeout(timer);
+      this.turnTimers.delete(gameId);
+    }
+    this.turnDeadlines.delete(gameId);
+  }
+
+  /**
+   * (Re)arm the per-turn timeout after every commit, off the same fan-out humans and bots share.
+   * A single human is ever "on the clock" (the current player in a single-actor phase); a bot turn,
+   * game over, or the simultaneous SETUP_TICKETS phase carries no timer. Rearming on every commit
+   * means a player's own sub-actions (e.g. drawing the first of two cards) refresh their budget —
+   * the timer bounds each pending decision, and once one lapses the rest of that turn is completed
+   * at once in `runTurnTimeout`. Also fans out the cosmetic `TurnTimer` countdown to every client.
+   */
+  private scheduleTurnTimeout(match: Match): void {
+    const gameId = match.session.gameId;
+    const prev = this.turnTimers.get(gameId);
+    if (prev) {
+      clearTimeout(prev);
+      this.turnTimers.delete(gameId);
+    }
+    if (this.turnTimeoutMs <= 0) return; // disabled (tests)
+
+    const hadCountdown = this.turnDeadlines.has(gameId);
+    this.turnDeadlines.delete(gameId);
+    const actor = turnActor(match.session.raw());
+    if (!actor || isBotId(actor as string)) {
+      // Nobody human is on the clock — clear any countdown the clients were showing.
+      if (hadCountdown) this.broadcastTurnTimer(match, '', 0);
+      return;
+    }
+
+    this.turnDeadlines.set(gameId, {
+      player: actor as string,
+      at: Date.now() + this.turnTimeoutMs,
+    });
+    const timer = setTimeout(() => {
+      this.turnTimers.delete(gameId);
+      void this.runTurnTimeout(gameId, actor);
+    }, this.turnTimeoutMs);
+    timer.unref?.();
+    this.turnTimers.set(gameId, timer);
+    this.broadcastTurnTimer(match, actor as string, this.turnTimeoutMs);
+  }
+
+  /** Fan out the cosmetic countdown frame (playerId "" + 0 clears it). */
+  private broadcastTurnTimer(match: Match, playerId: string, remainingMs: number): void {
+    const gameId = match.session.gameId;
+    const frame = turnTimerFrame(playerId, remainingMs, this.turnTimeoutMs);
+    for (const conn of this.members.get(gameId)?.values() ?? []) conn.send(frame);
+    for (const conn of this.spectators.get(gameId) ?? []) conn.send(frame);
+  }
+
+  /** Hand a single (re)connecting client the CURRENT countdown (remaining, not a fresh budget). */
+  private sendTurnTimer(conn: Connection, match: Match): void {
+    const d = this.turnDeadlines.get(match.session.gameId);
+    if (!d) return;
+    const remaining = Math.max(0, d.at - Date.now());
+    conn.send(turnTimerFrame(d.player, remaining, this.turnTimeoutMs));
+  }
+
+  /**
+   * The timer lapsed: auto-play the timed-out player's default action(s) through the SAME
+   * prepare→persist→commit→fan-out path humans and bots use (so each is a logged, replay-safe
+   * action), looping until the turn leaves them. A turn is at most a few sub-actions (drawing two
+   * cards is the max), so the guard is generous. Chosen from `legalActions`, so it can never inject
+   * an illegal move; a persist failure bails (the player keeps the turn, a later commit re-arms).
+   */
+  private async runTurnTimeout(gameId: string, actor: PlayerId): Promise<void> {
+    const match = this.registry.get(gameId);
+    if (!match) return;
+    await match.queue.run(async () => {
+      let autoPlayed = false;
+      for (let guard = 0; guard < 20; guard++) {
+        const s = match.session;
+        // Re-check under the queue: the player may have acted while we waited for the lock.
+        if (turnActor(s.raw()) !== actor) break;
+        const action = chooseTimeoutAction(s.board, s.raw(), actor);
+        if (!action) break;
+        const prep = s.prepare(action);
+        if (!prep.ok) break;
+        this.metrics.commandReceived();
+        const startedAt = performance.now();
+        const applied = await this.applyPrepared(match, action, prep.prepared);
+        if (!applied.ok) {
+          this.log.warn(
+            `turn-timeout auto-move persist failed for ${actor as string} in game ${gameId}`,
+          );
+          break;
+        }
+        if (!autoPlayed) {
+          this.metrics.turnTimedOut?.();
+          autoPlayed = true;
+        }
+        this.broadcast(match, prep.prepared.events, null, 0);
+        this.metrics.commandApplied((performance.now() - startedAt) / 1000);
+      }
+    });
+    // The auto-completed turn may now be a bot's — let the driver take over.
+    void this.driveBots(gameId);
+  }
+
   /**
    * Push triggers, fed by the same commit fan-out humans and bots share. TURN_STARTED
    * schedules a debounced your-turn reminder for a socketless human (re-checked at fire
@@ -1044,6 +1168,7 @@ export class GameHub {
     ackClientSeq: number,
   ): void {
     this.maybeNotify(match, events);
+    this.scheduleTurnTimeout(match);
     const members = this.members.get(match.session.gameId);
     if (!members) return;
     const version = match.session.stateVersion;

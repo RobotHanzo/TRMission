@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/index.ts": {
-    "mtime": 1783991408.8009808,
-    "ast_hash": "07693f93baf502aeeb39145108888a78",
+    "mtime": 1783995740.723681,
+    "ast_hash": "9c50145d5efc1da2932490095bf82973",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/tutorial.ts": {
@@ -4595,8 +4595,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/index.ts": {
-    "mtime": 1783991449.886119,
-    "ast_hash": "e411412206edb77f7daacbd93b93ca58",
+    "mtime": 1783995941.5491374,
+    "ast_hash": "dbafdb706b5a571d6715e49fd332ce85",
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/tutorial.ts": {
@@ -5932,6 +5932,21 @@
   "apps/web/src/hooks/useSoundSetup.ts": {
     "mtime": 1783993957.8636456,
     "ast_hash": "622d58cb4a72451e3427b13959c0e9b0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/i18n/content.ts": {
+    "mtime": 1783995460.8209352,
+    "ast_hash": "e692889c33ad6628782d2a87c8b403e8",
+    "semantic_hash": ""
+  },
+  "apps/web/src/i18n/content.ts": {
+    "mtime": 1783995459.7966075,
+    "ast_hash": "e692889c33ad6628782d2a87c8b403e8",
+    "semantic_hash": ""
+  },
+  "packages/client-core/src/i18n/content.ts": {
+    "mtime": 1783995444.6606746,
+    "ast_hash": "3a740efadcb779f22304dcc7c14f54de",
     "semantic_hash": ""
   }
 }

@@ -70,8 +70,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/config/env.ts": {
-    "mtime": 1783869478.5500517,
-    "ast_hash": "8112512e1a79347cb1d95f197d64a42b",
+    "mtime": 1784055353.6208434,
+    "ast_hash": "5173162df8a38a9f7a30cf7a0c386470",
     "semantic_hash": ""
   },
   "apps/server/src/db/database.module.ts": {
@@ -100,13 +100,13 @@
     "semantic_hash": "12adca04366aa664495c1e9276116d69"
   },
   "apps/server/src/game/game-session.ts": {
-    "mtime": 1783991145.8813903,
-    "ast_hash": "212ea3b1f3563e96f7268a99082edbaa",
+    "mtime": 1784007462.7641938,
+    "ast_hash": "f85a2dc19d724b8da75e715e5870c9ff",
     "semantic_hash": ""
   },
   "apps/server/src/game/game.module.ts": {
-    "mtime": 1783869478.5550525,
-    "ast_hash": "084ed41012f126d6143f52a4d9db030f",
+    "mtime": 1784055359.1896265,
+    "ast_hash": "58a2b29e0b0d326e1b1f89789558d81b",
     "semantic_hash": ""
   },
   "apps/server/src/health/health.controller.ts": {
@@ -170,8 +170,8 @@
     "semantic_hash": "de54bde2061ef57284883b1465c3ca06"
   },
   "apps/server/src/observability/hooks.ts": {
-    "mtime": 1783971495.6859748,
-    "ast_hash": "eeb72969a46f6ae2047ff3ae75d902f5",
+    "mtime": 1784055330.2181046,
+    "ast_hash": "b34a5696eee19ca5bf1b1bb18b0875ad",
     "semantic_hash": ""
   },
   "apps/server/src/observability/metrics.controller.ts": {
@@ -180,8 +180,8 @@
     "semantic_hash": "b7b2b04c30be3b2c035ec7efdd3853c4"
   },
   "apps/server/src/observability/metrics.service.ts": {
-    "mtime": 1783971517.6544797,
-    "ast_hash": "2f7b86ec6cd296a72669ec1d3f9bb2e5",
+    "mtime": 1784055346.352959,
+    "ast_hash": "64ff9410dc76a3afdbd1c227ae2d27b4",
     "semantic_hash": ""
   },
   "apps/server/src/observability/observability.module.ts": {
@@ -205,13 +205,13 @@
     "semantic_hash": "85570b2a2502df5b79a0090115d9fef6"
   },
   "apps/server/src/persistence/game-store.ts": {
-    "mtime": 1783971436.867965,
-    "ast_hash": "bb0339f6f9e1710106503a05dff43e10",
+    "mtime": 1784007454.0994978,
+    "ast_hash": "c3b18f6bf328c6e95a59c1e84634176e",
     "semantic_hash": ""
   },
   "apps/server/src/persistence/types.ts": {
-    "mtime": 1783971431.62921,
-    "ast_hash": "78bfc16a2be39abf9035131feffdb02a",
+    "mtime": 1784007437.70772,
+    "ast_hash": "dd6013fd560d1a2573d3027eb3817172",
     "semantic_hash": ""
   },
   "apps/server/src/ws/bot-pacing.ts": {
@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "apps/server/src/ws/hub.ts": {
-    "mtime": 1783991290.0713077,
-    "ast_hash": "e6df80d3777ccce997fa3e97d494ab7b",
+    "mtime": 1784056940.8477652,
+    "ast_hash": "89d7291d08302e27b382922fc33890cd",
     "semantic_hash": ""
   },
   "apps/server/src/ws/jwt-ticket.ts": {
@@ -325,8 +325,8 @@
     "semantic_hash": ""
   },
   "apps/server/test/persistence.spec.ts": {
-    "mtime": 1783276377.899473,
-    "ast_hash": "a8d69d1fe13393c0817f24163108e5bc",
+    "mtime": 1784007505.615377,
+    "ast_hash": "c8f54c943d04ec9acff3123aa63a729a",
     "semantic_hash": ""
   },
   "apps/server/test/spectators.spec.ts": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/index.ts": {
-    "mtime": 1783991408.8009808,
-    "ast_hash": "07693f93baf502aeeb39145108888a78",
+    "mtime": 1784056141.9214666,
+    "ast_hash": "1b14482a6ec269024682d33b765e8cd9",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/tutorial.ts": {
@@ -825,8 +825,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/net/connection.ts": {
-    "mtime": 1783991360.1733353,
-    "ast_hash": "51e6314b0f271248fc0398ab2b0fbd5c",
+    "mtime": 1784055845.0579133,
+    "ast_hash": "e2caca1fb89bc1542c136e514547b122",
     "semantic_hash": ""
   },
   "apps/web/src/net/rest.test.ts": {
@@ -870,8 +870,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/screens/GameStage.tsx": {
-    "mtime": 1783896451.9560218,
-    "ast_hash": "777bf34dbd30fcd9278726e5d3d70924",
+    "mtime": 1784056425.1420898,
+    "ast_hash": "34a606c8a5d598112e00abf08765d3f1",
     "semantic_hash": ""
   },
   "apps/web/src/screens/HistoryScreen.test.tsx": {
@@ -930,13 +930,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/sound/cues.test.ts": {
-    "mtime": 1783194712.480253,
-    "ast_hash": "8157afef2ff5c08ecbfc6c7872050e9f",
+    "mtime": 1784055989.9889793,
+    "ast_hash": "dc53780c3c4e227df5d5b7015bd6306d",
     "semantic_hash": ""
   },
   "apps/web/src/sound/cues.ts": {
-    "mtime": 1783194631.6389656,
-    "ast_hash": "663cd8cb6c8c6d66ec2dae8e3315d6be",
+    "mtime": 1784055957.6910203,
+    "ast_hash": "20c30123f19fd6ec017690ae6daf63a2",
     "semantic_hash": ""
   },
   "apps/web/src/sound/player.test.ts": {
@@ -1095,8 +1095,8 @@
     "semantic_hash": ""
   },
   "packages/codec/src/frames.ts": {
-    "mtime": 1783991137.1478765,
-    "ast_hash": "345c3e8ed4719b9a7e272f4a9011ffa2",
+    "mtime": 1784055207.8340576,
+    "ast_hash": "d143dd4a7a6bc776b7c9ccb1e14f1abe",
     "semantic_hash": ""
   },
   "packages/codec/src/index.ts": {
@@ -1375,8 +1375,8 @@
     "semantic_hash": ""
   },
   "packages/proto/src/index.ts": {
-    "mtime": 1783809759.7038949,
-    "ast_hash": "2fb0f54414b31a9d88f8b16b152c3e02",
+    "mtime": 1784055168.4861107,
+    "ast_hash": "1238ce1cc06756fd6f4f75ce04fa34c3",
     "semantic_hash": ""
   },
   "packages/proto/test/proto.spec.ts": {
@@ -1510,8 +1510,8 @@
     "semantic_hash": ""
   },
   "apps/web/public/sounds/CREDITS.md": {
-    "mtime": 1783276378.0255406,
-    "ast_hash": "c9e3a2dc8789055640d2955fe7d8f8a8",
+    "mtime": 1784056940.929582,
+    "ast_hash": "52885fcd3ac64be6ea9dd672fd8ef64e",
     "semantic_hash": ""
   },
   "docker-compose.yml": {
@@ -4595,8 +4595,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/index.ts": {
-    "mtime": 1783991449.886119,
-    "ast_hash": "e411412206edb77f7daacbd93b93ca58",
+    "mtime": 1784056523.6558332,
+    "ast_hash": "aff2a3a93589df25aa29b3b66525ada3",
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/tutorial.ts": {
@@ -4615,8 +4615,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/net/connection.ts": {
-    "mtime": 1783991370.2174325,
-    "ast_hash": "5d41aa0090646e00cc78f728a6f5743a",
+    "mtime": 1784055860.917629,
+    "ast_hash": "252c1bbb7fedcfd0c8f5d323d02292ea",
     "semantic_hash": ""
   },
   "apps/mobile/src/net/rest.test.ts": {
@@ -4800,8 +4800,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/GameStage.tsx": {
-    "mtime": 1783935795.7366598,
-    "ast_hash": "f8e7c0e66429226b4e386ca826cc5d93",
+    "mtime": 1784056484.6522675,
+    "ast_hash": "7c9c32958feebeaa8073d42023e12d7f",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/HomeScreen.tsx": {
@@ -4865,8 +4865,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/sound/cues.ts": {
-    "mtime": 1783869478.5195496,
-    "ast_hash": "04fe0d3836e39a17a3b24ebf385b5f46",
+    "mtime": 1784055977.7414248,
+    "ast_hash": "c485200dd3b68d1d241c0e0340791ae8",
     "semantic_hash": ""
   },
   "apps/mobile/src/sound/player.test.ts": {
@@ -5260,8 +5260,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/assets/sounds/CREDITS.md": {
-    "mtime": 1783869478.4134762,
-    "ast_hash": "c9e3a2dc8789055640d2955fe7d8f8a8",
+    "mtime": 1784056940.9496756,
+    "ast_hash": "52885fcd3ac64be6ea9dd672fd8ef64e",
     "semantic_hash": ""
   },
   "apps/mobile/fastlane/metadata/android/en-US/full_description.txt": {
@@ -5600,13 +5600,13 @@
     "semantic_hash": ""
   },
   "packages/client-core/src/net/socket.ts": {
-    "mtime": 1783991345.113395,
-    "ast_hash": "fc6ed88ad2c4ac3f28732201b55615cc",
+    "mtime": 1784055782.844119,
+    "ast_hash": "48878f9836f5e26a208c70392c98254e",
     "semantic_hash": ""
   },
   "packages/client-core/test/socket.spec.ts": {
-    "mtime": 1783897598.612702,
-    "ast_hash": "1573c6ca4f2599ccbf3418a0fd70b65f",
+    "mtime": 1784056558.5508785,
+    "ast_hash": "3871b67299c07f13d98b92eb7474ce37",
     "semantic_hash": ""
   },
   "packages/client-core/tsconfig.json": {
@@ -5660,8 +5660,8 @@
     "semantic_hash": ""
   },
   "packages/client-core/src/store/game.ts": {
-    "mtime": 1783898398.307395,
-    "ast_hash": "5bbd174f38a152c0b32c90d5972a9285",
+    "mtime": 1784055816.6394894,
+    "ast_hash": "772b50d0adc1e1244c618bcb60445be7",
     "semantic_hash": ""
   },
   "packages/client-core/src/store/log.ts": {
@@ -5932,6 +5932,81 @@
   "apps/web/src/hooks/useSoundSetup.ts": {
     "mtime": 1783993957.8636456,
     "ast_hash": "622d58cb4a72451e3427b13959c0e9b0",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/i18n/content.ts": {
+    "mtime": 1783995460.8209352,
+    "ast_hash": "e692889c33ad6628782d2a87c8b403e8",
+    "semantic_hash": ""
+  },
+  "apps/web/src/i18n/content.ts": {
+    "mtime": 1783995459.7966075,
+    "ast_hash": "e692889c33ad6628782d2a87c8b403e8",
+    "semantic_hash": ""
+  },
+  "packages/client-core/src/i18n/content.ts": {
+    "mtime": 1783995444.6606746,
+    "ast_hash": "3a740efadcb779f22304dcc7c14f54de",
+    "semantic_hash": ""
+  },
+  "apps/mobile/src/components/game/TurnCountdown.tsx": {
+    "mtime": 1784056458.8900542,
+    "ast_hash": "e2884b738ad1d8473434cf36de0c2b16",
+    "semantic_hash": ""
+  },
+  "apps/server/src/ws/turn-timeout.ts": {
+    "mtime": 1784055133.1841066,
+    "ast_hash": "293e508d8f5ed6513904ec6ea7a81d0d",
+    "semantic_hash": ""
+  },
+  "apps/server/test/turn-timeout.e2e.spec.ts": {
+    "mtime": 1784056940.876402,
+    "ast_hash": "4c2d87f4ef89c9c6b27c7145ce6e0a20",
+    "semantic_hash": ""
+  },
+  "apps/server/test/turn-timeout.spec.ts": {
+    "mtime": 1784056940.8653512,
+    "ast_hash": "7fa08397c23fd8ff903782c1924c06af",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/TurnCountdown.test.tsx": {
+    "mtime": 1784056708.5392506,
+    "ast_hash": "4a85574e05c055e33b014be36153607d",
+    "semantic_hash": ""
+  },
+  "apps/web/src/components/TurnCountdown.tsx": {
+    "mtime": 1784056940.889916,
+    "ast_hash": "b5cb6ad9bc527f8669a2e09b4de11e03",
+    "semantic_hash": ""
+  },
+  "packages/client-core/src/game/turnCountdown.ts": {
+    "mtime": 1784056396.0158107,
+    "ast_hash": "d196dc510061872b62f9c7266daf27fc",
+    "semantic_hash": ""
+  },
+  "packages/client-core/test/gameStore.spec.ts": {
+    "mtime": 1784056573.1765852,
+    "ast_hash": "7384be87af623fa5778a09be5c707bb1",
+    "semantic_hash": ""
+  },
+  "apps/mobile/assets/sounds/countdown-lapsed.mp3": {
+    "mtime": 1784055898.9838233,
+    "ast_hash": "5a619cfa739deb6da96d5045ad7dd95d",
+    "semantic_hash": ""
+  },
+  "apps/mobile/assets/sounds/countdown-warning.mp3": {
+    "mtime": 1784055898.9828236,
+    "ast_hash": "01089d4094ae91ac14b150b4194241df",
+    "semantic_hash": ""
+  },
+  "apps/web/public/sounds/countdown-lapsed.mp3": {
+    "mtime": 1784055893.9708655,
+    "ast_hash": "5a619cfa739deb6da96d5045ad7dd95d",
+    "semantic_hash": ""
+  },
+  "apps/web/public/sounds/countdown-warning.mp3": {
+    "mtime": 1784055893.9046059,
+    "ast_hash": "01089d4094ae91ac14b150b4194241df",
     "semantic_hash": ""
   }
 }

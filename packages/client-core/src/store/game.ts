@@ -21,6 +21,16 @@ export interface EventBatch {
   events: GameEvent[];
 }
 
+/** The active per-turn countdown (issue #13): who is on the clock and when it lapses. Cosmetic —
+ *  the server is authoritative and will auto-play if the deadline passes. */
+export interface TurnTimerState {
+  playerId: string;
+  /** Client-local wall-clock (ms) at which the countdown reaches zero. */
+  deadline: number;
+  /** The full per-turn budget (ms), for rendering a proportional bar/ring. */
+  totalMs: number;
+}
+
 interface GameState {
   snapshot: GameSnapshot | null;
   status: SocketStatus;
@@ -32,9 +42,12 @@ interface GameState {
   sessionReplaced: boolean;
   /** Latest camera framing broadcast by a member; consumed by "follow the acting player". */
   actingCamera: ActingCamera | null;
+  /** The active per-turn countdown, or null when nobody is on the clock. */
+  turnTimer: TurnTimerState | null;
   applySnapshot(snapshot: GameSnapshot): void;
   applyEvents(stateVersion: number, events: GameEvent[]): void;
   applyCameraMoved(playerId: string, view: CameraView): void;
+  applyTurnTimer(playerId: string, remainingMs: number, totalMs: number): void;
   setStatus(status: SocketStatus): void;
   setRejection(rejection: RejectionInfo | null): void;
   setSessionReplaced(sessionReplaced: boolean): void;
@@ -49,6 +62,7 @@ const creator: StateCreator<GameState> = (set) => ({
   rejection: null,
   sessionReplaced: false,
   actingCamera: null,
+  turnTimer: null,
   // Snapshot is authoritative; ignore any that arrives out of order (older version).
   // A turn handover (current player changed) drops any stale follow-camera so the next
   // actor's framing starts clean rather than snapping to the previous player's last view.
@@ -70,6 +84,14 @@ const creator: StateCreator<GameState> = (set) => ({
         ? { actingCamera: { playerId, view: { cx: view.cx, cy: view.cy, span: view.span } } }
         : s,
     ),
+  // Anchor the countdown to a client-local deadline so the component counts down against its own
+  // clock (no server/client skew). An empty playerId clears it (bot turn / game over / disabled).
+  applyTurnTimer: (playerId, remainingMs, totalMs) =>
+    set(() =>
+      playerId
+        ? { turnTimer: { playerId, deadline: Date.now() + remainingMs, totalMs } }
+        : { turnTimer: null },
+    ),
   setStatus: (status) => set({ status }),
   setRejection: (rejection) => set({ rejection }),
   setSessionReplaced: (sessionReplaced) => set({ sessionReplaced }),
@@ -81,6 +103,7 @@ const creator: StateCreator<GameState> = (set) => ({
       rejection: null,
       sessionReplaced: false,
       actingCamera: null,
+      turnTimer: null,
     }),
 });
 

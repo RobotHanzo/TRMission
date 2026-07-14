@@ -174,6 +174,8 @@ const resources = {
       turnOf: '輪到 {{name}}',
       yourTurn: '輪到你了',
       gameOver: '遊戲結束',
+      turnTimeRemaining: '剩餘 {{seconds}} 秒',
+      turnTimeoutHint: '時間到系統將自動抽一張車廂卡',
 
       drawBlind: '抽牌堆',
       drawTickets: '抽任務卡',
@@ -701,6 +703,8 @@ const resources = {
       turnOf: "{{name}}'s turn",
       yourTurn: 'Your turn',
       gameOver: 'Game over',
+      turnTimeRemaining: '{{seconds}}s left',
+      turnTimeoutHint: 'On time-out the server auto-draws a train card',
 
       drawBlind: 'Draw from deck',
       drawTickets: 'Draw tickets',

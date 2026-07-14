@@ -11,7 +11,8 @@
 // v5: preset_id oneof case on Chat/ChatBroadcast/ChatEntry — canned, per-locale-translated chat
 // messages alongside free text (@trm/shared's chat-presets catalog).
 // v6: future random-event phases, commands, resources, payment modifiers, and projections.
-export const PROTOCOL_VERSION = 6;
+// v7: TurnTimer ServerEnvelope frame — the cosmetic per-turn countdown (issue #13's round timer).
+export const PROTOCOL_VERSION = 7;
 
 export * from './gen/trmission/v1/common_pb';
 export * from './gen/trmission/v1/client_pb';

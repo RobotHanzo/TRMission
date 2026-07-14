@@ -15,6 +15,7 @@ export class MetricsService implements MetricsHooks {
   private readonly botStalls: Counter<'reason'>;
   private readonly recoveryFailures: Counter;
   private readonly internalErrors: Counter;
+  private readonly turnTimeouts: Counter;
   private readonly roomsPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly gamesPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly pushesSent: Counter<'kind'>;
@@ -63,6 +64,11 @@ export class MetricsService implements MetricsHooks {
     this.internalErrors = new Counter({
       name: 'trm_ws_internal_errors_total',
       help: 'Inbound WS frames that threw unexpectedly (should stay 0)',
+      registers: [this.registry],
+    });
+    this.turnTimeouts = new Counter({
+      name: 'trm_turn_timeouts_total',
+      help: 'Turns whose per-turn timer lapsed and were auto-played by the server',
       registers: [this.registry],
     });
     this.roomsPurged = new Counter({
@@ -117,6 +123,9 @@ export class MetricsService implements MetricsHooks {
   }
   internalError(): void {
     this.internalErrors.inc();
+  }
+  turnTimedOut(): void {
+    this.turnTimeouts.inc();
   }
   roomPurged(trigger: 'auto' | 'manual', priorStatus: string): void {
     this.roomsPurged.inc({ trigger, priorStatus });

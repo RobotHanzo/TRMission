@@ -13,6 +13,9 @@ export const env = {
   devGame: process.env.TRM_DEV_GAME === '1',
   /** Delay between consecutive bot moves (ms) so humans can follow the play. */
   botMoveDelayMs: Number(process.env.TRM_BOT_DELAY_MS ?? 600),
+  /** Per-turn time limit (ms); on lapse the server auto-plays a default action (issue #13).
+   *  Default 75s; 0 disables the timer entirely (used in tests). */
+  turnTimeoutMs: Number(process.env.TRM_TURN_TIMEOUT_MS ?? 75_000),
   /** Force-update floor for the mobile app: builds below this are told to update. 0 = off. */
   mobileMinBuild: Number(process.env.MOBILE_MIN_BUILD ?? 0),
 
