@@ -44,6 +44,7 @@ import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
 import { TrainCarCard } from '../components/TrainCarCard';
 import { PlayerTrackers } from '../components/PlayerTrackers';
+import { TurnCountdown } from '../components/TurnCountdown';
 import { TicketPanel } from '../components/TicketPanel';
 import { PaymentModal } from '../components/PaymentModal';
 import { TicketChooser } from '../components/TicketChooser';
@@ -492,6 +493,7 @@ export function GameStage({
   );
   const trackers = (
     <div className="hud-block">
+      <TurnCountdown />
       <PlayerTrackers snapshot={snapshot} />
     </div>
   );

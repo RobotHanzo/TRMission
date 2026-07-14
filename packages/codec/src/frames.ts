@@ -52,6 +52,19 @@ export const cameraMovedFrame = (playerId: string, view: CameraView): ServerEven
   value: { playerId, view },
 });
 
+// Ephemeral per-turn countdown: how long the player being timed has left before the server
+// auto-plays a default action for them (issue #13). Cosmetic — never part of the authoritative
+// snapshot or action log. remainingMs is a duration (the client counts down against its own clock);
+// playerId "" with remainingMs 0 clears the countdown (a bot's turn, or the game ended).
+export const turnTimerFrame = (
+  playerId: string,
+  remainingMs: number,
+  totalMs: number,
+): ServerEvent => ({
+  case: 'turnTimer',
+  value: { playerId, remainingMs, totalMs },
+});
+
 export const pongFrame = (nonce: number): ServerEvent => ({ case: 'pong', value: { nonce } });
 
 // Cosmetic hub/session bookkeeping (a seated player's connection was confirmed lost, after a

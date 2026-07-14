@@ -49,6 +49,9 @@ export interface SocketHandlers {
   onPlayerConnectionChanged?(playerId: string, connected: boolean): void;
   /** Another member's camera framing, relayed for "follow the acting player". */
   onCameraMoved?(playerId: string, view: CameraView): void;
+  /** The per-turn countdown for the player currently on the clock (issue #13): `remainingMs` until
+   *  the server auto-plays for them. `playerId` "" (with 0) clears it (a bot's turn / game over). */
+  onTurnTimer?(playerId: string, remainingMs: number, totalMs: number): void;
   /** This seat was claimed by another connection; the socket will not auto-reconnect. */
   onSessionReplaced?(): void;
 }
@@ -193,6 +196,13 @@ export class GameSocket {
       case 'cameraMoved':
         if (env.event.value.view)
           this.handlers.onCameraMoved?.(env.event.value.playerId, env.event.value.view);
+        break;
+      case 'turnTimer':
+        this.handlers.onTurnTimer?.(
+          env.event.value.playerId,
+          env.event.value.remainingMs,
+          env.event.value.totalMs,
+        );
         break;
       default:
         break; // pong / unset

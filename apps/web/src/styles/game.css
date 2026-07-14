@@ -759,6 +759,71 @@
   min-width: 72px;
 }
 
+/* Per-turn countdown (issue #13) — a depleting bar + remaining seconds above the trackers. */
+.turn-countdown {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-1) var(--tr-space-2);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  background: var(--tr-surface-2);
+  font-variant-numeric: tabular-nums;
+}
+.turn-countdown-secs {
+  font-weight: 700;
+  min-width: 2.25ch;
+  text-align: right;
+  color: var(--tr-ink);
+}
+.turn-countdown-ring {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tr-line) 65%, transparent);
+  overflow: hidden;
+}
+.turn-countdown-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  transform: scaleX(var(--frac, 1));
+  background: var(--tr-ember);
+  transition: transform 200ms linear;
+}
+.turn-countdown.is-warning {
+  border-color: var(--tr-danger);
+}
+.turn-countdown.is-warning .turn-countdown-secs {
+  color: var(--tr-danger);
+}
+.turn-countdown.is-warning .turn-countdown-ring::after {
+  background: var(--tr-danger);
+}
+/* Only pulse when it's the local player being timed (their own clock running out). */
+.turn-countdown.is-warning.is-self {
+  animation: turn-countdown-pulse 1s ease-in-out infinite;
+}
+@keyframes turn-countdown-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tr-danger) 32%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .turn-countdown.is-warning.is-self {
+    animation: none;
+  }
+  .turn-countdown-ring::after {
+    transition: none;
+  }
+}
+
 .trackers {
   list-style: none;
   margin: 0;

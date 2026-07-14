@@ -34,6 +34,16 @@ describe('GameSocket history dispatch', () => {
       { playerId: 'p1', content: { case: 'text', value: 'hi' } },
     ]);
   });
+
+  it('routes a TurnTimer frame to onTurnTimer (issue #13 countdown)', () => {
+    const onTurnTimer = vi.fn();
+    const socket = new GameSocket('tkt', { onTurnTimer }, 'ws://x');
+    deliver(socket, {
+      serverSeq: 2,
+      event: { case: 'turnTimer', value: { playerId: 'p2', remainingMs: 60000, totalMs: 75000 } },
+    });
+    expect(onTurnTimer).toHaveBeenCalledWith('p2', 60000, 75000);
+  });
 });
 
 class FakeWebSocket {

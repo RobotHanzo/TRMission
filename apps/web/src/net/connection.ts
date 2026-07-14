@@ -57,6 +57,8 @@ export function connectGame(ticket: string, ticketSource?: TicketSource): GameSo
       onPlayerConnectionChanged: (playerId, connected) =>
         useLog.getState().ingestConnectionChange(playerId, connected),
       onCameraMoved: (playerId, view) => useGame.getState().applyCameraMoved(playerId, view),
+      onTurnTimer: (playerId, remainingMs, totalMs) =>
+        useGame.getState().applyTurnTimer(playerId, remainingMs, totalMs),
       onSessionReplaced: () => useGame.getState().setSessionReplaced(true),
     },
     defaultWsUrl(),

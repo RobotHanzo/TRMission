@@ -20,6 +20,8 @@ export interface MetricsHooks {
    * no longer replays). The affected players can't resume that game — alert on any increase.
    */
   recoveryFailed?(): void;
+  /** A player's per-turn timer lapsed and the server auto-played a default action for them. */
+  turnTimedOut?(): void;
   /** An inbound frame threw somewhere unexpected. Should stay at 0; each one is a bug. */
   internalError?(): void;
 }
@@ -34,4 +36,5 @@ export const NOOP_METRICS: MetricsHooks = {
   botDriverStalled() {},
   recoveryFailed() {},
   internalError() {},
+  turnTimedOut() {},
 };

@@ -10,7 +10,9 @@ export type Cue =
   | 'stationBuilt'
   | 'railwayBuilt'
   | 'eventStart'
-  | 'chatMessage';
+  | 'chatMessage'
+  | 'countdownWarning'
+  | 'countdownLapsed';
 
 export interface CueDef {
   /** Path under Vite's public/ root (served at this URL). */
@@ -34,6 +36,9 @@ export const CUES: Record<Cue, CueDef> = {
   railwayBuilt: { src: '/sounds/railway-built.mp3', gain: 0.9, throttleMs: 70 },
   eventStart: { src: '/sounds/event-start.mp3', gain: 1.0, throttleMs: 300 },
   chatMessage: { src: '/sounds/chat-message.mp3', gain: 0.7, throttleMs: 200 },
+  // Per-turn countdown (issue #13): a tick each of the final seconds, a distinct tone when it lapses.
+  countdownWarning: { src: '/sounds/countdown-warning.mp3', gain: 0.7, throttleMs: 500 },
+  countdownLapsed: { src: '/sounds/countdown-lapsed.mp3', gain: 0.9, throttleMs: 500 },
 };
 
 /** Gain multiplier for a cue triggered by an opponent's action (vs the local player's). */

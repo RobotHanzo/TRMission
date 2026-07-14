@@ -287,6 +287,17 @@ message CameraMoved {
   CameraView view = 2;
 }
 
+// Ephemeral, non-authoritative per-turn countdown: how long the player currently being timed has
+// left before the server auto-plays a default action on their behalf (issue #13). Cosmetic — never
+// part of the deterministic snapshot or action log. Carries a *duration* (remaining_ms), not a
+// wall-clock deadline, so the client counts down against its own clock with no server/client skew.
+// player_id is "" with remaining_ms 0 to CLEAR the countdown (a bot's turn, or the game ended).
+message TurnTimer {
+  string player_id = 1;
+  uint32 remaining_ms = 2; // ms until the server auto-plays for player_id
+  uint32 total_ms = 3;     // the full per-turn budget, for rendering a full bar
+}
+
 message Pong {
   uint32 nonce = 1;
 }
@@ -306,5 +317,6 @@ message ServerEnvelope {
     CameraMoved camera_moved = 9;
     HistoryReplay history = 10;
     PlayerConnectionChanged player_connection_changed = 11;
+    TurnTimer turn_timer = 12;
   }
 }
