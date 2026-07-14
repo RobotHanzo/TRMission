@@ -3,7 +3,7 @@ import { makeRng, DEFAULT_RULE_PARAMS, asCityId, asRouteId } from '@trm/shared';
 import type { EventsMode, RuleParams } from '@trm/shared';
 import type { GameContent, CityDef, RouteDef } from '@trm/map-data';
 import { taiwanBoard, CONTENT_HASH } from '../src/taiwan';
-import { buildBoard } from '../src/board';
+import { buildBoard, groupMembersOf } from '../src/board';
 import type { Board } from '../src/board';
 import { generateSchedule, fiveCityPaths, PROCESSION_PATH_CAP } from '../src/events/schedule';
 import { initGame } from '../src/setup';
@@ -232,13 +232,27 @@ describe('generateSchedule — determinism & structure', () => {
               board.cityById.get(r.b as string)?.region === e.region;
             expect(touches).toBe(true);
           }
+          // Base pick sizes still hold as a lower bound; the upper bound is no longer fixed
+          // since a picked route's double-route sibling gets pulled in too (issue #19).
           if (e.kind === 'TYPHOON_LANDFALL') {
             expect(e.routeIds.length).toBeGreaterThanOrEqual(2);
-            expect(e.routeIds.length).toBeLessThanOrEqual(3);
           }
           if (e.kind === 'SKY_LANTERN') {
             expect(e.routeIds.length).toBeGreaterThanOrEqual(3);
-            expect(e.routeIds.length).toBeLessThanOrEqual(4);
+          }
+        }
+        // Double-route siblings must never be split across "disrupted" vs "untouched" — every
+        // sibling of a routeIds member must itself be in routeIds (issue #19).
+        if (
+          (e.kind === 'TYPHOON_LANDFALL' ||
+            e.kind === 'SKY_LANTERN' ||
+            e.kind === 'SLOPE_REPAIR_ORDER') &&
+          e.routeIds
+        ) {
+          for (const rid of e.routeIds) {
+            for (const sib of groupMembersOf(board, rid)) {
+              expect(e.routeIds).toContain(sib);
+            }
           }
         }
       }

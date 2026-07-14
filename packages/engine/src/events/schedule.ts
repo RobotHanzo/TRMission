@@ -1,6 +1,7 @@
 import type { RngState, RuleParams, RouteId, CityId, EventsMode } from '@trm/shared';
 import { nextInt, shuffle } from '@trm/shared';
 import type { Board } from '../board';
+import { groupMembersOf } from '../board';
 import type { EventsState, EventScheduleEntry, RandomEventKind } from '../types/events-state';
 
 /**
@@ -170,7 +171,9 @@ export function generateSchedule(
       const pickCount = pickBase + extra;
       const [shuffled, nextS] = shuffle(touching, cur);
       cur = nextS;
-      routeIds = shuffled.slice(0, pickCount);
+      // Double-route siblings must be disrupted together — claiming one half of a pair would
+      // otherwise leave the untouched parallel edge open, silently defeating the event.
+      routeIds = withGroupSiblings(board, shuffled.slice(0, pickCount));
     } else if (kind === 'VIRAL_HOTSPOT') {
       const cities = eligibleHotspotCities();
       const [ci, nextC] = nextInt(cur, cities.length);
@@ -206,7 +209,7 @@ export function generateSchedule(
     } else if (kind === 'SLOPE_REPAIR_ORDER') {
       const [ri, nextR] = nextInt(cur, sortedRouteIds.length);
       cur = nextR;
-      routeIds = [sortedRouteIds[ri] as RouteId];
+      routeIds = withGroupSiblings(board, [sortedRouteIds[ri] as RouteId]);
     } else if (kind === 'GODDESS_PROCESSION') {
       const [pi, nextP] = nextInt(cur, processionPaths.length);
       cur = nextP;
@@ -388,6 +391,23 @@ const MODE_TUNING: Record<Exclude<EventsMode, 'off'>, ModeTuning> = {
 // ────────────────────────────────────────────── helpers ─────────────────────────────────────────
 
 const cmpStr = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/** Pulls in each picked route's double-route siblings so a disruptive event never leaves an
+ * untouched parallel edge as an escape hatch. Pure post-process — draws zero extra RNG so the
+ * consumption sequence for everything scheduled after stays byte-identical. */
+function withGroupSiblings(board: Board, ids: readonly RouteId[]): RouteId[] {
+  const out = [...ids];
+  const seen = new Set<string>(out.map((id) => id as string));
+  for (const id of ids) {
+    for (const sib of groupMembersOf(board, id)) {
+      if (!seen.has(sib as string)) {
+        seen.add(sib as string);
+        out.push(sib);
+      }
+    }
+  }
+  return out;
+}
 
 function pickCategory(
   available: readonly { cat: Category; weight: number }[],
