@@ -54,17 +54,41 @@ export const cameraMovedFrame = (playerId: string, view: CameraView): ServerEven
 
 export const pongFrame = (nonce: number): ServerEvent => ({ case: 'pong', value: { nonce } });
 
-// One-shot backfill of the game's event history (already redacted) + persisted chat,
-// sent after the snapshot on (re)connect. The client routes this to the log/chat only.
+// Cosmetic hub/session bookkeeping (a seated player's connection was confirmed lost, after a
+// debounce grace window, or they returned) — never an engine action, never part of the
+// deterministic action log.
+export const playerConnectionChangedFrame = (
+  playerId: string,
+  connected: boolean,
+): ServerEvent => ({
+  case: 'playerConnectionChanged',
+  value: { playerId, connected },
+});
+
+export interface ConnectionLogEntryInit {
+  playerId: string;
+  connected: boolean;
+  afterEventIndex: number;
+}
+
+// One-shot backfill of the game's event history (already redacted) + persisted chat + the
+// connection-change log, sent after the snapshot on (re)connect. The client routes this to the
+// log/chat only.
 export const historyReplayFrame = (
   events: PbGameEvent[],
   chat: readonly { playerId: string; content: ChatContent; ts: number }[],
   stateVersion: number,
+  connectionLog: readonly ConnectionLogEntryInit[] = [],
 ): ServerEvent => ({
   case: 'history',
   value: {
     events,
     chat: chat.map((c) => ({ playerId: c.playerId, content: c.content, ts: BigInt(c.ts) })),
     stateVersion,
+    connectionLog: connectionLog.map((c) => ({
+      playerId: c.playerId,
+      connected: c.connected,
+      afterEventIndex: c.afterEventIndex,
+    })),
   },
 });

@@ -113,6 +113,15 @@ message EndgameTriggered {
 
 message GameEnded {}
 
+// Broadcast when a seated player's connection to a LIVE game is confirmed lost (after a debounce
+// grace window, so a page reload / brief network blip is never misreported as a departure) or
+// they return. Cosmetic hub/session bookkeeping — never an engine action, never part of the
+// deterministic action log or stateDigest.
+message PlayerConnectionChanged {
+  string player_id = 1;
+  bool connected = 2;
+}
+
 // A destination ticket completed mid-game (own routes connect both endpoints, or — under
 // unlimitedStationBorrow — a station-borrowed edge does). PUBLIC: finished tickets are public by
 // design (see CompletedTicket in common.proto); the two endpoint cities/value are not carried
@@ -249,6 +258,17 @@ message ChatEntry {
   int64 ts = 3;
 }
 
+// One persisted player-connection change, replayed in a HistoryReplay on (re)connect. Never part
+// of the deterministic action log (hub/session bookkeeping, not an engine action) — `after_event_index`
+// anchors it to a splice position within this SAME frame's `events` (0 = before any of them) so a
+// backfilled client can interleave it at roughly the right point in the log instead of always at
+// the end.
+message ConnectionLogEntry {
+  string player_id = 1;
+  bool connected = 2;
+  uint32 after_event_index = 3;
+}
+
 // Sent once after the snapshot on (re)connect: the full game history, redacted
 // per-recipient. The client routes this to the log/chat ONLY — never to the
 // animation/sound channel — so a reconnect does not replay the whole game.
@@ -256,6 +276,7 @@ message HistoryReplay {
   repeated GameEvent events = 1; // log-only; same redaction as live events
   repeated ChatEntry chat = 2;   // empty for spectators (members-only chat)
   uint32 state_version = 3;
+  repeated ConnectionLogEntry connection_log = 4;
 }
 
 // Ephemeral, non-authoritative: another member's current camera framing, relayed so
@@ -284,5 +305,6 @@ message ServerEnvelope {
     Pong pong = 8;
     CameraMoved camera_moved = 9;
     HistoryReplay history = 10;
+    PlayerConnectionChanged player_connection_changed = 11;
   }
 }

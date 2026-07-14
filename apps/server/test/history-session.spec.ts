@@ -34,12 +34,18 @@ describe('GameSession.history()', () => {
       captured.push(...res.events);
     }
 
-    expect(session.history()).toEqual(captured);
-    expect(session.history().length).toBeGreaterThan(0);
+    const { events, actionBoundaries } = session.history();
+    expect(events).toEqual(captured);
+    expect(events.length).toBeGreaterThan(0);
+    expect(actionBoundaries.length).toBe(session.appliedActions.length);
+    expect(actionBoundaries[actionBoundaries.length - 1]).toBe(events.length);
+    for (let i = 1; i < actionBoundaries.length; i++) {
+      expect(actionBoundaries[i]).toBeGreaterThanOrEqual(actionBoundaries[i - 1]!);
+    }
   });
 
   it('returns [] for a freshly created session', () => {
     const session = new GameSession('h2', taiwanBoard(), config);
-    expect(session.history()).toEqual([]);
+    expect(session.history()).toEqual({ events: [], actionBoundaries: [] });
   });
 });

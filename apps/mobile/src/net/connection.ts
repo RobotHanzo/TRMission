@@ -44,10 +44,12 @@ export function connectGame(ticket: string, ticketSource?: TicketSource): GameSo
       onRejection: (r) =>
         useGame.getState().setRejection({ code: r.code, messageKey: r.messageKey }),
       onChat: (playerId, content) => useChat.getState().ingest({ playerId, content }),
-      onHistory: (events, chat) => {
-        useLog.getState().ingestHistory(events);
+      onHistory: (events, chat, connectionLog) => {
+        useLog.getState().ingestHistory(events, connectionLog);
         useChat.getState().ingestHistory(chat);
       },
+      onPlayerConnectionChanged: (playerId, connected) =>
+        useLog.getState().ingestConnectionChange(playerId, connected),
       onCameraMoved: (playerId, view) => useGame.getState().applyCameraMoved(playerId, view),
       onSessionReplaced: () => useGame.getState().setSessionReplaced(true),
     },

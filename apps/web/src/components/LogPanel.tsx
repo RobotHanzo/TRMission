@@ -82,6 +82,10 @@ export function LogPanel() {
         return t('log.gameStarted');
       case 'gameEnded':
         return t('log.gameEnded');
+      case 'playerLeft':
+        return t('log.playerLeft', { name });
+      case 'playerReconnected':
+        return t('log.playerReconnected', { name });
       case 'turnStarted':
         return t('log.turnStarted', { name });
       case 'routeClaimed':

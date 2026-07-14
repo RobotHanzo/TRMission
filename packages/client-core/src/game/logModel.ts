@@ -26,7 +26,9 @@ export type LogKind =
   | 'eventNightMarketSwapped'
   | 'eventPerkChosen'
   | 'eventHiveResolved'
-  | 'marketRecycled';
+  | 'marketRecycled'
+  | 'playerLeft'
+  | 'playerReconnected';
 
 export interface LogDatum {
   kind: LogKind;
@@ -37,6 +39,17 @@ export interface LogDatum {
 
 export interface LogEntry extends LogDatum {
   id: number;
+}
+
+/** A hub-originated player-connection change, never an engine event — kept in the log's own
+ *  vocabulary rather than `GameEvent` since it has no deterministic engine counterpart. */
+export function connectionLogDatum(playerId: string, connected: boolean): LogDatum {
+  return {
+    kind: connected ? 'playerReconnected' : 'playerLeft',
+    playerId,
+    data: {},
+    importance: 'alert',
+  };
 }
 
 /**

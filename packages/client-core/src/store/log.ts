@@ -1,15 +1,29 @@
 import { create, useStore, type StateCreator } from 'zustand';
 import { createContext, useContext } from 'react';
 import type { GameEvent } from '@trm/proto';
-import { entriesFromEvents, type LogEntry } from '../game/logModel';
+import {
+  connectionLogDatum,
+  entriesFromEvents,
+  type LogDatum,
+  type LogEntry,
+} from '../game/logModel';
 
 const CAP = 1000;
+
+/** A backfilled player-connection change, positioned at a splice point within the SAME
+ *  `HistoryReplay`'s `events` array (see `net/socket.ts`'s `onHistory`). */
+export interface ConnectionLogBackfillEntry {
+  playerId: string;
+  connected: boolean;
+  afterEventIndex: number;
+}
 
 interface LogState {
   entries: LogEntry[];
   nextId: number;
   ingestLive(events: GameEvent[]): void;
-  ingestHistory(events: GameEvent[]): void;
+  ingestHistory(events: GameEvent[], connectionLog?: ConnectionLogBackfillEntry[]): void;
+  ingestConnectionChange(playerId: string, connected: boolean): void;
   reset(): void;
 }
 
@@ -25,12 +39,36 @@ const creator: StateCreator<LogState> = (set) => ({
       for (const d of datas) entries.push({ id: id++, ...d });
       return { entries: entries.slice(-CAP), nextId: id };
     }),
+  ingestConnectionChange: (playerId, connected) =>
+    set((s) => {
+      const entries = [...s.entries, { id: s.nextId, ...connectionLogDatum(playerId, connected) }];
+      return { entries: entries.slice(-CAP), nextId: s.nextId + 1 };
+    }),
   // History is the server's COMPLETE backfill, re-sent on every (re)connect and always
   // delivered before any live event on that connection. Replace the store with it so a
   // transient reconnect re-fills the disconnect-window gap; live events then append.
-  ingestHistory: (events) =>
+  // Connection-log entries are interleaved at their recorded splice point — event-by-event
+  // (rather than batching entriesFromEvents over the whole array) so `afterEventIndex` (a
+  // position within the RAW `events` array) lines up even though noisy events are filtered out.
+  ingestHistory: (events, connectionLog = []) =>
     set(() => {
-      const entries = entriesFromEvents(events).map((d, i) => ({ id: i + 1, ...d }));
+      const byIndex = new Map<number, ConnectionLogBackfillEntry[]>();
+      for (const c of connectionLog) {
+        const arr = byIndex.get(c.afterEventIndex);
+        if (arr) arr.push(c);
+        else byIndex.set(c.afterEventIndex, [c]);
+      }
+      const datas: LogDatum[] = [];
+      const pushConnAt = (idx: number): void => {
+        for (const c of byIndex.get(idx) ?? [])
+          datas.push(connectionLogDatum(c.playerId, c.connected));
+      };
+      pushConnAt(0);
+      events.forEach((e, i) => {
+        datas.push(...entriesFromEvents([e]));
+        pushConnAt(i + 1);
+      });
+      const entries = datas.map((d, i) => ({ id: i + 1, ...d }));
       return { entries: entries.slice(-CAP), nextId: entries.length + 1 };
     }),
   reset: () => set({ entries: [], nextId: 1 }),

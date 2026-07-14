@@ -45,8 +45,17 @@ import {
   historyReplayFrame,
   cameraMovedFrame,
   pongFrame,
+  playerConnectionChangedFrame,
 } from '@trm/codec';
 import type { ChatEntry, ChatContent } from '../persistence/types';
+
+/** A recorded connection change, anchored to the action count at the moment it happened (not yet
+ *  redacted/positioned — `sendHistory` maps `afterActionCount` to a per-recipient event index). */
+interface ConnectionLogRecord {
+  playerId: string;
+  connected: boolean;
+  afterActionCount: number;
+}
 
 /** Framework-free push seam (the Nest PushService is adapted into this by game.module). */
 export interface PushSink {
@@ -72,6 +81,9 @@ export interface GameHubOptions {
   push?: PushSink;
   /** Debounce before a your-turn push to a socketless player, ms (default 15s; 0 = next tick). */
   yourTurnDelayMs?: number;
+  /** Debounce before a dropped connection is logged as "left" in the action log, ms (default 20s;
+   *  a reconnect within this window — e.g. a page reload — never surfaces at all). */
+  playerLeftDelayMs?: number;
 }
 
 /**
@@ -130,8 +142,20 @@ export class GameHub {
   private readonly lastCamera = new Map<string, { playerId: string; view: CameraView }>();
   /** gameId → ordered chat lines (replayed in HistoryReplay; persisted via the store). */
   private readonly chatLog = new Map<string, ChatEntry[]>();
+  /**
+   * gameId → ordered player-connection changes (replayed in HistoryReplay). In-memory only —
+   * ephemeral cosmetic bookkeeping (like `lastCamera`), never engine actions, never persisted:
+   * a server restart drops it, which only means a recovered game's backfill starts clean.
+   */
+  private readonly connectionLog = new Map<string, ConnectionLogRecord[]>();
+  /** gameId → (playerId → pending debounced "player left" timer). */
+  private readonly leaveTimers = new Map<string, Map<string, NodeJS.Timeout>>();
+  /** gameId → playerIds with an outstanding "left" notice (cleared, and mirrored as a
+   *  "reconnected" notice, the next time that player successfully re-binds a seat). */
+  private readonly leftNotice = new Map<string, Set<string>>();
   private readonly push: PushSink | undefined;
   private readonly yourTurnDelayMs: number;
+  private readonly playerLeftDelayMs: number;
   /** gameId → pending your-turn reminder (one per game — there is one current player). */
   private readonly pushTimers = new Map<string, NodeJS.Timeout>();
 
@@ -151,6 +175,7 @@ export class GameHub {
     this.botDriverRescheduleMs = options.botDriverRescheduleMs ?? DEFAULT_BOT_DRIVER_RESCHEDULE_MS;
     this.push = options.push;
     this.yourTurnDelayMs = options.yourTurnDelayMs ?? 15_000;
+    this.playerLeftDelayMs = options.playerLeftDelayMs ?? 20_000;
   }
 
   async createMatch(
@@ -161,6 +186,7 @@ export class GameHub {
   ): Promise<Match> {
     this.members.set(gameId, new Map());
     this.chatLog.set(gameId, []);
+    this.connectionLog.set(gameId, []);
     const match = this.registry.create(gameId, board, config);
     if (bots.length > 0) this.bots.set(gameId, new Map(bots.map((b) => [b.playerId, b])));
     if (this.store) {
@@ -212,6 +238,7 @@ export class GameHub {
     }
     const match = this.registry.adopt(gameId, session);
     if (!this.members.has(gameId)) this.members.set(gameId, new Map());
+    if (!this.connectionLog.has(gameId)) this.connectionLog.set(gameId, []);
     if (this.store && !this.chatLog.has(gameId)) {
       try {
         this.chatLog.set(gameId, await this.store.loadChat(gameId));
@@ -251,6 +278,10 @@ export class GameHub {
     this.spectators.delete(gameId);
     this.bots.delete(gameId);
     this.chatLog.delete(gameId);
+    this.connectionLog.delete(gameId);
+    for (const timer of this.leaveTimers.get(gameId)?.values() ?? []) clearTimeout(timer);
+    this.leaveTimers.delete(gameId);
+    this.leftNotice.delete(gameId);
     this.lastCamera.delete(gameId);
     this.clearYourTurnTimer(gameId);
     // After removal the bot driver's next registry.get() misses and its loop exits;
@@ -283,12 +314,73 @@ export class GameHub {
     const conn = this.connections.get(id);
     if (!conn) return;
     if (conn.binding) {
-      const m = this.members.get(conn.binding.gameId);
-      if (m?.get(conn.binding.player as string) === conn) m.delete(conn.binding.player as string);
-      this.spectators.get(conn.binding.gameId)?.delete(conn);
+      const { gameId, player, seat } = conn.binding;
+      const m = this.members.get(gameId);
+      const wasCurrent = m?.get(player as string) === conn;
+      if (wasCurrent) m.delete(player as string);
+      this.spectators.get(gameId)?.delete(conn);
+      // Only a still-current seated member's drop is a real disconnect — a stale connection
+      // finally closing after SESSION_REPLACED already handed the seat to a new one is not.
+      if (wasCurrent && seat >= 0) this.scheduleLeaveCheck(gameId, player as string);
     }
     this.connections.delete(id);
     this.metrics.connectionClosed();
+  }
+
+  /**
+   * Debounce a dropped seated connection before logging it as "left" — a page reload or brief
+   * network blip reconnects well within the window and never surfaces at all (cancelled by
+   * `onHello`'s re-bind). Re-schedules (restarts the window) on repeated flapping.
+   */
+  private scheduleLeaveCheck(gameId: string, playerId: string): void {
+    const match = this.registry.get(gameId);
+    if (!match || match.session.phase === 'GAME_OVER') return;
+    let perGame = this.leaveTimers.get(gameId);
+    if (!perGame) {
+      perGame = new Map();
+      this.leaveTimers.set(gameId, perGame);
+    }
+    const existing = perGame.get(playerId);
+    if (existing) clearTimeout(existing);
+    const timer = setTimeout(() => {
+      perGame!.delete(playerId);
+      // Fire-time re-check: still no live connection, game still resident and live.
+      if (this.members.get(gameId)?.has(playerId)) return;
+      const live = this.registry.get(gameId);
+      if (!live || live.session.phase === 'GAME_OVER') return;
+      this.recordConnectionChange(gameId, playerId, false, live);
+    }, this.playerLeftDelayMs);
+    timer.unref?.();
+    perGame.set(playerId, timer);
+  }
+
+  private cancelLeaveCheck(gameId: string, playerId: string): void {
+    const timer = this.leaveTimers.get(gameId)?.get(playerId);
+    if (timer) {
+      clearTimeout(timer);
+      this.leaveTimers.get(gameId)?.delete(playerId);
+    }
+  }
+
+  /** Record + broadcast a player-connection change (cosmetic; never touches game state). */
+  private recordConnectionChange(
+    gameId: string,
+    playerId: string,
+    connected: boolean,
+    match: Match,
+  ): void {
+    const log = this.connectionLog.get(gameId) ?? [];
+    log.push({ playerId, connected, afterActionCount: match.session.appliedActions.length });
+    this.connectionLog.set(gameId, log);
+
+    const frame = playerConnectionChangedFrame(playerId, connected);
+    for (const conn of this.members.get(gameId)?.values() ?? []) conn.send(frame);
+    for (const conn of this.spectators.get(gameId) ?? []) conn.send(frame);
+
+    const notices = this.leftNotice.get(gameId) ?? new Set<string>();
+    if (connected) notices.delete(playerId);
+    else notices.add(playerId);
+    this.leftNotice.set(gameId, notices);
   }
 
   /**
@@ -455,6 +547,12 @@ export class GameHub {
     conn.binding = { gameId: binding.gameId, player, seat: binding.seat };
     conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
     this.members.get(binding.gameId)?.set(binding.playerId, conn);
+    this.cancelLeaveCheck(binding.gameId, binding.playerId);
+    // Only announce a return if a "left" notice actually fired earlier — a reconnect inside the
+    // debounce window (the common reload/blip case) was never announced, so it stays silent.
+    if (this.leftNotice.get(binding.gameId)?.has(binding.playerId)) {
+      this.recordConnectionChange(binding.gameId, binding.playerId, true, match);
+    }
 
     conn.send(welcomeFrame(binding.gameId, binding.playerId, binding.seat), clientSeq);
     this.sendSnapshot(conn, match);
@@ -836,14 +934,31 @@ export class GameHub {
     this.sendProjected(conn, match, conn.binding?.player ?? null, ackClientSeq);
   }
 
-  /** One-shot backfill: the redacted event history + (for members) the chat log. */
+  /** One-shot backfill: the redacted event history + (for members) the chat log + the
+   *  connection-change log, the last spliced in at roughly the right point via the per-viewer
+   *  wire-event count reached after each action (redaction can drop events, so this recount is
+   *  per-recipient rather than reusing the engine-side action boundaries directly). */
   private sendHistory(conn: Connection, match: Match, viewer: PlayerId | null): void {
-    const events = match.session
-      .history()
-      .map((e) => eventToProto(e, viewer))
-      .filter((e): e is PbGameEvent => e !== null);
-    const chat = this.chatLog.get(match.session.gameId) ?? [];
-    conn.send(historyReplayFrame(events, chat, match.session.stateVersion));
+    const gameId = match.session.gameId;
+    const { events, actionBoundaries } = match.session.history();
+    const wireEvents: PbGameEvent[] = [];
+    const wireBoundaries: number[] = [0];
+    let engineIdx = 0;
+    for (const boundary of actionBoundaries) {
+      while (engineIdx < boundary) {
+        const pb = eventToProto(events[engineIdx]!, viewer);
+        if (pb) wireEvents.push(pb);
+        engineIdx++;
+      }
+      wireBoundaries.push(wireEvents.length);
+    }
+    const connectionLog = (this.connectionLog.get(gameId) ?? []).map((c) => ({
+      playerId: c.playerId,
+      connected: c.connected,
+      afterEventIndex: wireBoundaries[c.afterActionCount] ?? wireEvents.length,
+    }));
+    const chat = this.chatLog.get(gameId) ?? [];
+    conn.send(historyReplayFrame(wireEvents, chat, match.session.stateVersion, connectionLog));
   }
 
   private clearYourTurnTimer(gameId: string): void {

@@ -36,8 +36,17 @@ export interface SocketHandlers {
   onEvents?(stateVersion: number, events: GameEvent[]): void;
   onRejection?(rejection: Rejection): void;
   onChat?(playerId: string, content: ChatContent): void;
-  /** One-shot backfill of the action-log history + persisted chat on (re)connect. */
-  onHistory?(events: GameEvent[], chat: { playerId: string; content: ChatContent }[]): void;
+  /** One-shot backfill of the action-log history + persisted chat + connection-change log on
+   *  (re)connect. `afterEventIndex` anchors each connection change to a splice point within
+   *  this SAME `events` array. */
+  onHistory?(
+    events: GameEvent[],
+    chat: { playerId: string; content: ChatContent }[],
+    connectionLog: { playerId: string; connected: boolean; afterEventIndex: number }[],
+  ): void;
+  /** A seated player's connection was confirmed lost (after the server's debounce) or they
+   *  returned — cosmetic hub bookkeeping, never a game event. */
+  onPlayerConnectionChanged?(playerId: string, connected: boolean): void;
   /** Another member's camera framing, relayed for "follow the acting player". */
   onCameraMoved?(playerId: string, view: CameraView): void;
   /** This seat was claimed by another connection; the socket will not auto-reconnect. */
@@ -168,6 +177,17 @@ export class GameSocket {
           env.event.value.chat
             .filter((c) => c.content.case)
             .map((c) => ({ playerId: c.playerId, content: c.content as ChatContent })),
+          env.event.value.connectionLog.map((c) => ({
+            playerId: c.playerId,
+            connected: c.connected,
+            afterEventIndex: c.afterEventIndex,
+          })),
+        );
+        break;
+      case 'playerConnectionChanged':
+        this.handlers.onPlayerConnectionChanged?.(
+          env.event.value.playerId,
+          env.event.value.connected,
         );
         break;
       case 'cameraMoved':

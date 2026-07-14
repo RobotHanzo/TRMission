@@ -33,9 +33,39 @@ describe('useLog', () => {
     useLog.getState().reset();
     expect(useLog.getState().entries).toEqual([]);
   });
+
+  it('ingestConnectionChange appends a live player-left / player-reconnected entry', () => {
+    useLog.getState().ingestConnectionChange('p1', false);
+    useLog.getState().ingestConnectionChange('p1', true);
+    const e = useLog.getState().entries;
+    expect(e).toHaveLength(2);
+    expect(e[0]).toMatchObject({ kind: 'playerLeft', playerId: 'p1' });
+    expect(e[1]).toMatchObject({ kind: 'playerReconnected', playerId: 'p1' });
+  });
+
+  it('backfill interleaves the connection log at its recorded splice point', () => {
+    useLog.getState().ingestHistory(
+      [turn('p1'), turn('p2')],
+      [
+        { playerId: 'p3', connected: false, afterEventIndex: 1 },
+        { playerId: 'p4', connected: false, afterEventIndex: 0 },
+      ],
+    );
+    const e = useLog.getState().entries;
+    // p4's notice (afterEventIndex 0) comes before any event; p1's turn; p3's notice
+    // (afterEventIndex 1) after the first event; then p2's turn.
+    expect(e.map((x) => [x.kind, x.playerId])).toEqual([
+      ['playerLeft', 'p4'],
+      ['turnStarted', 'p1'],
+      ['playerLeft', 'p3'],
+      ['turnStarted', 'p2'],
+    ]);
+  });
 });
 
 describe('contextual log store', () => {
+  beforeEach(() => useLog.getState().reset());
+
   it('createLogStore returns an isolated instance (singleton untouched)', () => {
     const iso = createLogStore();
     iso.setState({
