@@ -96,6 +96,7 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
       board,
       data!.config,
       data!.snapshot?.state ?? null,
+      data!.preSnapshotActions,
       data!.tail,
     );
 
@@ -107,6 +108,30 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
     expect(snapCount).toBeGreaterThan(1);
     expect(data!.snapshot!.seq).toBeGreaterThan(0);
     expect(data!.tail.length).toBeLessThan(live.stateVersion);
+  });
+
+  it('preserves the full action-log backfill (history()) across a checkpoint recovery (issue #20)', async () => {
+    const config = configFor('persist-history');
+    const live = new GameSession('g5', board, config);
+    await store.createGame('g5', config, live.raw(), live.digest());
+    await driveDirect(live, 'g5', 40);
+
+    const data = await store.loadForRecovery('g5');
+    expect(data!.snapshot!.seq).toBeGreaterThan(0); // recovery crosses at least one checkpoint
+    const recovered = GameSession.restore(
+      'g5',
+      board,
+      data!.config,
+      data!.snapshot?.state ?? null,
+      data!.preSnapshotActions,
+      data!.tail,
+    );
+
+    // A reconnect after this recovery must get the client action log back in full, not just
+    // the events since the last checkpoint.
+    expect(recovered.appliedActions).toEqual(live.appliedActions);
+    expect(recovered.history()).toEqual(live.history());
+    expect(recovered.history().events.length).toBeGreaterThan(0);
   });
 
   it('recovers a full completed game and marks it COMPLETED', async () => {
@@ -126,6 +151,7 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
       board,
       data!.config,
       data!.snapshot?.state ?? null,
+      data!.preSnapshotActions,
       data!.tail,
     );
     expect(recovered.digest()).toBe(live.digest());
@@ -152,7 +178,14 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
 
     const data = await store.loadForRecovery('g3');
     expect(() =>
-      GameSession.restore('g3', board, data!.config, data!.snapshot?.state ?? null, data!.tail),
+      GameSession.restore(
+        'g3',
+        board,
+        data!.config,
+        data!.snapshot?.state ?? null,
+        data!.preSnapshotActions,
+        data!.tail,
+      ),
     ).toThrow(/digest mismatch/);
   });
 
@@ -301,6 +334,7 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
       board,
       data!.config,
       data!.snapshot?.state ?? null,
+      data!.preSnapshotActions,
       data!.tail,
     );
     expect(rec.digest()).toBe(d1);

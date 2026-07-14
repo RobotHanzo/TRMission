@@ -231,6 +231,7 @@ export class GameHub {
         board,
         data.config,
         data.snapshot?.state ?? null,
+        data.preSnapshotActions,
         data.tail,
       );
     } catch (err) {

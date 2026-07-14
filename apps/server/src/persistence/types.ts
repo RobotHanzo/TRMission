@@ -77,6 +77,11 @@ export interface RecoveryData {
   config: GameConfig;
   snapshot: { seq: number; state: GameState } | null;
   tail: { seq: number; action: Action; stateDigest: string }[];
+  /** Actions at/before the snapshot cursor, in order. State reconstruction never needs these
+   *  (the snapshot already bakes them in), but `GameSession.appliedActions` does — `history()`
+   *  replays the full action list from genesis to backfill the client's action log, so recovery
+   *  must seed it with every action, not just the post-snapshot tail. */
+  preSnapshotActions: Action[];
   bots: BotProfile[];
   /** The engine major that wrote this game. Recovery refuses anything the current engine can't
    *  run — the persisted `GameState` is the engine's own shape, and an older major's shape can be

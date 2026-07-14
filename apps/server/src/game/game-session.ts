@@ -107,16 +107,23 @@ export class GameSession {
    * actions, verifying each step's digest against what was stored. A mismatch means the
    * persisted log diverged from the engine — recovery aborts rather than resume a corrupt
    * game (risk #2/#3).
+   *
+   * `preActions` are the actions already baked into `snapshotState` (at/before the
+   * checkpoint) — they seed `appliedActions` unverified (the snapshot itself, taken at
+   * write time, is the trusted source for that state) so `history()` can still replay the
+   * FULL game from genesis after recovery, not just the post-checkpoint tail.
    */
   static restore(
     gameId: string,
     board: Board,
     config: GameConfig,
     snapshotState: GameState | null,
+    preActions: readonly Action[],
     tail: ReadonlyArray<{ action: Action; stateDigest: string }>,
   ): GameSession {
     const s = new GameSession(gameId, board, config);
     if (snapshotState) s.state = snapshotState;
+    s.appliedActions.push(...preActions);
     for (const { action, stateDigest: expected } of tail) {
       const res = s.apply(action);
       if (!res.ok)

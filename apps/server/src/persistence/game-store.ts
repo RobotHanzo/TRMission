@@ -186,11 +186,24 @@ export class MongoGameStore implements GameStorePort {
       .find({ gameId, seq: { $gt: sinceSeq } })
       .sort({ seq: 1 })
       .toArray();
+    // Only the action payloads are needed here (not stateDigest) — these feed
+    // GameSession.appliedActions for the history() backfill, never state reconstruction.
+    const preSnapshotActions =
+      sinceSeq > 0
+        ? (
+            await this.events
+              .find({ gameId, seq: { $lte: sinceSeq } })
+              .sort({ seq: 1 })
+              .project<{ action: Action }>({ action: 1 })
+              .toArray()
+          ).map((e) => e.action)
+        : [];
 
     return {
       config: storedToConfig(game.config),
       snapshot: snap ? { seq: snap.seq, state: snap.state } : null,
       tail: tail.map((e) => ({ seq: e.seq, action: e.action, stateDigest: e.stateDigest })),
+      preSnapshotActions,
       bots: game.bots ?? [],
       engineVersion: game.engineVersion,
     };
