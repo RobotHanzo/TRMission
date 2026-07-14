@@ -12,7 +12,13 @@ import { api, ApiError, type MapSelector } from '../net/rest';
 vi.mock('../net/connection', () => ({ connectGame: vi.fn(), disconnectGame: vi.fn() }));
 const { play } = vi.hoisted(() => ({ play: vi.fn() }));
 vi.mock('../sound/player', () => ({
-  soundPlayer: { preload: vi.fn().mockResolvedValue(undefined), unlock: vi.fn(), play, setEnabled: vi.fn(), setVolume: vi.fn() },
+  soundPlayer: {
+    preload: vi.fn().mockResolvedValue(undefined),
+    unlock: vi.fn(),
+    play,
+    setEnabled: vi.fn(),
+    setVolume: vi.fn(),
+  },
 }));
 vi.mock('../net/rest', () => {
   class ApiError extends Error {
