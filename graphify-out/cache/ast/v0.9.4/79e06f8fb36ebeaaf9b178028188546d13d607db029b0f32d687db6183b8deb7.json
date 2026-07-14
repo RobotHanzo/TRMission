@@ -1,0 +1,31 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_packages_client_core_claude_md",
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "packages/client-core/CLAUDE.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_claude_claude_md",
+      "label": "CLAUDE.md",
+      "file_type": "document",
+      "source_file": "packages/client-core/CLAUDE.md",
+      "source_location": "L1"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_packages_client_core_claude_md",
+      "target": "d_web_projects_trmission_packages_client_core_claude_claude_md",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/CLAUDE.md",
+      "source_location": "L1",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

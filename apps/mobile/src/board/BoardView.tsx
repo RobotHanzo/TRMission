@@ -4,14 +4,14 @@
 // this; here the camera IS the board-space view descriptor, so every framing consumes/produces
 // {cx, cy, span} directly. Purely snapshot-driven: no store writes besides the animation expiries.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { PixelRatio, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
 import type { GameSnapshot } from '@trm/proto';
 import { MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { CITIES, ROUTES, cityById, cityName, routeById } from '../game/content';
-import { closedRouteIds } from '../game/events';
+import { boardEventOverlays } from '../game/events';
 import { HUB_CITIES, ROUTE_GEOMETRY } from '../game/routeGeometry';
 import { ownershipMap } from '../game/view';
 import { cityTier } from '../game/lod';
@@ -30,14 +30,16 @@ import {
   boundsOfContent,
   homeCamera,
   pinchTo,
+  rasterSpec,
   visibleFraction,
+  type Bounds,
   type CameraState,
   type Viewport,
 } from './camera';
 import { buildHitScene, hitTest } from './hitTest';
 import { latestActionPoi, shouldDisengageFollow } from './followModel';
 import { useBoardCamera, type BoardCamera } from './useBoardCamera';
-import { MapSceneSkia } from './MapSceneSkia';
+import { MapSceneSkia, SCENE_OVERSCAN } from './MapSceneSkia';
 import { BoardControls } from './BoardControls';
 
 /** A claimed route glows for this long once it actually comes into view. */
@@ -51,7 +53,11 @@ export interface BoardViewProps {
   snapshot: GameSnapshot;
   locale: Locale;
   colorBlind: boolean;
-  canAct: boolean;
+  /** Route taps resolve only while true. Split from `canBuildStation` so the tutorial can gate
+   *  claiming and station-building independently (a CLAIM_ROUTE beat must not leave cities live). */
+  canClaim: boolean;
+  /** City taps resolve only while true. */
+  canBuildStation: boolean;
   onPickRoute(routeId: string): void;
   onPickCity(cityId: string): void;
   /** Cities to softly highlight (the offered tickets' endpoints, while choosing tickets). */
@@ -266,7 +272,8 @@ function BoardInner({
   snapshot,
   locale,
   colorBlind,
-  canAct,
+  canClaim,
+  canBuildStation,
   onPickRoute,
   onPickCity,
   highlightCities,
@@ -281,12 +288,11 @@ function BoardInner({
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
     return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
   }, [snapshot]);
-  // A closed route (typhoon landfall / slope repair order) can't be claimed (the server rejects
-  // it) → not tappable either. The web's other random-event derivations (reopen/sky/hotspot/
-  // charter, and the expansion's lantern-host/procession/bento/night-market/lucky/harvest badges)
-  // wire in when MapSceneSkia grows its event-overlay props — nothing here can consume them yet;
-  // the EventsPanel's route list + camera spotlight is the mobile surface for that info.
-  const closedRoutes = useMemo(() => closedRouteIds(snapshot.randomEvents), [snapshot]);
+  // The full random-events board projection (shared with the web Board via client-core). A
+  // closed route (typhoon landfall / slope repair order) can't be claimed (the server rejects
+  // it) → not tappable either; everything else renders through MapSceneSkia's EventOverlayLayer.
+  const events = useMemo(() => boardEventOverlays(snapshot.randomEvents), [snapshot]);
+  const closedRoutes = events.closedRoutes;
 
   // The active catalog is stable while a board is mounted (screens gate on useActiveContent
   // readiness before rendering), so content-derived structures build once.
@@ -301,8 +307,10 @@ function BoardInner({
   // rebuilds on viewport/content changes, not every snapshot render).
   const snapshotRef = useRef(snapshot);
   snapshotRef.current = snapshot;
-  const canActRef = useRef(canAct);
-  canActRef.current = canAct;
+  const canClaimRef = useRef(canClaim);
+  canClaimRef.current = canClaim;
+  const canBuildStationRef = useRef(canBuildStation);
+  canBuildStationRef.current = canBuildStation;
   const ownedRef = useRef(owned);
   ownedRef.current = owned;
   const closedRef = useRef(closedRoutes);
@@ -327,17 +335,18 @@ function BoardInner({
   }, []);
 
   // Tap → manual hit-test → pick handlers. Ports MapScene's claimable gate + Board's claimFilter:
-  // routes resolve only while the viewer can act and the route is still open + unclaimed.
+  // routes resolve only while the viewer can claim and the route is still open + unclaimed;
+  // cities only while station-building is live (the two are gated independently — tutorial).
   const onTap = useCallback(
     (screen: { x: number; y: number }, tapCam: CameraState) => {
-      if (!canActRef.current) return;
+      if (!canClaimRef.current && !canBuildStationRef.current) return;
       const hit = hitTest(screen, tapCam, vp, scene);
       if (!hit) return;
       if (hit.kind === 'city') {
-        onPickCityRef.current(hit.id);
+        if (canBuildStationRef.current) onPickCityRef.current(hit.id);
         return;
       }
-      if (!closedRef.current.has(hit.id) && !ownedRef.current.has(hit.id)) {
+      if (canClaimRef.current && !closedRef.current.has(hit.id) && !ownedRef.current.has(hit.id)) {
         onPickRouteRef.current(hit.id);
       }
     },
@@ -346,6 +355,23 @@ function BoardInner({
 
   const camOpts = useMemo(() => ({ onTap, onGesture: onManualCamera }), [onTap, onManualCamera]);
   const cam = useBoardCamera(vp, ACTIVE_BASE_VIEW, home, camOpts);
+
+  // The gesture-time raster snapshot's region + resolution, re-derived at every camera settle
+  // (cam.settled only changes identity when the camera actually moved). The scene bounds match
+  // MapSceneSkia's picture bounds exactly, so the snapshot never covers un-drawn space.
+  const sceneBounds = useMemo<Bounds>(
+    () => ({
+      x: ACTIVE_BASE_VIEW.x - SCENE_OVERSCAN,
+      y: ACTIVE_BASE_VIEW.y - SCENE_OVERSCAN,
+      w: ACTIVE_BASE_VIEW.w + SCENE_OVERSCAN * 2,
+      h: ACTIVE_BASE_VIEW.h + SCENE_OVERSCAN * 2,
+    }),
+    [],
+  );
+  const raster = useMemo(
+    () => rasterSpec(cam.settled, vp, sceneBounds, PixelRatio.get()),
+    [cam.settled, vp, sceneBounds],
+  );
 
   // Publish the live camera to the tutorial's spotlight bridge while this board is mounted
   // (unconditional — the tutorial runs in sandbox mode, where CameraSync never mounts).
@@ -459,9 +485,12 @@ function BoardInner({
               bucket={cam.lod.bucket}
               inv={cam.lod.inv}
               marker={cam.lod.marker}
+              events={snapshot.randomEvents ? events : undefined}
               sweeps={sweeps}
               routeReveal={routeReveal}
               reducedMotion={reducedMotion}
+              motion={cam.moving}
+              raster={raster}
             />
           </Group>
         </Canvas>

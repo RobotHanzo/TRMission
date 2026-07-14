@@ -1,8 +1,11 @@
+import { withGradleProperties } from '@expo/config-plugins';
 import type { ExpoConfig } from 'expo/config';
 
-// Build number is the forced-update gate axis (compared against GET /version/mobile.minBuild).
-// Bump it on every store submission; keep it in lockstep with versionCode/buildNumber in P6.
-const BUILD_NUMBER = 1;
+// Build number is the forced-update gate axis (compared against GET /version/mobile.minBuild) AND
+// the native versionCode/CFBundleVersion (docs/release/mobile-versioning.md). The release workflows
+// derive it from the release tag (`v<semver>+<build>`) and inject it via this env var at
+// `expo prebuild` time; local/dev builds fall back to 1 and are never shipped.
+const BUILD_NUMBER = Number(process.env.BUILD_NUMBER ?? 1);
 
 // The google-signin config plugin (without-Firebase mode) VALIDATES `iosUrlScheme` at every config
 // eval — for `expo run:android`/`prebuild` too, not just iOS — and rejects anything not prefixed
@@ -19,14 +22,28 @@ const config: ExpoConfig = {
   scheme: 'trmission', // trmission:// OAuth deep-link fallback (P0 accepts it)
   version: '0.1.0',
   orientation: 'default', // tablets unlock; phone default is portrait (enforced per-screen in P2)
+  // The shared TRMission rail-ticket mark — the same logo as the web favicon
+  // (apps/web/public/icon.svg), ported to the native sizes/masks by scripts/gen-brand-assets.js.
+  // Full-bleed square: the OS applies its own mask.
+  icon: './assets/icon.png',
+  // Chrome theming follows the OS + the in-app theme setting (theme/useTheme.ts).
+  userInterfaceStyle: 'automatic',
   // New Architecture is the default (and only) mode in RN 0.85 / SDK 56 — no flag needed.
   ios: {
-    bundleIdentifier: 'tw.trmission.app',
+    bundleIdentifier: 'dev.robothanzo.trmission',
+    buildNumber: String(BUILD_NUMBER),
     supportsTablet: true, // iPad; requireFullScreen deliberately unset (iPadOS 26 ignores it)
     associatedDomains: ['applinks:trmission.example'], // real origin filled in P6
   },
   android: {
-    package: 'tw.trmission.app',
+    package: 'dev.robothanzo.trmission',
+    versionCode: BUILD_NUMBER,
+    adaptiveIcon: {
+      foregroundImage: './assets/adaptive-icon.png',
+      // Android 13+ themed icons tint this white-alpha variant to the wallpaper palette.
+      monochromeImage: './assets/adaptive-icon-monochrome.png',
+      backgroundColor: '#E55509', // EMU orange — the tile behind the white ticket foreground
+    },
     intentFilters: [
       {
         action: 'VIEW',
@@ -63,6 +80,20 @@ const config: ExpoConfig = {
     'expo-notifications',
     // Android 16 = target API 36, mandatory for Play updates from 2026-08-31 (P5 Task 8 pin).
     ['expo-build-properties', { android: { targetSdkVersion: 36, compileSdkVersion: 36 } }],
+    [
+      'expo-splash-screen',
+      {
+        // Mark + bilingual wordmark lockup; App.tsx holds the splash until the boot chain
+        // (forced-update check → prefs hydrate → session restore) finishes.
+        image: './assets/splash-icon.png',
+        imageWidth: 360,
+        backgroundColor: '#f6f1e7', // warm paper
+        dark: {
+          image: './assets/splash-icon-dark.png',
+          backgroundColor: '#1a1c1f', // DARK_TOKENS.paper
+        },
+      },
+    ],
   ],
   extra: {
     serverOrigin: process.env.TRM_SERVER_ORIGIN ?? 'https://trmission.robothanzo.dev',
@@ -75,4 +106,18 @@ const config: ExpoConfig = {
   },
 };
 
-export default config;
+// `expo prebuild`'s template caps the Gradle daemon at -XX:MaxMetaspaceSize=512m, which OOMs
+// `lintVitalAnalyzeRelease` on this app's large autolinked module graph (skia, reanimated,
+// worklets, ...) on release builds. Raise the budget — CI runners have plenty of headroom.
+export default withGradleProperties(config, (modConfig) => {
+  const jvmArgs = modConfig.modResults.find(
+    (item) => item.type === 'property' && item.key === 'org.gradle.jvmargs',
+  );
+  const value = '-Xmx4096m -XX:MaxMetaspaceSize=1536m';
+  if (jvmArgs?.type === 'property') {
+    jvmArgs.value = value;
+  } else {
+    modConfig.modResults.push({ type: 'property', key: 'org.gradle.jvmargs', value });
+  }
+  return modConfig;
+});

@@ -19,7 +19,8 @@ import { completedByPlayer } from '../game/tickets';
 import { isMyTurn } from '../game/view';
 import { isChatRejectionKey } from '../game/chatErrors';
 import { eventRejectionHintKey, hasActiveEvent } from '../game/events';
-import { gateFlags, type ActionGate } from '../game/actionGate';
+import { gateAllowsTarget, gateFlags, type ActionGate } from '../game/actionGate';
+import { TurnBanner } from '../components/game/TurnBanner';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../features/tutorial/targets';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
 import { useSoundDriver } from '../hooks/useSoundDriver';
@@ -40,6 +41,7 @@ import { TunnelModal } from '../components/game/TunnelModal';
 import { ScoreBoard } from '../components/game/ScoreBoard';
 import { CommsPanel } from '../components/game/CommsPanel';
 import { AnimationLayer } from '../components/game/AnimationLayer';
+import { registerAnimTarget } from '../components/game/animTargets';
 import { dockTabs, stageTier, type DockTabKey } from './stageLayout';
 
 export interface GameStageProps {
@@ -63,6 +65,9 @@ export interface GameStageProps {
   frameTarget?: BoardFrameTarget | null | undefined;
   /** Tutorial only: the current beat's interaction gate (see game/actionGate.ts). */
   actionGate?: ActionGate | null | undefined;
+  /** Tutorial only: fires whenever the payment-choice modal opens/closes, so the coachmark can
+   *  redirect its spotlight + copy to the payment dialog once the learner's tap opens it. */
+  onPendingClaim?: ((kind: 'route' | 'station' | null) => void) | undefined;
 }
 
 const RAIL_WIDTH = 360;
@@ -81,6 +86,7 @@ export function GameStage({
   sandbox,
   frameTarget,
   actionGate,
+  onPendingClaim,
 }: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -133,12 +139,33 @@ export function GameStage({
   const canDraw = myTurn && (phase === Phase.AWAIT_ACTION || phase === Phase.DRAWING_CARDS);
 
   // Tutorial action gate: an `await` beat keeps only its expected affordance live; 'locked'
-  // disables them all. No gate (live game) ⇒ every affordance enabled.
+  // disables them all. No gate (live game) ⇒ every affordance enabled. Claim and station are
+  // gated INDEPENDENTLY (not OR'd into one board-wide flag) so e.g. a CLAIM_ROUTE beat doesn't
+  // leave every city on the map still tappable for BUILD_STATION, and vice versa.
   const allow = gateFlags(actionGate);
-  const boardCanAct = canAct && (allow.claim || allow.station);
+  const boardCanClaim = canAct && allow.claim;
+  const boardCanBuildStation = canAct && allow.station;
   const marketCanDraw = canDraw && allow.draw;
 
   const flow = useClaimFlow(snapshot, commands);
+  // Tutorial: let the coachmark know a payment choice just opened (or closed), so it can redirect
+  // its spotlight + copy to the dialog instead of the map target that opened it.
+  const claimKind = flow.claim?.kind ?? null;
+  useEffect(() => {
+    onPendingClaim?.(claimKind === 'repair' ? null : claimKind);
+  }, [claimKind, onPendingClaim]);
+  // Tutorial: while an await beat is active, only its expected affordance accepts a board tap at
+  // all, and — when the beat names a specific route/city — only THAT target. Everything else is
+  // ignored outright, so a stray tap can't spend the learner's hand on the wrong claim or strand
+  // the beat on a non-match. Live games pass no gate ⇒ these are transparent wrappers.
+  const pickRoute = (routeId: string): void => {
+    if (!gateAllowsTarget(actionGate, 'route', routeId)) return;
+    flow.pickRoute(routeId);
+  };
+  const pickCity = (cityId: string): void => {
+    if (!gateAllowsTarget(actionGate, 'city', cityId)) return;
+    flow.pickCity(cityId);
+  };
 
   // Tutorial on compact: a beat awaiting a market action must surface the Draw tab — its target
   // would otherwise sit inside an unselected (unmounted) dock panel and the learner would stall.
@@ -185,9 +212,10 @@ export function GameStage({
       snapshot={snapshot}
       locale={locale}
       colorBlind={colorBlind}
-      canAct={boardCanAct}
-      onPickRoute={flow.pickRoute}
-      onPickCity={flow.pickCity}
+      canClaim={boardCanClaim}
+      canBuildStation={boardCanBuildStation}
+      onPickRoute={pickRoute}
+      onPickCity={pickCity}
       highlightCities={highlightCities}
       sandbox={sandbox}
       frameTarget={frameTarget}
@@ -198,6 +226,8 @@ export function GameStage({
   // The blocking event-phase prompt sits above the board in every tier so a required
   // lantern/draft/hive choice is never buried inside an unselected dock tab.
   const eventPhaseBar = <EventPhaseBar snapshot={snapshot} commands={commands} locale={locale} />;
+  // Whose turn + connection state, persistent across every tier (web's AppHeader equivalent).
+  const turnBanner = <TurnBanner snapshot={snapshot} sandbox={sandbox} />;
   const market = (
     <View style={styles.marketBlock}>
       <CardMarket
@@ -358,9 +388,15 @@ export function GameStage({
     return (
       <View style={styles.fill}>
         {spectatorBanner}
+        {turnBanner}
         {eventPhaseBar}
         <View style={styles.fill}>{board}</View>
         <View
+          // The dock is the only always-mounted HUD surface on phones (its panels swap by tab).
+          // Registering it as a flight anchor gives card draws a destination even while the Hand
+          // tab is inactive — otherwise the flight has no `hand` target and silently no-ops.
+          ref={(v) => registerAnimTarget('dock', v)}
+          collapsable={false}
           style={[styles.dock, { height: Math.round(height * 0.45), paddingBottom: insets.bottom }]}
         >
           {needKeep ? (
@@ -419,6 +455,7 @@ export function GameStage({
     return (
       <View style={styles.fill}>
         {spectatorBanner}
+        {turnBanner}
         {eventPhaseBar}
         <View style={styles.row}>
           <View style={styles.fill}>{board}</View>
@@ -438,6 +475,7 @@ export function GameStage({
   return (
     <View style={styles.fill}>
       {spectatorBanner}
+      {turnBanner}
       {eventPhaseBar}
       <View style={styles.row}>
         <View style={styles.fill}>{board}</View>

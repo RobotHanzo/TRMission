@@ -37,7 +37,7 @@ import {
 } from '../game/events';
 import type { GameCommands } from '../net/commands';
 import type { BoardFrameTarget } from '../game/boardView';
-import { gateFlags, type ActionGate } from '../features/tutorial/types';
+import { gateAllowsTarget, gateFlags, type ActionGate } from '../features/tutorial/types';
 import { Board } from '../components/Board';
 import { EventsPanel } from '../components/EventsPanel';
 import { CardMarket } from '../components/CardMarket';
@@ -294,10 +294,7 @@ export function GameStage({
     // all, and — when it names a specific route — only THAT route. Everything else (a different
     // action entirely, or the right action but the wrong route) is ignored outright, so a stray
     // click can't spend the learner's hand on the wrong claim or strand the beat on a non-match.
-    if (actionGate && actionGate !== 'locked') {
-      if (actionGate.t !== 'CLAIM_ROUTE') return;
-      if (actionGate.routeId && actionGate.routeId !== routeId) return;
-    }
+    if (!gateAllowsTarget(actionGate, 'route', routeId)) return;
     const route = routeById.get(routeId);
     if (!route) return;
     const extra = skyLanternSurcharge(randomEvents, routeId);
@@ -322,10 +319,7 @@ export function GameStage({
   const pickCity = (cityId: string) => {
     // Tutorial: same treatment as `pickRoute` — only a BUILD_STATION beat accepts a city click,
     // and only the named city when one is specified.
-    if (actionGate && actionGate !== 'locked') {
-      if (actionGate.t !== 'BUILD_STATION') return;
-      if (actionGate.cityId && actionGate.cityId !== cityId) return;
-    }
+    if (!gateAllowsTarget(actionGate, 'city', cityId)) return;
     const remaining = myPub?.stationsRemaining ?? 0;
     if (remaining <= 0) {
       pushNotification({ variant: 'notice', text: t('noStationsLeft') });

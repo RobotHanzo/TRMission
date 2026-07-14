@@ -17,7 +17,7 @@ land-rings geography, its own coordinate frame).
 1. **Geography:** keep the hand-drawn coast (`taiwan-geography.ts`) — coast + central-range relief +
    island blobs + compass. Do **not** adopt tw2.1's projected land-rings geography. The bundled map
    therefore stays `geography`-less (renders via `Geography()` / `GeographyLayer` fallback).
-2. **Station placement:** *group-transform all* mainland stations. Fit one affine
+2. **Station placement:** _group-transform all_ mainland stations. Fit one affine
    `old = A·new + t` from the 24 shared mainland cities, apply to every mainland station so the
    network adopts tw2.1's relative arrangement, re-registered on the current coast. Islands + Mazu
    are placed by hand on the existing blobs.
@@ -26,7 +26,7 @@ land-rings geography, its own coordinate frame).
    cities (Kaohsiung, Changhua, Chiayi, Hualien, Alishan, Matsu, Green Island, Orchid Island,
    Liuqiu), tw2.1's for new. **Everything else from tw2.1**: zh names, Chinese regions
    (北部/中部/南部/東部/離島), route/ticket topology, colors, lengths, ferry/tunnel/double flags,
-   bows. Route & ticket ids kept **verbatim** from tw2.1 (opaque; only *city* endpoints remapped).
+   bows. Route & ticket ids kept **verbatim** from tw2.1 (opaque; only _city_ endpoints remapped).
 4. **Kaohsiung–Zuoying parallel:** tw2.1 has two ungrouped BLUE/1 edges. Recolour one **RED** and
    group the pair as a double (**group K**).
 5. **龜山島 / 小琉球:** set `isIsland: true` (tw2.1 had them `false`).
@@ -73,7 +73,7 @@ Passes `validateContent()` (verified against raw tw2.1 with a mirror pre-check).
 - Bump live `MAP_META.version` 3 → 4; rewrite `cities.ts` / `routes.ts` / `tickets.ts`.
 - **Freeze v3** as `archive/v3.ts` — full literal cities/routes/tickets (v4 diverges in all three).
 - **Freeze v2's cities/tickets as literals** by repointing `archive/v2.ts` to the frozen v3 tables
-  (`CITIES_V3` / `TICKETS_V3`); v2's routes are already a literal. Today `archive/v2.ts` *references*
+  (`CITIES_V3` / `TICKETS_V3`); v2's routes are already a literal. Today `archive/v2.ts` _references_
   the live tables, which are changing — leaving it would drift the pinned v2 hash.
 - `CONTENT_REGISTRY` = `[CONTENT_V2, CONTENT_V3, TAIWAN_CONTENT]`.
 - `versions.spec.ts`: pin the v3 hash (new tripwire), keep the v2 pin, update the "current is

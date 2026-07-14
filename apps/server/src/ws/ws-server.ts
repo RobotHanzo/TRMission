@@ -2,8 +2,11 @@
 // holds all protocol logic; this file only moves bytes and manages socket lifecycle.
 import { randomUUID } from 'node:crypto';
 import type { Server as HttpServer } from 'node:http';
+import { Logger } from '@nestjs/common';
 import { WebSocketServer, type WebSocket, type RawData } from 'ws';
 import type { GameHub } from './hub';
+
+const log = new Logger('ws');
 
 export function attachWsServer(
   httpServer: HttpServer,
@@ -23,7 +26,11 @@ export function attachWsServer(
     );
 
     socket.on('message', (data: RawData) => {
-      void hub.receive(id, toUint8(data));
+      // `hub.receive` handles its own errors; this catch is the last line of defence, because an
+      // unhandled rejection here would take the whole server down with every other game on it.
+      hub.receive(id, toUint8(data)).catch((err: unknown) => {
+        log.error(`ws receive failed for ${id}: ${err instanceof Error ? err.message : err}`);
+      });
     });
     socket.on('close', () => hub.closeConnection(id));
     socket.on('error', () => hub.closeConnection(id));

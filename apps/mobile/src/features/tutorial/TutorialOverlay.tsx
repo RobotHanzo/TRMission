@@ -2,14 +2,117 @@
 // renders the beat's narration, an optional component specimen (the visual glossary), a progress
 // bar, a connector caret toward the spotlighted target, and the right control for the beat mode.
 // coachPosition dodges it to the top / a side dock when a target would sit under the bottom-
-// anchored bubble. (The web's finale confetti has no native counterpart — the badge carries it.)
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+// anchored bubble. Motion mirrors web's tutorial.css: the coach slides+scales in per position
+// change (260ms), the specimen/body fade-slide per beat (320/240ms), the progress bar glides
+// (360ms), "your turn" pulses (1.6s loop), and the finale badge pops with overshoot — all plain
+// RN Animated (the TutorialSpotlight idiom) and all inert under reduced motion.
+import { useCallback, useEffect, useRef, useState, type PropsWithChildren } from 'react';
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, PartyPopper, RotateCcw, X } from 'lucide-react-native';
 import type { Beat, SpecimenSpec } from './types';
+import { Confetti } from '../../components/celebration/Confetti';
 import { Specimen } from './Specimens';
 import { coachPosition, spotlightBounds, spotlightCentre, type FlatRect } from './focus';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
+
+/** Mount-scoped fade + 6px rise (web `tut-specimen-in`/`tut-body-in`) — remount via `key` per
+ *  beat re-fires it, exactly like web's keyed CSS animation. */
+function FadeSlideIn({
+  durationMs,
+  reduced,
+  children,
+}: PropsWithChildren<{ durationMs: number; reduced: boolean }>) {
+  const progress = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduced) return;
+    const anim = Animated.timing(progress, {
+      toValue: 1,
+      duration: durationMs,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+      isInteraction: false,
+    });
+    anim.start();
+    return () => anim.stop();
+  }, [progress, durationMs, reduced]);
+  return (
+    <Animated.View
+      style={{
+        opacity: progress,
+        transform: [
+          { translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [6, 0] }) },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
+/** The finale badge's overshoot pop (web `tut-finale-pop`, 480ms, back-out easing). */
+function FinalePop({ reduced, children }: PropsWithChildren<{ reduced: boolean }>) {
+  const progress = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduced) return;
+    const anim = Animated.timing(progress, {
+      toValue: 1,
+      duration: 480,
+      easing: Easing.out(Easing.back(2)),
+      useNativeDriver: true,
+      isInteraction: false,
+    });
+    anim.start();
+    return () => anim.stop();
+  }, [progress, reduced]);
+  return (
+    <Animated.View
+      style={{
+        opacity: progress.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }),
+        transform: [{ scale: progress.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
+/** The 1.6s "your turn" attention pulse (web `tut-pulse`: opacity 1 → 0.45 → 1, looped). */
+function PulseView({ reduced, children }: PropsWithChildren<{ reduced: boolean }>) {
+  const opacity = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (reduced) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.45,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+          isInteraction: false,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+          isInteraction: false,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [opacity, reduced]);
+  return <Animated.View style={{ opacity }}>{children}</Animated.View>;
+}
 
 export interface TutorialOverlayProps {
   beat: Beat | null;
@@ -43,6 +146,7 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
   const { beat, done, index, total, lessonNo, lessonCount, isLastLesson, specimen } = props;
   const spotRects = props.spotRects ?? [];
   const { width, height } = useWindowDimensions();
+  const reduced = useReducedMotion();
 
   // The very end of the tutorial (last lesson complete) gets the celebratory finale card.
   const finished = done && isLastLesson;
@@ -72,34 +176,84 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
     return { marginRight: Math.round(Math.max(GAP, Math.min(width - bounds.x + GAP, maxStart))) };
   })();
 
-  // The caret rides the edge of the coach that faces the spotlight target and points at it —
-  // coach-relative (via measureInWindow) so it survives any window size. Hidden until laid out.
+  // The caret rides the edge of the coach that faces the spotlight target and points at it. The
+  // coach's window rect is captured only when its LAYOUT changes; the caret pixel then derives in
+  // render from whatever spotRects the tracking hook hands over — so a camera glide that updates
+  // the rects every frame moves the caret smoothly without a native measure round-trip per tick.
   const coachRef = useRef<View>(null);
-  const [caret, setCaret] = useState<{ axis: 'x' | 'y'; px: number } | null>(null);
-  // Keyed on the rect VALUES: the measuring hook hands over a fresh array every poll.
-  const spotKey = JSON.stringify(spotRects);
-  const measureCaret = useCallback(() => {
-    const centre = spotlightCentre(spotRects);
+  const [coachRect, setCoachRect] = useState<{ x: number; y: number; w: number; h: number } | null>(
+    null,
+  );
+  const measureCoach = useCallback(() => {
     const coach = coachRef.current;
-    if (!centre || !coach) {
-      setCaret(null);
-      return;
-    }
+    if (!coach) return;
     coach.measureInWindow((x, y, w, h) => {
       if (!w || !h) {
-        setCaret(null); // no layout yet (or a test renderer) — skip the caret
+        setCoachRect(null); // no layout yet (or a test renderer) — skip the caret
         return;
       }
-      const pad = 24; // keeps the caret off the rounded corners
-      if (sideDocked) {
-        setCaret({ axis: 'y', px: Math.max(pad, Math.min(h - pad, centre.y - y)) });
-      } else {
-        setCaret({ axis: 'x', px: Math.max(pad, Math.min(w - pad, centre.x - x)) });
-      }
+      setCoachRect((prev) =>
+        prev && prev.x === x && prev.y === y && prev.w === w && prev.h === h
+          ? prev
+          : { x, y, w, h },
+      );
     });
-    // `spotKey` stands in for `spotRects` (fresh identity each poll would loop the effect).
-  }, [spotKey, sideDocked]);
-  useEffect(measureCaret, [measureCaret]);
+  }, []);
+
+  // Entrance / reposition: slide in from the edge the coach docks against + a slight scale-up
+  // (web `tut-coach-in` / `tut-coach-in-side`, 260ms). Re-fires whenever the dock position flips.
+  const enter = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduced) {
+      enter.setValue(1);
+      return;
+    }
+    enter.setValue(0);
+    const anim = Animated.timing(enter, {
+      toValue: 1,
+      duration: 260,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+      isInteraction: false,
+    });
+    anim.start();
+    return () => anim.stop();
+  }, [pos, reduced, enter]);
+  const enterShift = enter.interpolate({
+    inputRange: [0, 1],
+    outputRange: [pos === 'top' ? -12 : pos === 'bottom' ? 12 : 0, 0],
+  });
+  const enterShiftX = enter.interpolate({
+    inputRange: [0, 1],
+    outputRange: [pos === 'left' ? 12 : pos === 'right' ? -12 : 0, 0],
+  });
+
+  // The progress bar glides between beats instead of jumping (web: width 360ms transition).
+  const progressAnim = useRef(new Animated.Value(progress)).current;
+  useEffect(() => {
+    if (reduced) {
+      progressAnim.setValue(progress);
+      return;
+    }
+    const anim = Animated.timing(progressAnim, {
+      toValue: progress,
+      duration: 360,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false, // width is a layout prop
+      isInteraction: false,
+    });
+    anim.start();
+    return () => anim.stop();
+  }, [progress, reduced, progressAnim]);
+
+  const centre = spotlightCentre(spotRects);
+  const pad = 24; // keeps the caret off the rounded corners
+  const caret: { axis: 'x' | 'y'; px: number } | null =
+    centre && coachRect
+      ? sideDocked
+        ? { axis: 'y', px: Math.max(pad, Math.min(coachRect.h - pad, centre.y - coachRect.y)) }
+        : { axis: 'x', px: Math.max(pad, Math.min(coachRect.w - pad, centre.x - coachRect.x)) }
+      : null;
 
   const caretStyle =
     caret &&
@@ -117,14 +271,29 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
 
   return (
     <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, wrapperStyles[pos]]}>
-      <View
+      {/* Whole-tutorial finale: screen-wide celebration behind the coach card — the same shared
+          confetti as the endgame scoreboard. */}
+      <Confetti active={finished} />
+      <Animated.View
         ref={coachRef}
-        onLayout={measureCaret}
+        onLayout={measureCoach}
         collapsable={false}
         accessibilityViewIsModal={false}
         accessibilityLabel={t('tutorial.title')}
         testID="tut-coach"
-        style={[styles.coach, { width: coachW }, dock]}
+        style={[
+          styles.coach,
+          { width: coachW },
+          dock,
+          {
+            opacity: enter,
+            transform: [
+              { translateY: enterShift },
+              { translateX: enterShiftX },
+              { scale: enter.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] }) },
+            ],
+          },
+        ]}
       >
         {caretStyle && <View style={caretStyle} />}
 
@@ -148,24 +317,38 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
         </View>
 
         {finished && (
-          <View style={styles.finaleBadge}>
-            <PartyPopper size={34} color={ACCENT} />
-          </View>
+          <FinalePop reduced={reduced}>
+            <View style={styles.finaleBadge}>
+              <PartyPopper size={34} color={ACCENT} />
+            </View>
+          </FinalePop>
         )}
         {finished && <Text style={styles.finaleTitle}>{t('tutorial.finalTitle')}</Text>}
 
         {!done && specimen && (
-          <View style={styles.specimen} key={beat?.id}>
-            <Specimen spec={specimen} />
-          </View>
+          <FadeSlideIn durationMs={320} reduced={reduced} key={beat?.id}>
+            <View style={styles.specimen}>
+              <Specimen spec={specimen} />
+            </View>
+          </FadeSlideIn>
         )}
 
-        <Text style={styles.body} key={(beat?.id ?? 'done') + ':body'}>
-          {body}
-        </Text>
+        <FadeSlideIn durationMs={240} reduced={reduced} key={(beat?.id ?? 'done') + ':body'}>
+          <Text style={styles.body}>{body}</Text>
+        </FadeSlideIn>
 
         <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          <Animated.View
+            style={[
+              styles.progressFill,
+              {
+                width: progressAnim.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ['0%', '100%'],
+                }),
+              },
+            ]}
+          />
         </View>
 
         <View style={styles.actions}>
@@ -233,16 +416,18 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
               </Pressable>
             )
           ) : beat?.mode === 'await' ? (
-            <Text testID="tut-yourturn" style={styles.yourTurn}>
-              {t('tutorial.yourTurn')}
-            </Text>
+            <PulseView reduced={reduced}>
+              <Text testID="tut-yourturn" style={styles.yourTurn}>
+                {t('tutorial.yourTurn')}
+              </Text>
+            </PulseView>
           ) : (
             <Text testID="tut-watching" style={styles.watching}>
               {t('tutorial.watching')}
             </Text>
           )}
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }

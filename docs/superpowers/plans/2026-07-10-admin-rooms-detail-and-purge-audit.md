@@ -4,7 +4,7 @@
 
 **Goal:** Stop the background purge sweep from writing no-op audit entries, and give the admin Rooms view a click-to-open detail drawer at parity with the Games view.
 
-**Architecture:** Two independent changes. (1) `PurgeService.runSweep` skips the `purge.run` audit write only for *auto* sweeps that deleted nothing; manual runs always log. (2) A new `GET /dashboard/rooms/:code` endpoint returns a redacted room detail (never the seed), and `RoomsView` rows become clickable, opening a `RoomDrawer` that fetches it — inline Close/Delete buttons stay, with click-through suppressed, and are mirrored inside the drawer.
+**Architecture:** Two independent changes. (1) `PurgeService.runSweep` skips the `purge.run` audit write only for _auto_ sweeps that deleted nothing; manual runs always log. (2) A new `GET /dashboard/rooms/:code` endpoint returns a redacted room detail (never the seed), and `RoomsView` rows become clickable, opening a `RoomDrawer` that fetches it — inline Close/Delete buttons stay, with click-through suppressed, and are mirrored inside the drawer.
 
 **Tech Stack:** NestJS + zod (`nestjs-zod`) + native mongodb driver (server); React + Vite 5 + zustand + react-i18next (admin); vitest + supertest + mongodb-memory-server (server tests); vitest + @testing-library/react (admin tests). Yarn 4 workspaces.
 
@@ -22,30 +22,32 @@
 
 ## File structure
 
-| File | Responsibility | Task |
-|------|----------------|------|
-| `apps/server/src/dashboard/purge.service.ts` (modify) | Guard the auto-sweep audit write on non-zero deletions | 1 |
-| `apps/server/test/purge-audit-skip.e2e.spec.ts` (create) | Prove auto no-op skips the log; manual no-op still logs | 1 |
-| `apps/server/src/dashboard/dashboard.schemas.ts` (modify) | `DashboardRoomDetailSchema` | 2 |
-| `apps/server/src/dashboard/dashboard-games.service.ts` (modify) | `roomDetail(code)` | 2 |
-| `apps/server/src/dashboard/dashboard-games.controller.ts` (modify) | `GET rooms/:code` | 2 |
-| `apps/server/test/dashboard-read.e2e.spec.ts` (modify) | Room-detail endpoint tests | 2 |
-| `apps/admin/src/store/ui.ts` (modify) | Add `'rooms'` to the detail-drawer view union | 3 |
-| `apps/admin/src/net/rest.ts` (modify) | `RoomDetail` type + `api.getRoom` | 3 |
-| `apps/admin/src/store/ui.test.ts` (modify) | Cover `openDetail`/`closeDetail` for rooms | 3 |
-| `apps/admin/src/i18n/index.ts` (modify) | `rooms.*` detail keys (both locales) | 4 |
-| `apps/admin/src/views/RoomsView.tsx` (modify) | Clickable rows + `RoomDrawer` | 4 |
-| `apps/admin/src/views/RoomsView.test.tsx` (modify) | Row-click opens the drawer | 4 |
+| File                                                               | Responsibility                                          | Task |
+| ------------------------------------------------------------------ | ------------------------------------------------------- | ---- |
+| `apps/server/src/dashboard/purge.service.ts` (modify)              | Guard the auto-sweep audit write on non-zero deletions  | 1    |
+| `apps/server/test/purge-audit-skip.e2e.spec.ts` (create)           | Prove auto no-op skips the log; manual no-op still logs | 1    |
+| `apps/server/src/dashboard/dashboard.schemas.ts` (modify)          | `DashboardRoomDetailSchema`                             | 2    |
+| `apps/server/src/dashboard/dashboard-games.service.ts` (modify)    | `roomDetail(code)`                                      | 2    |
+| `apps/server/src/dashboard/dashboard-games.controller.ts` (modify) | `GET rooms/:code`                                       | 2    |
+| `apps/server/test/dashboard-read.e2e.spec.ts` (modify)             | Room-detail endpoint tests                              | 2    |
+| `apps/admin/src/store/ui.ts` (modify)                              | Add `'rooms'` to the detail-drawer view union           | 3    |
+| `apps/admin/src/net/rest.ts` (modify)                              | `RoomDetail` type + `api.getRoom`                       | 3    |
+| `apps/admin/src/store/ui.test.ts` (modify)                         | Cover `openDetail`/`closeDetail` for rooms              | 3    |
+| `apps/admin/src/i18n/index.ts` (modify)                            | `rooms.*` detail keys (both locales)                    | 4    |
+| `apps/admin/src/views/RoomsView.tsx` (modify)                      | Clickable rows + `RoomDrawer`                           | 4    |
+| `apps/admin/src/views/RoomsView.test.tsx` (modify)                 | Row-click opens the drawer                              | 4    |
 
 ---
 
 ## Task 1: Auto-purge no-op audit skip
 
 **Files:**
+
 - Modify: `apps/server/src/dashboard/purge.service.ts:250-254`
 - Test: `apps/server/test/purge-audit-skip.e2e.spec.ts` (create)
 
 **Interfaces:**
+
 - Consumes: `PurgeService.runSweep(trigger: 'auto' | 'manual', actor?: AuthUser): Promise<PurgeSummary>` and the `dashboardAudit` collection (already exist).
 - Produces: unchanged public signature; only the internal audit-write condition changes.
 
@@ -121,26 +123,26 @@ Expected: FAIL on the first case — current code logs every auto sweep, so `cou
 In `apps/server/src/dashboard/purge.service.ts`, replace the trailing audit block in `runSweep` (currently):
 
 ```ts
-    if (trigger === 'auto') {
-      await this.audit.logSystem('purge.run', undefined, params);
-    } else {
-      await this.audit.log(actor!, 'purge.run', undefined, params);
-    }
+if (trigger === 'auto') {
+  await this.audit.logSystem('purge.run', undefined, params);
+} else {
+  await this.audit.log(actor!, 'purge.run', undefined, params);
+}
 ```
 
 with:
 
 ```ts
-    if (trigger === 'auto') {
-      // An idle auto sweep that changed nothing isn't worth an audit row (it would otherwise
-      // stream 0/0 entries on every interval and fill the Purge view's recent-runs table).
-      if (summary.roomsDeleted > 0 || summary.gamesDeleted > 0) {
-        await this.audit.logSystem('purge.run', undefined, params);
-      }
-    } else {
-      // A manual run always logs — it records that an operator triggered a sweep, even a no-op.
-      await this.audit.log(actor!, 'purge.run', undefined, params);
-    }
+if (trigger === 'auto') {
+  // An idle auto sweep that changed nothing isn't worth an audit row (it would otherwise
+  // stream 0/0 entries on every interval and fill the Purge view's recent-runs table).
+  if (summary.roomsDeleted > 0 || summary.gamesDeleted > 0) {
+    await this.audit.logSystem('purge.run', undefined, params);
+  }
+} else {
+  // A manual run always logs — it records that an operator triggered a sweep, even a no-op.
+  await this.audit.log(actor!, 'purge.run', undefined, params);
+}
 ```
 
 - [ ] **Step 4: Run the test to verify it passes**
@@ -165,12 +167,14 @@ git commit -m "fix(dashboard): skip the audit log for no-op auto-purge sweeps"
 ## Task 2: Server room-detail endpoint
 
 **Files:**
+
 - Modify: `apps/server/src/dashboard/dashboard.schemas.ts` (after `RoomsListSchema`, ~line 219)
 - Modify: `apps/server/src/dashboard/dashboard-games.service.ts` (import + new method)
 - Modify: `apps/server/src/dashboard/dashboard-games.controller.ts` (import + new route)
 - Test: `apps/server/test/dashboard-read.e2e.spec.ts` (the `describe('rooms', ...)` block, ~line 306)
 
 **Interfaces:**
+
 - Consumes: `RoomRepo.get(code)`, `DEFAULT_ROOM_SETTINGS`, `MapSelector` (from `../lobby/room.repo`); `this.games` collection (already in the service).
 - Produces:
   - `DashboardGamesService.roomDetail(code: string): Promise<RoomDetail>` where `RoomDetail` is the object shape below.
@@ -182,27 +186,24 @@ git commit -m "fix(dashboard): skip the audit log for no-op auto-purge sweeps"
 In `apps/server/test/dashboard-read.e2e.spec.ts`, add two cases inside the existing `describe('rooms', () => { ... })` block (after the `lists rooms with status and members` test). `roomCode` is a STARTED room whose game is LIVE and whose doc carries a `seed`, so the seed-omission check is meaningful:
 
 ```ts
-  it('room detail returns members, settings, and linked game status — never the seed', async () => {
-    const res = await request(server())
-      .get(`/api/v1/dashboard/rooms/${roomCode}`)
-      .set(auth(admin.token))
-      .expect(200);
-    expect(res.body.code).toBe(roomCode);
-    expect(res.body.status).toBe('STARTED');
-    expect(res.body.gameId).toBe(liveGameId);
-    expect(res.body.gameStatus).toBe('LIVE');
-    expect(res.body.members).toHaveLength(2);
-    expect(res.body.settings.map.source).toBe('official');
-    expect(typeof res.body.settings.unlimitedStationBorrow).toBe('boolean');
-    expect(res.body).not.toHaveProperty('seed');
-  });
+it('room detail returns members, settings, and linked game status — never the seed', async () => {
+  const res = await request(server())
+    .get(`/api/v1/dashboard/rooms/${roomCode}`)
+    .set(auth(admin.token))
+    .expect(200);
+  expect(res.body.code).toBe(roomCode);
+  expect(res.body.status).toBe('STARTED');
+  expect(res.body.gameId).toBe(liveGameId);
+  expect(res.body.gameStatus).toBe('LIVE');
+  expect(res.body.members).toHaveLength(2);
+  expect(res.body.settings.map.source).toBe('official');
+  expect(typeof res.body.settings.unlimitedStationBorrow).toBe('boolean');
+  expect(res.body).not.toHaveProperty('seed');
+});
 
-  it('404s an unknown room code', async () => {
-    await request(server())
-      .get('/api/v1/dashboard/rooms/NOPE1')
-      .set(auth(admin.token))
-      .expect(404);
-  });
+it('404s an unknown room code', async () => {
+  await request(server()).get('/api/v1/dashboard/rooms/NOPE1').set(auth(admin.token)).expect(404);
+});
 ```
 
 > Scope note: a dedicated "403 without `rooms.read`" case is omitted — the `viewer` role already holds `rooms.read`, and the `@RequirePermission('rooms.read')` guard is the same infrastructure already covered for the sibling list endpoint. Adding one would require a bespoke `deniedPermissions` account for no new coverage.
@@ -353,11 +354,13 @@ git commit -m "feat(dashboard): add GET /dashboard/rooms/:code room detail (seed
 ## Task 3: Admin router union + REST client type
 
 **Files:**
+
 - Modify: `apps/admin/src/store/ui.ts:77` and `:100`
 - Modify: `apps/admin/src/net/rest.ts` (after the `RoomRow` interface, ~line 123; and in the `api` object after `deleteRoom`, ~line 315)
 - Test: `apps/admin/src/store/ui.test.ts`
 
 **Interfaces:**
+
 - Consumes: `DashboardRoomDetailSchema`'s shape from Task 2.
 - Produces:
   - `RoomDetail` TS interface (imported by Task 4).
@@ -477,11 +480,13 @@ git commit -m "feat(admin): wire rooms into the detail-drawer router + REST clie
 ## Task 4: RoomsView clickable rows + RoomDrawer
 
 **Files:**
+
 - Modify: `apps/admin/src/i18n/index.ts` (the `rooms:` block in **both** `zhHant` ~line 184 and `en` ~line 521)
 - Modify: `apps/admin/src/views/RoomsView.tsx` (full rewrite below)
 - Test: `apps/admin/src/views/RoomsView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `api.getRoom` + `RoomDetail` (Task 3); `useUi().openDetail/closeDetail/param` with `'rooms'` (Task 3); `Drawer`, `SignalBadge`/`aspectForStatus`, `fmtDateTime`/`shortId`.
 - Produces: no exported API changes; a `RoomDrawer` component local to `RoomsView.tsx`.
 
@@ -731,7 +736,9 @@ function RoomDrawer({
                     : m.isGuest
                       ? t('rooms.guest')
                       : ''}{' '}
-                  <span className="oc-muted">{m.ready ? t('rooms.ready') : t('rooms.notReady')}</span>
+                  <span className="oc-muted">
+                    {m.ready ? t('rooms.ready') : t('rooms.notReady')}
+                  </span>
                 </span>
               </div>
             ))}
@@ -1054,6 +1061,7 @@ Expected: graph updated (AST-only, no API cost).
 ## Self-review
 
 **Spec coverage:**
+
 - Part 1 (auto no-op skip, manual always logs) → Task 1. ✓
 - Part 2 server detail endpoint, seed-redacted → Task 2. ✓
 - Part 2 router union + REST client → Task 3. ✓

@@ -50,7 +50,7 @@ plain).
 - Drop the `target.ferryLocos > 0` guard from the eligibility check. Keep the `target.isTunnel` and
   `target.doubleGroup` guards unchanged (still no-ops).
 - Sibling construction currently always flips color: `color: target.color === 'RED' ? 'BLUE' :
-  'RED'`. Change so a ferry source is mirrored instead of flipped:
+'RED'`. Change so a ferry source is mirrored instead of flipped:
   ```
   color: target.ferryLocos > 0 ? target.color : (target.color === 'RED' ? 'BLUE' : 'RED')
   ```
@@ -91,7 +91,7 @@ user edit `ferryLocos`/color/length independently of `doubleGroup` — that was 
 - **`store.test.ts`:** update the existing "convertToDouble is a no-op for tunnel, ferry, or
   already-double routes" case — ferry is no longer a no-op; split it so only tunnel and
   already-double remain no-ops. Add a new case: converting a ferry route (`ferryLocos: 2, color:
-  'GRAY'`) produces a sibling with the same `ferryLocos` and `color: 'GRAY'` (not a RED/BLUE flip).
+'GRAY'`) produces a sibling with the same `ferryLocos` and `color: 'GRAY'` (not a RED/BLUE flip).
 - **`RoutesStage.test.tsx`:** add a case exercising the new-route path with both `ferryLocos` set and
   `makeDouble` checked, asserting the sibling mirrors ferry/color; add/update a case asserting the
   convert-to-double button now renders for a selected ferry route (still hidden for a tunnel).

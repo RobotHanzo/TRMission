@@ -1,1 +1,31 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_p2_task_2_brief_md", "label": "p2-task-2-brief.md", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-2-brief.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_2_brief_task_2_ticket_minting_post_dashboard_games_gameid_replay_ticket", "label": "Task 2: Ticket minting \u2014 `POST /dashboard/games/:gameId/replay-ticket`", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-2-brief.md", "source_location": "L1"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_p2_task_2_brief_md", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_2_brief_task_2_ticket_minting_post_dashboard_games_gameid_replay_ticket", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-2-brief.md", "source_location": "L1", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_2_brief_md",
+      "label": "p2-task-2-brief.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-2-brief.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_2_brief_task_2_ticket_minting_post_dashboard_games_gameid_replay_ticket",
+      "label": "Task 2: Ticket minting \u2014 `POST /dashboard/games/:gameId/replay-ticket`",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-2-brief.md",
+      "source_location": "L1"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_2_brief_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_2_brief_task_2_ticket_minting_post_dashboard_games_gameid_replay_ticket",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-2-brief.md",
+      "source_location": "L1",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -25,7 +25,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const roomCode = route.params.roomCode;
-  const { sessionReplaced } = useGameConnection(roomCode);
+  const { sessionReplaced } = useGameConnection(roomCode, {
+    spectator: route.params.spectator,
+  });
   const snapshot = useGame((s) => s.snapshot);
   const setRoster = useRoster((s) => s.setMembers);
   const user = useSession((s) => s.user);

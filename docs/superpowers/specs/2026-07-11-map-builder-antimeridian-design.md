@@ -29,7 +29,7 @@ No other country in the dataset crosses the seam (USA's Aleutians are clamped un
    world map the user pans across the seam to draw a normal rectangle over it.
 
 Both share a single geometry primitive; they differ only in how the crop that crosses the seam is
-*expressed* (auto-detected vs. drawn).
+_expressed_ (auto-detected vs. drawn).
 
 ## The core idea: longitude unwrapping
 
@@ -107,7 +107,7 @@ return finalizeGeography(dissolveCountryRings(chosen.rings), chosen.bbox);
 - `dissolveCountryRings` (polygon union) operates on the already-unwrapped coordinate space, so the
   union is computed where the country is contiguous — no code change to the dissolve itself.
 - No UI change. `CountryPickStage.tsx`'s selection map (viewBox −180…180) still draws each country
-  from raw rings and remains fully clickable; only the *result geometry* changes.
+  from raw rings and remains fully clickable; only the _result geometry_ changes.
 
 Result: RUS and FJI dissolve and project as one landmass; every other selection is byte-identical
 to before (the smaller-span branch is always the raw one for non-crossers).
@@ -175,7 +175,7 @@ export function cropToGeography(crop: CropBBox): CropResult | null {
 Add a longitude-span guard so a degenerate near-global or over-wrapped crop is rejected:
 
 ```ts
-crop.lonMax - crop.lonMin < 360
+crop.lonMax - crop.lonMin < 360;
 ```
 
 (Latitude bounds and `lonMin < lonMax` unchanged. A normal −179…179 crop, span 358, still passes.)
@@ -221,7 +221,7 @@ crop.lonMax - crop.lonMin < 360
 
 ## Out of scope
 
-- Changing `CountryPickStage.tsx`'s selection map so Russia looks whole while *browsing* to click
+- Changing `CountryPickStage.tsx`'s selection map so Russia looks whole while _browsing_ to click
   it (cosmetic; it's already one clickable path). Optional future polish.
 - Auto-centering the crop panorama precisely on a re-opened wrapped crop.
 - Any server, proto, engine, or `@trm/map-data` change.

@@ -1,22 +1,30 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
 import { signInWithDiscord } from '../auth/discord';
 import { signInWithGoogle } from '../auth/google';
+import { api, type AuthConfig } from '../net/rest';
 import { useSession } from '../store/session';
+import {
+  BrandWordmark,
+  Card,
+  ErrorText,
+  Field,
+  LinkButton,
+  MutedText,
+  PrimaryButton,
+  RouteGlyph,
+  Screen,
+  SecondaryButton,
+} from '../theme/chrome';
+import { DiscordIcon, GoogleIcon } from '../theme/brandIcons';
+import { SPACE, useTheme } from '../theme/useTheme';
 
 /** The five sign-in methods P0 exposes: guest, email/password, Google, Apple (iOS), Discord. */
 export function LoginScreen(): React.JSX.Element {
   const { t } = useTranslation();
+  const { dark } = useTheme();
   const error = useSession((s) => s.error);
   const loading = useSession((s) => s.loading);
   const playAsGuest = useSession((s) => s.playAsGuest);
@@ -28,6 +36,26 @@ export function LoginScreen(): React.JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [guestName, setGuestName] = useState('');
+
+  // Only the server-enabled sign-in methods render (ports the web auth-config gate). An
+  // unreachable server keeps everything visible — the buttons themselves surface the failure.
+  const [config, setConfig] = useState<AuthConfig | null>(null);
+  useEffect(() => {
+    let live = true;
+    api
+      .config()
+      .then((c) => live && setConfig(c))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
+  const passwordOn = config?.passwordLogin ?? true;
+  const guestOn = config?.guest ?? true;
+  const googleOn = config?.providers.google ?? true;
+  const discordOn = config?.providers.discord ?? true;
+  const appleOn = (config?.providers.apple ?? true) && Platform.OS === 'ios';
 
   const submitPassword = (): void => {
     if (mode === 'login') void login(email, password);
@@ -56,105 +84,119 @@ export function LoginScreen(): React.JSX.Element {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{t('home.title')}</Text>
-      <Text style={styles.tagline}>{t('login.tagline')}</Text>
+    <Screen scroll centered>
+      <View style={styles.brand}>
+        <BrandWordmark size="hero" />
+        <MutedText center>{t('login.tagline')}</MutedText>
+      </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder={t('login.email')}
-        autoCapitalize="none"
-        keyboardType="email-address"
-        autoComplete="email"
-        value={email}
-        onChangeText={setEmail}
-        editable={!loading}
-      />
-      {mode === 'register' && (
-        <TextInput
-          style={styles.input}
-          placeholder={t('login.displayName')}
-          value={displayName}
-          onChangeText={setDisplayName}
-          editable={!loading}
-        />
+      {passwordOn && (
+        <Card style={styles.form}>
+          <Field
+            placeholder={t('login.email')}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            value={email}
+            onChangeText={setEmail}
+            editable={!loading}
+          />
+          {mode === 'register' && (
+            <Field
+              placeholder={t('login.displayName')}
+              value={displayName}
+              onChangeText={setDisplayName}
+              editable={!loading}
+            />
+          )}
+          <Field
+            placeholder={t('login.password')}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            editable={!loading}
+          />
+          <PrimaryButton
+            title={mode === 'login' ? t('login.signIn') : t('login.register')}
+            onPress={submitPassword}
+            disabled={loading}
+          />
+          <LinkButton
+            title={mode === 'login' ? t('login.toRegister') : t('login.toLogin')}
+            onPress={() => setMode(mode === 'login' ? 'register' : 'login')}
+            disabled={loading}
+          />
+        </Card>
       )}
-      <TextInput
-        style={styles.input}
-        placeholder={t('login.password')}
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        editable={!loading}
-      />
 
-      <Pressable style={styles.primary} onPress={submitPassword} disabled={loading}>
-        <Text style={styles.primaryText}>
-          {mode === 'login' ? t('login.signIn') : t('login.register')}
-        </Text>
-      </Pressable>
-      <Pressable
-        onPress={() => setMode(mode === 'login' ? 'register' : 'login')}
-        disabled={loading}
-      >
-        <Text style={styles.link}>
-          {mode === 'login' ? t('login.toRegister') : t('login.toLogin')}
-        </Text>
-      </Pressable>
+      {/* "or" — the route glyph carries the divider: chrome quoting the board. */}
+      <View style={styles.divider}>
+        <RouteGlyph />
+      </View>
 
-      <Text style={styles.or}>{t('login.or')}</Text>
-
-      <Pressable style={styles.secondary} onPress={() => void playAsGuest()} disabled={loading}>
-        <Text style={styles.secondaryText}>{t('login.guest')}</Text>
-      </Pressable>
-      <Pressable
-        style={styles.secondary}
-        onPress={() => void signInWithGoogle()}
-        disabled={loading}
-      >
-        <Text style={styles.secondaryText}>{t('login.google')}</Text>
-      </Pressable>
-      <Pressable
-        style={styles.secondary}
-        onPress={() => void signInWithDiscord()}
-        disabled={loading}
-      >
-        <Text style={styles.secondaryText}>{t('login.discord')}</Text>
-      </Pressable>
-      {Platform.OS === 'ios' && (
-        <AppleAuthentication.AppleAuthenticationButton
-          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-          buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-          cornerRadius={8}
-          style={styles.appleButton}
-          onPress={() => void handleApple()}
-        />
-      )}
+      <View style={styles.providers}>
+        {guestOn && (
+          <>
+            <Field
+              placeholder={t('login.guestName')}
+              value={guestName}
+              maxLength={24}
+              onChangeText={setGuestName}
+              editable={!loading}
+            />
+            <SecondaryButton
+              title={t('login.guest')}
+              onPress={() => void playAsGuest(guestName)}
+              disabled={loading}
+            />
+          </>
+        )}
+        {googleOn && (
+          <SecondaryButton
+            title={t('login.google')}
+            icon={<GoogleIcon />}
+            onPress={() => void signInWithGoogle()}
+            disabled={loading}
+          />
+        )}
+        {discordOn && (
+          <SecondaryButton
+            title={t('login.discord')}
+            icon={<DiscordIcon />}
+            onPress={() => void signInWithDiscord()}
+            disabled={loading}
+          />
+        )}
+        {appleOn && (
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+            buttonStyle={
+              dark
+                ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+                : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+            }
+            cornerRadius={10}
+            style={styles.appleButton}
+            onPress={() => void handleApple()}
+          />
+        )}
+      </View>
 
       {loading && <ActivityIndicator style={styles.spinner} />}
-      {error && <Text style={styles.error}>{error}</Text>}
-    </View>
+      {error && (
+        <View style={styles.spinner}>
+          <ErrorText>{error}</ErrorText>
+        </View>
+      )}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24, gap: 10 },
-  title: { fontSize: 32, fontWeight: '700', textAlign: 'center' },
-  tagline: { fontSize: 14, textAlign: 'center', opacity: 0.7, marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, fontSize: 16 },
-  primary: { backgroundColor: '#1f6feb', borderRadius: 8, padding: 14, alignItems: 'center' },
-  primaryText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  secondary: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-  },
-  secondaryText: { fontSize: 16, fontWeight: '500' },
+  brand: { alignItems: 'center', gap: SPACE[2], marginBottom: SPACE[6] },
+  form: { alignSelf: 'center', width: '100%', maxWidth: 420 },
+  divider: { marginVertical: SPACE[4] },
+  providers: { alignSelf: 'center', width: '100%', maxWidth: 420, gap: SPACE[2] },
   appleButton: { height: 48, width: '100%' },
-  link: { textAlign: 'center', color: '#1f6feb', paddingVertical: 6 },
-  or: { textAlign: 'center', opacity: 0.5, marginVertical: 4 },
-  spinner: { marginTop: 8 },
-  error: { color: '#d33', textAlign: 'center', marginTop: 4 },
+  spinner: { marginTop: SPACE[3] },
 });

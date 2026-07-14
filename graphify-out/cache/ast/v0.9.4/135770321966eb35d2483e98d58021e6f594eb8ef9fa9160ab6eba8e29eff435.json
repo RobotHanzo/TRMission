@@ -1,1 +1,95 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_md", "label": "2026-07-06-sign-in-with-apple.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_sign_in_with_apple_p0_b_implementation_plan", "label": "Sign in with Apple (P0-b) Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_1_advertise_apple_in_authconfig_auth_config", "label": "Task 1: Advertise Apple in AuthConfig + `/auth/config`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L25"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_2_apple_identity_token_verification_credential_route", "label": "Task 2: Apple identity-token verification + credential route", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L136"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_3_full_suite_regression_docs", "label": "Task 3: Full-suite regression + docs", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L581"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_sign_in_with_apple_p0_b_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_sign_in_with_apple_p0_b_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_1_advertise_apple_in_authconfig_auth_config", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L25", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_2_apple_identity_token_verification_credential_route", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L136", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_3_full_suite_regression_docs", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md", "source_location": "L581", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_md",
+      "label": "2026-07-06-sign-in-with-apple.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_sign_in_with_apple_p0_b_implementation_plan",
+      "label": "Sign in with Apple (P0-b) Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_1_advertise_apple_in_authconfig_auth_config",
+      "label": "Task 1: Advertise Apple in AuthConfig + `/auth/config`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L25"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_2_apple_identity_token_verification_credential_route",
+      "label": "Task 2: Apple identity-token verification + credential route",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L136"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_3_full_suite_regression_docs",
+      "label": "Task 3: Full-suite regression + docs",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L581"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_sign_in_with_apple_p0_b_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_sign_in_with_apple_p0_b_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_1_advertise_apple_in_authconfig_auth_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_2_apple_identity_token_verification_credential_route",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L136",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_sign_in_with_apple_task_3_full_suite_regression_docs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-sign-in-with-apple.md",
+      "source_location": "L581",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

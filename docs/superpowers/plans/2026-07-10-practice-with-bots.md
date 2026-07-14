@@ -22,12 +22,14 @@
 ### Task 1: Server — atomic `POST /rooms/practice` endpoint
 
 **Files:**
+
 - Create: `apps/server/test/lobby-practice.e2e.spec.ts`
 - Modify: `apps/server/src/lobby/lobby.schemas.ts` (add `PracticeResultSchema` after `TicketResultSchema`, ~line 76)
 - Modify: `apps/server/src/lobby/lobby.service.ts` (add `PracticeResult` interface after `TicketResult`, ~line 49; add `startPractice` method after `start`, ~line 370)
 - Modify: `apps/server/src/lobby/lobby.controller.ts` (import `PracticeResultSchema`; add `practice` route after `create`, ~line 39)
 
 **Interfaces:**
+
 - Consumes (existing `LobbyService` methods, unchanged): `create(user): Promise<RoomView>` (RoomView has `code: string`), `addBot(code, user, difficulty: BotDifficulty): Promise<RoomView>`, `ready(code, user, ready: boolean): Promise<RoomView>`, `start(code, user): Promise<TicketResult>` where `TicketResult = { gameId: string; ticket: string }`, and the private `assertNotDisabled(userId): Promise<void>`.
 - Produces: `LobbyService.startPractice(user: AuthUser): Promise<PracticeResult>` where `PracticeResult = { gameId: string; ticket: string; code: string }`; HTTP `POST /api/v1/rooms/practice` returning that shape as JSON with status 200.
 
@@ -75,7 +77,10 @@ describe('lobby: practice with bots (one-call quick start)', () => {
     expect(room.body.members).toHaveLength(3);
 
     const bots = room.body.members.filter((m: { isBot?: boolean }) => m.isBot);
-    expect(bots.map((b: { difficulty: string }) => b.difficulty).sort()).toEqual(['EASY', 'MEDIUM']);
+    expect(bots.map((b: { difficulty: string }) => b.difficulty).sort()).toEqual([
+      'EASY',
+      'MEDIUM',
+    ]);
 
     const humans = room.body.members.filter((m: { isBot?: boolean }) => !m.isBot);
     expect(humans).toHaveLength(1);
@@ -165,6 +170,7 @@ git commit -m "feat(server): POST /rooms/practice — one-call start vs easy+med
 ### Task 2: Web — welcome-screen "Practice with bots" card + navigation
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts` (add `PracticeResult` interface after `TicketResult`, ~line 90; add `startPractice` to the `api` object near `createRoom`/`startRoom`, ~line 342)
 - Modify: `apps/web/src/i18n/index.ts` (add `practice*` keys under `home.welcome` in the zh-Hant table ~line 51 and the en table ~line 603)
 - Modify: `apps/web/src/screens/WelcomeScreen.tsx` (new `onPractice` prop + practice card + local busy/error state)
@@ -173,6 +179,7 @@ git commit -m "feat(server): POST /rooms/practice — one-call start vs easy+med
 - Modify: `apps/web/src/screens/HomeScreen.test.tsx` (mock `startPractice`; add a test)
 
 **Interfaces:**
+
 - Consumes: `LobbyService`'s HTTP `POST /rooms/practice` returning `{ gameId, ticket, code }` (Task 1); existing web helpers `connectGame(ticket, { roomCode })`, `useUi().enterRoom(code)`, `useUi().enterGame(gameId, ticket)`.
 - Produces: `api.startPractice(): Promise<PracticeResult>` where `PracticeResult = TicketResult & { code: string }`; `WelcomeScreen` prop `onPractice: () => Promise<void>`.
 
@@ -205,7 +212,7 @@ In `apps/web/src/screens/HomeScreen.test.tsx`:
 (b) Add `startPractice` to the `mocked` cast type (the `as unknown as {...}` block, ~line 25):
 
 ```ts
-  startPractice: ReturnType<typeof vi.fn>;
+startPractice: ReturnType<typeof vi.fn>;
 ```
 
 (c) Add this test at the end of the `describe('HomeScreen', ...)` block (after the last `it(...)`, ~line 167):
@@ -347,27 +354,27 @@ export function WelcomeScreen({
 In `apps/web/src/screens/HomeScreen.tsx`, add the handler just before the `if (showWelcome) {` block (after `if (showWelcome === null) return null;`, ~line 131). It intentionally does NOT catch — it re-throws so `WelcomeScreen` surfaces the error:
 
 ```tsx
-  // Welcome-screen "practice with bots": one server call spins up a started game vs bots, then we
-  // navigate exactly like watch() does (roomCode + /room/:code URL before entering the game view).
-  const startPractice = async () => {
-    const tk = await api.startPractice();
-    connectGame(tk.ticket, { roomCode: tk.code });
-    enterRoom(tk.code);
-    enterGame(tk.gameId, tk.ticket);
-  };
+// Welcome-screen "practice with bots": one server call spins up a started game vs bots, then we
+// navigate exactly like watch() does (roomCode + /room/:code URL before entering the game view).
+const startPractice = async () => {
+  const tk = await api.startPractice();
+  connectGame(tk.ticket, { roomCode: tk.code });
+  enterRoom(tk.code);
+  enterGame(tk.gameId, tk.ticket);
+};
 ```
 
 Then pass it to `<WelcomeScreen>` (the JSX at ~line 133-138):
 
 ```tsx
-    return (
-      <WelcomeScreen
-        name={user.displayName}
-        onStartTutorial={enterTutorial}
-        onPractice={startPractice}
-        onContinue={() => setShowWelcome(false)}
-      />
-    );
+return (
+  <WelcomeScreen
+    name={user.displayName}
+    onStartTutorial={enterTutorial}
+    onPractice={startPractice}
+    onContinue={() => setShowWelcome(false)}
+  />
+);
 ```
 
 (`enterRoom`, `enterGame`, `connectGame`, and `api` are already imported/destructured at the top of this file — no new imports.)
@@ -429,6 +436,7 @@ Expected: graph refreshes (AST-only, no API cost).
 ## Self-Review
 
 **Spec coverage:**
+
 - Server `startPractice` service method → Task 1, Step 4. ✓
 - `POST /rooms/practice` route → Task 1, Step 5. ✓
 - `PracticeResultSchema` (code + ticket) → Task 1, Step 3. ✓

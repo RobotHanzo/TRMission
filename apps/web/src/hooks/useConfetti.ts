@@ -1,9 +1,10 @@
 import confetti from 'canvas-confetti';
 import { useEffect } from 'react';
+import { CONFETTI_COLORS, CONFETTI_INTERVAL_MS } from '../theme/colors';
 import { useReducedMotion } from './useReducedMotion';
 
-const COLORS = ['#e8732c', '#0f4c81', '#ffd76a', '#4caf50', '#9c27b0', '#e91e63'];
-const INTERVAL_MS = 1800;
+const COLORS = [...CONFETTI_COLORS];
+const INTERVAL_MS = CONFETTI_INTERVAL_MS;
 
 /** Fires continuous confetti bursts from both sides while `active` is true. No-op under reduced motion. */
 export function useConfetti(active: boolean): void {

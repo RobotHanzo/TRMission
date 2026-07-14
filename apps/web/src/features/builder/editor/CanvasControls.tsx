@@ -9,13 +9,7 @@ import { frameHome } from '../../../game/frameHome';
  *  `fitHome` re-frames the authored geography to the viewport on reset — the live board's
  *  behaviour — for the stages that render a `path.land` (Stops/Routes/Curves); the world
  *  crop/trim/country-pick stages have no such land shape and keep the plain `resetTransform`. */
-export function CanvasControls({
-  onReset,
-  fitHome,
-}: {
-  onReset?(): void;
-  fitHome?: boolean;
-}) {
+export function CanvasControls({ onReset, fitHome }: { onReset?(): void; fitHome?: boolean }) {
   const { t } = useTranslation();
   const controls = useControls();
   const { zoomIn, zoomOut, resetTransform } = controls;

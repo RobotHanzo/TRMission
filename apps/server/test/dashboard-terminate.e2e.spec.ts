@@ -295,8 +295,9 @@ describe('admin transfer host', () => {
       .send({ difficulty: 'EASY' })
       .expect(200);
     const roomDoc = await t.db.collection('rooms').findOne({ _id: code } as never);
-    const botId = (roomDoc as unknown as { members: { userId: string; isBot?: boolean }[] })
-      .members.find((m) => m.isBot)!.userId;
+    const botId = (
+      roomDoc as unknown as { members: { userId: string; isBot?: boolean }[] }
+    ).members.find((m) => m.isBot)!.userId;
     await request(server())
       .post(`/api/v1/dashboard/rooms/${code}/transfer/${botId}`)
       .set(auth(moderator.token))

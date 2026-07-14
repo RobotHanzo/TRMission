@@ -20,6 +20,7 @@ export function CountryPickStage() {
   const setGeography = useEditorStore((s) => s.setGeography);
   const setStage = useEditorStore((s) => s.setStage);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const [showBorders, setShowBorders] = useState(false);
   const zoomVarRef = useRef<HTMLDivElement | null>(null);
 
   const toggle = (id: string) => {
@@ -32,8 +33,8 @@ export function CountryPickStage() {
   };
 
   const result = useMemo(
-    () => (selected.size > 0 ? countriesToGeography([...selected]) : null),
-    [selected],
+    () => (selected.size > 0 ? countriesToGeography([...selected], showBorders) : null),
+    [selected, showBorders],
   );
   const crop = result?.geography.crop;
   const lonSpan = crop ? crop.lonMax - crop.lonMin : 0;
@@ -101,6 +102,14 @@ export function CountryPickStage() {
         {selected.size > 0 && (
           <p className="muted">{t('builder.countrySelectedCount', { n: selected.size })}</p>
         )}
+        <label className="row editor-border-toggle">
+          <input
+            type="checkbox"
+            checked={showBorders}
+            onChange={(e) => setShowBorders(e.target.checked)}
+          />
+          {t('builder.showCountryBorders')}
+        </label>
         {result ? (
           <>
             <svg
@@ -121,6 +130,13 @@ export function CountryPickStage() {
                   key={i}
                   d={`M ${ring.map(([x, y]) => `${x},${y}`).join(' L ')} Z`}
                   className="editor-world-land"
+                />
+              ))}
+              {result.geography.borders?.map((ring, i) => (
+                <path
+                  key={`border-${i}`}
+                  d={`M ${ring.map(([x, y]) => `${x},${y}`).join(' L ')} Z`}
+                  className="editor-world-border"
                 />
               ))}
             </svg>

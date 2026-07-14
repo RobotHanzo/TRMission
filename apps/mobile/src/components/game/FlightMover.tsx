@@ -42,8 +42,18 @@ export function FlightMover({ flight }: { flight: Flight }) {
     };
     const srcKey = flight.slot !== null ? `market-slot-${flight.slot}` : 'deck';
     const dstKey = flight.toPlayerId === me ? 'hand' : `player-${flight.toPlayerId}`;
-    void Promise.all([measureAnimTarget(srcKey), measureAnimTarget(dstKey)]).then(([src, dst]) => {
+    // `dock` is the compact-layout fallback: on phones the hand/tracker destination lives in a
+    // dock tab that may be inactive (unmounted) mid-draw, so its precise target is gone. The dock
+    // itself is always mounted, so the card still flies into the tray region — restoring the draw
+    // animation the tablet layouts get for free (both panels mounted). Null on wider tiers, where
+    // the primary target is always present anyway.
+    void Promise.all([
+      measureAnimTarget(srcKey),
+      measureAnimTarget(dstKey),
+      measureAnimTarget('dock'),
+    ]).then(([src, dstPrimary, dstFallback]) => {
       if (cancelled) return;
+      const dst = dstPrimary ?? dstFallback;
       if (!src || !dst || reduced) {
         finish();
         return;

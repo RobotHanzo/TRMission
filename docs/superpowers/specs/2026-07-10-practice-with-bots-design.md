@@ -6,7 +6,7 @@
 ## Goal
 
 Add a third option to the first-entry `WelcomeScreen` (shown only to brand-new accounts with 0
-completed games): **"Practice with bots"**. Clicking it starts a game *immediately* — you plus one
+completed games): **"Practice with bots"**. Clicking it starts a game _immediately_ — you plus one
 EASY bot and one MEDIUM bot, on the default map with default rules — and drops the player straight
 onto the game board, skipping the lobby.
 
@@ -18,7 +18,7 @@ them.
 
 1. **Destination:** straight into the live game board (not the pre-filled lobby). "For playing
    immediately."
-2. **Implementation:** a new *atomic* server endpoint (`POST /rooms/practice`), not a client-side
+2. **Implementation:** a new _atomic_ server endpoint (`POST /rooms/practice`), not a client-side
    chain of the existing endpoints. Rationale: one round-trip, no orphan room on partial failure,
    reusable and independently testable.
 
@@ -83,6 +83,7 @@ Used in the controller's `@ApiResponse`.
 ```
 startPractice: () => req<PracticeResult>('POST', '/rooms/practice'),
 ```
+
 `PracticeResult = TicketResult & { code: string }`.
 
 ### 5. `WelcomeScreen` — `screens/WelcomeScreen.tsx`

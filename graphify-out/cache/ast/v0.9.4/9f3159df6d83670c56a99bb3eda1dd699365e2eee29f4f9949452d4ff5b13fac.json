@@ -1,1 +1,79 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_md", "label": "2026-07-06-account-deletion.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_account_deletion_p0_c_implementation_plan", "label": "Account Deletion (P0-c) Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_task_1_delete_auth_me_cascade_apple_revocation", "label": "Task 1: `DELETE /auth/me` \u2014 cascade + Apple revocation", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L22"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_task_2_full_suite_regression_docs", "label": "Task 2: Full-suite regression + docs", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L562"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_account_deletion_p0_c_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_account_deletion_p0_c_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_task_1_delete_auth_me_cascade_apple_revocation", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L22", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_task_2_full_suite_regression_docs", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md", "source_location": "L562", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_md",
+      "label": "2026-07-06-account-deletion.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_account_deletion_p0_c_implementation_plan",
+      "label": "Account Deletion (P0-c) Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_task_1_delete_auth_me_cascade_apple_revocation",
+      "label": "Task 1: `DELETE /auth/me` \u2014 cascade + Apple revocation",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L22"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_task_2_full_suite_regression_docs",
+      "label": "Task 2: Full-suite regression + docs",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L562"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_account_deletion_p0_c_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_account_deletion_p0_c_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_task_1_delete_auth_me_cascade_apple_revocation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_06_account_deletion_task_2_full_suite_regression_docs",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-06-account-deletion.md",
+      "source_location": "L562",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

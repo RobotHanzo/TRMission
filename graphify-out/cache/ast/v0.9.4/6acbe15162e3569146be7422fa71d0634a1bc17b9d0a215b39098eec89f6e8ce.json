@@ -1,1 +1,159 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_md", "label": "2026-07-11-admin-force-spectate.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_admin_dashboard_force_spectate_a_live_game_implementation_plan", "label": "Admin dashboard: force-spectate a live game \u2014 Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L22"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_1_shared_permission_taxonomy", "label": "Task 1: Shared permission taxonomy", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L43"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_2_mint_ticket_endpoint_dashboard_ws_game_ticket", "label": "Task 2: Mint-ticket endpoint (dashboard \u2192 ws-game ticket)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L178"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_3_roster_endpoint_end_to_end_bypass_proof", "label": "Task 3: Roster endpoint + end-to-end bypass proof", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L390"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_4_admin_dashboard_ui_spectate_button", "label": "Task 4: Admin dashboard UI \u2014 Spectate button", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L646"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_5_apps_web_routing_for_admin_spectate_gameid", "label": "Task 5: `apps/web` routing for `/admin-spectate/:gameId`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L790"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_6_adminspectatescreen_live_connection_roster", "label": "Task 6: `AdminSpectateScreen` \u2014 live connection + roster", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L961"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_self_review", "label": "Self-Review", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L1233"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_admin_dashboard_force_spectate_a_live_game_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_admin_dashboard_force_spectate_a_live_game_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L22", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_1_shared_permission_taxonomy", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L43", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_2_mint_ticket_endpoint_dashboard_ws_game_ticket", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L178", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_3_roster_endpoint_end_to_end_bypass_proof", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L390", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_4_admin_dashboard_ui_spectate_button", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L646", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_5_apps_web_routing_for_admin_spectate_gameid", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L790", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_6_adminspectatescreen_live_connection_roster", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L961", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_admin_dashboard_force_spectate_a_live_game_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_self_review", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md", "source_location": "L1233", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_md",
+      "label": "2026-07-11-admin-force-spectate.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_admin_dashboard_force_spectate_a_live_game_implementation_plan",
+      "label": "Admin dashboard: force-spectate a live game \u2014 Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L22"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_1_shared_permission_taxonomy",
+      "label": "Task 1: Shared permission taxonomy",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L43"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_2_mint_ticket_endpoint_dashboard_ws_game_ticket",
+      "label": "Task 2: Mint-ticket endpoint (dashboard \u2192 ws-game ticket)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L178"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_3_roster_endpoint_end_to_end_bypass_proof",
+      "label": "Task 3: Roster endpoint + end-to-end bypass proof",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L390"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_4_admin_dashboard_ui_spectate_button",
+      "label": "Task 4: Admin dashboard UI \u2014 Spectate button",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L646"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_5_apps_web_routing_for_admin_spectate_gameid",
+      "label": "Task 5: `apps/web` routing for `/admin-spectate/:gameId`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L790"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_6_adminspectatescreen_live_connection_roster",
+      "label": "Task 6: `AdminSpectateScreen` \u2014 live connection + roster",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L961"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_self_review",
+      "label": "Self-Review",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L1233"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_admin_dashboard_force_spectate_a_live_game_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_admin_dashboard_force_spectate_a_live_game_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_1_shared_permission_taxonomy",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_2_mint_ticket_endpoint_dashboard_ws_game_ticket",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L178",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_3_roster_endpoint_end_to_end_bypass_proof",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L390",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_4_admin_dashboard_ui_spectate_button",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L646",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_5_apps_web_routing_for_admin_spectate_gameid",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L790",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_task_6_adminspectatescreen_live_connection_roster",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L961",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_admin_dashboard_force_spectate_a_live_game_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_admin_force_spectate_self_review",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-admin-force-spectate.md",
+      "source_location": "L1233",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

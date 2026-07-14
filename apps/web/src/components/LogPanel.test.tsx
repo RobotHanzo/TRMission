@@ -116,6 +116,19 @@ describe('LogPanel', () => {
     expect(screen.getByText(new RegExp(`\\+${ticket.value}`))).toBeInTheDocument();
   });
 
+  it('renders player-left and player-reconnected notices', () => {
+    useLog.setState({
+      entries: [
+        { id: 1, kind: 'playerLeft', playerId: 'p1', data: {}, importance: 'alert' },
+        { id: 2, kind: 'playerReconnected', playerId: 'p1', data: {}, importance: 'alert' },
+      ],
+      nextId: 3,
+    });
+    render(<LogPanel />);
+    expect(screen.getByText(/已離線/)).toBeInTheDocument();
+    expect(screen.getByText(/已重新連線/)).toBeInTheDocument();
+  });
+
   it('renders the taken face-up locomotive chip as the rainbow gradient, not a flat hex', () => {
     useLog.setState({
       entries: [

@@ -3,7 +3,7 @@ import { createZodDto } from 'nestjs-zod';
 import { CHAT_PRESET_IDS } from '@trm/shared';
 import { ROOM_CHAT_MAX_LEN } from './room.repo';
 
-const botDifficulty = z.enum(['EASY', 'MEDIUM', 'HARD']);
+const botDifficulty = z.enum(['EASY', 'MEDIUM', 'HARD', 'HELL']);
 
 export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).max(5).optional() });
 export const ReadySchema = z.object({ ready: z.boolean() });

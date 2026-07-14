@@ -35,7 +35,7 @@ export interface GenerateTicketsOptions {
   readonly longCount?: number;
   readonly shortCount?: number;
   readonly shortMinDistance?: number;
-  readonly shortMaxValue?: number;   // NEW — undefined = unbounded (today's behavior)
+  readonly shortMaxValue?: number; // NEW — undefined = unbounded (today's behavior)
 }
 ```
 
@@ -69,7 +69,7 @@ today's output byte-for-byte.**
 Same as today's `shortMinDistance`: if the (now smaller) candidate pool can't fill `shortCount`
 picks, the sampling loop's `remaining.length > 0` guard (`generate.ts:95`) just stops early and
 `generateTickets` returns fewer SHORT tickets than requested. It does not throw and does not need to
-know *why* the pool ran dry — that distinction is surfaced in the UI (below).
+know _why_ the pool ran dry — that distinction is surfaced in the UI (below).
 
 ### 4. UI (`MissionsStage.tsx`, `GenerateModal`)
 

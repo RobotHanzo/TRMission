@@ -29,6 +29,30 @@ jobs:
       - run: corepack enable
       - run: yarn install --immutable
 
+      # apps/mobile imports @trm/proto, whose src/gen/** is buf-generated and gitignored (see
+      # root CLAUDE.md) — without this, Metro fails to resolve the generated *_pb modules when
+      # the Xcode build phase bundles the release JS.
+      - run: yarn workspace @trm/proto generate
+
+      # Yarn 4 defaults enableScripts to false, so @shopify/react-native-skia's postinstall
+      # (which copies its prebuilt xcframeworks into libs/ios) never runs — the Xcode build
+      # then fails to find the Skia binaries. Run its bin script manually instead of flipping
+      # enableScripts repo-wide (that would also re-enable every other dependency's postinstall).
+      - run: npx install-skia
+
+      # Same BUILD_NUMBER axis as mobile-android.yml (docs/release/mobile-versioning.md) — keeps
+      # CFBundleVersion in lockstep with versionCode so a `v<semver>+<build>` tag ships one build
+      # number to both stores. Branch pushes stay at the fallback (1); TestFlight will reject a
+      # second upload at the same build number, so don't tag-push twice without bumping +<build>.
+      - name: Derive BUILD_NUMBER from the release tag
+        id: build_number
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$ ]]; then
+            echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=1" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Prebuild the iOS native project
         working-directory: apps/mobile
         run: npx expo prebuild --platform ios --no-install
@@ -36,6 +60,7 @@ jobs:
           TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
 
       - name: Install CocoaPods
         working-directory: apps/mobile/ios

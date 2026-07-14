@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Crown, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import type { EventsMode } from '@trm/shared';
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
+import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
 import {
   api,
-  ApiError,
   type RoomView,
   type RoomMember,
   type RoomSettings,
@@ -18,6 +18,8 @@ import {
 } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { track } from '../lib/analytics';
+import { soundPlayer } from '../sound/player';
+import { OPPONENT_GAIN } from '../sound/cues';
 import { SEAT_COLORS } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { NotificationStack } from '../components/NotificationStack';
@@ -27,12 +29,12 @@ import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
 import type { Locale } from '../store/ui';
-import { chatPresetKey } from '../game/chatPresets';
+import { chatPresetKey } from '@trm/client-core';
 import { ChatPresetPicker } from '../components/ChatPresetPicker';
 import '../styles/game.css';
 import '../styles/room.css';
 
-const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
+const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD', 'HELL'];
 
 /** Best-effort display name for the room's selected map. The server resolves this for official
  *  maps (`mapName`); for a custom map it falls back to the viewer's own map list, which only
@@ -101,108 +103,45 @@ export function RoomScreen() {
       .catch(() => setMyMaps([]));
   }, [user, canBuild]);
 
-  // Poll the room (lobby push is a later enhancement); auto-enter the game when started.
-  // `active` doubles as the terminal flag: a terminal outcome clears it, and the interval
-  // tears itself down on the next tick so we never re-poll (or re-spam join) after one.
+  // Poll the room (lobby push is a later enhancement); auto-enter the game when started. The
+  // join/kick/spectate/terminal semantics live in client-core's startLobbyPoll (shared with
+  // mobile) — this wires its outcomes to web routing and notifications.
   useEffect(() => {
     if (!code) return; // no room to poll (e.g. mid-navigation after leaving/being kicked)
-    let active = true;
-    // Whether we have ever been present here (seated or spectating). Once true, vanishing
-    // from both lists means the host kicked us — go home instead of silently rejoining.
-    let wasPresent = false;
-    const poll = async () => {
-      try {
-        let r = await api.getRoom(code);
-        if (!active) return;
-        if (r.status === 'CLOSED') {
-          active = false;
-          goHome(); // the room is gone — nothing to wait in or rejoin
-          return;
-        }
-        // A shared link can land a non-member here. Join the lobby once; a game already in
-        // progress that we aren't part of can't be joined, so spectate instead if the room
-        // allows it, otherwise bail home rather than trap.
-        // (Existing members of a STARTED game skip this and reconnect via the ticket below —
-        // the server rejects join on a started room even for members.)
-        if (!r.members.some((m) => m.userId === user?.id)) {
-          // Spectators (arrived watching OR demoted themselves from a seat) are legitimately
-          // absent from `members`; only vanishing from BOTH lists is a kick.
-          const amSpectator = r.spectators.some((s) => s.userId === user?.id);
-          if (wasPresent && !amSpectator) {
-            active = false;
-            if (r.status === 'LOBBY') setKicked(true);
-            else goHome();
-            return;
-          }
-          if (r.status !== 'LOBBY') {
-            // A started game we aren't seated in can't be joined — spectate if allowed (this
-            // carries a demoted lobby spectator into watching once the game starts); else bail home.
-            if (r.status === 'STARTED' && r.gameId && r.settings.allowSpectating) {
-              const tk = await api.spectate(code);
-              if (!active) return;
-              connectGame(tk.ticket, { roomCode: code, spectator: true });
-              enterGame(tk.gameId, tk.ticket);
-              return;
-            }
-            active = false;
-            goHome();
-            return;
-          }
-          // A lobby non-member who isn't a spectator joins a seat once; a demoted spectator
-          // falls through to keep watching the lobby (never auto-rejoined onto a seat).
-          if (!amSpectator) {
-            r = await api.joinRoom(code);
-            if (!active) return;
-            // A full room seats the joiner as a spectator instead of rejecting the join —
-            // tell them once, since they expected a seat.
-            if (
-              !r.members.some((m) => m.userId === user?.id) &&
-              r.spectators.some((s) => s.userId === user?.id)
-            ) {
-              pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') });
-            }
-          }
-        }
-        wasPresent = true;
-        setRoom(r);
-        if (r.status === 'STARTED' && r.gameId) {
-          const ticket = await api.getTicket(code);
-          if (!active) return;
-          connectGame(ticket.ticket, { roomCode: code });
-          enterGame(ticket.gameId, ticket.ticket);
-        }
-      } catch (e) {
-        if (!active) return;
-        // A room we can't fetch (deleted, or we're not a member) can't be restored —
-        // e.g. landing on a stale /room/:code after a reload. Bail home, don't trap.
-        if (e instanceof ApiError && (e.status === 404 || e.status === 403)) {
-          active = false;
-          goHome();
-          return;
-        }
-        // A 400 from join (room full, or the host started the game mid-poll) is terminal —
-        // stop polling so we don't re-spam join every 2s; the error card offers a way home.
-        if (e instanceof ApiError && e.status === 400) {
-          active = false;
-          setErr((e as Error).message);
-          return;
-        }
-        setErr((e as Error).message);
-      }
-    };
-    void poll();
-    const id = setInterval(() => {
-      if (!active) {
-        clearInterval(id);
-        return;
-      }
-      void poll();
-    }, 2000);
-    return () => {
-      active = false;
-      clearInterval(id);
-    };
-  }, [code, user?.id, enterGame, goHome, pushNotification]);
+    return startLobbyPoll(code, user?.id, api, {
+      onRoom: setRoom,
+      onEnterGame: (tk, { spectator }) => {
+        connectGame(
+          tk.ticket,
+          spectator ? { roomCode: code, spectator: true } : { roomCode: code },
+        );
+        enterGame(tk.gameId, tk.ticket);
+      },
+      onGone: goHome,
+      onKicked: () => setKicked(true),
+      onFullRoomSpectateNotice: () =>
+        pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') }),
+      onError: (message) => setErr(message),
+    });
+  }, [code, user?.id, enterGame, goHome, pushNotification, t]);
+
+  // Play the same chatMessage cue the in-game chat uses (see useSoundDriver's seenChatId) — keyed
+  // on ts rather than array index since the server caps room.chat to its last N entries, so an
+  // index count would silently stop firing once a long-lived lobby chat gets truncated.
+  const seenChatTs = useRef<number | null>(null);
+  useEffect(() => {
+    if (!room) return;
+    const last = room.chat.at(-1)?.ts ?? 0;
+    if (seenChatTs.current === null) {
+      seenChatTs.current = last;
+      return;
+    }
+    for (const entry of room.chat) {
+      if (entry.ts <= seenChatTs.current) continue;
+      soundPlayer.play('chatMessage', entry.userId === user?.id ? 1 : OPPONENT_GAIN);
+    }
+    seenChatTs.current = last;
+  }, [room, user?.id]);
 
   if (!room)
     return (

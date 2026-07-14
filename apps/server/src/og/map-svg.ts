@@ -101,6 +101,19 @@ function customLandLayer(geography?: MapGeography): string {
   return parts.join('\n');
 }
 
+/** Cosmetic country-border overlay (Geography.tsx's `.country-border`), if the draft opted in. */
+function customBorderLayer(geography?: MapGeography): string {
+  const parts: string[] = [];
+  for (const ring of geography?.borders ?? []) {
+    const d = smoothClosedPath(ring);
+    if (!d) continue;
+    parts.push(
+      `<path d="${d}" fill="none" stroke="${P.coast}" stroke-width="${D.countryBorderW}" stroke-dasharray="${D.countryBorderDash}" opacity="${D.countryBorderOpacity}"/>`,
+    );
+  }
+  return parts.join('\n');
+}
+
 /** The hand-authored official Taiwan coastline + central-range relief + outlying islands,
  *  drawn with the exact recipe Geography.tsx's `Geography()` uses. Custom drafts never reach
  *  this — they draw their own authored rings via {@link customLandLayer}. */
@@ -129,6 +142,7 @@ function geographyLayer(
   return [
     graticuleLayer(view, official),
     official ? officialTaiwanLandLayer() : customLandLayer(geography),
+    official ? '' : customBorderLayer(geography),
   ].join('\n');
 }
 

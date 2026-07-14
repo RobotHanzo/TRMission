@@ -22,6 +22,7 @@
 ### Task 1: Server — self-service "mark tutorial completed" endpoint
 
 **Files:**
+
 - Modify: `apps/server/src/auth/user.repo.ts`
 - Modify: `apps/server/src/auth/auth.types.ts`
 - Modify: `apps/server/src/auth/auth.schemas.ts`
@@ -30,6 +31,7 @@
 - Test: `apps/server/test/auth.e2e.spec.ts`
 
 **Interfaces:**
+
 - Produces: `UserRepo.setTutorialCompleted(userId: string, value: boolean): Promise<UserDoc | null>` — used again in Task 2 (admin reset, called with `false`).
 - Produces: `AuthService.completeTutorial(userId: string): Promise<PublicUser>`.
 - Produces: `PublicUser.tutorialCompleted: boolean` (both the `auth.types.ts` interface and the `auth.schemas.ts` zod `PublicUserSchema`) — consumed by `apps/web`'s `net/rest.ts` `PublicUser` type in Task 3.
@@ -207,6 +209,7 @@ git commit -m "feat(server): add self-service tutorial-completed flag"
 **Depends on:** Task 1 (the e2e test drives completion through `POST /auth/me/tutorial-completed`).
 
 **Files:**
+
 - Modify: `packages/shared/src/dashboard.ts`
 - Modify: `apps/server/src/dashboard/audit.repo.ts`
 - Modify: `apps/server/src/dashboard/dashboard.schemas.ts`
@@ -215,6 +218,7 @@ git commit -m "feat(server): add self-service tutorial-completed flag"
 - Test: Create `apps/server/test/dashboard-tutorial-reset.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `UserRepo.setTutorialCompleted(userId, false)` (Task 1).
 - Produces: permission `'users.tutorialReset'` (moderator+), `DashboardAuditAction` member `'user.tutorialReset'`, `DashboardUserRowSchema.tutorialCompleted: boolean` (inherited by `DashboardUserDetailSchema`), `DashboardUsersService.resetTutorial(actor, userId)`, route `POST /api/v1/dashboard/users/:id/tutorial-reset`.
 
@@ -453,12 +457,14 @@ git commit -m "feat(server): add dashboard tutorial-reset endpoint (moderator+, 
 ### Task 3: Web — mark tutorial completed at the finale
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Modify: `apps/web/src/store/session.ts`
 - Modify: `apps/web/src/features/tutorial/TutorialScreen.tsx`
 - Test: Create `apps/web/src/features/tutorial/TutorialScreen.test.tsx`
 
 **Interfaces:**
+
 - Produces: `PublicUser.tutorialCompleted: boolean` (web-side type, `net/rest.ts`), `api.markTutorialCompleted(): Promise<PublicUser>`, `useSession().completeTutorial(): Promise<void>`.
 - Consumed by: Task 4 (`WelcomeScreen`/`HomeScreen` read `user.tutorialCompleted`).
 
@@ -610,7 +616,7 @@ export default function TutorialScreen() {
 Update the `onCreateGame` prop passed to `TutorialRunner` (line 172):
 
 ```ts
-      onCreateGame={finishTutorial}
+onCreateGame = { finishTutorial };
 ```
 
 - [ ] **Step 6: Run the test to verify it passes**
@@ -637,6 +643,7 @@ git commit -m "feat(web): mark tutorial completed from the finale CTA"
 **Depends on:** Task 3 (`PublicUser.tutorialCompleted` on the web `net/rest.ts` type).
 
 **Files:**
+
 - Create: `apps/web/src/components/TutorialRecommendDialog.tsx`
 - Modify: `apps/web/src/screens/WelcomeScreen.tsx`
 - Modify: `apps/web/src/screens/HomeScreen.tsx`
@@ -644,12 +651,13 @@ git commit -m "feat(web): mark tutorial completed from the finale CTA"
 - Modify: `apps/web/src/screens/HomeScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `PublicUser.tutorialCompleted` (Task 3).
 - Produces: `WelcomeScreenProps.tutorialCompleted: boolean` (new required prop).
 
 - [ ] **Step 1: Write the failing tests**
 
-In `apps/web/src/screens/HomeScreen.test.tsx`, update the shared `signedIn` fixture (line 36-42) to include the new field — defaulting it `true` so every *existing* test (which doesn't care about this feature) keeps passing unchanged, implicitly covering the "dialog bypassed when already completed" case:
+In `apps/web/src/screens/HomeScreen.test.tsx`, update the shared `signedIn` fixture (line 36-42) to include the new field — defaulting it `true` so every _existing_ test (which doesn't care about this feature) keeps passing unchanged, implicitly covering the "dialog bypassed when already completed" case:
 
 ```ts
 const signedIn = {
@@ -933,17 +941,17 @@ export function WelcomeScreen({
 In `apps/web/src/screens/HomeScreen.tsx`, update the `<WelcomeScreen>` render (line 140-149):
 
 ```tsx
-  if (showWelcome) {
-    return (
-      <WelcomeScreen
-        name={user.displayName}
-        tutorialCompleted={user.tutorialCompleted}
-        onStartTutorial={enterTutorial}
-        onPractice={startPractice}
-        onContinue={() => setShowWelcome(false)}
-      />
-    );
-  }
+if (showWelcome) {
+  return (
+    <WelcomeScreen
+      name={user.displayName}
+      tutorialCompleted={user.tutorialCompleted}
+      onStartTutorial={enterTutorial}
+      onPractice={startPractice}
+      onContinue={() => setShowWelcome(false)}
+    />
+  );
+}
 ```
 
 - [ ] **Step 7: Run the tests to verify they pass**
@@ -970,12 +978,14 @@ git commit -m "feat(web): recommend the tutorial before practicing or jumping in
 **Depends on:** Task 2 (dashboard row/detail schema + reset endpoint).
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts`
 - Modify: `apps/admin/src/views/UsersView.tsx`
 - Modify: `apps/admin/src/i18n/index.ts`
 - Modify: `apps/admin/src/views/UsersView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `POST /dashboard/users/:id/tutorial-reset` (Task 2), permission `'users.tutorialReset'` (Task 2).
 - Produces: `UserRow.tutorialCompleted: boolean` (also picked up by `UserDetail extends UserRow`), `api.resetUserTutorial(id: string): Promise<UserDetail>`.
 
@@ -1113,16 +1123,16 @@ en `toast` block, after `userDeleted: 'Account deleted',` (line 425):
 In `apps/admin/src/views/UsersView.tsx`, update the table header (line 346-355):
 
 ```tsx
-            <tr>
-              <th>{t('users.colUser')}</th>
-              <th>{t('users.colEmail')}</th>
-              <th>{t('users.colKind')}</th>
-              <th>{t('users.colOauth')}</th>
-              <th>{t('users.colStatus')}</th>
-              <th>{t('users.colTutorial')}</th>
-              <th>{t('users.colCreated')}</th>
-              <th>{t('users.colExpires')}</th>
-            </tr>
+<tr>
+  <th>{t('users.colUser')}</th>
+  <th>{t('users.colEmail')}</th>
+  <th>{t('users.colKind')}</th>
+  <th>{t('users.colOauth')}</th>
+  <th>{t('users.colStatus')}</th>
+  <th>{t('users.colTutorial')}</th>
+  <th>{t('users.colCreated')}</th>
+  <th>{t('users.colExpires')}</th>
+</tr>
 ```
 
 And the row rendering (line 367-374), inserting the new cell right after the status `<td>`:
@@ -1146,25 +1156,25 @@ And the row rendering (line 367-374), inserting the new cell right after the sta
 In `apps/admin/src/views/UsersView.tsx`, add a permission selector alongside the existing ones (after `const canFeatures = useSession((s) => s.hasPermission('users.features'));`, line 47):
 
 ```ts
-  const canFeatures = useSession((s) => s.hasPermission('users.features'));
-  const canResetTutorial = useSession((s) => s.hasPermission('users.tutorialReset'));
+const canFeatures = useSession((s) => s.hasPermission('users.features'));
+const canResetTutorial = useSession((s) => s.hasPermission('users.tutorialReset'));
 ```
 
 Add the reset handler alongside `removeUser` (after it, before the component's `return`, i.e. after line 96):
 
 ```ts
-  const resetTutorial = async () => {
-    if (!detail) return;
-    setBusy(true);
-    try {
-      setDetail(await api.resetUserTutorial(detail.id));
-      pushToast('success', t('toast.tutorialReset'));
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    } finally {
-      setBusy(false);
-    }
-  };
+const resetTutorial = async () => {
+  if (!detail) return;
+  setBusy(true);
+  try {
+    setDetail(await api.resetUserTutorial(detail.id));
+    pushToast('success', t('toast.tutorialReset'));
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  } finally {
+    setBusy(false);
+  }
+};
 ```
 
 Add a KV row inside the main info `<section>`, right after the sessions row (after line 160, before the section's closing `</section>` on line 161):
@@ -1186,13 +1196,15 @@ Add a KV row inside the main info `<section>`, right after the sessions row (aft
 Add the reset button as its own gated section, right after the `canFeatures` block (after line 218, before the `canBan` block on line 220):
 
 ```tsx
-          {canResetTutorial && detail.tutorialCompleted && (
-            <section>
-              <button className="oc-btn" disabled={busy} onClick={() => void resetTutorial()}>
-                {t('users.resetTutorial')}
-              </button>
-            </section>
-          )}
+{
+  canResetTutorial && detail.tutorialCompleted && (
+    <section>
+      <button className="oc-btn" disabled={busy} onClick={() => void resetTutorial()}>
+        {t('users.resetTutorial')}
+      </button>
+    </section>
+  );
+}
 ```
 
 - [ ] **Step 7: Run the tests to verify they pass**

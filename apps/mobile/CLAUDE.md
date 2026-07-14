@@ -82,15 +82,20 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
   _documented, not planned_ — see the P2 plan (Task 1) before ever revisiting renderers; do
   not silently switch.
 
-## Net layer — deltas from `apps/web`
+## Net layer — the shared core + mobile transport
 
-- `net/rest.ts` — port of the web REST client with two changes: an **absolute** `API_BASE` (no
-  same-origin cookie jar) and **token-in-body refresh** (P0-a `x-trm-client: mobile`). The access
-  token lives in memory; the refresh token lives in the OS keystore (`net/secureStore.ts`,
-  `expo-secure-store`). A 401 rotates via `POST /auth/refresh {refreshToken}` under a single-flight
-  guard, then persists the rotated token. Issuance captures both tokens.
-- `net/socket.ts` — verbatim port of the protobuf `GameSocket` except the default URL is `WS_URL`
-  (config, not `location`) and `ws.binaryType = 'arraybuffer'` is set explicitly.
+The REST client, `GameSocket`, and `SandboxSocket` live in `@trm/client-core`; the app-side
+`net/rest.ts`/`net/socket.ts` are the mobile TRANSPORT + re-export shims:
+
+- `net/rest.ts` — builds the shared client with the mobile `RestTransport`: an **absolute** base
+  (`SERVER_ORIGIN`, no same-origin cookie jar), the `x-trm-client: mobile` header, and
+  **token-in-body refresh**. The access token lives in memory inside the shared core; the refresh
+  token lives in the OS keystore (`net/secureStore.ts`, `expo-secure-store`). A 401 rotates via
+  `POST /auth/refresh {refreshToken}` under the core's single-flight guard; issuance and rotation
+  persist tokens through the transport hooks.
+- `net/connection.ts` — constructs the shared `GameSocket` with `WS_URL` and a `TicketRefresh`
+  (the room code from `useGameConnection`) so every in-socket reconnect re-mints a fresh
+  short-TTL ws ticket instead of replaying the expired seed one.
 - `store/session.ts` — port with a keystore-aware `restore()` (fast-paths when no refresh token
   exists), `loginWithApple`/`DiscordExchange`, `signInMethod` tracking, and push register/unregister.
 - Auth screens drive all five P0 methods: guest, email/password, Google (native SDK → ID token),
@@ -115,10 +120,15 @@ authorization).
 
 - **`.github/workflows/mobile-ci.yml`** — ubuntu, PRs touching `apps/mobile/**`/`packages/**`:
   `typecheck` + `lint` + `test` (fast JS gate; the whole-repo CI also covers mobile via turbo).
-- **`.github/workflows/mobile-android.yml`** — ubuntu, `release/**` + tags: `expo prebuild` →
-  Gradle `bundleRelease` signed via AGP injected-signing properties → `.aab` artifact.
-- **`.github/workflows/mobile-ios.yml`** — **macos-latest** (billed ~10x, so release-gated):
-  `expo prebuild` → `pod install` → `fastlane ios beta` (match + gym + pilot → TestFlight).
+- **`.github/workflows/mobile-android.yml`** — ubuntu, `release/**` + tags: derives `BUILD_NUMBER`
+  from a `v<semver>+<build>` tag (branch pushes fall back to 1) → `expo prebuild` → Gradle
+  `bundleRelease` signed via AGP injected-signing properties → `.aab` artifact → on a real tag only,
+  `fastlane android internal` publishes to Play's **internal testing track** (never production —
+  promote locally with `fastlane android promote`). One-time Play Console + service-account setup:
+  `docs/release/play-console-setup.md`.
+- **`.github/workflows/mobile-ios.yml`** — **macos-latest** (billed ~10x, so release-gated): same
+  tag-derived `BUILD_NUMBER` → `expo prebuild` → `pod install` → `fastlane ios beta` (match + gym +
+  pilot → TestFlight).
 - **`.github/workflows/mobile-ota.yml`** — JS-only OTA publish to the self-hosted
   expo-open-ota server (`eoas publish`; runbook + forced-update interplay in
   `docs/mobile/ota.md`). Native changes are fenced automatically by
@@ -137,7 +147,9 @@ secret in CI, manifests are signed at serve time by the OTA server's mounted key
 `apps/mobile/certs/keys/` must never be committed).
 
 Android **secrets**: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
-`ANDROID_KEY_PASSWORD`.
+`ANDROID_KEY_PASSWORD` (signing), `PLAY_JSON_KEY_BASE64` (base64 Play service-account JSON —
+Play Developer API access for `fastlane android internal`; provisioning steps in
+`docs/release/play-console-setup.md`).
 
 iOS **secrets**: `MATCH_GIT_URL`, `MATCH_PASSWORD`, `MATCH_GIT_BASIC_AUTHORIZATION` (fastlane match
 repo), `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (base64 App Store Connect API key).
@@ -163,11 +175,12 @@ is deferred — docs/TODO.md). Pure core (no RN imports) → jest-testable off-d
 ## Tutorial (`src/features/tutorial/`)
 
 The interactive tutorial is fully offline: lessons are scripted scenarios over a REAL local
-`@trm/engine` game (`net/sandboxSocket.ts` → engine `reduce` → `redactFor` → `viewToSnapshot`
-→ the standard game store → GameStage). `types.ts`, `curriculum.ts`, `focus.ts`, and
-`i18n/tutorial.ts` are **byte-identical copies of `apps/web`** (enforced by `parity.spec.ts`)
-— the anchor-id strings inside them are simultaneously the web's CSS selectors and this app's
-`TutorialTargetRegistry` anchor ids (`targets.tsx`); change them on web first, then re-copy.
+`@trm/engine` game (the shared `SandboxSocket` → engine `reduce` → `redactFor` → `viewToSnapshot`
+→ the standard game store → GameStage). The tutorial core (`types`/`curriculum`/`focus`/
+`useScenarioPlayer` + `i18n/tutorial`) lives in **`@trm/client-core`** (single source, shared with
+web; the old byte-copy parity contract is retired) — the anchor-id strings inside it are
+simultaneously the web's CSS selectors and this app's `TutorialTargetRegistry` anchor ids
+(`targets.tsx`).
 HUD spotlights measure ref-registered Views via `measureInWindow` (`useTutorialAnchor`, keep
 `collapsable={false}`); city/route spotlights are computed from board geometry projected
 through the camera (`boardRects.ts`; `cameraBridge.ts` is the only file that may touch camera

@@ -30,10 +30,12 @@ Vitest + Supertest for server e2e; Vitest + Testing Library for web component te
 ### Task 1: Server — `RoomRepo.join` falls back to spectating on a full lobby
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts:206-230` (the `join` method)
 - Test: Create `apps/server/test/lobby-full-join-spectate.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `RoomDoc`, `RoomSpectator`, `DEFAULT_ROOM_SETTINGS`, `JoinResult` — all already defined
   in `apps/server/src/lobby/room.repo.ts` (no changes to these types).
 - Produces: `RoomRepo.join(code, member)` still returns `Promise<JoinResult>`
@@ -214,12 +216,14 @@ git commit -m "feat(server): fall back to spectating when joining a full lobby"
 ### Task 2: Web — `HomeScreen` shows a one-time notice on spectate fallback
 
 **Files:**
+
 - Modify: `apps/web/src/i18n/index.ts` (add `fullRoomSpectateNotice`, zh block ~line 129 and en block
   ~line 708)
 - Modify: `apps/web/src/screens/HomeScreen.tsx` (imports, `pushNotification` hook, `join()`)
 - Test: Modify `apps/web/src/screens/HomeScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useAnimationsStore` + `NotificationCue` variant `'notice'` from
   `apps/web/src/store/animations.ts` (existing — `pushNotification({ variant: 'notice', text })`, no
   changes needed there). `RoomView.members` / `RoomView.spectators` from `apps/web/src/net/rest.ts`
@@ -265,16 +269,16 @@ import { useAnimations } from '../store/animations';
 Add `useAnimations.getState().reset();` to the top of the existing `beforeEach`:
 
 ```ts
-  beforeEach(() => {
-    vi.clearAllMocks();
-    useAnimations.getState().reset();
-    mocked.getPublicRooms.mockResolvedValue([]);
-    mocked.getMyRooms.mockResolvedValue([]);
-    mocked.history.mockResolvedValue([{ role: 'player' }]);
-    useSession.setState({ user: { ...signedIn } });
-    window.history.replaceState(null, '', '/');
-    useUi.setState({ view: 'home', roomCode: null, gameId: null, ticket: null });
-  });
+beforeEach(() => {
+  vi.clearAllMocks();
+  useAnimations.getState().reset();
+  mocked.getPublicRooms.mockResolvedValue([]);
+  mocked.getMyRooms.mockResolvedValue([]);
+  mocked.history.mockResolvedValue([{ role: 'player' }]);
+  useSession.setState({ user: { ...signedIn } });
+  window.history.replaceState(null, '', '/');
+  useUi.setState({ view: 'home', roomCode: null, gameId: null, ticket: null });
+});
 ```
 
 Add this test right after the `'spectates via the code box...'` test (after line 119):
@@ -318,42 +322,42 @@ In `export function HomeScreen()`, add the hook next to the other `useUi` hooks 
 `const clearHomeFocus = useUi((s) => s.clearHomeFocus);`):
 
 ```ts
-  const pushNotification = useAnimationsStore((s) => s.pushNotification);
+const pushNotification = useAnimationsStore((s) => s.pushNotification);
 ```
 
 Replace the `join` function's body:
 
 ```ts
-  const join = async () => {
-    setBusy(true);
-    setErr(null);
-    try {
-      const target = code.trim().toUpperCase();
-      const r = await api.getRoom(target);
-      if (r.status === 'STARTED' && r.settings.allowSpectating) {
-        const tk = await api.spectate(target);
-        connectGame(tk.ticket, { roomCode: target, spectator: true });
-        // Same as watch() above: establish roomCode + the /room/:code URL before entering.
-        enterRoom(target);
-        enterGame(tk.gameId, tk.ticket);
-      } else {
-        const joined = await api.joinRoom(target);
-        // A full room seats the joiner as a spectator instead of rejecting the join — tell
-        // them once, since they expected a seat.
-        if (
-          !joined.members.some((m) => m.userId === user.id) &&
-          joined.spectators.some((s) => s.userId === user.id)
-        ) {
-          pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') });
-        }
-        enterRoom(joined.code);
+const join = async () => {
+  setBusy(true);
+  setErr(null);
+  try {
+    const target = code.trim().toUpperCase();
+    const r = await api.getRoom(target);
+    if (r.status === 'STARTED' && r.settings.allowSpectating) {
+      const tk = await api.spectate(target);
+      connectGame(tk.ticket, { roomCode: target, spectator: true });
+      // Same as watch() above: establish roomCode + the /room/:code URL before entering.
+      enterRoom(target);
+      enterGame(tk.gameId, tk.ticket);
+    } else {
+      const joined = await api.joinRoom(target);
+      // A full room seats the joiner as a spectator instead of rejecting the join — tell
+      // them once, since they expected a seat.
+      if (
+        !joined.members.some((m) => m.userId === user.id) &&
+        joined.spectators.some((s) => s.userId === user.id)
+      ) {
+        pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') });
       }
-    } catch (e) {
-      setErr((e as Error).message);
-    } finally {
-      setBusy(false);
+      enterRoom(joined.code);
     }
-  };
+  } catch (e) {
+    setErr((e as Error).message);
+  } finally {
+    setBusy(false);
+  }
+};
 ```
 
 - [ ] **Step 5: Run the test to verify it passes**
@@ -373,10 +377,12 @@ git commit -m "feat(web): notify on the home screen when a full-room join lands 
 ### Task 3: Web — `RoomScreen`'s auto-join shows the same one-time notice
 
 **Files:**
+
 - Modify: `apps/web/src/screens/RoomScreen.tsx` (the poll effect, ~lines 100-190)
 - Test: Modify `apps/web/src/screens/RoomScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `pushNotification` from `useAnimationsStore` — already imported and destructured in
   `RoomScreen.tsx:71` (`const pushNotification = useAnimationsStore((s) => s.pushNotification);`),
   no new import needed. `fullRoomSpectateNotice` i18n key — added in Task 2 (this task takes a hard
@@ -414,31 +420,31 @@ Expected: FAIL — the notice text never appears (nothing pushes it yet).
 In `apps/web/src/screens/RoomScreen.tsx`, inside the poll effect, change:
 
 ```ts
-          // A lobby non-member who isn't a spectator joins a seat once; a demoted spectator
-          // falls through to keep watching the lobby (never auto-rejoined onto a seat).
-          if (!amSpectator) {
-            r = await api.joinRoom(code);
-            if (!active) return;
-          }
+// A lobby non-member who isn't a spectator joins a seat once; a demoted spectator
+// falls through to keep watching the lobby (never auto-rejoined onto a seat).
+if (!amSpectator) {
+  r = await api.joinRoom(code);
+  if (!active) return;
+}
 ```
 
 to:
 
 ```ts
-          // A lobby non-member who isn't a spectator joins a seat once; a demoted spectator
-          // falls through to keep watching the lobby (never auto-rejoined onto a seat).
-          if (!amSpectator) {
-            r = await api.joinRoom(code);
-            if (!active) return;
-            // A full room seats the joiner as a spectator instead of rejecting the join —
-            // tell them once, since they expected a seat.
-            if (
-              !r.members.some((m) => m.userId === user?.id) &&
-              r.spectators.some((s) => s.userId === user?.id)
-            ) {
-              pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') });
-            }
-          }
+// A lobby non-member who isn't a spectator joins a seat once; a demoted spectator
+// falls through to keep watching the lobby (never auto-rejoined onto a seat).
+if (!amSpectator) {
+  r = await api.joinRoom(code);
+  if (!active) return;
+  // A full room seats the joiner as a spectator instead of rejecting the join —
+  // tell them once, since they expected a seat.
+  if (
+    !r.members.some((m) => m.userId === user?.id) &&
+    r.spectators.some((s) => s.userId === user?.id)
+  ) {
+    pushNotification({ variant: 'notice', text: t('fullRoomSpectateNotice') });
+  }
+}
 ```
 
 Then update the effect's dependency array (currently `}, [code, user?.id, enterGame, goHome]);`) to

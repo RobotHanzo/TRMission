@@ -2,9 +2,11 @@
 // to a Reanimated shared-value camera ({cx, cy, span}), plus the quantized LOD state (bucket / inv /
 // marker) MapSceneSkia needs to counter-scale track weight, labels, and markers. The Skia Group
 // transform is a derived value (UI thread); LOD is discrete React state recomputed on the JS thread
-// only when the zoom moves enough to matter — the native equivalent of the web's per-frame CSS-var
-// writes, minus that jank. Used by the dev board screen now and the online/offline BoardView next.
-import { useCallback, useMemo, useState } from 'react';
+// only when the camera SETTLES — while a gesture or programmatic glide is in flight the JS thread
+// does nothing at all (no LOD steps, no re-renders, no picture re-records), which is what keeps the
+// pinch from drowning the JS thread. `moving`/`settled` let the Board swap the static scene to its
+// rasterized snapshot for the duration of the motion (see camera.ts rasterSpec).
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Gesture, type ComposedGesture } from 'react-native-gesture-handler';
 import {
   Easing,
@@ -29,6 +31,10 @@ import {
   type ZoomBucket,
 } from './camera';
 
+/** Slack past a programmatic glide's duration before the camera counts as settled — covers the
+ *  timing curve's tail plus a couple of frames of scheduling. */
+const ANIMATE_SETTLE_SLACK_MS = 120;
+
 export interface BoardLod {
   bucket: ZoomBucket;
   /** Track-weight / label counter-scale (web --inv-scale). */
@@ -44,6 +50,12 @@ export interface BoardCamera {
   gesture: ComposedGesture;
   /** Quantized zoom state driving MapSceneSkia's counter-scaling. */
   lod: BoardLod;
+  /** TRUE while a gesture or programmatic glide is moving the camera (React state — flips only
+   *  at motion boundaries, never per frame). */
+  moving: boolean;
+  /** The camera at the last settle (mount, gesture end, or glide end) — the frame the board's
+   *  gesture-time raster snapshot is rendered for. */
+  settled: CameraState;
   /** Ease the camera to a target over `ms` (programmatic — never disengages follow). */
   animateTo: (cam: CameraState, ms: number) => void;
   /** Jump the camera immediately (no animation). */
@@ -93,11 +105,42 @@ export function useBoardCamera(
     [homeSpan],
   );
 
-  // Wake the JS thread to re-quantize LOD only when the span moves enough to possibly cross a
-  // threshold — a cheap arithmetic-only worklet, no cross-module calls on the UI thread.
+  // ── Motion bookkeeping ────────────────────────────────────────────────────
+  // A depth counter spanning every concurrent mover (pan + pinch run simultaneously; follow-mode
+  // fires overlapping animateTo glides). While depth > 0 the LOD reaction below is muted, so a
+  // whole pinch produces ZERO JS work; the single recompute (→ one re-render → one picture
+  // re-record → one snapshot re-raster, all at idle) happens when depth returns to 0.
+  const motionDepth = useRef(0);
+  const [moving, setMoving] = useState(false);
+  const [settled, setSettled] = useState<CameraState>(home);
+  const movingSV = useSharedValue(false);
+
+  const beginMotion = useCallback(() => {
+    motionDepth.current += 1;
+    if (motionDepth.current === 1) {
+      movingSV.value = true;
+      setMoving(true);
+    }
+  }, [movingSV]);
+  const endMotion = useCallback(() => {
+    motionDepth.current = Math.max(0, motionDepth.current - 1);
+    if (motionDepth.current === 0) {
+      movingSV.value = false;
+      setMoving(false);
+      recomputeLod(span.value);
+      const next = { cx: cx.value, cy: cy.value, span: span.value };
+      setSettled((prev) =>
+        prev.cx === next.cx && prev.cy === next.cy && prev.span === next.span ? prev : next,
+      );
+    }
+  }, [movingSV, recomputeLod, cx, cy, span]);
+
+  // Re-quantize LOD when the span jumps while the camera is at rest (snapTo). Gestures and glides
+  // are muted here — their settle recompute happens in endMotion instead.
   useAnimatedReaction(
     () => span.value,
     (sp, prev) => {
+      if (movingSV.value) return;
       if (prev === null || Math.abs(sp - prev) >= prev * 0.04) runOnJS(recomputeLod)(sp);
     },
     [recomputeLod],
@@ -117,17 +160,42 @@ export function useBoardCamera(
       cx.value = cam.cx;
       cy.value = cam.cy;
       span.value = cam.span;
+      recomputeLod(cam.span);
+      setSettled((prev) =>
+        prev.cx === cam.cx && prev.cy === cam.cy && prev.span === cam.span ? prev : { ...cam },
+      );
     },
-    [cx, cy, span],
+    [cx, cy, span, recomputeLod],
+  );
+
+  // Every glide pairs one beginMotion with one delayed endMotion; the timers are tracked so an
+  // unmount mid-glide never fires a state update afterwards.
+  const animTimers = useRef(new Set<ReturnType<typeof setTimeout>>());
+  useEffect(
+    () => () => {
+      for (const id of animTimers.current) clearTimeout(id);
+      animTimers.current.clear();
+    },
+    [],
   );
   const animateTo = useCallback(
     (cam: CameraState, ms: number) => {
+      if (ms <= 0) {
+        snapTo(cam);
+        return;
+      }
       const cfg = { duration: ms, easing: Easing.out(Easing.cubic) };
       cx.value = withTiming(cam.cx, cfg);
       cy.value = withTiming(cam.cy, cfg);
       span.value = withTiming(cam.span, cfg);
+      beginMotion();
+      const id = setTimeout(() => {
+        animTimers.current.delete(id);
+        endMotion();
+      }, ms + ANIMATE_SETTLE_SLACK_MS);
+      animTimers.current.add(id);
     },
-    [cx, cy, span],
+    [cx, cy, span, snapTo, beginMotion, endMotion],
   );
   // Double-tap zooms in about the tapped point (ports the web's zoom-in double-click intent).
   const zoomAt = useCallback(
@@ -152,20 +220,35 @@ export function useBoardCamera(
     ];
   });
 
+  // Per-gesture "did activate" flags so onFinalize (which fires even for gestures that FAILED
+  // without activating, e.g. a tap that never became a pan) only ends motion it actually began.
+  const panActive = useSharedValue(false);
+  const pinchActive = useSharedValue(false);
+
   const gesture = useMemo<ComposedGesture>(() => {
     const pan = Gesture.Pan()
       .averageTouches(true)
       .onStart(() => {
+        panActive.value = true;
+        runOnJS(beginMotion)();
         runOnJS(notifyGesture)();
       })
       .onChange((e) => {
         const s = vp.w / span.value;
         cx.value -= e.changeX / s;
         cy.value -= e.changeY / s;
+      })
+      .onFinalize(() => {
+        if (panActive.value) {
+          panActive.value = false;
+          runOnJS(endMotion)();
+        }
       });
     const pinch = Gesture.Pinch()
       .onStart(() => {
+        pinchActive.value = true;
         pinchStartSpan.value = span.value;
+        runOnJS(beginMotion)();
         runOnJS(notifyGesture)();
       })
       .onChange((e) => {
@@ -179,6 +262,12 @@ export function useBoardCamera(
         span.value = next;
         cx.value = bx - (e.focalX - vp.w / 2) / s1;
         cy.value = by - (e.focalY - vp.h / 2) / s1;
+      })
+      .onFinalize(() => {
+        if (pinchActive.value) {
+          pinchActive.value = false;
+          runOnJS(endMotion)();
+        }
       });
     const tap = Gesture.Tap()
       .maxDuration(250)
@@ -191,7 +280,22 @@ export function useBoardCamera(
         if (ok) runOnJS(zoomAt)(e.x, e.y);
       });
     return Gesture.Race(Gesture.Simultaneous(pan, pinch), Gesture.Exclusive(doubleTap, tap));
-  }, [vp.w, vp.h, view, cx, cy, span, pinchStartSpan, notifyGesture, notifyTap, zoomAt]);
+  }, [
+    vp.w,
+    vp.h,
+    view,
+    cx,
+    cy,
+    span,
+    pinchStartSpan,
+    panActive,
+    pinchActive,
+    beginMotion,
+    endMotion,
+    notifyGesture,
+    notifyTap,
+    zoomAt,
+  ]);
 
-  return { transform, gesture, lod, animateTo, snapTo, currentCamera };
+  return { transform, gesture, lod, moving, settled, animateTo, snapTo, currentCamera };
 }

@@ -43,11 +43,13 @@ Turborepo monorepo.
 ### Task 1: Shared permission taxonomy
 
 **Files:**
+
 - Modify: `packages/shared/src/dashboard.ts`
 - Modify: `apps/server/src/dashboard/audit.repo.ts`
 - Create: `packages/shared/src/dashboard.test.ts`
 
 **Interfaces:**
+
 - Produces: `'games.spectateLive'` as a valid `DashboardPermission`, granted at the `viewer` role
   tier (same tier as `'games.viewReplay'`). Produces `'game.spectateLive'` as a valid
   `DashboardAuditAction`. Later tasks (2, 4) use both string literals directly.
@@ -178,18 +180,20 @@ git commit -m "feat(shared): add games.spectateLive dashboard permission"
 ### Task 2: Mint-ticket endpoint (dashboard → ws-game ticket)
 
 **Files:**
+
 - Modify: `apps/server/src/dashboard/dashboard-games.service.ts`
 - Modify: `apps/server/src/dashboard/dashboard-games.controller.ts`
 - Create: `apps/server/test/admin-spectate.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `TokenService.signWsTicket({gameId, playerId, seat}): string` (existing,
   `apps/server/src/auth/token.service.ts:34-37`); `AuditService.log(actor, action, target)`
   (existing); `env.wsTicketTtl` (existing, `apps/server/src/config/env.ts:21`); the
   `'games.spectateLive'` permission from Task 1.
 - Produces: `DashboardGamesService.mintSpectateTicket(actor: AuthUser, gameId: string):
-  Promise<{ ticket: string; expiresIn: string }>`. `POST
-  /api/v1/dashboard/games/:gameId/spectate-ticket`. Task 3's e2e tests and Task 4's admin UI both
+Promise<{ ticket: string; expiresIn: string }>`. `POST
+/api/v1/dashboard/games/:gameId/spectate-ticket`. Task 3's e2e tests and Task 4's admin UI both
   call this route.
 
 - [ ] **Step 1: Write the failing e2e test**
@@ -390,6 +394,7 @@ git commit -m "feat(server): mint a dashboard ticket to force-spectate a LIVE ga
 ### Task 3: Roster endpoint + end-to-end bypass proof
 
 **Files:**
+
 - Modify: `apps/server/src/history/history.repo.ts`
 - Create: `apps/server/src/history/admin-spectate.guard.ts`
 - Create: `apps/server/src/history/admin-spectate.controller.ts`
@@ -397,12 +402,13 @@ git commit -m "feat(server): mint a dashboard ticket to force-spectate a LIVE ga
 - Modify: `apps/server/test/admin-spectate.e2e.spec.ts` (append)
 
 **Interfaces:**
+
 - Consumes: `TokenService.verifyWsTicket(token): WsTicketPayload | null` (existing,
   `apps/server/src/auth/token.service.ts:39-46`); `HistoryRepo.displayNames(userIds:
-  string[]): Promise<Map<string, string>>` (existing).
+string[]): Promise<Map<string, string>>` (existing).
 - Produces: `HistoryRepo.loadSpectateRoster(gameId: string): Promise<{ players: {id: string;
-  seat: number}[]; bots: BotProfile[] } | null>`. `GET /api/v1/history/:gameId/admin-spectate?
-  ticket=` returning `{ players: [{userId, seat, displayName?, isBot?, difficulty?}] }`. Task 6's
+seat: number}[]; bots: BotProfile[] } | null>`. `GET /api/v1/history/:gameId/admin-spectate?
+ticket=` returning `{ players: [{userId, seat, displayName?, isBot?, difficulty?}] }`. Task 6's
   `apps/web` screen calls this route.
 
 - [ ] **Step 1: Write the failing e2e tests**
@@ -592,9 +598,7 @@ export class AdminSpectateController {
         userId: p.id,
         seat: p.seat,
         ...(names.has(p.id) ? { displayName: names.get(p.id) } : {}),
-        ...(botsById.has(p.id)
-          ? { isBot: true, difficulty: botsById.get(p.id)!.difficulty }
-          : {}),
+        ...(botsById.has(p.id) ? { isBot: true, difficulty: botsById.get(p.id)!.difficulty } : {}),
       })),
     };
   }
@@ -646,12 +650,14 @@ git commit -m "feat(server): serve a ticket-authorized roster for live spectatin
 ### Task 4: Admin dashboard UI — Spectate button
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts`
 - Modify: `apps/admin/src/views/GamesView.tsx`
 - Modify: `apps/admin/src/i18n/index.ts`
 - Modify: `apps/admin/src/views/GamesView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `POST /dashboard/games/:gameId/spectate-ticket` from Task 2; `webOrigin()` (existing,
   `apps/admin/src/lib/mainApp.ts`); `useSession((s) => s.hasPermission('games.spectateLive'))`
   (existing hook, now resolves truthy because of Task 1).
@@ -735,37 +741,39 @@ In `apps/admin/src/views/GamesView.tsx`, add the permission hook right after `ca
 (line 35):
 
 ```ts
-  const canSpectateLive = useSession((s) => s.hasPermission('games.spectateLive'));
+const canSpectateLive = useSession((s) => s.hasPermission('games.spectateLive'));
 ```
 
 Add the handler right after the `viewReplay` function (which ends at its closing `};`, before
 `del`):
 
 ```ts
-  const spectate = async () => {
-    try {
-      const { ticket } = await api.mintSpectateTicket(id);
-      window.open(
-        `${webOrigin()}/admin-spectate/${encodeURIComponent(id)}?ticket=${encodeURIComponent(ticket)}`,
-        '_blank',
-      );
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-    }
-  };
+const spectate = async () => {
+  try {
+    const { ticket } = await api.mintSpectateTicket(id);
+    window.open(
+      `${webOrigin()}/admin-spectate/${encodeURIComponent(id)}?ticket=${encodeURIComponent(ticket)}`,
+      '_blank',
+    );
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+  }
+};
 ```
 
 Add the button JSX right after the `canViewReplay` section (which closes with `</section>\n
 )}`, right before the `canTerminate` section):
 
 ```tsx
-          {canSpectateLive && detail.status === 'LIVE' && (
-            <section>
-              <button className="oc-btn" onClick={() => void spectate()}>
-                {t('games.spectate')}
-              </button>
-            </section>
-          )}
+{
+  canSpectateLive && detail.status === 'LIVE' && (
+    <section>
+      <button className="oc-btn" onClick={() => void spectate()}>
+        {t('games.spectate')}
+      </button>
+    </section>
+  );
+}
 ```
 
 - [ ] **Step 6: Run test to verify it passes**
@@ -790,12 +798,14 @@ git commit -m "feat(admin): add a Spectate button for LIVE games"
 ### Task 5: `apps/web` routing for `/admin-spectate/:gameId`
 
 **Files:**
+
 - Modify: `apps/web/src/store/ui.ts`
 - Modify: `apps/web/src/store/ui.test.ts`
 
 **Interfaces:**
+
 - Produces: `View` gains `'adminSpectate'`. `adminSpectateFromPath(): { id: string; ticket:
-  string | null } | null`. `UiState` gains `adminSpectateGameId: string | null` and
+string | null } | null`. `UiState` gains `adminSpectateGameId: string | null` and
   `adminSpectateTicket: string | null`. `syncFromUrl` recognizes `/admin-spectate/:gameId` and is
   never auth-gated for it. Task 6's `AdminSpectateScreen` and `App.tsx` consume these fields/the
   `'adminSpectate'` view.
@@ -807,20 +817,20 @@ routing'` block, right after the `'syncFromUrl(not authed) on /replay/:id is NOT
 view-by-link replays'` test:
 
 ```ts
-  it('syncFromUrl(authed) on /admin-spectate/:id restores the adminSpectate view with the ticket', () => {
-    window.history.replaceState(null, '', '/admin-spectate/game-1?ticket=tok');
-    useUi.getState().syncFromUrl(true);
-    expect(useUi.getState().view).toBe('adminSpectate');
-    expect(useUi.getState().adminSpectateGameId).toBe('game-1');
-    expect(useUi.getState().adminSpectateTicket).toBe('tok');
-  });
+it('syncFromUrl(authed) on /admin-spectate/:id restores the adminSpectate view with the ticket', () => {
+  window.history.replaceState(null, '', '/admin-spectate/game-1?ticket=tok');
+  useUi.getState().syncFromUrl(true);
+  expect(useUi.getState().view).toBe('adminSpectate');
+  expect(useUi.getState().adminSpectateGameId).toBe('game-1');
+  expect(useUi.getState().adminSpectateTicket).toBe('tok');
+});
 
-  it('syncFromUrl(not authed) on /admin-spectate/:id is NOT gated — the ticket is the sole authority', () => {
-    window.history.replaceState(null, '', '/admin-spectate/game-1?ticket=tok');
-    useUi.getState().syncFromUrl(false);
-    expect(useUi.getState().view).toBe('adminSpectate');
-    expect(useUi.getState().adminSpectateGameId).toBe('game-1');
-  });
+it('syncFromUrl(not authed) on /admin-spectate/:id is NOT gated — the ticket is the sole authority', () => {
+  window.history.replaceState(null, '', '/admin-spectate/game-1?ticket=tok');
+  useUi.getState().syncFromUrl(false);
+  expect(useUi.getState().view).toBe('adminSpectate');
+  expect(useUi.getState().adminSpectateGameId).toBe('game-1');
+});
 ```
 
 Also add this new `describe` block at the end of the file, after `describe('roomCodeFromPath'`:
@@ -903,9 +913,9 @@ export const adminSpectateFromPath = (): { id: string; ticket: string | null } |
 Add the state fields to `UiState`, right after `adminReplayTicket`:
 
 ```ts
-  /** The ticket-authorized /admin-spectate/:gameId route — game id + ticket parsed from the URL. */
-  adminSpectateGameId: string | null;
-  adminSpectateTicket: string | null;
+/** The ticket-authorized /admin-spectate/:gameId route — game id + ticket parsed from the URL. */
+adminSpectateGameId: string | null;
+adminSpectateTicket: string | null;
 ```
 
 Add the initial state, right after `adminReplayTicket: null,`:
@@ -919,23 +929,23 @@ Add the `syncFromUrl` branch, right after the existing `adminReplay` branch's cl
 }` (before the "Replays are NOT auth-gated" comment/`replayId` branch):
 
 ```ts
-    // Ticket-authorized maintainer view — never auth-gated (the ticket is the sole authority),
-    // reachable from a fresh tab with no prior session in this app. Force-joins a LIVE game as
-    // a spectator, bypassing the room's allowSpectating setting.
-    const adminSpectate = adminSpectateFromPath();
-    if (adminSpectate) {
-      disconnectGame();
-      set({
-        view: 'adminSpectate',
-        adminSpectateGameId: adminSpectate.id,
-        adminSpectateTicket: adminSpectate.ticket,
-        roomCode: null,
-        gameId: null,
-        ticket: null,
-        replayGameId: null,
-      });
-      return;
-    }
+// Ticket-authorized maintainer view — never auth-gated (the ticket is the sole authority),
+// reachable from a fresh tab with no prior session in this app. Force-joins a LIVE game as
+// a spectator, bypassing the room's allowSpectating setting.
+const adminSpectate = adminSpectateFromPath();
+if (adminSpectate) {
+  disconnectGame();
+  set({
+    view: 'adminSpectate',
+    adminSpectateGameId: adminSpectate.id,
+    adminSpectateTicket: adminSpectate.ticket,
+    roomCode: null,
+    gameId: null,
+    ticket: null,
+    replayGameId: null,
+  });
+  return;
+}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -961,6 +971,7 @@ git commit -m "feat(web): route /admin-spectate/:gameId, never auth-gated"
 ### Task 6: `AdminSpectateScreen` — live connection + roster
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Create: `apps/web/src/screens/AdminSpectateScreen.tsx`
 - Create: `apps/web/src/screens/AdminSpectateScreen.test.tsx`
@@ -968,11 +979,12 @@ git commit -m "feat(web): route /admin-spectate/:gameId, never auth-gated"
 - Modify: `apps/web/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Consumes: `GET /history/:gameId/admin-spectate?ticket=` from Task 3; `connectGame(ticket:
-  string): GameSocket` / `disconnectGame(): void` / `getSocket(): GameSocket | null` (existing,
+string): GameSocket` / `disconnectGame(): void` / `getSocket(): GameSocket | null` (existing,
   `apps/web/src/net/connection.ts`); `useRoster((s) => s.setMembers)` (existing); `GameStage`
   (existing, `apps/web/src/screens/GameStage.tsx`); `useUi((s) => s.adminSpectateGameId /
-  adminSpectateTicket)` from Task 5.
+adminSpectateTicket)` from Task 5.
 - Produces: default-exported `AdminSpectateScreen` React component, rendered by `App.tsx` for
   `view === 'adminSpectate'`.
 
@@ -1192,23 +1204,25 @@ const AdminSpectateScreen = lazy(() => import('./screens/AdminSpectateScreen'));
 Add `'adminSpectate'` to `isGameLayout`, right after `view === 'adminReplay'`:
 
 ```ts
-  const isGameLayout =
-    view === 'game' ||
-    view === 'tutorial' ||
-    view === 'replay' ||
-    view === 'adminReplay' ||
-    view === 'adminSpectate' ||
-    view === 'mapEditor';
+const isGameLayout =
+  view === 'game' ||
+  view === 'tutorial' ||
+  view === 'replay' ||
+  view === 'adminReplay' ||
+  view === 'adminSpectate' ||
+  view === 'mapEditor';
 ```
 
 Add the render branch, right after the `view === 'adminReplay'` block:
 
 ```tsx
-            {view === 'adminSpectate' && (
-              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
-                <AdminSpectateScreen />
-              </Suspense>
-            )}
+{
+  view === 'adminSpectate' && (
+    <Suspense fallback={<div className="card">{t('connecting')}</div>}>
+      <AdminSpectateScreen />
+    </Suspense>
+  );
+}
 ```
 
 - [ ] **Step 7: Run test to verify it passes**
@@ -1233,6 +1247,7 @@ git commit -m "feat(web): add the live force-spectate screen for maintainers"
 ## Self-Review
 
 **Spec coverage:**
+
 - New `games.spectateLive` permission at the viewer tier → Task 1.
 - Mint endpoint bypassing `allowSpectating`/eligibility, reusing `signWsTicket` → Task 2.
 - Roster endpoint reusing `verifyWsTicket`, permissive to any valid spectator ticket → Task 3.

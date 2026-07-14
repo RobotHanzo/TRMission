@@ -54,7 +54,7 @@ gitignored and a drift between it and the `.proto` is a CI failure.
 ## Monorepo layout & build order
 
 ```
-packages/proto  → shared → map-data → engine → bots/codec → apps/{server,web,admin,mobile}
+packages/proto  → shared → map-data → engine → bots/codec → client-core → apps/{server,web,admin,mobile}
 ```
 
 - `@trm/shared` — enums, scoring/rule constants, **seeded counter PRNG**, ids, error taxonomy, digest.
@@ -64,6 +64,12 @@ packages/proto  → shared → map-data → engine → bots/codec → apps/{serv
   with difficulty heuristics; deterministic per state+botId). Shared by the server's bot
   driver and the mobile app's offline games.
 - `@trm/proto` — protobuf-es wire protocol (the engine⇄wire contract).
+- `@trm/client-core` — the **shared headless client core** for web + mobile: REST client (platform
+  transports injected), `GameSocket`, `SandboxSocket`, zustand stores (game/chat/log/animations),
+  game view logic (payments/tunnel/events/tickets/content catalog), the tutorial core
+  (types/curriculum/focus/scenario player + tutorial i18n), and card/cartography colour tokens.
+  `react`/`zustand`/`i18next` are peerDependencies — keep both apps pinned to the SAME react
+  version (pinned exactly; a second nested copy splits module identity and breaks hooks).
 - `apps/server` — NestJS: WebSocket gateway + REST (auth/lobby/history/dashboard) + Mongo + OpenAPI + bots.
 - `apps/web` — React + Vite + TS: SVG board, realtime client, i18n, zustand.
 - `apps/admin` — the maintainer dashboard (REST-only React app, deployed same-origin under
@@ -78,11 +84,14 @@ packages/proto  → shared → map-data → engine → bots/codec → apps/{serv
 Internal packages export **TS source** (no per-lib build step) except `proto` (codegen). Each area
 has its own `CLAUDE.md` with the local architecture — read it before working there.
 
-**`apps/web` and `apps/mobile` are two clients over the same game.** They duplicate UI/UX rather
-than sharing components, so a frontend change to one (rules text, i18n string, game-flow screen,
-notification copy, endgame/pass handling, etc.) usually has an equivalent gap on the other. When
-you land a frontend change, check whether the other client needs the same change before calling
-the work done — don't assume fixing one side is sufficient.
+**`apps/web` and `apps/mobile` are two clients over the same game, sharing one headless core.**
+Client logic (net, stores, game view logic, tutorial core, colour tokens) lives ONCE in
+`@trm/client-core`; only rendering stays platform-native (DOM/SVG on web, RN/Skia on mobile),
+kept separate where performance, aesthetics, or platform features justify it. **Never implement
+the same logic twice across the two apps** — extract it to `@trm/client-core` instead (app-side
+files that moved are thin re-export shims, so component import paths stay stable). Presentation
+changes (a screen, an animation, notification copy) still need a per-platform pass: when you land
+one side, check whether the other client needs the equivalent before calling the work done.
 
 ## The big picture
 

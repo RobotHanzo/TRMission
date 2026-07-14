@@ -1,1 +1,72 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_todo_md", "label": "TODO.md", "file_type": "document", "source_file": "docs/TODO.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_todo_todo_deferred_work_tracker", "label": "TODO \u2014 deferred work tracker", "file_type": "document", "source_file": "docs/TODO.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_todo_mobile_deferred_from_v1", "label": "Mobile \u2014 deferred from v1", "file_type": "document", "source_file": "docs/TODO.md", "source_location": "L7"}, {"id": "d_web_projects_trmission_docs_todo_cross_platform_surfaced_by_the_mobile_research_benefits_web_too", "label": "Cross-platform (surfaced by the mobile research, benefits web too)", "file_type": "document", "source_file": "docs/TODO.md", "source_location": "L26"}], "edges": [{"source": "d_web_projects_trmission_docs_todo_md", "target": "d_web_projects_trmission_docs_todo_todo_deferred_work_tracker", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/TODO.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_todo_todo_deferred_work_tracker", "target": "d_web_projects_trmission_docs_todo_mobile_deferred_from_v1", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/TODO.md", "source_location": "L7", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_todo_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_md", "relation": "references", "confidence": "EXTRACTED", "source_file": "docs/TODO.md", "source_location": "L9", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_todo_todo_deferred_work_tracker", "target": "d_web_projects_trmission_docs_todo_cross_platform_surfaced_by_the_mobile_research_benefits_web_too", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/TODO.md", "source_location": "L26", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_todo_md",
+      "label": "TODO.md",
+      "file_type": "document",
+      "source_file": "docs/TODO.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_todo_todo_deferred_work_tracker",
+      "label": "TODO \u2014 deferred work tracker",
+      "file_type": "document",
+      "source_file": "docs/TODO.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_todo_mobile_deferred_from_v1",
+      "label": "Mobile \u2014 deferred from v1",
+      "file_type": "document",
+      "source_file": "docs/TODO.md",
+      "source_location": "L7"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_todo_cross_platform_surfaced_by_the_mobile_research_benefits_web_too",
+      "label": "Cross-platform (surfaced by the mobile research, benefits web too)",
+      "file_type": "document",
+      "source_file": "docs/TODO.md",
+      "source_location": "L26"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_todo_md",
+      "target": "d_web_projects_trmission_docs_todo_todo_deferred_work_tracker",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/TODO.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_todo_todo_deferred_work_tracker",
+      "target": "d_web_projects_trmission_docs_todo_mobile_deferred_from_v1",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/TODO.md",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_todo_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_06_mobile_app_design_md",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/TODO.md",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_todo_todo_deferred_work_tracker",
+      "target": "d_web_projects_trmission_docs_todo_cross_platform_surfaced_by_the_mobile_research_benefits_web_too",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/TODO.md",
+      "source_location": "L26",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

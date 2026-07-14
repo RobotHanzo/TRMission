@@ -10,6 +10,7 @@ import {
   invScale,
   markerScale,
   visibleFraction,
+  rasterSpec,
   SPAN_MIN,
   spanMax,
 } from './camera';
@@ -80,5 +81,38 @@ describe('visibleFraction', () => {
       { x: 50, y: 260 }, // far south → out
     ];
     expect(visibleFraction(pts, cam, vp)).toBe(0.5);
+  });
+});
+
+describe('rasterSpec (gesture-time snapshot region + resolution)', () => {
+  const scene = { x: -54, y: -48, w: 188, h: 192 }; // view ± SCENE_OVERSCAN
+
+  it('zoomed out: region clamps to the whole scene, 1:1 device pixels', () => {
+    // span 100 over 400dp @2x ⇒ 8 px/unit; 3 viewports (300×600 units) ⊇ scene → clamp.
+    const spec = rasterSpec({ cx: 50, cy: 50, span: 100 }, vp, scene, 2);
+    expect(spec).not.toBeNull();
+    expect(spec!.rect).toEqual(scene);
+    expect(spec!.pxPerUnit).toBeCloseTo(8);
+  });
+
+  it('zoomed in: region is 3 viewports centred on the camera, still device-crisp', () => {
+    const spec = rasterSpec({ cx: 50, cy: 50, span: 20 }, vp, scene, 2, 8192);
+    // visible 20×40 units → region 60×120 centred on (50,50), inside the scene.
+    expect(spec!.rect).toEqual({ x: 20, y: -10, w: 60, h: 120 });
+    expect(spec!.pxPerUnit).toBeCloseTo((2 * 400) / 20); // 40 px/unit, under the 8192 cap
+  });
+
+  it('deep zoom on a high-DPI panel: the texture cap binds and resolution degrades gracefully', () => {
+    const spec = rasterSpec({ cx: 50, cy: 50, span: 10 }, vp, scene, 3, 1024);
+    // wanted 120 px/unit, but region h = 3·10·(800/400) = 60 units → cap 1024/60 ≈ 17.07.
+    expect(spec!.pxPerUnit).toBeCloseTo(1024 / 60);
+  });
+
+  it('camera fully outside the scene yields no spec (fall back to vectors)', () => {
+    expect(rasterSpec({ cx: 10_000, cy: 10_000, span: 20 }, vp, scene, 2)).toBeNull();
+  });
+
+  it('degenerate viewport yields no spec', () => {
+    expect(rasterSpec({ cx: 50, cy: 50, span: 100 }, { w: 0, h: 0 }, scene, 2)).toBeNull();
   });
 });

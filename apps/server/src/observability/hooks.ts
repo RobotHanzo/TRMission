@@ -15,6 +15,13 @@ export interface MetricsHooks {
    * again (see `GameHub.driveBots`).
    */
   botDriverStalled(reason: 'no_legal_action' | 'persist_failed'): void;
+  /**
+   * A persisted game could not be brought back (incompatible engine major, or a snapshot+tail that
+   * no longer replays). The affected players can't resume that game — alert on any increase.
+   */
+  recoveryFailed?(): void;
+  /** An inbound frame threw somewhere unexpected. Should stay at 0; each one is a bug. */
+  internalError?(): void;
 }
 
 export const NOOP_METRICS: MetricsHooks = {
@@ -25,4 +32,6 @@ export const NOOP_METRICS: MetricsHooks = {
   connectionClosed() {},
   leakBlocked() {},
   botDriverStalled() {},
+  recoveryFailed() {},
+  internalError() {},
 };

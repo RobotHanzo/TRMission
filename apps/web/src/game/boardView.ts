@@ -14,18 +14,14 @@
 // project through that. Same "measure the real geometry" tack `frameHome` takes.
 import { MIN_SCALE, MAX_SCALE } from './geography';
 
-/** A board auto-pan target: a set of route ids or city ids to frame. */
-export interface BoardFrameTarget {
-  kind: 'route' | 'cities';
-  ids: string[];
-  /** Skip the glide and snap straight to the target (used by replay seeks/jumps). */
-  instant?: boolean;
-}
-
-/** The auto-pan transform duration (ms) for `target`: instant/reduced-motion snap to 0, else glide. */
-export function frameDurationMs(target: BoardFrameTarget, reducedMotion: boolean): number {
-  return target.instant || reducedMotion ? 0 : 600;
-}
+// The screen-independent parts (the wire-shaped ViewDescriptor, the auto-pan BoardFrameTarget)
+// are shared with mobile via @trm/client-core; only the rzpp pixel bridging below is web-only.
+export {
+  frameDurationMs,
+  type BoardFrameTarget,
+  type ViewDescriptor,
+} from '@trm/client-core/game/boardModel';
+import type { ViewDescriptor } from '@trm/client-core/game/boardModel';
 
 /** react-zoom-pan-pinch transform state (a subset of its `ReactZoomPanPinchState`). */
 export interface BoardTransform {
@@ -35,16 +31,6 @@ export interface BoardTransform {
   positionY: number;
   /** Zoom multiplier (rzpp `scale`). */
   scale: number;
-}
-
-/** A viewport framing in board units — what we put on the wire (`CameraView`). */
-export interface ViewDescriptor {
-  /** Board x (0–100 space) under the viewport centre. */
-  cx: number;
-  /** Board y (0–100 space) under the viewport centre. */
-  cy: number;
-  /** How many board units span the viewport WIDTH (the zoom metric). */
-  span: number;
 }
 
 /**

@@ -33,8 +33,7 @@ export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean
 
   let endgame = state.endgame;
   let triggeredNow = false;
-  const trainsTrigger =
-    (player?.trainCars ?? Infinity) <= state.ruleParams.endgameTrainThreshold;
+  const trainsTrigger = (player?.trainCars ?? Infinity) <= state.ruleParams.endgameTrainThreshold;
   // Deadlock: the card pool is dead and no one can claim a route, so no player's trains will ever
   // drop to the threshold. Begin the end sequence anyway so the game does not stall.
   const deadlockTrigger = !trainsTrigger && poolDead(state) && noPlayerCanClaimRoute(board, state);

@@ -2,18 +2,25 @@
 // longest-route review (scoreboard hides so the board shows the seat-coloured highlight, with a
 // floating bar to return), and inspect-map (dismissed to pan the final board freely). The web's
 // <table> becomes per-player stat rows — same data, same view/map affordances, phone-sized.
-// (Confetti lands with Task 10's animation pass.)
+// Celebration: continuous confetti behind the sheet, plus the web's rate-this-game block
+// (per-gameId dedupe, only for online games — the room context is unset offline) + Discord CTA.
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Crown, Eye, Map as MapIcon, X } from 'lucide-react-native';
+import { Bot, Crown, Eye, Map as MapIcon, MessagesSquare, X } from 'lucide-react-native';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { GameSnapshot, PlayerFinal } from '@trm/proto';
 import type { RoomMember } from '../../net/rest';
+import { api } from '../../net/rest';
 import { seatColor } from '../../theme/colors';
 import { seatByPlayer } from '../../game/view';
 import { usePlayerName } from '../../game/playerName';
 import { ticketById } from '../../game/content';
+import { getActiveRoomContext } from '../../game/activeRoom';
+import { hasRatedGame, markGameRated } from '../../game/ratedGames';
+import { openDiscord } from '../../discord';
 import { useAnimationsStore } from '../../store/animations';
+import { Confetti } from '../celebration/Confetti';
+import { StarRating } from './StarRating';
 import { TicketCard } from './TicketCard';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
@@ -60,6 +67,42 @@ export function ScoreBoard({
   const [ticketModal, setTicketModal] = useState<TicketModal | null>(null);
   const [viewingMap, setViewingMap] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
+
+  // Rating is an online-game affordance: the room context is only set by GameScreen (never for
+  // offline/tutorial sandboxes), matching the web's gameId+roomCode gate.
+  const [{ gameId, roomCode }] = useState(getActiveRoomContext);
+  const [stars, setStars] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [ratingError, setRatingError] = useState(false);
+  // null while the dedupe check is in flight — the block renders nothing until it resolves, so
+  // an already-rated game never flashes the picker (and vice versa).
+  const [alreadyRated, setAlreadyRated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!gameId) return;
+    void hasRatedGame(gameId).then((rated) => {
+      if (!cancelled) setAlreadyRated(rated);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [gameId]);
+
+  const submitRating = async (): Promise<void> => {
+    if (!gameId || !roomCode || stars === 0) return;
+    setSubmitting(true);
+    setRatingError(false);
+    try {
+      await api.submitRating({ gameId, roomId: roomCode, stars });
+      await markGameRated(gameId);
+      setAlreadyRated(true);
+    } catch {
+      setRatingError(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Always drop any lingering map highlight when the scoreboard unmounts (e.g. leaving the game).
   useEffect(() => () => clearRouteReveal(), [clearRouteReveal]);
@@ -146,6 +189,7 @@ export function ScoreBoard({
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onLeave}>
       <View style={styles.backdrop}>
+        <Confetti active={!ticketModal} />
         <View style={styles.modal}>
           <Text style={styles.title}>{t('gameOver')}</Text>
           <ScrollView style={styles.scroll}>
@@ -249,6 +293,41 @@ export function ScoreBoard({
             </View>
           )}
 
+          {gameId && roomCode && alreadyRated !== null && (
+            <View style={styles.ratingBlock} testID="scoreboard-rating">
+              <Text style={styles.ratingLabel}>{t('rateAppPrompt')}</Text>
+              {alreadyRated ? (
+                <Text style={styles.ratingThanks}>{t('ratingThanks')}</Text>
+              ) : (
+                <>
+                  <View style={styles.ratingRow}>
+                    <StarRating value={stars} onChange={setStars} size={28} disabled={submitting} />
+                    <Pressable
+                      style={[styles.primaryBtn, (stars === 0 || submitting) && styles.btnDisabled]}
+                      accessibilityRole="button"
+                      accessibilityState={{ disabled: stars === 0 || submitting }}
+                      disabled={stars === 0 || submitting}
+                      onPress={() => void submitRating()}
+                    >
+                      <Text style={styles.primaryText}>{t('submitRating')}</Text>
+                    </Pressable>
+                  </View>
+                  {ratingError && <Text style={styles.ratingError}>{t('ratingSubmitError')}</Text>}
+                </>
+              )}
+            </View>
+          )}
+
+          <Pressable
+            style={styles.discordBtn}
+            accessibilityRole="button"
+            onPress={openDiscord}
+            testID="scoreboard-discord"
+          >
+            <MessagesSquare size={16} color="#fff" />
+            <Text style={styles.discordText}>{t('discordCta')}</Text>
+          </Pressable>
+
           <View style={styles.actions}>
             <Pressable
               style={styles.plainBtn}
@@ -347,6 +426,27 @@ const styles = StyleSheet.create({
   rematchTally: { fontSize: 12, opacity: 0.65 },
   rematchBtns: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
   voteOn: { backgroundColor: 'rgba(46,125,50,0.14)', borderRadius: 8 },
+  ratingBlock: {
+    gap: 6,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.08)',
+    paddingTop: 10,
+  },
+  ratingLabel: { fontSize: 13, fontWeight: '700' },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
+  ratingThanks: { fontSize: 13, color: '#2e7d32', fontWeight: '600' },
+  ratingError: { fontSize: 12, color: '#b3261e' },
+  btnDisabled: { opacity: 0.45 },
+  discordBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 44,
+    borderRadius: 10,
+    backgroundColor: '#5865f2',
+  },
+  discordText: { color: '#fff', fontSize: 14, fontWeight: '700' },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
   plainBtn: { paddingHorizontal: 12, paddingVertical: 10, minHeight: 44, justifyContent: 'center' },
   plainText: { fontSize: 14, fontWeight: '600', color: '#1d4ed8' },

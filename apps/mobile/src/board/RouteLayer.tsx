@@ -2,7 +2,9 @@
 // MapScene route branch (apps/web/src/components/{RouteShape,MapScene}.tsx) drawn with the shared
 // MAP_DIMS/MAP_INKS tokens (the same numbers game.css resolves through its --m-* vars, so the
 // mobile board can never drift from the web board). Stack per route:
-//   glow bloom → tunnel glint → paper roadbed → ties / ferry pips / car slots → colour-blind chip.
+//   tunnel glint → paper roadbed → ties / ferry pips / car slots → colour-blind chip.
+// (The claim-glow bloom is a LIVE overlay in MapSceneSkia now — this layer is recorded into the
+// cached static Picture and must stay animation-free.)
 // Across-track thicknesses counter-scale by `inv` (web --inv-scale) so the network keeps a constant
 // on-screen weight; along-path positions/lengths are map-bound (from the geometry).
 import { Fragment } from 'react';
@@ -59,7 +61,6 @@ function mixHex(a: string, b: string, t: number): string {
 export interface RouteLayerProps {
   model: readonly RouteRenderModel[];
   owned?: ReadonlyMap<string, RouteOwnership> | undefined;
-  glowingRoutes?: ReadonlyMap<string, number> | undefined;
   colorBlind?: boolean | undefined;
   /** Draw required-loco rainbow pips on unclaimed ferries (default true). */
   showFerryLocos?: boolean | undefined;
@@ -70,7 +71,6 @@ export interface RouteLayerProps {
 export function RouteLayer({
   model,
   owned,
-  glowingRoutes,
   colorBlind,
   showFerryLocos = true,
   inv,
@@ -97,7 +97,6 @@ export function RouteLayer({
         const slotStrokeW = (isOwned ? D.slotOwnedStrokeW : D.slotStrokeW) * inv;
         const slotH = D.slotH * inv;
         const slotRx = D.slotRx * inv;
-        const glowSeat = glowingRoutes?.get(m.id);
         // Once owned, ferry pips take the owner's colour (no rainbow); the backdrop hides them too.
         const ferryLocos = isOwned || showFerryLocos === false ? 0 : m.ferryLocos;
         const loco = ferryLocoBlock(m.length, ferryLocos);
@@ -107,16 +106,6 @@ export function RouteLayer({
             key={m.id}
             transform={[{ translateX: m.perp.x * inv }, { translateY: m.perp.y * inv }]}
           >
-            {glowSeat !== undefined && (
-              <Path
-                path={m.bed}
-                style="stroke"
-                strokeWidth={D.bedOwnedW * 2.4 * inv}
-                strokeCap="round"
-                color={seatColor(glowSeat)}
-                opacity={0.3}
-              />
-            )}
             {m.isTunnel && (
               <Path
                 path={m.bed}

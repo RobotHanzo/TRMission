@@ -48,23 +48,9 @@ export interface AdminReplayData extends ReplayData {
   terminatedReason?: string;
 }
 
-/**
- * Engine major versions whose persisted action logs the current code can replay without action-
- * semantic divergence. v5 replayed a v4 log equivalently (v5 only added inert genesis fields), but v6
- * is NOT provably inert for v4/v5 games (see history in git blame), and v7 is not provably inert
- * for v6 either: v7 locks own-track ticket completions into `completedTickets` (and emits
- * TICKET_COMPLETED) mid-game for every ruleset, not just unlimitedStationBorrow, which changes
- * `stateDigest` at exactly the points a ticket completes — a v6 game replayed under v7 would
- * digest-mismatch at that step. So v7 stands alone rather than extending the allowlist. Only
- * extend this list for a new version when the change is provably inert for the versions already
- * listed. v8 adds stateful future-event actions/phases and therefore cannot replay a v7 action
- * log byte-identically. v9 changes the deadlock rule: a dead-pool `DRAW_TICKETS` with no productive
- * move is now rejected (and the endgame can trigger on a deadlock), so a v8 log containing such an
- * action would diverge or become illegal under v9. v10 only adds the terminal END_GAME action;
- * every existing v9 action retains identical behavior, so the current interpreter supports v9
- * and v10 logs.
- */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10];
+/** The allowlist now lives with the persistence layer (live recovery gates on it too). */
+export { REPLAY_COMPATIBLE_ENGINE_VERSIONS } from '../persistence/engine-compat';
+import { isEngineVersionSupported } from '../persistence/engine-compat';
 
 @Injectable()
 export class HistoryRepo {
@@ -91,11 +77,7 @@ export class HistoryRepo {
     rows: { contentHash: string; engineVersion: number | undefined }[],
   ): Promise<boolean[]> {
     const staticFlags: (boolean | undefined)[] = rows.map((r) => {
-      if (
-        r.engineVersion === undefined ||
-        !REPLAY_COMPATIBLE_ENGINE_VERSIONS.includes(r.engineVersion)
-      )
-        return false;
+      if (!isEngineVersionSupported(r.engineVersion)) return false;
       try {
         boardForContentHash(r.contentHash);
         return true;

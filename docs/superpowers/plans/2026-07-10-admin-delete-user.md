@@ -24,9 +24,11 @@
 ## File Structure
 
 **Create:**
+
 - `apps/server/test/dashboard-delete-user.e2e.spec.ts` — e2e coverage for the new endpoint.
 
 **Modify:**
+
 - `packages/shared/src/dashboard.ts` — add `users.delete` permission (+ `ADMIN_PERMISSIONS`).
 - `packages/shared/test/dashboard.spec.ts` — assert the new permission's tier.
 - `apps/server/src/dashboard/audit.repo.ts` — add `'user.delete'` to the action union.
@@ -45,10 +47,12 @@
 ## Task 1: Add the `users.delete` permission to `@trm/shared`
 
 **Files:**
+
 - Modify: `packages/shared/src/dashboard.ts`
 - Test: `packages/shared/test/dashboard.spec.ts`
 
 **Interfaces:**
+
 - Produces: a new `DashboardPermission` literal `'users.delete'`, present in `ADMIN_PERMISSIONS` and `owner`'s set. Consumed by the server guard (`@RequirePermission('users.delete')`) and the admin UI (`hasPermission('users.delete')`) in later tasks.
 
 - [ ] **Step 1: Write the failing test**
@@ -56,14 +60,14 @@
 Add this `it` block inside the existing `describe('dashboard permission taxonomy', ...)` in `packages/shared/test/dashboard.spec.ts` (after the `maps.read` test near the end):
 
 ```ts
-  it('users.delete is admin-tier, above the moderator-tier users.ban', () => {
-    expect(ROLE_PERMISSIONS.viewer).not.toContain('users.delete');
-    expect(ROLE_PERMISSIONS.moderator).toContain('users.ban');
-    expect(ROLE_PERMISSIONS.moderator).not.toContain('users.delete');
-    expect(ROLE_PERMISSIONS.admin).toContain('users.delete');
-    expect(ROLE_PERMISSIONS.owner).toContain('users.delete');
-    expect(DASHBOARD_PERMISSIONS).toContain('users.delete');
-  });
+it('users.delete is admin-tier, above the moderator-tier users.ban', () => {
+  expect(ROLE_PERMISSIONS.viewer).not.toContain('users.delete');
+  expect(ROLE_PERMISSIONS.moderator).toContain('users.ban');
+  expect(ROLE_PERMISSIONS.moderator).not.toContain('users.delete');
+  expect(ROLE_PERMISSIONS.admin).toContain('users.delete');
+  expect(ROLE_PERMISSIONS.owner).toContain('users.delete');
+  expect(DASHBOARD_PERMISSIONS).toContain('users.delete');
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -120,6 +124,7 @@ git commit -m "feat(shared): add admin-tier users.delete dashboard permission"
 This is one vertical slice: the e2e spec is the failing test; the implementation steps build bottom-up until it passes.
 
 **Files:**
+
 - Create: `apps/server/test/dashboard-delete-user.e2e.spec.ts`
 - Modify: `apps/server/src/dashboard/audit.repo.ts`
 - Modify: `apps/server/src/auth/user.repo.ts`
@@ -129,6 +134,7 @@ This is one vertical slice: the e2e spec is the failing test; the implementation
 - Modify: `apps/server/src/dashboard/dashboard-users.controller.ts`
 
 **Interfaces:**
+
 - Consumes: `PurgeService` (private `terminateIfLive`, injected `rooms`), `RoomRepo.findActiveByMember`/`closeLobby`, `SessionRepo.revokeAllForUser`, `DashboardAccountRepo.findById`, `AuditService.log`, `ModerationReasonDto`.
 - Produces:
   - `UserRepo.deleteById(userId: string): Promise<boolean>`
@@ -190,7 +196,12 @@ describe('delete user', () => {
     // A completed-game archive row referencing the victim — must survive the delete.
     await t.db
       .collection('matchHistory')
-      .insertOne({ _id: 'mh-old', gameId: 'g-old', winners: [victim.userId], completedAt: new Date() } as never);
+      .insertOne({
+        _id: 'mh-old',
+        gameId: 'g-old',
+        winners: [victim.userId],
+        completedAt: new Date(),
+      } as never);
 
     // Put the victim in a LIVE game as host (mirrors dashboard-ban.e2e setup).
     const other = await request(server())
@@ -238,8 +249,12 @@ describe('delete user', () => {
     expect((await t.db.collection('rooms').findOne({ _id: code }))?.status).toBe('CLOSED');
 
     // Owned maps dropped; the archive kept.
-    expect(await t.db.collection('customMaps').countDocuments({ ownerId: victim.userId } as never)).toBe(0);
-    expect(await t.db.collection('matchHistory').countDocuments({ _id: 'mh-old' } as never)).toBe(1);
+    expect(
+      await t.db.collection('customMaps').countDocuments({ ownerId: victim.userId } as never),
+    ).toBe(0);
+    expect(await t.db.collection('matchHistory').countDocuments({ _id: 'mh-old' } as never)).toBe(
+      1,
+    );
 
     // Audited with counts.
     const entry = await t.db
@@ -294,7 +309,7 @@ export type DashboardAuditAction =
   | 'user.unban'
   | 'user.features'
   | 'user.delete'
-  | 'game.terminate'
+  | 'game.terminate';
 ```
 
 - [ ] **Step 4: Add `UserRepo.deleteById`**
@@ -495,12 +510,14 @@ git commit -m "feat(server): DELETE dashboard/users/:id — hard-delete an accou
 ## Task 3: Admin SPA — delete button, REST client, i18n
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts`
 - Modify: `apps/admin/src/i18n/index.ts`
 - Modify: `apps/admin/src/views/UsersView.tsx`
 - Test: `apps/admin/src/views/UsersView.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `DELETE /dashboard/users/:id` (Task 2), `users.delete` permission (Task 1), `ConfirmDialog`, `useSession().hasPermission`, `useToast().push`.
 - Produces: `api.deleteUser(id: string, reason?: string): Promise<void>`; a `users.delete`-gated danger button in `UserDrawer`.
 
@@ -656,66 +673,66 @@ In `apps/admin/src/views/UsersView.tsx`:
 Add the permission read next to `canBan` (near line 45):
 
 ```ts
-  const canBan = useSession((s) => s.hasPermission('users.ban'));
-  const canDelete = useSession((s) => s.hasPermission('users.delete'));
+const canBan = useSession((s) => s.hasPermission('users.ban'));
+const canDelete = useSession((s) => s.hasPermission('users.delete'));
 ```
 
 Add a confirm-state flag next to the existing `confirming` state (near line 49):
 
 ```ts
-  const [confirming, setConfirming] = useState(false);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+const [confirming, setConfirming] = useState(false);
+const [confirmingDelete, setConfirmingDelete] = useState(false);
 ```
 
 Add the delete handler right after the `toggleBan` function (after line 80). On success it unmounts the drawer via `onClose`, so it does not touch state afterward:
 
 ```ts
-  const removeUser = async (reason?: string) => {
-    if (!detail) return;
-    setBusy(true);
-    try {
-      await api.deleteUser(detail.id, reason);
-      pushToast('success', t('toast.userDeleted'));
-      onClose();
-    } catch (e) {
-      pushToast('error', e instanceof Error ? e.message : t('common.error'));
-      setBusy(false);
-      setConfirmingDelete(false);
-    }
-  };
+const removeUser = async (reason?: string) => {
+  if (!detail) return;
+  setBusy(true);
+  try {
+    await api.deleteUser(detail.id, reason);
+    pushToast('success', t('toast.userDeleted'));
+    onClose();
+  } catch (e) {
+    pushToast('error', e instanceof Error ? e.message : t('common.error'));
+    setBusy(false);
+    setConfirmingDelete(false);
+  }
+};
 ```
 
 Add the button block immediately after the existing `{canBan && !detail.isMaintainer && ( ... )}` section (after line 220):
 
 ```tsx
-          {canDelete && !detail.isMaintainer && (
-            <section>
-              <button
-                className="oc-btn danger"
-                disabled={busy}
-                onClick={() => setConfirmingDelete(true)}
-              >
-                {t('users.delete')}
-              </button>
-            </section>
-          )}
+{
+  canDelete && !detail.isMaintainer && (
+    <section>
+      <button className="oc-btn danger" disabled={busy} onClick={() => setConfirmingDelete(true)}>
+        {t('users.delete')}
+      </button>
+    </section>
+  );
+}
 ```
 
 Add the confirm dialog immediately after the existing `{confirming && ( ... )}` block (after line 233):
 
 ```tsx
-          {confirmingDelete && (
-            <ConfirmDialog
-              title={t('users.deleteConfirmTitle')}
-              body={t('users.deleteConfirmBody')}
-              confirmLabel={t('users.delete')}
-              danger
-              withReason
-              busy={busy}
-              onConfirm={(reason) => void removeUser(reason)}
-              onCancel={() => setConfirmingDelete(false)}
-            />
-          )}
+{
+  confirmingDelete && (
+    <ConfirmDialog
+      title={t('users.deleteConfirmTitle')}
+      body={t('users.deleteConfirmBody')}
+      confirmLabel={t('users.delete')}
+      danger
+      withReason
+      busy={busy}
+      onConfirm={(reason) => void removeUser(reason)}
+      onCancel={() => setConfirmingDelete(false)}
+    />
+  );
+}
 ```
 
 - [ ] **Step 6: Run the tests to verify they pass**
@@ -744,6 +761,7 @@ git commit -m "feat(admin): delete-account button in the Users drawer"
 - [ ] **Step 1: Run the affected workspaces' checks**
 
 Run:
+
 ```bash
 yarn workspace @trm/shared test --run
 yarn workspace @trm/server test --run dashboard
@@ -751,6 +769,7 @@ yarn workspace @trm/admin test --run
 yarn typecheck
 yarn lint
 ```
+
 Expected: all PASS / no errors. If anything fails, fix within the owning task's files and re-run before proceeding.
 
 - [ ] **Step 2: Manual smoke (optional, if a dev stack is running)**

@@ -69,7 +69,7 @@ export function PrivacyScreen() {
       <h3>聯絡我們 · Contact</h3>
       <p>
         隱私問題或內容申訴請寄至 · For privacy questions or content appeals:{' '}
-        <a href="mailto:PLACEHOLDER-SUPPORT-EMAIL">PLACEHOLDER-SUPPORT-EMAIL</a>
+        <a href="mailto:trmission@robothanzo.dev">trmission@robothanzo.dev</a>
       </p>
     </div>
   );

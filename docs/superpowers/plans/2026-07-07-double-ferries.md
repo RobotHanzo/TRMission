@@ -362,63 +362,61 @@ EOF
 In `apps/web/src/features/builder/editor/store.test.ts`, find the existing test:
 
 ```ts
-  it('convertToDouble is a no-op for tunnel, ferry, or already-double routes', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.addRoute(route('r1', 'c1', 'c2', { isTunnel: true }));
-    s.addRoute(route('r2', 'c1', 'c2', { ferryLocos: 1, color: 'GRAY' }));
-    s.addRoute(route('r3', 'c1', 'c2', { doubleGroup: 'A' }));
+it('convertToDouble is a no-op for tunnel, ferry, or already-double routes', () => {
+  const s = useEditorStore.getState();
+  s.placeCity(city('c1'));
+  s.placeCity(city('c2'));
+  s.addRoute(route('r1', 'c1', 'c2', { isTunnel: true }));
+  s.addRoute(route('r2', 'c1', 'c2', { ferryLocos: 1, color: 'GRAY' }));
+  s.addRoute(route('r3', 'c1', 'c2', { doubleGroup: 'A' }));
 
-    s.convertToDouble('r1');
-    s.convertToDouble('r2');
-    s.convertToDouble('r3');
+  s.convertToDouble('r1');
+  s.convertToDouble('r2');
+  s.convertToDouble('r3');
 
-    expect(useEditorStore.getState().draft.routes).toHaveLength(3);
-  });
+  expect(useEditorStore.getState().draft.routes).toHaveLength(3);
+});
 ```
 
 Replace it with two tests — ferry is no longer a no-op case, so it gets its own positive test instead:
 
 ```ts
-  it('convertToDouble is a no-op for tunnel or already-double routes', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.addRoute(route('r1', 'c1', 'c2', { isTunnel: true }));
-    s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
+it('convertToDouble is a no-op for tunnel or already-double routes', () => {
+  const s = useEditorStore.getState();
+  s.placeCity(city('c1'));
+  s.placeCity(city('c2'));
+  s.addRoute(route('r1', 'c1', 'c2', { isTunnel: true }));
+  s.addRoute(route('r2', 'c1', 'c2', { doubleGroup: 'A' }));
 
-    s.convertToDouble('r1');
-    s.convertToDouble('r2');
+  s.convertToDouble('r1');
+  s.convertToDouble('r2');
 
-    expect(useEditorStore.getState().draft.routes).toHaveLength(2);
+  expect(useEditorStore.getState().draft.routes).toHaveLength(2);
+});
+
+it('convertToDouble mirrors a ferry route into a double-ferry pair', () => {
+  const s = useEditorStore.getState();
+  s.placeCity(city('c1'));
+  s.placeCity(city('c2'));
+  s.addRoute(route('r1', 'c1', 'c2', { color: 'GRAY', length: 3, ferryLocos: 2, isTunnel: false }));
+
+  s.convertToDouble('r1');
+
+  const routes = useEditorStore.getState().draft.routes;
+  expect(routes).toHaveLength(2);
+  const original = routes.find((r) => r.id === 'r1')!;
+  expect(original.doubleGroup).toBe('A');
+  const sibling = routes.find((r) => r.id !== 'r1')!;
+  expect(sibling).toMatchObject({
+    a: 'c1',
+    b: 'c2',
+    length: 3,
+    isTunnel: false,
+    ferryLocos: 2,
+    color: 'GRAY',
+    doubleGroup: 'A',
   });
-
-  it('convertToDouble mirrors a ferry route into a double-ferry pair', () => {
-    const s = useEditorStore.getState();
-    s.placeCity(city('c1'));
-    s.placeCity(city('c2'));
-    s.addRoute(
-      route('r1', 'c1', 'c2', { color: 'GRAY', length: 3, ferryLocos: 2, isTunnel: false }),
-    );
-
-    s.convertToDouble('r1');
-
-    const routes = useEditorStore.getState().draft.routes;
-    expect(routes).toHaveLength(2);
-    const original = routes.find((r) => r.id === 'r1')!;
-    expect(original.doubleGroup).toBe('A');
-    const sibling = routes.find((r) => r.id !== 'r1')!;
-    expect(sibling).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      length: 3,
-      isTunnel: false,
-      ferryLocos: 2,
-      color: 'GRAY',
-      doubleGroup: 'A',
-    });
-  });
+});
 ```
 
 - [ ] **Step 2: Run the tests to verify the new one fails**
@@ -625,60 +623,61 @@ const baseRoutes: RouteDraft[] = [
 In the same file, add these tests inside the `describe('RoutesStage', ...)` block, after the existing `'clicking convert-to-double turns the selected route into a double pair'` test:
 
 ```tsx
-  it('shows the convert-to-double button for a ferry route', () => {
-    render(<RoutesStage />);
-    fireEvent.click(screen.getByText('route-r4'));
+it('shows the convert-to-double button for a ferry route', () => {
+  render(<RoutesStage />);
+  fireEvent.click(screen.getByText('route-r4'));
 
-    expect(screen.getByText('轉換為雙軌路線')).toBeInTheDocument();
+  expect(screen.getByText('轉換為雙軌路線')).toBeInTheDocument();
+});
+
+it('clicking convert-to-double on a ferry route mirrors it into a double-ferry pair', () => {
+  render(<RoutesStage />);
+  fireEvent.click(screen.getByText('route-r4'));
+  fireEvent.click(screen.getByText('轉換為雙軌路線'));
+
+  const routes = useEditorStore.getState().draft.routes;
+  const original = routes.find((r) => r.id === 'r4')!;
+  expect(original.doubleGroup).toBe('B'); // 'A' is already taken by r3
+  const sibling = routes.find((r) => r.doubleGroup === 'B' && r.id !== 'r4');
+  expect(sibling).toMatchObject({
+    a: 'c1',
+    b: 'c2',
+    length: 2,
+    isTunnel: false,
+    ferryLocos: 1,
+    color: 'GRAY',
   });
+});
 
-  it('clicking convert-to-double on a ferry route mirrors it into a double-ferry pair', () => {
-    render(<RoutesStage />);
-    fireEvent.click(screen.getByText('route-r4'));
-    fireEvent.click(screen.getByText('轉換為雙軌路線'));
+it('creates a mirrored double-ferry pair from the new-route form when ferry and make-double are both set', () => {
+  render(<RoutesStage />);
+  fireEvent.click(screen.getByText('city-c1'));
+  fireEvent.click(screen.getByText('city-c2'));
 
-    const routes = useEditorStore.getState().draft.routes;
-    const original = routes.find((r) => r.id === 'r4')!;
-    expect(original.doubleGroup).toBe('B'); // 'A' is already taken by r3
-    const sibling = routes.find((r) => r.doubleGroup === 'B' && r.id !== 'r4');
-    expect(sibling).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      length: 2,
-      isTunnel: false,
-      ferryLocos: 1,
-      color: 'GRAY',
-    });
+  fireEvent.change(screen.getByLabelText('渡輪所需彩色車頭數'), { target: { value: '2' } });
+  fireEvent.click(screen.getByRole('switch', { name: '建立為雙軌路線' }));
+  fireEvent.click(screen.getByText('儲存'));
+
+  const routes = useEditorStore.getState().draft.routes;
+  const created = routes.filter((r) => !baseRoutes.some((b) => b.id === r.id));
+  expect(created).toHaveLength(2);
+  const [first, second] = created;
+  expect(first).toMatchObject({ a: 'c1', b: 'c2', color: 'GRAY', ferryLocos: 2 });
+  expect(second).toMatchObject({
+    a: 'c1',
+    b: 'c2',
+    color: 'GRAY',
+    ferryLocos: 2,
+    doubleGroup: first!.doubleGroup,
   });
-
-  it('creates a mirrored double-ferry pair from the new-route form when ferry and make-double are both set', () => {
-    render(<RoutesStage />);
-    fireEvent.click(screen.getByText('city-c1'));
-    fireEvent.click(screen.getByText('city-c2'));
-
-    fireEvent.change(screen.getByLabelText('渡輪所需彩色車頭數'), { target: { value: '2' } });
-    fireEvent.click(screen.getByRole('switch', { name: '建立為雙軌路線' }));
-    fireEvent.click(screen.getByText('儲存'));
-
-    const routes = useEditorStore.getState().draft.routes;
-    const created = routes.filter((r) => !baseRoutes.some((b) => b.id === r.id));
-    expect(created).toHaveLength(2);
-    const [first, second] = created;
-    expect(first).toMatchObject({ a: 'c1', b: 'c2', color: 'GRAY', ferryLocos: 2 });
-    expect(second).toMatchObject({
-      a: 'c1',
-      b: 'c2',
-      color: 'GRAY',
-      ferryLocos: 2,
-      doubleGroup: first!.doubleGroup,
-    });
-  });
+});
 ```
 
 - [ ] **Step 3: Run the tests to verify the new ones fail**
 
 Run: `yarn workspace @trm/web test --run RoutesStage.test`
 Expected: FAIL —
+
 - `'shows the convert-to-double button for a ferry route'` fails because the button is still gated on `ferryLocos === 0`.
 - `'clicking convert-to-double on a ferry route...'` fails for the same reason (button not found to click).
 - `'creates a mirrored double-ferry pair from the new-route form...'` fails because the sibling still gets flipped to `RED`/`BLUE` instead of mirroring `GRAY`.

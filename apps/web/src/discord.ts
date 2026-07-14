@@ -1,6 +1,6 @@
-// Vanity URL — redirects server-side to the invite link, so the invite can rotate without
-// touching client code.
-export const DISCORD_URL = 'https://trmission.robothanzo.dev/discord';
+import { DISCORD_URL } from '@trm/client-core/links';
+
+export { DISCORD_URL };
 
 export function openDiscord(): void {
   window.open(DISCORD_URL, '_blank', 'noopener,noreferrer');

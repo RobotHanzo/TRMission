@@ -63,17 +63,17 @@ guard shape:
 
 1. `403` if `userId === actor.userId` (cannot delete yourself).
 2. `404` if the user does not exist.
-3. `409` if the target holds a `dashboardAccounts` record — *"target holds dashboard access —
-   revoke it first"* (identical guard to `disable`; keeps the maintainer/owner lockout
+3. `409` if the target holds a `dashboardAccounts` record — _"target holds dashboard access —
+   revoke it first"_ (identical guard to `disable`; keeps the maintainer/owner lockout
    protections authoritative — you can never delete a maintainer's account while their dashboard
    access is live).
 4. **Force-through teardown** → `PurgeService.terminateActiveForMember(actor.userId, userId,
-   reason)` (new public method, below). Returns `{ gamesTerminated, roomsClosed }`.
+reason)` (new public method, below). Returns `{ gamesTerminated, roomsClosed }`.
 5. `sessions.revokeAllForUser(userId)` — immediate session kill.
 6. `customMaps.deleteByOwner(userId)` — new `deleteMany({ ownerId })` helper on `CustomMapRepo`.
 7. `users.deleteById(userId)` — new `deleteOne({ _id })` helper on `UserRepo`.
 8. `audit.log(actor, 'user.delete', { type: 'user', id: userId }, { reason, gamesTerminated,
-   roomsClosed })`.
+roomsClosed })`.
 
 Returns `void` (controller sends `204`).
 
@@ -95,17 +95,17 @@ each. `DashboardUsersService` gains a `PurgeService` constructor dependency (bot
 
 ### What is deleted vs. kept
 
-| Deleted                                             | Kept (the archive)                                                        |
-| --------------------------------------------------- | ------------------------------------------------------------------------- |
-| `users` doc                                         | `matchHistory` (winner/participant ids dangle, as they already do for TTL-expired guests) |
-| refresh sessions (revoked)                          | `mapContents` (immutable published content — live games/replays keep resolving) |
-| owned `customMaps` drafts                           | `dashboardAudit` (denormalised `actorName`; records the deletion itself)   |
-|                                                     | the user's LIVE games become `TERMINATED` records; their rooms `CLOSED` — not deleted |
+| Deleted                    | Kept (the archive)                                                                        |
+| -------------------------- | ----------------------------------------------------------------------------------------- |
+| `users` doc                | `matchHistory` (winner/participant ids dangle, as they already do for TTL-expired guests) |
+| refresh sessions (revoked) | `mapContents` (immutable published content — live games/replays keep resolving)           |
+| owned `customMaps` drafts  | `dashboardAudit` (denormalised `actorName`; records the deletion itself)                  |
+|                            | the user's LIVE games become `TERMINATED` records; their rooms `CLOSED` — not deleted     |
 
 ### `apps/admin` — web UI
 
 - `net/rest.ts`: `deleteUser: (id, reason?) => req<void>('DELETE',
-  '/dashboard/users/:id', { reason })`.
+'/dashboard/users/:id', { reason })`.
 - `views/UsersView.tsx` `UserDrawer`: a second **danger** button **"Delete account"** rendered
   below the disable/enable button, gated on `canDelete = hasPermission('users.delete')` **and**
   `!detail.isMaintainer` (matches the server's 409). Clicking opens a `ConfirmDialog`

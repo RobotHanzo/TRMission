@@ -1,1 +1,223 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_md", "label": "2026-07-07-lobby-spectating-and-chat.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_lobby_spectating_spectator_chat_lobby_chat_layout_implementation_plan", "label": "Lobby Spectating + Spectator Chat + Lobby Chat Layout Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_1_lobby_demote_rejoin_endpoints_watch_rejoin", "label": "Task 1: Lobby demote/rejoin endpoints (`watch` / `rejoin`)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L21"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_2_widen_leave_kick_to_recognize_spectators", "label": "Task 2: Widen `leave`/`kick` to recognize spectators", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L479"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_3_widen_lobby_preset_chat_to_spectators", "label": "Task 3: Widen lobby preset chat to spectators", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L630"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_4_unify_post_start_spectating_into_roomdoc_spectators", "label": "Task 4: Unify post-start spectating into `RoomDoc.spectators`", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L703"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_5_in_game_chat_opens_to_spectators_hub", "label": "Task 5: In-game chat opens to spectators (hub)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L781"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_6_web_roster_store_learns_about_spectators", "label": "Task 6: Web roster store learns about spectators", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L933"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_7_chatpanel_opens_to_spectators_removes_the_disabled_gate_fixes_author_colour", "label": "Task 7: `ChatPanel` opens to spectators (removes the disabled gate, fixes author colour)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1150"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_8_drop_the_now_dead_chatdisabled_plumbing_commspanel_gamestage", "label": "Task 8: Drop the now-dead `chatDisabled` plumbing (`CommsPanel`, `GameStage`)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1351"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_9_roomscreen_spectate_join_as_player_buttons_spectator_list_poll_effect_fix", "label": "Task 9: `RoomScreen` \u2014 Spectate / Join-as-player buttons + spectator list + poll-effect fix", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1411"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_10_restyle_the_lobby_chat_panel_as_a_right_hand_column", "label": "Task 10: Restyle the lobby chat panel as a right-hand column", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1762"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_11_full_repo_verification", "label": "Task 11: Full-repo verification", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L2063"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_lobby_spectating_spectator_chat_lobby_chat_layout_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_lobby_spectating_spectator_chat_lobby_chat_layout_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_1_lobby_demote_rejoin_endpoints_watch_rejoin", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L21", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_2_widen_leave_kick_to_recognize_spectators", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L479", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_3_widen_lobby_preset_chat_to_spectators", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L630", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_4_unify_post_start_spectating_into_roomdoc_spectators", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L703", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_5_in_game_chat_opens_to_spectators_hub", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L781", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_6_web_roster_store_learns_about_spectators", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L933", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_7_chatpanel_opens_to_spectators_removes_the_disabled_gate_fixes_author_colour", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1150", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_8_drop_the_now_dead_chatdisabled_plumbing_commspanel_gamestage", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1351", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_9_roomscreen_spectate_join_as_player_buttons_spectator_list_poll_effect_fix", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1411", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_10_restyle_the_lobby_chat_panel_as_a_right_hand_column", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L1762", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_11_full_repo_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md", "source_location": "L2063", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_md",
+      "label": "2026-07-07-lobby-spectating-and-chat.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_lobby_spectating_spectator_chat_lobby_chat_layout_implementation_plan",
+      "label": "Lobby Spectating + Spectator Chat + Lobby Chat Layout Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_1_lobby_demote_rejoin_endpoints_watch_rejoin",
+      "label": "Task 1: Lobby demote/rejoin endpoints (`watch` / `rejoin`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L21"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_2_widen_leave_kick_to_recognize_spectators",
+      "label": "Task 2: Widen `leave`/`kick` to recognize spectators",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L479"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_3_widen_lobby_preset_chat_to_spectators",
+      "label": "Task 3: Widen lobby preset chat to spectators",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L630"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_4_unify_post_start_spectating_into_roomdoc_spectators",
+      "label": "Task 4: Unify post-start spectating into `RoomDoc.spectators`",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L703"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_5_in_game_chat_opens_to_spectators_hub",
+      "label": "Task 5: In-game chat opens to spectators (hub)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L781"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_6_web_roster_store_learns_about_spectators",
+      "label": "Task 6: Web roster store learns about spectators",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L933"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_7_chatpanel_opens_to_spectators_removes_the_disabled_gate_fixes_author_colour",
+      "label": "Task 7: `ChatPanel` opens to spectators (removes the disabled gate, fixes author colour)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1150"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_8_drop_the_now_dead_chatdisabled_plumbing_commspanel_gamestage",
+      "label": "Task 8: Drop the now-dead `chatDisabled` plumbing (`CommsPanel`, `GameStage`)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1351"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_9_roomscreen_spectate_join_as_player_buttons_spectator_list_poll_effect_fix",
+      "label": "Task 9: `RoomScreen` \u2014 Spectate / Join-as-player buttons + spectator list + poll-effect fix",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1411"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_10_restyle_the_lobby_chat_panel_as_a_right_hand_column",
+      "label": "Task 10: Restyle the lobby chat panel as a right-hand column",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1762"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_11_full_repo_verification",
+      "label": "Task 11: Full-repo verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L2063"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_lobby_spectating_spectator_chat_lobby_chat_layout_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_lobby_spectating_spectator_chat_lobby_chat_layout_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_1_lobby_demote_rejoin_endpoints_watch_rejoin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_2_widen_leave_kick_to_recognize_spectators",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L479",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_3_widen_lobby_preset_chat_to_spectators",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L630",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_4_unify_post_start_spectating_into_roomdoc_spectators",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L703",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_5_in_game_chat_opens_to_spectators_hub",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L781",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_6_web_roster_store_learns_about_spectators",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L933",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_7_chatpanel_opens_to_spectators_removes_the_disabled_gate_fixes_author_colour",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1150",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_8_drop_the_now_dead_chatdisabled_plumbing_commspanel_gamestage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1351",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_9_roomscreen_spectate_join_as_player_buttons_spectator_list_poll_effect_fix",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1411",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_10_restyle_the_lobby_chat_panel_as_a_right_hand_column",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L1762",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_07_lobby_spectating_and_chat_task_11_full_repo_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-07-lobby-spectating-and-chat.md",
+      "source_location": "L2063",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,1 +1,47 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_md", "label": "p2-task-5-brief.md", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-5-brief.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_task_5_apps_admin_view_replay_button", "label": "Task 5: apps/admin \u2014 \"View Replay\" button", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-5-brief.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_self_review_notes", "label": "Self-Review Notes", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-5-brief.md", "source_location": "L137"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_md", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_task_5_apps_admin_view_replay_button", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-5-brief.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_md", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_self_review_notes", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-5-brief.md", "source_location": "L137", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_md",
+      "label": "p2-task-5-brief.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-5-brief.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_task_5_apps_admin_view_replay_button",
+      "label": "Task 5: apps/admin \u2014 \"View Replay\" button",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-5-brief.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_self_review_notes",
+      "label": "Self-Review Notes",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-5-brief.md",
+      "source_location": "L137"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_task_5_apps_admin_view_replay_button",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-5-brief.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_5_brief_self_review_notes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-5-brief.md",
+      "source_location": "L137",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

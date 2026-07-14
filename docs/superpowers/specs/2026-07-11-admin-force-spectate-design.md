@@ -42,7 +42,7 @@ needed at all** — this is the smallest possible surface for the capability.
 
 `packages/shared/src/dashboard.ts`: add `'games.spectateLive'` to `DASHBOARD_PERMISSIONS` and to
 `VIEWER_PERMISSIONS` (the same tier as `games.viewReplay`). Live-spectating is arguably
-*lower*-sensitivity than replay: the spectator only ever receives a null-viewer redacted
+_lower_-sensitivity than replay: the spectator only ever receives a null-viewer redacted
 projection (no hand, no tickets, ever), whereas a replay eventually discloses everything about a
 finished game.
 
@@ -59,7 +59,7 @@ mintSpectateTicket(actor: AuthUser, gameId: string): Promise<{ ticket: string; e
 - Audits `game.spectateLive` (`{ type: 'game', id: gameId }`) via `AuditService`, same shape as
   `mintReplayTicket`'s audit call.
 - Returns `{ ticket: this.tokens.signWsTicket({ gameId, playerId: actor.userId, seat: -1 }),
-  expiresIn: env.wsTicketTtl }` — the *existing* ws-game ticket, minted with the maintainer's own
+expiresIn: env.wsTicketTtl }` — the _existing_ ws-game ticket, minted with the maintainer's own
   account id as the spectating `playerId`. No new ticket kind, no change to `TokenService` or the
   hub's ticket verifier.
 
@@ -94,7 +94,7 @@ GET /history/:gameId/admin-spectate?ticket=...
   `HistoryRepo.displayNames` + `game.bots`) — no action log, no config, no seed: the live WS
   snapshot already carries all game state, this endpoint exists solely to resolve names.
 
-Note this guard accepts *any* valid spectator ws-game ticket for the matching game, not only ones
+Note this guard accepts _any_ valid spectator ws-game ticket for the matching game, not only ones
 minted by the dashboard flow — that's fine: a normal spectator's own ticket would equally satisfy
 `seat === -1`, and player display names are not hidden information.
 
@@ -159,14 +159,14 @@ Maintainer (dashboard session, games.spectateLive)
 
 ## Error handling
 
-| Condition | Behavior |
-|---|---|
-| Game not LIVE at mint time | 409 from `mintSpectateTicket`, toast in `GamesView` |
-| Game unknown | 404 from `mintSpectateTicket` |
-| Game ends while admin is watching | Normal game-over frames fire; no special-casing (identical to any real spectator) |
-| Expired/invalid ticket at `ClientHello` | Existing `UNAUTHENTICATED` rejection path, unchanged |
-| Expired/invalid/mismatched ticket at roster fetch | Nondisclosing 404 from the new guard |
-| Socket drop after ws-ticket TTL | No re-mint from this screen; admin opens a fresh link |
+| Condition                                         | Behavior                                                                          |
+| ------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Game not LIVE at mint time                        | 409 from `mintSpectateTicket`, toast in `GamesView`                               |
+| Game unknown                                      | 404 from `mintSpectateTicket`                                                     |
+| Game ends while admin is watching                 | Normal game-over frames fire; no special-casing (identical to any real spectator) |
+| Expired/invalid ticket at `ClientHello`           | Existing `UNAUTHENTICATED` rejection path, unchanged                              |
+| Expired/invalid/mismatched ticket at roster fetch | Nondisclosing 404 from the new guard                                              |
+| Socket drop after ws-ticket TTL                   | No re-mint from this screen; admin opens a fresh link                             |
 
 ## Testing
 

@@ -26,29 +26,31 @@
 ### Task 1: Spectating is not auto-purge activity (game + record paths)
 
 **Files:**
+
 - Modify: `apps/server/src/persistence/game-store.ts` (`addSpectator`, ~L156-161)
 - Modify: `apps/server/src/lobby/room.repo.ts` (`recordSpectator`, ~L540-545)
 - Test: `apps/server/test/spectators.spec.ts`
 
 **Interfaces:**
+
 - Consumes: nothing new.
 - Produces: `MongoGameStore.addSpectator(gameId, userId)` and `RoomRepo.recordSpectator(code, spectator)` no longer bump `updatedAt` (same signatures).
 
 - [ ] **Step 1: Write the failing test** — append inside the `describe('spectator persistence', …)` block in `apps/server/test/spectators.spec.ts`:
 
 ```ts
-  it('addSpectator does not bump the game updatedAt (spectating is not activity)', async () => {
-    const board = taiwanBoard();
-    const config: GameConfig = { seed: 'spect-nobump', players, contentHash: CONTENT_HASH };
-    const genesis = initGame(board, config);
-    await store.createGame('gs-nobump', config, genesis, stateDigest(genesis));
-    const before = await db.collection<GameDoc>('games').findOne({ _id: 'gs-nobump' });
-    await new Promise((r) => setTimeout(r, 5));
-    await store.addSpectator('gs-nobump', 'watcher');
-    const after = await db.collection<GameDoc>('games').findOne({ _id: 'gs-nobump' });
-    expect(after?.spectators).toEqual(['watcher']);
-    expect(after?.updatedAt.getTime()).toBe(before?.updatedAt.getTime());
-  });
+it('addSpectator does not bump the game updatedAt (spectating is not activity)', async () => {
+  const board = taiwanBoard();
+  const config: GameConfig = { seed: 'spect-nobump', players, contentHash: CONTENT_HASH };
+  const genesis = initGame(board, config);
+  await store.createGame('gs-nobump', config, genesis, stateDigest(genesis));
+  const before = await db.collection<GameDoc>('games').findOne({ _id: 'gs-nobump' });
+  await new Promise((r) => setTimeout(r, 5));
+  await store.addSpectator('gs-nobump', 'watcher');
+  const after = await db.collection<GameDoc>('games').findOne({ _id: 'gs-nobump' });
+  expect(after?.spectators).toEqual(['watcher']);
+  expect(after?.updatedAt.getTime()).toBe(before?.updatedAt.getTime());
+});
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -92,11 +94,13 @@ git commit -m "fix(server): spectating no longer bumps a game's purge clock"
 ### Task 2: Owners cannot spectate
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts` (`BecomeSpectatorResult` type ~L99-105, `becomeSpectator` ~L480-507)
 - Modify: `apps/server/src/lobby/lobby.service.ts` (`becomeSpectator` ~L194-204, `spectateTicket` ~L354-369)
 - Test: `apps/server/test/lobby.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `RoomRepo.becomeSpectator` from Task 1's file.
 - Produces: `becomeSpectator` returns a new `'is_host'` result; `LobbyService.spectateTicket` throws `403` for a seated member.
 
@@ -107,7 +111,11 @@ describe('lobby: host cannot spectate', () => {
   it('rejects the host demoting to spectator, but lets a non-host demote', async () => {
     const a = await guest('Ada');
     const b = await guest('Ben');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
     await request(server()).post(`/api/v1/rooms/${code}/watch`).set(auth(a.token)).expect(400); // host
@@ -117,11 +125,23 @@ describe('lobby: host cannot spectate', () => {
   it('rejects a seated player minting a spectate ticket for their own game', async () => {
     const a = await guest('Cid');
     const b = await guest('Dot');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
-    await request(server()).post(`/api/v1/rooms/${code}/ready`).set(auth(a.token)).send({ ready: true }).expect(200);
-    await request(server()).post(`/api/v1/rooms/${code}/ready`).set(auth(b.token)).send({ ready: true }).expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ready`)
+      .set(auth(a.token))
+      .send({ ready: true })
+      .expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ready`)
+      .set(auth(b.token))
+      .send({ ready: true })
+      .expect(200);
     await request(server()).post(`/api/v1/rooms/${code}/start`).set(auth(a.token)).expect(200);
     await request(server()).post(`/api/v1/rooms/${code}/spectate`).set(auth(a.token)).expect(403);
   });
@@ -179,15 +199,15 @@ export type BecomeSpectatorResult =
 - [ ] **Step 5: Map `'is_host'` in the service** — in `apps/server/src/lobby/lobby.service.ts` `becomeSpectator`, add after the `not_member` line:
 
 ```ts
-    if (r === 'is_host') throw new BadRequestException('the host cannot spectate');
+if (r === 'is_host') throw new BadRequestException('the host cannot spectate');
 ```
 
 - [ ] **Step 6: Reject seated players from `spectateTicket`** — in `apps/server/src/lobby/lobby.service.ts`, add right after the `if (!room.gameId) throw …` line inside `spectateTicket`:
 
 ```ts
-    if (this.seatOf(room, user.userId) >= 0) {
-      throw new ForbiddenException('players cannot spectate their own game');
-    }
+if (this.seatOf(room, user.userId) >= 0) {
+  throw new ForbiddenException('players cannot spectate their own game');
+}
 ```
 
 - [ ] **Step 7: Run tests to verify they pass**
@@ -207,12 +227,14 @@ git commit -m "feat(server): prohibit room owners from spectating"
 ### Task 3: Ownership transfer, room close, and a bot-safe host leave
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts` (add result types after `BecomePlayerResult` ~L106; `leave` ~L236-265; add `transferHost` + `closeRoom` methods)
 - Modify: `apps/server/src/lobby/lobby.service.ts` (add `transferOwnership` + `closeRoom` after `leave` ~L177)
 - Modify: `apps/server/src/lobby/lobby.controller.ts` (add two routes after `leave` ~L70)
 - Test: `apps/server/test/lobby.e2e.spec.ts`
 
 **Interfaces:**
+
 - Produces:
   - `RoomRepo.transferHost(code, hostId, targetId): Promise<RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid'>`
   - `RoomRepo.closeRoom(code, hostId): Promise<RoomDoc | 'not_found' | 'forbidden' | 'started'>`
@@ -227,10 +249,17 @@ describe('lobby: ownership transfer, close, and bot-safe leave', () => {
   it('transfers ownership to a seated member, keeping the old host seated', async () => {
     const a = await guest('Eve');
     const b = await guest('Fox');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
-    const res = await request(server()).post(`/api/v1/rooms/${code}/transfer/${b.id}`).set(auth(a.token)).expect(200);
+    const res = await request(server())
+      .post(`/api/v1/rooms/${code}/transfer/${b.id}`)
+      .set(auth(a.token))
+      .expect(200);
     expect(res.body.hostId).toBe(b.id);
     expect(res.body.members.map((m: { userId: string }) => m.userId)).toContain(a.id);
   });
@@ -238,30 +267,58 @@ describe('lobby: ownership transfer, close, and bot-safe leave', () => {
   it('rejects transfer by a non-host and to an invalid target', async () => {
     const a = await guest('Gil');
     const b = await guest('Hal');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
-    await request(server()).post(`/api/v1/rooms/${code}/transfer/${a.id}`).set(auth(b.token)).expect(403);
-    await request(server()).post(`/api/v1/rooms/${code}/transfer/nobody`).set(auth(a.token)).expect(400);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/transfer/${a.id}`)
+      .set(auth(b.token))
+      .expect(403);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/transfer/nobody`)
+      .set(auth(a.token))
+      .expect(400);
   });
 
   it('lets the host close the room for everyone', async () => {
     const a = await guest('Ivy');
     const b = await guest('Jon');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
     await request(server()).post(`/api/v1/rooms/${code}/close`).set(auth(b.token)).expect(403); // non-host
-    const res = await request(server()).post(`/api/v1/rooms/${code}/close`).set(auth(a.token)).expect(200);
+    const res = await request(server())
+      .post(`/api/v1/rooms/${code}/close`)
+      .set(auth(a.token))
+      .expect(200);
     expect(res.body.status).toBe('CLOSED');
   });
 
   it('closes the room when the host leaves with only bots remaining', async () => {
     const a = await guest('Kim');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
-    await request(server()).post(`/api/v1/rooms/${code}/bots`).set(auth(a.token)).send({ difficulty: 'EASY' }).expect(200);
-    const left = await request(server()).post(`/api/v1/rooms/${code}/leave`).set(auth(a.token)).expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/bots`)
+      .set(auth(a.token))
+      .send({ difficulty: 'EASY' })
+      .expect(200);
+    const left = await request(server())
+      .post(`/api/v1/rooms/${code}/leave`)
+      .set(auth(a.token))
+      .expect(200);
     expect(left.body.status).toBe('CLOSED');
   });
 });
@@ -400,6 +457,7 @@ git commit -m "feat(server): owner transfer/close endpoints + bot-safe host leav
 ### Task 4: Lobby free-text chat (server)
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts` (`RoomChatEntry` ~L57-61, add `ROOM_CHAT_MAX_LEN`, `sendChat` ~L426-448)
 - Modify: `apps/server/src/lobby/lobby.schemas.ts` (`ChatSchema` ~L11, `RoomChatEntrySchema` ~L47-51)
 - Modify: `apps/server/src/lobby/lobby.service.ts` (`sendChat` ~L217-223, imports)
@@ -407,6 +465,7 @@ git commit -m "feat(server): owner transfer/close endpoints + bot-safe host leav
 - Test: `apps/server/test/lobby.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `RoomRepo` from Task 1–3's file.
 - Produces:
   - `RoomChatEntry = { userId: string; ts: number; presetId?: string; text?: string }`; `export const ROOM_CHAT_MAX_LEN = 2048`.
@@ -419,16 +478,35 @@ git commit -m "feat(server): owner transfer/close endpoints + bot-safe host leav
 describe('lobby: free-text chat', () => {
   it('accepts free text, still accepts presets, and rejects empty / both / neither', async () => {
     const a = await guest('Lee');
-    const room = await request(server()).post('/api/v1/rooms').set(auth(a.token)).send({}).expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
     const code: string = room.body.code;
     const sent = await request(server())
-      .post(`/api/v1/rooms/${code}/chat`).set(auth(a.token)).send({ text: 'hello there' }).expect(200);
+      .post(`/api/v1/rooms/${code}/chat`)
+      .set(auth(a.token))
+      .send({ text: 'hello there' })
+      .expect(200);
     const last = sent.body.chat[sent.body.chat.length - 1];
     expect(last.text).toBe('hello there');
     expect(last.presetId).toBeUndefined();
-    await request(server()).post(`/api/v1/rooms/${code}/chat`).set(auth(a.token)).send({ presetId: 'THANKS' }).expect(200);
-    await request(server()).post(`/api/v1/rooms/${code}/chat`).set(auth(a.token)).send({ text: '   ' }).expect(400);
-    await request(server()).post(`/api/v1/rooms/${code}/chat`).set(auth(a.token)).send({}).expect(400);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/chat`)
+      .set(auth(a.token))
+      .send({ presetId: 'THANKS' })
+      .expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/chat`)
+      .set(auth(a.token))
+      .send({ text: '   ' })
+      .expect(400);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/chat`)
+      .set(auth(a.token))
+      .send({})
+      .expect(400);
   });
 });
 ```
@@ -572,10 +650,12 @@ git commit -m "feat(server): free-text lobby chat alongside presets"
 ### Task 5: Web — fix "spectate acts as a kick" + hide Watch from the host
 
 **Files:**
+
 - Modify: `apps/web/src/screens/RoomScreen.tsx` (poll branch ~L110-141; the seated-member button row ~L479-493)
 - Test: `apps/web/src/screens/RoomScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: existing `api.getRoom`, `useUi`, `useSession`.
 - Produces: no exported changes — behavioural fix only.
 
@@ -630,56 +710,60 @@ Expected: FAIL — the host still shows a 觀戰 button and the self-demote poll
 - [ ] **Step 3: Reorder the poll's non-member branch** in `apps/web/src/screens/RoomScreen.tsx` — replace the whole `if (!r.members.some((m) => m.userId === user?.id)) { … }` block (currently lines ~110-141) with:
 
 ```tsx
-        if (!r.members.some((m) => m.userId === user?.id)) {
-          // Spectators (arrived watching OR demoted themselves from a seat) are legitimately
-          // absent from `members`; only vanishing from BOTH lists is a kick.
-          const amSpectator = r.spectators.some((s) => s.userId === user?.id);
-          if (wasPresent && !amSpectator) {
-            active = false;
-            if (r.status === 'LOBBY') setKicked(true);
-            else goHome();
-            return;
-          }
-          if (r.status !== 'LOBBY') {
-            // A started game we aren't seated in can't be joined — spectate if allowed (this
-            // carries a demoted lobby spectator into watching once the game starts); else bail home.
-            if (r.status === 'STARTED' && r.gameId && r.settings.allowSpectating) {
-              const tk = await api.spectate(code);
-              if (!active) return;
-              connectGame(tk.ticket);
-              enterGame(tk.gameId, tk.ticket);
-              return;
-            }
-            active = false;
-            goHome();
-            return;
-          }
-          // A lobby non-member who isn't a spectator joins a seat once; a demoted spectator
-          // falls through to keep watching the lobby (never auto-rejoined onto a seat).
-          if (!amSpectator) {
-            r = await api.joinRoom(code);
-            if (!active) return;
-          }
-        }
+if (!r.members.some((m) => m.userId === user?.id)) {
+  // Spectators (arrived watching OR demoted themselves from a seat) are legitimately
+  // absent from `members`; only vanishing from BOTH lists is a kick.
+  const amSpectator = r.spectators.some((s) => s.userId === user?.id);
+  if (wasPresent && !amSpectator) {
+    active = false;
+    if (r.status === 'LOBBY') setKicked(true);
+    else goHome();
+    return;
+  }
+  if (r.status !== 'LOBBY') {
+    // A started game we aren't seated in can't be joined — spectate if allowed (this
+    // carries a demoted lobby spectator into watching once the game starts); else bail home.
+    if (r.status === 'STARTED' && r.gameId && r.settings.allowSpectating) {
+      const tk = await api.spectate(code);
+      if (!active) return;
+      connectGame(tk.ticket);
+      enterGame(tk.gameId, tk.ticket);
+      return;
+    }
+    active = false;
+    goHome();
+    return;
+  }
+  // A lobby non-member who isn't a spectator joins a seat once; a demoted spectator
+  // falls through to keep watching the lobby (never auto-rejoined onto a seat).
+  if (!amSpectator) {
+    r = await api.joinRoom(code);
+    if (!active) return;
+  }
+}
 ```
 
 - [ ] **Step 4: Hide the Watch button from the host** in `apps/web/src/screens/RoomScreen.tsx` — replace the `{me && ( … ready + watch … )}` block (~L480-493) with a ready button for all seated members and a Watch button only for non-hosts:
 
 ```tsx
-          {me && (
-            <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
-              {me.ready ? t('cancelReady') : t('markReady')}
-            </button>
-          )}
-          {me && !isHost && (
-            <button
-              onClick={() => void becomeSpectator()}
-              disabled={room.members.length <= 1}
-              title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
-            >
-              {t('watch')}
-            </button>
-          )}
+{
+  me && (
+    <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
+      {me.ready ? t('cancelReady') : t('markReady')}
+    </button>
+  );
+}
+{
+  me && !isHost && (
+    <button
+      onClick={() => void becomeSpectator()}
+      disabled={room.members.length <= 1}
+      title={room.members.length <= 1 ? t('spectateDisabledOnlyMember') : undefined}
+    >
+      {t('watch')}
+    </button>
+  );
+}
 ```
 
 - [ ] **Step 5: Run tests to verify they pass**
@@ -699,11 +783,13 @@ git commit -m "fix(web): self-demote to spectator no longer reads as a kick; hid
 ### Task 6: Web — free-text lobby chat input
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts` (`RoomChatEntry` ~L68-72, `sendRoomChat` ~L340-341)
 - Modify: `apps/web/src/screens/RoomScreen.tsx` (`sendChat` ~L240; `chatDraft` state near ~L64; chat panel render ~L552-575)
 - Test: `apps/web/src/screens/RoomScreen.test.tsx` (update the existing preset test + `baseRoom` chat type; add a free-text test)
 
 **Interfaces:**
+
 - Consumes: server free-text chat from Task 4.
 - Produces: `api.sendRoomChat(code, payload: { presetId: string } | { text: string })`; `RoomChatEntry` gains optional `text`, `presetId` optional.
 
@@ -718,7 +804,7 @@ git commit -m "fix(web): self-demote to spectator no longer reads as a kick; hid
 (b) In `describe('RoomScreen preset chat', …)`, update the first test's assertion from `toHaveBeenCalledWith('ABCD', 'GOOD_LUCK')` to:
 
 ```ts
-    expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', { presetId: 'GOOD_LUCK' });
+expect(api.sendRoomChat).toHaveBeenCalledWith('ABCD', { presetId: 'GOOD_LUCK' });
 ```
 
 (c) Append a free-text test to the same `describe`:
@@ -768,47 +854,45 @@ Replace `sendRoomChat`:
 (a) Add draft state next to the other `useState` calls (near `const [room, setRoom] = useState…`):
 
 ```tsx
-  const [chatDraft, setChatDraft] = useState('');
+const [chatDraft, setChatDraft] = useState('');
 ```
 
 (b) Change the preset sender to send the object shape (~L240):
 
 ```tsx
-  const sendChat = (presetId: string) => void guard(api.sendRoomChat(code, { presetId }));
+const sendChat = (presetId: string) => void guard(api.sendRoomChat(code, { presetId }));
 ```
 
 (c) In the chat panel, render `text` when present and add the input form. Replace the `.chat-messages` map line that renders the preset with:
 
 ```tsx
-                  <span className="chat-text">
-                    {c.text ?? t(chatPresetKey(c.presetId ?? ''))}
-                  </span>
+<span className="chat-text">{c.text ?? t(chatPresetKey(c.presetId ?? ''))}</span>
 ```
 
 and, immediately after the closing `</div>` of `.chat-presets` (before `</section>`), add:
 
 ```tsx
-          <form
-            className="chat-input"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const text = chatDraft.trim();
-              if (!text) return;
-              setChatDraft('');
-              void guard(api.sendRoomChat(code, { text }));
-            }}
-          >
-            <input
-              type="text"
-              maxLength={2048}
-              value={chatDraft}
-              placeholder={t('chat.placeholder')}
-              onChange={(e) => setChatDraft(e.target.value)}
-            />
-            <button type="submit" disabled={chatDraft.trim().length === 0}>
-              {t('chat.send')}
-            </button>
-          </form>
+<form
+  className="chat-input"
+  onSubmit={(e) => {
+    e.preventDefault();
+    const text = chatDraft.trim();
+    if (!text) return;
+    setChatDraft('');
+    void guard(api.sendRoomChat(code, { text }));
+  }}
+>
+  <input
+    type="text"
+    maxLength={2048}
+    value={chatDraft}
+    placeholder={t('chat.placeholder')}
+    onChange={(e) => setChatDraft(e.target.value)}
+  />
+  <button type="submit" disabled={chatDraft.trim().length === 0}>
+    {t('chat.send')}
+  </button>
+</form>
 ```
 
 - [ ] **Step 5: Run tests to verify they pass**
@@ -828,6 +912,7 @@ git commit -m "feat(web): free-text input in the lobby chat"
 ### Task 7: Web — owner leave (transfer-or-close) dialog
 
 **Files:**
+
 - Create: `apps/web/src/components/OwnerLeaveDialog.tsx`
 - Modify: `apps/web/src/net/rest.ts` (add `transferOwnership`, `closeRoom` near `watchRoom` ~L336-337)
 - Modify: `apps/web/src/i18n/index.ts` (add 7 keys to zh after `leaveConfirmBody` ~L211, and the same to en after `leaveConfirmBody` ~L727)
@@ -835,6 +920,7 @@ git commit -m "feat(web): free-text input in the lobby chat"
 - Test: `apps/web/src/screens/RoomScreen.test.tsx` (add `transferOwnership`/`closeRoom` to the mock; two new tests)
 
 **Interfaces:**
+
 - Consumes: server transfer/close from Task 3; `RoomMember` type from `net/rest`.
 - Produces: `OwnerLeaveDialog` component; `api.transferOwnership(code, userId)`, `api.closeRoom(code)`.
 
@@ -1001,65 +1087,69 @@ import { OwnerLeaveDialog } from '../components/OwnerLeaveDialog';
 (b) Add a second confirm-action and dialog-open state near the existing `useConfirmAction()` destructure:
 
 ```tsx
-  const {
-    open: closeOpen,
-    request: requestClose,
-    confirm: confirmClose,
-    cancel: cancelClose,
-  } = useConfirmAction();
-  const [ownerLeaveOpen, setOwnerLeaveOpen] = useState(false);
+const {
+  open: closeOpen,
+  request: requestClose,
+  confirm: confirmClose,
+  cancel: cancelClose,
+} = useConfirmAction();
+const [ownerLeaveOpen, setOwnerLeaveOpen] = useState(false);
 ```
 
 (c) Add derived list + handlers near the existing `leave` function:
 
 ```tsx
-  const otherHumans = room.members.filter((m) => m.userId !== user?.id && !m.isBot);
-  const closeAndGoHome = async () => {
-    await api.closeRoom(code).catch(() => undefined);
-    goHome();
-  };
-  const transferAndLeave = async (targetId: string) => {
-    setOwnerLeaveOpen(false);
-    await api.transferOwnership(code, targetId).catch(() => undefined);
-    await api.leaveRoom(code).catch(() => undefined);
-    goHome();
-  };
-  const onLeaveClick = () => {
-    if (!isHost) {
-      requestLeave(() => void leave());
-    } else if (otherHumans.length === 0) {
-      requestClose(() => void closeAndGoHome());
-    } else {
-      setOwnerLeaveOpen(true);
-    }
-  };
+const otherHumans = room.members.filter((m) => m.userId !== user?.id && !m.isBot);
+const closeAndGoHome = async () => {
+  await api.closeRoom(code).catch(() => undefined);
+  goHome();
+};
+const transferAndLeave = async (targetId: string) => {
+  setOwnerLeaveOpen(false);
+  await api.transferOwnership(code, targetId).catch(() => undefined);
+  await api.leaveRoom(code).catch(() => undefined);
+  goHome();
+};
+const onLeaveClick = () => {
+  if (!isHost) {
+    requestLeave(() => void leave());
+  } else if (otherHumans.length === 0) {
+    requestClose(() => void closeAndGoHome());
+  } else {
+    setOwnerLeaveOpen(true);
+  }
+};
 ```
 
 (d) Point the Leave button at `onLeaveClick` — replace the existing leave button:
 
 ```tsx
-          <button onClick={onLeaveClick}>{t('leave')}</button>
+<button onClick={onLeaveClick}>{t('leave')}</button>
 ```
 
 (e) Render the two new dialogs next to the existing `{leaveOpen && (<ConfirmDialog … />)}` block:
 
 ```tsx
-        {closeOpen && (
-          <ConfirmDialog
-            title={t('closeRoomConfirmTitle')}
-            message={t('closeRoomConfirmBody')}
-            onConfirm={confirmClose}
-            onCancel={cancelClose}
-          />
-        )}
-        {ownerLeaveOpen && (
-          <OwnerLeaveDialog
-            candidates={otherHumans}
-            onTransfer={(id) => void transferAndLeave(id)}
-            onClose={() => void closeAndGoHome()}
-            onCancel={() => setOwnerLeaveOpen(false)}
-          />
-        )}
+{
+  closeOpen && (
+    <ConfirmDialog
+      title={t('closeRoomConfirmTitle')}
+      message={t('closeRoomConfirmBody')}
+      onConfirm={confirmClose}
+      onCancel={cancelClose}
+    />
+  );
+}
+{
+  ownerLeaveOpen && (
+    <OwnerLeaveDialog
+      candidates={otherHumans}
+      onTransfer={(id) => void transferAndLeave(id)}
+      onClose={() => void closeAndGoHome()}
+      onCancel={() => setOwnerLeaveOpen(false)}
+    />
+  );
+}
 ```
 
 - [ ] **Step 7: Run tests to verify they pass**

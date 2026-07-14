@@ -11,7 +11,7 @@ import { getSocket } from '../../net/connection';
 import { usePlayerName } from '../../game/playerName';
 import { seatColor } from '../../theme/colors';
 import { chatRejectionHintKey } from '../../game/chatErrors';
-import { CHAT_PRESET_IDS, chatPresetKey } from '../../game/chatPresets';
+import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core';
 import { PlayerActionSheet, canModerate } from './PlayerActionSheet';
 
 const MAX_LEN = 2048;

@@ -10,6 +10,6 @@ cannot be engineered away (spec: Risks & mitigations).
 By signing below, the business owner acknowledges this risk and approves submission to
 the Apple App Store and Google Play under the TRMission name and current art.
 
-- Owner: ****\*\*****\_\_****\*\***** Date: \***\*\_\_\*\***
+- Owner: \***\*\*\*\*\***\_\_\***\*\*\*\*\*** Date: \***\*\_\_\*\***
 - Reviewed defenses: original content audit ✔ · no reserved terms in store copy/keywords ✔
   (verified: `rg -ri "ticket to ride|days of wonder" apps/mobile/fastlane docs/release` → no hits)

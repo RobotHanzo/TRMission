@@ -24,11 +24,13 @@
 ### Task 1: `@trm/map-data` — Taiwan fork geography
 
 **Files:**
+
 - Modify: `packages/map-data/src/taiwan-geography.ts` (add `taiwanForkGeography()`)
 - Modify: `packages/map-data/src/index.ts` (add `forkGeography?` to `OfficialMap`; set it on the Taiwan entry)
 - Test: `packages/map-data/test/fork-geography.spec.ts` (create)
 
 **Interfaces:**
+
 - Consumes: existing `TAIWAN_BASE_VIEW`, `TAIWAN_OUTLINE`, `TAIWAN_ISLANDS` (from `taiwan-geography.ts`); `MapGeography` type; `validateGeography`, `validateContent`, `validateForPlay`, `officialMapById`, `OFFICIAL_MAPS` (from `index.ts`).
 - Produces:
   - `taiwanForkGeography(): MapGeography` (exported from `taiwan-geography.ts`, re-exported via `index.ts`'s `export * from './taiwan-geography'`).
@@ -179,7 +181,12 @@ Set it on the Taiwan entry:
 
 ```ts
 export const OFFICIAL_MAPS: readonly OfficialMap[] = [
-  { mapId: MAP_META.mapId, content: TAIWAN_CONTENT, hash: CONTENT_HASH, forkGeography: taiwanForkGeography() },
+  {
+    mapId: MAP_META.mapId,
+    content: TAIWAN_CONTENT,
+    hash: CONTENT_HASH,
+    forkGeography: taiwanForkGeography(),
+  },
 ];
 ```
 
@@ -207,12 +214,14 @@ git commit -m "feat(map-data): generate a forkable MapGeography from the Taiwan 
 ### Task 2: `apps/server` — `GET /maps/official` + `POST /maps/fork/:mapId`
 
 **Files:**
+
 - Modify: `apps/server/src/maps/maps.service.ts` (add `OfficialMapSummary`, `listOfficial()`, `forkOfficial()`)
 - Modify: `apps/server/src/maps/maps.schemas.ts` (add `OfficialMapSummarySchema`)
 - Modify: `apps/server/src/maps/maps.controller.ts` (add the two routes; ordering matters)
 - Test: `apps/server/test/maps.e2e.spec.ts` (add a `describe` block; reuse the file's `registered`/`guest` helpers)
 
 **Interfaces:**
+
 - Consumes: `OFFICIAL_MAPS`, `officialMapById` (from `@trm/map-data`, incl. `forkGeography` from Task 1); `CustomMapRepo.create`/`update`; existing `toDetail`, `MapDraft`, `MapDetail`.
 - Produces:
   - `MapsService.listOfficial(): OfficialMapSummary[]` where `OfficialMapSummary = { mapId: string; nameZh: string; nameEn: string; cities: number; routes: number }`.
@@ -404,6 +413,7 @@ git commit -m "feat(server): fork an official map into a custom draft (GET /maps
 ### Task 3: `apps/web` — fork picker beside "Clone by code"
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts` (add `OfficialMapSummary` type + `listOfficialMaps`/`forkOfficialMap`)
 - Modify: `apps/web/src/features/builder/MapsScreen.tsx` (fork card in a two-column row with clone-by-code)
 - Modify: `apps/web/src/i18n/index.ts` (add `builder.forkOfficialTitle`, `builder.forkMap` in zh + en)
@@ -411,6 +421,7 @@ git commit -m "feat(server): fork an official map into a custom draft (GET /maps
 - Test: `apps/web/src/features/builder/MapsScreen.test.tsx` (create)
 
 **Interfaces:**
+
 - Consumes: Task 2's `GET /maps/official` and `POST /maps/fork/:mapId`; existing `MapDetail` type, `useUi().enterMapEditor` (sets `view: 'mapEditor'`, `editingMapId`), `t('builder.peekSummary', { cities, routes })`.
 - Produces (on `api`): `listOfficialMaps(): Promise<OfficialMapSummary[]>`, `forkOfficialMap(mapId: string): Promise<MapDetail>`, and the exported `OfficialMapSummary` interface.
 
@@ -527,91 +538,97 @@ In `apps/web/src/features/builder/MapsScreen.tsx`:
 Extend the rest import to include the new type:
 
 ```ts
-import { api, ApiError, type MapSummary, type OfficialMapSummary, type SharedMapView } from '../../net/rest';
+import {
+  api,
+  ApiError,
+  type MapSummary,
+  type OfficialMapSummary,
+  type SharedMapView,
+} from '../../net/rest';
 ```
 
 Add state + loader + handler inside the component (next to the existing `useState`/`refresh`):
 
 ```ts
-  const [official, setOfficial] = useState<OfficialMapSummary[] | null>(null);
-  const [forking, setForking] = useState<string | null>(null);
+const [official, setOfficial] = useState<OfficialMapSummary[] | null>(null);
+const [forking, setForking] = useState<string | null>(null);
 
-  useEffect(() => {
-    api
-      .listOfficialMaps()
-      .then(setOfficial)
-      .catch(() => setOfficial([]));
-  }, []);
+useEffect(() => {
+  api
+    .listOfficialMaps()
+    .then(setOfficial)
+    .catch(() => setOfficial([]));
+}, []);
 
-  const doFork = async (mapId: string) => {
-    setForking(mapId);
-    try {
-      const detail = await api.forkOfficialMap(mapId);
-      enterMapEditor(detail.id);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setForking(null);
-    }
-  };
+const doFork = async (mapId: string) => {
+  setForking(mapId);
+  try {
+    const detail = await api.forkOfficialMap(mapId);
+    enterMapEditor(detail.id);
+  } catch (e) {
+    setError(e instanceof Error ? e.message : String(e));
+  } finally {
+    setForking(null);
+  }
+};
 ```
 
 Replace the existing single "Clone by code" `<div className="card stack"> … </div>` (the second card) with a two-column row that holds the new fork card AND the clone card:
 
 ```tsx
-      <div className="row maps-columns">
-        <div className="card stack">
-          <h2>{t('builder.forkOfficialTitle')}</h2>
-          {official?.map((m) => (
-            <div key={m.mapId} className="row between maps-row">
-              <div className="maps-row-name">
-                <span>
-                  {m.nameZh} <span className="muted">({m.nameEn})</span>
-                </span>
-                <span className="muted maps-row-updated">
-                  {t('builder.peekSummary', { cities: m.cities, routes: m.routes })}
-                </span>
-              </div>
-              <button
-                className="primary"
-                disabled={forking === m.mapId}
-                onClick={() => void doFork(m.mapId)}
-              >
-                {t('builder.forkMap')}
-              </button>
-            </div>
-          ))}
+<div className="row maps-columns">
+  <div className="card stack">
+    <h2>{t('builder.forkOfficialTitle')}</h2>
+    {official?.map((m) => (
+      <div key={m.mapId} className="row between maps-row">
+        <div className="maps-row-name">
+          <span>
+            {m.nameZh} <span className="muted">({m.nameEn})</span>
+          </span>
+          <span className="muted maps-row-updated">
+            {t('builder.peekSummary', { cities: m.cities, routes: m.routes })}
+          </span>
         </div>
-
-        <div className="card stack">
-          <h2>{t('builder.cloneByCode')}</h2>
-          <div className="row">
-            <input
-              placeholder={t('builder.shareCode')}
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-            />
-            <button onClick={() => void doPeek()}>{t('builder.peek')}</button>
-          </div>
-          {peekError && <p className="error">{peekError}</p>}
-          {peek && (
-            <div className="stack">
-              <p>
-                {peek.nameZh} <span className="muted">({peek.nameEn})</span>
-              </p>
-              <p className="muted">
-                {t('builder.peekSummary', {
-                  cities: peek.draft.cities.length,
-                  routes: peek.draft.routes.length,
-                })}
-              </p>
-              <button className="primary" disabled={cloning} onClick={() => void doClone()}>
-                {t('builder.cloneMap')}
-              </button>
-            </div>
-          )}
-        </div>
+        <button
+          className="primary"
+          disabled={forking === m.mapId}
+          onClick={() => void doFork(m.mapId)}
+        >
+          {t('builder.forkMap')}
+        </button>
       </div>
+    ))}
+  </div>
+
+  <div className="card stack">
+    <h2>{t('builder.cloneByCode')}</h2>
+    <div className="row">
+      <input
+        placeholder={t('builder.shareCode')}
+        value={code}
+        onChange={(e) => setCode(e.target.value.toUpperCase())}
+      />
+      <button onClick={() => void doPeek()}>{t('builder.peek')}</button>
+    </div>
+    {peekError && <p className="error">{peekError}</p>}
+    {peek && (
+      <div className="stack">
+        <p>
+          {peek.nameZh} <span className="muted">({peek.nameEn})</span>
+        </p>
+        <p className="muted">
+          {t('builder.peekSummary', {
+            cities: peek.draft.cities.length,
+            routes: peek.draft.routes.length,
+          })}
+        </p>
+        <button className="primary" disabled={cloning} onClick={() => void doClone()}>
+          {t('builder.cloneMap')}
+        </button>
+      </div>
+    )}
+  </div>
+</div>
 ```
 
 > The "My maps" card above (with the create-new row) is unchanged and stays outside this row.
@@ -678,6 +695,7 @@ git commit -m "chore: formatting after fork-from-official feature"
 ## Self-Review
 
 **Spec coverage:**
+
 - Fork geography for Taiwan (spec §1) → Task 1.
 - `OfficialMap.forkGeography` + generic `content.geography ?? forkGeography` rule (spec §1) → Task 1 (field) + Task 2 (rule in `forkOfficial`).
 - `GET /maps/official` + `POST /maps/fork/:mapId`, service, schema, route-ordering caveat (spec §2) → Task 2.

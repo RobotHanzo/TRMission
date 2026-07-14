@@ -27,6 +27,14 @@ jobs:
           cache: yarn
       - run: corepack enable
       - run: yarn install --immutable
+      # Same jest/babel transform cache the whole-repo CI keeps warm (see ci.yml).
+      - uses: actions/cache@v4
+        with:
+          path: apps/mobile/.jest-cache
+          key: jest-mobile-${{ runner.os }}-${{ hashFiles('yarn.lock', 'apps/mobile/babel.config.js') }}-${{ github.sha }}
+          restore-keys: |
+            jest-mobile-${{ runner.os }}-${{ hashFiles('yarn.lock', 'apps/mobile/babel.config.js') }}-
+            jest-mobile-${{ runner.os }}-
       # Generated protobuf sources are gitignored and must exist before mobile imports @trm/proto.
       - run: yarn workspace @trm/proto generate
       - run: yarn workspace @trm/mobile typecheck

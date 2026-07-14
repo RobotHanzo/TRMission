@@ -16,6 +16,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # ubuntu-latest ships ~70GB of preinstalled tooling this JS/Android/Ruby pipeline never
+      # touches (.NET, Haskell, CodeQL, Docker images, ...), leaving only ~14GB free. Compiling
+      # react-native-skia's native code for all 4 ABIs plus the release bundling step exhausts
+      # that, failing packageReleaseBundle with "No space left on device". Reclaim space up
+      # front rather than dropping build architectures (a product-facing device-support call).
+      - name: Free up disk space for the native build
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost /opt/hostedtoolcache/CodeQL
+          docker image prune -af || true
+          df -h /
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
@@ -24,8 +36,37 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: apps/mobile
       - run: corepack enable
       - run: yarn install --immutable
+
+      # apps/mobile imports @trm/proto, whose src/gen/** is buf-generated and gitignored (see
+      # root CLAUDE.md) — without this, Metro fails to resolve the generated *_pb modules when
+      # Gradle's createBundleReleaseJsAndAssets task bundles the release JS.
+      - run: yarn workspace @trm/proto generate
+
+      # Yarn 4 defaults enableScripts to false, so @shopify/react-native-skia's postinstall
+      # (which copies its prebuilt libskia.a et al into libs/android) never runs — CMake then
+      # fails with "Skia prebuilt binaries not found". Run its bin script manually instead of
+      # flipping enableScripts repo-wide (that would also re-enable every other dependency's
+      # postinstall).
+      - run: npx install-skia
+
+      # BUILD_NUMBER is versionCode/CFBundleVersion (docs/release/mobile-versioning.md): only a
+      # `v<semver>+<build>` tag carries a real one — branch pushes stay at the dev fallback (1) and
+      # are never published to Play (see the publish step's `if:` below).
+      - name: Derive BUILD_NUMBER from the release tag
+        id: build_number
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$ ]]; then
+            echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=1" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Prebuild the Android native project
         working-directory: apps/mobile
@@ -34,6 +75,7 @@ jobs:
           TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
 
       - name: Decode the release keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
@@ -53,4 +95,16 @@ jobs:
           path: apps/mobile/android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
 
-# P6 flips the final step to `fastlane supply` (Play internal track) instead of uploading an artifact.
+      # Only a real release tag publishes — see docs/release/play-console-setup.md for the one-time
+      # Play Console + service-account setup this depends on. Always the internal track only; promote
+      # to production locally with `fastlane android promote` once the track is verified.
+      - name: Decode the Play service account key
+        if: github.ref_type == 'tag'
+        run: echo "${{ secrets.PLAY_JSON_KEY_BASE64 }}" | base64 -d > "$RUNNER_TEMP/play-key.json"
+
+      - name: Upload to Play's internal testing track
+        if: github.ref_type == 'tag'
+        working-directory: apps/mobile
+        run: bundle exec fastlane android internal
+        env:
+          PLAY_JSON_KEY_FILE: ${{ runner.temp }}/play-key.json

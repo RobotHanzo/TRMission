@@ -9,7 +9,7 @@ Five related lobby/room changes:
 2. **Owner leaving prompts transfer-or-close.** When the host leaves a room with other human
    players present, they must either hand ownership to a chosen member (then leave) or close the
    whole room for everyone.
-3. **Fix "spectate acts as a kick".** Pressing *watch* in the lobby currently trips the client's
+3. **Fix "spectate acts as a kick".** Pressing _watch_ in the lobby currently trips the client's
    kicked-modal on the next poll; a self-demoted spectator should just keep watching.
 4. **Lobby free-text chat.** The lobby chat is preset-only and has no text box; the in-game chat
    already supports free text. Bring the lobby to parity (keep presets, add an input).
@@ -46,7 +46,7 @@ Five related lobby/room changes:
 
 **Web (`apps/web/src/screens/RoomScreen.tsx`)**
 
-- Hide the *watch* button when `isHost` (wrap it in `me && !isHost`). The ready button stays for all
+- Hide the _watch_ button when `isHost` (wrap it in `me && !isHost`). The ready button stays for all
   seated members.
 
 ## Part 2 — Owner leaving: transfer or close
@@ -122,7 +122,7 @@ into spectating the game when it starts (previously `wasPresent` sent them home)
 - `RoomRepo.sendChat(code, userId, entry: { presetId: ChatPresetId } | { text: string })`:
   unchanged rate-limit (5 / 5 s) + `$slice: -ROOM_CHAT_CAP` (30). Pushes `{ userId, ...entry, ts }`.
 - `lobby.schemas.ts`: `ChatSchema = z.object({ presetId: z.enum(CHAT_PRESET_IDS).optional(),
-  text: z.string().max(ROOM_CHAT_MAX_LEN).optional() })` (plain object — validation of "exactly one"
+text: z.string().max(ROOM_CHAT_MAX_LEN).optional() })` (plain object — validation of "exactly one"
   lives in the service, so OpenAPI generation stays on a `ZodObject`). `RoomChatEntrySchema` gets
   `presetId: z.string().optional()` + `text: z.string().optional()`.
 - `LobbyService.sendChat(code, user, { presetId?, text? })`: reject unless exactly one is present;
@@ -154,8 +154,7 @@ is never purged; only a game watched by idle spectators (no player moves) ages o
 ## Error handling & edge cases
 
 - Host tries to `/watch` → 400. Host tries `/spectate` on their started game → 403.
-- `transfer` to a bot / spectator / non-member / self → 400 `invalid`. `transfer` by a non-host →
-  403. `transfer`/`close` on a STARTED room → 400.
+- `transfer` to a bot / spectator / non-member / self → 400 `invalid`. `transfer` by a non-host → 403. `transfer`/`close` on a STARTED room → 400.
 - Free-text chat: empty/whitespace → 400; both preset+text or neither → 400; over-length → 400;
   rate-limited → 400 (existing).
 - Spectator kicked by host (removed from both lists) still correctly shows the kicked modal

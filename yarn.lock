@@ -4276,6 +4276,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@trm/client-core@workspace:*, @trm/client-core@workspace:packages/client-core":
+  version: 0.0.0-use.local
+  resolution: "@trm/client-core@workspace:packages/client-core"
+  dependencies:
+    "@trm/codec": "workspace:*"
+    "@trm/engine": "workspace:*"
+    "@trm/map-data": "workspace:*"
+    "@trm/proto": "workspace:*"
+    "@trm/shared": "workspace:*"
+    "@trm/tsc7": "workspace:*"
+    typescript: "npm:@typescript/typescript6@^6.0.2"
+    vitest: "npm:^2.1.8"
+  peerDependencies:
+    i18next: ^24.2.0
+    react: ^19.2.0
+    react-i18next: ^15.4.0
+    zustand: ^5.0.2
+  languageName: unknown
+  linkType: soft
+
 "@trm/codec@workspace:*, @trm/codec@workspace:packages/codec":
   version: 0.0.0-use.local
   resolution: "@trm/codec@workspace:packages/codec"
@@ -4319,6 +4339,7 @@ __metadata:
   resolution: "@trm/mobile@workspace:apps/mobile"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.12.1"
+    "@expo/config-plugins": "npm:~56.0.11"
     "@expo/ngrok": "npm:^4.1.0"
     "@formatjs/intl-getcanonicallocales": "npm:^3.2.10"
     "@formatjs/intl-locale": "npm:^5.3.9"
@@ -4331,6 +4352,7 @@ __metadata:
     "@react-navigation/native-stack": "npm:^7.3.10"
     "@shopify/react-native-skia": "npm:2.6.2"
     "@testing-library/react-native": "npm:^13.0.0"
+    "@trm/client-core": "workspace:*"
     "@trm/codec": "workspace:*"
     "@trm/engine": "workspace:*"
     "@trm/map-data": "workspace:*"
@@ -4353,6 +4375,7 @@ __metadata:
     expo-notifications: "npm:~56.0.19"
     expo-screen-orientation: "npm:~56.0.5"
     expo-secure-store: "npm:~56.0.4"
+    expo-splash-screen: "npm:~56.0.12"
     expo-sqlite: "npm:~56.0.5"
     expo-status-bar: "npm:~56.0.4"
     expo-updates: "npm:~56.0.21"
@@ -4366,6 +4389,7 @@ __metadata:
     react: "npm:19.2.3"
     react-i18next: "npm:^15.4.0"
     react-native: "npm:0.85.3"
+    react-native-confetti-cannon: "npm:^1.5.2"
     react-native-gesture-handler: "npm:~2.31.1"
     react-native-reanimated: "npm:4.3.1"
     react-native-safe-area-context: "npm:~5.7.0"
@@ -4469,6 +4493,7 @@ __metadata:
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.1.0"
+    "@trm/client-core": "workspace:*"
     "@trm/codec": "workspace:*"
     "@trm/engine": "workspace:*"
     "@trm/map-data": "workspace:*"
@@ -4485,8 +4510,8 @@ __metadata:
     jsdom: "npm:^25.0.1"
     lucide-react: "npm:^0.468.0"
     polygon-clipping: "npm:^0.15.7"
-    react: "npm:^19.2.0"
-    react-dom: "npm:^19.2.0"
+    react: "npm:19.2.3"
+    react-dom: "npm:19.2.3"
     react-i18next: "npm:^15.4.0"
     react-zoom-pan-pinch: "npm:^4.0.3"
     typescript: "npm:@typescript/typescript6@^6.0.2"
@@ -8021,6 +8046,19 @@ __metadata:
   version: 56.0.5
   resolution: "expo-server@npm:56.0.5"
   checksum: 10/0fa69600d65d09f100d513c431ce5152531d588db46fc56d18a9d029b0d758d061d9981afa394c0d30a01ae580050ad0c570f3a58f6a296d719dbf8812952fe1
+  languageName: node
+  linkType: hard
+
+"expo-splash-screen@npm:~56.0.12":
+  version: 56.0.12
+  resolution: "expo-splash-screen@npm:56.0.12"
+  dependencies:
+    "@expo/config-plugins": "npm:~56.0.11"
+    "@expo/image-utils": "npm:^0.10.2"
+    xml2js: "npm:0.6.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 10/d8bcda5554aaf0aefc0b0c8bbe19cbde1ee21150392d0b8e314be2d98a48c566f818f3912f1da091fec0701706ff023a94c298bcf41ecef3dd24d8a50464b7f8
   languageName: node
   linkType: hard
 
@@ -11861,6 +11899,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-dom@npm:19.2.3":
+  version: 19.2.3
+  resolution: "react-dom@npm:19.2.3"
+  dependencies:
+    scheduler: "npm:^0.27.0"
+  peerDependencies:
+    react: ^19.2.3
+  checksum: 10/5780f6d4c8e8ece09f82c5500ba2d55e01c30b5273f9281734d7d3b65013cd1fa52ec4e4436e5248c0a9e5bc340836044051168bbad8d7eac4d33ee6c2a867a1
+  languageName: node
+  linkType: hard
+
 "react-dom@npm:^19.2.0":
   version: 19.2.7
   resolution: "react-dom@npm:19.2.7"
@@ -11927,6 +11976,13 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 10/73b36281e58eeb27c9cc6031301b6ae19ecdc9f18ae2d518bdb39b0ac564e65c5779405d623f1df9abf378a13858b79442480244bd579968afc1faf9a2ce5e05
+  languageName: node
+  linkType: hard
+
+"react-native-confetti-cannon@npm:^1.5.2":
+  version: 1.5.2
+  resolution: "react-native-confetti-cannon@npm:1.5.2"
+  checksum: 10/0ca5d56eef9763e891d228017708c340b54cc87d46d1c38d7aff5b46d511d78b52d884b9492aa1022cdd4772ef974c0e2175831516b1aafda93208e97e5098a1
   languageName: node
   linkType: hard
 

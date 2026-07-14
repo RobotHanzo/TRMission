@@ -23,6 +23,7 @@
 ## File Structure
 
 **Create:**
+
 - `apps/server/src/auth/feature-defaults.repo.ts` — the global-defaults Mongo repo.
 - `apps/server/test/feature-defaults.e2e.spec.ts` — proves the union mechanism.
 - `apps/server/src/dashboard/dashboard-feature-defaults.controller.ts` — `GET/PUT /dashboard/config/features`.
@@ -30,6 +31,7 @@
 - `apps/server/test/dashboard-config-features.e2e.spec.ts` — endpoint + permission + audit e2e.
 
 **Modify:**
+
 - `packages/shared/src/dashboard.ts`, `packages/shared/test/dashboard.spec.ts` — new `config.features` permission.
 - `packages/shared/src/features.ts` — doc-comment accuracy (global defaults now exist).
 - `apps/server/src/auth/user.repo.ts` — `hasFeature` unions the global default set.
@@ -48,10 +50,12 @@
 ### Task 1: `config.features` permission
 
 **Files:**
+
 - Modify: `packages/shared/src/dashboard.ts`
 - Test: `packages/shared/test/dashboard.spec.ts`
 
 **Interfaces:**
+
 - Produces: `'config.features'` as a valid `DashboardPermission` literal, granted to `admin` and `owner` (not `viewer`/`moderator`) — every later task that references this permission string relies on it typechecking.
 
 - [ ] **Step 1: Write the failing test**
@@ -59,13 +63,13 @@
 Append to `packages/shared/test/dashboard.spec.ts`, inside the existing `describe('dashboard permission taxonomy', ...)` block, right before the final closing `});`:
 
 ```ts
-  it('config.features is admin-tier, independent of users.features', () => {
-    expect(ROLE_PERMISSIONS.viewer).not.toContain('config.features');
-    expect(ROLE_PERMISSIONS.moderator).not.toContain('config.features');
-    expect(ROLE_PERMISSIONS.admin).toContain('config.features');
-    expect(ROLE_PERMISSIONS.owner).toContain('config.features');
-    expect(DASHBOARD_PERMISSIONS).toContain('config.features');
-  });
+it('config.features is admin-tier, independent of users.features', () => {
+  expect(ROLE_PERMISSIONS.viewer).not.toContain('config.features');
+  expect(ROLE_PERMISSIONS.moderator).not.toContain('config.features');
+  expect(ROLE_PERMISSIONS.admin).toContain('config.features');
+  expect(ROLE_PERMISSIONS.owner).toContain('config.features');
+  expect(DASHBOARD_PERMISSIONS).toContain('config.features');
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -139,11 +143,13 @@ git commit -m "feat(shared): add config.features dashboard permission"
 ### Task 2: Global feature defaults storage + `UserRepo.hasFeature` union
 
 **Files:**
+
 - Create: `apps/server/src/auth/feature-defaults.repo.ts`
 - Modify: `apps/server/src/auth/user.repo.ts`, `apps/server/src/auth/auth.module.ts`, `packages/shared/src/features.ts`
 - Test: `apps/server/test/feature-defaults.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `MONGO_DB` token (`apps/server/src/db/tokens.ts`); `UserFeature` (`@trm/shared`).
 - Produces: `FeatureDefaultsRepo` (`@Injectable`, exported from `AuthModule`) with `get(): Promise<UserFeature[]>` and `set(features: UserFeature[]): Promise<UserFeature[]>`; `INITIAL_DEFAULTS: readonly UserFeature[] = ['randomEvents']` — the code-level fallback used until a maintainer ever saves a value. `UserRepo.hasFeature(userId, feature)` now returns `true` for a feature that's only in the global default set. Task 3 and Task 5 both depend on `FeatureDefaultsRepo`.
 
@@ -336,7 +342,14 @@ import { GOOGLE_ID_TOKEN_VERIFIER, GoogleAuthLibraryVerifier } from './google-id
   // Exported so the lobby can sign ws-game tickets and guard its routes; SessionRepo
   // for the dashboard's per-user session counts + ban-time revocation; FeatureDefaultsRepo
   // for the dashboard's default-flags endpoint (Task 5).
-  exports: [TokenService, AccessTokenGuard, FeatureGuard, UserRepo, FeatureDefaultsRepo, SessionRepo],
+  exports: [
+    TokenService,
+    AccessTokenGuard,
+    FeatureGuard,
+    UserRepo,
+    FeatureDefaultsRepo,
+    SessionRepo,
+  ],
 })
 export class AuthModule {}
 ```
@@ -377,10 +390,12 @@ git commit -m "feat(server): global feature-flag defaults, unioned into UserRepo
 ### Task 3: `PublicUser.features` reflects the defaults
 
 **Files:**
+
 - Modify: `apps/server/src/auth/auth.service.ts`
 - Test: `apps/server/test/feature-gating.e2e.spec.ts` (existing — one assertion changes)
 
 **Interfaces:**
+
 - Consumes: `FeatureDefaultsRepo.get()` (Task 2).
 - Produces: `AuthService.issue/me/updatePreferences` all return a `PublicUser.features` that is `[...account grants, ...global defaults]` deduplicated — the shape the web app's `useHasFeature()` reads.
 
@@ -548,9 +563,11 @@ git commit -m "feat(server): PublicUser.features unions the global feature defau
 ### Task 4: Rooms default to `moderate` events
 
 **Files:**
+
 - Modify: `apps/server/src/lobby/room.repo.ts`, `apps/server/test/lobby-settings.e2e.spec.ts`, `apps/server/test/lobby-events.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: nothing new (pure constant change; `start()`'s existing silent-downgrade-to-`off` when the host lacks `randomEvents` is unchanged).
 - Produces: `DEFAULT_ROOM_SETTINGS.eventsMode === 'moderate'` — any room whose stored settings don't explicitly set `eventsMode` now shows/starts `moderate` instead of `off` (subject to the host holding `randomEvents`, direct or default).
 
@@ -559,16 +576,16 @@ git commit -m "feat(server): PublicUser.features unions the global feature defau
 In `apps/server/test/lobby-settings.e2e.spec.ts`, change the `it('defaults settings on a fresh room', ...)` assertion:
 
 ```ts
-    expect(room.body.settings).toEqual({
-      unlimitedStationBorrow: true,
-      secondDrawAfterBlindRainbow: false,
-      noUnfinishedTicketPenalty: false,
-      doubleRouteSingleFor23: true,
-      eventsMode: 'moderate',
-      allowSpectating: true,
-      visibility: 'INVITE_ONLY',
-      map: { source: 'official', mapId: 'taiwan' },
-    });
+expect(room.body.settings).toEqual({
+  unlimitedStationBorrow: true,
+  secondDrawAfterBlindRainbow: false,
+  noUnfinishedTicketPenalty: false,
+  doubleRouteSingleFor23: true,
+  eventsMode: 'moderate',
+  allowSpectating: true,
+  visibility: 'INVITE_ONLY',
+  map: { source: 'official', mapId: 'taiwan' },
+});
 ```
 
 In `apps/server/test/lobby-events.e2e.spec.ts`, this whole suite tests the per-account `randomEvents` gate boundary by creating hosts with **no** grant and expecting them to be refused — that only holds if the global default is neutralized for this file, since Task 3 made `randomEvents` a real global default elsewhere. Add one line to `beforeAll`:
@@ -636,11 +653,13 @@ git commit -m "feat(server): default new rooms to moderate events"
 ### Task 5: Dashboard endpoint — `GET/PUT /dashboard/config/features`
 
 **Files:**
+
 - Create: `apps/server/src/dashboard/dashboard-feature-defaults.controller.ts`, `apps/server/src/dashboard/dashboard-feature-defaults.service.ts`
 - Modify: `apps/server/src/dashboard/dashboard.schemas.ts`, `apps/server/src/dashboard/audit.repo.ts`, `apps/server/src/dashboard/dashboard.module.ts`
 - Test: `apps/server/test/dashboard-config-features.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `FeatureDefaultsRepo` (Task 2, exported from `AuthModule`, which `DashboardModule` already imports); `AuditService.log` (existing); `config.features` permission (Task 1).
 - Produces: `GET /api/v1/dashboard/config/features` → `{ features: UserFeature[] }`; `PUT` same path/body/response, permission-gated, audited as `'config.features'`. Task 6 (admin REST client) calls these two routes by exact path/shape.
 
@@ -726,9 +745,14 @@ describe('dashboard config: default feature flags', () => {
       .get('/api/v1/dashboard/audit')
       .set(auth(owner.token))
       .expect(200);
-    const entry = audit.body.entries.find((e: { action: string }) => e.action === 'config.features');
+    const entry = audit.body.entries.find(
+      (e: { action: string }) => e.action === 'config.features',
+    );
     expect(entry).toBeDefined();
-    expect(entry.params).toEqual({ before: ['randomEvents'], after: ['mapBuilder', 'replayReview'] });
+    expect(entry.params).toEqual({
+      before: ['randomEvents'],
+      after: ['mapBuilder', 'replayReview'],
+    });
 
     // Unknown feature name is rejected by validation.
     await request(server())
@@ -958,9 +982,11 @@ git commit -m "feat(server): dashboard endpoint to edit the global default featu
 ### Task 6: Generalize `FeatureToggles` to a `target` prop
 
 **Files:**
+
 - Modify: `apps/admin/src/net/rest.ts`, `apps/admin/src/components/FeatureToggles.tsx`, `apps/admin/src/components/FeatureToggles.test.tsx`, `apps/admin/src/views/UsersView.tsx`, `apps/admin/src/views/FeaturesView.tsx`
 
 **Interfaces:**
+
 - Consumes: `PUT/GET /dashboard/config/features` (Task 5).
 - Produces: `api.getDefaultFeatures(): Promise<{features: UserFeature[]}>`, `api.putDefaultFeatures(features): Promise<{features: UserFeature[]}>`; `FeatureToggles({ target, initial })` where `target` is `{kind:'user', userId, onSaved?: (detail: UserDetail) => void} | {kind:'defaults', onSaved?: (features: UserFeature[]) => void}` — Task 7's new panel depends on this exact `target` shape and the two REST methods.
 
@@ -1132,27 +1158,27 @@ In `apps/admin/src/net/rest.ts`, add next to `listFeaturedUsers` (inside the `ap
 In `apps/admin/src/views/UsersView.tsx`, update the `FeatureToggles` usage:
 
 ```tsx
-              <FeatureToggles
-                key={detail.features.join(',')}
-                target={{ kind: 'user', userId: detail.id, onSaved: setDetail }}
-                initial={detail.features}
-              />
+<FeatureToggles
+  key={detail.features.join(',')}
+  target={{ kind: 'user', userId: detail.id, onSaved: setDetail }}
+  initial={detail.features}
+/>
 ```
 
 In `apps/admin/src/views/FeaturesView.tsx`, update the per-user drawer's `FeatureToggles` usage:
 
 ```tsx
-            <FeatureToggles
-              target={{
-                kind: 'user',
-                userId: editing.id,
-                onSaved: () => {
-                  setEditing(null);
-                  void load();
-                },
-              }}
-              initial={editing.features}
-            />
+<FeatureToggles
+  target={{
+    kind: 'user',
+    userId: editing.id,
+    onSaved: () => {
+      setEditing(null);
+      void load();
+    },
+  }}
+  initial={editing.features}
+/>
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -1180,9 +1206,11 @@ git commit -m "refactor(admin): generalize FeatureToggles to a user/defaults tar
 ### Task 7: "Default feature flags" panel in the admin Features view
 
 **Files:**
+
 - Modify: `apps/admin/src/views/FeaturesView.tsx`, `apps/admin/src/views/FeaturesView.test.tsx`, `apps/admin/src/i18n/index.ts`
 
 **Interfaces:**
+
 - Consumes: `api.getDefaultFeatures`/`api.putDefaultFeatures` and `FeatureToggles({target: {kind:'defaults', onSaved}, initial})` (Task 6); `useSession((s) => s.hasPermission('config.features'))` (Task 1's permission).
 - Produces: nothing consumed by a later task — this is the final task.
 

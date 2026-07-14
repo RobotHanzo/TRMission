@@ -190,7 +190,8 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         if (!g) return null;
 
         const o = owned?.get(r.id);
-        const claimable = !!canClaim && !o && !!onRouteClick && (claimFilter ? claimFilter(r) : true);
+        const claimable =
+          !!canClaim && !o && !!onRouteClick && (claimFilter ? claimFilter(r) : true);
         const clickable = claimable || (!!alwaysHitRoutes && !!onRouteClick);
         // Unclaimed → route colour; claimed → owner's seat colour; locked → muted grey.
         const fill =

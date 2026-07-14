@@ -1,1 +1,143 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_md", "label": "2026-07-11-transferable-room-owners-design.md", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "label": "Transferable room owners \u2014 design", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_goal", "label": "Goal", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_decisions_load_bearing", "label": "Decisions (load-bearing)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L13"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_part_1_standalone_transfer_player_facing", "label": "Part 1 \u2014 Standalone transfer (player-facing)", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L40"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_part_2_admin_dashboard_reassignment", "label": "Part 2 \u2014 Admin/dashboard reassignment", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L59"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_error_handling_edge_cases", "label": "Error handling & edge cases", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L97"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_testing_verification", "label": "Testing & verification", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L111"}, {"id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_out_of_scope", "label": "Out of scope", "file_type": "document", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L127"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_md", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_goal", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_decisions_load_bearing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_part_1_standalone_transfer_player_facing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L40", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_part_2_admin_dashboard_reassignment", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L59", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_error_handling_edge_cases", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L97", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_testing_verification", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L111", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design", "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_out_of_scope", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md", "source_location": "L127", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_md",
+      "label": "2026-07-11-transferable-room-owners-design.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "label": "Transferable room owners \u2014 design",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_goal",
+      "label": "Goal",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_decisions_load_bearing",
+      "label": "Decisions (load-bearing)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_part_1_standalone_transfer_player_facing",
+      "label": "Part 1 \u2014 Standalone transfer (player-facing)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L40"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_part_2_admin_dashboard_reassignment",
+      "label": "Part 2 \u2014 Admin/dashboard reassignment",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L59"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_error_handling_edge_cases",
+      "label": "Error handling & edge cases",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L97"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_testing_verification",
+      "label": "Testing & verification",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L111"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_out_of_scope",
+      "label": "Out of scope",
+      "file_type": "document",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L127"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_md",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_goal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_decisions_load_bearing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_part_1_standalone_transfer_player_facing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_part_2_admin_dashboard_reassignment",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_error_handling_edge_cases",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L97",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_testing_verification",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_transferable_room_owners_design",
+      "target": "d_web_projects_trmission_docs_superpowers_specs_2026_07_11_transferable_room_owners_design_out_of_scope",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/specs/2026-07-11-transferable-room-owners-design.md",
+      "source_location": "L127",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

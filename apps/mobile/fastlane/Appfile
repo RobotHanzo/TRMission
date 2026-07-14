@@ -1,4 +1,5 @@
-app_identifier("tw.trmission.app")
+app_identifier("dev.robothanzo.trmission") # iOS bundle id
+package_name("dev.robothanzo.trmission") # Android application id
 # Apple Developer team id — only needed for local, interactive fastlane runs; CI authenticates with
 # the App Store Connect API key instead, so these stay optional/env-driven.
 apple_id(ENV["FASTLANE_APPLE_ID"]) if ENV["FASTLANE_APPLE_ID"]

@@ -35,6 +35,7 @@ content-driven one in `apps/web/src/game/content.ts`. Deduplicate the parallel-t
 ### Task 1: Station-tier data model (`@trm/map-data`)
 
 **Files:**
+
 - Modify: `packages/map-data/src/types.ts:3-12`
 - Modify: `packages/map-data/src/cities.ts` (whole file)
 - Modify: `packages/map-data/test/content.spec.ts`
@@ -42,6 +43,7 @@ content-driven one in `apps/web/src/game/content.ts`. Deduplicate the parallel-t
 - Test: `packages/map-data/test/content.spec.ts` (same file — see above)
 
 **Interfaces:**
+
 - Produces: `export type CityTier = 'major' | 'secondary' | 'tertiary' | 'minor';` and
   `readonly tier?: CityTier;` on `CityDef`, both from `packages/map-data/src/types.ts`, re-exported
   from `@trm/map-data`'s package root via the existing `export * from './types';` in `index.ts` (no
@@ -93,44 +95,44 @@ Edit `packages/map-data/test/content.spec.ts`. Insert a new `it` block right aft
 stable content hash" test (after line 45, before `it('catches a broken graph...`):
 
 ```typescript
-  it('assigns tier matching the retired lod.ts major/secondary/tertiary lists', () => {
-    const major = new Set([
-      'taipei',
-      'hsinchu',
-      'taichung',
-      'chiayi',
-      'tainan',
-      'kaohsiung',
-      'hualien',
-      'taitung',
-      'yilan',
-      'hengchun',
-    ]);
-    const secondary = new Set([
-      'keelung',
-      'taoyuan',
-      'miaoli',
-      'changhua',
-      'douliu',
-      'pingtung',
-      'nantou',
-      'alishan',
-      'yuli',
-      'luodong',
-    ]);
-    const tertiary = new Set(['zhunan', 'banqiao', 'shalu', 'huwei', 'zuoying', 'chaozhou']);
-    for (const city of TAIWAN_CONTENT.cities) {
-      const id = city.id as string;
-      const expected = major.has(id)
-        ? 'major'
-        : secondary.has(id)
-          ? 'secondary'
-          : tertiary.has(id)
-            ? 'tertiary'
-            : 'minor';
-      expect(city.tier ?? 'minor').toBe(expected);
-    }
-  });
+it('assigns tier matching the retired lod.ts major/secondary/tertiary lists', () => {
+  const major = new Set([
+    'taipei',
+    'hsinchu',
+    'taichung',
+    'chiayi',
+    'tainan',
+    'kaohsiung',
+    'hualien',
+    'taitung',
+    'yilan',
+    'hengchun',
+  ]);
+  const secondary = new Set([
+    'keelung',
+    'taoyuan',
+    'miaoli',
+    'changhua',
+    'douliu',
+    'pingtung',
+    'nantou',
+    'alishan',
+    'yuli',
+    'luodong',
+  ]);
+  const tertiary = new Set(['zhunan', 'banqiao', 'shalu', 'huwei', 'zuoying', 'chaozhou']);
+  for (const city of TAIWAN_CONTENT.cities) {
+    const id = city.id as string;
+    const expected = major.has(id)
+      ? 'major'
+      : secondary.has(id)
+        ? 'secondary'
+        : tertiary.has(id)
+          ? 'tertiary'
+          : 'minor';
+    expect(city.tier ?? 'minor').toBe(expected);
+  }
+});
 ```
 
 - [ ] **Step 3: Run the test to verify it fails**
@@ -252,10 +254,12 @@ git commit -m "feat(map-data): add optional station tier, migrate Taiwan off har
 ### Task 2: Server accepts and persists station tier
 
 **Files:**
+
 - Modify: `apps/server/src/maps/maps.schemas.ts:21-29`
 - Test: `apps/server/test/maps.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: nothing new from Task 1 beyond the `@trm/map-data` package already resolving.
 - Produces: `CityDraftSchema` now accepts an optional `tier` field that round-trips through
   `PUT /api/v1/maps/:id` → Mongo → `GET /api/v1/maps/:id`. `draftFromDto` needs **no code change**
@@ -268,31 +272,31 @@ Edit `apps/server/test/maps.e2e.spec.ts`. Insert a new `it` block inside the exi
 test):
 
 ```typescript
-  it('round-trips an authored station tier through update and read', async () => {
-    const a = await registered('mapowner-tier@example.com', 'OwnerTier');
-    const created = await request(server())
-      .post('/api/v1/maps')
-      .set(auth(a.token))
-      .send({ nameZh: 'X', nameEn: 'X' })
-      .expect(201);
-    const id: string = created.body.id;
+it('round-trips an authored station tier through update and read', async () => {
+  const a = await registered('mapowner-tier@example.com', 'OwnerTier');
+  const created = await request(server())
+    .post('/api/v1/maps')
+    .set(auth(a.token))
+    .send({ nameZh: 'X', nameEn: 'X' })
+    .expect(201);
+  const id: string = created.body.id;
 
-    const draftWithTier = {
-      ...tinyDraft,
-      cities: [{ ...tinyDraft.cities[0], tier: 'major' }, tinyDraft.cities[1]],
-    };
-    const updated = await request(server())
-      .put(`/api/v1/maps/${id}`)
-      .set(auth(a.token))
-      .send({ draft: draftWithTier })
-      .expect(200);
-    const updatedCity = updated.body.draft.cities.find((c: { id: string }) => c.id === 'm1');
-    expect(updatedCity.tier).toBe('major');
+  const draftWithTier = {
+    ...tinyDraft,
+    cities: [{ ...tinyDraft.cities[0], tier: 'major' }, tinyDraft.cities[1]],
+  };
+  const updated = await request(server())
+    .put(`/api/v1/maps/${id}`)
+    .set(auth(a.token))
+    .send({ draft: draftWithTier })
+    .expect(200);
+  const updatedCity = updated.body.draft.cities.find((c: { id: string }) => c.id === 'm1');
+  expect(updatedCity.tier).toBe('major');
 
-    const got = await request(server()).get(`/api/v1/maps/${id}`).set(auth(a.token)).expect(200);
-    const gotCity = got.body.draft.cities.find((c: { id: string }) => c.id === 'm1');
-    expect(gotCity.tier).toBe('major');
-  });
+  const got = await request(server()).get(`/api/v1/maps/${id}`).set(auth(a.token)).expect(200);
+  const gotCity = got.body.draft.cities.find((c: { id: string }) => c.id === 'm1');
+  expect(gotCity.tier).toBe('major');
+});
 ```
 
 - [ ] **Step 2: Run the test to verify it fails**
@@ -357,6 +361,7 @@ git commit -m "feat(server): accept and persist an optional station tier on cust
 ### Task 3: Builder UI — station priority selector
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts:151-159`
 - Modify: `apps/web/src/i18n/index.ts:437` and `:995` (insertion points; exact line numbers shift
   slightly once earlier keys are inserted — insert immediately after the `isIsland` line in each
@@ -366,6 +371,7 @@ git commit -m "feat(server): accept and persist an optional station tier on cust
 - Test: `apps/web/src/features/builder/editor/contentAdapter.test.ts`
 
 **Interfaces:**
+
 - Consumes: nothing new from Tasks 1-2 (this task only touches the web client's own draft type,
   which is independently declared, not imported from `@trm/map-data`).
 - Produces: `CityDraft.tier?: string` on `apps/web/src/net/rest.ts`'s `CityDraft`, consumed by
@@ -543,17 +549,26 @@ after the existing `draftToContent` one (or a new `it` inside it — either is f
 `it` inside the existing `describe('draftToContent', ...)` block):
 
 ```typescript
-  it('carries an authored city tier into content', () => {
-    const draftWithCity: MapDraft = {
-      cities: [
-        { id: 'a', nameZh: '甲', nameEn: 'A', x: 0, y: 0, region: 'r', isIsland: false, tier: 'major' },
-      ],
-      routes: [],
-      tickets: [],
-    };
-    const content = draftToContent(draftWithCity, { nameZh: 'x', nameEn: 'x' });
-    expect(content.cities[0]!.tier).toBe('major');
-  });
+it('carries an authored city tier into content', () => {
+  const draftWithCity: MapDraft = {
+    cities: [
+      {
+        id: 'a',
+        nameZh: '甲',
+        nameEn: 'A',
+        x: 0,
+        y: 0,
+        region: 'r',
+        isIsland: false,
+        tier: 'major',
+      },
+    ],
+    routes: [],
+    tickets: [],
+  };
+  const content = draftToContent(draftWithCity, { nameZh: 'x', nameEn: 'x' });
+  expect(content.cities[0]!.tier).toBe('major');
+});
 ```
 
 - [ ] **Step 8: Run the test to verify it passes**
@@ -583,6 +598,7 @@ git commit -m "feat(web): station priority selector in the map builder's Stops s
 ### Task 4: Render tier from content instead of hardcoded id lists
 
 **Files:**
+
 - Modify: `apps/web/src/game/content.ts:1-32`
 - Create: `apps/web/src/game/content.test.ts`
 - Modify: `apps/web/src/game/lod.ts` (whole file)
@@ -590,6 +606,7 @@ git commit -m "feat(web): station priority selector in the map builder's Stops s
 - Modify: `apps/web/src/components/Board.tsx:20,29`
 
 **Interfaces:**
+
 - Consumes: `CityDef.tier?: CityTier` from Task 1 (already live in `@trm/map-data`).
 - Produces: `export const cityTier = (id: string): CityTier => ...` from
   `apps/web/src/game/content.ts`, replacing the same-named export that used to live in
@@ -664,7 +681,6 @@ export const cityName = (id: string, locale: Locale): string => {
 add:
 
 ```typescript
-
 /** Cartographic label tier for the live board's progressive zoom reveal (see game/lod.ts's
  *  zoomBucket + the [data-zoom] CSS rules). Reads the active content's authored tier, falling
  *  back to 'minor' for content authored before this field existed, or an id outside the active
@@ -786,10 +802,12 @@ git commit -m "refactor(web): drive city label tier from authored content, not h
 ### Task 5: Move the parallel-tracks control above Save/Cancel
 
 **Files:**
+
 - Modify: `apps/web/src/features/builder/editor/stages/RoutesStage.tsx` (whole file)
 - Test: `apps/web/src/features/builder/editor/stages/RoutesStage.test.tsx`
 
 **Interfaces:**
+
 - No cross-task dependency — fully independent of Tasks 1-4.
 - Produces: `RouteForm`'s `parallelTracks?: { value: 1 | 2 | 3; onChange(v: 1 | 2 | 3): void }`
   prop, replacing the removed `hideDouble?: boolean` prop. No other file references
@@ -827,7 +845,7 @@ inside the `describe('RoutesStage', ...)` block:
 
 Run: `yarn workspace @trm/web test --run RoutesStage`
 Expected: the new-route test PASSES (already correctly positioned today); the edit-route test
-FAILS (`compareDocumentPosition` shows the control currently renders *after* Save, so the
+FAILS (`compareDocumentPosition` shows the control currently renders _after_ Save, so the
 `DOCUMENT_POSITION_FOLLOWING` bit is not set on `saveButton` relative to `group` — the expression
 evaluates falsy).
 

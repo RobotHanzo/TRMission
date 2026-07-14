@@ -17,7 +17,7 @@ export interface AnalyticsEvents {
   room_join: { via: 'code' | 'public_list' | 'rejoin' };
   spectate_start: Record<string, never>;
   practice_start: Record<string, never>;
-  bot_add: { difficulty: 'EASY' | 'MEDIUM' | 'HARD' };
+  bot_add: { difficulty: 'EASY' | 'MEDIUM' | 'HARD' | 'HELL' };
   room_leave: Record<string, never>;
   game_start: {
     player_count: number;

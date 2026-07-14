@@ -3,7 +3,7 @@
 // same straightRouteGeometry — so it looks identical to the live game and can never drift (the
 // invariant the web version holds with shared CSS classes). Track colours go through RouteLayer's
 // own colour-key lookup, so even the glossary's greys are the board's greys.
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Canvas, Group } from '@shopify/react-native-skia';
@@ -39,6 +39,19 @@ const SPEC_DOUBLE_GAP = 1.35 * SPEC_INV;
 /** Display px per board unit for the route glossary (the web scales its SVG with CSS instead). */
 const SPEC_PX = 20;
 
+// The available inner width of the specimen box (measured by the `Specimen` wrapper). A Skia canvas
+// has a fixed pixel size, unlike the web's CSS-scaled SVG, so on a narrow coachmark the widest
+// tracks (the 4-car tunnel) would overflow the card. Canvases counter-scale to fit this width.
+const SpecimenWidthCtx = createContext<number | undefined>(undefined);
+
+/** px-per-board-unit for a canvas `boardW` units wide that must fit within the measured specimen
+ *  width, less any sibling `reserve` (a compare-row label, a claim row's arrow/card/count). Falls
+ *  back to the natural size before measurement / under jest, so nothing shrinks unexpectedly. */
+function fitPx(natural: number, boardW: number, avail: number | undefined, reserve = 0): number {
+  if (avail == null) return natural;
+  return Math.max(1, Math.min(natural, (avail - reserve) / boardW));
+}
+
 /** One synthetic straight route rendered through the board's own model builder + painter. */
 function trackModel(
   id: string,
@@ -68,8 +81,15 @@ function trackModel(
  *  renders as the board's twin track: two full parallel routes in DIFFERENT liveries (never one
  *  faded out). A ferry's pips take the neutral GRAY key — exactly as the map paints an unclaimed
  *  ferry. */
-function RouteCanvas({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'double' }) {
+function RouteCanvas({
+  variant,
+  reserve = 0,
+}: {
+  variant: 'rail' | 'ferry' | 'tunnel' | 'double';
+  reserve?: number;
+}) {
   const count = variant === 'tunnel' ? 4 : 3;
+  const px = fitPx(SPEC_PX, SPEC_W, useContext(SpecimenWidthCtx), reserve);
   const models =
     variant === 'double'
       ? [
@@ -80,8 +100,8 @@ function RouteCanvas({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'doub
         ? trackModel('spec', 'GRAY', count, { ferry: true }, SPEC_W / 2, SPEC_CY)
         : trackModel('spec', 'BLUE', count, { tunnel: variant === 'tunnel' }, SPEC_W / 2, SPEC_CY);
   return (
-    <Canvas style={{ width: SPEC_W * SPEC_PX, height: SPEC_H * SPEC_PX }}>
-      <Group transform={[{ scale: SPEC_PX }]}>
+    <Canvas style={{ width: SPEC_W * px, height: SPEC_H * px }}>
+      <Group transform={[{ scale: px }]}>
         <RouteLayer model={models} inv={SPEC_INV} />
       </Group>
     </Canvas>
@@ -96,6 +116,9 @@ export function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel
   );
 }
 
+// Each compare row reserves its fixed label column (64) + the row gap (8) so the track fits beside it.
+const COMPARE_RESERVE = 64 + 8;
+
 export function RouteCompareSpecimen() {
   const { t } = useTranslation();
   const rows: Array<['rail' | 'ferry' | 'tunnel', string]> = [
@@ -108,7 +131,7 @@ export function RouteCompareSpecimen() {
       {rows.map(([variant, label]) => (
         <View style={styles.compareRow} key={variant}>
           <Text style={styles.compareLabel}>{label}</Text>
-          <RouteCanvas variant={variant} />
+          <RouteCanvas variant={variant} reserve={COMPARE_RESERVE} />
         </View>
       ))}
     </View>
@@ -246,14 +269,18 @@ export function ScoreTableSpecimen() {
  *  board-faithful geometry as the route chapter. Display px/board-unit is fixed so every row's
  *  cars are the same size; longer routes are simply wider. */
 const CLAIM_TRACK_PX = 14; // display px per board unit
+// A claim row also carries an arrow, a payment card (CLAIM_CARD_W) and the ×N count — reserve that
+// so the longest track (len 4) still fits the coachmark instead of pushing the row off the edge.
+const CLAIM_RESERVE = 44 + 30 + 40;
 function ClaimTrack({ len, color }: { len: number; color: string }) {
   const pad = 0.9;
   const w = len * STRAIGHT_PITCH + pad * 2;
   const h = 3;
+  const px = fitPx(CLAIM_TRACK_PX, w, useContext(SpecimenWidthCtx), CLAIM_RESERVE);
   const models = trackModel(`claim-${color}-${len}`, color, len, {}, w / 2, h / 2);
   return (
-    <Canvas style={{ width: w * CLAIM_TRACK_PX, height: h * CLAIM_TRACK_PX }}>
-      <Group transform={[{ scale: CLAIM_TRACK_PX }]}>
+    <Canvas style={{ width: w * px, height: h * px }}>
+      <Group transform={[{ scale: px }]}>
         <RouteLayer model={models} inv={SPEC_INV} />
       </Group>
     </Canvas>
@@ -313,7 +340,7 @@ export function TicketSpecimen({ id }: { id: string }) {
   );
 }
 
-export function Specimen({ spec }: { spec: SpecimenSpec }) {
+function renderSpecimen(spec: SpecimenSpec) {
   switch (spec.kind) {
     case 'routes-compare':
       return <RouteCompareSpecimen />;
@@ -334,6 +361,18 @@ export function Specimen({ spec }: { spec: SpecimenSpec }) {
     case 'ticket':
       return <TicketSpecimen id={spec.id} />;
   }
+}
+
+export function Specimen({ spec }: { spec: SpecimenSpec }) {
+  // Measure the box the specimen is given so its fixed-size Skia canvases can counter-scale to fit
+  // (the coachmark is much narrower on a phone than on a tablet). Undefined until first layout —
+  // canvases fall back to their natural size until then.
+  const [avail, setAvail] = useState<number | undefined>(undefined);
+  return (
+    <View onLayout={(e) => setAvail(e.nativeEvent.layout.width)}>
+      <SpecimenWidthCtx.Provider value={avail}>{renderSpecimen(spec)}</SpecimenWidthCtx.Provider>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

@@ -27,9 +27,7 @@ export class AdminSpectateController {
         userId: p.id,
         seat: p.seat,
         ...(names.has(p.id) ? { displayName: names.get(p.id) } : {}),
-        ...(botsById.has(p.id)
-          ? { isBot: true, difficulty: botsById.get(p.id)!.difficulty }
-          : {}),
+        ...(botsById.has(p.id) ? { isBot: true, difficulty: botsById.get(p.id)!.difficulty } : {}),
       })),
     };
   }

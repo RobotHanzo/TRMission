@@ -18,7 +18,12 @@ export class RatingsRepo implements OnModuleInit {
     await this.col.createIndex({ createdAt: -1 });
   }
 
-  async insert(userId: string, gameId: string, roomId: string, stars: number): Promise<GameRatingDoc> {
+  async insert(
+    userId: string,
+    gameId: string,
+    roomId: string,
+    stars: number,
+  ): Promise<GameRatingDoc> {
     const doc: GameRatingDoc = {
       _id: randomUUID(),
       userId,
@@ -35,10 +40,7 @@ export class RatingsRepo implements OnModuleInit {
   listPage(cursor: { t: Date; id: string } | null, limit: number): Promise<GameRatingDoc[]> {
     const filter = cursor
       ? {
-          $or: [
-            { createdAt: { $lt: cursor.t } },
-            { createdAt: cursor.t, _id: { $lt: cursor.id } },
-          ],
+          $or: [{ createdAt: { $lt: cursor.t } }, { createdAt: cursor.t, _id: { $lt: cursor.id } }],
         }
       : {};
     return this.col.find(filter).sort({ createdAt: -1, _id: -1 }).limit(limit).toArray();
@@ -46,9 +48,11 @@ export class RatingsRepo implements OnModuleInit {
 
   async summary(): Promise<{ avgStars: number | null; totalCount: number }> {
     const [agg] = await this.col
-      .aggregate<{ _id: null; avg: number; count: number }>([
-        { $group: { _id: null, avg: { $avg: '$stars' }, count: { $sum: 1 } } },
-      ])
+      .aggregate<{
+        _id: null;
+        avg: number;
+        count: number;
+      }>([{ $group: { _id: null, avg: { $avg: '$stars' }, count: { $sum: 1 } } }])
       .toArray();
     return { avgStars: agg ? agg.avg : null, totalCount: agg ? agg.count : 0 };
   }

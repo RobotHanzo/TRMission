@@ -38,6 +38,18 @@ jobs:
           path: ~/.cache/mongodb-binaries
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
 
+      # The mobile suite is jest+babel over the whole RN graph AND the raw-TS @trm packages. Cold,
+      # that transform costs minutes — and because RN components require lazily, the cost lands
+      # inside test bodies, which is what pushed the tutorial walkthrough past its timeout.
+      - name: Cache jest transform cache (mobile)
+        uses: actions/cache@v4
+        with:
+          path: apps/mobile/.jest-cache
+          key: jest-mobile-${{ runner.os }}-${{ hashFiles('yarn.lock', 'apps/mobile/babel.config.js') }}-${{ github.sha }}
+          restore-keys: |
+            jest-mobile-${{ runner.os }}-${{ hashFiles('yarn.lock', 'apps/mobile/babel.config.js') }}-
+            jest-mobile-${{ runner.os }}-
+
       - name: Typecheck
         run: yarn typecheck
 

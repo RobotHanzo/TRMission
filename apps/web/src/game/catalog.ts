@@ -1,27 +1,2 @@
-import { TAIWAN_CONTENT } from '@trm/map-data';
-import type { GameContent, MapGeography } from '@trm/map-data';
-import { applyContentTables } from './content';
-import { rebuildRouteGeometry } from './routeGeometry';
-import { BASE_VIEW, type View } from '../game/geography';
-
-// The single place allowed to swap the active board content (content.ts + routeGeometry.ts stay
-// one-directional — routeGeometry reads content, content knows nothing of routeGeometry — so this
-// orchestrator sits above both instead of introducing a cycle between them).
-
-/** The active map's viewBox; falls back to the hand-authored Taiwan framing when the content
- *  carries no geography (the Taiwan official map, or any future official map without custom art). */
-export let ACTIVE_BASE_VIEW: View = BASE_VIEW;
-
-/** The active map's cropped-world cartography, or null to render the hand-authored Taiwan coast. */
-export let ACTIVE_GEOGRAPHY: MapGeography | null = null;
-
-export function setActiveContent(content: GameContent): void {
-  applyContentTables(content);
-  rebuildRouteGeometry();
-  ACTIVE_BASE_VIEW = content.geography?.baseView ?? BASE_VIEW;
-  ACTIVE_GEOGRAPHY = content.geography ?? null;
-}
-
-export function resetToDefaultContent(): void {
-  setActiveContent(TAIWAN_CONTENT);
-}
+// Re-export shim: this module moved to @trm/client-core (shared web+mobile).
+export * from '@trm/client-core/game/catalog';

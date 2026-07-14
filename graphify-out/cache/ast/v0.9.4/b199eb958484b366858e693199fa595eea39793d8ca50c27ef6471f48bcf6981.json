@@ -1,0 +1,567 @@
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_json",
+      "label": "package.json",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_name",
+      "label": "name",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L2"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_version",
+      "label": "version",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_private",
+      "label": "private",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L4"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_type",
+      "label": "type",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L5"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_exports",
+      "label": "exports",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_types",
+      "label": "types",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L8"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_default",
+      "label": "default",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L9"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_scripts",
+      "label": "scripts",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L16"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_scripts_typecheck",
+      "label": "typecheck",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L17"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_scripts_test",
+      "label": "test",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L18"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_scripts_lint",
+      "label": "lint",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L19"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_dependencies",
+      "label": "dependencies",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L21"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_codec",
+      "label": "@trm/codec",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L22"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_engine",
+      "label": "@trm/engine",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L23"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_map_data",
+      "label": "@trm/map-data",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L24"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_proto",
+      "label": "@trm/proto",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L25"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_shared",
+      "label": "@trm/shared",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L26"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_peerdependencies",
+      "label": "peerDependencies",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L28"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_peerdependencies_i18next",
+      "label": "i18next",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L29"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_peerdependencies_react",
+      "label": "react",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L30"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_peerdependencies_react_i18next",
+      "label": "react-i18next",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L31"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_peerdependencies_zustand",
+      "label": "zustand",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L32"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_devdependencies",
+      "label": "devDependencies",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L34"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_devdependencies_trm_tsc7",
+      "label": "@trm/tsc7",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L35"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_devdependencies_typescript",
+      "label": "typescript",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L36"
+    },
+    {
+      "id": "d_web_projects_trmission_packages_client_core_package_devdependencies_vitest",
+      "label": "vitest",
+      "file_type": "code",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L37"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_name",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_version",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_private",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_type",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_exports",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_exports",
+      "target": "d_web_projects_trmission_packages_client_core_package_types",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_exports",
+      "target": "d_web_projects_trmission_packages_client_core_package_default",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_exports",
+      "target": "d_web_projects_trmission_packages_client_core_package_types",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_exports",
+      "target": "d_web_projects_trmission_packages_client_core_package_default",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_scripts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_scripts",
+      "target": "d_web_projects_trmission_packages_client_core_package_scripts_typecheck",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_scripts",
+      "target": "d_web_projects_trmission_packages_client_core_package_scripts_test",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_scripts",
+      "target": "d_web_projects_trmission_packages_client_core_package_scripts_lint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_dependencies",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_codec",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_codec",
+      "target": "trm_codec",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L22",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_engine",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_engine",
+      "target": "trm_engine",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_map_data",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_map_data",
+      "target": "trm_map_data",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_proto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_proto",
+      "target": "trm_proto",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_shared",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_dependencies_trm_shared",
+      "target": "trm_shared",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_peerdependencies",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_peerdependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_peerdependencies_i18next",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_peerdependencies_i18next",
+      "target": "i18next",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_peerdependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_peerdependencies_react",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_peerdependencies_react",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_peerdependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_peerdependencies_react_i18next",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_peerdependencies_react_i18next",
+      "target": "react_i18next",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_peerdependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_peerdependencies_zustand",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_peerdependencies_zustand",
+      "target": "zustand",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_json",
+      "target": "d_web_projects_trmission_packages_client_core_package_devdependencies",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_devdependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_devdependencies_trm_tsc7",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_devdependencies_trm_tsc7",
+      "target": "trm_tsc7",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L35",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_devdependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_devdependencies_typescript",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_devdependencies_typescript",
+      "target": "typescript",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_devdependencies",
+      "target": "d_web_projects_trmission_packages_client_core_package_devdependencies_vitest",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_packages_client_core_package_devdependencies_vitest",
+      "target": "vitest",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "packages/client-core/package.json",
+      "source_location": "L37",
+      "weight": 1.0,
+      "context": "import"
+    }
+  ]
+}

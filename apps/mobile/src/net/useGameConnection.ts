@@ -17,11 +17,15 @@ export interface GameConnection {
   retry(): void;
 }
 
-export function useGameConnection(roomCode: string): GameConnection {
+export function useGameConnection(
+  roomCode: string,
+  opts?: { spectator?: boolean | undefined },
+): GameConnection {
   const status = useGame((s) => s.status);
   const sessionReplaced = useGame((s) => s.sessionReplaced);
   const [attempt, setAttempt] = useState(0);
   const connecting = useRef(false);
+  const spectator = opts?.spectator === true;
 
   useEffect(() => {
     let cancelled = false;
@@ -29,8 +33,11 @@ export function useGameConnection(roomCode: string): GameConnection {
       if (connecting.current) return;
       connecting.current = true;
       try {
-        const { ticket } = await api.getTicket(roomCode);
-        if (!cancelled) connectGame(ticket);
+        // A spectator mints through /spectate (watch-only seat); a player through /ticket.
+        const { ticket } = spectator ? await api.spectate(roomCode) : await api.getTicket(roomCode);
+        // The room code rides along so the shared socket can re-mint a fresh ticket on every
+        // in-socket reconnect attempt (the seed one expires within seconds of a drop).
+        if (!cancelled) connectGame(ticket, spectator ? { roomCode, spectator } : { roomCode });
       } catch {
         // REST failure (offline / room gone): surfaces as the socket status staying 'closed';
         // the OfflineBanner + retry() cover it.
@@ -50,7 +57,7 @@ export function useGameConnection(roomCode: string): GameConnection {
       sub.remove();
       disconnectGame();
     };
-  }, [roomCode, attempt]);
+  }, [roomCode, spectator, attempt]);
 
   return { status, sessionReplaced, retry: () => setAttempt((a) => a + 1) };
 }

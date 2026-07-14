@@ -331,9 +331,6 @@ describe('rooms', () => {
   });
 
   it('404s an unknown room code', async () => {
-    await request(server())
-      .get('/api/v1/dashboard/rooms/NOPE1')
-      .set(auth(admin.token))
-      .expect(404);
+    await request(server()).get('/api/v1/dashboard/rooms/NOPE1').set(auth(admin.token)).expect(404);
   });
 });

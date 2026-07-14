@@ -47,16 +47,16 @@ In that state:
 
 ## Decisions (confirmed with the requester)
 
-- **End behavior:** *Final round + skips.* Begin the normal end-sequence (endgame countdown) on
+- **End behavior:** _Final round + skips._ Begin the normal end-sequence (endgame countdown) on
   deadlock; stuck players' turns resolve as passes; a player who can still build a station gets a
   real final turn.
-- **Stuck human's turn:** *Always the button.* A stuck human always clicks the Pass/Skip button to
+- **Stuck human's turn:** _Always the button._ A stuck human always clicks the Pass/Skip button to
   end their turn (even during the end sequence). Bots pass automatically (the driver picks the sole
   legal move). No engine-level auto-skip of humans.
-- **Skip notification:** *Reuse `PLAYER_PASSED`.* A `PASS` is only ever legal when the player has no
+- **Skip notification:** _Reuse `PLAYER_PASSED`._ A `PASS` is only ever legal when the player has no
   other move, so `PLAYER_PASSED` already means "was stuck"; the web renders it as
   "skipped — no possible moves". No new wire event.
-- **End-sequence banner:** *Distinct deadlock banner.* Add `reason` to `ENDGAME_TRIGGERED`
+- **End-sequence banner:** _Distinct deadlock banner._ Add `reason` to `ENDGAME_TRIGGERED`
   (`FINAL_TRAINS` | `DEADLOCK`) so the final-round banner can read "no more routes can be built".
 
 ## Design
@@ -76,7 +76,7 @@ reducer, the legal-move check, and the turn sequencer:
   them), it returns `false` and `PASS` becomes legal.
 - Mirror this in `applyDrawTickets`: reject a `DRAW_TICKETS` action when the player has no productive
   move (so `legalActions` — which filters candidates through `reduce` — stops offering it), leaving
-  `legalActions == [PASS]`. **A15 stays exactly intact**: `PASS` is the *sole* legal move, not one of
+  `legalActions == [PASS]`. **A15 stays exactly intact**: `PASS` is the _sole_ legal move, not one of
   two. This preserves the highest-risk engine invariant — `events-property.spec`'s
   `hasPass ⟺ !hasAnyLegalMove` biconditional — because `hasAnyLegalMove` (false when stuck) and
   candidate generation (offers only `PASS`) move together.
@@ -94,7 +94,7 @@ full round of passes.
 
 - A stuck **bot** now has `legalActions == [PASS]`, so `chooseBotAction` returns `PASS` (its
   `legal.length === 1` fast path) — bots "auto-skip" through the normal driver, no special-casing.
-- A player who can still build a **station** is *not* stuck (station build is a productive move), so
+- A player who can still build a **station** is _not_ stuck (station build is a productive move), so
   they take a real final turn; only players with no productive move pass.
 
 **Versioning.** Bump `ENGINE_VERSION` 8 → 9 with a comment. Off-path identity holds: nothing changes
@@ -110,7 +110,7 @@ trigger + rule-7.5 guard), `types/events.ts` (`ENDGAME_TRIGGERED.reason`), `type
 
 - Add **`youMustPass`** to `RedactedView` (`types/view.ts`), computed in `redactFor`
   (`selectors.ts`): `phase === 'AWAIT_ACTION' && viewer !== null && viewer === currentPlayer &&
-  !hasAnyLegalMove(board, state, viewer)`. The client cannot compute this from a redacted snapshot,
+!hasAnyLegalMove(board, state, viewer)`. The client cannot compute this from a redacted snapshot,
   so the server surfaces it. It is inherently per-viewer, so it rides the **`SelfView`** block (a new
   `bool you_must_pass` in `common.proto`), which is already absent for spectators.
 - Add `reason` to the `EndgameTriggered` proto message (`server.proto`) — a small enum

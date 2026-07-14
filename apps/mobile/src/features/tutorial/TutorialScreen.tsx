@@ -82,7 +82,23 @@ function TutorialRunner({
   const snapshot = useGame((s) => s.snapshot);
   const reduced = useReducedMotion();
   const beat = player.beat;
-  const spotlight = beat?.spotlight;
+  // Once the learner's tap on the highlighted route/city opens the payment dialog, redirect the
+  // coachmark to IT instead of the map target — the beat itself doesn't finish (and advance) until
+  // a payment is actually confirmed, so the learner needs to be told where to look next.
+  const [pendingClaim, setPendingClaim] = useState<'route' | 'station' | null>(null);
+  useEffect(() => {
+    setPendingClaim(null);
+  }, [beat?.id]);
+  const awaitsPayment =
+    !!beat &&
+    beat.mode === 'await' &&
+    (beat.expect.t === 'CLAIM_ROUTE' || beat.expect.t === 'BUILD_STATION');
+  const showPayHint = awaitsPayment && pendingClaim !== null;
+  const effectiveBeat =
+    showPayHint && beat ? { ...beat, text: 'tutorial.payHint', specimen: undefined } : beat;
+  const spotlight = showPayHint
+    ? ({ kind: 'hud', selector: '.payment-options' } as const)
+    : beat?.spotlight;
   const rects = useSpotlightRects(spotlight);
   const spotlightCities = spotlight?.kind === 'cities' ? spotlight.ids : undefined;
   const frameTarget = beat?.frame ?? null;
@@ -114,11 +130,12 @@ function TutorialRunner({
       spotlightCities={spotlightCities}
       frameTarget={frameTarget}
       actionGate={actionGate}
+      onPendingClaim={setPendingClaim}
       overlay={
         <>
           <TutorialSpotlight rects={rects} reducedMotion={reduced} dimAll={dimAll} />
           <TutorialOverlay
-            beat={beat}
+            beat={effectiveBeat}
             done={player.done}
             index={player.index}
             total={player.total}
@@ -126,7 +143,7 @@ function TutorialRunner({
             lessonNo={lessonNo}
             lessonCount={lessonCount}
             isLastLesson={isLast}
-            specimen={beat?.specimen}
+            specimen={effectiveBeat?.specimen}
             spotRects={rects}
             onAdvance={player.next}
             onReplay={player.restart}
@@ -214,7 +231,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  btnAccent: { borderWidth: 0, backgroundColor: '#1f6feb' },
+  btnAccent: { borderWidth: 0, backgroundColor: '#0f5fa6' },
   btnText: { fontWeight: '600' },
   btnAccentText: { fontWeight: '700', color: '#fff' },
   link: { textDecorationLine: 'underline', textAlign: 'center', marginTop: 6 },

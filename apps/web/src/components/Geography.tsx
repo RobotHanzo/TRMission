@@ -39,7 +39,7 @@ export interface CustomGeographyProps {
 /** A custom map's cropped-world land silhouette: one smoothed path per ring, no relief/islands/
  *  compass (those are hand-tuned Taiwan decorations with no generic equivalent). */
 export function CustomGeography({ geography, selectedRings, onRingClick }: CustomGeographyProps) {
-  const { baseView, land } = geography;
+  const { baseView, land, borders } = geography;
   const { xs, ys } = graticuleFor(baseView);
   return (
     <g className="geo" pointerEvents={onRingClick ? 'auto' : 'none'}>
@@ -81,6 +81,9 @@ export function CustomGeography({ geography, selectedRings, onRingClick }: Custo
           </g>
         );
       })}
+      {borders?.map((ring, i) => (
+        <path key={`border-${i}`} className="country-border" d={smoothCoastPath(ring)} />
+      ))}
     </g>
   );
 }

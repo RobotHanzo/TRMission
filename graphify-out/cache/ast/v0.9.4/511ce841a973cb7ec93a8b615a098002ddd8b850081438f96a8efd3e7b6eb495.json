@@ -1,1 +1,127 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_task_6_report_md", "label": "task-6-report.md", "file_type": "document", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview", "label": "Task 6 Report: Admin UI \u2014 drawer detail + static SVG preview", "file_type": "document", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_6_report_what_i_implemented", "label": "What I implemented", "file_type": "document", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L6"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_6_report_tdd_evidence_for_mappreview", "label": "TDD Evidence for MapPreview", "file_type": "document", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L37"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_6_report_full_admin_suite_result", "label": "Full admin suite result", "file_type": "document", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L57"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_6_report_files_changed", "label": "Files changed", "file_type": "document", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L75"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_6_report_self_review_findings", "label": "Self-review findings", "file_type": "document", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L88"}, {"id": "d_web_projects_trmission_superpowers_sdd_task_6_report_concerns", "label": "Concerns", "file_type": "document", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L100"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_task_6_report_md", "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview", "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_what_i_implemented", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L6", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview", "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_tdd_evidence_for_mappreview", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L37", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview", "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_full_admin_suite_result", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L57", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview", "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_files_changed", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L75", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview", "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_self_review_findings", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L88", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview", "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/task-6-report.md", "source_location": "L100", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_6_report_md",
+      "label": "task-6-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview",
+      "label": "Task 6 Report: Admin UI \u2014 drawer detail + static SVG preview",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_6_report_what_i_implemented",
+      "label": "What I implemented",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_6_report_tdd_evidence_for_mappreview",
+      "label": "TDD Evidence for MapPreview",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L37"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_6_report_full_admin_suite_result",
+      "label": "Full admin suite result",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L57"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_6_report_files_changed",
+      "label": "Files changed",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L75"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_6_report_self_review_findings",
+      "label": "Self-review findings",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L88"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_task_6_report_concerns",
+      "label": "Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L100"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_6_report_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_what_i_implemented",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_tdd_evidence_for_mappreview",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_full_admin_suite_result",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_files_changed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_self_review_findings",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_task_6_report_task_6_report_admin_ui_drawer_detail_static_svg_preview",
+      "target": "d_web_projects_trmission_superpowers_sdd_task_6_report_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/task-6-report.md",
+      "source_location": "L100",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

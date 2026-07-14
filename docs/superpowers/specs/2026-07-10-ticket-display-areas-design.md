@@ -15,7 +15,7 @@ preview simply never got the same treatment.
 Two things follow from this:
 
 1. **Correctness:** the ticket mini-map must follow the active map's geography, not hardcoded Taiwan.
-2. **Feature:** authors want to control the *displayed area* (crop/zoom) of each ticket's mini-map,
+2. **Feature:** authors want to control the _displayed area_ (crop/zoom) of each ticket's mini-map,
    per ticket, with a map-wide default and a safe fallback for tickets that set nothing.
 
 ## Scope
@@ -34,18 +34,18 @@ A presentation-only spec, resolved to an SVG `viewBox` rectangle at render time:
 
 ```ts
 export type TicketView =
-  | { readonly mode: 'full' }                            // whole map (baseView)
-  | { readonly mode: 'auto' }                            // auto-crop: bbox of the two cities + padding
-  | { readonly mode: 'zoom'; readonly level: number };   // auto-frame on midpoint(a,b); level 0..1
+  | { readonly mode: 'full' } // whole map (baseView)
+  | { readonly mode: 'auto' } // auto-crop: bbox of the two cities + padding
+  | { readonly mode: 'zoom'; readonly level: number }; // auto-frame on midpoint(a,b); level 0..1
 
 export interface TicketDef {
   // …existing id/a/b/value/deck…
-  readonly view?: TicketView;          // per-ticket override; absent ⇒ inherit map default
+  readonly view?: TicketView; // per-ticket override; absent ⇒ inherit map default
 }
 
 export interface MapGeography {
   // …existing baseView/land/crop…
-  readonly defaultTicketView?: TicketView;   // map-wide default for tickets that set no view
+  readonly defaultTicketView?: TicketView; // map-wide default for tickets that set no view
 }
 ```
 
@@ -63,7 +63,7 @@ resolve(ticket, geography) =
 
 **Decision — ultimate fallback is whole-map, not auto-crop.** This preserves current Taiwan behavior
 byte-for-behavior and is the most predictable "acceptable default". An author who wants every unset
-ticket auto-framed sets the *map default* to `auto` in one place.
+ticket auto-framed sets the _map default_ to `auto` in one place.
 
 ### The two framing modes (math, in board space 0..100)
 
@@ -76,7 +76,7 @@ Given endpoints `a=(ax,ay)`, `b=(bx,by)` and the map's `baseView`:
   Proposed constants: `AUTO_PAD_FRAC = 0.6`, `AUTO_PAD_MIN = 8`, `AUTO_MIN_SPAN = 25` (board units).
 - **`zoom`** (slider `level ∈ [0,1]`): centered on `midpoint(a,b)`; box size interpolates from the
   whole `baseView` at `0` to a tight close-up at `1` (`ZOOM_TIGHT_FRAC = 0.18` of each `baseView`
-  dimension); clamp inside `baseView`. This is framing *tightness*, **not** guaranteed containment —
+  dimension); clamp inside `baseView`. This is framing _tightness_, **not** guaranteed containment —
   the deliberate difference from `auto`.
 
 The resolver lives in map-data (pure, unit-testable, single source of truth), e.g.
@@ -98,7 +98,7 @@ key-sorted `JSON.stringify` that drops absent keys, so:
 
 **Invariant to preserve:** never assign `view: undefined` / `defaultTicketView: undefined`
 explicitly. Follow the established spread-if-defined pattern (`...(x !== undefined ? { view: x } : {})`)
-everywhere a draft/DTO is converted, and have "Default" in the UI *remove* the key (see plumbing).
+everywhere a draft/DTO is converted, and have "Default" in the UI _remove_ the key (see plumbing).
 
 ## Rendering (`apps/web`)
 

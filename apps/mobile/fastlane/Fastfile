@@ -29,3 +29,47 @@ platform :ios do
     )
   end
 end
+
+# Play publishing via a service-account JSON key (Play Developer API) — no EAS, same self-managed
+# posture as iOS. `PLAY_JSON_KEY_FILE` is a decoded-in-CI path (mobile-android.yml); for local runs
+# export it yourself. See docs/release/play-console-setup.md for how to provision the key.
+#
+# CI only ever calls :internal — it never touches the live store listing/images and never
+# promotes a track. `metadata`/`promote` are deliberately local-only lanes.
+platform :android do
+  desc "Upload the signed AAB to Play's internal testing track"
+  lane :internal do
+    upload_to_play_store(
+      track: "internal",
+      aab: "android/app/build/outputs/bundle/release/app-release.aab",
+      json_key: ENV["PLAY_JSON_KEY_FILE"],
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Push the committed store listing (fastlane/metadata/android) — run locally, not in CI"
+  lane :metadata do
+    upload_to_play_store(
+      json_key: ENV["PLAY_JSON_KEY_FILE"],
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Promote the current internal-track build to production — run locally, not in CI"
+  lane :promote do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      json_key: ENV["PLAY_JSON_KEY_FILE"],
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

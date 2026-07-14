@@ -8,7 +8,7 @@ import { track } from '../lib/analytics';
 import { usePlayerName } from '../game/playerName';
 import { SEAT_COLORS } from '../theme/colors';
 import { chatRejectionHintKey } from '../game/chatErrors';
-import { chatPresetKey } from '../game/chatPresets';
+import { chatPresetKey } from '@trm/client-core';
 import { ChatPresetPicker } from './ChatPresetPicker';
 
 const MAX_LEN = 2048;

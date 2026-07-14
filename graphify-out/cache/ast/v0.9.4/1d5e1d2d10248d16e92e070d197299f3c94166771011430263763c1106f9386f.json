@@ -1,1 +1,191 @@
-{"nodes": [{"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_md", "label": "p2-task-1-report.md", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission", "label": "Task 1 Report: `games.viewReplay` Permission", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_summary", "label": "Summary", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L3"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_implementation", "label": "Implementation", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L7"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_files_changed", "label": "Files Changed", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L9"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_changes_made", "label": "Changes Made", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L14"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_tdd_evidence", "label": "TDD Evidence", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L30"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_red_phase", "label": "RED Phase", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L32"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_green_phase", "label": "GREEN Phase", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L45"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_commit", "label": "Commit", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L56"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_self_review_checklist", "label": "Self-Review Checklist", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L62"}, {"id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_no_issues_or_concerns", "label": "No Issues or Concerns", "file_type": "document", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L72"}], "edges": [{"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_md", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_summary", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_implementation", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L7", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_implementation", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_files_changed", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L9", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_implementation", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_changes_made", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L14", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_tdd_evidence", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L30", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_tdd_evidence", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_red_phase", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L32", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_tdd_evidence", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_green_phase", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L45", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_commit", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L56", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_self_review_checklist", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L62", "weight": 1.0}, {"source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission", "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_no_issues_or_concerns", "relation": "contains", "confidence": "EXTRACTED", "source_file": ".superpowers/sdd/p2-task-1-report.md", "source_location": "L72", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_md",
+      "label": "p2-task-1-report.md",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission",
+      "label": "Task 1 Report: `games.viewReplay` Permission",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_summary",
+      "label": "Summary",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_implementation",
+      "label": "Implementation",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L7"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_files_changed",
+      "label": "Files Changed",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L9"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_changes_made",
+      "label": "Changes Made",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L14"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_tdd_evidence",
+      "label": "TDD Evidence",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L30"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_red_phase",
+      "label": "RED Phase",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L32"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_green_phase",
+      "label": "GREEN Phase",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L45"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_commit",
+      "label": "Commit",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L56"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_self_review_checklist",
+      "label": "Self-Review Checklist",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L62"
+    },
+    {
+      "id": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_no_issues_or_concerns",
+      "label": "No Issues or Concerns",
+      "file_type": "document",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L72"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_md",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_summary",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_implementation",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_implementation",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_files_changed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_implementation",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_changes_made",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_tdd_evidence",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_tdd_evidence",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_red_phase",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_tdd_evidence",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_green_phase",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_commit",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_self_review_checklist",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L62",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_task_1_report_games_viewreplay_permission",
+      "target": "d_web_projects_trmission_superpowers_sdd_p2_task_1_report_no_issues_or_concerns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": ".superpowers/sdd/p2-task-1-report.md",
+      "source_location": "L72",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

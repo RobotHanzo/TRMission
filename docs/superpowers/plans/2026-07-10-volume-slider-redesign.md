@@ -36,6 +36,7 @@ already used elsewhere in `SettingsModal.tsx`), plain CSS (no new libraries), Vi
 ### Task 1: `VolumeSlider` component + `SettingsModal` wiring
 
 **Files:**
+
 - Create: `apps/web/src/components/ui/VolumeSlider.tsx`
 - Modify: `apps/web/src/styles/app.css:648-650` (insert new rules right after the
   `.switch.on .switch-knob` block, before the `/* A one-shot attention pulse...` comment)
@@ -45,20 +46,21 @@ already used elsewhere in `SettingsModal.tsx`), plain CSS (no new libraries), Vi
   section" describe block)
 
 **Interfaces:**
+
 - Produces: `VolumeSlider` — `apps/web/src/components/ui/VolumeSlider.tsx`, default export none,
   named export `VolumeSlider(props: { value: number; enabled: boolean; onChangeValue(next:
-  number): void; onToggleEnabled(next: boolean): void; rangeLabel: string; muteLabel: string })`.
+number): void; onToggleEnabled(next: boolean): void; rangeLabel: string; muteLabel: string })`.
   Renders a `<div className="volume-slider">` containing a `<button type="button"
-  className="volume-icon-btn" aria-pressed={enabled} aria-label={muteLabel}>` (speaker icon,
+className="volume-icon-btn" aria-pressed={enabled} aria-label={muteLabel}>` (speaker icon,
   `onClick` calls `onToggleEnabled(!enabled)`) and an `<input type="range" className="volume-range"
-  aria-label={rangeLabel}>` (unchanged `min`/`max`/`step`/`disabled`/`onChange` semantics of the
+aria-label={rangeLabel}>` (unchanged `min`/`max`/`step`/`disabled`/`onChange` semantics of the
   control it replaces).
 
 - [ ] **Step 1: Write the failing test**
 
   Open `apps/web/src/components/SettingsModal.test.tsx` and add a new `it` inside the existing
   `describe('SettingsModal sound section', ...)` block (after the `'changes volume via the
-  slider'` test, before the closing `});` of that describe):
+slider'` test, before the closing `});` of that describe):
 
   ```tsx
   it('mutes via the volume icon shortcut', () => {
@@ -77,7 +79,7 @@ already used elsewhere in `SettingsModal.tsx`), plain CSS (no new libraries), Vi
 
   Run: `yarn workspace @trm/web test --run SettingsModal`
   Expected: FAIL — `TestingLibraryElementError: Unable to find an accessible element with the role
-  "button" and name ...` (no such control exists yet; the modal's only other button is the "close"
+"button" and name ...` (no such control exists yet; the modal's only other button is the "close"
   icon button, whose accessible name is `t('close')`, not `t('sound')`).
 
 - [ ] **Step 3: Create the `VolumeSlider` component**
@@ -146,41 +148,41 @@ already used elsewhere in `SettingsModal.tsx`), plain CSS (no new libraries), Vi
   Then replace the sound `<section>` block:
 
   ```tsx
-        <section className="setting setting-row">
-          <div>
-            <div className="setting-label">{t('sound')}</div>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={soundVolume}
-              disabled={!soundEnabled}
-              aria-label={t('volume')}
-              onChange={(e) => setSoundVolume(Number(e.target.value))}
-            />
-          </div>
-          <Switch checked={soundEnabled} onChange={setSoundEnabled} label={t('sound')} />
-        </section>
+  <section className="setting setting-row">
+    <div>
+      <div className="setting-label">{t('sound')}</div>
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.05}
+        value={soundVolume}
+        disabled={!soundEnabled}
+        aria-label={t('volume')}
+        onChange={(e) => setSoundVolume(Number(e.target.value))}
+      />
+    </div>
+    <Switch checked={soundEnabled} onChange={setSoundEnabled} label={t('sound')} />
+  </section>
   ```
 
   with:
 
   ```tsx
-        <section className="setting setting-row">
-          <div>
-            <div className="setting-label">{t('sound')}</div>
-            <VolumeSlider
-              value={soundVolume}
-              enabled={soundEnabled}
-              onChangeValue={setSoundVolume}
-              onToggleEnabled={setSoundEnabled}
-              rangeLabel={t('volume')}
-              muteLabel={t('sound')}
-            />
-          </div>
-          <Switch checked={soundEnabled} onChange={setSoundEnabled} label={t('sound')} />
-        </section>
+  <section className="setting setting-row">
+    <div>
+      <div className="setting-label">{t('sound')}</div>
+      <VolumeSlider
+        value={soundVolume}
+        enabled={soundEnabled}
+        onChangeValue={setSoundVolume}
+        onToggleEnabled={setSoundEnabled}
+        rangeLabel={t('volume')}
+        muteLabel={t('sound')}
+      />
+    </div>
+    <Switch checked={soundEnabled} onChange={setSoundEnabled} label={t('sound')} />
+  </section>
   ```
 
 - [ ] **Step 5: Run the test to verify it passes**
@@ -196,7 +198,6 @@ already used elsewhere in `SettingsModal.tsx`), plain CSS (no new libraries), Vi
   `/* A one-shot attention pulse... */` comment):
 
   ```css
-
   /* Volume slider (settings modal) — icon + restyled native <input type="range"> */
   .volume-slider {
     display: flex;

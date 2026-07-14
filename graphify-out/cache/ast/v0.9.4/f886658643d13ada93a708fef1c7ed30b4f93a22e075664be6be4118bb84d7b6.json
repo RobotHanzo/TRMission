@@ -1,1 +1,1309 @@
-{"nodes": [{"id": "d_web_projects_trmission_apps_mobile_package_json", "label": "package.json", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L1"}, {"id": "d_web_projects_trmission_apps_mobile_package_name", "label": "name", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L2"}, {"id": "d_web_projects_trmission_apps_mobile_package_version", "label": "version", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L3"}, {"id": "d_web_projects_trmission_apps_mobile_package_private", "label": "private", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L4"}, {"id": "d_web_projects_trmission_apps_mobile_package_main", "label": "main", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L5"}, {"id": "d_web_projects_trmission_apps_mobile_package_scripts", "label": "scripts", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L6"}, {"id": "d_web_projects_trmission_apps_mobile_package_scripts_start", "label": "start", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L7"}, {"id": "d_web_projects_trmission_apps_mobile_package_scripts_android", "label": "android", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L8"}, {"id": "d_web_projects_trmission_apps_mobile_package_scripts_ios", "label": "ios", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L9"}, {"id": "d_web_projects_trmission_apps_mobile_package_scripts_prebuild", "label": "prebuild", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L10"}, {"id": "d_web_projects_trmission_apps_mobile_package_scripts_typecheck", "label": "typecheck", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L11"}, {"id": "d_web_projects_trmission_apps_mobile_package_scripts_lint", "label": "lint", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L12"}, {"id": "d_web_projects_trmission_apps_mobile_package_scripts_test", "label": "test", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L13"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies", "label": "dependencies", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L15"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_bufbuild_protobuf", "label": "@bufbuild/protobuf", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L16"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_formatjs_intl_pluralrules", "label": "@formatjs/intl-pluralrules", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L17"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_async_storage_async_storage", "label": "@react-native-async-storage/async-storage", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L18"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_community_netinfo", "label": "@react-native-community/netinfo", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L19"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_google_signin_google_signin", "label": "@react-native-google-signin/google-signin", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L20"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native", "label": "@react-navigation/native", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L21"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native_stack", "label": "@react-navigation/native-stack", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L22"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_codec", "label": "@trm/codec", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L23"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_engine", "label": "@trm/engine", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L24"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_map_data", "label": "@trm/map-data", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L25"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_proto", "label": "@trm/proto", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L26"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_shared", "label": "@trm/shared", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L27"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo", "label": "expo", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L28"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_apple_authentication", "label": "expo-apple-authentication", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L29"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_auth_session", "label": "expo-auth-session", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L30"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_constants", "label": "expo-constants", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L31"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_crypto", "label": "expo-crypto", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L32"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_linking", "label": "expo-linking", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L33"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_notifications", "label": "expo-notifications", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L34"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_secure_store", "label": "expo-secure-store", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L35"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_status_bar", "label": "expo-status-bar", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L36"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_fast_text_encoding", "label": "fast-text-encoding", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L37"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_i18next", "label": "i18next", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L38"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_immer", "label": "immer", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L39"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react", "label": "react", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L40"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_i18next", "label": "react-i18next", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L41"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native", "label": "react-native", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L42"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_safe_area_context", "label": "react-native-safe-area-context", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L43"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_screens", "label": "react-native-screens", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L44"}, {"id": "d_web_projects_trmission_apps_mobile_package_dependencies_zustand", "label": "zustand", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L45"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies", "label": "devDependencies", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L47"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_native_jest_preset", "label": "@react-native/jest-preset", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L48"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_testing_library_react_native", "label": "@testing-library/react-native", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L49"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_jest", "label": "@types/jest", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L50"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_react", "label": "@types/react", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L51"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_eslint", "label": "eslint", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L52"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest", "label": "jest", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L53"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest_expo", "label": "jest-expo", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L54"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_test_renderer", "label": "react-test-renderer", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L55"}, {"id": "d_web_projects_trmission_apps_mobile_package_devdependencies_typescript", "label": "typescript", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L56"}, {"id": "d_web_projects_trmission_apps_mobile_package_jest", "label": "jest", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L58"}, {"id": "d_web_projects_trmission_apps_mobile_package_jest_preset", "label": "preset", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L59"}, {"id": "d_web_projects_trmission_apps_mobile_package_jest_transformignorepatterns", "label": "transformIgnorePatterns", "file_type": "code", "source_file": "apps/mobile/package.json", "source_location": "L60"}], "edges": [{"source": "d_web_projects_trmission_apps_mobile_package_json", "target": "d_web_projects_trmission_apps_mobile_package_name", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L2", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_json", "target": "d_web_projects_trmission_apps_mobile_package_version", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L3", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_json", "target": "d_web_projects_trmission_apps_mobile_package_private", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L4", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_json", "target": "d_web_projects_trmission_apps_mobile_package_main", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L5", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_json", "target": "d_web_projects_trmission_apps_mobile_package_scripts", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L6", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_scripts", "target": "d_web_projects_trmission_apps_mobile_package_scripts_start", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L7", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_scripts", "target": "d_web_projects_trmission_apps_mobile_package_scripts_android", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L8", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_scripts", "target": "d_web_projects_trmission_apps_mobile_package_scripts_ios", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L9", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_scripts", "target": "d_web_projects_trmission_apps_mobile_package_scripts_prebuild", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L10", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_scripts", "target": "d_web_projects_trmission_apps_mobile_package_scripts_typecheck", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_scripts", "target": "d_web_projects_trmission_apps_mobile_package_scripts_lint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L12", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_scripts", "target": "d_web_projects_trmission_apps_mobile_package_scripts_test", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L13", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_json", "target": "d_web_projects_trmission_apps_mobile_package_dependencies", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L15", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_bufbuild_protobuf", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L16", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_bufbuild_protobuf", "target": "bufbuild_protobuf", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L16", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_formatjs_intl_pluralrules", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L17", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_formatjs_intl_pluralrules", "target": "formatjs_intl_pluralrules", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L17", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_async_storage_async_storage", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L18", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_async_storage_async_storage", "target": "react_native_async_storage_async_storage", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L18", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_community_netinfo", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L19", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_community_netinfo", "target": "react_native_community_netinfo", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L19", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_google_signin_google_signin", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L20", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_google_signin_google_signin", "target": "react_native_google_signin_google_signin", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L20", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L21", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native", "target": "react_navigation_native", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L21", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native_stack", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L22", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native_stack", "target": "react_navigation_native_stack", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L22", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_codec", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L23", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_codec", "target": "trm_codec", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L23", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_engine", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L24", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_engine", "target": "trm_engine", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L24", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_map_data", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L25", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_map_data", "target": "trm_map_data", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L25", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_proto", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L26", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_proto", "target": "trm_proto", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L26", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_shared", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L27", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_shared", "target": "trm_shared", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L27", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L28", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo", "target": "expo", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L28", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_apple_authentication", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L29", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_apple_authentication", "target": "expo_apple_authentication", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L29", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_auth_session", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L30", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_auth_session", "target": "expo_auth_session", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L30", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_constants", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L31", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_constants", "target": "expo_constants", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L31", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_crypto", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L32", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_crypto", "target": "expo_crypto", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L32", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_linking", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L33", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_linking", "target": "expo_linking", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L33", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_notifications", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L34", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_notifications", "target": "expo_notifications", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L34", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_secure_store", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L35", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_secure_store", "target": "expo_secure_store", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L35", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_status_bar", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L36", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_status_bar", "target": "expo_status_bar", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L36", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_fast_text_encoding", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L37", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_fast_text_encoding", "target": "fast_text_encoding", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L37", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_i18next", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L38", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_i18next", "target": "i18next", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L38", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_immer", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L39", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_immer", "target": "immer", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L39", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L40", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react", "target": "react", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L40", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_i18next", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L41", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_i18next", "target": "react_i18next", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L41", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L42", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native", "target": "react_native", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L42", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_safe_area_context", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L43", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_safe_area_context", "target": "react_native_safe_area_context", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L43", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_screens", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L44", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_screens", "target": "react_native_screens", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L44", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies", "target": "d_web_projects_trmission_apps_mobile_package_dependencies_zustand", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L45", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_dependencies_zustand", "target": "zustand", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L45", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_json", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L47", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_native_jest_preset", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L48", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_native_jest_preset", "target": "react_native_jest_preset", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L48", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_testing_library_react_native", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L49", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_testing_library_react_native", "target": "testing_library_react_native", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L49", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_jest", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L50", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_jest", "target": "types_jest", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L50", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_react", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L51", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_react", "target": "types_react", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L51", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_eslint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L52", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_eslint", "target": "eslint", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L52", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L53", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest", "target": "jest", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L53", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest_expo", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L54", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest_expo", "target": "jest_expo", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L54", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_test_renderer", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L55", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_test_renderer", "target": "react_test_renderer", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L55", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies", "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_typescript", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L56", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_devdependencies_typescript", "target": "typescript", "relation": "imports", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L56", "weight": 1.0, "context": "import"}, {"source": "d_web_projects_trmission_apps_mobile_package_json", "target": "d_web_projects_trmission_apps_mobile_package_jest", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L58", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_jest", "target": "d_web_projects_trmission_apps_mobile_package_jest_preset", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L59", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_jest", "target": "d_web_projects_trmission_apps_mobile_package_jest_transformignorepatterns", "relation": "contains", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L60", "weight": 1.0}, {"source": "d_web_projects_trmission_apps_mobile_package_jest_transformignorepatterns", "target": "ref_node_modules_pnpm_jest_react_native_react_native_community_expo_nent_expo_nent_expo_google_fonts_react_navigation_react_navigation_bufbuild_formatjs_trm", "relation": "extends", "confidence": "EXTRACTED", "source_file": "apps/mobile/package.json", "source_location": "L60", "weight": 1.0, "context": "import"}]}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_json",
+      "label": "package.json",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_name",
+      "label": "name",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L2"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_version",
+      "label": "version",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L3"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_private",
+      "label": "private",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L4"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_main",
+      "label": "main",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L5"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "label": "scripts",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L6"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_scripts_start",
+      "label": "start",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L7"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_scripts_android",
+      "label": "android",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L8"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_scripts_ios",
+      "label": "ios",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L9"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_scripts_prebuild",
+      "label": "prebuild",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L10"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_scripts_typecheck",
+      "label": "typecheck",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_scripts_lint",
+      "label": "lint",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L12"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_scripts_test",
+      "label": "test",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L13"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "label": "dependencies",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L15"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_bufbuild_protobuf",
+      "label": "@bufbuild/protobuf",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L16"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_formatjs_intl_pluralrules",
+      "label": "@formatjs/intl-pluralrules",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L17"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_async_storage_async_storage",
+      "label": "@react-native-async-storage/async-storage",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L18"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_community_netinfo",
+      "label": "@react-native-community/netinfo",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L19"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_google_signin_google_signin",
+      "label": "@react-native-google-signin/google-signin",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L20"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native",
+      "label": "@react-navigation/native",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L21"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native_stack",
+      "label": "@react-navigation/native-stack",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L22"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_codec",
+      "label": "@trm/codec",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L23"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_engine",
+      "label": "@trm/engine",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L24"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_map_data",
+      "label": "@trm/map-data",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L25"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_proto",
+      "label": "@trm/proto",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L26"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_shared",
+      "label": "@trm/shared",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L27"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo",
+      "label": "expo",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L28"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_apple_authentication",
+      "label": "expo-apple-authentication",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L29"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_auth_session",
+      "label": "expo-auth-session",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L30"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_constants",
+      "label": "expo-constants",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L31"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_crypto",
+      "label": "expo-crypto",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L32"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_linking",
+      "label": "expo-linking",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L33"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_notifications",
+      "label": "expo-notifications",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L34"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_secure_store",
+      "label": "expo-secure-store",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L35"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_status_bar",
+      "label": "expo-status-bar",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L36"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_fast_text_encoding",
+      "label": "fast-text-encoding",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L37"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_i18next",
+      "label": "i18next",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L38"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_immer",
+      "label": "immer",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L39"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react",
+      "label": "react",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L40"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_i18next",
+      "label": "react-i18next",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L41"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native",
+      "label": "react-native",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L42"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_safe_area_context",
+      "label": "react-native-safe-area-context",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L43"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_screens",
+      "label": "react-native-screens",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L44"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_dependencies_zustand",
+      "label": "zustand",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L45"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "label": "devDependencies",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L47"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_native_jest_preset",
+      "label": "@react-native/jest-preset",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L48"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_testing_library_react_native",
+      "label": "@testing-library/react-native",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L49"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_jest",
+      "label": "@types/jest",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L50"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_react",
+      "label": "@types/react",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L51"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_eslint",
+      "label": "eslint",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L52"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest",
+      "label": "jest",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L53"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest_expo",
+      "label": "jest-expo",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L54"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_test_renderer",
+      "label": "react-test-renderer",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L55"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_devdependencies_typescript",
+      "label": "typescript",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L56"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_jest",
+      "label": "jest",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L58"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_jest_preset",
+      "label": "preset",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L59"
+    },
+    {
+      "id": "d_web_projects_trmission_apps_mobile_package_jest_transformignorepatterns",
+      "label": "transformIgnorePatterns",
+      "file_type": "code",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L60"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_json",
+      "target": "d_web_projects_trmission_apps_mobile_package_name",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_json",
+      "target": "d_web_projects_trmission_apps_mobile_package_version",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_json",
+      "target": "d_web_projects_trmission_apps_mobile_package_private",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_json",
+      "target": "d_web_projects_trmission_apps_mobile_package_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_json",
+      "target": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "target": "d_web_projects_trmission_apps_mobile_package_scripts_start",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "target": "d_web_projects_trmission_apps_mobile_package_scripts_android",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "target": "d_web_projects_trmission_apps_mobile_package_scripts_ios",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "target": "d_web_projects_trmission_apps_mobile_package_scripts_prebuild",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "target": "d_web_projects_trmission_apps_mobile_package_scripts_typecheck",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "target": "d_web_projects_trmission_apps_mobile_package_scripts_lint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_scripts",
+      "target": "d_web_projects_trmission_apps_mobile_package_scripts_test",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_json",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_bufbuild_protobuf",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_bufbuild_protobuf",
+      "target": "bufbuild_protobuf",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_formatjs_intl_pluralrules",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_formatjs_intl_pluralrules",
+      "target": "formatjs_intl_pluralrules",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L17",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_async_storage_async_storage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_async_storage_async_storage",
+      "target": "react_native_async_storage_async_storage",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_community_netinfo",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_community_netinfo",
+      "target": "react_native_community_netinfo",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_google_signin_google_signin",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_google_signin_google_signin",
+      "target": "react_native_google_signin_google_signin",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L20",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native",
+      "target": "react_navigation_native",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L21",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native_stack",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_navigation_native_stack",
+      "target": "react_navigation_native_stack",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L22",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_codec",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_codec",
+      "target": "trm_codec",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_engine",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_engine",
+      "target": "trm_engine",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_map_data",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_map_data",
+      "target": "trm_map_data",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_proto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_proto",
+      "target": "trm_proto",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_shared",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_trm_shared",
+      "target": "trm_shared",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L27",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo",
+      "target": "expo",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_apple_authentication",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_apple_authentication",
+      "target": "expo_apple_authentication",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_auth_session",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_auth_session",
+      "target": "expo_auth_session",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_constants",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_constants",
+      "target": "expo_constants",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_crypto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_crypto",
+      "target": "expo_crypto",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_linking",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_linking",
+      "target": "expo_linking",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L33",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_notifications",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_notifications",
+      "target": "expo_notifications",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_secure_store",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_secure_store",
+      "target": "expo_secure_store",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L35",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_status_bar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_expo_status_bar",
+      "target": "expo_status_bar",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_fast_text_encoding",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_fast_text_encoding",
+      "target": "fast_text_encoding",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L37",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_i18next",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_i18next",
+      "target": "i18next",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_immer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_immer",
+      "target": "immer",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L39",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react",
+      "target": "react",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L40",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_i18next",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_i18next",
+      "target": "react_i18next",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native",
+      "target": "react_native",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_safe_area_context",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_safe_area_context",
+      "target": "react_native_safe_area_context",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L43",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_screens",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_react_native_screens",
+      "target": "react_native_screens",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_dependencies_zustand",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_dependencies_zustand",
+      "target": "zustand",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L45",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_json",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_native_jest_preset",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_native_jest_preset",
+      "target": "react_native_jest_preset",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L48",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_testing_library_react_native",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_testing_library_react_native",
+      "target": "testing_library_react_native",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L49",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_jest",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_jest",
+      "target": "types_jest",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_react",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_types_react",
+      "target": "types_react",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_eslint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_eslint",
+      "target": "eslint",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest",
+      "target": "jest",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L53",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest_expo",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_jest_expo",
+      "target": "jest_expo",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L54",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_test_renderer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_react_test_renderer",
+      "target": "react_test_renderer",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L55",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies",
+      "target": "d_web_projects_trmission_apps_mobile_package_devdependencies_typescript",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_devdependencies_typescript",
+      "target": "typescript",
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_json",
+      "target": "d_web_projects_trmission_apps_mobile_package_jest",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_jest",
+      "target": "d_web_projects_trmission_apps_mobile_package_jest_preset",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_jest",
+      "target": "d_web_projects_trmission_apps_mobile_package_jest_transformignorepatterns",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_apps_mobile_package_jest_transformignorepatterns",
+      "target": "ref_node_modules_pnpm_jest_react_native_react_native_community_expo_nent_expo_nent_expo_google_fonts_react_navigation_react_navigation_bufbuild_formatjs_trm",
+      "relation": "extends",
+      "confidence": "EXTRACTED",
+      "source_file": "apps/mobile/package.json",
+      "source_location": "L60",
+      "weight": 1.0,
+      "context": "import"
+    }
+  ]
+}

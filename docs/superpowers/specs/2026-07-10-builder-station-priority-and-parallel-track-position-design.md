@@ -17,7 +17,7 @@ Two independent asks in the custom map builder:
 2. **Parallel-track control position.** `RoutesStage.tsx`'s `RouteForm` renders the `[1][2][3]`
    parallel-tracks `Segmented` control in two places: inline, before the Save/Cancel row, for a
    **new** route; and a second, duplicate copy passed through an `extra` slot for an **existing**
-   route, which renders *after* Save/Cancel. The edit-mode instance needs to move above Save.
+   route, which renders _after_ Save/Cancel. The edit-mode instance needs to move above Save.
 
 ## Decisions (settled with the user)
 
@@ -45,6 +45,7 @@ Two independent asks in the custom map builder:
    (§3) — the only practical effect is that content which predates this feature, or a test fixture
    that never mentions it, reads as `undefined` and falls back to `'minor'` at the one read site
    (§4), the same graceful-fallback shape `cityName` already uses for an unknown id.
+
 3. Builder UI gets a **plain selector only** (no canvas indicator/preview) — a `Segmented` field in
    the Stops-stage inspector, matching the existing `isIsland` control's pattern.
 4. While relocating the parallel-tracks control, remove the duplication that caused the bug: give
@@ -158,7 +159,7 @@ Two independent asks in the custom map builder:
 ### `apps/web/src/features/builder/editor/stages/RoutesStage.tsx`
 
 - `RouteForm` gains an optional prop `parallelTracks?: { value: 1 | 2 | 3; onChange(v: 1 | 2 | 3):
-  void }`, replacing `hideDouble?: boolean`.
+void }`, replacing `hideDouble?: boolean`.
   - When `parallelTracks` is supplied (edit-existing-route case), the form's single inline
     `[1][2][3]` `Segmented` — rendered in its existing position, directly before the Save/Cancel row
     — reads/writes through it (`value`/`onChange`) instead of local `trackCount` state.
@@ -167,7 +168,7 @@ Two independent asks in the custom map builder:
 - In `RoutesStage`'s edit-existing-route branch, drop the duplicate `Segmented` currently built
   inline inside `extra` (RoutesStage.tsx:110-133) and instead pass
   `parallelTracks={{ value: <current pair count, clamped 1-3>, onChange: (v) =>
-  setPairTrackCount(selectedRoute.id, v) }}`. `extra` now carries only the Delete button, which
+setPairTrackCount(selectedRoute.id, v) }}`. `extra` now carries only the Delete button, which
   stays below Save/Cancel (unchanged).
 - Net effect: exactly one parallel-tracks control definition, always positioned identically
   (immediately before Save/Cancel) in both new-route and edit-route forms; no visual or behavioral

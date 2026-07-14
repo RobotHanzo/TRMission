@@ -91,6 +91,13 @@ export interface MapGeography {
   };
   /** Map-wide default displayed area for tickets that set no `view` of their own. */
   readonly defaultTicketView?: TicketView;
+  /** Optional cosmetic country-border overlay: each picked country's own (undissolved) exterior
+   *  ring, in the same board-space/rounding convention as `land`. Drawn as unfilled strokes on top
+   *  of `land` — where two selected countries share an edge, both rings trace it and it reads as a
+   *  single border line; a coastal edge simply retraces the coastline. Absent ⇒ no overlay. Only
+   *  ever populated by the "pick whole countries" crop mode (a manual crop box has no per-country
+   *  data to draw borders from). */
+  readonly borders?: readonly (readonly (readonly [number, number])[])[];
 }
 
 /** The curated subset of RuleParams a map may set as its own defaults (ignored by the engine

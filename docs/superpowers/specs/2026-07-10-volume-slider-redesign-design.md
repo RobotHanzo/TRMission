@@ -32,7 +32,7 @@ interface Props {
 - **Track**: the native `<input type="range">` (keeps built-in keyboard support and
   `role="slider"`), fully restyled — `-webkit-appearance: none`, 4px rounded track. The filled
   portion up to the current value is a `linear-gradient` driven by a CSS custom property
-  (`style={{ '--tr-range-fill': `${value * 100}%` }}`) so no JS-computed gradient string is
+  (`style={{ '--tr-range-fill': `${value \* 100}%` }}`) so no JS-computed gradient string is
   needed; Firefox uses `::-moz-range-track` + `::-moz-range-progress` for the same effect.
 - **Thumb**: small circle, `--tr-blue` fill, `--tr-shadow`-style drop shadow matching the
   `Switch` knob, slight scale on hover, visible `:focus-visible` ring.
