@@ -190,7 +190,6 @@ export function ScoreBoard({
           <table>
             <thead>
               <tr>
-                <th />
                 <th>{t('player')}</th>
                 <th title={t('routePoints')}>🚆 {t('routePoints')}</th>
                 <th title={t('completedTickets')}>✅ {t('completedTickets')}</th>
@@ -204,21 +203,27 @@ export function ScoreBoard({
             <tbody>
               {sorted.map((pf) => {
                 const seat = seatOf(pf.playerId);
+                const name = nameOf(pf.playerId);
                 const { completed, failed, gain, loss } = ticketSplit(pf);
                 return (
                   <tr key={pf.playerId} className={winners.has(pf.playerId) ? 'winner' : ''}>
-                    <td>
-                      <span
-                        className="seat-dot"
-                        style={{ background: SEAT_COLORS[seat % 5] ?? '#888' }}
-                      />
-                      {winners.has(pf.playerId) && <Crown size={14} aria-hidden />}
+                    <td className="player">
+                      <span className="player-cell">
+                        <span
+                          className="seat-dot"
+                          style={{ background: SEAT_COLORS[seat % 5] ?? '#888' }}
+                        />
+                        {winners.has(pf.playerId) && <Crown size={14} aria-hidden />}
+                        {isBot(pf.playerId) && <Bot size={13} aria-hidden />}
+                        <span className="player-name" title={name}>
+                          {name}
+                        </span>
+                      </span>
                     </td>
-                    <td>
-                      {isBot(pf.playerId) && <Bot size={13} aria-hidden />} {nameOf(pf.playerId)}
+                    <td className="num" data-label={t('routePoints')}>
+                      {pf.routePoints}
                     </td>
-                    <td className="num">{pf.routePoints}</td>
-                    <td className="num gain">
+                    <td className="num gain" data-label={t('completedTickets')}>
                       <span className="cell-value">
                         +{gain}
                         {completed.length > 0 && (
@@ -235,7 +240,7 @@ export function ScoreBoard({
                         )}
                       </span>
                     </td>
-                    <td className="num loss">
+                    <td className="num loss" data-label={t('failedTickets')}>
                       <span className="cell-value">
                         {loss > 0 ? `−${loss}` : '0'}
                         {failed.length > 0 && (
@@ -252,8 +257,10 @@ export function ScoreBoard({
                         )}
                       </span>
                     </td>
-                    <td className="num">+{pf.stationBonus}</td>
-                    <td className="num longest">
+                    <td className="num" data-label={t('stationBonus')}>
+                      +{pf.stationBonus}
+                    </td>
+                    <td className="num longest" data-label={t('longestPath')}>
                       <span className="cell-value">
                         {t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}
                         {pf.longestTrailRouteIds.length > 0 && (
@@ -268,8 +275,12 @@ export function ScoreBoard({
                         )}
                       </span>
                     </td>
-                    {showEventBonus && <td className="num">+{pf.eventBonus}</td>}
-                    <td className="num total">
+                    {showEventBonus && (
+                      <td className="num" data-label={t('eventScoreBonus')}>
+                        +{pf.eventBonus}
+                      </td>
+                    )}
+                    <td className="num total" data-label={t('totalScore')}>
                       <b>{pf.total}</b>
                     </td>
                   </tr>

@@ -88,6 +88,19 @@ describe('ScoreBoard', () => {
     expect(screen.getByText('137')).toBeInTheDocument();
   });
 
+  // ≤820px the table stacks into per-player cards and the header row is hidden, so each score cell
+  // carries its own column label (data-label) — an unlabelled cell would render as a bare number.
+  it('labels every score cell with its column header for the stacked (narrow) layout', () => {
+    const { container } = render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+    const headers = [...container.querySelectorAll('thead th')]
+      .slice(1) // the player column heads the card, so it needs no per-cell label
+      .map((th) => th.getAttribute('title') ?? th.textContent!.trim());
+    const firstRowLabels = [...container.querySelectorAll('tbody tr:first-child td.num')].map(
+      (td) => td.getAttribute('data-label'),
+    );
+    expect(firstRowLabels).toEqual(headers);
+  });
+
   it('hides the event-bonus column entirely for a game played without random events', () => {
     const offSnap = create(GameSnapshotSchema, {
       stateVersion: 1,

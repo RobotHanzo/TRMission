@@ -1540,8 +1540,13 @@ button.ticket-card:hover {
 }
 
 .modal.scoreboard {
-  max-width: min(760px, 95vw);
+  /* Wide enough that the 8 score columns read on one line each on a laptop; below that they wrap
+     (and on a phone the table stacks) rather than scrolling sideways. */
+  max-width: min(880px, 95vw);
 }
+/* The score table is sized to FIT this box at every width (headers wrap, long names ellipsize,
+   phones stack it into cards) — overflow-x stays a safety valve for a locale we didn't foresee,
+   not the normal reading mode. */
 .scoreboard-scroll {
   overflow-x: auto;
   overflow-y: auto;
@@ -1571,19 +1576,41 @@ button.ticket-card:hover {
 }
 .scoreboard th,
 .scoreboard td {
-  padding: 4px 8px;
+  padding: 4px 6px;
   text-align: left;
 }
 .scoreboard th {
-  white-space: nowrap;
+  /* Wrapping (not nowrap) is what keeps the 8 columns inside the modal: a squeezed header folds
+     onto a second line instead of forcing the table wider than its container. keep-all makes it
+     fold at the spaces (icon / label) instead of mid-word — CJK breaks anywhere otherwise. */
+  word-break: keep-all;
   font-size: 0.82em;
   color: var(--tr-ink-soft);
   font-weight: 600;
+}
+.scoreboard td.player {
+  max-width: 150px;
+}
+.scoreboard .player-cell {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+/* A long name (a bot's difficulty suffix, a 8-char handle) truncates rather than wrapping the row
+   into a 4-line block; the full name stays available as a tooltip. */
+.scoreboard .player-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .scoreboard td.num {
   text-align: right;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+.scoreboard td.longest {
+  white-space: normal;
 }
 .scoreboard td.gain {
   color: var(--tr-ok);
@@ -1596,6 +1623,53 @@ button.ticket-card:hover {
 }
 .scoreboard tr.winner {
   background: color-mix(in srgb, var(--tr-ember) 12%, transparent);
+}
+/* Narrow tier: eight columns can't fit a phone (and read cramped on a small laptop window), so
+   below 820px each player becomes a card of labelled rows — every cell carries its own header via
+   data-label. Stacking, not sideways scrolling, is the narrow-screen answer. */
+@media (max-width: 820px) {
+  .scoreboard-scroll {
+    max-height: 50vh;
+    max-height: 50dvh;
+  }
+  .scoreboard thead {
+    display: none;
+  }
+  .scoreboard table,
+  .scoreboard tbody,
+  .scoreboard tr,
+  .scoreboard td {
+    display: block;
+  }
+  .scoreboard tr {
+    border: 1px solid var(--tr-line);
+    border-radius: var(--tr-radius);
+    padding: var(--tr-space-2);
+  }
+  .scoreboard tr + tr {
+    margin-top: var(--tr-space-2);
+  }
+  .scoreboard td.player {
+    max-width: none;
+    font-weight: 700;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--tr-line);
+  }
+  .scoreboard td.num {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--tr-space-3);
+  }
+  .scoreboard td.num::before {
+    content: attr(data-label);
+    color: var(--tr-ink-soft);
+    font-size: 0.82em;
+    font-weight: 600;
+  }
+  .scoreboard td.longest {
+    white-space: nowrap;
+  }
 }
 .scoreboard-actions {
   display: flex;
