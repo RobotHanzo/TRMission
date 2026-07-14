@@ -119,6 +119,11 @@ export const MAP_DIMS = {
   reliefOpacity: 0.55,
   reliefRidgeW: 0.3,
   reliefRidgeDash: '0.5 0.9',
+  // Cosmetic political border overlay for a custom map's picked countries (see
+  // MapGeography.borders) — dashed so it reads distinctly from the solid coastline stroke.
+  countryBorderW: 0.35,
+  countryBorderDash: '1.1 0.7',
+  countryBorderOpacity: 0.85,
 } as const;
 
 /**
@@ -139,6 +144,9 @@ export function mapCssVars(): Record<string, string> {
     '--m-relief-o': String(D.reliefOpacity),
     '--m-relief-ridge-w': String(D.reliefRidgeW),
     '--m-relief-ridge-dash': D.reliefRidgeDash,
+    '--m-border-w': String(D.countryBorderW),
+    '--m-border-dash': D.countryBorderDash,
+    '--m-border-o': String(D.countryBorderOpacity),
     '--m-bed-w': String(D.bedW),
     '--m-bed-o': String(D.bedOpacity),
     '--m-bed-owned-w': String(D.bedOwnedW),

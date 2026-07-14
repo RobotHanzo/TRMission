@@ -111,11 +111,29 @@ export function dissolveCountryRings(rings: readonly Ring[]): Ring[] {
  * rings directly from the selected countries — never clipping against WORLD_LAND — so picking
  * "France" can't drag in Belgium just because it falls inside the union bounding box. Null for an
  * empty/all-unmatched selection, or one whose union bbox isValidCrop still rejects.
+ *
+ * `showBorders` opts into the cosmetic country-border overlay (`MapGeography.borders`): each
+ * selected country's own undissolved exterior ring, simplified/projected the same way as `land`
+ * but never merged, so a shared edge between two picked countries still traces as a line once
+ * `land` has erased it. Skipped for a single-country pick — there is no internal border to show.
  */
-export function countriesToGeography(ids: readonly string[]): CropResult | null {
+export function countriesToGeography(
+  ids: readonly string[],
+  showBorders = false,
+): CropResult | null {
   const idSet = new Set(ids);
   const rings = WORLD_COUNTRIES.filter((c) => idSet.has(c.id)).flatMap(ringsForCountry);
   const chosen = chooseMinimalLonRepresentation(rings);
   if (!chosen || !isValidCrop(chosen.bbox)) return null;
-  return finalizeGeography(dissolveCountryRings(chosen.rings), chosen.bbox);
+  const result = finalizeGeography(dissolveCountryRings(chosen.rings), chosen.bbox);
+  if (!showBorders || idSet.size < 2) return result;
+
+  const { rings: simplifiedBorders } = simplifyToFit(chosen.rings, {
+    startTolerance: startToleranceFor(chosen.bbox),
+    maxVertices: 8000,
+    maxRings: 200,
+  });
+  const { project } = buildProjection(chosen.bbox);
+  const borders = simplifiedBorders.map((ring) => ring.map(([lon, lat]) => project(lon, lat)));
+  return { ...result, geography: { ...result.geography, borders } };
 }

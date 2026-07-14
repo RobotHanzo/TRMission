@@ -299,6 +299,12 @@
   stroke: var(--tr-coast);
   stroke-width: calc(0.35px * var(--inv-scale, 1));
 }
+.editor-world-border {
+  fill: none;
+  stroke: var(--tr-coast);
+  stroke-width: calc(0.35px * var(--inv-scale, 1));
+  stroke-dasharray: calc(1.1px * var(--inv-scale, 1)) calc(0.7px * var(--inv-scale, 1));
+}
 .editor-world-graticule line {
   stroke: var(--tr-sea-line);
   stroke-width: calc(0.4px * var(--inv-scale, 1));
@@ -380,6 +386,9 @@
   align-items: center;
   gap: var(--tr-space-1);
   padding: 2px 0;
+  cursor: pointer;
+}
+.editor-border-toggle {
   cursor: pointer;
 }
 .crop-stage-shell {

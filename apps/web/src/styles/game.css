@@ -413,6 +413,14 @@
   stroke-width: calc(var(--m-land-stroke-w) * 1px);
   stroke-linejoin: round;
 }
+.country-border {
+  fill: none;
+  stroke: var(--tr-coast);
+  stroke-width: calc(var(--m-border-w) * 1px);
+  stroke-dasharray: var(--m-border-dash);
+  opacity: var(--m-border-o);
+  pointer-events: none;
+}
 .relief {
   fill: var(--tr-relief);
   opacity: var(--m-relief-o);
@@ -1471,6 +1479,26 @@ button.ticket-card:hover {
 }
 .scoreboard-scroll {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 45vh;
+  max-height: 45dvh;
+  /* Custom scrollbar — thin, themed, avoids the system default (matches .game-rail/.chat-messages). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--tr-line) transparent;
+}
+.scoreboard-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scoreboard-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scoreboard-scroll::-webkit-scrollbar-thumb {
+  background: var(--tr-line);
+  border-radius: 999px;
+}
+.scoreboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--tr-ink-soft);
 }
 .scoreboard table {
   width: 100%;

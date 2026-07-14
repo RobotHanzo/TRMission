@@ -37,6 +37,32 @@ describe('MapDraftSchema keeps display-area fields', () => {
     });
     expect(parsed.geography?.defaultTicketView).toEqual({ mode: 'zoom', level: 0.3 });
   });
+  it('keeps a geography borders overlay', () => {
+    const parsed = MapDraftSchema.parse({
+      cities: [],
+      routes: [],
+      tickets: [],
+      geography: {
+        baseView: { x: 0, y: 0, w: 1, h: 1 },
+        land: [],
+        crop: { lonMin: 0, lonMax: 1, latMin: 0, latMax: 1 },
+        borders: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+          ],
+        ],
+      },
+    });
+    expect(parsed.geography?.borders).toEqual([
+      [
+        [0, 0],
+        [1, 0],
+        [1, 1],
+      ],
+    ]);
+  });
   it('keeps authored auspicious pairs instead of stripping them', () => {
     const parsed = MapDraftSchema.parse({
       cities: [],

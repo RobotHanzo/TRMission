@@ -283,7 +283,10 @@ const resources = {
         CHARTER_SPECIAL: { name: '觀光專開列車', desc: '以自己的路網連接指定兩座城市即可得分' },
         SKY_LANTERN: { name: '天燈之夜', desc: '指定路線分數加倍，但佔領需多付一張車廂卡' },
         AFTERSHOCK: { name: '餘震特報', desc: '隧道試掘多亮一張牌；放棄時可補抽一張' },
-        RAILWAY_GALA: { name: '鐵路節慶典', desc: '全體玩家抽牌，本輪首座車站免費興建' },
+        RAILWAY_GALA: {
+          name: '鐵路節慶典',
+          desc: '全體玩家抽牌，本輪第一位興建車站之玩家可免費建造',
+        },
         STAMP_RALLY: { name: '鐵道集章週', desc: '活動期間每連接一座新車站可 +1 分' },
         LANTERN_HOST_CITY: {
           name: '燈會主辦城',
@@ -614,6 +617,7 @@ const resources = {
         countryPickEmptyHint: '點擊地圖或從列表中選擇國家',
         countryPreviewEmptyHint: '選擇至少一個國家以預覽',
         countryLonWarning: '經度範圍過大，投影會失真',
+        showCountryBorders: '顯示國界線',
         cropModeToggle: '裁切模式',
         cropModeDraw: '框選區域',
         cropModeCountries: '選擇國家',
@@ -1049,7 +1053,7 @@ const resources = {
         },
         RAILWAY_GALA: {
           name: 'Railway Anniversary Gala',
-          desc: "Everyone draws, and this round's first station is free",
+          desc: 'Everyone draws, and whoever builds the first station this round may build it for free',
         },
         STAMP_RALLY: {
           name: 'Stamp Rally Week',
@@ -1391,6 +1395,7 @@ const resources = {
         countryPickEmptyHint: 'Click the map or pick from the list',
         countryPreviewEmptyHint: 'Select at least one country to preview',
         countryLonWarning: 'Longitude range too wide, projection will distort',
+        showCountryBorders: 'Show country borders',
         cropModeToggle: 'Crop mode',
         cropModeDraw: 'Draw a region',
         cropModeCountries: 'Pick countries',

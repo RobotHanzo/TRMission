@@ -79,6 +79,7 @@ export const MapGeographyDraftSchema = z.object({
     latMax: z.number().finite(),
   }),
   defaultTicketView: TicketViewSchema.optional(),
+  borders: z.array(ringSchema).max(MAX_GEOGRAPHY_RINGS).optional(),
 });
 
 export const MapRulesDraftSchema = z.object({
@@ -154,8 +155,12 @@ function compactRules(rules: z.infer<typeof MapRulesDraftSchema>): MapRules {
 function compactGeography(
   geo: NonNullable<z.infer<typeof MapDraftSchema>['geography']>,
 ): MapGeography {
-  const { defaultTicketView, ...rest } = geo;
-  return { ...rest, ...(defaultTicketView !== undefined ? { defaultTicketView } : {}) };
+  const { defaultTicketView, borders, ...rest } = geo;
+  return {
+    ...rest,
+    ...(defaultTicketView !== undefined ? { defaultTicketView } : {}),
+    ...(borders !== undefined ? { borders } : {}),
+  };
 }
 
 /** The wire shape carries plain strings; the internal MapDraft uses branded ids. Already

@@ -97,6 +97,16 @@ export function formatIssue(issue: ValidationIssue): string {
       return `land ring ${p.index} has a coordinate outside the allowed board range`;
     case 'tooManyVertices':
       return `total land vertices ${p.count} exceeds the maximum of ${p.max}`;
+    case 'tooManyBorderRings':
+      return `too many border rings: ${p.count} exceeds the maximum of ${p.max}`;
+    case 'borderRingTooFewVertices':
+      return `border ring ${p.index} has fewer than 3 vertices`;
+    case 'borderRingNonFiniteCoordinate':
+      return `border ring ${p.index} has a non-finite coordinate`;
+    case 'borderRingCoordinateOutOfRange':
+      return `border ring ${p.index} has a coordinate outside the allowed board range`;
+    case 'tooManyBorderVertices':
+      return `total border vertices ${p.count} exceeds the maximum of ${p.max}`;
     case 'cropBboxInvalid':
       return 'crop bbox must have lonMin < lonMax and latMin < latMax';
     case 'ruleOutOfRange':
@@ -380,6 +390,38 @@ export function validateGeographyIssues(geo: MapGeography): ValidationIssue[] {
   if (geo.defaultTicketView) {
     for (const issue of ticketViewIssues(geo.defaultTicketView, 'defaultTicketView'))
       push(issue.code, issue.params);
+  }
+
+  if (geo.borders) {
+    if (geo.borders.length > MAX_GEOGRAPHY_RINGS) {
+      push('tooManyBorderRings', { count: geo.borders.length, max: MAX_GEOGRAPHY_RINGS });
+    }
+    let borderVertices = 0;
+    geo.borders.forEach((ring, i) => {
+      borderVertices += ring.length;
+      if (ring.length < 3) {
+        push('borderRingTooFewVertices', { index: i });
+        return;
+      }
+      for (const [x, y] of ring) {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) {
+          push('borderRingNonFiniteCoordinate', { index: i });
+          break;
+        }
+        if (
+          x < GEOGRAPHY_COORD_MIN ||
+          x > GEOGRAPHY_COORD_MAX ||
+          y < GEOGRAPHY_COORD_MIN ||
+          y > GEOGRAPHY_COORD_MAX
+        ) {
+          push('borderRingCoordinateOutOfRange', { index: i });
+          break;
+        }
+      }
+    });
+    if (borderVertices > MAX_GEOGRAPHY_VERTICES) {
+      push('tooManyBorderVertices', { count: borderVertices, max: MAX_GEOGRAPHY_VERTICES });
+    }
   }
 
   return issues;

@@ -208,6 +208,8 @@ export interface MapGeographyDraft {
   crop: { lonMin: number; lonMax: number; latMin: number; latMax: number };
   /** Map-wide default displayed area for tickets that set no `view`. */
   defaultTicketView?: TicketView;
+  /** Optional cosmetic country-border overlay rings; absent ⇒ no overlay. */
+  borders?: readonly (readonly (readonly [number, number])[])[];
 }
 export interface MapRulesDraft {
   trainCarsStart?: number;

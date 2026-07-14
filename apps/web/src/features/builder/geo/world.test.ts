@@ -96,6 +96,31 @@ describe('countriesToGeography', () => {
     expect(validateGeography(result!.geography)).toEqual([]);
   });
 
+  it('omits borders by default', () => {
+    const result = countriesToGeography(['FRA', 'DEU']);
+    expect(result).not.toBeNull();
+    expect(result!.geography.borders).toBeUndefined();
+  });
+
+  it('populates undissolved per-country border rings when showBorders is true', () => {
+    const withoutBorders = countriesToGeography(['FRA', 'DEU'], false);
+    const withBorders = countriesToGeography(['FRA', 'DEU'], true);
+    expect(withBorders).not.toBeNull();
+    expect(withBorders!.geography.borders).toBeDefined();
+    expect(withBorders!.geography.borders!.length).toBeGreaterThan(0);
+    // Borders keep each country's own ring, so unlike land they are NOT dissolved into one shape.
+    expect(withBorders!.geography.borders!.length).toBeGreaterThanOrEqual(
+      withoutBorders!.geography.land.length,
+    );
+    expect(validateGeography(withBorders!.geography)).toEqual([]);
+  });
+
+  it('never populates borders for a single-country selection (no internal border exists)', () => {
+    const result = countriesToGeography(['JPN'], true);
+    expect(result).not.toBeNull();
+    expect(result!.geography.borders).toBeUndefined();
+  });
+
   it('excludes a neighbour that falls inside the union bbox but was not selected', () => {
     const picked = countriesToGeography(['FRA', 'DEU']);
     expect(picked).not.toBeNull();

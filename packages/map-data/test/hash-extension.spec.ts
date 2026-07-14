@@ -84,4 +84,24 @@ describe('hashContent extension', () => {
     };
     expect(hashContent(geoWithDefault)).not.toBe(hashContent(geoOnly));
   });
+
+  it('a geography borders overlay changes the hash vs geography alone', () => {
+    const geoOnly: GameContent = { ...TAIWAN_CONTENT, geography: GEO };
+    const geoWithBorders: GameContent = {
+      ...TAIWAN_CONTENT,
+      geography: {
+        ...GEO,
+        borders: [
+          [
+            [0, 0],
+            [10, 0],
+            [10, 10],
+          ],
+        ],
+      },
+    };
+    expect(hashContent(geoWithBorders)).not.toBe(hashContent(geoOnly));
+    // The type extension alone must not move any pre-existing hash.
+    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
+  });
 });

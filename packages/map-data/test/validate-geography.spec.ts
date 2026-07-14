@@ -97,4 +97,55 @@ describe('validateGeography', () => {
     };
     expect(validateGeography(geo).some((e) => /crop/.test(e))).toBe(true);
   });
+
+  it('accepts geography with a valid borders overlay', () => {
+    const geo: MapGeography = {
+      ...VALID,
+      borders: [
+        [
+          [10, 10],
+          [90, 10],
+          [90, 90],
+        ],
+      ],
+    };
+    expect(validateGeography(geo)).toEqual([]);
+  });
+
+  it('rejects a border ring with fewer than 3 vertices', () => {
+    const geo: MapGeography = {
+      ...VALID,
+      borders: [
+        [
+          [0, 0],
+          [1, 1],
+        ],
+      ],
+    };
+    expect(validateGeography(geo).some((e) => /border/.test(e))).toBe(true);
+  });
+
+  it('rejects a border ring with a coordinate far outside the board space', () => {
+    const geo: MapGeography = {
+      ...VALID,
+      borders: [
+        [
+          [0, 0],
+          [900, 5],
+          [10, 10],
+        ],
+      ],
+    };
+    expect(validateGeography(geo).some((e) => /border/.test(e))).toBe(true);
+  });
+
+  it('rejects too many border rings', () => {
+    const ring: readonly (readonly [number, number])[] = [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+    ];
+    const geo: MapGeography = { ...VALID, borders: Array.from({ length: 401 }, () => ring) };
+    expect(validateGeography(geo).some((e) => /border/.test(e))).toBe(true);
+  });
 });
