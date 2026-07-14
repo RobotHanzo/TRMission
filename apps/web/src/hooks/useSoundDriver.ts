@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { Phase } from '@trm/proto';
 import { useGameStore, useGameStoreApi } from '../store/game';
-import { useUi } from '../store/ui';
 import { useChat } from '../store/chat';
 import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
 import { cuesFromEvents, gameOverCue } from '../sound/soundModel';
 import { completedByPlayer } from '../game/tickets';
+import { useSoundSetup } from './useSoundSetup';
 
 const EMPTY: ReadonlySet<string> = new Set();
 
@@ -30,25 +30,9 @@ export function useSoundDriver(sandbox?: boolean): void {
   const prevPhase = useRef<Phase | null>(null);
   const prevSelfCompleted = useRef<ReadonlySet<string> | null>(null);
 
-  // Preload + first-gesture unlock + keep the player synced with the per-device sound prefs.
-  useEffect(() => {
-    void soundPlayer.preload();
-    const { soundEnabled, soundVolume } = useUi.getState();
-    soundPlayer.setEnabled(soundEnabled);
-    soundPlayer.setVolume(soundVolume);
-    const unsub = useUi.subscribe((s) => {
-      soundPlayer.setEnabled(s.soundEnabled);
-      soundPlayer.setVolume(s.soundVolume);
-    });
-    const unlock = () => soundPlayer.unlock();
-    window.addEventListener('pointerdown', unlock);
-    window.addEventListener('keydown', unlock);
-    return () => {
-      unsub();
-      window.removeEventListener('pointerdown', unlock);
-      window.removeEventListener('keydown', unlock);
-    };
-  }, []);
+  // Preload/enable-sync/unlock now lives at the app root (useSoundSetup) so the lobby has sound
+  // too; called here as well so a game reached without ever visiting the lobby still works.
+  useSoundSetup();
 
   // Event-driven cues (draws, turn cue, station, route).
   useEffect(() => {
