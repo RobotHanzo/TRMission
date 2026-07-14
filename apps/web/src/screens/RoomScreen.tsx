@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Crown, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
@@ -18,6 +18,8 @@ import {
 } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { track } from '../lib/analytics';
+import { soundPlayer } from '../sound/player';
+import { OPPONENT_GAIN } from '../sound/cues';
 import { SEAT_COLORS } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { NotificationStack } from '../components/NotificationStack';
@@ -122,6 +124,24 @@ export function RoomScreen() {
       onError: (message) => setErr(message),
     });
   }, [code, user?.id, enterGame, goHome, pushNotification, t]);
+
+  // Play the same chatMessage cue the in-game chat uses (see useSoundDriver's seenChatId) — keyed
+  // on ts rather than array index since the server caps room.chat to its last N entries, so an
+  // index count would silently stop firing once a long-lived lobby chat gets truncated.
+  const seenChatTs = useRef<number | null>(null);
+  useEffect(() => {
+    if (!room) return;
+    const last = room.chat.at(-1)?.ts ?? 0;
+    if (seenChatTs.current === null) {
+      seenChatTs.current = last;
+      return;
+    }
+    for (const entry of room.chat) {
+      if (entry.ts <= seenChatTs.current) continue;
+      soundPlayer.play('chatMessage', entry.userId === user?.id ? 1 : OPPONENT_GAIN);
+    }
+    seenChatTs.current = last;
+  }, [room, user?.id]);
 
   if (!room)
     return (

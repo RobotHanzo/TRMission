@@ -10,6 +10,10 @@ import { api, ApiError, type MapSelector } from '../net/rest';
 // RoomScreen drives the lobby over REST + opens the game socket on start; stub both so the
 // component can be exercised without a backend or a real WebSocket.
 vi.mock('../net/connection', () => ({ connectGame: vi.fn(), disconnectGame: vi.fn() }));
+const { play } = vi.hoisted(() => ({ play: vi.fn() }));
+vi.mock('../sound/player', () => ({
+  soundPlayer: { preload: vi.fn().mockResolvedValue(undefined), unlock: vi.fn(), play, setEnabled: vi.fn(), setVolume: vi.fn() },
+}));
 vi.mock('../net/rest', () => {
   class ApiError extends Error {
     constructor(
@@ -503,6 +507,68 @@ describe('RoomScreen preset chat', () => {
     await waitFor(() =>
       expect(container.querySelector('.chat-messages .chat-msg')?.textContent).toContain('謝謝！'),
     );
+  });
+});
+
+describe('RoomScreen chat sound cue', () => {
+  it('does not play a cue for chat already present on the first load (reconnect-safe seed)', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        members: [member('host'), member('u-me')],
+        chat: [{ userId: 'host', text: 'already here', ts: 1 }],
+      }),
+    );
+    render(<RoomScreen />);
+    await screen.findByText('already here');
+    expect(play).not.toHaveBeenCalled();
+  });
+
+  it('plays chatMessage at full gain for my own new message', async () => {
+    vi.useFakeTimers();
+    try {
+      mocked.getRoom
+        .mockResolvedValueOnce(room({ members: [member('host'), member('u-me')], chat: [] }))
+        .mockResolvedValue(
+          room({
+            members: [member('host'), member('u-me')],
+            chat: [{ userId: 'u-me', text: 'hi', ts: 1 }],
+          }),
+        );
+      render(<RoomScreen />);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(100);
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2100);
+      });
+      expect(play).toHaveBeenCalledWith('chatMessage', 1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('plays chatMessage attenuated for an incoming message from someone else', async () => {
+    vi.useFakeTimers();
+    try {
+      mocked.getRoom
+        .mockResolvedValueOnce(room({ members: [member('host'), member('u-me')], chat: [] }))
+        .mockResolvedValue(
+          room({
+            members: [member('host'), member('u-me')],
+            chat: [{ userId: 'host', text: 'gl hf', ts: 1 }],
+          }),
+        );
+      render(<RoomScreen />);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(100);
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2100);
+      });
+      expect(play).toHaveBeenCalledWith('chatMessage', 0.5);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

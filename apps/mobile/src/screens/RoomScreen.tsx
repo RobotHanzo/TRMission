@@ -3,7 +3,7 @@
 // visibility), watch/rejoin, lobby chat, native share, and the shared join/kick/spectate poll
 // semantics (client-core startLobbyPoll — the exact machine the web runs).
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -35,6 +35,8 @@ import {
 import { SERVER_ORIGIN } from '../config';
 import { useHasFeature, useSession } from '../store/session';
 import { useUi } from '../store/ui';
+import { soundPlayer } from '../sound/player';
+import { OPPONENT_GAIN } from '../sound/cues';
 import { seatColor } from '../theme/colors';
 import { useTheme } from '../theme/useTheme';
 import {
@@ -153,6 +155,24 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
       onError: (message) => setErr(message),
     });
   }, [code, user?.id, navigation, t]);
+
+  // Play the same chatMessage cue the in-game chat uses (see useSoundDriver's seenChatId) — keyed
+  // on ts rather than array index since the server caps room.chat to its last N entries, so an
+  // index count would silently stop firing once a long-lived lobby chat gets truncated.
+  const seenChatTs = useRef<number | null>(null);
+  useEffect(() => {
+    if (!room) return;
+    const last = room.chat.at(-1)?.ts ?? 0;
+    if (seenChatTs.current === null) {
+      seenChatTs.current = last;
+      return;
+    }
+    for (const entry of room.chat) {
+      if (entry.ts <= seenChatTs.current) continue;
+      soundPlayer.play('chatMessage', entry.userId === user?.id ? 1 : OPPONENT_GAIN);
+    }
+    seenChatTs.current = last;
+  }, [room, user?.id]);
 
   if (!room) {
     return (
