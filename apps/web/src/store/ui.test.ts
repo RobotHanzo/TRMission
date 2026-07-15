@@ -69,11 +69,24 @@ describe('ui store routing', () => {
     );
   });
 
-  it('syncFromUrl(not authed) on / gates to /login', () => {
+  it('syncFromUrl(not authed) on / is NOT gated — the public landing renders on the home view', () => {
     window.history.replaceState(null, '', '/');
     useUi.getState().syncFromUrl(false);
+    expect(useUi.getState().view).toBe('home');
+    expect(path()).toBe('/');
+  });
+
+  it('enterLogin PUSHES /login so Back returns to the landing page', () => {
+    window.history.replaceState(null, '', '/');
+    useUi.getState().enterLogin();
     expect(useUi.getState().view).toBe('login');
     expect(path()).toBe('/login');
+  });
+
+  it('enterPrivacy pushes /privacy and sets the view', () => {
+    useUi.getState().enterPrivacy();
+    expect(useUi.getState().view).toBe('privacy');
+    expect(path()).toBe('/privacy');
   });
 
   it('syncFromUrl on / (authed) yields the home view', () => {

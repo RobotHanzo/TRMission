@@ -51,11 +51,14 @@ export interface AnalyticsEvents {
   rating_submit: { stars: number };
   rematch_vote: { wants: boolean };
   play_again: Record<string, never>;
-  discord_click: { source: 'welcome' | 'endgame' | 'header' };
+  discord_click: { source: 'welcome' | 'endgame' | 'header' | 'landing' };
   // onboarding
   tutorial_begin: { scope: 'full' | 'core' };
   tutorial_complete: Record<string, never>;
   welcome_shown: Record<string, never>;
+  // the signed-out public homepage — its impression is the top of the acquisition funnel
+  landing_shown: Record<string, never>;
+  landing_cta_click: { target: 'tutorial' | 'login' };
   encyclopedia_open: Record<string, never>;
   // replay
   replay_open: { source: 'history' | 'link' };

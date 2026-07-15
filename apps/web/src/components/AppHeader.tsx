@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Settings,
+  LogIn,
   LogOut,
   DoorOpen,
   User,
@@ -30,9 +31,10 @@ export function AppHeader() {
   const goHome = useUi((s) => s.goHome);
   const enterHistory = useUi((s) => s.enterHistory);
   const enterMaps = useUi((s) => s.enterMaps);
-  const navigateLogin = useUi((s) => s.navigateLogin);
+  const enterLogin = useUi((s) => s.enterLogin);
   const openEncyclopedia = useUi((s) => s.setEncyclopediaOpen);
   const user = useSession((s) => s.user);
+  const booting = useSession((s) => s.booting);
   const canBuild = useHasFeature('mapBuilder');
   const logout = useSession((s) => s.logout);
   const snapshot = useGame((s) => s.snapshot);
@@ -62,7 +64,7 @@ export function AppHeader() {
 
   const onLogout = () => {
     void logout();
-    navigateLogin('/'); // home requires auth, so land back on the login screen
+    goHome(); // '/' is public — signing out lands on the landing page
   };
 
   // In-game, the header doubles as the game status bar (connection + whose turn) and
@@ -148,6 +150,15 @@ export function AppHeader() {
             </button>
             {menuOpen && (
               <div className="header-menu" role="menu" aria-label={t('menu')}>
+                {!booting && !user && !onAuthScreen && (
+                  <button
+                    className="header-menu-item"
+                    role="menuitem"
+                    onClick={menuAct(enterLogin)}
+                  >
+                    <LogIn size={16} aria-hidden /> {t('signIn')}
+                  </button>
+                )}
                 {user && (
                   <div
                     className="header-menu-user"
@@ -277,6 +288,12 @@ export function AppHeader() {
             {user && !inGame && (
               <button onClick={onLogout} aria-label={t('logout')} title={t('logout')}>
                 <LogOut size={16} aria-hidden />
+              </button>
+            )}
+            {!booting && !user && !onAuthScreen && (
+              <button className="primary header-signin" onClick={enterLogin}>
+                <LogIn size={16} aria-hidden />
+                {t('signIn')}
               </button>
             )}
             {inGame && (

@@ -84,7 +84,7 @@ describe('HomeScreen', () => {
     expect(screen.getByText('歡迎回來，Tester')).toBeInTheDocument();
   });
 
-  it('renders nothing while signed out (the router redirects to /login)', () => {
+  it('renders nothing while signed out (App swaps in the landing page on this view)', () => {
     useSession.setState({ user: null });
     const { container } = render(<HomeScreen />);
     expect(container).toBeEmptyDOMElement();

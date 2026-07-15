@@ -1,0 +1,508 @@
+/* ── Public landing page (signed-out /) ──
+   Warm-paper marketing front door on the existing token system. One bold element:
+   the "departures board" CTA panel — fixed dark in both themes, like the real
+   LED departure boards on TRA platforms (it is its own light source). */
+
+/* Chained with .app-main: landing.css loads before app.css (screen-module import order),
+   so a bare .app-main--landing would lose the same-specificity cascade to .app-main. */
+.app-main.app-main--landing {
+  max-width: 100%;
+  padding: 0;
+}
+
+.landing {
+  display: flex;
+  flex-direction: column;
+}
+.landing-wrap {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-left: var(--tr-space-6);
+  padding-right: var(--tr-space-6);
+}
+
+/* ── Hero: sea-to-paper wash, drifting dashed rails, copy + the real board ── */
+.landing-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--tr-sea) 55%, var(--tr-paper)),
+    var(--tr-paper) 78%
+  );
+  border-bottom: 1px solid var(--tr-line);
+}
+.landing-hero-rails {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.45;
+}
+.landing-hero-rails path {
+  stroke: var(--tr-coast);
+  stroke-width: 3;
+  fill: none;
+  stroke-dasharray: 2 14;
+  stroke-linecap: round;
+}
+.landing-hero-rails circle {
+  fill: var(--tr-coast);
+}
+
+.landing-hero-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+  gap: clamp(24px, 5vw, 64px);
+  align-items: center;
+  padding-top: clamp(40px, 7vh, 88px);
+  padding-bottom: clamp(40px, 7vh, 88px);
+}
+
+.landing-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  margin: 0 0 var(--tr-space-4);
+  font-family: var(--tr-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase; /* latin only; CJK is unaffected */
+  color: var(--tr-ink-soft);
+  border: 1px solid var(--tr-line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: color-mix(in srgb, var(--tr-surface) 72%, transparent);
+}
+.landing-title {
+  margin: 0 0 var(--tr-space-4);
+  font-size: clamp(30px, 4.6vw, 46px);
+  line-height: 1.22;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--tr-ink);
+  white-space: pre-line; /* the i18n title carries its own line break */
+}
+.landing-lede {
+  margin: 0 0 var(--tr-space-6);
+  max-width: 34em;
+  font-size: 15.5px;
+  line-height: 1.8;
+  color: var(--tr-ink-soft);
+}
+
+/* ── The departures board: the page's two actions as departure rows ── */
+.landing-departures {
+  --dep-panel: #14181e;
+  --dep-line: #262c35;
+  --dep-amber: #f5b942;
+  --dep-soft: #9aa4b1;
+  --dep-go: #43d17c;
+  max-width: 560px;
+  overflow: hidden;
+  background: var(--dep-panel);
+  /* Faint horizontal scanlines — the LED-matrix texture, no image asset needed. */
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.016) 0 1px,
+    transparent 1px 3px
+  );
+  border: 1px solid var(--dep-line);
+  border-radius: var(--tr-radius);
+  box-shadow:
+    var(--tr-shadow),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+.landing-departures-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--tr-space-3);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--dep-line);
+  font-family: var(--tr-font-mono);
+}
+.landing-departures-zh {
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: #d8dde4;
+}
+.landing-departures-en {
+  font-size: 10.5px;
+  letter-spacing: 0.34em;
+  color: var(--dep-soft);
+}
+button.landing-departure {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  grid-template-areas:
+    'dest status arrow'
+    'meta status arrow';
+  align-items: center;
+  column-gap: var(--tr-space-4);
+  row-gap: 2px;
+  width: 100%;
+  text-align: start;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--dep-amber);
+  font-family: var(--tr-font-mono);
+  transition: background 0.15s ease;
+}
+button.landing-departure + button.landing-departure {
+  border-top: 1px solid var(--dep-line);
+}
+button.landing-departure:hover:not(:disabled) {
+  filter: none; /* the global button dim would dull the amber; light the row instead */
+  background: rgba(255, 255, 255, 0.05);
+}
+.landing-departure-dest {
+  grid-area: dest;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.landing-departure-meta {
+  grid-area: meta;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--dep-soft);
+}
+.landing-departure-status {
+  grid-area: status;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--dep-amber) 55%, transparent);
+  white-space: nowrap;
+}
+.landing-departure-status--go {
+  border-color: color-mix(in srgb, var(--dep-go) 55%, transparent);
+  color: var(--dep-go);
+}
+.landing-departure-arrow {
+  grid-area: arrow;
+  color: var(--dep-soft);
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
+}
+button.landing-departure:hover .landing-departure-arrow {
+  transform: translateX(3px);
+  color: #fff;
+}
+
+/* ── The board panel: the real map framed like a station wall map ── */
+.landing-board {
+  position: relative;
+  height: clamp(380px, 56vh, 560px);
+  overflow: hidden;
+  border: 1px solid var(--tr-coast);
+  border-radius: var(--tr-radius-lg);
+  box-shadow: var(--tr-shadow);
+  background: var(--tr-sea);
+}
+.landing-board-map {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.landing-board-map .board {
+  width: 100%;
+  height: 100%;
+}
+.landing-board-caption {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  font-family: var(--tr-font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--tr-ink);
+  background: color-mix(in srgb, var(--tr-surface) 88%, transparent);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  padding: 5px 10px;
+}
+
+/* ── Quiet sections below the hero ── */
+.landing-section {
+  padding-top: clamp(40px, 7vh, 72px);
+  padding-bottom: clamp(40px, 7vh, 72px);
+}
+.landing-section + .landing-section {
+  padding-top: 0;
+}
+.landing-h2 {
+  margin: 0 0 var(--tr-space-2);
+  font-size: clamp(22px, 2.6vw, 28px);
+  font-weight: 750;
+}
+.landing-section-lede {
+  margin: 0 0 var(--tr-space-6);
+  max-width: 40em;
+  line-height: 1.7;
+  color: var(--tr-ink-soft);
+}
+
+.landing-how-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--tr-space-4);
+}
+.landing-how-card {
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  padding: 20px;
+}
+.landing-how-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--tr-blue) 12%, var(--tr-surface));
+  color: var(--tr-blue);
+  margin-bottom: var(--tr-space-3);
+}
+.landing-how-card h3 {
+  margin: 0 0 6px;
+  font-size: 16.5px;
+}
+.landing-how-card p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--tr-ink-soft);
+}
+.landing-scoring {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tr-space-2);
+  margin: var(--tr-space-6) 0 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--tr-coast);
+  border-radius: var(--tr-radius);
+  background: color-mix(in srgb, var(--tr-land) 30%, var(--tr-surface));
+  color: var(--tr-ink-soft);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.landing-scoring svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--tr-ember);
+}
+
+.landing-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--tr-space-4);
+}
+.landing-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tr-space-3);
+  padding: 16px;
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  background: var(--tr-surface);
+}
+.landing-feature-icon {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--tr-ember) 12%, var(--tr-surface));
+  color: var(--tr-ember);
+}
+.landing-feature h3 {
+  margin: 0 0 4px;
+  font-size: 14.5px;
+}
+.landing-feature p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--tr-ink-soft);
+}
+
+/* Account & data: a route-line list — each point is a stop on the line. */
+.landing-account-points {
+  margin: 0 0 var(--tr-space-6);
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-4);
+  max-width: 46em;
+}
+.landing-account-points li {
+  position: relative;
+  padding-left: 26px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--tr-ink-soft);
+}
+.landing-account-points li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.45em;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--tr-blue);
+  background: var(--tr-paper);
+}
+.landing-account-points li::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: calc(0.45em + 16px);
+  bottom: calc(-1 * var(--tr-space-4));
+  width: 2px;
+  background: var(--tr-line);
+}
+.landing-account-points li:last-child::after {
+  display: none;
+}
+.landing-account-links {
+  display: flex;
+  gap: var(--tr-space-6);
+  flex-wrap: wrap;
+}
+.landing-account-links .link {
+  font-size: 14px;
+}
+a.link {
+  color: inherit;
+}
+
+/* ── Footer ── */
+.landing-footer {
+  border-top: 1px solid var(--tr-line);
+  background: var(--tr-surface);
+}
+.landing-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-3);
+  padding-top: var(--tr-space-8);
+  padding-bottom: var(--tr-space-8);
+}
+.landing-footer-tagline {
+  margin: 0;
+  font-size: 13px;
+}
+.landing-footer-links {
+  display: flex;
+  gap: var(--tr-space-3);
+  flex-wrap: wrap;
+}
+.landing-footer-links button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.landing-footer-disclaimer {
+  margin: var(--tr-space-2) 0 0;
+  font-size: 12px;
+}
+
+/* ── Motion: one page-load orchestration + the rails' slow drift ── */
+@media (prefers-reduced-motion: no-preference) {
+  .landing-hero-rails path {
+    animation: landing-rails-drift 26s linear infinite;
+  }
+  .landing-hero-copy > * {
+    animation: landing-rise 0.55s ease both;
+  }
+  .landing-hero-copy > :nth-child(2) {
+    animation-delay: 0.06s;
+  }
+  .landing-hero-copy > :nth-child(3) {
+    animation-delay: 0.12s;
+  }
+  .landing-hero-copy > :nth-child(4) {
+    animation-delay: 0.18s;
+  }
+  .landing-board {
+    animation: landing-rise 0.55s ease 0.2s both;
+  }
+  /* The departure rows "light up" after the panel rises, top row first. */
+  button.landing-departure {
+    animation: landing-light 0.4s ease both;
+  }
+  button.landing-departure:nth-of-type(1) {
+    animation-delay: 0.34s;
+  }
+  button.landing-departure:nth-of-type(2) {
+    animation-delay: 0.46s;
+  }
+}
+@keyframes landing-rails-drift {
+  to {
+    stroke-dashoffset: -160;
+  }
+}
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes landing-light {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .landing-hero-grid {
+    grid-template-columns: 1fr;
+  }
+  .landing-board {
+    height: clamp(300px, 46vh, 420px);
+  }
+  .landing-how-grid,
+  .landing-features-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .landing-wrap {
+    padding-left: var(--tr-space-4);
+    padding-right: var(--tr-space-4);
+  }
+  .landing-title {
+    font-size: 28px;
+  }
+  .landing-how-grid,
+  .landing-features-grid {
+    grid-template-columns: 1fr;
+  }
+  /* Keep the status pill (it carries "no sign-in needed"); drop the arrow instead. */
+  .landing-departure-arrow {
+    display: none;
+  }
+  button.landing-departure {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'dest status'
+      'meta status';
+  }
+}

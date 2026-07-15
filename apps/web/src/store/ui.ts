@@ -28,7 +28,8 @@ export type View =
 
 // --- URL routing -----------------------------------------------------------
 // The browser path is the durable source of truth for *where* the user is:
-//   /                → home (requires auth; redirects to /login otherwise)
+//   /                → home when signed in; the public landing page otherwise
+//                      (App picks the screen off the session — never auth-gated)
 //   /login           → the login screen (guest + password + OAuth)
 //   /login/callback  → lands here after an OAuth round-trip; resumes the session and continues
 //   /room/:code      → lobby and in-game alike (the room code re-mints a ws ticket
@@ -228,6 +229,11 @@ interface UiState {
   clearHomeFocus(): void;
   /** Send an unauthenticated visitor to /login, remembering where they were headed. */
   navigateLogin(returnTo: string): void;
+  /** A user-initiated trip to /login (landing CTA / header button) — PUSHED, so Back returns
+   *  to where they were (navigateLogin's replace semantics are for auth-gate redirects only). */
+  enterLogin(): void;
+  /** Open the public privacy policy in-app (it is also cold-loadable at /privacy). */
+  enterPrivacy(): void;
   /** After any successful sign-in, resume the `?redirect=` target (default home). */
   navigateAfterAuth(): void;
   /** Reconcile the view with the current browser path (initial load + back/forward). */
@@ -328,6 +334,16 @@ export const useUi = create<UiState>()((set, get) => ({
     disconnectGame();
     replacePath(loginPathFor(returnTo));
     set({ view: 'login', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  },
+  enterLogin: () => {
+    disconnectGame();
+    pushPath(LOGIN_PATH);
+    set({ view: 'login', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  },
+  enterPrivacy: () => {
+    disconnectGame();
+    pushPath(PRIVACY_PATH);
+    set({ view: 'privacy', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
   navigateAfterAuth: () => {
     const target = readRedirectParam();
@@ -524,13 +540,10 @@ export const useUi = create<UiState>()((set, get) => ({
       get().navigateLogin(`/room/${code}`);
       return;
     }
-    // Home (or any unknown path) → home when authed, else the login gate.
-    if (authed) {
-      disconnectGame();
-      set({ view: 'home', roomCode: null, gameId: null, ticket: null, replayGameId: null });
-      return;
-    }
-    get().navigateLogin('/');
+    // Home (or any unknown path). '/' is never auth-gated: App renders the public landing
+    // page for signed-out visitors and the lobby for signed-in users off the same view.
+    disconnectGame();
+    set({ view: 'home', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
   setLocale: (locale) => {
     writeLocal(LOCALE_KEY, locale);

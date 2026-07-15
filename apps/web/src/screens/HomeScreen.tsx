@@ -126,8 +126,8 @@ export function HomeScreen() {
     };
   }, [user]);
 
-  // Unauthenticated visitors are redirected to /login by the router; render nothing during the
-  // brief logout transition before the view switches.
+  // Signed-out visitors get LandingScreen from App on this same view; render nothing during
+  // the brief logout transition before that swap happens.
   if (!user) return null;
 
   // Don't flash the homepage (or its rooms-list fetch) while it's still unknown whether this is

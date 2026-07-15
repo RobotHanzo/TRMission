@@ -94,6 +94,13 @@
   color: var(--tr-danger);
   border-color: var(--tr-danger);
 }
+/* Signed-out header action (landing page and other public screens). */
+.header-signin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  font-weight: 600;
+}
 /* In-game, the header carries the game status (connection + whose turn) centred between the
    brand and the action buttons. Absent on other screens, where the bar stays brand ↔ actions. */
 .header-status {

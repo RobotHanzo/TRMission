@@ -7,6 +7,7 @@ import { useLeaveWarning } from './hooks/useLeaveWarning';
 import { usePageViewTracking } from './hooks/usePageViewTracking';
 import { useSoundSetup } from './hooks/useSoundSetup';
 import { HomeScreen } from './screens/HomeScreen';
+import { LandingScreen } from './screens/LandingScreen';
 import { RoomScreen } from './screens/RoomScreen';
 import { GameScreen } from './screens/GameScreen';
 import { LoginScreen } from './screens/LoginScreen';
@@ -103,7 +104,9 @@ export function App() {
     : isLogin
       ? 'app-main app-main--login'
       : view === 'home'
-        ? 'app-main app-main--home' // the hero + two-column grid needs more than the reading column
+        ? user
+          ? 'app-main app-main--home' // the hero + two-column grid needs more than the reading column
+          : 'app-main app-main--landing' // signed out: the full-bleed public landing page
         : view === 'room'
           ? 'app-main app-main--room' // the room+chat two-column grid needs more than the reading column
           : 'app-main';
@@ -118,7 +121,8 @@ export function App() {
           <>
             {view === 'login' && <LoginScreen />}
             {view === 'loginCallback' && <LoginCallback />}
-            {view === 'home' && <HomeScreen />}
+            {/* '/' is never auth-gated: signed-out visitors get the public landing page. */}
+            {view === 'home' && (user ? <HomeScreen /> : <LandingScreen />)}
             {view === 'room' && <RoomScreen />}
             {view === 'history' && <HistoryScreen />}
             {view === 'deleteAccount' && <DeleteAccountScreen />}
