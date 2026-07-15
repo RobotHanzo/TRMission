@@ -14,11 +14,12 @@ import {
   type LayoutChangeEvent,
 } from 'react-native';
 import { Pause, Play, SkipBack, SkipForward } from 'lucide-react-native';
-import { buildBoard, ENGINE_VERSION, SCHEMA_VERSION } from '@trm/engine';
+import { buildBoard } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
 import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
 import { useReplayPlayer } from '@trm/client-core/replay/useReplayPlayer';
 import { frameTargetForAction } from '@trm/client-core/replay/frameTarget';
+import { isReplayVersionCompatible } from '@trm/client-core/replay/compatibility';
 import type { RootStackParamList } from '../navigation';
 import { api, ApiError, type ReplayPayload, type ReplayPlayerMeta } from '../net/rest';
 import { resolveContent } from '../game/contentCache';
@@ -58,9 +59,9 @@ export default function ReplayScreen({ route, navigation }: Props): React.JSX.El
       .replay(gameId)
       .then(async (payload) => {
         if (cancelled) return;
-        // The client's OWN engine must match the stored game — the server's `replayable`
-        // flag is advisory; this is the authoritative check.
-        if (payload.engineVersion !== ENGINE_VERSION || payload.schemaVersion !== SCHEMA_VERSION) {
+        // The client must explicitly support the stored engine + schema — the server's
+        // `replayable` flag is advisory; this is the authoritative check.
+        if (!isReplayVersionCompatible(payload.engineVersion, payload.schemaVersion)) {
           setLoad({ kind: 'error', msgKey: 'history.notReplayable' });
           return;
         }

@@ -132,7 +132,8 @@ These mirror the ADRs in the development plan; treat them as binding.
   fan-out; a unique `(gameId, seq)` Mongo index is the durable double-apply guard. Idempotency is on
   the monotonic per-socket `client_seq`.
 - **Version pins.** `engineVersion` + `contentHash` + `schemaVersion` are stamped on persisted games;
-  replay refuses to cross versions. `CONTENT_HASH` is derived from the authored content, so any map
+  replay crosses engine versions only through an explicit compatibility allowlist (mobile offline
+  resume remains exact-version pinned). `CONTENT_HASH` is derived from the authored content, so any map
   edit changes it.
 - **Naming/tooling pins.** The 6th card colour is **PURPLE** everywhere (never PINK). Seat colours
   are abstract indices 0–4 on the wire, coloured client-side. `apps/web` pins **Vite ^5** for vitest

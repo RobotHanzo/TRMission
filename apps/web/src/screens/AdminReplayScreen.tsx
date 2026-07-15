@@ -3,7 +3,7 @@
 // same ReplayStage/GameStage/useReplayPlayer machinery as the player-facing /replay route.
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { buildBoard, ENGINE_VERSION, SCHEMA_VERSION } from '@trm/engine';
+import { buildBoard } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
 import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
 import { api, ApiError, type AdminReplayPayload } from '../net/rest';
@@ -13,6 +13,7 @@ import { useUi } from '../store/ui';
 import { useRoster } from '../store/roster';
 import { SandboxProvider } from '../store/sandboxProvider';
 import { ReplayStage } from './ReplayScreen';
+import { isReplayVersionCompatible } from '../features/replay/compatibility';
 import '../styles/replay.css';
 
 type LoadState =
@@ -45,7 +46,7 @@ export default function AdminReplayScreen() {
       .adminReplay(gameId, ticket)
       .then(async (payload) => {
         if (cancelled) return;
-        if (payload.engineVersion !== ENGINE_VERSION || payload.schemaVersion !== SCHEMA_VERSION) {
+        if (!isReplayVersionCompatible(payload.engineVersion, payload.schemaVersion)) {
           setLoad({ kind: 'error', msgKey: 'history.notReplayable' });
           return;
         }

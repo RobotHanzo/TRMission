@@ -88,6 +88,21 @@ const loadable = (over: Partial<ReplayPayload> = {}): ReplayPayload =>
     ...over,
   });
 
+describe('ReplayScreen compatible engine window', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useSession.setState({ user: { ...signedIn } });
+    useUi.setState({ view: 'replay', replayGameId: 'g1' });
+    window.history.replaceState(null, '', '/replay/g1');
+  });
+
+  it('loads an engine 9 replay under the current engine', async () => {
+    mocked.replay.mockResolvedValue(loadable({ engineVersion: 9 }));
+    render(<ReplayScreen />);
+    expect(await screen.findByRole('slider')).toBeInTheDocument();
+  });
+});
+
 describe('ReplayScreen sharing controls', () => {
   beforeEach(() => {
     vi.clearAllMocks();

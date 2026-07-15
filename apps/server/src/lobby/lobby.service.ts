@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { buildBoard } from '@trm/engine';
@@ -213,6 +214,45 @@ export class LobbyService {
     const r = await this.rooms.setRematchVote(code, user.userId, vote);
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    return toView(r);
+  }
+
+  /** A seated human member records (or retracts) an early-end vote. The host can end the game
+   *  alone; otherwise all but one of the room's eligible human players must vote yes. */
+  async voteEnd(code: string, user: AuthUser, vote: boolean): Promise<RoomView> {
+    const current = await this.rooms.get(code);
+    if (!current) throw new NotFoundException('room not found');
+    if (current.status !== 'STARTED' || !current.gameId) {
+      throw new BadRequestException('game has not started');
+    }
+    if (!current.members.some((m) => m.userId === user.userId && !m.isBot)) {
+      throw new ForbiddenException('not a member of this room');
+    }
+    if (await this.hub.isGameOver(current.gameId)) {
+      throw new BadRequestException('game has already ended');
+    }
+
+    const r = await this.rooms.setEndVote(code, user.userId, vote);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'not_started') throw new BadRequestException('game has not started');
+    if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    // Close the race with a natural/other-vote completion between the pre-check and room update.
+    if (r.gameId && (await this.hub.isGameOver(r.gameId))) {
+      throw new BadRequestException('game has already ended');
+    }
+
+    const eligibleHumans = r.members.filter((m) => !m.isBot);
+    const threshold = Math.max(1, eligibleHumans.length - 1);
+    const yesVotes = eligibleHumans.filter((m) => m.wantsEnd === true).length;
+    const authorized = vote && (r.hostId === user.userId || yesVotes >= threshold);
+    if (authorized && r.gameId) {
+      const ended = await this.hub.endGame(r.gameId, asPlayerId(user.userId));
+      if (ended === 'not_found') throw new BadRequestException('active game not found');
+      if (ended === 'invalid_player') throw new ForbiddenException('not a player in this game');
+      if (ended === 'persist_failed') {
+        throw new ServiceUnavailableException('could not persist game completion; retry the vote');
+      }
+    }
     return toView(r);
   }
 

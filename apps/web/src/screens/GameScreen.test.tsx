@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema, Phase } from '@trm/proto';
-import '../i18n';
+import i18n from '../i18n';
 import { GameScreen } from './GameScreen';
 import { useGame } from '../store/game';
 import { useUi } from '../store/ui';
@@ -18,6 +18,7 @@ vi.mock('../net/rest', () => ({
   setAccessToken: vi.fn(),
   api: {
     getRoom: vi.fn(() => Promise.resolve({ members: [] })),
+    voteEnd: vi.fn(() => Promise.resolve({ members: [] })),
     voteRematch: vi.fn(() => Promise.resolve({ members: [] })),
     rematch: vi.fn(() => Promise.resolve({ members: [] })),
   },
@@ -154,6 +155,42 @@ const liveSnap = () =>
     you: { playerId: 'p0' },
   });
 
+describe('GameScreen end-game vote', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('confirms and submits the room end vote', async () => {
+    await i18n.changeLanguage('en');
+    try {
+      useUi.setState({ view: 'game', ticket: 'tkt', roomCode: 'ABCD', gameId: 'g1' });
+      useGame.setState({ snapshot: liveSnap(), rejection: null, sessionReplaced: false });
+      const room = {
+        hostId: 'p1',
+        status: 'STARTED',
+        members: [
+          { userId: 'p0', displayName: 'P0', isGuest: false, seat: 0, ready: true },
+          { userId: 'p1', displayName: 'P1', isGuest: false, seat: 1, ready: true },
+        ],
+        spectators: [],
+      };
+      vi.mocked(api.getRoom).mockResolvedValue(room as never);
+      vi.mocked(api.voteEnd).mockResolvedValue({
+        ...room,
+        members: [{ ...room.members[0]!, wantsEnd: true }, room.members[1]!],
+      } as never);
+
+      render(<GameScreen />);
+      fireEvent.click(await screen.findByRole('button', { name: 'Vote to end game' }));
+      expect(api.voteEnd).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm vote' }));
+
+      await waitFor(() => expect(api.voteEnd).toHaveBeenCalledWith('ABCD', true));
+      expect(await screen.findByRole('button', { name: 'Withdraw end vote' })).toBeInTheDocument();
+    } finally {
+      await i18n.changeLanguage('zh-Hant');
+    }
+  });
+});
+
 // A finished game seen by a spectator (no `you`) — must never be auto-joined into a reset lobby.
 const gameOverSpectatorSnap = () =>
   create(GameSnapshotSchema, {
@@ -224,11 +261,11 @@ describe('GameScreen rematch redirect', () => {
     }
   });
 
-  it('does not run the rematch poll while the game is still live', async () => {
+  it('polls room vote state while the game is still live', async () => {
     vi.useFakeTimers();
     try {
       useUi.setState({ view: 'game', ticket: 'tkt', roomCode: 'ABCD', gameId: 'g1' });
-      useGame.setState({ snapshot: liveSnap(), rejection: null });
+      useGame.setState({ snapshot: liveSnap(), rejection: null, sessionReplaced: false });
       vi.mocked(api.getRoom).mockClear();
       vi.mocked(api.getRoom).mockResolvedValue({
         hostId: 'p0',
@@ -237,8 +274,8 @@ describe('GameScreen rematch redirect', () => {
       } as never);
       render(<GameScreen />);
       await vi.advanceTimersByTimeAsync(5000);
-      // Only the pre-existing one-shot roster effect fires — the game-over poll never starts.
-      expect(vi.mocked(api.getRoom)).toHaveBeenCalledTimes(1);
+      // One initial roster fetch plus live vote refreshes at 2s and 4s.
+      expect(vi.mocked(api.getRoom)).toHaveBeenCalledTimes(3);
       expect(useUi.getState().view).toBe('game');
     } finally {
       vi.useRealTimers();

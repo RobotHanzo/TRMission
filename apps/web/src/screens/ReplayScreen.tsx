@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
-import { buildBoard, ENGINE_VERSION, SCHEMA_VERSION } from '@trm/engine';
+import { buildBoard } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
 import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
 import {
@@ -30,6 +30,7 @@ import { useReplayPlayer } from '../features/replay/useReplayPlayer';
 import { PerspectiveSwitcher } from '../features/replay/PerspectiveSwitcher';
 import { ReplayShare } from '../features/replay/ReplayShare';
 import { frameTargetForAction } from '../features/replay/frameTarget';
+import { isReplayVersionCompatible } from '../features/replay/compatibility';
 import '../styles/replay.css';
 
 type LoadState =
@@ -61,9 +62,9 @@ export default function ReplayScreen() {
           openedRef.current = gameId;
           track('replay_open', { source: useUi.getState().consumeReplaySource() });
         }
-        // The client's OWN engine must match the stored game — the server's `replayable`
-        // flag is advisory; this is the authoritative check.
-        if (payload.engineVersion !== ENGINE_VERSION || payload.schemaVersion !== SCHEMA_VERSION) {
+        // The client must explicitly support the stored engine + schema — the server's
+        // `replayable` flag is advisory; this is the authoritative check.
+        if (!isReplayVersionCompatible(payload.engineVersion, payload.schemaVersion)) {
           setLoad({ kind: 'error', msgKey: 'history.notReplayable' });
           return;
         }

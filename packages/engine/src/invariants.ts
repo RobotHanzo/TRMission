@@ -110,16 +110,25 @@ export function checkInvariants(board: Board, state: GameState): string[] {
           problems.push(`event resource ${playerId}.${kind} is invalid: ${value}`);
       }
     }
-    if ((state.turn.phase === 'HIVE_DRAW') !== (ev.pendingHiveDraw !== undefined)) {
+    // A server-authorized early end may occur during one of these transient phases. Preserve the
+    // pending piles/metadata (especially Hive cards, for conservation) in the terminal snapshot;
+    // phase/pending equivalence is only meaningful while the game is still live.
+    if (
+      state.turn.phase !== 'GAME_OVER' &&
+      (state.turn.phase === 'HIVE_DRAW') !== (ev.pendingHiveDraw !== undefined)
+    ) {
       problems.push('HIVE_DRAW phase/pending state mismatch');
     }
     if (
-      (state.turn.phase === 'LANTERN_RELOCATION') !==
-      (ev.lanternPendingRelocation !== undefined)
+      state.turn.phase !== 'GAME_OVER' &&
+      (state.turn.phase === 'LANTERN_RELOCATION') !== (ev.lanternPendingRelocation !== undefined)
     ) {
       problems.push('LANTERN_RELOCATION phase/pending state mismatch');
     }
-    if ((state.turn.phase === 'EVENT_DRAFT') !== (ev.eventDraft !== undefined)) {
+    if (
+      state.turn.phase !== 'GAME_OVER' &&
+      (state.turn.phase === 'EVENT_DRAFT') !== (ev.eventDraft !== undefined)
+    ) {
       problems.push('EVENT_DRAFT phase/pending state mismatch');
     }
     for (let i = 1; i < ev.schedule.length; i++) {

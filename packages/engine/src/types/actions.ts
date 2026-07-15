@@ -18,6 +18,10 @@ export interface Payment {
 export type EventPerk = 'CLAIM_DISCOUNT' | 'DRAW_TWO' | 'REPAIR_PERMIT';
 
 export type Action =
+  /** Server-authorized early completion after the room's end-game vote succeeds. This action is
+   *  intentionally not exposed by the gameplay command codec; keeping it in the engine log makes
+   *  the terminal state deterministic across persistence recovery and replay. */
+  | { readonly t: 'END_GAME'; readonly player: PlayerId }
   /** SETUP_TICKETS: each player simultaneously keeps ≥ minKeepInitial of their initial offer. */
   | {
       readonly t: 'KEEP_INITIAL_TICKETS';

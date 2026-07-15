@@ -52,6 +52,9 @@ export interface RoomMember {
   /** Advisory "I want to play again" vote, meaningful only while status === 'STARTED'.
    *  Reset to false whenever a game starts or a rematch resets the room to LOBBY. */
   wantsRematch?: boolean;
+  /** Vote to end the active game immediately. The host's affirmative vote is authoritative;
+   *  otherwise the game ends once all but one eligible human player have voted yes. */
+  wantsEnd?: boolean;
 }
 
 export interface RoomChatEntry {
@@ -98,6 +101,7 @@ export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidd
 export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 export type KickResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
 export type SendChatResult = RoomDoc | 'not_found' | 'not_member' | 'rate_limited';
+export type EndVoteResult = RoomDoc | 'not_found' | 'not_member' | 'not_started';
 export type BecomeSpectatorResult =
   | RoomDoc
   | 'not_found'
@@ -357,7 +361,15 @@ export class RoomRepo implements OnModuleInit {
   async markStarted(code: string, hostId: string, gameId: string, seed: string): Promise<boolean> {
     const res = await this.col.updateOne(
       { _id: code, hostId, status: 'LOBBY' },
-      { $set: { status: 'STARTED', gameId, seed, updatedAt: new Date() } },
+      {
+        $set: {
+          status: 'STARTED',
+          gameId,
+          seed,
+          'members.$[].wantsEnd': false,
+          updatedAt: new Date(),
+        },
+      },
     );
     return res.modifiedCount === 1;
   }
@@ -460,6 +472,30 @@ export class RoomRepo implements OnModuleInit {
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
 
+  /** Any seated human member records (or retracts) their vote to end the active game. The
+   *  decision threshold is evaluated by LobbyService from the returned authoritative room. */
+  async setEndVote(code: string, userId: string, vote: boolean): Promise<EndVoteResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'STARTED' || !room.gameId) return 'not_started';
+    if (!room.members.some((m) => m.userId === userId && !m.isBot)) return 'not_member';
+
+    const update = await this.col.updateOne(
+      { _id: code, status: 'STARTED', gameId: room.gameId, 'members.userId': userId },
+      { $set: { 'members.$.wantsEnd': vote, updatedAt: new Date() } },
+    );
+    if (update.matchedCount !== 1) {
+      // The pre-check above raced with a concurrent change (status flip, or this member being
+      // removed from the room). Re-derive which one so the caller gets the right error instead of
+      // a blanket "not started".
+      const latest = await this.col.findOne({ _id: code });
+      if (!latest) return 'not_found';
+      if (!latest.members.some((m) => m.userId === userId && !m.isBot)) return 'not_member';
+      return 'not_started';
+    }
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
   /** Any room member sends a preset OR free-text chat message; rate-limited from the persisted
    *  array itself (no separate in-memory tracker) so it survives restarts without new state. */
   async sendChat(
@@ -505,6 +541,7 @@ export class RoomRepo implements OnModuleInit {
       ...m,
       ready: m.isBot === true,
       wantsRematch: false,
+      wantsEnd: false,
     }));
     const res = await this.col.updateOne(
       { _id: code, hostId, status: 'STARTED', gameId: expectedGameId },

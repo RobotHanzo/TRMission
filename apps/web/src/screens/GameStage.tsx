@@ -44,6 +44,7 @@ import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
 import { TrainCarCard } from '../components/TrainCarCard';
 import { PlayerTrackers } from '../components/PlayerTrackers';
+import { EndGameVote } from '../components/EndGameVote';
 import { TurnCountdown } from '../components/TurnCountdown';
 import { TicketPanel } from '../components/TicketPanel';
 import { PaymentModal } from '../components/PaymentModal';
@@ -72,10 +73,13 @@ export interface GameStageProps {
   /** The live socket or the local sandbox; null briefly while a live game (re)connects. */
   commands: GameCommands | null;
   onLeave: () => void;
-  /** Room membership + advisory rematch votes, for the post-game-over ScoreBoard. Undefined in
-   *  sandbox/tutorial/replay contexts, where there's no room to rematch. */
+  /** Live room membership, including end-game/rematch votes. Undefined in sandbox/tutorial/replay
+   *  contexts, where there is no multiplayer room. */
   isHost?: boolean | undefined;
-  rematchMembers?: RoomMember[] | undefined;
+  roomMembers?: RoomMember[] | undefined;
+  endVotePending?: boolean | undefined;
+  endVoteError?: boolean | undefined;
+  onVoteEnd?: ((wantsEnd: boolean) => void) | undefined;
   onVoteRematch?: ((wantsRematch: boolean) => void) | undefined;
   onPlayAgain?: (() => void) | undefined;
   /** Tutorial / encyclopedia overlay rendered above the board + HUD. */
@@ -100,7 +104,10 @@ export function GameStage({
   commands,
   onLeave,
   isHost,
-  rematchMembers,
+  roomMembers,
+  endVotePending,
+  endVoteError,
+  onVoteEnd,
   onVoteRematch,
   onPlayAgain,
   overlay,
@@ -491,10 +498,22 @@ export function GameStage({
       />
     </div>
   );
+  const endVote =
+    phase !== Phase.GAME_OVER && me && roomMembers && onVoteEnd ? (
+      <EndGameVote
+        members={roomMembers}
+        playerId={me}
+        isHost={isHost ?? false}
+        pending={endVotePending}
+        error={endVoteError}
+        onVote={onVoteEnd}
+      />
+    ) : null;
   const trackers = (
     <div className="hud-block">
       <TurnCountdown />
       <PlayerTrackers snapshot={snapshot} />
+      {endVote}
     </div>
   );
   const market = (
@@ -628,18 +647,22 @@ export function GameStage({
   // The rail's inner content: the ticket chooser while drafting, else trackers/market/(hand)/missions.
   const railInner = needKeep ? (
     // Choosing tickets takes over the rail so the board stays visible and pan/zoomable; the hand
-    // and kept missions move into the chooser's own peek toggles.
-    <TicketChooser
-      offered={snapshot.you?.pendingOfferTicketIds ?? []}
-      minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
-      lockLong={phase === Phase.SETUP_TICKETS}
-      hand={snapshot.you?.hand}
-      handCount={myPub?.handCount ?? 0}
-      keptTicketIds={snapshot.you?.keptTicketIds ?? []}
-      completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
-      confirmDisabled={!allow.keep}
-      onConfirm={confirmKeep}
-    />
+    // and kept missions move into the chooser's own peek toggles. Keep the room vote reachable in
+    // case a player is stuck during the initial draft.
+    <>
+      <TicketChooser
+        offered={snapshot.you?.pendingOfferTicketIds ?? []}
+        minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
+        lockLong={phase === Phase.SETUP_TICKETS}
+        hand={snapshot.you?.hand}
+        handCount={myPub?.handCount ?? 0}
+        keptTicketIds={snapshot.you?.keptTicketIds ?? []}
+        completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
+        confirmDisabled={!allow.keep}
+        onConfirm={confirmKeep}
+      />
+      {endVote && <div className="hud-block">{endVote}</div>}
+    </>
   ) : boardLayout === 'rail' ? (
     <>
       <EventsPanel />
@@ -822,7 +845,7 @@ export function GameStage({
           snapshot={snapshot}
           onLeave={onLeave}
           isHost={isHost}
-          members={rematchMembers}
+          members={roomMembers}
           onVote={onVoteRematch}
           onPlayAgain={onPlayAgain}
         />

@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 9 (deadlock end-sequence)', () => {
-    expect(ENGINE_VERSION).toBe(9);
+  it('is engine version 10 (persisted server-authorized early completion)', () => {
+    expect(ENGINE_VERSION).toBe(10);
   });
 
   it('replays byte-identically under each variant', () => {

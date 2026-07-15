@@ -150,6 +150,8 @@ export function chooseBotAction(
 
 function scoreAction(a: Action, ctx: Ctx): number {
   switch (a.t) {
+    case 'END_GAME':
+      return -Infinity; // internal control-plane action; legalActions never returns it
     case 'CLAIM_ROUTE':
       return scoreClaim(a, ctx);
     case 'DRAW_FACEUP':

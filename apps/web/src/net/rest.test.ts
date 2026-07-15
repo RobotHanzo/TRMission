@@ -81,6 +81,18 @@ describe('rest client: per-game settings + spectating', () => {
     expect(JSON.parse(init?.body as string)).toEqual({ wantsRematch: true });
   });
 
+  it('POSTs an in-game end vote', async () => {
+    const fetchMock = vi.fn((_path: string, _init?: RequestInit) =>
+      Promise.resolve(res(200, { code: 'ABCDEF', members: [] })),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    await api.voteEnd('ABCDEF', true);
+    const [path, init] = fetchMock.mock.calls[0]!;
+    expect(path).toBe('/api/v1/rooms/ABCDEF/end-vote');
+    expect(init?.method).toBe('POST');
+    expect(JSON.parse(init?.body as string)).toEqual({ wantsEnd: true });
+  });
+
   it('POSTs a rematch request', async () => {
     const fetchMock = vi.fn(() => Promise.resolve(res(200, { code: 'ABCDEF', members: [] })));
     vi.stubGlobal('fetch', fetchMock);

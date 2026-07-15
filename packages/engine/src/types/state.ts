@@ -155,4 +155,25 @@ export const SCHEMA_VERSION = 1;
 // v9: deadlock end-sequence — a player with no productive move in a dead card pool must PASS
 // (futile ticket draws are no longer forced), and the endgame is triggered when the pool is dead
 // and no one can claim a route (ENDGAME_TRIGGERED gains `reason`). Off-path play is unchanged.
-export const ENGINE_VERSION = 9;
+// v10: server-authorized END_GAME is a new persisted action grammar. Existing v9 action behavior
+// is unchanged and remains replay-compatible, but a recovered v9 game that applies END_GAME
+// upgrades its terminal state/game document to v10 so older interpreters never receive it.
+export const ENGINE_VERSION = 10;
+
+/**
+ * Which persisted engine majors THIS engine can replay/recover byte-identically — the single gate
+ * shared by server-side crash recovery, post-game replay eligibility, and every client that needs
+ * to know whether a stored action log is safe to feed through its own reducer (server, web, mobile
+ * all import this rather than hand-copying the list, so it cannot drift between them).
+ *
+ * v5 replayed a v4 log identically (only inert genesis fields added), but v6 is NOT provably inert
+ * for v4/v5 (see git history), and v7 is not provably inert for v6 either: v7 locks own-track
+ * ticket completions into `completedTickets` (and emits TICKET_COMPLETED) mid-game for every
+ * ruleset, changing `stateDigest` at exactly the points a ticket completes. v8 adds stateful
+ * future-event actions/phases and cannot replay a v7 log byte-identically. v9 changes the deadlock
+ * rule (a dead-pool DRAW_TICKETS is now rejected; endgame can trigger on deadlock), so a v8 log
+ * containing such an action would diverge or become illegal under v9. v10 only adds the terminal
+ * END_GAME action; every existing v9 action retains identical behavior. Only extend this list for a
+ * new version when the change is provably inert for every version already listed.
+ */
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10];

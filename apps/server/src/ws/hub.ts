@@ -91,6 +91,13 @@ export interface GameHubOptions {
   playerLeftDelayMs?: number;
 }
 
+export type EndGameResult =
+  | 'ended'
+  | 'already_ended'
+  | 'not_found'
+  | 'invalid_player'
+  | 'persist_failed';
+
 /**
  * A persisted game that can never be brought back to life (incompatible engine major, or a
  * snapshot+tail that no longer replays). Distinct from an infrastructure failure: the client is
@@ -316,6 +323,32 @@ export class GameHub {
     if (match) return match.session.phase === 'GAME_OVER';
     const status = await this.store?.getStatus(gameId);
     return status === 'COMPLETED';
+  }
+
+  /**
+   * Complete a live game immediately after the room-level vote authorizes it. The synthetic
+   * END_GAME action travels through the same queue and write-ahead path as gameplay commands, so
+   * recovery and replay reproduce the scored GAME_OVER state exactly. The room service owns
+   * authorization; this method still requires a seated player id for a trustworthy audit action.
+   */
+  async endGame(gameId: string, requestedBy: PlayerId): Promise<EndGameResult> {
+    let match = this.registry.get(gameId);
+    if (!match) match = (await this.recoverMatch(gameId)) ?? undefined;
+    if (!match) return 'not_found';
+
+    return match.queue.run(async () => {
+      if (match.session.phase === 'GAME_OVER') return 'already_ended';
+
+      const action: Action = { t: 'END_GAME', player: requestedBy };
+      const prep = match.session.prepare(action);
+      if (!prep.ok) return 'invalid_player';
+
+      const applied = await this.applyPrepared(match, action, prep.prepared);
+      if (!applied.ok) return 'persist_failed';
+
+      this.broadcast(match, prep.prepared.events, null, 0);
+      return 'ended';
+    });
   }
 
   openConnection(id: string, sink: Sink, closeFn?: CloseFn): Connection {

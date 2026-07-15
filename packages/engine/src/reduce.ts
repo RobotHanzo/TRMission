@@ -5,7 +5,7 @@ import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
 import { getRoute, groupMembersOf } from './board';
 import { openTrackCount } from './config';
-import type { GameState } from './types/state';
+import { ENGINE_VERSION, type GameState } from './types/state';
 import type { CharterContract } from './types/events-state';
 import type { Action, Payment, EventPerk } from './types/actions';
 import type { GameEvent } from './types/events';
@@ -21,7 +21,7 @@ import {
   ownConnectedTicketIds,
   citiesConnected,
 } from './graph/connectivity';
-import { stationBorrowEdges } from './scoring';
+import { computeFinalScores, stationBorrowEdges } from './scoring';
 import {
   isRouteClosed,
   claimsSuspended,
@@ -74,6 +74,26 @@ export function reduce(board: Board, state: GameState, action: Action): ReduceRe
 function dispatch(board: Board, state: GameState, action: Action): ReduceResult {
   const phase = state.turn.phase;
   if (phase === 'GAME_OVER') return err(violation('GAME_OVER', 'game is over'));
+
+  // END_GAME is an internal, server-authorized control-plane action. Room ownership / vote
+  // authorization happens before it reaches the engine, so it deliberately bypasses normal turn
+  // and phase checks. It still validates that the recorded actor belongs to this game so a corrupt
+  // persisted action cannot silently complete an unrelated match.
+  if (action.t === 'END_GAME') {
+    if (!state.players[action.player as string]) {
+      return err(violation('NOT_YOUR_TURN', 'unknown player'));
+    }
+    const ended: GameState = {
+      ...state,
+      engineVersion: ENGINE_VERSION,
+      turn: { ...state.turn, phase: 'GAME_OVER' },
+      finalScores: null,
+    };
+    return ok({
+      state: { ...ended, finalScores: computeFinalScores(board, ended) },
+      events: [{ e: 'GAME_ENDED', visibility: 'PUBLIC' }],
+    });
+  }
 
   if (phase === 'SETUP_TICKETS') {
     if (action.t !== 'KEEP_INITIAL_TICKETS')

@@ -50,6 +50,7 @@ export interface RoomMember {
   isBot?: boolean;
   difficulty?: BotDifficulty;
   wantsRematch?: boolean;
+  wantsEnd?: boolean;
 }
 export interface RoomSpectator {
   userId: string;
