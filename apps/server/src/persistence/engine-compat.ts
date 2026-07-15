@@ -10,21 +10,13 @@
  * game instead: an old major is unresumable regardless (its stored digests were computed under
  * different rules and could never re-verify).
  *
- * Engine majors whose persisted action logs the current server can still replay byte-identically.
- * v5 replayed a v4 log identically (v5 only added inert genesis fields), but v6 is NOT provably
- * inert for v4/v5 games (see history in git blame), and v7 is not provably inert for v6 either: v7
- * locks own-track ticket completions into `completedTickets` (and emits TICKET_COMPLETED) mid-game
- * for every ruleset, not just unlimitedStationBorrow, which changes `stateDigest` at exactly the
- * points a ticket completes — a v6 game replayed under v7 would digest-mismatch at that step. So v7
- * stands alone rather than extending the allowlist. Only extend this list for a new version when
- * the change is provably inert for the versions already listed. v8 adds stateful future-event
- * actions/phases and therefore cannot replay a v7 action log byte-identically. v9 changes the
- * deadlock rule: a dead-pool `DRAW_TICKETS` with no productive move is now rejected (and the
- * endgame can trigger on a deadlock), so a v8 log containing such an action would diverge or become
- * illegal under v9. v10 only adds the terminal `END_GAME` action; every existing v9 action retains
- * identical behavior, so the current interpreter supports persisted v9 and v10 games.
+ * The allowlist itself (`REPLAY_COMPATIBLE_ENGINE_VERSIONS`, with the version-by-version reasoning
+ * for why each major was or wasn't provably inert for the ones before it) is owned by `@trm/engine`
+ * — the only package every consumer (server recovery/replay, web replay, mobile replay) can import,
+ * so the list can't drift between them. Re-exported here for existing call sites in this package.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10];
+import { REPLAY_COMPATIBLE_ENGINE_VERSIONS } from '@trm/engine';
+export { REPLAY_COMPATIBLE_ENGINE_VERSIONS } from '@trm/engine';
 
 /**
  * Can the current engine load a game persisted under `version`? `undefined` = a legacy doc written

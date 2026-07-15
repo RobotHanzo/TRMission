@@ -484,7 +484,15 @@ export class RoomRepo implements OnModuleInit {
       { _id: code, status: 'STARTED', gameId: room.gameId, 'members.userId': userId },
       { $set: { 'members.$.wantsEnd': vote, updatedAt: new Date() } },
     );
-    if (update.matchedCount !== 1) return 'not_started';
+    if (update.matchedCount !== 1) {
+      // The pre-check above raced with a concurrent change (status flip, or this member being
+      // removed from the room). Re-derive which one so the caller gets the right error instead of
+      // a blanket "not started".
+      const latest = await this.col.findOne({ _id: code });
+      if (!latest) return 'not_found';
+      if (!latest.members.some((m) => m.userId === userId && !m.isBot)) return 'not_member';
+      return 'not_started';
+    }
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
 

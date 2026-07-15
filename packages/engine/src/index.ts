@@ -26,7 +26,11 @@ export type {
   PlayerFinal,
   FinalScoreboard,
 } from './types/state';
-export { SCHEMA_VERSION, ENGINE_VERSION } from './types/state';
+export {
+  SCHEMA_VERSION,
+  ENGINE_VERSION,
+  REPLAY_COMPATIBLE_ENGINE_VERSIONS,
+} from './types/state';
 
 export type {
   EventsState,
