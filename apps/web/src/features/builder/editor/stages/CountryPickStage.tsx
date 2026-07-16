@@ -98,10 +98,6 @@ export function CountryPickStage() {
       </div>
       <aside className="card stack editor-inspector">
         <h3>{t('builder.cropPreview')}</h3>
-        <CountryList selected={selected} onToggle={toggle} />
-        {selected.size > 0 && (
-          <p className="muted">{t('builder.countrySelectedCount', { n: selected.size })}</p>
-        )}
         <label className="row editor-border-toggle">
           <input
             type="checkbox"
@@ -110,6 +106,10 @@ export function CountryPickStage() {
           />
           {t('builder.showCountryBorders')}
         </label>
+        <CountryList selected={selected} onToggle={toggle} />
+        {selected.size > 0 && (
+          <p className="muted">{t('builder.countrySelectedCount', { n: selected.size })}</p>
+        )}
         {result ? (
           <>
             <svg

@@ -34,15 +34,16 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   const contentStatus = useActiveContent(snapshot?.contentHash);
   const [room, setRoom] = useState<RoomView | null>(null);
 
-  // Pull the room (member names / bot labels for the trackers + scoreboard, host id and rematch
-  // votes for the post-game flow). Snapshots carry ids only — names are lobby data.
+  // Pull the room (member + spectator names / bot labels for the trackers, scoreboard and chat,
+  // host id and rematch votes for the post-game flow). Snapshots carry ids only — names are
+  // lobby data.
   useEffect(() => {
     let cancelled = false;
     api
       .getRoom(roomCode)
       .then((r) => {
         if (!cancelled) {
-          setRoster(r.members);
+          setRoster(r.members, r.spectators);
           setRoom(r);
         }
       })
@@ -64,31 +65,34 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
     };
   }, [activeGameId, roomCode]);
 
-  // Once the game is over, poll the room every 2s: refresh the rematch vote tally, and the moment
-  // the host resets it to LOBBY, carry this client back into the room — the same way starting a
-  // game carried everyone out of it. Spectators are excluded: they were never room members, and
-  // the room screen's own poll would otherwise auto-join a non-member landing on a LOBBY room.
+  // Poll the room every 2s throughout live play: this keeps the roster in sync with spectators
+  // who join mid-game (so chat can name them) as well as the rematch vote tally once the game
+  // ends, and the moment the host resets a finished game to LOBBY, carries this client back into
+  // the room — the same way starting a game carried everyone out of it. Spectators are excluded:
+  // they were never room members, and the room screen's own poll would otherwise auto-join a
+  // non-member landing on a LOBBY room.
   const phase = snapshot?.phase;
+  const gameOver = phase === Phase.GAME_OVER;
   const isSpectator = !snapshot?.you;
   useEffect(() => {
-    if (phase !== Phase.GAME_OVER || isSpectator) return;
+    if (!roomCode || isSpectator) return;
     let active = true;
     const poll = async (): Promise<void> => {
       try {
         const r = await api.getRoom(roomCode);
         if (!active) return;
-        if (r.status === 'LOBBY') {
+        if (gameOver && r.status === 'LOBBY') {
           active = false;
           navigation.replace('Room', { code: roomCode });
           return;
         }
-        setRoster(r.members);
+        setRoster(r.members, r.spectators);
         setRoom(r);
       } catch {
         // transient — next tick retries; this is a convenience poll, not a critical path
       }
     };
-    void poll();
+    if (gameOver) void poll();
     const id = setInterval(() => {
       if (!active) {
         clearInterval(id);
@@ -100,7 +104,7 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
       active = false;
       clearInterval(id);
     };
-  }, [roomCode, phase, isSpectator, navigation, setRoster]);
+  }, [roomCode, gameOver, isSpectator, navigation, setRoster]);
 
   // Leaving tears down the socket (unmount → useGameConnection cleanup). Nothing is at stake
   // before the first snapshot arrives, so only confirm once there's an actual game to abandon.
@@ -118,7 +122,7 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   const voteRematch = async (wantsRematch: boolean): Promise<void> => {
     try {
       const r = await api.voteRematch(roomCode, wantsRematch);
-      setRoster(r.members);
+      setRoster(r.members, r.spectators);
       setRoom(r);
     } catch {
       // transient — the next poll tick resyncs

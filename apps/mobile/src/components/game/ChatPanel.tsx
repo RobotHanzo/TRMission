@@ -7,9 +7,11 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { useChat } from '../../store/chat';
 import { useGame } from '../../store/game';
 import { useModeration } from '../../store/moderation';
+import { useRoster } from '../../store/roster';
 import { getSocket } from '../../net/connection';
 import { usePlayerName } from '../../game/playerName';
 import { seatColor } from '../../theme/colors';
+import { useTheme } from '../../theme/useTheme';
 import { chatRejectionHintKey } from '../../game/chatErrors';
 import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core';
 import { PlayerActionSheet, canModerate } from './PlayerActionSheet';
@@ -24,6 +26,8 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
   const snapshot = useGame((s) => s.snapshot);
   const rejection = useGame((s) => s.rejection);
   const nameOf = usePlayerName();
+  const rosterById = useRoster((s) => s.byId);
+  const { tokens } = useTheme();
   const me = snapshot?.you?.playerId ?? null;
   const blocked = useModeration((s) => s.blocked);
   const [draft, setDraft] = useState('');
@@ -47,7 +51,9 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
     if (key) setHint(t(key));
   }, [rejection, t]);
 
-  const seatOf = (pid: string): number => snapshot?.players.find((p) => p.id === pid)?.seat ?? 0;
+  // null for a spectator author (not in the seated snapshot.players list) — never seat 0.
+  const seatOf = (pid: string): number | null =>
+    snapshot?.players.find((p) => p.id === pid)?.seat ?? null;
 
   const withinRateLimit = (): boolean => {
     const now = Date.now();
@@ -83,28 +89,43 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
         {visible.length === 0 ? (
           <Text style={styles.empty}>{t('chat.empty')}</Text>
         ) : (
-          visible.map((m) => (
-            <Pressable
-              key={m.id}
-              style={styles.msg}
-              onLongPress={() => {
-                if (!canModerate(m.playerId, me)) return;
-                setSheetTarget({
-                  id: m.playerId,
-                  name: nameOf({ id: m.playerId, seat: seatOf(m.playerId) }),
-                });
-              }}
-            >
-              <Text style={[styles.author, { color: seatColor(seatOf(m.playerId)) }]}>
-                {nameOf({ id: m.playerId, seat: seatOf(m.playerId), isMe: m.playerId === me })}
-              </Text>
-              <Text style={styles.msgText}>
-                {m.content.case === 'presetId'
-                  ? t(chatPresetKey(m.content.value))
-                  : m.content.value}
-              </Text>
-            </Pressable>
-          ))
+          visible.map((m) => {
+            const seat = seatOf(m.playerId);
+            // A null seat means a spectator author (never a seated player): tag them "[旁觀者]"
+            // and use their roster display name — NOT the seat-0 "P{seat+1}" fallback, which
+            // would mislabel every spectator as "P1". The tag stands alone until the roster
+            // resolves (e.g. right after they joined mid-game).
+            const isSpectator = seat === null;
+            const author = isSpectator
+              ? [t('chat.spectatorTag'), rosterById[m.playerId]?.displayName]
+                  .filter(Boolean)
+                  .join(' ')
+              : nameOf({ id: m.playerId, seat, isMe: m.playerId === me });
+            return (
+              <Pressable
+                key={m.id}
+                style={styles.msg}
+                onLongPress={() => {
+                  if (!canModerate(m.playerId, me)) return;
+                  setSheetTarget({ id: m.playerId, name: author });
+                }}
+              >
+                <Text
+                  style={[
+                    styles.author,
+                    { color: isSpectator ? tokens.inkSoft : seatColor(seat) },
+                  ]}
+                >
+                  {author}
+                </Text>
+                <Text style={styles.msgText}>
+                  {m.content.case === 'presetId'
+                    ? t(chatPresetKey(m.content.value))
+                    : m.content.value}
+                </Text>
+              </Pressable>
+            );
+          })
         )}
       </ScrollView>
       {sheetTarget && (
