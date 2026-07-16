@@ -383,6 +383,12 @@ a.link {
   border-top: 1px solid var(--tr-line);
   border-bottom: 1px solid var(--tr-line);
 }
+/* It's a banded section with its own borders (unlike the quiet sections above it, which
+   blend together and zero out their shared edge via `.landing-section + .landing-section`)
+   — it needs the full top padding back so its content doesn't hug the top border. */
+.landing-section.landing-discord {
+  padding-top: clamp(40px, 7vh, 72px);
+}
 .landing-discord-inner {
   display: flex;
   align-items: center;
