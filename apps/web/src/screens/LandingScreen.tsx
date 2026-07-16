@@ -61,6 +61,10 @@ export function LandingScreen() {
     track('landing_cta_click', { target: 'login' });
     enterLogin();
   };
+  const joinDiscord = () => {
+    track('discord_click', { source: 'landing' });
+    openDiscord();
+  };
   const switchLocale = () => {
     const next = locale === 'zh-Hant' ? 'en' : 'zh-Hant';
     track('settings_change', { setting: 'locale', value: next });
@@ -191,18 +195,30 @@ export function LandingScreen() {
         </div>
       </section>
 
+      <section className="landing-section landing-discord">
+        <div className="landing-wrap landing-discord-inner">
+          <div className="landing-discord-copy">
+            <span className="landing-discord-icon">
+              <DiscordGlyph size={22} />
+            </span>
+            <div>
+              <h2 className="landing-h2">{t('landing.discordSection.title')}</h2>
+              <p className="landing-section-lede">{t('landing.discordSection.lede')}</p>
+            </div>
+          </div>
+          <button className="discord-cta landing-discord-cta" onClick={joinDiscord}>
+            <DiscordGlyph size={18} /> {t('landing.discordSection.cta')}
+          </button>
+        </div>
+      </section>
+
       <footer className="landing-footer">
         <div className="landing-wrap landing-footer-inner">
           <BrandBanner size="header" />
           <p className="landing-footer-tagline muted">{t('tagline')}</p>
           <div className="landing-footer-links">
             <button onClick={enterPrivacy}>{t('landing.account.privacyCta')}</button>
-            <button
-              onClick={() => {
-                track('discord_click', { source: 'landing' });
-                openDiscord();
-              }}
-            >
+            <button onClick={joinDiscord}>
               <DiscordGlyph size={15} /> {t('discord')}
             </button>
             <button onClick={switchLocale}>{t('landing.langSwitch')}</button>

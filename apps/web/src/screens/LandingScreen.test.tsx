@@ -34,6 +34,12 @@ describe('LandingScreen (signed-out /)', () => {
     expect(window.location.pathname).toBe('/login');
   });
 
+  it('has a Discord community section with a join button', () => {
+    render(<LandingScreen />);
+    expect(screen.getByRole('heading', { name: '加入 Discord 社群' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /加入 Discord$/ })).toBeInTheDocument();
+  });
+
   it('links the privacy policy and account deletion (OAuth homepage requirements)', () => {
     render(<LandingScreen />);
     fireEvent.click(screen.getAllByRole('button', { name: '隱私權政策' })[0]!);

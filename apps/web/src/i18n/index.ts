@@ -144,6 +144,11 @@ const resources = {
           privacyCta: '隱私權政策',
           deleteCta: '刪除帳號與資料',
         },
+        discordSection: {
+          title: '加入 Discord 社群',
+          lede: '揪團開局、回報問題、搶先看新地圖與功能——玩家與開發者都在這裡。',
+          cta: '加入 Discord',
+        },
         langSwitch: 'English',
         footer: {
           disclaimer:
@@ -736,6 +741,11 @@ const resources = {
             'When you sign in with Google we only read your basic profile — display name, email, and avatar — to create your game account. No other permissions are requested.',
           privacyCta: 'Privacy policy',
           deleteCta: 'Delete your account & data',
+        },
+        discordSection: {
+          title: 'Join the Discord',
+          lede: 'Find people to play with, report bugs, and get an early look at new maps and features — players and developers hang out here.',
+          cta: 'Join Discord',
         },
         langSwitch: '中文',
         footer: {
