@@ -100,7 +100,6 @@ const resources = {
         // \n + `white-space: pre-line` controls the break — CJK auto-wrap would split 路線 mid-word.
         title: '在台灣鐵道上\n搶占路線、完成任務',
         lede: '《台鐵任務》是一款以台灣鐵路為靈感的線上桌上遊戲：收集車廂卡、佔下城市之間的路段，把任務卡上的起訖點連成一氣。支援 2–5 人連線對戰、機器人陪練與觀戰。',
-        boardCaption: '實際遊戲棋盤 — 台灣全島路網',
         departures: {
           title: '即將發車',
           tutorialDest: '新手教學',
@@ -685,7 +684,6 @@ const resources = {
         eyebrow: 'An online multiplayer railway board game · free to play',
         title: 'Claim routes across Taiwan,\ncomplete your missions',
         lede: "TRMission is an online board game inspired by Taiwan's railways: collect train-car cards, claim the routes between cities, and link your mission tickets end to end. Play live with 2–5 players, practise against bots, or spectate a friend's game.",
-        boardCaption: 'The actual game board — an island-wide rail network',
         departures: {
           title: 'Departures',
           tutorialDest: 'Tutorial',

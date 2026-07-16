@@ -127,7 +127,6 @@ export function LandingScreen() {
           {/* The real board (same MapScene the game renders), framed as a station wall map. */}
           <div className="landing-board">
             <MapBackdrop className="landing-board-map" fit="contain" />
-            <span className="landing-board-caption">{t('landing.boardCaption')}</span>
           </div>
         </div>
       </section>

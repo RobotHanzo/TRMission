@@ -216,19 +216,6 @@ button.landing-departure:hover .landing-departure-arrow {
   width: 100%;
   height: 100%;
 }
-.landing-board-caption {
-  position: absolute;
-  left: 12px;
-  bottom: 12px;
-  font-family: var(--tr-font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
-  color: var(--tr-ink);
-  background: color-mix(in srgb, var(--tr-surface) 88%, transparent);
-  border: 1px solid var(--tr-line);
-  border-radius: var(--tr-radius-sm);
-  padding: 5px 10px;
-}
 
 /* ── Quiet sections below the hero ── */
 .landing-section {
