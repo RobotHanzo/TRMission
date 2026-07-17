@@ -17,7 +17,7 @@ export type Spotlight =
 /** A rendered game-component specimen shown inside the coachmark (the visual glossary). */
 export type SpecimenSpec =
   | { kind: 'routes-compare' }
-  | { kind: 'route'; variant: 'rail' | 'ferry' | 'tunnel' | 'double' }
+  | { kind: 'route'; variant: 'rail' | 'ferry' | 'tunnel' | 'double' | 'broken' }
   | { kind: 'card-row' }
   | { kind: 'loco-card' }
   | { kind: 'station' }

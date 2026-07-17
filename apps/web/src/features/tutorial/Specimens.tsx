@@ -39,14 +39,15 @@ function SpecTrack({
   fill,
   count,
 }: {
-  variant: 'rail' | 'ferry' | 'tunnel';
+  variant: 'rail' | 'ferry' | 'tunnel' | 'broken';
   cy: number;
   fill: string;
   count: number;
 }) {
   const isTunnel = variant === 'tunnel';
   const isFerry = variant === 'ferry';
-  const cls = 'route' + (isTunnel ? ' tunnel' : isFerry ? ' ferry' : '');
+  const isBroken = variant === 'broken';
+  const cls = 'route' + (isTunnel ? ' tunnel' : isFerry ? ' ferry' : isBroken ? ' broken' : '');
   return (
     <g className={cls}>
       <RouteShape
@@ -56,6 +57,7 @@ function SpecTrack({
         ferryLocos={isFerry ? 1 : 0}
         length={count}
         fill={fill}
+        brokenCarriages={isBroken ? 2 : 0}
       />
     </g>
   );
@@ -64,7 +66,11 @@ function SpecTrack({
 /** A short straight route drawn with the live board components. A `double` renders as the board's
  *  twin track: two full parallel routes in DIFFERENT liveries (never one faded out), sitting snug. A
  *  ferry's pips are the neutral grey of a GRAY route — exactly as the map paints an unclaimed ferry. */
-export function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'double' }) {
+export function RouteSpecimen({
+  variant,
+}: {
+  variant: 'rail' | 'ferry' | 'tunnel' | 'double' | 'broken';
+}) {
   const count = variant === 'tunnel' ? 4 : 3;
   return (
     <svg

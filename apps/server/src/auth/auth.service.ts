@@ -9,6 +9,7 @@ import { UserRepo, toPublicUser, type UserDoc } from './user.repo';
 import { FeatureDefaultsRepo } from './feature-defaults.repo';
 import { SessionRepo } from './session.repo';
 import { TokenService } from './token.service';
+import type { MapFeatureKey } from '@trm/shared';
 import type { IssuedAuth, Locale, PublicUser, UserPreferences } from './auth.types';
 
 @Injectable()
@@ -121,6 +122,12 @@ export class AuthService {
 
   async completeTutorial(userId: string): Promise<PublicUser> {
     const user = await this.users.setTutorialCompleted(userId, true);
+    if (!user) throw new UnauthorizedException('user not found');
+    return this.withDefaults(user);
+  }
+
+  async markFeatureIntroSeen(userId: string, feature: MapFeatureKey): Promise<PublicUser> {
+    const user = await this.users.addSeenFeatureIntro(userId, feature);
     if (!user) throw new UnauthorizedException('user not found');
     return this.withDefaults(user);
   }

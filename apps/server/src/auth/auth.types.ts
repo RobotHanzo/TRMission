@@ -1,4 +1,4 @@
-import type { UserFeature } from '@trm/shared';
+import type { MapFeatureKey, UserFeature } from '@trm/shared';
 
 export type Locale = 'zh-Hant' | 'en';
 export type Theme = 'system' | 'light' | 'dark';
@@ -78,6 +78,8 @@ export interface PublicUser {
   features: UserFeature[];
   /** Whether this account has reached the guided tutorial's finale. */
   tutorialCompleted: boolean;
+  /** Map-feature intros already shown to this account (one-shot per feature). */
+  seenFeatureIntros: MapFeatureKey[];
   email?: string;
   avatarUrl?: string;
 }

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
+import { MAP_FEATURE_KEYS } from '@trm/shared';
 
 // zod is the single source for both validation (via ZodValidationPipe + these DTOs)
 // and the OpenAPI body/response schemas (via apiSchema()).
@@ -56,6 +57,8 @@ export class RefreshDto extends createZodDto(RefreshSchema.default({})) {}
 export class LogoutDto extends createZodDto(LogoutSchema.default({})) {}
 export class MobileExchangeDto extends createZodDto(MobileExchangeSchema) {}
 export class AppleCredentialDto extends createZodDto(AppleCredentialSchema) {}
+export const FeatureIntroSeenSchema = z.object({ feature: z.enum(MAP_FEATURE_KEYS) });
+export class FeatureIntroSeenDto extends createZodDto(FeatureIntroSeenSchema) {}
 // Web sends DELETE /auth/me with no body — default to {} so the zod pipe doesn't 400 it.
 export class DeleteAccountDto extends createZodDto(DeleteAccountSchema.default({})) {}
 
@@ -64,6 +67,7 @@ export const PublicUserSchema = z.object({
   displayName: z.string(),
   isGuest: z.boolean(),
   tutorialCompleted: z.boolean(),
+  seenFeatureIntros: z.array(z.enum(MAP_FEATURE_KEYS)),
   preferences: PreferencesSchema,
   email: z.string().optional(),
   avatarUrl: z.string().optional(),

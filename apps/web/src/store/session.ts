@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { UserFeature } from '@trm/shared';
+import type { MapFeatureKey, UserFeature } from '@trm/shared';
 import { api, setOnTokenChange, type PublicUser, type UserPreferences } from '../net/rest';
 import { useUi } from './ui';
 import { track } from '../lib/analytics';
@@ -24,6 +24,9 @@ interface SessionState {
   /** Mark the guided tutorial as completed (called from the tutorial finale). Non-fatal on failure
    *  — a failed write just means the welcome-screen recommendation shows up again next time. */
   completeTutorial(): Promise<void>;
+  /** Record that a map-feature intro (e.g. broken rail) was shown. Non-fatal on failure — the
+   *  intro just shows once more at the next game start. */
+  markFeatureIntroSeen(feature: MapFeatureKey): Promise<void>;
   clearError(): void;
 }
 
@@ -116,6 +119,13 @@ export const useSession = create<SessionState>()((set, get) => {
         set({ user: await api.markTutorialCompleted() });
       } catch {
         /* non-fatal: popup just keeps recommending the tutorial next time */
+      }
+    },
+    async markFeatureIntroSeen(feature) {
+      try {
+        set({ user: await api.markFeatureIntroSeen(feature) });
+      } catch {
+        /* non-fatal: the intro reappears at the next game start */
       }
     },
     clearError: () => set({ error: null }),

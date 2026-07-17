@@ -508,6 +508,33 @@
   }
 }
 
+/* One-shot feature-intro dialog (new-mechanic explainer at game start). */
+.feature-intro {
+  max-width: 420px;
+}
+.feature-intro-eyebrow {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.feature-intro-specimen {
+  display: flex;
+  justify-content: center;
+  padding: 0.35rem 0;
+}
+.feature-intro-text {
+  margin: 0;
+  line-height: 1.55;
+}
+.feature-intro-controls {
+  align-items: center;
+}
+.feature-intro-progress {
+  margin-right: auto;
+  font-size: 0.85rem;
+}
+
 /* Visual glossary specimens shown inside the coachmark. The special-routes legend is shown larger so
    the ferry loco-slots and tunnel ties read clearly. */
 .tut-route-specimen {

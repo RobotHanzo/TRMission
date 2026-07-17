@@ -106,6 +106,21 @@ export const tutorialZh = {
     rail: '鐵路',
     ferry: '渡輪',
     tunnel: '隧道',
+    broken: '斷軌',
+  },
+  featureIntro: {
+    heading: '本地圖的特殊規則',
+    skip: '略過',
+    done: '知道了',
+    pageOf: '第 {{page}} / {{total}} 頁',
+    brokenRail: {
+      title: '斷軌',
+      what: '這張地圖有「斷軌」路線：軌道損壞的路段（以裂痕標示）在修復之前，任何人都無法宣告。',
+      repair:
+        '花一整個回合修復：支付與「損壞節數」等量、該路線顏色的火車牌（灰色路線可用任一種顏色；彩色車頭萬用），並立即依修復長度得分——不放置任何火車車廂。',
+      exclusive:
+        '修復者在自己的下一個回合結束前，擁有這條路線的「獨家宣告權」；期限過後，任何玩家都可以宣告它。',
+    },
   },
   chapters: {
     c0: '基礎',
@@ -229,6 +244,21 @@ export const tutorialEn = {
     rail: 'Railway',
     ferry: 'Ferry',
     tunnel: 'Tunnel',
+    broken: 'Broken rail',
+  },
+  featureIntro: {
+    heading: 'Special rules on this map',
+    skip: 'Skip',
+    done: 'Got it',
+    pageOf: 'Page {{page}} / {{total}}',
+    brokenRail: {
+      title: 'Broken rail',
+      what: 'This map has broken rails: a damaged stretch of track (marked by a crack) cannot be claimed by anyone until it has been repaired.',
+      repair:
+        "Spend a full turn to repair it: pay train cards equal to the damaged length, in the route's colour (any one colour on gray routes; locomotives are wild), and score immediately as if you had built a route of that length — no train cars are placed.",
+      exclusive:
+        'The repairer holds exclusive claim rights until the end of their own next turn; after that window, any player may claim the route.',
+    },
   },
   chapters: {
     c0: 'Basics',

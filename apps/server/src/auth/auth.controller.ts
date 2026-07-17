@@ -58,6 +58,8 @@ import {
   AccessResultSchema,
   AuthConfigSchema,
   PublicUserSchema,
+  FeatureIntroSeenDto,
+  FeatureIntroSeenSchema,
 } from './auth.schemas';
 import { apiSchema } from '../openapi/openapi';
 import { env } from '../config/env';
@@ -375,6 +377,17 @@ export class AuthController {
   @ApiResponse({ status: 200, schema: apiSchema(PublicUserSchema) })
   async completeTutorial(@CurrentUser() user: AuthUser) {
     return this.auth.completeTutorial(user.userId);
+  }
+
+  @Post('me/feature-intros')
+  @HttpCode(200)
+  @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Record that a map-feature intro was shown to the current user' })
+  @ApiBody({ schema: apiSchema(FeatureIntroSeenSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(PublicUserSchema) })
+  async markFeatureIntroSeen(@CurrentUser() user: AuthUser, @Body() body: FeatureIntroSeenDto) {
+    return this.auth.markFeatureIntroSeen(user.userId, body.feature);
   }
 
   // ── OAuth (browser navigations, not JSON — excluded from the OpenAPI doc) ──────────────────

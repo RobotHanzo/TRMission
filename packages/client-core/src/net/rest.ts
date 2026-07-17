@@ -31,6 +31,7 @@ import type {
   TicketResult,
   UserPreferences,
 } from './restTypes';
+import type { MapFeatureKey } from '@trm/shared';
 
 export class ApiError extends Error {
   constructor(
@@ -190,6 +191,8 @@ function buildApi(
     updatePreferences: (prefs: UserPreferences) =>
       req<PublicUser>('PATCH', '/auth/me/preferences', prefs),
     markTutorialCompleted: () => req<PublicUser>('POST', '/auth/me/tutorial-completed'),
+    markFeatureIntroSeen: (feature: MapFeatureKey) =>
+      req<PublicUser>('POST', '/auth/me/feature-intros', { feature }),
     logout: async (): Promise<void> => {
       const refreshToken = (await transport.readRefreshToken?.()) ?? undefined;
       await req<void>('POST', '/auth/logout', refreshToken ? { refreshToken } : undefined);

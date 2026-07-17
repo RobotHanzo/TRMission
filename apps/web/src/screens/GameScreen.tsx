@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Phase } from '@trm/proto';
 import { useGame } from '../store/game';
@@ -9,9 +9,11 @@ import { api, type RoomView } from '../net/rest';
 import { connectGame, getSocket } from '../net/connection';
 import { track } from '../lib/analytics';
 import { useActiveContent } from '../game/useActiveContent';
+import { resolveContent } from '../game/contentCache';
 import { GameStage } from './GameStage';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
+import { FeatureIntroGate } from '../features/tutorial/FeatureIntroDialog';
 
 /**
  * Live-game shell: owns the socket connect + roster fetch, then delegates the board + HUD to the
@@ -29,6 +31,14 @@ export function GameScreen() {
   const sessionReplaced = useGame((s) => s.sessionReplaced);
   const setRoster = useRoster((s) => s.setMembers);
   const contentStatus = useActiveContent(snapshot?.contentHash);
+  // The resolved map content for the one-shot feature-intro check. Once the status is 'ready' the
+  // hash resolves synchronously from the content cache (the Promise guard is just belt-and-braces).
+  const contentHash = snapshot?.contentHash;
+  const activeContent = useMemo(() => {
+    if (!contentHash || contentStatus !== 'ready') return null;
+    const c = resolveContent(contentHash);
+    return c instanceof Promise ? null : c;
+  }, [contentHash, contentStatus]);
   const [room, setRoom] = useState<RoomView | null>(null);
   const [endVotePending, setEndVotePending] = useState(false);
   const [endVoteError, setEndVoteError] = useState(false);
@@ -211,6 +221,8 @@ export function GameScreen() {
           onCancel={cancelLeave}
         />
       )}
+      {/* One-shot intro for map mechanics the default map doesn't have (e.g. broken rails). */}
+      {activeContent && <FeatureIntroGate content={activeContent} />}
     </>
   );
 }

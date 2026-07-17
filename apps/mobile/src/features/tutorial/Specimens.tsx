@@ -57,7 +57,7 @@ function trackModel(
   id: string,
   color: string,
   count: number,
-  opts: { tunnel?: boolean; ferry?: boolean },
+  opts: { tunnel?: boolean; ferry?: boolean; broken?: number },
   cx: number,
   cy: number,
 ): RouteRenderModel[] {
@@ -71,6 +71,7 @@ function trackModel(
         length: count,
         isTunnel: !!opts.tunnel,
         ferryLocos: opts.ferry ? 1 : 0,
+        brokenCarriages: opts.broken ?? 0,
       },
     ],
     new Map([[id, straightRouteGeometry(count, !!opts.tunnel, cx, cy)]]),
@@ -85,7 +86,7 @@ function RouteCanvas({
   variant,
   reserve = 0,
 }: {
-  variant: 'rail' | 'ferry' | 'tunnel' | 'double';
+  variant: 'rail' | 'ferry' | 'tunnel' | 'double' | 'broken';
   reserve?: number;
 }) {
   const count = variant === 'tunnel' ? 4 : 3;
@@ -98,7 +99,9 @@ function RouteCanvas({
         ]
       : variant === 'ferry'
         ? trackModel('spec', 'GRAY', count, { ferry: true }, SPEC_W / 2, SPEC_CY)
-        : trackModel('spec', 'BLUE', count, { tunnel: variant === 'tunnel' }, SPEC_W / 2, SPEC_CY);
+        : variant === 'broken'
+          ? trackModel('spec', 'BLUE', count, { broken: 2 }, SPEC_W / 2, SPEC_CY)
+          : trackModel('spec', 'BLUE', count, { tunnel: variant === 'tunnel' }, SPEC_W / 2, SPEC_CY);
   return (
     <Canvas style={{ width: SPEC_W * px, height: SPEC_H * px }}>
       <Group transform={[{ scale: px }]}>
@@ -108,7 +111,11 @@ function RouteCanvas({
   );
 }
 
-export function RouteSpecimen({ variant }: { variant: 'rail' | 'ferry' | 'tunnel' | 'double' }) {
+export function RouteSpecimen({
+  variant,
+}: {
+  variant: 'rail' | 'ferry' | 'tunnel' | 'double' | 'broken';
+}) {
   return (
     <View testID="tut-specimen" style={styles.centered}>
       <RouteCanvas variant={variant} />

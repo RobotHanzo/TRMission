@@ -1,7 +1,7 @@
 // Live-game shell (ports the web GameScreen): owns the socket lifecycle (useGameConnection), the
 // room/roster fetch, and the game-over rematch poll, then delegates the board + HUD to the
 // presentational GameStage (shared with the offline/tutorial sandbox in P3/P4).
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -14,7 +14,9 @@ import { useGame } from '../store/game';
 import { useRoster } from '../store/roster';
 import { useSession } from '../store/session';
 import { useActiveContent } from '../game/useActiveContent';
+import { resolveContent } from '../game/contentCache';
 import { GameStage } from './GameStage';
+import { FeatureIntroOverlay } from '../features/tutorial/FeatureIntroOverlay';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { setActiveGameId } from '../push/notifications';
 import { setActiveRoomContext } from '../game/activeRoom';
@@ -32,6 +34,14 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   const setRoster = useRoster((s) => s.setMembers);
   const user = useSession((s) => s.user);
   const contentStatus = useActiveContent(snapshot?.contentHash);
+  // The resolved map content for the one-shot feature-intro check. Once the status is 'ready' the
+  // hash resolves synchronously from the content cache (the Promise guard is just belt-and-braces).
+  const contentHash = snapshot?.contentHash;
+  const activeContent = useMemo(() => {
+    if (!contentHash || contentStatus !== 'ready') return null;
+    const c = resolveContent(contentHash);
+    return c instanceof Promise ? null : c;
+  }, [contentHash, contentStatus]);
   const [room, setRoom] = useState<RoomView | null>(null);
 
   // Pull the room (member + spectator names / bot labels for the trackers, scoreboard and chat,
@@ -205,6 +215,8 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
           <PushPrompt />
         </View>
       )}
+      {/* One-shot intro for map mechanics the default map doesn't have (e.g. broken rails). */}
+      {activeContent && <FeatureIntroOverlay content={activeContent} />}
     </View>
   );
 }

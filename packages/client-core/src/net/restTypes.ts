@@ -1,7 +1,7 @@
 // Wire types for the control-plane REST API — the single source of truth for BOTH clients
 // (the union of what the server actually sends; apps/web and apps/mobile previously kept
 // drifting copies). Pure types only; the client factory lives in ./rest.
-import type { EventsMode, ReportCategory, UserFeature } from '@trm/shared';
+import type { EventsMode, MapFeatureKey, ReportCategory, UserFeature } from '@trm/shared';
 import type { TicketView } from '@trm/map-data';
 
 export type Theme = 'system' | 'light' | 'dark';
@@ -22,6 +22,9 @@ export interface PublicUser {
   features: UserFeature[];
   /** Whether this account has reached the guided tutorial's finale. */
   tutorialCompleted: boolean;
+  /** Map-feature intros already shown (one-shot per feature). Optional so pre-existing test
+   *  fixtures stay valid; the live server always sends it — read with `?? []`. */
+  seenFeatureIntros?: MapFeatureKey[];
   email?: string;
   avatarUrl?: string;
 }

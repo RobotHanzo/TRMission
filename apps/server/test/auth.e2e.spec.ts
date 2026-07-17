@@ -190,6 +190,45 @@ describe('auth: tutorial completion flag', () => {
   });
 });
 
+describe('auth: seen map-feature intros', () => {
+  it('defaults to empty, records a feature idempotently, and rejects unknown keys', async () => {
+    const reg = await request(server())
+      .post('/api/v1/auth/register')
+      .send({ email: 'intro@example.com', password: 'password123', displayName: 'Intro' })
+      .expect(201);
+    expect(reg.body.user.seenFeatureIntros).toEqual([]);
+    const token = reg.body.accessToken;
+
+    const first = await request(server())
+      .post('/api/v1/auth/me/feature-intros')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ feature: 'brokenRail' })
+      .expect(200);
+    expect(first.body.seenFeatureIntros).toEqual(['brokenRail']);
+
+    // $addToSet: repeating the same feature stays a single entry.
+    const second = await request(server())
+      .post('/api/v1/auth/me/feature-intros')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ feature: 'brokenRail' })
+      .expect(200);
+    expect(second.body.seenFeatureIntros).toEqual(['brokenRail']);
+
+    // Only keys from the shared MAP_FEATURE_KEYS taxonomy are accepted.
+    await request(server())
+      .post('/api/v1/auth/me/feature-intros')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ feature: 'notAFeature' })
+      .expect(400);
+
+    const me = await request(server())
+      .get('/api/v1/auth/me')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+    expect(me.body.seenFeatureIntros).toEqual(['brokenRail']);
+  });
+});
+
 describe('auth: guest → registered upgrade (keeps the same id)', () => {
   it('attaches credentials in place', async () => {
     const guest = await request(server())

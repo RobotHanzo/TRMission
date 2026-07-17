@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { UserFeature } from '@trm/shared';
+import type { MapFeatureKey, UserFeature } from '@trm/shared';
 import {
   api,
   setAccessToken,
@@ -35,6 +35,9 @@ interface SessionState {
   loginWithDiscordExchange(code: string): Promise<void>;
   /** Persist display prefs to a registered account (guests stay AsyncStorage-only). */
   savePreferences(prefs: UserPreferences): Promise<void>;
+  /** Record that a map-feature intro (e.g. broken rail) was shown. Non-fatal on failure — the
+   *  on-device mirror (features/tutorial/featureIntroSeen.ts) still hides it locally. */
+  markFeatureIntroSeen(feature: MapFeatureKey): Promise<void>;
   signOut(): Promise<void>;
   /** Drop the in-memory access token + keystore refresh token (P5 reuses on account deletion). */
   clearLocalSession(): Promise<void>;
@@ -121,6 +124,13 @@ export const useSession = create<SessionState>()((set, get) => {
         set({ user: await api.updatePreferences(prefs) });
       } catch {
         /* non-fatal: the ui store + AsyncStorage already hold the new value */
+      }
+    },
+    async markFeatureIntroSeen(feature) {
+      try {
+        set({ user: await api.markFeatureIntroSeen(feature) });
+      } catch {
+        /* non-fatal: the on-device mirror still remembers */
       }
     },
     async signOut() {

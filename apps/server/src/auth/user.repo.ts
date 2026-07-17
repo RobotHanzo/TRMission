@@ -1,7 +1,7 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
-import type { UserFeature } from '@trm/shared';
+import type { MapFeatureKey, UserFeature } from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
 import { env } from '../config/env';
 import type { Locale, PublicUser, UserPreferences } from './auth.types';
@@ -32,6 +32,9 @@ export interface UserDoc {
   features?: UserFeature[];
   /** Set once the user reaches the guided tutorial's finale (self-reported by the client). */
   tutorialCompleted?: boolean;
+  /** Map-feature intros this account has already been shown (e.g. broken rail) — the one-shot
+   *  coachmark when a game starts on a map with mechanics the default map lacks. */
+  seenFeatureIntros?: MapFeatureKey[];
   /** Client-side mute list: ids whose chat/name this account chooses not to see. Capped. */
   blockedUserIds?: string[];
   /** Client IP of the most recent successful sign-in (see `clientIp` — Cloudflare-aware). */
@@ -48,6 +51,7 @@ export const toPublicUser = (u: UserDoc): PublicUser => ({
   isGuest: u.isGuest,
   features: u.features ?? [],
   tutorialCompleted: u.tutorialCompleted ?? false,
+  seenFeatureIntros: u.seenFeatureIntros ?? [],
   // Merge stored prefs over the defaults so docs written before a field existed still get a
   // complete set; a legacy top-level `locale` is honoured when the prefs blob predates it.
   preferences: {
@@ -287,6 +291,16 @@ export class UserRepo implements OnModuleInit {
     return this.col.findOneAndUpdate(
       { _id: userId },
       { $set: { tutorialCompleted: value } },
+      { returnDocument: 'after' },
+    );
+  }
+
+  /** Record that a map-feature intro was shown — `$addToSet`, so repeats are naturally
+   *  idempotent. Available to guests too (same posture as `setTutorialCompleted`). */
+  addSeenFeatureIntro(userId: string, feature: MapFeatureKey): Promise<UserDoc | null> {
+    return this.col.findOneAndUpdate(
+      { _id: userId },
+      { $addToSet: { seenFeatureIntros: feature } },
       { returnDocument: 'after' },
     );
   }
