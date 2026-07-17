@@ -28,6 +28,8 @@ export interface SceneRoute {
   readonly length: number;
   readonly isTunnel?: boolean | undefined;
   readonly ferryLocos?: number | undefined;
+  /** >0 ⇒ broken rail (斷軌): unclaimable until repaired (see `repairedRoutes`). */
+  readonly brokenCarriages?: number | undefined;
 }
 
 /** A route's claim state (from the snapshot): owned by a seat, or locked (double sibling). */
@@ -75,6 +77,9 @@ export interface MapSceneProps<C extends SceneCity, R extends SceneRoute> {
   /** Draw the required-loco rainbow pips on unclaimed ferries (default true; the login
    *  backdrop turns them off to keep its quiet all-pips look). */
   showFerryLocos?: boolean | undefined;
+  /** Broken-rail routes that have been repaired (from the snapshot): they render as normal
+   *  track again. Omitted (the builder / backdrop) ⇒ every broken route shows its break. */
+  repairedRoutes?: ReadonlySet<string> | undefined;
 
   /* ── labels + per-surface class hooks ── */
   /** City label text; omitted → no labels at all. */
@@ -142,6 +147,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
   canBuildStation,
   colorBlind,
   showFerryLocos,
+  repairedRoutes,
   cityLabel,
   cityTier,
   routeTitle,
@@ -203,6 +209,10 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         const carOpacity = o?.locked ? 0.45 : 1;
         const isFerry = (r.ferryLocos ?? 0) > 0;
         const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
+        // A broken rail shows its break until the snapshot reports it repaired (or it is owned,
+        // which can only happen after a repair anyway).
+        const brokenNow =
+          (r.brokenCarriages ?? 0) > 0 && !o && !(repairedRoutes?.has(r.id) ?? false);
         const glowSeat = glowingRoutes?.get(r.id);
         const routeHook = routeClass?.(r);
         const extra = routeHook ? ` ${routeHook}` : '';
@@ -212,6 +222,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
           (o ? ' owned' : '') +
           (glowSeat !== undefined ? ' just-claimed' : '') +
           kind +
+          (brokenNow ? ' broken' : '') +
           extra;
         // The owner's seat colour, exposed to CSS so a claimed route tints its whole roadbed
         // (the "background") to its owner — and the glow bloom reuses the same `--seat`.
@@ -252,6 +263,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
               length={r.length}
               fill={fill}
               carOpacity={carOpacity}
+              brokenCarriages={brokenNow ? (r.brokenCarriages ?? 0) : 0}
             />
 
             {(claimable || alwaysHitRoutes) && (

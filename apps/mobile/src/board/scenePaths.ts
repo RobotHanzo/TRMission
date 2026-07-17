@@ -25,6 +25,8 @@ export interface RouteRenderModel {
   readonly isFerry: boolean;
   /** Count of required-wild locomotive pips (0 for a non-ferry). */
   readonly ferryLocos: number;
+  /** >0 ⇒ broken rail (斷軌): that many centred car slots render damaged until repaired. */
+  readonly brokenCarriages: number;
 }
 
 export function buildRouteRenderModel(
@@ -50,6 +52,7 @@ export function buildRouteRenderModel(
       isTunnel: !!r.isTunnel,
       isFerry: ferryLocos > 0,
       ferryLocos,
+      brokenCarriages: r.brokenCarriages ?? 0,
     });
   }
   return out;

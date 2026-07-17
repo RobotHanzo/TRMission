@@ -83,6 +83,30 @@ describe('Taiwan map content', () => {
     }
   });
 
+  it('accepts a valid broken rail and rejects invalid brokenCarriages', () => {
+    const withBroken = {
+      ...TAIWAN_CONTENT,
+      routes: TAIWAN_CONTENT.routes.map((r) => (r.length >= 3 ? { ...r, brokenCarriages: 2 } : r)),
+    };
+    expect(validateContent(withBroken).ok).toBe(true);
+
+    const notALength = {
+      ...TAIWAN_CONTENT,
+      routes: TAIWAN_CONTENT.routes.map((r, i) => (i === 0 ? { ...r, brokenCarriages: 5 } : r)),
+    };
+    const r1 = validateContent(notALength);
+    expect(r1.ok).toBe(false);
+    expect(r1.issues.some((i) => i.code === 'brokenCarriagesInvalid')).toBe(true);
+
+    const tooLong = {
+      ...TAIWAN_CONTENT,
+      routes: TAIWAN_CONTENT.routes.map((r) => (r.length < 8 ? { ...r, brokenCarriages: 8 } : r)),
+    };
+    const r2 = validateContent(tooLong);
+    expect(r2.ok).toBe(false);
+    expect(r2.issues.some((i) => i.code === 'brokenCarriagesExceedLength')).toBe(true);
+  });
+
   it('catches a broken graph (disconnected city)', () => {
     const broken = {
       ...TAIWAN_CONTENT,

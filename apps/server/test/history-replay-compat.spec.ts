@@ -37,7 +37,7 @@ describe('history: replay-compat engine-version allowlist (plan risk R1)', () =>
     expect(byId.get('g-v8')?.replayable).toBe(false);
   });
 
-  it('allowlists v9 plus the additive v10 END_GAME grammar', () => {
-    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toEqual([9, 10]);
+  it('allowlists v9 plus the additive v10 END_GAME grammar and content-gated v11 broken rails', () => {
+    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toEqual([9, 10, 11]);
   });
 });

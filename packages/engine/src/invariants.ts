@@ -78,6 +78,30 @@ export function checkInvariants(board: Board, state: GameState): string[] {
     cities.add(s.cityId as string);
   }
 
+  // 4b. Broken-rail repairs: every record points at an authored broken route, is credited to a
+  //     real player, and its exclusivity countdown stays within [0, players + 1].
+  if (state.brokenRails) {
+    const seatIds = new Set(state.turnOrder.map((id) => id as string));
+    for (const [routeId, repair] of Object.entries(state.brokenRails)) {
+      const r = board.routeById.get(routeId);
+      if (!r || (r.brokenCarriages ?? 0) <= 0) {
+        problems.push(`broken-rail repair for a non-broken route: ${routeId}`);
+      }
+      if (!seatIds.has(repair.by as string)) {
+        problems.push(`broken-rail repair by unknown player: ${routeId} → ${repair.by as string}`);
+      }
+      if (
+        !Number.isInteger(repair.exclusiveTurnEnds) ||
+        repair.exclusiveTurnEnds < 0 ||
+        repair.exclusiveTurnEnds > state.turnOrder.length + 1
+      ) {
+        problems.push(
+          `broken-rail exclusivity out of range: ${routeId} = ${repair.exclusiveTurnEnds}`,
+        );
+      }
+    }
+  }
+
   // 5. Random-events structural invariants (only when the feature is on). Route closure is a claim
   //    gate (see reduce.ts), not a stored flag, so there is nothing route-level to reconcile here;
   //    a reopen-bonus route is always still unclaimed (consumed by the claim that awards it).

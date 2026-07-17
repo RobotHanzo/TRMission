@@ -67,6 +67,12 @@ export function LogPanel() {
           route: routeName(String(e.data.routeId)),
           points: e.data.points,
         });
+      case 'brokenRailRepaired':
+        return t('log.brokenRailRepaired', {
+          name,
+          route: routeName(String(e.data.routeId)),
+          points: e.data.points,
+        });
       case 'stationBuilt':
         return t('log.stationBuilt', { name, city: cityName(String(e.data.cityId), locale) });
       case 'tunnelRevealed':

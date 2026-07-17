@@ -1,6 +1,6 @@
 import type { PlayerId } from '@trm/shared';
 import type { Board } from './board';
-import type { GameState } from './types/state';
+import type { BrokenRailRepair, GameState } from './types/state';
 import type { GameEvent } from './types/events';
 import { computeFinalScores } from './scoring';
 import { offerTickets, allKeptTicketsCompleted } from './tickets';
@@ -22,8 +22,31 @@ export interface TurnOutcome {
  * all-PASS termination rule (A15), then either end the game (computing final scores) or advance
  * to the next player. The turn's own effects must already be applied to `state`.
  */
-export function endTurn(board: Board, state: GameState, opts: { wasPass: boolean }): TurnOutcome {
+/**
+ * Broken-rail exclusivity tick: each completed turn (including the repair turn itself) counts one
+ * step of every repairer's exclusive-claim window down toward 0 (open to everyone). No-op — and
+ * referentially identical — when no window is running, so pre-broken-rail digests are untouched.
+ */
+function tickBrokenRailExclusivity(state: GameState): GameState {
+  const rails = state.brokenRails;
+  if (!rails || !Object.values(rails).some((r) => r.exclusiveTurnEnds > 0)) return state;
+  const ticked: Record<string, BrokenRailRepair> = {};
+  for (const [rid, repair] of Object.entries(rails)) {
+    ticked[rid] =
+      repair.exclusiveTurnEnds > 0
+        ? { ...repair, exclusiveTurnEnds: repair.exclusiveTurnEnds - 1 }
+        : repair;
+  }
+  return { ...state, brokenRails: ticked };
+}
+
+export function endTurn(
+  board: Board,
+  initialState: GameState,
+  opts: { wasPass: boolean },
+): TurnOutcome {
   const events: GameEvent[] = [];
+  const state = tickBrokenRailExclusivity(initialState);
   const n = state.turnOrder.length;
   const curIdx = state.turn.orderIndex;
   const curPlayer = state.turnOrder[curIdx] as PlayerId;

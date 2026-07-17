@@ -28,6 +28,7 @@ function contentFromDto(dto: MapContentDto): GameContent {
       isTunnel: r.isTunnel,
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
       ...(r.bow !== undefined ? { bow: r.bow } : {}),
+      ...(r.brokenCarriages !== undefined ? { brokenCarriages: r.brokenCarriages } : {}),
     })),
     tickets: dto.tickets.map((t) => ({
       ...t,

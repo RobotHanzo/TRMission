@@ -146,6 +146,12 @@ export function viewToSnapshot(
     },
     // Random-events projection (unset when the feature is off — `view.events` is absent).
     randomEvents: view.events === undefined ? undefined : randomEventsToPb(view.events),
+    // Broken-rail repair records (public; empty until the first repair happens).
+    brokenRails: Object.entries(view.brokenRails ?? {}).map(([routeId, repair]) => ({
+      routeId,
+      repairedByPlayerId: repair.by as string,
+      exclusiveTurnEnds: repair.exclusiveTurnEnds,
+    })),
     you:
       self === undefined || self.hand === null
         ? undefined

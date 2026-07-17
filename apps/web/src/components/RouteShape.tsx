@@ -34,6 +34,9 @@ export interface RouteShapeProps {
   fill: string;
   /** Dimming for a locked (unclaimable double sibling) route. */
   carOpacity?: number;
+  /** >0 ⇒ this broken rail is still unrepaired: a centred block of that many car slots renders
+   *  as damaged (`.slot.broken-car`) with a crack bolt across the middle. Pass 0 once repaired. */
+  brokenCarriages?: number;
 }
 
 /**
@@ -48,9 +51,14 @@ export function RouteShape({
   length,
   fill,
   carOpacity = 1,
+  brokenCarriages = 0,
 }: RouteShapeProps) {
   // The `ferryLocos` pips that stand for the required wild cards are a centred block of the chain.
   const locoStart = Math.max(0, Math.floor((length - ferryLocos) / 2));
+  // A broken rail's damaged carriages are a centred block too (same placement rule as ferry locos).
+  const brokenStart = Math.max(0, Math.floor((length - brokenCarriages) / 2));
+  const isBrokenSlot = (i: number): boolean =>
+    brokenCarriages > 0 && i >= brokenStart && i < brokenStart + brokenCarriages;
   return (
     <>
       {/* Tunnel: a wide faint-grey stroke on the railway path covers the tie extent. */}
@@ -104,7 +112,7 @@ export function RouteShape({
         g.slots.map((s, i) => (
           <rect
             key={i}
-            className="slot"
+            className={isBrokenSlot(i) ? 'slot broken-car' : 'slot'}
             x={-s.len / 2}
             width={s.len}
             fill={fill}
@@ -112,6 +120,15 @@ export function RouteShape({
             transform={`translate(${s.x.toFixed(2)} ${s.y.toFixed(2)}) rotate(${s.angle.toFixed(1)})`}
           />
         ))
+      )}
+      {/* The severed-track bolt across the route middle — the at-a-glance "斷軌" cue. */}
+      {brokenCarriages > 0 && (
+        <g
+          className="break-mark"
+          transform={`translate(${g.mid.x.toFixed(2)} ${g.mid.y.toFixed(2)})`}
+        >
+          <path d="M -1.7 -0.4 L -0.5 -0.75 L -0.05 0.05 L 1.1 -0.55 L 1.7 0.4 L 0.45 0.7 L 0 -0.05 L -1.15 0.55 Z" />
+        </g>
       )}
     </>
   );

@@ -12,7 +12,11 @@ import type { GameEvent } from './types/events';
 import { refillMarket } from './deck';
 import { emptyHand, totalCards } from './hand';
 import type { CardCounts } from './hand';
-import { validateRoutePayment, validateStationPayment } from './payments';
+import {
+  validateRoutePayment,
+  validateStationPayment,
+  validateBrokenRailPayment,
+} from './payments';
 import { currentPlayerId, endTurn } from './turn';
 import { offerTickets, allKeptTicketsCompleted } from './tickets';
 import { getPlayer, withPlayer, spendCards, addCardToHand, setOwnership } from './reducers/common';
@@ -442,6 +446,19 @@ function claimPreconditions(
   }
   if (isRouteClosed(state, routeId))
     return err(violation('ROUTE_CLOSED_BY_EVENT', 'route closed by a typhoon landfall'));
+  if ((route.brokenCarriages ?? 0) > 0) {
+    const repair = state.brokenRails?.[routeId as string];
+    if (!repair) {
+      return err(
+        violation('ROUTE_BROKEN', 'broken rail must be repaired before it can be claimed'),
+      );
+    }
+    if (repair.exclusiveTurnEnds > 0 && repair.by !== player) {
+      return err(
+        violation('ROUTE_REPAIR_EXCLUSIVE', 'the repairer holds exclusive claim rights this round'),
+      );
+    }
+  }
   for (const other of groupMembersOf(board, routeId)) {
     const oc = state.ownership[other as string];
     if (oc && 'owner' in oc && oc.owner === player) {
@@ -1096,6 +1113,18 @@ function applyRepairRoute(
       active.routeIds?.includes(routeId) &&
       !ev.repairedRouteIds.includes(routeId),
   );
+  // A REPAIR_ROUTE on a broken rail (斷軌) is the permanent-route-type repair — unless the route is
+  // simultaneously an open slope-repair target, in which case the event repair keeps its historical
+  // meaning (the break can then be repaired on a later turn).
+  const route = getRoute(board, routeId);
+  if (
+    route &&
+    (route.brokenCarriages ?? 0) > 0 &&
+    !state.brokenRails?.[routeId as string] &&
+    !repairable
+  ) {
+    return applyBrokenRailRepair(board, state, player, route, payment);
+  }
   if (!ev || !repairable || state.ownership[routeId as string]) {
     return err(violation('EVENT_REPAIR_UNAVAILABLE', 'route is not open for event repair'));
   }
@@ -1144,6 +1173,66 @@ function applyRepairRoute(
         player,
         points: 3,
         routeId,
+        visibility: 'PUBLIC',
+      },
+      ...out.events,
+    ],
+  });
+}
+
+/**
+ * Repair a broken rail (斷軌): a full-turn action paying `brokenCarriages` cards of the route's
+ * colour (gray: any single colour; locomotives wild). The repairer banks
+ * `routePoints[brokenCarriages]` — as if they had built a route of that length — but places no
+ * trains; the route itself stays open and becomes claimable, exclusively by the repairer until
+ * their next turn ends, then by everyone.
+ */
+function applyBrokenRailRepair(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  route: RouteDef,
+  payment: Payment,
+): ReduceResult {
+  const routeId = route.id;
+  const cell = state.ownership[routeId as string];
+  if (cell) {
+    if ('locked' in cell) return err(violation('ROUTE_LOCKED', 'route is locked'));
+    return err(violation('ROUTE_TAKEN', 'route already claimed'));
+  }
+  if (isRouteClosed(state, routeId))
+    return err(violation('ROUTE_CLOSED_BY_EVENT', 'route closed by a typhoon landfall'));
+  if (payment.bentoSpend || payment.useClaimDiscount) {
+    return err(
+      violation('EVENT_REPAIR_PAYMENT_INVALID', 'claim resources cannot modify a repair payment'),
+    );
+  }
+  const p = getPlayer(state, player);
+  if (!p) return err(violation('NOT_YOUR_TURN', 'unknown player'));
+  const validated = validateBrokenRailPayment(route, payment, p);
+  if (!validated.ok) return err(validated.error);
+
+  const carriages = route.brokenCarriages ?? 0;
+  const points = state.ruleParams.routePoints[carriages] ?? 0;
+  let next = spendCards(state, player, validated.value.spent);
+  next = withPlayer(next, player, (pl) => ({ ...pl, routePoints: pl.routePoints + points }));
+  next = {
+    ...next,
+    brokenRails: {
+      ...(next.brokenRails ?? {}),
+      [routeId as string]: { by: player, exclusiveTurnEnds: next.turnOrder.length + 1 },
+    },
+  };
+  const out = endTurn(board, next, { wasPass: false });
+  return ok({
+    state: out.state,
+    events: [
+      {
+        e: 'BROKEN_RAIL_REPAIRED',
+        player,
+        routeId,
+        carriages,
+        pointsAwarded: points,
         visibility: 'PUBLIC',
       },
       ...out.events,

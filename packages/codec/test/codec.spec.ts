@@ -538,6 +538,60 @@ describe('@trm/codec eventToProto — random events (M4)', () => {
   });
 });
 
+describe('@trm/codec — broken rail (斷軌)', () => {
+  it('carries brokenRails repair records through wire bytes', () => {
+    const board = taiwanBoard();
+    const state = initGame(board, config);
+    const routeId = board.content.routes[0]!.id;
+    const withRepair: GameState = {
+      ...state,
+      brokenRails: { [routeId as string]: { by: p1, exclusiveTurnEnds: 2 } },
+    };
+    const snap = viewToSnapshot(redactFor(board, withRepair, p2), 7, p2);
+    const decoded = fromBinary(GameSnapshotSchema, toBinary(GameSnapshotSchema, snap));
+    expect(decoded.brokenRails).toHaveLength(1);
+    expect(decoded.brokenRails[0]).toMatchObject({
+      routeId: routeId as string,
+      repairedByPlayerId: 'p1',
+      exclusiveTurnEnds: 2,
+    });
+  });
+
+  it('leaves brokenRails empty when no repair has happened', () => {
+    const board = taiwanBoard();
+    const state = initGame(board, config);
+    const snap = viewToSnapshot(redactFor(board, state, p1), 0, p1);
+    expect(snap.brokenRails).toEqual([]);
+  });
+
+  it('round-trips BROKEN_RAIL_REPAIRED as a public event', () => {
+    const ev: GameEvent = {
+      e: 'BROKEN_RAIL_REPAIRED',
+      player: p1,
+      routeId: asRouteId('R7'),
+      carriages: 3,
+      pointsAwarded: 4,
+      visibility: 'PUBLIC',
+    };
+    const forOther = eventToProto(ev, p2);
+    expect(forOther).not.toBeNull();
+    const decoded = fromBinary(GameEventSchema, toBinary(GameEventSchema, forOther!));
+    expect(decoded.event.case).toBe('brokenRailRepaired');
+    if (decoded.event.case !== 'brokenRailRepaired') throw new Error('unreachable');
+    expect(decoded.event.value).toMatchObject({
+      playerId: 'p1',
+      routeId: 'R7',
+      carriages: 3,
+      pointsAwarded: 4,
+    });
+  });
+
+  it('maps the broken-rail rejections to their stable wire codes', () => {
+    expect(rejectionToPb('ROUTE_BROKEN')).toBe(137);
+    expect(rejectionToPb('ROUTE_REPAIR_EXCLUSIVE')).toBe(138);
+  });
+});
+
 describe('@trm/codec rejectionToPb — random-events rule violations (M1/M4)', () => {
   it('maps ROUTE_CLOSED_BY_EVENT / EVENT_CLAIMS_SUSPENDED / EVENT_STATIONS_SUSPENDED to 126/127/128', () => {
     expect(rejectionToPb('ROUTE_CLOSED_BY_EVENT')).toBe(RejectionCode.ROUTE_CLOSED_BY_EVENT);

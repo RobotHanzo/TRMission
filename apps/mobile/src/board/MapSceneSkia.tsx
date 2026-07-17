@@ -60,6 +60,8 @@ export interface SceneRoute {
   readonly length: number;
   readonly isTunnel?: boolean | undefined;
   readonly ferryLocos?: number | undefined;
+  /** >0 ⇒ broken rail (斷軌): unclaimable until repaired (see `repairedRoutes`). */
+  readonly brokenCarriages?: number | undefined;
 }
 /** A route's claim state (from the snapshot): owned by a seat, or locked (double sibling). */
 export interface RouteOwnership {
@@ -86,6 +88,9 @@ export interface MapSceneSkiaProps {
   highlightCities?: ReadonlySet<string> | undefined;
   colorBlind?: boolean | undefined;
   showFerryLocos?: boolean | undefined;
+  /** Broken-rail routes that have been repaired (from the snapshot): they render as normal
+   *  track again. Omitted (the tutorial specimens) ⇒ every broken route shows its break. */
+  repairedRoutes?: ReadonlySet<string> | undefined;
 
   /* ── labels ── */
   cityLabel?: ((city: SceneCity) => string) | undefined;
@@ -128,6 +133,7 @@ interface MapSceneStaticProps {
   highlightCities?: ReadonlySet<string> | undefined;
   colorBlind?: boolean | undefined;
   showFerryLocos?: boolean | undefined;
+  repairedRoutes?: ReadonlySet<string> | undefined;
   cityLabel?: ((city: SceneCity) => string) | undefined;
   cityTier?: ((cityId: string) => string) | undefined;
   bucket: ZoomBucket;
@@ -146,6 +152,7 @@ function MapSceneStatic({
   highlightCities,
   colorBlind,
   showFerryLocos,
+  repairedRoutes,
   cityLabel,
   cityTier,
   bucket,
@@ -160,6 +167,7 @@ function MapSceneStatic({
         owned={owned}
         colorBlind={colorBlind}
         showFerryLocos={showFerryLocos}
+        repairedRoutes={repairedRoutes}
         inv={inv}
       />
       <CityLayer
@@ -195,6 +203,7 @@ export function MapSceneSkia({
   highlightCities,
   colorBlind,
   showFerryLocos,
+  repairedRoutes,
   cityLabel,
   cityTier,
   bucket,
@@ -224,6 +233,7 @@ export function MapSceneSkia({
         highlightCities={highlightCities}
         colorBlind={colorBlind}
         showFerryLocos={showFerryLocos}
+        repairedRoutes={repairedRoutes}
         cityLabel={cityLabel}
         cityTier={cityTier}
         bucket={bucket}
@@ -242,6 +252,7 @@ export function MapSceneSkia({
       highlightCities,
       colorBlind,
       showFerryLocos,
+      repairedRoutes,
       cityLabel,
       cityTier,
       bucket,

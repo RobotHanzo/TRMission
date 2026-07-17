@@ -544,6 +544,27 @@
   stroke: var(--m-ferry-loco-edge);
   stroke-width: calc(var(--m-ferry-loco-stroke-w) * 1px * var(--inv-scale));
 }
+/* ── Broken rail (斷軌) ──────────────────────────────────────────────────────── */
+/* Damaged carriages: hollowed-out slots with a hazard dash, so the centred broken block reads
+   as missing track against the intact cars. The block disappears once the route is repaired
+   (the renderer stops marking the slots). */
+.route.broken .slot.broken-car {
+  fill-opacity: 0.16;
+  stroke: var(--m-car-edge);
+  stroke-dasharray: calc(0.9px * var(--inv-scale)) calc(0.7px * var(--inv-scale));
+}
+/* The severed-track bolt at the route middle — drawn in board units, counter-scaled so it keeps
+   a constant on-screen size like the glyph badge. */
+/* The path's coordinates are authored centred on (0,0) (its group carries the translate to the
+   route middle), so scaling about the local origin counter-scales it in place. */
+.break-mark path {
+  fill: #c5221f;
+  stroke: var(--tr-surface);
+  stroke-width: 0.28px;
+  stroke-linejoin: round;
+  transform: scale(var(--inv-scale));
+}
+
 .hit {
   fill: none;
   stroke: transparent;

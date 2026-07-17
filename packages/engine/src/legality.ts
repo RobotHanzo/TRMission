@@ -68,6 +68,11 @@ export function canClaimAnyRoute(board: Board, state: GameState, player: PlayerI
   for (const route of board.content.routes) {
     if (state.ownership[route.id as string]) continue;
     if (closed.has(route.id as string)) continue;
+    if ((route.brokenCarriages ?? 0) > 0) {
+      const repair = state.brokenRails?.[route.id as string];
+      if (!repair) continue;
+      if (repair.exclusiveTurnEnds > 0 && repair.by !== player) continue;
+    }
     const ownsGroupMember = groupMembersOf(board, route.id).some((other) => {
       const sc = state.ownership[other as string];
       return sc && 'owner' in sc && sc.owner === player;
@@ -136,6 +141,23 @@ export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId
     (resources.repairPermits > 0 || canAffordCount(p.hand, 2))
   )
     return true;
+  // Broken-rail repair is a main action whenever an unrepaired broken route's cards can be paid
+  // (mirror of applyBrokenRailRepair: unowned, not event-closed, not an open slope-repair target —
+  // that case keeps the event meaning of REPAIR_ROUTE and is covered by the slope branch above).
+  {
+    const closed = closedRouteIds(state);
+    for (const route of board.content.routes) {
+      const carriages = route.brokenCarriages ?? 0;
+      if (carriages <= 0) continue;
+      const rid = route.id as string;
+      if (state.brokenRails?.[rid] || state.ownership[rid] || closed.has(rid)) continue;
+      const canAfford =
+        route.color === 'GRAY'
+          ? TRAIN_COLORS.some((c) => p.hand[c] + p.hand.LOCOMOTIVE >= carriages)
+          : p.hand[route.color] + p.hand.LOCOMOTIVE >= carriages;
+      if (canAfford) return true;
+    }
+  }
   // A free night-market swap can change the hand before the main action, so it is itself a legal
   // non-pass continuation. Once used, the normal main-action checks below decide whether PASS is
   // required.

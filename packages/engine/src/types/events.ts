@@ -66,6 +66,15 @@ export type GameEvent =
     }
   | { readonly e: 'DOUBLE_ROUTE_LOCKED'; readonly routeId: RouteId; readonly visibility: 'PUBLIC' }
   | {
+      readonly e: 'BROKEN_RAIL_REPAIRED';
+      readonly player: PlayerId;
+      readonly routeId: RouteId;
+      /** The authored brokenCarriages count that was paid for. */
+      readonly carriages: number;
+      readonly pointsAwarded: number;
+      readonly visibility: 'PUBLIC';
+    }
+  | {
       readonly e: 'TUNNEL_REVEALED';
       readonly player: PlayerId;
       readonly routeId: RouteId;

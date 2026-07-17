@@ -193,6 +193,8 @@ export interface RouteDraft {
   isTunnel: boolean;
   /** Signed curve-apex deviation override (board units); absent = automatic bow. */
   bow?: number;
+  /** >0 ⇒ broken rail (斷軌): must be repaired (this many matching cards) before claiming. */
+  brokenCarriages?: number;
 }
 export interface TicketDraft {
   id: string;

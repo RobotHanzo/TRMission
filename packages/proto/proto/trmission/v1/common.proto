@@ -95,6 +95,8 @@ enum RejectionCode {
   REJECTION_CODE_EVENT_DRAFT_CHOICE_INVALID = 134;
   REJECTION_CODE_EVENT_HIVE_UNAVAILABLE = 135;
   REJECTION_CODE_EVENT_RESOURCE_UNAVAILABLE = 136;
+  REJECTION_CODE_ROUTE_BROKEN = 137;
+  REJECTION_CODE_ROUTE_REPAIR_EXCLUSIVE = 138;
 }
 
 // Optional event resource spent alongside a route payment.
@@ -161,6 +163,15 @@ message RouteOwnership {
 message StationPlacement {
   string player_id = 1;
   string city_id = 2;
+}
+
+// Repair record for a broken-rail route (authored with brokenCarriages > 0). A broken route
+// absent from the snapshot's broken_rails list is still unrepaired (unclaimable). While
+// `exclusive_turn_ends > 0` only the repairer may claim the route.
+message BrokenRailRepair {
+  string route_id = 1;
+  string repaired_by_player_id = 2;
+  uint32 exclusive_turn_ends = 3;
 }
 
 // A destination ticket revealed because its owner has COMPLETED it (their own
@@ -394,4 +405,7 @@ message GameSnapshot {
 
   // Random-events projection (unset when the feature is off).
   RandomEventsState random_events = 22;
+
+  // Broken-rail repair records (empty until the first repair happens).
+  repeated BrokenRailRepair broken_rails = 23;
 }

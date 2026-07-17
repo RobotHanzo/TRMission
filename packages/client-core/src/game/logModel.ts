@@ -7,6 +7,7 @@ export type LogKind =
   | 'gameStarted'
   | 'turnStarted'
   | 'routeClaimed'
+  | 'brokenRailRepaired'
   | 'stationBuilt'
   | 'tunnelRevealed'
   | 'tunnelCommitted'
@@ -80,6 +81,18 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
           kind: 'routeClaimed',
           playerId: ev.value.playerId,
           data: { routeId: ev.value.routeId, points: ev.value.pointsAwarded },
+          importance: 'highlight',
+        });
+        break;
+      case 'brokenRailRepaired':
+        out.push({
+          kind: 'brokenRailRepaired',
+          playerId: ev.value.playerId,
+          data: {
+            routeId: ev.value.routeId,
+            carriages: ev.value.carriages,
+            points: ev.value.pointsAwarded,
+          },
           importance: 'highlight',
         });
         break;

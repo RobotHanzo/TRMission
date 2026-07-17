@@ -87,6 +87,48 @@ export function validateRoutePayment(
   return ok({ playedColor, spent });
 }
 
+/**
+ * Validate a payment to repair a broken rail: exactly `route.brokenCarriages` cards of the route's
+ * colour (gray: any single colour), locomotives wild. No ferry-locomotive floor and no train-car
+ * requirement — repairing spends cards only; the repairer places no trains.
+ */
+export function validateBrokenRailPayment(
+  route: RouteDef,
+  payment: Payment,
+  player: PlayerState,
+): Result<PaymentPlan, RuleViolation> {
+  const { color, colorCount, locomotives } = payment;
+  const requiredCards = route.brokenCarriages ?? 0;
+  if (colorCount < 0 || locomotives < 0) {
+    return err(violation('BAD_PAYMENT_LENGTH', 'negative card counts'));
+  }
+  if (colorCount + locomotives !== requiredCards) {
+    return err(
+      violation(
+        'BAD_PAYMENT_LENGTH',
+        `payment ${colorCount}+${locomotives} != broken carriages ${requiredCards}`,
+        { length: requiredCards },
+      ),
+    );
+  }
+  if (colorCount > 0 && color === null) {
+    return err(violation('BAD_PAYMENT_COLOR', 'colored cards require a colour'));
+  }
+  if (route.color !== 'GRAY' && colorCount > 0 && color !== route.color) {
+    return err(
+      violation('BAD_PAYMENT_COLOR', `route needs ${route.color}, got ${color}`, {
+        needed: route.color,
+      }),
+    );
+  }
+  const playedColor = colorCount > 0 ? color : null;
+  const spent = spentFrom(playedColor, colorCount, locomotives);
+  if (!handHas(player, spent)) {
+    return err(violation('INSUFFICIENT_CARDS', 'not enough cards in hand'));
+  }
+  return ok({ playedColor, spent });
+}
+
 /** Validate a payment to build a station costing `cost` cards of one colour (locos wild). */
 export function validateStationPayment(
   cost: number,

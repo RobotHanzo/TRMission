@@ -69,6 +69,13 @@ message DoubleRouteLocked {
   string route_id = 1;
 }
 
+message BrokenRailRepaired {
+  string player_id = 1;
+  string route_id = 2;
+  uint32 carriages = 3;
+  uint32 points_awarded = 4;
+}
+
 message TunnelRevealed {
   string player_id = 1;
   string route_id = 2;
@@ -221,6 +228,7 @@ message GameEvent {
     EventPerkChosen event_perk_chosen = 28;
     EventHiveCardRevealed event_hive_card_revealed = 29;
     EventHiveResolved event_hive_resolved = 30;
+    BrokenRailRepaired broken_rail_repaired = 31;
   }
 }
 

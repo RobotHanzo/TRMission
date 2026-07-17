@@ -53,6 +53,10 @@ export function formatIssue(issue: ValidationIssue): string {
       return `${p.routeId}: route cannot be both ferry and tunnel`;
     case 'bowOutOfRange':
       return `${p.routeId}: bow ${p.bow} is outside the allowed range [-${p.limit}, ${p.limit}]`;
+    case 'brokenCarriagesInvalid':
+      return `${p.routeId}: brokenCarriages ${p.brokenCarriages} must be one of 1,2,3,4,6,8`;
+    case 'brokenCarriagesExceedLength':
+      return `${p.routeId}: brokenCarriages ${p.brokenCarriages} exceeds length ${p.length}`;
     case 'doubleGroupInvalidSize':
       return `parallel group ${p.group}: expected 2 or 3 routes, got ${p.count}`;
     case 'tooManyParallelRoutes':
@@ -205,6 +209,19 @@ export function validateContent(content: GameContent): ValidationResult {
 
     if (r.bow !== undefined && (!Number.isFinite(r.bow) || Math.abs(r.bow) > BOW_LIMIT)) {
       push('bowOutOfRange', { routeId: rid, bow: r.bow, limit: BOW_LIMIT });
+    }
+
+    if (r.brokenCarriages !== undefined && r.brokenCarriages !== 0) {
+      // Must be a scorable route length — repair points come from the routePoints table.
+      if (!(ROUTE_LENGTHS as readonly number[]).includes(r.brokenCarriages)) {
+        push('brokenCarriagesInvalid', { routeId: rid, brokenCarriages: r.brokenCarriages });
+      } else if (r.brokenCarriages > r.length) {
+        push('brokenCarriagesExceedLength', {
+          routeId: rid,
+          brokenCarriages: r.brokenCarriages,
+          length: r.length,
+        });
+      }
     }
 
     colorBalance[r.color] = (colorBalance[r.color] ?? 0) + 1;

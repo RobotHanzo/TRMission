@@ -8,7 +8,14 @@ import type {
   Hand,
   EventsMode,
 } from '@trm/shared';
-import type { Phase, OwnerCell, StationPlacement, Endgame, PlayerFinal } from './state';
+import type {
+  Phase,
+  OwnerCell,
+  BrokenRailRepair,
+  StationPlacement,
+  Endgame,
+  PlayerFinal,
+} from './state';
 import type {
   ActiveEvent,
   CharterContract,
@@ -76,6 +83,8 @@ export interface RedactedView {
   readonly ticketDeckShortCount: number;
 
   readonly ownership: Readonly<Record<string, OwnerCell>>;
+  /** Broken-rail repair records (public). Absent until the first repair happens. */
+  readonly brokenRails?: Readonly<Record<string, BrokenRailRepair>>;
   readonly stations: readonly StationPlacement[];
   readonly endgame: Endgame;
 

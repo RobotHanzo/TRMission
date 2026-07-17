@@ -30,6 +30,14 @@ export interface RouteDef {
   readonly ferryLocos: number;
   readonly isTunnel: boolean;
   /**
+   * >0 ⇒ broken rail (斷軌): the route cannot be claimed until a player spends a turn repairing
+   * it — paying this many cards of the route's colour (gray: any one colour; locomotives wild)
+   * and scoring as if they had built a route of this length. Must be a valid route length
+   * (1,2,3,4,6,8) and ≤ `length`. Optional so pre-existing content hashes identically
+   * (`stableStringify` drops absent keys); absent reads as 0 (a normal route).
+   */
+  readonly brokenCarriages?: number;
+  /**
    * Signed curve-apex deviation from the straight chord (board units, along the chord's unit
    * normal (-dy, dx)/len for a→b). Absent ⇒ the automatic bow (arc away from intruding cities).
    * Authored by the map builder's Curves stage; render-only — the engine ignores it.

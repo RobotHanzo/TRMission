@@ -3,9 +3,10 @@ import { SCHEMA_VERSION } from '@trm/engine';
 import { isReplayVersionCompatible } from './compatibility';
 
 describe('replay version compatibility', () => {
-  it('accepts engine 9 and engine 10 with the current schema', () => {
+  it('accepts engine 9 through engine 11 with the current schema', () => {
     expect(isReplayVersionCompatible(9, SCHEMA_VERSION)).toBe(true);
     expect(isReplayVersionCompatible(10, SCHEMA_VERSION)).toBe(true);
+    expect(isReplayVersionCompatible(11, SCHEMA_VERSION)).toBe(true);
   });
 
   it('still requires an exact schema version', () => {
@@ -15,6 +16,6 @@ describe('replay version compatibility', () => {
 
   it('rejects engine versions outside the supported replay window', () => {
     expect(isReplayVersionCompatible(8, SCHEMA_VERSION)).toBe(false);
-    expect(isReplayVersionCompatible(11, SCHEMA_VERSION)).toBe(false);
+    expect(isReplayVersionCompatible(12, SCHEMA_VERSION)).toBe(false);
   });
 });

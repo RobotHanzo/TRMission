@@ -42,7 +42,9 @@ export type RuleViolationCode =
   | 'EVENT_LANTERN_RELOCATION_INVALID'
   | 'EVENT_DRAFT_CHOICE_INVALID'
   | 'EVENT_HIVE_UNAVAILABLE'
-  | 'EVENT_RESOURCE_UNAVAILABLE';
+  | 'EVENT_RESOURCE_UNAVAILABLE'
+  | 'ROUTE_BROKEN'
+  | 'ROUTE_REPAIR_EXCLUSIVE';
 
 export interface RuleViolation {
   readonly code: RuleViolationCode;
@@ -96,6 +98,8 @@ export const ERROR_CATALOG: Readonly<Record<RuleViolationCode, ErrorMeta>> = Obj
   EVENT_DRAFT_CHOICE_INVALID: { messageKey: 'errors:eventDraftChoiceInvalid' },
   EVENT_HIVE_UNAVAILABLE: { messageKey: 'errors:eventHiveUnavailable' },
   EVENT_RESOURCE_UNAVAILABLE: { messageKey: 'errors:eventResourceUnavailable' },
+  ROUTE_BROKEN: { messageKey: 'errors:routeBroken' },
+  ROUTE_REPAIR_EXCLUSIVE: { messageKey: 'errors:routeRepairExclusive' },
 });
 
 export function violation(

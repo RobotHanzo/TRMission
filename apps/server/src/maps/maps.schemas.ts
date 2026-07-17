@@ -46,6 +46,9 @@ export const RouteDraftSchema = z.object({
   ferryLocos: z.number().int().min(0).max(8),
   isTunnel: z.boolean(),
   bow: z.number().finite().min(-BOW_LIMIT).max(BOW_LIMIT).optional(),
+  // Broken rail (斷軌): full cross-field validation (valid length, ≤ route length) runs in
+  // @trm/map-data's validateContent at start; this only bounds the raw draft value.
+  brokenCarriages: z.number().int().min(0).max(8).optional(),
 });
 
 export const TicketDraftSchema = z.object({
@@ -182,6 +185,10 @@ export function draftFromDto(dto: z.infer<typeof MapDraftSchema>): MapDraft {
       isTunnel: r.isTunnel,
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
       ...(r.bow !== undefined ? { bow: r.bow } : {}),
+      // 0 normalizes to "not broken" (key omitted) so the content hash stays canonical.
+      ...(r.brokenCarriages !== undefined && r.brokenCarriages > 0
+        ? { brokenCarriages: r.brokenCarriages }
+        : {}),
     })),
     tickets: dto.tickets.map(({ view, ...t }) => ({
       ...t,

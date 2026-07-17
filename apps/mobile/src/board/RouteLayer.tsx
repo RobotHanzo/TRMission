@@ -16,6 +16,7 @@ import {
   Path,
   Rect,
   RoundedRect,
+  Skia,
   vec,
 } from '@shopify/react-native-skia';
 import { MAP_DIMS, MAP_INKS, MAP_PALETTE_LIGHT, LIVERY_COLORS } from '@trm/map-data';
@@ -29,6 +30,12 @@ const PALETTE = MAP_PALETTE_LIGHT;
 const DEG = Math.PI / 180;
 /** Muted grey for a locked (unclaimable double-sibling) route — mirrors web MapScene.tsx. */
 const LOCKED_GREY = '#9aa0a6';
+/** The severed-track bolt at a broken rail's midpoint (web RouteShape.tsx `.break-mark`): the
+ *  same path, authored centred on (0,0) in board units, counter-scaled in place like the glyph. */
+const BREAK_MARK = Skia.Path.MakeFromSVGString(
+  'M -1.7 -0.4 L -0.5 -0.75 L -0.05 0.05 L 1.1 -0.55 L 1.7 0.4 L 0.45 0.7 L 0 -0.05 L -1.15 0.55 Z',
+);
+const BREAK_MARK_FILL = '#c5221f';
 
 const colorOf = (rc: string): string =>
   rc === 'GRAY'
@@ -64,6 +71,9 @@ export interface RouteLayerProps {
   colorBlind?: boolean | undefined;
   /** Draw required-loco rainbow pips on unclaimed ferries (default true). */
   showFerryLocos?: boolean | undefined;
+  /** Broken-rail routes the snapshot reports repaired (client-core `brokenRailMap` keys): they
+   *  render as normal track again. Omitted ⇒ every broken route shows its break. */
+  repairedRoutes?: ReadonlySet<string> | undefined;
   /** Track-weight counter-scale (web --inv-scale). */
   inv: number;
 }
@@ -73,6 +83,7 @@ export function RouteLayer({
   owned,
   colorBlind,
   showFerryLocos = true,
+  repairedRoutes,
   inv,
 }: RouteLayerProps) {
   return (
@@ -100,6 +111,11 @@ export function RouteLayer({
         // Once owned, ferry pips take the owner's colour (no rainbow); the backdrop hides them too.
         const ferryLocos = isOwned || showFerryLocos === false ? 0 : m.ferryLocos;
         const loco = ferryLocoBlock(m.length, ferryLocos);
+        // A broken rail (斷軌) shows its break until the snapshot reports it repaired (or it is
+        // owned) — web MapScene's `brokenNow`. The damaged block is centred like the ferry locos.
+        const brokenNow =
+          m.brokenCarriages > 0 && !o && !(repairedRoutes?.has(m.id) ?? false);
+        const broken = ferryLocoBlock(m.length, brokenNow ? m.brokenCarriages : 0);
 
         return (
           <Group
@@ -215,32 +231,56 @@ export function RouteLayer({
                 })}
               </>
             ) : (
-              m.slots.map((s, i) => (
-                <Group
-                  key={`c${i}`}
-                  transform={[{ translateX: s.x }, { translateY: s.y }, { rotate: s.angle * DEG }]}
-                >
-                  <RoundedRect
-                    x={-s.len / 2}
-                    y={-slotH / 2}
-                    width={s.len}
-                    height={slotH}
-                    r={slotRx}
-                    color={fill}
-                    opacity={carOpacity}
-                  />
-                  <RoundedRect
-                    x={-s.len / 2}
-                    y={-slotH / 2}
-                    width={s.len}
-                    height={slotH}
-                    r={slotRx}
-                    style="stroke"
-                    strokeWidth={slotStrokeW}
-                    color={MAP_INKS.carEdge}
-                  />
-                </Group>
-              ))
+              m.slots.map((s, i) => {
+                // Damaged carriage (web `.slot.broken-car`): hollowed fill + a hazard-dash edge,
+                // so the broken block reads as missing track against the intact cars.
+                const isBrokenCar = brokenNow && i >= broken.start && i < broken.end;
+                return (
+                  <Group
+                    key={`c${i}`}
+                    transform={[{ translateX: s.x }, { translateY: s.y }, { rotate: s.angle * DEG }]}
+                  >
+                    <RoundedRect
+                      x={-s.len / 2}
+                      y={-slotH / 2}
+                      width={s.len}
+                      height={slotH}
+                      r={slotRx}
+                      color={fill}
+                      opacity={isBrokenCar ? 0.16 : carOpacity}
+                    />
+                    <RoundedRect
+                      x={-s.len / 2}
+                      y={-slotH / 2}
+                      width={s.len}
+                      height={slotH}
+                      r={slotRx}
+                      style="stroke"
+                      strokeWidth={slotStrokeW}
+                      color={MAP_INKS.carEdge}
+                    >
+                      {isBrokenCar ? <DashPathEffect intervals={[0.9 * inv, 0.7 * inv]} /> : null}
+                    </RoundedRect>
+                  </Group>
+                );
+              })
+            )}
+
+            {/* The severed-track bolt across the route middle — the at-a-glance "斷軌" cue
+                (web RouteShape's .break-mark: red fill, surface stroke, counter-scaled). */}
+            {brokenNow && BREAK_MARK && (
+              <Group
+                transform={[{ translateX: m.mid.x }, { translateY: m.mid.y }, { scale: inv }]}
+              >
+                <Path path={BREAK_MARK} color={BREAK_MARK_FILL} />
+                <Path
+                  path={BREAK_MARK}
+                  style="stroke"
+                  strokeWidth={0.28}
+                  strokeJoin="round"
+                  color={PALETTE.surface}
+                />
+              </Group>
             )}
 
             {colorBlind && !isOwned && (

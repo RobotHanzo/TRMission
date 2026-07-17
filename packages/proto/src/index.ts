@@ -12,7 +12,9 @@
 // messages alongside free text (@trm/shared's chat-presets catalog).
 // v6: future random-event phases, commands, resources, payment modifiers, and projections.
 // v7: TurnTimer ServerEnvelope frame — the cosmetic per-turn countdown (issue #13's round timer).
-export const PROTOCOL_VERSION = 7;
+// v8: broken-rail (斷軌) wire shape — GameSnapshot.broken_rails, the BrokenRailRepaired GameEvent
+// oneof case, and the ROUTE_BROKEN / ROUTE_REPAIR_EXCLUSIVE rejection codes.
+export const PROTOCOL_VERSION = 8;
 
 export * from './gen/trmission/v1/common_pb';
 export * from './gen/trmission/v1/client_pb';

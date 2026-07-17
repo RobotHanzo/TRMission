@@ -9,6 +9,8 @@ import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RouteDef } from '@trm/map-data';
 import { routeById } from './content';
 import {
+  brokenRailShortfall,
+  enumerateBrokenRailPayments,
   enumerateRepairPayments,
   enumerateRoutePayments,
   enumerateStationPayments,
@@ -27,7 +29,7 @@ import type { GameCommands } from '../net/commands';
 export type Claim =
   | { kind: 'route'; route: RouteDef; payments: Payment[] }
   | { kind: 'station'; cityId: string; payments: Payment[] }
-  | { kind: 'repair'; routeId: string; payments: Payment[] };
+  | { kind: 'repair'; routeId: string; payments: Payment[]; broken?: true };
 
 export interface ClaimFlow {
   claim: Claim | null;
@@ -63,6 +65,23 @@ export function useClaimFlow(snapshot: GameSnapshot, commands: GameCommands | nu
   const pickRoute = (routeId: string): void => {
     const route = routeById.get(routeId);
     if (!route) return;
+    // A tap on an unrepaired broken rail (斷軌) is the REPAIR action, not a claim.
+    if (
+      (route.brokenCarriages ?? 0) > 0 &&
+      !snapshot.brokenRails.some((b) => b.routeId === routeId)
+    ) {
+      const payments = enumerateBrokenRailPayments(hand, route);
+      if (payments.length) {
+        setClaim({ kind: 'repair', routeId, payments, broken: true });
+        return;
+      }
+      const s = brokenRailShortfall(hand, route);
+      pushNotification({
+        variant: 'notice',
+        text: t('insufficientCards', { need: s.need, have: s.have }),
+      });
+      return;
+    }
     const extra = skyLanternSurcharge(randomEvents, routeId);
     const payments = enumerateRoutePayments(hand, route, extra, {
       bentoTokens: myPub?.bentoTokens ?? 0,

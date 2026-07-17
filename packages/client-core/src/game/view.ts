@@ -19,6 +19,36 @@ export function ownershipMap(snap: GameSnapshot): Map<string, OwnershipInfo> {
   return m;
 }
 
+export interface BrokenRailInfo {
+  repairedByPlayerId: string;
+  repairedBySeat?: number;
+  /** >0 ⇒ only the repairer may claim the route for now. */
+  exclusiveTurnEnds: number;
+}
+
+/** routeId → repair record. A broken-rail route absent from this map is still unrepaired. */
+export function brokenRailMap(snap: GameSnapshot): Map<string, BrokenRailInfo> {
+  const seats = seatByPlayer(snap);
+  const m = new Map<string, BrokenRailInfo>();
+  for (const b of snap.brokenRails) {
+    const seat = seats.get(b.repairedByPlayerId);
+    m.set(b.routeId, {
+      repairedByPlayerId: b.repairedByPlayerId,
+      ...(seat !== undefined ? { repairedBySeat: seat } : {}),
+      exclusiveTurnEnds: b.exclusiveTurnEnds,
+    });
+  }
+  return m;
+}
+
+/** Whether `playerId` may claim this broken-rail route right now (repaired + window rules). */
+export const canClaimBrokenRail = (
+  info: BrokenRailInfo | undefined,
+  playerId: string | null,
+): boolean =>
+  info !== undefined &&
+  (info.exclusiveTurnEnds <= 0 || (playerId !== null && info.repairedByPlayerId === playerId));
+
 export const myId = (snap: GameSnapshot): string | null => snap.you?.playerId ?? null;
 export const isMyTurn = (snap: GameSnapshot): boolean =>
   !!snap.you && snap.currentPlayerId === snap.you.playerId;

@@ -342,7 +342,9 @@ export function GameStage({
               ? t('claimRoute')
               : flow.claim.kind === 'station'
                 ? t('buildStation')
-                : t('events.repairRoute')
+                : flow.claim.broken
+                  ? t('events.repairBrokenRail')
+                  : t('events.repairRoute')
           }
           options={flow.claim.payments}
           onPick={flow.confirmPayment}

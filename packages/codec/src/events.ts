@@ -68,6 +68,16 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
       });
     case 'DOUBLE_ROUTE_LOCKED':
       return wrap({ case: 'doubleRouteLocked', value: { routeId: ev.routeId as string } });
+    case 'BROKEN_RAIL_REPAIRED':
+      return wrap({
+        case: 'brokenRailRepaired',
+        value: {
+          playerId: ev.player as string,
+          routeId: ev.routeId as string,
+          carriages: ev.carriages,
+          pointsAwarded: ev.pointsAwarded,
+        },
+      });
     case 'TUNNEL_REVEALED':
       return wrap({
         case: 'tunnelRevealed',

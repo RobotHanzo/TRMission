@@ -27,6 +27,9 @@ export function draftToContent(
       isTunnel: r.isTunnel,
       ...(r.doubleGroup !== undefined ? { doubleGroup: r.doubleGroup } : {}),
       ...(r.bow !== undefined ? { bow: r.bow } : {}),
+      ...(r.brokenCarriages !== undefined && r.brokenCarriages > 0
+        ? { brokenCarriages: r.brokenCarriages }
+        : {}),
     })),
     tickets: draft.tickets.map((t) => ({
       ...t,

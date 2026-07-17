@@ -26,6 +26,18 @@ export type Phase =
 /** A claimed route is owned; a locked route (closed double sibling in 2–3p) has no owner. */
 export type OwnerCell = { readonly owner: PlayerId } | { readonly locked: true };
 
+/**
+ * Repair record for a broken-rail route (`RouteDef.brokenCarriages > 0`). A broken route with no
+ * record is still broken (unclaimable); once a record exists the route is repaired. While
+ * `exclusiveTurnEnds > 0` only the repairer may claim it — the counter starts at
+ * `turnOrder.length + 1` and is decremented once per completed turn (including the repair turn
+ * itself), so it reaches 0 exactly when the repairer's next turn has ended.
+ */
+export interface BrokenRailRepair {
+  readonly by: PlayerId;
+  readonly exclusiveTurnEnds: number;
+}
+
 export interface PlayerState {
   readonly id: PlayerId;
   readonly seat: SeatIndex;
@@ -119,6 +131,9 @@ export interface GameState {
 
   /** routeId → owner/locked. Absent key ⇒ open route. */
   readonly ownership: Readonly<Record<string, OwnerCell>>;
+  /** routeId → broken-rail repair record. Absent (key omitted, not `undefined`) until the first
+   *  repair happens, so games on maps without broken rails digest byte-identically to pre-v11. */
+  readonly brokenRails?: Readonly<Record<string, BrokenRailRepair>>;
   readonly stations: readonly StationPlacement[];
 
   readonly pendingTunnel: PendingTunnel | null;
@@ -158,7 +173,13 @@ export const SCHEMA_VERSION = 1;
 // v10: server-authorized END_GAME is a new persisted action grammar. Existing v9 action behavior
 // is unchanged and remains replay-compatible, but a recovered v9 game that applies END_GAME
 // upgrades its terminal state/game document to v10 so older interpreters never receive it.
-export const ENGINE_VERSION = 10;
+// v11: broken rails (斷軌) — routes authored with `brokenCarriages > 0` are unclaimable until a
+// player spends a turn on a REPAIR_ROUTE (paying brokenCarriages cards of the route colour,
+// scoring routePoints[brokenCarriages]), recorded in the new optional `brokenRails` state field;
+// the repairer holds exclusive claim rights until their next turn ends. Every new behavior is
+// gated on the authored `brokenCarriages` field, which no pre-v11 content hash contains, so
+// existing logs replay byte-identically.
+export const ENGINE_VERSION = 11;
 
 /**
  * Which persisted engine majors THIS engine can replay/recover byte-identically — the single gate
@@ -173,7 +194,10 @@ export const ENGINE_VERSION = 10;
  * future-event actions/phases and cannot replay a v7 log byte-identically. v9 changes the deadlock
  * rule (a dead-pool DRAW_TICKETS is now rejected; endgame can trigger on deadlock), so a v8 log
  * containing such an action would diverge or become illegal under v9. v10 only adds the terminal
- * END_GAME action; every existing v9 action retains identical behavior. Only extend this list for a
- * new version when the change is provably inert for every version already listed.
+ * END_GAME action; every existing v9 action retains identical behavior. v11's broken-rail rules
+ * activate only for routes with the new authored `brokenCarriages` field — impossible under any
+ * pre-v11 content hash — so v9/v10 logs replay byte-identically (the optional `brokenRails` state
+ * field is never populated for them). Only extend this list for a new version when the change is
+ * provably inert for every version already listed.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11];

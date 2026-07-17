@@ -147,6 +147,43 @@ export function enumerateRepairPayments(hand: Hand, repairPermits = 0): Payment[
   return out;
 }
 
+/**
+ * Every legal payment to repair a broken rail (斷軌): exactly `route.brokenCarriages` cards of
+ * the route's colour (gray: any single colour), locomotives wild — mirrors the engine's
+ * `validateBrokenRailPayment` (no ferry minimum, no train-car requirement, no claim modifiers).
+ */
+export function enumerateBrokenRailPayments(hand: Hand, route: RouteDef): Payment[] {
+  const required = route.brokenCarriages ?? 0;
+  if (required <= 0) return [];
+  const out: Payment[] = [];
+  for (let loco = 0; loco <= required; loco++) {
+    if (hand.LOCOMOTIVE < loco) continue;
+    const colorCount = required - loco;
+    if (colorCount === 0) {
+      out.push({ color: null, colorCount: 0, locomotives: loco });
+      continue;
+    }
+    if (route.color === 'GRAY') {
+      for (const c of TRAIN_COLORS)
+        if (hand[c] >= colorCount) out.push({ color: c, colorCount, locomotives: loco });
+    } else if (hand[route.color] >= colorCount) {
+      out.push({ color: route.color, colorCount, locomotives: loco });
+    }
+  }
+  return out;
+}
+
+/** Why a broken rail can't be repaired with this hand. Mirrors `enumerateBrokenRailPayments`. */
+export function brokenRailShortfall(hand: Hand, route: RouteDef): Shortfall {
+  const bestColor =
+    route.color === 'GRAY' ? Math.max(...TRAIN_COLORS.map((c) => hand[c])) : hand[route.color];
+  return {
+    kind: 'cards',
+    need: route.brokenCarriages ?? 0,
+    have: bestColor + hand.LOCOMOTIVE,
+  };
+}
+
 export interface Shortfall {
   /** `locos` = a ferry's locomotive minimum isn't met; `cards` = not enough matching cards. */
   kind: 'cards' | 'locos';

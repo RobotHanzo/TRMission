@@ -168,6 +168,27 @@ export function legalActions(board: Board, state: GameState, player: PlayerId): 
         }
       }
     }
+    for (const route of board.content.routes) {
+      const carriages = route.brokenCarriages ?? 0;
+      if (carriages <= 0) continue;
+      const rid = route.id as string;
+      if (state.brokenRails?.[rid] || state.ownership[rid]) continue;
+      // While the route is an open slope-repair target, REPAIR_ROUTE keeps its event-repair
+      // meaning (mirror of applyRepairRoute's precedence) — those candidates are enumerated above.
+      const eventRepairable = state.events?.active.some(
+        (active) =>
+          active.kind === 'SLOPE_REPAIR_ORDER' &&
+          active.routeIds?.includes(route.id) &&
+          !state.events?.repairedRouteIds.includes(route.id),
+      );
+      if (eventRepairable) continue;
+      for (const payment of enumeratePayments(p.hand, carriages, {
+        ferryLocos: 0,
+        specific: route.color === 'GRAY' ? null : route.color,
+      })) {
+        candidates.push({ t: 'REPAIR_ROUTE', player, routeId: route.id, payment });
+      }
+    }
     if (canUseNightMarketSwap(board, state, player)) {
       for (const giveColor of CARD_COLORS) {
         if (p.hand[giveColor] <= 0) continue;
@@ -338,6 +359,7 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
     ticketDeckLongCount: state.ticketDeckLong.length,
     ticketDeckShortCount: state.ticketDeckShort.length,
     ownership: { ...state.ownership },
+    ...(state.brokenRails ? { brokenRails: { ...state.brokenRails } } : {}),
     stations: [...state.stations],
     endgame: state.endgame,
     pendingTunnel: state.pendingTunnel

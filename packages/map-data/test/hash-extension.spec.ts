@@ -65,6 +65,16 @@ describe('hashContent extension', () => {
     expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
   });
 
+  it('a broken rail changes the hash; content without one hashes exactly as before', () => {
+    const withBroken: GameContent = {
+      ...TAIWAN_CONTENT,
+      routes: TAIWAN_CONTENT.routes.map((r, i) => (i === 0 ? { ...r, brokenCarriages: 2 } : r)),
+    };
+    expect(hashContent(withBroken)).not.toBe(PINNED_HASH);
+    // The type extension alone must not move any pre-existing hash.
+    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
+  });
+
   it('a ticket view changes the hash; content without one hashes exactly as before', () => {
     const withView: GameContent = {
       ...TAIWAN_CONTENT,

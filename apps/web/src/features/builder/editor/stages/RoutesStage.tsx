@@ -153,8 +153,12 @@ function RouteForm({
   const [length, setLength] = useState<RouteLength>(initial.length as RouteLength);
   const [isTunnel, setIsTunnel] = useState(initial.isTunnel);
   const [ferryLocos, setFerryLocos] = useState(initial.ferryLocos);
+  const [brokenCarriages, setBrokenCarriages] = useState(initial.brokenCarriages ?? 0);
   const [trackCount, setTrackCount] = useState(1);
   const isFerry = ferryLocos > 0;
+  // 0 = not broken; the draft stores 0 explicitly (spread-merge updates can't drop keys) and the
+  // content adapters normalize 0 → key-omitted so the published content hash stays canonical.
+  const brokenOptions = [0, ...ROUTE_LENGTHS.filter((n) => n <= length)];
 
   const colorOptions: DropdownOption<RouteColor>[] = ROUTE_COLORS.map((c) => {
     const token = c === 'GRAY' ? GRAY_TOKEN : CARD_COLOR_TOKENS[c];
@@ -178,7 +182,11 @@ function RouteForm({
         <Segmented<string>
           options={ROUTE_LENGTHS.map((n) => ({ value: String(n), label: String(n) }))}
           value={String(length)}
-          onChange={(v) => setLength(Number(v) as RouteLength)}
+          onChange={(v) => {
+            const next = Number(v) as RouteLength;
+            setLength(next);
+            setBrokenCarriages((b) => (b > next ? 0 : b));
+          }}
           ariaLabel={t('builder.routeLength')}
         />
       </label>
@@ -218,6 +226,21 @@ function RouteForm({
           }}
         />
       </label>
+      <label className="field">
+        <span className="field-label">{t('builder.brokenCarriages')}</span>
+        <Segmented<string>
+          options={brokenOptions.map((n) => ({
+            value: String(n),
+            label: n === 0 ? t('builder.brokenNone') : String(n),
+          }))}
+          value={String(brokenCarriages)}
+          onChange={(v) => setBrokenCarriages(Number(v))}
+          ariaLabel={t('builder.brokenCarriages')}
+        />
+        {brokenCarriages > 0 ? (
+          <span className="muted small">{t('builder.brokenCarriagesHint')}</span>
+        ) : null}
+      </label>
       <div className="field">
         <span className="field-label">{t('builder.parallelTracks')}</span>
         <Segmented<string>
@@ -238,7 +261,12 @@ function RouteForm({
       <div className="row">
         <button
           className="primary"
-          onClick={() => onSubmit({ ...initial, color, length, isTunnel, ferryLocos }, trackCount)}
+          onClick={() =>
+            onSubmit(
+              { ...initial, color, length, isTunnel, ferryLocos, brokenCarriages },
+              trackCount,
+            )
+          }
         >
           {t('save')}
         </button>

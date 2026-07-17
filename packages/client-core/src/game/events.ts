@@ -216,6 +216,8 @@ const EVENT_ERROR_KEYS: Readonly<Record<string, string>> = {
   'errors:eventDraftChoiceInvalid': 'errors.eventDraftChoiceInvalid',
   'errors:eventHiveUnavailable': 'errors.eventHiveUnavailable',
   'errors:eventResourceUnavailable': 'errors.eventResourceUnavailable',
+  'errors:routeBroken': 'errors.routeBroken',
+  'errors:routeRepairExclusive': 'errors.routeRepairExclusive',
 };
 
 /** The `errors.*` i18n key for an event rejection messageKey, or null if it isn't one. */

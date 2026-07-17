@@ -105,6 +105,8 @@ const REJECTION_TO_PB: Record<RuleViolationCode, PbRejectionCode> = {
   EVENT_DRAFT_CHOICE_INVALID: PbRejectionCode.EVENT_DRAFT_CHOICE_INVALID,
   EVENT_HIVE_UNAVAILABLE: PbRejectionCode.EVENT_HIVE_UNAVAILABLE,
   EVENT_RESOURCE_UNAVAILABLE: PbRejectionCode.EVENT_RESOURCE_UNAVAILABLE,
+  ROUTE_BROKEN: PbRejectionCode.ROUTE_BROKEN,
+  ROUTE_REPAIR_EXCLUSIVE: PbRejectionCode.ROUTE_REPAIR_EXCLUSIVE,
 };
 
 export const pbToCardColorOrNull = (c: PbCardColor): CardColor | null => PB_TO_CARD[c] ?? null;

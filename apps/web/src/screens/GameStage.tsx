@@ -22,8 +22,10 @@ import {
   enumerateRoutePayments,
   enumerateStationPayments,
   enumerateRepairPayments,
+  enumerateBrokenRailPayments,
   routeShortfall,
   stationShortfall,
+  brokenRailShortfall,
   paymentToProto,
   type Payment,
 } from '../game/payments';
@@ -63,7 +65,7 @@ import '../styles/animations.css';
 type Claim =
   | { kind: 'route'; route: RouteDef; payments: Payment[] }
   | { kind: 'station'; cityId: string; payments: Payment[] }
-  | { kind: 'repair'; routeId: string; payments: Payment[] };
+  | { kind: 'repair'; routeId: string; payments: Payment[]; broken?: true };
 
 /** Phone bottom-dock panels: the rail's sections plus the log/chat, one visible at a time. */
 type DockTab = 'hand' | 'draw' | 'missions' | 'events' | 'players' | 'comms';
@@ -298,6 +300,23 @@ export function GameStage({
     if (!gateAllowsTarget(actionGate, 'route', routeId)) return;
     const route = routeById.get(routeId);
     if (!route) return;
+    // A tap on an unrepaired broken rail (斷軌) is the REPAIR action, not a claim.
+    if (
+      (route.brokenCarriages ?? 0) > 0 &&
+      !snapshot.brokenRails.some((b) => b.routeId === routeId)
+    ) {
+      const payments = enumerateBrokenRailPayments(hand, route);
+      if (payments.length) {
+        setClaim({ kind: 'repair', routeId, payments, broken: true });
+        return;
+      }
+      const s = brokenRailShortfall(hand, route);
+      pushNotification({
+        variant: 'notice',
+        text: t('insufficientCards', { need: s.need, have: s.have }),
+      });
+      return;
+    }
     const extra = skyLanternSurcharge(randomEvents, routeId);
     const payments = enumerateRoutePayments(hand, route, extra, {
       bentoTokens: myPub?.bentoTokens ?? 0,
@@ -818,7 +837,9 @@ export function GameStage({
               ? t('claimRoute')
               : claim.kind === 'station'
                 ? t('buildStation')
-                : t('events.repairRoute')
+                : claim.broken
+                  ? t('events.repairBrokenRail')
+                  : t('events.repairRoute')
           }
           options={claim.payments}
           onPick={confirmPayment}

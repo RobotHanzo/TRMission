@@ -336,7 +336,11 @@ void i18n.use(initReactI18next).init({
         },
         ...eventsModeZh,
         events: eventsZh,
-        errors: eventErrorsZh,
+        errors: {
+          ...eventErrorsZh,
+          routeBroken: '這是斷軌路線，須先搶修才能鋪設',
+          routeRepairExclusive: '搶修者本輪享有優先鋪設權，請稍候',
+        },
         boot: {
           updateTitle: '需要更新',
           updateBody: '請更新至最新版本以繼續遊玩。',
@@ -657,7 +661,11 @@ void i18n.use(initReactI18next).init({
         },
         ...eventsModeEn,
         events: eventsEn,
-        errors: eventErrorsEn,
+        errors: {
+          ...eventErrorsEn,
+          routeBroken: 'That rail is broken — it must be repaired before it can be claimed',
+          routeRepairExclusive: 'The repairer has first claim rights this round',
+        },
         boot: {
           updateTitle: 'Update required',
           updateBody: 'Please update to the latest version to continue.',

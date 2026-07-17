@@ -19,7 +19,7 @@ import type { GameSnapshot, GameEvent } from '@trm/proto';
 import { CITIES, ROUTES, cityById, routeById, cityName, cityTier } from '../game/content';
 import { boardEventOverlays } from '../game/events';
 import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
-import { ownershipMap } from '../game/view';
+import { ownershipMap, brokenRailMap, canClaimBrokenRail, myId } from '../game/view';
 import { zoomBucket } from '../game/lod';
 import {
   transformToView,
@@ -477,6 +477,9 @@ export function Board({
 }: BoardProps) {
   const { t } = useTranslation();
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
+  const brokenRails = useMemo(() => brokenRailMap(snapshot), [snapshot]);
+  const repairedRoutes = useMemo(() => new Set(brokenRails.keys()), [brokenRails]);
+  const viewerId = myId(snapshot);
   const stationCities = useMemo(() => {
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
     return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
@@ -641,12 +644,27 @@ export function Board({
             canClaim={canClaim}
             canBuildStation={canBuildStation}
             colorBlind={colorBlind}
+            repairedRoutes={repairedRoutes}
             cityLabel={(c) => cityName(c.id, locale)}
             cityTier={cityTier}
-            routeTitle={(r) => `${cityName(r.a, locale)}–${cityName(r.b, locale)} · ${r.length}`}
+            routeTitle={(r) => {
+              const base = `${cityName(r.a, locale)}–${cityName(r.b, locale)} · ${r.length}`;
+              return (r.brokenCarriages ?? 0) > 0 && !brokenRails.has(r.id)
+                ? `${base} · ${t('events.brokenRailCarriages', { n: r.brokenCarriages })}`
+                : base;
+            }}
             // A typhoon-closed route can't be claimed (the server rejects it), so it's not
-            // clickable here either — the overlay signals why.
-            claimFilter={(r) => !closedRoutes.has(r.id)}
+            // clickable here either — the overlay signals why. A broken rail stays clickable
+            // while unrepaired (the tap opens the REPAIR flow); once repaired it is claim-gated
+            // to the repairer during their exclusivity window.
+            claimFilter={(r) => {
+              if (closedRoutes.has(r.id)) return false;
+              if ((r.brokenCarriages ?? 0) > 0) {
+                const info = brokenRails.get(r.id);
+                if (info && !canClaimBrokenRail(info, viewerId)) return false;
+              }
+              return true;
+            }}
             routeClass={(r) =>
               [
                 closedRoutes.has(r.id) ? 'evt-closed' : '',
@@ -662,6 +680,8 @@ export function Board({
               'data-sky': skyRoutes.has(r.id) ? 'true' : undefined,
               'data-reopen': reopenRoutes.has(r.id) ? 'true' : undefined,
               'data-harvest': harvestRoutes.has(r.id) ? 'true' : undefined,
+              'data-broken':
+                (r.brokenCarriages ?? 0) > 0 && !brokenRails.has(r.id) ? 'true' : undefined,
             })}
             cityData={(c) => {
               const hotspot = hotspots.get(c.id);
@@ -698,6 +718,26 @@ export function Board({
                     </text>
                   </g>
                 )}
+                {/* Repaired broken rail with a live exclusivity window: mark the repairer's
+                    first-claim right until it opens to everyone. */}
+                {(() => {
+                  const info = brokenRails.get(r.id);
+                  if (!info || info.exclusiveTurnEnds <= 0 || owned.get(r.id)) return null;
+                  return (
+                    <g className="evt-chip broken-exclusive-chip" pointerEvents="none">
+                      <circle cx={g.mid.x} cy={g.mid.y} pointerEvents="auto">
+                        <title>
+                          {t('events.brokenRailExclusive', {
+                            name: `P${(info.repairedBySeat ?? 0) + 1}`,
+                          })}
+                        </title>
+                      </circle>
+                      <text x={g.mid.x} y={g.mid.y} aria-hidden="true">
+                        🔧
+                      </text>
+                    </g>
+                  );
+                })()}
               </>
             )}
             renderCityOverlay={(c) => {

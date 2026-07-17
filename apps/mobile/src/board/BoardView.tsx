@@ -13,7 +13,7 @@ import { MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { CITIES, ROUTES, cityById, cityName, routeById } from '../game/content';
 import { boardEventOverlays } from '../game/events';
 import { HUB_CITIES, ROUTE_GEOMETRY } from '../game/routeGeometry';
-import { ownershipMap } from '../game/view';
+import { brokenRailMap, canClaimBrokenRail, myId, ownershipMap } from '../game/view';
 import { cityTier } from '../game/lod';
 import { ACTIVE_BASE_VIEW, ACTIVE_GEOGRAPHY } from '../game/catalog';
 import { getSocket } from '../net/connection';
@@ -284,6 +284,8 @@ function BoardInner({
   const reducedMotion = useReducedMotion();
   // ── Derivations from the snapshot (ports Board.tsx's pure useMemos) ──
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
+  const brokenRails = useMemo(() => brokenRailMap(snapshot), [snapshot]);
+  const repairedRoutes = useMemo(() => new Set(brokenRails.keys()), [brokenRails]);
   const stationCities = useMemo(() => {
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
     return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
@@ -315,6 +317,8 @@ function BoardInner({
   ownedRef.current = owned;
   const closedRef = useRef(closedRoutes);
   closedRef.current = closedRoutes;
+  const brokenRailsRef = useRef(brokenRails);
+  brokenRailsRef.current = brokenRails;
   const sandboxRef = useRef(sandbox);
   sandboxRef.current = sandbox;
   const onPickRouteRef = useRef(onPickRoute);
@@ -346,9 +350,18 @@ function BoardInner({
         if (canBuildStationRef.current) onPickCityRef.current(hit.id);
         return;
       }
-      if (canClaimRef.current && !closedRef.current.has(hit.id) && !ownedRef.current.has(hit.id)) {
-        onPickRouteRef.current(hit.id);
+      if (!canClaimRef.current || closedRef.current.has(hit.id) || ownedRef.current.has(hit.id)) {
+        return;
       }
+      // A broken rail stays tappable while unrepaired (the tap opens the REPAIR flow); once
+      // repaired it is claim-gated to the repairer during their exclusivity window (ports the
+      // web Board's claimFilter).
+      const def = routeById.get(hit.id);
+      if (def && (def.brokenCarriages ?? 0) > 0) {
+        const info = brokenRailsRef.current.get(hit.id);
+        if (info && !canClaimBrokenRail(info, myId(snapshotRef.current))) return;
+      }
+      onPickRouteRef.current(hit.id);
     },
     [vp, scene],
   );
@@ -480,6 +493,7 @@ function BoardInner({
               glowingStations={glowingStations}
               highlightCities={highlightCities}
               colorBlind={colorBlind}
+              repairedRoutes={repairedRoutes}
               cityLabel={(c) => cityName(c.id, locale)}
               cityTier={cityTier}
               bucket={cam.lod.bucket}

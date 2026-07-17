@@ -207,7 +207,12 @@ function scoreClaim(a: Extract<Action, { t: 'CLAIM_ROUTE' }>, ctx: Ctx): number 
     // Discipline: while a live ticket plan exists and trains are plentiful, off-plan claims
     // burn the trains the plan needs. Once trains run low the brake releases so the endgame
     // still drains them (termination stays safe).
-    if (pull === undefined && ctx.incompleteTickets > 0 && ctx.wanted.size > 0 && ctx.trainCars > 10)
+    if (
+      pull === undefined &&
+      ctx.incompleteTickets > 0 &&
+      ctx.wanted.size > 0 &&
+      ctx.trainCars > 10
+    )
       v -= 6;
   }
   if (ctx.knobs.eventSense) {
@@ -395,6 +400,17 @@ function scoreLanternRelocation(
 
 function scoreRepair(a: Extract<Action, { t: 'REPAIR_ROUTE' }>, ctx: Ctx): number {
   const cost = a.payment.locomotives * ctx.knobs.locoPenalty;
+  const r = ctx.board.routeById.get(a.routeId as string);
+  const carriages = r?.brokenCarriages ?? 0;
+  if (r && carriages > 0 && !ctx.state.brokenRails?.[a.routeId as string]) {
+    // Broken-rail (斷軌) repair: banks routePoints[carriages] immediately (no trains spent) and
+    // grants one round of exclusive claim rights — extra-valuable when we want the route.
+    const pts = ctx.state.ruleParams.routePoints[carriages] ?? carriages;
+    let v = pts + 1 - cost;
+    const pull = ctx.wanted.get(a.routeId as string);
+    if (pull !== undefined) v += 4 + pull;
+    return v;
+  }
   if (!ctx.knobs.eventSense) return 7 - cost;
   // Repairing spends the whole turn and reopens the route for everyone — only worth it
   // for a route we plan to claim ourselves (the +2 reopen bonus goes to the first claimer).
@@ -642,7 +658,8 @@ function shortestUsablePath(
   const ownStations = new Set(
     ctx.state.stations.filter((s) => s.playerId === ctx.botId).map((s) => s.cityId as string),
   );
-  const built = ctx.state.ruleParams.stationsPerPlayer -
+  const built =
+    ctx.state.ruleParams.stationsPerPlayer -
     (ctx.state.players[ctx.botId as string]?.stationsRemaining ??
       ctx.state.ruleParams.stationsPerPlayer);
 
@@ -700,7 +717,13 @@ function shortestUsablePath(
       const nd = best + step;
       if (nd < (dist.get(nk) ?? Infinity)) {
         dist.set(nk, nd);
-        prev.set(nk, { key: curKey, city, routeId: rid as string, owned: usable === 'owned', borrowCity });
+        prev.set(nk, {
+          key: curKey,
+          city,
+          routeId: rid as string,
+          owned: usable === 'owned',
+          borrowCity,
+        });
       }
     }
   }
