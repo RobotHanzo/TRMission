@@ -81,6 +81,29 @@ export const mapEditorIdFromPath = (): string | null => {
   return id ? decodeURIComponent(id) : null;
 };
 
+/** True when the current URL resolves to `view: 'home'` in `syncFromUrl` regardless of auth
+ *  state — mirrors that function's routing minus the `authed` branches. Lets `App` render the
+ *  home view (landing or, once the session probe settles, the signed-in home) immediately on a
+ *  cold load instead of blocking behind the boot spinner; every other path still needs `authed`
+ *  resolved before it's safe to render (or redirect), so those keep waiting on the boot gate. */
+export const isHomeColdLoadPath = (): boolean => {
+  const path = window.location.pathname;
+  return !(
+    path === TUTORIAL_PATH ||
+    path === LOGIN_CALLBACK_PATH ||
+    path === LOGIN_PATH ||
+    path === HISTORY_PATH ||
+    adminReplayFromPath() ||
+    adminSpectateFromPath() ||
+    replayIdFromPath() ||
+    path === MAPS_PATH ||
+    mapEditorIdFromPath() ||
+    path === PRIVACY_PATH ||
+    path === DELETE_ACCOUNT_PATH ||
+    roomCodeFromPath()
+  );
+};
+
 // Keep a post-login target same-origin (mirrors the server's `safeRedirect`) so the redirect
 // param can never become an open redirect.
 const safePath = (p: string | null | undefined): string => {

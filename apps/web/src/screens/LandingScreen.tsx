@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useUi } from '../store/ui';
+import { useSession } from '../store/session';
 import { MapBackdrop } from '../components/MapBackdrop';
 import { BrandBanner } from '../components/BrandBanner';
 import { DiscordGlyph } from '../components/icons/DiscordGlyph';
@@ -47,11 +48,16 @@ export function LandingScreen() {
   const enterTutorial = useUi((s) => s.enterTutorial);
   const enterLogin = useUi((s) => s.enterLogin);
   const enterPrivacy = useUi((s) => s.enterPrivacy);
+  const booting = useSession((s) => s.booting);
 
-  // Landing impression — the top of the acquisition funnel (mirrors welcome_shown).
+  // Landing impression — the top of the acquisition funnel (mirrors welcome_shown). App now
+  // renders this screen optimistically while the session probe is still in flight (so a
+  // signed-out visitor never waits on a network round trip to see the page); hold the impression
+  // until that probe settles so a visitor who turns out to be signed in — and gets swapped to
+  // HomeScreen in the same tick — never counts as a landing impression.
   useEffect(() => {
-    track('landing_shown', {});
-  }, []);
+    if (!booting) track('landing_shown', {});
+  }, [booting]);
 
   const startTutorial = () => {
     track('landing_cta_click', { target: 'tutorial' });

@@ -1,6 +1,6 @@
-import { useEffect, useRef, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useUi } from './store/ui';
+import { useUi, isHomeColdLoadPath } from './store/ui';
 import { useHasFeature, useSession } from './store/session';
 import { AppHeader } from './components/AppHeader';
 import { useLeaveWarning } from './hooks/useLeaveWarning';
@@ -45,6 +45,13 @@ export function App() {
   useLeaveWarning();
   usePageViewTracking();
   useSoundSetup();
+
+  // '/' (and any unrecognized path, which falls back to it) never needs `authed` to decide what
+  // to render — App picks landing vs. home off `user` directly — so a cold load there can paint
+  // immediately instead of waiting on the session probe. Every other path DOES need `authed`
+  // (to render vs. redirect to /login) and keeps the boot gate. Captured once: it only describes
+  // the URL this tab was cold-loaded with, not later in-app navigation.
+  const [homeColdLoad] = useState(isHomeColdLoadPath);
 
   // The map builder is feature-gated: a direct /maps URL without the grant lands home.
   // (Cosmetic only — the server 403s regardless.)
@@ -115,7 +122,7 @@ export function App() {
     <div className={isGameLayout ? 'app app--game' : 'app'}>
       <AppHeader />
       <main className={mainClass}>
-        {booting ? (
+        {booting && !homeColdLoad ? (
           <div className="card">{t('connecting')}</div>
         ) : (
           <>
