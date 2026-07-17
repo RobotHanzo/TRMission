@@ -126,9 +126,6 @@ export function LandingScreen() {
               <button className="landing-departure" onClick={signIn}>
                 <span className="landing-departure-dest">{t('landing.departures.playDest')}</span>
                 <span className="landing-departure-meta">{t('landing.departures.playMeta')}</span>
-                <span className="landing-departure-status">
-                  {t('landing.departures.playStatus')}
-                </span>
                 <ArrowRight className="landing-departure-arrow" size={18} aria-hidden />
               </button>
             </div>

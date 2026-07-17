@@ -107,7 +107,6 @@ const resources = {
           tutorialStatus: '免登入',
           playDest: '多人對戰',
           playMeta: '訪客或帳號皆可遊玩',
-          playStatus: '請先登入',
         },
         how: {
           title: '每回合，三選一',
@@ -696,7 +695,6 @@ const resources = {
           tutorialStatus: 'No sign-in',
           playDest: 'Multiplayer',
           playMeta: 'Play as a guest or with an account',
-          playStatus: 'Sign in to board',
         },
         how: {
           title: 'Each turn, pick one of three',
