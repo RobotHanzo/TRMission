@@ -513,9 +513,9 @@ export function GameStage({
     <div className="hud-block">
       <TurnCountdown />
       <PlayerTrackers snapshot={snapshot} />
-      {endVote}
     </div>
   );
+  const endVoteSection = endVote ? <div className="hud-block">{endVote}</div> : null;
   const market = (
     <div className="hud-block">
       <CardMarket
@@ -661,7 +661,7 @@ export function GameStage({
         confirmDisabled={!allow.keep}
         onConfirm={confirmKeep}
       />
-      {endVote && <div className="hud-block">{endVote}</div>}
+      {endVoteSection}
     </>
   ) : boardLayout === 'rail' ? (
     <>
@@ -670,6 +670,7 @@ export function GameStage({
       {market}
       {handSection}
       {ticketsSection}
+      {endVoteSection}
     </>
   ) : (
     <>
@@ -677,6 +678,7 @@ export function GameStage({
       {trackers}
       {market}
       {ticketsSection}
+      {endVoteSection}
     </>
   );
   const showHandStrip = !needKeep && boardLayout === 'tray';
@@ -744,7 +746,10 @@ export function GameStage({
                 ) : dockTab === 'events' ? (
                   <EventsPanel />
                 ) : dockTab === 'players' ? (
-                  trackers
+                  <>
+                    {trackers}
+                    {endVoteSection}
+                  </>
                 ) : (
                   comms
                 )}
