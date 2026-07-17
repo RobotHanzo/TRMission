@@ -17,17 +17,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
           bundler-cache: true
           working-directory: apps/mobile
-      - run: corepack enable
-      - run: yarn install --immutable
+      - uses: ./.github/actions/setup-yarn
 
       # apps/mobile imports @trm/proto, whose src/gen/** is buf-generated and gitignored (see
       # root CLAUDE.md) — without this, Metro fails to resolve the generated *_pb modules when
@@ -61,6 +56,18 @@ jobs:
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
+
+      # Keyed on the prebuild-generated Podfile (ios/ itself isn't committed — see the CNG note
+      # above), so this only misses when native deps actually change.
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/CocoaPods
+            apps/mobile/ios/Pods
+          key: cocoapods-${{ hashFiles('apps/mobile/ios/Podfile') }}
+          restore-keys: |
+            cocoapods-
 
       - name: Install CocoaPods
         working-directory: apps/mobile/ios

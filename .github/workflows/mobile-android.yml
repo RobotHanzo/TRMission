@@ -28,21 +28,17 @@ jobs:
           docker image prune -af || true
           df -h /
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
           bundler-cache: true
           working-directory: apps/mobile
-      - run: corepack enable
-      - run: yarn install --immutable
+      - uses: ./.github/actions/setup-yarn
 
       # apps/mobile imports @trm/proto, whose src/gen/** is buf-generated and gitignored (see
       # root CLAUDE.md) — without this, Metro fails to resolve the generated *_pb modules when

@@ -24,10 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: corepack enable
-      - run: yarn install --immutable
+      - uses: ./.github/actions/setup-yarn
       # proto codegen must exist before any workspace build (src/gen is gitignored).
       - run: yarn workspace @trm/proto generate
       - run: yarn typecheck

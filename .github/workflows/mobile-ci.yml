@@ -21,12 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-      - run: corepack enable
-      - run: yarn install --immutable
+      - uses: ./.github/actions/setup-yarn
       # Same jest/babel transform cache the whole-repo CI keeps warm (see ci.yml).
       - uses: actions/cache@v4
         with:

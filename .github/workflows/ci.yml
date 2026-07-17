@@ -11,32 +11,143 @@ permissions:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  # cancel-in-progress: true
+  cancel-in-progress: true
 
 jobs:
-  test:
+  typecheck:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-yarn
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - name: Cache Turbo task cache
+        uses: actions/cache@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: yarn
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ github.job }}-
 
-      - name: Enable Corepack
-        run: corepack enable
+      - run: yarn typecheck
 
-      - name: Install dependencies
-        run: yarn install --immutable
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-yarn
+
+      # `yarn lint` is a plain `eslint .`, not turbo-orchestrated, so it doesn't get proto's
+      # generated code as a side effect of another step the way the test/typecheck jobs do.
+      - name: Generate proto sources
+        run: yarn workspace @trm/proto generate
+
+      - run: yarn lint
+
+  # Heavy suites (engine, server, web) each get their own runner instead of timesharing one
+  # box's cores via turbo's concurrency cap — see ci.yml history for the single-job baseline.
+  # Package → job assignment must stay a 1:1 partition of every "test"/"test:pure" task; if you
+  # add a workspace with tests, add it to exactly one job's --filter list below.
+  test-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-yarn
+
+      - name: Cache Turbo task cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ github.job }}-
+
+      - name: Test
+        run: >-
+          yarn turbo run test test:pure --filter=@trm/engine --
+          --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-engine
+          path: '**/test-results/junit.xml'
+          if-no-files-found: ignore
+
+  test-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-yarn
+
+      - name: Cache Turbo task cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ github.job }}-
 
       - name: Cache mongodb-memory-server binary
         uses: actions/cache@v4
         with:
           path: ~/.cache/mongodb-binaries
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+      - name: Warm MongoDB binary cache
+        run: yarn workspace @trm/server warm-mongo
+
+      - name: Test
+        run: >-
+          yarn turbo run test test:pure --filter=@trm/server --
+          --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-server
+          path: '**/test-results/junit.xml'
+          if-no-files-found: ignore
+
+  test-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-yarn
+
+      - name: Cache Turbo task cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ github.job }}-
+
+      - name: Test
+        run: >-
+          yarn turbo run test test:pure --filter=@trm/web --
+          --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-web
+          path: '**/test-results/junit.xml'
+          if-no-files-found: ignore
+
+  # Everything else: small/fast suites that don't need their own runner.
+  test-rest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-yarn
+
+      - name: Cache Turbo task cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ github.job }}-
 
       # The mobile suite is jest+babel over the whole RN graph AND the raw-TS @trm packages. Cold,
       # that transform costs minutes — and because RN components require lazily, the cost lands
@@ -50,23 +161,34 @@ jobs:
             jest-mobile-${{ runner.os }}-${{ hashFiles('yarn.lock', 'apps/mobile/babel.config.js') }}-
             jest-mobile-${{ runner.os }}-
 
-      - name: Typecheck
-        run: yarn typecheck
-
-      - name: Lint
-        run: yarn lint
-
-      - name: Warm MongoDB binary cache
-        run: yarn workspace @trm/server warm-mongo
-
       - name: Test
-        # Heavy workspace suites spawn their own workers; cap Turbo tasks to avoid CI contention.
-        run: yarn test --concurrency=2 -- --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+        run: >-
+          yarn turbo run test test:pure
+          --filter=@trm/proto --filter=@trm/shared --filter=@trm/map-data --filter=@trm/codec
+          --filter=@trm/admin --filter=@trm/bots --filter=@trm/client-core --filter=@trm/mobile --
+          --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-rest
+          path: '**/test-results/junit.xml'
+          if-no-files-found: ignore
+
+  report:
+    needs: [test-engine, test-server, test-web, test-rest]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          path: test-results
+          merge-multiple: true
 
       - name: Report test results
         uses: mikepenz/action-junit-report@v4
-        if: always()
         with:
-          report_paths: '**/test-results/junit.xml'
+          report_paths: 'test-results/**/junit.xml'
           detailed_summary: true
           include_passed: true

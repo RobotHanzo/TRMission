@@ -1,0 +1,36 @@
+name: Setup Node + Yarn
+description: >
+  Sets up Node from .nvmrc, restores node_modules (exact match on yarn.lock) with a fallback to
+  Yarn's own package cache, and installs dependencies. Assumes actions/checkout already ran.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        cache: yarn
+
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
+
+    # Exact-match cache: a hit means yarn.lock is byte-identical to some previous run, so the
+    # linked node_modules tree is guaranteed correct and install can be skipped outright. A miss
+    # still benefits from setup-node's yarn-package cache above (network-free, just re-links).
+    - name: Cache node_modules
+      id: node-modules-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          node_modules
+          apps/*/node_modules
+          packages/*/node_modules
+          tooling/*/node_modules
+        key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
+    - name: Install dependencies
+      if: steps.node-modules-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: yarn install --immutable
