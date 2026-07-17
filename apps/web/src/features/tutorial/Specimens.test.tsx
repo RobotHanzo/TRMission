@@ -9,6 +9,7 @@ const specs: SpecimenSpec[] = [
   { kind: 'route', variant: 'ferry' },
   { kind: 'route', variant: 'tunnel' },
   { kind: 'route', variant: 'double' },
+  { kind: 'route', variant: 'broken' },
   { kind: 'card-row' },
   { kind: 'station' },
   { kind: 'station-cost' },

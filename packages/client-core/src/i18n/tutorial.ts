@@ -63,6 +63,8 @@ export const tutorialZh = {
     ferry: '渡輪路線（通往離島）：支付時必須包含「足夠數量的彩色車頭」，圖示會標明需要幾個。',
     tunnel:
       '隧道路線：宣告後會從牌庫翻開 3 張牌；每翻到一張與你支付顏色相同、或彩色車頭的牌，就要「額外」多付一張同色或彩色車頭，否則可以放棄（已付的牌會留在手上）。',
+    broken:
+      '斷軌路線（部分地圖）：損壞的路段（以裂痕標示）修復前無法宣告。花一個回合支付「損壞節數」張該路線顏色的牌（灰色可用任一種顏色；彩色車頭萬用）即可修復並立即依修復長度得分——不放置車廂。修復者在下一回合結束前擁有獨家宣告權，之後任何人都能宣告。',
   },
   stations: {
     title: '車站',
@@ -200,6 +202,8 @@ export const tutorialEn = {
       'Ferry routes (to the islands): your payment must include enough locomotives — the icons show how many.',
     tunnel:
       'Tunnel routes: after you claim, 3 cards are revealed; for each one matching your paid colour (or a locomotive) you must pay one extra of that colour or a locomotive — or abort (your cards stay in hand).',
+    broken:
+      "Broken rails (on some maps): a damaged stretch (marked by a crack) can't be claimed until repaired. Spend a turn paying cards equal to the damaged length in the route's colour (any one colour on gray; locomotives wild) to repair it and score that length immediately — no trains placed. The repairer alone may claim it until the end of their next turn; after that, anyone may.",
   },
   stations: {
     title: 'Stations',

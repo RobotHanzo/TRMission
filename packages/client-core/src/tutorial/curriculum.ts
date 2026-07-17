@@ -171,6 +171,14 @@ export const LESSONS: Lesson[] = [
         spotlight: { kind: 'route', ids: ['R5'] },
         frame: { kind: 'route', ids: ['R5'] },
       },
+      // Broken rail exists only on custom maps (no Taiwan route to spotlight/frame), so this beat
+      // is specimen-only. The one-shot in-game FeatureIntro covers the first live encounter.
+      {
+        id: 'broken',
+        text: 'tutorial.special.broken',
+        mode: 'info',
+        specimen: { kind: 'route', variant: 'broken' },
+      },
     ],
   },
   {
