@@ -16,6 +16,11 @@ const BUILD_NUMBER = Number(process.env.BUILD_NUMBER ?? 1);
 const googleIosUrlScheme =
   process.env.TRM_GOOGLE_IOS_URL_SCHEME ?? 'com.googleusercontent.apps.placeholder';
 
+// One source for the production origin: the deep-link hosts (associated domains / App Links) and
+// the app's API base derive from the same env var so they can never drift apart.
+const serverOrigin = process.env.TRM_SERVER_ORIGIN ?? 'https://trmission.robothanzo.dev';
+const serverHost = new URL(serverOrigin).hostname;
+
 const config: ExpoConfig = {
   name: 'TRMission',
   slug: 'trmission',
@@ -33,7 +38,40 @@ const config: ExpoConfig = {
     bundleIdentifier: 'dev.robothanzo.trmission',
     buildNumber: String(BUILD_NUMBER),
     supportsTablet: true, // iPad; requireFullScreen deliberately unset (iPadOS 26 ignores it)
-    associatedDomains: ['applinks:trmission.example'], // real origin filled in P6
+    associatedDomains: [`applinks:${serverHost}`],
+    config: {
+      // Standard TLS only (exempt) — answers App Store Connect's export-compliance question so
+      // TestFlight/App Store submissions don't stall on the manual prompt.
+      usesNonExemptEncryption: false,
+    },
+    // Apple privacy manifest (ITMS-91053): the required-reason APIs this app's dependency graph
+    // touches — AsyncStorage/UserDefaults (CA92.1), file timestamps (expo-updates/sqlite/
+    // file-system, C617.1), free disk space (E174.1), system boot time (uptime clocks, 35F9.1).
+    // No tracking, no tracking domains; App Store Connect's App Privacy questionnaire (accounts,
+    // UGC, push tokens — no ads/analytics) is filled separately per docs/release/*.
+    privacyManifests: {
+      NSPrivacyTracking: false,
+      NSPrivacyTrackingDomains: [],
+      NSPrivacyCollectedDataTypes: [],
+      NSPrivacyAccessedAPITypes: [
+        {
+          NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryUserDefaults',
+          NSPrivacyAccessedAPITypeReasons: ['CA92.1'],
+        },
+        {
+          NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryFileTimestamp',
+          NSPrivacyAccessedAPITypeReasons: ['C617.1'],
+        },
+        {
+          NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryDiskSpace',
+          NSPrivacyAccessedAPITypeReasons: ['E174.1'],
+        },
+        {
+          NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategorySystemBootTime',
+          NSPrivacyAccessedAPITypeReasons: ['35F9.1'],
+        },
+      ],
+    },
   },
   android: {
     package: 'dev.robothanzo.trmission',
@@ -48,10 +86,13 @@ const config: ExpoConfig = {
       {
         action: 'VIEW',
         autoVerify: true,
-        data: [{ scheme: 'https', host: 'trmission.example', pathPrefix: '/m/callback' }],
+        data: [{ scheme: 'https', host: serverHost, pathPrefix: '/m/callback' }],
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],
+    // No ads/analytics anywhere in the app: block the advertising-id permission outright so a
+    // transitive Play Services dependency can never re-add it behind the Data-safety form's back.
+    blockedPermissions: ['com.google.android.gms.permission.AD_ID'],
   },
   updates: {
     // Self-hosted expo-open-ota manifest endpoint (docs/mobile/ota.md). The origin is a
@@ -77,7 +118,9 @@ const config: ExpoConfig = {
     'expo-secure-store',
     'expo-apple-authentication',
     ['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }],
-    'expo-notifications',
+    // Brand-coloured status-bar tint for Android notifications (a dedicated white-on-transparent
+    // small icon is a designer TODO; until then the default icon is at least tinted).
+    ['expo-notifications', { color: '#E55509' }],
     // Android 16 = target API 36, mandatory for Play updates from 2026-08-31 (P5 Task 8 pin).
     ['expo-build-properties', { android: { targetSdkVersion: 36, compileSdkVersion: 36 } }],
     [
@@ -96,7 +139,7 @@ const config: ExpoConfig = {
     ],
   ],
   extra: {
-    serverOrigin: process.env.TRM_SERVER_ORIGIN ?? 'https://trmission.robothanzo.dev',
+    serverOrigin,
     buildNumber: BUILD_NUMBER,
     // Google Sign-In client ids (native app + the server "web" audience). Real values are
     // provisioned at store-setup time (P6); the server accepts the native ids via

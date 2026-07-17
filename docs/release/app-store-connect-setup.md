@@ -146,7 +146,7 @@ The Android equivalent of `assetlinks.json`. Two things have to agree:
 1. **Server**: set `APPLE_APP_ID=<TeamID>.dev.robothanzo.trmission` so
    `GET /.well-known/apple-app-site-association` serves the real value (unset ⇒ 404).
 2. **App**: `apps/mobile/app.config.ts` still has the placeholder
-   `associatedDomains: ['applinks:trmission.example']` — replace `trmission.example` with the
+   `associatedDomains: ['applinks:trmission.robothanzo.dev']` — replace `trmission.robothanzo.dev` with the
    real production origin (same value as `TRM_SERVER_ORIGIN`/`OAUTH_REDIRECT_BASE`) before the
    first store build. This is a source change, not a Console step — commit it once the production
    origin is final.

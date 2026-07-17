@@ -1,7 +1,8 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, StyleSheet, View } from 'react-native';
+import { GOOGLE_WEB_CLIENT_ID, SERVER_ORIGIN } from '../config';
 import { signInWithApple } from '../auth/apple';
 import { signInWithDiscord } from '../auth/discord';
 import { signInWithGoogle } from '../auth/google';
@@ -54,7 +55,9 @@ export function LoginScreen(): React.JSX.Element {
   }, []);
   const passwordOn = config?.passwordLogin ?? true;
   const guestOn = config?.guest ?? true;
-  const googleOn = config?.providers.google ?? true;
+  // Server-enabled AND locally provisioned: without baked client ids the native Google SDK can
+  // only no-op, and a visibly dead sign-in button is a routine store-review rejection.
+  const googleOn = (config?.providers.google ?? true) && !!GOOGLE_WEB_CLIENT_ID;
   const discordOn = config?.providers.discord ?? true;
   const appleOn = (config?.providers.apple ?? true) && Platform.OS === 'ios';
   // Android has no native SIWA: the server's redirect flow runs in a system browser instead —
@@ -200,6 +203,14 @@ export function LoginScreen(): React.JSX.Element {
           <ErrorText>{error}</ErrorText>
         </View>
       )}
+
+      {/* Store compliance: the privacy policy is reachable from the sign-in surface too. */}
+      <View style={styles.footer}>
+        <LinkButton
+          title={t('settings.privacyPolicy')}
+          onPress={() => void Linking.openURL(`${SERVER_ORIGIN}/privacy`)}
+        />
+      </View>
     </Screen>
   );
 }
@@ -211,4 +222,5 @@ const styles = StyleSheet.create({
   providers: { alignSelf: 'center', width: '100%', maxWidth: 420, gap: SPACE[2] },
   appleButton: { height: 48, width: '100%' },
   spinner: { marginTop: SPACE[3] },
+  footer: { marginTop: SPACE[4], alignItems: 'center' },
 });

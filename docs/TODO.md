@@ -22,9 +22,13 @@
   claim-a-route happy path on device).
 - **Self-hosted Mac runner** — swap for GitHub-hosted macOS minutes in `mobile-ios.yml`
   when Mac hardware is available; workflow is a drop-in change.
-- **Public web account-deletion page** — Google Play's Data-safety form requires an HTTPS
-  URL usable without the app; the server endpoint exists (`DELETE /auth/me`), the web page
-  does not. Needed before store listing (P6).
+- **Terms of Service / Community Guidelines page** — the UGC surface has block/report and a
+  privacy policy (`/privacy`, linked in-app), but no ToS/EULA page yet; Apple reviewers of
+  UGC apps sometimes ask for one. Content needs an owner decision — draft `/terms`, then link
+  it beside the privacy row in mobile Settings + LoginScreen.
+- **Android notification small icon** — `expo-notifications` is configured with the brand
+  `color` only; a proper white-on-transparent small-icon asset needs a designer pass
+  (`['expo-notifications', { icon, color }]`).
 
 ## Cross-platform (surfaced by the mobile research, benefits web too)
 

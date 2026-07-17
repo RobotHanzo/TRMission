@@ -3,9 +3,10 @@
 // glyphs, sound + volume, push toggle, haptics toggle, and in-app account deletion. Guests have
 // no deletion row — a guest account holds nothing its TTL won't reap. Preference changes apply
 // instantly (ui store persists on-device) and then sync to the account (no-op for guests).
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { BoardLayout, Locale, Theme, UserPreferences } from '../net/rest';
+import { SERVER_ORIGIN } from '../config';
 import { useSettings } from '../store/settings';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
@@ -185,6 +186,18 @@ export function SettingsScreen(): React.JSX.Element {
         <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.haptics')}</Text>
         <Switch testID="haptics-switch" value={haptics} onValueChange={setHaptics} />
       </View>
+
+      {/* Store compliance (Apple 5.1.1 / Play): the privacy policy must be reachable IN the app,
+          not just from the store listing. Served by the same-origin web app. */}
+      <SectionLabel>{t('settings.about')}</SectionLabel>
+      <Pressable
+        testID="settings-privacy-policy"
+        accessibilityRole="link"
+        style={styles.row}
+        onPress={() => void Linking.openURL(`${SERVER_ORIGIN}/privacy`)}
+      >
+        <Text style={[styles.label, { color: tokens.blue }]}>{t('settings.privacyPolicy')}</Text>
+      </Pressable>
 
       {!isGuest && (
         <Pressable

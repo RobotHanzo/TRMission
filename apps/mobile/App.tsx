@@ -11,6 +11,7 @@ import './src/i18n'; // initialise the i18n singleton before any screen uses use
 // jest-mocked environments must not crash the module load.
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 import { navigationRef, RootNavigator } from './src/navigation';
+import { SERVER_ORIGIN } from './src/config';
 import { watchTokenRotation } from './src/push/register';
 import {
   installNotificationHandler,
@@ -24,7 +25,7 @@ import { useSoundSetup } from './src/hooks/useSoundSetup';
 // `trmission://room/CODE` (and the web share URL's /room/CODE path) lands straight in that
 // room's lobby — the RoomScreen's shared poll joins/spectates exactly like a web link visit.
 const linking = {
-  prefixes: ['trmission://', 'https://trmission.example'],
+  prefixes: ['trmission://', SERVER_ORIGIN],
   config: {
     screens: {
       Room: 'room/:code',

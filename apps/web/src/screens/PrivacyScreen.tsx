@@ -1,12 +1,11 @@
 /**
  * Public privacy-policy page (both app stores require an HTTPS privacy URL; Play's
- * Data-safety form points here). Legal content is deliberately bilingual on one page —
- * zh-Hant first, then English — so it does NOT go through i18n keys. It enumerates
- * exactly what the server actually stores; keep it in lockstep with the store
- * data-safety forms (docs/mobile/store-listings.md) whenever collection changes.
- *
- * PLACEHOLDER-SUPPORT-EMAIL is launch-gated: the Task 11 checklist blocks store
- * submission until it is replaced with the real monitored mailbox.
+ * Data-safety form points here, and the mobile app links here from Settings + the login
+ * screen). Legal content is deliberately bilingual on one page — zh-Hant first, then
+ * English — so it does NOT go through i18n keys. It enumerates exactly what the server
+ * actually stores; keep it in lockstep with the store data-safety forms
+ * (docs/release/play-console-setup.md + app-store-connect-setup.md) whenever collection
+ * changes. Contact address: the monitored trmission@robothanzo.dev mailbox below.
  */
 export function PrivacyScreen() {
   return (

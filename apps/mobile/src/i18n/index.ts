@@ -107,6 +107,8 @@ void i18n.use(initReactI18next).init({
           sound: '音效',
           volume: '音量',
           deleteAccount: '刪除帳號',
+          about: '關於',
+          privacyPolicy: '隱私權政策',
           deleteConfirmTitle: '確定要刪除帳號嗎？',
           deleteConfirmBody: '此動作無法復原。你的個人資料將被刪除，對局紀錄將匿名化。',
           deleteConfirmAction: '永久刪除',
@@ -427,6 +429,8 @@ void i18n.use(initReactI18next).init({
           sound: 'Sound',
           volume: 'Volume',
           deleteAccount: 'Delete account',
+          about: 'About',
+          privacyPolicy: 'Privacy policy',
           deleteConfirmTitle: 'Delete your account?',
           deleteConfirmBody:
             'This cannot be undone. Your profile is deleted and match records are anonymized.',
