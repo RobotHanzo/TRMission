@@ -105,6 +105,8 @@ export const DashboardUserRowSchema = z.object({
   createdAt: z.string(),
   disabledAt: z.string().optional(),
   guestExpiresAt: z.string().optional(),
+  lastLoginIp: z.string().optional(),
+  lastLoginAt: z.string().optional(),
 });
 
 export const DashboardUserDetailSchema = DashboardUserRowSchema.extend({

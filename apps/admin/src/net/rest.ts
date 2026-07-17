@@ -55,6 +55,8 @@ export interface UserRow {
   createdAt: string;
   disabledAt?: string;
   guestExpiresAt?: string;
+  lastLoginIp?: string;
+  lastLoginAt?: string;
 }
 export interface UserDetail extends UserRow {
   locale?: string;

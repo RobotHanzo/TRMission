@@ -28,11 +28,12 @@ export class AuthService {
     return { ...pub, features: [...new Set([...pub.features, ...defaults])] };
   }
 
-  private async issue(user: UserDoc): Promise<IssuedAuth> {
+  private async issue(user: UserDoc, ip?: string): Promise<IssuedAuth> {
     // The single session-mint chokepoint (guest/register/login/upgrade/OAuth): a banned
     // account can never obtain a new session through any entry method.
     if (user.disabledAt) throw new ForbiddenException('account disabled');
     const refreshToken = await this.sessions.create(user._id);
+    if (ip) await this.users.recordLogin(user._id, ip);
     return {
       user: await this.withDefaults(user),
       accessToken: this.tokens.signAccess(user),
@@ -41,12 +42,12 @@ export class AuthService {
   }
 
   /** Mint a fresh session for an already-resolved user (used by the OAuth flow). */
-  issueFor(user: UserDoc): Promise<IssuedAuth> {
-    return this.issue(user);
+  issueFor(user: UserDoc, ip?: string): Promise<IssuedAuth> {
+    return this.issue(user, ip);
   }
 
-  async guest(displayName: string, locale: Locale): Promise<IssuedAuth> {
-    return this.issue(await this.users.createGuest(displayName, locale));
+  async guest(displayName: string, locale: Locale, ip?: string): Promise<IssuedAuth> {
+    return this.issue(await this.users.createGuest(displayName, locale), ip);
   }
 
   async register(
@@ -54,31 +55,33 @@ export class AuthService {
     password: string,
     displayName: string,
     locale: Locale,
+    ip?: string,
   ): Promise<IssuedAuth> {
     if (await this.users.findByEmail(email))
       throw new ConflictException('email already registered');
     return this.issue(
       await this.users.createRegistered(email, await hash(password), displayName, locale),
+      ip,
     );
   }
 
   /** Attach credentials to the currently-authenticated guest, keeping its id (A9). */
-  async upgrade(userId: string, email: string, password: string): Promise<IssuedAuth> {
+  async upgrade(userId: string, email: string, password: string, ip?: string): Promise<IssuedAuth> {
     if (await this.users.findByEmail(email))
       throw new ConflictException('email already registered');
     const user = await this.users.upgradeGuest(userId, email, await hash(password));
     if (!user) throw new UnauthorizedException('not a guest account');
     // Prior guest refresh families die with the upgrade; the fresh one is minted just below.
     await this.sessions.revokeAllForUser(user._id);
-    return this.issue(user);
+    return this.issue(user, ip);
   }
 
-  async login(email: string, password: string): Promise<IssuedAuth> {
+  async login(email: string, password: string, ip?: string): Promise<IssuedAuth> {
     const user = await this.users.findByEmail(email);
     if (!user?.passwordHash || !(await verify(user.passwordHash, password))) {
       throw new UnauthorizedException('invalid credentials');
     }
-    return this.issue(user);
+    return this.issue(user, ip);
   }
 
   async refresh(

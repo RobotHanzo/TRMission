@@ -186,7 +186,11 @@ export class OauthService {
    * here are ordinary REST errors (this is a JSON call, not a top-level navigation that must always
    * land somewhere) — no redirect/error-query-param plumbing needed.
    */
-  async handleCredential(idToken: string, guestUserId: string | undefined): Promise<IssuedAuth> {
+  async handleCredential(
+    idToken: string,
+    guestUserId: string | undefined,
+    ip?: string,
+  ): Promise<IssuedAuth> {
     const cfg = this.authConfig.provider('google');
     if (!cfg) throw new UnauthorizedException('provider_disabled');
 
@@ -208,7 +212,7 @@ export class OauthService {
       profile.avatarUrl,
       guestUserId,
     );
-    return this.auth.issueFor(user);
+    return this.auth.issueFor(user, ip);
   }
 
   /**
@@ -221,6 +225,7 @@ export class OauthService {
     identityToken: string,
     fullName: string | undefined,
     guestUserId: string | undefined,
+    ip?: string,
   ): Promise<IssuedAuth> {
     const audiences = this.authConfig.appleClientIds;
     if (audiences.length === 0) throw new UnauthorizedException('provider_disabled');
@@ -243,7 +248,7 @@ export class OauthService {
       profile.avatarUrl,
       guestUserId,
     );
-    return this.auth.issueFor(user);
+    return this.auth.issueFor(user, ip);
   }
 
   private async resolveAccount(

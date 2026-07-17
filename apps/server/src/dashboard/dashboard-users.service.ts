@@ -35,6 +35,8 @@ const toRow = (u: UserDoc) => ({
   createdAt: u.createdAt.toISOString(),
   ...(u.disabledAt ? { disabledAt: u.disabledAt.toISOString() } : {}),
   ...(u.guestExpiresAt ? { guestExpiresAt: u.guestExpiresAt.toISOString() } : {}),
+  ...(u.lastLoginIp ? { lastLoginIp: u.lastLoginIp } : {}),
+  ...(u.lastLoginAt ? { lastLoginAt: u.lastLoginAt.toISOString() } : {}),
 });
 
 @Injectable()

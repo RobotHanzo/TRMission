@@ -24,6 +24,7 @@ import {
 import { randomInt } from 'node:crypto';
 import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { clientIp } from './client-ip';
 import { AccessTokenGuard } from './access-token.guard';
 import { MobileCodeRepo } from './mobile-code.repo';
 import { UserRepo } from './user.repo';
@@ -138,7 +139,11 @@ export class AuthController {
     return this.finish(
       req,
       res,
-      await this.auth.guest(body.displayName ?? randomGuestName(), body.locale ?? 'zh-Hant'),
+      await this.auth.guest(
+        body.displayName ?? randomGuestName(),
+        body.locale ?? 'zh-Hant',
+        clientIp(req),
+      ),
     );
   }
 
@@ -160,6 +165,7 @@ export class AuthController {
         body.password,
         body.displayName,
         body.locale ?? 'zh-Hant',
+        clientIp(req),
       ),
     );
   }
@@ -178,7 +184,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
-    return this.finish(req, res, await this.auth.upgrade(user.userId, body.email, body.password));
+    return this.finish(
+      req,
+      res,
+      await this.auth.upgrade(user.userId, body.email, body.password, clientIp(req)),
+    );
   }
 
   @Post('login')
@@ -192,7 +202,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     if (!this.authConfig.passwordLogin) throw new ForbiddenException('password login disabled');
-    return this.finish(req, res, await this.auth.login(body.email, body.password));
+    return this.finish(req, res, await this.auth.login(body.email, body.password, clientIp(req)));
   }
 
   @Post('oauth/google/credential')
@@ -210,7 +220,11 @@ export class AuthController {
     const guestUserId = await this.oauth.guestIdFromRefresh(
       body.refreshToken ?? req.cookies?.[REFRESH_COOKIE],
     );
-    return this.finish(req, res, await this.oauth.handleCredential(body.credential, guestUserId));
+    return this.finish(
+      req,
+      res,
+      await this.oauth.handleCredential(body.credential, guestUserId, clientIp(req)),
+    );
   }
 
   @Post('oauth/apple/credential')
@@ -230,7 +244,12 @@ export class AuthController {
     return this.finish(
       req,
       res,
-      await this.oauth.handleAppleCredential(body.identityToken, body.fullName, guestUserId),
+      await this.oauth.handleAppleCredential(
+        body.identityToken,
+        body.fullName,
+        guestUserId,
+        clientIp(req),
+      ),
     );
   }
 
@@ -251,12 +270,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Redeem a one-time OAuth code for a mobile token pair' })
   @ApiBody({ schema: apiSchema(MobileExchangeSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(MobileAuthResultSchema) })
-  async mobileExchange(@Body() body: MobileExchangeDto) {
+  async mobileExchange(@Body() body: MobileExchangeDto, @Req() req: Request) {
     const userId = await this.mobileCodes.redeem('exchange', body.code);
     if (!userId) throw new UnauthorizedException('invalid or expired code');
     const user = await this.users.findById(userId);
     if (!user) throw new UnauthorizedException('user not found');
-    const issued = await this.auth.issueFor(user);
+    const issued = await this.auth.issueFor(user, clientIp(req));
     return {
       user: issued.user,
       accessToken: issued.accessToken,
@@ -275,6 +294,7 @@ export class AuthController {
   @ApiExcludeEndpoint()
   async mobileWebHandoff(
     @Query('code') code: string | undefined,
+    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     const userId = await this.mobileCodes.redeem('carry', code);
@@ -284,7 +304,7 @@ export class AuthController {
       return;
     }
     try {
-      const issued = await this.auth.issueFor(user);
+      const issued = await this.auth.issueFor(user, clientIp(req));
       this.setRefresh(res, issued.refreshToken);
       res.redirect(`${this.authConfig.redirectBase}/maps`);
     } catch {
@@ -446,7 +466,7 @@ export class AuthController {
       return;
     }
     try {
-      const issued = await this.auth.issueFor(result.user);
+      const issued = await this.auth.issueFor(result.user, clientIp(req));
       this.setRefresh(res, issued.refreshToken);
       res.redirect(this.authConfig.webCallback({ redirect: result.redirect }));
     } catch {

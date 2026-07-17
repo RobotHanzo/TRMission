@@ -34,6 +34,9 @@ export interface UserDoc {
   tutorialCompleted?: boolean;
   /** Client-side mute list: ids whose chat/name this account chooses not to see. Capped. */
   blockedUserIds?: string[];
+  /** Client IP of the most recent successful sign-in (see `clientIp` — Cloudflare-aware). */
+  lastLoginIp?: string;
+  lastLoginAt?: Date;
 }
 
 /** Upper bound on the mute list so the user doc stays small (compliance UX, not social graph). */
@@ -173,6 +176,14 @@ export class UserRepo implements OnModuleInit {
     await this.col.updateOne(
       { _id: userId, isGuest: true },
       { $set: { guestExpiresAt: new Date(Date.now() + env.guestTtlMs) } },
+    );
+  }
+
+  /** Stamp the client IP of a successful sign-in (all entry methods — see `AuthService.issue`). */
+  async recordLogin(userId: string, ip: string): Promise<void> {
+    await this.col.updateOne(
+      { _id: userId },
+      { $set: { lastLoginIp: ip, lastLoginAt: new Date() } },
     );
   }
 

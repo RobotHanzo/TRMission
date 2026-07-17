@@ -153,6 +153,17 @@ function UserDrawer({
               <span className="k">{t('users.colCreated')}</span>
               <span className="v">{fmtDateTime(detail.createdAt, locale)}</span>
             </div>
+            {detail.lastLoginIp && (
+              <div className="oc-kv">
+                <span className="k">{t('users.lastLoginIp')}</span>
+                <span className="v">
+                  <span className="oc-mono">{detail.lastLoginIp}</span>
+                  {detail.lastLoginAt && (
+                    <span className="oc-muted"> · {fmtDateTime(detail.lastLoginAt, locale)}</span>
+                  )}
+                </span>
+              </div>
+            )}
             {detail.locale && (
               <div className="oc-kv">
                 <span className="k">{t('users.locale')}</span>
