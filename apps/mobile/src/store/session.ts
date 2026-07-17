@@ -33,6 +33,8 @@ interface SessionState {
   loginWithAppleCredential(identityToken: string, fullName?: string): Promise<void>;
   /** Complete the Discord handoff: redeem the one-time exchange code for a token pair. */
   loginWithDiscordExchange(code: string): Promise<void>;
+  /** Complete the Android Apple handoff (browser redirect flow): redeem the exchange code. */
+  loginWithAppleExchange(code: string): Promise<void>;
   /** Persist display prefs to a registered account (guests stay AsyncStorage-only). */
   savePreferences(prefs: UserPreferences): Promise<void>;
   /** Record that a map-feature intro (e.g. broken rail) was shown. Non-fatal on failure — the
@@ -117,6 +119,7 @@ export const useSession = create<SessionState>()((set, get) => {
     loginWithAppleCredential: (identityToken, fullName) =>
       run('apple', () => api.appleCredential(identityToken, fullName)),
     loginWithDiscordExchange: (code) => run('discord', () => api.mobileExchange(code)),
+    loginWithAppleExchange: (code) => run('apple', () => api.mobileExchange(code)),
     async savePreferences(prefs) {
       const u = get().user;
       if (!u || u.isGuest) return; // guests persist via AsyncStorage only

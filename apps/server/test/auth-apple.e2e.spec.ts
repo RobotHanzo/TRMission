@@ -5,6 +5,7 @@ import {
   createTestApp,
   refreshCookie,
   FakeAppleIdTokenVerifier,
+  FakeAppleRedirectClient,
   OAUTH_TEST_CONFIG,
   type TestApp,
 } from './app';
@@ -31,9 +32,14 @@ beforeAll(async () => {
 afterAll(() => t.close());
 
 describe('apple: /auth/config advertises the provider', () => {
-  it('reports apple: true when audiences are configured', async () => {
+  it('reports apple: true (credential) but appleRedirect: false without a Services ID', async () => {
     const res = await request(server()).get('/api/v1/auth/config').expect(200);
-    expect(res.body.providers).toEqual({ google: true, discord: true, apple: true });
+    expect(res.body.providers).toEqual({
+      google: true,
+      discord: true,
+      apple: true,
+      appleRedirect: false,
+    });
   });
 });
 
@@ -159,9 +165,159 @@ describe('apple credential sign-in', () => {
   });
 });
 
-describe('apple stays credential-only', () => {
-  it('the redirect flow rejects apple as a provider', async () => {
+describe('apple redirect flow stays off without a Services ID', () => {
+  it('start redirects with provider_disabled when unconfigured', async () => {
     const res = await request(server()).get('/api/v1/auth/oauth/apple/start').expect(302);
     expect(String(res.headers.location)).toContain('error=provider_disabled');
+  });
+});
+
+describe('apple redirect flow (web + android)', () => {
+  const SERVICES_ID = 'dev.robothanzo.trmission.web';
+  let ra: TestApp;
+  let rVerifier: FakeAppleIdTokenVerifier;
+  let rClient: FakeAppleRedirectClient;
+  const rServer = () => ra.app.getHttpServer();
+
+  const appleNonceCookie = (res: { headers: Record<string, unknown> }): string => {
+    const setCookie = res.headers['set-cookie'] as string[] | undefined;
+    const c = setCookie?.find((s) => s.startsWith('trm_oauth_apple='));
+    return c ? (c.split(';')[0] ?? '') : '';
+  };
+  const startFlow = async (query = '') => {
+    const res = await request(rServer())
+      .get(`/api/v1/auth/oauth/apple/start${query}`)
+      .expect(302);
+    const url = new URL(String(res.headers.location));
+    return { url, state: url.searchParams.get('state') ?? '', cookie: appleNonceCookie(res) };
+  };
+
+  beforeAll(async () => {
+    rVerifier = new FakeAppleIdTokenVerifier();
+    rClient = new FakeAppleRedirectClient();
+    ra = await createTestApp({
+      mongod: sharedMongod,
+      dbName: 'trm-test-apple-redirect',
+      authConfig: {
+        ...OAUTH_TEST_CONFIG,
+        appleClientIds: ['dev.robothanzo.trmission'],
+        appleServicesId: SERVICES_ID,
+      },
+      appleVerifier: rVerifier,
+      appleRedirectClient: rClient,
+    });
+  }, 60_000);
+  afterAll(() => ra.close());
+
+  it('advertises appleRedirect: true when the Services ID is configured', async () => {
+    const res = await request(rServer()).get('/api/v1/auth/config').expect(200);
+    expect(res.body.providers.appleRedirect).toBe(true);
+  });
+
+  it('start builds the Apple authorize URL (form_post, Services ID) + nonce cookie', async () => {
+    const { url, state, cookie } = await startFlow('?redirect=%2Froom%2FABCDE');
+    expect(url.origin + url.pathname).toBe('https://appleid.apple.com/auth/authorize');
+    expect(url.searchParams.get('client_id')).toBe(SERVICES_ID);
+    expect(url.searchParams.get('response_type')).toBe('code');
+    expect(url.searchParams.get('response_mode')).toBe('form_post');
+    expect(url.searchParams.get('scope')).toBe('name email');
+    expect(url.searchParams.get('redirect_uri')).toBe(
+      'http://localhost:5173/api/v1/auth/oauth/apple/callback',
+    );
+    expect(state).toBeTruthy();
+    expect(cookie).toContain('trm_oauth_apple=');
+  });
+
+  it('web round trip: form_post callback signs in, sets the refresh cookie, honors the name', async () => {
+    rClient.idToken = 'fake-redirect-id-token';
+    rClient.fail = false;
+    rVerifier.profile = {
+      sub: 'apple-web-1',
+      email: 'appleweb@example.com',
+      emailVerified: true,
+      displayName: '',
+      avatarUrl: null,
+    };
+    rVerifier.fail = false;
+    const { state, cookie } = await startFlow('?redirect=%2Froom%2FABCDE');
+    const res = await request(rServer())
+      .post('/api/v1/auth/oauth/apple/callback')
+      .set('Cookie', cookie)
+      .type('form')
+      .send({
+        code: 'web-code-1',
+        state,
+        user: JSON.stringify({ name: { firstName: '蘋', lastName: '果' } }),
+      })
+      .expect(302);
+    expect(String(res.headers.location)).toContain('/login/callback');
+    expect(String(res.headers.location)).not.toContain('error=');
+    expect(refreshCookie(res)).toContain('trm_refresh=');
+    expect(rClient.calls).toContain('web-code-1');
+    // Both the native bundle id and the web Services ID are accepted audiences.
+    expect(rVerifier.lastAudience).toEqual(['dev.robothanzo.trmission', SERVICES_ID]);
+  });
+
+  it('mobile round trip: callback hands off a single-use exchange code', async () => {
+    rClient.idToken = 'fake-redirect-id-token';
+    rVerifier.profile = {
+      sub: 'apple-android-1',
+      email: 'appleandroid@example.com',
+      emailVerified: true,
+      displayName: '',
+      avatarUrl: null,
+    };
+    const { state, cookie } = await startFlow('?client=mobile');
+    const cb = await request(rServer())
+      .post('/api/v1/auth/oauth/apple/callback')
+      .set('Cookie', cookie)
+      .type('form')
+      .send({ code: 'android-code-1', state })
+      .expect(302);
+    const loc = new URL(String(cb.headers.location));
+    expect(loc.pathname).toBe('/m/callback');
+    const exchangeCode = loc.searchParams.get('code');
+    expect(exchangeCode).toBeTruthy();
+
+    const exchanged = await request(rServer())
+      .post('/api/v1/auth/mobile/exchange')
+      .set('x-trm-client', 'mobile')
+      .send({ code: exchangeCode })
+      .expect(200);
+    expect(exchanged.body.user.email).toBe('appleandroid@example.com');
+    expect(exchanged.body.refreshToken).toBeTruthy();
+  });
+
+  it('rejects a tampered state', async () => {
+    const res = await request(rServer())
+      .post('/api/v1/auth/oauth/apple/callback')
+      .type('form')
+      .send({ code: 'c', state: 'garbage' })
+      .expect(302);
+    expect(String(res.headers.location)).toContain('error=invalid_state');
+  });
+
+  it('rejects a mismatched nonce cookie', async () => {
+    const { state } = await startFlow();
+    const res = await request(rServer())
+      .post('/api/v1/auth/oauth/apple/callback')
+      .set('Cookie', 'trm_oauth_apple=wrong-nonce')
+      .type('form')
+      .send({ code: 'c', state })
+      .expect(302);
+    expect(String(res.headers.location)).toContain('error=invalid_state');
+  });
+
+  it('redirects with exchange_failed when Apple rejects the code', async () => {
+    rClient.fail = true;
+    const { state, cookie } = await startFlow();
+    const res = await request(rServer())
+      .post('/api/v1/auth/oauth/apple/callback')
+      .set('Cookie', cookie)
+      .type('form')
+      .send({ code: 'bad', state })
+      .expect(302);
+    expect(String(res.headers.location)).toContain('error=exchange_failed');
+    rClient.fail = false;
   });
 });

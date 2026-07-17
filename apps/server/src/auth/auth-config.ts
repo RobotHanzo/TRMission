@@ -4,7 +4,10 @@ import { env } from '../config/env';
 export type OauthProvider = 'google' | 'discord';
 export const OAUTH_PROVIDERS: readonly OauthProvider[] = ['google', 'discord'];
 
-/** Providers an account identity can be linked under. Apple is credential-only (no redirect flow). */
+/** Providers an account identity can be linked under. Apple sits outside OAUTH_PROVIDERS: its
+ *  native path is credential-only, and its web/Android redirect flow diverges enough from the
+ *  shared PKCE+userinfo machinery (form_post callback, per-request ES256 client_secret, identity
+ *  from the id_token) that it has dedicated routes — see auth.controller appleStart/appleCallback. */
 export type IdentityProvider = OauthProvider | 'apple';
 
 /** Everything needed to drive one provider's authorization-code + PKCE flow. */
@@ -49,6 +52,7 @@ export interface AuthConfigOverrides {
   providers?: Partial<Record<OauthProvider, { clientId: string; clientSecret: string }>>;
   googleMobileClientIds?: string[];
   appleClientIds?: string[];
+  appleServicesId?: string;
 }
 
 /**
@@ -63,6 +67,7 @@ export class AuthConfig {
   readonly redirectBase: string;
   readonly googleMobileClientIds: string[];
   readonly appleClientIds: string[];
+  readonly appleServicesId: string;
   private readonly providers: Record<OauthProvider, ProviderConfig | null>;
 
   // @Optional so Nest injects `undefined` for the real provider (env-driven); tests pass overrides
@@ -73,6 +78,7 @@ export class AuthConfig {
     this.redirectBase = (overrides?.redirectBase ?? env.oauthRedirectBase).replace(/\/+$/, '');
     this.googleMobileClientIds = overrides?.googleMobileClientIds ?? env.googleMobileClientIds;
     this.appleClientIds = overrides?.appleClientIds ?? env.appleClientIds;
+    this.appleServicesId = overrides?.appleServicesId ?? env.appleServicesId;
     const g = overrides?.providers?.google;
     const d = overrides?.providers?.discord;
     this.providers = {
@@ -94,9 +100,25 @@ export class AuthConfig {
     return this.providers[p] ?? null;
   }
 
-  /** Sign in with Apple is credential-only: enabled iff at least one audience is configured. */
+  /** Sign in with Apple (native credential path): enabled iff at least one audience is configured. */
   get appleEnabled(): boolean {
     return this.appleClientIds.length > 0;
+  }
+
+  /** SIWA web/Android redirect flow: enabled iff a Services ID is configured. (The ES256 key
+   *  material is checked separately at exchange time — see FetchAppleRedirectClient.) */
+  get appleRedirectEnabled(): boolean {
+    return this.appleServicesId.length > 0;
+  }
+
+  /** The Services ID's registered Return URL — must byte-match Apple's developer console. */
+  appleCallbackUrl(): string {
+    return `${this.redirectBase}/api/v1/auth/oauth/apple/callback`;
+  }
+
+  /** Every audience an Apple identity token may carry: native bundle ids + the web Services ID. */
+  appleAudiences(): string[] {
+    return [...new Set([...this.appleClientIds, this.appleServicesId].filter(Boolean))];
   }
 
   /** Every audience a Google ID token may carry: web client id + native app client ids. */
@@ -132,7 +154,7 @@ export class AuthConfig {
   publicConfig(): {
     passwordLogin: boolean;
     guest: boolean;
-    providers: { google: boolean; discord: boolean; apple: boolean };
+    providers: { google: boolean; discord: boolean; apple: boolean; appleRedirect: boolean };
     googleClientId?: string;
   } {
     return {
@@ -142,6 +164,9 @@ export class AuthConfig {
         google: !!this.providers.google,
         discord: !!this.providers.discord,
         apple: this.appleEnabled,
+        // The browser/Android flow is gated separately: the credential path (`apple`) works with
+        // audiences alone, the redirect flow additionally needs the Services ID.
+        appleRedirect: this.appleRedirectEnabled,
       },
       ...(this.providers.google ? { googleClientId: this.providers.google.clientId } : {}),
     };

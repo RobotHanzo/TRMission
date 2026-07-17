@@ -19,6 +19,10 @@ import {
   APPLE_ID_TOKEN_VERIFIER,
   type AppleIdTokenVerifier,
 } from '../src/auth/apple-id-token.verifier';
+import {
+  APPLE_REDIRECT_CLIENT,
+  type AppleRedirectClient,
+} from '../src/auth/apple-redirect.client';
 import { APPLE_TOKEN_REVOKER, type AppleTokenRevoker } from '../src/account/apple-token-revoker';
 import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
 import {
@@ -41,6 +45,8 @@ export interface TestAppOptions {
   googleVerifier?: GoogleIdTokenVerifier;
   /** Stub Apple identity-token verification (Sign in with Apple credential flow). */
   appleVerifier?: AppleIdTokenVerifier;
+  /** Stub the SIWA redirect flow's code-exchange network seam. */
+  appleRedirectClient?: AppleRedirectClient;
   /** Stub Apple token revocation (account deletion). */
   appleRevoker?: AppleTokenRevoker;
   /** Override DashboardConfig (owner-email bootstrap) without touching env. */
@@ -75,6 +81,8 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
     builder = builder.overrideProvider(GOOGLE_ID_TOKEN_VERIFIER).useValue(opts.googleVerifier);
   if (opts.appleVerifier)
     builder = builder.overrideProvider(APPLE_ID_TOKEN_VERIFIER).useValue(opts.appleVerifier);
+  if (opts.appleRedirectClient)
+    builder = builder.overrideProvider(APPLE_REDIRECT_CLIENT).useValue(opts.appleRedirectClient);
   if (opts.appleRevoker)
     builder = builder.overrideProvider(APPLE_TOKEN_REVOKER).useValue(opts.appleRevoker);
   if (opts.dashboardConfig)
@@ -135,6 +143,18 @@ export class FakeAppleIdTokenVerifier implements AppleIdTokenVerifier {
     this.lastAudience = audience;
     if (this.fail || !this.profile) throw new Error('fake apple verify failed');
     return this.profile;
+  }
+}
+
+/** A controllable stand-in for the SIWA redirect flow's authorization-code exchange. */
+export class FakeAppleRedirectClient implements AppleRedirectClient {
+  idToken: string | null = null;
+  fail = false;
+  calls: string[] = [];
+  async exchangeCode(code: string): Promise<{ idToken: string }> {
+    this.calls.push(code);
+    if (this.fail || !this.idToken) throw new Error('fake apple exchange failed');
+    return { idToken: this.idToken };
   }
 }
 

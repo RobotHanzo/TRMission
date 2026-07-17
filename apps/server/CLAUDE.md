@@ -112,12 +112,21 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   NEW web session family, sets the normal Strict refresh cookie, and 302s to `/maps`
   (errors 302 to `/login/callback?error=…`, never a 500 on a top-level navigation). It is
   the one sanctioned way a native session becomes a web cookie session.
-  **Sign in with Apple** is credential-only: `POST /auth/oauth/apple/credential`
+  **Sign in with Apple** has two entry points. Native (iOS): `POST /auth/oauth/apple/credential`
   (`{identityToken, fullName?, refreshToken?}`) verifies against Apple's JWKS
-  (`apple-id-token.verifier.ts`, audiences = `APPLE_CLIENT_IDS`) and converges on
-  `resolveAccount` under the `'apple'` identity — Hide My Email relay addresses are
-  treated as verified emails and simply don't cross-link with other providers. There is
-  no `/oauth/apple/start`; Apple never enters the redirect flow.
+  (`apple-id-token.verifier.ts`, audiences = `appleAudiences()` — `APPLE_CLIENT_IDS` plus the
+  Services ID) and converges on `resolveAccount` under the `'apple'` identity — Hide My Email
+  relay addresses are treated as verified emails and simply don't cross-link with other
+  providers. Web + Android: a DEDICATED redirect-flow route pair `GET /oauth/apple/start` +
+  `POST /oauth/apple/callback` (declared before the `:provider` routes; `asProvider` still
+  rejects `apple` so Apple stays outside `OAUTH_PROVIDERS`) — enabled when `APPLE_SERVICES_ID`
+  is set. Apple diverges from the shared flow three ways: per-request ES256 client_secret
+  (`apple-client-secret.ts`, shared with the revoker), identity from the token response's
+  `id_token` (no userinfo; exchange seam `apple-redirect.client.ts`, faked in e2e), and a
+  `response_mode=form_post` callback that arrives as a CROSS-SITE POST — so its nonce cookie
+  (`trm_oauth_apple`) is SameSite=None/HTTPS-only, and over dev http the signed short-TTL
+  state alone binds the round-trip. `?client=mobile` hands off via the same `/m/callback`
+  exchange-code path Discord uses (Android runs this flow in a system browser).
   **Account deletion**: `DELETE /auth/me` (Bearer; optional `{appleAuthorizationCode}` from a
   fresh SIWA re-auth for token revocation, best-effort). Cascade in `src/account/`: deletes
   users/authSessions/customMaps drafts, leaves LOBBY rooms via `RoomRepo.leave`, `$pull`s
@@ -224,6 +233,9 @@ Mobile clients: `MOBILE_MIN_BUILD` (forced-update floor served at `GET /version/
 `GOOGLE_MOBILE_CLIENT_IDS` (comma list — extra ID-token audiences for the iOS/Android
 Google Sign-In apps), `APPLE_CLIENT_IDS` (comma list of bundle ids / Services IDs accepted
 as Sign in with Apple identity-token audiences — enables `POST /auth/oauth/apple/credential`),
+`APPLE_SERVICES_ID` (the SIWA web/Android redirect flow's OAuth client_id — enables
+`GET/POST /auth/oauth/apple/{start,callback}`; register
+`${OAUTH_REDIRECT_BASE}/api/v1/auth/oauth/apple/callback` as its Return URL),
 `APPLE_TEAM_ID` + `APPLE_KEY_ID` + `APPLE_PRIVATE_KEY` (SIWA token revocation during
 `DELETE /auth/me` account deletion; revocation is best-effort per TN3194),
 `APPLE_APP_ID` + `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256`

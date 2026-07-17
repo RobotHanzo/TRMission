@@ -71,6 +71,10 @@ export const REFRESH_PATH = '/api/v1/auth';
 // cross-site top-level navigation, on which Strict cookies would be withheld — breaking every
 // callback. Scoped to the oauth subtree so it never rides along with ordinary auth calls.
 const OAUTH_NONCE_COOKIE = 'trm_oauth';
+// Apple's form_post callback is a cross-site POST — even Lax is withheld there, so the SIWA
+// redirect flow uses its own SameSite=None (HTTPS-only) nonce cookie. Separate name so an
+// in-flight Google/Discord round-trip is never clobbered by an Apple one (or vice versa).
+const APPLE_NONCE_COOKIE = 'trm_oauth_apple';
 const OAUTH_NONCE_PATH = '/api/v1/auth/oauth';
 const randomGuestName = (): string => `旅客${randomInt(1000, 10000)}`;
 /** Exchange codes only need to survive the 302 → app-open → POST hop. */
@@ -393,6 +397,100 @@ export class AuthController {
   // ── OAuth (browser navigations, not JSON — excluded from the OpenAPI doc) ──────────────────
   // Both routes are unguarded: the user is not yet authenticated. Identity is carried through the
   // provider in a signed `state`, bound to this browser by the `trm_oauth` nonce cookie.
+
+  // ── Sign in with Apple: the web/Android redirect flow ──────────────────────────────────────
+  // Declared BEFORE the generic :provider routes so Nest matches these first (asProvider still
+  // rejects 'apple' — Apple deliberately stays outside OAUTH_PROVIDERS because it diverges from
+  // the shared PKCE+userinfo machinery: per-request ES256 client_secret, identity from the
+  // id_token, and a response_mode=form_post callback that arrives as a CROSS-SITE POST). The
+  // nonce cookie is therefore SameSite=None (a Lax cookie never rides a cross-site POST), under
+  // its own name so an in-flight Google/Discord round-trip is never clobbered.
+
+  @Get('oauth/apple/start')
+  @ApiExcludeEndpoint()
+  async appleStart(
+    @Query('redirect') redirect: string | undefined,
+    @Query('client') client: string | undefined,
+    @Query('carry') carry: string | undefined,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const mobile = client === 'mobile';
+    const failUrl = (error: string): string =>
+      mobile
+        ? this.authConfig.mobileCallback({ error })
+        : this.authConfig.webCallback({ error });
+    if (!this.authConfig.appleRedirectEnabled) {
+      res.redirect(failUrl('provider_disabled'));
+      return;
+    }
+    const guestUserId = mobile
+      ? await this.oauth.guestIdFromCarryCode(carry)
+      : await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
+    const built = this.oauth.buildAppleAuthorize(redirect, guestUserId, mobile);
+    if (!built) {
+      res.redirect(failUrl('provider_disabled'));
+      return;
+    }
+    // SameSite=None only sticks as Secure — over dev http browsers drop it and the signed state
+    // alone binds the round-trip (see handleAppleRedirectCallback's nonce rule).
+    res.cookie(APPLE_NONCE_COOKIE, built.nonce, {
+      httpOnly: true,
+      secure: env.cookieSecure,
+      sameSite: env.cookieSecure ? 'none' : 'lax',
+      path: OAUTH_NONCE_PATH,
+      maxAge: env.oauthStateTtlMs, // same lifetime as the signed state it guards
+    });
+    res.redirect(built.url);
+  }
+
+  @Post('oauth/apple/callback')
+  @ApiExcludeEndpoint()
+  async appleCallback(
+    @Body('code') code: string | undefined,
+    @Body('state') state: string | undefined,
+    @Body('user') userField: string | undefined,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const nonceCookie = req.cookies?.[APPLE_NONCE_COOKIE] as string | undefined;
+    res.clearCookie(APPLE_NONCE_COOKIE, { path: OAUTH_NONCE_PATH });
+    const result = await this.oauth.handleAppleRedirectCallback(
+      code,
+      state,
+      userField,
+      nonceCookie,
+      env.cookieSecure,
+    );
+    if (!result.ok) {
+      res.redirect(
+        result.mobile
+          ? this.authConfig.mobileCallback({ error: result.error })
+          : this.authConfig.webCallback({ redirect: result.redirect, error: result.error }),
+      );
+      return;
+    }
+    if (result.mobile) {
+      // No cookie can survive the system-browser → app hop; hand off a single-use code instead.
+      const exchangeCode = await this.mobileCodes.mint(
+        'exchange',
+        result.user._id,
+        EXCHANGE_CODE_TTL_MS,
+      );
+      res.redirect(this.authConfig.mobileCallback({ code: exchangeCode }));
+      return;
+    }
+    try {
+      const issued = await this.auth.issueFor(result.user, clientIp(req));
+      this.setRefresh(res, issued.refreshToken);
+      res.redirect(this.authConfig.webCallback({ redirect: result.redirect }));
+    } catch {
+      // e.g. account disabled between resolution and issuance — never 500 a top-level navigation.
+      res.redirect(
+        this.authConfig.webCallback({ redirect: result.redirect, error: 'server_error' }),
+      );
+    }
+  }
 
   @Get('oauth/:provider/start')
   @ApiExcludeEndpoint()

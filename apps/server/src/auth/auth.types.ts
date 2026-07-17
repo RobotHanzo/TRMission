@@ -60,9 +60,10 @@ export interface AdminReplayTicketPayload {
  */
 export interface OauthStatePayload {
   kind: 'oauth-state';
-  provider: 'google' | 'discord';
+  provider: 'google' | 'discord' | 'apple';
   redirect: string;
   nonce: string;
+  /** PKCE verifier — empty string for Apple, which ignores PKCE (identity comes from the id_token). */
   codeVerifier: string;
   guestUserId?: string;
   /** Set when the flow started with ?client=mobile: the callback hands off via /m/callback. */

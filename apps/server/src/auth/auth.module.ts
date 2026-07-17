@@ -15,6 +15,7 @@ import { OauthService } from './oauth.service';
 import { OAUTH_HTTP, FetchOauthHttp } from './oauth.http';
 import { GOOGLE_ID_TOKEN_VERIFIER, GoogleAuthLibraryVerifier } from './google-id-token.verifier';
 import { APPLE_ID_TOKEN_VERIFIER, JoseAppleIdTokenVerifier } from './apple-id-token.verifier';
+import { APPLE_REDIRECT_CLIENT, FetchAppleRedirectClient } from './apple-redirect.client';
 
 @Module({
   imports: [JwtModule.register({ secret: env.jwtSecret })],
@@ -33,6 +34,7 @@ import { APPLE_ID_TOKEN_VERIFIER, JoseAppleIdTokenVerifier } from './apple-id-to
     { provide: OAUTH_HTTP, useClass: FetchOauthHttp },
     { provide: GOOGLE_ID_TOKEN_VERIFIER, useClass: GoogleAuthLibraryVerifier },
     { provide: APPLE_ID_TOKEN_VERIFIER, useClass: JoseAppleIdTokenVerifier },
+    { provide: APPLE_REDIRECT_CLIENT, useClass: FetchAppleRedirectClient },
   ],
   // Exported so the lobby can sign ws-game tickets and guard its routes; SessionRepo
   // for the dashboard's per-user session counts + ban-time revocation; FeatureDefaultsRepo

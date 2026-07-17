@@ -2,6 +2,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
+import { signInWithApple } from '../auth/apple';
 import { signInWithDiscord } from '../auth/discord';
 import { signInWithGoogle } from '../auth/google';
 import { api, type AuthConfig } from '../net/rest';
@@ -18,7 +19,7 @@ import {
   Screen,
   SecondaryButton,
 } from '../theme/chrome';
-import { DiscordIcon, GoogleIcon } from '../theme/brandIcons';
+import { AppleIcon, DiscordIcon, GoogleIcon } from '../theme/brandIcons';
 import { SPACE, useTheme } from '../theme/useTheme';
 
 /** The five sign-in methods P0 exposes: guest, email/password, Google, Apple (iOS), Discord. */
@@ -56,6 +57,9 @@ export function LoginScreen(): React.JSX.Element {
   const googleOn = config?.providers.google ?? true;
   const discordOn = config?.providers.discord ?? true;
   const appleOn = (config?.providers.apple ?? true) && Platform.OS === 'ios';
+  // Android has no native SIWA: the server's redirect flow runs in a system browser instead —
+  // it needs the Apple Services ID configured (`appleRedirect`), not just the native audiences.
+  const appleWebOn = Platform.OS !== 'ios' && !!config?.providers.appleRedirect;
 
   const submitPassword = (): void => {
     if (mode === 'login') void login(email, password);
@@ -178,6 +182,14 @@ export function LoginScreen(): React.JSX.Element {
             cornerRadius={10}
             style={styles.appleButton}
             onPress={() => void handleApple()}
+          />
+        )}
+        {appleWebOn && (
+          <SecondaryButton
+            title={t('login.apple')}
+            icon={<AppleIcon color={dark ? '#fff' : '#000'} />}
+            onPress={() => void signInWithApple()}
+            disabled={loading}
           />
         )}
       </View>

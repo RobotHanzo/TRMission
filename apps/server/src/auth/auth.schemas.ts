@@ -93,6 +93,13 @@ export const MobileAuthResultSchema = z.object({
 export const AuthConfigSchema = z.object({
   passwordLogin: z.boolean(),
   guest: z.boolean(),
-  providers: z.object({ google: z.boolean(), discord: z.boolean(), apple: z.boolean() }),
+  providers: z.object({
+    google: z.boolean(),
+    discord: z.boolean(),
+    apple: z.boolean(),
+    /** The SIWA web/Android redirect flow (Services ID configured) — distinct from the native
+     *  credential path so the web/Android buttons only render when the flow can actually run. */
+    appleRedirect: z.boolean(),
+  }),
   googleClientId: z.string().optional(),
 });

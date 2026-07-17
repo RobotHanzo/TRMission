@@ -639,6 +639,12 @@
   border-color: #5865f2;
   color: #fff;
 }
+/* Sign in with Apple: black button per Apple's HIG. */
+.oauth-apple {
+  background: #000;
+  border-color: #000;
+  color: #fff;
+}
 
 /* Toggle switch (colour-blind) */
 .switch {

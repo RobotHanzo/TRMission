@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { SignJWT, importPKCS8 } from 'jose';
 import { env } from '../config/env';
+import {
+  APPLE_BASE_URL,
+  appleSecretConfigured,
+  mintAppleClientSecret,
+} from '../auth/apple-client-secret';
 
 /**
  * Best-effort Sign in with Apple token revocation for account deletion (TN3194):
@@ -14,8 +18,6 @@ export interface AppleTokenRevoker {
 
 export const APPLE_TOKEN_REVOKER = Symbol('APPLE_TOKEN_REVOKER');
 
-const APPLE_BASE = 'https://appleid.apple.com';
-
 @Injectable()
 export class FetchAppleTokenRevoker implements AppleTokenRevoker {
   private readonly log = new Logger('AppleTokenRevoker');
@@ -25,28 +27,16 @@ export class FetchAppleTokenRevoker implements AppleTokenRevoker {
   }
 
   private get configured(): boolean {
-    return !!(env.appleTeamId && env.appleKeyId && env.applePrivateKey && this.clientId);
-  }
-
-  /** ES256 client secret: kid header = key id; iss = team id; sub = client id (case-sensitive). */
-  private async clientSecret(): Promise<string> {
-    const key = await importPKCS8(env.applePrivateKey, 'ES256');
-    return new SignJWT({})
-      .setProtectedHeader({ alg: 'ES256', kid: env.appleKeyId })
-      .setIssuer(env.appleTeamId)
-      .setSubject(this.clientId)
-      .setAudience(APPLE_BASE)
-      .setIssuedAt()
-      .setExpirationTime('10m')
-      .sign(key);
+    return appleSecretConfigured() && !!this.clientId;
   }
 
   async revoke(authorizationCode: string): Promise<boolean> {
     if (!this.configured) return false;
     try {
-      const secret = await this.clientSecret();
+      // ES256 client secret shared with the redirect flow (auth/apple-client-secret.ts).
+      const secret = await mintAppleClientSecret(this.clientId);
       // Native-flow codes are exchanged WITHOUT redirect_uri (web-flow-only parameter).
-      const exchange = await fetch(`${APPLE_BASE}/auth/token`, {
+      const exchange = await fetch(`${APPLE_BASE_URL}/auth/token`, {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
@@ -62,7 +52,7 @@ export class FetchAppleTokenRevoker implements AppleTokenRevoker {
       }
       const tokens = (await exchange.json()) as { refresh_token?: string };
       if (!tokens.refresh_token) return false;
-      const revoke = await fetch(`${APPLE_BASE}/auth/revoke`, {
+      const revoke = await fetch(`${APPLE_BASE_URL}/auth/revoke`, {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({

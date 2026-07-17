@@ -1,8 +1,8 @@
-// OAuth provider marks for the login screen's Google/Discord buttons — react-native-svg ports of
-// the same inline SVGs apps/web/src/screens/LoginScreen.tsx and
+// OAuth provider marks for the login screen's Google/Discord/Apple buttons — react-native-svg
+// ports of the same inline SVGs apps/web/src/screens/LoginScreen.tsx and
 // apps/web/src/components/icons/DiscordGlyph.tsx use (brand icons aren't in lucide, so web
-// hand-rolls them too). Apple needs no equivalent: its native AppleAuthenticationButton already
-// carries Apple's own mark.
+// hand-rolls them too). On iOS the native AppleAuthenticationButton carries Apple's own mark;
+// AppleIcon below is for the ANDROID browser-flow button.
 import Svg, { Path } from 'react-native-svg';
 
 /** Google's official multi-colour "G" mark. */
@@ -25,6 +25,16 @@ export function GoogleIcon({ size = 18 }: { size?: number }) {
         fill="#EA4335"
         d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.5 0 24 0 13.6 0 4.6 5.4 2.6 13.1l8.1 6.2C12.6 13.7 17.8 9.5 24 9.5z"
       />
+    </Svg>
+  );
+}
+
+/** The Apple mark (matches the web LoginScreen's inline path). Themed ink by default so it reads
+ *  on the plain bordered SecondaryButton in both light and dark. */
+export function AppleIcon({ size = 18, color = '#000' }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <Path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
     </Svg>
   );
 }

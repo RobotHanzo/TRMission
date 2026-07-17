@@ -38,10 +38,17 @@ export interface AuthResult {
 export interface AuthConfig {
   passwordLogin: boolean;
   guest: boolean;
-  providers: { google: boolean; discord: boolean; apple: boolean };
+  providers: {
+    google: boolean;
+    discord: boolean;
+    /** SIWA native credential path (iOS). */
+    apple: boolean;
+    /** SIWA web/Android redirect flow (Services ID configured). Optional: older servers omit it. */
+    appleRedirect?: boolean;
+  };
   googleClientId?: string;
 }
-export type OauthProvider = 'google' | 'discord';
+export type OauthProvider = 'google' | 'discord' | 'apple';
 export type BotDifficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'HELL';
 
 export interface RoomMember {

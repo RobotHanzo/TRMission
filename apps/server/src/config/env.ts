@@ -71,6 +71,11 @@ export const env = {
   appleTeamId: process.env.APPLE_TEAM_ID ?? '',
   appleKeyId: process.env.APPLE_KEY_ID ?? '',
   applePrivateKey: (process.env.APPLE_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
+  /** SIWA web/Android redirect flow: the Apple Services ID used as the OAuth client_id (its
+   *  registered Return URL must be `${OAUTH_REDIRECT_BASE}/api/v1/auth/oauth/apple/callback`).
+   *  Unset ⇒ Apple stays credential-only (native iOS). Needs the three revocation vars above
+   *  for the ES256 client_secret at code exchange. */
+  appleServicesId: process.env.APPLE_SERVICES_ID ?? '',
   /** Universal/App Link verification (served under /.well-known when set). */
   appleAppId: process.env.APPLE_APP_ID ?? '', // "TEAMID.bundle.id"
   androidPackageName: process.env.ANDROID_PACKAGE_NAME ?? '',
