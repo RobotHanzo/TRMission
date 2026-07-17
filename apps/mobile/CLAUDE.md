@@ -50,11 +50,18 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
   protobuf `CameraView`, so the myTurn camera broadcast and opponent camera-follow need zero
   projection math. Reanimated shared values drive a single Skia `<Group transform>`; gestures
   (pan/pinch, gesture-handler) mutate `cx/cy/span` on the UI thread.
-- **Quantized LOD, not per-frame styles**: continuous zoom only moves the GPU transform. The
-  React tree re-renders solely when the zoom crosses a quantized bucket
-  (`cam.lod.{bucket,inv,marker}`), which resizes track weights / markers / label tiers.
-  `HOME_SCALE_EQUIV = 2.4` anchors the span→scale-equivalent mapping the buckets are derived
-  from. Never write JS-side styles per frame (the web's known jank source).
+- **Throttled LOD, not per-frame styles**: continuous zoom moves the GPU transform every frame;
+  the React tree re-renders only when the LOD re-quantizes (`cam.lod.{bucket,inv,marker}`) —
+  at every settle, plus a threshold-throttled handful of times WHILE a zoom is in flight
+  (`MID_GESTURE_LOD_RATIO` in `useBoardCamera.ts`), so track weights / markers / label tiers
+  follow a pinch near-continuously. `HOME_SCALE_EQUIV = 2.4` anchors the span→scale-equivalent
+  mapping. Never write JS-side styles per frame (the web's known jank source).
+- **Motion rendering is split by gesture kind** (`useStaticMapPicture.ts` + `MapSceneSkia`'s
+  `motionSV`/`zoomingSV` guard): a pure PAN blits the settled-camera raster snapshot
+  (pixel-perfect under translation, one textured quad per frame); the moment the span changes
+  the crisp cached vector Picture takes over on the UI thread (a per-frame `translateX`
+  quick-reject duck — no React), so pinch-zoom renders live vectors that follow the gesture in
+  real time instead of magnifying a fixed-resolution texture.
 - **Manual hit-testing** (`src/board/hitTest.ts`, pure + unit-tested): Skia children aren't
   touch targets; a tap projects screen→board through the current camera and hit-tests routes
   (segment distance) and cities (radius) against the shared geometry.

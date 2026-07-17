@@ -16,6 +16,7 @@ import {
   useSharedValue,
   withTiming,
   type DerivedValue,
+  type SharedValue,
 } from 'react-native-reanimated';
 import type { Transforms3d } from '@shopify/react-native-skia';
 import {
@@ -35,6 +36,12 @@ import {
  *  timing curve's tail plus a couple of frames of scheduling. */
 const ANIMATE_SETTLE_SLACK_MS = 120;
 
+/** Mid-gesture LOD cadence, as a span RATIO between JS recomputes: while a zoom is in flight the
+ *  LOD (inv/marker/bucket) re-quantizes every time the span drifts this factor past the last
+ *  computed value — a handful of re-records per pinch, so weights and label tiers track the zoom
+ *  near-continuously without per-frame JS work. */
+const MID_GESTURE_LOD_RATIO = 1.12;
+
 export interface BoardLod {
   bucket: ZoomBucket;
   /** Track-weight / label counter-scale (web --inv-scale). */
@@ -53,6 +60,12 @@ export interface BoardCamera {
   /** TRUE while a gesture or programmatic glide is moving the camera (React state — flips only
    *  at motion boundaries, never per frame). */
   moving: boolean;
+  /** UI-thread mirror of `moving` (set at motion boundaries, readable per frame in worklets). */
+  movingSV: SharedValue<boolean>;
+  /** TRUE once the span has changed during the CURRENT motion (a pinch or a zooming glide) —
+   *  the scene draws crisp vectors instead of the settled-camera raster while this is set.
+   *  Cleared when the motion settles. */
+  zoomingSV: SharedValue<boolean>;
   /** The camera at the last settle (mount, gesture end, or glide end) — the frame the board's
    *  gesture-time raster snapshot is rendered for. */
   settled: CameraState;
@@ -114,6 +127,9 @@ export function useBoardCamera(
   const [moving, setMoving] = useState(false);
   const [settled, setSettled] = useState<CameraState>(home);
   const movingSV = useSharedValue(false);
+  const zoomingSV = useSharedValue(false);
+  /** The span the current LOD state was computed for — the mid-gesture throttle reference. */
+  const lodSpanSV = useSharedValue(home.span);
 
   const beginMotion = useCallback(() => {
     motionDepth.current += 1;
@@ -126,22 +142,39 @@ export function useBoardCamera(
     motionDepth.current = Math.max(0, motionDepth.current - 1);
     if (motionDepth.current === 0) {
       movingSV.value = false;
+      zoomingSV.value = false;
       setMoving(false);
+      lodSpanSV.value = span.value;
       recomputeLod(span.value);
       const next = { cx: cx.value, cy: cy.value, span: span.value };
       setSettled((prev) =>
         prev.cx === next.cx && prev.cy === next.cy && prev.span === next.span ? prev : next,
       );
     }
-  }, [movingSV, recomputeLod, cx, cy, span]);
+  }, [movingSV, zoomingSV, lodSpanSV, recomputeLod, cx, cy, span]);
 
-  // Re-quantize LOD when the span jumps while the camera is at rest (snapTo). Gestures and glides
-  // are muted here — their settle recompute happens in endMotion instead.
+  // Span watcher (UI thread). While a motion is in flight: the first span change flags `zooming`
+  // (the scene switches from the settled raster to live vectors), and the LOD re-quantizes each
+  // time the span drifts MID_GESTURE_LOD_RATIO past the last computed value — a few JS recomputes
+  // per pinch, so track weight / label tiers follow the zoom without any per-frame JS. At rest the
+  // original snapTo re-quantize applies.
   useAnimatedReaction(
     () => span.value,
     (sp, prev) => {
-      if (movingSV.value) return;
-      if (prev === null || Math.abs(sp - prev) >= prev * 0.04) runOnJS(recomputeLod)(sp);
+      if (movingSV.value) {
+        if (prev !== null && sp !== prev) zoomingSV.value = true;
+        const ref = lodSpanSV.value;
+        const ratio = sp > ref ? sp / ref : ref / sp;
+        if (ratio >= MID_GESTURE_LOD_RATIO) {
+          lodSpanSV.value = sp;
+          runOnJS(recomputeLod)(sp);
+        }
+        return;
+      }
+      if (prev === null || Math.abs(sp - prev) >= prev * 0.04) {
+        lodSpanSV.value = sp;
+        runOnJS(recomputeLod)(sp);
+      }
     },
     [recomputeLod],
   );
@@ -160,12 +193,13 @@ export function useBoardCamera(
       cx.value = cam.cx;
       cy.value = cam.cy;
       span.value = cam.span;
+      lodSpanSV.value = cam.span;
       recomputeLod(cam.span);
       setSettled((prev) =>
         prev.cx === cam.cx && prev.cy === cam.cy && prev.span === cam.span ? prev : { ...cam },
       );
     },
-    [cx, cy, span, recomputeLod],
+    [cx, cy, span, lodSpanSV, recomputeLod],
   );
 
   // Every glide pairs one beginMotion with one delayed endMotion; the timers are tracked so an
@@ -297,5 +331,16 @@ export function useBoardCamera(
     zoomAt,
   ]);
 
-  return { transform, gesture, lod, moving, settled, animateTo, snapTo, currentCamera };
+  return {
+    transform,
+    gesture,
+    lod,
+    moving,
+    movingSV,
+    zoomingSV,
+    settled,
+    animateTo,
+    snapTo,
+    currentCamera,
+  };
 }

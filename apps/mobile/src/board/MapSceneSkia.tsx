@@ -17,11 +17,14 @@ import {
 } from '@shopify/react-native-skia';
 import {
   Easing,
+  useDerivedValue,
   useSharedValue,
   withDelay,
   withSequence,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
+import type { Transforms3d } from '@shopify/react-native-skia';
 import { MAP_DIMS, type MapGeography, type RouteGeometry } from '@trm/map-data';
 import { seatColor } from '../theme/colors';
 import type { BoardEventOverlays } from '../game/events';
@@ -111,8 +114,14 @@ export interface MapSceneSkiaProps {
   reducedMotion?: boolean | undefined;
 
   /* ── gesture-time raster snapshot (see useStaticMapImage) ── */
-  /** TRUE while the camera is moving — draw the rasterized snapshot instead of the vectors. */
-  motion?: boolean | undefined;
+  /** UI-thread motion flag (useBoardCamera.movingSV): while set AND `zoomingSV` is not, the
+   *  vector picture ducks off-screen so the rasterized snapshot carries the frame (full-FPS
+   *  panning). Omitted (the tutorial specimens, tests) the scene simply always draws vectors. */
+  motionSV?: SharedValue<boolean> | undefined;
+  /** UI-thread zoom flag (useBoardCamera.zoomingSV): the span changed during this motion, so the
+   *  settled raster is the WRONG resolution — the crisp vector picture draws instead, following
+   *  the pinch in real time. */
+  zoomingSV?: SharedValue<boolean> | undefined;
   /** Snapshot region + resolution for the settled camera (camera.ts rasterSpec). Omitted (the
    *  tutorial specimens, tests) the scene simply always draws vectors. */
   raster?: RasterSpec | null | undefined;
@@ -213,7 +222,8 @@ export function MapSceneSkia({
   sweeps,
   routeReveal,
   reducedMotion,
-  motion,
+  motionSV,
+  zoomingSV,
   raster,
 }: MapSceneSkiaProps) {
   const model = useMemo(() => buildRouteRenderModel(routes, geometry), [routes, geometry]);
@@ -274,7 +284,7 @@ export function MapSceneSkia({
 
   // The snapshot draws UNDER the vectors at rest (fully hidden — the picture's sea rect is opaque
   // and covers the whole scene) so its GPU texture stays uploaded/warm, then carries the frame
-  // alone while the camera moves. No snapshot yet (first record still in flight, or an
+  // alone while the camera PANS. No snapshot yet (first record still in flight, or an
   // environment without offscreen surfaces) → the vectors keep drawing through motion as before.
   const snapshotElement = snapshot ? (
     <SkiaImage
@@ -288,10 +298,30 @@ export function MapSceneSkia({
     />
   ) : null;
 
+  // Vector visibility, decided per frame on the UI thread (no React involvement): the picture
+  // ducks off-screen ONLY while a pure pan is in flight and a snapshot exists — Skia's clip
+  // quick-reject makes the off-screen drawPicture free, and the raster (pixel-perfect under pure
+  // translation) carries the frame. The moment the span changes (`zoomingSV`) the picture snaps
+  // back, so a pinch renders crisp vectors that follow the zoom in real time instead of
+  // magnifying the settled-resolution texture.
+  const hasSnapshot = !!snapshot;
+  const VECTOR_DUCK = 1e7;
+  const vectorGuard = useDerivedValue<Transforms3d>(() => {
+    const duck =
+      hasSnapshot && motionSV !== undefined && motionSV.value && !(zoomingSV?.value ?? false);
+    return [{ translateX: duck ? VECTOR_DUCK : 0 }];
+  }, [hasSnapshot, motionSV, zoomingSV]);
+
   return (
     <Group>
       {snapshotElement}
-      {motion && snapshotElement ? null : picture ? <Picture picture={picture} /> : staticElement}
+      {picture ? (
+        <Group transform={vectorGuard}>
+          <Picture picture={picture} />
+        </Group>
+      ) : (
+        staticElement
+      )}
       {/* Random-events overlays: live JSX over the picture — the event slice changes per round
           and must never force a static-scene re-record. */}
       {events && (

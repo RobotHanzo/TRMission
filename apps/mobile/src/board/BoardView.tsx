@@ -503,7 +503,8 @@ function BoardInner({
               sweeps={sweeps}
               routeReveal={routeReveal}
               reducedMotion={reducedMotion}
-              motion={cam.moving}
+              motionSV={cam.movingSV}
+              zoomingSV={cam.zoomingSV}
               raster={raster}
             />
           </Group>
