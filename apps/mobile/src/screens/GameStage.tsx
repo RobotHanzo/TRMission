@@ -8,6 +8,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ChevronDown, ChevronUp } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RoomMember } from '../net/rest';
@@ -109,6 +110,8 @@ export function GameStage({
   const pushedRejectionRef = useRef<RejectionInfo | null>(null);
 
   const [dockTab, setDockTab] = useState<DockTabKey>('hand');
+  // Compact only: collapse the dock down to its tab bar so the board gets the full window.
+  const [dockCollapsed, setDockCollapsed] = useState(false);
   const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
 
   const version = snapshot.stateVersion;
@@ -181,6 +184,8 @@ export function GameStage({
       expect === 'DRAW_TICKETS'
     ) {
       setDockTab('draw');
+      // A collapsed dock would leave the beat's target off-screen — pop it back open.
+      setDockCollapsed(false);
     }
   }, [compact, actionGate]);
 
@@ -393,6 +398,9 @@ export function GameStage({
         : source === 'missions'
           ? (snapshot.you?.keptTicketIds.length ?? 0)
           : null;
+    // The mandatory ticket chooser overrides a collapsed dock — a required choice must stay
+    // visible. Collapsed otherwise shrinks the dock to its tab bar, giving the board the window.
+    const dockOpen = needKeep || !dockCollapsed;
     return (
       <View style={styles.fill}>
         {spectatorBanner}
@@ -405,52 +413,76 @@ export function GameStage({
           // tab is inactive — otherwise the flight has no `hand` target and silently no-ops.
           ref={(v) => registerAnimTarget('dock', v)}
           collapsable={false}
-          style={[styles.dock, { height: Math.round(height * 0.45), paddingBottom: insets.bottom }]}
+          style={[
+            styles.dock,
+            dockOpen && { height: Math.round(height * 0.45) },
+            { paddingBottom: insets.bottom },
+          ]}
         >
           {needKeep ? (
             <ScrollView contentContainerStyle={styles.dockPanel}>{chooser}</ScrollView>
           ) : (
             <>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.dockTabs}
-                contentContainerStyle={styles.dockTabsRow}
-              >
-                {tabs.map(({ key, labelKey, countSource }) => {
-                  const count = countOf(countSource);
-                  const active = dockTab === key;
-                  return (
-                    <Pressable
-                      key={key}
-                      style={[styles.dockTabBtn, active && styles.dockTabActive]}
-                      accessibilityRole="tab"
-                      accessibilityState={{ selected: active }}
-                      onPress={() => setDockTab(key)}
-                    >
-                      <Text style={[styles.dockTabText, active && styles.dockTabTextActive]}>
-                        {t(labelKey)}
-                        {count !== null ? ` ${count}` : ''}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-              <ScrollView contentContainerStyle={styles.dockPanel}>
-                {dockTab === 'hand' ? (
-                  handSection
-                ) : dockTab === 'draw' ? (
-                  market
-                ) : dockTab === 'missions' ? (
-                  ticketsSection
-                ) : dockTab === 'events' ? (
-                  <EventsPanel />
-                ) : dockTab === 'players' ? (
-                  trackers
-                ) : (
-                  comms
-                )}
-              </ScrollView>
+              <View style={styles.dockTabsWrap}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.dockTabs}
+                  contentContainerStyle={styles.dockTabsRow}
+                >
+                  {tabs.map(({ key, labelKey, countSource }) => {
+                    const count = countOf(countSource);
+                    const active = dockTab === key;
+                    return (
+                      <Pressable
+                        key={key}
+                        style={[styles.dockTabBtn, active && styles.dockTabActive]}
+                        accessibilityRole="tab"
+                        accessibilityState={{ selected: active }}
+                        onPress={() => {
+                          setDockTab(key);
+                          // Tapping any tab while collapsed reopens the panel it names.
+                          setDockCollapsed(false);
+                        }}
+                      >
+                        <Text style={[styles.dockTabText, active && styles.dockTabTextActive]}>
+                          {t(labelKey)}
+                          {count !== null ? ` ${count}` : ''}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+                <Pressable
+                  style={({ pressed }) => [styles.dockToggle, pressed && styles.pressed]}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(dockCollapsed ? 'dockExpand' : 'dockCollapse')}
+                  onPress={() => setDockCollapsed((c) => !c)}
+                >
+                  {dockCollapsed ? (
+                    <ChevronUp size={18} color="#4b5563" />
+                  ) : (
+                    <ChevronDown size={18} color="#4b5563" />
+                  )}
+                </Pressable>
+              </View>
+              {dockOpen && (
+                <ScrollView contentContainerStyle={styles.dockPanel}>
+                  {dockTab === 'hand' ? (
+                    handSection
+                  ) : dockTab === 'draw' ? (
+                    market
+                  ) : dockTab === 'missions' ? (
+                    ticketsSection
+                  ) : dockTab === 'events' ? (
+                    <EventsPanel />
+                  ) : dockTab === 'players' ? (
+                    trackers
+                  ) : (
+                    comms
+                  )}
+                </ScrollView>
+              )}
             </>
           )}
         </View>
@@ -539,8 +571,16 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(0,0,0,0.12)',
     backgroundColor: '#faf7f0',
   },
-  dockTabs: { flexGrow: 0 },
+  dockTabsWrap: { flexDirection: 'row', alignItems: 'center' },
+  dockTabs: { flexGrow: 0, flexShrink: 1 },
   dockTabsRow: { flexDirection: 'row', gap: 4, paddingHorizontal: 6, paddingVertical: 6 },
+  dockToggle: {
+    marginLeft: 'auto',
+    paddingHorizontal: 12,
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   dockTabBtn: {
     borderRadius: 8,
     paddingHorizontal: 12,

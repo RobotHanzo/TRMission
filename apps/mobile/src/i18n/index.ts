@@ -317,6 +317,8 @@ void i18n.use(initReactI18next).init({
         dockDraw: '抽牌',
         dockEvents: '事件',
         dockPlayers: '玩家',
+        dockCollapse: '收合面板',
+        dockExpand: '展開面板',
         chat: {
           heading: '聊天',
           empty: '尚無訊息',
@@ -642,6 +644,8 @@ void i18n.use(initReactI18next).init({
         dockDraw: 'Draw',
         dockEvents: 'Events',
         dockPlayers: 'Players',
+        dockCollapse: 'Collapse panel',
+        dockExpand: 'Expand panel',
         chat: {
           heading: 'Chat',
           empty: 'No messages yet',

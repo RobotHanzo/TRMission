@@ -104,7 +104,7 @@ export function TicketCard({ ticketId, selected, onToggle, disabled, completed }
 
 const styles = StyleSheet.create({
   card: {
-    width: 148,
+    width: 150,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.18)',
@@ -114,7 +114,14 @@ const styles = StyleSheet.create({
   completed: { opacity: 0.55 },
   locked: { opacity: 0.6 },
   pressed: { opacity: 0.8 },
-  map: { height: 118, borderBottomWidth: 1, borderBottomColor: P.coast, borderStyle: 'dashed' },
+  // Web parity: .ticket-card is 150px wide with a 158px-tall .ticket-map, so the mini-map keeps
+  // the same portrait 150:158 proportions here at whatever width the card renders.
+  map: {
+    aspectRatio: 150 / 158,
+    borderBottomWidth: 1,
+    borderBottomColor: P.coast,
+    borderStyle: 'dashed',
+  },
   flag: {
     position: 'absolute',
     top: 5,
