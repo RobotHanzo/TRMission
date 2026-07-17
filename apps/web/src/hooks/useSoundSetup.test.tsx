@@ -53,4 +53,10 @@ describe('useSoundSetup', () => {
     window.dispatchEvent(new Event('keydown'));
     expect(unlock).toHaveBeenCalledTimes(2);
   });
+
+  it('re-unlocks when the tab becomes visible again (background/minimize recovery)', () => {
+    render(<Harness />);
+    document.dispatchEvent(new Event('visibilitychange')); // jsdom: document.hidden === false
+    expect(unlock).toHaveBeenCalledTimes(1);
+  });
 });

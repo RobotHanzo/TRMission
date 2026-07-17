@@ -1,22 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { useTurnCountdown } from '@trm/client-core/game/turnCountdown';
-import { soundPlayer } from '../sound/player';
-
-// Module-level (stable identity) so the hook's ticking effect never restarts on re-render.
-const SOUNDS = {
-  onWarningTick: () => soundPlayer.play('countdownWarning'),
-  onLapsed: () => soundPlayer.play('countdownLapsed'),
-};
 
 /**
  * The per-turn countdown ring (issue #13): shows how long the player on the clock has before the
  * server auto-plays for them. Renders nothing when nobody is on the clock (bot turn, game over,
- * replay/tutorial sandbox). The warning-tick and time's-up sounds fire for the local player only,
- * driven inside the shared {@link useTurnCountdown} hook.
+ * replay/tutorial sandbox). The warning-tick and time's-up SOUNDS are not driven here: interval
+ * ticking is throttled to a crawl in hidden tabs, so useSoundDriver pre-schedules them on the
+ * audio clock instead (mobile still injects its callbacks into the shared hook).
  */
 export function TurnCountdown() {
   const { t } = useTranslation();
-  const cd = useTurnCountdown(SOUNDS);
+  const cd = useTurnCountdown();
   if (!cd) return null;
 
   const frac = cd.totalMs > 0 ? Math.max(0, Math.min(1, cd.remainingMs / cd.totalMs)) : 0;

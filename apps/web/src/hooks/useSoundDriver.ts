@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Phase } from '@trm/proto';
+import { COUNTDOWN_WARN_MS } from '@trm/client-core/game/turnCountdown';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useChat } from '../store/chat';
 import { soundPlayer } from '../sound/player';
@@ -24,6 +25,8 @@ export function useSoundDriver(sandbox?: boolean): void {
   const snapshot = useGameStore((s) => s.snapshot);
   const lastBatch = useGameStore((s) => s.lastBatch);
   const lastLiveChat = useChat((s) => s.lastLive);
+  const turnTimer = useGameStore((s) => s.turnTimer);
+  const myId = useGameStore((s) => s.snapshot?.you?.playerId ?? null);
 
   const seenBatchSeq = useRef(0);
   const seenChatId = useRef(0);
@@ -53,6 +56,30 @@ export function useSoundDriver(sandbox?: boolean): void {
     const me = gameStore.getState().snapshot?.you?.playerId ?? null;
     soundPlayer.play('chatMessage', lastLiveChat.playerId === me ? 1 : OPPONENT_GAIN);
   }, [lastLiveChat, gameStore]);
+
+  // Countdown cues, pre-scheduled on the AUDIO clock the moment the server (re)arms the local
+  // player's timer. The visual ring ticks on a setInterval (useTurnCountdown), but hidden tabs
+  // clamp timers to 1s — and to once per MINUTE after 5 minutes hidden — so interval-driven
+  // sounds miss the whole warning window while the site is unfocused/minimized. The audio clock
+  // keeps time regardless of focus, and the timer frame itself arrives over the WS (also
+  // unthrottled), so these land on time even in a background tab. A replaced/cleared timer
+  // (the player acted, turn handover, game over) cancels everything still pending.
+  useEffect(() => {
+    if (sandbox || !turnTimer || myId === null || turnTimer.playerId !== myId) return;
+    const rem = turnTimer.deadline - Date.now();
+    if (rem <= 0) return;
+    const cancels: Array<() => void> = [];
+    // One tick at each moment "sec seconds remaining" begins (skipping boundaries already past —
+    // if the timer arrives mid-window the current second's tick fires ~immediately at offset 0).
+    for (let sec = 1; sec * 1000 <= COUNTDOWN_WARN_MS; sec++) {
+      const at = rem - sec * 1000;
+      if (at > -1000) cancels.push(soundPlayer.schedule('countdownWarning', Math.max(0, at)));
+    }
+    cancels.push(soundPlayer.schedule('countdownLapsed', rem));
+    return () => {
+      for (const cancel of cancels) cancel();
+    };
+  }, [turnTimer, myId, sandbox]);
 
   // Snapshot diffs: game-over (once) + self mission completion.
   useEffect(() => {

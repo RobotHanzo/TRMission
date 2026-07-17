@@ -20,12 +20,20 @@ export function useSoundSetup(): void {
       soundPlayer.setVolume(s.soundVolume);
     });
     const unlock = () => soundPlayer.unlock();
+    // Also re-unlock when the tab becomes visible again: once the page has ever had a user
+    // gesture, resume() succeeds without a fresh one, so sound recovers on return from a
+    // minimized/background stint without waiting for the next click.
+    const onVisible = () => {
+      if (!document.hidden) soundPlayer.unlock();
+    };
     window.addEventListener('pointerdown', unlock);
     window.addEventListener('keydown', unlock);
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
       unsub();
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
+      document.removeEventListener('visibilitychange', onVisible);
     };
   }, []);
 }

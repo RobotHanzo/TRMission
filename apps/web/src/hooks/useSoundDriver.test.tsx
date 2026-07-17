@@ -1,6 +1,6 @@
 // Follows the repo convention (see useAnimationDriver.test.tsx): a <Harness/> component, real
 // snapshots via create(GameSnapshotSchema), and useGame.getState().applySnapshot/applyEvents.
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, act } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema, Phase, type GameEvent, type GameSnapshot } from '@trm/proto';
@@ -8,12 +8,21 @@ import { useGame } from '../store/game';
 import { useChat } from '../store/chat';
 import { useSoundDriver } from './useSoundDriver';
 
-const { play } = vi.hoisted(() => ({ play: vi.fn() }));
+const { play, schedule, scheduleCancels } = vi.hoisted(() => {
+  const scheduleCancels: ReturnType<typeof vi.fn>[] = [];
+  const schedule = vi.fn((_cue: string, _inMs: number) => {
+    const cancel = vi.fn();
+    scheduleCancels.push(cancel);
+    return cancel;
+  });
+  return { play: vi.fn(), schedule, scheduleCancels };
+});
 vi.mock('../sound/player', () => ({
   soundPlayer: {
     preload: vi.fn().mockResolvedValue(undefined),
     unlock: vi.fn(),
     play,
+    schedule,
     setEnabled: vi.fn(),
     setVolume: vi.fn(),
   },
@@ -43,9 +52,12 @@ function Harness({ sandbox }: { sandbox?: boolean } = {}) {
 
 beforeEach(() => {
   play.mockClear();
+  schedule.mockClear();
+  scheduleCancels.length = 0;
   useGame.getState().reset();
   useChat.getState().reset();
 });
+afterEach(() => vi.useRealTimers());
 
 describe('useSoundDriver', () => {
   it('does not fire game-over on the first snapshot (resume safety)', () => {
@@ -139,5 +151,57 @@ describe('useSoundDriver', () => {
         .ingestHistory([{ playerId: 'p1', content: { case: 'text', value: 'old' } }]),
     );
     expect(play).not.toHaveBeenCalledWith('chatMessage', expect.anything());
+  });
+
+  // Countdown cues are pre-scheduled on the audio clock (immune to hidden-tab timer throttling)
+  // the moment the server arms the local player's timer — not ticked out of a setInterval.
+  describe('countdown scheduling', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(1_000_000);
+    });
+
+    it('schedules the warning ticks and the lapse when my timer arms', () => {
+      render(<Harness />);
+      act(() => useGame.getState().applySnapshot(snap(1, {})));
+      act(() => useGame.getState().applyTurnTimer('p0', 75_000, 75_000));
+      const warnings = schedule.mock.calls.filter((c) => c[0] === 'countdownWarning');
+      expect(warnings.map((c) => c[1])).toEqual([
+        74_000, 73_000, 72_000, 71_000, 70_000, 69_000, 68_000, 67_000, 66_000, 65_000,
+      ]);
+      expect(schedule).toHaveBeenCalledWith('countdownLapsed', 75_000);
+    });
+
+    it('arming mid-warning-window plays the current second immediately, skipping past boundaries', () => {
+      render(<Harness />);
+      act(() => useGame.getState().applySnapshot(snap(1, {})));
+      act(() => useGame.getState().applyTurnTimer('p0', 5_000, 75_000));
+      const warnings = schedule.mock.calls.filter((c) => c[0] === 'countdownWarning');
+      expect(warnings.map((c) => c[1])).toEqual([4_000, 3_000, 2_000, 1_000, 0]);
+      expect(schedule).toHaveBeenCalledWith('countdownLapsed', 5_000);
+    });
+
+    it('cancels everything still pending when the timer clears', () => {
+      render(<Harness />);
+      act(() => useGame.getState().applySnapshot(snap(1, {})));
+      act(() => useGame.getState().applyTurnTimer('p0', 75_000, 75_000));
+      expect(scheduleCancels.length).toBe(11);
+      act(() => useGame.getState().applyTurnTimer('', 0, 0));
+      expect(scheduleCancels.every((c) => c.mock.calls.length > 0)).toBe(true);
+    });
+
+    it("schedules nothing for an opponent's timer", () => {
+      render(<Harness />);
+      act(() => useGame.getState().applySnapshot(snap(1, {})));
+      act(() => useGame.getState().applyTurnTimer('p1', 75_000, 75_000));
+      expect(schedule).not.toHaveBeenCalled();
+    });
+
+    it('schedules nothing in sandbox mode', () => {
+      render(<Harness sandbox />);
+      act(() => useGame.getState().applySnapshot(snap(1, {})));
+      act(() => useGame.getState().applyTurnTimer('p0', 75_000, 75_000));
+      expect(schedule).not.toHaveBeenCalled();
+    });
   });
 });
