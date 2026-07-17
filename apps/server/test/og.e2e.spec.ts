@@ -102,6 +102,38 @@ describe('GET /api/v1/og/site.png', () => {
   });
 });
 
+describe('search-engine surface (nginx rewrites /robots.txt + /sitemap.xml here)', () => {
+  it('robots.txt allows the OG renderer but blocks the rest of the API + maintainer routes', async () => {
+    const res = await request(server())
+      .get('/api/v1/og/robots.txt')
+      .set('X-Forwarded-Proto', 'https')
+      .set('Host', 'play.example.tw')
+      .expect(200);
+    expect(res.headers['content-type']).toContain('text/plain');
+    expect(res.text).toContain('User-agent: *');
+    expect(res.text).toContain('Allow: /api/v1/og/');
+    expect(res.text).toContain('Disallow: /api/');
+    expect(res.text).toContain('Disallow: /admin/');
+    expect(res.text).toContain('Sitemap: https://play.example.tw/sitemap.xml');
+    // Preview bots must keep fetching share targets — never disallowed.
+    expect(res.text).not.toMatch(/Disallow: \/(room|replay|maps)/);
+  });
+
+  it('sitemap.xml lists only the public pages, absolutised from the forwarded host', async () => {
+    const res = await request(server())
+      .get('/api/v1/og/sitemap.xml')
+      .set('X-Forwarded-Proto', 'https')
+      .set('Host', 'play.example.tw')
+      .expect(200);
+    expect(res.headers['content-type']).toContain('xml');
+    for (const path of ['/', '/tutorial', '/login', '/privacy']) {
+      expect(res.text).toContain(`<loc>https://play.example.tw${path}</loc>`);
+    }
+    expect(res.text).not.toContain('/room/');
+    expect(res.text).not.toContain('/replay/');
+  });
+});
+
 describe('GET /api/v1/og/page', () => {
   it('serves the generic site meta for / and for unknown paths', async () => {
     for (const q of ['', '?path=/', '?path=/history', '?path=//evil.example']) {

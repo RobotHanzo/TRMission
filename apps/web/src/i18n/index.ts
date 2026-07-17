@@ -30,6 +30,30 @@ const resources = {
       tutorial: tutorialZh,
       appName: '台鐵任務',
       tagline: '在台灣鐵道上搶占路線、完成任務卡。',
+
+      // Per-route <title> / meta description (useDocumentMeta). Descriptions exist only
+      // for the indexable public pages — everything else is noindex.
+      seo: {
+        titles: {
+          home: '台鐵任務 TRMission — 台灣鐵道路線桌遊',
+          login: '登入 · 台鐵任務 TRMission',
+          tutorial: '新手教學 · 台鐵任務 TRMission',
+          history: '對局紀錄 · 台鐵任務 TRMission',
+          replay: '對局重播 · 台鐵任務 TRMission',
+          room: '房間 {{code}} · 台鐵任務 TRMission',
+          game: '對局進行中 · 台鐵任務 TRMission',
+          maps: '自訂地圖 · 台鐵任務 TRMission',
+          mapEditor: '地圖編輯器 · 台鐵任務 TRMission',
+          privacy: '隱私權政策 · 台鐵任務 TRMission',
+          deleteAccount: '刪除帳號 · 台鐵任務 TRMission',
+        },
+        descriptions: {
+          home: '免費線上多人鐵道桌遊：收集車廂卡、佔領台灣城市之間的路線、完成任務卡。支援 2–5 人連線對戰、機器人陪練、觀戰與對局回放。',
+          login: '登入台鐵任務 — 以訪客、電子郵件、Google 或 Discord 帳號開始遊戲。',
+          tutorial: '5 分鐘互動教學：學會抽車廂卡、佔領路線與任務計分。免登入即可開始。',
+          privacy: '台鐵任務的隱私權政策：我們收集哪些資料、如何使用，以及如何刪除帳號與資料。',
+        },
+      },
       language: '語言',
       discord: 'Discord 社群',
       settings: '設定',
@@ -629,6 +653,33 @@ const resources = {
       tutorial: tutorialEn,
       appName: 'TRMission',
       tagline: 'Claim railway routes across Taiwan and complete your mission tickets.',
+
+      // Per-route <title> / meta description (useDocumentMeta). Descriptions exist only
+      // for the indexable public pages — everything else is noindex.
+      seo: {
+        titles: {
+          home: 'TRMission 台鐵任務 — a Taiwan railway board game',
+          login: 'Sign in · TRMission 台鐵任務',
+          tutorial: 'Tutorial · TRMission 台鐵任務',
+          history: 'Match history · TRMission 台鐵任務',
+          replay: 'Replay · TRMission 台鐵任務',
+          room: 'Room {{code}} · TRMission 台鐵任務',
+          game: 'Game in progress · TRMission 台鐵任務',
+          maps: 'Custom maps · TRMission 台鐵任務',
+          mapEditor: 'Map editor · TRMission 台鐵任務',
+          privacy: 'Privacy policy · TRMission 台鐵任務',
+          deleteAccount: 'Delete account · TRMission 台鐵任務',
+        },
+        descriptions: {
+          home: 'A free online multiplayer railway board game set in Taiwan: collect train-car cards, claim routes between cities, and complete mission tickets. Live games for 2–5 players, bots to practise against, spectating, and replays.',
+          login:
+            'Sign in to TRMission — play as a guest or with an email, Google, or Discord account.',
+          tutorial:
+            'A 5-minute interactive tutorial: learn drawing cards, claiming routes, and mission scoring. No sign-in needed.',
+          privacy:
+            'The TRMission privacy policy: what data we collect, how it is used, and how to delete your account and data.',
+        },
+      },
       language: 'Language',
       discord: 'Discord Community',
       settings: 'Settings',

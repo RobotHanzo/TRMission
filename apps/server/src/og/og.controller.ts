@@ -33,6 +33,22 @@ export class OgController {
     return this.og.pageHtml(await this.og.pageMeta(path, code), baseUrl(req));
   }
 
+  // nginx rewrites the site-root /robots.txt and /sitemap.xml here (the Vite dev proxy
+  // mirrors that) — absolute URLs need the request host, never known at build time.
+  @Get('robots.txt')
+  @Header('Content-Type', 'text/plain; charset=utf-8')
+  @Header('Cache-Control', CACHE)
+  robots(@Req() req: Request): string {
+    return this.og.robotsTxt(baseUrl(req));
+  }
+
+  @Get('sitemap.xml')
+  @Header('Content-Type', 'application/xml; charset=utf-8')
+  @Header('Cache-Control', CACHE)
+  sitemap(@Req() req: Request): string {
+    return this.og.sitemapXml(baseUrl(req));
+  }
+
   @Get('site.png')
   @Header('Content-Type', 'image/png')
   @Header('Cache-Control', CACHE)

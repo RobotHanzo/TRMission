@@ -168,6 +168,34 @@ export class OgService {
     return site;
   }
 
+  /** Search-engine surface — nginx rewrites /robots.txt here. Preview crawlers
+   *  (Twitterbot, Slackbot, …) honour robots.txt for the og:image fetch too, so the
+   *  OG renderer is explicitly allowed before the API is disallowed (longest-match
+   *  wins), and /room//replay//maps stay fetchable. Ephemeral pages are kept out of
+   *  the search index by the SPA's per-route robots meta, not by blocking them here. */
+  robotsTxt(baseUrl: string): string {
+    return [
+      'User-agent: *',
+      'Allow: /api/v1/og/',
+      'Disallow: /api/',
+      'Disallow: /admin/',
+      'Disallow: /admin-replay/',
+      'Disallow: /admin-spectate/',
+      'Disallow: /login/callback',
+      `Sitemap: ${baseUrl}/sitemap.xml`,
+      '',
+    ].join('\n');
+  }
+
+  /** Only the public, indexable pages — rooms/replays/shared maps are capability URLs
+   *  that come and go; listing them would just churn the index. */
+  sitemapXml(baseUrl: string): string {
+    const urls = ['/', '/tutorial', '/login', '/privacy']
+      .map((p) => `  <url><loc>${escapeXml(baseUrl + p)}</loc></url>`)
+      .join('\n');
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+  }
+
   /** The tiny crawler-facing HTML document (bots read <head>; humans get meta-refreshed). */
   pageHtml(meta: PageMeta, baseUrl: string): string {
     const t = escapeXml(meta.title);
@@ -188,6 +216,8 @@ export class OgService {
 <meta property="og:image" content="${img}">
 <meta property="og:image:width" content="${CARD_W}">
 <meta property="og:image:height" content="${CARD_H}">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="${url}">
 <meta http-equiv="refresh" content="0;url=${escapeXml(meta.path)}">

@@ -29,7 +29,17 @@
     <meta property="og:image" content="/api/v1/og/site.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="zh_TW" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="台鐵任務 TRMission" />
+    <meta
+      name="twitter:description"
+      content="搶佔台灣鐵道路線 — 鋪設路線、連接城市、完成任務。A railway board game set in Taiwan: claim routes, link cities, complete missions."
+    />
+    <meta name="twitter:image" content="/api/v1/og/site.png" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f1e7" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1a1c1f" />
     <script>
       // Resolve the saved theme before first paint to avoid a light/dark flash.
       (function () {
@@ -47,6 +57,18 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <h1>台鐵任務 TRMission</h1>
+      <p>
+        《台鐵任務》是一款免費的線上多人鐵道桌遊：收集車廂卡、佔領台灣城市之間的路線、完成任務卡。
+        支援 2–5 人連線對戰、機器人陪練、觀戰與對局回放。需要啟用 JavaScript 才能遊玩。
+      </p>
+      <p>
+        TRMission is a free online multiplayer railway board game set in Taiwan: collect train-car
+        cards, claim routes between cities, and complete mission tickets. Playing requires
+        JavaScript to be enabled.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

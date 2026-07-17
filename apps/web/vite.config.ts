@@ -60,6 +60,15 @@ export default defineConfig({
     proxy: {
       '/api': { target: `http://${serverHost}:3001`, changeOrigin: true },
       '/ws': { target: `ws://${serverHost}:3001`, ws: true },
+      // Same routing nginx does in prod: robots + sitemap are server-rendered.
+      '/robots.txt': {
+        target: `http://${serverHost}:3001`,
+        rewrite: () => '/api/v1/og/robots.txt',
+      },
+      '/sitemap.xml': {
+        target: `http://${serverHost}:3001`,
+        rewrite: () => '/api/v1/og/sitemap.xml',
+      },
     },
     allowedHosts: ['trmission.robothanzo.dev', 'localhost'],
   },

@@ -6,6 +6,7 @@ import { AppHeader } from './components/AppHeader';
 import { useLeaveWarning } from './hooks/useLeaveWarning';
 import { usePageViewTracking } from './hooks/usePageViewTracking';
 import { useSoundSetup } from './hooks/useSoundSetup';
+import { useDocumentMeta } from './hooks/useDocumentMeta';
 import { HomeScreen } from './screens/HomeScreen';
 import { LandingScreen } from './screens/LandingScreen';
 import { RoomScreen } from './screens/RoomScreen';
@@ -45,6 +46,7 @@ export function App() {
   useLeaveWarning();
   usePageViewTracking();
   useSoundSetup();
+  useDocumentMeta();
 
   // '/' (and any unrecognized path, which falls back to it) never needs `authed` to decide what
   // to render — App picks landing vs. home off `user` directly — so a cold load there can paint
