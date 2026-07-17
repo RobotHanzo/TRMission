@@ -1,7 +1,8 @@
 /* ── Public landing page (signed-out /) ──
    Warm-paper marketing front door on the existing token system. One bold element:
-   the "departures board" CTA panel — fixed dark in both themes, like the real
-   LED departure boards on TRA platforms (it is its own light source). */
+   the "departures board" CTA panel — in dark mode it's a fixed-dark LED board (its own
+   light source, like the real TRA platform signs); in light mode it follows the warm-paper
+   surface tokens instead, so it doesn't read as a jarring black hole on the page. */
 
 /* Chained with .app-main: landing.css loads before app.css (screen-module import order),
    so a bare .app-main--landing would lose the same-specificity cascade to .app-main. */
@@ -94,24 +95,40 @@
   color: var(--tr-ink-soft);
 }
 
-/* ── The departures board: the page's two actions as departure rows ── */
+/* ── The departures board: the page's two actions as departure rows ──
+   Light mode (default): a normal warm-paper card, off the shared surface tokens.
+   Dark mode: the fixed-dark LED board look, overridden below. */
 .landing-departures {
-  --dep-panel: #14181e;
-  --dep-line: #262c35;
-  --dep-amber: #f5b942;
-  --dep-soft: #9aa4b1;
-  --dep-go: #43d17c;
+  --dep-panel: var(--tr-surface);
+  --dep-line: var(--tr-line);
+  --dep-head: var(--tr-ink-soft);
+  --dep-soft: var(--tr-ink-soft);
+  --dep-amber: var(--tr-ember);
+  --dep-go: var(--tr-ok);
+  --dep-hover-bg: color-mix(in srgb, var(--tr-ink) 6%, transparent);
+  --dep-hover-ink: var(--tr-ink);
   max-width: 560px;
   overflow: hidden;
   background: var(--dep-panel);
+  border: 1px solid var(--dep-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+}
+:root[data-theme='dark'] .landing-departures {
+  --dep-panel: #14181e;
+  --dep-line: #262c35;
+  --dep-head: #d8dde4;
+  --dep-soft: #9aa4b1;
+  --dep-amber: #f5b942;
+  --dep-go: #43d17c;
+  --dep-hover-bg: rgba(255, 255, 255, 0.05);
+  --dep-hover-ink: #fff;
   /* Faint horizontal scanlines — the LED-matrix texture, no image asset needed. */
   background-image: repeating-linear-gradient(
     0deg,
     rgba(255, 255, 255, 0.016) 0 1px,
     transparent 1px 3px
   );
-  border: 1px solid var(--dep-line);
-  border-radius: var(--tr-radius);
   box-shadow:
     var(--tr-shadow),
     inset 0 0 0 1px rgba(255, 255, 255, 0.02);
@@ -127,7 +144,7 @@
 .landing-departures-zh {
   font-size: 13px;
   letter-spacing: 0.3em;
-  color: #d8dde4;
+  color: var(--dep-head);
 }
 .landing-departures-en {
   font-size: 10.5px;
@@ -158,7 +175,7 @@ button.landing-departure + button.landing-departure {
 }
 button.landing-departure:hover:not(:disabled) {
   filter: none; /* the global button dim would dull the amber; light the row instead */
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--dep-hover-bg);
 }
 .landing-departure-dest {
   grid-area: dest;
@@ -194,7 +211,7 @@ button.landing-departure:hover:not(:disabled) {
 }
 button.landing-departure:hover .landing-departure-arrow {
   transform: translateX(3px);
-  color: #fff;
+  color: var(--dep-hover-ink);
 }
 
 /* ── The board panel: the real map framed like a station wall map ── */
