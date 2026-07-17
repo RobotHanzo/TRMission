@@ -3,6 +3,7 @@ import polygonClipping, { type Polygon } from 'polygon-clipping';
 import { WORLD_LAND } from './worldData';
 import { isCrudeTaiwanRing, taiwanRings } from './taiwan';
 import { WORLD_COUNTRIES, type CountryLand } from './worldCountries';
+import { TAIWAN_CITIES } from './taiwanCities';
 import { buildProjection, isValidCrop, type CropBBox } from './projection';
 import { clipRingsToBBox, type Ring } from './clip';
 import { simplifyToFit } from './simplify';
@@ -107,26 +108,22 @@ export function dissolveCountryRings(rings: readonly Ring[]): Ring[] {
 }
 
 /**
- * Turn a set of selected country ids into a MapGeography, mirroring cropToGeography but sourcing
- * rings directly from the selected countries — never clipping against WORLD_LAND — so picking
- * "France" can't drag in Belgium just because it falls inside the union bounding box. Null for an
- * empty/all-unmatched selection, or one whose union bbox isValidCrop still rejects.
+ * Shared tail for the "pick whole regions" crop modes (countries, Taiwanese cities): source rings
+ * directly from the selected regions — never clipping against WORLD_LAND — so picking "France"
+ * can't drag in Belgium just because it falls inside the union bounding box. `rings` is the union
+ * of every selected region's exterior rings. Null for an empty selection or one whose union bbox
+ * isValidCrop rejects.
  *
- * `showBorders` opts into the cosmetic country-border overlay (`MapGeography.borders`): each
- * selected country's own undissolved exterior ring, simplified/projected the same way as `land`
- * but never merged, so a shared edge between two picked countries still traces as a line once
- * `land` has erased it. Skipped for a single-country pick — there is no internal border to show.
+ * `showBorders` opts into the cosmetic border overlay (`MapGeography.borders`): each selected
+ * region's own undissolved exterior ring, simplified/projected the same way as `land` but never
+ * merged, so a shared edge between two picked regions still traces as a line once `land` has erased
+ * it. The caller gates this to multi-region picks — a single region has no internal border to show.
  */
-export function countriesToGeography(
-  ids: readonly string[],
-  showBorders = false,
-): CropResult | null {
-  const idSet = new Set(ids);
-  const rings = WORLD_COUNTRIES.filter((c) => idSet.has(c.id)).flatMap(ringsForCountry);
+function regionsToGeography(rings: readonly Ring[], showBorders: boolean): CropResult | null {
   const chosen = chooseMinimalLonRepresentation(rings);
   if (!chosen || !isValidCrop(chosen.bbox)) return null;
   const result = finalizeGeography(dissolveCountryRings(chosen.rings), chosen.bbox);
-  if (!showBorders || idSet.size < 2) return result;
+  if (!showBorders) return result;
 
   const { rings: simplifiedBorders } = simplifyToFit(chosen.rings, {
     startTolerance: startToleranceFor(chosen.bbox),
@@ -136,4 +133,30 @@ export function countriesToGeography(
   const { project } = buildProjection(chosen.bbox);
   const borders = simplifiedBorders.map((ring) => ring.map(([lon, lat]) => project(lon, lat)));
   return { ...result, geography: { ...result.geography, borders } };
+}
+
+/**
+ * Turn a set of selected country ids into a MapGeography, mirroring cropToGeography but sourcing
+ * rings directly from the selected countries (see regionsToGeography). Taiwan gets its detailed
+ * silhouette spliced in via ringsForCountry. Borders are shown only for a multi-country pick.
+ */
+export function countriesToGeography(
+  ids: readonly string[],
+  showBorders = false,
+): CropResult | null {
+  const idSet = new Set(ids);
+  const rings = WORLD_COUNTRIES.filter((c) => idSet.has(c.id)).flatMap(ringsForCountry);
+  return regionsToGeography(rings, showBorders && idSet.size >= 2);
+}
+
+/**
+ * Turn a set of selected Taiwanese-city ids (縣市, ISO 3166-2) into a MapGeography — the
+ * city-level parallel of countriesToGeography, sharing regionsToGeography. `showBorders` traces the
+ * internal county/city boundaries between picked divisions; shown only for a multi-city pick, where
+ * an internal border actually exists (a single city's border is just its own coastline/outline).
+ */
+export function citiesToGeography(ids: readonly string[], showBorders = false): CropResult | null {
+  const idSet = new Set(ids);
+  const rings = TAIWAN_CITIES.filter((c) => idSet.has(c.id)).flatMap((c) => c.rings);
+  return regionsToGeography(rings, showBorders && idSet.size >= 2);
 }

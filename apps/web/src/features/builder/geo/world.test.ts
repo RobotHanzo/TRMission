@@ -3,6 +3,7 @@ import { validateGeography } from '@trm/map-data';
 import {
   cropToGeography,
   countriesToGeography,
+  citiesToGeography,
   dissolveCountryRings,
   startToleranceFor,
 } from './world';
@@ -172,6 +173,68 @@ describe('countriesToGeography', () => {
     expect(geography.crop.lonMax - geography.crop.lonMin).toBeLessThan(200);
     expect(geography.crop.lonMax).toBeGreaterThan(180);
     expect(validateGeography(geography)).toEqual([]);
+  });
+});
+
+describe('citiesToGeography', () => {
+  it('returns null for an empty selection', () => {
+    expect(citiesToGeography([])).toBeNull();
+  });
+
+  it('returns null when no id matches', () => {
+    expect(citiesToGeography(['TW-ZZZ'])).toBeNull();
+  });
+
+  it('builds a valid geography for a single city', () => {
+    const result = citiesToGeography(['TW-TPE']);
+    expect(result).not.toBeNull();
+    expect(result!.geography.land.length).toBeGreaterThan(0);
+    expect(validateGeography(result!.geography)).toEqual([]);
+  });
+
+  it('dissolves the shared border between neighbouring cities into one landmass', () => {
+    // Taipei City is entirely enclosed by New Taipei City — their union is a single landmass.
+    const result = citiesToGeography(['TW-TPE', 'TW-TPQ']);
+    expect(result).not.toBeNull();
+    expect(result!.geography.land.length).toBeLessThanOrEqual(2);
+    expect(validateGeography(result!.geography)).toEqual([]);
+  });
+
+  it('omits borders by default', () => {
+    const result = citiesToGeography(['TW-TPE', 'TW-TPQ']);
+    expect(result).not.toBeNull();
+    expect(result!.geography.borders).toBeUndefined();
+  });
+
+  it('traces internal county borders when showBorders is true for a multi-city pick', () => {
+    const withBorders = citiesToGeography(['TW-TPE', 'TW-TPQ'], true);
+    expect(withBorders).not.toBeNull();
+    expect(withBorders!.geography.borders).toBeDefined();
+    expect(withBorders!.geography.borders!.length).toBeGreaterThan(0);
+    expect(validateGeography(withBorders!.geography)).toEqual([]);
+  });
+
+  it('never populates borders for a single-city selection (no internal border exists)', () => {
+    const result = citiesToGeography(['TW-TPE'], true);
+    expect(result).not.toBeNull();
+    expect(result!.geography.borders).toBeUndefined();
+  });
+
+  it('excludes unselected divisions between two far-apart picks (no phantom land bridge)', () => {
+    // Taipei (north) + Kaohsiung (south) are non-adjacent, with the whole central spine of
+    // unselected counties between them. Sourcing rings from the picks (never clipping a bbox
+    // against WORLD_LAND) must leave exactly two disjoint land blobs — a bbox crop would instead
+    // fill in Taichung, Chiayi, Tainan… and bridge them into one landmass.
+    const picked = citiesToGeography(['TW-TPE', 'TW-KHH']);
+    expect(picked).not.toBeNull();
+    expect(picked!.geography.land).toHaveLength(2);
+    expect(validateGeography(picked!.geography)).toEqual([]);
+  });
+
+  it('is deterministic for the same selection', () => {
+    const a = citiesToGeography(['TW-TXG']);
+    const b = citiesToGeography(['TW-TXG']);
+    expect(a).toEqual(b);
   });
 });
 

@@ -49,6 +49,12 @@ describe('CropStage', () => {
     expect(screen.getByPlaceholderText('搜尋國家…')).toBeInTheDocument();
   });
 
+  it('switches to city-pick mode via the toggle', () => {
+    render(<CropStage />);
+    fireEvent.click(screen.getByText('選擇縣市'));
+    expect(screen.getByPlaceholderText('搜尋縣市…')).toBeInTheDocument();
+  });
+
   it('discards an in-progress draw selection when switching away and back', () => {
     const { container } = render(<CropStage />);
     const svg = container.querySelector('svg.editor-world')!;
@@ -69,5 +75,16 @@ describe('CropStage', () => {
     fireEvent.click(screen.getByText('框選區域'));
     fireEvent.click(screen.getByText('選擇國家'));
     expect(screen.getByText('選擇至少一個國家以預覽')).toBeInTheDocument();
+  });
+
+  it('discards an in-progress city selection when switching away and back', () => {
+    const { container } = render(<CropStage />);
+    fireEvent.click(screen.getByText('選擇縣市'));
+    fireEvent.click(container.querySelector('[data-city-id="TW-TPE"]')!);
+    expect(screen.queryByText('選擇至少一個縣市以預覽')).toBeNull();
+
+    fireEvent.click(screen.getByText('框選區域'));
+    fireEvent.click(screen.getByText('選擇縣市'));
+    expect(screen.getByText('選擇至少一個縣市以預覽')).toBeInTheDocument();
   });
 });
