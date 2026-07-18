@@ -20,7 +20,7 @@ describe('Taiwan map content', () => {
     expect(s.ferryCount).toBe(14);
     expect(s.ferryLocoSymbols).toBe(25);
     // Sum over ALL 77 segments.
-    expect(s.totalTrackLength).toBe(218);
+    expect(s.totalTrackLength).toBe(217);
     expect(s.ticketCount).toBe(84);
     expect(s.longTicketCount).toBe(9);
   });

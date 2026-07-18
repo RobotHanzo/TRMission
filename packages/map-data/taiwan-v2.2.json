@@ -1,0 +1,2504 @@
+{
+  "_id": "8ae79c99-6e63-432e-b884-c86d40830552",
+  "ownerId": "9473f0da-a58f-4445-a02d-41efa5ffe70f",
+  "nameZh": "台灣2.2版本 加工",
+  "nameEn": "Taiwan v2.2",
+  "revision": 41,
+  "draft": {
+    "cities": [
+      {
+        "id": "matsu",
+        "nameZh": "馬祖",
+        "nameEn": "Matsu",
+        "x": 24,
+        "y": 7,
+        "region": "離島",
+        "isIsland": true,
+        "tier": "minor"
+      },
+      {
+        "id": "kinmen",
+        "nameZh": "金門",
+        "nameEn": "Kinmen",
+        "x": 4,
+        "y": 33,
+        "region": "離島",
+        "isIsland": true,
+        "tier": "minor"
+      },
+      {
+        "id": "penghu",
+        "nameZh": "澎湖",
+        "nameEn": "Penghu",
+        "x": 16,
+        "y": 50,
+        "region": "離島",
+        "isIsland": true,
+        "tier": "minor"
+      },
+      {
+        "id": "greenisland",
+        "nameZh": "綠島",
+        "nameEn": "Green Island",
+        "x": 65,
+        "y": 70,
+        "region": "東部",
+        "isIsland": true,
+        "tier": "minor"
+      },
+      {
+        "id": "orchidisland",
+        "nameZh": "蘭嶼",
+        "nameEn": "Orchid Island",
+        "x": 68,
+        "y": 85,
+        "region": "東部",
+        "isIsland": true,
+        "tier": "minor"
+      },
+      {
+        "id": "taipei",
+        "nameZh": "臺北",
+        "nameEn": "Taipei",
+        "x": 61.8,
+        "y": 12.8,
+        "region": "北部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "banqiao",
+        "nameZh": "板橋",
+        "nameEn": "Banqiao",
+        "x": 59.3,
+        "y": 14.6,
+        "region": "北部",
+        "isIsland": false,
+        "tier": "tertiary"
+      },
+      {
+        "id": "taoyuan",
+        "nameZh": "桃園",
+        "nameEn": "Taoyuan",
+        "x": 55.2,
+        "y": 14,
+        "region": "北部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "hsinchu",
+        "nameZh": "新竹",
+        "nameEn": "Hsinchu",
+        "x": 49.6,
+        "y": 16,
+        "region": "北部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "zhunan",
+        "nameZh": "竹南",
+        "nameEn": "Zhunan",
+        "x": 46.1,
+        "y": 20.4,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "tertiary"
+      },
+      {
+        "id": "miaoli",
+        "nameZh": "苗栗",
+        "nameEn": "Miaoli",
+        "x": 49.2,
+        "y": 27.1,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "shalu",
+        "nameZh": "沙鹿",
+        "nameEn": "Shalu",
+        "x": 41.4,
+        "y": 29.2,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "tertiary"
+      },
+      {
+        "id": "taichung",
+        "nameZh": "臺中",
+        "nameEn": "Taichung",
+        "x": 46.2,
+        "y": 34.1,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "changhua",
+        "nameZh": "彰化",
+        "nameEn": "Changhua",
+        "x": 39.1,
+        "y": 34.6,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "nantou",
+        "nameZh": "南投",
+        "nameEn": "Nantou",
+        "x": 48.4,
+        "y": 39.4,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "douliu",
+        "nameZh": "斗六",
+        "nameEn": "Douliu",
+        "x": 41.3,
+        "y": 44.9,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "chiayi",
+        "nameZh": "嘉義",
+        "nameEn": "Chiayi",
+        "x": 39.3,
+        "y": 50.8,
+        "region": "南部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "tainan",
+        "nameZh": "臺南",
+        "nameEn": "Tainan",
+        "x": 31.8,
+        "y": 58.2,
+        "region": "南部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "kaohsiung",
+        "nameZh": "高雄",
+        "nameEn": "Kaohsiung",
+        "x": 33.9,
+        "y": 68.8,
+        "region": "南部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "pingtung",
+        "nameZh": "屏東",
+        "nameEn": "Pingtung",
+        "x": 40,
+        "y": 68.6,
+        "region": "南部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "chaozhou",
+        "nameZh": "潮州",
+        "nameEn": "Chaozhou",
+        "x": 40.2,
+        "y": 78.1,
+        "region": "南部",
+        "isIsland": false,
+        "tier": "tertiary"
+      },
+      {
+        "id": "keelung",
+        "nameZh": "基隆",
+        "nameEn": "Keelung",
+        "x": 66.5,
+        "y": 10.5,
+        "region": "北部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "hualien",
+        "nameZh": "花蓮",
+        "nameEn": "Hualien",
+        "x": 66.3,
+        "y": 40.8,
+        "region": "東部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "yilan",
+        "nameZh": "宜蘭",
+        "nameEn": "Yilan",
+        "x": 70.7,
+        "y": 21.1,
+        "region": "北部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "luodong",
+        "nameZh": "羅東",
+        "nameEn": "Luodong",
+        "x": 70.3,
+        "y": 28.9,
+        "region": "北部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "taitung",
+        "nameZh": "臺東",
+        "nameEn": "Taitung",
+        "x": 57.5,
+        "y": 67.1,
+        "region": "東部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "chishang",
+        "nameZh": "池上",
+        "nameEn": "Chishang",
+        "x": 57.1,
+        "y": 56,
+        "region": "東部",
+        "isIsland": false,
+        "tier": "minor"
+      },
+      {
+        "id": "yuli",
+        "nameZh": "玉里",
+        "nameEn": "Yuli",
+        "x": 60.7,
+        "y": 48.6,
+        "region": "東部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "alishan",
+        "nameZh": "阿里山",
+        "nameEn": "Alishan",
+        "x": 46.8,
+        "y": 50.3,
+        "region": "南部",
+        "isIsland": false,
+        "tier": "secondary"
+      },
+      {
+        "id": "jiji",
+        "nameZh": "集集",
+        "nameEn": "JiJi",
+        "x": 48.4,
+        "y": 44.6,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "minor"
+      },
+      {
+        "id": "huwei",
+        "nameZh": "虎尾",
+        "nameEn": "Huwei",
+        "x": 35.1,
+        "y": 45,
+        "region": "中部",
+        "isIsland": false,
+        "tier": "tertiary"
+      },
+      {
+        "id": "guishan",
+        "nameZh": "龜山島",
+        "nameEn": "Guishan Island",
+        "x": 77.3,
+        "y": 23,
+        "region": "北部",
+        "isIsland": true,
+        "tier": "minor"
+      },
+      {
+        "id": "hengchun",
+        "nameZh": "恆春",
+        "nameEn": "Hengchun",
+        "x": 44.2,
+        "y": 87.3,
+        "region": "南部",
+        "isIsland": false,
+        "tier": "major"
+      },
+      {
+        "id": "liuqiu",
+        "nameZh": "小琉球",
+        "nameEn": "Liuqiu",
+        "x": 33,
+        "y": 78,
+        "region": "南部",
+        "isIsland": true,
+        "tier": "minor"
+      },
+      {
+        "id": "zuoying",
+        "nameZh": "左營",
+        "nameEn": "Zuoying",
+        "x": 31.5,
+        "y": 63.6,
+        "region": "南部",
+        "isIsland": false,
+        "tier": "tertiary"
+      },
+      {
+        "id": "pingxi",
+        "nameZh": "平溪",
+        "nameEn": "Pingxi",
+        "x": 64.8,
+        "y": 16.8,
+        "region": "北部",
+        "isIsland": false,
+        "tier": "minor"
+      }
+    ],
+    "routes": [
+      {
+        "id": "R1",
+        "a": "taipei",
+        "b": "banqiao",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "H"
+      },
+      {
+        "id": "R2",
+        "a": "taipei",
+        "b": "banqiao",
+        "color": "GREEN",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "H"
+      },
+      {
+        "id": "R3",
+        "a": "taipei",
+        "b": "keelung",
+        "color": "YELLOW",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "B"
+      },
+      {
+        "id": "R4",
+        "a": "taipei",
+        "b": "keelung",
+        "color": "PURPLE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "B"
+      },
+      {
+        "id": "R5",
+        "a": "taoyuan",
+        "b": "yilan",
+        "color": "RED",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "R6",
+        "a": "keelung",
+        "b": "yilan",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "R8",
+        "a": "shalu",
+        "b": "taichung",
+        "color": "GREEN",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R9",
+        "a": "zhunan",
+        "b": "shalu",
+        "color": "GRAY",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R10",
+        "a": "miaoli",
+        "b": "taichung",
+        "color": "BLUE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "C",
+        "bow": -1.2
+      },
+      {
+        "id": "R11",
+        "a": "miaoli",
+        "b": "taichung",
+        "color": "YELLOW",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "C",
+        "bow": -1.2
+      },
+      {
+        "id": "R12",
+        "a": "shalu",
+        "b": "changhua",
+        "color": "PURPLE",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0.8
+      },
+      {
+        "id": "R13",
+        "a": "taichung",
+        "b": "nantou",
+        "color": "BLACK",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R14",
+        "a": "zhunan",
+        "b": "miaoli",
+        "color": "WHITE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R15",
+        "a": "changhua",
+        "b": "nantou",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0.7
+      },
+      {
+        "id": "R16",
+        "a": "keelung",
+        "b": "matsu",
+        "color": "GRAY",
+        "length": 8,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "R17",
+        "a": "kinmen",
+        "b": "matsu",
+        "color": "GRAY",
+        "length": 8,
+        "ferryLocos": 3,
+        "isTunnel": false
+      },
+      {
+        "id": "R18",
+        "a": "kinmen",
+        "b": "penghu",
+        "color": "GRAY",
+        "length": 6,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "R19",
+        "a": "taitung",
+        "b": "greenisland",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 1,
+        "isTunnel": false
+      },
+      {
+        "id": "R20",
+        "a": "yilan",
+        "b": "luodong",
+        "color": "GREEN",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "D"
+      },
+      {
+        "id": "R21",
+        "a": "yilan",
+        "b": "luodong",
+        "color": "PURPLE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "D"
+      },
+      {
+        "id": "R22",
+        "a": "hualien",
+        "b": "yuli",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R23",
+        "a": "nantou",
+        "b": "yuli",
+        "color": "WHITE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "R24",
+        "a": "nantou",
+        "b": "hualien",
+        "color": "ORANGE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "R25",
+        "a": "penghu",
+        "b": "kaohsiung",
+        "color": "GRAY",
+        "length": 4,
+        "ferryLocos": 2,
+        "isTunnel": false,
+        "bow": 5.6
+      },
+      {
+        "id": "R26",
+        "a": "tainan",
+        "b": "penghu",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 1,
+        "isTunnel": false,
+        "bow": 0.8
+      },
+      {
+        "id": "R27",
+        "a": "changhua",
+        "b": "douliu",
+        "color": "YELLOW",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0
+      },
+      {
+        "id": "R28",
+        "a": "douliu",
+        "b": "chiayi",
+        "color": "RED",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0
+      },
+      {
+        "id": "R30",
+        "a": "chiayi",
+        "b": "tainan",
+        "color": "YELLOW",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "E"
+      },
+      {
+        "id": "R31",
+        "a": "chiayi",
+        "b": "tainan",
+        "color": "ORANGE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "E"
+      },
+      {
+        "id": "R32",
+        "a": "chiayi",
+        "b": "alishan",
+        "color": "PURPLE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R33",
+        "a": "alishan",
+        "b": "taitung",
+        "color": "BLACK",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "R34",
+        "a": "taitung",
+        "b": "orchidisland",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 2,
+        "isTunnel": false,
+        "bow": 1.9
+      },
+      {
+        "id": "R35",
+        "a": "greenisland",
+        "b": "orchidisland",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 1,
+        "isTunnel": false
+      },
+      {
+        "id": "R36",
+        "a": "yuli",
+        "b": "chishang",
+        "color": "BLUE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R37",
+        "a": "chishang",
+        "b": "taitung",
+        "color": "ORANGE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R38",
+        "a": "kaohsiung",
+        "b": "pingtung",
+        "color": "ORANGE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R39",
+        "a": "tainan",
+        "b": "pingtung",
+        "color": "GREEN",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R40",
+        "a": "taitung",
+        "b": "pingtung",
+        "color": "PURPLE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R41",
+        "a": "taitung",
+        "b": "chaozhou",
+        "color": "BLUE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": -1.9
+      },
+      {
+        "id": "R42",
+        "a": "pingtung",
+        "b": "chaozhou",
+        "color": "GRAY",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R43",
+        "a": "taichung",
+        "b": "changhua",
+        "color": "RED",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "L"
+      },
+      {
+        "id": "R44",
+        "a": "hsinchu",
+        "b": "zhunan",
+        "color": "WHITE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "F"
+      },
+      {
+        "id": "R45",
+        "a": "hsinchu",
+        "b": "zhunan",
+        "color": "ORANGE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "F"
+      },
+      {
+        "id": "R46",
+        "a": "taoyuan",
+        "b": "hsinchu",
+        "color": "BLACK",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "G"
+      },
+      {
+        "id": "R47",
+        "a": "taoyuan",
+        "b": "hsinchu",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "G"
+      },
+      {
+        "id": "R48",
+        "a": "taoyuan",
+        "b": "banqiao",
+        "color": "BLUE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "I"
+      },
+      {
+        "id": "R49",
+        "a": "taoyuan",
+        "b": "banqiao",
+        "color": "WHITE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "I"
+      },
+      {
+        "id": "R50",
+        "a": "jiji",
+        "b": "alishan",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": -0.1
+      },
+      {
+        "id": "R51",
+        "a": "nantou",
+        "b": "jiji",
+        "color": "ORANGE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "M"
+      },
+      {
+        "id": "R52",
+        "a": "douliu",
+        "b": "jiji",
+        "color": "BLUE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R53",
+        "a": "miaoli",
+        "b": "hualien",
+        "color": "GREEN",
+        "length": 6,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "R54",
+        "a": "changhua",
+        "b": "huwei",
+        "color": "BLACK",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R55",
+        "a": "huwei",
+        "b": "tainan",
+        "color": "WHITE",
+        "length": 6,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R56",
+        "a": "luodong",
+        "b": "guishan",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 1,
+        "isTunnel": false
+      },
+      {
+        "id": "R57",
+        "a": "yilan",
+        "b": "guishan",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 1,
+        "isTunnel": false
+      },
+      {
+        "id": "R58",
+        "a": "chaozhou",
+        "b": "hengchun",
+        "color": "YELLOW",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R59",
+        "a": "kaohsiung",
+        "b": "liuqiu",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R60",
+        "a": "liuqiu",
+        "b": "hengchun",
+        "color": "PURPLE",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R61",
+        "a": "hengchun",
+        "b": "orchidisland",
+        "color": "GRAY",
+        "length": 4,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "R62",
+        "a": "luodong",
+        "b": "hualien",
+        "color": "RED",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "J"
+      },
+      {
+        "id": "R63",
+        "a": "luodong",
+        "b": "hualien",
+        "color": "BLUE",
+        "length": 4,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "J"
+      },
+      {
+        "id": "R64",
+        "a": "huwei",
+        "b": "douliu",
+        "color": "PURPLE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R65",
+        "a": "taipei",
+        "b": "pingxi",
+        "color": "WHITE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R66",
+        "a": "pingxi",
+        "b": "yilan",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "R67",
+        "a": "keelung",
+        "b": "pingxi",
+        "color": "ORANGE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false
+      },
+      {
+        "id": "R68",
+        "a": "liuqiu",
+        "b": "chaozhou",
+        "color": "WHITE",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "bow": 0.1
+      },
+      {
+        "id": "R69",
+        "a": "yuli",
+        "b": "greenisland",
+        "color": "GRAY",
+        "length": 4,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "R70",
+        "a": "zuoying",
+        "b": "kaohsiung",
+        "color": "BLUE",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "K"
+      },
+      {
+        "id": "R71",
+        "a": "tainan",
+        "b": "zuoying",
+        "color": "BLACK",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "A"
+      },
+      {
+        "id": "R72",
+        "a": "zuoying",
+        "b": "kaohsiung",
+        "color": "RED",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "K"
+      },
+      {
+        "id": "R73",
+        "a": "tainan",
+        "b": "zuoying",
+        "color": "GRAY",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "A"
+      },
+      {
+        "id": "R74",
+        "a": "kinmen",
+        "b": "changhua",
+        "color": "GRAY",
+        "length": 6,
+        "ferryLocos": 2,
+        "isTunnel": false
+      },
+      {
+        "id": "R75",
+        "a": "shalu",
+        "b": "matsu",
+        "color": "GRAY",
+        "length": 8,
+        "ferryLocos": 3,
+        "isTunnel": false
+      },
+      {
+        "id": "R76",
+        "a": "alishan",
+        "b": "chishang",
+        "color": "GRAY",
+        "length": 3,
+        "ferryLocos": 0,
+        "isTunnel": true
+      },
+      {
+        "id": "R77",
+        "a": "taichung",
+        "b": "changhua",
+        "color": "BLACK",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "L"
+      },
+      {
+        "id": "R78",
+        "a": "nantou",
+        "b": "jiji",
+        "color": "YELLOW",
+        "length": 1,
+        "ferryLocos": 0,
+        "isTunnel": false,
+        "doubleGroup": "M"
+      },
+      {
+        "id": "R7",
+        "a": "hsinchu",
+        "b": "miaoli",
+        "color": "RED",
+        "length": 2,
+        "ferryLocos": 0,
+        "isTunnel": true,
+        "bow": -1
+      }
+    ],
+    "tickets": [
+      {
+        "id": "L1",
+        "a": "penghu",
+        "b": "taipei",
+        "value": 23,
+        "deck": "LONG"
+      },
+      {
+        "id": "L2",
+        "a": "matsu",
+        "b": "orchidisland",
+        "value": 30,
+        "deck": "LONG"
+      },
+      {
+        "id": "L3",
+        "a": "kinmen",
+        "b": "luodong",
+        "value": 24,
+        "deck": "LONG"
+      },
+      {
+        "id": "L4",
+        "a": "zhunan",
+        "b": "chishang",
+        "value": 22,
+        "deck": "LONG"
+      },
+      {
+        "id": "L5",
+        "a": "banqiao",
+        "b": "tainan",
+        "value": 22,
+        "deck": "LONG"
+      },
+      {
+        "id": "L6",
+        "a": "hengchun",
+        "b": "nantou",
+        "value": 18,
+        "deck": "LONG"
+      },
+      {
+        "id": "L7",
+        "a": "jiji",
+        "b": "keelung",
+        "value": 18,
+        "deck": "LONG"
+      },
+      {
+        "id": "L8",
+        "a": "kaohsiung",
+        "b": "zhunan",
+        "value": 20,
+        "deck": "LONG"
+      },
+      {
+        "id": "L9",
+        "a": "pingxi",
+        "b": "zuoying",
+        "value": 21,
+        "deck": "LONG"
+      },
+      {
+        "id": "S1",
+        "a": "matsu",
+        "b": "keelung",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S2",
+        "a": "matsu",
+        "b": "taipei",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S3",
+        "a": "kinmen",
+        "b": "shalu",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S4",
+        "a": "kinmen",
+        "b": "penghu",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S5",
+        "a": "kinmen",
+        "b": "tainan",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S6",
+        "a": "penghu",
+        "b": "chiayi",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S7",
+        "a": "penghu",
+        "b": "kaohsiung",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S8",
+        "a": "penghu",
+        "b": "liuqiu",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S9",
+        "a": "keelung",
+        "b": "guishan",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S10",
+        "a": "taipei",
+        "b": "luodong",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S11",
+        "a": "taipei",
+        "b": "hualien",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S12",
+        "a": "taipei",
+        "b": "zhunan",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S13",
+        "a": "taipei",
+        "b": "miaoli",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S14",
+        "a": "taipei",
+        "b": "taichung",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S15",
+        "a": "banqiao",
+        "b": "guishan",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S16",
+        "a": "banqiao",
+        "b": "zhunan",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S17",
+        "a": "banqiao",
+        "b": "taichung",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S18",
+        "a": "taoyuan",
+        "b": "hsinchu",
+        "value": 2,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S19",
+        "a": "taoyuan",
+        "b": "hualien",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S20",
+        "a": "taoyuan",
+        "b": "shalu",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S21",
+        "a": "taoyuan",
+        "b": "miaoli",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S22",
+        "a": "hsinchu",
+        "b": "shalu",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S23",
+        "a": "hsinchu",
+        "b": "taichung",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S24",
+        "a": "hsinchu",
+        "b": "yuli",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S25",
+        "a": "zhunan",
+        "b": "shalu",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S26",
+        "a": "zhunan",
+        "b": "changhua",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S27",
+        "a": "zhunan",
+        "b": "taichung",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S28",
+        "a": "miaoli",
+        "b": "jiji",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S29",
+        "a": "miaoli",
+        "b": "taichung",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S30",
+        "a": "miaoli",
+        "b": "yuli",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S31",
+        "a": "miaoli",
+        "b": "douliu",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S32",
+        "a": "shalu",
+        "b": "changhua",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S33",
+        "a": "shalu",
+        "b": "huwei",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S34",
+        "a": "taichung",
+        "b": "hualien",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S35",
+        "a": "taichung",
+        "b": "douliu",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S36",
+        "a": "taichung",
+        "b": "chiayi",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S37",
+        "a": "taichung",
+        "b": "tainan",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S38",
+        "a": "changhua",
+        "b": "nantou",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S39",
+        "a": "changhua",
+        "b": "jiji",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S40",
+        "a": "changhua",
+        "b": "taitung",
+        "value": 12,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S41",
+        "a": "nantou",
+        "b": "yuli",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S42",
+        "a": "nantou",
+        "b": "taitung",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S43",
+        "a": "nantou",
+        "b": "chiayi",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S44",
+        "a": "jiji",
+        "b": "greenisland",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S45",
+        "a": "jiji",
+        "b": "kaohsiung",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S46",
+        "a": "douliu",
+        "b": "pingtung",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S47",
+        "a": "douliu",
+        "b": "alishan",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S48",
+        "a": "douliu",
+        "b": "tainan",
+        "value": 7,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S49",
+        "a": "huwei",
+        "b": "tainan",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S50",
+        "a": "huwei",
+        "b": "liuqiu",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S51",
+        "a": "huwei",
+        "b": "chiayi",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S52",
+        "a": "alishan",
+        "b": "pingtung",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S53",
+        "a": "alishan",
+        "b": "tainan",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S54",
+        "a": "chiayi",
+        "b": "tainan",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S55",
+        "a": "chiayi",
+        "b": "kaohsiung",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S56",
+        "a": "chiayi",
+        "b": "hengchun",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S57",
+        "a": "chiayi",
+        "b": "taitung",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S58",
+        "a": "tainan",
+        "b": "pingtung",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S59",
+        "a": "tainan",
+        "b": "chaozhou",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S60",
+        "a": "tainan",
+        "b": "greenisland",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S61",
+        "a": "kaohsiung",
+        "b": "chishang",
+        "value": 8,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S62",
+        "a": "kaohsiung",
+        "b": "orchidisland",
+        "value": 9,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S63",
+        "a": "pingtung",
+        "b": "liuqiu",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S64",
+        "a": "yilan",
+        "b": "hualien",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S65",
+        "a": "yilan",
+        "b": "chishang",
+        "value": 10,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S66",
+        "a": "luodong",
+        "b": "guishan",
+        "value": 2,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S67",
+        "a": "luodong",
+        "b": "greenisland",
+        "value": 11,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S68",
+        "a": "luodong",
+        "b": "yuli",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S69",
+        "a": "hualien",
+        "b": "taitung",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S70",
+        "a": "yuli",
+        "b": "taitung",
+        "value": 4,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S71",
+        "a": "yuli",
+        "b": "orchidisland",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S72",
+        "a": "chishang",
+        "b": "orchidisland",
+        "value": 5,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S73",
+        "a": "taitung",
+        "b": "orchidisland",
+        "value": 3,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S74",
+        "a": "taitung",
+        "b": "chaozhou",
+        "value": 6,
+        "deck": "SHORT"
+      },
+      {
+        "id": "S75",
+        "a": "taitung",
+        "b": "hengchun",
+        "value": 8,
+        "deck": "SHORT"
+      }
+    ],
+    "auspiciousPairs": [
+      {
+        "id": "taipei-kaohsiung",
+        "a": "taipei",
+        "b": "kaohsiung"
+      },
+      {
+        "id": "hualien-taitung",
+        "a": "hualien",
+        "b": "taitung"
+      }
+    ],
+    "geography": {
+      "baseView": {
+        "x": -4,
+        "y": -2,
+        "w": 84,
+        "h": 98
+      },
+      "land": [
+        [
+          [
+            56.7,
+            10
+          ],
+          [
+            62.1,
+            5.9
+          ],
+          [
+            64.8,
+            7.3
+          ],
+          [
+            67.9,
+            9.3
+          ],
+          [
+            71.8,
+            11.3
+          ],
+          [
+            73.6,
+            14.2
+          ],
+          [
+            71.3,
+            20.1
+          ],
+          [
+            72.9,
+            25.5
+          ],
+          [
+            68.4,
+            35.8
+          ],
+          [
+            66.2,
+            43.1
+          ],
+          [
+            63.9,
+            52.9
+          ],
+          [
+            61.2,
+            62.7
+          ],
+          [
+            57.2,
+            69.6
+          ],
+          [
+            51.1,
+            77.4
+          ],
+          [
+            48.9,
+            82.8
+          ],
+          [
+            46.4,
+            89.2
+          ],
+          [
+            40.6,
+            84.8
+          ],
+          [
+            38.8,
+            76.9
+          ],
+          [
+            36.1,
+            73.7
+          ],
+          [
+            32.1,
+            72
+          ],
+          [
+            29.4,
+            62.7
+          ],
+          [
+            29.4,
+            52.9
+          ],
+          [
+            32.5,
+            40.2
+          ],
+          [
+            35.6,
+            35.3
+          ],
+          [
+            38.8,
+            30.4
+          ],
+          [
+            42.4,
+            25.5
+          ],
+          [
+            46,
+            18.1
+          ],
+          [
+            50.9,
+            12.2
+          ]
+        ],
+        [
+          [
+            17.5,
+            50
+          ],
+          [
+            17.39,
+            50.57
+          ],
+          [
+            17.06,
+            51.06
+          ],
+          [
+            16.57,
+            51.39
+          ],
+          [
+            16,
+            51.5
+          ],
+          [
+            15.43,
+            51.39
+          ],
+          [
+            14.94,
+            51.06
+          ],
+          [
+            14.61,
+            50.57
+          ],
+          [
+            14.5,
+            50
+          ],
+          [
+            14.61,
+            49.43
+          ],
+          [
+            14.94,
+            48.94
+          ],
+          [
+            15.43,
+            48.61
+          ],
+          [
+            16,
+            48.5
+          ],
+          [
+            16.57,
+            48.61
+          ],
+          [
+            17.06,
+            48.94
+          ],
+          [
+            17.39,
+            49.43
+          ]
+        ],
+        [
+          [
+            19.15,
+            48.7
+          ],
+          [
+            19.09,
+            49.03
+          ],
+          [
+            18.9,
+            49.3
+          ],
+          [
+            18.63,
+            49.49
+          ],
+          [
+            18.3,
+            49.55
+          ],
+          [
+            17.97,
+            49.49
+          ],
+          [
+            17.7,
+            49.3
+          ],
+          [
+            17.51,
+            49.03
+          ],
+          [
+            17.45,
+            48.7
+          ],
+          [
+            17.51,
+            48.37
+          ],
+          [
+            17.7,
+            48.1
+          ],
+          [
+            17.97,
+            47.91
+          ],
+          [
+            18.3,
+            47.85
+          ],
+          [
+            18.63,
+            47.91
+          ],
+          [
+            18.9,
+            48.1
+          ],
+          [
+            19.09,
+            48.37
+          ]
+        ],
+        [
+          [
+            14.9,
+            51.6
+          ],
+          [
+            14.84,
+            51.91
+          ],
+          [
+            14.67,
+            52.17
+          ],
+          [
+            14.41,
+            52.34
+          ],
+          [
+            14.1,
+            52.4
+          ],
+          [
+            13.79,
+            52.34
+          ],
+          [
+            13.53,
+            52.17
+          ],
+          [
+            13.36,
+            51.91
+          ],
+          [
+            13.3,
+            51.6
+          ],
+          [
+            13.36,
+            51.29
+          ],
+          [
+            13.53,
+            51.03
+          ],
+          [
+            13.79,
+            50.86
+          ],
+          [
+            14.1,
+            50.8
+          ],
+          [
+            14.41,
+            50.86
+          ],
+          [
+            14.67,
+            51.03
+          ],
+          [
+            14.84,
+            51.29
+          ]
+        ],
+        [
+          [
+            5.5,
+            33
+          ],
+          [
+            5.39,
+            33.57
+          ],
+          [
+            5.06,
+            34.06
+          ],
+          [
+            4.57,
+            34.39
+          ],
+          [
+            4,
+            34.5
+          ],
+          [
+            3.43,
+            34.39
+          ],
+          [
+            2.94,
+            34.06
+          ],
+          [
+            2.61,
+            33.57
+          ],
+          [
+            2.5,
+            33
+          ],
+          [
+            2.61,
+            32.43
+          ],
+          [
+            2.94,
+            31.94
+          ],
+          [
+            3.43,
+            31.61
+          ],
+          [
+            4,
+            31.5
+          ],
+          [
+            4.57,
+            31.61
+          ],
+          [
+            5.06,
+            31.94
+          ],
+          [
+            5.39,
+            32.43
+          ]
+        ],
+        [
+          [
+            25,
+            7
+          ],
+          [
+            24.92,
+            7.38
+          ],
+          [
+            24.71,
+            7.71
+          ],
+          [
+            24.38,
+            7.92
+          ],
+          [
+            24,
+            8
+          ],
+          [
+            23.62,
+            7.92
+          ],
+          [
+            23.29,
+            7.71
+          ],
+          [
+            23.08,
+            7.38
+          ],
+          [
+            23,
+            7
+          ],
+          [
+            23.08,
+            6.62
+          ],
+          [
+            23.29,
+            6.29
+          ],
+          [
+            23.62,
+            6.08
+          ],
+          [
+            24,
+            6
+          ],
+          [
+            24.38,
+            6.08
+          ],
+          [
+            24.71,
+            6.29
+          ],
+          [
+            24.92,
+            6.62
+          ]
+        ],
+        [
+          [
+            26.4,
+            5.5
+          ],
+          [
+            26.35,
+            5.77
+          ],
+          [
+            26.19,
+            5.99
+          ],
+          [
+            25.97,
+            6.15
+          ],
+          [
+            25.7,
+            6.2
+          ],
+          [
+            25.43,
+            6.15
+          ],
+          [
+            25.21,
+            5.99
+          ],
+          [
+            25.05,
+            5.77
+          ],
+          [
+            25,
+            5.5
+          ],
+          [
+            25.05,
+            5.23
+          ],
+          [
+            25.21,
+            5.01
+          ],
+          [
+            25.43,
+            4.85
+          ],
+          [
+            25.7,
+            4.8
+          ],
+          [
+            25.97,
+            4.85
+          ],
+          [
+            26.19,
+            5.01
+          ],
+          [
+            26.35,
+            5.23
+          ]
+        ],
+        [
+          [
+            34,
+            78
+          ],
+          [
+            33.92,
+            78.38
+          ],
+          [
+            33.71,
+            78.71
+          ],
+          [
+            33.38,
+            78.92
+          ],
+          [
+            33,
+            79
+          ],
+          [
+            32.62,
+            78.92
+          ],
+          [
+            32.29,
+            78.71
+          ],
+          [
+            32.08,
+            78.38
+          ],
+          [
+            32,
+            78
+          ],
+          [
+            32.08,
+            77.62
+          ],
+          [
+            32.29,
+            77.29
+          ],
+          [
+            32.62,
+            77.08
+          ],
+          [
+            33,
+            77
+          ],
+          [
+            33.38,
+            77.08
+          ],
+          [
+            33.71,
+            77.29
+          ],
+          [
+            33.92,
+            77.62
+          ]
+        ],
+        [
+          [
+            66,
+            70
+          ],
+          [
+            65.92,
+            70.38
+          ],
+          [
+            65.71,
+            70.71
+          ],
+          [
+            65.38,
+            70.92
+          ],
+          [
+            65,
+            71
+          ],
+          [
+            64.62,
+            70.92
+          ],
+          [
+            64.29,
+            70.71
+          ],
+          [
+            64.08,
+            70.38
+          ],
+          [
+            64,
+            70
+          ],
+          [
+            64.08,
+            69.62
+          ],
+          [
+            64.29,
+            69.29
+          ],
+          [
+            64.62,
+            69.08
+          ],
+          [
+            65,
+            69
+          ],
+          [
+            65.38,
+            69.08
+          ],
+          [
+            65.71,
+            69.29
+          ],
+          [
+            65.92,
+            69.62
+          ]
+        ],
+        [
+          [
+            69.2,
+            85
+          ],
+          [
+            69.11,
+            85.46
+          ],
+          [
+            68.85,
+            85.85
+          ],
+          [
+            68.46,
+            86.11
+          ],
+          [
+            68,
+            86.2
+          ],
+          [
+            67.54,
+            86.11
+          ],
+          [
+            67.15,
+            85.85
+          ],
+          [
+            66.89,
+            85.46
+          ],
+          [
+            66.8,
+            85
+          ],
+          [
+            66.89,
+            84.54
+          ],
+          [
+            67.15,
+            84.15
+          ],
+          [
+            67.54,
+            83.89
+          ],
+          [
+            68,
+            83.8
+          ],
+          [
+            68.46,
+            83.89
+          ],
+          [
+            68.85,
+            84.15
+          ],
+          [
+            69.11,
+            84.54
+          ]
+        ],
+        [
+          [
+            74.6,
+            28
+          ],
+          [
+            74.53,
+            28.34
+          ],
+          [
+            74.34,
+            28.64
+          ],
+          [
+            74.04,
+            28.83
+          ],
+          [
+            73.7,
+            28.9
+          ],
+          [
+            73.36,
+            28.83
+          ],
+          [
+            73.06,
+            28.64
+          ],
+          [
+            72.87,
+            28.34
+          ],
+          [
+            72.8,
+            28
+          ],
+          [
+            72.87,
+            27.66
+          ],
+          [
+            73.06,
+            27.36
+          ],
+          [
+            73.36,
+            27.17
+          ],
+          [
+            73.7,
+            27.1
+          ],
+          [
+            74.04,
+            27.17
+          ],
+          [
+            74.34,
+            27.36
+          ],
+          [
+            74.53,
+            27.66
+          ]
+        ]
+      ],
+      "crop": {
+        "lonMin": 118,
+        "lonMax": 122.1,
+        "latMin": 21.8,
+        "latMax": 26.4
+      }
+    }
+  },
+  "createdAt": {
+    "$date": "2026-07-18T18:50:16.268Z"
+  },
+  "updatedAt": {
+    "$date": "2026-07-18T19:04:28.840Z"
+  },
+  "shareCode": "A7SH2WKU"
+}

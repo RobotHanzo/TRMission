@@ -1240,8 +1240,8 @@
     "semantic_hash": ""
   },
   "packages/engine/test/board-registry.spec.ts": {
-    "mtime": 1783624930.2324214,
-    "ast_hash": "f7b4eefb7645e41095767070ecd01697",
+    "mtime": 1784398817.4246638,
+    "ast_hash": "1ab19c658e41273a32974dbfaaaa7c0f",
     "semantic_hash": ""
   },
   "packages/engine/test/connectivity.spec.ts": {
@@ -1330,13 +1330,13 @@
     "semantic_hash": ""
   },
   "packages/map-data/src/index.ts": {
-    "mtime": 1783809759.6973882,
-    "ast_hash": "1672fa0cae511c9f7ee2c31de05b3968",
+    "mtime": 1784398509.3289442,
+    "ast_hash": "b1136c8b7e902c8f3a1aa86242a1566d",
     "semantic_hash": ""
   },
   "packages/map-data/src/routes.ts": {
-    "mtime": 1783626567.365296,
-    "ast_hash": "796b1bc8d2ca95a903d85c28b026d3b9",
+    "mtime": 1784398487.31879,
+    "ast_hash": "d31db7c2fdb78c6da5ced285fd5ab2f9",
     "semantic_hash": ""
   },
   "packages/map-data/src/tickets.ts": {
@@ -1355,13 +1355,13 @@
     "semantic_hash": ""
   },
   "packages/map-data/test/content.spec.ts": {
-    "mtime": 1784318143.6287096,
-    "ast_hash": "0d528f81621f4a4b433bb55b223a443e",
+    "mtime": 1784398659.4202173,
+    "ast_hash": "dab3505a1cbfdfc58acc2a28154cad67",
     "semantic_hash": ""
   },
   "packages/map-data/test/versions.spec.ts": {
-    "mtime": 1783809759.7013905,
-    "ast_hash": "7332c0af14b5ccbb5203b5789ba3741b",
+    "mtime": 1784398702.232836,
+    "ast_hash": "e16239e8e4afc88811280287fbe603a5",
     "semantic_hash": ""
   },
   "packages/map-data/tsconfig.json": {
@@ -1925,8 +1925,8 @@
     "semantic_hash": ""
   },
   "packages/map-data/test/hash-extension.spec.ts": {
-    "mtime": 1784316460.6849027,
-    "ast_hash": "bfc1a02e0824941a12da7f6f196a392d",
+    "mtime": 1784398672.8373194,
+    "ast_hash": "250960454d4664faaa88b59fd8ba2828",
     "semantic_hash": ""
   },
   "packages/map-data/test/validate-for-play.spec.ts": {
@@ -2620,8 +2620,8 @@
     "semantic_hash": ""
   },
   "packages/engine/test/golden/off-mode.json": {
-    "mtime": 1783971666.704852,
-    "ast_hash": "ad26769289eaa9ccecb49a2e349bbf65",
+    "mtime": 1784398731.9024675,
+    "ast_hash": "963984958fd5b36cfc543bb4111928b5",
     "semantic_hash": ""
   },
   "packages/engine/test/off-mode-identity.spec.ts": {
@@ -4100,8 +4100,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/board/hitTest.test.ts": {
-    "mtime": 1783869478.4481666,
-    "ast_hash": "a41a166216ec3cf057bb1ed4fe66b767",
+    "mtime": 1784399034.7942255,
+    "ast_hash": "84843a39584e71c94162feded50912d4",
     "semantic_hash": ""
   },
   "apps/mobile/src/board/hitTest.ts": {
@@ -5220,8 +5220,8 @@
     "semantic_hash": ""
   },
   "packages/map-data/src/archive/v4.ts": {
-    "mtime": 1783809759.6963754,
-    "ast_hash": "8d29a8688e60ba27cd75cd835789d204",
+    "mtime": 1784398572.4394214,
+    "ast_hash": "768fdcaa79343485abb141d8b80791ff",
     "semantic_hash": ""
   },
   "packages/shared/src/reports.ts": {
@@ -6152,6 +6152,11 @@
   "apps/server/src/auth/apple-redirect.client.ts": {
     "mtime": 1784330551.1577787,
     "ast_hash": "348dcfdb434de1baf3f2b11c35da0cff",
+    "semantic_hash": ""
+  },
+  "packages/map-data/src/archive/v5.ts": {
+    "mtime": 1784398603.4605374,
+    "ast_hash": "84ce36e19a146990387a2bc177ee839b",
     "semantic_hash": ""
   }
 }

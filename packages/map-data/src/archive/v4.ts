@@ -1,17 +1,68 @@
-import type { GameContent, MapMeta } from '../types';
-import { CITIES } from '../cities';
+import type { GameContent, MapMeta, CityDef, CityTier } from '../types';
+import { asCityId } from '@trm/shared';
 import { TICKETS } from '../tickets';
 import { buildRoute, type Row } from '../routes';
 
 /**
  * Frozen map-content version 4, immediately before authored auspicious pairs were added in v5.
  *
- * `routes` used to be referenced from the live table (byte-identical at the time), but the
- * 2026-07-19 route changelog that shipped v6 diverged it — the pinned v4 hash in
- * `test/versions.spec.ts` is the tripwire that caught the drift, per this package's CLAUDE.md.
- * `routes` is now captured here as its own frozen literal (identical to v5's, since nothing
- * about routes changed between v4 and v5 — only `meta` and `auspiciousPairs` did).
+ * `routes` and `cities` used to be referenced from the live tables (byte-identical at the time),
+ * but two later edits diverged them — the 2026-07-19 route changelog that shipped v6 (routes),
+ * and the 2026-07-19 station-position/curvature polish that followed (cities). Both tripwires
+ * fired in `test/versions.spec.ts`, per this package's CLAUDE.md, so both are now captured here
+ * as their own frozen literals (identical to v5's, since neither changed between v4 and v5 —
+ * only `meta` and `auspiciousPairs` did).
  */
+const c = (
+  id: string,
+  nameZh: string,
+  nameEn: string,
+  x: number,
+  y: number,
+  region: string,
+  isIsland = false,
+  tier: CityTier = 'minor',
+): CityDef => ({ id: asCityId(id), nameZh, nameEn, x, y, region, isIsland, tier });
+
+export const V4_CITIES: readonly CityDef[] = [
+  c('matsu', '馬祖', 'Matsu', 24, 7, '離島', true),
+  c('kinmen', '金門', 'Kinmen', 4, 33, '離島', true),
+  c('penghu', '澎湖', 'Penghu', 16, 50, '離島', true),
+  c('greenisland', '綠島', 'Green Island', 65, 70, '東部', true),
+  c('orchidisland', '蘭嶼', 'Orchid Island', 68, 85, '東部', true),
+  c('taipei', '臺北', 'Taipei', 61.8, 12.8, '北部', false, 'major'),
+  c('banqiao', '板橋', 'Banqiao', 59.3, 14.6, '北部', false, 'tertiary'),
+  c('taoyuan', '桃園', 'Taoyuan', 55.2, 14, '北部', false, 'secondary'),
+  c('hsinchu', '新竹', 'Hsinchu', 50.8, 17.6, '北部', false, 'major'),
+  c('zhunan', '竹南', 'Zhunan', 47.8, 19.5, '中部', false, 'tertiary'),
+  c('miaoli', '苗栗', 'Miaoli', 49.2, 27.1, '中部', false, 'secondary'),
+  c('shalu', '沙鹿', 'Shalu', 41.4, 29, '中部', false, 'tertiary'),
+  c('taichung', '臺中', 'Taichung', 43.4, 35.7, '中部', false, 'major'),
+  c('changhua', '彰化', 'Changhua', 35.6, 38.3, '中部', false, 'secondary'),
+  c('nantou', '南投', 'Nantou', 48.4, 39.4, '中部', false, 'secondary'),
+  c('douliu', '斗六', 'Douliu', 41, 45.8, '中部', false, 'secondary'),
+  c('chiayi', '嘉義', 'Chiayi', 36.9, 53.8, '南部', false, 'major'),
+  c('tainan', '臺南', 'Tainan', 31.8, 58.2, '南部', false, 'major'),
+  c('kaohsiung', '高雄', 'Kaohsiung', 33.9, 68.8, '南部', false, 'major'),
+  c('pingtung', '屏東', 'Pingtung', 39.7, 73.7, '南部', false, 'secondary'),
+  c('chaozhou', '潮州', 'Chaozhou', 40.2, 78.1, '南部', false, 'tertiary'),
+  c('keelung', '基隆', 'Keelung', 66.5, 10.5, '北部', false, 'secondary'),
+  c('hualien', '花蓮', 'Hualien', 61.6, 39.7, '東部', false, 'major'),
+  c('yilan', '宜蘭', 'Yilan', 65, 22, '北部', false, 'major'),
+  c('luodong', '羅東', 'Luodong', 66.3, 28, '北部', false, 'secondary'),
+  c('taitung', '臺東', 'Taitung', 53.5, 65.8, '東部', false, 'major'),
+  c('chishang', '池上', 'Chishang', 57.1, 56, '東部'),
+  c('yuli', '玉里', 'Yuli', 59, 47.7, '東部', false, 'secondary'),
+  c('alishan', '阿里山', 'Alishan', 45.5, 53.9, '南部', false, 'secondary'),
+  c('jiji', '集集', 'JiJi', 46, 45.3, '中部'),
+  c('huwei', '虎尾', 'Huwei', 35.7, 46, '中部', false, 'tertiary'),
+  c('guishan', '龜山島', 'Guishan Island', 73.7, 28, '北部', true),
+  c('hengchun', '恆春', 'Hengchun', 43, 85.2, '南部', false, 'major'),
+  c('liuqiu', '小琉球', 'Liuqiu', 33, 78, '南部', true),
+  c('zuoying', '左營', 'Zuoying', 31.5, 63.6, '南部', false, 'tertiary'),
+  c('pingxi', '平溪', 'Pingxi', 64.8, 16.8, '北部'),
+];
+
 const V4_ROWS: readonly Row[] = [
   ['R1', 'taipei', 'banqiao', 'GRAY', 1, 'D-H'],
   ['R2', 'taipei', 'banqiao', 'GREEN', 1, 'D-H'],
@@ -100,7 +151,7 @@ const V4_META: MapMeta = {
 
 export const CONTENT_V4: GameContent = {
   meta: V4_META,
-  cities: CITIES,
+  cities: V4_CITIES,
   routes: V4_ROUTES,
   tickets: TICKETS,
 };

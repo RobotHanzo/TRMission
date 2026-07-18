@@ -108,7 +108,7 @@ describe('content version registry', () => {
 
   it('pins the v6 current content hash', () => {
     expect(hashContent(TAIWAN_CONTENT)).toBe(
-      '191376768204c8261d167fc408d5ce1290546d845e6430a7c4806e957464a014',
+      '41b97c9b43df044d6a4322b7e40c413fad6ebe3335004af5a2c0cce100b71279',
     );
   });
 });

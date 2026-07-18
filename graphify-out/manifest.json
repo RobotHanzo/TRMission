@@ -1325,8 +1325,8 @@
     "semantic_hash": ""
   },
   "packages/map-data/src/cities.ts": {
-    "mtime": 1783654365.1893353,
-    "ast_hash": "791195bbca96cddf0a5c82ee39112d65",
+    "mtime": 1784401980.5994072,
+    "ast_hash": "9609d95f004596b21766647027618afd",
     "semantic_hash": ""
   },
   "packages/map-data/src/index.ts": {
@@ -1335,8 +1335,8 @@
     "semantic_hash": ""
   },
   "packages/map-data/src/routes.ts": {
-    "mtime": 1784398487.31879,
-    "ast_hash": "d31db7c2fdb78c6da5ced285fd5ab2f9",
+    "mtime": 1784401993.8411353,
+    "ast_hash": "ceaa7cbc3618b9bbc1bd39a5ef1ea8b0",
     "semantic_hash": ""
   },
   "packages/map-data/src/tickets.ts": {
@@ -1355,13 +1355,13 @@
     "semantic_hash": ""
   },
   "packages/map-data/test/content.spec.ts": {
-    "mtime": 1784398659.4202173,
-    "ast_hash": "dab3505a1cbfdfc58acc2a28154cad67",
+    "mtime": 1784402017.4875593,
+    "ast_hash": "9481325499d2f7bd1451a3b20243cc9c",
     "semantic_hash": ""
   },
   "packages/map-data/test/versions.spec.ts": {
-    "mtime": 1784398702.232836,
-    "ast_hash": "e16239e8e4afc88811280287fbe603a5",
+    "mtime": 1784402021.6349838,
+    "ast_hash": "f6327be13a91698fbfaaf17c6a610b86",
     "semantic_hash": ""
   },
   "packages/map-data/tsconfig.json": {
@@ -1925,8 +1925,8 @@
     "semantic_hash": ""
   },
   "packages/map-data/test/hash-extension.spec.ts": {
-    "mtime": 1784398672.8373194,
-    "ast_hash": "250960454d4664faaa88b59fd8ba2828",
+    "mtime": 1784402020.0964892,
+    "ast_hash": "0d48758b3ff63b460b810eb8437cefed",
     "semantic_hash": ""
   },
   "packages/map-data/test/validate-for-play.spec.ts": {
@@ -5220,8 +5220,8 @@
     "semantic_hash": ""
   },
   "packages/map-data/src/archive/v4.ts": {
-    "mtime": 1784398572.4394214,
-    "ast_hash": "768fdcaa79343485abb141d8b80791ff",
+    "mtime": 1784402099.0110333,
+    "ast_hash": "d77bccd65f61fcce83f18b13ad420d3f",
     "semantic_hash": ""
   },
   "packages/shared/src/reports.ts": {
@@ -6155,8 +6155,13 @@
     "semantic_hash": ""
   },
   "packages/map-data/src/archive/v5.ts": {
-    "mtime": 1784398603.4605374,
-    "ast_hash": "84ce36e19a146990387a2bc177ee839b",
+    "mtime": 1784402125.669523,
+    "ast_hash": "af69013c0a2d743d5c0def1c021d8b73",
+    "semantic_hash": ""
+  },
+  "map.json": {
+    "mtime": 1784401664.889697,
+    "ast_hash": "37965e7ad941f0e5705c1f15d09135e8",
     "semantic_hash": ""
   }
 }
