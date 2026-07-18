@@ -9,32 +9,32 @@ describe('Taiwan map content', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('has the expected size and shape (Taiwan map v4 — the tw2.1 network)', () => {
+  it('has the expected size and shape (Taiwan map v6 — the 2026-07-19 route changelog)', () => {
     const s = result.stats;
     expect(s.cityCount).toBe(36);
-    expect(s.routeCount).toBe(75);
-    // 64 distinct pairs; 75 − 64 = 11 parallel edges — exactly one per grouped double pair (A–K).
+    expect(s.routeCount).toBe(77);
+    // 64 distinct pairs; 77 − 64 = 13 parallel edges — exactly one per grouped double pair (A–M).
     expect(s.distinctPairCount).toBe(64);
-    expect(s.doublePairCount).toBe(11);
+    expect(s.doublePairCount).toBe(13);
     expect(s.tunnelCount).toBe(9);
     expect(s.ferryCount).toBe(14);
-    expect(s.ferryLocoSymbols).toBe(26);
-    // Sum over ALL 75 segments.
-    expect(s.totalTrackLength).toBe(221);
+    expect(s.ferryLocoSymbols).toBe(25);
+    // Sum over ALL 77 segments.
+    expect(s.totalTrackLength).toBe(218);
     expect(s.ticketCount).toBe(84);
     expect(s.longTicketCount).toBe(9);
   });
 
   it('has the planned colour balance', () => {
     expect(result.stats.colorBalance).toMatchObject({
-      RED: 7,
+      RED: 6,
       GREEN: 5,
-      BLUE: 6,
+      BLUE: 7,
       WHITE: 7,
-      ORANGE: 6,
-      YELLOW: 7,
-      PURPLE: 6,
-      BLACK: 5,
+      ORANGE: 7,
+      YELLOW: 6,
+      PURPLE: 7,
+      BLACK: 6,
       GRAY: 26,
     });
   });

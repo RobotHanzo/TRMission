@@ -10,6 +10,7 @@ import {
 import { CONTENT_V2 } from '../src/archive/v2';
 import { CONTENT_V3 } from '../src/archive/v3';
 import { CONTENT_V4 } from '../src/archive/v4';
+import { CONTENT_V5 } from '../src/archive/v5';
 
 describe('content version registry', () => {
   it('keys every registered version by its own content hash', () => {
@@ -27,22 +28,25 @@ describe('content version registry', () => {
     const v2Hash = hashContent(CONTENT_V2);
     const v3Hash = hashContent(CONTENT_V3);
     const v4Hash = hashContent(CONTENT_V4);
+    const v5Hash = hashContent(CONTENT_V5);
     expect(v2Hash).not.toBe(CONTENT_HASH);
     expect(v3Hash).not.toBe(CONTENT_HASH);
+    expect(v5Hash).not.toBe(CONTENT_HASH);
     expect(v2Hash).not.toBe(v3Hash);
     expect(resolveContentByHash(v2Hash)).toBe(CONTENT_V2);
     expect(resolveContentByHash(v3Hash)).toBe(CONTENT_V3);
     expect(resolveContentByHash(v4Hash)).toBe(CONTENT_V4);
+    expect(resolveContentByHash(v5Hash)).toBe(CONTENT_V5);
   });
 
   it('returns undefined for an unknown hash', () => {
     expect(resolveContentByHash('0'.repeat(64))).toBeUndefined();
   });
 
-  it('current content is map version 5 (tw2.1 plus authored auspicious pairs)', () => {
-    expect(TAIWAN_CONTENT.meta.version).toBe(5);
+  it('current content is map version 6 (2026-07-19 route changelog)', () => {
+    expect(TAIWAN_CONTENT.meta.version).toBe(6);
     expect(TAIWAN_CONTENT.cities.length).toBe(36);
-    expect(TAIWAN_CONTENT.routes.length).toBe(75);
+    expect(TAIWAN_CONTENT.routes.length).toBe(77);
   });
 
   it('v3 content is map version 3 with R77 as a length-2 tunnel', () => {
@@ -94,9 +98,17 @@ describe('content version registry', () => {
     );
   });
 
-  it('pins the v5 current content hash', () => {
-    expect(hashContent(TAIWAN_CONTENT)).toBe(
+  // Tripwire for the v5 snapshot (frozen when v6's route changelog replaced it). This is the same
+  // value the live TAIWAN_CONTENT hashed to while it was v5, so `archive/v5.ts` is proven byte-exact.
+  it('pins the archived v5 content hash', () => {
+    expect(hashContent(CONTENT_V5)).toBe(
       '6e06eb39c90aa6c82db20638f84b200d9a46bbd4f6777e883e6bab4840dbf26f',
+    );
+  });
+
+  it('pins the v6 current content hash', () => {
+    expect(hashContent(TAIWAN_CONTENT)).toBe(
+      '191376768204c8261d167fc408d5ce1290546d845e6430a7c4806e957464a014',
     );
   });
 });

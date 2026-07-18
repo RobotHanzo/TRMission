@@ -7,7 +7,7 @@ import { CONTENT_V4 } from '../src/archive/v4';
  * Tripwire for the hashContent formula extension (custom maps): geography/rules enter the
  * digest ONLY when present, so every hash minted before the extension stays byte-identical.
  */
-const PINNED_HASH = '6e06eb39c90aa6c82db20638f84b200d9a46bbd4f6777e883e6bab4840dbf26f';
+const PINNED_HASH = '191376768204c8261d167fc408d5ce1290546d845e6430a7c4806e957464a014';
 const V4_HASH = 'e211b5d98bd7142b8c52e63bf681a57dfab903375c95cee4c0dbc165ecc6f4ba';
 
 const GEO: MapGeography = {
@@ -23,7 +23,7 @@ const GEO: MapGeography = {
 };
 
 describe('hashContent extension', () => {
-  it('pins the current Taiwan (v5) hash', () => {
+  it('pins the current Taiwan (v6) hash', () => {
     expect(CONTENT_HASH).toBe(PINNED_HASH);
   });
 

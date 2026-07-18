@@ -7,6 +7,7 @@ import { taiwanForkGeography } from './taiwan-geography';
 import { CONTENT_V2 } from './archive/v2';
 import { CONTENT_V3 } from './archive/v3';
 import { CONTENT_V4 } from './archive/v4';
+import { CONTENT_V5 } from './archive/v5';
 
 export * from './types';
 export * from './cities';
@@ -22,7 +23,7 @@ export * from './render-tokens';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',
-  version: 5,
+  version: 6,
   nameZh: '台灣本島與離島',
   nameEn: 'Taiwan & Outlying Islands',
 };
@@ -71,7 +72,9 @@ export const CONTENT_HASH: string = hashContent(TAIWAN_CONTENT);
  * content change therefore never breaks an in-flight game's replay.
  */
 export const CONTENT_REGISTRY: ReadonlyMap<string, GameContent> = new Map(
-  [CONTENT_V2, CONTENT_V3, CONTENT_V4, TAIWAN_CONTENT].map((c) => [hashContent(c), c] as const),
+  [CONTENT_V2, CONTENT_V3, CONTENT_V4, CONTENT_V5, TAIWAN_CONTENT].map(
+    (c) => [hashContent(c), c] as const,
+  ),
 );
 
 /** Resolve the exact content a game was created against, or undefined if its version is unknown. */

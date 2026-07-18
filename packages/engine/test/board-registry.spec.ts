@@ -3,7 +3,8 @@ import { CONTENT_HASH, CONTENT_REGISTRY } from '@trm/map-data';
 import { boardForContentHash, taiwanBoard } from '../src/taiwan';
 
 // Resolve each registered version's hash by its map version, so this stays correct as more
-// versions are archived (v2 = pre-R77-tunnel, v3 = 39-city graph, v4 = current tw2.1 network).
+// versions are archived (v2 = pre-R77-tunnel, v3 = 39-city graph, v4/v5 = tw2.1 network,
+// v6 = current, post 2026-07-19 route changelog).
 const entries = [...CONTENT_REGISTRY.entries()];
 const hashOfVersion = (v: number): string => {
   const found = entries.find(([, c]) => c.meta.version === v);
@@ -12,13 +13,19 @@ const hashOfVersion = (v: number): string => {
 };
 
 describe('boardForContentHash', () => {
-  it('builds the current (v4) board for the current content hash', () => {
+  it('builds the current (v6) board for the current content hash', () => {
     const board = boardForContentHash(CONTENT_HASH);
     const current = taiwanBoard();
-    // A v4 route resolves identically; the old R77 id is gone from the current map.
     expect(board.routeById.get('R5')).toEqual(current.routeById.get('R5'));
     expect(board.routeById.get('R5')).toBeDefined();
-    expect(board.routeById.get('R77')).toBeUndefined();
+    // The 2026-07-19 changelog's 3 new routes (id sequence past R75) reused the R77 id — a
+    // completely different route than v3's length-2 R77 tunnel checked below.
+    expect(board.routeById.get('R77')).toMatchObject({
+      a: 'taichung',
+      b: 'changhua',
+      color: 'BLACK',
+      isTunnel: false,
+    });
   });
 
   it('builds the archived v3 board for the v3 hash — R77 is a length-2 tunnel', () => {

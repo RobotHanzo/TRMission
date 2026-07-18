@@ -39,7 +39,7 @@ describe('hitTest', () => {
     expect(pair.length).toBe(2); // re-verify group id against routes.ts if this fails
     const [r1] = pair;
     const g1 = geometry.get(r1!.id as string)!;
-    const slot = g1.slots[0]!;
+    const slot = g1.slots[Math.floor(g1.slots.length / 2)]!;
     // Bias the tap toward r1's own perp side.
     const px = boardToScreen({ x: slot.x + g1.perp.x * 1.2, y: slot.y + g1.perp.y * 1.2 }, cam, vp);
     expect(hitTest(px, cam, vp, scene)).toEqual({ kind: 'route', id: r1!.id });
