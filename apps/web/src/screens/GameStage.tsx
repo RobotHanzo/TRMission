@@ -473,7 +473,7 @@ export function GameStage({
           {hive.revealed.map((card, index) => {
             const color = pbToCard(card);
             return color ? (
-              <TrainCarCard key={`${card}-${index}`} color={color} count={1} size={42} />
+              <TrainCarCard key={`${card}-${index}`} color={color} size={64} />
             ) : null;
           })}
         </span>

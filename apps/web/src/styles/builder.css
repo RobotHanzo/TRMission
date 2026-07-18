@@ -361,13 +361,22 @@
 .editor-country {
   fill: var(--tr-land);
   stroke: var(--tr-coast);
-  stroke-width: calc(0.35px * var(--inv-scale, 1));
+  /* Countries/cities are drawn straight in lon/lat degrees rather than a board's projected
+     pixel space, and that viewBox's degrees-per-pixel ratio varies wildly by mode — Taiwan's
+     縣市 viewBox is ~80× tighter than the whole-world one. A calc()'d px width (the pattern
+     used for the board's own projected coastlines) would scale with that ratio and balloon
+     into a many-pixel-wide blob at Taiwan's zoom, so this pins the stroke to a constant
+     screen-pixel width regardless of viewBox scale (and of the pinch-zoom transform, so no
+     --inv-scale counter-scaling is needed here). */
+  stroke-width: 0.8px;
+  vector-effect: non-scaling-stroke;
   cursor: pointer;
 }
 .editor-country--selected {
   fill: color-mix(in srgb, var(--tr-ember) 45%, var(--tr-land));
   stroke: var(--tr-ember);
-  stroke-width: calc(0.7px * var(--inv-scale, 1));
+  stroke-width: 1.6px;
+  vector-effect: non-scaling-stroke;
 }
 .editor-country-pick {
   /* Country paths carry their own pointer cursor; no rectangle-drawing crosshair here. */
