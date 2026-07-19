@@ -9,13 +9,16 @@ import type { ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import { GestureDetector } from 'react-native-gesture-handler';
-import type { Viewport } from './camera';
+import type { Bounds, Viewport } from './camera';
 import type { BoardCamera } from './useBoardCamera';
 
 export interface BoardCanvasProps {
   cam: BoardCamera;
   /** The board viewport in dp (the web host sizes/positions its overdrawn canvas from it). */
   vp: Viewport;
+  /** The scene's full drawable rect in board units (view + overscan) — the web host paints the
+   *  whole thing when the GPU budget allows, so panning never meets an unpainted edge. */
+  sceneBounds: Bounds;
   /** The MapSceneSkia subtree — the host owns the Canvas and the camera transform around it. */
   children: ReactNode;
 }

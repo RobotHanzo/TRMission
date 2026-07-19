@@ -1660,6 +1660,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@expo-google-fonts/noto-sans-tc@npm:^0.4.3":
+  version: 0.4.3
+  resolution: "@expo-google-fonts/noto-sans-tc@npm:0.4.3"
+  checksum: 10/79e89196e3f6e0fd7bb2ad257f0a47df5631824dcc22b183376cdce57f32a459ea6bccf11848cc403372fb091d03e48bf733af0a5f4473992013b13c4d2df77c
+  languageName: node
+  linkType: hard
+
 "@expo/cli@npm:^56.1.18":
   version: 56.1.18
   resolution: "@expo/cli@npm:56.1.18"
@@ -4491,6 +4498,7 @@ __metadata:
   resolution: "@trm/mobile@workspace:apps/mobile"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.12.1"
+    "@expo-google-fonts/noto-sans-tc": "npm:^0.4.3"
     "@expo/config-plugins": "npm:~56.0.11"
     "@expo/metro-runtime": "npm:~56.0.17"
     "@expo/ngrok": "npm:^4.1.0"

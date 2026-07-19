@@ -1,18 +1,17 @@
 // A mission (destination ticket) card (ports the web TicketCard): a mini-map preview of the two
 // endpoint cities over the Taiwan board, a ticket stub with the city pair, and the point value.
 // Long routes wear an EMU-blue livery, short routes a warm ember one. With `onToggle` the card
-// becomes a pressable toggle (used while choosing tickets).
+// becomes a pressable toggle (used while choosing tickets). Theme-aware like the web's
+// var(--tr-*)-driven .ticket-card: the card chrome and the mini-map both follow light/dark.
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { MAP_PALETTE_LIGHT } from '@trm/map-data';
+import { MAP_PALETTE_DARK, MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { ticketById, ticketLabel } from '../../game/content';
 import { useUi } from '../../store/ui';
+import { useTheme } from '../../theme/useTheme';
+import { mix } from '../../theme/shade';
 import { RoutePreview } from './RoutePreview';
-
-const P = MAP_PALETTE_LIGHT;
-const BLUE = P.blue;
-const EMBER = '#ee6b1f';
 
 interface Props {
   ticketId: string;
@@ -28,34 +27,53 @@ interface Props {
 export function TicketCard({ ticketId, selected, onToggle, disabled, completed }: Props) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
+  const { tokens, dark } = useTheme();
   const def = ticketById.get(ticketId);
   const label = ticketLabel(ticketId, locale);
   if (!def || !label) return null;
 
+  const palette = dark ? MAP_PALETTE_DARK : MAP_PALETTE_LIGHT;
   const tone = label.long ? 'long' : 'short';
-  const toneHex = label.long ? BLUE : EMBER;
+  const toneHex = label.long ? tokens.blue : tokens.ember;
+  // Web parity: .ticket-map is the sea colour mixed toward the tone (color-mix 14% blue / 10%
+  // ember), so the mini-map keeps its livery in both themes.
+  const mapBg =
+    tone === 'long' ? mix(palette.sea, tokens.blue, 0.14) : mix(palette.sea, tokens.ember, 0.1);
   const selectable = onToggle !== undefined;
   const aria = `${label.a} – ${label.b}, ${label.value} ${t('points')}${
     completed ? `, ${t('completed')}` : ''
   }`;
 
+  const cardTheme = { backgroundColor: tokens.surface, borderColor: palette.coast };
   const body = (
     <>
-      <View style={[styles.map, { backgroundColor: tone === 'long' ? '#cfdde9' : '#e6ddd0' }]}>
-        <RoutePreview aId={def.a as string} bId={def.b as string} tone={tone} />
+      <View style={[styles.map, { backgroundColor: mapBg, borderBottomColor: palette.coast }]}>
+        <RoutePreview
+          aId={def.a as string}
+          bId={def.b as string}
+          toneHex={toneHex}
+          palette={palette}
+          surface={tokens.surface}
+        />
         {label.long && (
-          <View style={[styles.flag, { backgroundColor: BLUE }]}>
+          <View style={[styles.flag, { backgroundColor: tokens.blue }]}>
             <Text style={styles.flagText}>{t('longRoute')}</Text>
           </View>
         )}
         {selectable && (
-          <View style={[styles.checkChip, selected === true && { backgroundColor: toneHex }]}>
+          <View
+            style={[
+              styles.checkChip,
+              { borderColor: tokens.surface },
+              selected === true && { backgroundColor: toneHex },
+            ]}
+          >
             {selected === true && <Check size={12} color="#fff" />}
           </View>
         )}
       </View>
       <View style={styles.foot}>
-        <Text style={styles.route} numberOfLines={1}>
+        <Text style={[styles.route, { color: tokens.ink }]} numberOfLines={1}>
           <Text style={styles.city}>{label.a}</Text>
           <Text style={styles.dash}> — </Text>
           <Text style={styles.city}>{label.b}</Text>
@@ -65,8 +83,10 @@ export function TicketCard({ ticketId, selected, onToggle, disabled, completed }
         </View>
       </View>
       {completed && (
-        <View style={styles.doneStamp}>
-          <Check size={26} color="#2e7d32" strokeWidth={3} />
+        <View
+          style={[styles.doneStamp, { backgroundColor: tokens.surface, borderColor: tokens.ok }]}
+        >
+          <Check size={26} color={tokens.ok} strokeWidth={3} />
         </View>
       )}
     </>
@@ -77,6 +97,7 @@ export function TicketCard({ ticketId, selected, onToggle, disabled, completed }
       <Pressable
         style={({ pressed }) => [
           styles.card,
+          cardTheme,
           selected === true && { borderColor: toneHex, borderWidth: 2 },
           disabled === true && styles.locked,
           pressed && disabled !== true && styles.pressed,
@@ -93,7 +114,7 @@ export function TicketCard({ ticketId, selected, onToggle, disabled, completed }
   }
   return (
     <View
-      style={[styles.card, completed === true && styles.completed]}
+      style={[styles.card, cardTheme, completed === true && styles.completed]}
       accessibilityRole="image"
       accessibilityLabel={aria}
     >
@@ -107,8 +128,6 @@ const styles = StyleSheet.create({
     width: 150,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.18)',
-    backgroundColor: P.surface,
     overflow: 'hidden',
   },
   completed: { opacity: 0.55 },
@@ -119,7 +138,6 @@ const styles = StyleSheet.create({
   map: {
     aspectRatio: 150 / 158,
     borderBottomWidth: 1,
-    borderBottomColor: P.coast,
     borderStyle: 'dashed',
   },
   flag: {
@@ -131,6 +149,7 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   flagText: { color: '#fff', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
+  // Web parity: .ticket-check is a surface-ringed chip over a neutral dark wash.
   checkChip: {
     position: 'absolute',
     top: 5,
@@ -139,8 +158,7 @@ const styles = StyleSheet.create({
     height: 18,
     borderRadius: 9,
     borderWidth: 1.5,
-    borderColor: 'rgba(0,0,0,0.35)',
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    backgroundColor: 'rgba(0,0,0,0.18)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -170,9 +188,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: 'rgba(255,255,255,0.85)',
     borderWidth: 2,
-    borderColor: '#2e7d32',
     alignItems: 'center',
     justifyContent: 'center',
   },

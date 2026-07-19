@@ -2,7 +2,8 @@
 // PlayerHand). Colour-blind glyph chips follow the ui setting — on a phone the glyphs are
 // clutter unless they're needed.
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { CardRowScroll } from './CardRowScroll';
 import { CARD_COLORS } from '@trm/shared';
 import type { CardCounts } from '@trm/proto';
 import { handFromCounts } from '../../game/payments';
@@ -32,15 +33,11 @@ export function PlayerHand({ hand }: { hand: CardCounts | undefined }) {
       {present.length === 0 ? (
         <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('noCards')}</Text>
       ) : (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.row}
-        >
+        <CardRowScroll contentContainerStyle={styles.row}>
           {present.map((c) => (
             <TrainCarCard key={c} color={c} count={h[c]} showGlyph={colorBlind} />
           ))}
-        </ScrollView>
+        </CardRowScroll>
       )}
     </View>
   );

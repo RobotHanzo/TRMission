@@ -50,13 +50,26 @@ this surface; a device smoke is still the real acceptance bar.
   (`requireOptionalNativeModule` stub; `isAvailableAsync()` → false).
 - **Board gestures on web**: there is no UI thread in a browser — a Reanimated-driven Skia
   transform would force a full CanvasKit-wasm redraw per gesture frame. `BoardCanvas.web.tsx`
-  instead paints the canvas once per camera settle (viewport + overdraw margin) and moves it
-  with a composited CSS transform (`react-zoom-pan-pinch`-style, like the web client); a wheel
-  listener feeds `cam.wheelZoom` (focal-anchored; RNGH covers mouse drag + double-click). The
-  settled-raster snapshot is skipped on web (`BoardView`'s `USE_GESTURE_RASTER`), and replaced
-  static Pictures are disposed two frames late (`useStaticMapPicture.disposePicture`) because
-  CanvasKit's draw loop is decoupled from React commits — an immediate dispose throws
-  `BindingError: Cannot pass deleted object` from a queued frame.
+  instead paints the canvas at the settled camera and moves it with a composited CSS transform
+  (`react-zoom-pan-pinch`-style, like the web client); a wheel listener feeds `cam.wheelZoom`
+  (focal-anchored; RNGH covers mouse drag + double-click). Its header documents three
+  load-bearing invariants — full-scene COVERAGE within a GPU budget (+ a mid-pan repaint
+  watcher), the frame-ATOMIC baseline swap (kills the wrong-zoom flash at settle), and
+  device-PIXEL-GRID snapping of resting translations (a fractional CSS translate resamples the
+  raster into blur). The settled-raster snapshot is skipped on web (`BoardView`'s
+  `USE_GESTURE_RASTER`), and replaced static Pictures are disposed two frames late
+  (`useStaticMapPicture.disposePicture`) because CanvasKit's draw loop is decoupled from React
+  commits — an immediate dispose throws `BindingError: Cannot pass deleted object`.
+- **Board label fonts on web** (`board/webFonts.ts`): CanvasKit cannot see system fonts, and
+  RNSkia's web `ParagraphBuilder.Make` THROWS without a font provider — so city labels only
+  exist once the Noto Sans TC faces (copied to `public/fonts/` by `setup-web.js`) are fetched
+  and registered. The provider is a RECORD dep of the static map Picture (a one-shot offscreen
+  render would otherwise never re-record when fonts land), and `Skia.ParagraphBuilder.Make`
+  must be called as a METHOD — the web factory reads `this.CanvasKit`, so an unbound alias
+  throws (native happens to tolerate it). Loader breadcrumb: `window.__trmFonts`.
+- **Card rows on web** (`components/game/CardRowScroll.web.tsx`): browsers don't scroll an
+  overflowing row with a plain wheel or mouse drag — the web variant adds both (drag swallows
+  the resulting click past a slop) while native keeps the plain horizontal ScrollView.
 - **Alerts**: RNW's `Alert.alert` is a silent no-op, so `src/web/alertShim.ts` (installed from the
   web entry branch) maps it onto `window.confirm`/`window.alert` — OK runs the LAST non-cancel
   button, Cancel the `style: 'cancel'` one. Playwright must handle these as native dialogs

@@ -1,7 +1,8 @@
 // The player's kept mission cards, each with a route-preview mini-map (ports the web
 // TicketPanel). Completed missions sink to the bottom of the deck; otherwise server order.
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { CardRowScroll } from './CardRowScroll';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
 import { useTheme } from '../../theme/useTheme';
 import { TicketCard } from './TicketCard';
@@ -26,15 +27,11 @@ export function TicketPanel({ ticketIds, completedIds }: Props) {
       {ticketIds.length === 0 ? (
         <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('noTickets')}</Text>
       ) : (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.row}
-        >
+        <CardRowScroll contentContainerStyle={styles.row}>
           {ordered.map((id) => (
             <TicketCard key={id} ticketId={id} completed={isDone(id)} />
           ))}
-        </ScrollView>
+        </CardRowScroll>
       )}
     </View>
   );

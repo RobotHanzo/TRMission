@@ -1,7 +1,8 @@
 // A miniature of the Taiwan board for a mission card (ports the web RoutePreview): the island
 // silhouette and the faint rail web for context, then the two ticket endpoints pinned and joined
-// by a gentle neutral arc (no specific path is implied — any connection scores). Colours inline
-// the web's rp-* CSS values from the shared light palette.
+// by a gentle neutral arc (no specific path is implied — any connection scores). Mirrors the
+// web's rp-* classes, which resolve through the theme's --tr-* variables — so the caller passes
+// the active map palette (light/dark) plus the chrome surface + tone colours.
 import { useMemo } from 'react';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 import {
@@ -10,13 +11,11 @@ import {
   TAIWAN_CENTRAL_RANGE_PATH,
   TAIWAN_ISLANDS,
   TAIWAN_LAND_PATH,
+  type MapPalette,
 } from '@trm/map-data';
 import { CITIES, ROUTES, cityById } from '../../game/content';
 
-const P = MAP_PALETTE_LIGHT;
 const VIEWBOX = `${TAIWAN_BASE_VIEW.x} ${TAIWAN_BASE_VIEW.y} ${TAIWAN_BASE_VIEW.w} ${TAIWAN_BASE_VIEW.h}`;
-/** EMU blue for long routes, express ember for short (the web --tr-blue / --tr-ember). */
-const TONE_HEX = { long: P.blue, short: '#ee6b1f' } as const;
 
 /** Every route as a faint hairline, drawn once — pure cartographic context. */
 const networkPath = (): string => {
@@ -32,11 +31,21 @@ const networkPath = (): string => {
 interface Props {
   aId: string;
   bId: string;
-  /** 'long' tints the connection EMU-blue (long route), 'short' uses ember. */
-  tone: 'long' | 'short';
+  /** Connection tint — EMU blue for long routes, ember for short (the web --tr-blue/--tr-ember). */
+  toneHex: string;
+  /** The active cartography palette (light/dark) — the web's --tr-sea/land/coast/relief. */
+  palette?: MapPalette | undefined;
+  /** The chrome surface colour for the arc casing + pin rings (the web --tr-surface). */
+  surface?: string | undefined;
 }
 
-export function RoutePreview({ aId, bId, tone }: Props) {
+export function RoutePreview({
+  aId,
+  bId,
+  toneHex,
+  palette: P = MAP_PALETTE_LIGHT,
+  surface = MAP_PALETTE_LIGHT.surface,
+}: Props) {
   const net = useMemo(networkPath, []);
   const a = cityById.get(aId);
   const b = cityById.get(bId);
@@ -54,7 +63,6 @@ export function RoutePreview({ aId, bId, tone }: Props) {
   const cxp = mx + (-dy / len) * bow * sign;
   const cyp = my + (dx / len) * bow * sign;
   const arc = `M${a.x} ${a.y} Q${cxp} ${cyp} ${b.x} ${b.y}`;
-  const toneHex = TONE_HEX[tone];
 
   return (
     <Svg viewBox={VIEWBOX} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
@@ -94,7 +102,7 @@ export function RoutePreview({ aId, bId, tone }: Props) {
       <Path
         d={arc}
         fill="none"
-        stroke={P.surface}
+        stroke={surface}
         strokeWidth={2.6}
         strokeLinecap="round"
         opacity={0.85}
@@ -112,8 +120,8 @@ export function RoutePreview({ aId, bId, tone }: Props) {
       {[a, b].map((c) => (
         <G key={c.id as string}>
           <Circle cx={c.x} cy={c.y} r={3.4} fill={toneHex} opacity={0.2} />
-          <Circle cx={c.x} cy={c.y} r={1.7} fill={toneHex} stroke={P.surface} strokeWidth={0.5} />
-          <Circle cx={c.x} cy={c.y} r={0.7} fill={P.surface} />
+          <Circle cx={c.x} cy={c.y} r={1.7} fill={toneHex} stroke={surface} strokeWidth={0.5} />
+          <Circle cx={c.x} cy={c.y} r={0.7} fill={surface} />
         </G>
       ))}
 

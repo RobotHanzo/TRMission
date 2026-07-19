@@ -42,6 +42,7 @@ import { CityLayer } from './CityLayer';
 import { LabelLayer } from './LabelLayer';
 import { buildRouteRenderModel, type RouteRenderModel } from './scenePaths';
 import { useStaticMapImage, useStaticMapPicture } from './useStaticMapPicture';
+import { useBoardFontProvider } from './webFonts';
 
 /** Board units of sea drawn beyond the base view on every side, so panning never shows an edge.
  *  Shared with BoardView's raster-region clamp — the snapshot never covers more than the scene. */
@@ -297,7 +298,11 @@ export function MapSceneSkia({
     }),
     [view.x, view.y, view.w, view.h],
   );
-  const picture = useStaticMapPicture(staticElement, bounds, [staticElement, bounds]);
+  // The web font provider is a RECORD dep: drawAsPicture renders one-shot into an offscreen
+  // root, so a picture recorded before the fetched CJK faces landed has no labels and nothing
+  // else would ever re-record it (null on native/jest — a constant there).
+  const fontProvider = useBoardFontProvider();
+  const picture = useStaticMapPicture(staticElement, bounds, [staticElement, bounds, fontProvider]);
   const snapshot = useStaticMapImage(picture, raster);
 
   // The snapshot draws UNDER the vectors at rest (fully hidden — the picture's sea rect is opaque

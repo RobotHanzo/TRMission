@@ -493,7 +493,7 @@ function BoardInner({
 
   return (
     <View style={styles.fill}>
-      <BoardCanvas cam={cam} vp={vp}>
+      <BoardCanvas cam={cam} vp={vp} sceneBounds={sceneBounds}>
         <MapSceneSkia
           cities={CITIES}
           routes={ROUTES}

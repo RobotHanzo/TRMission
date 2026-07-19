@@ -14,7 +14,9 @@ import {
   type FontWeight,
   type SkParagraph,
   type SkPaint,
+  type SkTypefaceFontProvider,
 } from '@shopify/react-native-skia';
+import { BOARD_FONT_FAMILY, useBoardFontProvider } from './webFonts';
 
 /** A stroke paint for the label halo — mirrors the web `.city-label` `paint-order: stroke` outline
  *  (`stroke-linejoin: round`). Guarded: an environment without the Paint API (the jest mock) yields
@@ -40,22 +42,27 @@ function buildParagraph(
   maxWidth: number,
   weight: FontWeight | undefined,
   foreground: SkPaint | undefined,
+  provider: SkTypefaceFontProvider | null,
 ): SkParagraph | null {
   try {
     // No custom font provider → the paragraph builder resolves against the platform's SYSTEM font
     // collection, which is what carries the CJK faces (PingFang on iOS, Noto Sans TC on Android).
-    const make = Skia.ParagraphBuilder?.Make;
-    if (!make) return null;
+    // On WEB there is no system collection at all — RNSkia's web factory THROWS without a
+    // provider — so webFonts.ts supplies one with the fetched Noto Sans TC faces, and the style
+    // must name that family to shape through it. NOTE: call Make as a METHOD — the web factory
+    // reads `this.CanvasKit`, so an unbound alias throws (natively it happens to be bound).
+    if (typeof Skia.ParagraphBuilder?.Make !== 'function') return null;
     const style = {
       color: Skia.Color(color),
       fontSize,
       ...(weight !== undefined ? { fontStyle: { weight } } : {}),
+      ...(provider ? { fontFamilies: [BOARD_FONT_FAMILY] } : {}),
     };
     // A foreground paint (when present) overrides the fill colour — used to paint the stroke halo.
-    const para = make({ textAlign: TextAlign.Center })
-      .pushStyle(style, foreground)
-      .addText(text)
-      .build();
+    const builder = provider
+      ? Skia.ParagraphBuilder.Make({ textAlign: TextAlign.Center }, provider)
+      : Skia.ParagraphBuilder.Make({ textAlign: TextAlign.Center });
+    const para = builder.pushStyle(style, foreground).addText(text).build();
     para.layout(maxWidth);
     return para;
   } catch {
@@ -95,6 +102,8 @@ export function BoardText({
   halo,
   anchorBottom = false,
 }: BoardTextProps) {
+  // Null on native/jest; the loaded web provider once /fonts/ lands (labels re-render then).
+  const provider = useBoardFontProvider();
   // Keyed on the halo's primitive values (not the object identity the caller re-creates each render)
   // so the native paint isn't rebuilt every frame.
   const foreground = useMemo(
@@ -102,12 +111,13 @@ export function BoardText({
     [halo?.color, halo?.width],
   );
   const fill = useMemo(
-    () => buildParagraph(text, size, color, maxWidth, weight, undefined),
-    [text, size, color, maxWidth, weight],
+    () => buildParagraph(text, size, color, maxWidth, weight, undefined, provider),
+    [text, size, color, maxWidth, weight, provider],
   );
   const stroke = useMemo(
-    () => (foreground ? buildParagraph(text, size, color, maxWidth, weight, foreground) : null),
-    [text, size, color, maxWidth, weight, foreground],
+    () =>
+      foreground ? buildParagraph(text, size, color, maxWidth, weight, foreground, provider) : null,
+    [text, size, color, maxWidth, weight, foreground, provider],
   );
   if (!fill) return null;
   const top = anchorBottom ? y - (fill.getHeight?.() ?? size * 1.3) : y;
