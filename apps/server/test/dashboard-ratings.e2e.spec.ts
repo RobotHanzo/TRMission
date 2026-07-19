@@ -36,7 +36,7 @@ beforeAll(async () => {
   await request(server())
     .post('/api/v1/ratings')
     .set(auth(rater.token))
-    .send({ gameId: 'g1', roomId: 'ABCDE', stars: 4 })
+    .send({ gameId: 'g1', roomId: 'ABCDE', stars: 4, text: 'Loved it!' })
     .expect(201);
   await request(server())
     .post('/api/v1/ratings')
@@ -63,6 +63,7 @@ describe('GET /dashboard/ratings', () => {
     const row = res.body.ratings.find((r: { gameId: string }) => r.gameId === 'g1');
     expect(row.userDisplayName).toBe('Rater');
     expect(row.stars).toBe(4);
+    expect(row.text).toBe('Loved it!');
     expect(res.body).toHaveProperty('nextCursor');
   });
 });

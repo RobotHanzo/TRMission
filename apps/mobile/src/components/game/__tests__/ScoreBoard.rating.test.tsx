@@ -57,6 +57,26 @@ describe('ScoreBoard rating', () => {
     expect(screen.queryByTestId('star-1')).toBeNull();
   });
 
+  it('sends trimmed optional feedback text alongside the star rating', async () => {
+    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
+    await screen.findByTestId('scoreboard-rating');
+
+    fireEvent.press(screen.getByTestId('star-5'));
+    fireEvent.changeText(
+      screen.getByPlaceholderText('想告訴我們更多嗎？（選填）'),
+      '  Great game!  ',
+    );
+    fireEvent.press(screen.getByText('送出評分'));
+    await waitFor(() =>
+      expect(mockSubmitRating).toHaveBeenCalledWith({
+        gameId: 'g1',
+        roomId: 'ABCD',
+        stars: 5,
+        text: 'Great game!',
+      }),
+    );
+  });
+
   it('shows thanks immediately for an already-rated game', async () => {
     await markGameRated('g1');
     render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);

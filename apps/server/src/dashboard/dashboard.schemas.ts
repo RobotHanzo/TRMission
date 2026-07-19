@@ -384,6 +384,7 @@ export const RatingRowSchema = z.object({
   gameId: z.string(),
   roomId: z.string(),
   stars: z.number(),
+  text: z.string().optional(),
   createdAt: z.string(),
 });
 

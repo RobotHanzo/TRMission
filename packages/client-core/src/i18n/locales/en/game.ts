@@ -86,6 +86,7 @@ export default {
 
   rateAppPrompt: 'How was this game?',
   starRatingValue: '{{n}} star(s)',
+  ratingFeedbackPlaceholder: 'Tell us more (optional)',
   submitRating: 'Submit rating',
   ratingThanks: 'Thanks for rating!',
   ratingSubmitError: 'Could not submit your rating — please try again.',

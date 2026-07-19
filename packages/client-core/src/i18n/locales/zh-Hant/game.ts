@@ -85,6 +85,7 @@ export default {
 
   rateAppPrompt: '這場遊戲玩得如何？',
   starRatingValue: '{{n}} 顆星',
+  ratingFeedbackPlaceholder: '想告訴我們更多嗎？（選填）',
   submitRating: '送出評分',
   ratingThanks: '感謝你的評分！',
   ratingSubmitError: '評分送出失敗，請再試一次。',

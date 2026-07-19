@@ -237,7 +237,7 @@ function buildApi(
     sendRoomChat: (code: string, payload: { presetId: string } | { text: string }) =>
       req<RoomView>('POST', `/rooms/${code}/chat`, payload),
     rematch: (code: string) => req<RoomView>('POST', `/rooms/${code}/rematch`),
-    submitRating: (payload: { gameId: string; roomId: string; stars: number }) =>
+    submitRating: (payload: { gameId: string; roomId: string; stars: number; text?: string }) =>
       req<RatingResult>('POST', '/ratings', payload),
 
     // ── history / replay ────────────────────────────────────────────────────

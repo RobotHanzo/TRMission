@@ -114,6 +114,7 @@ export interface MobileCarryResult {
 export interface RatingResult {
   id: string;
   stars: number;
+  text?: string;
   createdAt: string;
 }
 export interface HistoryPlayer {

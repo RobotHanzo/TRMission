@@ -23,6 +23,7 @@ export class RatingsRepo implements OnModuleInit {
     gameId: string,
     roomId: string,
     stars: number,
+    text?: string,
   ): Promise<GameRatingDoc> {
     const doc: GameRatingDoc = {
       _id: randomUUID(),
@@ -30,6 +31,7 @@ export class RatingsRepo implements OnModuleInit {
       gameId,
       roomId,
       stars,
+      ...(text ? { text } : {}),
       createdAt: new Date(),
     };
     await this.col.insertOne(doc);

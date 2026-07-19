@@ -21,7 +21,18 @@ export class RatingsController {
   @ApiBody({ schema: apiSchema(SubmitRatingSchema) })
   @ApiResponse({ status: 201, schema: apiSchema(RatingResultSchema) })
   async submit(@CurrentUser() user: AuthUser, @Body() body: SubmitRatingDto) {
-    const doc = await this.ratings.insert(user.userId, body.gameId, body.roomId, body.stars);
-    return { id: doc._id, stars: doc.stars, createdAt: doc.createdAt.toISOString() };
+    const doc = await this.ratings.insert(
+      user.userId,
+      body.gameId,
+      body.roomId,
+      body.stars,
+      body.text,
+    );
+    return {
+      id: doc._id,
+      stars: doc.stars,
+      ...(doc.text ? { text: doc.text } : {}),
+      createdAt: doc.createdAt.toISOString(),
+    };
   }
 }

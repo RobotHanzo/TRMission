@@ -258,6 +258,7 @@ export interface RatingRow {
   gameId: string;
   roomId: string;
   stars: number;
+  text?: string;
   createdAt: string;
 }
 export type RatingsPage = {

@@ -255,6 +255,26 @@ describe('ScoreBoard rating + Discord', () => {
     expect(submitRating).toHaveBeenCalledWith({ gameId: 'g1', roomId: 'ABCDE', stars: 4 });
   });
 
+  it('sends trimmed optional feedback text alongside the star rating', async () => {
+    const submitRating = vi
+      .spyOn(api, 'submitRating')
+      .mockResolvedValue({ id: 'r1', stars: 5, createdAt: '2026-01-01T00:00:00.000Z' });
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+
+    fireEvent.click(screen.getAllByRole('radio')[4]!);
+    const feedback = screen.getByPlaceholderText('想告訴我們更多嗎？（選填）');
+    fireEvent.change(feedback, { target: { value: '  Great game!  ' } });
+
+    fireEvent.click(screen.getByRole('button', { name: '送出評分' }));
+    await screen.findByText('感謝你的評分！');
+    expect(submitRating).toHaveBeenCalledWith({
+      gameId: 'g1',
+      roomId: 'ABCDE',
+      stars: 5,
+      text: 'Great game!',
+    });
+  });
+
   it('remembers a rated game across remounts via localStorage', () => {
     localStorage.setItem('trm.ratedGameIds', JSON.stringify(['g1']));
     render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);

@@ -1764,6 +1764,20 @@ button.ticket-card:hover {
   color: var(--tr-ok);
   font-weight: 600;
 }
+.scoreboard-rating-feedback {
+  width: 100%;
+  max-width: 360px;
+  font: inherit;
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  background: var(--tr-surface);
+  color: var(--tr-ink);
+  resize: vertical;
+}
+.scoreboard-rating-feedback:disabled {
+  opacity: 0.7;
+}
 .star-rating {
   display: flex;
   gap: var(--tr-space-1);

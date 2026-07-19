@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Crown, Eye, Map as MapIcon, MessagesSquare, X } from 'lucide-react-native';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { GameSnapshot, PlayerFinal } from '@trm/proto';
 import type { RoomMember } from '../../net/rest';
 import { api } from '../../net/rest';
@@ -26,6 +26,7 @@ import { TicketCard } from './TicketCard';
 const isBot = (id: string): boolean => id.startsWith('bot:');
 const ticketValue = (id: string): number => ticketById.get(id)?.value ?? 0;
 const INK = '#4b5563';
+const FEEDBACK_MAX_LEN = 500;
 
 /** Completed (gains) vs failed (losses) kept tickets, with their point sums. */
 function ticketSplit(pf: PlayerFinal): {
@@ -72,6 +73,7 @@ export function ScoreBoard({
   // offline/tutorial sandboxes), matching the web's gameId+roomCode gate.
   const [{ gameId, roomCode }] = useState(getActiveRoomContext);
   const [stars, setStars] = useState(0);
+  const [feedback, setFeedback] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [ratingError, setRatingError] = useState(false);
   // null while the dedupe check is in flight — the block renders nothing until it resolves, so
@@ -93,8 +95,9 @@ export function ScoreBoard({
     if (!gameId || !roomCode || stars === 0) return;
     setSubmitting(true);
     setRatingError(false);
+    const text = feedback.trim();
     try {
-      await api.submitRating({ gameId, roomId: roomCode, stars });
+      await api.submitRating({ gameId, roomId: roomCode, stars, ...(text ? { text } : {}) });
       await markGameRated(gameId);
       setAlreadyRated(true);
     } catch {
@@ -312,6 +315,19 @@ export function ScoreBoard({
                       <Text style={styles.primaryText}>{t('submitRating')}</Text>
                     </Pressable>
                   </View>
+                  {stars > 0 && (
+                    <TextInput
+                      style={styles.feedbackInput}
+                      value={feedback}
+                      onChangeText={setFeedback}
+                      maxLength={FEEDBACK_MAX_LEN}
+                      placeholder={t('ratingFeedbackPlaceholder')}
+                      placeholderTextColor="rgba(75,85,99,0.6)"
+                      editable={!submitting}
+                      multiline
+                      numberOfLines={3}
+                    />
+                  )}
                   {ratingError && <Text style={styles.ratingError}>{t('ratingSubmitError')}</Text>}
                 </>
               )}
@@ -435,6 +451,16 @@ const styles = StyleSheet.create({
   ratingLabel: { fontSize: 13, fontWeight: '700' },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   ratingThanks: { fontSize: 13, color: '#2e7d32', fontWeight: '600' },
+  feedbackInput: {
+    minHeight: 60,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.15)',
+    borderRadius: 8,
+    padding: 8,
+    fontSize: 13,
+    color: INK,
+    textAlignVertical: 'top',
+  },
   ratingError: { fontSize: 12, color: '#b3261e' },
   btnDisabled: { opacity: 0.45 },
   discordBtn: {

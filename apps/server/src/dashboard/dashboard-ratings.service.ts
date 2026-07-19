@@ -13,6 +13,7 @@ const toRow = (r: GameRatingDoc, userDisplayName?: string) => ({
   gameId: r.gameId,
   roomId: r.roomId,
   stars: r.stars,
+  ...(r.text ? { text: r.text } : {}),
   createdAt: r.createdAt.toISOString(),
 });
 

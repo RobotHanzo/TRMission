@@ -21,6 +21,7 @@ const isBot = (id: string): boolean => id.startsWith('bot:');
 const ticketValue = (id: string): number => ticketById.get(id)?.value ?? 0;
 
 const RATED_GAMES_KEY = 'trm.ratedGameIds';
+const FEEDBACK_MAX_LEN = 500;
 
 function getRatedGameIds(): Set<string> {
   try {
@@ -84,6 +85,7 @@ export function ScoreBoard({
   const [viewingMap, setViewingMap] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [stars, setStars] = useState(0);
+  const [feedback, setFeedback] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [ratingError, setRatingError] = useState(false);
   const [alreadyRated, setAlreadyRated] = useState(() => !!gameId && getRatedGameIds().has(gameId));
@@ -92,8 +94,9 @@ export function ScoreBoard({
     if (!gameId || !roomCode || stars === 0) return;
     setSubmitting(true);
     setRatingError(false);
+    const text = feedback.trim();
     try {
-      await api.submitRating({ gameId, roomId: roomCode, stars });
+      await api.submitRating({ gameId, roomId: roomCode, stars, ...(text ? { text } : {}) });
       track('rating_submit', { stars });
       markGameRated(gameId);
       setAlreadyRated(true);
@@ -328,6 +331,17 @@ export function ScoreBoard({
             ) : (
               <>
                 <StarRating value={stars} onChange={setStars} size={32} disabled={submitting} />
+                {stars > 0 && (
+                  <textarea
+                    className="scoreboard-rating-feedback"
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value.slice(0, FEEDBACK_MAX_LEN))}
+                    maxLength={FEEDBACK_MAX_LEN}
+                    placeholder={t('ratingFeedbackPlaceholder')}
+                    disabled={submitting}
+                    rows={3}
+                  />
+                )}
                 <button
                   className="primary"
                   disabled={stars === 0 || submitting}

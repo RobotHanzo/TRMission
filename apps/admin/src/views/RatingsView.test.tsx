@@ -27,6 +27,7 @@ const RATING_ROW = {
   gameId: 'game-1',
   roomId: 'ABCDE',
   stars: 4,
+  text: 'Loved the map!',
   createdAt: '2026-01-01T00:00:00.000Z',
 };
 
@@ -46,5 +47,6 @@ describe('RatingsView', () => {
     render(<RatingsView />);
     await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument());
     expect(screen.getByText('平均 4.0 顆星．共 1 筆')).toBeInTheDocument();
+    expect(screen.getByText('Loved the map!')).toBeInTheDocument();
   });
 });

@@ -45,6 +45,7 @@ export function RatingsView() {
             <tr>
               <th>{t('ratings.colStars')}</th>
               <th>{t('ratings.colUser')}</th>
+              <th>{t('ratings.colFeedback')}</th>
               <th>{t('ratings.colGame')}</th>
               <th>{t('ratings.colRoom')}</th>
               <th className="num">{t('ratings.colSubmitted')}</th>
@@ -61,6 +62,7 @@ export function RatingsView() {
                   {r.userDisplayName ?? shortId(r.userId)}{' '}
                   <span className="oc-mono oc-muted">{shortId(r.userId)}</span>
                 </td>
+                <td>{r.text && <div>{r.text}</div>}</td>
                 <td className="oc-mono">{shortId(r.gameId)}</td>
                 <td className="oc-mono">{r.roomId}</td>
                 <td className="num">{fmtDateTime(r.createdAt, locale)}</td>

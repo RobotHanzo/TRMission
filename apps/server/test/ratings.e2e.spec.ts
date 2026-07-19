@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { createTestApp, type TestApp } from './app';
+import { RATING_TEXT_MAX_LEN } from '../src/ratings/ratings.schemas';
 
 let t: TestApp;
 const server = () => t.app.getHttpServer();
@@ -30,6 +31,28 @@ describe('POST /ratings', () => {
 
     const doc = await t.db.collection('gameRatings').findOne({ _id: res.body.id } as never);
     expect(doc).toMatchObject({ userId: player.id, gameId: 'g1', roomId: 'ABCDE', stars: 5 });
+  });
+
+  it('persists optional feedback text, trimmed', async () => {
+    const player = await guest('Rater4');
+    const res = await request(server())
+      .post('/api/v1/ratings')
+      .set(auth(player.token))
+      .send({ gameId: 'g4', roomId: 'KLMNO', stars: 4, text: '  Great game!  ' })
+      .expect(201);
+    expect(res.body.text).toBe('Great game!');
+
+    const doc = await t.db.collection('gameRatings').findOne({ _id: res.body.id } as never);
+    expect(doc).toMatchObject({ text: 'Great game!' });
+  });
+
+  it('rejects feedback text over the length limit', async () => {
+    const player = await guest('Rater5');
+    await request(server())
+      .post('/api/v1/ratings')
+      .set(auth(player.token))
+      .send({ gameId: 'g5', roomId: 'PQRST', stars: 3, text: 'x'.repeat(RATING_TEXT_MAX_LEN + 1) })
+      .expect(400);
   });
 
   it('rejects an out-of-range stars value', async () => {
