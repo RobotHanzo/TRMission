@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+# apps/server exposes Prometheus text-format metrics at GET /metrics, unauthenticated
+# (apps/server/src/observability/metrics.controller.ts). This target assumes the server
+# runs on the host via `yarn workspace @trm/server dev` (port 3001) while Prometheus runs
+# in Docker — host.docker.internal reaches the host from a container on Docker Desktop.
+# If you instead run the `server` compose service (the `full` profile), point this at
+# server:3001 instead.
+scrape_configs:
+  - job_name: trmission-server
+    static_configs:
+      - targets: ['host.docker.internal:3001']
+        labels:
+          service: trm-server
