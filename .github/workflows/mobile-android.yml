@@ -28,11 +28,6 @@ jobs:
           docker image prune -af || true
           df -h /
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-          cache: gradle
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
@@ -72,6 +67,15 @@ jobs:
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
+
+      # Deferred until after prebuild: `cache: gradle` hashes **/*.gradle*/gradle-wrapper.properties
+      # to key its cache, but android/ is CNG output (gitignored, never committed — see the top-of-file
+      # note) and doesn't exist until the prebuild step above runs.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
 
       - name: Decode the release keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
