@@ -3,6 +3,7 @@ import { KeyRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { GoogleGlyph } from './icons/GoogleGlyph';
 import { DiscordGlyph } from './icons/DiscordGlyph';
+import { AppleGlyph } from './icons/AppleGlyph';
 
 interface Props {
   oauthProviders: string[];
@@ -20,6 +21,9 @@ export function OAuthBadges({ oauthProviders, hasPassword }: Props) {
   }
   if (oauthProviders.includes('discord')) {
     badges.push({ key: 'discord', label: t('users.oauthDiscord'), icon: <DiscordGlyph /> });
+  }
+  if (oauthProviders.includes('apple')) {
+    badges.push({ key: 'apple', label: t('users.oauthApple'), icon: <AppleGlyph /> });
   }
   if (hasPassword) {
     badges.push({

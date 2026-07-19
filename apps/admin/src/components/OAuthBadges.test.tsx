@@ -21,4 +21,9 @@ describe('OAuthBadges', () => {
     expect(screen.getByTitle('Google')).toBeInTheDocument();
     expect(screen.queryByTitle('密碼')).not.toBeInTheDocument();
   });
+
+  it('renders an Apple badge for an account signed in with Sign in with Apple', () => {
+    render(<OAuthBadges oauthProviders={['apple']} hasPassword={false} />);
+    expect(screen.getByTitle('Apple')).toBeInTheDocument();
+  });
 });
