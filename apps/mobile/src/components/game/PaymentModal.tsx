@@ -4,6 +4,8 @@
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CARD_COLOR_TOKENS } from '../../theme/colors';
+import { useTheme } from '../../theme/useTheme';
+import { rgba } from '../../theme/shade';
 import type { Payment } from '../../game/payments';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
 import { TrainCarCard } from './TrainCarCard';
@@ -37,6 +39,7 @@ const describe = (p: Payment): string => {
 
 export function PaymentModal({ title, options, onPick, onCancel }: Props) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.paymentOptions);
   // Event-resource labels riding on a payment option (Bento token, claim discount, +2 bonus, …).
   const modifierLabels = (p: Payment): string[] => [
@@ -49,10 +52,13 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onCancel}>
       <Pressable testID="payment-backdrop" style={styles.backdrop} onPress={onCancel}>
-        <Pressable style={styles.modal} onPress={() => undefined}>
-          <Text style={styles.title}>{title}</Text>
+        <Pressable
+          style={[styles.modal, { backgroundColor: tokens.surface }]}
+          onPress={() => undefined}
+        >
+          <Text style={[styles.title, { color: tokens.ink }]}>{title}</Text>
           {options.length === 0 ? (
-            <Text style={styles.muted}>{t('cannotAfford')}</Text>
+            <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('cannotAfford')}</Text>
           ) : (
             <View {...anchor} style={styles.optionsScroll}>
               <ScrollView contentContainerStyle={styles.options}>
@@ -64,14 +70,22 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
                       key={i}
                       style={({ pressed }) => [
                         styles.option,
-                        isFree(p) && styles.optionFree,
+                        { borderColor: tokens.line, backgroundColor: rgba(tokens.ink, 0.03) },
+                        isFree(p) && {
+                          borderColor: tokens.ok,
+                          backgroundColor: rgba(tokens.ok, 0.08),
+                        },
                         pressed && styles.pressed,
                       ]}
                       accessibilityRole="button"
                       accessibilityLabel={isFree(p) ? t('events.freeStation') : aria}
                       onPress={() => onPick(p)}
                     >
-                      {isFree(p) && <Text style={styles.freeLabel}>{t('events.freeStation')}</Text>}
+                      {isFree(p) && (
+                        <Text style={[styles.freeLabel, { color: tokens.ok }]}>
+                          {t('events.freeStation')}
+                        </Text>
+                      )}
                       {modifiers.length > 0 && (
                         <View style={styles.modifiers}>
                           {modifiers.map((label) => (
@@ -95,7 +109,7 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
           )}
           <View style={styles.row}>
             <Pressable style={styles.cancelBtn} accessibilityRole="button" onPress={onCancel}>
-              <Text style={styles.cancelText}>{t('game.back')}</Text>
+              <Text style={[styles.cancelText, { color: tokens.blue }]}>{t('game.back')}</Text>
             </Pressable>
           </View>
         </Pressable>
@@ -117,12 +131,11 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     maxHeight: '80%',
     borderRadius: 12,
-    backgroundColor: '#fffdf8',
     padding: 16,
     gap: 10,
   },
   title: { fontSize: 16, fontWeight: '700' },
-  muted: { opacity: 0.6, fontSize: 13 },
+  muted: { fontSize: 13 },
   optionsScroll: { flexGrow: 0 },
   options: { gap: 8 },
   option: {
@@ -131,13 +144,10 @@ const styles = StyleSheet.create({
     gap: 10,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.16)',
-    backgroundColor: 'rgba(0,0,0,0.03)',
     padding: 10,
     minHeight: 44,
   },
-  optionFree: { borderColor: '#2e7d32', backgroundColor: 'rgba(46,125,50,0.08)' },
-  freeLabel: { color: '#2e7d32', fontWeight: '700', fontSize: 13 },
+  freeLabel: { fontWeight: '700', fontSize: 13 },
   modifiers: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, maxWidth: 120 },
   modifier: {
     fontSize: 11,
@@ -152,5 +162,5 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
   row: { flexDirection: 'row', justifyContent: 'flex-end' },
   cancelBtn: { paddingHorizontal: 14, paddingVertical: 10 },
-  cancelText: { fontSize: 14, fontWeight: '600', color: '#1d4ed8' },
+  cancelText: { fontSize: 14, fontWeight: '600' },
 });

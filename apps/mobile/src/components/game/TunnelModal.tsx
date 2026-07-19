@@ -18,6 +18,8 @@ import {
 import type { CardColor as PbCardColor } from '@trm/proto';
 import { REVEAL_FLIP_MS, REVEAL_STAGGER_MS } from '@trm/client-core/game/tunnel';
 import { CARD_COLOR_TOKENS } from '../../theme/colors';
+import { useTheme } from '../../theme/useTheme';
+import { rgba } from '../../theme/shade';
 import { pbToCard } from '../../game/cards';
 import type { Payment } from '../../game/payments';
 import { tunnelRevealMs } from '../../game/tunnel';
@@ -98,6 +100,7 @@ export function TunnelModal({
   onAbort,
 }: Props) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const reduced = useReducedMotion();
   // Hold the surcharge result + payment choices back until the reveal window has passed, so the
   // outcome isn't spoiled before the cards have (visually) arrived.
@@ -138,8 +141,8 @@ export function TunnelModal({
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onAbort}>
       <View style={styles.backdrop}>
-        <View style={styles.modal}>
-          <Text style={styles.title}>{t('tunnel')}</Text>
+        <View style={[styles.modal, { backgroundColor: tokens.surface }]}>
+          <Text style={[styles.title, { color: tokens.ink }]}>{t('tunnel')}</Text>
           {/* The drawn cards flip in one at a time (slow, for suspense). */}
           <View style={styles.reveal}>
             {revealed.map((c, i) => {
@@ -155,7 +158,7 @@ export function TunnelModal({
 
           {showResult && spectator && (
             <View style={styles.result}>
-              <Text style={styles.surcharge}>
+              <Text style={[styles.surcharge, { color: tokens.ink }]}>
                 {extraRequired === 0 ? t('tunnelNoExtra') : t('payExtra', { n: extraRequired })}
               </Text>
               {extraRequired > 0 &&
@@ -166,7 +169,10 @@ export function TunnelModal({
                   const surchargeColor = pbToCard(playedColor ?? 0) ?? 'LOCOMOTIVE';
                   return (
                     <View
-                      style={styles.readonlyOption}
+                      style={[
+                        styles.readonlyOption,
+                        { borderColor: tokens.line, backgroundColor: rgba(tokens.ink, 0.03) },
+                      ]}
                       accessibilityLabel={`${CARD_COLOR_TOKENS[surchargeColor].nameZh} ×${extraRequired}`}
                     >
                       <TrainCarCard color={surchargeColor} count={extraRequired} size={CARD_SIZE} />
@@ -180,10 +186,12 @@ export function TunnelModal({
             <View style={styles.result}>
               {options.length === 0 ? (
                 // Can't afford the surcharge — nothing to pay; abort is the only way on.
-                <Text style={styles.cannot}>{t('cannotAfford')}</Text>
+                <Text style={[styles.cannot, { color: tokens.inkSoft }]}>
+                  {t('cannotAfford')}
+                </Text>
               ) : (
                 <>
-                  <Text style={styles.surcharge}>
+                  <Text style={[styles.surcharge, { color: tokens.ink }]}>
                     {extraRequired === 0 ? t('tunnelNoExtra') : t('payExtra', { n: extraRequired })}
                   </Text>
                   <ScrollView style={styles.optionsScroll} contentContainerStyle={styles.options}>
@@ -192,7 +200,11 @@ export function TunnelModal({
                       return (
                         <Pressable
                           key={i}
-                          style={({ pressed }) => [styles.option, pressed && styles.pressed]}
+                          style={({ pressed }) => [
+                            styles.option,
+                            { borderColor: tokens.line, backgroundColor: rgba(tokens.ink, 0.03) },
+                            pressed && styles.pressed,
+                          ]}
                           accessibilityRole="button"
                           accessibilityLabel={hasCards ? describe(p) : t('confirm')}
                           onPress={() => onCommit(p)}
@@ -207,7 +219,11 @@ export function TunnelModal({
                               size={CARD_SIZE}
                             />
                           )}
-                          {!hasCards && <Text style={styles.confirmText}>{t('confirm')}</Text>}
+                          {!hasCards && (
+                            <Text style={[styles.confirmText, { color: tokens.blue }]}>
+                              {t('confirm')}
+                            </Text>
+                          )}
                         </Pressable>
                       );
                     })}
@@ -216,7 +232,7 @@ export function TunnelModal({
               )}
               <View style={styles.row}>
                 <Pressable style={styles.abortBtn} accessibilityRole="button" onPress={onAbort}>
-                  <Text style={styles.abortText}>{t('abort')}</Text>
+                  <Text style={[styles.abortText, { color: tokens.danger }]}>{t('abort')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -240,7 +256,6 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     maxHeight: '85%',
     borderRadius: 12,
-    backgroundColor: '#fffdf8',
     padding: 16,
     gap: 10,
   },
@@ -248,12 +263,10 @@ const styles = StyleSheet.create({
   reveal: { flexDirection: 'row', gap: 8, justifyContent: 'center', flexWrap: 'wrap' },
   result: { gap: 8 },
   surcharge: { fontSize: 14, fontWeight: '600' },
-  cannot: { fontSize: 14, fontWeight: '600', textAlign: 'center', opacity: 0.7 },
+  cannot: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
   readonlyOption: {
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.16)',
-    backgroundColor: 'rgba(0,0,0,0.03)',
     padding: 10,
     alignSelf: 'flex-start',
   },
@@ -265,14 +278,12 @@ const styles = StyleSheet.create({
     gap: 10,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.16)',
-    backgroundColor: 'rgba(0,0,0,0.03)',
     padding: 10,
     minHeight: 44,
   },
-  confirmText: { fontSize: 14, fontWeight: '700', color: '#1d4ed8' },
+  confirmText: { fontSize: 14, fontWeight: '700' },
   pressed: { opacity: 0.75 },
   row: { flexDirection: 'row', justifyContent: 'flex-end' },
   abortBtn: { paddingHorizontal: 14, paddingVertical: 10 },
-  abortText: { fontSize: 14, fontWeight: '600', color: '#b3261e' },
+  abortText: { fontSize: 14, fontWeight: '600' },
 });

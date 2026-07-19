@@ -13,6 +13,8 @@ import { usePlayerName } from '../../game/playerName';
 import { seatColor } from '../../theme/colors';
 import { useTheme } from '../../theme/useTheme';
 import { chatRejectionHintKey } from '../../game/chatErrors';
+import { rgba } from '../../theme/shade';
+import { TrayHead } from '../../theme/gameChrome';
 import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core';
 import { PlayerActionSheet, canModerate } from './PlayerActionSheet';
 
@@ -84,10 +86,10 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
 
   return (
     <View style={styles.panel}>
-      <Text style={styles.heading}>{t('chat.heading')}</Text>
+      <TrayHead title={t('chat.heading')} />
       <ScrollView ref={listRef} style={styles.messages}>
         {visible.length === 0 ? (
-          <Text style={styles.empty}>{t('chat.empty')}</Text>
+          <Text style={[styles.empty, { color: tokens.inkSoft }]}>{t('chat.empty')}</Text>
         ) : (
           visible.map((m) => {
             const seat = seatOf(m.playerId);
@@ -118,7 +120,7 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
                 >
                   {author}
                 </Text>
-                <Text style={styles.msgText}>
+                <Text style={[styles.msgText, { color: tokens.ink }]}>
                   {m.content.case === 'presetId'
                     ? t(chatPresetKey(m.content.value))
                     : m.content.value}
@@ -131,23 +133,36 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
       {sheetTarget && (
         <PlayerActionSheet target={sheetTarget} onClose={() => setSheetTarget(null)} />
       )}
-      {hint !== null && <Text style={styles.hint}>{hint}</Text>}
+      {hint !== null && <Text style={[styles.hint, { color: tokens.danger }]}>{hint}</Text>}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presets}>
         {CHAT_PRESET_IDS.map((id) => (
           <Pressable
             key={id}
-            style={({ pressed }) => [styles.presetBtn, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.presetBtn,
+              { borderColor: tokens.line, backgroundColor: rgba(tokens.ink, 0.04) },
+              pressed && styles.pressed,
+            ]}
             accessibilityRole="button"
             disabled={disabled}
             onPress={() => sendPreset(id)}
           >
-            <Text style={styles.presetText}>{t(chatPresetKey(id))}</Text>
+            <Text style={[styles.presetText, { color: tokens.ink }]}>{t(chatPresetKey(id))}</Text>
           </Pressable>
         ))}
       </ScrollView>
       <View style={styles.inputRow}>
         <TextInput
-          style={[styles.input, disabled && styles.inputDisabled]}
+          style={[
+            styles.input,
+            {
+              borderColor: tokens.line,
+              backgroundColor: tokens.surface,
+              color: tokens.ink,
+            },
+            disabled && styles.inputDisabled,
+          ]}
+          placeholderTextColor={tokens.inkSoft}
           maxLength={MAX_LEN}
           value={draft}
           editable={!disabled}
@@ -157,7 +172,11 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
           returnKeyType="send"
         />
         <Pressable
-          style={({ pressed }) => [styles.sendBtn, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.sendBtn,
+            { backgroundColor: tokens.blue },
+            pressed && styles.pressed,
+          ]}
           accessibilityRole="button"
           disabled={disabled || draft.trim().length === 0}
           onPress={send}
@@ -171,19 +190,16 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
 
 const styles = StyleSheet.create({
   panel: { gap: 4 },
-  heading: { fontSize: 13, fontWeight: '700' },
   messages: { maxHeight: 160, minHeight: 60 },
-  empty: { fontSize: 12, opacity: 0.55, paddingVertical: 4 },
+  empty: { fontSize: 12, paddingVertical: 4 },
   msg: { flexDirection: 'row', gap: 6, paddingVertical: 2, flexWrap: 'wrap' },
   author: { fontSize: 12, fontWeight: '700' },
-  msgText: { flexShrink: 1, fontSize: 12, color: '#374151' },
-  hint: { fontSize: 11, color: '#b3261e' },
+  msgText: { flexShrink: 1, fontSize: 12 },
+  hint: { fontSize: 11 },
   presets: { flexGrow: 0 },
   presetBtn: {
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.18)',
-    backgroundColor: 'rgba(0,0,0,0.04)',
     paddingHorizontal: 10,
     paddingVertical: 6,
     marginRight: 6,
@@ -195,16 +211,13 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.2)',
     paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 13,
-    backgroundColor: '#fff',
   },
   inputDisabled: { opacity: 0.5 },
   sendBtn: {
     borderRadius: 8,
-    backgroundColor: '#0f5fa6',
     paddingHorizontal: 12,
     paddingVertical: 9,
     minHeight: 40,

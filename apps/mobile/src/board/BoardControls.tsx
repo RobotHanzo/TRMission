@@ -1,14 +1,14 @@
 // The floating board controls — follow toggle, zoom ±, reset — porting the web MapControls
 // (apps/web/src/components/Board.tsx) minus the fullscreen button (a phone board IS fullscreen).
+// Styled through the chrome tokens (light/dark) as a floating surface cluster with paper shadow.
 // Zoom/reset go through the same disengage path as gestures, so pressing them while following
 // another player hands the camera back (but never during my own turn — see followModel).
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Eye, EyeOff, LocateFixed, Minus, Plus } from 'lucide-react-native';
-import { MAP_PALETTE_LIGHT } from '@trm/map-data';
+import { useTheme } from '../theme/useTheme';
 import { useUi } from '../store/ui';
 
-const P = MAP_PALETTE_LIGHT;
 const ICON = 18;
 
 export interface BoardControlsProps {
@@ -36,7 +36,9 @@ export function BoardControls({
         selected={followActing}
         onPress={() => void setFollowActing(!followActing)}
       >
-        {followActing ? <Eye size={ICON} color={P.ink} /> : <EyeOff size={ICON} color={P.ink} />}
+        {(color) =>
+          followActing ? <Eye size={ICON} color={color} /> : <EyeOff size={ICON} color={color} />
+        }
       </Ctl>
       <Ctl
         label={t('board.zoomIn')}
@@ -45,7 +47,7 @@ export function BoardControls({
           onZoom(1.4);
         }}
       >
-        <Plus size={ICON} color={P.ink} />
+        {(color) => <Plus size={ICON} color={color} />}
       </Ctl>
       <Ctl
         label={t('board.zoomOut')}
@@ -54,7 +56,7 @@ export function BoardControls({
           onZoom(1 / 1.4);
         }}
       >
-        <Minus size={ICON} color={P.ink} />
+        {(color) => <Minus size={ICON} color={color} />}
       </Ctl>
       <Ctl
         label={t('board.resetView')}
@@ -63,7 +65,7 @@ export function BoardControls({
           onReset();
         }}
       >
-        <LocateFixed size={ICON} color={P.ink} />
+        {(color) => <LocateFixed size={ICON} color={color} />}
       </Ctl>
     </View>
   );
@@ -78,21 +80,26 @@ function Ctl({
   label: string;
   selected?: boolean | undefined;
   onPress(): void;
-  children: React.ReactNode;
+  children: (iconColor: string) => React.ReactNode;
 }): React.JSX.Element {
+  const { tokens } = useTheme();
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
         styles.ctl,
+        {
+          backgroundColor: pressed ? tokens.surface2 : tokens.surface,
+          borderColor: selected === true ? tokens.blue : tokens.line,
+          shadowColor: tokens.ink,
+        },
         selected === true && styles.ctlSelected,
-        pressed && styles.ctlPressed,
       ]}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={selected === undefined ? undefined : { selected }}
     >
-      {children}
+      {children(selected === true ? tokens.blue : tokens.ink)}
     </Pressable>
   );
 }
@@ -100,15 +107,16 @@ function Ctl({
 const styles = StyleSheet.create({
   controls: { position: 'absolute', right: 12, bottom: 24, gap: 8 },
   ctl: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: P.surface,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: P.coast,
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
-  ctlSelected: { borderColor: P.blue, borderWidth: 2 },
-  ctlPressed: { backgroundColor: P.relief },
+  ctlSelected: { borderWidth: 2 },
 });

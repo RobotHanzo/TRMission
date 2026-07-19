@@ -9,7 +9,7 @@ import { Canvas, Group } from '@shopify/react-native-skia';
 import { GestureDetector } from 'react-native-gesture-handler';
 import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
 import type { GameSnapshot } from '@trm/proto';
-import { MAP_PALETTE_LIGHT } from '@trm/map-data';
+import { MAP_PALETTE_DARK, MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { CITIES, ROUTES, cityById, cityName, routeById } from '../game/content';
 import { boardEventOverlays } from '../game/events';
 import { HUB_CITIES, ROUTE_GEOMETRY } from '../game/routeGeometry';
@@ -21,6 +21,7 @@ import { useGameStore } from '../store/game';
 import { useAnimationsStore } from '../store/animations';
 import { useUi } from '../store/ui';
 import { useReducedMotion } from '../hooks/useReducedMotion';
+import { useTheme } from '../theme/useTheme';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../features/tutorial/targets';
 import { registerBoardCameraSource } from '../features/tutorial/cameraBridge';
 import type { Locale } from '../net/rest';
@@ -72,6 +73,7 @@ export interface BoardViewProps {
  *  seed from the home framing, which needs a real viewport before the first render. */
 export function BoardView(props: BoardViewProps): React.JSX.Element {
   const [vp, setVp] = useState<Viewport | null>(null);
+  const { dark } = useTheme();
   // The tutorial spotlights the whole board through this container (web `.board-viewport`).
   const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.board);
   const onLayout = (e: LayoutChangeEvent): void => {
@@ -81,7 +83,14 @@ export function BoardView(props: BoardViewProps): React.JSX.Element {
     );
   };
   return (
-    <View {...anchor} style={styles.viewport} onLayout={onLayout}>
+    <View
+      {...anchor}
+      style={[
+        styles.viewport,
+        { backgroundColor: (dark ? MAP_PALETTE_DARK : MAP_PALETTE_LIGHT).sea },
+      ]}
+      onLayout={onLayout}
+    >
       {vp && vp.w > 0 && vp.h > 0 ? <BoardInner {...props} vp={vp} /> : null}
     </View>
   );
@@ -282,6 +291,9 @@ function BoardInner({
   vp,
 }: BoardViewProps & { vp: Viewport }): React.JSX.Element {
   const reducedMotion = useReducedMotion();
+  // Themed cartography: the dark board palette follows the app theme (web tokens.css parity).
+  const { dark } = useTheme();
+  const palette = dark ? MAP_PALETTE_DARK : MAP_PALETTE_LIGHT;
   // ── Derivations from the snapshot (ports Board.tsx's pure useMemos) ──
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const brokenRails = useMemo(() => brokenRailMap(snapshot), [snapshot]);
@@ -499,6 +511,7 @@ function BoardInner({
               bucket={cam.lod.bucket}
               inv={cam.lod.inv}
               marker={cam.lod.marker}
+              palette={palette}
               events={snapshot.randomEvents ? events : undefined}
               sweeps={sweeps}
               routeReveal={routeReveal}
@@ -542,6 +555,6 @@ function BoardInner({
 }
 
 const styles = StyleSheet.create({
-  viewport: { flex: 1, backgroundColor: MAP_PALETTE_LIGHT.sea },
+  viewport: { flex: 1 },
   fill: { flex: 1 },
 });

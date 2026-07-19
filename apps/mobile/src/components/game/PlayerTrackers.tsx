@@ -9,6 +9,8 @@ import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-nativ
 import { Bot, Building2, Layers, Ticket, Train, Trophy } from 'lucide-react-native';
 import type { GameSnapshot } from '@trm/proto';
 import { seatColor } from '../../theme/colors';
+import { useTheme } from '../../theme/useTheme';
+import { rgba } from '../../theme/shade';
 import { useAnimationsStore } from '../../store/animations';
 import { playerLiveTotal } from '../../game/tickets';
 import { usePlayerName } from '../../game/playerName';
@@ -19,7 +21,6 @@ import { PlayerActionSheet, canModerate } from './PlayerActionSheet';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
 const STAT_ICON = 12;
-const STAT_INK = '#4b5563';
 
 /** Scales the local player's own row 1→1.04→1 while their turn cue runs (web anim-your-turn). */
 function TurnCueWrap({
@@ -80,6 +81,8 @@ function CueRing({ color, reduced }: { color: string; reduced: boolean }) {
 
 export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
+  const statInk = tokens.inkSoft;
   const nameOf = usePlayerName();
   const turnCue = useAnimationsStore((s) => s.turnCue);
   const clearTurnCue = useAnimationsStore((s) => s.clearTurnCue);
@@ -117,45 +120,57 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
               }}
               style={[
                 styles.row,
-                current && styles.rowCurrent,
-                cued && (turnCue?.isYou ? styles.rowYourTurn : styles.rowCued),
+                { borderColor: tokens.line, backgroundColor: rgba(tokens.ink, 0.03) },
+                current && {
+                  borderColor: tokens.ember,
+                  backgroundColor: rgba(tokens.ember, 0.08),
+                },
+                cued &&
+                  (turnCue?.isYou
+                    ? { backgroundColor: rgba(tokens.ember, 0.18) }
+                    : { backgroundColor: rgba(tokens.blue, 0.16) }),
               ]}
             >
               {cued && <CueRing color={seatColor(p.seat)} reduced={reduced} />}
               <View style={[styles.seatDot, { backgroundColor: seatColor(p.seat) }]} />
               {isBot(p.id) && (
                 <View testID={`bot-badge-${p.id}`}>
-                  <Bot size={13} color={STAT_INK} />
+                  <Bot size={13} color={statInk} />
                 </View>
               )}
-              <Text style={styles.name} numberOfLines={1}>
+              <Text style={[styles.name, { color: tokens.ink }]} numberOfLines={1}>
                 {nameOf({ id: p.id, seat: p.seat, isMe })}
               </Text>
               <View style={styles.stats}>
                 <Stat
-                  icon={<Train size={STAT_ICON} color={STAT_INK} />}
+                  icon={<Train size={STAT_ICON} color={statInk} />}
                   label={t('trainCars')}
                   value={p.trainCars}
+                  ink={statInk}
                 />
                 <Stat
-                  icon={<Trophy size={STAT_ICON} color={STAT_INK} />}
+                  icon={<Trophy size={STAT_ICON} color={statInk} />}
                   label={t('score')}
                   value={playerLiveTotal(snapshot, p.id)}
+                  ink={statInk}
                 />
                 <Stat
-                  icon={<Layers size={STAT_ICON} color={STAT_INK} />}
+                  icon={<Layers size={STAT_ICON} color={statInk} />}
                   label={t('cards')}
                   value={p.handCount}
+                  ink={statInk}
                 />
                 <Stat
-                  icon={<Ticket size={STAT_ICON} color={STAT_INK} />}
+                  icon={<Ticket size={STAT_ICON} color={statInk} />}
                   label={t('tickets')}
                   value={p.ticketCount}
+                  ink={statInk}
                 />
                 <Stat
-                  icon={<Building2 size={STAT_ICON} color={STAT_INK} />}
+                  icon={<Building2 size={STAT_ICON} color={statInk} />}
                   label={t('stations')}
                   value={p.stationsRemaining}
+                  ink={statInk}
                 />
               </View>
             </Pressable>
@@ -169,31 +184,36 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
   );
 }
 
-function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function Stat({
+  icon,
+  label,
+  value,
+  ink,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  ink: string;
+}) {
   return (
     <View style={styles.stat} accessibilityLabel={`${label} ${value}`}>
       {icon}
-      <Text style={styles.statText}>{value}</Text>
+      <Text style={[styles.statText, { color: ink }]}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  trackers: { gap: 4 },
+  trackers: { gap: 5 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 8,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    backgroundColor: 'rgba(0,0,0,0.03)',
+    borderWidth: 1,
   },
-  rowCurrent: { borderColor: '#0f5fa6', backgroundColor: 'rgba(15,95,166,0.08)' },
-  rowCued: { backgroundColor: 'rgba(15,95,166,0.16)' },
-  rowYourTurn: { backgroundColor: 'rgba(238,107,31,0.18)' },
   cueRing: {
     position: 'absolute',
     top: 0,
@@ -207,5 +227,5 @@ const styles = StyleSheet.create({
   name: { flexShrink: 1, fontSize: 13, fontWeight: '600' },
   stats: { flexDirection: 'row', gap: 8, marginLeft: 'auto' },
   stat: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  statText: { fontSize: 12, fontVariant: ['tabular-nums'], color: STAT_INK },
+  statText: { fontSize: 12, fontVariant: ['tabular-nums'] },
 });

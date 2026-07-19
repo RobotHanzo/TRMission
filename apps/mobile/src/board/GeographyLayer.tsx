@@ -1,8 +1,9 @@
 // The map's cartography — a Skia port of the web Geography.tsx (apps/web/src/components/Geography.tsx)
-// drawn with the shared MAP_PALETTE_LIGHT / MAP_DIMS tokens. `geography === null` → the hand-authored
-// Taiwan coast + central-range relief + islands; otherwise a custom map's cropped-world land rings
-// (one smoothed path each). Only the graticule counter-scales (web --inv-scale); land/relief strokes
-// are fixed board-unit weights like the web CSS.
+// drawn with the shared MapPalette / MAP_DIMS tokens. The palette arrives as a prop (light or dark,
+// resolved by BoardView from the app theme — the web equivalent is tokens.css swapping --tr-sea etc.).
+// `geography === null` → the hand-authored Taiwan coast + central-range relief + islands; otherwise a
+// custom map's cropped-world land rings (one smoothed path each). Only the graticule counter-scales
+// (web --inv-scale); land/relief strokes are fixed board-unit weights like the web CSS.
 import { useMemo } from 'react';
 import {
   Circle,
@@ -23,12 +24,10 @@ import {
   TAIWAN_ISLANDS,
   smoothClosedPath,
   type MapGeography,
+  type MapPalette,
 } from '@trm/map-data';
 
 const D = MAP_DIMS;
-const P = MAP_PALETTE_LIGHT;
-/** Graticule stroke ≈ the web's --tr-sea-line (rgba(31,90,130,.2)), as hex + opacity for Skia. */
-const GRAT_INK = '#1f5a82';
 
 export interface BoardView {
   x: number;
@@ -51,9 +50,16 @@ export interface GeographyLayerProps {
   view: BoardView;
   /** Graticule counter-scale (web --inv-scale). */
   inv: number;
+  /** Themed cartography palette (light default keeps specimens/tests on the classic look). */
+  palette?: MapPalette | undefined;
 }
 
-export function GeographyLayer({ geography, view, inv }: GeographyLayerProps) {
+export function GeographyLayer({
+  geography,
+  view,
+  inv,
+  palette: P = MAP_PALETTE_LIGHT,
+}: GeographyLayerProps) {
   const taiwanLand = useMemo(() => Skia.Path.MakeFromSVGString(TAIWAN_LAND_PATH), []);
   const taiwanRelief = useMemo(() => Skia.Path.MakeFromSVGString(TAIWAN_CENTRAL_RANGE_PATH), []);
   const customRings = useMemo<SkPath[]>(
@@ -86,8 +92,7 @@ export function GeographyLayer({ geography, view, inv }: GeographyLayerProps) {
             p2={vec(view.x + view.w + 6, y)}
             style="stroke"
             strokeWidth={gratW}
-            color={GRAT_INK}
-            opacity={0.2}
+            color={P.seaLine}
           >
             <DashPathEffect intervals={[D.graticuleDashA * inv, D.graticuleDashB * inv]} />
           </Line>
@@ -99,8 +104,7 @@ export function GeographyLayer({ geography, view, inv }: GeographyLayerProps) {
             p2={vec(x, view.y + view.h + 4)}
             style="stroke"
             strokeWidth={gratW}
-            color={GRAT_INK}
-            opacity={0.2}
+            color={P.seaLine}
           >
             <DashPathEffect intervals={[D.graticuleDashA * inv, D.graticuleDashB * inv]} />
           </Line>

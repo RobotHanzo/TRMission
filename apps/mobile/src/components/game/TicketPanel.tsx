@@ -3,6 +3,7 @@
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
+import { useTheme } from '../../theme/useTheme';
 import { TicketCard } from './TicketCard';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 
 export function TicketPanel({ ticketIds, completedIds }: Props) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   // The anchor wraps the empty state too — the web's tickets tray exists regardless.
   const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.tickets);
 
@@ -22,7 +24,7 @@ export function TicketPanel({ ticketIds, completedIds }: Props) {
   return (
     <View {...anchor}>
       {ticketIds.length === 0 ? (
-        <Text style={styles.muted}>{t('noTickets')}</Text>
+        <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('noTickets')}</Text>
       ) : (
         <ScrollView
           horizontal
@@ -40,5 +42,5 @@ export function TicketPanel({ ticketIds, completedIds }: Props) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8, paddingHorizontal: 4 },
-  muted: { opacity: 0.55, fontSize: 13, padding: 8 },
+  muted: { fontSize: 13, padding: 8 },
 });

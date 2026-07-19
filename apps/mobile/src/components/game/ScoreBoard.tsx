@@ -12,6 +12,8 @@ import type { GameSnapshot, PlayerFinal } from '@trm/proto';
 import type { RoomMember } from '../../net/rest';
 import { api } from '../../net/rest';
 import { seatColor } from '../../theme/colors';
+import { useTheme } from '../../theme/useTheme';
+import { rgba } from '../../theme/shade';
 import { seatByPlayer } from '../../game/view';
 import { usePlayerName } from '../../game/playerName';
 import { ticketById } from '../../game/content';
@@ -25,7 +27,8 @@ import { TicketCard } from './TicketCard';
 
 const isBot = (id: string): boolean => id.startsWith('bot:');
 const ticketValue = (id: string): number => ticketById.get(id)?.value ?? 0;
-const INK = '#4b5563';
+/** Winner's-crown gold — celebration ink, deliberately the same in both themes. */
+const CROWN_GOLD = '#b8860b';
 const FEEDBACK_MAX_LEN = 500;
 
 /** Completed (gains) vs failed (losses) kept tickets, with their point sums. */
@@ -61,6 +64,8 @@ export function ScoreBoard({
   onPlayAgain?: (() => void) | undefined;
 }) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
+  const ink = tokens.inkSoft;
   const playerName = usePlayerName();
   const setRouteReveal = useAnimationsStore((s) => s.setRouteReveal);
   const clearRouteReveal = useAnimationsStore((s) => s.clearRouteReveal);
@@ -140,15 +145,24 @@ export function ScoreBoard({
     const pf = fs.players.find((p) => p.playerId === viewingMap);
     return (
       <View style={styles.reviewBar} pointerEvents="box-none">
-        <View style={styles.reviewInner}>
-          <MapIcon size={15} color={INK} />
-          <Text style={styles.reviewCaption} numberOfLines={2}>
+        <View
+          style={[
+            styles.reviewInner,
+            { backgroundColor: rgba(tokens.surface, 0.95), borderColor: tokens.line },
+          ]}
+        >
+          <MapIcon size={15} color={ink} />
+          <Text style={[styles.reviewCaption, { color: tokens.ink }]} numberOfLines={2}>
             {t('longestRouteOf', { name: nameOf(viewingMap) })}
             {pf
               ? ` · ${t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}`
               : ''}
           </Text>
-          <Pressable style={styles.primaryBtn} accessibilityRole="button" onPress={backToScores}>
+          <Pressable
+            style={[styles.primaryBtn, { backgroundColor: tokens.blue }]}
+            accessibilityRole="button"
+            onPress={backToScores}
+          >
             <Text style={styles.primaryText}>{t('backToScores')}</Text>
           </Pressable>
         </View>
@@ -160,18 +174,23 @@ export function ScoreBoard({
   if (dismissed) {
     return (
       <View style={styles.reviewBar} pointerEvents="box-none">
-        <View style={styles.reviewInner}>
-          <MapIcon size={15} color={INK} />
-          <Text style={styles.reviewCaption}>{t('inspectingMap')}</Text>
+        <View
+          style={[
+            styles.reviewInner,
+            { backgroundColor: rgba(tokens.surface, 0.95), borderColor: tokens.line },
+          ]}
+        >
+          <MapIcon size={15} color={ink} />
+          <Text style={[styles.reviewCaption, { color: tokens.ink }]}>{t('inspectingMap')}</Text>
           <Pressable
-            style={styles.primaryBtn}
+            style={[styles.primaryBtn, { backgroundColor: tokens.blue }]}
             accessibilityRole="button"
             onPress={() => setDismissed(false)}
           >
             <Text style={styles.primaryText}>{t('backToScores')}</Text>
           </Pressable>
           <Pressable style={styles.plainBtn} accessibilityRole="button" onPress={onLeave}>
-            <Text style={styles.plainText}>{t('leaveGame')}</Text>
+            <Text style={[styles.plainText, { color: tokens.blue }]}>{t('leaveGame')}</Text>
           </Pressable>
         </View>
       </View>
@@ -193,28 +212,38 @@ export function ScoreBoard({
     <Modal visible transparent animationType="fade" onRequestClose={onLeave}>
       <View style={styles.backdrop}>
         <Confetti active={!ticketModal} />
-        <View style={styles.modal}>
-          <Text style={styles.title}>{t('gameOver')}</Text>
+        <View style={[styles.modal, { backgroundColor: tokens.surface }]}>
+          <Text style={[styles.title, { color: tokens.ink }]}>{t('gameOver')}</Text>
           <ScrollView style={styles.scroll}>
             {sorted.map((pf) => {
               const seat = seatOf(pf.playerId);
               const { completed, failed, gain, loss } = ticketSplit(pf);
               const winner = winners.has(pf.playerId);
               return (
-                <View key={pf.playerId} style={[styles.playerRow, winner && styles.winnerRow]}>
+                <View
+                  key={pf.playerId}
+                  style={[
+                    styles.playerRow,
+                    { backgroundColor: rgba(tokens.ink, 0.03) },
+                    winner && {
+                      borderColor: CROWN_GOLD,
+                      backgroundColor: rgba(CROWN_GOLD, 0.08),
+                    },
+                  ]}
+                >
                   <View style={styles.playerHead}>
                     <View style={[styles.seatDot, { backgroundColor: seatColor(seat) }]} />
-                    {winner && <Crown size={14} color="#b8860b" />}
-                    {isBot(pf.playerId) && <Bot size={13} color={INK} />}
-                    <Text style={styles.playerName} numberOfLines={1}>
+                    {winner && <Crown size={14} color={CROWN_GOLD} />}
+                    {isBot(pf.playerId) && <Bot size={13} color={ink} />}
+                    <Text style={[styles.playerName, { color: tokens.ink }]} numberOfLines={1}>
                       {nameOf(pf.playerId)}
                     </Text>
-                    <Text style={styles.total}>{pf.total}</Text>
+                    <Text style={[styles.total, { color: tokens.ink }]}>{pf.total}</Text>
                   </View>
                   <View style={styles.statsRow}>
-                    <Text style={styles.stat}>🚆 {pf.routePoints}</Text>
+                    <Text style={[styles.stat, { color: ink }]}>🚆 {pf.routePoints}</Text>
                     <View style={styles.statGroup}>
-                      <Text style={[styles.stat, styles.gain]}>✅ +{gain}</Text>
+                      <Text style={[styles.stat, { color: tokens.ok }]}>✅ +{gain}</Text>
                       {completed.length > 0 && (
                         <Pressable
                           style={styles.viewBtn}
@@ -224,12 +253,12 @@ export function ScoreBoard({
                             setTicketModal({ kind: 'completed', playerId: pf.playerId })
                           }
                         >
-                          <Eye size={13} color={INK} />
+                          <Eye size={13} color={ink} />
                         </Pressable>
                       )}
                     </View>
                     <View style={styles.statGroup}>
-                      <Text style={[styles.stat, styles.loss]}>
+                      <Text style={[styles.stat, { color: tokens.danger }]}>
                         ❌ {loss > 0 ? `−${loss}` : '0'}
                       </Text>
                       {failed.length > 0 && (
@@ -239,14 +268,16 @@ export function ScoreBoard({
                           accessibilityLabel={t('view')}
                           onPress={() => setTicketModal({ kind: 'failed', playerId: pf.playerId })}
                         >
-                          <Eye size={13} color={INK} />
+                          <Eye size={13} color={ink} />
                         </Pressable>
                       )}
                     </View>
-                    <Text style={styles.stat}>🚉 +{pf.stationBonus}</Text>
-                    {showEventBonus && <Text style={styles.stat}>✨ +{pf.eventBonus}</Text>}
+                    <Text style={[styles.stat, { color: ink }]}>🚉 +{pf.stationBonus}</Text>
+                    {showEventBonus && (
+                      <Text style={[styles.stat, { color: ink }]}>✨ +{pf.eventBonus}</Text>
+                    )}
                     <View style={styles.statGroup}>
-                      <Text style={styles.stat}>
+                      <Text style={[styles.stat, { color: ink }]}>
                         📏{' '}
                         {t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}
                       </Text>
@@ -257,7 +288,7 @@ export function ScoreBoard({
                           accessibilityLabel={t('viewOnMap')}
                           onPress={() => openMap(pf)}
                         >
-                          <MapIcon size={13} color={INK} />
+                          <MapIcon size={13} color={ink} />
                         </Pressable>
                       )}
                     </View>
@@ -269,23 +300,28 @@ export function ScoreBoard({
 
           {members && snapshot.you && (onVote !== undefined || onPlayAgain !== undefined) && (
             <View style={styles.rematchRow}>
-              <Text style={styles.rematchTally}>
+              <Text style={[styles.rematchTally, { color: ink }]}>
                 {t('rematchTally', { count: rematchCount, total: humanMembers.length })}
               </Text>
               <View style={styles.rematchBtns}>
                 {onVote && (
                   <Pressable
-                    style={[styles.plainBtn, myVote && styles.voteOn]}
+                    style={[
+                      styles.plainBtn,
+                      myVote && { backgroundColor: rgba(tokens.ok, 0.14), borderRadius: 8 },
+                    ]}
                     accessibilityRole="button"
                     accessibilityState={{ selected: myVote }}
                     onPress={() => onVote(!myVote)}
                   >
-                    <Text style={styles.plainText}>🔁 {t('wantRematch')}</Text>
+                    <Text style={[styles.plainText, { color: tokens.blue }]}>
+                      🔁 {t('wantRematch')}
+                    </Text>
                   </Pressable>
                 )}
                 {isHost === true && onPlayAgain && (
                   <Pressable
-                    style={styles.primaryBtn}
+                    style={[styles.primaryBtn, { backgroundColor: tokens.blue }]}
                     accessibilityRole="button"
                     onPress={onPlayAgain}
                   >
@@ -297,16 +333,22 @@ export function ScoreBoard({
           )}
 
           {gameId && roomCode && alreadyRated !== null && (
-            <View style={styles.ratingBlock} testID="scoreboard-rating">
-              <Text style={styles.ratingLabel}>{t('rateAppPrompt')}</Text>
+            <View style={[styles.ratingBlock, { borderTopColor: tokens.line }]} testID="scoreboard-rating">
+              <Text style={[styles.ratingLabel, { color: tokens.ink }]}>{t('rateAppPrompt')}</Text>
               {alreadyRated ? (
-                <Text style={styles.ratingThanks}>{t('ratingThanks')}</Text>
+                <Text style={[styles.ratingThanks, { color: tokens.ok }]}>
+                  {t('ratingThanks')}
+                </Text>
               ) : (
                 <>
                   <View style={styles.ratingRow}>
                     <StarRating value={stars} onChange={setStars} size={28} disabled={submitting} />
                     <Pressable
-                      style={[styles.primaryBtn, (stars === 0 || submitting) && styles.btnDisabled]}
+                      style={[
+                        styles.primaryBtn,
+                        { backgroundColor: tokens.blue },
+                        (stars === 0 || submitting) && styles.btnDisabled,
+                      ]}
                       accessibilityRole="button"
                       accessibilityState={{ disabled: stars === 0 || submitting }}
                       disabled={stars === 0 || submitting}
@@ -317,18 +359,25 @@ export function ScoreBoard({
                   </View>
                   {stars > 0 && (
                     <TextInput
-                      style={styles.feedbackInput}
+                      style={[
+                        styles.feedbackInput,
+                        { borderColor: tokens.line, color: tokens.ink },
+                      ]}
                       value={feedback}
                       onChangeText={setFeedback}
                       maxLength={FEEDBACK_MAX_LEN}
                       placeholder={t('ratingFeedbackPlaceholder')}
-                      placeholderTextColor="rgba(75,85,99,0.6)"
+                      placeholderTextColor={tokens.inkSoft}
                       editable={!submitting}
                       multiline
                       numberOfLines={3}
                     />
                   )}
-                  {ratingError && <Text style={styles.ratingError}>{t('ratingSubmitError')}</Text>}
+                  {ratingError && (
+                    <Text style={[styles.ratingError, { color: tokens.danger }]}>
+                      {t('ratingSubmitError')}
+                    </Text>
+                  )}
                 </>
               )}
             </View>
@@ -350,9 +399,13 @@ export function ScoreBoard({
               accessibilityRole="button"
               onPress={() => setDismissed(true)}
             >
-              <Text style={styles.plainText}>{t('inspectMap')}</Text>
+              <Text style={[styles.plainText, { color: tokens.blue }]}>{t('inspectMap')}</Text>
             </Pressable>
-            <Pressable style={styles.primaryBtn} accessibilityRole="button" onPress={onLeave}>
+            <Pressable
+              style={[styles.primaryBtn, { backgroundColor: tokens.blue }]}
+              accessibilityRole="button"
+              onPress={onLeave}
+            >
               <Text style={styles.primaryText}>{t('leaveGame')}</Text>
             </Pressable>
           </View>
@@ -360,9 +413,9 @@ export function ScoreBoard({
 
         {ticketModal && modalPlayer && (
           <View style={styles.backdropInner}>
-            <View style={styles.ticketModal}>
+            <View style={[styles.ticketModal, { backgroundColor: tokens.surface }]}>
               <View style={styles.ticketModalHead}>
-                <Text style={styles.ticketModalTitle} numberOfLines={1}>
+                <Text style={[styles.ticketModalTitle, { color: tokens.ink }]} numberOfLines={1}>
                   {t(ticketModal.kind === 'completed' ? 'completedTickets' : 'failedTickets')} ·{' '}
                   {nameOf(ticketModal.playerId)}
                 </Text>
@@ -372,7 +425,7 @@ export function ScoreBoard({
                   accessibilityLabel={t('close')}
                   onPress={() => setTicketModal(null)}
                 >
-                  <X size={16} color={INK} />
+                  <X size={16} color={ink} />
                 </Pressable>
               </View>
               <ScrollView horizontal contentContainerStyle={styles.ticketGrid}>
@@ -412,7 +465,6 @@ const styles = StyleSheet.create({
     maxWidth: 480,
     maxHeight: '90%',
     borderRadius: 12,
-    backgroundColor: '#fffdf8',
     padding: 16,
     gap: 10,
   },
@@ -422,46 +474,38 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     borderColor: 'transparent',
-    backgroundColor: 'rgba(0,0,0,0.03)',
     padding: 10,
     marginBottom: 6,
     gap: 6,
   },
-  winnerRow: { borderColor: '#b8860b', backgroundColor: 'rgba(184,134,11,0.08)' },
   playerHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   seatDot: { width: 10, height: 10, borderRadius: 5 },
   playerName: { flex: 1, fontSize: 14, fontWeight: '700' },
   total: { fontSize: 18, fontWeight: '800', fontVariant: ['tabular-nums'] },
   statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' },
   statGroup: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  stat: { fontSize: 12, color: INK, fontVariant: ['tabular-nums'] },
-  gain: { color: '#2e7d32' },
-  loss: { color: '#b3261e' },
+  stat: { fontSize: 12, fontVariant: ['tabular-nums'] },
   viewBtn: { padding: 6 },
   rematchRow: { gap: 6 },
-  rematchTally: { fontSize: 12, opacity: 0.65 },
+  rematchTally: { fontSize: 12 },
   rematchBtns: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  voteOn: { backgroundColor: 'rgba(46,125,50,0.14)', borderRadius: 8 },
   ratingBlock: {
     gap: 6,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.08)',
     paddingTop: 10,
   },
   ratingLabel: { fontSize: 13, fontWeight: '700' },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-  ratingThanks: { fontSize: 13, color: '#2e7d32', fontWeight: '600' },
+  ratingThanks: { fontSize: 13, fontWeight: '600' },
   feedbackInput: {
     minHeight: 60,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.15)',
     borderRadius: 8,
     padding: 8,
     fontSize: 13,
-    color: INK,
     textAlignVertical: 'top',
   },
-  ratingError: { fontSize: 12, color: '#b3261e' },
+  ratingError: { fontSize: 12 },
   btnDisabled: { opacity: 0.45 },
   discordBtn: {
     flexDirection: 'row',
@@ -475,9 +519,8 @@ const styles = StyleSheet.create({
   discordText: { color: '#fff', fontSize: 14, fontWeight: '700' },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
   plainBtn: { paddingHorizontal: 12, paddingVertical: 10, minHeight: 44, justifyContent: 'center' },
-  plainText: { fontSize: 14, fontWeight: '600', color: '#1d4ed8' },
+  plainText: { fontSize: 14, fontWeight: '600' },
   primaryBtn: {
-    backgroundColor: '#0f5fa6',
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -497,9 +540,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     borderRadius: 10,
-    backgroundColor: 'rgba(255,253,248,0.95)',
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.15)',
     paddingHorizontal: 10,
     paddingVertical: 6,
     maxWidth: '100%',
@@ -509,7 +550,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 440,
     borderRadius: 12,
-    backgroundColor: '#fffdf8',
     padding: 14,
     gap: 8,
   },

@@ -1,14 +1,24 @@
 // The presentational board + HUD + action handlers (ports the web GameStage), rendered for BOTH a
 // live server game (commands = GameSocket) and the local offline/tutorial sandbox (P3/P4). A pure
 // function of the passed snapshot plus display prefs. Adaptive tiers by window width instead of
-// the web's media queries: compact (<700dp) docks the HUD under a full-bleed board; two-pane
-// (700–999) adds the rail; three-pane (≥1000) adds a dedicated comms column. The web's
-// `boardLayout` pref is deliberately ignored — the dock/panes are the only layouts that keep the
-// (very vertical) board visible on a handheld.
+// the web's media queries: compact (<700dp) floats the status chips over a full-bleed board and
+// docks the HUD in a boarding-pass tray; two-pane (700–999) adds the rail; three-pane (≥1000)
+// adds a dedicated comms column. The web's `boardLayout` pref is deliberately ignored — the
+// dock/panes are the only layouts that keep the (very vertical) board visible on a handheld.
+// Every chrome surface styles through the ChromeTokens theme (gameChrome.tsx); the timetable
+// panel voice (TrayHead's dashed leader) is shared with the web's .tray-head.
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { ChevronDown, ChevronUp } from 'lucide-react-native';
+import {
+  Layers,
+  MessageSquare,
+  Sparkles,
+  Ticket,
+  Users,
+  WalletCards,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Phase, type GameSnapshot } from '@trm/proto';
 import type { RoomMember } from '../net/rest';
@@ -44,6 +54,9 @@ import { ScoreBoard } from '../components/game/ScoreBoard';
 import { CommsPanel } from '../components/game/CommsPanel';
 import { AnimationLayer } from '../components/game/AnimationLayer';
 import { registerAnimTarget } from '../components/game/animTargets';
+import { RADIUS, useTheme } from '../theme/useTheme';
+import { rgba } from '../theme/shade';
+import { GamePanel, TrayHead } from '../theme/gameChrome';
 import { dockTabs, stageTier, type DockTabKey } from './stageLayout';
 
 export interface GameStageProps {
@@ -74,6 +87,18 @@ export interface GameStageProps {
 
 const RAIL_WIDTH = 360;
 const COMMS_WIDTH = 320;
+/** The boarding-pass dock's rounded lip overlaps the board bottom by this much. */
+const DOCK_OVERLAP = 14;
+
+/** Tab glyphs for the phone dock (chrome-only Lucide, like the rest of the app UI). */
+const TAB_ICONS: Record<DockTabKey, LucideIcon> = {
+  hand: WalletCards,
+  draw: Layers,
+  missions: Ticket,
+  events: Sparkles,
+  players: Users,
+  comms: MessageSquare,
+};
 
 export function GameStage({
   snapshot,
@@ -93,6 +118,7 @@ export function GameStage({
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
   const colorBlind = useUi((s) => s.colorBlind);
+  const { tokens } = useTheme();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const tier = stageTier(width);
@@ -228,12 +254,6 @@ export function GameStage({
     />
   );
 
-  const trackers = (
-    <View style={{ gap: 6 }}>
-      <TurnCountdown />
-      <PlayerTrackers snapshot={snapshot} />
-    </View>
-  );
   // The blocking event-phase prompt sits above the board in every tier so a required
   // lantern/draft/hive choice is never buried inside an unselected dock tab.
   const eventPhaseBar = <EventPhaseBar snapshot={snapshot} commands={commands} locale={locale} />;
@@ -252,6 +272,7 @@ export function GameStage({
         {...drawTicketsAnchor}
         style={({ pressed }) => [
           styles.drawTicketsBtn,
+          { backgroundColor: tokens.ember, shadowColor: tokens.ink },
           (!canAct || snapshot.ticketDeckShortCount === 0 || !allow.tickets) &&
             styles.drawTicketsDisabled,
           pressed && styles.pressed,
@@ -269,7 +290,11 @@ export function GameStage({
       </Pressable>
       {canAct && snapshot.you?.youMustPass && (
         <Pressable
-          style={({ pressed }) => [styles.drawTicketsBtn, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.drawTicketsBtn,
+            { backgroundColor: tokens.blue, shadowColor: tokens.ink },
+            pressed && styles.pressed,
+          ]}
           accessibilityRole="button"
           onPress={() => commands?.pass()}
         >
@@ -285,20 +310,37 @@ export function GameStage({
       />
     </View>
   );
+  // Timetable panels — every HUD block sits on the same GamePanel sheet with a TrayHead
+  // (title ── dashed leader ── count pill), the shared voice with the web's .tray-section.
+  const drawSection = (
+    <GamePanel>
+      <TrayHead title={t('dockDraw')} count={snapshot.deckCount} />
+      {market}
+    </GamePanel>
+  );
   const handSection = (
-    <View style={styles.traySection}>
+    <GamePanel>
       <TrayHead title={t('cards')} count={myPub?.handCount ?? 0} />
       <PlayerHand hand={snapshot.you?.hand} />
-    </View>
+    </GamePanel>
   );
   const ticketsSection = (
-    <View style={styles.traySection}>
+    <GamePanel>
       <TrayHead title={t('tickets')} count={snapshot.you?.keptTicketIds.length ?? 0} />
       <TicketPanel
         ticketIds={snapshot.you?.keptTicketIds ?? []}
         completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
       />
-    </View>
+    </GamePanel>
+  );
+  // The countdown mounts ONCE per stage (its hook drives the warning sounds): floating over the
+  // board on compact, atop the players panel on the pane tiers.
+  const playersPanel = (withCountdown: boolean) => (
+    <GamePanel>
+      <TrayHead title={t('dockPlayers')} count={snapshot.players.length} />
+      {withCountdown && <TurnCountdown />}
+      <PlayerTrackers snapshot={snapshot} />
+    </GamePanel>
   );
 
   const chooser = (
@@ -321,8 +363,8 @@ export function GameStage({
   ) : (
     <>
       <EventsPanel />
-      {trackers}
-      {market}
+      {playersPanel(true)}
+      {drawSection}
       {handSection}
       {ticketsSection}
     </>
@@ -331,8 +373,14 @@ export function GameStage({
   const comms = sandbox ? <View /> : <CommsPanel chatDisabled={isSpectator} />;
 
   const spectatorBanner = isSpectator ? (
-    <View style={styles.spectatorBanner} accessibilityRole="text">
-      <Text style={styles.spectatorText}>
+    <View
+      style={[
+        styles.spectatorBanner,
+        { backgroundColor: tokens.surface, borderColor: tokens.blue, shadowColor: tokens.ink },
+      ]}
+      accessibilityRole="text"
+    >
+      <Text style={[styles.spectatorText, { color: tokens.ink }]}>
         <Text style={styles.spectatorStrong}>{t('spectating')}</Text> — {t('spectatingHint')}
       </Text>
     </View>
@@ -385,7 +433,8 @@ export function GameStage({
   );
 
   if (compact) {
-    // A bottom dock replaces rail/comms wholesale: a tabbed panel under a full-bleed board. The
+    // A bottom dock replaces rail/comms wholesale: a boarding-pass tray under a truly full-bleed
+    // board — the status chips float OVER the board's top instead of consuming its height. The
     // ticket chooser takes over the whole dock. (Unlike the web, the sandbox docks too — the
     // stacked-column exception existed for the web encyclopedia's caption anchors; on a phone a
     // dock is the only layout that keeps the board visible. Sandbox just drops the comms tab.)
@@ -402,11 +451,20 @@ export function GameStage({
     // visible. Collapsed otherwise shrinks the dock to its tab bar, giving the board the window.
     const dockOpen = needKeep || !dockCollapsed;
     return (
-      <View style={styles.fill}>
-        {spectatorBanner}
-        {turnBanner}
-        {eventPhaseBar}
-        <View style={styles.fill}>{board}</View>
+      <View style={[styles.fill, { backgroundColor: tokens.paper }]}>
+        <View style={styles.fill}>
+          {board}
+          {/* Floating status layer: turn/connection, event prompts, the ticking turn clock. */}
+          <View
+            style={[styles.floatStack, { top: insets.top + 6 }]}
+            pointerEvents="box-none"
+          >
+            {spectatorBanner}
+            {turnBanner}
+            {eventPhaseBar}
+            <TurnCountdown floating />
+          </View>
+        </View>
         <View
           // The dock is the only always-mounted HUD surface on phones (its panels swap by tab).
           // Registering it as a flight anchor gives card draws a destination even while the Hand
@@ -415,6 +473,11 @@ export function GameStage({
           collapsable={false}
           style={[
             styles.dock,
+            {
+              backgroundColor: tokens.paper,
+              borderColor: tokens.line,
+              shadowColor: tokens.ink,
+            },
             dockOpen && { height: Math.round(height * 0.45) },
             { paddingBottom: insets.bottom },
           ]}
@@ -423,61 +486,87 @@ export function GameStage({
             <ScrollView contentContainerStyle={styles.dockPanel}>{chooser}</ScrollView>
           ) : (
             <>
-              <View style={styles.dockTabsWrap}>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  style={styles.dockTabs}
-                  contentContainerStyle={styles.dockTabsRow}
-                >
-                  {tabs.map(({ key, labelKey, countSource }) => {
-                    const count = countOf(countSource);
-                    const active = dockTab === key;
-                    return (
-                      <Pressable
-                        key={key}
-                        style={[styles.dockTabBtn, active && styles.dockTabActive]}
-                        accessibilityRole="tab"
-                        accessibilityState={{ selected: active }}
-                        onPress={() => {
-                          setDockTab(key);
-                          // Tapping any tab while collapsed reopens the panel it names.
-                          setDockCollapsed(false);
-                        }}
+              {/* The tray's grab handle doubles as the collapse toggle. */}
+              <Pressable
+                style={styles.handleRow}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t(dockCollapsed ? 'dockExpand' : 'dockCollapse')}
+                onPress={() => setDockCollapsed((c) => !c)}
+              >
+                <View style={[styles.handle, { backgroundColor: tokens.line }]} />
+              </Pressable>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.dockTabs}
+                contentContainerStyle={styles.dockTabsRow}
+              >
+                {tabs.map(({ key, labelKey, countSource }) => {
+                  const count = countOf(countSource);
+                  const active = dockTab === key;
+                  const Icon = TAB_ICONS[key];
+                  return (
+                    <Pressable
+                      key={key}
+                      style={[
+                        styles.dockTabBtn,
+                        {
+                          backgroundColor: active ? tokens.ember : tokens.surface2,
+                          borderColor: active ? tokens.ember : tokens.line,
+                        },
+                      ]}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: active }}
+                      onPress={() => {
+                        setDockTab(key);
+                        // Tapping any tab while collapsed reopens the panel it names.
+                        setDockCollapsed(false);
+                      }}
+                    >
+                      <Icon size={14} color={active ? '#fff' : tokens.inkSoft} />
+                      <Text
+                        style={[styles.dockTabText, { color: active ? '#fff' : tokens.inkSoft }]}
                       >
-                        <Text style={[styles.dockTabText, active && styles.dockTabTextActive]}>
-                          {t(labelKey)}
-                          {count !== null ? ` ${count}` : ''}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </ScrollView>
-                <Pressable
-                  style={({ pressed }) => [styles.dockToggle, pressed && styles.pressed]}
-                  accessibilityRole="button"
-                  accessibilityLabel={t(dockCollapsed ? 'dockExpand' : 'dockCollapse')}
-                  onPress={() => setDockCollapsed((c) => !c)}
-                >
-                  {dockCollapsed ? (
-                    <ChevronUp size={18} color="#4b5563" />
-                  ) : (
-                    <ChevronDown size={18} color="#4b5563" />
-                  )}
-                </Pressable>
-              </View>
+                        {t(labelKey)}
+                      </Text>
+                      {count !== null && (
+                        <View
+                          style={[
+                            styles.dockTabCount,
+                            {
+                              backgroundColor: active
+                                ? 'rgba(255,255,255,0.28)'
+                                : rgba(tokens.ink, 0.08),
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.dockTabCountText,
+                              { color: active ? '#fff' : tokens.inkSoft },
+                            ]}
+                          >
+                            {count}
+                          </Text>
+                        </View>
+                      )}
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
               {dockOpen && (
                 <ScrollView contentContainerStyle={styles.dockPanel}>
                   {dockTab === 'hand' ? (
                     handSection
                   ) : dockTab === 'draw' ? (
-                    market
+                    drawSection
                   ) : dockTab === 'missions' ? (
                     ticketsSection
                   ) : dockTab === 'events' ? (
                     <EventsPanel />
                   ) : dockTab === 'players' ? (
-                    trackers
+                    playersPanel(false)
                   ) : (
                     comms
                   )}
@@ -493,17 +582,29 @@ export function GameStage({
 
   if (tier === 'three-pane') {
     return (
-      <View style={styles.fill}>
-        {spectatorBanner}
-        {turnBanner}
-        {eventPhaseBar}
+      <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: insets.top }]}>
+        <View style={styles.paneHeader}>
+          {spectatorBanner}
+          {turnBanner}
+          {eventPhaseBar}
+        </View>
         <View style={styles.row}>
           <View style={styles.fill}>{board}</View>
-          <ScrollView style={styles.rail} contentContainerStyle={styles.railContent}>
+          <ScrollView
+            style={[styles.rail, { borderLeftColor: tokens.line }]}
+            contentContainerStyle={styles.railContent}
+          >
             {railInner}
           </ScrollView>
           {!sandbox && (
-            <View style={[styles.commsPane, { paddingBottom: insets.bottom }]}>{comms}</View>
+            <View
+              style={[
+                styles.commsPane,
+                { borderLeftColor: tokens.line, paddingBottom: insets.bottom },
+              ]}
+            >
+              {comms}
+            </View>
           )}
         </View>
         {overlays}
@@ -513,28 +614,41 @@ export function GameStage({
 
   // two-pane: board + rail, with a rail↔comms tab pair (ports the web narrow-desktop branch).
   return (
-    <View style={styles.fill}>
-      {spectatorBanner}
-      {turnBanner}
-      {eventPhaseBar}
+    <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: insets.top }]}>
+      <View style={styles.paneHeader}>
+        {spectatorBanner}
+        {turnBanner}
+        {eventPhaseBar}
+      </View>
       <View style={styles.row}>
         <View style={styles.fill}>{board}</View>
-        <View style={styles.rail}>
+        <View style={[styles.rail, { borderLeftColor: tokens.line }]}>
           {!sandbox && (
             <View style={styles.commsTabs} accessibilityRole="tablist">
-              {(['rail', 'comms'] as const).map((key) => (
-                <Pressable
-                  key={key}
-                  style={[styles.commsTabBtn, commsTab === key && styles.dockTabActive]}
-                  accessibilityRole="tab"
-                  accessibilityState={{ selected: commsTab === key }}
-                  onPress={() => setCommsTab(key)}
-                >
-                  <Text style={[styles.dockTabText, commsTab === key && styles.dockTabTextActive]}>
-                    {t(key === 'rail' ? 'tabRail' : 'tabComms')}
-                  </Text>
-                </Pressable>
-              ))}
+              {(['rail', 'comms'] as const).map((key) => {
+                const active = commsTab === key;
+                return (
+                  <Pressable
+                    key={key}
+                    style={[
+                      styles.commsTabBtn,
+                      {
+                        backgroundColor: active ? tokens.ember : tokens.surface2,
+                        borderColor: active ? tokens.ember : tokens.line,
+                      },
+                    ]}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: active }}
+                    onPress={() => setCommsTab(key)}
+                  >
+                    <Text
+                      style={[styles.dockTabText, { color: active ? '#fff' : tokens.inkSoft }]}
+                    >
+                      {t(key === 'rail' ? 'tabRail' : 'tabComms')}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
           )}
           <ScrollView style={styles.fill} contentContainerStyle={styles.railContent}>
@@ -547,102 +661,107 @@ export function GameStage({
   );
 }
 
-function TrayHead({ title, count }: { title: string; count: number }) {
-  return (
-    <View style={styles.trayHead}>
-      <Text style={styles.trayTitle}>{title}</Text>
-      <Text style={styles.trayCount}>{count}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   row: { flex: 1, flexDirection: 'row' },
+  paneHeader: { paddingHorizontal: 10, paddingVertical: 6, gap: 6 },
+  floatStack: {
+    position: 'absolute',
+    left: 10,
+    right: 10,
+    gap: 6,
+  },
   spectatorBanner: {
-    backgroundColor: 'rgba(15,95,166,0.1)',
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
     paddingHorizontal: 10,
     paddingVertical: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   spectatorText: { fontSize: 12 },
   spectatorStrong: { fontWeight: '700' },
   dock: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.12)',
-    backgroundColor: '#faf7f0',
+    marginTop: -DOCK_OVERLAP,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -6 },
+    elevation: 16,
   },
-  dockTabsWrap: { flexDirection: 'row', alignItems: 'center' },
-  dockTabs: { flexGrow: 0, flexShrink: 1 },
-  dockTabsRow: { flexDirection: 'row', gap: 4, paddingHorizontal: 6, paddingVertical: 6 },
-  dockToggle: {
-    marginLeft: 'auto',
+  handleRow: { alignItems: 'center', paddingTop: 8, paddingBottom: 4 },
+  handle: { width: 40, height: 4, borderRadius: 999 },
+  dockTabs: { flexGrow: 0, flexShrink: 0 },
+  dockTabsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingTop: 2,
+    paddingBottom: 8,
+  },
+  dockTabBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderRadius: 999,
+    borderWidth: 1,
     paddingHorizontal: 12,
-    minHeight: 40,
+    minHeight: 38,
+    justifyContent: 'center',
+  },
+  dockTabText: { fontSize: 13, fontWeight: '600' },
+  dockTabCount: {
+    minWidth: 18,
+    height: 18,
+    borderRadius: 999,
+    paddingHorizontal: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dockTabBtn: {
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minHeight: 40,
-    justifyContent: 'center',
-  },
-  dockTabActive: { backgroundColor: 'rgba(15,95,166,0.12)' },
-  dockTabText: { fontSize: 13, fontWeight: '600', color: '#4b5563' },
-  dockTabTextActive: { color: '#0f5fa6' },
-  dockPanel: { padding: 10, gap: 8 },
+  dockTabCountText: { fontSize: 11, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  dockPanel: { padding: 10, gap: 10 },
   rail: {
     width: RAIL_WIDTH,
     borderLeftWidth: 1,
-    borderLeftColor: 'rgba(0,0,0,0.12)',
-    backgroundColor: '#faf7f0',
   },
-  railContent: { padding: 10, gap: 12 },
+  railContent: { padding: 10, gap: 10 },
   commsPane: {
     width: COMMS_WIDTH,
     borderLeftWidth: 1,
-    borderLeftColor: 'rgba(0,0,0,0.12)',
-    backgroundColor: '#faf7f0',
     padding: 10,
   },
   commsTabs: {
     flexDirection: 'row',
-    gap: 4,
-    paddingHorizontal: 6,
-    paddingTop: 6,
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingTop: 8,
   },
   commsTabBtn: {
     flex: 1,
-    borderRadius: 8,
+    borderRadius: 999,
+    borderWidth: 1,
     paddingVertical: 8,
     alignItems: 'center',
-    minHeight: 40,
+    minHeight: 38,
     justifyContent: 'center',
   },
   marketBlock: { gap: 8 },
   drawTicketsBtn: {
-    minHeight: 44,
-    borderRadius: 10,
-    backgroundColor: '#ee6b1f',
+    minHeight: 46,
+    borderRadius: RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   drawTicketsDisabled: { opacity: 0.45 },
   drawTicketsText: { color: '#fff', fontSize: 14, fontWeight: '700' },
-  pressed: { opacity: 0.8 },
-  traySection: { gap: 6 },
-  trayHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  trayTitle: { fontSize: 13, fontWeight: '700' },
-  trayCount: {
-    minWidth: 20,
-    textAlign: 'center',
-    borderRadius: 10,
-    backgroundColor: 'rgba(0,0,0,0.08)',
-    fontSize: 12,
-    fontWeight: '700',
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    overflow: 'hidden',
-  },
+  pressed: { opacity: 0.85 },
 });

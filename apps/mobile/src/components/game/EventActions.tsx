@@ -16,6 +16,8 @@ import { hasActiveEvent } from '../../game/events';
 import { pbToCard } from '../../game/cards';
 import type { EventPerkChoice, GameCommands } from '../../net/commands';
 import type { Locale } from '../../net/rest';
+import { RADIUS, useTheme } from '../../theme/useTheme';
+import { rgba } from '../../theme/shade';
 import { CardSwatch } from './CardSwatch';
 import { TrainCarCard } from './TrainCarCard';
 
@@ -34,6 +36,19 @@ const PERKS: readonly { perk: EventPerkChoice; labelKey: string }[] = [
 /** The blocking event-phase prompt (or null while no event phase is pending). */
 export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
+  // Floats over the board on compact - a solid surface card with an ember accent border, so the
+  // required choice stays legible on the map.
+  const barStyle = [
+    styles.bar,
+    {
+      backgroundColor: tokens.surface,
+      borderColor: rgba(tokens.ember, 0.55),
+      shadowColor: tokens.ink,
+    },
+  ];
+  const btnWash = { backgroundColor: rgba(tokens.blue, 0.12) };
+  const btnInk = { color: tokens.blue };
   const me = snapshot.you?.playerId ?? null;
   const ev = snapshot.randomEvents;
   const phase = snapshot.phase;
@@ -45,8 +60,10 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
   if (phase === Phase.LANTERN_RELOCATION && lanternPending) {
     const mine = lanternPending.playerId === me && !!commands;
     return (
-      <View style={styles.bar} accessibilityRole="menu" testID="event-phase-bar">
-        <Text style={styles.barTitle}>{t('events.relocationRequired')}</Text>
+      <View style={barStyle} accessibilityRole="menu" testID="event-phase-bar">
+        <Text style={[styles.barTitle, { color: tokens.ink }]}>
+          {t('events.relocationRequired')}
+        </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.barRow}>
             {lanternPending.candidateCityIds.map((cityId) => (
@@ -54,6 +71,7 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
                 key={cityId}
                 style={({ pressed }) => [
                   styles.btn,
+                  btnWash,
                   !mine && styles.btnDisabled,
                   pressed && styles.pressed,
                 ]}
@@ -61,7 +79,7 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
                 disabled={!mine}
                 onPress={() => commands?.relocateLanternHost(cityId)}
               >
-                <Text style={styles.btnText}>{cityName(cityId, locale)}</Text>
+                <Text style={[styles.btnText, btnInk]}>{cityName(cityId, locale)}</Text>
               </Pressable>
             ))}
           </View>
@@ -73,8 +91,10 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
   if (phase === Phase.EVENT_DRAFT && draft) {
     const mine = draft.currentPlayerId === me && !!commands;
     return (
-      <View style={styles.bar} accessibilityRole="menu" testID="event-phase-bar">
-        <Text style={styles.barTitle}>{t('events.ROLLING_STOCK_ALLOCATION_DAY.name')}</Text>
+      <View style={barStyle} accessibilityRole="menu" testID="event-phase-bar">
+        <Text style={[styles.barTitle, { color: tokens.ink }]}>
+          {t('events.ROLLING_STOCK_ALLOCATION_DAY.name')}
+        </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.barRow}>
             {PERKS.map(({ perk, labelKey }) => (
@@ -82,6 +102,7 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
                 key={perk}
                 style={({ pressed }) => [
                   styles.btn,
+                  btnWash,
                   !mine && styles.btnDisabled,
                   pressed && styles.pressed,
                 ]}
@@ -90,7 +111,7 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
                 disabled={!mine}
                 onPress={() => commands?.chooseEventPerk(perk)}
               >
-                <Text style={styles.btnText}>{t(labelKey)}</Text>
+                <Text style={[styles.btnText, btnInk]}>{t(labelKey)}</Text>
               </Pressable>
             ))}
           </View>
@@ -102,8 +123,8 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
   if (phase === Phase.HIVE_DRAW && hive) {
     const mine = hive.playerId === me && !!commands;
     return (
-      <View style={styles.bar} accessibilityRole="menu" testID="event-phase-bar">
-        <Text style={styles.barTitle}>
+      <View style={barStyle} accessibilityRole="menu" testID="event-phase-bar">
+        <Text style={[styles.barTitle, { color: tokens.ink }]}>
           {t('events.hiveTitle')} {hive.revealed.length}/{hive.maxDraws}
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -117,6 +138,7 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
             <Pressable
               style={({ pressed }) => [
                 styles.btn,
+                btnWash,
                 !mine && styles.btnDisabled,
                 pressed && styles.pressed,
               ]}
@@ -124,11 +146,12 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
               disabled={!mine}
               onPress={() => commands?.continueHiveDraw()}
             >
-              <Text style={styles.btnText}>{t('events.hiveContinue')}</Text>
+              <Text style={[styles.btnText, btnInk]}>{t('events.hiveContinue')}</Text>
             </Pressable>
             <Pressable
               style={({ pressed }) => [
                 styles.btn,
+                btnWash,
                 !mine && styles.btnDisabled,
                 pressed && styles.pressed,
               ]}
@@ -136,7 +159,7 @@ export function EventPhaseBar({ snapshot, commands, locale }: PhaseBarProps) {
               disabled={!mine}
               onPress={() => commands?.stopHiveDraw()}
             >
-              <Text style={styles.btnText}>{t('events.hiveStop')}</Text>
+              <Text style={[styles.btnText, btnInk]}>{t('events.hiveStop')}</Text>
             </Pressable>
           </View>
         </ScrollView>
@@ -166,6 +189,9 @@ export function EventTurnActions({
   onRepair,
 }: TurnActionsProps) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
+  const btnWash = { backgroundColor: rgba(tokens.blue, 0.12) };
+  const btnInk = { color: tokens.blue };
   const [nightGive, setNightGive] = useState<CardColor>('RED');
   const [nightSlot, setNightSlot] = useState(0);
 
@@ -200,22 +226,24 @@ export function EventTurnActions({
     <View style={styles.turnActions} testID="event-turn-actions">
       {hiveAvailable && (
         <Pressable
-          style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.btn, btnWash, pressed && styles.pressed]}
           accessibilityRole="button"
           onPress={() => commands?.startHiveDraw()}
         >
-          <Text style={styles.btnText}>{t('events.hiveStart')}</Text>
+          <Text style={[styles.btnText, btnInk]}>{t('events.hiveStart')}</Text>
         </Pressable>
       )}
 
       {nightAvailable && (
         <View style={styles.nightBlock}>
-          <Text style={styles.nightLabel}>{t('events.nightMarketSwap')}</Text>
+          <Text style={[styles.nightLabel, { color: tokens.ink }]}>
+            {t('events.nightMarketSwap')}
+          </Text>
           <View style={styles.chipRow}>
             {nightColors.map((color) => (
               <Pressable
                 key={color}
-                style={[styles.chip, selectedNightColor === color && styles.chipOn]}
+                style={[styles.chip, selectedNightColor === color && { borderColor: tokens.blue }]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: selectedNightColor === color }}
                 onPress={() => setNightGive(color)}
@@ -228,18 +256,24 @@ export function EventTurnActions({
             {nightSlots.map((slot) => (
               <Pressable
                 key={slot}
-                style={[styles.chip, styles.slotChip, selectedNightSlot === slot && styles.chipOn]}
+                style={[
+                  styles.chip,
+                  styles.slotChip,
+                  { backgroundColor: rgba(tokens.ink, 0.06) },
+                  selectedNightSlot === slot && { borderColor: tokens.blue },
+                ]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: selectedNightSlot === slot }}
                 onPress={() => setNightSlot(slot)}
               >
-                <Text style={styles.slotChipText}>{slot + 1}</Text>
+                <Text style={[styles.slotChipText, { color: tokens.ink }]}>{slot + 1}</Text>
               </Pressable>
             ))}
             <Pressable
               testID="night-swap-submit"
               style={({ pressed }) => [
                 styles.btn,
+                btnWash,
                 (selectedNightColor === undefined || selectedNightSlot === undefined) &&
                   styles.btnDisabled,
                 pressed && styles.pressed,
@@ -251,7 +285,7 @@ export function EventTurnActions({
                   commands?.nightMarketSwap(selectedNightColor, selectedNightSlot);
               }}
             >
-              <Text style={styles.btnText}>{t('events.nightMarketSwap')}</Text>
+              <Text style={[styles.btnText, btnInk]}>{t('events.nightMarketSwap')}</Text>
             </Pressable>
           </View>
         </View>
@@ -265,11 +299,13 @@ export function EventTurnActions({
         return (
           <Pressable
             key={routeId}
-            style={({ pressed }) => [styles.btn, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.btn, btnWash, pressed && styles.pressed]}
             accessibilityRole="button"
             onPress={() => onRepair(routeId)}
           >
-            <Text style={styles.btnText}>{t('events.repairRouteNamed', { route: endpoints })}</Text>
+            <Text style={[styles.btnText, btnInk]}>
+              {t('events.repairRouteNamed', { route: endpoints })}
+            </Text>
           </Pressable>
         );
       })}
@@ -279,12 +315,15 @@ export function EventTurnActions({
 
 const styles = StyleSheet.create({
   bar: {
-    backgroundColor: 'rgba(238,107,31,0.12)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(238,107,31,0.35)',
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
     paddingHorizontal: 10,
     paddingVertical: 8,
     gap: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   barTitle: { fontSize: 13, fontWeight: '700' },
   barRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
@@ -294,22 +333,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     justifyContent: 'center',
-    backgroundColor: 'rgba(15,95,166,0.12)',
   },
   btnDisabled: { opacity: 0.45 },
-  btnText: { fontSize: 13, fontWeight: '600', color: '#0f5fa6' },
+  btnText: { fontSize: 13, fontWeight: '600' },
   pressed: { opacity: 0.7 },
   nightBlock: { gap: 6 },
   nightLabel: { fontSize: 12, fontWeight: '700' },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6 },
   chip: { borderRadius: 8, padding: 3, borderWidth: 2, borderColor: 'transparent' },
-  chipOn: { borderColor: '#0f5fa6' },
   slotChip: {
     minWidth: 32,
     minHeight: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.06)',
   },
   slotChipText: { fontSize: 13, fontWeight: '700' },
 });

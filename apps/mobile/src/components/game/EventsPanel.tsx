@@ -16,11 +16,13 @@ import { usePlayerName } from '../../game/playerName';
 import { cityName, routeById } from '../../game/content';
 import { ownershipMap } from '../../game/view';
 import { eventDescKey, eventNameKey, roundsLeft } from '../../game/events';
-
-const INK = '#4b5563';
+import { useTheme } from '../../theme/useTheme';
+import { rgba } from '../../theme/shade';
+import { panelCardStyle, TrayHead } from '../../theme/gameChrome';
 
 export function EventsPanel() {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const snapshot = useGameStore((s) => s.snapshot);
   const locale = useUi((s) => s.locale);
   const nameOf = usePlayerName();
@@ -78,29 +80,41 @@ export function EventsPanel() {
       accessibilityLabel={t('view')}
       onPress={() => setInfoKind(kind)}
     >
-      <Info size={13} color={INK} />
+      <Info size={13} color={tokens.inkSoft} />
     </Pressable>
   );
 
+  // Semantic row washes (web parity: ember=active, blue=charter, ok=free, quiet=forecast).
+  const rowFree = { backgroundColor: rgba(tokens.ok, 0.1) };
+  const rowActive = { backgroundColor: rgba(tokens.ember, 0.1) };
+  const rowCharter = { backgroundColor: rgba(tokens.blue, 0.08) };
+  const rowForecast = { backgroundColor: rgba(tokens.ink, 0.04) };
+  const inkText = { color: tokens.ink };
+  const softText = { color: tokens.inkSoft };
+
   return (
-    <View style={styles.panel} testID="events-panel">
-      <View style={styles.head}>
-        <Text style={styles.title}>{t('events.panelTitle')}</Text>
-        <View style={styles.modeChip}>
-          <Text style={styles.modeChipText}>{t(`eventsMode_${ev.mode}`)}</Text>
-        </View>
-      </View>
+    <View style={[panelCardStyle(tokens), styles.panel]} testID="events-panel">
+      <TrayHead
+        title={t('events.panelTitle')}
+        right={
+          <View style={[styles.modeChip, { backgroundColor: rgba(tokens.blue, 0.12) }]}>
+            <Text style={[styles.modeChipText, { color: tokens.blue }]}>
+              {t(`eventsMode_${ev.mode}`)}
+            </Text>
+          </View>
+        }
+      />
 
       {ev.freeStationAvailable && (
-        <View style={[styles.row, styles.rowFree]}>
-          <Text style={styles.rowName}>{t('events.freeStation')}</Text>
+        <View style={[styles.row, rowFree]}>
+          <Text style={[styles.rowName, inkText]}>{t('events.freeStation')}</Text>
         </View>
       )}
 
       {ev.lanternHost && (
-        <View style={[styles.row, styles.rowActive]} testID="lantern-host-row">
-          <Text style={styles.rowName}>{t(eventNameKey('LANTERN_HOST_CITY'))}</Text>
-          <Text style={styles.rowSummary}>
+        <View style={[styles.row, rowActive]} testID="lantern-host-row">
+          <Text style={[styles.rowName, inkText]}>{t(eventNameKey('LANTERN_HOST_CITY'))}</Text>
+          <Text style={[styles.rowSummary, softText]}>
             {t('events.hostCity', { city: cityName(ev.lanternHost.cityId, locale) })}
           </Text>
           {infoButton('LANTERN_HOST_CITY')}
@@ -108,9 +122,9 @@ export function EventsPanel() {
       )}
 
       {ev.boringActive && (
-        <View style={[styles.row, styles.rowActive]}>
-          <Text style={styles.rowName}>{t(eventNameKey('BREAKTHROUGH_BORING_MACHINE'))}</Text>
-          <Text style={styles.rowSummary}>{t('events.boringActive')}</Text>
+        <View style={[styles.row, rowActive]}>
+          <Text style={[styles.rowName, inkText]}>{t(eventNameKey('BREAKTHROUGH_BORING_MACHINE'))}</Text>
+          <Text style={[styles.rowSummary, softText]}>{t('events.boringActive')}</Text>
           {infoButton('BREAKTHROUGH_BORING_MACHINE')}
         </View>
       )}
@@ -119,11 +133,11 @@ export function EventsPanel() {
         const left = roundsLeft(info, ev.roundIndex);
         const summary = affected(info);
         return (
-          <View key={info.id} style={[styles.row, styles.rowActive]}>
-            <Text style={styles.rowName}>{t(eventNameKey(info.kind))}</Text>
-            {summary !== null && <Text style={styles.rowSummary}>{summary}</Text>}
+          <View key={info.id} style={[styles.row, rowActive]}>
+            <Text style={[styles.rowName, inkText]}>{t(eventNameKey(info.kind))}</Text>
+            {summary !== null && <Text style={[styles.rowSummary, softText]}>{summary}</Text>}
             {left !== null && (
-              <Text style={styles.rowRounds}>{t('events.roundsLeft', { n: left })}</Text>
+              <Text style={[styles.rowRounds, softText]}>{t('events.roundsLeft', { n: left })}</Text>
             )}
             {infoButton(info.kind)}
           </View>
@@ -131,8 +145,8 @@ export function EventsPanel() {
       })}
 
       {ev.charters.map((c) => (
-        <View key={c.id} style={[styles.row, styles.rowCharter]}>
-          <Text style={styles.rowName}>
+        <View key={c.id} style={[styles.row, rowCharter]}>
+          <Text style={[styles.rowName, inkText]}>
             {t('events.charterOpen', {
               a: cityName(c.cityA, locale),
               b: cityName(c.cityB, locale),
@@ -140,7 +154,7 @@ export function EventsPanel() {
             })}
           </Text>
           {c.wonByPlayerId !== '' && (
-            <Text style={styles.rowSummary}>
+            <Text style={[styles.rowSummary, softText]}>
               {t('events.charterWon', {
                 name: nameOf({
                   id: c.wonByPlayerId,
@@ -155,15 +169,15 @@ export function EventsPanel() {
       ))}
 
       {ev.luckyContracts.map((contract) => (
-        <View key={contract.eventId} style={[styles.row, styles.rowCharter]}>
-          <Text style={styles.rowName}>
+        <View key={contract.eventId} style={[styles.row, rowCharter]}>
+          <Text style={[styles.rowName, inkText]}>
             {t('events.luckyPair', {
               a: cityName(contract.cityA, locale),
               b: cityName(contract.cityB, locale),
             })}
           </Text>
           {contract.wonByPlayerId !== '' && (
-            <Text style={styles.rowSummary}>
+            <Text style={[styles.rowSummary, softText]}>
               {t('events.charterWon', {
                 name: nameOf({
                   id: contract.wonByPlayerId,
@@ -178,9 +192,9 @@ export function EventsPanel() {
       ))}
 
       {ev.eventDraft && (
-        <View style={[styles.row, styles.rowActive]}>
-          <Text style={styles.rowName}>{t('events.draftTitle')}</Text>
-          <Text style={styles.rowSummary}>
+        <View style={[styles.row, rowActive]}>
+          <Text style={[styles.rowName, inkText]}>{t('events.draftTitle')}</Text>
+          <Text style={[styles.rowSummary, softText]}>
             {t('events.draftProgress', {
               n: Math.max(0, ev.eventDraft.order.length - ev.eventDraft.pickIndex),
             })}
@@ -189,9 +203,9 @@ export function EventsPanel() {
       )}
 
       {ev.pendingHiveDraw && (
-        <View style={[styles.row, styles.rowActive]}>
-          <Text style={styles.rowName}>{t('events.hiveTitle')}</Text>
-          <Text style={styles.rowSummary}>
+        <View style={[styles.row, rowActive]}>
+          <Text style={[styles.rowName, inkText]}>{t('events.hiveTitle')}</Text>
+          <Text style={[styles.rowSummary, softText]}>
             {t('events.hiveWaiting', {
               name: nameOf({
                 id: ev.pendingHiveDraw.playerId,
@@ -214,20 +228,20 @@ export function EventsPanel() {
           player.repairPermits > 0 ? t('events.repairPermits', { n: player.repairPermits }) : null,
         ].filter((value): value is string => value !== null);
         return (
-          <View key={player.id} style={[styles.row, styles.rowForecast]}>
-            <Text style={styles.rowName}>
+          <View key={player.id} style={[styles.row, rowForecast]}>
+            <Text style={[styles.rowName, inkText]}>
               {nameOf({ id: player.id, seat: player.seat, isMe: player.id === me })}
             </Text>
-            <Text style={styles.rowSummary}>{counts.join(' · ')}</Text>
+            <Text style={[styles.rowSummary, softText]}>{counts.join(' · ')}</Text>
           </View>
         );
       })}
 
       {forecast && (
-        <View style={[styles.row, styles.rowForecast]}>
-          <Text style={styles.rowLabel}>{t('events.forecast')}</Text>
-          <Text style={styles.rowName}>{t(eventNameKey(forecast.kind))}</Text>
-          <Text style={styles.rowSummary}>{t('events.startsNextRound')}</Text>
+        <View style={[styles.row, rowForecast]}>
+          <Text style={[styles.rowLabel, softText]}>{t('events.forecast')}</Text>
+          <Text style={[styles.rowName, inkText]}>{t(eventNameKey(forecast.kind))}</Text>
+          <Text style={[styles.rowSummary, softText]}>{t('events.startsNextRound')}</Text>
           {infoButton(forecast.kind)}
         </View>
       )}
@@ -239,24 +253,24 @@ export function EventsPanel() {
         onRequestClose={() => setInfoKind(null)}
       >
         <Pressable style={styles.backdrop} onPress={() => setInfoKind(null)}>
-          <Pressable style={styles.modal} onPress={() => undefined}>
+          <Pressable style={[styles.modal, { backgroundColor: tokens.surface }]} onPress={() => undefined}>
             {infoKind !== null && (
               <>
                 <View style={styles.modalHead}>
-                  <Text style={styles.modalTitle}>{t(eventNameKey(infoKind))}</Text>
+                  <Text style={[styles.modalTitle, inkText]}>{t(eventNameKey(infoKind))}</Text>
                   <Pressable
                     style={styles.infoBtn}
                     accessibilityRole="button"
                     accessibilityLabel={t('close')}
                     onPress={() => setInfoKind(null)}
                   >
-                    <X size={16} color={INK} />
+                    <X size={16} color={tokens.inkSoft} />
                   </Pressable>
                 </View>
-                <Text style={styles.modalDesc}>{t(eventDescKey(infoKind))}</Text>
+                <Text style={[styles.modalDesc, inkText]}>{t(eventDescKey(infoKind))}</Text>
                 {infoRouteIds.length > 0 && (
                   <>
-                    <Text style={styles.routeListTitle}>{t('events.routeListTitle')}</Text>
+                    <Text style={[styles.routeListTitle, inkText]}>{t('events.routeListTitle')}</Text>
                     <ScrollView style={styles.routeList}>
                       {infoRouteIds.map((rid) => {
                         const r = routeById.get(rid);
@@ -264,14 +278,14 @@ export function EventsPanel() {
                         return (
                           <Pressable
                             key={rid}
-                            style={({ pressed }) => [styles.routeItem, pressed && styles.pressed]}
+                            style={({ pressed }) => [styles.routeItem, { backgroundColor: rgba(tokens.ink, 0.04) }, pressed && styles.pressed]}
                             accessibilityRole="button"
                             onPress={() => {
                               setEventSpotlight({ kind: 'route', ids: [rid] });
                               setInfoKind(null);
                             }}
                           >
-                            <Text style={styles.routeItemText}>
+                            <Text style={[styles.routeItemText, inkText]}>
                               {cityName(r.a as string, locale)}–{cityName(r.b as string, locale)}
                             </Text>
                           </Pressable>
@@ -290,16 +304,13 @@ export function EventsPanel() {
 }
 
 const styles = StyleSheet.create({
-  panel: { gap: 4 },
-  head: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 13, fontWeight: '700' },
+  panel: { gap: 5 },
   modeChip: {
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 1,
-    backgroundColor: 'rgba(15,95,166,0.12)',
   },
-  modeChipText: { fontSize: 11, fontWeight: '600', color: '#0f5fa6' },
+  modeChipText: { fontSize: 11, fontWeight: '600' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -309,10 +320,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
   },
-  rowFree: { backgroundColor: 'rgba(46,125,50,0.10)' },
-  rowActive: { backgroundColor: 'rgba(238,107,31,0.10)' },
-  rowCharter: { backgroundColor: 'rgba(15,95,166,0.08)' },
-  rowForecast: { backgroundColor: 'rgba(0,0,0,0.04)' },
   rowLabel: { fontSize: 11, fontWeight: '700', opacity: 0.6 },
   rowName: { fontSize: 12, fontWeight: '600', flexShrink: 1 },
   rowSummary: { fontSize: 11, opacity: 0.7 },
@@ -331,7 +338,6 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     maxHeight: '75%',
     borderRadius: 12,
-    backgroundColor: '#fffdf8',
     padding: 16,
     gap: 8,
   },
@@ -344,7 +350,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 8,
     borderRadius: 6,
-    backgroundColor: 'rgba(0,0,0,0.04)',
     marginTop: 4,
   },
   routeItemText: { fontSize: 13 },

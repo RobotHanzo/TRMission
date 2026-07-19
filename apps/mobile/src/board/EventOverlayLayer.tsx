@@ -7,16 +7,15 @@
 import { useMemo } from 'react';
 import { Circle, DashPathEffect, Group, Line, Path, vec } from '@shopify/react-native-skia';
 import { Skia } from '@shopify/react-native-skia';
-import { MAP_DIMS } from '@trm/map-data';
+import { MAP_DIMS, MAP_PALETTE_LIGHT, type MapPalette } from '@trm/map-data';
 import type { BoardEventOverlays } from '../game/events';
 import { BoardText } from './skiaText';
 import type { RouteRenderModel } from './scenePaths';
 import type { SceneCity, RouteOwnership } from './MapSceneSkia';
 import type { ZoomBucket } from './camera';
 
-// Web tokens.css / game.css evt-* colours (light theme — the board is always drawn on paper).
-const SURFACE = '#fffdf8';
-const INK_SOFT = '#5b6168';
+// Web tokens.css / game.css evt-* colours. The event hues are theme-independent (same as web);
+// only the badge surface/ink pair follows the board palette.
 const OK_GREEN = '#3a9d5c';
 const EMU_BLUE = '#0f5fa6';
 const LUCKY_GOLD = '#d49a18';
@@ -76,6 +75,8 @@ export interface EventOverlayLayerProps {
   bucket: ZoomBucket;
   inv: number;
   marker: number;
+  /** Themed cartography palette (light default keeps specimens/tests on the classic look). */
+  palette?: MapPalette | undefined;
 }
 
 export function EventOverlayLayer({
@@ -86,7 +87,10 @@ export function EventOverlayLayer({
   bucket,
   inv,
   marker,
+  palette = MAP_PALETTE_LIGHT,
 }: EventOverlayLayerProps) {
+  // The closed-route badge's quiet ink: soft on paper, brightening with the dark board.
+  const badgeInk = palette.ink === MAP_PALETTE_LIGHT.ink ? '#5b6168' : '#a8adb3';
   const {
     closedRoutes,
     reopenRoutes,
@@ -183,21 +187,21 @@ export function EventOverlayLayer({
             />
             {showBadges && (
               <Group>
-                <Circle cx={m.mid.x} cy={m.mid.y} r={2.6 * inv} color={SURFACE} />
+                <Circle cx={m.mid.x} cy={m.mid.y} r={2.6 * inv} color={palette.surface} />
                 <Circle
                   cx={m.mid.x}
                   cy={m.mid.y}
                   r={2.6 * inv}
                   style="stroke"
                   strokeWidth={0.3 * inv}
-                  color={INK_SOFT}
+                  color={badgeInk}
                 />
                 <BoardText
                   text="🌀"
                   x={m.mid.x}
                   y={m.mid.y - 1.85 * inv}
                   size={3 * inv}
-                  color={INK_SOFT}
+                  color={badgeInk}
                   maxWidth={10 * inv}
                 />
               </Group>

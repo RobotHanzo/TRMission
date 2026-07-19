@@ -6,12 +6,11 @@
 // overlay in MapSceneSkia — this layer is recorded into the cached static Picture and must stay
 // animation-free.)
 import { Circle, Group, RoundedRect } from '@shopify/react-native-skia';
-import { MAP_DIMS, MAP_PALETTE_LIGHT } from '@trm/map-data';
+import { MAP_DIMS, MAP_PALETTE_LIGHT, type MapPalette } from '@trm/map-data';
 import { seatColor } from '../theme/colors';
 import type { SceneCity } from './MapSceneSkia';
 
 const D = MAP_DIMS;
-const P = MAP_PALETTE_LIGHT;
 
 export interface CityLayerProps {
   cities: readonly SceneCity[];
@@ -20,9 +19,18 @@ export interface CityLayerProps {
   highlightCities?: ReadonlySet<string> | undefined;
   /** Marker growth (web --marker-scale). */
   marker: number;
+  /** Themed cartography palette (light default keeps specimens/tests on the classic look). */
+  palette?: MapPalette | undefined;
 }
 
-export function CityLayer({ cities, hubs, stations, highlightCities, marker }: CityLayerProps) {
+export function CityLayer({
+  cities,
+  hubs,
+  stations,
+  highlightCities,
+  marker,
+  palette: P = MAP_PALETTE_LIGHT,
+}: CityLayerProps) {
   return (
     <>
       {cities.map((c) => {

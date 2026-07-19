@@ -10,6 +10,7 @@ import { CardColor as PbCardColor, Phase, type GameSnapshot } from '@trm/proto';
 import { tokenForPb } from '../../game/cards';
 import { handFromCounts, handTotal } from '../../game/payments';
 import { LIVERY_GRADIENT_COLORS } from '../../theme/colors';
+import { useTheme } from '../../theme/useTheme';
 import { useAnimationsStore } from '../../store/animations';
 import {
   TUTORIAL_ANCHORS,
@@ -70,6 +71,7 @@ export function CardMarket({
   blockFaceupLocomotives = false,
 }: Props) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const coveredSlots = useAnimationsStore((s) => s.coveredMarketSlots);
   const marketFlips = useAnimationsStore((s) => s.marketFlips);
   const reduced = useReducedMotion();
@@ -139,6 +141,7 @@ export function CardMarket({
               collapsable={false}
               style={({ pressed }) => [
                 styles.slot,
+                { backgroundColor: tokens.surface2, shadowColor: tokens.ink },
                 covered && styles.slotCovered,
                 empty && styles.slotEmpty,
                 !covered && !empty && !isLoco && tok ? { backgroundColor: tok.hex } : null,
@@ -169,32 +172,37 @@ export function CardMarket({
   );
 }
 
+// The deck back + covered faces are game objects (same deep slate in both themes, like the web
+// card back); only the empty-slot well follows the chrome theme.
+const CARD_BACK = '#3a4149';
+
 const styles = StyleSheet.create({
   market: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   deck: {
     minWidth: 48,
-    height: 56,
-    borderRadius: 8,
-    backgroundColor: '#3a4149',
+    height: 58,
+    borderRadius: 9,
+    backgroundColor: CARD_BACK,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
     paddingHorizontal: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.3)',
   },
-  deckCount: { color: '#fff', fontSize: 12, fontWeight: '700' },
+  deckCount: { color: '#fff', fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
   slots: { flexDirection: 'row', gap: 6, flex: 1 },
   slot: {
     flex: 1,
-    height: 56,
-    borderRadius: 8,
+    height: 58,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.22)',
     overflow: 'hidden',
-    backgroundColor: '#d8d3c8',
   },
-  slotCovered: { backgroundColor: '#3a4149' },
+  slotCovered: { backgroundColor: CARD_BACK },
   slotEmpty: { opacity: 0.4 },
   slotGlyph: { fontSize: 18, fontWeight: '700' },
   pressed: { opacity: 0.7 },

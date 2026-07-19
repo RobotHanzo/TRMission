@@ -19,14 +19,19 @@ import {
   Skia,
   vec,
 } from '@shopify/react-native-skia';
-import { MAP_DIMS, MAP_INKS, MAP_PALETTE_LIGHT, LIVERY_COLORS } from '@trm/map-data';
+import {
+  MAP_DIMS,
+  MAP_INKS,
+  MAP_PALETTE_LIGHT,
+  LIVERY_COLORS,
+  type MapPalette,
+} from '@trm/map-data';
 import { CARD_COLOR_TOKENS, GRAY_TOKEN, seatColor } from '../theme/colors';
 import { BoardText } from './skiaText';
 import { ferryLocoBlock, type RouteRenderModel } from './scenePaths';
 import type { RouteOwnership } from './MapSceneSkia';
 
 const D = MAP_DIMS;
-const PALETTE = MAP_PALETTE_LIGHT;
 const DEG = Math.PI / 180;
 /** Muted grey for a locked (unclaimable double-sibling) route — mirrors web MapScene.tsx. */
 const LOCKED_GREY = '#9aa0a6';
@@ -76,6 +81,8 @@ export interface RouteLayerProps {
   repairedRoutes?: ReadonlySet<string> | undefined;
   /** Track-weight counter-scale (web --inv-scale). */
   inv: number;
+  /** Themed cartography palette (light default keeps specimens/tests on the classic look). */
+  palette?: MapPalette | undefined;
 }
 
 export function RouteLayer({
@@ -85,6 +92,7 @@ export function RouteLayer({
   showFerryLocos = true,
   repairedRoutes,
   inv,
+  palette: PALETTE = MAP_PALETTE_LIGHT,
 }: RouteLayerProps) {
   return (
     <>

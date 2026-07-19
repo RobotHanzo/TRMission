@@ -12,6 +12,9 @@ import { useGameStore } from '../../store/game';
 import { useUi } from '../../store/ui';
 import { usePlayerName } from '../../game/playerName';
 import { CARD_COLOR_TOKENS, seatColor } from '../../theme/colors';
+import { useTheme } from '../../theme/useTheme';
+import { rgba } from '../../theme/shade';
+import { TrayHead } from '../../theme/gameChrome';
 import { cityName, routeById, ticketLabel } from '../../game/content';
 import { eventNameKey } from '../../game/events';
 import type { LogEntry } from '../../game/logModel';
@@ -23,6 +26,7 @@ const seatOf = (snapshot: GameSnapshot | null, playerId: string | null): number 
 
 export function LogPanel() {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const entries = useLogStore((s) => s.entries);
   const snapshot = useGameStore((s) => s.snapshot);
   const locale = useUi((s) => s.locale);
@@ -150,13 +154,20 @@ export function LogPanel() {
     const seat = seatOf(snapshot, e.playerId);
     const color = e.data.color as CardColor | null | undefined;
     return (
-      <View style={styles.line}>
+      <View
+        style={[
+          styles.line,
+          e.importance === 'highlight' && { backgroundColor: rgba(tokens.ink, 0.05) },
+          e.importance === 'alert' && { backgroundColor: rgba(tokens.ember, 0.12) },
+        ]}
+      >
         {seat !== null && <View style={[styles.dot, { backgroundColor: seatColor(seat) }]} />}
         <Text
           style={[
             styles.text,
-            e.importance === 'highlight' && styles.highlight,
-            e.importance === 'alert' && styles.alert,
+            { color: tokens.inkSoft },
+            e.importance === 'highlight' && [styles.strong, { color: tokens.ink }],
+            e.importance === 'alert' && [styles.strong, { color: tokens.danger }],
           ]}
         >
           {lineText(e)}
@@ -173,9 +184,9 @@ export function LogPanel() {
 
   return (
     <View style={styles.panel}>
-      <Text style={styles.heading}>{t('log.heading')}</Text>
+      <TrayHead title={t('log.heading')} />
       {entries.length === 0 ? (
-        <Text style={styles.empty}>{t('log.empty')}</Text>
+        <Text style={[styles.empty, { color: tokens.inkSoft }]}>{t('log.empty')}</Text>
       ) : (
         <FlatList
           ref={listRef}
@@ -196,7 +207,7 @@ export function LogPanel() {
         <Pressable
           testID="log-jump-latest"
           accessibilityRole="button"
-          style={styles.jumpChip}
+          style={[styles.jumpChip, { backgroundColor: tokens.blue }]}
           onPress={() => {
             atBottom.current = true;
             setShowJump(false);
@@ -212,19 +223,19 @@ export function LogPanel() {
 
 const styles = StyleSheet.create({
   panel: { flex: 1, gap: 4, minHeight: 80 },
-  heading: { fontSize: 13, fontWeight: '700' },
   list: { flex: 1 },
-  empty: { fontSize: 12, opacity: 0.55, paddingVertical: 4 },
+  empty: { fontSize: 12, paddingVertical: 4 },
   line: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
     paddingVertical: 2,
+    paddingHorizontal: 4,
+    borderRadius: 6,
   },
   dot: { width: 7, height: 7, borderRadius: 4 },
-  text: { flexShrink: 1, fontSize: 12, color: '#374151' },
-  highlight: { fontWeight: '700', color: '#1f2328' },
-  alert: { fontWeight: '700', color: '#b3261e' },
+  text: { flexShrink: 1, fontSize: 12 },
+  strong: { fontWeight: '700' },
   chip: {
     width: 12,
     height: 12,
@@ -236,7 +247,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 6,
     alignSelf: 'center',
-    backgroundColor: '#0f5fa6',
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,

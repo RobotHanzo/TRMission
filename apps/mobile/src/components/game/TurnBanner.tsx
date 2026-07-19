@@ -45,6 +45,7 @@ export function TurnBanner({
         {
           backgroundColor: mine ? tokens.blue : tokens.surface,
           borderColor: mine ? tokens.blue : tokens.line,
+          shadowColor: tokens.ink,
         },
       ]}
     >
@@ -72,10 +73,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderRadius: RADIUS.sm,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     gap: 8,
+    // Floats over the board on compact; the soft paper shadow keeps it legible on the map.
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   turnText: { fontSize: 13, fontWeight: '700', flexShrink: 1 },
   connChip: { borderRadius: RADIUS.sm, paddingHorizontal: 8, paddingVertical: 2 },

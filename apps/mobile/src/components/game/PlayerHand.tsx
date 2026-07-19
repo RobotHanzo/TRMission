@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CARD_COLORS } from '@trm/shared';
 import type { CardCounts } from '@trm/proto';
 import { handFromCounts } from '../../game/payments';
+import { useTheme } from '../../theme/useTheme';
 import { useUi } from '../../store/ui';
 import { registerAnimTarget } from './animTargets';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../../features/tutorial/targets';
@@ -13,6 +14,7 @@ import { TrainCarCard } from './TrainCarCard';
 
 export function PlayerHand({ hand }: { hand: CardCounts | undefined }) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const colorBlind = useUi((s) => s.colorBlind);
   const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.hand);
   const h = handFromCounts(hand);
@@ -28,7 +30,7 @@ export function PlayerHand({ hand }: { hand: CardCounts | undefined }) {
       collapsable={false}
     >
       {present.length === 0 ? (
-        <Text style={styles.muted}>{t('noCards')}</Text>
+        <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('noCards')}</Text>
       ) : (
         <ScrollView
           horizontal
@@ -46,5 +48,5 @@ export function PlayerHand({ hand }: { hand: CardCounts | undefined }) {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8, paddingHorizontal: 4, alignItems: 'center' },
-  muted: { opacity: 0.55, fontSize: 13, padding: 8 },
+  muted: { fontSize: 13, padding: 8 },
 });

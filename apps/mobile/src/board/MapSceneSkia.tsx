@@ -25,7 +25,13 @@ import {
   type SharedValue,
 } from 'react-native-reanimated';
 import type { Transforms3d } from '@shopify/react-native-skia';
-import { MAP_DIMS, type MapGeography, type RouteGeometry } from '@trm/map-data';
+import {
+  MAP_DIMS,
+  MAP_PALETTE_LIGHT,
+  type MapGeography,
+  type MapPalette,
+  type RouteGeometry,
+} from '@trm/map-data';
 import { seatColor } from '../theme/colors';
 import type { BoardEventOverlays } from '../game/events';
 import type { RasterSpec, ZoomBucket } from './camera';
@@ -104,6 +110,10 @@ export interface MapSceneSkiaProps {
   inv: number;
   marker: number;
 
+  /** Themed cartography palette (BoardView resolves light/dark from the app theme; omitted →
+   *  the classic light board, keeping specimens and tests unchanged). */
+  palette?: MapPalette | undefined;
+
   /* ── random-events overlays (client-core `boardEventOverlays`; omitted → events-off) ── */
   events?: BoardEventOverlays | undefined;
 
@@ -148,6 +158,7 @@ interface MapSceneStaticProps {
   bucket: ZoomBucket;
   inv: number;
   marker: number;
+  palette: MapPalette;
 }
 
 function MapSceneStatic({
@@ -167,10 +178,11 @@ function MapSceneStatic({
   bucket,
   inv,
   marker,
+  palette,
 }: MapSceneStaticProps) {
   return (
     <Group>
-      <GeographyLayer geography={geography} view={view} inv={inv} />
+      <GeographyLayer geography={geography} view={view} inv={inv} palette={palette} />
       <RouteLayer
         model={model}
         owned={owned}
@@ -178,6 +190,7 @@ function MapSceneStatic({
         showFerryLocos={showFerryLocos}
         repairedRoutes={repairedRoutes}
         inv={inv}
+        palette={palette}
       />
       <CityLayer
         cities={cities}
@@ -185,6 +198,7 @@ function MapSceneStatic({
         stations={stations}
         highlightCities={highlightCities}
         marker={marker}
+        palette={palette}
       />
       <LabelLayer
         cities={cities}
@@ -193,6 +207,7 @@ function MapSceneStatic({
         bucket={bucket}
         inv={inv}
         marker={marker}
+        palette={palette}
       />
     </Group>
   );
@@ -218,6 +233,7 @@ export function MapSceneSkia({
   bucket,
   inv,
   marker,
+  palette = MAP_PALETTE_LIGHT,
   events,
   sweeps,
   routeReveal,
@@ -249,6 +265,7 @@ export function MapSceneSkia({
         bucket={bucket}
         inv={inv}
         marker={marker}
+        palette={palette}
       />
     ),
     [
@@ -268,6 +285,7 @@ export function MapSceneSkia({
       bucket,
       inv,
       marker,
+      palette,
     ],
   );
   const bounds = useMemo<SkRect>(
@@ -333,6 +351,7 @@ export function MapSceneSkia({
           bucket={bucket}
           inv={inv}
           marker={marker}
+          palette={palette}
         />
       )}
       {/* Claim glow: the just-claimed route blooms in the owner's seat colour then settles (web
