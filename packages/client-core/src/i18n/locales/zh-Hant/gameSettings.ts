@@ -16,6 +16,9 @@ export default {
     '開啟時，2–3 人遊戲中每對平行路線只能佔用其中一條；關閉可讓雙方各佔一條。',
   settingRandomEvents: '隨機事件',
   settingRandomEventsDesc: '以颱風警報為靈感的隨機事件：封線、加分與驚喜',
+  settingSoloWaitForHost: '單人房等待房主',
+  settingSoloWaitForHostDesc:
+    '房內只有你和機器人時，遊戲會等你行動——沒有回合倒數，也不會自動代抽。',
   allowSpectating: '允許觀戰',
   roomVisibility: '房間可見度',
   visibility_PUBLIC: '公開',

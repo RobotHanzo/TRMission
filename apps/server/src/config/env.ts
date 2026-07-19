@@ -20,6 +20,9 @@ export const env = {
    *  auto-playing until a human returns (<=0 disables the streak pause; a lapse with no human
    *  socket connected at all always pauses immediately). */
   autoPlayPauseAfter: Number(process.env.TRM_AUTOPLAY_PAUSE_AFTER ?? 5),
+  /** Consecutive timed-out turns for ONE player after which — while other humans are still
+   *  connected — their seat is handed to a MEDIUM takeover bot (<=0 disables takeover). */
+  botTakeoverAfter: Number(process.env.TRM_BOT_TAKEOVER_AFTER ?? 3),
   /** Force-update floor for the mobile app: builds below this are told to update. 0 = off. */
   mobileMinBuild: Number(process.env.MOBILE_MIN_BUILD ?? 0),
 
@@ -121,4 +124,7 @@ export const env = {
   purgeIntervalMs: Number(process.env.PURGE_INTERVAL_MS ?? 60 * 60 * 1000),
   roomLobbyPurgeHours: Number(process.env.ROOM_LOBBY_PURGE_HOURS ?? 24),
   gameLivePurgeHours: Number(process.env.GAME_LIVE_PURGE_HOURS ?? 24 * 7),
+  /** A LIVE game the hub marked inactive (auto-play paused) longer than this is ENDED by the
+   *  sweep via the normal END_GAME path (scored, archived to history) rather than hard-purged. */
+  gamePausedPurgeHours: Number(process.env.GAME_PAUSED_PURGE_HOURS ?? 24),
 } as const;

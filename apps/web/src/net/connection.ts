@@ -59,6 +59,9 @@ export function connectGame(ticket: string, ticketSource?: TicketSource): GameSo
       onCameraMoved: (playerId, view) => useGame.getState().applyCameraMoved(playerId, view),
       onTurnTimer: (playerId, remainingMs, totalMs) =>
         useGame.getState().applyTurnTimer(playerId, remainingMs, totalMs),
+      onGamePaused: (paused, reason) => useGame.getState().applyGamePaused(paused, reason),
+      onSeatControlChanged: (playerId, botControlled) =>
+        useLog.getState().ingestSeatControlChange(playerId, botControlled),
       onSessionReplaced: () => useGame.getState().setSessionReplaced(true),
     },
     defaultWsUrl(),

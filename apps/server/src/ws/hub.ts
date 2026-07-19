@@ -48,8 +48,10 @@ import {
   pongFrame,
   playerConnectionChangedFrame,
   turnTimerFrame,
+  gamePausedFrame,
+  seatControlChangedFrame,
 } from '@trm/codec';
-import type { ChatEntry, ChatContent } from '../persistence/types';
+import type { ChatEntry, ChatContent, MatchOptions } from '../persistence/types';
 
 /** A recorded connection change, anchored to the action count at the moment it happened (not yet
  *  redacted/positioned — `sendHistory` maps `afterActionCount` to a per-recipient event index). */
@@ -63,7 +65,12 @@ interface ConnectionLogRecord {
 export interface PushSink {
   yourTurn(gameId: string, playerId: string): void;
   gameOver(gameId: string, playerIds: string[]): void;
+  /** The game was marked inactive (auto-play paused) — nudge its socketless humans back. */
+  gamePaused?(gameId: string, playerIds: string[]): void;
 }
+
+/** Why a game's per-turn auto-play was suspended. */
+export type PauseReason = 'afk_streak' | 'no_humans_connected';
 
 export interface GameHubOptions {
   verifier?: TicketVerifier;
@@ -81,6 +88,11 @@ export interface GameHubOptions {
    *  a deserted game to completion on its own. Default 5; <=0 disables the streak pause. A lapse
    *  that finds not a single seated human socket connected pauses immediately regardless. */
   autoPlayPauseAfter?: number;
+  /** Consecutive timed-out turns for one player after which — while OTHER humans are still
+   *  connected — their seat is handed to a MEDIUM takeover bot so the table stops waiting a full
+   *  budget every round. The player's own next action or seat (re)bind reclaims the seat. Default
+   *  3; <=0 disables takeover. Never fires in a deserted game (the inactive pause wins there). */
+  botTakeoverAfter?: number;
   /** In-process retries for a transient bot-move persist failure before a delayed re-drive (default 3). */
   botPersistRetries?: number;
   /** Delay between in-process persist retries, ms (default 500; 0 in tests). */
@@ -131,6 +143,7 @@ const DEFAULT_BOT_PERSIST_RETRY_DELAY_MS = 500;
 const DEFAULT_BOT_DRIVER_RESCHEDULE_MS = 15_000;
 const DEFAULT_TURN_TIMEOUT_MS = 75_000;
 const DEFAULT_AUTOPLAY_PAUSE_AFTER = 5;
+const DEFAULT_BOT_TAKEOVER_AFTER = 3;
 
 type BotMoveOutcome = 'moved' | 'noLegalAction' | 'persistFailed';
 
@@ -153,13 +166,19 @@ export class GameHub {
    *  handed the CURRENT remaining time rather than a fresh full budget. */
   private readonly turnDeadlines = new Map<string, { player: string; at: number }>();
   private readonly autoPlayPauseAfter: number;
+  private readonly botTakeoverAfter: number;
   /** gameId → consecutive auto-played (timed-out) human turns since the last real human action
    *  or seat (re)bind. */
   private readonly timeoutStreak = new Map<string, number>();
-  /** Games marked inactive: their humans kept timing out (or none held a live socket), so the
-   *  per-turn auto-play is suspended and the match rests at a human turn until someone returns.
-   *  Bots only ever act on their own turns, so a paused game cannot advance on its own. */
-  private readonly autoPlayPaused = new Set<string>();
+  /** gameId → (playerId → that player's consecutive timed-out turns) — feeds the MEDIUM-bot seat
+   *  takeover; reset by the player's own action or seat (re)bind. */
+  private readonly playerTimeoutStrikes = new Map<string, Map<string, number>>();
+  /** Games marked inactive (→ why): their humans kept timing out (or none held a live socket), so
+   *  the per-turn auto-play is suspended and the match rests at a human turn until someone
+   *  returns. Bots only ever act on their own turns, so a paused game cannot advance on its own. */
+  private readonly autoPlayPaused = new Map<string, PauseReason>();
+  /** gameId → server-side behaviour flags stamped at creation (persisted; recovery restores). */
+  private readonly matchOptions = new Map<string, MatchOptions>();
   private readonly botPersistRetries: number;
   private readonly botPersistRetryDelayMs: number;
   private readonly botDriverRescheduleMs: number;
@@ -204,6 +223,7 @@ export class GameHub {
     this.botMoveDelayMs = options.botMoveDelayMs ?? 600;
     this.turnTimeoutMs = options.turnTimeoutMs ?? DEFAULT_TURN_TIMEOUT_MS;
     this.autoPlayPauseAfter = options.autoPlayPauseAfter ?? DEFAULT_AUTOPLAY_PAUSE_AFTER;
+    this.botTakeoverAfter = options.botTakeoverAfter ?? DEFAULT_BOT_TAKEOVER_AFTER;
     this.botPersistRetries = options.botPersistRetries ?? DEFAULT_BOT_PERSIST_RETRIES;
     this.botPersistRetryDelayMs =
       options.botPersistRetryDelayMs ?? DEFAULT_BOT_PERSIST_RETRY_DELAY_MS;
@@ -218,12 +238,14 @@ export class GameHub {
     board: Board,
     config: GameConfig,
     bots: readonly BotProfile[] = [],
+    options?: MatchOptions,
   ): Promise<Match> {
     this.members.set(gameId, new Map());
     this.chatLog.set(gameId, []);
     this.connectionLog.set(gameId, []);
     const match = this.registry.create(gameId, board, config);
     if (bots.length > 0) this.bots.set(gameId, new Map(bots.map((b) => [b.playerId, b])));
+    if (options && Object.keys(options).length > 0) this.matchOptions.set(gameId, { ...options });
     if (this.store) {
       await this.store.createGame(
         gameId,
@@ -231,6 +253,7 @@ export class GameHub {
         match.session.raw(),
         match.session.digest(),
         bots,
+        options,
       );
     }
     // Bots resolve their initial tickets and play any opening turns immediately.
@@ -290,6 +313,9 @@ export class GameHub {
         ),
       );
     }
+    if (data.matchOptions && !this.matchOptions.has(gameId)) {
+      this.matchOptions.set(gameId, data.matchOptions);
+    }
     // A recovered game may be waiting on a bot — resume the driver.
     void this.driveBots(gameId);
     return match;
@@ -322,7 +348,9 @@ export class GameHub {
     this.clearYourTurnTimer(gameId);
     this.clearTurnTimer(gameId);
     this.timeoutStreak.delete(gameId);
+    this.playerTimeoutStrikes.delete(gameId);
     this.autoPlayPaused.delete(gameId);
+    this.matchOptions.delete(gameId);
     // After removal the bot driver's next registry.get() misses and its loop exits;
     // stragglers' commands take the existing NOT_IN_GAME path.
     this.registry.remove(gameId);
@@ -581,6 +609,7 @@ export class GameHub {
       this.sendHistory(conn, match, null);
       this.sendCachedCamera(conn);
       this.sendTurnTimer(conn, match);
+      this.sendMatchStatus(conn, match);
       return;
     }
 
@@ -614,9 +643,12 @@ export class GameHub {
     conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
     this.members.get(binding.gameId)?.set(binding.playerId, conn);
     this.cancelLeaveCheck(binding.gameId, binding.playerId);
-    // A seated human is (back) in the room: reset the AFK streak, and if the game had been marked
-    // inactive re-arm the per-turn timer. Spectator binds never resume — they cannot act, so
-    // resuming for them would just hand the game back to the bots with no player present.
+    // A seated human is (back) in the room: reset their timeout strikes and the AFK streak,
+    // reclaim their seat from a takeover bot, and if the game had been marked inactive re-arm the
+    // per-turn timer. Spectator binds never resume — they cannot act, so resuming for them would
+    // just hand the game back to the bots with no player present.
+    this.playerTimeoutStrikes.get(binding.gameId)?.delete(binding.playerId);
+    this.reclaimSeat(match, binding.playerId);
     this.resumeAutoPlay(match);
     // Only announce a return if a "left" notice actually fired earlier — a reconnect inside the
     // debounce window (the common reload/blip case) was never announced, so it stays silent.
@@ -629,6 +661,7 @@ export class GameHub {
     this.sendHistory(conn, match, player);
     this.sendCachedCamera(conn);
     this.sendTurnTimer(conn, match);
+    this.sendMatchStatus(conn, match);
   }
 
   private onResync(conn: Connection): void {
@@ -643,6 +676,7 @@ export class GameHub {
       this.sendSnapshot(conn, match);
       this.sendCachedCamera(conn);
       this.sendTurnTimer(conn, match);
+      this.sendMatchStatus(conn, match);
     }
   }
 
@@ -821,7 +855,10 @@ export class GameHub {
         return;
       }
       conn.lastClientSeq = env.clientSeq;
-      // A real human action clears any inactive marking; the broadcast below re-arms the timer.
+      // A real human action clears any inactive marking, resets the player's timeout strikes,
+      // and reclaims their seat from a takeover bot; the broadcast below re-arms the timer.
+      this.playerTimeoutStrikes.get(gameId)?.delete(player as string);
+      this.reclaimSeat(match, player as string, false);
       this.resumeAutoPlay(match, false);
       this.broadcast(match, prep.prepared.events, conn, env.clientSeq);
       this.metrics.commandApplied((performance.now() - startedAt) / 1000);
@@ -1063,18 +1100,49 @@ export class GameHub {
     return false;
   }
 
+  /** Whether a seated human OTHER than `except` holds a live socket (the takeover gate: a bot
+   *  only takes a seat while somebody else is actually waiting on it). */
+  private hasOtherConnectedHuman(gameId: string, except: string): boolean {
+    for (const playerId of this.members.get(gameId)?.keys() ?? []) {
+      if (playerId !== except && !isBotId(playerId)) return true;
+    }
+    return false;
+  }
+
+  /** Fan a cosmetic frame to every member and spectator of a match. */
+  private broadcastCosmetic(match: Match, frame: ReturnType<typeof gamePausedFrame>): void {
+    const gameId = match.session.gameId;
+    for (const conn of this.members.get(gameId)?.values() ?? []) conn.send(frame);
+    for (const conn of this.spectators.get(gameId) ?? []) conn.send(frame);
+  }
+
+  /** Fire-and-forget pausedAt stamp — purge reaps games that stay paused past its threshold. */
+  private stampPaused(gameId: string, at: Date | null): void {
+    const p = this.store?.setPausedAt?.(gameId, at);
+    if (p) void p.catch(() => {});
+  }
+
   /**
    * Mark a game inactive and suspend its per-turn auto-play: its humans kept timing out
    * (`afk_streak`) or none of them held a live socket when the timer lapsed
    * (`no_humans_connected`). The match simply rests at a human turn — bots only act on their own
    * turns, so nothing advances until `resumeAutoPlay` (a seat (re)bind or a real human action).
+   * Clients get a GamePaused frame (banner) and socketless humans a come-back push.
    */
-  private pauseAutoPlay(match: Match, reason: 'afk_streak' | 'no_humans_connected'): void {
+  private pauseAutoPlay(match: Match, reason: PauseReason): void {
     const gameId = match.session.gameId;
     if (!this.autoPlayPaused.has(gameId)) {
-      this.autoPlayPaused.add(gameId);
+      this.autoPlayPaused.set(gameId, reason);
       this.metrics.autoPlayPaused?.(reason);
       this.log.warn(`game ${gameId} marked inactive (${reason}); per-turn auto-play paused`);
+      this.broadcastCosmetic(match, gamePausedFrame(true, reason));
+      this.stampPaused(gameId, new Date());
+      if (this.push?.gamePaused) {
+        const absent = match.session.turnOrder
+          .map((p) => p as string)
+          .filter((p) => !isBotId(p) && !this.members.get(gameId)?.has(p));
+        if (absent.length > 0) this.push.gamePaused(gameId, absent);
+      }
     }
     this.clearTurnTimer(gameId);
     this.broadcastTurnTimer(match, '', 0); // drop any countdown clients were showing
@@ -1087,6 +1155,75 @@ export class GameHub {
     this.timeoutStreak.delete(gameId);
     if (!this.autoPlayPaused.delete(gameId)) return;
     this.log.log(`game ${gameId} is active again; per-turn auto-play resumed`);
+    this.broadcastCosmetic(match, gamePausedFrame(false, ''));
+    this.stampPaused(gameId, null);
+    if (rearm) this.scheduleTurnTimeout(match);
+  }
+
+  /** Hand a (re)connecting client the current pause/seat-control status (cosmetic, like the
+   *  countdown): whether the game is marked inactive, and which seats a takeover bot is playing. */
+  private sendMatchStatus(conn: Connection, match: Match): void {
+    const gameId = match.session.gameId;
+    const reason = this.autoPlayPaused.get(gameId);
+    if (reason) conn.send(gamePausedFrame(true, reason));
+    for (const playerId of this.bots.get(gameId)?.keys() ?? []) {
+      // Room bots (bot: ids) are announced by the roster; only converted human seats are news.
+      if (!isBotId(playerId)) conn.send(seatControlChangedFrame(playerId, true));
+    }
+  }
+
+  /** Persist the (changed) roster + append the durable seat-control record. Best-effort: the
+   *  in-memory roster is authoritative for the live process; recovery re-reads the persisted one. */
+  private persistRoster(match: Match, playerId: string, botControlled: boolean): void {
+    const gameId = match.session.gameId;
+    const roster = [...(this.bots.get(gameId)?.values() ?? [])];
+    const p = this.store?.updateBots?.(gameId, roster, {
+      playerId,
+      botControlled,
+      seq: match.session.stateVersion,
+    });
+    if (p) {
+      void p.catch(() =>
+        this.log.warn(`failed to persist seat-control change for ${playerId} in game ${gameId}`),
+      );
+    }
+  }
+
+  /**
+   * Hand a repeatedly-timing-out seat to a MEDIUM takeover bot (the user-facing contract: takeover
+   * planning always uses the MEDIUM policy, regardless of the room's own bots). The bot's moves go
+   * through the ordinary bot-driver path, so every one of them is a logged, replayable action; the
+   * takeover itself is broadcast to clients and appended to the game doc's seatControlLog.
+   */
+  private takeOverSeat(match: Match, playerId: PlayerId): void {
+    const gameId = match.session.gameId;
+    let roster = this.bots.get(gameId);
+    if (!roster) {
+      roster = new Map();
+      this.bots.set(gameId, roster);
+    }
+    roster.set(playerId as string, { playerId: playerId as string, difficulty: 'MEDIUM' });
+    this.playerTimeoutStrikes.get(gameId)?.delete(playerId as string);
+    this.metrics.seatControlChanged?.('takeover');
+    this.log.warn(
+      `seat ${playerId as string} in game ${gameId} handed to a MEDIUM bot after repeated timeouts`,
+    );
+    this.broadcastCosmetic(match, seatControlChangedFrame(playerId as string, true));
+    this.persistRoster(match, playerId as string, true);
+  }
+
+  /** The player acted or (re)bound their seat — take it back from the takeover bot. No-op unless
+   *  a takeover is actually active for them (room bots never reclaim: they have bot: ids and
+   *  never bind or send commands). */
+  private reclaimSeat(match: Match, playerId: string, rearm = true): void {
+    if (isBotId(playerId)) return;
+    const gameId = match.session.gameId;
+    if (!this.bots.get(gameId)?.delete(playerId)) return;
+    this.metrics.seatControlChanged?.('reclaim');
+    this.log.log(`seat ${playerId} in game ${gameId} reclaimed by its player`);
+    this.broadcastCosmetic(match, seatControlChangedFrame(playerId, false));
+    this.persistRoster(match, playerId, false);
+    // The seat may be the current turn with no timer armed (bot-controlled seats carry none).
     if (rearm) this.scheduleTurnTimeout(match);
   }
 
@@ -1107,10 +1244,13 @@ export class GameHub {
       this.turnTimers.delete(gameId);
     }
     if (this.turnTimeoutMs <= 0) return; // disabled (tests)
+    // A solo room (host + bots) that opted to wait for its human never arms the timer at all.
+    if (this.matchOptions.get(gameId)?.turnTimerDisabled) return;
 
     if (match.session.phase === 'GAME_OVER') {
       // Terminal hygiene — a finished game can never pause or resume again.
       this.timeoutStreak.delete(gameId);
+      this.playerTimeoutStrikes.delete(gameId);
       this.autoPlayPaused.delete(gameId);
     } else if (this.autoPlayPaused.has(gameId)) {
       // Inactive — stay disarmed (and keep client countdowns cleared) until a human returns.
@@ -1121,7 +1261,8 @@ export class GameHub {
     const hadCountdown = this.turnDeadlines.has(gameId);
     this.turnDeadlines.delete(gameId);
     const actor = turnActor(match.session.raw());
-    if (!actor || isBotId(actor as string)) {
+    // No timer for a room bot NOR a seat a takeover bot is playing (the driver moves for both).
+    if (!actor || isBotId(actor as string) || this.bots.get(gameId)?.has(actor as string)) {
       // Nobody human is on the clock — clear any countdown the clients were showing.
       if (hadCountdown) this.broadcastTurnTimer(match, '', 0);
       return;
@@ -1206,8 +1347,25 @@ export class GameHub {
     if (autoPlayed) {
       const streak = (this.timeoutStreak.get(gameId) ?? 0) + 1;
       this.timeoutStreak.set(gameId, streak);
+      let perPlayer = this.playerTimeoutStrikes.get(gameId);
+      if (!perPlayer) {
+        perPlayer = new Map();
+        this.playerTimeoutStrikes.set(gameId, perPlayer);
+      }
+      const strikes = (perPlayer.get(actor as string) ?? 0) + 1;
+      perPlayer.set(actor as string, strikes);
       if (this.autoPlayPauseAfter > 0 && streak >= this.autoPlayPauseAfter) {
         this.pauseAutoPlay(match, 'afk_streak');
+      } else if (
+        this.botTakeoverAfter > 0 &&
+        strikes >= this.botTakeoverAfter &&
+        !this.bots.get(gameId)?.has(actor as string) &&
+        this.hasOtherConnectedHuman(gameId, actor as string)
+      ) {
+        // Other humans are still at the table: hand the habitually timing-out seat to a MEDIUM
+        // bot so they stop waiting a full budget every round. In a deserted game the inactive
+        // pause above wins instead — a takeover there would just make bots play to nobody.
+        this.takeOverSeat(match, actor);
       }
     }
     // The auto-completed turn may now be a bot's — let the driver take over (a paused game still
@@ -1228,7 +1386,8 @@ export class GameHub {
       if (ev.e === 'TURN_STARTED') {
         this.clearYourTurnTimer(gameId); // a new turn supersedes any pending reminder
         const player = ev.player as string;
-        if (isBotId(player)) continue;
+        // No your-turn nudge for room bots or a seat a takeover bot is playing.
+        if (isBotId(player) || this.bots.get(gameId)?.has(player)) continue;
         if (this.members.get(gameId)?.has(player)) continue;
         const timer = setTimeout(() => {
           this.pushTimers.delete(gameId);

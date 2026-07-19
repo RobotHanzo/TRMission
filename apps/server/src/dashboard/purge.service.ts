@@ -7,6 +7,8 @@ import {
   type OnModuleInit,
 } from '@nestjs/common';
 import type { Collection, Db } from 'mongodb';
+import { asPlayerId } from '@trm/shared';
+import { isBotId } from '@trm/bots';
 import { MONGO_DB } from '../db/tokens';
 import { env } from '../config/env';
 import { GameHub } from '../ws/hub';
@@ -23,6 +25,8 @@ export type PurgeTrigger = 'auto' | 'manual';
 export interface PurgeSummary {
   roomsDeleted: number;
   gamesDeleted: number;
+  /** LIVE games that sat paused (inactive) past the threshold and were ENDED (scored+archived). */
+  pausedGamesEnded: number;
   capped: boolean;
 }
 
@@ -204,12 +208,50 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
     return { gamesTerminated, roomsClosed };
   }
 
+  /**
+   * End a LIVE game that sat inactive (auto-play paused) past GAME_PAUSED_PURGE_HOURS. Unlike the
+   * hard purge, this goes through the normal END_GAME path — the game is scored, archived to
+   * matchHistory, and stays replayable; only the room is closed so the seats free up. Falls back
+   * to terminate when ending is impossible (e.g. no human seat, unrecoverable state).
+   */
+  private async endPausedGame(game: GameDoc, terminatedBy: string): Promise<boolean> {
+    const humanSeat = game.config.players.map((p) => p.id).find((id) => !isBotId(id));
+    let ended = false;
+    if (humanSeat) {
+      try {
+        const res = await this.hub.endGame(game._id, asPlayerId(humanSeat));
+        ended = res === 'ended' || res === 'already_ended';
+      } catch {
+        ended = false;
+      }
+    }
+    if (!ended) {
+      await this.terminateIfLive(game._id, terminatedBy, 'auto-purge: game paused too long');
+      return false;
+    }
+    await this.rooms.closeByGameId(game._id);
+    return true;
+  }
+
   async runSweep(trigger: PurgeTrigger, actor?: AuthUser): Promise<PurgeSummary> {
     if (trigger === 'manual' && !actor) throw new Error('manual sweep requires an actor');
     const terminatedBy = trigger === 'auto' ? SYSTEM_ACTOR_ID : actor!.userId;
     const now = Date.now();
     const gameThreshold = new Date(now - env.gameLivePurgeHours * 3_600_000);
     const roomThreshold = new Date(now - env.roomLobbyPurgeHours * 3_600_000);
+    const pausedThreshold = new Date(now - env.gamePausedPurgeHours * 3_600_000);
+
+    // Paused games FIRST: an ended game flips to COMPLETED before the stale-LIVE query below
+    // runs, so the same sweep can never also hard-delete the game it just ended and archived.
+    const pausedGames = await this.games
+      .find({ status: 'LIVE', pausedAt: { $lt: pausedThreshold } })
+      .limit(SWEEP_CAP + 1)
+      .toArray();
+    const pausedCapped = pausedGames.length > SWEEP_CAP;
+    let pausedGamesEnded = 0;
+    for (const g of pausedGames.slice(0, SWEEP_CAP)) {
+      if (await this.endPausedGame(g, terminatedBy)) pausedGamesEnded++;
+    }
 
     const staleGames = await this.games
       .find({ status: 'LIVE', updatedAt: { $lt: gameThreshold } })
@@ -265,19 +307,21 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
       gamesDeleted: Math.min(staleGames.length, SWEEP_CAP),
       roomsDeleted:
         Math.min(staleLobby.length, SWEEP_CAP) + Math.min(staleStarted.length, SWEEP_CAP),
-      capped: gamesCapped || lobbyCapped || startedCapped,
+      pausedGamesEnded,
+      capped: gamesCapped || lobbyCapped || startedCapped || pausedCapped,
     };
     const params = {
       ...summary,
       thresholds: {
         gameLiveHours: env.gameLivePurgeHours,
         roomLobbyHours: env.roomLobbyPurgeHours,
+        gamePausedHours: env.gamePausedPurgeHours,
       },
     };
     if (trigger === 'auto') {
       // An idle auto sweep that changed nothing isn't worth an audit row (it would otherwise
       // stream 0/0 entries on every interval and fill the Purge view's recent-runs table).
-      if (summary.roomsDeleted > 0 || summary.gamesDeleted > 0) {
+      if (summary.roomsDeleted > 0 || summary.gamesDeleted > 0 || summary.pausedGamesEnded > 0) {
         await this.audit.logSystem('purge.run', undefined, params);
       }
     } else {
@@ -292,6 +336,7 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
     intervalMs: number;
     roomLobbyPurgeHours: number;
     gameLivePurgeHours: number;
+    gamePausedPurgeHours: number;
     recentRuns: {
       at: string;
       actorName: string;
@@ -306,6 +351,7 @@ export class PurgeService implements OnModuleInit, OnModuleDestroy {
       intervalMs: env.purgeIntervalMs,
       roomLobbyPurgeHours: env.roomLobbyPurgeHours,
       gameLivePurgeHours: env.gameLivePurgeHours,
+      gamePausedPurgeHours: env.gamePausedPurgeHours,
       recentRuns: entries.map((e) => ({
         at: e.at.toISOString(),
         actorName: e.actorName,

@@ -86,6 +86,10 @@ export function LogPanel() {
         return t('log.playerLeft', { name });
       case 'playerReconnected':
         return t('log.playerReconnected', { name });
+      case 'botTookOver':
+        return t('log.botTookOver', { name });
+      case 'seatReclaimed':
+        return t('log.seatReclaimed', { name });
       case 'turnStarted':
         return t('log.turnStarted', { name });
       case 'routeClaimed':

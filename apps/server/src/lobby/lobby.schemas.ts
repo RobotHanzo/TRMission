@@ -29,6 +29,10 @@ export const GameSettingsSchema = z.object({
   allowSpectating: z.boolean(),
   visibility: z.enum(['PUBLIC', 'INVITE_ONLY']),
   map: MapSelectorSchema,
+  /** Solo rooms (host + bots only): wait for the host instead of running the per-turn timer.
+   *  Only honoured at start when exactly one human is seated — a multi-human room keeps its
+   *  timer regardless of the stored value. */
+  soloWaitForHost: z.boolean(),
 });
 export const UpdateSettingsSchema = GameSettingsSchema.partial();
 

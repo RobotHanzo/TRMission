@@ -26,6 +26,9 @@ export interface MetricsHooks {
    *  (`afk_streak`) or none of them held a live socket at the lapse (`no_humans_connected`). The
    *  game rests at a human turn until a seat (re)bind or a real human action resumes it. */
   autoPlayPaused?(reason: 'afk_streak' | 'no_humans_connected'): void;
+  /** A seat changed hands between its human and the MEDIUM takeover bot (repeated timeouts hand
+   *  it over; the player's own next action or seat (re)bind reclaims it). */
+  seatControlChanged?(kind: 'takeover' | 'reclaim'): void;
   /** An inbound frame threw somewhere unexpected. Should stay at 0; each one is a bug. */
   internalError?(): void;
 }
@@ -42,4 +45,5 @@ export const NOOP_METRICS: MetricsHooks = {
   internalError() {},
   turnTimedOut() {},
   autoPlayPaused() {},
+  seatControlChanged() {},
 };

@@ -22,6 +22,8 @@ export default {
   gameEnded: 'Game over',
   playerLeft: '{{name}} disconnected',
   playerReconnected: '{{name}} reconnected',
+  botTookOver: '{{name}} timed out repeatedly — a bot is playing their seat',
+  seatReclaimed: '{{name}} took back their seat',
   eventAnnounced: 'Forecast: {{event}} incoming',
   eventStarted: '{{event}} started',
   eventEnded: '{{event}} ended',

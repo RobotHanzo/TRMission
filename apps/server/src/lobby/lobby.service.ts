@@ -410,11 +410,17 @@ export class LobbyService {
     const bots: BotProfile[] = room.members
       .filter((m) => m.isBot && m.difficulty)
       .map((m) => ({ playerId: m.userId, difficulty: m.difficulty as BotDifficulty }));
+    // Solo table (the host is the only human): honour "wait for host" — the game never arms the
+    // per-turn timer, so its bots rest until the host acts instead of auto-drawing for them.
+    // Enforced HERE (not just UI-hidden): a multi-human room keeps its timer regardless.
+    const humanCount = room.members.filter((m) => !m.isBot).length;
+    const matchOptions =
+      humanCount === 1 && s.soloWaitForHost ? { turnTimerDisabled: true } : undefined;
 
     if (!(await this.rooms.markStarted(code, user.userId, gameId, seed))) {
       throw new BadRequestException('could not start (already started?)');
     }
-    await this.hub.createMatch(gameId, board, config, bots);
+    await this.hub.createMatch(gameId, board, config, bots, matchOptions);
     // Fire-and-forget (PushService never throws): backgrounded members learn the game began.
     this.push.notifyGameStarted(
       room.members.filter((m) => !m.isBot).map((m) => m.userId),

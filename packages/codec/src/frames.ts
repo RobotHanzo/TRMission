@@ -65,6 +65,25 @@ export const turnTimerFrame = (
   value: { playerId, remainingMs, totalMs },
 });
 
+// The game was marked inactive (per-turn auto-play suspended) or became active again. Cosmetic
+// hub bookkeeping — never part of the authoritative snapshot or action log. reason is
+// "afk_streak" | "no_humans_connected" when paused, "" on resume.
+export const gamePausedFrame = (paused: boolean, reason: string): ServerEvent => ({
+  case: 'gamePaused',
+  value: { paused, reason },
+});
+
+// A seat's control changed hands between its human and a server-side bot (repeated timeouts hand
+// it to a bot; the player's next action or rebind reclaims it). Roster bookkeeping only — the
+// moves themselves are ordinary logged actions.
+export const seatControlChangedFrame = (
+  playerId: string,
+  botControlled: boolean,
+): ServerEvent => ({
+  case: 'seatControlChanged',
+  value: { playerId, botControlled },
+});
+
 export const pongFrame = (nonce: number): ServerEvent => ({ case: 'pong', value: { nonce } });
 
 // Cosmetic hub/session bookkeeping (a seated player's connection was confirmed lost, after a

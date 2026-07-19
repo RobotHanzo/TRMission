@@ -1,10 +1,12 @@
 // Per-turn countdown (issue #13), ported from the web TurnCountdown: a depleting bar + remaining
 // seconds shown above the trackers for whoever is on the clock. Renders nothing when nobody is
 // (bot turn / game over / offline sandbox). Warning-tick + time's-up sounds fire for the local
-// player only, driven inside the shared `useTurnCountdown` hook.
+// player only, driven inside the shared `useTurnCountdown` hook. While the server has the game
+// marked inactive (auto-play suspended) the same slot shows a "game paused" banner instead.
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { useTurnCountdown } from '@trm/client-core/game/turnCountdown';
+import { useGameStore } from '../../store/game';
 import { soundPlayer } from '../../sound/player';
 
 const EMBER = '#ee6b1f';
@@ -18,7 +20,15 @@ const SOUNDS = {
 
 export function TurnCountdown() {
   const { t } = useTranslation();
+  const paused = useGameStore((s) => s.paused);
   const cd = useTurnCountdown(SOUNDS);
+  if (paused) {
+    return (
+      <View testID="game-paused" style={styles.wrap} accessibilityRole="text">
+        <Text style={styles.pausedText}>{t('gamePausedBanner')}</Text>
+      </View>
+    );
+  }
   if (!cd) return null;
 
   const frac = cd.totalMs > 0 ? Math.max(0, Math.min(1, cd.remainingMs / cd.totalMs)) : 0;
@@ -61,6 +71,7 @@ const styles = StyleSheet.create({
     color: '#1f2328',
   },
   secsWarning: { color: DANGER },
+  pausedText: { fontSize: 13, color: 'rgba(31,35,40,0.65)' },
   track: {
     flex: 1,
     height: 6,

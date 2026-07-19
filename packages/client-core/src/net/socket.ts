@@ -52,6 +52,11 @@ export interface SocketHandlers {
   /** The per-turn countdown for the player currently on the clock (issue #13): `remainingMs` until
    *  the server auto-plays for them. `playerId` "" (with 0) clears it (a bot's turn / game over). */
   onTurnTimer?(playerId: string, remainingMs: number, totalMs: number): void;
+  /** The server marked the game inactive (auto-play suspended; `reason` is "afk_streak" |
+   *  "no_humans_connected") or lifted the mark (`paused` false, reason ""). Cosmetic. */
+  onGamePaused?(paused: boolean, reason: string): void;
+  /** A seat's control changed hands between its human and the server's takeover bot. */
+  onSeatControlChanged?(playerId: string, botControlled: boolean): void;
   /** This seat was claimed by another connection; the socket will not auto-reconnect. */
   onSessionReplaced?(): void;
 }
@@ -202,6 +207,15 @@ export class GameSocket {
           env.event.value.playerId,
           env.event.value.remainingMs,
           env.event.value.totalMs,
+        );
+        break;
+      case 'gamePaused':
+        this.handlers.onGamePaused?.(env.event.value.paused, env.event.value.reason);
+        break;
+      case 'seatControlChanged':
+        this.handlers.onSeatControlChanged?.(
+          env.event.value.playerId,
+          env.event.value.botControlled,
         );
         break;
       default:

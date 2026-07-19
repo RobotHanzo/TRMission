@@ -44,10 +44,14 @@ interface GameState {
   actingCamera: ActingCamera | null;
   /** The active per-turn countdown, or null when nobody is on the clock. */
   turnTimer: TurnTimerState | null;
+  /** Set while the server has this game marked inactive (auto-play suspended): reason is
+   *  "afk_streak" | "no_humans_connected". Null when the game is active. Cosmetic. */
+  paused: { reason: string } | null;
   applySnapshot(snapshot: GameSnapshot): void;
   applyEvents(stateVersion: number, events: GameEvent[]): void;
   applyCameraMoved(playerId: string, view: CameraView): void;
   applyTurnTimer(playerId: string, remainingMs: number, totalMs: number): void;
+  applyGamePaused(paused: boolean, reason: string): void;
   setStatus(status: SocketStatus): void;
   setRejection(rejection: RejectionInfo | null): void;
   setSessionReplaced(sessionReplaced: boolean): void;
@@ -63,6 +67,7 @@ const creator: StateCreator<GameState> = (set) => ({
   sessionReplaced: false,
   actingCamera: null,
   turnTimer: null,
+  paused: null,
   // Snapshot is authoritative; ignore any that arrives out of order (older version).
   // A turn handover (current player changed) drops any stale follow-camera so the next
   // actor's framing starts clean rather than snapping to the previous player's last view.
@@ -92,6 +97,7 @@ const creator: StateCreator<GameState> = (set) => ({
         ? { turnTimer: { playerId, deadline: Date.now() + remainingMs, totalMs } }
         : { turnTimer: null },
     ),
+  applyGamePaused: (paused, reason) => set({ paused: paused ? { reason } : null }),
   setStatus: (status) => set({ status }),
   setRejection: (rejection) => set({ rejection }),
   setSessionReplaced: (sessionReplaced) => set({ sessionReplaced }),
@@ -104,6 +110,7 @@ const creator: StateCreator<GameState> = (set) => ({
       sessionReplaced: false,
       actingCamera: null,
       turnTimer: null,
+      paused: null,
     }),
 });
 

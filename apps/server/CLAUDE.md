@@ -228,7 +228,14 @@ demo game on boot), `TRM_BOT_DELAY_MS` (pause between bot moves; `0` in tests),
 `TRM_TURN_TIMEOUT_MS` (per-turn budget before the server auto-plays a default action; `0` disables),
 `TRM_AUTOPLAY_PAUSE_AFTER` (consecutive timed-out human turns before a game is marked inactive and
 auto-play pauses until a human seat (re)binds or acts; a lapse that finds no human socket connected
-at all pauses immediately; default 5, `<=0` disables the streak pause),
+at all pauses immediately; default 5, `<=0` disables the streak pause; clients get a `GamePaused`
+frame + absent humans a come-back push, and the purge sweep ENDS games that stay paused past
+`GAME_PAUSED_PURGE_HOURS` via the normal scored END_GAME path),
+`TRM_BOT_TAKEOVER_AFTER` (consecutive timed-out turns for ONE player before — with other humans
+still connected — their seat is handed to a MEDIUM takeover bot, announced via `SeatControlChanged`
+and recorded on the game doc's `seatControlLog`; the player's next action or rebind reclaims it;
+default 3, `<=0` disables; solo rooms can instead disable the timer entirely via the
+`soloWaitForHost` room setting, stamped as `matchOptions.turnTimerDisabled` on the game),
 `JWT_ACCESS_TTL`, `WS_TICKET_TTL`, `REFRESH_TTL_MS`, `GUEST_TTL_MS`,
 `DASHBOARD_OWNER_EMAILS` (comma list of registered emails granted the `owner` dashboard role at
 every boot; other maintainers are managed from the dashboard itself).

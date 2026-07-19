@@ -29,7 +29,9 @@ export type LogKind =
   | 'eventHiveResolved'
   | 'marketRecycled'
   | 'playerLeft'
-  | 'playerReconnected';
+  | 'playerReconnected'
+  | 'botTookOver'
+  | 'seatReclaimed';
 
 export interface LogDatum {
   kind: LogKind;
@@ -47,6 +49,18 @@ export interface LogEntry extends LogDatum {
 export function connectionLogDatum(playerId: string, connected: boolean): LogDatum {
   return {
     kind: connected ? 'playerReconnected' : 'playerLeft',
+    playerId,
+    data: {},
+    importance: 'alert',
+  };
+}
+
+/** A hub-originated seat-control change: the server handed a repeatedly-timing-out seat to its
+ *  MEDIUM takeover bot, or the player took it back. Same posture as `connectionLogDatum` — hub
+ *  bookkeeping, never an engine event. */
+export function seatControlDatum(playerId: string, botControlled: boolean): LogDatum {
+  return {
+    kind: botControlled ? 'botTookOver' : 'seatReclaimed',
     playerId,
     data: {},
     importance: 'alert',

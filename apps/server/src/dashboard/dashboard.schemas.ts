@@ -318,6 +318,8 @@ export const AuditListSchema = z.object({
 export const PurgeRunResultSchema = z.object({
   roomsDeleted: z.number(),
   gamesDeleted: z.number(),
+  /** LIVE games that sat paused (inactive) past the threshold and were ENDED (scored+archived). */
+  pausedGamesEnded: z.number(),
   capped: z.boolean(),
 });
 
@@ -326,6 +328,7 @@ export const PurgeStatusSchema = z.object({
   intervalMs: z.number(),
   roomLobbyPurgeHours: z.number(),
   gameLivePurgeHours: z.number(),
+  gamePausedPurgeHours: z.number(),
   recentRuns: z.array(
     z.object({
       at: z.string(),

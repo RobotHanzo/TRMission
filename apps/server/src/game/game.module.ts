@@ -52,11 +52,13 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
           botMoveDelayMs: env.botMoveDelayMs,
           turnTimeoutMs: env.turnTimeoutMs,
           autoPlayPauseAfter: env.autoPlayPauseAfter,
+          botTakeoverAfter: env.botTakeoverAfter,
           boardResolver: makeBoardResolver(mapContents),
           // The hub stays framework-free: adapt the Nest service into the plain sink.
           push: {
             yourTurn: (gameId, playerId) => push.notifyYourTurn(gameId, playerId),
             gameOver: (gameId, playerIds) => push.notifyGameOver(gameId, playerIds),
+            gamePaused: (gameId, playerIds) => push.notifyGamePaused(gameId, playerIds),
           },
           yourTurnDelayMs: env.pushYourTurnDelayMs,
         }),

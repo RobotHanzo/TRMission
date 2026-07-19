@@ -21,6 +21,8 @@ export default {
   gameEnded: '遊戲結束',
   playerLeft: '{{name}} 已離線',
   playerReconnected: '{{name}} 已重新連線',
+  botTookOver: '{{name}} 多次逾時，改由電腦代打',
+  seatReclaimed: '{{name}} 已回來接手自己的座位',
   eventAnnounced: '預報：{{event}} 即將來臨',
   eventStarted: '{{event}} 開始',
   eventEnded: '{{event}} 結束',

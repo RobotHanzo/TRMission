@@ -34,7 +34,65 @@ describe('lobby: per-game settings', () => {
       allowSpectating: true,
       visibility: 'INVITE_ONLY',
       map: { source: 'official', mapId: 'taiwan' },
+      soloWaitForHost: true,
     });
+  });
+
+  it('a solo room (host + bot) starting with soloWaitForHost stamps turnTimerDisabled on the game', async () => {
+    const a = await guest('Solo');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server())
+      .post(`/api/v1/rooms/${code}/bots`)
+      .set(auth(a.token))
+      .send({ difficulty: 'EASY' })
+      .expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ready`)
+      .set(auth(a.token))
+      .send({ ready: true })
+      .expect(200);
+    const started = await request(server())
+      .post(`/api/v1/rooms/${code}/start`)
+      .set(auth(a.token))
+      .expect(200);
+
+    // The default-on solo setting reached the persisted game (recovery restores it from here).
+    const doc = await t.db
+      .collection('games')
+      .findOne({ _id: started.body.gameId } as never, { projection: { matchOptions: 1 } });
+    expect(doc?.matchOptions).toEqual({ turnTimerDisabled: true });
+  });
+
+  it('a multi-human room keeps its turn timer even with soloWaitForHost stored on', async () => {
+    const a = await guest('H2H-A');
+    const b = await guest('H2H-B');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    for (const u of [a, b]) {
+      await request(server())
+        .post(`/api/v1/rooms/${code}/ready`)
+        .set(auth(u.token))
+        .send({ ready: true })
+        .expect(200);
+    }
+    const started = await request(server())
+      .post(`/api/v1/rooms/${code}/start`)
+      .set(auth(a.token))
+      .expect(200);
+    const doc = await t.db
+      .collection('games')
+      .findOne({ _id: started.body.gameId } as never, { projection: { matchOptions: 1 } });
+    expect(doc?.matchOptions).toBeUndefined();
   });
 
   it('lets only the host update settings, only while in LOBBY', async () => {

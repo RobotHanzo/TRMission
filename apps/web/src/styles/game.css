@@ -814,6 +814,11 @@
   background: var(--tr-ember);
   transition: transform 200ms linear;
 }
+/* The server marked the game inactive — the countdown slot shows a paused banner instead. */
+.turn-countdown.is-paused {
+  color: var(--tr-ink-soft);
+  font-size: 0.85rem;
+}
 .turn-countdown.is-warning {
   border-color: var(--tr-danger);
 }

@@ -444,6 +444,22 @@ export function RoomScreen() {
               />
             </div>
           )}
+          {room.members.filter((m) => !m.isBot).length === 1 && (
+            // Only meaningful (and only shown) while the host is the lone human at the table:
+            // the started game then waits for them instead of running the per-turn timer.
+            <div className="row between setting-row">
+              <span>
+                <strong>{t('settingSoloWaitForHost')}</strong>
+                <br />
+                <span className="muted">{t('settingSoloWaitForHostDesc')}</span>
+              </span>
+              <Switch
+                checked={settings.soloWaitForHost}
+                onChange={(next) => setSetting({ soloWaitForHost: next })}
+                label={t('settingSoloWaitForHost')}
+              />
+            </div>
+          )}
           <div className="row between setting-row">
             <span>
               <strong>{t('allowSpectating')}</strong>

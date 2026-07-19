@@ -27,6 +27,10 @@ export interface RoomSettings {
   allowSpectating: boolean;
   visibility: RoomVisibility;
   map: MapSelector;
+  /** Solo rooms (host + bots only): wait for the host instead of running the per-turn timer —
+   *  the started game never arms it, so bots simply rest until the host acts. Only honoured at
+   *  start when exactly one human is seated. Default on. */
+  soloWaitForHost: boolean;
 }
 
 export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
@@ -38,6 +42,7 @@ export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   allowSpectating: true,
   visibility: 'INVITE_ONLY',
   map: { source: 'official', mapId: 'taiwan' },
+  soloWaitForHost: true,
 };
 
 export interface RoomMember {

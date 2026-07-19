@@ -478,6 +478,21 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
             }
           />
         )}
+        {room.members.filter((m) => !m.isBot).length === 1 && (
+          // Only meaningful (and only shown) while the host is the lone human at the table:
+          // the started game then waits for them instead of running the per-turn timer.
+          <SettingRow
+            label={t('room.settingSoloWaitForHost')}
+            desc={t('room.settingSoloWaitForHostDesc')}
+            control={
+              <Switch
+                value={settings.soloWaitForHost}
+                disabled={settingsLocked}
+                onValueChange={(next) => setSetting({ soloWaitForHost: next })}
+              />
+            }
+          />
+        )}
         <SettingRow
           label={t('room.allowSpectating')}
           control={

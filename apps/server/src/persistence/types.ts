@@ -16,6 +16,22 @@ export interface StoredConfig {
   shuffleTurnOrder?: boolean;
 }
 
+/** Server-side per-match behaviour flags (never engine rule params — the engine stays unaware). */
+export interface MatchOptions {
+  /** Solo room (host + bots only) opted to wait for its human: the per-turn timer is never armed,
+   *  so the game simply rests until the host acts. */
+  turnTimerDisabled?: boolean;
+}
+
+/** One durable seat-control change: the server handed a repeatedly-timing-out seat to a bot, or
+ *  the player took it back. `seq` anchors it to the action log position where it happened. */
+export interface SeatControlEntry {
+  playerId: string;
+  botControlled: boolean;
+  seq: number;
+  at: Date;
+}
+
 export interface GameDoc {
   _id: string; // gameId
   seed: string | number;
@@ -29,10 +45,18 @@ export interface GameDoc {
   terminatedAt?: Date;
   terminatedBy?: string; // maintainer userId
   terminatedReason?: string;
-  /** Bot players in this game (so the driver resumes them after crash recovery). */
+  /** Bot players in this game (so the driver resumes them after crash recovery). Includes seats
+   *  the server handed to a takeover bot — their entries carry the HUMAN playerId. */
   bots?: BotProfile[];
   /** userIds who ever spectated (never seated players); grants history/replay access. */
   spectators?: string[];
+  /** Server-side behaviour flags stamped at creation (recovery restores them). */
+  matchOptions?: MatchOptions;
+  /** Set while the hub has this game marked inactive (auto-play paused); cleared on resume.
+   *  The purge sweep ends games that stay paused past GAME_PAUSED_PURGE_HOURS. */
+  pausedAt?: Date;
+  /** Durable audit of seat-control changes (bot takeover after repeated timeouts / reclaim). */
+  seatControlLog?: SeatControlEntry[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -87,6 +111,8 @@ export interface RecoveryData {
    *  run — the persisted `GameState` is the engine's own shape, and an older major's shape can be
    *  missing fields the current reducer dereferences. `undefined` = predates the stamp. */
   engineVersion: number | undefined;
+  /** Server-side behaviour flags stamped at creation (absent on older docs). */
+  matchOptions?: MatchOptions;
 }
 
 /** Who may fetch a finished game's replay: members only, or anyone holding the link. */
@@ -117,7 +143,18 @@ export interface GameStorePort {
     genesisState: GameState,
     genesisDigest: string,
     bots?: readonly BotProfile[],
+    options?: MatchOptions,
   ): Promise<void>;
+  /** Replace the persisted bot roster (seat takeover/reclaim), appending the change to the
+   *  durable seatControlLog when given. Optional — in-memory fakes may omit it. */
+  updateBots?(
+    gameId: string,
+    bots: readonly BotProfile[],
+    change?: { playerId: string; botControlled: boolean; seq: number },
+  ): Promise<void>;
+  /** Stamp (or clear, with null) the hub's inactive marking so the purge sweep can reap games
+   *  that stay paused. Optional — in-memory fakes may omit it. */
+  setPausedAt?(gameId: string, at: Date | null): Promise<void>;
   appendAction(
     gameId: string,
     seq: number,

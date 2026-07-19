@@ -17,6 +17,7 @@ export class MetricsService implements MetricsHooks {
   private readonly internalErrors: Counter;
   private readonly turnTimeouts: Counter;
   private readonly autoPlayPauses: Counter<'reason'>;
+  private readonly seatControlChanges: Counter<'kind'>;
   private readonly roomsPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly gamesPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly pushesSent: Counter<'kind'>;
@@ -78,6 +79,12 @@ export class MetricsService implements MetricsHooks {
       labelNames: ['reason'],
       registers: [this.registry],
     });
+    this.seatControlChanges = new Counter({
+      name: 'trm_seat_control_changed_total',
+      help: 'Seats handed to (takeover) or taken back from (reclaim) the MEDIUM timeout bot',
+      labelNames: ['kind'],
+      registers: [this.registry],
+    });
     this.roomsPurged = new Counter({
       name: 'trm_rooms_purged_total',
       help: 'Rooms deleted, by trigger and prior status',
@@ -136,6 +143,9 @@ export class MetricsService implements MetricsHooks {
   }
   autoPlayPaused(reason: 'afk_streak' | 'no_humans_connected'): void {
     this.autoPlayPauses.inc({ reason });
+  }
+  seatControlChanged(kind: 'takeover' | 'reclaim'): void {
+    this.seatControlChanges.inc({ kind });
   }
   roomPurged(trigger: 'auto' | 'manual', priorStatus: string): void {
     this.roomsPurged.inc({ trigger, priorStatus });

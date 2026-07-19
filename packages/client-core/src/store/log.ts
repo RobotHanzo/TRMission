@@ -4,6 +4,7 @@ import type { GameEvent } from '@trm/proto';
 import {
   connectionLogDatum,
   entriesFromEvents,
+  seatControlDatum,
   type LogDatum,
   type LogEntry,
 } from '../game/logModel';
@@ -24,6 +25,7 @@ interface LogState {
   ingestLive(events: GameEvent[]): void;
   ingestHistory(events: GameEvent[], connectionLog?: ConnectionLogBackfillEntry[]): void;
   ingestConnectionChange(playerId: string, connected: boolean): void;
+  ingestSeatControlChange(playerId: string, botControlled: boolean): void;
   reset(): void;
 }
 
@@ -42,6 +44,11 @@ const creator: StateCreator<LogState> = (set) => ({
   ingestConnectionChange: (playerId, connected) =>
     set((s) => {
       const entries = [...s.entries, { id: s.nextId, ...connectionLogDatum(playerId, connected) }];
+      return { entries: entries.slice(-CAP), nextId: s.nextId + 1 };
+    }),
+  ingestSeatControlChange: (playerId, botControlled) =>
+    set((s) => {
+      const entries = [...s.entries, { id: s.nextId, ...seatControlDatum(playerId, botControlled) }];
       return { entries: entries.slice(-CAP), nextId: s.nextId + 1 };
     }),
   // History is the server's COMPLETE backfill, re-sent on every (re)connect and always

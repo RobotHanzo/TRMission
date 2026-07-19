@@ -9,6 +9,8 @@ export default {
   yourTurn: 'Your turn',
   gameOver: 'Game over',
   turnTimeRemaining: '{{seconds}}s left',
+  gamePausedBanner: 'Game paused — waiting for players',
+  gamePausedHint: 'It resumes when you act or reconnect',
   sessionReplacedTitle: 'Disconnected elsewhere',
   sessionReplacedAck: 'Back to home',
 

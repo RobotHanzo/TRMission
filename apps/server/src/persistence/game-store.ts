@@ -19,6 +19,8 @@ import {
   type GameChatDoc,
   type ChatEntry,
   type ChatContent,
+  type MatchOptions,
+  type SeatControlEntry,
 } from './types';
 
 /** Write a full checkpoint snapshot every N actions (also at game over). */
@@ -64,6 +66,7 @@ export class MongoGameStore implements GameStorePort {
     genesisState: GameState,
     genesisDigest: string,
     bots: readonly BotProfile[] = [],
+    options?: MatchOptions,
   ): Promise<void> {
     const now = new Date();
     await this.games.insertOne({
@@ -76,6 +79,7 @@ export class MongoGameStore implements GameStorePort {
       status: 'LIVE',
       currentSeq: 0,
       ...(bots.length > 0 ? { bots: bots.map((b) => ({ ...b })) } : {}),
+      ...(options && Object.keys(options).length > 0 ? { matchOptions: { ...options } } : {}),
       createdAt: now,
       updatedAt: now,
     });
@@ -151,6 +155,31 @@ export class MongoGameStore implements GameStorePort {
     );
   }
 
+  async updateBots(
+    gameId: string,
+    bots: readonly BotProfile[],
+    change?: { playerId: string; botControlled: boolean; seq: number },
+  ): Promise<void> {
+    const entry: SeatControlEntry | undefined = change ? { ...change, at: new Date() } : undefined;
+    await this.games.updateOne(
+      { _id: gameId },
+      {
+        $set: { bots: bots.map((b) => ({ ...b })) },
+        ...(entry ? { $push: { seatControlLog: entry } } : {}),
+      },
+      { writeConcern: { w: 'majority' } },
+    );
+  }
+
+  // Deliberately does NOT touch updatedAt: a paused game's activity clock stays frozen, so the
+  // regular stale-LIVE sweep still applies on top of the (shorter) paused threshold.
+  async setPausedAt(gameId: string, at: Date | null): Promise<void> {
+    await this.games.updateOne(
+      { _id: gameId },
+      at ? { $set: { pausedAt: at } } : { $unset: { pausedAt: '' } },
+    );
+  }
+
   async getStatus(gameId: string): Promise<GameDoc['status'] | undefined> {
     const game = await this.games.findOne({ _id: gameId }, { projection: { status: 1 } });
     return game?.status;
@@ -209,6 +238,7 @@ export class MongoGameStore implements GameStorePort {
       preSnapshotActions,
       bots: game.bots ?? [],
       engineVersion: game.engineVersion,
+      ...(game.matchOptions ? { matchOptions: game.matchOptions } : {}),
     };
   }
 }

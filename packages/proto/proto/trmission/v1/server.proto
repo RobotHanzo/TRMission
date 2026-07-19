@@ -306,6 +306,25 @@ message TurnTimer {
   uint32 total_ms = 3;     // the full per-turn budget, for rendering a full bar
 }
 
+// The server marked this game inactive and suspended its per-turn auto-play (its humans kept
+// timing out, or none of them held a live socket when the turn timer lapsed), or lifted that
+// mark. Cosmetic hub bookkeeping — never an engine action, never part of the deterministic
+// action log or stateDigest. reason is "afk_streak" | "no_humans_connected" when paused, "" on
+// resume.
+message GamePaused {
+  bool paused = 1;
+  string reason = 2;
+}
+
+// A seat's control changed hands between its human and a server-side bot: after repeated
+// timed-out turns the server hands the seat to a MEDIUM bot (bot_controlled = true); the
+// player's own next action or reconnect reclaims it (false). Roster bookkeeping — the moves the
+// bot makes are ordinary logged actions; this frame only announces who is planning them.
+message SeatControlChanged {
+  string player_id = 1;
+  bool bot_controlled = 2;
+}
+
 message Pong {
   uint32 nonce = 1;
 }
@@ -326,5 +345,7 @@ message ServerEnvelope {
     HistoryReplay history = 10;
     PlayerConnectionChanged player_connection_changed = 11;
     TurnTimer turn_timer = 12;
+    GamePaused game_paused = 13;
+    SeatControlChanged seat_control_changed = 14;
   }
 }

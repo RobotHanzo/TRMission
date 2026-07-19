@@ -8,6 +8,8 @@ export default {
   yourTurn: '輪到你了',
   gameOver: '遊戲結束',
   turnTimeRemaining: '剩餘 {{seconds}} 秒',
+  gamePausedBanner: '對局已暫停，等待玩家回來',
+  gamePausedHint: '你行動或重新連線後即恢復',
   sessionReplacedTitle: '連線已在別處建立',
   sessionReplacedAck: '返回首頁',
 

@@ -268,8 +268,10 @@ describe('purge sweep + status', () => {
     expect(typeof res.body.intervalMs).toBe('number');
     expect(typeof res.body.roomLobbyPurgeHours).toBe('number');
     expect(typeof res.body.gameLivePurgeHours).toBe('number');
+    expect(typeof res.body.gamePausedPurgeHours).toBe('number');
     expect(Array.isArray(res.body.recentRuns)).toBe(true);
   });
+
 
   it(
     'purges a stale LOBBY room, a stale LIVE game (closing but not deleting its room), and a ' +
@@ -377,5 +379,30 @@ describe('purge sweep + status', () => {
       .collection('rooms')
       .countDocuments({ _id: { $regex: /^CAP/ } } as never);
     expect(remaining).toBe(1);
+  }, 30_000);
+
+  // Runs LAST in this describe: earlier tests pin exact purge.run audit counts, and this one
+  // triggers an extra manual sweep.
+  it('ends (scores + archives) a LIVE game that stayed paused past the threshold, closing its room', async () => {
+    const paused = await startGame('PG-H', 'PG-M');
+    // Simulate the hub having marked it inactive long ago (the stamp the hub writes on pause).
+    await t.db.collection('games').updateOne({ _id: paused.gameId } as never, {
+      $set: { pausedAt: new Date(Date.now() - 48 * 3_600_000) },
+    });
+
+    const res = await request(server())
+      .post('/api/v1/dashboard/purge/run')
+      .set(auth(admin.token))
+      .expect(200);
+    expect(res.body.pausedGamesEnded).toBe(1);
+
+    // Ended via the normal END_GAME path — scored + archived, never hard-deleted.
+    const game = await t.db.collection('games').findOne({ _id: paused.gameId } as never);
+    expect(game?.status).toBe('COMPLETED');
+    const room = await t.db.collection('rooms').findOne({ _id: paused.code } as never);
+    expect(room?.status).toBe('CLOSED');
+    expect(
+      await t.db.collection('matchHistory').findOne({ _id: paused.gameId } as never),
+    ).not.toBeNull();
   }, 30_000);
 });

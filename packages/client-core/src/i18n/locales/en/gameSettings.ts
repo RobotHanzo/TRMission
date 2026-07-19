@@ -20,6 +20,9 @@ export default {
     'When on, only one of each pair of parallel routes can be claimed in a 2–3 player game; turn off to allow both to be claimed.',
   settingRandomEvents: 'Random events',
   settingRandomEventsDesc: 'Typhoon-warning inspired events: closures, bonuses and surprises',
+  settingSoloWaitForHost: 'Wait for me (solo room)',
+  settingSoloWaitForHostDesc:
+    'With only you and bots in the room, the game waits for you — no turn countdown, no auto-draw.',
   allowSpectating: 'Allow spectating',
   roomVisibility: 'Room visibility',
   visibility_PUBLIC: 'Public',

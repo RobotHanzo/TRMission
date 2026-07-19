@@ -5,7 +5,7 @@ import { MetricsService } from '../observability/metrics.service';
 import { DeviceRepo } from './device.repo';
 import { PUSH_TRANSPORTS, type PushMessage, type PushTransport } from './push.transports';
 
-export type PushKind = 'your_turn' | 'game_started' | 'game_over';
+export type PushKind = 'your_turn' | 'game_started' | 'game_over' | 'game_paused';
 
 type PushLocale = 'zh-Hant' | 'en';
 
@@ -21,6 +21,10 @@ const STRINGS: Record<PushKind, Record<PushLocale, { title: string; body: string
   game_over: {
     'zh-Hant': { title: '台鐵任務', body: '對局結束了，來看看結果吧！' },
     en: { title: 'TRMission', body: 'The game is over — see the results!' },
+  },
+  game_paused: {
+    'zh-Hant': { title: '台鐵任務', body: '對局暫停中，等你回來繼續！' },
+    en: { title: 'TRMission', body: 'Your game is paused — come back to resume!' },
   },
 };
 
@@ -55,6 +59,10 @@ export class PushService {
 
   notifyGameOver(gameId: string, userIds: string[]): void {
     void this.notify(userIds, 'game_over', { gameId });
+  }
+
+  notifyGamePaused(gameId: string, userIds: string[]): void {
+    void this.notify(userIds, 'game_paused', { gameId });
   }
 
   /** Awaitable core (tests await it; the wrappers above are the fire-and-forget seams). */

@@ -44,6 +44,31 @@ describe('GameSocket history dispatch', () => {
     });
     expect(onTurnTimer).toHaveBeenCalledWith('p2', 60000, 75000);
   });
+
+  it('routes GamePaused frames to onGamePaused (pause and resume)', () => {
+    const onGamePaused = vi.fn();
+    const socket = new GameSocket('tkt', { onGamePaused }, 'ws://x');
+    deliver(socket, {
+      serverSeq: 3,
+      event: { case: 'gamePaused', value: { paused: true, reason: 'afk_streak' } },
+    });
+    deliver(socket, {
+      serverSeq: 4,
+      event: { case: 'gamePaused', value: { paused: false, reason: '' } },
+    });
+    expect(onGamePaused).toHaveBeenNthCalledWith(1, true, 'afk_streak');
+    expect(onGamePaused).toHaveBeenNthCalledWith(2, false, '');
+  });
+
+  it('routes a SeatControlChanged frame to onSeatControlChanged', () => {
+    const onSeatControlChanged = vi.fn();
+    const socket = new GameSocket('tkt', { onSeatControlChanged }, 'ws://x');
+    deliver(socket, {
+      serverSeq: 5,
+      event: { case: 'seatControlChanged', value: { playerId: 'p3', botControlled: true } },
+    });
+    expect(onSeatControlChanged).toHaveBeenCalledWith('p3', true);
+  });
 });
 
 class FakeWebSocket {

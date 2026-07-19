@@ -80,6 +80,8 @@ export interface RoomSettings {
   visibility: RoomVisibility;
   map: MapSelector;
   eventsMode: EventsMode;
+  /** Solo rooms (host + bots only): wait for the host instead of running the per-turn timer. */
+  soloWaitForHost: boolean;
 }
 export interface RoomChatEntry {
   userId: string;
