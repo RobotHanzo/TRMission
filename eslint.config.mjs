@@ -24,6 +24,8 @@ export default tseslint.config(
       'tooling/tsc7/bin/**',
       // brand-asset generator (plain node script, run manually; see apps/mobile/assets/*.png).
       'apps/mobile/scripts/gen-brand-assets.js',
+      // plain CommonJS node script run by the `web` package.json script (not app code).
+      'apps/mobile/scripts/setup-web.js',
     ],
   },
   eslint.configs.recommended,

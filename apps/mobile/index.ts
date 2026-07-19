@@ -3,6 +3,9 @@
 import '@expo/metro-runtime';
 import './src/shims';
 import { Platform } from 'react-native';
+import type * as SkiaWebModule from '@shopify/react-native-skia/lib/module/web';
+import type * as ExpoModule from 'expo';
+import type * as AppModule from './App';
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 if (Platform.OS === 'web') {
@@ -12,16 +15,17 @@ if (Platform.OS === 'web') {
   // serve dynamic import() from this entry). canvaskit.wasm is served from public/ (copied
   // there by scripts/setup-web.js).
   require('./src/web/alertShim'); // RNW's Alert is a no-op; map it onto window.confirm/alert
-  const { LoadSkiaWeb } =
-    require('@shopify/react-native-skia/lib/module/web') as typeof import('@shopify/react-native-skia/lib/module/web');
+  const { LoadSkiaWeb } = require(
+    '@shopify/react-native-skia/lib/module/web',
+  ) as typeof SkiaWebModule;
   void LoadSkiaWeb({ locateFile: (file: string) => `/${file}` }).then(() => {
-    const { registerRootComponent } = require('expo') as typeof import('expo');
-    const App = (require('./App') as typeof import('./App')).default;
+    const { registerRootComponent } = require('expo') as typeof ExpoModule;
+    const App = (require('./App') as typeof AppModule).default;
     registerRootComponent(App);
   });
 } else {
-  const { registerRootComponent } = require('expo') as typeof import('expo');
-  const App = (require('./App') as typeof import('./App')).default;
+  const { registerRootComponent } = require('expo') as typeof ExpoModule;
+  const App = (require('./App') as typeof AppModule).default;
   registerRootComponent(App);
 }
 /* eslint-enable @typescript-eslint/no-require-imports */
