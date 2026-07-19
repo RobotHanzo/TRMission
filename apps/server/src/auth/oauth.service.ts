@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { createHash, randomBytes } from 'node:crypto';
 import { AuthConfig, type IdentityProvider, type OauthProvider } from './auth-config';
 import { TokenService } from './token.service';
@@ -71,6 +71,8 @@ export type CallbackResult =
 
 @Injectable()
 export class OauthService {
+  private readonly log = new Logger('OauthService');
+
   constructor(
     private readonly authConfig: AuthConfig,
     private readonly tokens: TokenService,
@@ -175,7 +177,8 @@ export class OauthService {
         this.authConfig.callbackUrl(provider),
         payload.codeVerifier,
       );
-    } catch {
+    } catch (e) {
+      this.log.warn(`${provider} code exchange failed: ${(e as Error).message}`);
       return { ok: false, error: 'exchange_failed', redirect, mobile };
     }
     if (!profile.email || !profile.emailVerified || !profile.sub) {
@@ -268,13 +271,15 @@ export class OauthService {
     let idToken: string;
     try {
       ({ idToken } = await this.appleRedirect.exchangeCode(code));
-    } catch {
+    } catch (e) {
+      this.log.warn(`apple code exchange failed: ${(e as Error).message}`);
       return { ok: false, error: 'exchange_failed', redirect, mobile };
     }
     let profile;
     try {
       profile = await this.appleVerifier.verify(idToken, this.authConfig.appleAudiences());
-    } catch {
+    } catch (e) {
+      this.log.warn(`apple id_token verification failed: ${(e as Error).message}`);
       return { ok: false, error: 'invalid_credential', redirect, mobile };
     }
     if (!profile.email || !profile.emailVerified || !profile.sub) {

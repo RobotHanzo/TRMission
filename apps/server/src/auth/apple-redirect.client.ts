@@ -27,6 +27,9 @@ export class FetchAppleRedirectClient implements AppleRedirectClient {
   async exchangeCode(code: string): Promise<{ idToken: string }> {
     const clientId = this.authConfig.appleServicesId;
     if (!clientId || !appleSecretConfigured()) {
+      this.log.warn(
+        'apple redirect flow not configured (missing APPLE_SERVICES_ID / APPLE_TEAM_ID / APPLE_KEY_ID / APPLE_PRIVATE_KEY)',
+      );
       throw new Error('apple redirect flow not configured');
     }
     const secret = await mintAppleClientSecret(clientId);
@@ -42,11 +45,15 @@ export class FetchAppleRedirectClient implements AppleRedirectClient {
       }),
     });
     if (!res.ok) {
-      this.log.warn(`apple code exchange failed: ${res.status}`);
+      const body = await res.text().catch(() => '<unreadable body>');
+      this.log.warn(`apple code exchange failed: ${res.status} ${body}`);
       throw new Error(`apple exchange failed: ${res.status}`);
     }
     const tokens = (await res.json()) as { id_token?: string };
-    if (!tokens.id_token) throw new Error('apple exchange returned no id_token');
+    if (!tokens.id_token) {
+      this.log.warn('apple exchange response had no id_token');
+      throw new Error('apple exchange returned no id_token');
+    }
     return { idToken: tokens.id_token };
   }
 }
