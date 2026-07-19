@@ -49,12 +49,21 @@ jobs:
 
       # BUILD_NUMBER is versionCode/CFBundleVersion (docs/release/mobile-versioning.md): only a
       # `v<semver>+<build>` tag carries a real one — branch pushes stay at the dev fallback (1) and
-      # are never published to Play (see the publish step's `if:` below).
+      # are never published to Play (see the publish step's `if:` below). A tag push that DOESN'T
+      # match must fail loudly here rather than silently fall back to 1: versionCode 1 is always
+      # already taken (the mandatory manual bootstrap upload, docs/release/play-console-setup.md
+      # Step 5, consumes it), so a silent fallback just wastes a full ~30min build before Play's
+      # upload step rejects it with "Version code 1 has already been used".
       - name: Derive BUILD_NUMBER from the release tag
         id: build_number
         run: |
-          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$ ]]; then
-            echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            if [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$ ]]; then
+              echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::Tag '$GITHUB_REF_NAME' doesn't match v<semver>+<build> (e.g. v1.0.0+1) — refusing to build/publish with the dev fallback BUILD_NUMBER=1, which Play will reject as already used. Re-tag as v<semver>+<build>."
+              exit 1
+            fi
           else
             echo "value=1" >> "$GITHUB_OUTPUT"
           fi

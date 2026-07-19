@@ -39,11 +39,18 @@ jobs:
       # CFBundleVersion in lockstep with versionCode so a `v<semver>+<build>` tag ships one build
       # number to both stores. Branch pushes stay at the fallback (1); TestFlight will reject a
       # second upload at the same build number, so don't tag-push twice without bumping +<build>.
+      # A tag push that doesn't match the pattern must fail loudly rather than silently build with
+      # the fallback — see mobile-android.yml's identical guard for why.
       - name: Derive BUILD_NUMBER from the release tag
         id: build_number
         run: |
-          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$ ]]; then
-            echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            if [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$ ]]; then
+              echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::Tag '$GITHUB_REF_NAME' doesn't match v<semver>+<build> (e.g. v1.0.0+1) — refusing to build/publish with the dev fallback BUILD_NUMBER=1. Re-tag as v<semver>+<build>."
+              exit 1
+            fi
           else
             echo "value=1" >> "$GITHUB_OUTPUT"
           fi
