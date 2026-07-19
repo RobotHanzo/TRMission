@@ -17,8 +17,10 @@ const googleIosUrlScheme =
   process.env.TRM_GOOGLE_IOS_URL_SCHEME ?? 'com.googleusercontent.apps.placeholder';
 
 // One source for the production origin: the deep-link hosts (associated domains / App Links) and
-// the app's API base derive from the same env var so they can never drift apart.
-const serverOrigin = process.env.TRM_SERVER_ORIGIN ?? 'https://trmission.robothanzo.dev';
+// the app's API base derive from the same env var so they can never drift apart. `||` (not `??`):
+// an unset repo variable reaches CI as `''`, not undefined (`${{ vars.TRM_SERVER_ORIGIN }}`), and
+// an empty string is never a legitimate origin.
+const serverOrigin = process.env.TRM_SERVER_ORIGIN || 'https://trmission.robothanzo.dev';
 const serverHost = new URL(serverOrigin).hostname;
 
 const config: ExpoConfig = {
