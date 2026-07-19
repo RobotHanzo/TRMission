@@ -123,10 +123,11 @@ export type AdminTransferHostResult = RoomDoc | 'not_found' | 'started' | 'inval
 export type CloseRoomResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 
 /** A public-listing row: for a STARTED room, `game` carries the linked game's version stamps
- *  (0 or 1 elements — `gameId` is unique) so the caller can filter out rooms whose map/engine
- *  version is no longer resolvable. Absent for LOBBY rooms, which have no game yet. */
+ *  and status (0 or 1 elements — `gameId` is unique) so the caller can filter out rooms whose
+ *  map/engine version is no longer resolvable, or whose game already ended. Absent for LOBBY
+ *  rooms, which have no game yet. */
 export interface PublicRoomDoc extends RoomDoc {
-  game?: Pick<GameDoc, 'contentHash' | 'engineVersion'>[];
+  game?: Pick<GameDoc, 'contentHash' | 'engineVersion' | 'status'>[];
 }
 
 // Room codes: 6 chars, no easily-confused glyphs (no I/O/0/1).
@@ -274,12 +275,17 @@ export class RoomRepo implements OnModuleInit {
     return this.col.findOne({ _id: code });
   }
 
-  /** Leave a LOBBY room: a spectator just drops off `spectators`; a seated member drops the
-   *  member, keeps seats contiguous, and transfers host or closes exactly as before. */
-  async leave(code: string, userId: string): Promise<RoomDoc | null> {
+  /** Leave a LOBBY room, or a STARTED room whose linked game has already ended (`gameIsOver`,
+   *  determined by the caller via `GameHub.isGameOver` — a room left STARTED after its game
+   *  finished can never advance on its own without a rematch, so leaving it behaves exactly like
+   *  leaving a LOBBY: a spectator just drops off `spectators`; a seated member drops the member,
+   *  keeps seats contiguous, and transfers host or closes exactly as before. A no-op for anything
+   *  else — a still-LIVE game's seats are governed by the in-game vote/timeout machinery, not
+   *  this endpoint. */
+  async leave(code: string, userId: string, gameIsOver = false): Promise<RoomDoc | null> {
     const room = await this.col.findOne({ _id: code });
     if (!room) return null;
-    if (room.status !== 'LOBBY') return room;
+    if (room.status !== 'LOBBY' && !(room.status === 'STARTED' && gameIsOver)) return room;
 
     if (room.spectators?.some((s) => s.userId === userId)) {
       await this.col.updateOne(
@@ -342,12 +348,14 @@ export class RoomRepo implements OnModuleInit {
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
 
-  /** Public rooms for the home screen: PUBLIC lobbies (joinable) + PUBLIC started games that
-   *  allow spectating (watchable). Newest first. Joins in each STARTED room's linked game
-   *  version stamps (`game`) so the caller can filter out rooms whose map/engine version is no
-   *  longer resolvable — see `LobbyService.listPublic`, which then trims the result back down to
-   *  `limit`. Fetches a larger candidate pool than `limit` (capped) so that filter dropping a few
-   *  stale rows out of the page doesn't shrink the final list below what was asked for. */
+  /** Public rooms for the home screen: PUBLIC lobbies (joinable) + PUBLIC started games that are
+   *  still LIVE and allow spectating (watchable) — a STARTED room whose game already ended (and
+   *  was never rematched back to LOBBY) has nothing left to watch, so it's excluded here rather
+   *  than lingering as a dead entry. Newest first. Joins in each STARTED room's linked game
+   *  version stamps + status (`game`) so the caller can further filter out rooms whose map/engine
+   *  version is no longer resolvable — see `LobbyService.listPublic`, which then trims the result
+   *  back down to `limit`. Fetches a larger candidate pool than `limit` (capped) so that filtering
+   *  a few stale rows out of the page doesn't shrink the final list below what was asked for. */
   async findPublic(limit = 50): Promise<PublicRoomDoc[]> {
     const candidatePool = Math.min(limit * 3, 500);
     return this.col
@@ -366,7 +374,12 @@ export class RoomRepo implements OnModuleInit {
             localField: 'gameId',
             foreignField: '_id',
             as: 'game',
-            pipeline: [{ $project: { contentHash: 1, engineVersion: 1 } }],
+            pipeline: [{ $project: { contentHash: 1, engineVersion: 1, status: 1 } }],
+          },
+        },
+        {
+          $match: {
+            $or: [{ status: 'LOBBY' }, { status: 'STARTED', 'game.status': 'LIVE' }],
           },
         },
       ])

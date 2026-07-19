@@ -245,6 +245,47 @@ describe('lobby: per-game settings', () => {
     expect(codes).toContain(okRoom.code);
   });
 
+  it('excludes a public STARTED room whose game already ended (never rematched)', async () => {
+    const a = await guest('DoneHost');
+    const b = await guest('DoneGuest');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(a.token))
+      .send({ visibility: 'PUBLIC' })
+      .expect(200);
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    for (const u of [a, b]) {
+      await request(server())
+        .post(`/api/v1/rooms/${code}/ready`)
+        .set(auth(u.token))
+        .send({ ready: true })
+        .expect(200);
+    }
+    const started = await request(server())
+      .post(`/api/v1/rooms/${code}/start`)
+      .set(auth(a.token))
+      .expect(200);
+
+    // A LIVE game is still watchable.
+    const liveList = await request(server()).get('/api/v1/rooms/public').expect(200);
+    expect((liveList.body as { code: string }[]).map((r) => r.code)).toContain(code);
+
+    // The game ends but the room is never rematched, left, or closed — this used to leave a dead
+    // "watchable" entry on the public listing forever.
+    await t.db
+      .collection('games')
+      .updateOne({ _id: started.body.gameId } as never, { $set: { status: 'COMPLETED' } });
+
+    const list = await request(server()).get('/api/v1/rooms/public').expect(200);
+    expect((list.body as { code: string }[]).map((r) => r.code)).not.toContain(code);
+  });
+
   it('excludes a public LOBBY room whose custom map selector has been deleted', async () => {
     const a = await guest('CustomHost');
     const room = await request(server())

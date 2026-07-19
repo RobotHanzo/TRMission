@@ -14,6 +14,7 @@ import {
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
 import { useGame } from '../store/game';
+import { api } from '../net/rest';
 import { turnStatus } from '../game/view';
 import { usePlayerName } from '../game/playerName';
 import { PHONE_QUERY, useMediaQuery } from '../hooks/useMediaQuery';
@@ -28,6 +29,7 @@ import { track } from '../lib/analytics';
 export function AppHeader() {
   const { t } = useTranslation();
   const view = useUi((s) => s.view);
+  const roomCode = useUi((s) => s.roomCode);
   const goHome = useUi((s) => s.goHome);
   const enterHistory = useUi((s) => s.enterHistory);
   const enterMaps = useUi((s) => s.enterMaps);
@@ -85,10 +87,16 @@ export function AppHeader() {
     confirm: confirmLeave,
     cancel: cancelLeave,
   } = useConfirmAction();
-  // Leaving the lobby or an active game abandons your seat, so confirm first; from any other
-  // screen there's nothing to lose, so the brand just navigates home.
+  // Leaving the lobby or an active game abandons your seat — tell the server before navigating
+  // home so the room doesn't linger stuck on whatever state it was last in (a STARTED room whose
+  // game already ended, or a LOBBY room, is freed/closed exactly as the in-room leave button
+  // would); from any other screen there's nothing to lose, so this just navigates home.
+  const leaveRoomAndGoHome = () => {
+    if (roomCode) void api.leaveRoom(roomCode).catch(() => undefined);
+    goHome();
+  };
   const onBrandClick = () => {
-    if (view === 'room' || inGame) requestLeave(goHome);
+    if (view === 'room' || inGame) requestLeave(leaveRoomAndGoHome);
     else goHome();
   };
 
@@ -223,7 +231,7 @@ export function AppHeader() {
                   <button
                     className="header-menu-item header-menu-item--danger"
                     role="menuitem"
-                    onClick={menuAct(() => requestLeave(goHome))}
+                    onClick={menuAct(() => requestLeave(leaveRoomAndGoHome))}
                   >
                     <DoorOpen size={16} aria-hidden /> {t('leave')}
                   </button>
@@ -297,7 +305,7 @@ export function AppHeader() {
               </button>
             )}
             {inGame && (
-              <button className="leave-btn" onClick={() => requestLeave(goHome)}>
+              <button className="leave-btn" onClick={() => requestLeave(leaveRoomAndGoHome)}>
                 <DoorOpen size={16} aria-hidden />
                 {t('leave')}
               </button>

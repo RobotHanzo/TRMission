@@ -184,7 +184,15 @@ export class LobbyService {
   }
 
   async leave(code: string, user: AuthUser): Promise<RoomView> {
-    const r = await this.rooms.leave(code, user.userId);
+    const room = await this.require(code);
+    // A STARTED room whose game already ended (and wasn't rematched back to LOBBY) can never
+    // advance on its own — let leaving here clean it up the same way leaving a LOBBY room does,
+    // instead of leaving a dead room stuck STARTED forever. A still-LIVE game's seats stay
+    // governed by the in-game vote/timeout machinery, not this endpoint (`RoomRepo.leave` no-ops
+    // for anything else).
+    const gameIsOver =
+      room.status === 'STARTED' && !!room.gameId && (await this.hub.isGameOver(room.gameId));
+    const r = await this.rooms.leave(code, user.userId, gameIsOver);
     if (!r) throw new NotFoundException('room not found');
     return toView(r);
   }

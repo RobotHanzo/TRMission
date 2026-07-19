@@ -262,3 +262,93 @@ describe('lobby: host rematch', () => {
     await request(server()).post(`/api/v1/rooms/${code}/rematch`).set(auth(a.token)).expect(200);
   });
 });
+
+describe('lobby: leaving a STARTED room whose game already ended', () => {
+  it('no-ops while the game is LIVE, then frees seats and closes once it is over', async () => {
+    const a = await guest('Host4');
+    const b = await guest('Guest4');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server()).post(`/api/v1/rooms/${code}/join`).set(auth(b.token)).expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ready`)
+      .set(auth(a.token))
+      .send({ ready: true })
+      .expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/ready`)
+      .set(auth(b.token))
+      .send({ ready: true })
+      .expect(200);
+    const started = await request(server())
+      .post(`/api/v1/rooms/${code}/start`)
+      .set(auth(a.token))
+      .expect(200);
+    const gameId: string = started.body.gameId;
+    const bTicket = (
+      await request(server()).post(`/api/v1/rooms/${code}/ticket`).set(auth(b.token)).expect(200)
+    ).body.ticket;
+
+    // Leaving a still-LIVE STARTED room is a no-op (seats there are governed by the in-game
+    // vote/timeout machinery, not this endpoint) — the member stays put.
+    const stillLive = await request(server())
+      .post(`/api/v1/rooms/${code}/leave`)
+      .set(auth(b.token))
+      .expect(200);
+    expect(stillLive.body.status).toBe('STARTED');
+    expect(stillLive.body.members.map((m: { userId: string }) => m.userId)).toEqual([a.id, b.id]);
+
+    const hub = t.app.get(GameHub);
+    const session = t.app.get(GameRegistry).get(gameId)!.session;
+    const board = session.board;
+    const conns: Record<string, { connId: string; ticket: string; seq: number }> = {
+      [a.id]: { connId: 'leave-a', ticket: started.body.ticket, seq: 0 },
+      [b.id]: { connId: 'leave-b', ticket: bTicket, seq: 0 },
+    };
+    for (const c of Object.values(conns)) {
+      hub.openConnection(c.connId, () => {});
+      await hub.receive(
+        c.connId,
+        encodeClient(++c.seq, { case: 'hello', value: { ticket: c.ticket, protocolVersion: 1 } }),
+      );
+    }
+    let guard = 0;
+    while (session.phase !== 'GAME_OVER') {
+      if (++guard > 5000) throw new Error('game did not terminate');
+      const state = session.raw();
+      const actor =
+        state.turn.phase === 'SETUP_TICKETS'
+          ? session.turnOrder.find((p) => session.hasPendingOffer(p))
+          : session.currentPlayer;
+      if (!actor) throw new Error('no actor');
+      const c = conns[actor as string];
+      if (!c) throw new Error(`unknown actor ${actor}`);
+      await hub.receive(
+        c.connId,
+        encodeClient(++c.seq, actionToCommand(pickAction(board, state, actor as PlayerId))),
+      );
+    }
+
+    // The game is over but nobody rematched. The room used to sit STARTED forever at this point —
+    // stuck on the public listing with nobody able to act on it. A non-host leaving now just frees
+    // their seat; the room stays STARTED (still watchable/rematchable by whoever remains).
+    const afterGuestLeaves = await request(server())
+      .post(`/api/v1/rooms/${code}/leave`)
+      .set(auth(b.token))
+      .expect(200);
+    expect(afterGuestLeaves.body.status).toBe('STARTED');
+    expect(afterGuestLeaves.body.members.map((m: { userId: string }) => m.userId)).toEqual([a.id]);
+
+    // The host leaving last (nobody left to hand the room to) closes it, instead of leaving a
+    // dead STARTED room behind forever.
+    const afterHostLeaves = await request(server())
+      .post(`/api/v1/rooms/${code}/leave`)
+      .set(auth(a.token))
+      .expect(200);
+    expect(afterHostLeaves.body.status).toBe('CLOSED');
+  });
+});

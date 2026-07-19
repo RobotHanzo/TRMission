@@ -116,16 +116,23 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
     };
   }, [roomCode, gameOver, isSpectator, navigation, setRoster]);
 
-  // Leaving tears down the socket (unmount → useGameConnection cleanup). Nothing is at stake
-  // before the first snapshot arrives, so only confirm once there's an actual game to abandon.
+  // Leaving tears down the socket (unmount → useGameConnection cleanup) AND tells the lobby, so a
+  // room whose game already ended (and wasn't rematched) gets freed/closed instead of lingering
+  // stuck STARTED forever (see RoomRepo.leave — a no-op unless the linked game is over). Nothing
+  // is at stake before the first snapshot arrives, so only confirm once there's an actual game to
+  // abandon.
+  const leaveRoom = (): void => {
+    void api.leaveRoom(roomCode).catch(() => undefined);
+    navigation.popToTop();
+  };
   const leave = (): void => {
     if (!snapshot) {
-      navigation.popToTop();
+      leaveRoom();
       return;
     }
     Alert.alert(t('leaveConfirmTitle'), t('leaveConfirmBody'), [
       { text: t('abort'), style: 'cancel' },
-      { text: t('confirm'), style: 'destructive', onPress: () => navigation.popToTop() },
+      { text: t('confirm'), style: 'destructive', onPress: leaveRoom },
     ]);
   };
 
