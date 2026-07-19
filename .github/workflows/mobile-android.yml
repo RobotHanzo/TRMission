@@ -28,6 +28,19 @@ jobs:
           docker image prune -af || true
           df -h /
 
+      # ccache hashes each compiler invocation's preprocessed source, so it survives android/ being
+      # regenerated from scratch every run by expo prebuild (CNG, gitignored — see top-of-file note),
+      # unlike a plain directory cache keyed on file mtimes. This is what actually cuts the ~26-32min
+      # native-build phase: the ~9 autolinked native modules (Skia bindings, Reanimated, Worklets,
+      # gesture-handler, screens, expo-modules-core, ...) recompile identical C++ on every run today.
+      # One shared key (not split by tag vs workflow_dispatch) lets a 2-ABI dev build's objects serve
+      # as partial hits for a 4-ABI release build and vice versa.
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: mobile-android
+          max-size: 2G
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
@@ -105,6 +118,12 @@ jobs:
       # setup-java's `cache: gradle` (above) already restores/saves.
       - name: Build the signed AAB
         working-directory: apps/mobile/android
+        env:
+          # CMake (>=3.4) seeds CMAKE_<LANG>_COMPILER_LAUNCHER from these env vars on first configure,
+          # applying to every autolinked module's externalNativeBuild without patching their
+          # node_modules build.gradle files individually.
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
           ./gradlew :app:bundleRelease --parallel --build-cache \
             -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.keystore" \
