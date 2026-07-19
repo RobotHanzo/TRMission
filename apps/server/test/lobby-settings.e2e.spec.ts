@@ -188,4 +188,99 @@ describe('lobby: per-game settings', () => {
     expect(codes).toContain(pub.body.code);
     expect(codes).not.toContain(priv.body.code);
   });
+
+  it('excludes public STARTED rooms whose game is engine-incompatible or has an unresolvable map', async () => {
+    const a = await guest('SpecHost');
+
+    // Two human players, no bots: nothing auto-acts after start, so the game stays at genesis
+    // and never re-stamps `engineVersion` out from under the test's DB mutation below (a bot
+    // would move immediately at TRM_BOT_DELAY_MS=0 and reset it via the normal appendAction path).
+    async function publicStartedRoom(): Promise<{ code: string; gameId: string }> {
+      const partner = await guest('SpecGuest');
+      const room = await request(server())
+        .post('/api/v1/rooms')
+        .set(auth(a.token))
+        .send({})
+        .expect(201);
+      const code: string = room.body.code;
+      await request(server())
+        .patch(`/api/v1/rooms/${code}/settings`)
+        .set(auth(a.token))
+        .send({ visibility: 'PUBLIC' })
+        .expect(200);
+      await request(server())
+        .post(`/api/v1/rooms/${code}/join`)
+        .set(auth(partner.token))
+        .expect(200);
+      for (const u of [a, partner]) {
+        await request(server())
+          .post(`/api/v1/rooms/${code}/ready`)
+          .set(auth(u.token))
+          .send({ ready: true })
+          .expect(200);
+      }
+      const started = await request(server())
+        .post(`/api/v1/rooms/${code}/start`)
+        .set(auth(a.token))
+        .expect(200);
+      return { code, gameId: started.body.gameId };
+    }
+
+    const badEngine = await publicStartedRoom();
+    await t.db
+      .collection('games')
+      .updateOne({ _id: badEngine.gameId } as never, { $set: { engineVersion: 1 } });
+
+    const badMap = await publicStartedRoom();
+    await t.db
+      .collection('games')
+      .updateOne({ _id: badMap.gameId } as never, { $set: { contentHash: 'not-a-real-hash' } });
+
+    const okRoom = await publicStartedRoom();
+
+    const list = await request(server()).get('/api/v1/rooms/public').expect(200);
+    const codes = (list.body as { code: string }[]).map((r) => r.code);
+    expect(codes).not.toContain(badEngine.code);
+    expect(codes).not.toContain(badMap.code);
+    expect(codes).toContain(okRoom.code);
+  });
+
+  it('excludes a public LOBBY room whose custom map selector has been deleted', async () => {
+    const a = await guest('CustomHost');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(a.token))
+      .send({ visibility: 'PUBLIC' })
+      .expect(200);
+
+    // Simulate a stale selector — the room was pointed at a custom draft that's since been
+    // deleted. Written directly (bypassing the mapBuilder-gated settings PATCH, which only
+    // matters for the write path) since this test targets the public-listing read filter.
+    await t.db.collection('rooms').updateOne({ _id: code } as never, {
+      $set: { 'settings.map': { source: 'custom', customMapId: 'missing-draft' } },
+    });
+
+    const list = await request(server()).get('/api/v1/rooms/public').expect(200);
+    expect((list.body as { code: string }[]).map((r) => r.code)).not.toContain(code);
+
+    // Restore a draft under that id — the room becomes resolvable again and reappears.
+    await t.db.collection('customMaps').insertOne({
+      _id: 'missing-draft',
+      ownerId: a.id,
+      nameZh: 'x',
+      nameEn: 'x',
+      revision: 1,
+      draft: { cities: [], routes: [], tickets: [] },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as never);
+    const list2 = await request(server()).get('/api/v1/rooms/public').expect(200);
+    expect((list2.body as { code: string }[]).map((r) => r.code)).toContain(code);
+  });
 });

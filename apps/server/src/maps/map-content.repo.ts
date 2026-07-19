@@ -27,6 +27,16 @@ export class MapContentRepo implements OnModuleInit {
     return this.col.findOne({ _id: hash });
   }
 
+  /** Batched existence check by hash — mirrors `HistoryRepo.replayableFlags`' fallback lookup,
+   *  reused by the public room listing's compatibility filter. */
+  async existingHashes(hashes: string[]): Promise<Set<string>> {
+    if (hashes.length === 0) return new Set();
+    const docs = await this.col
+      .find({ _id: { $in: hashes } }, { projection: { _id: 1 } })
+      .toArray();
+    return new Set(docs.map((d) => d._id));
+  }
+
   /** Insert-if-absent: identical hash ⇒ identical content, so a collision is always safe to drop. */
   async insertIfAbsent(doc: MapContentDoc): Promise<void> {
     try {

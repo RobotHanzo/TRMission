@@ -211,4 +211,16 @@ export class MapsService {
   async getContentByHash(hash: string) {
     return this.content.findByHash(hash);
   }
+
+  /** Which of these custom-map ids still have a draft (public room listing's compatibility
+   *  filter — a LOBBY room's selector can go stale if the host deletes the draft). */
+  existingCustomMapIds(ids: string[]): Promise<Set<string>> {
+    return this.maps.existingIds(ids);
+  }
+
+  /** Which of these content hashes are published (public room listing's compatibility filter,
+   *  fallback for hashes not in the static official registry). */
+  existingContentHashes(hashes: string[]): Promise<Set<string>> {
+    return this.content.existingHashes(hashes);
+  }
 }

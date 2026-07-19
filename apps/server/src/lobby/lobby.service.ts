@@ -6,7 +6,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { buildBoard } from '@trm/engine';
+import { boardForContentHash, buildBoard } from '@trm/engine';
 import type { Board, GameConfig, PlayerSeed } from '@trm/engine';
 import { officialMapById } from '@trm/map-data';
 import type { MapRules } from '@trm/map-data';
@@ -16,6 +16,7 @@ import {
   DEFAULT_ROOM_SETTINGS,
   ROOM_CHAT_MAX_LEN,
   type MapSelector,
+  type PublicRoomDoc,
   type RoomDoc,
   type RoomMember,
   type RoomSettings,
@@ -31,6 +32,7 @@ import type { AuthUser } from '../auth/auth.types';
 import { BOT_ID_PREFIX, type BotDifficulty, type BotProfile } from '@trm/bots';
 import { MapsService } from '../maps/maps.service';
 import { PushService } from '../push/push.service';
+import { isEngineVersionSupported } from '../persistence/engine-compat';
 
 export interface RoomView {
   code: string;
@@ -53,6 +55,9 @@ export interface TicketResult {
 export interface PracticeResult extends TicketResult {
   code: string;
 }
+
+/** Page size for the public rooms listing (matches `RoomRepo.findPublic`'s prior default). */
+const PUBLIC_ROOMS_LIMIT = 50;
 
 /** Display name for a map selector, when resolvable (official maps only, for now). */
 function mapNameFor(selector: MapSelector): { zh: string; en: string } | undefined {
@@ -354,9 +359,81 @@ export class LobbyService {
     return toView(r);
   }
 
-  /** Public rooms for the home screen (no auth required). */
+  /** Public rooms for the home screen (no auth required). Excludes rooms whose map or engine
+   *  version can no longer be resolved by this server — a LOBBY room whose selected map has
+   *  since disappeared (an official map removed from the registry, or the host's custom draft
+   *  deleted), or a STARTED room whose linked game was persisted under a no-longer-supported
+   *  engine major or an unresolvable content hash. Such a room can never be joined/spectated
+   *  successfully, so it would only be a dead entry in the list. `findPublic` overfetches its
+   *  candidate pool so trimming back to `PUBLIC_ROOMS_LIMIT` here still returns a full page
+   *  even when some of the newest rooms get filtered out. */
   async listPublic(): Promise<RoomView[]> {
-    return (await this.rooms.findPublic()).map(toView);
+    const rooms = await this.rooms.findPublic(PUBLIC_ROOMS_LIMIT);
+    const compatible = await this.filterVersionCompatible(rooms);
+    return compatible.slice(0, PUBLIC_ROOMS_LIMIT).map(toView);
+  }
+
+  /** Same two-part check `HistoryRepo.replayableFlags` uses for match history (static registry
+   *  first, one batched Mongo lookup for the rest) — applied here to LOBBY map selectors and
+   *  STARTED games' stamped content hash + engine version. */
+  private async filterVersionCompatible(rooms: PublicRoomDoc[]): Promise<PublicRoomDoc[]> {
+    const selectorOf = (r: PublicRoomDoc): MapSelector =>
+      ({ ...DEFAULT_ROOM_SETTINGS, ...r.settings }).map;
+
+    const lobbyCustomIds = [
+      ...new Set(
+        rooms
+          .filter((r) => r.status === 'LOBBY')
+          .map(selectorOf)
+          .filter((m): m is Extract<MapSelector, { source: 'custom' }> => m.source === 'custom')
+          .map((m) => m.customMapId),
+      ),
+    ];
+
+    // Which STARTED games' content hashes resolve against the static official-map registry
+    // (zero I/O) — computed once per distinct hash so a popular map isn't rebuilt per room.
+    const startedHashes = [
+      ...new Set(
+        rooms
+          .filter((r) => r.status === 'STARTED')
+          .map((r) => r.game?.[0]?.contentHash)
+          .filter((hash): hash is string => hash !== undefined),
+      ),
+    ];
+    const staticallyResolved = new Map<string, boolean>(
+      startedHashes.map((hash) => {
+        try {
+          boardForContentHash(hash);
+          return [hash, true];
+        } catch {
+          return [hash, false];
+        }
+      }),
+    );
+    const unresolvedHashes = startedHashes.filter((hash) => !staticallyResolved.get(hash));
+
+    // Independent lookups against different collections — run concurrently rather than
+    // paying two sequential round-trips on this hot, unauthenticated, frequently-polled endpoint.
+    const [existingCustomMaps, publishedContent] = await Promise.all([
+      lobbyCustomIds.length > 0
+        ? this.maps.existingCustomMapIds(lobbyCustomIds)
+        : Promise.resolve(new Set<string>()),
+      unresolvedHashes.length > 0
+        ? this.maps.existingContentHashes(unresolvedHashes)
+        : Promise.resolve(new Set<string>()),
+    ]);
+
+    return rooms.filter((r) => {
+      if (r.status === 'LOBBY') {
+        const selector = selectorOf(r);
+        return selector.source === 'official'
+          ? officialMapById(selector.mapId) !== undefined
+          : existingCustomMaps.has(selector.customMapId);
+      }
+      const meta = r.game?.[0];
+      if (!meta || !isEngineVersionSupported(meta.engineVersion)) return false;
+      return staticallyResolved.get(meta.contentHash) || publishedContent.has(meta.contentHash);
+    });
   }
 
   /** The caller's active rooms (lobby or live game) — powers the home screen's rejoin banner. */

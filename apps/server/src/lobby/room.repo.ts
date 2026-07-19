@@ -4,6 +4,7 @@ import type { Collection, Db } from 'mongodb';
 import type { EventsMode, ChatPresetId } from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
 import type { BotDifficulty } from '@trm/bots';
+import type { GameDoc } from '../persistence/types';
 
 export type RoomStatus = 'LOBBY' | 'STARTED' | 'CLOSED';
 export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
@@ -120,6 +121,13 @@ export type TransferHostResult = RoomDoc | 'not_found' | 'forbidden' | 'started'
 /** transferHostAdmin has no caller-is-host check, so it can never produce 'forbidden'. */
 export type AdminTransferHostResult = RoomDoc | 'not_found' | 'started' | 'invalid';
 export type CloseRoomResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
+
+/** A public-listing row: for a STARTED room, `game` carries the linked game's version stamps
+ *  (0 or 1 elements — `gameId` is unique) so the caller can filter out rooms whose map/engine
+ *  version is no longer resolvable. Absent for LOBBY rooms, which have no game yet. */
+export interface PublicRoomDoc extends RoomDoc {
+  game?: Pick<GameDoc, 'contentHash' | 'engineVersion'>[];
+}
 
 // Room codes: 6 chars, no easily-confused glyphs (no I/O/0/1).
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -335,15 +343,33 @@ export class RoomRepo implements OnModuleInit {
   }
 
   /** Public rooms for the home screen: PUBLIC lobbies (joinable) + PUBLIC started games that
-   *  allow spectating (watchable). Newest first. */
-  async findPublic(limit = 50): Promise<RoomDoc[]> {
+   *  allow spectating (watchable). Newest first. Joins in each STARTED room's linked game
+   *  version stamps (`game`) so the caller can filter out rooms whose map/engine version is no
+   *  longer resolvable — see `LobbyService.listPublic`, which then trims the result back down to
+   *  `limit`. Fetches a larger candidate pool than `limit` (capped) so that filter dropping a few
+   *  stale rows out of the page doesn't shrink the final list below what was asked for. */
+  async findPublic(limit = 50): Promise<PublicRoomDoc[]> {
+    const candidatePool = Math.min(limit * 3, 500);
     return this.col
-      .find({
-        'settings.visibility': 'PUBLIC',
-        $or: [{ status: 'LOBBY' }, { status: 'STARTED', 'settings.allowSpectating': true }],
-      })
-      .sort({ updatedAt: -1 })
-      .limit(limit)
+      .aggregate<PublicRoomDoc>([
+        {
+          $match: {
+            'settings.visibility': 'PUBLIC',
+            $or: [{ status: 'LOBBY' }, { status: 'STARTED', 'settings.allowSpectating': true }],
+          },
+        },
+        { $sort: { updatedAt: -1 } },
+        { $limit: candidatePool },
+        {
+          $lookup: {
+            from: 'games',
+            localField: 'gameId',
+            foreignField: '_id',
+            as: 'game',
+            pipeline: [{ $project: { contentHash: 1, engineVersion: 1 } }],
+          },
+        },
+      ])
       .toArray();
   }
 

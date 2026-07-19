@@ -36,6 +36,14 @@ export class CustomMapRepo implements OnModuleInit {
     return this.col.findOne({ _id: id });
   }
 
+  /** Batched existence check by id, no ownership filter — used to detect room map selectors
+   *  whose draft has since been deleted (public room listing's compatibility filter). */
+  async existingIds(ids: string[]): Promise<Set<string>> {
+    if (ids.length === 0) return new Set();
+    const docs = await this.col.find({ _id: { $in: ids } }, { projection: { _id: 1 } }).toArray();
+    return new Set(docs.map((d) => d._id));
+  }
+
   findByShareCode(code: string): Promise<CustomMapDoc | null> {
     return this.col.findOne({ shareCode: code });
   }
