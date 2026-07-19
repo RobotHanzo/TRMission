@@ -113,12 +113,21 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
   Skia `<Group>` transform from the camera's shared values (UI thread, per-frame, device-proven);
   web must NOT redraw per frame — see "Board gestures on web" in the web-harness section. Both
   implement the same `BoardCanvasProps` contract; keep them in sync.
-- **Motion rendering is split by gesture kind** (`useStaticMapPicture.ts` + `MapSceneSkia`'s
-  `motionSV`/`zoomingSV` guard): a pure PAN blits the settled-camera raster snapshot
-  (pixel-perfect under translation, one textured quad per frame); the moment the span changes
-  the crisp cached vector Picture takes over on the UI thread (a per-frame `translateX`
-  quick-reject duck — no React), so pinch-zoom renders live vectors that follow the gesture in
-  real time instead of magnifying a fixed-resolution texture.
+- **Motion rendering blits a raster snapshot for BOTH pan and zoom** (`useStaticMapPicture.ts` +
+  `MapSceneSkia`'s `motionSV` guard): while any gesture is in flight the cached vector Picture
+  ducks off-screen (a per-frame `translateX` quick-reject — no React) and the board draws the
+  rasterized snapshot instead, one textured quad per frame. For zoom specifically, the
+  snapshot's own camera (`useBoardCamera`'s `snapshotCam`) is refreshed at each mid-gesture
+  LOD-requantize checkpoint (`MID_GESTURE_LOD_RATIO`) during a pinch — not just once at
+  settle — so the texture backing an active zoom never drifts far from the live span instead of
+  redrawing the full vector scene (every route, every dashed line, every label's stroke-halo
+  Paragraph) on every single animation frame, which is what made native pinch-zoom
+  disproportionately laggy versus web/RNW (whose `BoardCanvas.web.tsx` gets an equivalent
+  cheap-texture-during-zoom effect for free from the browser's CSS-transform compositor). The
+  crisp vector Picture only draws once the gesture is genuinely at rest, or before any snapshot
+  has ever been produced. `cam.settled` and `cam.zoomingSV` keep their original settle-only
+  semantics unchanged — `BoardCanvas.web.tsx` depends on them as-is for its own separate
+  mid-pan-repaint strategy.
 - **Manual hit-testing** (`src/board/hitTest.ts`, pure + unit-tested): Skia children aren't
   touch targets; a tap projects screen→board through the current camera and hit-tests routes
   (segment distance) and cities (radius) against the shared geometry.

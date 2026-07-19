@@ -385,9 +385,11 @@ function BoardInner({
   const camOpts = useMemo(() => ({ onTap, onGesture: onManualCamera }), [onTap, onManualCamera]);
   const cam = useBoardCamera(vp, ACTIVE_BASE_VIEW, home, camOpts);
 
-  // The gesture-time raster snapshot's region + resolution, re-derived at every camera settle
-  // (cam.settled only changes identity when the camera actually moved). The scene bounds match
-  // MapSceneSkia's picture bounds exactly, so the snapshot never covers un-drawn space.
+  // The gesture-time raster snapshot's region + resolution, re-derived at every camera settle AND
+  // at each mid-gesture LOD checkpoint during a pinch (cam.snapshotCam — see useBoardCamera.ts),
+  // so the cheap texture backing an active zoom stays reasonably fresh instead of only updating
+  // once the gesture ends. The scene bounds match MapSceneSkia's picture bounds exactly, so the
+  // snapshot never covers un-drawn space.
   const sceneBounds = useMemo<Bounds>(
     () => ({
       x: ACTIVE_BASE_VIEW.x - SCENE_OVERSCAN,
@@ -398,8 +400,9 @@ function BoardInner({
     [],
   );
   const raster = useMemo(
-    () => (USE_GESTURE_RASTER ? rasterSpec(cam.settled, vp, sceneBounds, PixelRatio.get()) : null),
-    [cam.settled, vp, sceneBounds],
+    () =>
+      USE_GESTURE_RASTER ? rasterSpec(cam.snapshotCam, vp, sceneBounds, PixelRatio.get()) : null,
+    [cam.snapshotCam, vp, sceneBounds],
   );
 
   // Publish the live camera to the tutorial's spotlight bridge while this board is mounted
@@ -519,7 +522,6 @@ function BoardInner({
           routeReveal={routeReveal}
           reducedMotion={reducedMotion}
           motionSV={cam.movingSV}
-          zoomingSV={cam.zoomingSV}
           raster={raster}
         />
       </BoardCanvas>

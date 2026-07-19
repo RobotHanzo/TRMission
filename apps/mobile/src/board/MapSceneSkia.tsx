@@ -125,16 +125,14 @@ export interface MapSceneSkiaProps {
   reducedMotion?: boolean | undefined;
 
   /* ── gesture-time raster snapshot (see useStaticMapImage) ── */
-  /** UI-thread motion flag (useBoardCamera.movingSV): while set AND `zoomingSV` is not, the
-   *  vector picture ducks off-screen so the rasterized snapshot carries the frame (full-FPS
-   *  panning). Omitted (the tutorial specimens, tests) the scene simply always draws vectors. */
+  /** UI-thread motion flag (useBoardCamera.movingSV): while set, the vector picture ducks
+   *  off-screen so the rasterized snapshot carries the frame (full-FPS pan AND zoom) — the
+   *  snapshot's camera (useBoardCamera.snapshotCam) is refreshed at each mid-gesture LOD
+   *  checkpoint during a pinch, not just at settle, so it stays reasonably fresh throughout.
+   *  Omitted (the tutorial specimens, tests) the scene simply always draws vectors. */
   motionSV?: SharedValue<boolean> | undefined;
-  /** UI-thread zoom flag (useBoardCamera.zoomingSV): the span changed during this motion, so the
-   *  settled raster is the WRONG resolution — the crisp vector picture draws instead, following
-   *  the pinch in real time. */
-  zoomingSV?: SharedValue<boolean> | undefined;
-  /** Snapshot region + resolution for the settled camera (camera.ts rasterSpec). Omitted (the
-   *  tutorial specimens, tests) the scene simply always draws vectors. */
+  /** Snapshot region + resolution for the raster snapshot's camera (camera.ts rasterSpec).
+   *  Omitted (the tutorial specimens, tests) the scene simply always draws vectors. */
   raster?: RasterSpec | null | undefined;
 }
 
@@ -240,7 +238,6 @@ export function MapSceneSkia({
   routeReveal,
   reducedMotion,
   motionSV,
-  zoomingSV,
   raster,
 }: MapSceneSkiaProps) {
   const model = useMemo(() => buildRouteRenderModel(routes, geometry), [routes, geometry]);
@@ -322,18 +319,18 @@ export function MapSceneSkia({
   ) : null;
 
   // Vector visibility, decided per frame on the UI thread (no React involvement): the picture
-  // ducks off-screen ONLY while a pure pan is in flight and a snapshot exists — Skia's clip
-  // quick-reject makes the off-screen drawPicture free, and the raster (pixel-perfect under pure
-  // translation) carries the frame. The moment the span changes (`zoomingSV`) the picture snaps
-  // back, so a pinch renders crisp vectors that follow the zoom in real time instead of
-  // magnifying the settled-resolution texture.
+  // ducks off-screen while ANY motion is in flight (pan OR zoom) and a snapshot exists — Skia's
+  // clip quick-reject makes the off-screen drawPicture free, and the raster carries the frame.
+  // The snapshot's own camera (useBoardCamera.snapshotCam) is refreshed at each mid-gesture LOD
+  // checkpoint during a pinch, so it never drifts more than that ratio from the live span; the
+  // crisp vector picture only draws once the gesture is genuinely at rest (or before any
+  // snapshot has ever been produced).
   const hasSnapshot = !!snapshot;
   const VECTOR_DUCK = 1e7;
   const vectorGuard = useDerivedValue<Transforms3d>(() => {
-    const duck =
-      hasSnapshot && motionSV !== undefined && motionSV.value && !(zoomingSV?.value ?? false);
+    const duck = hasSnapshot && motionSV !== undefined && motionSV.value;
     return [{ translateX: duck ? VECTOR_DUCK : 0 }];
-  }, [hasSnapshot, motionSV, zoomingSV]);
+  }, [hasSnapshot, motionSV]);
 
   return (
     <Group>

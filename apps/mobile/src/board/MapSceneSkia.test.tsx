@@ -70,10 +70,9 @@ describe('MapSceneSkia', () => {
     ).not.toThrow();
   });
 
-  it('renders with the UI-thread motion/zoom guard shared values wired', () => {
-    function Scene({ moving, zooming }: { moving: boolean; zooming: boolean }) {
+  it('renders with the UI-thread motion guard shared value wired', () => {
+    function Scene({ moving }: { moving: boolean }) {
       const motionSV = useSharedValue(moving);
-      const zoomingSV = useSharedValue(zooming);
       return (
         <MapSceneSkia
           cities={TAIWAN_CONTENT.cities}
@@ -86,13 +85,11 @@ describe('MapSceneSkia', () => {
           inv={0.53}
           marker={0.72}
           motionSV={motionSV}
-          zoomingSV={zoomingSV}
         />
       );
     }
-    expect(() => render(<Scene moving={false} zooming={false} />)).not.toThrow();
-    expect(() => render(<Scene moving zooming={false} />)).not.toThrow();
-    expect(() => render(<Scene moving zooming />)).not.toThrow();
+    expect(() => render(<Scene moving={false} />)).not.toThrow();
+    expect(() => render(<Scene moving />)).not.toThrow();
   });
 
   it('renders the full random-events overlay set without crashing', () => {

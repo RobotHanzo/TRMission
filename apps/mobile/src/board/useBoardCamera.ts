@@ -5,7 +5,11 @@
 // only when the camera SETTLES — while a gesture or programmatic glide is in flight the JS thread
 // does nothing at all (no LOD steps, no re-renders, no picture re-records), which is what keeps the
 // pinch from drowning the JS thread. `moving`/`settled` let the Board swap the static scene to its
-// rasterized snapshot for the duration of the motion (see camera.ts rasterSpec).
+// rasterized snapshot for the duration of the motion (see camera.ts rasterSpec). `snapshotCam`
+// rides the SAME mid-gesture LOD-requantize cadence (MID_GESTURE_LOD_RATIO) to also refresh that
+// raster snapshot WHILE a pinch is in flight, not just at settle — so zoom gets the cheap-texture
+// treatment pan already gets, instead of redrawing the full vector scene every frame. `settled`
+// and `zoomingSV` are untouched (BoardCanvas.web.tsx depends on their exact settle-only cadence).
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Gesture, type ComposedGesture } from 'react-native-gesture-handler';
 import {
@@ -70,9 +74,14 @@ export interface BoardCamera {
    *  the scene draws crisp vectors instead of the settled-camera raster while this is set.
    *  Cleared when the motion settles. */
   zoomingSV: SharedValue<boolean>;
-  /** The camera at the last settle (mount, gesture end, or glide end) — the frame the board's
-   *  gesture-time raster snapshot is rendered for. */
+  /** The camera at the last settle (mount, gesture end, or glide end) — consumed by
+   *  BoardCanvas.web.tsx's own settle-only repaint strategy. Do not repurpose. */
   settled: CameraState;
+  /** The camera the gesture-time raster snapshot should be rendered for (camera.ts rasterSpec):
+   *  updates at settle exactly like `settled`, but ALSO at each mid-gesture LOD-requantize
+   *  checkpoint during a pinch, so the snapshot backing zoom stays within MID_GESTURE_LOD_RATIO
+   *  of the live camera instead of only refreshing once the gesture fully ends. */
+  snapshotCam: CameraState;
   /** Ease the camera to a target over `ms` (programmatic — never disengages follow). */
   animateTo: (cam: CameraState, ms: number) => void;
   /** Jump the camera immediately (no animation). */
@@ -134,10 +143,19 @@ export function useBoardCamera(
   const motionDepth = useRef(0);
   const [moving, setMoving] = useState(false);
   const [settled, setSettled] = useState<CameraState>(home);
+  const [snapshotCam, setSnapshotCam] = useState<CameraState>(home);
   const movingSV = useSharedValue(false);
   const zoomingSV = useSharedValue(false);
   /** The span the current LOD state was computed for — the mid-gesture throttle reference. */
   const lodSpanSV = useSharedValue(home.span);
+
+  const recomputeSnapshotCam = useCallback((camX: number, camY: number, sp: number) => {
+    setSnapshotCam((prev) =>
+      prev.cx === camX && prev.cy === camY && prev.span === sp
+        ? prev
+        : { cx: camX, cy: camY, span: sp },
+    );
+  }, []);
 
   const beginMotion = useCallback(() => {
     motionDepth.current += 1;
@@ -158,14 +176,18 @@ export function useBoardCamera(
       setSettled((prev) =>
         prev.cx === next.cx && prev.cy === next.cy && prev.span === next.span ? prev : next,
       );
+      recomputeSnapshotCam(next.cx, next.cy, next.span);
     }
-  }, [movingSV, zoomingSV, lodSpanSV, recomputeLod, cx, cy, span]);
+  }, [movingSV, zoomingSV, lodSpanSV, recomputeLod, recomputeSnapshotCam, cx, cy, span]);
 
   // Span watcher (UI thread). While a motion is in flight: the first span change flags `zooming`
-  // (the scene switches from the settled raster to live vectors), and the LOD re-quantizes each
-  // time the span drifts MID_GESTURE_LOD_RATIO past the last computed value — a few JS recomputes
-  // per pinch, so track weight / label tiers follow the zoom without any per-frame JS. At rest the
-  // original snapTo re-quantize applies.
+  // (the web canvas host's mid-pan-repaint exclusion; native's own vector-duck no longer keys off
+  // it — see MapSceneSkia's vectorGuard), and the LOD re-quantizes each time the span drifts
+  // MID_GESTURE_LOD_RATIO past the last computed value — a few JS recomputes per pinch, so track
+  // weight / label tiers follow the zoom without any per-frame JS. The SAME checkpoint also
+  // refreshes the raster snapshot's camera (recomputeSnapshotCam), so the cheap texture backing a
+  // pinch stays within that ratio of the live span instead of only updating once the gesture ends.
+  // At rest the original snapTo re-quantize applies.
   useAnimatedReaction(
     () => span.value,
     (sp, prev) => {
@@ -176,6 +198,7 @@ export function useBoardCamera(
         if (ratio >= MID_GESTURE_LOD_RATIO) {
           lodSpanSV.value = sp;
           runOnJS(recomputeLod)(sp);
+          runOnJS(recomputeSnapshotCam)(cx.value, cy.value, sp);
         }
         return;
       }
@@ -184,7 +207,7 @@ export function useBoardCamera(
         runOnJS(recomputeLod)(sp);
       }
     },
-    [recomputeLod],
+    [recomputeLod, recomputeSnapshotCam],
   );
 
   const notifyGesture = useCallback(() => {
@@ -206,8 +229,9 @@ export function useBoardCamera(
       setSettled((prev) =>
         prev.cx === cam.cx && prev.cy === cam.cy && prev.span === cam.span ? prev : { ...cam },
       );
+      recomputeSnapshotCam(cam.cx, cam.cy, cam.span);
     },
-    [cx, cy, span, lodSpanSV, recomputeLod],
+    [cx, cy, span, lodSpanSV, recomputeLod, recomputeSnapshotCam],
   );
 
   // Every glide pairs one beginMotion with one delayed endMotion; the timers are tracked so an
@@ -383,6 +407,7 @@ export function useBoardCamera(
     movingSV,
     zoomingSV,
     settled,
+    snapshotCam,
     animateTo,
     snapTo,
     currentCamera,
