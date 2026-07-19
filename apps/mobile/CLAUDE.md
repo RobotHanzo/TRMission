@@ -6,6 +6,7 @@ the server's authoritative state and never computes game truth itself (same cont
 
 ```bash
 yarn workspace @trm/mobile start        # Metro dev server (Expo)
+yarn workspace @trm/mobile web          # react-native-web harness on :8081 (see "Web harness")
 yarn workspace @trm/mobile typecheck    # tsc --noEmit
 yarn workspace @trm/mobile lint         # eslint src (root flat config)
 yarn workspace @trm/mobile test         # jest (jest-expo preset)
@@ -23,6 +24,35 @@ TRM_SERVER_ORIGIN=http://<lan-ip>:3001 yarn workspace @trm/mobile start   # poin
   self-hosted; push (P0 server) is direct FCM/APNs — the app only registers native device tokens.
 - Yarn 4 `nodeLinker: node-modules` (Metro can't resolve PnP). `apps/mobile/{android,ios,.expo}` are
   git-ignored — Continuous Native Generation regenerates them via `expo prebuild` in CI.
+
+## Web harness (react-native-web — for desktop/Playwright testing, NOT a shipped surface)
+
+`yarn workspace @trm/mobile web` serves the app at http://localhost:8081 so agents can drive the
+mobile UI with Playwright. Guest login, lobby/online play, offline bot games, and the tutorial all
+work end-to-end (the Skia board renders through CanvasKit wasm). Never trade native quality for
+this surface; a device smoke is still the real acceptance bar.
+
+- **Pointing at a server**: `TRM_SERVER_ORIGIN=http://localhost:3001 yarn workspace @trm/mobile web`,
+  and start the server with `CORS_ORIGINS=http://localhost:8081` — the browser enforces CORS where
+  native clients don't. The origin bakes into the bundle at TRANSFORM time and survives Metro
+  restarts in the transform cache: after changing it, start once with
+  `npx expo start --web --clear`.
+- **Entry** (`index.ts` web branch): CanvasKit must finish loading before the app graph EVALUATES
+  (Skia's web modules read `global.CanvasKit` at import), so App is `require`d only after
+  `LoadSkiaWeb` resolves. `scripts/setup-web.js` copies `canvaskit.wasm` → `public/` (gitignored);
+  the `web` script runs it automatically.
+- **Platform splits** (Metro resolves `.web.ts(x)` on web; jest/native never see them — they're
+  typechecked standalone): `net/secureStore.web.ts` (refresh token in localStorage),
+  `offline/localStore.web.ts` (in-memory saves — a reload loses offline games),
+  `screens/builderWebView.web.tsx` (iframe). Gated to `null` on web like under Expo Go:
+  `push/expoNotifications.ts`, `auth/googleSigninModule.ts`. Apple auth needs no gate
+  (`requireOptionalNativeModule` stub; `isAvailableAsync()` → false).
+- **Alerts**: RNW's `Alert.alert` is a silent no-op, so `src/web/alertShim.ts` (installed from the
+  web entry branch) maps it onto `window.confirm`/`window.alert` — OK runs the LAST non-cancel
+  button, Cancel the `style: 'cancel'` one. Playwright must handle these as native dialogs
+  (`browser_handle_dialog` / `page.on('dialog')`).
+- **Selectors**: RNW emits `testID` as `data-testid`; the accessibility tree mirrors RN
+  accessibility props (roles/labels), so a11y snapshots are the primary way to target UI.
 
 ## Monorepo resolution (metro.config.js)
 

@@ -96,6 +96,13 @@ const config: ExpoConfig = {
     // transitive Play Services dependency can never re-add it behind the Data-safety form's back.
     blockedPermissions: ['com.google.android.gms.permission.AD_ID'],
   },
+  web: {
+    // Desktop-browser harness so agents (Playwright) can exercise the mobile UI — not a shipped
+    // surface. `yarn workspace @trm/mobile web` serves it on :8081; see CLAUDE.md "Web harness".
+    bundler: 'metro',
+    output: 'single', // SPA fallback so deep links (e.g. /room/CODE) resolve client-side
+    favicon: './assets/icon.png',
+  },
   updates: {
     // Self-hosted expo-open-ota manifest endpoint (docs/mobile/ota.md). The origin is a
     // deploy-time repo variable so dev builds can point at the local compose container.

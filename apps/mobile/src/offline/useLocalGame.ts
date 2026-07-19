@@ -14,7 +14,7 @@ import { LocalSocket } from './localSocket';
 import { runBotBurst } from './botDriver';
 import { loadOfflineGame } from './loadGame';
 import { newOfflineSetup } from './newGame';
-import { SqliteLocalGameStore } from './sqliteStore';
+import { openLocalGameStore } from './localStore';
 import { randomGameId, randomSeed } from './seed';
 import type { LocalGameStorePort } from './types';
 
@@ -74,7 +74,7 @@ export function useLocalGame(
 
     void (async () => {
       try {
-        const store = deps?.store ?? (await SqliteLocalGameStore.open());
+        const store = deps?.store ?? (await openLocalGameStore());
         if (input.mode === 'new') {
           const setup = newOfflineSetup({
             mapId: input.mapId,

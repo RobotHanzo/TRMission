@@ -1,11 +1,12 @@
 // Home's offline block: the Play-vs-Bots entry + the in-progress resume list. Injectable
-// store for tests; defaults to the on-device sqlite store. Reloads whenever the screen
-// regains focus (a finished/abandoned game must drop off the list).
+// store for tests; defaults to the platform store (sqlite on device, in-memory on the web
+// harness). Reloads whenever the screen regains focus (a finished/abandoned game must drop
+// off the list).
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { officialMapById } from '@trm/map-data';
-import { SqliteLocalGameStore } from './sqliteStore';
+import { openLocalGameStore } from './localStore';
 import type { LocalGameStorePort, OfflineGameListEntry } from './types';
 
 export interface OfflineHomeSectionProps {
@@ -21,7 +22,7 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
   const [entries, setEntries] = useState<OfflineGameListEntry[]>([]);
 
   const reload = useCallback(async () => {
-    const s = store ?? (await SqliteLocalGameStore.open());
+    const s = store ?? (await openLocalGameStore());
     const all = await s.listGames();
     setEntries(all.filter((e) => e.status === 'LIVE'));
   }, [store]);
@@ -36,7 +37,7 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
   };
 
   const remove = async (gameId: string): Promise<void> => {
-    const s = store ?? (await SqliteLocalGameStore.open());
+    const s = store ?? (await openLocalGameStore());
     await s.deleteGame(gameId);
     await reload();
   };

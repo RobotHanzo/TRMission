@@ -1,4 +1,5 @@
 import { isRunningInExpoGo } from 'expo';
+import { Platform } from 'react-native';
 import type * as GoogleSigninPackage from '@react-native-google-signin/google-signin';
 
 /**
@@ -7,9 +8,11 @@ import type * as GoogleSigninPackage from '@react-native-google-signin/google-si
  * `expo-*` packages, this third-party native module is never bundled inside the generic Expo Go
  * client — it needs a custom dev/production build (same as the rest of this app's native
  * surface; see apps/mobile/CLAUDE.md). Load it lazily behind this guard so `expo start` + Expo
- * Go still boots; Google sign-in then no-ops until a real dev/production build.
+ * Go still boots; Google sign-in then no-ops until a real dev/production build. The web harness
+ * is gated for the same reason: there is no native module in a desktop browser either.
  */
-export const GoogleSigninModule: typeof GoogleSigninPackage | null = isRunningInExpoGo()
-  ? null
-  : // eslint-disable-next-line @typescript-eslint/no-require-imports
-    (require('@react-native-google-signin/google-signin') as typeof GoogleSigninPackage);
+export const GoogleSigninModule: typeof GoogleSigninPackage | null =
+  Platform.OS === 'web' || isRunningInExpoGo()
+    ? null
+    : // eslint-disable-next-line @typescript-eslint/no-require-imports
+      (require('@react-native-google-signin/google-signin') as typeof GoogleSigninPackage);

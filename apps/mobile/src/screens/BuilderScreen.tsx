@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import { WebView } from 'react-native-webview';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { useTranslation } from 'react-i18next';
 import { api } from '../net/rest';
 import { SERVER_ORIGIN } from '../config';
 import { useSession } from '../store/session';
+import { BuilderWebView } from './builderWebView';
 
 /** Entry gate: mirror of web's useHasFeature('mapBuilder') — cosmetic; server 403s regardless. */
 export function useCanBuild(): boolean {
@@ -69,17 +69,7 @@ export default function BuilderScreen(): React.JSX.Element {
       </View>
     );
   }
-  return (
-    <WebView
-      source={{ uri: handoffUrl }}
-      // iOS: WKWebView shares NSHTTPCookieStorage so the Strict cookie set by the 302 sticks.
-      sharedCookiesEnabled
-      // Android: allow the same-origin refresh cookie inside the WebView.
-      thirdPartyCookiesEnabled
-      startInLoadingState
-      // The builder is a same-origin SPA; external links (if any) stay inside — acceptable for v1.
-    />
-  );
+  return <BuilderWebView uri={handoffUrl} />;
 }
 
 const styles = StyleSheet.create({

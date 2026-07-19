@@ -1,4 +1,5 @@
 import { isRunningInExpoGo } from 'expo';
+import { Platform } from 'react-native';
 import type * as ExpoNotifications from 'expo-notifications';
 
 /**
@@ -8,8 +9,10 @@ import type * as ExpoNotifications from 'expo-notifications';
  * addPushTokenListener the moment the module loads, which throws there. Load it lazily behind
  * this guard so `expo start` + Expo Go still boots; push then no-ops until a real dev/production
  * build, which is the only place this app's direct FCM/APNs push needs to work anyway.
+ * The web harness is gated too: FCM/APNs device push has no meaning in a desktop browser tab.
  */
-export const Notifications: typeof ExpoNotifications | null = isRunningInExpoGo()
-  ? null
-  : // eslint-disable-next-line @typescript-eslint/no-require-imports
-    (require('expo-notifications') as typeof ExpoNotifications);
+export const Notifications: typeof ExpoNotifications | null =
+  Platform.OS === 'web' || isRunningInExpoGo()
+    ? null
+    : // eslint-disable-next-line @typescript-eslint/no-require-imports
+      (require('expo-notifications') as typeof ExpoNotifications);

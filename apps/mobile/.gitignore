@@ -5,3 +5,5 @@
 /.expo
 /dist
 *.log
+# Copied by scripts/setup-web.js for the web harness — a ~7MB binary, never committed.
+/public/canvaskit.wasm
