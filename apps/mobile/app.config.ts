@@ -164,5 +164,25 @@ export default withGradleProperties(config, (modConfig) => {
   } else {
     modConfig.modResults.push({ type: 'property', key: 'org.gradle.jvmargs', value });
   }
+
+  // CI-only ABI scoping for builds that never reach Play (see mobile-android.yml) — narrows the
+  // template's default armeabi-v7a/arm64-v8a/x86/x86_64 reactNativeArchitectures list to cut the
+  // serialized per-ABI native build. Unset (local dev, real release tags) leaves the template
+  // default, which is Play's actual distribution matrix, untouched.
+  if (process.env.TRM_ANDROID_ABIS) {
+    const abis = modConfig.modResults.find(
+      (item) => item.type === 'property' && item.key === 'reactNativeArchitectures',
+    );
+    if (abis?.type === 'property') {
+      abis.value = process.env.TRM_ANDROID_ABIS;
+    } else {
+      modConfig.modResults.push({
+        type: 'property',
+        key: 'reactNativeArchitectures',
+        value: process.env.TRM_ANDROID_ABIS,
+      });
+    }
+  }
+
   return modConfig;
 });

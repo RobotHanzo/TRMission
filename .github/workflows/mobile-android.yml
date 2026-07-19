@@ -67,6 +67,13 @@ jobs:
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
+          # Only a real v* tag reaches Play (see the publish step's `if:` below) — everything else
+          # (workflow_dispatch, release/** pushes) just needs a build to exist, so scope those down
+          # to one physical-device ABI + one emulator ABI. Profiling showed the ~9 native modules'
+          # (Skia bindings, Reanimated, Worklets, ...) serialized per-ABI CMake builds eating ~26 of
+          # ~34min; halving the ABI count roughly halves that. app.config.ts's withGradleProperties
+          # turns this into the generated gradle.properties' `reactNativeArchitectures`.
+          TRM_ANDROID_ABIS: ${{ github.ref_type != 'tag' && 'arm64-v8a,x86_64' || '' }}
 
       # Deferred until after prebuild: `cache: gradle` hashes **/*.gradle*/gradle-wrapper.properties
       # to key its cache, but android/ is CNG output (gitignored, never committed — see the top-of-file
@@ -80,10 +87,17 @@ jobs:
       - name: Decode the release keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
 
+      # Without --parallel, Gradle runs one task at a time across the whole module graph even
+      # though the per-ABI native (CMake/ninja) builds for the ~9 native modules (Skia bindings,
+      # Reanimated, Worklets, gesture-handler, screens, expo-modules-core, ...) have no
+      # dependencies on each other. Profiling a run showed that fully serial native-build phase
+      # alone eating ~26 of the ~34min total. --build-cache lets task outputs (compile, lint,
+      # resource merge) persist across runs too, riding the ~/.gradle/caches cache that
+      # setup-java's `cache: gradle` (above) already restores/saves.
       - name: Build the signed AAB
         working-directory: apps/mobile/android
         run: |
-          ./gradlew :app:bundleRelease \
+          ./gradlew :app:bundleRelease --parallel --build-cache \
             -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.keystore" \
             -Pandroid.injected.signing.store.password="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.ANDROID_KEY_ALIAS }}" \
