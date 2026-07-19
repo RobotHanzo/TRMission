@@ -2107,6 +2107,19 @@ button.ticket-card:hover {
   text-anchor: middle;
   dominant-baseline: central;
 }
+/* Repaired broken-rail exclusivity-window chip. */
+.broken-exclusive-chip circle {
+  fill: #e08a1e;
+  stroke: #fff;
+  stroke-width: calc(0.32px * var(--inv-scale));
+  r: calc(2.6px * var(--inv-scale));
+  filter: drop-shadow(0 0 calc(0.5px * var(--inv-scale)) rgba(0, 0, 0, 0.45));
+}
+.broken-exclusive-chip text {
+  font-size: calc(2.8px * var(--inv-scale));
+  text-anchor: middle;
+  dominant-baseline: central;
+}
 /* Viral-hotspot +N badge. */
 .evt-hotspot .evt-badge-bg {
   fill: #e08a1e;
@@ -2182,6 +2195,7 @@ button.ticket-card:hover {
 .board-viewport[data-zoom='far'] .evt-hotspot,
 .board-viewport[data-zoom='far'] .evt-city-badge,
 .board-viewport[data-zoom='far'] .evt-lucky-chip,
+.board-viewport[data-zoom='far'] .broken-exclusive-chip,
 .board-viewport[data-zoom='regional'] .evt-hotspot {
   display: none;
 }
