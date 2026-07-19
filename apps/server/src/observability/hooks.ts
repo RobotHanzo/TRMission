@@ -22,6 +22,10 @@ export interface MetricsHooks {
   recoveryFailed?(): void;
   /** A player's per-turn timer lapsed and the server auto-played a default action for them. */
   turnTimedOut?(): void;
+  /** A game was marked inactive and its per-turn auto-play suspended: its humans kept timing out
+   *  (`afk_streak`) or none of them held a live socket at the lapse (`no_humans_connected`). The
+   *  game rests at a human turn until a seat (re)bind or a real human action resumes it. */
+  autoPlayPaused?(reason: 'afk_streak' | 'no_humans_connected'): void;
   /** An inbound frame threw somewhere unexpected. Should stay at 0; each one is a bug. */
   internalError?(): void;
 }
@@ -37,4 +41,5 @@ export const NOOP_METRICS: MetricsHooks = {
   recoveryFailed() {},
   internalError() {},
   turnTimedOut() {},
+  autoPlayPaused() {},
 };

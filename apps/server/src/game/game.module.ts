@@ -51,6 +51,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
           metrics,
           botMoveDelayMs: env.botMoveDelayMs,
           turnTimeoutMs: env.turnTimeoutMs,
+          autoPlayPauseAfter: env.autoPlayPauseAfter,
           boardResolver: makeBoardResolver(mapContents),
           // The hub stays framework-free: adapt the Nest service into the plain sink.
           push: {

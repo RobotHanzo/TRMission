@@ -16,6 +16,10 @@ export const env = {
   /** Per-turn time limit (ms); on lapse the server auto-plays a default action (issue #13).
    *  Default 75s; 0 disables the timer entirely (used in tests). */
   turnTimeoutMs: Number(process.env.TRM_TURN_TIMEOUT_MS ?? 75_000),
+  /** Consecutive timed-out human turns after which a game is marked inactive and stops
+   *  auto-playing until a human returns (<=0 disables the streak pause; a lapse with no human
+   *  socket connected at all always pauses immediately). */
+  autoPlayPauseAfter: Number(process.env.TRM_AUTOPLAY_PAUSE_AFTER ?? 5),
   /** Force-update floor for the mobile app: builds below this are told to update. 0 = off. */
   mobileMinBuild: Number(process.env.MOBILE_MIN_BUILD ?? 0),
 

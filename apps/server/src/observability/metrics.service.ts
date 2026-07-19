@@ -16,6 +16,7 @@ export class MetricsService implements MetricsHooks {
   private readonly recoveryFailures: Counter;
   private readonly internalErrors: Counter;
   private readonly turnTimeouts: Counter;
+  private readonly autoPlayPauses: Counter<'reason'>;
   private readonly roomsPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly gamesPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly pushesSent: Counter<'kind'>;
@@ -69,6 +70,12 @@ export class MetricsService implements MetricsHooks {
     this.turnTimeouts = new Counter({
       name: 'trm_turn_timeouts_total',
       help: 'Turns whose per-turn timer lapsed and were auto-played by the server',
+      registers: [this.registry],
+    });
+    this.autoPlayPauses = new Counter({
+      name: 'trm_game_autoplay_paused_total',
+      help: 'Games marked inactive (per-turn auto-play suspended), by reason',
+      labelNames: ['reason'],
       registers: [this.registry],
     });
     this.roomsPurged = new Counter({
@@ -126,6 +133,9 @@ export class MetricsService implements MetricsHooks {
   }
   turnTimedOut(): void {
     this.turnTimeouts.inc();
+  }
+  autoPlayPaused(reason: 'afk_streak' | 'no_humans_connected'): void {
+    this.autoPlayPauses.inc({ reason });
   }
   roomPurged(trigger: 'auto' | 'manual', priorStatus: string): void {
     this.roomsPurged.inc({ trigger, priorStatus });

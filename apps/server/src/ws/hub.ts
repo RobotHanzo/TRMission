@@ -76,6 +76,11 @@ export interface GameHubOptions {
   /** Per-turn time limit (ms); on lapse the server auto-plays a default action for the current
    *  human player (issue #13). Default 75s; 0 disables the timer entirely (used in tests). */
   turnTimeoutMs?: number;
+  /** Consecutive timed-out human turns (with no real human action or seat (re)bind in between)
+   *  after which the game is marked inactive and auto-play stops — otherwise a table of bots plays
+   *  a deserted game to completion on its own. Default 5; <=0 disables the streak pause. A lapse
+   *  that finds not a single seated human socket connected pauses immediately regardless. */
+  autoPlayPauseAfter?: number;
   /** In-process retries for a transient bot-move persist failure before a delayed re-drive (default 3). */
   botPersistRetries?: number;
   /** Delay between in-process persist retries, ms (default 500; 0 in tests). */
@@ -125,6 +130,7 @@ const DEFAULT_BOT_PERSIST_RETRIES = 3;
 const DEFAULT_BOT_PERSIST_RETRY_DELAY_MS = 500;
 const DEFAULT_BOT_DRIVER_RESCHEDULE_MS = 15_000;
 const DEFAULT_TURN_TIMEOUT_MS = 75_000;
+const DEFAULT_AUTOPLAY_PAUSE_AFTER = 5;
 
 type BotMoveOutcome = 'moved' | 'noLegalAction' | 'persistFailed';
 
@@ -146,6 +152,14 @@ export class GameHub {
   /** gameId → the active turn's absolute wall-clock deadline, so a (re)connecting client can be
    *  handed the CURRENT remaining time rather than a fresh full budget. */
   private readonly turnDeadlines = new Map<string, { player: string; at: number }>();
+  private readonly autoPlayPauseAfter: number;
+  /** gameId → consecutive auto-played (timed-out) human turns since the last real human action
+   *  or seat (re)bind. */
+  private readonly timeoutStreak = new Map<string, number>();
+  /** Games marked inactive: their humans kept timing out (or none held a live socket), so the
+   *  per-turn auto-play is suspended and the match rests at a human turn until someone returns.
+   *  Bots only ever act on their own turns, so a paused game cannot advance on its own. */
+  private readonly autoPlayPaused = new Set<string>();
   private readonly botPersistRetries: number;
   private readonly botPersistRetryDelayMs: number;
   private readonly botDriverRescheduleMs: number;
@@ -189,6 +203,7 @@ export class GameHub {
     this.metrics = options.metrics ?? NOOP_METRICS;
     this.botMoveDelayMs = options.botMoveDelayMs ?? 600;
     this.turnTimeoutMs = options.turnTimeoutMs ?? DEFAULT_TURN_TIMEOUT_MS;
+    this.autoPlayPauseAfter = options.autoPlayPauseAfter ?? DEFAULT_AUTOPLAY_PAUSE_AFTER;
     this.botPersistRetries = options.botPersistRetries ?? DEFAULT_BOT_PERSIST_RETRIES;
     this.botPersistRetryDelayMs =
       options.botPersistRetryDelayMs ?? DEFAULT_BOT_PERSIST_RETRY_DELAY_MS;
@@ -306,6 +321,8 @@ export class GameHub {
     this.lastCamera.delete(gameId);
     this.clearYourTurnTimer(gameId);
     this.clearTurnTimer(gameId);
+    this.timeoutStreak.delete(gameId);
+    this.autoPlayPaused.delete(gameId);
     // After removal the bot driver's next registry.get() misses and its loop exits;
     // stragglers' commands take the existing NOT_IN_GAME path.
     this.registry.remove(gameId);
@@ -597,6 +614,10 @@ export class GameHub {
     conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
     this.members.get(binding.gameId)?.set(binding.playerId, conn);
     this.cancelLeaveCheck(binding.gameId, binding.playerId);
+    // A seated human is (back) in the room: reset the AFK streak, and if the game had been marked
+    // inactive re-arm the per-turn timer. Spectator binds never resume — they cannot act, so
+    // resuming for them would just hand the game back to the bots with no player present.
+    this.resumeAutoPlay(match);
     // Only announce a return if a "left" notice actually fired earlier — a reconnect inside the
     // debounce window (the common reload/blip case) was never announced, so it stays silent.
     if (this.leftNotice.get(binding.gameId)?.has(binding.playerId)) {
@@ -800,6 +821,8 @@ export class GameHub {
         return;
       }
       conn.lastClientSeq = env.clientSeq;
+      // A real human action clears any inactive marking; the broadcast below re-arms the timer.
+      this.resumeAutoPlay(match, false);
       this.broadcast(match, prep.prepared.events, conn, env.clientSeq);
       this.metrics.commandApplied((performance.now() - startedAt) / 1000);
     });
@@ -1031,6 +1054,42 @@ export class GameHub {
     this.turnDeadlines.delete(gameId);
   }
 
+  /** Whether any seated human currently holds a live socket for this game (bots never connect,
+   *  and spectators are tracked separately, so `members` is seated humans by construction). */
+  private hasConnectedHuman(gameId: string): boolean {
+    for (const playerId of this.members.get(gameId)?.keys() ?? []) {
+      if (!isBotId(playerId)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Mark a game inactive and suspend its per-turn auto-play: its humans kept timing out
+   * (`afk_streak`) or none of them held a live socket when the timer lapsed
+   * (`no_humans_connected`). The match simply rests at a human turn — bots only act on their own
+   * turns, so nothing advances until `resumeAutoPlay` (a seat (re)bind or a real human action).
+   */
+  private pauseAutoPlay(match: Match, reason: 'afk_streak' | 'no_humans_connected'): void {
+    const gameId = match.session.gameId;
+    if (!this.autoPlayPaused.has(gameId)) {
+      this.autoPlayPaused.add(gameId);
+      this.metrics.autoPlayPaused?.(reason);
+      this.log.warn(`game ${gameId} marked inactive (${reason}); per-turn auto-play paused`);
+    }
+    this.clearTurnTimer(gameId);
+    this.broadcastTurnTimer(match, '', 0); // drop any countdown clients were showing
+  }
+
+  /** A human is present again — reset the AFK streak and, if the game had been marked inactive,
+   *  lift it (re-arming the timer unless the caller's own fan-out is about to). */
+  private resumeAutoPlay(match: Match, rearm = true): void {
+    const gameId = match.session.gameId;
+    this.timeoutStreak.delete(gameId);
+    if (!this.autoPlayPaused.delete(gameId)) return;
+    this.log.log(`game ${gameId} is active again; per-turn auto-play resumed`);
+    if (rearm) this.scheduleTurnTimeout(match);
+  }
+
   /**
    * (Re)arm the per-turn timeout after every commit, off the same fan-out humans and bots share.
    * A single human is ever "on the clock" (the current player in a single-actor phase); a bot turn,
@@ -1038,6 +1097,7 @@ export class GameHub {
    * means a player's own sub-actions (e.g. drawing the first of two cards) refresh their budget —
    * the timer bounds each pending decision, and once one lapses the rest of that turn is completed
    * at once in `runTurnTimeout`. Also fans out the cosmetic `TurnTimer` countdown to every client.
+   * A game marked inactive stays disarmed here until a human bind/action resumes it.
    */
   private scheduleTurnTimeout(match: Match): void {
     const gameId = match.session.gameId;
@@ -1047,6 +1107,16 @@ export class GameHub {
       this.turnTimers.delete(gameId);
     }
     if (this.turnTimeoutMs <= 0) return; // disabled (tests)
+
+    if (match.session.phase === 'GAME_OVER') {
+      // Terminal hygiene — a finished game can never pause or resume again.
+      this.timeoutStreak.delete(gameId);
+      this.autoPlayPaused.delete(gameId);
+    } else if (this.autoPlayPaused.has(gameId)) {
+      // Inactive — stay disarmed (and keep client countdowns cleared) until a human returns.
+      if (this.turnDeadlines.delete(gameId)) this.broadcastTurnTimer(match, '', 0);
+      return;
+    }
 
     const hadCountdown = this.turnDeadlines.has(gameId);
     this.turnDeadlines.delete(gameId);
@@ -1092,12 +1162,22 @@ export class GameHub {
    * action), looping until the turn leaves them. A turn is at most a few sub-actions (drawing two
    * cards is the max), so the guard is generous. Chosen from `legalActions`, so it can never inject
    * an illegal move; a persist failure bails (the player keeps the turn, a later commit re-arms).
+   *
+   * Two guards keep a deserted table from playing itself to completion (the auto-play exists to
+   * keep the game moving for the OTHER people at it, so with nobody around it has no purpose):
+   * a lapse that finds no seated human socket at all pauses the game instead of auto-playing, and
+   * `autoPlayPauseAfter` consecutive auto-played turns with no real human action in between pause
+   * it even while sockets linger open.
    */
   private async runTurnTimeout(gameId: string, actor: PlayerId): Promise<void> {
     const match = this.registry.get(gameId);
     if (!match) return;
+    if (!this.hasConnectedHuman(gameId)) {
+      this.pauseAutoPlay(match, 'no_humans_connected');
+      return;
+    }
+    let autoPlayed = false;
     await match.queue.run(async () => {
-      let autoPlayed = false;
       for (let guard = 0; guard < 20; guard++) {
         const s = match.session;
         // Re-check under the queue: the player may have acted while we waited for the lock.
@@ -1123,7 +1203,15 @@ export class GameHub {
         this.metrics.commandApplied((performance.now() - startedAt) / 1000);
       }
     });
-    // The auto-completed turn may now be a bot's — let the driver take over.
+    if (autoPlayed) {
+      const streak = (this.timeoutStreak.get(gameId) ?? 0) + 1;
+      this.timeoutStreak.set(gameId, streak);
+      if (this.autoPlayPauseAfter > 0 && streak >= this.autoPlayPauseAfter) {
+        this.pauseAutoPlay(match, 'afk_streak');
+      }
+    }
+    // The auto-completed turn may now be a bot's — let the driver take over (a paused game still
+    // lets bots finish the current round; it then rests at the next human turn, disarmed).
     void this.driveBots(gameId);
   }
 
