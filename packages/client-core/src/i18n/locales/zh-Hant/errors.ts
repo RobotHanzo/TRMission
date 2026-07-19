@@ -1,0 +1,28 @@
+// Engine/server rejection reasons shown to the acting player. Both clients get the full set —
+// these mirror the engine's error taxonomy, which is identical online and offline.
+export default {
+  routeClosedByEvent: '此路線因颱風暫時封閉',
+  eventClaimsSuspended: '颱風假：本輪不可佔領路線',
+  eventStationsSuspended: '颱風假：本輪不可建車站',
+  eventFaceupLocoBlocked: '全車對號入座期間不可拿取翻開的彩虹車頭',
+  eventRepairUnavailable: '這條路線目前無法搶修',
+  eventRepairPaymentInvalid: '搶修需要兩張同色牌或一張搶修許可',
+  eventNightMarketUnavailable: '本回合目前無法逛夜市',
+  eventLanternRelocationInvalid: '這座城市不能成為新的燈會主辦城',
+  eventDraftChoiceInvalid: '目前無法選擇這項調度能力',
+  eventHiveUnavailable: '目前無法進行蜂炮試膽',
+  eventResourceUnavailable: '沒有可使用的事件資源',
+  lanternRelocationRequired: '請先移動燈會主辦標記',
+  invalidLanternHostCity: '這座城市不能成為新的燈會主辦城',
+  noBentoToken: '你沒有可使用的便當',
+  invalidBentoSpend: '這次佔領不能使用該便當效果',
+  routeNotRepairable: '這條路線目前無法搶修',
+  invalidRepairPayment: '搶修需要兩張同色牌或一張搶修許可',
+  routeBroken: '這是斷軌路線，須先搶修才能鋪設',
+  routeRepairExclusive: '搶修者本輪享有優先鋪設權，請稍候',
+  nightMarketUnavailable: '本回合目前無法逛夜市',
+  invalidNightMarketSwap: '無法交換這組車廂卡',
+  invalidEventPerk: '無法選擇這項調度能力',
+  hiveDrawUnavailable: '目前無法進行蜂炮試膽',
+  faceupLocomotiveReserved: '全車對號入座期間不可拿取翻開的彩虹車頭',
+};
