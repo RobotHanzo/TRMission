@@ -1,16 +1,19 @@
 // The bot brain. `chooseBotAction` ranks every *legal* action (candidates come straight
 // from the engine's `legalActions`, so a bot can never emit an illegal move) by a
 // difficulty-tuned utility and returns the best one. Four difficulties differ in:
-//   • planning  — whether the bot routes toward its destination tickets (and, at the top
-//     tier, plans all tickets jointly so their paths share a trunk),
-//   • noise      — random jitter that makes weak bots play loosely,
-//   • drafting   — whether it draws extra tickets mid-game,
-//   • stations    — whether it spends a station to rescue a blocked ticket (HELL also
-//     builds one proactively when borrowing an opponent edge beats the detour),
-//   • eventSense — whether event actions are scored in context (HELL) or by flat priors.
+//   • planning  — 1: route toward tickets; 2: +stations & ticket drafting; 3: joint
+//     multi-ticket planning (paths share a trunk) + proactive stations + bottleneck
+//     grabs; 4 (HELL): +tunnel risk priced off unseen-pool card counting, colour-reserve
+//     payment discipline, point-density claim tilt, longest-trail contention, and endgame
+//     tempo keyed to the authoritative countdown,
+//   • noise      — random jitter that makes the entry tier play loosely,
+//   • eventSense — whether event actions are scored in context (HARD+) or by flat priors.
 //
 // Decisions use only fair information (the bot's own hand/tickets + public board state),
-// the same a human client could compute — the hidden event schedule is never read.
+// the same a human client could compute — the hidden event schedule, the deck order, and
+// opponents' hand colours / ticket ids are never read. HELL's card counting works off the
+// PUBLIC discard/market counts; its opponent awareness reads only claimed routes (public
+// ownership) and the public endgame countdown.
 // Picks are a deterministic function of state + botId, so behaviour is reproducible
 // (handy for tests); the chosen action is logged like any other, so replay/recovery
 // never depends on the policy.
@@ -26,16 +29,21 @@ import {
   activeHarvestRegion,
   processionCurrentCity,
   groupMembersOf,
+  effectiveTunnelRevealCount,
+  longestTrail,
+  longestTrailWithPath,
 } from '@trm/engine';
-import type { Action, Board, GameState } from '@trm/engine';
-import { TRAIN_COLORS } from '@trm/shared';
+import type { Action, Board, GameState, TrailEdge } from '@trm/engine';
+import { TRAIN_COLORS, CARD_COLORS, buildDeckComposition } from '@trm/shared';
 import type { PlayerId, CardColor, TrainColor, TicketId, RouteId, CityId } from '@trm/shared';
 import type { BotDifficulty } from './types';
 
 interface Knobs {
-  /** 0 = ignore tickets, 1 = route toward tickets, 2 = +stations & ticket drafting,
-   *  3 = joint multi-ticket planning + proactive stations + opponent awareness. */
-  readonly planning: 0 | 1 | 2 | 3;
+  /** 1 = route toward tickets, 2 = +stations & ticket drafting,
+   *  3 = joint multi-ticket planning + proactive stations + opponent awareness,
+   *  4 = +tunnel risk pricing, colour reserve, point-density tilt, longest-trail
+   *  contention, endgame tempo. */
+  readonly planning: 1 | 2 | 3 | 4;
   /** Magnitude of random score jitter — high makes a bot play sloppily. */
   readonly noise: number;
   readonly draftTickets: boolean;
@@ -50,15 +58,6 @@ interface Knobs {
 
 const KNOBS: Record<BotDifficulty, Knobs> = {
   EASY: {
-    planning: 0,
-    noise: 6,
-    draftTickets: false,
-    useStations: false,
-    locoPenalty: 1.5,
-    keepFactor: 0,
-    eventSense: false,
-  },
-  MEDIUM: {
     planning: 1,
     noise: 1.5,
     draftTickets: true,
@@ -67,7 +66,7 @@ const KNOBS: Record<BotDifficulty, Knobs> = {
     keepFactor: 0.6,
     eventSense: false,
   },
-  HARD: {
+  MEDIUM: {
     planning: 2,
     noise: 0,
     draftTickets: true,
@@ -76,7 +75,7 @@ const KNOBS: Record<BotDifficulty, Knobs> = {
     keepFactor: 0.7,
     eventSense: false,
   },
-  HELL: {
+  HARD: {
     planning: 3,
     noise: 0,
     draftTickets: true,
@@ -85,7 +84,31 @@ const KNOBS: Record<BotDifficulty, Knobs> = {
     keepFactor: 0.7,
     eventSense: true,
   },
+  HELL: {
+    planning: 4,
+    noise: 0,
+    draftTickets: true,
+    useStations: true,
+    locoPenalty: 2.5,
+    keepFactor: 0.7,
+    eventSense: true,
+  },
 };
+
+// HELL scoring weights, tuned with test/strength.harness.spec.ts against the HARD policy
+// (60W-38L-2T, +11.1 mean margin over 100 seeded 2p matches at these values). Ablations that
+// LOST to HARD and were dropped: opponent-corridor denial maps, ticket-race draft suppression,
+// unseen-pool blind/face-up draw EV, and a contested-bottleneck claim bonus.
+/** Expected-overpay weight per (reveal × match-probability) unit on tunnel claims. */
+const TUNNEL_RISK = 0.6;
+/** Penalty per card of an off-plan payment that dips below a wanted colour's reserve. */
+const RESERVE_W = 0.8;
+/** Point-density tilt weight (scaled by game-phase urgency). */
+const PPT_W = 3;
+/** Early-game damping on off-plan length<=2 claims. */
+const SHORT_DAMP = 1.5;
+/** Trail-endpoint claim bonus before the countdown starts (2 once it runs). */
+const TRAIL_EARLY_W = 0.8;
 
 /** Base bias that makes claiming any affordable route beat a plain card draw → trains drain → game ends. */
 const CLAIM_BIAS = 4;
@@ -116,6 +139,19 @@ interface Ctx {
   readonly endgameNear: boolean;
   /** Kept tickets not yet connected by the bot's own track. */
   readonly incompleteTickets: number;
+  // ── HELL-only context (planning >= 4); zero/empty for lower tiers ──
+  /** Per-colour count of cards NOT visible to the bot (deck + opponents' hands, estimated
+   *  as full composition − own hand − market − discard − pending tunnel reveal). */
+  readonly unseen: Readonly<Record<CardColor, number>>;
+  readonly unseenTotal: number;
+  /** The authoritative endgame countdown has started (public `state.endgame`). */
+  readonly lastRound: boolean;
+  /** Own full turns left once the countdown runs (Infinity before it triggers). */
+  readonly myTurnsLeft: number;
+  /** Walk endpoints of the bot's own current longest trail, when the bonus is contested. */
+  readonly trailEndpoints: ReadonlySet<string>;
+  /** colour → largest single unclaimed wanted-route cost in that colour (reserve target). */
+  readonly neededAmount: ReadonlyMap<TrainColor, number>;
 }
 
 /** Pick the bot's move for the current state, or null if it has nothing to do right now. */
@@ -206,18 +242,52 @@ function scoreClaim(a: Extract<Action, { t: 'CLAIM_ROUTE' }>, ctx: Ctx): number 
     if (pull !== undefined && !hasOpenAlternative(ctx, a.routeId as string)) v += 2;
     // Discipline: while a live ticket plan exists and trains are plentiful, off-plan claims
     // burn the trains the plan needs. Once trains run low the brake releases so the endgame
-    // still drains them (termination stays safe).
+    // still drains them (termination stays safe). HELL also releases it the moment the
+    // authoritative countdown starts — no plan pays off beyond what is banked by then.
     if (
       pull === undefined &&
       ctx.incompleteTickets > 0 &&
       ctx.wanted.size > 0 &&
-      ctx.trainCars > 10
+      ctx.trainCars > 10 &&
+      !ctx.lastRound
     )
       v -= 6;
   }
   if (ctx.knobs.eventSense) {
     v += eventClaimBonus(a.routeId as string, r, pts, ctx);
     v += paymentShaping(a.payment, r.length);
+  }
+  if (ctx.knobs.planning >= 4) {
+    // Tunnel risk: expected surcharge = reveal count × P(a revealed card matches the payment),
+    // over the unseen pool. Also steers WHICH payment variant to use (scarce colour matches less).
+    if (r.isTunnel) {
+      const pMatch =
+        ((a.payment.color ? (ctx.unseen[a.payment.color] ?? 0) : 0) +
+          (ctx.unseen.LOCOMOTIVE ?? 0)) /
+        ctx.unseenTotal;
+      v -= effectiveTunnelRevealCount(ctx.state) * pMatch * TUNNEL_RISK;
+    }
+    // Colour reserve: don't fund an off-plan claim with a colour a wanted route still needs.
+    if (a.payment.color && pull === undefined) {
+      const reserve = ctx.neededAmount.get(a.payment.color as TrainColor);
+      if (reserve !== undefined) {
+        const after = (ctx.hand[a.payment.color] ?? 0) - a.payment.colorCount;
+        if (after < reserve) v -= Math.min(a.payment.colorCount, reserve - after) * RESERVE_W;
+      }
+    }
+    // Point density: the route score table is convex (a len-6 banks 2.5 pts/train vs 1 for a
+    // len-2), so tilt every claim toward long, point-dense routes — the tilt strengthens as
+    // the table closes, and on our own final turn nothing but banked points matters.
+    const urgency = ctx.lastRound ? 1 : ctx.endgameNear ? 0.5 : 0.25;
+    v += (pts / Math.max(1, r.length) - 1) * urgency * PPT_W;
+    if (ctx.myTurnsLeft <= 1) v += pts * 0.5;
+    // Early short-route claims waste tempo a long dump would spend better (convex scoring).
+    if (SHORT_DAMP > 0 && r.length <= 2 && pull === undefined && !ctx.endgameNear && !ctx.lastRound)
+      v -= SHORT_DAMP;
+    // Longest-trail contention: extend our own best trail from its endpoints while the bonus
+    // is still in reach of a rival.
+    if (ctx.trailEndpoints.has(r.a as string) || ctx.trailEndpoints.has(r.b as string))
+      v += ctx.lastRound ? 2 : TRAIL_EARLY_W;
   }
   return v;
 }
@@ -283,6 +353,8 @@ function scoreFaceup(a: Extract<Action, { t: 'DRAW_FACEUP' }>, ctx: Ctx): number
 
 function scoreDrawTickets(ctx: Ctx): number {
   if (!ctx.knobs.draftTickets) return -50;
+  // HELL: never draft into the confirmed countdown — there is no runway left to build.
+  if (ctx.lastRound) return -50;
   if (ctx.knobs.planning >= 3) {
     // Draft eagerly once every kept ticket is built (a mature network completes fresh
     // tickets cheaply), otherwise at HARD's cautious pace; never near the endgame.
@@ -333,7 +405,6 @@ function scoreTunnel(a: Extract<Action, { t: 'RESOLVE_TUNNEL' }>, ctx: Ctx): num
 
 /** Value of keeping a particular set of tickets (offered at setup or mid-game). */
 function scoreKeep(keep: readonly TicketId[], ctx: Ctx): number {
-  if (ctx.knobs.planning === 0) return -keep.length; // weak bots keep the minimum, lowest risk
   if (ctx.knobs.planning >= 3) return scoreKeepSet(keep, ctx);
   let total = 0;
   for (const tid of keep) total += keepValue(tid, ctx);
@@ -475,6 +546,14 @@ function buildContext(board: Board, state: GameState, botId: PlayerId, knobs: Kn
     }
   }
 
+  const hell = knobs.planning >= 4;
+  const pool = hell ? unseenPool(state, hand) : null;
+  const neededAmount = new Map<TrainColor, number>();
+  const lastRound = hell && state.endgame.triggered;
+  const myTurnsLeft = lastRound
+    ? Math.ceil(state.endgame.finalTurnsRemaining / Math.max(1, state.turnOrder.length))
+    : Infinity;
+
   let incompleteTickets = 0;
 
   const ctx: Ctx = {
@@ -495,6 +574,12 @@ function buildContext(board: Board, state: GameState, botId: PlayerId, knobs: Kn
     get incompleteTickets() {
       return incompleteTickets;
     },
+    unseen: pool?.unseen ?? emptyHand(),
+    unseenTotal: pool?.total ?? 1,
+    lastRound,
+    myTurnsLeft,
+    trailEndpoints: hell ? contestedTrailEndpoints(board, state, botId) : EMPTY_SET,
+    neededAmount,
   };
 
   if (knobs.planning >= 1) {
@@ -516,7 +601,13 @@ function buildContext(board: Board, state: GameState, botId: PlayerId, knobs: Kn
       for (const rid of path.routeIds) {
         wanted.set(rid, (wanted.get(rid) ?? 0) + share);
         const r = board.routeById.get(rid);
-        if (r && r.color !== 'GRAY') needed.add(r.color as TrainColor);
+        if (r && r.color !== 'GRAY') {
+          needed.add(r.color as TrainColor);
+          if (hell) {
+            const c = r.color as TrainColor;
+            neededAmount.set(c, Math.max(neededAmount.get(c) ?? 0, r.length));
+          }
+        }
       }
     }
   }
@@ -589,6 +680,80 @@ const emptyHand = (): Record<CardColor, number> => {
   h.LOCOMOTIVE = 0;
   return h;
 };
+
+// ── HELL-only context builders (planning >= 4) ───────────────────────────────
+
+/**
+ * Per-colour census of the cards the bot cannot see (deck + opponents' hands), from PUBLIC
+ * counts only: full composition − own hand − face-up market − discard − pending tunnel reveal.
+ * The exchangeability posterior unseen[c]/total is then the fair estimate of "next blind card
+ * is colour c" — exactly the count a card-counting human could keep.
+ */
+function unseenPool(
+  state: GameState,
+  hand: Readonly<Record<CardColor, number>>,
+): { unseen: Record<CardColor, number>; total: number } {
+  const unseen = buildDeckComposition(state.ruleParams);
+  for (const c of CARD_COLORS)
+    unseen[c] = Math.max(0, unseen[c] - (hand[c] ?? 0) - (state.discard[c] ?? 0));
+  for (const m of state.market) if (m) unseen[m] = Math.max(0, unseen[m] - 1);
+  for (const c of state.pendingTunnel?.revealed ?? []) unseen[c] = Math.max(0, unseen[c] - 1);
+  let total = 0;
+  for (const c of CARD_COLORS) total += unseen[c];
+  return { unseen, total: Math.max(1, total) };
+}
+
+/** Owned routes of `pid` as weighted trail edges (ownership is public). */
+function trailEdgesOf(board: Board, state: GameState, pid: PlayerId): TrailEdge[] {
+  const edges: TrailEdge[] = [];
+  for (const [routeId, cell] of Object.entries(state.ownership)) {
+    if ('owner' in cell && cell.owner === pid) {
+      const r = board.routeById.get(routeId);
+      if (r) edges.push({ u: r.a as string, v: r.b as string, w: r.length });
+    }
+  }
+  return edges;
+}
+
+/** Small deterministic budget: mid-game networks are tiny next to final-scoring's default. */
+const TRAIL_BUDGET = 20_000;
+
+/**
+ * Walk endpoints (odd-degree vertices) of the bot's own current longest trail — but only while
+ * the longest-trail bonus is contested (a rival's trail is within striking distance, mirroring
+ * how final scoring awards ties to everyone at the max). Empty set ⇒ don't chase the bonus.
+ */
+function contestedTrailEndpoints(
+  board: Board,
+  state: GameState,
+  botId: PlayerId,
+): ReadonlySet<string> {
+  const mine = trailEdgesOf(board, state, botId);
+  if (mine.length === 0) return EMPTY_SET;
+  let bestRival = 0;
+  for (const pid of state.turnOrder) {
+    if (pid === botId) continue;
+    const rival = longestTrail(trailEdgesOf(board, state, pid), TRAIL_BUDGET);
+    bestRival = Math.max(bestRival, rival);
+  }
+  const my = longestTrailWithPath(mine, TRAIL_BUDGET);
+  if (my.length < bestRival - 4) return EMPTY_SET; // out of reach — points elsewhere are better
+  const degree = new Map<string, number>();
+  for (const i of my.edges) {
+    const e = mine[i];
+    if (!e) continue;
+    degree.set(e.u, (degree.get(e.u) ?? 0) + 1);
+    degree.set(e.v, (degree.get(e.v) ?? 0) + 1);
+  }
+  const endpoints = new Set<string>();
+  for (const [city, d] of degree) if (d % 2 === 1) endpoints.add(city);
+  if (endpoints.size === 0) {
+    // A closed trail (Euler circuit over the owned loop) has no odd-degree vertex, but it can
+    // be broken open and extended from ANY of its cities — every visited city is an endpoint.
+    for (const city of degree.keys()) endpoints.add(city);
+  }
+  return endpoints;
+}
 
 /** Is a route currently usable for the bot to traverse/claim? */
 function routeUsable(ctx: Ctx, routeId: string): 'owned' | 'open' | 'enemy' | null {
