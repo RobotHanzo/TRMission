@@ -315,6 +315,7 @@ export function EventTurnActions({
 
 const styles = StyleSheet.create({
   bar: {
+    maxWidth: '100%',
     borderWidth: 1,
     borderRadius: RADIUS.md,
     paddingHorizontal: 10,
@@ -326,7 +327,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   barTitle: { fontSize: 13, fontWeight: '700' },
-  barRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  barRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   turnActions: { gap: 8 },
   btn: {
     minHeight: 40,

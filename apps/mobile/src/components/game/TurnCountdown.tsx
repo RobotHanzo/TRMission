@@ -34,9 +34,7 @@ export function TurnCountdown({ floating }: { floating?: boolean | undefined }) 
   if (paused) {
     return (
       <View testID="game-paused" style={shellStyle} accessibilityRole="text">
-        <Text style={[styles.pausedText, { color: tokens.inkSoft }]}>
-          {t('gamePausedBanner')}
-        </Text>
+        <Text style={[styles.pausedText, { color: tokens.inkSoft }]}>{t('gamePausedBanner')}</Text>
       </View>
     );
   }
@@ -52,9 +50,7 @@ export function TurnCountdown({ floating }: { floating?: boolean | undefined }) 
       accessibilityLiveRegion={cd.warning && cd.isSelf ? 'assertive' : 'none'}
       accessibilityLabel={t('turnTimeRemaining', { seconds: cd.seconds })}
     >
-      <Text
-        style={[styles.secs, { color: cd.warning ? tokens.danger : tokens.ink }]}
-      >
+      <Text style={[styles.secs, { color: cd.warning ? tokens.danger : tokens.ink }]}>
         {cd.seconds}
       </Text>
       <View style={[styles.track, { backgroundColor: rgba(tokens.ink, 0.1) }]}>
@@ -75,6 +71,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   floating: {
+    // Fixed chip width: the depleting track is flex and would collapse in a hug-content
+    // (centered) float column.
+    width: 220,
+    maxWidth: '100%',
     shadowOpacity: 0.1,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },

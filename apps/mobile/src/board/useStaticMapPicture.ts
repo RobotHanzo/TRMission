@@ -14,6 +14,7 @@
 // fallback renders — this is a performance cache, never a correctness dependency.
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
+import { Platform } from 'react-native';
 import {
   Skia,
   drawAsPicture,
@@ -22,6 +23,24 @@ import {
   type SkRect,
 } from '@shopify/react-native-skia';
 import type { RasterSpec } from './camera';
+
+/** Release a replaced/unmounted picture's native command buffer. On WEB the CanvasKit view's
+ *  draw loop is decoupled from React commits — a queued rAF frame can still replay the OLD
+ *  picture after the swap has committed, and drawing a deleted wasm object is a BindingError
+ *  ("Cannot pass deleted object as a pointer of type sk_sp<Picture>"). Two frames of grace let
+ *  any in-flight frame finish; native sksg has dropped the node by effect time (device-proven),
+ *  so it keeps the immediate release. */
+const disposePicture = (pic: SkPicture): void => {
+  if (Platform.OS !== 'web') {
+    pic.dispose?.();
+    return;
+  }
+  const raf =
+    typeof requestAnimationFrame === 'function'
+      ? requestAnimationFrame
+      : (cb: () => void) => setTimeout(cb, 32);
+  raf(() => raf(() => pic.dispose?.()));
+};
 
 export function useStaticMapPicture(
   element: ReactElement,
@@ -50,16 +69,16 @@ export function useStaticMapPicture(
     };
   }, deps);
 
-  // Release the REPLACED picture's native command buffer once the swap has committed (the old
-  // one is out of the sksg tree by the time this effect runs); the final one on unmount.
+  // Release the REPLACED picture's native command buffer once the swap has committed (via
+  // disposePicture — immediate on native, frame-deferred on web); the final one on unmount.
   const prevPicture = useRef<SkPicture | null>(null);
   useEffect(() => {
-    if (prevPicture.current && prevPicture.current !== picture) prevPicture.current.dispose?.();
+    if (prevPicture.current && prevPicture.current !== picture) disposePicture(prevPicture.current);
     prevPicture.current = picture;
   }, [picture]);
   useEffect(
     () => () => {
-      prevPicture.current?.dispose?.();
+      if (prevPicture.current) disposePicture(prevPicture.current);
       prevPicture.current = null;
     },
     [],

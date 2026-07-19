@@ -4,9 +4,7 @@
 // this; here the camera IS the board-space view descriptor, so every framing consumes/produces
 // {cx, cy, span} directly. Purely snapshot-driven: no store writes besides the animation expiries.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { PixelRatio, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
-import { Canvas, Group } from '@shopify/react-native-skia';
-import { GestureDetector } from 'react-native-gesture-handler';
+import { PixelRatio, Platform, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
 import type { GameSnapshot } from '@trm/proto';
 import { MAP_PALETTE_DARK, MAP_PALETTE_LIGHT } from '@trm/map-data';
@@ -41,7 +39,13 @@ import { buildHitScene, hitTest } from './hitTest';
 import { latestActionPoi, shouldDisengageFollow } from './followModel';
 import { useBoardCamera, type BoardCamera } from './useBoardCamera';
 import { MapSceneSkia, SCENE_OVERSCAN } from './MapSceneSkia';
+import { BoardCanvas } from './BoardCanvas';
 import { BoardControls } from './BoardControls';
+
+/** On react-native-web the canvas never redraws mid-gesture (BoardCanvas.web.tsx moves it with a
+ *  CSS transform instead), so the settled raster snapshot — whose whole point is cheap per-frame
+ *  pan blits — would only add a wasm readback stall at every settle. Skip it there. */
+const USE_GESTURE_RASTER = Platform.OS !== 'web';
 
 /** A claimed route glows for this long once it actually comes into view. */
 const GLOW_MS = 1300;
@@ -394,7 +398,7 @@ function BoardInner({
     [],
   );
   const raster = useMemo(
-    () => rasterSpec(cam.settled, vp, sceneBounds, PixelRatio.get()),
+    () => (USE_GESTURE_RASTER ? rasterSpec(cam.settled, vp, sceneBounds, PixelRatio.get()) : null),
     [cam.settled, vp, sceneBounds],
   );
 
@@ -489,40 +493,36 @@ function BoardInner({
 
   return (
     <View style={styles.fill}>
-      <GestureDetector gesture={cam.gesture}>
-        <Canvas style={styles.fill}>
-          <Group transform={cam.transform}>
-            <MapSceneSkia
-              cities={CITIES}
-              routes={ROUTES}
-              geometry={ROUTE_GEOMETRY}
-              hubs={HUB_CITIES}
-              geography={ACTIVE_GEOGRAPHY}
-              view={ACTIVE_BASE_VIEW}
-              owned={owned}
-              stations={stationCities}
-              glowingRoutes={startedGlowRoutes}
-              glowingStations={glowingStations}
-              highlightCities={highlightCities}
-              colorBlind={colorBlind}
-              repairedRoutes={repairedRoutes}
-              cityLabel={(c) => cityName(c.id, locale)}
-              cityTier={cityTier}
-              bucket={cam.lod.bucket}
-              inv={cam.lod.inv}
-              marker={cam.lod.marker}
-              palette={palette}
-              events={snapshot.randomEvents ? events : undefined}
-              sweeps={sweeps}
-              routeReveal={routeReveal}
-              reducedMotion={reducedMotion}
-              motionSV={cam.movingSV}
-              zoomingSV={cam.zoomingSV}
-              raster={raster}
-            />
-          </Group>
-        </Canvas>
-      </GestureDetector>
+      <BoardCanvas cam={cam} vp={vp}>
+        <MapSceneSkia
+          cities={CITIES}
+          routes={ROUTES}
+          geometry={ROUTE_GEOMETRY}
+          hubs={HUB_CITIES}
+          geography={ACTIVE_GEOGRAPHY}
+          view={ACTIVE_BASE_VIEW}
+          owned={owned}
+          stations={stationCities}
+          glowingRoutes={startedGlowRoutes}
+          glowingStations={glowingStations}
+          highlightCities={highlightCities}
+          colorBlind={colorBlind}
+          repairedRoutes={repairedRoutes}
+          cityLabel={(c) => cityName(c.id, locale)}
+          cityTier={cityTier}
+          bucket={cam.lod.bucket}
+          inv={cam.lod.inv}
+          marker={cam.lod.marker}
+          palette={palette}
+          events={snapshot.randomEvents ? events : undefined}
+          sweeps={sweeps}
+          routeReveal={routeReveal}
+          reducedMotion={reducedMotion}
+          motionSV={cam.movingSV}
+          zoomingSV={cam.zoomingSV}
+          raster={raster}
+        />
+      </BoardCanvas>
 
       {!sandbox && <CameraSync snapshot={snapshot} cam={cam} />}
       <RevealFramer cam={cam} />

@@ -76,7 +76,13 @@ export function RootNavigator(): React.JSX.Element {
         <>
           <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Room" component={RoomScreen} options={{ title: t('room.title') }} />
-          <Stack.Screen name="Game" component={GameScreen} options={{ title: t('game.title') }} />
+          {/* Game surfaces are full-bleed: the stage's floating leave chip replaces the header
+              back button (the title still names the browser tab in the web harness). */}
+          <Stack.Screen
+            name="Game"
+            component={GameScreen}
+            options={{ title: t('game.title'), headerShown: false }}
+          />
           <Stack.Screen
             name="OfflineSetup"
             component={OfflineSetupScreen}
@@ -85,7 +91,7 @@ export function RootNavigator(): React.JSX.Element {
           <Stack.Screen
             name="OfflineGame"
             component={OfflineGameScreen}
-            options={{ title: t('game.title') }}
+            options={{ title: t('game.title'), headerShown: false }}
           />
           <Stack.Screen
             name="Tutorial"

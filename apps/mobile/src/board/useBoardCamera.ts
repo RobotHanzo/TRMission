@@ -42,6 +42,10 @@ const ANIMATE_SETTLE_SLACK_MS = 120;
  *  near-continuously without per-frame JS work. */
 const MID_GESTURE_LOD_RATIO = 1.12;
 
+/** A wheel-zoom burst counts as ONE motion: it settles this long after the last tick, so the
+ *  crisp settle redraw lands right after the scroll stops instead of once per notch. */
+const WHEEL_SETTLE_MS = 160;
+
 export interface BoardLod {
   bucket: ZoomBucket;
   /** Track-weight / label counter-scale (web --inv-scale). */
@@ -75,6 +79,10 @@ export interface BoardCamera {
   snapTo: (cam: CameraState) => void;
   /** Read the live camera on the JS thread (for hit-testing / broadcast). */
   currentCamera: () => CameraState;
+  /** Focal-anchored step zoom for a mouse wheel (the react-native-web harness — desktop has no
+   *  pinch). A burst of ticks is one motion: it begins on the first tick, disengages follow like
+   *  any manual gesture, and settles WHEEL_SETTLE_MS after the last tick. */
+  wheelZoom: (focal: { x: number; y: number }, factor: number) => void;
 }
 
 export interface UseBoardCameraOpts {
@@ -245,6 +253,42 @@ export function useBoardCamera(
     [cx, cy, span],
   );
 
+  // Wheel zoom (web harness). Shared values are writable from the JS thread, so each tick applies
+  // the same focal-anchored pinch math directly; the idle timer folds a whole scroll burst into
+  // one begin/end motion pair (one follow-disengage, one settle redraw).
+  const wheelIdle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (wheelIdle.current !== null) clearTimeout(wheelIdle.current);
+    },
+    [],
+  );
+  const wheelZoom = useCallback(
+    (focal: { x: number; y: number }, factor: number) => {
+      if (wheelIdle.current === null) {
+        beginMotion();
+        notifyGesture();
+      } else {
+        clearTimeout(wheelIdle.current);
+      }
+      wheelIdle.current = setTimeout(() => {
+        wheelIdle.current = null;
+        endMotion();
+      }, WHEEL_SETTLE_MS);
+      const next = pinchTo(
+        { cx: cx.value, cy: cy.value, span: span.value },
+        focal,
+        factor,
+        vp,
+        view,
+      );
+      cx.value = next.cx;
+      cy.value = next.cy;
+      span.value = next.span;
+    },
+    [beginMotion, endMotion, notifyGesture, cx, cy, span, vp, view],
+  );
+
   const transform = useDerivedValue<Transforms3d>(() => {
     const s = vp.w / span.value;
     return [
@@ -342,5 +386,6 @@ export function useBoardCamera(
     animateTo,
     snapTo,
     currentCamera,
+    wheelZoom,
   };
 }

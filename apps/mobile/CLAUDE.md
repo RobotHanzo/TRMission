@@ -44,9 +44,19 @@ this surface; a device smoke is still the real acceptance bar.
 - **Platform splits** (Metro resolves `.web.ts(x)` on web; jest/native never see them — they're
   typechecked standalone): `net/secureStore.web.ts` (refresh token in localStorage),
   `offline/localStore.web.ts` (in-memory saves — a reload loses offline games),
-  `screens/builderWebView.web.tsx` (iframe). Gated to `null` on web like under Expo Go:
+  `screens/builderWebView.web.tsx` (iframe), `board/BoardCanvas.web.tsx` (the board's camera —
+  see the board section). Gated to `null` on web like under Expo Go:
   `push/expoNotifications.ts`, `auth/googleSigninModule.ts`. Apple auth needs no gate
   (`requireOptionalNativeModule` stub; `isAvailableAsync()` → false).
+- **Board gestures on web**: there is no UI thread in a browser — a Reanimated-driven Skia
+  transform would force a full CanvasKit-wasm redraw per gesture frame. `BoardCanvas.web.tsx`
+  instead paints the canvas once per camera settle (viewport + overdraw margin) and moves it
+  with a composited CSS transform (`react-zoom-pan-pinch`-style, like the web client); a wheel
+  listener feeds `cam.wheelZoom` (focal-anchored; RNGH covers mouse drag + double-click). The
+  settled-raster snapshot is skipped on web (`BoardView`'s `USE_GESTURE_RASTER`), and replaced
+  static Pictures are disposed two frames late (`useStaticMapPicture.disposePicture`) because
+  CanvasKit's draw loop is decoupled from React commits — an immediate dispose throws
+  `BindingError: Cannot pass deleted object` from a queued frame.
 - **Alerts**: RNW's `Alert.alert` is a silent no-op, so `src/web/alertShim.ts` (installed from the
   web entry branch) maps it onto `window.confirm`/`window.alert` — OK runs the LAST non-cancel
   button, Cancel the `style: 'cancel'` one. Playwright must handle these as native dialogs
@@ -86,6 +96,10 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
   (`MID_GESTURE_LOD_RATIO` in `useBoardCamera.ts`), so track weights / markers / label tiers
   follow a pinch near-continuously. `HOME_SCALE_EQUIV = 2.4` anchors the span→scale-equivalent
   mapping. Never write JS-side styles per frame (the web's known jank source).
+- **The Canvas host is platform-split** (`board/BoardCanvas.tsx` / `.web.tsx`): native drives the
+  Skia `<Group>` transform from the camera's shared values (UI thread, per-frame, device-proven);
+  web must NOT redraw per frame — see "Board gestures on web" in the web-harness section. Both
+  implement the same `BoardCanvasProps` contract; keep them in sync.
 - **Motion rendering is split by gesture kind** (`useStaticMapPicture.ts` + `MapSceneSkia`'s
   `motionSV`/`zoomingSV` guard): a pure PAN blits the settled-camera raster snapshot
   (pixel-perfect under translation, one textured quad per frame); the moment the span changes

@@ -11,6 +11,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import {
+  ArrowLeft,
   Layers,
   MessageSquare,
   Sparkles,
@@ -386,6 +387,38 @@ export function GameStage({
     </View>
   ) : null;
 
+  // The floating HUD over the board (every tier — the nav header is hidden on game routes so the
+  // board is truly full-bleed): the leave chip where the header's back button sat, status chips
+  // centered beside it. The countdown joins only on compact, where no players panel carries it.
+  const floatHud = (top: number, withCountdown: boolean) => (
+    <View style={[styles.floatStack, { top }]} pointerEvents="box-none">
+      <Pressable
+        style={({ pressed }) => [
+          styles.leaveBtn,
+          {
+            backgroundColor: pressed ? tokens.surface2 : tokens.surface,
+            borderColor: tokens.line,
+            shadowColor: tokens.ink,
+          },
+        ]}
+        accessibilityRole="button"
+        accessibilityLabel={t('leaveGame')}
+        testID="stage-leave"
+        onPress={onLeave}
+      >
+        <ArrowLeft size={20} color={tokens.ink} />
+      </Pressable>
+      <View style={styles.floatChips} pointerEvents="box-none">
+        {spectatorBanner}
+        {turnBanner}
+        {eventPhaseBar}
+        {withCountdown && <TurnCountdown floating />}
+      </View>
+      {/* Mirror of the leave chip's footprint, so the chips center on the board. */}
+      <View style={styles.floatSpacer} pointerEvents="none" />
+    </View>
+  );
+
   const overlays = (
     <>
       {flow.claim && (
@@ -454,16 +487,7 @@ export function GameStage({
       <View style={[styles.fill, { backgroundColor: tokens.paper }]}>
         <View style={styles.fill}>
           {board}
-          {/* Floating status layer: turn/connection, event prompts, the ticking turn clock. */}
-          <View
-            style={[styles.floatStack, { top: insets.top + 6 }]}
-            pointerEvents="box-none"
-          >
-            {spectatorBanner}
-            {turnBanner}
-            {eventPhaseBar}
-            <TurnCountdown floating />
-          </View>
+          {floatHud(insets.top + 6, true)}
         </View>
         <View
           // The dock is the only always-mounted HUD surface on phones (its panels swap by tab).
@@ -583,13 +607,11 @@ export function GameStage({
   if (tier === 'three-pane') {
     return (
       <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: insets.top }]}>
-        <View style={styles.paneHeader}>
-          {spectatorBanner}
-          {turnBanner}
-          {eventPhaseBar}
-        </View>
         <View style={styles.row}>
-          <View style={styles.fill}>{board}</View>
+          <View style={styles.fill}>
+            {board}
+            {floatHud(8, false)}
+          </View>
           <ScrollView
             style={[styles.rail, { borderLeftColor: tokens.line }]}
             contentContainerStyle={styles.railContent}
@@ -615,13 +637,11 @@ export function GameStage({
   // two-pane: board + rail, with a rail↔comms tab pair (ports the web narrow-desktop branch).
   return (
     <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: insets.top }]}>
-      <View style={styles.paneHeader}>
-        {spectatorBanner}
-        {turnBanner}
-        {eventPhaseBar}
-      </View>
       <View style={styles.row}>
-        <View style={styles.fill}>{board}</View>
+        <View style={styles.fill}>
+          {board}
+          {floatHud(8, false)}
+        </View>
         <View style={[styles.rail, { borderLeftColor: tokens.line }]}>
           {!sandbox && (
             <View style={styles.commsTabs} accessibilityRole="tablist">
@@ -641,9 +661,7 @@ export function GameStage({
                     accessibilityState={{ selected: active }}
                     onPress={() => setCommsTab(key)}
                   >
-                    <Text
-                      style={[styles.dockTabText, { color: active ? '#fff' : tokens.inkSoft }]}
-                    >
+                    <Text style={[styles.dockTabText, { color: active ? '#fff' : tokens.inkSoft }]}>
                       {t(key === 'rail' ? 'tabRail' : 'tabComms')}
                     </Text>
                   </Pressable>
@@ -664,14 +682,30 @@ export function GameStage({
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   row: { flex: 1, flexDirection: 'row' },
-  paneHeader: { paddingHorizontal: 10, paddingVertical: 6, gap: 6 },
   floatStack: {
     position: 'absolute',
     left: 10,
     right: 10,
-    gap: 6,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  floatChips: { flex: 1, alignItems: 'center', gap: 6 },
+  floatSpacer: { width: 44 },
+  leaveBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   spectatorBanner: {
+    maxWidth: '100%',
     borderWidth: 1,
     borderRadius: RADIUS.md,
     paddingHorizontal: 10,
@@ -727,6 +761,10 @@ const styles = StyleSheet.create({
   dockPanel: { padding: 10, gap: 10 },
   rail: {
     width: RAIL_WIDTH,
+    // Pinned: react-native-web's ScrollView base style adds flexGrow/Shrink 1, which would let
+    // the rail eat the board's free space in a flex row (native defaults don't grow).
+    flexGrow: 0,
+    flexShrink: 0,
     borderLeftWidth: 1,
   },
   railContent: { padding: 10, gap: 10 },
