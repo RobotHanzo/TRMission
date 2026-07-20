@@ -43,15 +43,15 @@ export interface AdSenseConfig {
 }
 
 export const ADSENSE: AdSenseConfig = {
-  client: '', // ca-pub-… publisher id
+  client: 'ca-pub-6497728947722029', // ca-pub-… publisher id
   slots: {
-    landingTop: '', // HORIZONTAL — landing leaderboard after hero
-    landingInline: '', // HORIZONTAL — landing in-content
-    home: '', // SQUARE — home side rail
-    history: '', // HORIZONTAL — history in-feed
-    room: '', // SQUARE — room chat aside
-    privacy: '', // HORIZONTAL — privacy in-content
-    postgame: '', // HORIZONTAL — scoreboard banner
-    comms: '', // SQUARE — in-game comms column (~295px)
+    landingTop: '5092879263', // HORIZONTAL — landing leaderboard after hero
+    landingInline: '4888985270', // HORIZONTAL — landing in-content
+    home: '4941936103', // SQUARE — home side rail
+    history: '3628854431', // HORIZONTAL — history in-feed
+    room: '2262821938', // SQUARE — room chat aside
+    privacy: '2466715927', // HORIZONTAL — privacy in-content
+    postgame: '1165362687', // HORIZONTAL — scoreboard banner
+    comms: '2315772768', // SQUARE — in-game comms column (~295px)
   },
 };

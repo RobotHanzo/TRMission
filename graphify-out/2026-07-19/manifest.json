@@ -1510,8 +1510,8 @@
     "semantic_hash": ""
   },
   "docker-compose.yml": {
-    "mtime": 1783869478.5881693,
-    "ast_hash": "2df80545d13a2c954e69560c439e1cb9",
+    "mtime": 1784469187.2709672,
+    "ast_hash": "22706b6e9a7a24f0e4e7335e5e026650",
     "semantic_hash": ""
   },
   "docker-stack.yml": {
@@ -5225,8 +5225,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-android.yml": {
-    "mtime": 1784420909.3296378,
-    "ast_hash": "0829918921810d26b1ad01374145389b",
+    "mtime": 1784473682.7260118,
+    "ast_hash": "db8c2baa8250c736d6eb1201893f5cc2",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ci.yml": {
@@ -6602,6 +6602,26 @@
   "apps/admin/src/components/icons/AppleGlyph.tsx": {
     "mtime": 1784466285.2811646,
     "ast_hash": "3eae381edac76e15f5373875609d1b7a",
+    "semantic_hash": ""
+  },
+  "tooling/monitoring/grafana/dashboards/trmission-server.json": {
+    "mtime": 1784469167.7396502,
+    "ast_hash": "efa8ce40c50c994cee13e154719daf3e",
+    "semantic_hash": ""
+  },
+  "tooling/monitoring/grafana/provisioning/dashboards/dashboards.yml": {
+    "mtime": 1784469100.533162,
+    "ast_hash": "46bb2cefe5d0a268871f9d6836dbe280",
+    "semantic_hash": ""
+  },
+  "tooling/monitoring/grafana/provisioning/datasources/datasource.yml": {
+    "mtime": 1784469096.705624,
+    "ast_hash": "1e074a30b49fb73231d93fc6c463f5d0",
+    "semantic_hash": ""
+  },
+  "tooling/monitoring/prometheus/prometheus.yml": {
+    "mtime": 1784469092.8547287,
+    "ast_hash": "934bca20036a1e0536287b8491ca3919",
     "semantic_hash": ""
   }
 }
