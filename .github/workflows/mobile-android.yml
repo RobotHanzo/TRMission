@@ -7,6 +7,13 @@ on:
     branches: ['release/**']
     tags: ['v*']
   workflow_dispatch:
+  # GitHub evicts any cache untouched for 7 days, and this lane only fires on release/** + tags —
+  # so between releases the ccache + Gradle build cache age out and the next release build is cold.
+  # A twice-weekly warm-up build on main keeps both caches fresh. It runs the cheap 2-ABI dev path
+  # (non-tag ⇒ TRM_ANDROID_ABIS scoped down, BUILD_NUMBER=1) and never publishes to Play (every
+  # publish step is gated on github.ref_type == 'tag').
+  schedule:
+    - cron: '0 3 * * 1,4'
 
 permissions:
   contents: read
@@ -14,6 +21,16 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # ccache defaults to compiler_check=mtime, but this workflow regenerates android/ (CNG),
+    # restores node_modules from cache, and re-provisions the NDK toolchain every run — all with
+    # fresh mtimes — so the default treats the compiler/inputs as changed and misses nearly every
+    # object (why the native phase stayed slow "even with ccache"). Hash the compiler by CONTENT,
+    # and tell ccache that __DATE__/__TIME__ and include-file timestamps are not real inputs, so
+    # cached objects actually survive across runs. RN's build-speed docs call out this exact CI
+    # footgun. These env vars override the ccache config the ccache-action writes.
+    env:
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: time_macros,include_file_mtime,include_file_ctime
     steps:
       - uses: actions/checkout@v4
 
@@ -39,7 +56,11 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: mobile-android
-          max-size: 2G
+          # 2G thrashed: 4 ABIs × the C++-heavy modules (Skia alone is large) evict each other
+          # inside the cache even on a warm restore. verbose:2 prints `ccache -s` in the post step
+          # so the real hit rate is visible — read it together with the job-level CCACHE_* env above.
+          max-size: 5G
+          verbose: 2
 
       - uses: ruby/setup-ruby@v1
         with:
@@ -97,14 +118,20 @@ jobs:
           # turns this into the generated gradle.properties' `reactNativeArchitectures`.
           TRM_ANDROID_ABIS: ${{ github.ref_type != 'tag' && 'arm64-v8a,x86_64' || '' }}
 
-      # Deferred until after prebuild: `cache: gradle` hashes **/*.gradle*/gradle-wrapper.properties
-      # to key its cache, but android/ is CNG output (gitignored, never committed — see the top-of-file
-      # note) and doesn't exist until the prebuild step above runs.
+      # Deferred until after prebuild: android/ is CNG output (gitignored, never committed — see the
+      # top-of-file note) and doesn't exist until the prebuild step above runs. setup-java provides
+      # the JDK only; Gradle caching moves to setup-gradle below.
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
+
+      # Richer caching than setup-java's `cache: gradle` (which only caches downloaded deps):
+      # setup-gradle persists the Gradle User Home AND wires a local build cache that the
+      # `--build-cache` flag (below) reads, keyed on task INPUTS rather than file mtimes — so task
+      # outputs (Kotlin/Java compile, resource merge, dex) survive across runs. The per-ABI CMake
+      # native compile stays ccache's job.
+      - uses: gradle/actions/setup-gradle@v4
 
       - name: Decode the release keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
@@ -113,9 +140,14 @@ jobs:
       # though the per-ABI native (CMake/ninja) builds for the ~9 native modules (Skia bindings,
       # Reanimated, Worklets, gesture-handler, screens, expo-modules-core, ...) have no
       # dependencies on each other. Profiling a run showed that fully serial native-build phase
-      # alone eating ~26 of the ~34min total. --build-cache lets task outputs (compile, lint,
-      # resource merge) persist across runs too, riding the ~/.gradle/caches cache that
-      # setup-java's `cache: gradle` (above) already restores/saves.
+      # alone eating ~26 of the ~34min total. --build-cache lets task outputs (compile, resource
+      # merge, dex) persist across runs too, riding the local build cache that setup-gradle (above)
+      # restores/saves.
+      #
+      # -x lintVitalRelease skips Android's release lint — a multi-minute task, and the one that
+      # forced app.config.ts's metaspace bump to stop it OOMing. JS/TS lint is already gated in
+      # mobile-ci.yml; the native lint here mostly flags manifest/resource issues, an acceptable
+      # trade for release-build speed.
       - name: Build the signed AAB
         working-directory: apps/mobile/android
         env:
@@ -125,7 +157,7 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
         run: |
-          ./gradlew :app:bundleRelease --parallel --build-cache \
+          ./gradlew :app:bundleRelease -x lintVitalRelease --parallel --build-cache \
             -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.keystore" \
             -Pandroid.injected.signing.store.password="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.ANDROID_KEY_ALIAS }}" \
