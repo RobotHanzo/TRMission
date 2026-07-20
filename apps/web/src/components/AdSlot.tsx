@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useHasFeature } from '../store/session';
+import { useUi } from '../store/ui';
 import {
   adClient,
   adsEnabled,
@@ -42,9 +44,15 @@ export function AdSlot({
   // Hooks must run unconditionally; a 0px floor makes the no-minWidth case always match.
   const wide = useMediaQuery(`(min-width: ${minWidthPx ?? 0}px)`);
   const pushedRef = useRef(false);
+  // Ad opt-out: honoured only for accounts holding the `adFree` feature, so a stray localStorage
+  // flag can't suppress ads without the granted perk (the settings toggle is gated the same way).
+  // Both hooks must run unconditionally — don't `&&` them, or the hook count changes between renders.
+  const hasAdFree = useHasFeature('adFree');
+  const hideAdsPref = useUi((s) => s.hideAds);
+  const optedOut = hasAdFree && hideAdsPref;
 
   const slot = adSlotId(placement);
-  const show = adsEnabled() && slot !== '' && (!minWidthPx || wide);
+  const show = adsEnabled() && slot !== '' && !optedOut && (!minWidthPx || wide);
 
   useEffect(() => {
     if (!show) {

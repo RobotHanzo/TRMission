@@ -11,7 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useUi } from '../store/ui';
-import { useSession } from '../store/session';
+import { useSession, useHasFeature } from '../store/session';
 import { track } from '../lib/analytics';
 import type { Theme, UserPreferences } from '../net/rest';
 import type { BoardLayout, Locale } from '../store/ui';
@@ -53,7 +53,12 @@ export function SettingsModal({ onClose }: Props) {
   const soundVolume = useUi((s) => s.soundVolume);
   const setSoundEnabled = useUi((s) => s.setSoundEnabled);
   const setSoundVolume = useUi((s) => s.setSoundVolume);
+  const hideAds = useUi((s) => s.hideAds);
+  const setHideAds = useUi((s) => s.setHideAds);
   const savePreferences = useSession((s) => s.savePreferences);
+  // The ad opt-out toggle only appears for accounts granted the `adFree` feature (from the
+  // maintainer dashboard); AdSlot enforces the same feature check before honouring the preference.
+  const canHideAds = useHasFeature('adFree');
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -91,6 +96,11 @@ export function SettingsModal({ onClose }: Props) {
   const chooseSound = (next: boolean) => {
     setSoundEnabled(next);
     track('settings_change', { setting: 'sound', value: String(next) });
+  };
+  // Per-device only (localStorage, like sound) — not routed through savePreferences.
+  const chooseHideAds = (next: boolean) => {
+    setHideAds(next);
+    track('settings_change', { setting: 'hide_ads', value: String(next) });
   };
 
   return (
@@ -171,6 +181,16 @@ export function SettingsModal({ onClose }: Props) {
           </div>
           <Switch checked={soundEnabled} onChange={chooseSound} label={t('sound')} />
         </section>
+
+        {canHideAds && (
+          <section className="setting setting-row">
+            <div>
+              <div className="setting-label">{t('hideAds')}</div>
+              <div className="muted setting-desc">{t('hideAdsDesc')}</div>
+            </div>
+            <Switch checked={hideAds} onChange={chooseHideAds} label={t('hideAds')} />
+          </section>
+        )}
       </div>
     </div>
   );

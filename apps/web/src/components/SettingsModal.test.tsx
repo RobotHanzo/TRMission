@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { UserFeature } from '@trm/shared';
 import '../i18n';
 import { SettingsModal } from './SettingsModal';
 import { useUi } from '../store/ui';
@@ -83,5 +84,44 @@ describe('SettingsModal sound section', () => {
 
     expect(useUi.getState().soundEnabled).toBe(false);
     expect(muteBtn).toHaveAttribute('aria-pressed', 'false');
+  });
+});
+
+describe('SettingsModal ad opt-out (feature-gated)', () => {
+  const adFreeUser = {
+    id: 'u1',
+    displayName: 'Tester',
+    isGuest: false,
+    preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
+    features: ['adFree'] as UserFeature[],
+    tutorialCompleted: true,
+  } as const;
+
+  beforeEach(() => {
+    localStorage.clear();
+    useSession.setState({ savePreferences: vi.fn(), user: null });
+    useUi.setState({
+      theme: 'system',
+      colorBlind: false,
+      locale: 'zh-Hant',
+      boardLayout: 'rail',
+      hideAds: false,
+    });
+  });
+
+  it('hides the toggle for accounts without the adFree feature', () => {
+    render(<SettingsModal onClose={() => undefined} />);
+    expect(screen.queryByRole('switch', { name: /廣告|hide ads/i })).toBeNull();
+  });
+
+  it('shows the toggle and writes the preference for adFree accounts', () => {
+    useSession.setState({ user: { ...adFreeUser } });
+    render(<SettingsModal onClose={() => undefined} />);
+    const sw = screen.getByRole('switch', { name: /廣告|hide ads/i });
+    expect(sw).toHaveAttribute('aria-checked', 'false');
+
+    fireEvent.click(sw);
+
+    expect(useUi.getState().hideAds).toBe(true);
   });
 });

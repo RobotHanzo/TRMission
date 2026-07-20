@@ -140,6 +140,7 @@ const LOCALE_KEY = 'trm.locale';
 const BOARD_LAYOUT_KEY = 'trm.boardLayout';
 const SOUND_ENABLED_KEY = 'trm.soundEnabled';
 const SOUND_VOLUME_KEY = 'trm.soundVolume';
+const HIDE_ADS_KEY = 'trm.hideAds';
 const THEMES: Theme[] = ['system', 'light', 'dark'];
 const LOCALES: Locale[] = ['zh-Hant', 'en'];
 const BOARD_LAYOUTS: BoardLayout[] = ['rail', 'tray'];
@@ -191,6 +192,13 @@ const readSoundVolume = (): number => {
     return 0.6;
   }
 };
+const readHideAds = (): boolean => {
+  try {
+    return localStorage.getItem(HIDE_ADS_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
 const writeLocal = (key: string, value: string): void => {
   try {
     localStorage.setItem(key, value);
@@ -220,6 +228,9 @@ interface UiState {
   /** Sound effects on/off + volume — per-device (localStorage only, never account-synced). */
   soundEnabled: boolean;
   soundVolume: number;
+  /** Ad opt-out — per-device (localStorage only). The toggle that sets it is gated behind the
+   *  `adFree` account feature; AdSlot only honours it for accounts that hold that feature. */
+  hideAds: boolean;
   /** "Follow the acting player" camera toggle — in-memory, off on each load. */
   followActing: boolean;
   /** The in-game rules encyclopedia overlay (a local sandbox; never touches the live game). */
@@ -267,6 +278,7 @@ interface UiState {
   setBoardLayout(boardLayout: BoardLayout): void;
   setSoundEnabled(soundEnabled: boolean): void;
   setSoundVolume(soundVolume: number): void;
+  setHideAds(hideAds: boolean): void;
   setFollowActing(followActing: boolean): void;
   setEncyclopediaOpen(open: boolean): void;
   setPractice(isPractice: boolean): void;
@@ -294,6 +306,7 @@ export const useUi = create<UiState>()((set, get) => ({
   boardLayout: readBoardLayout(),
   soundEnabled: readSoundEnabled(),
   soundVolume: readSoundVolume(),
+  hideAds: readHideAds(),
   followActing: false,
   encyclopediaOpen: false,
   homeFocus: null,
@@ -592,6 +605,10 @@ export const useUi = create<UiState>()((set, get) => ({
     const v = Math.max(0, Math.min(1, soundVolume));
     writeLocal(SOUND_VOLUME_KEY, String(v));
     set({ soundVolume: v });
+  },
+  setHideAds: (hideAds) => {
+    writeLocal(HIDE_ADS_KEY, hideAds ? '1' : '0');
+    set({ hideAds });
   },
   setFollowActing: (followActing) => set({ followActing }),
   setEncyclopediaOpen: (encyclopediaOpen) => set({ encyclopediaOpen }),

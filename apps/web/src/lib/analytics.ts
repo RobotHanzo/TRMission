@@ -72,7 +72,7 @@ export interface AnalyticsEvents {
   map_delete: Record<string, never>;
   // settings
   settings_change: {
-    setting: 'locale' | 'theme' | 'board_layout' | 'colorblind' | 'sound';
+    setting: 'locale' | 'theme' | 'board_layout' | 'colorblind' | 'sound' | 'hide_ads';
     value: string;
   };
   room_settings_change: { setting: string };

@@ -381,6 +381,7 @@ const zhHant = {
     replayReview: '重播檢視',
     mapBuilder: '地圖編輯器',
     randomEvents: '隨機事件',
+    adFree: '免廣告（可關閉廣告）',
   },
   accountSelector: {
     searchPlaceholder: '搜尋名稱或電子郵件…',
@@ -819,6 +820,7 @@ const en: typeof zhHant = {
     replayReview: 'Replay viewing',
     mapBuilder: 'Map builder',
     randomEvents: 'Random events',
+    adFree: 'Ad-free (can disable ads)',
   },
   accountSelector: {
     searchPlaceholder: 'Search by name or email…',

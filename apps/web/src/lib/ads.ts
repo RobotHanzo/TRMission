@@ -1,55 +1,26 @@
-// Google AdSense configuration + one-time library loader for the MANUAL ad units this app places.
+// Google AdSense: MANUAL ad-unit helpers + a one-time library loader.
 //
-// Ads are OFF unless VITE_ADSENSE_CLIENT is set to a `ca-pub-…` publisher id at build time. So dev,
-// vitest, and any deploy without the env var render no ad markup at all — every <AdSlot /> returns
-// null, which is why the existing screen tests are unaffected. Each placement also needs its own
-// ad-unit id (VITE_ADSENSE_SLOT_*); a placement with no id renders nothing, so partial config is safe.
+// The publisher id and per-placement ad-unit ids come from the checked-in static config in
+// config/adsense.ts (they are not secret — they ship in the client HTML anyway). Ads are OFF unless
+// that config carries a real `ca-pub-…` id, so an unconfigured build renders no ad markup at all —
+// every <AdSlot /> returns null, which is why the screen tests are unaffected.
 //
 // Manual units (not Auto ads) on purpose: this is an SPA with a zustand view router, so there are no
 // full page loads for Auto ads to hook. Each <AdSlot /> requests once on mount and re-requests only
 // when React remounts it — i.e. on a real view change (screens are conditionally rendered in App.tsx).
-//
-// Env access is via literal `import.meta.env.VITE_*` member reads (dynamic `env[key]` would NOT be
-// statically replaced by Vite in a production build) done inside functions (so vitest `vi.stubEnv`
-// can exercise the enabled path).
 
-export type AdPlacement =
-  | 'landingTop'
-  | 'landingInline'
-  | 'home'
-  | 'history'
-  | 'room'
-  | 'privacy'
-  | 'postgame'
-  | 'comms';
+import { ADSENSE } from '../config/adsense';
+
+export type AdPlacement = keyof typeof ADSENSE.slots;
 
 /** The `ca-pub-…` publisher id, or '' when ads are not configured for this build. */
-export const adClient = (): string => (import.meta.env.VITE_ADSENSE_CLIENT ?? '') as string;
+export const adClient = (): string => ADSENSE.client;
 
 /** Ads only render when a real publisher id is present. */
-export const adsEnabled = (): boolean => adClient().startsWith('ca-pub-');
+export const adsEnabled = (): boolean => ADSENSE.client.startsWith('ca-pub-');
 
 /** The ad-unit id for a placement, or '' if it hasn't been configured. */
-export function adSlotId(placement: AdPlacement): string {
-  switch (placement) {
-    case 'landingTop':
-      return (import.meta.env.VITE_ADSENSE_SLOT_LANDING_TOP ?? '') as string;
-    case 'landingInline':
-      return (import.meta.env.VITE_ADSENSE_SLOT_LANDING_INLINE ?? '') as string;
-    case 'home':
-      return (import.meta.env.VITE_ADSENSE_SLOT_HOME ?? '') as string;
-    case 'history':
-      return (import.meta.env.VITE_ADSENSE_SLOT_HISTORY ?? '') as string;
-    case 'room':
-      return (import.meta.env.VITE_ADSENSE_SLOT_ROOM ?? '') as string;
-    case 'privacy':
-      return (import.meta.env.VITE_ADSENSE_SLOT_PRIVACY ?? '') as string;
-    case 'postgame':
-      return (import.meta.env.VITE_ADSENSE_SLOT_POSTGAME ?? '') as string;
-    case 'comms':
-      return (import.meta.env.VITE_ADSENSE_SLOT_COMMS ?? '') as string;
-  }
-}
+export const adSlotId = (placement: AdPlacement): string => ADSENSE.slots[placement];
 
 const ADSENSE_SRC = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
 
