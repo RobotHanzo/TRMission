@@ -7,6 +7,8 @@
  * (docs/release/play-console-setup.md + app-store-connect-setup.md) whenever collection
  * changes. Contact address: the monitored trmission@robothanzo.dev mailbox below.
  */
+import { AdSlot } from '../components/AdSlot';
+
 export function PrivacyScreen() {
   return (
     <div className="card stack">
@@ -104,6 +106,32 @@ export function PrivacyScreen() {
         for details.
       </p>
 
+      <p>
+        網頁版顯示由 Google AdSense 提供的廣告。Google 及其廣告合作夥伴可能使用 Cookie
+        或裝置識別碼，依你先前的造訪投放個人化或非個人化廣告；廣告內容與版位無法存取你的手牌、車票、聊天內容或其他遊戲機密資訊。你可於{' '}
+        <a href="https://myadcenter.google.com/" target="_blank" rel="noreferrer">
+          Google 廣告設定
+        </a>{' '}
+        調整個人化廣告，並於適用當地法規時透過同意管理視窗（CMP）選擇退出。詳見{' '}
+        <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noreferrer">
+          Google 廣告技術與隱私
+        </a>
+        。行動應用程式（iOS／Android）不透過 Google AdSense 投放廣告。
+        <br />
+        The web app displays ads served by Google AdSense. Google and its advertising partners may
+        use cookies or device identifiers to serve personalized or non-personalized ads based on
+        your prior visits; ad content and placements have <strong>no</strong> access to your hand,
+        tickets, chat, or other game-secret data. You can manage personalized ads in{' '}
+        <a href="https://myadcenter.google.com/" target="_blank" rel="noreferrer">
+          Google Ad Settings
+        </a>
+        , and opt out via a consent-management dialog (CMP) where local law requires one. See{' '}
+        <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noreferrer">
+          How Google uses advertising cookies
+        </a>
+        . The mobile apps (iOS/Android) do not serve ads through Google AdSense.
+      </p>
+
       <h3>保留與刪除 · Retention &amp; deletion</h3>
       <p>
         訪客帳號閒置一段時間後自動刪除。你可以隨時在 <a href="/account/delete">/account/delete</a>{' '}
@@ -113,6 +141,8 @@ export function PrivacyScreen() {
         time at <a href="/account/delete">/account/delete</a> or from the in-app Settings screen;
         deletion removes the account, its sign-in methods, all sessions, and map drafts.
       </p>
+
+      <AdSlot placement="privacy" reserveHeight={250} />
 
       <h3>聯絡我們 · Contact</h3>
       <p>

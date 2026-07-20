@@ -1,0 +1,64 @@
+/* Manual AdSense slots (see components/AdSlot.tsx + lib/ads.ts).
+   Every rule here is inert unless VITE_ADSENSE_CLIENT is configured — AdSlot renders no markup
+   otherwise. The label + bounding rules keep an ad visibly distinct from app content, which the
+   AdSense placement policy requires (never format ads to look like part of the UI). */
+.ad-slot {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin: var(--tr-space-4) auto;
+  padding: 0;
+  text-align: center;
+  overflow: hidden;
+  /* A clear top/bottom boundary so an ad never reads as part of the surrounding UI. */
+  border-top: 1px solid var(--tr-line);
+  border-bottom: 1px solid var(--tr-line);
+}
+
+.ad-slot-label {
+  display: block;
+  padding: 4px 0 2px;
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tr-ink-soft);
+  opacity: 0.7;
+}
+
+.ad-slot-ins {
+  display: block;
+  width: 100%;
+}
+
+/* Home dashboard: the unit lives at the bottom of the right-hand side rail, well clear of the
+   hero's Create/Join buttons. */
+.home-side-ad {
+  margin: var(--tr-space-3) 0 0;
+}
+
+/* History feed: an in-feed unit wedged between game rows — keep it snug with the list rhythm. */
+.history-ad {
+  margin: var(--tr-space-3) 0;
+}
+
+/* In-game comms column (≥1300px only): sits between the read-only action log and the chat input.
+   A boxed, clearly separated block so it can't be confused with the log or chat, with breathing
+   room below it before the interactive chat input (accidental-click clearance). */
+.ad-slot--comms {
+  flex: 0 0 auto;
+  margin: 0 var(--tr-space-3) var(--tr-space-2);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+}
+
+/* Post-game results modal: a separated banner between the score table and the rematch controls. */
+.scoreboard-ad {
+  margin: var(--tr-space-2) 0;
+}
+
+/* Room lobby chat aside: below the chat input, desktop only. */
+.room-ad {
+  margin: var(--tr-space-3) 0 0;
+}

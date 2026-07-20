@@ -18,6 +18,7 @@ import { useUi } from '../store/ui';
 import { useSession } from '../store/session';
 import { MapBackdrop } from '../components/MapBackdrop';
 import { BrandBanner } from '../components/BrandBanner';
+import { AdSlot } from '../components/AdSlot';
 import { DiscordGlyph } from '../components/icons/DiscordGlyph';
 import { openDiscord } from '../discord';
 import { track } from '../lib/analytics';
@@ -138,6 +139,12 @@ export function LandingScreen() {
         </div>
       </section>
 
+      {/* Top of the acquisition funnel: one responsive unit AFTER the hero (never before the first
+          content) — the strongest, most policy-safe inventory in the app. */}
+      <div className="landing-wrap">
+        <AdSlot placement="landingTop" reserveHeight={90} />
+      </div>
+
       <section className="landing-section">
         <div className="landing-wrap">
           <h2 className="landing-h2">{t('landing.how.title')}</h2>
@@ -178,6 +185,11 @@ export function LandingScreen() {
           </div>
         </div>
       </section>
+
+      {/* One in-content unit between sections, mid-scroll. */}
+      <div className="landing-wrap">
+        <AdSlot placement="landingInline" reserveHeight={250} />
+      </div>
 
       <section className="landing-section">
         <div className="landing-wrap">

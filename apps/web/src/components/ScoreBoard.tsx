@@ -13,6 +13,7 @@ import { useConfetti } from '../hooks/useConfetti';
 import { useUi } from '../store/ui';
 import { TicketCard } from './TicketCard';
 import { StarRating } from './StarRating';
+import { AdSlot } from './AdSlot';
 import { DiscordGlyph } from './icons/DiscordGlyph';
 import { openDiscord } from '../discord';
 import { track } from '../lib/analytics';
@@ -292,6 +293,9 @@ export function ScoreBoard({
             </tbody>
           </table>
         </div>
+        {/* Post-game results: no active gameplay, high dwell — a policy-safe moment. Separated from
+            the rematch / rating controls below by its own labelled block so it can't be mis-clicked. */}
+        <AdSlot placement="postgame" reserveHeight={250} className="scoreboard-ad" />
         {members && snapshot.you && (onVote || onPlayAgain) && (
           <div className="row between rematch-row">
             <span className="muted">

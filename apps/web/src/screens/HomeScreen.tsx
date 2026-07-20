@@ -8,6 +8,7 @@ import { api, type RoomView } from '../net/rest';
 import { connectGame } from '../net/connection';
 import { track } from '../lib/analytics';
 import { WelcomeScreen } from './WelcomeScreen';
+import { AdSlot } from '../components/AdSlot';
 
 /** The guest sidebar notice: a one-line nudge that expands into the upgrade form in place. */
 function GuestUpgradeCard() {
@@ -362,6 +363,8 @@ export function HomeScreen() {
             </span>
           </button>
           {user.isGuest && <GuestUpgradeCard />}
+          {/* Dashboard ad: bottom of the side rail, well below the hero's Create/Join controls. */}
+          <AdSlot placement="home" reserveHeight={250} className="home-side-ad" />
         </aside>
       </div>
     </div>

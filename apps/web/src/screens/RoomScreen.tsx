@@ -28,6 +28,7 @@ import { OwnerLeaveDialog } from '../components/OwnerLeaveDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
+import { AdSlot } from '../components/AdSlot';
 import type { Locale } from '../store/ui';
 import { chatPresetKey } from '@trm/client-core';
 import { ChatPresetPicker } from '../components/ChatPresetPicker';
@@ -628,6 +629,10 @@ export function RoomScreen() {
             </button>
           </form>
         </section>
+        {/* Lobby ad: desktop only (≥900px), below the chat input so the interactive form stays
+            above it. The lobby has idle dwell time, but is button-dense — the width gate keeps it
+            off the cramped stacked phone layout, and it's clear of the Start / chat controls. */}
+        <AdSlot placement="room" minWidthPx={900} reserveHeight={250} className="room-ad" />
       </aside>
     </div>
   );
