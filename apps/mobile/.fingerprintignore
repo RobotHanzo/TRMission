@@ -1,0 +1,6 @@
+# RNRepo's local prebuilt-artifact cache must never perturb the OTA runtime-version fingerprint
+# (app.config.ts `runtimeVersion: { policy: 'fingerprint' }`, read by mobile-ota.yml). Whether a
+# covered module is fetched prebuilt or compiled from source is a build accelerator, NOT a change to
+# the native surface a shipped binary presents — so it must not change the fingerprint or old
+# binaries would stop receiving OTA updates.
+**/.rnrepo-cache/**/*

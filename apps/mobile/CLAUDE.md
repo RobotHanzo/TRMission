@@ -20,8 +20,12 @@ TRM_SERVER_ORIGIN=http://<lan-ip>:3001 yarn workspace @trm/mobile start   # poin
 - **React Navigation 7** native-stack (not Expo Router — few screens, heavily custom UI).
 - **jest 29** (NOT 30): `jest-expo@56` is a jest-29 preset; a jest-30 runtime collides with its
   jest-29 internals. Keep the whole `jest*` stack on 29.
-- **No EAS, no Expo push service, no SaaS.** Builds run in GitHub Actions + fastlane; OTA (P5) is
-  self-hosted; push (P0 server) is direct FCM/APNs — the app only registers native device tokens.
+- **No EAS, no Expo push service, no _paid_ SaaS.** Builds run in GitHub Actions + fastlane; OTA (P5)
+  is self-hosted; push (P0 server) is direct FCM/APNs — the app only registers native device tokens.
+  Free / open-source hosted services are allowed where they neither bill nor lock us in (e.g. RNRepo's
+  public GPG-signed prebuilt-artifact Maven via `@rnrepo/expo-config-plugin`, used to cut the Android
+  CI native build; it auto-falls back to source per library). EAS and any paid relay stay out. This
+  re-aligns with the design spec, which already scoped the ban to "no _paid_ SaaS in the delivery chain."
 - Yarn 4 `nodeLinker: node-modules` (Metro can't resolve PnP). `apps/mobile/{android,ios,.expo}` are
   git-ignored — Continuous Native Generation regenerates them via `expo prebuild` in CI.
 
@@ -202,7 +206,13 @@ authorization).
   `bundleRelease` signed via AGP injected-signing properties → `.aab` artifact → on a real tag only,
   `fastlane android internal` publishes to Play's **internal testing track** (never production —
   promote locally with `fastlane android promote`). One-time Play Console + service-account setup:
-  `docs/release/play-console-setup.md`.
+  `docs/release/play-console-setup.md`. Native-build speed stack: **RNRepo** prebuilt artifacts
+  (`@rnrepo/expo-config-plugin`) replace source compilation of the covered autolinked modules
+  (Skia/Reanimated/Worklets/gesture-handler/screens; `expo-modules-core` still builds from source on
+  RN 0.85), **ccache** (`CCACHE_COMPILERCHECK=content` — the default `mtime` missed everything because
+  CNG regenerates `android/` each run) covers the fallback compiles, and **`gradle/actions/setup-gradle`**'s
+  build cache the Kotlin/Java/dex tasks; `lintVitalRelease` is skipped, and a twice-weekly scheduled
+  warm-up keeps those caches from GitHub's 7-day eviction between infrequent release runs.
 - **`.github/workflows/mobile-ios.yml`** — **macos-latest** (billed ~10x, so release-gated): same
   tag-derived `BUILD_NUMBER` → `expo prebuild` → `pod install` → `fastlane ios beta` (match + gym +
   pilot → TestFlight).

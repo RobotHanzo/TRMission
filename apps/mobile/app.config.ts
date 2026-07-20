@@ -146,6 +146,16 @@ const config: ExpoConfig = {
         },
       },
     ],
+    // RNRepo swaps source compilation of the covered autolinked native modules (Skia, Reanimated,
+    // Worklets, gesture-handler, screens) for prebuilt, GPG-signed AARs from its public Maven — the
+    // dominant cost of the Android CI native build. Anything uncovered (e.g. expo-modules-core on RN
+    // 0.85) falls back to building from source automatically, so this can only speed up, never break.
+    // Free / OSS, no account — allowed under the "no PAID SaaS" rule (see apps/mobile/CLAUDE.md). Kept
+    // LAST so it sees every autolinked module after the other plugins have configured Gradle. Applies
+    // to iOS too; set DISABLE_RNREPO=1 on an `expo prebuild` to bypass. Its `.rnrepo-cache` is
+    // fingerprint-ignored (.fingerprintignore) so the prebuilt-vs-source choice never shifts the OTA
+    // runtimeVersion. Companion `@rnrepo/build-tools` is a direct dep too (hoisted node_modules).
+    '@rnrepo/expo-config-plugin',
   ],
   extra: {
     serverOrigin,
