@@ -126,10 +126,11 @@ export interface MapSceneSkiaProps {
 
   /* ── gesture-time raster snapshot (see useStaticMapImage) ── */
   /** UI-thread motion flag (useBoardCamera.movingSV): while set, the vector picture ducks
-   *  off-screen so the rasterized snapshot carries the frame (full-FPS pan AND zoom) — the
-   *  snapshot's camera (useBoardCamera.snapshotCam) is refreshed at each mid-gesture LOD
-   *  checkpoint during a pinch, not just at settle, so it stays reasonably fresh throughout.
-   *  Omitted (the tutorial specimens, tests) the scene simply always draws vectors. */
+   *  off-screen so the rasterized snapshot carries the frame (full-FPS pan AND zoom). The
+   *  snapshot is rendered once at the last camera settle (useBoardCamera.settled) and then
+   *  simply scaled/translated by the live transform for the whole gesture — it never
+   *  re-rasterizes mid-motion (that offscreen pass is too expensive to repeat while a pinch is
+   *  active). Omitted (the tutorial specimens, tests) the scene simply always draws vectors. */
   motionSV?: SharedValue<boolean> | undefined;
   /** Snapshot region + resolution for the raster snapshot's camera (camera.ts rasterSpec).
    *  Omitted (the tutorial specimens, tests) the scene simply always draws vectors. */
@@ -321,10 +322,11 @@ export function MapSceneSkia({
   // Vector visibility, decided per frame on the UI thread (no React involvement): the picture
   // ducks off-screen while ANY motion is in flight (pan OR zoom) and a snapshot exists — Skia's
   // clip quick-reject makes the off-screen drawPicture free, and the raster carries the frame.
-  // The snapshot's own camera (useBoardCamera.snapshotCam) is refreshed at each mid-gesture LOD
-  // checkpoint during a pinch, so it never drifts more than that ratio from the live span; the
-  // crisp vector picture only draws once the gesture is genuinely at rest (or before any
-  // snapshot has ever been produced).
+  // The snapshot itself is the last SETTLED render (useBoardCamera.settled) and does not refresh
+  // mid-gesture — the GPU transform simply scales/translates that one texture for the whole
+  // pinch or pan, same trick either way. It may drift soft at the far end of a large zoom; the
+  // crisp vector picture takes back over the instant the gesture is genuinely at rest (or before
+  // any snapshot has ever been produced).
   const hasSnapshot = !!snapshot;
   const VECTOR_DUCK = 1e7;
   const vectorGuard = useDerivedValue<Transforms3d>(() => {

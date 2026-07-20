@@ -385,11 +385,13 @@ function BoardInner({
   const camOpts = useMemo(() => ({ onTap, onGesture: onManualCamera }), [onTap, onManualCamera]);
   const cam = useBoardCamera(vp, ACTIVE_BASE_VIEW, home, camOpts);
 
-  // The gesture-time raster snapshot's region + resolution, re-derived at every camera settle AND
-  // at each mid-gesture LOD checkpoint during a pinch (cam.snapshotCam — see useBoardCamera.ts),
-  // so the cheap texture backing an active zoom stays reasonably fresh instead of only updating
-  // once the gesture ends. The scene bounds match MapSceneSkia's picture bounds exactly, so the
-  // snapshot never covers un-drawn space.
+  // The gesture-time raster snapshot's region + resolution, re-derived only at camera settle
+  // (cam.settled) — for BOTH pan and zoom the texture is rendered once at rest, then scaled and
+  // translated freely by the live camera transform for the whole next gesture (never mid-motion:
+  // useStaticMapImage's offscreen raster pass is expensive enough that re-triggering it during an
+  // active pinch stalls the JS thread worse than the live-vector redraw it's meant to replace).
+  // The scene bounds match MapSceneSkia's picture bounds exactly, so the snapshot never covers
+  // un-drawn space.
   const sceneBounds = useMemo<Bounds>(
     () => ({
       x: ACTIVE_BASE_VIEW.x - SCENE_OVERSCAN,
@@ -400,9 +402,8 @@ function BoardInner({
     [],
   );
   const raster = useMemo(
-    () =>
-      USE_GESTURE_RASTER ? rasterSpec(cam.snapshotCam, vp, sceneBounds, PixelRatio.get()) : null,
-    [cam.snapshotCam, vp, sceneBounds],
+    () => (USE_GESTURE_RASTER ? rasterSpec(cam.settled, vp, sceneBounds, PixelRatio.get()) : null),
+    [cam.settled, vp, sceneBounds],
   );
 
   // Publish the live camera to the tutorial's spotlight bridge while this board is mounted

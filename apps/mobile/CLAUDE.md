@@ -116,18 +116,22 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
 - **Motion rendering blits a raster snapshot for BOTH pan and zoom** (`useStaticMapPicture.ts` +
   `MapSceneSkia`'s `motionSV` guard): while any gesture is in flight the cached vector Picture
   ducks off-screen (a per-frame `translateX` quick-reject — no React) and the board draws the
-  rasterized snapshot instead, one textured quad per frame. For zoom specifically, the
-  snapshot's own camera (`useBoardCamera`'s `snapshotCam`) is refreshed at each mid-gesture
-  LOD-requantize checkpoint (`MID_GESTURE_LOD_RATIO`) during a pinch — not just once at
-  settle — so the texture backing an active zoom never drifts far from the live span instead of
-  redrawing the full vector scene (every route, every dashed line, every label's stroke-halo
-  Paragraph) on every single animation frame, which is what made native pinch-zoom
-  disproportionately laggy versus web/RNW (whose `BoardCanvas.web.tsx` gets an equivalent
-  cheap-texture-during-zoom effect for free from the browser's CSS-transform compositor). The
-  crisp vector Picture only draws once the gesture is genuinely at rest, or before any snapshot
-  has ever been produced. `cam.settled` and `cam.zoomingSV` keep their original settle-only
-  semantics unchanged — `BoardCanvas.web.tsx` depends on them as-is for its own separate
-  mid-pan-repaint strategy.
+  rasterized snapshot instead, one textured quad per frame, avoiding the full vector redraw
+  (every route, every dashed line, every label's stroke-halo Paragraph) that made native
+  pinch-zoom disproportionately laggy versus web/RNW (whose `BoardCanvas.web.tsx` gets an
+  equivalent cheap-texture-during-zoom effect for free from the browser's CSS-transform
+  compositor). The snapshot is rendered ONCE per gesture, at the last settle (`cam.settled`,
+  `useStaticMapImage`), and then simply scaled/translated by the live GPU transform for the
+  *entire* pan or pinch — it deliberately does NOT re-rasterize mid-gesture. A mid-gesture
+  refresh (keyed to the `MID_GESTURE_LOD_RATIO` checkpoints) was tried and reverted:
+  `useStaticMapImage`'s offscreen pass records the whole static Picture into a surface up to
+  4096px² and reads it back to CPU (`makeNonTextureImage`), which is expensive enough by design
+  ("taken while the user is idle", per its own header comment) that firing it several times
+  during one pinch stalled the JS thread worse than the live-vector redraw it replaced. The
+  texture can go soft at the far end of a large zoom instead; the crisp vector Picture takes
+  back over the instant the gesture is genuinely at rest, or before any snapshot has ever been
+  produced. `cam.zoomingSV` keeps its original settle-only semantics unchanged —
+  `BoardCanvas.web.tsx` depends on it as-is for its own separate mid-pan-repaint strategy.
 - **Manual hit-testing** (`src/board/hitTest.ts`, pure + unit-tested): Skia children aren't
   touch targets; a tap projects screen→board through the current camera and hit-tests routes
   (segment distance) and cities (radius) against the shared geometry.
