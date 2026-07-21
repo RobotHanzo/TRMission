@@ -82,6 +82,14 @@ describe('AdSlot', () => {
     expect(container.querySelector('.adsbygoogle')).toBeNull();
   });
 
+  // The comms column is height-constrained and its chat panel can't shrink, so a rigid ad on a
+  // short viewport overflows the whole panel. The gate drops the ad instead.
+  it('stays hidden below its height gate (jsdom matchMedia reports no match)', () => {
+    configureAds();
+    const { container } = render(<AdSlot placement="comms" minHeightPx={800} />);
+    expect(container.querySelector('.adsbygoogle')).toBeNull();
+  });
+
   it('is suppressed for an adFree account that has toggled ads off', () => {
     configureAds();
     useSession.setState({ user: { ...adFreeUser } });

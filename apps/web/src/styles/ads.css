@@ -32,6 +32,15 @@
   width: 100%;
 }
 
+/* No fill for this request: AdSense stamps `data-ad-status="unfilled"` on the <ins>. Collapse the
+   whole slot — label, borders and reserved height included — instead of leaving an empty labelled
+   box (which is both dead space and a policy smell: a bordered "Advertisement" frame with nothing
+   in it). The reserved height only exists to absorb the fill, so once we know there is none, drop
+   it. Filled slots never match this rule, so the CLS reservation still does its job. */
+.ad-slot:has(> .ad-slot-ins[data-ad-status='unfilled']) {
+  display: none;
+}
+
 /* Home dashboard: the unit lives at the bottom of the right-hand side rail, well clear of the
    hero's Create/Join buttons. */
 .home-side-ad {
@@ -43,11 +52,21 @@
   margin: var(--tr-space-3) 0;
 }
 
-/* In-game comms column (≥1300px only): sits between the read-only action log and the chat input.
-   A boxed, clearly separated block so it can't be confused with the log or chat, with breathing
-   room below it before the interactive chat input (accidental-click clearance). */
+/* In-game comms column (≥1300px and ≥800px tall — see CommsPanel): sits between the read-only
+   action log and the chat input. A boxed, clearly separated block so it can't be confused with the
+   log or chat, with breathing room below it before the interactive chat input (accidental-click
+   clearance).
+
+   Sizing is the load-bearing part. `.comms` is a height-constrained flex column: the log shrinks
+   (flex:1, min-height:0) but `.chat-panel` is flex:none, so a rigid ad here overflows the whole
+   panel and pushes the chat input out of its box the moment the column runs short. AdSlot's height
+   gate is what normally prevents that; these rules are the backstop for the case it can't predict —
+   a creative taller than the reserved height. The ad yields (shrink + clip) instead of the panel. */
 .ad-slot--comms {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 40%;
+  overflow: hidden;
   margin: 0 var(--tr-space-3) var(--tr-space-2);
   border: 1px solid var(--tr-line);
   border-radius: var(--tr-radius);
