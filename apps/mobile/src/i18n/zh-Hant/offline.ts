@@ -1,4 +1,4 @@
-import { difficulty } from '@trm/client-core/i18n/locales/zh-Hant';
+import { difficulty, eventsMode, gameSettings } from '@trm/client-core/i18n/locales/zh-Hant';
 
 // Offline (serverless) games against bots. The difficulty labels alias the shared enum
 // vocabulary — this screen's keys predate the shared `difficulty_*` naming.
@@ -11,6 +11,9 @@ export default {
   difficultyMEDIUM: difficulty.difficulty_MEDIUM,
   difficultyHARD: difficulty.difficulty_HARD,
   difficultyHELL: difficulty.difficulty_HELL,
+  events: gameSettings.settingRandomEvents,
+  eventsDesc: gameSettings.settingRandomEventsDesc,
+  ...eventsMode,
   start: '開始對局',
   botsN: '{{count}} 名電腦玩家',
   inProgress: '進行中',

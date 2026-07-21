@@ -11,6 +11,7 @@ const makeSetup = (gameId = 'local:test-1') =>
     mapId: 'taiwan',
     botCount: 2,
     difficulty: 'MEDIUM',
+    eventsMode: 'off',
     gameId,
     seed: 'offline-spec-seed',
   });

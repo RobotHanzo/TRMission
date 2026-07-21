@@ -14,6 +14,7 @@ describe('OfflineHomeSection', () => {
         mapId: 'taiwan',
         botCount: 3,
         difficulty: 'HARD',
+        eventsMode: 'off',
         gameId: 'local:home-1',
         seed: 's',
       }),

@@ -9,13 +9,16 @@ import { ENGINE_VERSION } from '@trm/engine';
 import type { GameConfig, PlayerSeed } from '@trm/engine';
 import { officialMapById } from '@trm/map-data';
 import { asPlayerId } from '@trm/shared';
-import type { SeatIndex } from '@trm/shared';
+import type { EventsMode, SeatIndex } from '@trm/shared';
 import { LOCAL_HUMAN_ID, type OfflineGameSetup } from './types';
 
 export interface NewOfflineGameOptions {
   readonly mapId: string;
   readonly botCount: 1 | 2 | 3 | 4;
   readonly difficulty: BotDifficulty;
+  /** Already clamped to 'off' by the caller when the account lacks the randomEvents feature —
+   *  mirrors LobbyService.start's "silent downgrade" so this builder stays a pure function. */
+  readonly eventsMode: EventsMode;
   /** Injected randomness (see seed.ts). */
   readonly gameId: string;
   readonly seed: string;
@@ -29,7 +32,6 @@ const DEFAULT_VARIANT_FLAGS = {
   secondDrawAfterBlindRainbow: false,
   noUnfinishedTicketPenalty: false,
   doubleRouteSingleFor23: true,
-  eventsMode: 'off',
 } as const;
 
 export function newOfflineSetup(opts: NewOfflineGameOptions): OfflineGameSetup {
@@ -47,7 +49,11 @@ export function newOfflineSetup(opts: NewOfflineGameOptions): OfflineGameSetup {
     seed: opts.seed,
     players,
     contentHash: map.hash,
-    ruleParams: { ...(map.content.rules ?? {}), ...DEFAULT_VARIANT_FLAGS },
+    ruleParams: {
+      ...(map.content.rules ?? {}),
+      ...DEFAULT_VARIANT_FLAGS,
+      eventsMode: opts.eventsMode,
+    },
   };
   return {
     gameId: opts.gameId,

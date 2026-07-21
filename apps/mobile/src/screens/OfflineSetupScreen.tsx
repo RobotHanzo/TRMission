@@ -5,11 +5,19 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import { BOT_DIFFICULTIES, type BotDifficulty } from '@trm/bots';
+import type { EventsMode } from '@trm/shared';
 import type { RootStackParamList } from '../navigation';
+import { useHasFeature } from '../store/session';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OfflineSetup'>;
 
 const BOT_COUNTS = [1, 2, 3, 4] as const;
+const EVENTS_MODES = [
+  'off',
+  'light',
+  'moderate',
+  'intense',
+] as const satisfies readonly EventsMode[];
 
 function Choice({
   label,
@@ -35,9 +43,13 @@ function Choice({
 export function OfflineSetupScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation();
   const zh = i18n.language.startsWith('zh');
+  const canConfigureEvents = useHasFeature('randomEvents');
   const [mapId, setMapId] = useState(OFFICIAL_MAPS[0]!.mapId);
   const [botCount, setBotCount] = useState<(typeof BOT_COUNTS)[number]>(2);
   const [difficulty, setDifficulty] = useState<BotDifficulty>('MEDIUM');
+  // Mirrors DEFAULT_ROOM_SETTINGS.eventsMode; clamped to 'off' at start time if the feature was
+  // revoked meanwhile (same "silent downgrade" LobbyService.start applies online).
+  const [eventsMode, setEventsMode] = useState<EventsMode>('moderate');
 
   return (
     <ScrollView contentContainerStyle={styles.root}>
@@ -79,11 +91,34 @@ export function OfflineSetupScreen({ navigation }: Props) {
         ))}
       </View>
 
+      {canConfigureEvents && (
+        <>
+          <Text style={styles.label}>{t('offline.events')}</Text>
+          <Text style={styles.desc}>{t('offline.eventsDesc')}</Text>
+          <View style={styles.row}>
+            {EVENTS_MODES.map((m) => (
+              <Choice
+                key={m}
+                label={t(`offline.eventsMode_${m}`)}
+                selected={eventsMode === m}
+                onPress={() => setEventsMode(m)}
+              />
+            ))}
+          </View>
+        </>
+      )}
+
       <Pressable
         accessibilityRole="button"
         style={styles.start}
         onPress={() =>
-          navigation.replace('OfflineGame', { mode: 'new', mapId, botCount, difficulty })
+          navigation.replace('OfflineGame', {
+            mode: 'new',
+            mapId,
+            botCount,
+            difficulty,
+            eventsMode: canConfigureEvents ? eventsMode : 'off',
+          })
         }
       >
         <Text style={styles.startText}>{t('offline.start')}</Text>
@@ -96,6 +131,7 @@ const styles = StyleSheet.create({
   root: { padding: 20, gap: 8 },
   title: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
   label: { fontSize: 14, opacity: 0.7, marginTop: 12 },
+  desc: { fontSize: 12, opacity: 0.6, marginTop: 2 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   choice: {
     paddingVertical: 8,

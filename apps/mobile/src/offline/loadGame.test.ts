@@ -6,7 +6,14 @@ import { newOfflineSetup } from './newGame';
 
 const board = taiwanBoard();
 const setupFor = (gameId: string) =>
-  newOfflineSetup({ mapId: 'taiwan', botCount: 1, difficulty: 'EASY', gameId, seed: 's1' });
+  newOfflineSetup({
+    mapId: 'taiwan',
+    botCount: 1,
+    difficulty: 'EASY',
+    eventsMode: 'off',
+    gameId,
+    seed: 's1',
+  });
 
 describe('loadOfflineGame', () => {
   it('loads and resumes a stored game', async () => {

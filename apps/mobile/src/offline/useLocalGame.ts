@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { boardForContentHash } from '@trm/engine';
 import type { Action, GameEvent } from '@trm/engine';
 import type { BotDifficulty } from '@trm/bots';
+import type { EventsMode } from '@trm/shared';
 import type { GameStoreApi } from '../store/game';
 import type { LogStoreApi } from '../store/log';
 import type { GameCommands } from '../net/commands';
@@ -19,7 +20,13 @@ import { randomGameId, randomSeed } from './seed';
 import type { LocalGameStorePort } from './types';
 
 export type LocalGameInput =
-  | { mode: 'new'; mapId: string; botCount: 1 | 2 | 3 | 4; difficulty: BotDifficulty }
+  | {
+      mode: 'new';
+      mapId: string;
+      botCount: 1 | 2 | 3 | 4;
+      difficulty: BotDifficulty;
+      eventsMode: EventsMode;
+    }
   | { mode: 'resume'; gameId: string };
 
 export interface LocalGameHandle {
@@ -80,6 +87,7 @@ export function useLocalGame(
             mapId: input.mapId,
             botCount: input.botCount,
             difficulty: input.difficulty,
+            eventsMode: input.eventsMode,
             gameId: randomGameId(),
             seed: randomSeed(),
           });

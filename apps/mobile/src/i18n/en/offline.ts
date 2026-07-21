@@ -1,4 +1,4 @@
-import { difficulty } from '@trm/client-core/i18n/locales/en';
+import { difficulty, eventsMode, gameSettings } from '@trm/client-core/i18n/locales/en';
 import type { TranslationShape } from '@trm/client-core/i18n/shape';
 import type zh from '../zh-Hant/offline';
 
@@ -11,6 +11,9 @@ export default {
   difficultyMEDIUM: difficulty.difficulty_MEDIUM,
   difficultyHARD: difficulty.difficulty_HARD,
   difficultyHELL: difficulty.difficulty_HELL,
+  events: gameSettings.settingRandomEvents,
+  eventsDesc: gameSettings.settingRandomEventsDesc,
+  ...eventsMode,
   start: 'Start game',
   botsN: '{{count}} bot(s)',
   inProgress: 'In progress',
