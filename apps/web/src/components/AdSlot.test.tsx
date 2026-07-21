@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import type { UserFeature } from '@trm/shared';
 import '../i18n';
@@ -21,31 +21,48 @@ const adFreeUser = {
 
 /** Turn ads on by writing the (checked-in, mutable) static config, restored after each test. */
 const configureAds = () => {
+  ADSENSE.enabled = true;
   ADSENSE.client = 'ca-pub-1234567890';
   ADSENSE.slots.home = '9988776655';
   ADSENSE.slots.comms = '5544332211';
 };
 
-afterEach(() => {
+/** Reset to a fully ad-free baseline. Runs before AND after each test so cases never inherit the
+ *  checked-in production config (which now ships real `ca-pub-…` ids) — each test opts in via
+ *  `configureAds()`. */
+const resetAds = () => {
+  ADSENSE.enabled = false;
   ADSENSE.client = '';
   (Object.keys(ADSENSE.slots) as (keyof typeof ADSENSE.slots)[]).forEach((k) => {
     ADSENSE.slots[k] = '';
   });
   useSession.setState({ user: null });
   useUi.setState({ hideAds: false });
-});
+};
+
+beforeEach(resetAds);
+afterEach(resetAds);
 
 describe('AdSlot', () => {
-  it('renders nothing when no publisher id is configured (the dev/test default)', () => {
+  it('renders nothing when no publisher id is configured', () => {
     const { container } = render(<AdSlot placement="home" />);
     expect(container.querySelector('.adsbygoogle')).toBeNull();
     expect(container.querySelector('.ad-slot')).toBeNull();
   });
 
   it('renders nothing when the publisher id is set but this placement has no unit id', () => {
+    ADSENSE.enabled = true;
     ADSENSE.client = 'ca-pub-1234567890';
     const { container } = render(<AdSlot placement="home" />);
     expect(container.querySelector('.adsbygoogle')).toBeNull();
+  });
+
+  it('renders nothing when the master switch is off, even with ids configured', () => {
+    configureAds();
+    ADSENSE.enabled = false;
+    const { container } = render(<AdSlot placement="home" />);
+    expect(container.querySelector('.adsbygoogle')).toBeNull();
+    expect(container.querySelector('.ad-slot')).toBeNull();
   });
 
   it('renders a labelled ins with the client + slot when both are configured', () => {

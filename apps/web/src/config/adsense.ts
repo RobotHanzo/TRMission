@@ -2,12 +2,21 @@
 // ad-unit id are embedded in the client HTML that ships to every visitor anyway, so there is nothing
 // to keep in an env var or a secret store).
 //
-// Ads stay OFF until `client` is a real `ca-pub-…` publisher id. Each placement also needs its own
-// ad-unit id — create one unit per placement in the AdSense dashboard and paste the ids below. Any
-// slot left blank simply renders no ad there; leave everything blank to ship a completely ad-free
-// build. This is the ONLY place these ids live — edit here to change or disable ads.
+// Ads stay OFF unless `enabled` is true AND `client` is a real `ca-pub-…` publisher id. Each
+// placement also needs its own ad-unit id — create one unit per placement in the AdSense dashboard
+// and paste the ids below. Any slot left blank simply renders no ad there. This is the ONLY place
+// these ids live — edit here to change or disable ads.
+//
+// To turn ads off, flip `enabled` to false: it is the master switch, so the ids below can stay
+// checked in (no need to blank them out and restore them later) and no ad markup or AdSense script
+// reaches the page.
 
 export interface AdSenseConfig {
+  /**
+   * Master switch. When false, no ad renders anywhere and the AdSense script is never injected —
+   * regardless of the publisher/unit ids below. Flip this rather than blanking the ids.
+   */
+  enabled: boolean;
   /** `ca-pub-…` publisher id, or '' to disable all ads. */
   client: string;
   // Per-placement ad-unit ids (the numeric `data-ad-slot`), or '' to skip that placement.
@@ -43,6 +52,7 @@ export interface AdSenseConfig {
 }
 
 export const ADSENSE: AdSenseConfig = {
+  enabled: true, // master switch — set to false to ship an ad-free build without touching the ids
   client: 'ca-pub-6497728947722029', // ca-pub-… publisher id
   slots: {
     landingTop: '5092879263', // HORIZONTAL — landing leaderboard after hero
