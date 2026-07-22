@@ -2612,6 +2612,21 @@ button.ticket-card:hover {
   font: inherit;
   animation: team-chip-land 220ms ease-out;
 }
+.team-chip svg {
+  flex-shrink: 0;
+}
+/* The name is the only part allowed to give up space — it truncates as a whole unit instead
+   of letting the flexbox squeeze individual CJK words down to a one-character-per-line sliver. */
+.team-chip-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.team-chip-name em {
+  font-style: normal;
+}
 button.team-chip {
   cursor: pointer;
 }

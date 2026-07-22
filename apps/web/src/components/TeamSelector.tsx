@@ -110,9 +110,11 @@ export function TeamSelector({
                         aria-hidden
                       />
                       {m.isBot && <Bot size={15} aria-hidden />}
-                      <span>{memberName(m)}</span>
-                      {m.userId === room.hostId && <em className="muted">({t('host')})</em>}
-                      {m.userId === myUserId && <em className="muted">({t('you')})</em>}
+                      <span className="team-chip-name" title={memberName(m)}>
+                        {memberName(m)}
+                        {m.userId === room.hostId && <em className="muted"> ({t('host')})</em>}
+                        {m.userId === myUserId && <em className="muted"> ({t('you')})</em>}
+                      </span>
                       {m.isBot ? (
                         <span className="badge bot">{t('botTag')}</span>
                       ) : (
