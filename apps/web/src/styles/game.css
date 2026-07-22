@@ -2398,7 +2398,7 @@ button.ticket-card:hover {
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--tr-line);
   border-radius: 10px;
-  background: color-mix(in srgb, var(--tr-panel) 92%, transparent);
+  background: color-mix(in srgb, var(--tr-surface) 92%, transparent);
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -2418,6 +2418,7 @@ button.ticket-card:hover {
   position: relative;
   width: 2rem;
   height: 2.5rem;
+  padding: 0;
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 6px;
   font-weight: 700;
@@ -2445,7 +2446,7 @@ button.ticket-card:hover {
   padding: 0 2px;
   border-radius: 999px;
   background: var(--tr-ink);
-  color: var(--tr-panel);
+  color: var(--tr-paper);
   font-size: 0.65rem;
   line-height: 1rem;
   text-align: center;
