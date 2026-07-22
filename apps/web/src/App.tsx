@@ -9,13 +9,8 @@ import { useSoundSetup } from './hooks/useSoundSetup';
 import { useDocumentMeta } from './hooks/useDocumentMeta';
 import { HomeScreen } from './screens/HomeScreen';
 import { LandingScreen } from './screens/LandingScreen';
-import { RoomScreen } from './screens/RoomScreen';
-import { GameScreen } from './screens/GameScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { LoginCallback } from './screens/LoginCallback';
-import { HistoryScreen } from './screens/HistoryScreen';
-import { LeaderboardScreen } from './screens/LeaderboardScreen';
-import { DeleteAccountScreen } from './screens/DeleteAccountScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import './styles/app.css';
 import './styles/home.css';
@@ -29,6 +24,24 @@ const AdminSpectateScreen = lazy(() => import('./screens/AdminSpectateScreen'));
 // The map builder (world data + zod-shaped editor state) is its own chunk too.
 const MapsScreen = lazy(() => import('./features/builder/MapsScreen'));
 const MapEditorScreen = lazy(() => import('./features/builder/editor/EditorScreen'));
+// The in-game + lobby UI (board interaction, protobuf command codec, panels, chat) and the
+// auth-gated secondary screens are all off the public landing/login funnel — keep them out of
+// the main chunk so a first paint of `/` doesn't ship code it never runs.
+const RoomScreen = lazy(() =>
+  import('./screens/RoomScreen').then((m) => ({ default: m.RoomScreen })),
+);
+const GameScreen = lazy(() =>
+  import('./screens/GameScreen').then((m) => ({ default: m.GameScreen })),
+);
+const HistoryScreen = lazy(() =>
+  import('./screens/HistoryScreen').then((m) => ({ default: m.HistoryScreen })),
+);
+const LeaderboardScreen = lazy(() =>
+  import('./screens/LeaderboardScreen').then((m) => ({ default: m.LeaderboardScreen })),
+);
+const DeleteAccountScreen = lazy(() =>
+  import('./screens/DeleteAccountScreen').then((m) => ({ default: m.DeleteAccountScreen })),
+);
 
 export function App() {
   const { t, i18n } = useTranslation();
@@ -128,7 +141,9 @@ export function App() {
         {booting && !homeColdLoad ? (
           <div className="card">{t('connecting')}</div>
         ) : (
-          <>
+          // One boundary for every lazy screen (only one view renders at a time, so a single
+          // fallback is equivalent to per-view ones); eager screens render without suspending.
+          <Suspense fallback={<div className="card">{t('connecting')}</div>}>
             {view === 'login' && <LoginScreen />}
             {view === 'loginCallback' && <LoginCallback />}
             {/* '/' is never auth-gated: signed-out visitors get the public landing page. */}
@@ -138,38 +153,14 @@ export function App() {
             {view === 'leaderboard' && <LeaderboardScreen />}
             {view === 'deleteAccount' && <DeleteAccountScreen />}
             {view === 'privacy' && <PrivacyScreen />}
-            {view === 'maps' && (
-              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
-                <MapsScreen />
-              </Suspense>
-            )}
-            {view === 'mapEditor' && (
-              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
-                <MapEditorScreen />
-              </Suspense>
-            )}
-            {view === 'replay' && (
-              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
-                <ReplayScreen />
-              </Suspense>
-            )}
-            {view === 'adminReplay' && (
-              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
-                <AdminReplayScreen />
-              </Suspense>
-            )}
-            {view === 'adminSpectate' && (
-              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
-                <AdminSpectateScreen />
-              </Suspense>
-            )}
+            {view === 'maps' && <MapsScreen />}
+            {view === 'mapEditor' && <MapEditorScreen />}
+            {view === 'replay' && <ReplayScreen />}
+            {view === 'adminReplay' && <AdminReplayScreen />}
+            {view === 'adminSpectate' && <AdminSpectateScreen />}
             {view === 'game' && <GameScreen />}
-            {view === 'tutorial' && (
-              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
-                <TutorialScreen />
-              </Suspense>
-            )}
-          </>
+            {view === 'tutorial' && <TutorialScreen />}
+          </Suspense>
         )}
       </main>
       {encyclopediaOpen && (

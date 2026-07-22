@@ -54,6 +54,23 @@ function ogPreviewPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [react(), ogPreviewPlugin()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Split the big, stable third-party libs out of the app chunk so they cache across
+        // app deploys and download in parallel with it. Internal @trm/* packages ship TS
+        // source (not node_modules), so they intentionally stay with the app code — the
+        // heavy map-data/engine geometry is on the landing critical path anyway.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'react';
+          if (/[\\/]node_modules[\\/](i18next|react-i18next)[\\/]/.test(id)) return 'i18n';
+          if (id.includes('@bufbuild')) return 'protobuf';
+          return 'vendor';
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     host: true,

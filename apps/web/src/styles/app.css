@@ -811,11 +811,17 @@
   }
 }
 
-/* Touch-primary devices get comfortable tap targets; desktop keeps the 32px icon convention. */
-@media (pointer: coarse) {
+/* Touch-primary devices — and the narrow viewports a mobile audit emulates — get 48×48 tap
+   targets (the Apple/Google minimum) on the two header controls that fall short of it: the
+   hamburger icon button and the brand logo. Desktop mouse keeps the compact 32px icon
+   convention. The visible glyph/logo is unchanged; only the clickable box grows. */
+@media (pointer: coarse), (max-width: 700px) {
   .icon-btn {
-    min-width: 40px;
-    min-height: 40px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+  .brand {
+    min-height: 48px;
   }
 }
 
