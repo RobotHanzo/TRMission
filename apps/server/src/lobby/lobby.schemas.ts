@@ -5,7 +5,11 @@ import { ROOM_CHAT_MAX_LEN } from './room.repo';
 
 const botDifficulty = z.enum(['EASY', 'MEDIUM', 'HARD', 'HELL']);
 
-export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).max(5).optional() });
+// Up to 6 seats: seats 0–4 are the free-for-all range, seat 5 exists only for the 6-player team
+// layouts (three pairs / two trios).
+export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).max(6).optional() });
+/** Host-only: the full seat order as a permutation of the current member ids. */
+export const SeatOrderSchema = z.object({ userIds: z.array(z.string()).min(2).max(6) });
 export const ReadySchema = z.object({ ready: z.boolean() });
 export const AddBotSchema = z.object({ difficulty: botDifficulty });
 export const RematchVoteSchema = z.object({ wantsRematch: z.boolean() });
@@ -26,6 +30,9 @@ export const GameSettingsSchema = z.object({
   noUnfinishedTicketPenalty: z.boolean(),
   doubleRouteSingleFor23: z.boolean(),
   eventsMode: z.enum(['off', 'light', 'moderate', 'intense']),
+  /** Team game: 0 = free-for-all, 2 or 3 = number of teams. Validated against the seated player
+   *  count at start (4p→2 teams; 6p→2 or 3), where it becomes `GameConfig.teamCount`. */
+  teamCount: z.union([z.literal(0), z.literal(2), z.literal(3)]),
   allowSpectating: z.boolean(),
   visibility: z.enum(['PUBLIC', 'INVITE_ONLY']),
   map: MapSelectorSchema,
@@ -37,6 +44,7 @@ export const GameSettingsSchema = z.object({
 export const UpdateSettingsSchema = GameSettingsSchema.partial();
 
 export class CreateRoomDto extends createZodDto(CreateRoomSchema) {}
+export class SeatOrderDto extends createZodDto(SeatOrderSchema) {}
 export class ReadyDto extends createZodDto(ReadySchema) {}
 export class AddBotDto extends createZodDto(AddBotSchema) {}
 export class UpdateSettingsDto extends createZodDto(UpdateSettingsSchema) {}

@@ -31,6 +31,7 @@ describe('lobby: per-game settings', () => {
       noUnfinishedTicketPenalty: false,
       doubleRouteSingleFor23: true,
       eventsMode: 'moderate',
+      teamCount: 0,
       allowSpectating: true,
       visibility: 'INVITE_ONLY',
       map: { source: 'official', mapId: 'taiwan' },

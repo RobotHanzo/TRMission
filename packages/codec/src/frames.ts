@@ -40,9 +40,13 @@ export const rejectionFrame = (
   value: { ackClientSeq, code, messageKey, message },
 });
 
-export const chatFrame = (playerId: string, content: ChatContent): ServerEvent => ({
+export const chatFrame = (
+  playerId: string,
+  content: ChatContent,
+  teamOnly = false,
+): ServerEvent => ({
   case: 'chat',
-  value: { playerId, content },
+  value: { playerId, content, teamOnly },
 });
 
 // Ephemeral cosmetic relay of another member's camera framing (board-space). Not part
@@ -76,10 +80,7 @@ export const gamePausedFrame = (paused: boolean, reason: string): ServerEvent =>
 // A seat's control changed hands between its human and a server-side bot (repeated timeouts hand
 // it to a bot; the player's next action or rebind reclaims it). Roster bookkeeping only — the
 // moves themselves are ordinary logged actions.
-export const seatControlChangedFrame = (
-  playerId: string,
-  botControlled: boolean,
-): ServerEvent => ({
+export const seatControlChangedFrame = (playerId: string, botControlled: boolean): ServerEvent => ({
   case: 'seatControlChanged',
   value: { playerId, botControlled },
 });

@@ -94,14 +94,14 @@ describe('lobby: vote to end the active game', () => {
     expect(await t.db.collection('games').findOne({ _id: gameId } as never)).toMatchObject({
       status: 'COMPLETED',
       currentSeq: 1,
-      engineVersion: 11,
+      engineVersion: 12,
     });
     expect(await t.db.collection('gameEvents').findOne({ gameId, seq: 1 } as never)).toMatchObject({
       action: { t: 'END_GAME', player: host.id },
     });
     expect(await t.db.collection('matchHistory').findOne({ _id: gameId } as never)).toMatchObject({
       _id: gameId,
-      engineVersion: 11,
+      engineVersion: 12,
     });
 
     // A completed game keeps its room in STARTED for the scoreboard/rematch flow, but neither a
@@ -170,11 +170,11 @@ describe('lobby: vote to end the active game', () => {
 
     expect(decided.body.members.filter((m: { wantsEnd?: boolean }) => m.wantsEnd).length).toBe(3);
     expect(registry.get(gameId)?.session.phase).toBe('GAME_OVER');
-    expect(registry.get(gameId)?.session.raw().engineVersion).toBe(11);
+    expect(registry.get(gameId)?.session.raw().engineVersion).toBe(12);
     expect(await t.db.collection('games').findOne({ _id: gameId } as never)).toMatchObject({
       status: 'COMPLETED',
       currentSeq: 1,
-      engineVersion: 11,
+      engineVersion: 12,
     });
   });
 

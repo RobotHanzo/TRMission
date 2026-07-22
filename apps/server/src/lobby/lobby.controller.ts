@@ -6,6 +6,8 @@ import { AccessTokenGuard } from '../auth/access-token.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import {
   CreateRoomDto,
+  SeatOrderDto,
+  SeatOrderSchema,
   ReadyDto,
   AddBotDto,
   UpdateSettingsDto,
@@ -194,6 +196,15 @@ export class LobbyController {
     @Param('userId') userId: string,
   ) {
     return this.lobby.kick(code.toUpperCase(), user, userId);
+  }
+
+  @Post(':code/seats')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Host rearranges the seat order (the team picker; LOBBY only)' })
+  @ApiBody({ schema: apiSchema(SeatOrderSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  reseat(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: SeatOrderDto) {
+    return this.lobby.reseat(code.toUpperCase(), user, body.userIds);
   }
 
   @Patch(':code/settings')

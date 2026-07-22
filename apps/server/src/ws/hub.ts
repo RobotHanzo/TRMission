@@ -21,7 +21,7 @@ import {
   SESSION_REPLACED_CLOSE_CODE,
 } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
-import { boardForContentHash, ENGINE_VERSION } from '@trm/engine';
+import { boardForContentHash, ENGINE_VERSION, teammates } from '@trm/engine';
 import type { Action, Board, GameConfig, GameEvent } from '@trm/engine';
 import { isEngineVersionSupported } from '../persistence/engine-compat';
 import type { GameRegistry, Match } from '../game/game-registry';
@@ -520,7 +520,7 @@ export class GameHub {
         this.onResync(conn);
         return;
       case 'chat':
-        await this.onChat(conn, env.clientSeq, cmd.value.content);
+        await this.onChat(conn, env.clientSeq, cmd.value.content, cmd.value.teamOnly);
         return;
       case 'cameraUpdate':
         this.onCameraUpdate(conn, cmd.value.view);
@@ -684,6 +684,7 @@ export class GameHub {
     conn: Connection,
     clientSeq: number,
     content: Chat['content'],
+    teamOnly = false,
   ): Promise<void> {
     if (!conn.binding) return; // unbound → no chat
 
@@ -732,6 +733,24 @@ export class GameHub {
 
     const gameId = conn.binding.gameId;
     const playerId = conn.binding.player as string;
+    const members = this.members.get(gameId);
+
+    // Team channel: deliver to the sender's side only. Deliberately EPHEMERAL — not appended to
+    // the chat log and not persisted — because that log is replayed to every member (and to
+    // spectators) on reconnect, which would leak a private line after the fact. Spectators are
+    // excluded for the same reason: the channel is what replaces table talk between partners.
+    if (teamOnly) {
+      const match = this.registry.get(gameId);
+      const side = match ? teammates(match.session.raw(), conn.binding.player) : null;
+      if (!side || side.length <= 1) return; // not a team game — silently drop rather than broadcast
+      if (members) {
+        for (const [memberId, member] of members) {
+          if (side.includes(memberId as PlayerId)) member.send(chatFrame(playerId, toSend, true));
+        }
+      }
+      return;
+    }
+
     const log = this.chatLog.get(gameId) ?? [];
     const seq = log.length;
     log.push({ playerId, content: toSend, ts: now });
@@ -744,7 +763,6 @@ export class GameHub {
       }
     }
 
-    const members = this.members.get(gameId);
     if (members) for (const member of members.values()) member.send(chatFrame(playerId, toSend));
     const specs = this.spectators.get(gameId);
     if (specs) for (const spec of specs) spec.send(chatFrame(playerId, toSend));

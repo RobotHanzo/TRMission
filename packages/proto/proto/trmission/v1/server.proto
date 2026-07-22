@@ -270,6 +270,9 @@ message ChatBroadcast {
     string text = 2;
     string preset_id = 3;
   }
+  // True for a team-only line, so clients can render it on the team channel. Such a frame is only
+  // ever sent to the sender's teammates.
+  bool team_only = 4;
 }
 
 // One persisted chat line, replayed in a HistoryReplay on (re)connect.

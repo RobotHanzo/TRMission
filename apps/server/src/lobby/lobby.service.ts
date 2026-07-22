@@ -10,7 +10,13 @@ import { boardForContentHash, buildBoard } from '@trm/engine';
 import type { Board, GameConfig, PlayerSeed } from '@trm/engine';
 import { officialMapById } from '@trm/map-data';
 import type { MapRules } from '@trm/map-data';
-import { asPlayerId, type SeatIndex, type ChatPresetId } from '@trm/shared';
+import {
+  asPlayerId,
+  layoutsForPlayerCount,
+  TEAM_LAYOUTS,
+  type SeatIndex,
+  type ChatPresetId,
+} from '@trm/shared';
 import {
   RoomRepo,
   DEFAULT_ROOM_SETTINGS,
@@ -352,6 +358,20 @@ export class LobbyService {
     return toView(r);
   }
 
+  /**
+   * Host rearranges the seating. This is the team picker: membership is `seat % teamCount`, so
+   * ordering the seats is what assigns partners. Everyone's ready flag resets (see `reseat`).
+   */
+  async reseat(code: string, user: AuthUser, userIds: readonly string[]): Promise<RoomView> {
+    const r = await this.rooms.reseat(code, user.userId, userIds);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'forbidden') throw new ForbiddenException('only the host can rearrange seats');
+    if (r === 'invalid')
+      throw new BadRequestException('seat order must list every current player exactly once');
+    return toView(r);
+  }
+
   /** Host updates the per-game settings while the room is still in LOBBY. */
   async updateSettings(code: string, user: AuthUser, patch: RoomSettingsPatch): Promise<RoomView> {
     if (patch.map) await this.assertMapSelectable(patch.map, user.userId);
@@ -458,6 +478,19 @@ export class LobbyService {
     if (room.members.length < 2) throw new BadRequestException('need at least 2 players');
     if (!room.members.every((m) => m.ready))
       throw new BadRequestException('all players must be ready');
+    // Team layout must divide the table exactly. Checked HERE (not just in the settings PATCH)
+    // because players can join or leave after the host picks a layout.
+    const teamCount = room.settings.teamCount ?? 0;
+    if (teamCount > 0) {
+      const seated = room.members.length;
+      if (!layoutsForPlayerCount(seated).some((l) => l.teamCount === teamCount)) {
+        throw new BadRequestException(
+          `a ${teamCount}-team game needs ${TEAM_LAYOUTS.filter((l) => l.teamCount === teamCount)
+            .map((l) => l.playerCount)
+            .join(' or ')} players, but ${seated} are seated`,
+        );
+      }
+    }
 
     const gameId = randomUUID();
     const seed = randomUUID();
@@ -480,7 +513,9 @@ export class LobbyService {
       contentHash,
       // Randomize who acts first so the host (always seat 0) isn't perpetually the opening player.
       // Seeded off `config.seed` in `initGame`'s fixed RNG order, so replay stays byte-identical.
+      // In a team game the engine turns this into a ROTATION so partners keep alternating.
       shuffleTurnOrder: true,
+      ...(teamCount > 0 ? { teamCount } : {}),
       ruleParams: {
         ...mapRules,
         unlimitedStationBorrow: s.unlimitedStationBorrow,

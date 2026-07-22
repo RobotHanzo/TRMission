@@ -25,6 +25,9 @@ export interface RoomSettings {
    *  by the host's per-account `randomEvents` feature (`@trm/shared`'s `USER_FEATURES`) — a room
    *  can only carry a non-'off' value while its host holds that feature. */
   eventsMode: EventsMode;
+  /** Team game: 0 = free-for-all, else the number of teams (2–3). Membership is `seat %
+   *  teamCount`, so arranging teams in the lobby means reordering seats. */
+  teamCount: number;
   allowSpectating: boolean;
   visibility: RoomVisibility;
   map: MapSelector;
@@ -40,6 +43,7 @@ export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   noUnfinishedTicketPenalty: false,
   doubleRouteSingleFor23: true,
   eventsMode: 'moderate',
+  teamCount: 0,
   allowSpectating: true,
   visibility: 'INVITE_ONLY',
   map: { source: 'official', mapId: 'taiwan' },
@@ -106,6 +110,7 @@ export type JoinResult = RoomDoc | 'not_found' | 'full' | 'started' | 'already';
 export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidden';
 export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 export type KickResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
+export type ReseatResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
 export type SendChatResult = RoomDoc | 'not_found' | 'not_member' | 'rate_limited';
 export type EndVoteResult = RoomDoc | 'not_found' | 'not_member' | 'not_started';
 export type BecomeSpectatorResult =
@@ -468,6 +473,45 @@ export class RoomRepo implements OnModuleInit {
     await this.col.updateOne(
       { _id: code },
       { $set: { members: remaining, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /**
+   * Host-only: reseat the table to an explicit order. `userIds` must be a permutation of the
+   * current members — anything else is rejected rather than partially applied, so a stale client
+   * (someone joined or left since it rendered) can never silently drop a player from the table.
+   *
+   * This is how teams are arranged: membership is `seat % teamCount`, so putting partners on
+   * alternating seats IS choosing the teams. Also resets everyone's ready flag, because the table
+   * a player agreed to is not the table they would now be playing.
+   */
+  async reseat(code: string, hostId: string, userIds: readonly string[]): Promise<ReseatResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    if (room.hostId !== hostId) return 'forbidden';
+
+    const current = room.members.map((m) => m.userId);
+    const wanted = [...userIds];
+    if (
+      wanted.length !== current.length ||
+      new Set(wanted).size !== wanted.length ||
+      !wanted.every((id) => current.includes(id))
+    ) {
+      return 'invalid';
+    }
+
+    const byId = new Map(room.members.map((m) => [m.userId, m]));
+    const reseated = wanted.map((id, i) => ({
+      ...(byId.get(id) as RoomMember),
+      seat: i,
+      // Bots are always ready; humans must re-confirm the new seating.
+      ready: byId.get(id)?.isBot === true,
+    }));
+    await this.col.updateOne(
+      { _id: code, status: 'LOBBY', members: { $size: current.length } },
+      { $set: { members: reseated, updatedAt: new Date() } },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
