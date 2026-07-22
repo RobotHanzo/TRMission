@@ -143,6 +143,23 @@ export interface ReplayPlayerMeta extends HistoryPlayer {
   isBot?: boolean;
   difficulty?: BotDifficulty;
 }
+
+export type LeaderboardScopeKind = 'allTime' | 'season';
+export type LeaderboardMetric = 'rating' | 'wins' | 'gamesPlayed';
+
+export interface LeaderboardEntry {
+  userId: string;
+  displayName?: string;
+  rank: number;
+  rating: number;
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+}
+export interface LeaderboardPage {
+  rows: LeaderboardEntry[];
+  nextCursor: string | null;
+}
 /** Who may fetch a replay: participants only, or anyone holding the link. */
 export type ReplayVisibility = 'private' | 'link';
 /** actions stay `unknown[]` here so an eager bundle never imports @trm/engine types;

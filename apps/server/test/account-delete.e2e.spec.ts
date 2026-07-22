@@ -117,6 +117,17 @@ describe('DELETE /auth/me: cascade', () => {
       createdAt: now,
       lastSeenAt: now,
     } as never);
+    await t.db.collection('playerLeaderboardStats').insertOne({
+      _id: `${uid}:allTime` as never,
+      userId: uid,
+      scope: 'allTime',
+      rating: 1520,
+      gamesPlayed: 1,
+      wins: 1,
+      losses: 0,
+      version: 1,
+      updatedAt: now,
+    } as never);
 
     await request(server())
       .delete('/api/v1/auth/me')
@@ -130,6 +141,7 @@ describe('DELETE /auth/me: cascade', () => {
     expect(hist?.spectators).toEqual([]);
     expect(await t.db.collection('customMaps').countDocuments({ ownerId: uid })).toBe(0);
     expect(await t.db.collection('userDevices').countDocuments({ userId: uid })).toBe(0);
+    expect(await t.db.collection('playerLeaderboardStats').countDocuments({ userId: uid })).toBe(0);
   });
 
   it('refuses to delete a maintainer with 409 until access is revoked', async () => {

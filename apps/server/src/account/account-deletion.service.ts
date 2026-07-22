@@ -7,6 +7,7 @@ import { CustomMapRepo } from '../maps/custom-map.repo';
 import { DashboardAccountRepo } from '../dashboard/dashboard-account.repo';
 import { DeviceRepo } from '../push/device.repo';
 import { RatingsRepo } from '../ratings/ratings.repo';
+import { LeaderboardRepo } from '../leaderboard/leaderboard.repo';
 import { APPLE_TOKEN_REVOKER, type AppleTokenRevoker } from './apple-token-revoker';
 import type { AuthUser } from '../auth/auth.types';
 
@@ -27,6 +28,7 @@ export class AccountDeletionService {
     private readonly dashboardAccounts: DashboardAccountRepo,
     private readonly devices: DeviceRepo,
     private readonly ratings: RatingsRepo,
+    private readonly leaderboard: LeaderboardRepo,
     @Inject(APPLE_TOKEN_REVOKER) private readonly appleRevoker: AppleTokenRevoker,
   ) {}
 
@@ -50,6 +52,7 @@ export class AccountDeletionService {
     await this.history.pullSpectator(user.userId);
     await this.customMaps.deleteByOwner(user.userId);
     await this.ratings.deleteByUser(user.userId);
+    await this.leaderboard.deleteByUser(user.userId);
     await this.devices.deleteAllForUser(user.userId);
     await this.sessions.deleteAllForUser(user.userId);
     await this.users.deleteById(user.userId);

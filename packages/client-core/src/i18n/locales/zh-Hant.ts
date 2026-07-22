@@ -13,6 +13,7 @@ export { default as game } from './zh-Hant/game';
 export { default as gameSettings } from './zh-Hant/gameSettings';
 export { default as history } from './zh-Hant/history';
 export { default as home } from './zh-Hant/home';
+export { default as leaderboard } from './zh-Hant/leaderboard';
 export { default as log } from './zh-Hant/log';
 export { default as report } from './zh-Hant/report';
 export { default as room } from './zh-Hant/room';

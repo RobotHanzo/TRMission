@@ -27,6 +27,9 @@ import { DashboardRatingsService } from './dashboard-ratings.service';
 import { DashboardRatingsController } from './dashboard-ratings.controller';
 import { DashboardBootstrap } from './dashboard-bootstrap';
 import { RatingsModule } from '../ratings/ratings.module';
+import { LeaderboardModule } from '../leaderboard/leaderboard.module';
+import { DashboardLeaderboardService } from './dashboard-leaderboard.service';
+import { DashboardLeaderboardController } from './dashboard-leaderboard.controller';
 import { ModerationModule } from '../moderation/moderation.module';
 import { DashboardReportsService } from './dashboard-reports.service';
 import { DashboardReportsController } from './dashboard-reports.controller';
@@ -44,6 +47,7 @@ import { DashboardReportsController } from './dashboard-reports.controller';
     HistoryModule,
     MapsModule,
     RatingsModule,
+    LeaderboardModule,
     ModerationModule,
   ],
   controllers: [
@@ -55,6 +59,7 @@ import { DashboardReportsController } from './dashboard-reports.controller';
     DashboardPurgeController,
     DashboardMapsController,
     DashboardRatingsController,
+    DashboardLeaderboardController,
     DashboardReportsController,
   ],
   providers: [
@@ -72,6 +77,7 @@ import { DashboardReportsController } from './dashboard-reports.controller';
     PurgeService,
     DashboardMapsService,
     DashboardRatingsService,
+    DashboardLeaderboardService,
     DashboardReportsService,
   ],
   // AccountModule's deletion flow checks maintainer status (the same "revoke access first"

@@ -38,6 +38,7 @@ export const DASHBOARD_PERMISSIONS = [
   'maps.read',
   'maps.moderate',
   'ratings.read',
+  'leaderboard.read',
   'config.features',
   'reports.read',
   'reports.resolve',
@@ -56,6 +57,7 @@ const VIEWER_PERMISSIONS: readonly DashboardPermission[] = [
   'games.spectateLive',
   'maps.read',
   'ratings.read',
+  'leaderboard.read',
 ];
 
 const MODERATOR_PERMISSIONS: readonly DashboardPermission[] = [

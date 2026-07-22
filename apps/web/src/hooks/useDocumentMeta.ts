@@ -26,6 +26,7 @@ const TITLE_KEY: Record<View, string> = {
   login: 'seo.titles.login',
   loginCallback: 'seo.titles.login',
   history: 'seo.titles.history',
+  leaderboard: 'seo.titles.leaderboard',
   replay: 'seo.titles.replay',
   adminReplay: 'seo.titles.replay',
   adminSpectate: 'seo.titles.game',

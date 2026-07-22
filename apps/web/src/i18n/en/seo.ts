@@ -9,6 +9,7 @@ export default {
     login: 'Sign in · TRMission 台鐵任務',
     tutorial: 'Tutorial · TRMission 台鐵任務',
     history: 'Match history · TRMission 台鐵任務',
+    leaderboard: 'Leaderboard · TRMission 台鐵任務',
     replay: 'Replay · TRMission 台鐵任務',
     room: 'Room {{code}} · TRMission 台鐵任務',
     game: 'Game in progress · TRMission 台鐵任務',

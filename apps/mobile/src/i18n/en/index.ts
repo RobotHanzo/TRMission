@@ -7,6 +7,7 @@ import {
   eventsMode,
   game as gameShared,
   history,
+  leaderboard,
   report,
   tutorial,
 } from '@trm/client-core/i18n/locales/en';
@@ -44,6 +45,7 @@ export default {
   offline,
   login,
   history,
+  leaderboard,
   room,
   game,
   board,

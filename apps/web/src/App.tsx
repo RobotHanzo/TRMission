@@ -14,6 +14,7 @@ import { GameScreen } from './screens/GameScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { LoginCallback } from './screens/LoginCallback';
 import { HistoryScreen } from './screens/HistoryScreen';
+import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { DeleteAccountScreen } from './screens/DeleteAccountScreen';
 import { PrivacyScreen } from './screens/PrivacyScreen';
 import './styles/app.css';
@@ -134,6 +135,7 @@ export function App() {
             {view === 'home' && (user ? <HomeScreen /> : <LandingScreen />)}
             {view === 'room' && <RoomScreen />}
             {view === 'history' && <HistoryScreen />}
+            {view === 'leaderboard' && <LeaderboardScreen />}
             {view === 'deleteAccount' && <DeleteAccountScreen />}
             {view === 'privacy' && <PrivacyScreen />}
             {view === 'maps' && (

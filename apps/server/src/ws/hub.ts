@@ -69,6 +69,14 @@ export interface PushSink {
   gamePaused?(gameId: string, playerIds: string[]): void;
 }
 
+/** Framework-free leaderboard seam (the Nest LeaderboardService is adapted into this by
+ *  game.module). Fire-and-forget: `applyPrepared` never awaits/blocks on it and swallows its
+ *  errors, since a leaderboard update is an ancillary side effect, never something a client
+ *  waits on. */
+export interface LeaderboardSink {
+  onGameOver(gameId: string): Promise<void>;
+}
+
 /** Why a game's per-turn auto-play was suspended. */
 export type PauseReason = 'afk_streak' | 'no_humans_connected';
 
@@ -101,6 +109,8 @@ export interface GameHubOptions {
   botDriverRescheduleMs?: number;
   /** Push sink for turn/game notifications (absent = no pushes). */
   push?: PushSink;
+  /** Leaderboard sink notified once per completed game (absent = no rating/stats tracking). */
+  leaderboard?: LeaderboardSink;
   /** Debounce before a your-turn push to a socketless player, ms (default 15s; 0 = next tick). */
   yourTurnDelayMs?: number;
   /** Debounce before a dropped connection is logged as "left" in the action log, ms (default 20s;
@@ -206,6 +216,7 @@ export class GameHub {
    *  "reconnected" notice, the next time that player successfully re-binds a seat). */
   private readonly leftNotice = new Map<string, Set<string>>();
   private readonly push: PushSink | undefined;
+  private readonly leaderboard: LeaderboardSink | undefined;
   private readonly yourTurnDelayMs: number;
   private readonly playerLeftDelayMs: number;
   /** gameId → pending your-turn reminder (one per game — there is one current player). */
@@ -229,6 +240,7 @@ export class GameHub {
       options.botPersistRetryDelayMs ?? DEFAULT_BOT_PERSIST_RETRY_DELAY_MS;
     this.botDriverRescheduleMs = options.botDriverRescheduleMs ?? DEFAULT_BOT_DRIVER_RESCHEDULE_MS;
     this.push = options.push;
+    this.leaderboard = options.leaderboard;
     this.yourTurnDelayMs = options.yourTurnDelayMs ?? 15_000;
     this.playerLeftDelayMs = options.playerLeftDelayMs ?? 20_000;
   }
@@ -917,6 +929,10 @@ export class GameHub {
       } catch {
         // non-fatal: status is a convenience flag; the event log remains the source of truth.
       }
+      // Fire-and-forget: leaderboard stats are an ancillary side effect, never something a
+      // client waits on. Safe even on the maintainer-termination race (recordCompletion may
+      // have skipped the archive) — the sink is self-verifying against the matchHistory doc.
+      void this.leaderboard?.onGameOver(match.session.gameId).catch(() => {});
     }
     return { ok: true };
   }

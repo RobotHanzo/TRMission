@@ -8,6 +8,7 @@ import {
   eventsMode,
   game,
   gameSettings,
+  leaderboard,
   report,
   room,
   settings,
@@ -53,6 +54,7 @@ export default {
   chat,
   report,
   history,
+  leaderboard,
   deleteAccount,
   builder,
 } satisfies TranslationShape<typeof zhHant>;

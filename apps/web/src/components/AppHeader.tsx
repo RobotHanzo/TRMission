@@ -10,6 +10,7 @@ import {
   History,
   Map as MapIcon,
   Menu,
+  Trophy,
 } from 'lucide-react';
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
@@ -32,6 +33,7 @@ export function AppHeader() {
   const roomCode = useUi((s) => s.roomCode);
   const goHome = useUi((s) => s.goHome);
   const enterHistory = useUi((s) => s.enterHistory);
+  const enterLeaderboard = useUi((s) => s.enterLeaderboard);
   const enterMaps = useUi((s) => s.enterMaps);
   const enterLogin = useUi((s) => s.enterLogin);
   const openEncyclopedia = useUi((s) => s.setEncyclopediaOpen);
@@ -184,6 +186,15 @@ export function AppHeader() {
                     <History size={16} aria-hidden /> {t('history.title')}
                   </button>
                 )}
+                {user && !onAuthScreen && !inGame && (
+                  <button
+                    className="header-menu-item"
+                    role="menuitem"
+                    onClick={menuAct(enterLeaderboard)}
+                  >
+                    <Trophy size={16} aria-hidden /> {t('leaderboard.title')}
+                  </button>
+                )}
                 {user && !onAuthScreen && !inGame && canBuild && (
                   <button className="header-menu-item" role="menuitem" onClick={menuAct(enterMaps)}>
                     <MapIcon size={16} aria-hidden /> {t('builder.myMaps')}
@@ -253,6 +264,15 @@ export function AppHeader() {
                 title={t('history.title')}
               >
                 <History size={16} aria-hidden />
+              </button>
+            )}
+            {user && !onAuthScreen && !inGame && (
+              <button
+                onClick={enterLeaderboard}
+                aria-label={t('leaderboard.title')}
+                title={t('leaderboard.title')}
+              >
+                <Trophy size={16} aria-hidden />
               </button>
             )}
             {user && !onAuthScreen && !inGame && canBuild && (

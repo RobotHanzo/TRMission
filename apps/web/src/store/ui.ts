@@ -18,6 +18,7 @@ export type View =
   | 'login'
   | 'loginCallback'
   | 'history'
+  | 'leaderboard'
   | 'replay'
   | 'adminReplay'
   | 'adminSpectate'
@@ -39,6 +40,7 @@ const LOGIN_PATH = '/login';
 const LOGIN_CALLBACK_PATH = '/login/callback';
 const TUTORIAL_PATH = '/tutorial';
 const HISTORY_PATH = '/history';
+const LEADERBOARD_PATH = '/leaderboard';
 const REPLAY_PATH = /^\/replay\/([^/]+)$/;
 const ADMIN_REPLAY_PATH = /^\/admin-replay\/([^/]+)$/;
 const ADMIN_SPECTATE_PATH = /^\/admin-spectate\/([^/]+)$/;
@@ -93,6 +95,7 @@ export const isHomeColdLoadPath = (): boolean => {
     path === LOGIN_CALLBACK_PATH ||
     path === LOGIN_PATH ||
     path === HISTORY_PATH ||
+    path === LEADERBOARD_PATH ||
     adminReplayFromPath() ||
     adminSpectateFromPath() ||
     replayIdFromPath() ||
@@ -251,6 +254,8 @@ interface UiState {
   enterTutorial(): void;
   /** Open the game-history screen (finished games the user played or spectated). */
   enterHistory(): void;
+  /** Open the player leaderboard (rating/wins/games-played, all-time or this season). */
+  enterLeaderboard(): void;
   /** Open the replay player for one finished game. */
   enterReplay(gameId: string): void;
   /** Open the custom-map list/builder screen. */
@@ -344,6 +349,11 @@ export const useUi = create<UiState>()((set, get) => ({
     pushPath(HISTORY_PATH);
     set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
+  enterLeaderboard: () => {
+    disconnectGame();
+    pushPath(LEADERBOARD_PATH);
+    set({ view: 'leaderboard', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  },
   enterReplay: (gameId) => {
     disconnectGame();
     pushPath(`/replay/${encodeURIComponent(gameId)}`);
@@ -399,6 +409,11 @@ export const useUi = create<UiState>()((set, get) => ({
     if (target === HISTORY_PATH) {
       replacePath(HISTORY_PATH);
       set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    if (target === LEADERBOARD_PATH) {
+      replacePath(LEADERBOARD_PATH);
+      set({ view: 'leaderboard', roomCode: null, gameId: null, ticket: null, replayGameId: null });
       return;
     }
     const replayId = REPLAY_PATH.exec(target)?.[1];
@@ -473,6 +488,17 @@ export const useUi = create<UiState>()((set, get) => ({
       }
       disconnectGame();
       set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    // Leaderboard is account-scoped too — gate unauthenticated visitors like history (guests
+    // may still view it; they simply never appear as rows themselves).
+    if (path === LEADERBOARD_PATH) {
+      if (!authed) {
+        get().navigateLogin(LEADERBOARD_PATH);
+        return;
+      }
+      disconnectGame();
+      set({ view: 'leaderboard', roomCode: null, gameId: null, ticket: null, replayGameId: null });
       return;
     }
     // Ticket-authorized maintainer view — never auth-gated (the ticket is the sole

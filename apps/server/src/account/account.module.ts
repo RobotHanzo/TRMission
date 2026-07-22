@@ -6,6 +6,7 @@ import { MapsModule } from '../maps/maps.module';
 import { DashboardModule } from '../dashboard/dashboard.module';
 import { PushModule } from '../push/push.module';
 import { RatingsModule } from '../ratings/ratings.module';
+import { LeaderboardModule } from '../leaderboard/leaderboard.module';
 import { AccountController } from './account.controller';
 import { AccountDeletionService } from './account-deletion.service';
 import { APPLE_TOKEN_REVOKER, FetchAppleTokenRevoker } from './apple-token-revoker';
@@ -21,6 +22,7 @@ import { APPLE_TOKEN_REVOKER, FetchAppleTokenRevoker } from './apple-token-revok
     DashboardModule,
     PushModule,
     RatingsModule,
+    LeaderboardModule,
   ],
   controllers: [AccountController],
   providers: [

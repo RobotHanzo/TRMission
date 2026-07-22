@@ -6,6 +6,7 @@ export default {
     login: '登入 · 台鐵任務 TRMission',
     tutorial: '新手教學 · 台鐵任務 TRMission',
     history: '對局紀錄 · 台鐵任務 TRMission',
+    leaderboard: '排行榜 · 台鐵任務 TRMission',
     replay: '對局重播 · 台鐵任務 TRMission',
     room: '房間 {{code}} · 台鐵任務 TRMission',
     game: '對局進行中 · 台鐵任務 TRMission',

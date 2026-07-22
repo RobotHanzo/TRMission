@@ -12,6 +12,7 @@ import TutorialScreen from './features/tutorial/TutorialScreen';
 import BuilderScreen from './screens/BuilderScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
+import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import ReplayScreen from './screens/ReplayScreen';
 import EncyclopediaScreen from './screens/EncyclopediaScreen';
 import type { LocalGameInput } from './offline/useLocalGame';
@@ -36,6 +37,8 @@ export type RootStackParamList = {
   Settings: undefined;
   /** Finished games (players + spectated) — each replayable row opens the Replay player. */
   History: undefined;
+  /** Player leaderboard (rating/wins/games-played, all-time or this season). */
+  Leaderboard: undefined;
   /** Client-side replay of a finished game through the sandbox GameStage. */
   Replay: { gameId: string };
   /** The rules encyclopedia: chapter-grouped topics with auto-playing sandbox demos. */
@@ -112,6 +115,11 @@ export function RootNavigator(): React.JSX.Element {
             name="History"
             component={HistoryScreen}
             options={{ title: t('history.title') }}
+          />
+          <Stack.Screen
+            name="Leaderboard"
+            component={LeaderboardScreen}
+            options={{ title: t('leaderboard.title') }}
           />
           <Stack.Screen
             name="Replay"

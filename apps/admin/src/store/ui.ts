@@ -14,6 +14,7 @@ export type AdminView =
   | 'purge'
   | 'maps'
   | 'ratings'
+  | 'leaderboard'
   | 'reports';
 
 export type AdminTheme = 'dark' | 'light';
@@ -28,7 +29,7 @@ export function parsePath(pathname: string): { view: AdminView; param: string | 
   let p = pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname;
   if (!p.startsWith('/')) p = `/${p}`;
   const m =
-    /^\/(users|features|games|rooms|maintainers|audit|purge|maps|ratings|reports)(?:\/([^/]+))?\/?$/.exec(
+    /^\/(users|features|games|rooms|maintainers|audit|purge|maps|ratings|leaderboard|reports)(?:\/([^/]+))?\/?$/.exec(
       p,
     );
   if (m) return { view: m[1] as AdminView, param: m[2] ? decodeURIComponent(m[2]) : null };

@@ -457,6 +457,16 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     </Pressable>
   );
 
+  const leaderboardLink = online && (
+    <Pressable
+      testID="home-leaderboard"
+      accessibilityRole="button"
+      onPress={() => navigation.navigate('Leaderboard')}
+    >
+      <Text style={[styles.settingsLink, { color: tokens.blue }]}>{t('leaderboard.title')}</Text>
+    </Pressable>
+  );
+
   const settingsLink = (
     <Pressable
       testID="home-settings"
@@ -495,6 +505,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
             {encyclopediaLink}
             {builderLink}
             {historyLink}
+            {leaderboardLink}
             {settingsLink}
             {signOutLink}
           </View>
@@ -510,6 +521,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
           {builderLink}
           {encyclopediaLink}
           {historyLink}
+          {leaderboardLink}
           {settingsLink}
           {signOutLink}
         </>

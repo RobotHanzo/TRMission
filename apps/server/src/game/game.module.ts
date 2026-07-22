@@ -13,6 +13,8 @@ import { MapsModule } from '../maps/maps.module';
 import { MapContentRepo } from '../maps/map-content.repo';
 import { PushModule } from '../push/push.module';
 import { PushService } from '../push/push.service';
+import { LeaderboardModule } from '../leaderboard/leaderboard.module';
+import { LeaderboardService } from '../leaderboard/leaderboard.service';
 import { env } from '../config/env';
 
 /** Static registry first (official maps, zero I/O); fall back to Mongo for custom-map content
@@ -32,7 +34,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
 // Provides the WebSocket hub through DI (verifier = JWT ws-ticket, metrics wired), so
 // the lobby can start games and main can attach it to the raw ws server.
 @Module({
-  imports: [AuthModule, MapsModule, PushModule],
+  imports: [AuthModule, MapsModule, PushModule, LeaderboardModule],
   providers: [
     GameRegistry,
     {
@@ -44,6 +46,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
         metrics: MetricsService,
         mapContents: MapContentRepo,
         push: PushService,
+        leaderboard: LeaderboardService,
       ) =>
         new GameHub(registry, {
           store,
@@ -61,8 +64,17 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
             gamePaused: (gameId, playerIds) => push.notifyGamePaused(gameId, playerIds),
           },
           yourTurnDelayMs: env.pushYourTurnDelayMs,
+          leaderboard: { onGameOver: (gameId) => leaderboard.onGameOver(gameId) },
         }),
-      inject: [GameRegistry, GAME_STORE, TokenService, MetricsService, MapContentRepo, PushService],
+      inject: [
+        GameRegistry,
+        GAME_STORE,
+        TokenService,
+        MetricsService,
+        MapContentRepo,
+        PushService,
+        LeaderboardService,
+      ],
     },
   ],
   exports: [GameHub, GameRegistry],

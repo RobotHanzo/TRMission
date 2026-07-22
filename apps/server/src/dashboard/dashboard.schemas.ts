@@ -6,6 +6,8 @@ import {
   REPORT_CATEGORIES,
   USER_FEATURES,
 } from '@trm/shared';
+import { LEADERBOARD_METRICS, LEADERBOARD_SCOPE_KINDS } from '../leaderboard/leaderboard.types';
+import { LeaderboardRowSchema } from '../leaderboard/leaderboard.schemas';
 
 // zod is the single source for both validation (ZodValidationPipe + DTOs) and the
 // OpenAPI schemas (apiSchema()), per the auth/maps modules.
@@ -394,6 +396,21 @@ export const RatingsListSchema = z.object({
   nextCursor: z.string().nullable(),
   avgStars: z.number().nullable(),
   totalCount: z.number(),
+});
+
+// ---- leaderboard ------------------------------------------------------------------
+
+export const LeaderboardListQuerySchema = z.object({
+  scope: z.enum(LEADERBOARD_SCOPE_KINDS).default('allTime'),
+  metric: z.enum(LEADERBOARD_METRICS).default('rating'),
+  limit,
+  cursor,
+});
+export class LeaderboardListQueryDto extends createZodDto(LeaderboardListQuerySchema) {}
+
+export const LeaderboardListSchema = z.object({
+  rows: z.array(LeaderboardRowSchema),
+  nextCursor: z.string().nullable(),
 });
 
 // ---- reports (UGC moderation) ---------------------------------------------------------

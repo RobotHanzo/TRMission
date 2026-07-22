@@ -269,6 +269,20 @@ export type RatingsPage = {
   totalCount: number;
 };
 
+export type LeaderboardScopeKind = 'allTime' | 'season';
+export type LeaderboardMetric = 'rating' | 'wins' | 'gamesPlayed';
+
+export interface LeaderboardRow {
+  userId: string;
+  displayName?: string;
+  rank: number;
+  rating: number;
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+}
+export type LeaderboardPage = { rows: LeaderboardRow[]; nextCursor: string | null };
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -427,6 +441,9 @@ export const api = {
 
   listRatings: (opts: { cursor?: string } = {}) =>
     req<RatingsPage>('GET', `/dashboard/ratings${qs(opts)}`),
+  listLeaderboard: (
+    opts: { scope?: LeaderboardScopeKind; metric?: LeaderboardMetric; cursor?: string } = {},
+  ) => req<LeaderboardPage>('GET', `/dashboard/leaderboard${qs(opts)}`),
   listReports: (opts: { status?: ReportStatusFilter; cursor?: string } = {}) =>
     req<ReportsPage>('GET', `/dashboard/reports${qs(opts)}`),
   resolveReport: (id: string, note?: string) =>

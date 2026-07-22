@@ -9,6 +9,7 @@ import { LobbyModule } from './lobby/lobby.module';
 import { HistoryModule } from './history/history.module';
 import { MapsModule } from './maps/maps.module';
 import { RatingsModule } from './ratings/ratings.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AccountModule } from './account/account.module';
 import { PushModule } from './push/push.module';
@@ -35,6 +36,7 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     LobbyModule,
     HistoryModule,
     RatingsModule,
+    LeaderboardModule,
     DashboardModule,
     AccountModule,
     PushModule,

@@ -17,6 +17,10 @@ import type {
   MapDraft,
   MapSummary,
   MatchSummary,
+  LeaderboardEntry,
+  LeaderboardMetric,
+  LeaderboardPage,
+  LeaderboardScopeKind,
   MobileCarryResult,
   OfficialMapSummary,
   PracticeResult,
@@ -267,6 +271,36 @@ function buildApi(
         'GET',
         `/history/${encodeURIComponent(gameId)}/admin-spectate?ticket=${encodeURIComponent(ticket)}`,
       ),
+
+    // ── leaderboard ─────────────────────────────────────────────────────────
+    leaderboard: (
+      opts: {
+        scope?: LeaderboardScopeKind;
+        metric?: LeaderboardMetric;
+        cursor?: string;
+        limit?: number;
+      } = {},
+    ) => {
+      const params = new URLSearchParams();
+      if (opts.scope) params.set('scope', opts.scope);
+      if (opts.metric) params.set('metric', opts.metric);
+      if (opts.cursor) params.set('cursor', opts.cursor);
+      if (opts.limit) params.set('limit', String(opts.limit));
+      const qs = params.toString();
+      return req<LeaderboardPage>('GET', `/leaderboard${qs ? `?${qs}` : ''}`);
+    },
+    myLeaderboardStanding: (
+      opts: { scope?: LeaderboardScopeKind; metric?: LeaderboardMetric } = {},
+    ) => {
+      const params = new URLSearchParams();
+      if (opts.scope) params.set('scope', opts.scope);
+      if (opts.metric) params.set('metric', opts.metric);
+      const qs = params.toString();
+      return req<{ standing: LeaderboardEntry | null }>(
+        'GET',
+        `/leaderboard/me${qs ? `?${qs}` : ''}`,
+      );
+    },
 
     // ── custom maps ─────────────────────────────────────────────────────────
     listMaps: () => req<MapSummary[]>('GET', '/maps'),

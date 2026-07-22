@@ -108,6 +108,7 @@ const SCREEN_TO_PATH: Record<View, string> = {
   login: '/login',
   loginCallback: '/login/callback',
   history: '/history',
+  leaderboard: '/leaderboard',
   replay: '/replay/:gameId',
   adminReplay: '/admin-replay/:gameId',
   adminSpectate: '/admin-spectate/:gameId',
