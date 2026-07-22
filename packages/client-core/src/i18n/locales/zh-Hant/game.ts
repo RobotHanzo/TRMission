@@ -13,7 +13,7 @@ export default {
   sessionReplacedTitle: '連線已在別處建立',
   sessionReplacedAck: '返回首頁',
 
-  botName: '機器人（{{level}}）',
+  botName: '{{level}}機器人',
 
   drawBlind: '抽牌堆',
   drawTickets: '抽任務卡',

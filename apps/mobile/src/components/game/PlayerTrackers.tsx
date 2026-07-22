@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Bot, Building2, Layers, Ticket, Train, Trophy } from 'lucide-react-native';
 import type { GameSnapshot } from '@trm/proto';
-import { seatColor } from '../../theme/colors';
+import { seatColor, teamColor } from '../../theme/colors';
 import { useTheme } from '../../theme/useTheme';
 import { rgba } from '../../theme/shade';
 import { useAnimationsStore } from '../../store/animations';
@@ -133,6 +133,11 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
             >
               {cued && <CueRing color={seatColor(p.seat)} reduced={reduced} />}
               <View style={[styles.seatDot, { backgroundColor: seatColor(p.seat) }]} />
+              {p.team >= 0 && (
+                <View style={[styles.teamBadge, { backgroundColor: teamColor(p.team) }]}>
+                  <Text style={styles.teamBadgeText}>{t('teamName', { n: p.team + 1 })}</Text>
+                </View>
+              )}
               {isBot(p.id) && (
                 <View testID={`bot-badge-${p.id}`}>
                   <Bot size={13} color={statInk} />
@@ -224,6 +229,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   seatDot: { width: 10, height: 10, borderRadius: 5 },
+  teamBadge: { paddingHorizontal: 7, paddingVertical: 1, borderRadius: 999 },
+  teamBadgeText: { fontSize: 11, fontWeight: '700', color: '#fff' },
   name: { flexShrink: 1, fontSize: 13, fontWeight: '600' },
   stats: { flexDirection: 'row', gap: 8, marginLeft: 'auto' },
   stat: { flexDirection: 'row', alignItems: 'center', gap: 2 },

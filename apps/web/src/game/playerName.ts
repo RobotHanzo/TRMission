@@ -3,7 +3,7 @@ import { useRoster } from '../store/roster';
 
 /**
  * A label resolver for an in-game player. Prefers the lobby roster (real account names, or a
- * localized "機器人（難度）" label for bots) and falls back to `P{seat+1}` when the roster has not
+ * localized "難度機器人" label for bots) and falls back to `P{seat+1}` when the roster has not
  * loaded yet. The viewer themself is always shown as "you".
  */
 export function usePlayerName(): (player: { id: string; seat: number; isMe?: boolean }) => string {

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Train, Building2, Trophy, Layers, Ticket, Bot } from 'lucide-react';
 import type { GameSnapshot } from '@trm/proto';
-import { SEAT_COLORS } from '../theme/colors';
+import { SEAT_COLORS, teamColor } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { playerLiveTotal } from '../game/tickets';
 import { usePlayerName } from '../game/playerName';
@@ -39,6 +39,11 @@ export function PlayerTrackers({ snapshot }: { snapshot: GameSnapshot }) {
               style={{ background: SEAT_COLORS[p.seat % 5] ?? '#888' }}
               aria-hidden
             />
+            {p.team >= 0 && (
+              <span className="tracker-team" style={{ background: teamColor(p.team) }}>
+                {t('teamName', { n: p.team + 1 })}
+              </span>
+            )}
             {isBot(p.id) && <Bot size={13} aria-hidden />}
             <span className="tracker-name">{nameOf({ id: p.id, seat: p.seat, isMe })}</span>
             <span className="tracker-stats">
