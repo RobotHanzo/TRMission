@@ -76,6 +76,16 @@ export function commandToAction(command: Command, player: PlayerId): Action | nu
       return { t: 'CONTINUE_HIVE_DRAW', player };
     case 'stopHiveDraw':
       return { t: 'STOP_HIVE_DRAW', player };
+    // The team is derived server-side from the authenticated player's seat — the wire carries only
+    // a colour, so a client can never name someone else's pool.
+    case 'pushToTeamPool': {
+      const color = pbToCardColorOrNull(command.value.color);
+      return color === null ? null : { t: 'PUSH_TO_TEAM_POOL', player, color };
+    }
+    case 'takeFromTeamPool': {
+      const color = pbToCardColorOrNull(command.value.color);
+      return color === null ? null : { t: 'TAKE_FROM_TEAM_POOL', player, color };
+    }
     case 'pass':
       return { t: 'PASS', player };
     default:

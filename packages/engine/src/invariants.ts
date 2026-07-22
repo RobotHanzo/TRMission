@@ -12,7 +12,8 @@ export function checkInvariants(board: Board, state: GameState): string[] {
   const problems: string[] = [];
 
   // 1. Card conservation (global & per-colour). Cards live in: hands, deck, discard,
-  //    non-null market slots, and a pending tunnel's revealed pile.
+  //    non-null market slots, a pending tunnel's revealed pile, and — in a team game — the
+  //    per-team card pools (cards parked between partners are still in the game).
   const totals: Record<CardColor, number> = Object.fromEntries(
     CARD_COLORS.map((c) => [c, 0]),
   ) as Record<CardColor, number>;
@@ -25,6 +26,7 @@ export function checkInvariants(board: Board, state: GameState): string[] {
   if (state.pendingTunnel) for (const c of state.pendingTunnel.revealed) totals[c] += 1;
   if (state.events?.pendingHiveDraw)
     for (const c of state.events.pendingHiveDraw.revealed) totals[c] += 1;
+  for (const pool of state.teamPools ?? []) for (const c of CARD_COLORS) totals[c] += pool[c];
 
   for (const c of CARD_COLORS) {
     const expected =

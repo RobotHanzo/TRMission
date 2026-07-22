@@ -8,8 +8,16 @@ export interface PlayerSeed {
 export interface GameConfig {
   /** Seed string/number; the entire game replays from this + the action log. */
   readonly seed: string | number;
-  /** 2–5 players. Turn order follows this array unless `shuffleTurnOrder`. */
+  /** 2–5 players free-for-all, or 4/6 in a team game. Turn order follows this array unless
+   *  `shuffleTurnOrder`. */
   readonly players: readonly PlayerSeed[];
+  /**
+   * Team game: how many teams share this table. Absent ⇒ free-for-all, and the resulting state
+   * carries no team keys at all (byte-identical to a pre-v12 game). Together with the seated
+   * player count this pins the layout exactly: 4p/2 = two pairs, 6p/3 = three pairs, 6p/2 = two
+   * trios. Membership is `seat % teamCount`, so partners are always interleaved around the table.
+   */
+  readonly teamCount?: number;
   /** Partial overrides applied over DEFAULT_RULE_PARAMS. */
   readonly ruleParams?: Partial<RuleParams>;
   /** If true, the starting turn order is RNG-shuffled (else uses `players` order). */

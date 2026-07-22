@@ -1,25 +1,28 @@
 import type { PlayerId, RouteId, TicketId } from '@trm/shared';
 import type { Board } from './board';
-import type { GameState, FinalScoreboard, PlayerFinal } from './types/state';
+import type { GameState, FinalScoreboard, PlayerFinal, TeamFinal } from './types/state';
 import { longestTrail, longestTrailWithPath } from './graph/longestTrail';
 import type { TrailEdge } from './graph/longestTrail';
 import { evaluateTickets } from './graph/connectivity';
 import type { Edge } from './graph/connectivity';
 import { UnionFind } from './graph/unionFind';
+import { teamOwnedEdges, ownedBySide } from './teams';
 
-/** Routes a player owns, as graph edges (with length weight for the longest-trail bonus). */
+/**
+ * The routes backing a player's network, as graph edges (length-weighted for the trail bonus).
+ * In a team game this is the UNION of the side's routes — a partner's track extends your network
+ * for ticket completion and for the combined trail. In a free-for-all `teamOwnedEdges` collapses
+ * to exactly the player's own routes, so this is the historical behaviour unchanged.
+ */
 function ownedEdges(board: Board, state: GameState, player: PlayerId): TrailEdge[] {
-  const out: TrailEdge[] = [];
-  for (const [routeId, cell] of Object.entries(state.ownership)) {
-    if ('owner' in cell && cell.owner === player) {
-      const r = board.routeById.get(routeId);
-      if (r) out.push({ u: r.a as string, v: r.b as string, w: r.length });
-    }
-  }
-  return out;
+  return teamOwnedEdges(board, state, player);
 }
 
-/** Opponent (non-locked) routes incident to a city → borrowable edges for station scoring. */
+/**
+ * Opposing (non-locked) routes incident to a city → borrowable edges for station scoring. A
+ * teammate's route is deliberately NOT a candidate: it is already part of the team network, so
+ * borrowing it would burn the station's single borrow slot on a no-op.
+ */
 function borrowCandidatesForCity(
   board: Board,
   state: GameState,
@@ -29,7 +32,7 @@ function borrowCandidatesForCity(
   const out: Edge[] = [];
   for (const routeId of board.incident.get(city) ?? []) {
     const cell = state.ownership[routeId as string];
-    if (cell && 'owner' in cell && cell.owner !== owner) {
+    if (cell && 'owner' in cell && !ownedBySide(state, routeId as string, owner)) {
       const r = board.routeById.get(routeId as string);
       if (r) out.push({ a: r.a as string, b: r.b as string });
     }
@@ -42,6 +45,9 @@ export function stationBorrowEdges(board: Board, state: GameState, playerId: Pla
   const out: Edge[] = [];
   const seen = new Set<string>();
   for (const s of state.stations) {
+    // Own stations only, even in a team game: a partner's stations serve THEIR tickets. Pooling
+    // them would also blow up the borrow-assignment enumeration (≤3 stations × ≤7 options is what
+    // keeps `evaluateTickets` exhaustive; a trio would make it 7^9).
     if (s.playerId !== playerId) continue;
     for (const e of borrowCandidatesForCity(board, state, s.cityId as string, playerId)) {
       const key = e.a < e.b ? `${e.a}|${e.b}` : `${e.b}|${e.a}`;
@@ -147,7 +153,8 @@ export function longestTrailRouteIdsFor(
   const routeOf: RouteId[] = [];
   const edges: TrailEdge[] = [];
   for (const [routeId, cell] of Object.entries(state.ownership)) {
-    if ('owner' in cell && cell.owner === playerId) {
+    // Team game: highlight the side's combined trail — the one the bonus was actually awarded for.
+    if ('owner' in cell && ownedBySide(state, routeId, playerId)) {
       const r = board.routeById.get(routeId);
       if (r) {
         routeOf.push(routeId as RouteId);
@@ -195,9 +202,15 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
   }
 
   const maxTrail = Math.max(0, ...[...trailLengths.values()]);
+  const teams = state.teams;
+
   const finals: PlayerFinal[] = partials.map((p) => {
+    // In a team game `trailLengths` already holds the side's COMBINED trail (ownedEdges is
+    // team-wide), so every member reports the same length — but the 10-point bonus is awarded
+    // once, on the team row below, instead of once per member.
     const longestTrailLength = trailLengths.get(p.playerId as string) ?? 0;
-    const longestBonus = longestTrailLength === maxTrail && maxTrail > 0 ? longestPathBonus : 0;
+    const longestBonus =
+      teams === undefined && longestTrailLength === maxTrail && maxTrail > 0 ? longestPathBonus : 0;
     return {
       ...p,
       longestTrailLength,
@@ -206,7 +219,59 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
     };
   });
 
-  return { players: finals, ranking: rankPlayers(finals) };
+  if (teams === undefined) return { players: finals, ranking: rankPlayers(finals) };
+
+  const teamFinals: TeamFinal[] = teams.map((members, team) => {
+    const rows = members
+      .map((id) => finals.find((f) => f.playerId === id))
+      .filter((f): f is PlayerFinal => f !== undefined);
+    const sum = (pick: (f: PlayerFinal) => number): number =>
+      rows.reduce((acc, f) => acc + pick(f), 0);
+    // Every member carries the same combined length; read the first rather than summing.
+    const longestTrailLength = rows[0]?.longestTrailLength ?? 0;
+    const longestBonus = longestTrailLength === maxTrail && maxTrail > 0 ? longestPathBonus : 0;
+    const eventBonus = sum((f) => f.eventBonus ?? 0);
+    const routePoints = sum((f) => f.routePoints);
+    const ticketNet = sum((f) => f.ticketNet);
+    const stationBonus = sum((f) => f.stationBonus);
+    return {
+      team,
+      members: [...members],
+      routePoints,
+      ticketNet,
+      ticketsCompleted: sum((f) => f.ticketsCompleted),
+      stationBonus,
+      longestTrailLength,
+      longestBonus,
+      ...(eventBonus > 0 ? { eventBonus } : {}),
+      total: routePoints + ticketNet + stationBonus + longestBonus + eventBonus,
+    };
+  });
+
+  return {
+    players: finals,
+    ranking: rankPlayers(finals),
+    teams: teamFinals,
+    teamRanking: rankTeams(teamFinals),
+  };
+}
+
+/** Team tiebreaker, mirroring {@link rankPlayers}: total desc → tickets desc → holds longest. */
+function rankTeams(finals: readonly TeamFinal[]): number[][] {
+  const cmp = (a: TeamFinal, b: TeamFinal): number => {
+    if (a.total !== b.total) return b.total - a.total;
+    if (a.ticketsCompleted !== b.ticketsCompleted) return b.ticketsCompleted - a.ticketsCompleted;
+    return (b.longestBonus > 0 ? 1 : 0) - (a.longestBonus > 0 ? 1 : 0);
+  };
+  const sorted = [...finals].sort(cmp);
+  const groups: number[][] = [];
+  for (const f of sorted) {
+    const last = groups[groups.length - 1];
+    const head = last ? finals.find((x) => x.team === last[0]) : undefined;
+    if (last && head && cmp(head, f) === 0) last.push(f.team);
+    else groups.push([f.team]);
+  }
+  return groups;
 }
 
 /** Strict tiebreaker: total desc → ticketsCompleted desc → stationsUsed asc → holds longest. */

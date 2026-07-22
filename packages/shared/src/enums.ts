@@ -46,8 +46,13 @@ export type RouteLength = (typeof ROUTE_LENGTHS)[number];
 /** A hand / discard pile, modelled as a colour-count multiset (cards are fungible). */
 export type Hand = Readonly<Record<CardColor, number>>;
 
-/** Seat index 0..4 — wire-level player identity. The visible seat palette is client-side (ADR A11). */
-export type SeatIndex = 0 | 1 | 2 | 3 | 4;
+/** Seat index 0..5 — wire-level player identity. The visible seat palette is client-side (ADR A11).
+ *  Seats 0..4 are the free-for-all range; seat 5 exists only for the 6-player team layouts. */
+export type SeatIndex = 0 | 1 | 2 | 3 | 4 | 5;
+
+/** Seats at a free-for-all table. Team layouts may seat up to {@link MAX_SEATS}. */
+export const MAX_FFA_SEATS = 5;
+export const MAX_SEATS = 6;
 
 export const isTrainColor = (c: string): c is TrainColor =>
   (TRAIN_COLORS as readonly string[]).includes(c);

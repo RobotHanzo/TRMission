@@ -83,6 +83,19 @@ message StartHiveDraw {}
 message ContinueHiveDraw {}
 message StopHiveDraw {}
 
+// Team game: move one card from hand into your team's public pool (engine PUSH_TO_TEAM_POOL).
+// Free, once per turn. The server derives the team from the authenticated seat — the client
+// never names one.
+message PushToTeamPool {
+  CardColor color = 1;
+}
+
+// Team game: take one card out of your team's pool (engine TAKE_FROM_TEAM_POOL). Counts as one
+// of the turn's two draws.
+message TakeFromTeamPool {
+  CardColor color = 1;
+}
+
 // Ask the server for a fresh full snapshot (reconnect / desync recovery).
 message Resync {}
 
@@ -130,5 +143,7 @@ message ClientEnvelope {
     StartHiveDraw start_hive_draw = 20;
     ContinueHiveDraw continue_hive_draw = 21;
     StopHiveDraw stop_hive_draw = 22;
+    PushToTeamPool push_to_team_pool = 23;
+    TakeFromTeamPool take_from_team_pool = 24;
   }
 }

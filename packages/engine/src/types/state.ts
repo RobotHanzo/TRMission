@@ -63,6 +63,8 @@ export interface TurnState {
   readonly cardsDrawnThisTurn: number;
   /** Present only after the active player used the Night Market free pre-action. */
   readonly nightMarketSwapUsed?: true;
+  /** Present only after the active player used their one free team-pool push this turn. */
+  readonly teamPushUsed?: true;
 }
 
 export interface PendingTunnel {
@@ -103,10 +105,30 @@ export interface PlayerFinal {
   readonly total: number;
 }
 
+/** A team's aggregated end-game score. Present only in a team game. */
+export interface TeamFinal {
+  readonly team: number;
+  readonly members: readonly PlayerId[];
+  /** Sum of the members' route points / ticket nets / station bonuses. */
+  readonly routePoints: number;
+  readonly ticketNet: number;
+  readonly ticketsCompleted: number;
+  readonly stationBonus: number;
+  /** Longest trail over the UNION of the team's routes (the combined-network ruling). */
+  readonly longestTrailLength: number;
+  readonly longestBonus: number;
+  readonly eventBonus?: number;
+  readonly total: number;
+}
+
 export interface FinalScoreboard {
   readonly players: readonly PlayerFinal[];
   /** Ranking as equivalence groups (a group with >1 entry = tied co-winners/places). */
   readonly ranking: readonly (readonly PlayerId[])[];
+  /** Team totals, ascending by team id. Absent (key omitted) in a free-for-all game. */
+  readonly teams?: readonly TeamFinal[];
+  /** Team ranking as equivalence groups of team ids. Absent in a free-for-all game. */
+  readonly teamRanking?: readonly (readonly number[])[];
 }
 
 export interface GameState {
@@ -147,6 +169,20 @@ export interface GameState {
   /** Random-events runtime state. Absent (key omitted, not `undefined`) when the feature is off,
    *  so an off-mode game clones/digests byte-identically to a pre-v5 game. */
   readonly events?: EventsState;
+
+  /**
+   * Team rosters, index = team id, each listed in ascending seat order. Absent (key omitted, not
+   * `undefined`) in a free-for-all game, so an FFA game digests byte-identically to a pre-v12
+   * game. Membership is fixed at genesis from `seat % teamCount` and never changes.
+   */
+  readonly teams?: readonly (readonly PlayerId[])[];
+
+  /**
+   * Each team's face-up card pool, index-aligned with `teams`. This is the ONLY channel through
+   * which teammates may pass cards — hands stay secret — and it is public to every viewer, so it
+   * doubles as the signalling device that replaces table talk. Absent in a free-for-all game.
+   */
+  readonly teamPools?: readonly Readonly<Record<CardColor, number>>[];
 }
 
 export const SCHEMA_VERSION = 1;
@@ -179,7 +215,13 @@ export const SCHEMA_VERSION = 1;
 // the repairer holds exclusive claim rights until their next turn ends. Every new behavior is
 // gated on the authored `brokenCarriages` field, which no pre-v11 content hash contains, so
 // existing logs replay byte-identically.
-export const ENGINE_VERSION = 11;
+// v12: team mode (組隊模式) — 4p/6p tables split into 2–3 teams. Teams share a network for ticket
+// completion and for a single combined longest-trail bonus, teammates see each other's kept
+// tickets, and cards move between partners only through a public per-team card pool (the new
+// PUSH_TO_TEAM_POOL free action + TAKE_FROM_TEAM_POOL draw). Every new behavior is gated on the
+// optional `teams` state key, which only `GameConfig.teamCount` can produce, so a free-for-all
+// game carries no team keys and replays byte-identically to v9–v11.
+export const ENGINE_VERSION = 12;
 
 /**
  * Which persisted engine majors THIS engine can replay/recover byte-identically — the single gate
@@ -197,7 +239,11 @@ export const ENGINE_VERSION = 11;
  * END_GAME action; every existing v9 action retains identical behavior. v11's broken-rail rules
  * activate only for routes with the new authored `brokenCarriages` field — impossible under any
  * pre-v11 content hash — so v9/v10 logs replay byte-identically (the optional `brokenRails` state
- * field is never populated for them). Only extend this list for a new version when the change is
- * provably inert for every version already listed.
+ * field is never populated for them). v12's team rules activate only when `GameConfig.teamCount`
+ * is set — impossible in any persisted pre-v12 config — so v9/v10/v11 logs replay byte-identically
+ * (the optional `teams`/`teamPools` state keys and the `turn.teamPushUsed` flag are never
+ * populated for them, and no RuleParams field was added, which would have changed every digest).
+ * Only extend this list for a new version when the change is provably inert for every version
+ * already listed.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11, 12];

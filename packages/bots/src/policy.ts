@@ -32,6 +32,8 @@ import {
   effectiveTunnelRevealCount,
   longestTrail,
   longestTrailWithPath,
+  partnersOf,
+  teamOf,
 } from '@trm/engine';
 import type { Action, Board, GameState, TrailEdge } from '@trm/engine';
 import { TRAIN_COLORS, CARD_COLORS, buildDeckComposition } from '@trm/shared';
@@ -152,6 +154,14 @@ interface Ctx {
   readonly trailEndpoints: ReadonlySet<string>;
   /** colour → largest single unclaimed wanted-route cost in that colour (reserve target). */
   readonly neededAmount: ReadonlyMap<TrainColor, number>;
+  // ── team-game context (empty in a free-for-all) ──
+  /** Teammate ids, excluding the bot itself. */
+  readonly partners: ReadonlySet<string>;
+  /** The bot's team id, or null in a free-for-all. */
+  readonly team: number | null;
+  /** Colours the bot's partners still need for THEIR tickets — derived from their kept tickets
+   *  (shared in team mode) and the public board, never from a partner's hidden hand. */
+  readonly partnerNeeds: ReadonlySet<TrainColor>;
 }
 
 /** Pick the bot's move for the current state, or null if it has nothing to do right now. */
@@ -221,9 +231,44 @@ function scoreAction(a: Action, ctx: Ctx): number {
     case 'STOP_HIVE_DRAW':
       if (ctx.knobs.eventSense) return 1;
       return (ctx.state.events?.pendingHiveDraw?.revealed.length ?? 0) >= 3 ? 7 : 2;
+    case 'PUSH_TO_TEAM_POOL':
+      return scoreTeamPush(a, ctx);
+    case 'TAKE_FROM_TEAM_POOL':
+      return scoreTeamTake(a, ctx);
     case 'PASS':
       return -1000; // only ever chosen when it is the sole legal action
   }
+}
+
+/**
+ * Donating a card to the team pool. Worth doing only when the card is genuinely surplus to the
+ * bot's own plan AND a partner has a use for it — otherwise the pool just leaks tempo, since a
+ * pushed card costs the partner a whole draw to pick up.
+ */
+function scoreTeamPush(a: Extract<Action, { t: 'PUSH_TO_TEAM_POOL' }>, ctx: Ctx): number {
+  if (ctx.partners.size === 0) return -1000;
+  const color = a.color;
+  const held = ctx.hand[color] ?? 0;
+  // Never give away a locomotive, or a colour we are still reserving for our own routes.
+  if (color === 'LOCOMOTIVE') return -50;
+  if (ctx.needed.has(color as TrainColor)) {
+    const reserve = ctx.neededAmount.get(color as TrainColor) ?? 0;
+    if (held <= reserve) return -50;
+  }
+  const wantedByPartner = ctx.partnerNeeds.has(color as TrainColor);
+  if (!wantedByPartner) return -20;
+  // Surplus and useful to a partner: a genuinely good play, scaled by how spare the card is.
+  return 4 + Math.min(3, held - 1);
+}
+
+/** Taking from the pool is a draw whose colour is KNOWN — strictly better than a blind draw when
+ *  the colour is one we need, and roughly a face-up draw otherwise. */
+function scoreTeamTake(a: Extract<Action, { t: 'TAKE_FROM_TEAM_POOL' }>, ctx: Ctx): number {
+  const color = a.color;
+  if (color === 'LOCOMOTIVE') return 8; // a known wild beats every other draw
+  if (ctx.needed.has(color as TrainColor)) return 6.5;
+  // Don't strip a colour a partner is obviously hoarding for themselves unless we need it.
+  return ctx.partnerNeeds.has(color as TrainColor) ? 1.5 : 3.5;
 }
 
 function scoreClaim(a: Extract<Action, { t: 'CLAIM_ROUTE' }>, ctx: Ctx): number {
@@ -556,11 +601,32 @@ function buildContext(board: Board, state: GameState, botId: PlayerId, knobs: Kn
 
   let incompleteTickets = 0;
 
+  // Team context. A partner's kept tickets ARE fair information in team mode (the engine shares
+  // them through redactFor), so the bot may plan around them — but never around a partner's hand.
+  const partners = new Set(partnersOf(state, botId).map((id) => id as string));
+  const partnerNeeds = new Set<TrainColor>();
+  for (const pid of partners) {
+    const partner = state.players[pid];
+    for (const tid of partner?.keptTickets ?? []) {
+      const t = board.ticketById.get(tid as string);
+      if (!t) continue;
+      for (const route of board.content.routes) {
+        if (state.ownership[route.id as string]) continue;
+        if (route.color === 'GRAY') continue;
+        if (route.a === t.a || route.b === t.a || route.a === t.b || route.b === t.b)
+          partnerNeeds.add(route.color);
+      }
+    }
+  }
+
   const ctx: Ctx = {
     board,
     state,
     botId,
     knobs,
+    partners,
+    team: teamOf(state, botId),
+    partnerNeeds,
     hand,
     trainCars: self?.trainCars ?? 0,
     keptTickets,
@@ -755,11 +821,17 @@ function contestedTrailEndpoints(
   return endpoints;
 }
 
-/** Is a route currently usable for the bot to traverse/claim? */
+/**
+ * Is a route currently usable for the bot to traverse/claim? In a team game a PARTNER'S route
+ * counts as 'owned' — it really is part of the bot's network for ticket completion — which is the
+ * single change that makes path-finding, ticket planning, and `connectedByOwned` all team-aware,
+ * and stops the bot from treating its own partner as a blocking rival.
+ */
 function routeUsable(ctx: Ctx, routeId: string): 'owned' | 'open' | 'enemy' | null {
   const cell = ctx.state.ownership[routeId];
   if (!cell) return 'open';
-  if ('owner' in cell) return cell.owner === ctx.botId ? 'owned' : 'enemy';
+  if ('owner' in cell)
+    return cell.owner === ctx.botId || ctx.partners.has(cell.owner as string) ? 'owned' : 'enemy';
   return null; // locked double-route sibling
 }
 

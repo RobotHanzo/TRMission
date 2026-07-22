@@ -4,6 +4,7 @@ import type { Board } from './board';
 import type { GameState } from './types/state';
 import type { GameEvent } from './types/events';
 import { ownConnectedTicketIds } from './graph/connectivity';
+import { teamOwnedConnectivityEdges } from './teams';
 import { withPlayer } from './reducers/common';
 import { ticketOfferCount } from './events/effects';
 
@@ -50,13 +51,9 @@ export function allKeptTicketsCompleted(board: Board, state: GameState, player: 
   const p = state.players[player as string];
   if (!p || p.keptTickets.length === 0) return false;
 
-  const ownEdges: { a: string; b: string }[] = [];
-  for (const [routeId, cell] of Object.entries(state.ownership)) {
-    if ('owner' in cell && cell.owner === player) {
-      const r = board.routeById.get(routeId);
-      if (r) ownEdges.push({ a: r.a as string, b: r.b as string });
-    }
-  }
+  // Team game: the side's combined track counts, matching the completion rule the lock uses — so
+  // rule 7.5 fires exactly when the player really has no objective left.
+  const ownEdges = teamOwnedConnectivityEdges(board, state, player);
 
   const tickets = p.keptTickets
     .map((tid) => {

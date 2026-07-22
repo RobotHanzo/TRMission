@@ -56,8 +56,23 @@ export const LIVERY_COLORS = MAP_LIVERY_COLORS;
  */
 export const LOCOMOTIVE_GRADIENT = `linear-gradient(135deg, ${LIVERY_COLORS.join(', ')})`;
 
-/** Seat colours — deliberately distinct from the 8 card colours (ADR A11). */
-export const SEAT_COLORS = ['#0E8C8C', '#C0398B', '#E8A33D', '#5A6B7B', '#7CB342'] as const;
+/** Seat colours — deliberately distinct from the 8 card colours (ADR A11). Six entries: the 6th
+ *  seat exists only at a 6-player team table. */
+export const SEAT_COLORS = [
+  '#0E8C8C',
+  '#C0398B',
+  '#E8A33D',
+  '#5A6B7B',
+  '#7CB342',
+  '#8E5BD0',
+] as const;
+
+/** Team colours — a banner/flag hue per team, distinct from every seat colour so a team badge
+ *  never reads as a player's train colour. Index = team id (ADR A11: abstract on the wire). */
+export const TEAM_COLORS = ['#1F6FB2', '#C1443C', '#3F8F4A'] as const;
+
+/** A team id's display colour (wraps defensively past the 3 supported teams). */
+export const teamColor = (team: number): string => TEAM_COLORS[team % 3] ?? '#888';
 
 /** Celebration confetti palette + burst cadence (endgame scoreboard, ticket fanfare, finale). */
 export const CONFETTI_COLORS = [
@@ -70,5 +85,5 @@ export const CONFETTI_COLORS = [
 ] as const;
 export const CONFETTI_INTERVAL_MS = 1800;
 
-/** A seat index's display colour (wraps past 5 seats defensively). */
-export const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
+/** A seat index's display colour (wraps past 6 seats defensively). */
+export const seatColor = (seat: number): string => SEAT_COLORS[seat % 6] ?? '#888';

@@ -221,6 +221,23 @@ export type GameEvent =
       readonly busted: boolean;
       readonly keptCount: number;
       readonly visibility: 'PUBLIC';
+    }
+  /** Team game: a card moved from a player's hand into their team's public pool. PUBLIC — the
+   *  pool is open information, which is the whole point of it as a signalling channel. */
+  | {
+      readonly e: 'TEAM_POOL_PUSHED';
+      readonly player: PlayerId;
+      readonly team: number;
+      readonly card: CardColor;
+      readonly visibility: 'PUBLIC';
+    }
+  /** Team game: a player took a card out of their team's pool as one of their draws. */
+  | {
+      readonly e: 'TEAM_POOL_TAKEN';
+      readonly player: PlayerId;
+      readonly team: number;
+      readonly card: CardColor;
+      readonly visibility: 'PUBLIC';
     };
 
 export type GameEventType = GameEvent['e'];

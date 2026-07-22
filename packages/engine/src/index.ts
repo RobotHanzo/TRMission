@@ -25,6 +25,7 @@ export type {
   StationPlacement,
   Endgame,
   PlayerFinal,
+  TeamFinal,
   FinalScoreboard,
 } from './types/state';
 export { SCHEMA_VERSION, ENGINE_VERSION, REPLAY_COMPATIBLE_ENGINE_VERSIONS } from './types/state';
@@ -114,6 +115,20 @@ export {
 } from './graph/connectivity';
 export type { Edge, TicketGoal, TicketEvaluation, IdTicketGoal } from './graph/connectivity';
 export { UnionFind } from './graph/unionFind';
+
+export {
+  isTeamGame,
+  teamOf,
+  teammates,
+  partnersOf,
+  sameTeam,
+  teamOwnedEdges,
+  teamOwnedConnectivityEdges,
+  ownedBySide,
+  teamPool,
+  teamPoolCount,
+  teamPoolHasRoom,
+} from './teams';
 
 // Re-export the canonical content + helpers for convenience.
 export { TAIWAN_CONTENT, CONTENT_HASH, taiwanBoard, boardForContentHash } from './taiwan';

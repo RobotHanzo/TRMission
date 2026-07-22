@@ -93,6 +93,10 @@ export function actionToCommand(action: Action): Command {
       return { case: 'continueHiveDraw', value: {} };
     case 'STOP_HIVE_DRAW':
       return { case: 'stopHiveDraw', value: {} };
+    case 'PUSH_TO_TEAM_POOL':
+      return { case: 'pushToTeamPool', value: { color: cardOrNullToPb(action.color) } };
+    case 'TAKE_FROM_TEAM_POOL':
+      return { case: 'takeFromTeamPool', value: { color: cardOrNullToPb(action.color) } };
     case 'PASS':
       return { case: 'pass', value: {} };
   }

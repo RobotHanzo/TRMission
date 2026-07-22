@@ -216,6 +216,17 @@ message PublicPlayerState {
   uint32 blessings = 9;
   uint32 claim_discounts = 10;
   uint32 repair_permits = 11;
+  // Team id, or -1 in a free-for-all. A team id is public (it is visible at the table); it is a
+  // scalar index like `seat` and still cannot carry a colour, card, or ticket.
+  int32 team = 12;
+}
+
+// One teammate's kept destination tickets. This deliberately carries ticket ids, so — exactly
+// like `CompletedTicket` — it lives OUTSIDE the counts-only PublicPlayerState and is embedded
+// only in the owner-addressed SelfView (risk #1 invariant preserved).
+message TeammateTickets {
+  string player_id = 1;
+  repeated string kept_ticket_ids = 2;
 }
 
 // The viewer's own private state. Embedded ONLY in a snapshot addressed to this
@@ -226,6 +237,11 @@ message SelfView {
   repeated string kept_ticket_ids = 3;
   repeated string pending_offer_ticket_ids = 4;
   bool you_must_pass = 5; // true ⇒ show a Pass control (current player, AWAIT_ACTION, no legal move)
+  // Team game: each teammate's kept tickets (the shared-objective ruling). A teammate's HAND is
+  // never here — the team pool is the only card channel between partners.
+  repeated TeammateTickets teammates = 6;
+  // True iff this player has already spent their one free team-pool push this turn.
+  bool team_push_used = 7;
 }
 
 // One player's end-of-game score breakdown. `kept_ticket_ids` are revealed here
@@ -255,9 +271,47 @@ message RankingGroup {
   repeated string player_ids = 1;
 }
 
+// One team's aggregated end-game score. The longest-trail bonus is awarded HERE, once per team,
+// never on the member PlayerFinal rows.
+message TeamFinal {
+  uint32 team = 1;
+  repeated string member_ids = 2;
+  int32 route_points = 3;
+  int32 ticket_net = 4;
+  uint32 tickets_completed = 5;
+  int32 station_bonus = 6;
+  uint32 longest_trail_length = 7;
+  int32 longest_bonus = 8;
+  int32 event_bonus = 9;
+  int32 total = 10;
+}
+
+// Final team ranking as equivalence groups; a group of >1 = tied teams.
+message TeamRankingGroup {
+  repeated uint32 teams = 1;
+}
+
 message FinalScoreboard {
   repeated PlayerFinal players = 1;
   repeated RankingGroup ranking = 2;
+  // Team totals + ranking. Empty in a free-for-all game.
+  repeated TeamFinal teams = 3;
+  repeated TeamRankingGroup team_ranking = 4;
+}
+
+// A team's public face-up card pool — the only channel partners may pass cards through, and open
+// information to every viewer (including spectators), which is what makes it a signalling device.
+message TeamPool {
+  uint32 team = 1;
+  repeated string member_ids = 2;
+  CardCounts cards = 3;
+}
+
+// Team-game projection. Absent (empty `pools`) in a free-for-all.
+message TeamState {
+  repeated TeamPool pools = 1;
+  // How many cards one pool may hold, so clients can render remaining capacity.
+  uint32 capacity = 2;
 }
 
 // Active rule variants for a game (display only — the engine has already baked their
@@ -268,6 +322,7 @@ message GameSettings {
   bool no_unfinished_ticket_penalty = 3;
   bool double_route_single_for23 = 4;
   string events_mode = 5; // "off" | "light" | "moderate" | "intense"
+  uint32 team_count = 6;  // 0 = free-for-all; 2–3 = team game
 }
 
 // A permanent viral-hotspot marker: each `level` adds +1 point to all route claims touching this city.
@@ -408,4 +463,7 @@ message GameSnapshot {
 
   // Broken-rail repair records (empty until the first repair happens).
   repeated BrokenRailRepair broken_rails = 23;
+
+  // Team rosters + public card pools (unset in a free-for-all game).
+  TeamState teams = 24;
 }

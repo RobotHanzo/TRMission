@@ -79,6 +79,13 @@ export type Action =
   | { readonly t: 'START_HIVE_DRAW'; readonly player: PlayerId }
   | { readonly t: 'CONTINUE_HIVE_DRAW'; readonly player: PlayerId }
   | { readonly t: 'STOP_HIVE_DRAW'; readonly player: PlayerId }
+  /** Team game: move one card from hand into your team's face-up pool. A FREE action, once per
+   *  turn — it does not consume the turn and is deliberately excluded from `hasAnyLegalMove`, so
+   *  it can never keep a stuck player from having to PASS (A15 termination). */
+  | { readonly t: 'PUSH_TO_TEAM_POOL'; readonly player: PlayerId; readonly color: CardColor }
+  /** Team game: take one card from your team's pool. Counts as one of the turn's two card draws,
+   *  exactly like taking a face-up market card (a LOCOMOTIVE ends the draw). */
+  | { readonly t: 'TAKE_FROM_TEAM_POOL'; readonly player: PlayerId; readonly color: CardColor }
   /** Pass — only legal when the player has no other legal move (A15 termination). */
   | { readonly t: 'PASS'; readonly player: PlayerId };
 

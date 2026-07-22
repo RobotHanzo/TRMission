@@ -18,7 +18,7 @@ describe('server-authorized early game end', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.state.turn.phase).toBe('GAME_OVER');
-    expect(result.value.state.engineVersion).toBe(11);
+    expect(result.value.state.engineVersion).toBe(12);
     expect(result.value.state.actionSeq).toBe(state.actionSeq + 1);
     expect(result.value.state.finalScores?.players).toHaveLength(3);
     expect(result.value.events).toEqual([{ e: 'GAME_ENDED', visibility: 'PUBLIC' }]);
@@ -44,7 +44,7 @@ describe('server-authorized early game end', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.state.engineVersion).toBe(11);
+    expect(result.value.state.engineVersion).toBe(12);
   });
 
   it('rejects an end action attributed to someone outside the game', () => {

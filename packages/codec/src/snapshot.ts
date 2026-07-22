@@ -43,6 +43,8 @@ function publicPlayer(p: RedactedPlayer) {
     blessings: p.blessings,
     claimDiscounts: p.claimDiscounts,
     repairPermits: p.repairPermits,
+    // Team id is public table information; -1 encodes "free-for-all" since proto3 uint32 cannot.
+    team: p.team ?? -1,
   };
 }
 
@@ -95,6 +97,22 @@ export function viewToSnapshot(
           ranking: view.finalScores.ranking.map((group) => ({
             playerIds: group.map((id) => id as string),
           })),
+          // Team totals + ranking (empty arrays in a free-for-all game).
+          teams: (view.finalScores.teams ?? []).map((tf) => ({
+            team: tf.team,
+            memberIds: tf.members.map((id) => id as string),
+            routePoints: tf.routePoints,
+            ticketNet: tf.ticketNet,
+            ticketsCompleted: tf.ticketsCompleted,
+            stationBonus: tf.stationBonus,
+            longestTrailLength: tf.longestTrailLength,
+            longestBonus: tf.longestBonus,
+            eventBonus: tf.eventBonus ?? 0,
+            total: tf.total,
+          })),
+          teamRanking: (view.finalScores.teamRanking ?? []).map((group) => ({
+            teams: [...group],
+          })),
         };
 
   return create(GameSnapshotSchema, {
@@ -143,7 +161,21 @@ export function viewToSnapshot(
       noUnfinishedTicketPenalty: view.settings.noUnfinishedTicketPenalty,
       doubleRouteSingleFor23: view.settings.doubleRouteSingleFor23,
       eventsMode: view.settings.eventsMode,
+      teamCount: view.settings.teamCount,
     },
+    // Team rosters + public pools (unset in a free-for-all). Public to players AND spectators —
+    // the pool is the signalling channel that replaces table talk, so everyone must read it.
+    teams:
+      view.teams === undefined
+        ? undefined
+        : {
+            capacity: view.teams.capacity,
+            pools: view.teams.rosters.map((members, team) => ({
+              team,
+              memberIds: members.map((id) => id as string),
+              cards: handToCardCounts((view.teams?.pools[team] ?? {}) as Hand),
+            })),
+          },
     // Random-events projection (unset when the feature is off — `view.events` is absent).
     randomEvents: view.events === undefined ? undefined : randomEventsToPb(view.events),
     // Broken-rail repair records (public; empty until the first repair happens).
@@ -161,6 +193,18 @@ export function viewToSnapshot(
             keptTicketIds: (self.keptTickets ?? []).map((id) => id as string),
             pendingOfferTicketIds: (self.pendingTicketOffer ?? []).map((id) => id as string),
             youMustPass: view.youMustPass,
+            // Teammates' kept tickets ride in the owner-addressed SelfView, never on the
+            // counts-only PublicPlayerState. `redactFor` already decided visibility: a teammate's
+            // keptTickets is non-null exactly when this viewer is allowed to see it.
+            teammates: view.players
+              .filter(
+                (p) => p.id !== self.id && p.team !== null && p.team === self.team && p.keptTickets,
+              )
+              .map((p) => ({
+                playerId: p.id as string,
+                keptTicketIds: (p.keptTickets ?? []).map((id) => id as string),
+              })),
+            teamPushUsed: view.teams?.youPushedThisTurn ?? false,
           },
     finalScores,
   });

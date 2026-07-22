@@ -15,6 +15,7 @@ export function makeConfig(
   numPlayers: number,
   seed: string | number,
   ruleParams?: GameConfig['ruleParams'],
+  teamCount?: number,
 ): { board: Board; config: GameConfig } {
   const board = taiwanBoard();
   const players = Array.from({ length: numPlayers }, (_, i) => ({
@@ -23,7 +24,13 @@ export function makeConfig(
   }));
   return {
     board,
-    config: { seed, players, contentHash: CONTENT_HASH, ...(ruleParams ? { ruleParams } : {}) },
+    config: {
+      seed,
+      players,
+      contentHash: CONTENT_HASH,
+      ...(ruleParams ? { ruleParams } : {}),
+      ...(teamCount !== undefined ? { teamCount } : {}),
+    },
   };
 }
 
@@ -127,11 +134,13 @@ export function playGreedyGame(
     checkEachStep?: boolean;
     maxSteps?: number;
     ruleParams?: GameConfig['ruleParams'];
+    /** Play as a team game with this many teams (membership = seat % teamCount). */
+    teamCount?: number;
     /** Inspection hook run before each action is chosen (e.g. an assertion on `state`). */
     onStep?: (board: Board, state: GameState) => void;
   } = {},
 ): PlayResult {
-  const { board, config } = makeConfig(numPlayers, seed, opts.ruleParams);
+  const { board, config } = makeConfig(numPlayers, seed, opts.ruleParams, opts.teamCount);
   let state = initGame(board, config);
   let rng = makeRng(`policy:${seed}`);
   const log: Action[] = [];

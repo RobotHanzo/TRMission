@@ -1,5 +1,5 @@
 import type { PlayerId, CardColor, TrainColor, CityId, RouteId } from '@trm/shared';
-import { CARD_COLORS, TRAIN_COLORS } from '@trm/shared';
+import { CARD_COLORS, TRAIN_COLORS, TEAM_POOL_CAPACITY } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
 import type { GameState } from './types/state';
@@ -17,6 +17,7 @@ import {
 } from './events/effects';
 import { ownConnectedTicketIds } from './graph/connectivity';
 import { evaluatePlayerTickets, longestTrailRouteIdsFor } from './scoring';
+import { teamOf, teamPool, sameTeam, teamOwnedConnectivityEdges } from './teams';
 import type { TicketId } from '@trm/shared';
 
 type Hand = Record<CardColor, number>;
@@ -198,12 +199,29 @@ export function legalActions(board: Board, state: GameState, player: PlayerId): 
       }
     }
     if (hiveOfSparksActive(state)) candidates.push({ t: 'START_HIVE_DRAW', player });
+    // Team pool: push (free, once per turn) and take (a draw). `reduce` filters both, so a
+    // free-for-all game generates nothing here and its candidate list is unchanged.
+    const team = teamOf(state, player);
+    if (team !== null) {
+      for (const color of CARD_COLORS) {
+        if (p.hand[color] > 0) candidates.push({ t: 'PUSH_TO_TEAM_POOL', player, color });
+        if (teamPool(state, team)[color] > 0)
+          candidates.push({ t: 'TAKE_FROM_TEAM_POOL', player, color });
+      }
+    }
     candidates.push({ t: 'PASS', player });
   } else if (phase === 'DRAWING_CARDS') {
     candidates.push({ t: 'DRAW_BLIND', player });
     state.market.forEach((c, slot) => {
       if (c !== null && c !== 'LOCOMOTIVE') candidates.push({ t: 'DRAW_FACEUP', player, slot });
     });
+    const team = teamOf(state, player);
+    if (team !== null) {
+      for (const color of CARD_COLORS) {
+        if (color !== 'LOCOMOTIVE' && teamPool(state, team)[color] > 0)
+          candidates.push({ t: 'TAKE_FROM_TEAM_POOL', player, color });
+      }
+    }
   } else if (phase === 'TICKET_SELECTION') {
     if (p.pendingTicketOffer) {
       for (const keep of combinations(p.pendingTicketOffer, state.ruleParams.minKeepNormal)) {
@@ -287,13 +305,9 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
       for (const tid of p.completedTickets) completedTickets.push({ player: id, ticket: tid });
       continue;
     }
-    const ownEdges: { a: string; b: string }[] = [];
-    for (const [routeId, cell] of Object.entries(state.ownership)) {
-      if ('owner' in cell && cell.owner === id) {
-        const r = board.routeById.get(routeId);
-        if (r) ownEdges.push({ a: r.a as string, b: r.b as string });
-      }
-    }
+    // Team game: a ticket is publicly complete once the SIDE's combined track joins its endpoints
+    // (teamOwnedConnectivityEdges collapses to the player's own routes in a free-for-all).
+    const ownEdges = teamOwnedConnectivityEdges(board, state, id);
     const tickets = p.keptTickets
       .map((tid) => {
         const t = board.ticketById.get(tid as string);
@@ -309,10 +323,13 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
   const players: RedactedPlayer[] = state.turnOrder.map((id) => {
     const p = state.players[id as string];
     const isSelf = id === viewer;
-    const keptVisible = isSelf || gameOver;
+    // Teammates share their destination tickets — the coordination the mode is built around.
+    // Hands deliberately stay hidden even from a partner (the pool is the only card channel).
+    const keptVisible = isSelf || gameOver || (viewer !== null && sameTeam(state, viewer, id));
     const resources = eventResources(state, id);
     return {
       id,
+      team: teamOf(state, id),
       seat: p?.seat ?? 0,
       trainCars: p?.trainCars ?? 0,
       stationsRemaining: p?.stationsRemaining ?? 0,
@@ -343,14 +360,18 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
             longestTrailRouteIds: longestTrailRouteIdsFor(board, state, pf.playerId),
           })),
           ranking: state.finalScores.ranking,
+          ...(state.finalScores.teams ? { teams: state.finalScores.teams } : {}),
+          ...(state.finalScores.teamRanking ? { teamRanking: state.finalScores.teamRanking } : {}),
         };
+
+  const currentPlayer = gameOver ? null : (state.turnOrder[state.turn.orderIndex] as PlayerId);
 
   return {
     schemaVersion: state.schemaVersion,
     contentHash: state.contentHash,
     phase: state.turn.phase,
     orderIndex: state.turn.orderIndex,
-    currentPlayer: gameOver ? null : (state.turnOrder[state.turn.orderIndex] as PlayerId),
+    currentPlayer,
     youMustPass,
     turnOrder: state.turnOrder,
     market: [...state.market],
@@ -374,12 +395,24 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
     players,
     finalScores,
     completedTickets,
+    ...(state.teams
+      ? {
+          teams: {
+            rosters: state.teams.map((r) => [...r]),
+            pools: (state.teamPools ?? []).map((pool) => ({ ...pool })),
+            capacity: TEAM_POOL_CAPACITY,
+            youPushedThisTurn:
+              state.turn.teamPushUsed === true && viewer !== null && viewer === currentPlayer,
+          },
+        }
+      : {}),
     settings: {
       unlimitedStationBorrow: state.ruleParams.unlimitedStationBorrow,
       secondDrawAfterBlindRainbow: state.ruleParams.secondDrawAfterBlindRainbow,
       noUnfinishedTicketPenalty: state.ruleParams.noUnfinishedTicketPenalty,
       doubleRouteSingleFor23: state.ruleParams.doubleRouteSingleFor23,
       eventsMode: state.ruleParams.eventsMode ?? 'off',
+      teamCount: state.teams?.length ?? 0,
     },
     ...(eventsBlock ? { events: eventsBlock } : {}),
   };

@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 11 (broken-rail routes: repair action + exclusive claim window)', () => {
-    expect(ENGINE_VERSION).toBe(11);
+  it('is engine version 12 (team mode: shared network, combined trail, team card pool)', () => {
+    expect(ENGINE_VERSION).toBe(12);
   });
 
   it('replays byte-identically under each variant', () => {

@@ -190,6 +190,18 @@ export function eventToProto(ev: GameEvent, recipient: PlayerId | null): PbGameE
         case: 'eventHiveResolved',
         value: { playerId: ev.player as string, busted: ev.busted, keptCount: ev.keptCount },
       });
+    // Both team-pool events are PUBLIC: the pool is open information by design, so the card is
+    // named for every recipient rather than blanked like a blind draw.
+    case 'TEAM_POOL_PUSHED':
+      return wrap({
+        case: 'teamPoolPushed',
+        value: { playerId: ev.player as string, team: ev.team, card: cardToPb(ev.card) },
+      });
+    case 'TEAM_POOL_TAKEN':
+      return wrap({
+        case: 'teamPoolTaken',
+        value: { playerId: ev.player as string, team: ev.team, card: cardToPb(ev.card) },
+      });
   }
 }
 

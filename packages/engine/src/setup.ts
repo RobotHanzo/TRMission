@@ -1,5 +1,5 @@
 import type { PlayerId, TicketId, CardColor } from '@trm/shared';
-import { DEFAULT_RULE_PARAMS, makeRng, shuffle } from '@trm/shared';
+import { DEFAULT_RULE_PARAMS, makeRng, nextInt, shuffle, teamOfSeat } from '@trm/shared';
 import type { Board } from './board';
 import type { GameConfig } from './config';
 import type { GameState, PlayerState } from './types/state';
@@ -16,16 +16,46 @@ import { generateSchedule } from './events/schedule';
  * (8) random-event schedule. Step (8) draws ZERO when `eventsMode` is off/absent, so an off-mode
  * genesis produces a byte-identical rng counter to a pre-events game.
  */
+/**
+ * Resolve team rosters from the seat map, or `undefined` for a free-for-all. Each roster is in
+ * ascending seat order, and membership is `seat % teamCount` — so partners are interleaved around
+ * the table by construction and no seating pass can ever break the alternation.
+ */
+function buildTeams(config: GameConfig): PlayerId[][] | undefined {
+  const teamCount = config.teamCount;
+  if (teamCount === undefined) return undefined;
+  const rosters: PlayerId[][] = Array.from({ length: teamCount }, () => []);
+  for (const seed of [...config.players].sort((a, b) => a.seat - b.seat)) {
+    (rosters[teamOfSeat(seed.seat, teamCount)] as PlayerId[]).push(seed.id);
+  }
+  return rosters;
+}
+
 export function initGame(board: Board, config: GameConfig): GameState {
   const ruleParams = { ...DEFAULT_RULE_PARAMS, ...(config.ruleParams ?? {}) };
   let rng = makeRng(config.seed);
 
-  // (1) Turn order.
-  let turnOrder: PlayerId[] = config.players.map((p) => p.id);
-  if (config.shuffleTurnOrder) {
-    const [shuffled, next] = shuffle(turnOrder, rng);
-    turnOrder = shuffled;
-    rng = next;
+  // (1) Turn order. A team game seats partners interleaved (`seat % teamCount`), so turn order
+  // must stay seat-ascending or teams would stop alternating; it is randomised by ROTATION only
+  // (one nextInt draw), which changes who opens without ever putting two teammates back to back.
+  // The free-for-all path is untouched, so its RNG stream stays byte-identical to pre-v12.
+  let turnOrder: PlayerId[];
+  if (config.teamCount !== undefined) {
+    const bySeat = [...config.players].sort((a, b) => a.seat - b.seat).map((p) => p.id);
+    if (config.shuffleTurnOrder) {
+      const [offset, next] = nextInt(rng, bySeat.length);
+      rng = next;
+      turnOrder = [...bySeat.slice(offset), ...bySeat.slice(0, offset)];
+    } else {
+      turnOrder = bySeat;
+    }
+  } else {
+    turnOrder = config.players.map((p) => p.id);
+    if (config.shuffleTurnOrder) {
+      const [shuffled, next] = shuffle(turnOrder, rng);
+      turnOrder = shuffled;
+      rng = next;
+    }
   }
 
   // (2) Deck.
@@ -103,6 +133,11 @@ export function initGame(board: Board, config: GameConfig): GameState {
   const [events, rngAfterEvents] = generateSchedule(board, ruleParams, rng);
   rng = rngAfterEvents;
 
+  // (9) Teams. Pure derivation from the seat map — consumes NO rng, so a free-for-all genesis is
+  // byte-identical to pre-v12 and the keys below are omitted entirely rather than set undefined.
+  const teams = buildTeams(config);
+  const teamPools = teams ? teams.map(() => emptyHand()) : undefined;
+
   return {
     schemaVersion: SCHEMA_VERSION,
     engineVersion: ENGINE_VERSION,
@@ -110,6 +145,7 @@ export function initGame(board: Board, config: GameConfig): GameState {
     rng,
     ruleParams,
     ...(events ? { events } : {}),
+    ...(teams && teamPools ? { teams, teamPools } : {}),
     turnOrder,
     players,
     turn: { orderIndex: 0, phase: 'SETUP_TICKETS', cardsDrawnThisTurn: 0 },

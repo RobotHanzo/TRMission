@@ -196,6 +196,20 @@ message EventHiveResolved {
   uint32 kept_count = 3;
 }
 
+// Team game: a card moved from a player's hand into their team's public pool.
+message TeamPoolPushed {
+  string player_id = 1;
+  uint32 team = 2;
+  CardColor card = 3;
+}
+
+// Team game: a player took a card out of their team's pool as one of their draws.
+message TeamPoolTaken {
+  string player_id = 1;
+  uint32 team = 2;
+  CardColor card = 3;
+}
+
 message GameEvent {
   oneof event {
     GameStarted game_started = 1;
@@ -229,6 +243,8 @@ message GameEvent {
     EventHiveCardRevealed event_hive_card_revealed = 29;
     EventHiveResolved event_hive_resolved = 30;
     BrokenRailRepaired broken_rail_repaired = 31;
+    TeamPoolPushed team_pool_pushed = 32;
+    TeamPoolTaken team_pool_taken = 33;
   }
 }
 

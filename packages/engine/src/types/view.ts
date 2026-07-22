@@ -15,6 +15,7 @@ import type {
   StationPlacement,
   Endgame,
   PlayerFinal,
+  TeamFinal,
 } from './state';
 import type {
   ActiveEvent,
@@ -41,6 +42,9 @@ export interface RedactedPlayerFinal extends PlayerFinal {
 export interface RedactedFinalScoreboard {
   readonly players: readonly RedactedPlayerFinal[];
   readonly ranking: readonly (readonly PlayerId[])[];
+  /** Team totals + team ranking. Absent in a free-for-all game. */
+  readonly teams?: readonly TeamFinal[];
+  readonly teamRanking?: readonly (readonly number[])[];
 }
 
 /** A player as seen by a particular viewer: own secrets included, opponents' are counts only. */
@@ -56,12 +60,15 @@ export interface RedactedPlayer {
   readonly blessings: number;
   readonly claimDiscounts: number;
   readonly repairPermits: number;
-  /** Own hand only (null for opponents). */
+  /** Own hand only (null for opponents — a TEAMMATE'S HAND IS NOT VISIBLE either; the team pool
+   *  is the only card channel between partners). */
   readonly hand: Hand | null;
-  /** Own kept tickets, or everyone's at GAME_OVER (null for hidden opponents). */
+  /** Own kept tickets, a teammate's in a team game, or everyone's at GAME_OVER (null otherwise). */
   readonly keptTickets: readonly TicketId[] | null;
   /** Own pending offer only. */
   readonly pendingTicketOffer: readonly TicketId[] | null;
+  /** This player's team id, or null in a free-for-all. */
+  readonly team: number | null;
 }
 
 export interface RedactedView {
@@ -104,6 +111,20 @@ export interface RedactedView {
   readonly players: readonly RedactedPlayer[];
   readonly finalScores: RedactedFinalScoreboard | null;
 
+  /**
+   * Team rosters (index = team id) and each team's PUBLIC card pool. Absent in a free-for-all.
+   * The pools are open information on purpose: with hands secret and no table talk, the pool is
+   * the channel partners signal through, so every player must be able to read it.
+   */
+  readonly teams?: {
+    readonly rosters: readonly (readonly PlayerId[])[];
+    readonly pools: readonly Hand[];
+    /** How many cards a pool may hold, so clients can render remaining capacity. */
+    readonly capacity: number;
+    /** True iff the viewer has already spent their one free push this turn. */
+    readonly youPushedThisTurn: boolean;
+  };
+
   /** Active rule variants for this game (display only — consequences are already baked in). */
   readonly settings: {
     readonly unlimitedStationBorrow: boolean;
@@ -111,6 +132,8 @@ export interface RedactedView {
     readonly noUnfinishedTicketPenalty: boolean;
     readonly doubleRouteSingleFor23: boolean;
     readonly eventsMode: EventsMode;
+    /** Number of teams, or 0 in a free-for-all. */
+    readonly teamCount: number;
   };
 
   /**

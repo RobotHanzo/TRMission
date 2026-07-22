@@ -57,6 +57,14 @@ import {
 } from './events/effects';
 import { drawEventCard, applyEventRefill } from './events/draw';
 import { hasAnyLegalMove } from './legality';
+import {
+  teamOf,
+  teamPool,
+  teamPoolCount,
+  teamPoolHasRoom,
+  withTeamPool,
+  teamOwnedConnectivityEdges,
+} from './teams';
 
 export interface ReduceOutput {
   readonly state: GameState;
@@ -128,6 +136,10 @@ function dispatch(board: Board, state: GameState, action: Action): ReduceResult 
           return applyNightMarketSwap(board, state, action.player, action.giveColor, action.slot);
         case 'START_HIVE_DRAW':
           return applyStartHiveDraw(board, state, action.player);
+        case 'PUSH_TO_TEAM_POOL':
+          return applyPushToTeamPool(state, action.player, action.color);
+        case 'TAKE_FROM_TEAM_POOL':
+          return applyTakeFromTeamPool(board, state, action.player, action.color);
         case 'PASS':
           return applyPass(board, state, action.player);
         default:
@@ -137,6 +149,8 @@ function dispatch(board: Board, state: GameState, action: Action): ReduceResult 
       if (action.t === 'DRAW_BLIND') return applyDrawBlind(board, state, action.player);
       if (action.t === 'DRAW_FACEUP')
         return applyDrawFaceup(board, state, action.player, action.slot);
+      if (action.t === 'TAKE_FROM_TEAM_POOL')
+        return applyTakeFromTeamPool(board, state, action.player, action.color);
       return err(violation('WRONG_PHASE', 'must finish drawing'));
     case 'TICKET_SELECTION':
       if (action.t === 'KEEP_TICKETS')
@@ -422,6 +436,90 @@ function applyDrawFaceup(
   if (drawn >= limit || !hasSecondDrawAvailable(next)) {
     // Limit reached, or deck+discard+market are exhausted/unusable so a further pick is provably
     // impossible (DRAWING_CARDS has no PASS escape) — end the turn now.
+    const out = endTurn(board, next, { wasPass: false });
+    return ok({ state: out.state, events: [...events, ...out.events] });
+  }
+  next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: drawn } };
+  return ok({ state: next, events });
+}
+
+// ──────────────────────────────────────────────── team card pool ────────────────────────────
+
+/**
+ * Push one card from hand into your team's public pool — a FREE action, once per turn, that does
+ * not advance the turn. Bounded by {@link TEAM_POOL_CAPACITY} so the pool stays a signalling
+ * device rather than a shared hand, and excluded from `hasAnyLegalMove` so a player who can only
+ * push still has to PASS (A15 termination is preserved).
+ */
+function applyPushToTeamPool(state: GameState, player: PlayerId, color: CardColor): ReduceResult {
+  const team = teamOf(state, player);
+  if (team === null) return err(violation('WRONG_PHASE', 'not a team game'));
+  if (state.turn.teamPushUsed)
+    return err(violation('WRONG_PHASE', 'already pushed to the team pool this turn'));
+  if (!teamPoolHasRoom(state, team)) return err(violation('WRONG_PHASE', 'the team pool is full'));
+  const p = getPlayer(state, player);
+  if (!p) return err(violation('NOT_YOUR_TURN', 'unknown player'));
+  if (p.hand[color] <= 0) return err(violation('INSUFFICIENT_CARDS', 'no such card in hand'));
+
+  const pool = teamPool(state, team);
+  const next: GameState = {
+    ...withPlayer(state, player, (pl) => ({
+      ...pl,
+      hand: { ...pl.hand, [color]: pl.hand[color] - 1 },
+    })),
+    teamPools: withTeamPool(state, team, { ...pool, [color]: pool[color] + 1 }),
+    turn: { ...state.turn, teamPushUsed: true },
+  };
+  return ok({
+    state: next,
+    events: [{ e: 'TEAM_POOL_PUSHED', player, team, card: color, visibility: 'PUBLIC' }],
+  });
+}
+
+/**
+ * Take one card out of your team's pool. This IS a draw — it consumes one of the turn's two
+ * picks and follows the same locomotive rule as the face-up market (a loco is first-pick only and
+ * spends the whole base allotment), so the pool can never be a free extra card.
+ */
+function applyTakeFromTeamPool(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  color: CardColor,
+): ReduceResult {
+  const team = teamOf(state, player);
+  if (team === null) return err(violation('WRONG_PHASE', 'not a team game'));
+  const pool = teamPool(state, team);
+  if (pool[color] <= 0) return err(violation('MARKET_SLOT_EMPTY', 'no such card in the team pool'));
+  const isFirst = state.turn.phase === 'AWAIT_ACTION';
+  if (color === 'LOCOMOTIVE' && !isFirst) {
+    return err(violation('FACEUP_LOCO_SECOND_DRAW', 'cannot take a locomotive as the second draw'));
+  }
+
+  let next: GameState = {
+    ...state,
+    teamPools: withTeamPool(state, team, { ...pool, [color]: pool[color] - 1 }),
+  };
+  next = addCardToHand(next, player, color);
+  const events: GameEvent[] = [
+    { e: 'TEAM_POOL_TAKEN', player, team, card: color, visibility: 'PUBLIC' },
+  ];
+
+  const drawn = (isFirst ? 0 : state.turn.cardsDrawnThisTurn) + 1;
+  const extraDraw = dayOffExtraDraw(state);
+  const limit = 2 + extraDraw;
+  // A second pick is available if the deck side OR the team's own pool can still supply one.
+  const canPickAgain = hasSecondDrawAvailable(next) || teamPoolCount(next, team) > 0;
+
+  if (color === 'LOCOMOTIVE') {
+    if (extraDraw > 0 && canPickAgain) {
+      next = { ...next, turn: { ...next.turn, phase: 'DRAWING_CARDS', cardsDrawnThisTurn: 2 } };
+      return ok({ state: next, events });
+    }
+    const out = endTurn(board, next, { wasPass: false });
+    return ok({ state: out.state, events: [...events, ...out.events] });
+  }
+  if (drawn >= limit || !canPickAgain) {
     const out = endTurn(board, next, { wasPass: false });
     return ok({ state: out.state, events: [...events, ...out.events] });
   }
@@ -1550,13 +1648,10 @@ function lockCompletedTickets(
     if (!p || p.keptTickets.length === 0) continue;
     const already = new Set(p.completedTickets as readonly string[]);
 
-    const ownEdges: { a: string; b: string }[] = [];
-    for (const [routeId, cell] of Object.entries(next.ownership)) {
-      if ('owner' in cell && cell.owner === pid) {
-        const r = board.routeById.get(routeId);
-        if (r) ownEdges.push({ a: r.a as string, b: r.b as string });
-      }
-    }
+    // Team game: the SIDE's combined track completes a ticket, so a partner's claim can lock your
+    // ticket. Still monotonic (routes are never unclaimed and membership is fixed at genesis), so
+    // the locked set continues to equal the end-game total. Collapses to own-track in a free-for-all.
+    const ownEdges = teamOwnedConnectivityEdges(board, next, pid);
     const tickets = p.keptTickets
       .map((tid) => {
         const t = board.ticketById.get(tid as string);

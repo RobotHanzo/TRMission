@@ -6,6 +6,7 @@ import { groupMembersOf } from './board';
 import type { GameState } from './types/state';
 import type { CardCounts } from './hand';
 import { getPlayer } from './reducers/common';
+import { teamOf, teamPoolCount } from './teams';
 import {
   allSeatsReservedActive,
   claimsSuspended,
@@ -106,6 +107,11 @@ export function noPlayerCanClaimRoute(board: Board, state: GameState): boolean {
 export function hasAnyLegalMove(board: Board, state: GameState, player: PlayerId): boolean {
   const p = getPlayer(state, player);
   if (!p) return false;
+  // Team pool: taking from it IS a productive draw, so it counts here. Pushing INTO it never does
+  // — it is a free action that moves a card sideways within the team, and counting it would let a
+  // player who can do nothing else avoid PASS forever, breaking the A15 termination guarantee.
+  const team = teamOf(state, player);
+  if (team !== null && teamPoolCount(state, team) > 0) return true;
   // Draw cards: any card available anywhere?
   const discardTotal = totalDiscard(state.discard);
   if (state.deck.length + discardTotal > 0) return true;
