@@ -739,6 +739,35 @@ describe('RoomScreen team selector', () => {
     );
   });
 
+  it('host-assign mode: dragging a chip onto another team column reseats the same way', async () => {
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'host' } }),
+    );
+    mocked.reseatRoom.mockResolvedValue(teamRoom());
+    render(<RoomScreen />);
+    // Same swap as the click test (g1 ⇄ u-me), driven by native HTML5 drag-and-drop instead.
+    const chip = await screen.findByRole('button', { name: /Guest1/ });
+    const targetHeader = screen.getByRole('button', { name: /1 隊/ });
+    const targetColumn = targetHeader.parentElement as HTMLElement;
+    const dataTransfer = {
+      data: {} as Record<string, string>,
+      setData(format: string, value: string) {
+        this.data[format] = value;
+      },
+      getData(format: string) {
+        return this.data[format] ?? '';
+      },
+      effectAllowed: '',
+      dropEffect: '',
+    };
+    fireEvent.dragStart(chip, { dataTransfer });
+    fireEvent.dragOver(targetColumn, { dataTransfer });
+    fireEvent.drop(targetColumn, { dataTransfer });
+    await waitFor(() =>
+      expect(mocked.reseatRoom).toHaveBeenCalledWith('ABCD', ['g1', 'u-me', 'g2', 'g3']),
+    );
+  });
+
   it('random mode: shows a host-only shuffle button that reseats the table', async () => {
     mocked.getRoom.mockResolvedValue(
       teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'random' } }),

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Crown, Shuffle, UserMinus, X } from 'lucide-react';
 import type { RoomView, RoomMember, RoomSettings } from '../net/rest';
@@ -31,8 +31,10 @@ interface TeamSelectorProps {
 /**
  * Replaces the flat member list whenever team mode is on: one "platform board" column per team
  * (ribbon in the team's own colour), rendered per the room's `teamAssignMode` — read-only +
- * host shuffle button (random), tap-a-player-then-tap-a-team (host), or a per-column Join button
- * (self). Host powers (kick/transfer/remove bot) stay available on every chip regardless of mode.
+ * host shuffle button (random), tap-a-player-then-tap-a-team OR drag-a-chip-onto-a-column (host),
+ * or a per-column Join button (self). The two host-assign interactions share the same
+ * `onAssign` call, so either one is just a different way to pick the same (userId, team) pair.
+ * Host powers (kick/transfer/remove bot) stay available on every chip regardless of mode.
  */
 export function TeamSelector({
   room,
@@ -48,9 +50,13 @@ export function TeamSelector({
 }: TeamSelectorProps) {
   const { t } = useTranslation();
   const [selected, setSelected] = useState<string | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
   const mode = room.settings.teamAssignMode;
   const teamCount = room.settings.teamCount;
   const assignable = mode === 'host' && isHost;
+  // Either interaction resolves to the same active member; a column lights up as a valid
+  // drop target for whichever one is in flight.
+  const activeUserId = selected ?? dragging;
 
   const teams = Array.from({ length: teamCount }, (_, team) => ({
     team,
@@ -59,13 +65,33 @@ export function TeamSelector({
       .sort((a, b) => a.seat - b.seat),
   }));
 
+  const assignToColumn = (userId: string, team: number) => {
+    onAssign(userId, team);
+    setSelected(null);
+    setDragging(null);
+  };
   const selectChip = (userId: string) => {
     setSelected((cur) => (cur === userId ? null : userId));
   };
   const dropOnColumn = (team: number) => {
     if (!assignable || selected === null) return;
-    onAssign(selected, team);
-    setSelected(null);
+    assignToColumn(selected, team);
+  };
+  const handleChipDragStart = (userId: string) => (e: DragEvent<HTMLButtonElement>) => {
+    e.dataTransfer.setData('text/plain', userId);
+    e.dataTransfer.effectAllowed = 'move';
+    setDragging(userId);
+  };
+  const handleColumnDragOver = (e: DragEvent<HTMLDivElement>) => {
+    if (!assignable) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+  const handleColumnDrop = (team: number) => (e: DragEvent<HTMLDivElement>) => {
+    if (!assignable) return;
+    e.preventDefault();
+    const userId = e.dataTransfer.getData('text/plain');
+    if (userId) assignToColumn(userId, team);
   };
 
   return (
@@ -85,9 +111,14 @@ export function TeamSelector({
         {teams.map(({ team, members }) => {
           const isMyTeam = members.some((m) => m.userId === myUserId);
           const dropActive =
-            assignable && selected !== null && !members.some((m) => m.userId === selected);
+            assignable && activeUserId !== null && !members.some((m) => m.userId === activeUserId);
           return (
-            <div key={team} className="team-column">
+            <div
+              key={team}
+              className={dropActive ? 'team-column team-column-drop-target' : 'team-column'}
+              onDragOver={assignable ? handleColumnDragOver : undefined}
+              onDrop={assignable ? handleColumnDrop(team) : undefined}
+            >
               <button
                 type="button"
                 className={
@@ -129,8 +160,17 @@ export function TeamSelector({
                       {assignable ? (
                         <button
                           type="button"
-                          className={selected === m.userId ? 'team-chip selected' : 'team-chip'}
+                          className={[
+                            'team-chip',
+                            selected === m.userId && 'selected',
+                            dragging === m.userId && 'dragging',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
                           aria-pressed={selected === m.userId}
+                          draggable
+                          onDragStart={handleChipDragStart(m.userId)}
+                          onDragEnd={() => setDragging(null)}
                           onClick={() => selectChip(m.userId)}
                         >
                           {chipContent}
