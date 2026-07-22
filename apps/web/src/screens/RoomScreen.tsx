@@ -311,7 +311,7 @@ export function RoomScreen() {
                   className="badge team-badge"
                   style={{ background: teamColor(m.seat % teamCount) }}
                 >
-                  {t('teamName', { n: (m.seat % teamCount) + 1, ns: 'game' })}
+                  {t('teamName', { n: (m.seat % teamCount) + 1 })}
                 </span>
               )}
               {m.isBot && <Bot size={15} aria-hidden />}

@@ -18,7 +18,7 @@ export default {
     deleteAccount: 'Delete account · TRMission 台鐵任務',
   },
   descriptions: {
-    home: 'A free online multiplayer railway board game set in Taiwan: collect train-car cards, claim routes between cities, and complete mission tickets. Live games for 2–5 players, bots to practise against, spectating, and replays.',
+    home: 'A free online multiplayer railway board game set in Taiwan: collect train-car cards, claim routes between cities, and complete mission tickets. Live games for 2–5 players plus team mode, bots to practise against, spectating, and replays.',
     login: 'Sign in to TRMission — play as a guest or with an email, Google, or Discord account.',
     tutorial:
       'A 5-minute interactive tutorial: learn drawing cards, claiming routes, and mission scoring. No sign-in needed.',

@@ -3,7 +3,7 @@ export default {
   eyebrow: '線上多人鐵道桌遊 · 免費遊玩',
   // \n + `white-space: pre-line` controls the break — CJK auto-wrap would split 路線 mid-word.
   title: '在台灣鐵道上\n搶占路線、完成任務',
-  lede: '《台鐵任務》是一款以台灣鐵路為靈感的線上桌上遊戲：收集車廂卡、佔下城市之間的路段，把任務卡上的起訖點連成一氣。支援 2–5 人連線對戰、機器人陪練與觀戰。',
+  lede: '《台鐵任務》是一款以台灣鐵路為靈感的線上桌上遊戲：收集車廂卡、佔下城市之間的路段，把任務卡上的起訖點連成一氣。支援 2–5 人連線對戰（組隊模式最多 6 人）、機器人陪練與觀戰。',
   departures: {
     title: '即將發車',
     tutorialDest: '新手教學',
@@ -26,7 +26,7 @@ export default {
   features: {
     title: '不只是一張地圖',
     multiplayerTitle: '即時多人對戰',
-    multiplayerDesc: '2–5 人房間，貼個房號就能開局，也可以中途加入觀戰。',
+    multiplayerDesc: '2–5 人房間（組隊模式 4 或 6 人），貼個房號就能開局，也可以中途加入觀戰。',
     botsTitle: '機器人陪練',
     botsDesc: '多種難度的電腦玩家，缺人補位、想練隨時開。',
     learnTitle: '教學與規則百科',

@@ -35,8 +35,28 @@ Set/Map-iteration-order dependence.
   **deterministic instruction-count budget** (never wall-clock). B&B and DP are cross-checked in tests.
 - `graph/connectivity.ts` — ticket completion via union-find over owned edges, augmented by an
   exhaustive deterministic search over each station's borrowed opponent edge.
+- `teams.ts` — the single answer to "who is on whose side" (v12). Every team rule reads membership
+  through it, and in a free-for-all `teammates()` returns just `[player]`, so the shared-network
+  code collapses to the historical per-player behaviour with no branch at the call sites.
 - `scoring.ts`, `setup.ts`, `turn.ts`, `serialize.ts` (`stateDigest`/`replay`/`cloneState`),
   `invariants.ts` (conservation checks fast-check'd in tests).
+
+## Team mode (v12)
+
+A team game is any game whose config carried `teamCount`. Membership is `seat % teamCount`, so
+partners are interleaved around the table by construction and the genesis turn-order shuffle is a
+ROTATION (one `nextInt`) rather than a permutation — alternation cannot be broken. Teams share a
+network for ticket completion (including the mid-game lock) and score ONE combined longest-trail
+bonus on a team scoreboard row; the per-player rows carry `longestBonus: 0` so it is never doubled.
+Teammates see each other's kept tickets, but never each other's hands: cards move between partners
+only through the public per-team pool (`PUSH_TO_TEAM_POOL` is free once per turn and is deliberately
+excluded from `hasAnyLegalMove` so A15 termination survives; `TAKE_FROM_TEAM_POOL` is a draw).
+
+**Adding no `RuleParams` field was deliberate** — `stateDigest` covers `ruleParams`, so a new key
+there would change every existing game's digest and break the replay allowlist. All team state is
+optional keys (`teams`, `teamPools`, `turn.teamPushUsed`) that only `GameConfig.teamCount` can
+produce, which is what lets v12 sit in `REPLAY_COMPATIBLE_ENGINE_VERSIONS` beside 9/10/11. Keep it
+that way.
 
 ## When changing rules
 

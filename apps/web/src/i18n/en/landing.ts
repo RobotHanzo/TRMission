@@ -5,7 +5,7 @@ import type zh from '../zh-Hant/landing';
 export default {
   eyebrow: 'An online multiplayer railway board game · free to play',
   title: 'Claim routes across Taiwan,\ncomplete your missions',
-  lede: "TRMission is an online board game inspired by Taiwan's railways: collect train-car cards, claim the routes between cities, and link your mission tickets end to end. Play live with 2–5 players, practise against bots, or spectate a friend's game.",
+  lede: "TRMission is an online board game inspired by Taiwan's railways: collect train-car cards, claim the routes between cities, and link your mission tickets end to end. Play live with 2–5 players (or 4 and 6 in team mode), practise against bots, or spectate a friend's game.",
   departures: {
     title: 'Departures',
     tutorialDest: 'Tutorial',
@@ -33,7 +33,7 @@ export default {
     title: 'More than a map',
     multiplayerTitle: 'Live multiplayer',
     multiplayerDesc:
-      'Rooms for 2–5 players — share a room code to start, or join mid-game as a spectator.',
+      'Rooms for 2–5 players (4 or 6 in team mode) — share a room code to start, or join mid-game as a spectator.',
     botsTitle: 'Bots to practise with',
     botsDesc:
       'Computer players across several difficulties fill empty seats whenever you want a game.',

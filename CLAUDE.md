@@ -136,8 +136,14 @@ These mirror the ADRs in the development plan; treat them as binding.
   resume remains exact-version pinned). `CONTENT_HASH` is derived from the authored content, so any map
   edit changes it.
 - **Naming/tooling pins.** The 6th card colour is **PURPLE** everywhere (never PINK). Seat colours
-  are abstract indices 0–4 on the wire, coloured client-side. `apps/web` pins **Vite ^5** for vitest
-  2 compatibility — do not bump to Vite 6.
+  are abstract indices 0–5 on the wire, coloured client-side (seat 5 exists only for the 6-player
+  team layouts). `apps/web` pins **Vite ^5** for vitest 2 compatibility — do not bump to Vite 6.
+- **Team mode is opt-in per room and structurally inert when off.** `RoomSettings.teamCount`
+  (0 = free-for-all, 2 or 3) becomes `GameConfig.teamCount`; membership is `seat % teamCount`, so
+  arranging teams in the lobby IS reordering seats (`POST /rooms/:code/seats`). Teams share a
+  network for tickets + one combined longest-trail bonus, see each other's tickets but never each
+  other's hands, and pass cards only through a public per-team pool. See `packages/engine/CLAUDE.md`
+  for why no `RuleParams` field was added (it would have changed every existing game's digest).
 
 ## Server env vars
 
