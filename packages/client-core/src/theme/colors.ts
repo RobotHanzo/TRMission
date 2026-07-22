@@ -23,8 +23,8 @@ export const CARD_COLOR_TOKENS: Record<CardColor, ColorToken> = {
   YELLOW: { key: 'YELLOW', hex: ROUTE_COLOR_HEX.YELLOW, ink: '#241B00', nameZh: '黃', glyph: '●' },
   GREEN: { key: 'GREEN', hex: ROUTE_COLOR_HEX.GREEN, ink: '#FFFFFF', nameZh: '綠', glyph: '■' },
   BLUE: { key: 'BLUE', hex: ROUTE_COLOR_HEX.BLUE, ink: '#FFFFFF', nameZh: '藍', glyph: '♠' },
-  PURPLE: { key: 'PURPLE', hex: ROUTE_COLOR_HEX.PURPLE, ink: '#FFFFFF', nameZh: '紫', glyph: '♥' },
-  BLACK: { key: 'BLACK', hex: ROUTE_COLOR_HEX.BLACK, ink: '#FFFFFF', nameZh: '黑', glyph: '♣' },
+  PURPLE: { key: 'PURPLE', hex: ROUTE_COLOR_HEX.PURPLE, ink: '#FFFFFF', nameZh: '紫', glyph: '✦' },
+  BLACK: { key: 'BLACK', hex: ROUTE_COLOR_HEX.BLACK, ink: '#FFFFFF', nameZh: '黑', glyph: '⬢' },
   WHITE: { key: 'WHITE', hex: ROUTE_COLOR_HEX.WHITE, ink: '#1B1C1E', nameZh: '白', glyph: '○' },
   // The wild card reads as "any colour" — themed as the rainbow locomotive (彩虹車頭).
   LOCOMOTIVE: {
