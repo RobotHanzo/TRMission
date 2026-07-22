@@ -15,7 +15,15 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
   // CSP is disabled so the Scalar /docs page can load its CDN bundle; tighten in prod.
-  app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
+  // Referrer-Policy is pinned to match the web tier's nginx value (helmet's default is
+  // `no-referrer`) so the proxied /api responses never carry two conflicting policies.
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    }),
+  );
   app.use(cookieParser());
   if (env.corsOrigins.length > 0) app.enableCors({ origin: env.corsOrigins, credentials: true });
 

@@ -216,6 +216,7 @@ export class OgService {
 <meta property="og:image" content="${img}">
 <meta property="og:image:width" content="${CARD_W}">
 <meta property="og:image:height" content="${CARD_H}">
+<meta property="og:image:alt" content="${t}">
 <meta property="og:locale" content="zh_TW">
 <meta property="og:locale:alternate" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
