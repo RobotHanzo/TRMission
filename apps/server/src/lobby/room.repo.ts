@@ -1,7 +1,13 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
-import { seatOrderMovingToTeam, teamOfSeat, type EventsMode, type ChatPresetId } from '@trm/shared';
+import {
+  seatOrderMovingToTeam,
+  teamOfSeat,
+  TEAM_LAYOUTS,
+  type EventsMode,
+  type ChatPresetId,
+} from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
 import type { BotDifficulty } from '@trm/bots';
 import type { GameDoc } from '../persistence/types';
@@ -360,9 +366,18 @@ export class RoomRepo implements OnModuleInit {
       if (v !== undefined) (clean as Record<string, unknown>)[k] = v;
     }
     const settings: RoomSettings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings, ...clean };
+    // A team layout must be seatable: e.g. 3 teams' only layout (PAIRS_3) needs a 6-seat table.
+    // Raise the room's cap to fit whatever the chosen team count can require, so a would-be 6th
+    // player can actually join instead of being turned away as "full" before ever reaching the
+    // team-layout check at start. Never shrinks the cap (turning team mode back off keeps it).
+    const requiredSeats = TEAM_LAYOUTS.filter((l) => l.teamCount === settings.teamCount).reduce(
+      (max, l) => Math.max(max, l.playerCount),
+      0,
+    );
+    const maxPlayers = Math.max(room.maxPlayers, requiredSeats);
     await this.col.updateOne(
       { _id: code, hostId, status: 'LOBBY' },
-      { $set: { settings, updatedAt: new Date() } },
+      { $set: { settings, maxPlayers, updatedAt: new Date() } },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }

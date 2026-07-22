@@ -72,6 +72,52 @@ describe('lobby: team mode', () => {
       .expect(400);
   });
 
+  it('raises a default 5-seat room to fit a 3-team table once teamCount is set to 3', async () => {
+    // Mirrors a real room: created with no explicit maxPlayers (defaults to 5), same as the web
+    // client's "create room" button. Without the cap-raise, a 6th seat can never be filled — the
+    // 3-team layout (PAIRS_3) only exists at 6 players, so the room would reject the 6th join as
+    // "full" before the team-layout check at start ever gets a chance to run.
+    const host = await guest('Host');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
+    const code = room.body.code as string;
+    expect(room.body.maxPlayers).toBe(5);
+
+    await setTeams(code, host.token, 3);
+    const afterSettings = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(host.token))
+      .expect(200);
+    expect(afterSettings.body.maxPlayers).toBe(6);
+
+    for (let i = 0; i < 5; i++) {
+      await request(server())
+        .post(`/api/v1/rooms/${code}/bots`)
+        .set(auth(host.token))
+        .send({ difficulty: 'EASY' })
+        .expect(200);
+    }
+    const finalRoom = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(host.token))
+      .expect(200);
+    expect(finalRoom.body.members).toHaveLength(6);
+  });
+
+  it('does not shrink an existing larger room when team mode is switched off', async () => {
+    const { host, code } = await roomWithBots(6, 0);
+    await setTeams(code, host.token, 3);
+    await setTeams(code, host.token, 0);
+    const room = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(host.token))
+      .expect(200);
+    expect(room.body.maxPlayers).toBe(6);
+  });
+
   it('starts a 4-player 2-team game and stamps teamCount on the engine state', async () => {
     const { host, code } = await roomWithBots(4, 3);
     await setTeams(code, host.token, 2);
