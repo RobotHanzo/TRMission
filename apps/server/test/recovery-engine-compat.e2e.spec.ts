@@ -72,18 +72,16 @@ async function seedLegacyGame(gameId: string, engineVersion: number): Promise<vo
 
   await db.collection<GameDoc>('games').updateOne({ _id: gameId }, { $set: { engineVersion } });
   // The pre-v8 EventsState shape: the expansion fields simply did not exist.
-  await db
-    .collection('gameSnapshots')
-    .updateMany(
-      { gameId },
-      {
-        $unset: {
-          'state.events.luckyContracts': '',
-          'state.events.repairedRouteIds': '',
-          'state.events.resources': '',
-        },
+  await db.collection('gameSnapshots').updateMany(
+    { gameId },
+    {
+      $unset: {
+        'state.events.luckyContracts': '',
+        'state.events.repairedRouteIds': '',
+        'state.events.resources': '',
       },
-    );
+    },
+  );
 }
 
 const helloFrame = (gameId: string, playerId: string, seat: number): Uint8Array =>

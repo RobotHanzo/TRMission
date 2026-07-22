@@ -80,7 +80,9 @@ export function CityPickStage() {
                     key={c.id}
                     data-city-id={c.id}
                     d={c.rings
-                      .map((ring) => `M ${ring.map(([lon, lat]) => `${lon},${-lat}`).join(' L ')} Z`)
+                      .map(
+                        (ring) => `M ${ring.map(([lon, lat]) => `${lon},${-lat}`).join(' L ')} Z`,
+                      )
                       .join(' ')}
                     className={`editor-country${selected.has(c.id) ? ' editor-country--selected' : ''}`}
                     onClick={() => toggle(c.id)}

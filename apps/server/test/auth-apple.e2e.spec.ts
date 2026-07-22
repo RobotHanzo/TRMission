@@ -185,9 +185,7 @@ describe('apple redirect flow (web + android)', () => {
     return c ? (c.split(';')[0] ?? '') : '';
   };
   const startFlow = async (query = '') => {
-    const res = await request(rServer())
-      .get(`/api/v1/auth/oauth/apple/start${query}`)
-      .expect(302);
+    const res = await request(rServer()).get(`/api/v1/auth/oauth/apple/start${query}`).expect(302);
     const url = new URL(String(res.headers.location));
     return { url, state: url.searchParams.get('state') ?? '', cookie: appleNonceCookie(res) };
   };

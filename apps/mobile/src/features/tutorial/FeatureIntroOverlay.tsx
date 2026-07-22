@@ -63,7 +63,11 @@ function FeatureIntroCard({ intro, onClose }: { intro: FeatureIntroDef; onClose:
 
 /** Mounts the first pending intro for this game's map; marks it seen when dismissed. Multiple new
  *  features queue naturally: marking one seen re-evaluates and surfaces the next. */
-export function FeatureIntroOverlay({ content }: { content: GameContent }): React.JSX.Element | null {
+export function FeatureIntroOverlay({
+  content,
+}: {
+  content: GameContent;
+}): React.JSX.Element | null {
   const user = useSession((s) => s.user);
   const markSeen = useSession((s) => s.markFeatureIntroSeen);
   // null until the on-device mirror loads — the overlay stays hidden meanwhile.

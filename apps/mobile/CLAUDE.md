@@ -126,7 +126,7 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
   equivalent cheap-texture-during-zoom effect for free from the browser's CSS-transform
   compositor). The snapshot is rendered ONCE per gesture, at the last settle (`cam.settled`,
   `useStaticMapImage`), and then simply scaled/translated by the live GPU transform for the
-  *entire* pan or pinch — it deliberately does NOT re-rasterize mid-gesture. A mid-gesture
+  _entire_ pan or pinch — it deliberately does NOT re-rasterize mid-gesture. A mid-gesture
   refresh (keyed to the `MID_GESTURE_LOD_RATIO` checkpoints) was tried and reverted:
   `useStaticMapImage`'s offscreen pass records the whole static Picture into a surface up to
   4096px² and reads it back to CPU (`makeNonTextureImage`), which is expensive enough by design

@@ -460,9 +460,9 @@
     "semantic_hash": "08fa3d8d9afdb1f97b3092f437721d62"
   },
   "apps/web/src/components/PlayerTrackers.tsx": {
-    "mtime": 1782775136.629991,
-    "ast_hash": "a6625d2d09ca461a571b95412b7b0ad6",
-    "semantic_hash": "a6625d2d09ca461a571b95412b7b0ad6"
+    "mtime": 1784704293.5665846,
+    "ast_hash": "72b612cd4a047311e8a003ff7952fc43",
+    "semantic_hash": ""
   },
   "apps/web/src/components/RoutePreview.tsx": {
     "mtime": 1783764257.504804,
@@ -735,9 +735,9 @@
     "semantic_hash": ""
   },
   "apps/web/src/game/playerName.ts": {
-    "mtime": 1782643803.0833318,
-    "ast_hash": "c28ea6a2fa88eacf32db23c7bef2c439",
-    "semantic_hash": "c28ea6a2fa88eacf32db23c7bef2c439"
+    "mtime": 1784704345.3740788,
+    "ast_hash": "efeee2c59a9da35862fb285aafd17f9a",
+    "semantic_hash": ""
   },
   "apps/web/src/game/routeGeometry.test.ts": {
     "mtime": 1783626567.3632932,
@@ -920,8 +920,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/screens/RoomScreen.tsx": {
-    "mtime": 1784693174.655375,
-    "ast_hash": "4709ef94d2844285f90ab81550592c78",
+    "mtime": 1784694149.366122,
+    "ast_hash": "3d2904252e5423344173559080b8dee0",
     "semantic_hash": ""
   },
   "apps/web/src/sound/cues.test.ts": {
@@ -1480,8 +1480,8 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1784420909.3316374,
-    "ast_hash": "4fe44dbb6ddf1aa66aed6618da5cbc24",
+    "mtime": 1784694292.6359894,
+    "ast_hash": "ae6dad2779a3fd8f6d6490473e600579",
     "semantic_hash": ""
   },
   "README.md": {
@@ -1600,9 +1600,9 @@
     "semantic_hash": "4d10398b8fe0104504c5fbe4022ee97a"
   },
   "packages/engine/CLAUDE.md": {
-    "mtime": 1782573152.9433086,
-    "ast_hash": "89e3a40d0405b8aab8272094fbfc5f4c",
-    "semantic_hash": "89e3a40d0405b8aab8272094fbfc5f4c"
+    "mtime": 1784694279.8182745,
+    "ast_hash": "87fb3ad78fbd6c37eac51cea74be9711",
+    "semantic_hash": ""
   },
   "packages/map-data/CLAUDE.md": {
     "mtime": 1783411484.4300468,
@@ -4205,8 +4205,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/PlayerTrackers.tsx": {
-    "mtime": 1784478488.8471334,
-    "ast_hash": "ad1a10791655d1ef9f0594710b163866",
+    "mtime": 1784704320.0739799,
+    "ast_hash": "d08ce31362b29e59852e169cb68ec2d1",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/RoutePreview.tsx": {
@@ -4510,8 +4510,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/game/playerName.ts": {
-    "mtime": 1783869478.4854918,
-    "ast_hash": "cd508d837648d322df904bca62cd048c",
+    "mtime": 1784704350.025563,
+    "ast_hash": "b23b996f9befc9696235ab9072432336",
     "semantic_hash": ""
   },
   "apps/mobile/src/game/routeGeometry.ts": {
@@ -5660,8 +5660,8 @@
     "semantic_hash": ""
   },
   "packages/client-core/src/theme/colors.ts": {
-    "mtime": 1784691061.8612413,
-    "ast_hash": "9d746ae29c66f4a1d9ec46d02cdecd23",
+    "mtime": 1784704012.9922957,
+    "ast_hash": "c95da1a52f32bde67a0a5f151da5b0f2",
     "semantic_hash": ""
   },
   "packages/client-core/src/game/catalog.ts": {
@@ -6315,8 +6315,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/en/landing.ts": {
-    "mtime": 1784428654.4713821,
-    "ast_hash": "f7e433f59d9e1f6c8616c9986aa2bdff",
+    "mtime": 1784694265.8771417,
+    "ast_hash": "f98529df8f19e4055a2be92a1a8456dc",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/en/lobby.ts": {
@@ -6330,8 +6330,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/en/seo.ts": {
-    "mtime": 1784428638.6001742,
-    "ast_hash": "b85b7acd76ccecc51ffb86352b24dba5",
+    "mtime": 1784694265.8781414,
+    "ast_hash": "073438952360928da6a393dd8a785fff",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/en/ui.ts": {
@@ -6380,8 +6380,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/zh-Hant/landing.ts": {
-    "mtime": 1784428557.6632373,
-    "ast_hash": "f57cb5b2b61d7b244bbc19071754c36e",
+    "mtime": 1784694265.8721416,
+    "ast_hash": "ffec94494ebe9c35ecf3d91627e97482",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/zh-Hant/lobby.ts": {
@@ -6395,8 +6395,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/zh-Hant/seo.ts": {
-    "mtime": 1784428495.4271853,
-    "ast_hash": "e4789f88457b867cf246271955fca5c6",
+    "mtime": 1784694265.875141,
+    "ast_hash": "a74a463345782a490d751a18117ae747",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/zh-Hant/ui.ts": {
@@ -6540,8 +6540,8 @@
     "semantic_hash": ""
   },
   "packages/client-core/src/i18n/locales/zh-Hant/game.ts": {
-    "mtime": 1784692937.2995605,
-    "ast_hash": "90496fb8c36ec1970f1208daa6602d71",
+    "mtime": 1784704284.2560391,
+    "ast_hash": "58d15189793a424e405053df42217d21",
     "semantic_hash": ""
   },
   "packages/client-core/src/i18n/locales/zh-Hant/gameSettings.ts": {
@@ -6705,8 +6705,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/config/adsense.ts": {
-    "mtime": 1784609093.80855,
-    "ast_hash": "cdc57ec2511781b5038c1d467cb276b6",
+    "mtime": 1784700050.1444008,
+    "ast_hash": "e64f1a9801e6f8d853cf8d5558f19a2b",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/OfflineSetupScreen.test.tsx": {

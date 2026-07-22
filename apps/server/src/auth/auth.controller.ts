@@ -417,9 +417,7 @@ export class AuthController {
   ): Promise<void> {
     const mobile = client === 'mobile';
     const failUrl = (error: string): string =>
-      mobile
-        ? this.authConfig.mobileCallback({ error })
-        : this.authConfig.webCallback({ error });
+      mobile ? this.authConfig.mobileCallback({ error }) : this.authConfig.webCallback({ error });
     if (!this.authConfig.appleRedirectEnabled) {
       res.redirect(failUrl('provider_disabled'));
       return;

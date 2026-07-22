@@ -186,9 +186,7 @@ export function TunnelModal({
             <View style={styles.result}>
               {options.length === 0 ? (
                 // Can't afford the surcharge — nothing to pay; abort is the only way on.
-                <Text style={[styles.cannot, { color: tokens.inkSoft }]}>
-                  {t('cannotAfford')}
-                </Text>
+                <Text style={[styles.cannot, { color: tokens.inkSoft }]}>{t('cannotAfford')}</Text>
               ) : (
                 <>
                   <Text style={[styles.surcharge, { color: tokens.ink }]}>

@@ -3,7 +3,16 @@
 // glyphs, sound + volume, push toggle, haptics toggle, and in-app account deletion. Guests have
 // no deletion row — a guest account holds nothing its TTL won't reap. Preference changes apply
 // instantly (ui store persists on-device) and then sync to the account (no-op for guests).
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import {
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { BoardLayout, Locale, Theme, UserPreferences } from '../net/rest';
 import { SERVER_ORIGIN } from '../config';

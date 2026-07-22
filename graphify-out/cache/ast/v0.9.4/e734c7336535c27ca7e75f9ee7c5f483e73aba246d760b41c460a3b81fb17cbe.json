@@ -1,1 +1,223 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_md", "label": "2026-07-11-ga-analytics-events.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan", "label": "GA Analytics Events Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "label": "File Structure", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L22"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_1_analytics_wrapper_module", "label": "Task 1: Analytics wrapper module", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L32"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_2_spa_page_view_on_route_change", "label": "Task 2: SPA page_view on route change", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L238"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_3_auth_events_login_sign_up_guest_upgrade_logout", "label": "Task 3: Auth events (login / sign_up / guest_upgrade / logout)", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L339"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_4_game_lifecycle_events_sandbox_gating", "label": "Task 4: Game lifecycle events + sandbox gating", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L458"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_5_lobby_matchmaking_events", "label": "Task 5: Lobby & matchmaking events", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L670"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_6_in_game_comms_connection_events", "label": "Task 6: In-game comms & connection events", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L721"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_7_end_of_game_app_chrome_events", "label": "Task 7: End-of-game & app-chrome events", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L758"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_8_onboarding_replay_builder_settings_events", "label": "Task 8: Onboarding, replay, builder & settings events", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L806"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_9_full_validation_build", "label": "Task 9: Full validation & build", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L874"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_self_review", "label": "Self-Review", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L906"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L22", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_1_analytics_wrapper_module", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L32", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_2_spa_page_view_on_route_change", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L238", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_3_auth_events_login_sign_up_guest_upgrade_logout", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L339", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_4_game_lifecycle_events_sandbox_gating", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L458", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_5_lobby_matchmaking_events", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L670", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_6_in_game_comms_connection_events", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L721", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_7_end_of_game_app_chrome_events", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L758", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_8_onboarding_replay_builder_settings_events", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L806", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_9_full_validation_build", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L874", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_self_review", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md", "source_location": "L906", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_md",
+      "label": "2026-07-11-ga-analytics-events.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan",
+      "label": "GA Analytics Events Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "label": "File Structure",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L22"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_1_analytics_wrapper_module",
+      "label": "Task 1: Analytics wrapper module",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L32"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_2_spa_page_view_on_route_change",
+      "label": "Task 2: SPA page_view on route change",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L238"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_3_auth_events_login_sign_up_guest_upgrade_logout",
+      "label": "Task 3: Auth events (login / sign_up / guest_upgrade / logout)",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L339"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_4_game_lifecycle_events_sandbox_gating",
+      "label": "Task 4: Game lifecycle events + sandbox gating",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L458"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_5_lobby_matchmaking_events",
+      "label": "Task 5: Lobby & matchmaking events",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L670"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_6_in_game_comms_connection_events",
+      "label": "Task 6: In-game comms & connection events",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L721"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_7_end_of_game_app_chrome_events",
+      "label": "Task 7: End-of-game & app-chrome events",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L758"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_8_onboarding_replay_builder_settings_events",
+      "label": "Task 8: Onboarding, replay, builder & settings events",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L806"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_9_full_validation_build",
+      "label": "Task 9: Full validation & build",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L874"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_self_review",
+      "label": "Self-Review",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L906"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_1_analytics_wrapper_module",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_2_spa_page_view_on_route_change",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L238",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_3_auth_events_login_sign_up_guest_upgrade_logout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L339",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_4_game_lifecycle_events_sandbox_gating",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L458",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_5_lobby_matchmaking_events",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L670",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_6_in_game_comms_connection_events",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L721",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_7_end_of_game_app_chrome_events",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L758",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_8_onboarding_replay_builder_settings_events",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L806",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_file_structure",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_task_9_full_validation_build",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L874",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_ga_analytics_events_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_ga_analytics_events_self_review",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-ga-analytics-events.md",
+      "source_location": "L906",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

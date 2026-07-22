@@ -123,7 +123,9 @@ export function EventsPanel() {
 
       {ev.boringActive && (
         <View style={[styles.row, rowActive]}>
-          <Text style={[styles.rowName, inkText]}>{t(eventNameKey('BREAKTHROUGH_BORING_MACHINE'))}</Text>
+          <Text style={[styles.rowName, inkText]}>
+            {t(eventNameKey('BREAKTHROUGH_BORING_MACHINE'))}
+          </Text>
           <Text style={[styles.rowSummary, softText]}>{t('events.boringActive')}</Text>
           {infoButton('BREAKTHROUGH_BORING_MACHINE')}
         </View>
@@ -137,7 +139,9 @@ export function EventsPanel() {
             <Text style={[styles.rowName, inkText]}>{t(eventNameKey(info.kind))}</Text>
             {summary !== null && <Text style={[styles.rowSummary, softText]}>{summary}</Text>}
             {left !== null && (
-              <Text style={[styles.rowRounds, softText]}>{t('events.roundsLeft', { n: left })}</Text>
+              <Text style={[styles.rowRounds, softText]}>
+                {t('events.roundsLeft', { n: left })}
+              </Text>
             )}
             {infoButton(info.kind)}
           </View>
@@ -253,7 +257,10 @@ export function EventsPanel() {
         onRequestClose={() => setInfoKind(null)}
       >
         <Pressable style={styles.backdrop} onPress={() => setInfoKind(null)}>
-          <Pressable style={[styles.modal, { backgroundColor: tokens.surface }]} onPress={() => undefined}>
+          <Pressable
+            style={[styles.modal, { backgroundColor: tokens.surface }]}
+            onPress={() => undefined}
+          >
             {infoKind !== null && (
               <>
                 <View style={styles.modalHead}>
@@ -270,7 +277,9 @@ export function EventsPanel() {
                 <Text style={[styles.modalDesc, inkText]}>{t(eventDescKey(infoKind))}</Text>
                 {infoRouteIds.length > 0 && (
                   <>
-                    <Text style={[styles.routeListTitle, inkText]}>{t('events.routeListTitle')}</Text>
+                    <Text style={[styles.routeListTitle, inkText]}>
+                      {t('events.routeListTitle')}
+                    </Text>
                     <ScrollView style={styles.routeList}>
                       {infoRouteIds.map((rid) => {
                         const r = routeById.get(rid);
@@ -278,7 +287,11 @@ export function EventsPanel() {
                         return (
                           <Pressable
                             key={rid}
-                            style={({ pressed }) => [styles.routeItem, { backgroundColor: rgba(tokens.ink, 0.04) }, pressed && styles.pressed]}
+                            style={({ pressed }) => [
+                              styles.routeItem,
+                              { backgroundColor: rgba(tokens.ink, 0.04) },
+                              pressed && styles.pressed,
+                            ]}
                             accessibilityRole="button"
                             onPress={() => {
                               setEventSpotlight({ kind: 'route', ids: [rid] });

@@ -1,1 +1,191 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_release_play_console_setup_md", "label": "play-console-setup.md", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "label": "Google Play Console setup", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_1_developer_account", "label": "1. Developer account", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L10"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_2_create_the_app", "label": "2. Create the app", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L23"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_3_store_listing_ratings_data_safety", "label": "3. Store listing, ratings, data safety", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L38"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_4_app_signing", "label": "4. App signing", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L66"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_5_first_manual_upload_bootstraps_the_app_required_can_t_be_skipped", "label": "5. First manual upload (bootstraps the app \u2014 required, can't be skipped)", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L91"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_6_recruit_internal_testers", "label": "6. Recruit internal testers", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L129"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_7_api_access_service_account_for_ci", "label": "7. API access \u2014 service account for CI", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L139"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_8_add_the_key_to_github", "label": "8. Add the key to GitHub", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L162"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_9_verify_the_pipeline", "label": "9. Verify the pipeline", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L186"}, {"id": "d_web_projects_trmission_docs_release_play_console_setup_10_production_access_when_ready_to_launch_not_before", "label": "10. Production access (when ready to launch, not before)", "file_type": "document", "source_file": "docs/release/play-console-setup.md", "source_location": "L194"}], "edges": [{"source": "d_web_projects_trmission_docs_release_play_console_setup_md", "target": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_1_developer_account", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L10", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_2_create_the_app", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L23", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_3_store_listing_ratings_data_safety", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L38", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_4_app_signing", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L66", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_5_first_manual_upload_bootstraps_the_app_required_can_t_be_skipped", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L91", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_6_recruit_internal_testers", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L129", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_7_api_access_service_account_for_ci", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L139", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_8_add_the_key_to_github", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L162", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_9_verify_the_pipeline", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L186", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup", "target": "d_web_projects_trmission_docs_release_play_console_setup_10_production_access_when_ready_to_launch_not_before", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/release/play-console-setup.md", "source_location": "L194", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_md",
+      "label": "play-console-setup.md",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "label": "Google Play Console setup",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_1_developer_account",
+      "label": "1. Developer account",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L10"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_2_create_the_app",
+      "label": "2. Create the app",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L23"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_3_store_listing_ratings_data_safety",
+      "label": "3. Store listing, ratings, data safety",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L38"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_4_app_signing",
+      "label": "4. App signing",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L66"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_5_first_manual_upload_bootstraps_the_app_required_can_t_be_skipped",
+      "label": "5. First manual upload (bootstraps the app \u2014 required, can't be skipped)",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L91"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_6_recruit_internal_testers",
+      "label": "6. Recruit internal testers",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L129"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_7_api_access_service_account_for_ci",
+      "label": "7. API access \u2014 service account for CI",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L139"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_8_add_the_key_to_github",
+      "label": "8. Add the key to GitHub",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L162"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_9_verify_the_pipeline",
+      "label": "9. Verify the pipeline",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L186"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_release_play_console_setup_10_production_access_when_ready_to_launch_not_before",
+      "label": "10. Production access (when ready to launch, not before)",
+      "file_type": "document",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L194"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_md",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_1_developer_account",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_2_create_the_app",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_3_store_listing_ratings_data_safety",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_4_app_signing",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_5_first_manual_upload_bootstraps_the_app_required_can_t_be_skipped",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L91",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_6_recruit_internal_testers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_7_api_access_service_account_for_ci",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L139",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_8_add_the_key_to_github",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L162",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_9_verify_the_pipeline",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L186",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_release_play_console_setup_google_play_console_setup",
+      "target": "d_web_projects_trmission_docs_release_play_console_setup_10_production_access_when_ready_to_launch_not_before",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/release/play-console-setup.md",
+      "source_location": "L194",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

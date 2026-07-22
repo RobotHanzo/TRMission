@@ -54,14 +54,12 @@ describe('delete user', () => {
       .insertOne({ _id: 'cm-victim', ownerId: victim.userId, updatedAt: new Date() } as never);
 
     // A completed-game archive row referencing the victim — must survive the delete.
-    await t.db
-      .collection('matchHistory')
-      .insertOne({
-        _id: 'mh-old',
-        gameId: 'g-old',
-        winners: [victim.userId],
-        completedAt: new Date(),
-      } as never);
+    await t.db.collection('matchHistory').insertOne({
+      _id: 'mh-old',
+      gameId: 'g-old',
+      winners: [victim.userId],
+      completedAt: new Date(),
+    } as never);
 
     // A rating the victim submitted — must be dropped on account deletion.
     await ratings().insertOne({

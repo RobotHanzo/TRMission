@@ -10,266 +10,1042 @@
   "refresh": "30s",
   "time": { "from": "now-6h", "to": "now" },
   "panels": [
-    { "id": 1, "type": "row", "title": "Overview", "collapsed": false, "panels": [], "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 } },
     {
-      "id": 2, "type": "stat", "title": "Active WS Connections",
+      "id": 1,
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Active WS Connections",
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "trm_active_connections", "legendFormat": "connections", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "textMode": "auto" }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "trm_active_connections",
+          "legendFormat": "connections",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
     },
     {
-      "id": 3, "type": "stat", "title": "Commands / sec",
+      "id": 3,
+      "type": "stat",
+      "title": "Commands / sec",
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(trm_commands_total[5m]))", "legendFormat": "commands/s", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "textMode": "auto" }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(trm_commands_total[5m]))",
+          "legendFormat": "commands/s",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "decimals": 2,
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
     },
     {
-      "id": 4, "type": "stat", "title": "Command Rejection Rate",
+      "id": 4,
+      "type": "stat",
+      "title": "Command Rejection Rate",
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(trm_command_rejections_total[5m])) / sum(rate(trm_commands_total[5m]))", "legendFormat": "rejection rate", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(trm_command_rejections_total[5m])) / sum(rate(trm_commands_total[5m]))",
+          "legendFormat": "rejection rate",
+          "refId": "A"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit", "decimals": 1,
+          "unit": "percentunit",
+          "decimals": 1,
           "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.05 }, { "color": "red", "value": 0.15 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.05 },
+              { "color": "red", "value": 0.15 }
+            ]
+          }
         },
         "overrides": []
       },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "textMode": "auto" }
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
     },
     {
-      "id": 5, "type": "stat", "title": "Security Leaks Blocked (must stay 0)",
+      "id": 5,
+      "type": "stat",
+      "title": "Security Leaks Blocked (must stay 0)",
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 1 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "trm_security_leak_blocked_total", "legendFormat": "leaks blocked", "refId": "A" }],
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "trm_security_leak_blocked_total",
+          "legendFormat": "leaks blocked",
+          "refId": "A"
+        }
+      ],
       "fieldConfig": {
         "defaults": {
-          "unit": "short", "decimals": 0,
+          "unit": "short",
+          "decimals": 0,
           "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] }
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
         },
         "overrides": []
       },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" }
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
     },
 
-    { "id": 6, "type": "row", "title": "Command Pipeline", "collapsed": false, "panels": [], "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 } },
     {
-      "id": 7, "type": "timeseries", "title": "Commands Received",
+      "id": 6,
+      "type": "row",
+      "title": "Command Pipeline",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 5 }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Commands Received",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(trm_commands_total[5m]))", "legendFormat": "commands/s", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(trm_commands_total[5m]))",
+          "legendFormat": "commands/s",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
     },
     {
-      "id": 8, "type": "timeseries", "title": "Rejections by Rule Code",
+      "id": 8,
+      "type": "timeseries",
+      "title": "Rejections by Rule Code",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (code) (rate(trm_command_rejections_total[5m]))", "legendFormat": "{{code}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "stacking": { "mode": "normal" }, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (code) (rate(trm_command_rejections_total[5m]))",
+          "legendFormat": "{{code}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "stacking": { "mode": "normal" },
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
     },
     {
-      "id": 9, "type": "timeseries", "title": "Command Apply Latency (validate + apply + fan-out)",
+      "id": 9,
+      "type": "timeseries",
+      "title": "Command Apply Latency (validate + apply + fan-out)",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.50, sum by (le) (rate(trm_command_apply_seconds_bucket[5m])))", "legendFormat": "p50", "refId": "A" },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.95, sum by (le) (rate(trm_command_apply_seconds_bucket[5m])))", "legendFormat": "p95", "refId": "B" },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "histogram_quantile(0.99, sum by (le) (rate(trm_command_apply_seconds_bucket[5m])))", "legendFormat": "p99", "refId": "C" }
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(trm_command_apply_seconds_bucket[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(trm_command_apply_seconds_bucket[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(trm_command_apply_seconds_bucket[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "s", "color": { "mode": "palette-classic" },
-          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 0, "pointSize": 5, "showPoints": "never", "spanNulls": true },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.05 }, { "color": "red", "value": 0.2 }] }
+          "unit": "s",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.05 },
+              { "color": "red", "value": 0.2 }
+            ]
+          }
         },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
     },
     {
-      "id": 10, "type": "timeseries", "title": "Active WS Connections Over Time",
+      "id": 10,
+      "type": "timeseries",
+      "title": "Active WS Connections Over Time",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "trm_active_connections", "legendFormat": "connections", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "trm_active_connections",
+          "legendFormat": "connections",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
     },
 
-    { "id": 11, "type": "row", "title": "Reliability (alarms — should stay at zero)", "collapsed": false, "panels": [], "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 } },
     {
-      "id": 12, "type": "stat", "title": "Bot Driver Stalls (total)",
+      "id": 11,
+      "type": "row",
+      "title": "Reliability (alarms — should stay at zero)",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 }
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Bot Driver Stalls (total)",
       "gridPos": { "h": 4, "w": 6, "x": 0, "y": 23 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(trm_bot_driver_stalled_total)", "legendFormat": "stalls", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(trm_bot_driver_stalled_total)",
+          "legendFormat": "stalls",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
     },
     {
-      "id": 13, "type": "stat", "title": "Game Recovery Failures (total)",
+      "id": 13,
+      "type": "stat",
+      "title": "Game Recovery Failures (total)",
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 23 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "trm_game_recovery_failed_total", "legendFormat": "recovery failed", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "trm_game_recovery_failed_total",
+          "legendFormat": "recovery failed",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
     },
     {
-      "id": 14, "type": "stat", "title": "WS Internal Errors (total)",
+      "id": 14,
+      "type": "stat",
+      "title": "WS Internal Errors (total)",
       "gridPos": { "h": 4, "w": 6, "x": 12, "y": 23 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "trm_ws_internal_errors_total", "legendFormat": "internal errors", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "textMode": "auto" }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "trm_ws_internal_errors_total",
+          "legendFormat": "internal errors",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
     },
     {
-      "id": 15, "type": "stat", "title": "Turn Timeouts (total, informational)",
+      "id": 15,
+      "type": "stat",
+      "title": "Turn Timeouts (total, informational)",
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 23 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "trm_turn_timeouts_total", "legendFormat": "turn timeouts", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0, "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "textMode": "auto" }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "trm_turn_timeouts_total",
+          "legendFormat": "turn timeouts",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": { "mode": "fixed", "fixedColor": "blue" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
     },
     {
-      "id": 16, "type": "timeseries", "title": "Bot Driver Stalls by Reason",
+      "id": 16,
+      "type": "timeseries",
+      "title": "Bot Driver Stalls by Reason",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 27 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (reason) (rate(trm_bot_driver_stalled_total[15m]))", "legendFormat": "{{reason}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (reason) (rate(trm_bot_driver_stalled_total[15m]))",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
     },
     {
-      "id": 17, "type": "timeseries", "title": "Error & Timeout Rates",
+      "id": 17,
+      "type": "timeseries",
+      "title": "Error & Timeout Rates",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 27 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(trm_ws_internal_errors_total[15m]))", "legendFormat": "internal errors", "refId": "A" },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(trm_game_recovery_failed_total[15m]))", "legendFormat": "recovery failed", "refId": "B" },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(trm_turn_timeouts_total[15m]))", "legendFormat": "turn timeouts", "refId": "C" }
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(trm_ws_internal_errors_total[15m]))",
+          "legendFormat": "internal errors",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(trm_game_recovery_failed_total[15m]))",
+          "legendFormat": "recovery failed",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(trm_turn_timeouts_total[15m]))",
+          "legendFormat": "turn timeouts",
+          "refId": "C"
+        }
       ],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-
-    { "id": 18, "type": "row", "title": "Game Lifecycle", "collapsed": false, "panels": [], "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 } },
-    {
-      "id": 19, "type": "timeseries", "title": "Auto-play Pauses by Reason",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 36 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (reason) (rate(trm_game_autoplay_paused_total[15m]))", "legendFormat": "{{reason}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    {
-      "id": 20, "type": "timeseries", "title": "Seat Control Changes by Kind",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 36 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (kind) (rate(trm_seat_control_changed_total[15m]))", "legendFormat": "{{kind}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    {
-      "id": 21, "type": "timeseries", "title": "Rooms Purged (by trigger / prior status)",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 44 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (trigger, priorStatus) (rate(trm_rooms_purged_total[30m]))", "legendFormat": "{{trigger}} / {{priorStatus}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "stacking": { "mode": "normal" }, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    {
-      "id": 22, "type": "timeseries", "title": "Games Purged (by trigger / prior status)",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 44 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (trigger, priorStatus) (rate(trm_games_purged_total[30m]))", "legendFormat": "{{trigger}} / {{priorStatus}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "stacking": { "mode": "normal" }, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-
-    { "id": 23, "type": "row", "title": "Push Notifications", "collapsed": false, "panels": [], "gridPos": { "h": 1, "w": 24, "x": 0, "y": 52 } },
-    {
-      "id": 24, "type": "timeseries", "title": "Push Sent by Kind",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 53 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (kind) (rate(trm_push_sent_total[15m]))", "legendFormat": "{{kind}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    {
-      "id": 25, "type": "timeseries", "title": "Push Failed by Kind",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 53 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (kind) (rate(trm_push_failed_total[15m]))", "legendFormat": "{{kind}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    {
-      "id": 26, "type": "stat", "title": "Push Failure Ratio",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 53 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(trm_push_failed_total[15m])) / (sum(rate(trm_push_sent_total[15m])) + sum(rate(trm_push_failed_total[15m])))", "legendFormat": "failure ratio", "refId": "A" }],
       "fieldConfig": {
         "defaults": {
-          "unit": "percentunit", "decimals": 1,
-          "color": { "mode": "thresholds" },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.05 }, { "color": "red", "value": 0.2 }] }
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
         },
         "overrides": []
       },
-      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "textMode": "auto" }
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
     },
 
-    { "id": 27, "type": "row", "title": "Node.js Process Health", "collapsed": false, "panels": [], "gridPos": { "h": 1, "w": 24, "x": 0, "y": 61 } },
     {
-      "id": 28, "type": "timeseries", "title": "CPU Usage",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 62 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(process_cpu_seconds_total[5m]))", "legendFormat": "CPU (cores)", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "percentunit", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
+      "id": 18,
+      "type": "row",
+      "title": "Game Lifecycle",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 }
     },
     {
-      "id": 29, "type": "timeseries", "title": "Memory",
+      "id": 19,
+      "type": "timeseries",
+      "title": "Auto-play Pauses by Reason",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 36 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (reason) (rate(trm_game_autoplay_paused_total[15m]))",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "Seat Control Changes by Kind",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 36 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (kind) (rate(trm_seat_control_changed_total[15m]))",
+          "legendFormat": "{{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Rooms Purged (by trigger / prior status)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 44 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (trigger, priorStatus) (rate(trm_rooms_purged_total[30m]))",
+          "legendFormat": "{{trigger}} / {{priorStatus}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "stacking": { "mode": "normal" },
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "Games Purged (by trigger / prior status)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 44 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (trigger, priorStatus) (rate(trm_games_purged_total[30m]))",
+          "legendFormat": "{{trigger}} / {{priorStatus}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "stacking": { "mode": "normal" },
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+
+    {
+      "id": 23,
+      "type": "row",
+      "title": "Push Notifications",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 52 }
+    },
+    {
+      "id": 24,
+      "type": "timeseries",
+      "title": "Push Sent by Kind",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 53 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (kind) (rate(trm_push_sent_total[15m]))",
+          "legendFormat": "{{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 25,
+      "type": "timeseries",
+      "title": "Push Failed by Kind",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 53 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (kind) (rate(trm_push_failed_total[15m]))",
+          "legendFormat": "{{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 26,
+      "type": "stat",
+      "title": "Push Failure Ratio",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 53 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(trm_push_failed_total[15m])) / (sum(rate(trm_push_sent_total[15m])) + sum(rate(trm_push_failed_total[15m])))",
+          "legendFormat": "failure ratio",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 1,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.05 },
+              { "color": "red", "value": 0.2 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto"
+      }
+    },
+
+    {
+      "id": 27,
+      "type": "row",
+      "title": "Node.js Process Health",
+      "collapsed": false,
+      "panels": [],
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 61 }
+    },
+    {
+      "id": 28,
+      "type": "timeseries",
+      "title": "CPU Usage",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 62 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum(rate(process_cpu_seconds_total[5m]))",
+          "legendFormat": "CPU (cores)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 29,
+      "type": "timeseries",
+      "title": "Memory",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 62 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "process_resident_memory_bytes", "legendFormat": "RSS", "refId": "A" },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "nodejs_heap_size_used_bytes", "legendFormat": "heap used", "refId": "B" },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "nodejs_heap_size_total_bytes", "legendFormat": "heap total", "refId": "C" }
-      ],
-      "fieldConfig": { "defaults": { "unit": "bytes", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 5, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    {
-      "id": 30, "type": "timeseries", "title": "Event Loop Lag",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 70 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "nodejs_eventloop_lag_mean_seconds", "legendFormat": "mean", "refId": "A" },
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "nodejs_eventloop_lag_p99_seconds", "legendFormat": "p99", "refId": "B" }
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "process_resident_memory_bytes",
+          "legendFormat": "RSS",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "nodejs_heap_size_used_bytes",
+          "legendFormat": "heap used",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "nodejs_heap_size_total_bytes",
+          "legendFormat": "heap total",
+          "refId": "C"
+        }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "s", "color": { "mode": "palette-classic" },
-          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 0, "pointSize": 5, "showPoints": "never", "spanNulls": true },
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.1 }, { "color": "red", "value": 0.5 }] }
+          "unit": "bytes",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 5,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
         },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
     },
     {
-      "id": 31, "type": "timeseries", "title": "GC Time by Kind (fraction of wall time)",
+      "id": 30,
+      "type": "timeseries",
+      "title": "Event Loop Lag",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 70 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "nodejs_eventloop_lag_mean_seconds",
+          "legendFormat": "mean",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "nodejs_eventloop_lag_p99_seconds",
+          "legendFormat": "p99",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.1 },
+              { "color": "red", "value": 0.5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 31,
+      "type": "timeseries",
+      "title": "GC Time by Kind (fraction of wall time)",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 70 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "targets": [{ "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum by (kind) (rate(nodejs_gc_duration_seconds_sum[5m]))", "legendFormat": "{{kind}}", "refId": "A" }],
-      "fieldConfig": { "defaults": { "unit": "percentunit", "color": { "mode": "palette-classic" }, "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "stacking": { "mode": "normal" }, "pointSize": 5, "showPoints": "never", "spanNulls": true } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": ["mean", "max", "last"] }, "tooltip": { "mode": "multi", "sort": "desc" } }
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "sum by (kind) (rate(nodejs_gc_duration_seconds_sum[5m]))",
+          "legendFormat": "{{kind}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 15,
+            "stacking": { "mode": "normal" },
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": ["mean", "max", "last"]
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
     }
   ]
 }

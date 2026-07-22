@@ -15,9 +15,8 @@ if (Platform.OS === 'web') {
   // serve dynamic import() from this entry). canvaskit.wasm is served from public/ (copied
   // there by scripts/setup-web.js).
   require('./src/web/alertShim'); // RNW's Alert is a no-op; map it onto window.confirm/alert
-  const { LoadSkiaWeb } = require(
-    '@shopify/react-native-skia/lib/module/web',
-  ) as typeof SkiaWebModule;
+  const { LoadSkiaWeb } =
+    require('@shopify/react-native-skia/lib/module/web') as typeof SkiaWebModule;
   void LoadSkiaWeb({ locateFile: (file: string) => `/${file}` }).then(() => {
     const { registerRootComponent } = require('expo') as typeof ExpoModule;
     const App = (require('./App') as typeof AppModule).default;

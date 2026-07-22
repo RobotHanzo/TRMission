@@ -48,7 +48,10 @@ const creator: StateCreator<LogState> = (set) => ({
     }),
   ingestSeatControlChange: (playerId, botControlled) =>
     set((s) => {
-      const entries = [...s.entries, { id: s.nextId, ...seatControlDatum(playerId, botControlled) }];
+      const entries = [
+        ...s.entries,
+        { id: s.nextId, ...seatControlDatum(playerId, botControlled) },
+      ];
       return { entries: entries.slice(-CAP), nextId: s.nextId + 1 };
     }),
   // History is the server's COMPLETE backfill, re-sent on every (re)connect and always

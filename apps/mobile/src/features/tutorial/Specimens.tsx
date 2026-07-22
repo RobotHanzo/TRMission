@@ -101,7 +101,14 @@ function RouteCanvas({
         ? trackModel('spec', 'GRAY', count, { ferry: true }, SPEC_W / 2, SPEC_CY)
         : variant === 'broken'
           ? trackModel('spec', 'BLUE', count, { broken: 2 }, SPEC_W / 2, SPEC_CY)
-          : trackModel('spec', 'BLUE', count, { tunnel: variant === 'tunnel' }, SPEC_W / 2, SPEC_CY);
+          : trackModel(
+              'spec',
+              'BLUE',
+              count,
+              { tunnel: variant === 'tunnel' },
+              SPEC_W / 2,
+              SPEC_CY,
+            );
   return (
     <Canvas style={{ width: SPEC_W * px, height: SPEC_H * px }}>
       <Group transform={[{ scale: px }]}>

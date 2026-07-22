@@ -272,7 +272,6 @@ describe('purge sweep + status', () => {
     expect(Array.isArray(res.body.recentRuns)).toBe(true);
   });
 
-
   it(
     'purges a stale LOBBY room, a stale LIVE game (closing but not deleting its room), and a ' +
       'STARTED room whose game finished long ago — leaves fresh ones alone',

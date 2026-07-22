@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { TAIWAN_CONTENT, type GameContent } from '@trm/map-data';
-import {
-  introducedFeatureIntros,
-  pendingFeatureIntros,
-} from '../src/tutorial/featureIntro';
+import { introducedFeatureIntros, pendingFeatureIntros } from '../src/tutorial/featureIntro';
 
 /** Taiwan content with its first route re-authored as a broken rail. */
 const withBrokenRail = (): GameContent => ({

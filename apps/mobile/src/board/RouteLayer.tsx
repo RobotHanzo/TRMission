@@ -121,8 +121,7 @@ export function RouteLayer({
         const loco = ferryLocoBlock(m.length, ferryLocos);
         // A broken rail (斷軌) shows its break until the snapshot reports it repaired (or it is
         // owned) — web MapScene's `brokenNow`. The damaged block is centred like the ferry locos.
-        const brokenNow =
-          m.brokenCarriages > 0 && !o && !(repairedRoutes?.has(m.id) ?? false);
+        const brokenNow = m.brokenCarriages > 0 && !o && !(repairedRoutes?.has(m.id) ?? false);
         const broken = ferryLocoBlock(m.length, brokenNow ? m.brokenCarriages : 0);
 
         return (
@@ -246,7 +245,11 @@ export function RouteLayer({
                 return (
                   <Group
                     key={`c${i}`}
-                    transform={[{ translateX: s.x }, { translateY: s.y }, { rotate: s.angle * DEG }]}
+                    transform={[
+                      { translateX: s.x },
+                      { translateY: s.y },
+                      { rotate: s.angle * DEG },
+                    ]}
                   >
                     <RoundedRect
                       x={-s.len / 2}
@@ -277,9 +280,7 @@ export function RouteLayer({
             {/* The severed-track bolt across the route middle — the at-a-glance "斷軌" cue
                 (web RouteShape's .break-mark: red fill, surface stroke, counter-scaled). */}
             {brokenNow && BREAK_MARK && (
-              <Group
-                transform={[{ translateX: m.mid.x }, { translateY: m.mid.y }, { scale: inv }]}
-              >
+              <Group transform={[{ translateX: m.mid.x }, { translateY: m.mid.y }, { scale: inv }]}>
                 <Path path={BREAK_MARK} color={BREAK_MARK_FILL} />
                 <Path
                   path={BREAK_MARK}

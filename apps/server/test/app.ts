@@ -19,10 +19,7 @@ import {
   APPLE_ID_TOKEN_VERIFIER,
   type AppleIdTokenVerifier,
 } from '../src/auth/apple-id-token.verifier';
-import {
-  APPLE_REDIRECT_CLIENT,
-  type AppleRedirectClient,
-} from '../src/auth/apple-redirect.client';
+import { APPLE_REDIRECT_CLIENT, type AppleRedirectClient } from '../src/auth/apple-redirect.client';
 import { APPLE_TOKEN_REVOKER, type AppleTokenRevoker } from '../src/account/apple-token-revoker';
 import { DashboardConfig, type DashboardConfigOverrides } from '../src/dashboard/dashboard-config';
 import {

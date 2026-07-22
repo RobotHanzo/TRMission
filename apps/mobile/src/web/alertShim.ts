@@ -16,7 +16,8 @@ Alert.alert = (title, message, buttons) => {
     list[0]?.onPress?.();
     return;
   }
-  const affirmative = [...list].reverse().find((b) => b.style !== 'cancel') ?? list[list.length - 1];
+  const affirmative =
+    [...list].reverse().find((b) => b.style !== 'cancel') ?? list[list.length - 1];
   const cancel = list.find((b) => b.style === 'cancel');
   if (window.confirm(text)) affirmative?.onPress?.();
   else cancel?.onPress?.();

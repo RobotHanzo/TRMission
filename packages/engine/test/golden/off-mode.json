@@ -21,26 +21,17 @@
     {
       "t": "KEEP_INITIAL_TICKETS",
       "player": "p0",
-      "keep": [
-        "L4",
-        "S58"
-      ]
+      "keep": ["L4", "S58"]
     },
     {
       "t": "KEEP_INITIAL_TICKETS",
       "player": "p1",
-      "keep": [
-        "L5",
-        "S75"
-      ]
+      "keep": ["L5", "S75"]
     },
     {
       "t": "KEEP_INITIAL_TICKETS",
       "player": "p2",
-      "keep": [
-        "L7",
-        "S12"
-      ]
+      "keep": ["L7", "S12"]
     },
     {
       "t": "CLAIM_ROUTE",
@@ -1422,11 +1413,7 @@
       "doubleRouteSingleFor23": true,
       "eventsMode": "off"
     },
-    "turnOrder": [
-      "p0",
-      "p1",
-      "p2"
-    ],
+    "turnOrder": ["p0", "p1", "p2"],
     "players": {
       "p0": {
         "id": "p0",
@@ -1444,15 +1431,10 @@
         },
         "trainCars": 0,
         "stationsRemaining": 3,
-        "keptTickets": [
-          "L4",
-          "S58"
-        ],
+        "keptTickets": ["L4", "S58"],
         "pendingTicketOffer": null,
         "routePoints": 69,
-        "completedTickets": [
-          "S58"
-        ]
+        "completedTickets": ["S58"]
       },
       "p1": {
         "id": "p1",
@@ -1470,15 +1452,10 @@
         },
         "trainCars": 7,
         "stationsRemaining": 3,
-        "keptTickets": [
-          "L5",
-          "S75"
-        ],
+        "keptTickets": ["L5", "S75"],
         "pendingTicketOffer": null,
         "routePoints": 53,
-        "completedTickets": [
-          "S75"
-        ]
+        "completedTickets": ["S75"]
       },
       "p2": {
         "id": "p2",
@@ -1496,10 +1473,7 @@
         },
         "trainCars": 6,
         "stationsRemaining": 3,
-        "keptTickets": [
-          "L7",
-          "S12"
-        ],
+        "keptTickets": ["L7", "S12"],
         "pendingTicketOffer": null,
         "routePoints": 50,
         "completedTickets": []
@@ -1548,21 +1522,8 @@
       "WHITE": 0,
       "LOCOMOTIVE": 6
     },
-    "market": [
-      "YELLOW",
-      "BLUE",
-      "BLUE",
-      "RED",
-      "YELLOW"
-    ],
-    "ticketDeckLong": [
-      "L2",
-      "L1",
-      "L8",
-      "L9",
-      "L6",
-      "L3"
-    ],
+    "market": ["YELLOW", "BLUE", "BLUE", "RED", "YELLOW"],
+    "ticketDeckLong": ["L2", "L1", "L8", "L9", "L6", "L3"],
     "ticketDeckShort": [
       "S55",
       "S23",
@@ -1875,17 +1836,7 @@
           "total": 38
         }
       ],
-      "ranking": [
-        [
-          "p0"
-        ],
-        [
-          "p1"
-        ],
-        [
-          "p2"
-        ]
-      ]
+      "ranking": [["p0"], ["p1"], ["p2"]]
     },
     "actionSeq": 224
   },

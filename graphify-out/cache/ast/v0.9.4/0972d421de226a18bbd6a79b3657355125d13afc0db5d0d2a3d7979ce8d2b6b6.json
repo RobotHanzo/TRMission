@@ -1,1 +1,95 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_md", "label": "2026-07-11-full-room-join-as-spectator.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_full_room_join_falls_back_to_spectating_implementation_plan", "label": "Full-Room Join Falls Back to Spectating Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L16"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_1_server_roomrepo_join_falls_back_to_spectating_on_a_full_lobby", "label": "Task 1: Server \u2014 `RoomRepo.join` falls back to spectating on a full lobby", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L30"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_2_web_homescreen_shows_a_one_time_notice_on_spectate_fallback", "label": "Task 2: Web \u2014 `HomeScreen` shows a one-time notice on spectate fallback", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L216"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_3_web_roomscreen_s_auto_join_shows_the_same_one_time_notice", "label": "Task 3: Web \u2014 `RoomScreen`'s auto-join shows the same one-time notice", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L377"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_full_room_join_falls_back_to_spectating_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_full_room_join_falls_back_to_spectating_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L16", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_1_server_roomrepo_join_falls_back_to_spectating_on_a_full_lobby", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L30", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_2_web_homescreen_shows_a_one_time_notice_on_spectate_fallback", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L216", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_3_web_roomscreen_s_auto_join_shows_the_same_one_time_notice", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md", "source_location": "L377", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_md",
+      "label": "2026-07-11-full-room-join-as-spectator.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_full_room_join_falls_back_to_spectating_implementation_plan",
+      "label": "Full-Room Join Falls Back to Spectating Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L16"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_1_server_roomrepo_join_falls_back_to_spectating_on_a_full_lobby",
+      "label": "Task 1: Server \u2014 `RoomRepo.join` falls back to spectating on a full lobby",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L30"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_2_web_homescreen_shows_a_one_time_notice_on_spectate_fallback",
+      "label": "Task 2: Web \u2014 `HomeScreen` shows a one-time notice on spectate fallback",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L216"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_3_web_roomscreen_s_auto_join_shows_the_same_one_time_notice",
+      "label": "Task 3: Web \u2014 `RoomScreen`'s auto-join shows the same one-time notice",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L377"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_full_room_join_falls_back_to_spectating_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_full_room_join_falls_back_to_spectating_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_1_server_roomrepo_join_falls_back_to_spectating_on_a_full_lobby",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_2_web_homescreen_shows_a_one_time_notice_on_spectate_fallback",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L216",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_global_constraints",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_11_full_room_join_as_spectator_task_3_web_roomscreen_s_auto_join_shows_the_same_one_time_notice",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-11-full-room-join-as-spectator.md",
+      "source_location": "L377",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

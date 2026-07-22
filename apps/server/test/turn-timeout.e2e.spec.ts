@@ -139,9 +139,9 @@ describe('per-turn timeout (issue #13)', () => {
     await until(() => paused.includes('afk_streak'));
     expect(timedOut).toBe(2);
     // Clients were told to drop the countdown AND shown the paused banner frame.
-    expect(
-      frames.some((f) => f.event.case === 'turnTimer' && f.event.value.playerId === ''),
-    ).toBe(true);
+    expect(frames.some((f) => f.event.case === 'turnTimer' && f.event.value.playerId === '')).toBe(
+      true,
+    );
     expect(
       frames.some(
         (f) =>
@@ -161,13 +161,14 @@ describe('per-turn timeout (issue #13)', () => {
 
     // The game rests on the human's turn; a real action resumes auto-play (and their idleness
     // afterwards times out again — the timer is armed once more).
-    await hub.receive('hc', encodeClient(++seq, actionToCommand({ t: 'DRAW_BLIND', player: human })));
+    await hub.receive(
+      'hc',
+      encodeClient(++seq, actionToCommand({ t: 'DRAW_BLIND', player: human })),
+    );
     await until(() => timedOut > 2);
     expect(timedOut).toBeGreaterThan(2);
     // The resume was announced too (paused=false with an empty reason).
-    expect(
-      frames.some((f) => f.event.case === 'gamePaused' && !f.event.value.paused),
-    ).toBe(true);
+    expect(frames.some((f) => f.event.case === 'gamePaused' && !f.event.value.paused)).toBe(true);
 
     await hub.evictMatch('afk', 'test complete');
   }, 20_000);
@@ -225,10 +226,13 @@ describe('per-turn timeout (issue #13)', () => {
     expect(session.currentPlayer).toBe(human);
 
     // The host can still act normally whenever they come back.
-    await hub.receive('hc', encodeClient(++seq, actionToCommand({ t: 'DRAW_BLIND', player: human })));
-    expect(
-      session.appliedActions.some((a) => a.t === 'DRAW_BLIND' && a.player === human),
-    ).toBe(true);
+    await hub.receive(
+      'hc',
+      encodeClient(++seq, actionToCommand({ t: 'DRAW_BLIND', player: human })),
+    );
+    expect(session.appliedActions.some((a) => a.t === 'DRAW_BLIND' && a.player === human)).toBe(
+      true,
+    );
 
     await hub.evictMatch('solo', 'test complete');
   }, 20_000);
@@ -293,7 +297,10 @@ describe('per-turn timeout (issue #13)', () => {
     const bOffer = session.raw().players[bruce as string]!.pendingTicketOffer!;
     await hub.receive(
       'ca',
-      encodeClient(++aseq, actionToCommand({ t: 'KEEP_INITIAL_TICKETS', player: alice, keep: aOffer })),
+      encodeClient(
+        ++aseq,
+        actionToCommand({ t: 'KEEP_INITIAL_TICKETS', player: alice, keep: aOffer }),
+      ),
     );
     await hub.receive(
       'cb',
@@ -367,9 +374,9 @@ describe('per-turn timeout (issue #13)', () => {
     hub.closeConnection('hc');
     await until(() => paused.includes('no_humans_connected'));
     expect(timedOut).toBe(0);
-    expect(
-      session.appliedActions.some((a) => a.t === 'DRAW_BLIND' && a.player === human),
-    ).toBe(false);
+    expect(session.appliedActions.some((a) => a.t === 'DRAW_BLIND' && a.player === human)).toBe(
+      false,
+    );
 
     // Reconnecting the seat resumes auto-play: the still-idle human now times out normally.
     hub.openConnection('hc2', () => {});

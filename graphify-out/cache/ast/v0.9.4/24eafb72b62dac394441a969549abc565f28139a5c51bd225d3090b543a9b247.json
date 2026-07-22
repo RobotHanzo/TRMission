@@ -1,1 +1,159 @@
-{"nodes": [{"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_md", "label": "2026-07-10-admin-rooms-detail-and-purge-audit.md", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "label": "Admin rooms detail + auto-purge no-op audit skip \u2014 Implementation Plan", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L1"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_global_constraints", "label": "Global Constraints", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L11"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_file_structure", "label": "File structure", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L23"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_1_auto_purge_no_op_audit_skip", "label": "Task 1: Auto-purge no-op audit skip", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L42"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_2_server_room_detail_endpoint", "label": "Task 2: Server room-detail endpoint", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L167"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_3_admin_router_union_rest_client_type", "label": "Task 3: Admin router union + REST client type", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L354"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_4_roomsview_clickable_rows_roomdrawer", "label": "Task 4: RoomsView clickable rows + RoomDrawer", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L480"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_5_full_validation_graph_refresh", "label": "Task 5: Full validation + graph refresh", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L1036"}, {"id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_self_review", "label": "Self-review", "file_type": "document", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L1061"}], "edges": [{"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_md", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L1", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_global_constraints", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L11", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_file_structure", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L23", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_1_auto_purge_no_op_audit_skip", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L42", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_2_server_room_detail_endpoint", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L167", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_3_admin_router_union_rest_client_type", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L354", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_4_roomsview_clickable_rows_roomdrawer", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L480", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_5_full_validation_graph_refresh", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L1036", "weight": 1.0}, {"source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan", "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_self_review", "relation": "contains", "confidence": "EXTRACTED", "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md", "source_location": "L1061", "weight": 1.0}], "input_tokens": 0, "output_tokens": 0}
+{
+  "nodes": [
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_md",
+      "label": "2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "label": "Admin rooms detail + auto-purge no-op audit skip \u2014 Implementation Plan",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_global_constraints",
+      "label": "Global Constraints",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_file_structure",
+      "label": "File structure",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L23"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_1_auto_purge_no_op_audit_skip",
+      "label": "Task 1: Auto-purge no-op audit skip",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L42"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_2_server_room_detail_endpoint",
+      "label": "Task 2: Server room-detail endpoint",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L167"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_3_admin_router_union_rest_client_type",
+      "label": "Task 3: Admin router union + REST client type",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L354"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_4_roomsview_clickable_rows_roomdrawer",
+      "label": "Task 4: RoomsView clickable rows + RoomDrawer",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L480"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_5_full_validation_graph_refresh",
+      "label": "Task 5: Full validation + graph refresh",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L1036"
+    },
+    {
+      "id": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_self_review",
+      "label": "Self-review",
+      "file_type": "document",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L1061"
+    }
+  ],
+  "edges": [
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_md",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_global_constraints",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_file_structure",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_1_auto_purge_no_op_audit_skip",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_2_server_room_detail_endpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L167",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_3_admin_router_union_rest_client_type",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L354",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_4_roomsview_clickable_rows_roomdrawer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L480",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_task_5_full_validation_graph_refresh",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L1036",
+      "weight": 1.0
+    },
+    {
+      "source": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_admin_rooms_detail_auto_purge_no_op_audit_skip_implementation_plan",
+      "target": "d_web_projects_trmission_docs_superpowers_plans_2026_07_10_admin_rooms_detail_and_purge_audit_self_review",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/superpowers/plans/2026-07-10-admin-rooms-detail-and-purge-audit.md",
+      "source_location": "L1061",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
