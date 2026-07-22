@@ -52,7 +52,7 @@ export interface AdSenseConfig {
 }
 
 export const ADSENSE: AdSenseConfig = {
-  enabled: true, // master switch — set to false to ship an ad-free build without touching the ids
+  enabled: false, // master switch — set to false to ship an ad-free build without touching the ids
   client: 'ca-pub-6497728947722029', // ca-pub-… publisher id
   slots: {
     landingTop: '5092879263', // HORIZONTAL — landing leaderboard after hero

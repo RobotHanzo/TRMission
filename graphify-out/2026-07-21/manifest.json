@@ -485,13 +485,13 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/SettingsModal.test.tsx": {
-    "mtime": 1783676798.1416326,
-    "ast_hash": "311bdf0e65051cc04edff18db0dcb504",
+    "mtime": 1784590292.2552552,
+    "ast_hash": "e78c319b4cb35d830a54dcd0c4f224ed",
     "semantic_hash": ""
   },
   "apps/web/src/components/SettingsModal.tsx": {
-    "mtime": 1783720100.7793603,
-    "ast_hash": "de051231ea2553da9d112917aaa0805e",
+    "mtime": 1784590154.770636,
+    "ast_hash": "babe47f67cda65ef593f8b601a3d0832",
     "semantic_hash": ""
   },
   "apps/web/src/components/TicketCard.tsx": {
@@ -1025,8 +1025,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/store/ui.ts": {
-    "mtime": 1784420909.4131596,
-    "ast_hash": "4d370027e64aa4de118d58db21c63740",
+    "mtime": 1784590129.18734,
+    "ast_hash": "e642a333bdbff664b08bb9b333f55081",
     "semantic_hash": ""
   },
   "apps/web/src/theme/colors.ts": {
@@ -1510,12 +1510,12 @@
     "semantic_hash": ""
   },
   "docker-compose.yml": {
-    "mtime": 1784469187.2709672,
+    "mtime": 1784590730.1267476,
     "ast_hash": "22706b6e9a7a24f0e4e7335e5e026650",
     "semantic_hash": ""
   },
   "docker-stack.yml": {
-    "mtime": 1783107676.9480767,
+    "mtime": 1784590746.846782,
     "ast_hash": "ccaf9c396739c88eff1c966850ebdef7",
     "semantic_hash": ""
   },
@@ -2265,8 +2265,8 @@
     "semantic_hash": ""
   },
   "apps/admin/src/i18n/index.ts": {
-    "mtime": 1784466303.8185306,
-    "ast_hash": "8c12dc9ed36a6d0140523d46137abd87",
+    "mtime": 1784590080.3384066,
+    "ast_hash": "73d94c00e27e9169599de06fe39e3600",
     "semantic_hash": ""
   },
   "apps/admin/src/lib/fmt.ts": {
@@ -2385,13 +2385,13 @@
     "semantic_hash": ""
   },
   "packages/shared/src/features.ts": {
-    "mtime": 1783699015.7775412,
-    "ast_hash": "423bd0d0e981d770aa310b31772513c5",
+    "mtime": 1784590066.497429,
+    "ast_hash": "f0d88050a561e4d01aa1e34b51627d5e",
     "semantic_hash": ""
   },
   "packages/shared/test/features.spec.ts": {
-    "mtime": 1783248447.982045,
-    "ast_hash": "430530be351c5c27b10dac4fbb9322f5",
+    "mtime": 1784592106.2126658,
+    "ast_hash": "e9012084222746ab667fe386c9190747",
     "semantic_hash": ""
   },
   "apps/server/src/auth/feature.guard.ts": {
@@ -3890,8 +3890,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/lib/analytics.ts": {
-    "mtime": 1784420909.4021597,
-    "ast_hash": "9566f36e32681ae1bf001e19f88035e0",
+    "mtime": 1784590422.9377687,
+    "ast_hash": "0ba0c28092b2a21f5dae2f7196627ec1",
     "semantic_hash": ""
   },
   "apps/web/src/hooks/usePageViewTracking.test.ts": {
@@ -6335,8 +6335,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/en/ui.ts": {
-    "mtime": 1784428608.7220292,
-    "ast_hash": "d2eb614fc8f29e9179895aeeb2b39d2b",
+    "mtime": 1784590086.170443,
+    "ast_hash": "46ddb1175f91e32b5514f0a5fe7cdcf7",
     "semantic_hash": ""
   },
   "apps/web/src/i18n/zh-Hant/auth.ts": {
@@ -6400,8 +6400,8 @@
     "semantic_hash": ""
   },
   "apps/web/src/i18n/zh-Hant/ui.ts": {
-    "mtime": 1784428459.1006324,
-    "ast_hash": "a3d4e5d117395e9457fc75ef46ce875c",
+    "mtime": 1784590091.3826218,
+    "ast_hash": "9289a308787e5e861180021116604b8e",
     "semantic_hash": ""
   },
   "packages/client-core/src/i18n/locales/en.ts": {
@@ -6690,18 +6690,23 @@
     "semantic_hash": ""
   },
   "apps/web/src/components/AdSlot.test.tsx": {
-    "mtime": 1784589595.0763083,
-    "ast_hash": "9004a441f7d96287705d6a29d1871b56",
+    "mtime": 1784609126.9497807,
+    "ast_hash": "c216994b46d4cfedbd055b2613c99f13",
     "semantic_hash": ""
   },
   "apps/web/src/components/AdSlot.tsx": {
-    "mtime": 1784589423.5267856,
-    "ast_hash": "5ec1dabdfc6467793aa0485613941dcc",
+    "mtime": 1784590361.0971189,
+    "ast_hash": "27400e8d54b9a8305bd84a47dc4c3a08",
     "semantic_hash": ""
   },
   "apps/web/src/lib/ads.ts": {
-    "mtime": 1784589406.56169,
-    "ast_hash": "99c7d9076379f0ef3de99f9dad917e62",
+    "mtime": 1784609107.1406827,
+    "ast_hash": "33cbe43c722c0279279740ec66fb8416",
+    "semantic_hash": ""
+  },
+  "apps/web/src/config/adsense.ts": {
+    "mtime": 1784609093.80855,
+    "ast_hash": "cdc57ec2511781b5038c1d467cb276b6",
     "semantic_hash": ""
   }
 }
