@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Bot,
-  ChevronDown,
-  ChevronUp,
-  Crown,
-  Globe,
-  Lock,
-  Map as MapIcon,
-  UserMinus,
-  X,
-} from 'lucide-react';
+import { Bot, Crown, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
-import { layoutsForPlayerCount, TEAM_LAYOUTS, type EventsMode } from '@trm/shared';
+import {
+  layoutsForPlayerCount,
+  seatOrderMovingToTeam,
+  shuffleSeatOrder,
+  TEAM_LAYOUTS,
+  type EventsMode,
+} from '@trm/shared';
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
@@ -30,7 +26,7 @@ import { connectGame } from '../net/connection';
 import { track } from '../lib/analytics';
 import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
-import { SEAT_COLORS, teamColor } from '../theme/colors';
+import { SEAT_COLORS } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { NotificationStack } from '../components/NotificationStack';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -38,6 +34,7 @@ import { OwnerLeaveDialog } from '../components/OwnerLeaveDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
 import { Switch } from '../components/ui/Switch';
 import { Segmented } from '../components/ui/Segmented';
+import { TeamSelector } from '../components/TeamSelector';
 import { AdSlot } from '../components/AdSlot';
 import type { Locale } from '../store/ui';
 import { chatPresetKey } from '@trm/client-core';
@@ -221,19 +218,15 @@ export function RoomScreen() {
   };
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
-  /**
-   * Swap a player one seat up/down. Because membership is `seat % teamCount`, a single swap moves
-   * them to the adjacent team — which makes this the whole team picker on web.
-   */
-  const moveSeat = (userId: string, delta: number) => {
-    if (!room) return;
-    const order = [...room.members].sort((a, b) => a.seat - b.seat).map((m) => m.userId);
-    const from = order.indexOf(userId);
-    const to = from + delta;
-    if (from < 0 || to < 0 || to >= order.length) return;
-    [order[from], order[to]] = [order[to] as string, order[from] as string];
-    void guard(api.reseatRoom(code, order));
+  /** Host-assign mode: move `userId` onto `team`, swapping seats with that team's current
+   *  lowest-seat occupant (the one shared seat-math primitive, also used server-side for
+   *  self-join). A no-op (null) when they're already on that team. */
+  const assignToTeam = (userId: string, team: number) => {
+    const order = seatOrderMovingToTeam(room.members, userId, team, teamCount);
+    if (order) void guard(api.reseatRoom(code, order));
   };
+  const joinTeam = (team: number) => void guard(api.joinTeam(code, team));
+  const shuffleTeams = () => void guard(api.reseatRoom(code, shuffleSeatOrder(room.members)));
   const transferHost = (userId: string) => void guard(api.transferOwnership(code, userId));
   const sendChat = (presetId: string) => {
     track('chat_send', { kind: 'preset', context: 'lobby' });
@@ -296,90 +289,73 @@ export function RoomScreen() {
           </div>
         </div>
 
-        <ul className="member-list">
-          {room.members.map((m) => (
-            <li key={m.userId}>
-              <span
-                className="seat-dot"
-                style={{ background: SEAT_COLORS[m.seat % 6] ?? '#888' }}
-                aria-hidden
-              />
-              {teamCount > 0 && (
-                // Team membership IS the seat order (`seat % teamCount`), so this badge is derived,
-                // never stored — reordering seats below moves players between sides.
+        {teamCount > 0 ? (
+          <TeamSelector
+            room={room}
+            isHost={isHost}
+            myUserId={user?.id}
+            memberName={memberName}
+            onAssign={assignToTeam}
+            onJoinTeam={joinTeam}
+            onShuffle={shuffleTeams}
+            onRemoveBot={removeBot}
+            onTransferHost={(id) => requestTransfer(() => transferHost(id))}
+            onKick={kick}
+          />
+        ) : (
+          <ul className="member-list">
+            {room.members.map((m) => (
+              <li key={m.userId}>
                 <span
-                  className="badge team-badge"
-                  style={{ background: teamColor(m.seat % teamCount) }}
-                >
-                  {t('teamName', { n: (m.seat % teamCount) + 1 })}
-                </span>
-              )}
-              {m.isBot && <Bot size={15} aria-hidden />}
-              <span>{memberName(m)}</span>
-              {m.userId === room.hostId && <em className="muted">({t('host')})</em>}
-              {m.userId === user?.id && <em className="muted">({t('you')})</em>}
-              {m.isBot ? (
-                <span className="badge bot">{t('botTag')}</span>
-              ) : (
-                <span className={m.ready ? 'badge ok' : 'badge'}>
-                  {m.ready ? t('ready') : t('notReady')}
-                </span>
-              )}
-              {isHost && m.isBot && (
-                <button
-                  className="icon-btn"
-                  aria-label={t('removeBot')}
-                  title={t('removeBot')}
-                  onClick={() => removeBot(m.userId)}
-                >
-                  <X size={14} aria-hidden />
-                </button>
-              )}
-              {isHost && !m.isBot && m.userId !== room.hostId && (
-                <button
-                  className="icon-btn"
-                  aria-label={t('makeOwner')}
-                  title={t('makeOwner')}
-                  onClick={() => requestTransfer(() => transferHost(m.userId))}
-                >
-                  <Crown size={14} aria-hidden />
-                </button>
-              )}
-              {isHost && !m.isBot && m.userId !== room.hostId && (
-                <button
-                  className="icon-btn"
-                  aria-label={t('kickPlayer')}
-                  title={t('kickPlayer')}
-                  onClick={() => kick(m.userId)}
-                >
-                  <UserMinus size={14} aria-hidden />
-                </button>
-              )}
-              {isHost && teamCount > 0 && (
-                <>
+                  className="seat-dot"
+                  style={{ background: SEAT_COLORS[m.seat % 6] ?? '#888' }}
+                  aria-hidden
+                />
+                {m.isBot && <Bot size={15} aria-hidden />}
+                <span>{memberName(m)}</span>
+                {m.userId === room.hostId && <em className="muted">({t('host')})</em>}
+                {m.userId === user?.id && <em className="muted">({t('you')})</em>}
+                {m.isBot ? (
+                  <span className="badge bot">{t('botTag')}</span>
+                ) : (
+                  <span className={m.ready ? 'badge ok' : 'badge'}>
+                    {m.ready ? t('ready') : t('notReady')}
+                  </span>
+                )}
+                {isHost && m.isBot && (
                   <button
                     className="icon-btn"
-                    aria-label={t('moveSeatUp')}
-                    title={t('moveSeatUp')}
-                    disabled={m.seat === 0}
-                    onClick={() => moveSeat(m.userId, -1)}
+                    aria-label={t('removeBot')}
+                    title={t('removeBot')}
+                    onClick={() => removeBot(m.userId)}
                   >
-                    <ChevronUp size={14} aria-hidden />
+                    <X size={14} aria-hidden />
                   </button>
+                )}
+                {isHost && !m.isBot && m.userId !== room.hostId && (
                   <button
                     className="icon-btn"
-                    aria-label={t('moveSeatDown')}
-                    title={t('moveSeatDown')}
-                    disabled={m.seat === room.members.length - 1}
-                    onClick={() => moveSeat(m.userId, 1)}
+                    aria-label={t('makeOwner')}
+                    title={t('makeOwner')}
+                    onClick={() => requestTransfer(() => transferHost(m.userId))}
                   >
-                    <ChevronDown size={14} aria-hidden />
+                    <Crown size={14} aria-hidden />
                   </button>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+                )}
+                {isHost && !m.isBot && m.userId !== room.hostId && (
+                  <button
+                    className="icon-btn"
+                    aria-label={t('kickPlayer')}
+                    title={t('kickPlayer')}
+                    onClick={() => kick(m.userId)}
+                  >
+                    <UserMinus size={14} aria-hidden />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
 
         {room.spectators.length > 0 && (
           <>
@@ -538,6 +514,25 @@ export function RoomScreen() {
               ariaLabel={t('settingTeamMode')}
             />
           </div>
+          {teamCount > 0 && (
+            <div className="row between setting-row">
+              <span>
+                <strong>{t('settingTeamAssignMode')}</strong>
+                <br />
+                <span className="muted">{t('settingTeamAssignModeDesc')}</span>
+              </span>
+              <Segmented<'random' | 'host' | 'self'>
+                options={[
+                  { value: 'random', label: t('teamAssignModeRandom') },
+                  { value: 'host', label: t('teamAssignModeHost') },
+                  { value: 'self', label: t('teamAssignModeSelf') },
+                ]}
+                value={settings.teamAssignMode}
+                onChange={(v) => setSetting({ teamAssignMode: v })}
+                ariaLabel={t('settingTeamAssignMode')}
+              />
+            </div>
+          )}
           {room.members.filter((m) => !m.isBot).length === 1 && (
             // Only meaningful (and only shown) while the host is the lone human at the table:
             // the started game then waits for them instead of running the per-turn timer.

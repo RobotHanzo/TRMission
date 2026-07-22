@@ -214,3 +214,152 @@ describe('lobby: team mode', () => {
     expect(state?.teamPools).toBeUndefined();
   });
 });
+
+describe('lobby: team assignment mode', () => {
+  it('defaults to host-assign and persists a patch through settings', async () => {
+    const { host, code } = await roomWithBots(4, 3);
+    const before = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(host.token))
+      .expect(200);
+    expect(before.body.settings.teamAssignMode).toBe('host');
+
+    const after = await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(host.token))
+      .send({ teamAssignMode: 'self' })
+      .expect(200);
+    expect(after.body.settings.teamAssignMode).toBe('self');
+  });
+
+  it('lets a member self-join a team, swapping seats with the target team’s occupant', async () => {
+    const host = await guest('Host');
+    const other = await guest('Joiner');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({ maxPlayers: 4 })
+      .expect(201);
+    const code = room.body.code as string;
+    await request(server())
+      .post(`/api/v1/rooms/${code}/join`)
+      .set(auth(other.token))
+      .send({})
+      .expect(200);
+    for (let i = 0; i < 2; i++) {
+      await request(server())
+        .post(`/api/v1/rooms/${code}/bots`)
+        .set(auth(host.token))
+        .send({ difficulty: 'EASY' })
+        .expect(200);
+    }
+    await setTeams(code, host.token, 2);
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(host.token))
+      .send({ teamAssignMode: 'self' })
+      .expect(200);
+
+    // host=seat0 (team0), other=seat1 (team1). `other` joins team 0, swapping with host.
+    const after = await request(server())
+      .post(`/api/v1/rooms/${code}/team`)
+      .set(auth(other.token))
+      .send({ team: 0 })
+      .expect(200);
+    const seatOf = new Map<string, number>(
+      after.body.members.map((m: { userId: string; seat: number }) => [m.userId, m.seat]),
+    );
+    expect(seatOf.get(other.id)).toBe(0);
+    expect(seatOf.get(host.id)).toBe(1);
+    // Only the two swapped members' ready flags reset — bots are unaffected either way.
+    const otherRow = after.body.members.find((m: { userId: string }) => m.userId === other.id);
+    const hostRow = after.body.members.find((m: { userId: string }) => m.userId === host.id);
+    expect(otherRow.ready).toBe(false);
+    expect(hostRow.ready).toBe(false);
+  });
+
+  it('is a no-op (200, unchanged) when already on the requested team', async () => {
+    const { host, code } = await roomWithBots(4, 3);
+    await setTeams(code, host.token, 2);
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(host.token))
+      .send({ teamAssignMode: 'self' })
+      .expect(200);
+    const before = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(host.token))
+      .expect(200);
+    const hostSeat = before.body.members.find((m: { userId: string }) => m.userId === host.id).seat;
+
+    const after = await request(server())
+      .post(`/api/v1/rooms/${code}/team`)
+      .set(auth(host.token))
+      .send({ team: hostSeat % 2 })
+      .expect(200);
+    expect(after.body.members.find((m: { userId: string }) => m.userId === host.id).seat).toBe(
+      hostSeat,
+    );
+  });
+
+  it('rejects self-join when the room is not in self mode', async () => {
+    const { host, code } = await roomWithBots(4, 3);
+    await setTeams(code, host.token, 2); // teamAssignMode defaults to 'host'
+    await request(server())
+      .post(`/api/v1/rooms/${code}/team`)
+      .set(auth(host.token))
+      .send({ team: 1 })
+      .expect(403);
+  });
+
+  it('rejects an out-of-range team index', async () => {
+    const { host, code } = await roomWithBots(4, 3);
+    await setTeams(code, host.token, 2);
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(host.token))
+      .send({ teamAssignMode: 'self' })
+      .expect(200);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/team`)
+      .set(auth(host.token))
+      .send({ team: 2 }) // only teams 0/1 exist for a 2-team room
+      .expect(400);
+  });
+
+  it('rejects self-join from a non-member', async () => {
+    const { host, code } = await roomWithBots(4, 3);
+    await setTeams(code, host.token, 2);
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(host.token))
+      .send({ teamAssignMode: 'self' })
+      .expect(200);
+    const outsider = await guest('Outsider');
+    await request(server())
+      .post(`/api/v1/rooms/${code}/team`)
+      .set(auth(outsider.token))
+      .send({ team: 0 })
+      .expect(403);
+  });
+
+  it('leaves the host-only reseat endpoint untouched regardless of teamAssignMode', async () => {
+    const { host, code } = await roomWithBots(4, 3);
+    await setTeams(code, host.token, 2);
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(host.token))
+      .send({ teamAssignMode: 'self' })
+      .expect(200);
+    const room = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(host.token))
+      .expect(200);
+    const ids: string[] = room.body.members.map((m: { userId: string }) => m.userId);
+    await request(server())
+      .post(`/api/v1/rooms/${code}/seats`)
+      .set(auth(host.token))
+      .send({ userIds: [...ids].reverse() })
+      .expect(200);
+  });
+});

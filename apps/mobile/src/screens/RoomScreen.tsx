@@ -17,9 +17,15 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Bot, ChevronDown, ChevronUp, Crown, UserMinus, X } from 'lucide-react-native';
+import { Bot, Crown, UserMinus, X } from 'lucide-react-native';
 import { OFFICIAL_MAPS } from '@trm/map-data';
-import { layoutsForPlayerCount, TEAM_LAYOUTS, type EventsMode } from '@trm/shared';
+import {
+  layoutsForPlayerCount,
+  seatOrderMovingToTeam,
+  shuffleSeatOrder,
+  TEAM_LAYOUTS,
+  type EventsMode,
+} from '@trm/shared';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
 import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core/game/chatPresets';
 import type { RootStackParamList } from '../navigation';
@@ -37,7 +43,7 @@ import { useHasFeature, useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
-import { seatColor, teamColor } from '../theme/colors';
+import { seatColor } from '../theme/colors';
 import { useTheme } from '../theme/useTheme';
 import {
   Card,
@@ -47,6 +53,7 @@ import {
   SecondaryButton,
   SectionLabel,
 } from '../theme/chrome';
+import { TeamSelector } from '../components/TeamSelector';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Room'>;
 
@@ -223,15 +230,14 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
     void p.then(setRoom).catch((e: Error) => setErr(e.message));
   const setSetting = (patch: Partial<RoomSettings>): void =>
     guard(api.updateRoomSettings(code, patch));
-  /** Swap a player one seat along; with membership = `seat % teamCount`, that changes their side. */
-  const moveSeat = (userId: string, delta: number): void => {
-    const order = [...room.members].sort((a, b) => a.seat - b.seat).map((m) => m.userId);
-    const from = order.indexOf(userId);
-    const to = from + delta;
-    if (from < 0 || to < 0 || to >= order.length) return;
-    [order[from], order[to]] = [order[to] as string, order[from] as string];
-    guard(api.reseatRoom(code, order));
+  /** Host-assign mode: move `userId` onto `team` via the shared seat-swap primitive (also used
+   *  server-side for self-join). A no-op when they're already on that team. */
+  const assignToTeam = (userId: string, team: number): void => {
+    const order = seatOrderMovingToTeam(room.members, userId, team, teamCount);
+    if (order) guard(api.reseatRoom(code, order));
   };
+  const joinTeam = (team: number): void => guard(api.joinTeam(code, team));
+  const shuffleTeams = (): void => guard(api.reseatRoom(code, shuffleSeatOrder(room.members)));
 
   const confirm = (title: string, body: string, action: () => void): void =>
     Alert.alert(title, body, [
@@ -295,116 +301,124 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
 
       {/* ── members ── */}
       <SectionLabel>{t('room.members')}</SectionLabel>
-      <Card>
-        {room.members.map((m) => (
-          <View key={m.userId} style={styles.memberRow} testID={`member-${m.userId}`}>
-            <View style={[styles.seatDot, { backgroundColor: seatColor(m.seat) }]} />
-            {teamCount > 0 && (
-              // Derived from the seat, never stored — reordering seats moves players between sides.
-              <Text style={[styles.teamBadge, { backgroundColor: teamColor(m.seat % teamCount) }]}>
-                {t('game.teamName', { n: (m.seat % teamCount) + 1 })}
+      {teamCount > 0 ? (
+        <>
+          <TeamSelector
+            room={room}
+            isHost={isHost}
+            myUserId={user?.id}
+            memberName={memberName}
+            onAssign={assignToTeam}
+            onJoinTeam={joinTeam}
+            onShuffle={shuffleTeams}
+            onRemoveBot={(botId) => guard(api.removeBot(code, botId))}
+            onTransferHost={(id) =>
+              confirm(t('room.transferConfirmTitle'), t('room.transferConfirmBody'), () =>
+                guard(api.transferOwnership(code, id)),
+              )
+            }
+            onKick={(id) => guard(api.kickPlayer(code, id))}
+          />
+          {canAddBot && (
+            <Card>
+              <View style={styles.botRow}>
+                <MutedText>{t('room.addBot')}</MutedText>
+                {DIFFICULTIES.map((d) => (
+                  <Pressable
+                    key={d}
+                    testID={`add-bot-${d}`}
+                    accessibilityRole="button"
+                    style={[styles.chip, { borderColor: tokens.line }]}
+                    onPress={() => guard(api.addBot(code, d))}
+                  >
+                    <Text style={[styles.chipText, { color: tokens.ink }]}>
+                      {t(`room.difficulty_${d}`)}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </Card>
+          )}
+        </>
+      ) : (
+        <Card>
+          {room.members.map((m) => (
+            <View key={m.userId} style={styles.memberRow} testID={`member-${m.userId}`}>
+              <View style={[styles.seatDot, { backgroundColor: seatColor(m.seat) }]} />
+              {m.isBot && <Bot size={14} color={tokens.inkSoft} />}
+              <Text style={[styles.memberName, { color: tokens.ink }]} numberOfLines={1}>
+                {memberName(m)}
+                {m.userId === room.hostId ? ` · ${t('room.host')}` : ''}
+                {m.userId === user?.id ? ` · ${t('room.you')}` : ''}
               </Text>
-            )}
-            {m.isBot && <Bot size={14} color={tokens.inkSoft} />}
-            <Text style={[styles.memberName, { color: tokens.ink }]} numberOfLines={1}>
-              {memberName(m)}
-              {m.userId === room.hostId ? ` · ${t('room.host')}` : ''}
-              {m.userId === user?.id ? ` · ${t('room.you')}` : ''}
-            </Text>
-            <Text
-              style={[
-                styles.readyBadge,
-                { color: m.isBot || m.ready ? '#2e7d32' : tokens.inkSoft },
-              ]}
-            >
-              {m.isBot ? t('room.botTag') : m.ready ? t('room.ready') : t('room.notReady')}
-            </Text>
-            {isHost && m.isBot && (
-              <Pressable
-                testID={`remove-bot-${m.userId}`}
-                accessibilityRole="button"
-                accessibilityLabel={t('room.removeBot')}
-                hitSlop={8}
-                style={styles.iconBtn}
-                onPress={() => guard(api.removeBot(code, m.userId))}
+              <Text
+                style={[
+                  styles.readyBadge,
+                  { color: m.isBot || m.ready ? '#2e7d32' : tokens.inkSoft },
+                ]}
               >
-                <X size={16} color={tokens.inkSoft} />
-              </Pressable>
-            )}
-            {isHost && !m.isBot && m.userId !== room.hostId && (
-              <>
+                {m.isBot ? t('room.botTag') : m.ready ? t('room.ready') : t('room.notReady')}
+              </Text>
+              {isHost && m.isBot && (
                 <Pressable
+                  testID={`remove-bot-${m.userId}`}
                   accessibilityRole="button"
-                  accessibilityLabel={t('room.makeOwner')}
+                  accessibilityLabel={t('room.removeBot')}
                   hitSlop={8}
                   style={styles.iconBtn}
-                  onPress={() =>
-                    confirm(t('room.transferConfirmTitle'), t('room.transferConfirmBody'), () =>
-                      guard(api.transferOwnership(code, m.userId)),
-                    )
-                  }
+                  onPress={() => guard(api.removeBot(code, m.userId))}
                 >
-                  <Crown size={16} color={tokens.inkSoft} />
+                  <X size={16} color={tokens.inkSoft} />
                 </Pressable>
+              )}
+              {isHost && !m.isBot && m.userId !== room.hostId && (
+                <>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('room.makeOwner')}
+                    hitSlop={8}
+                    style={styles.iconBtn}
+                    onPress={() =>
+                      confirm(t('room.transferConfirmTitle'), t('room.transferConfirmBody'), () =>
+                        guard(api.transferOwnership(code, m.userId)),
+                      )
+                    }
+                  >
+                    <Crown size={16} color={tokens.inkSoft} />
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('room.kickPlayer')}
+                    hitSlop={8}
+                    style={styles.iconBtn}
+                    onPress={() => guard(api.kickPlayer(code, m.userId))}
+                  >
+                    <UserMinus size={16} color={tokens.inkSoft} />
+                  </Pressable>
+                </>
+              )}
+            </View>
+          ))}
+          {canAddBot && (
+            <View style={styles.botRow}>
+              <MutedText>{t('room.addBot')}</MutedText>
+              {DIFFICULTIES.map((d) => (
                 <Pressable
+                  key={d}
+                  testID={`add-bot-${d}`}
                   accessibilityRole="button"
-                  accessibilityLabel={t('room.kickPlayer')}
-                  hitSlop={8}
-                  style={styles.iconBtn}
-                  onPress={() => guard(api.kickPlayer(code, m.userId))}
+                  style={[styles.chip, { borderColor: tokens.line }]}
+                  onPress={() => guard(api.addBot(code, d))}
                 >
-                  <UserMinus size={16} color={tokens.inkSoft} />
+                  <Text style={[styles.chipText, { color: tokens.ink }]}>
+                    {t(`room.difficulty_${d}`)}
+                  </Text>
                 </Pressable>
-              </>
-            )}
-            {isHost && teamCount > 0 && (
-              <>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('room.moveSeatUp')}
-                  disabled={m.seat === 0}
-                  hitSlop={8}
-                  style={styles.iconBtn}
-                  onPress={() => moveSeat(m.userId, -1)}
-                >
-                  <ChevronUp size={16} color={m.seat === 0 ? tokens.line : tokens.inkSoft} />
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('room.moveSeatDown')}
-                  disabled={m.seat === room.members.length - 1}
-                  hitSlop={8}
-                  style={styles.iconBtn}
-                  onPress={() => moveSeat(m.userId, 1)}
-                >
-                  <ChevronDown
-                    size={16}
-                    color={m.seat === room.members.length - 1 ? tokens.line : tokens.inkSoft}
-                  />
-                </Pressable>
-              </>
-            )}
-          </View>
-        ))}
-        {canAddBot && (
-          <View style={styles.botRow}>
-            <MutedText>{t('room.addBot')}</MutedText>
-            {DIFFICULTIES.map((d) => (
-              <Pressable
-                key={d}
-                testID={`add-bot-${d}`}
-                accessibilityRole="button"
-                style={[styles.chip, { borderColor: tokens.line }]}
-                onPress={() => guard(api.addBot(code, d))}
-              >
-                <Text style={[styles.chipText, { color: tokens.ink }]}>
-                  {t(`room.difficulty_${d}`)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
-      </Card>
+              ))}
+            </View>
+          )}
+        </Card>
+      )}
 
       {/* ── spectators ── */}
       {room.spectators.length > 0 && (
@@ -550,6 +564,24 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
             />
           }
         />
+        {teamCount > 0 && (
+          <SettingRow
+            label={t('room.settingTeamAssignMode')}
+            desc={t('room.settingTeamAssignModeDesc')}
+            control={
+              <Chips<'random' | 'host' | 'self'>
+                options={[
+                  { value: 'random', label: t('room.teamAssignModeRandom') },
+                  { value: 'host', label: t('room.teamAssignModeHost') },
+                  { value: 'self', label: t('room.teamAssignModeSelf') },
+                ]}
+                value={settings.teamAssignMode}
+                onChange={(v) => setSetting({ teamAssignMode: v })}
+                disabled={settingsLocked}
+              />
+            }
+          />
+        )}
         {room.members.filter((m) => !m.isBot).length === 1 && (
           // Only meaningful (and only shown) while the host is the lone human at the table:
           // the started game then waits for them instead of running the per-turn timer.
@@ -732,15 +764,6 @@ const styles = StyleSheet.create({
   seatDot: { width: 10, height: 10, borderRadius: 5 },
   memberName: { flexShrink: 1, fontSize: 15, fontWeight: '600' },
   readyBadge: { marginLeft: 'auto', fontSize: 12, fontWeight: '700' },
-  teamBadge: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '700',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
   iconBtn: { padding: 8 },
   botRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 4 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },

@@ -8,6 +8,8 @@ import {
   CreateRoomDto,
   SeatOrderDto,
   SeatOrderSchema,
+  JoinTeamDto,
+  JoinTeamSchema,
   ReadyDto,
   AddBotDto,
   UpdateSettingsDto,
@@ -205,6 +207,15 @@ export class LobbyController {
   @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
   reseat(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: SeatOrderDto) {
     return this.lobby.reseat(code.toUpperCase(), user, body.userIds);
+  }
+
+  @Post(':code/team')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'A member joins a specific team (self-join mode; LOBBY only)' })
+  @ApiBody({ schema: apiSchema(JoinTeamSchema) })
+  @ApiResponse({ status: 200, schema: apiSchema(RoomViewSchema) })
+  joinTeam(@CurrentUser() user: AuthUser, @Param('code') code: string, @Body() body: JoinTeamDto) {
+    return this.lobby.joinTeam(code.toUpperCase(), user, body.team);
   }
 
   @Patch(':code/settings')

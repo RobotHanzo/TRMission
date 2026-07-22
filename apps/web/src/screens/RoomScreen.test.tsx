@@ -50,6 +50,8 @@ vi.mock('../net/rest', () => {
       rejoinRoom: vi.fn(),
       transferOwnership: vi.fn(),
       closeRoom: vi.fn(),
+      reseatRoom: vi.fn(),
+      joinTeam: vi.fn(),
     },
   };
 });
@@ -93,6 +95,7 @@ const baseRoom = () => ({
     map: { source: 'official', mapId: 'taiwan' } as MapSelector,
     eventsMode: 'off' as 'off' | 'light' | 'moderate' | 'intense',
     teamCount: 0,
+    teamAssignMode: 'host' as 'random' | 'host' | 'self',
     soloWaitForHost: true,
   },
   gameId: undefined as string | undefined,
@@ -110,6 +113,8 @@ const mocked = api as unknown as {
   updateRoomSettings: ReturnType<typeof vi.fn>;
   watchRoom: ReturnType<typeof vi.fn>;
   rejoinRoom: ReturnType<typeof vi.fn>;
+  reseatRoom: ReturnType<typeof vi.fn>;
+  joinTeam: ReturnType<typeof vi.fn>;
 };
 
 beforeEach(() => {
@@ -689,6 +694,86 @@ describe('RoomScreen spectating', () => {
     expect(kickBtns.length).toBeGreaterThan(0);
     fireEvent.click(kickBtns[0]!);
     expect(mocked.kickPlayer).toHaveBeenCalledWith('ABCD', 'g1');
+  });
+});
+
+describe('RoomScreen team selector', () => {
+  const meHost = { userId: 'u-me', displayName: 'Me', isGuest: true, seat: 0, ready: false };
+  const teamMembers = [
+    meHost,
+    { userId: 'g1', displayName: 'Guest1', isGuest: true, seat: 1, ready: false },
+    { userId: 'g2', displayName: 'Guest2', isGuest: true, seat: 2, ready: false },
+    { userId: 'g3', displayName: 'Guest3', isGuest: true, seat: 3, ready: false },
+  ];
+  const teamRoom = (over: Partial<ReturnType<typeof baseRoom>> = {}) =>
+    room({
+      hostId: 'u-me',
+      members: teamMembers,
+      settings: { ...baseRoom().settings, teamCount: 2 },
+      ...over,
+    });
+
+  it('replaces the flat member list with team columns once team mode is on', async () => {
+    mocked.getRoom.mockResolvedValue(teamRoom());
+    render(<RoomScreen />);
+    await screen.findByText('Guest1');
+    expect(document.querySelector('.member-list')).toBeNull();
+    expect(document.querySelectorAll('.team-column')).toHaveLength(2);
+  });
+
+  it('host-assign mode: selecting a player then a team reseats via the shared swap primitive', async () => {
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'host' } }),
+    );
+    mocked.reseatRoom.mockResolvedValue(teamRoom());
+    render(<RoomScreen />);
+    // Seats: u-me=0 (team 1), g1=1 (team 2), g2=2 (team 1), g3=3 (team 2). Select g1 (team 2)
+    // then click team 1's header — a valid drop target — to swap them with team 1's lowest
+    // seat, u-me.
+    const chip = await screen.findByRole('button', { name: /Guest1/ });
+    fireEvent.click(chip);
+    const targetHeader = screen.getByRole('button', { name: /1 隊/ });
+    fireEvent.click(targetHeader);
+    await waitFor(() =>
+      expect(mocked.reseatRoom).toHaveBeenCalledWith('ABCD', ['g1', 'u-me', 'g2', 'g3']),
+    );
+  });
+
+  it('random mode: shows a host-only shuffle button that reseats the table', async () => {
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'random' } }),
+    );
+    mocked.reseatRoom.mockResolvedValue(teamRoom());
+    render(<RoomScreen />);
+    const shuffle = await screen.findByRole('button', { name: '隨機分隊' });
+    fireEvent.click(shuffle);
+    await waitFor(() => expect(mocked.reseatRoom).toHaveBeenCalled());
+    const [, order] = mocked.reseatRoom.mock.calls[0] as [string, string[]];
+    expect(new Set(order)).toEqual(new Set(teamMembers.map((m) => m.userId)));
+  });
+
+  it('self-join mode: a non-host can join another team via the Join button', async () => {
+    useSession.setState({ user: { ...ME, id: 'g1' }, booting: false });
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'self' } }),
+    );
+    mocked.joinTeam.mockResolvedValue(teamRoom());
+    render(<RoomScreen />);
+    // g1 sits on seat 1 (team 2 of 2) — the Join button under team 1's column moves them there.
+    const joinButtons = await screen.findAllByRole('button', { name: '加入' });
+    fireEvent.click(joinButtons[0]!);
+    await waitFor(() => expect(mocked.joinTeam).toHaveBeenCalledWith('ABCD', 0));
+  });
+
+  it('does not show a Join button under a player’s own current team', async () => {
+    useSession.setState({ user: { ...ME, id: 'g1' }, booting: false });
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'self' } }),
+    );
+    render(<RoomScreen />);
+    await screen.findByText('Guest1');
+    // Exactly one team isn't g1's own (teamCount=2), so exactly one Join button renders.
+    expect(await screen.findAllByRole('button', { name: '加入' })).toHaveLength(1);
   });
 });
 

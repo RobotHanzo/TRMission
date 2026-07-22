@@ -53,6 +53,7 @@ const settings = {
   map: { source: 'official' as const, mapId: 'taiwan' },
   eventsMode: 'off' as const,
   teamCount: 0,
+  teamAssignMode: 'host' as const,
   soloWaitForHost: true,
 };
 const pubRoom = (code: string, status: RoomView['status'], gameId?: string): RoomView => ({

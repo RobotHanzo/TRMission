@@ -10,6 +10,8 @@ const botDifficulty = z.enum(['EASY', 'MEDIUM', 'HARD', 'HELL']);
 export const CreateRoomSchema = z.object({ maxPlayers: z.number().int().min(2).max(6).optional() });
 /** Host-only: the full seat order as a permutation of the current member ids. */
 export const SeatOrderSchema = z.object({ userIds: z.array(z.string()).min(2).max(6) });
+/** Self-join mode: any seated member picks their own team (0-indexed, max 3 teams). */
+export const JoinTeamSchema = z.object({ team: z.number().int().min(0).max(2) });
 export const ReadySchema = z.object({ ready: z.boolean() });
 export const AddBotSchema = z.object({ difficulty: botDifficulty });
 export const RematchVoteSchema = z.object({ wantsRematch: z.boolean() });
@@ -33,6 +35,8 @@ export const GameSettingsSchema = z.object({
   /** Team game: 0 = free-for-all, 2 or 3 = number of teams. Validated against the seated player
    *  count at start (4p→2 teams; 6p→2 or 3), where it becomes `GameConfig.teamCount`. */
   teamCount: z.union([z.literal(0), z.literal(2), z.literal(3)]),
+  /** How players get sorted into teams while `teamCount > 0`; irrelevant otherwise. */
+  teamAssignMode: z.enum(['random', 'host', 'self']),
   allowSpectating: z.boolean(),
   visibility: z.enum(['PUBLIC', 'INVITE_ONLY']),
   map: MapSelectorSchema,
@@ -45,6 +49,7 @@ export const UpdateSettingsSchema = GameSettingsSchema.partial();
 
 export class CreateRoomDto extends createZodDto(CreateRoomSchema) {}
 export class SeatOrderDto extends createZodDto(SeatOrderSchema) {}
+export class JoinTeamDto extends createZodDto(JoinTeamSchema) {}
 export class ReadyDto extends createZodDto(ReadySchema) {}
 export class AddBotDto extends createZodDto(AddBotSchema) {}
 export class UpdateSettingsDto extends createZodDto(UpdateSettingsSchema) {}

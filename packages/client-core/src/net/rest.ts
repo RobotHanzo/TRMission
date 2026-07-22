@@ -220,6 +220,9 @@ function buildApi(
      *  picker. `userIds` must be a permutation of the current members; human ready flags reset. */
     reseatRoom: (code: string, userIds: readonly string[]) =>
       req<RoomView>('POST', `/rooms/${code}/seats`, { userIds }),
+    /** Self-join mode: move yourself onto `team` (0-indexed). No-op if you're already there. */
+    joinTeam: (code: string, team: number) =>
+      req<RoomView>('POST', `/rooms/${code}/team`, { team }),
     startRoom: (code: string) => req<TicketResult>('POST', `/rooms/${code}/start`),
     startPractice: () => req<PracticeResult>('POST', '/rooms/practice'),
     getTicket: (code: string) => req<TicketResult>('POST', `/rooms/${code}/ticket`),

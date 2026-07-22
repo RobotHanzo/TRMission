@@ -372,6 +372,19 @@ export class LobbyService {
     return toView(r);
   }
 
+  /** Any seated member: move yourself onto `team` (self-join mode only). */
+  async joinTeam(code: string, user: AuthUser, team: number): Promise<RoomView> {
+    const r = await this.rooms.joinTeam(code, user.userId, team);
+    if (r === 'not_found') throw new NotFoundException('room not found');
+    if (r === 'started') throw new BadRequestException('game already started');
+    if (r === 'mode_disabled')
+      throw new ForbiddenException('self-join is not enabled for this room');
+    if (r === 'not_member') throw new ForbiddenException('not a member of this room');
+    if (r === 'invalid_team') throw new BadRequestException('invalid team');
+    if (r === 'already') return this.get(code);
+    return toView(r);
+  }
+
   /** Host updates the per-game settings while the room is still in LOBBY. */
   async updateSettings(code: string, user: AuthUser, patch: RoomSettingsPatch): Promise<RoomView> {
     if (patch.map) await this.assertMapSelectable(patch.map, user.userId);

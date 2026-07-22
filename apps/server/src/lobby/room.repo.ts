@@ -1,7 +1,7 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
-import type { EventsMode, ChatPresetId } from '@trm/shared';
+import { seatOrderMovingToTeam, teamOfSeat, type EventsMode, type ChatPresetId } from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
 import type { BotDifficulty } from '@trm/bots';
 import type { GameDoc } from '../persistence/types';
@@ -28,6 +28,11 @@ export interface RoomSettings {
   /** Team game: 0 = free-for-all, else the number of teams (2–3). Membership is `seat %
    *  teamCount`, so arranging teams in the lobby means reordering seats. */
   teamCount: number;
+  /** How players get sorted into teams: the host shuffles everyone ('random'), the host places
+   *  each player individually ('host'), or every player picks their own team ('self'). Only
+   *  meaningful while `teamCount > 0`. Defaults to 'host' — today's only behavior — so existing
+   *  rooms need no migration. */
+  teamAssignMode: 'random' | 'host' | 'self';
   allowSpectating: boolean;
   visibility: RoomVisibility;
   map: MapSelector;
@@ -44,6 +49,7 @@ export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
   doubleRouteSingleFor23: true,
   eventsMode: 'moderate',
   teamCount: 0,
+  teamAssignMode: 'host',
   allowSpectating: true,
   visibility: 'INVITE_ONLY',
   map: { source: 'official', mapId: 'taiwan' },
@@ -111,6 +117,14 @@ export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidd
 export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 export type KickResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
 export type ReseatResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
+export type JoinTeamResult =
+  | RoomDoc
+  | 'not_found'
+  | 'started'
+  | 'not_member'
+  | 'mode_disabled'
+  | 'invalid_team'
+  | 'already';
 export type SendChatResult = RoomDoc | 'not_found' | 'not_member' | 'rate_limited';
 export type EndVoteResult = RoomDoc | 'not_found' | 'not_member' | 'not_started';
 export type BecomeSpectatorResult =
@@ -511,6 +525,42 @@ export class RoomRepo implements OnModuleInit {
     }));
     await this.col.updateOne(
       { _id: code, status: 'LOBBY', members: { $size: current.length } },
+      { $set: { members: reseated, updatedAt: new Date() } },
+    );
+    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+  }
+
+  /**
+   * Any seated member (not just the host): move yourself onto `team`, gated on the room's
+   * `teamAssignMode` being 'self' — the non-host counterpart to `reseat`. Swaps seats with
+   * `team`'s lowest-seat current occupant (`seatOrderMovingToTeam`) rather than resetting
+   * everyone's ready flag: only the two swapped members actually changed sides.
+   */
+  async joinTeam(code: string, userId: string, team: number): Promise<JoinTeamResult> {
+    const room = await this.col.findOne({ _id: code });
+    if (!room) return 'not_found';
+    if (room.status !== 'LOBBY') return 'started';
+    const settings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+    if (settings.teamAssignMode !== 'self' || settings.teamCount <= 0) return 'mode_disabled';
+    if (!Number.isInteger(team) || team < 0 || team >= settings.teamCount) return 'invalid_team';
+
+    const me = room.members.find((m) => m.userId === userId);
+    if (!me) return 'not_member';
+    if (teamOfSeat(me.seat, settings.teamCount) === team) return 'already';
+
+    const order = seatOrderMovingToTeam(room.members, userId, team, settings.teamCount);
+    if (!order) return 'invalid_team'; // no seat currently belongs to `team` yet
+
+    const byId = new Map(room.members.map((m) => [m.userId, m]));
+    const reseated = order.map((id, seat) => {
+      const member = byId.get(id) as RoomMember;
+      // Only the two swapped members' sides actually changed — reset just their ready flags
+      // (bots stay ready) rather than the whole table's, unlike a host-driven `reseat`.
+      const moved = id === userId || member.seat !== seat;
+      return { ...member, seat, ready: moved ? member.isBot === true : member.ready };
+    });
+    await this.col.updateOne(
+      { _id: code, status: 'LOBBY', members: { $size: room.members.length } },
       { $set: { members: reseated, updatedAt: new Date() } },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';

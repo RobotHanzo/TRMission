@@ -84,6 +84,10 @@ export interface RoomSettings {
    *  teamCount`, so arranging teams means reordering seats (`reseatRoom`). Validated against the
    *  seated player count when the host starts. */
   teamCount: number;
+  /** How players get sorted into teams while `teamCount > 0`: the host shuffles everyone
+   *  ('random'), the host places each player individually ('host', today's default), or every
+   *  player picks their own team via `joinTeam` ('self'). */
+  teamAssignMode: 'random' | 'host' | 'self';
   /** Solo rooms (host + bots only): wait for the host instead of running the per-turn timer. */
   soloWaitForHost: boolean;
 }
