@@ -1746,6 +1746,9 @@ button.ticket-card:hover {
     white-space: nowrap;
   }
 }
+.scoreboard-guest-card {
+  margin-bottom: var(--tr-space-3);
+}
 .scoreboard-actions {
   display: flex;
   justify-content: flex-end;

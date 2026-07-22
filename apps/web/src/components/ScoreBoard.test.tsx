@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema, Phase } from '@trm/proto';
 import '../i18n'; // initialise react-i18next so labels resolve
@@ -7,9 +7,10 @@ import i18n from '../i18n';
 import { ScoreBoard } from './ScoreBoard';
 import { useAnimations } from '../store/animations';
 import { TICKETS, ROUTES, ticketById } from '../game/content';
-import type { RoomMember } from '../net/rest';
+import type { RoomMember, PublicUser } from '../net/rest';
 import { useUi } from '../store/ui';
 import { api } from '../net/rest';
+import { useSession } from '../store/session';
 
 const done = TICKETS[0]!.id as string;
 const failed = TICKETS[1]!.id as string;
@@ -285,5 +286,61 @@ describe('ScoreBoard rating + Discord', () => {
   it('always shows a Discord join button', () => {
     render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
     expect(screen.getByRole('button', { name: /加入 Discord 社群/ })).toBeInTheDocument();
+  });
+});
+
+const guestUser: PublicUser = {
+  id: 'g1',
+  displayName: 'Guest',
+  isGuest: true,
+  preferences: { theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' },
+  features: [],
+  tutorialCompleted: true,
+};
+
+describe('ScoreBoard guest upgrade', () => {
+  beforeEach(() => {
+    useAnimations.getState().reset();
+    void i18n.changeLanguage('zh-Hant');
+    useUi.setState({ gameId: 'g1', roomCode: 'ABCDE' });
+    useSession.setState({ user: null, loading: false, error: null });
+  });
+
+  it('offers a guest player the leaderboard-framed upgrade nudge', () => {
+    useSession.setState({ user: guestUser });
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+    expect(screen.getByTestId('scoreboard-guest-upgrade')).toBeInTheDocument();
+    expect(screen.getByText(/排行榜/)).toBeInTheDocument();
+  });
+
+  it('hides for a registered player', () => {
+    useSession.setState({ user: { ...guestUser, isGuest: false } });
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+    expect(screen.queryByTestId('scoreboard-guest-upgrade')).not.toBeInTheDocument();
+  });
+
+  it('hides outside an online room context (replay/sandbox)', () => {
+    useUi.setState({ gameId: null, roomCode: null });
+    useSession.setState({ user: guestUser });
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+    expect(screen.queryByTestId('scoreboard-guest-upgrade')).not.toBeInTheDocument();
+  });
+
+  it('expands into an email/password form and upgrades the account on submit', async () => {
+    const upgrade = vi
+      .spyOn(api, 'upgrade')
+      .mockResolvedValue({ user: { ...guestUser, isGuest: false }, accessToken: 'tok' });
+    useSession.setState({ user: guestUser });
+    render(<ScoreBoard snapshot={snap} onLeave={() => {}} />);
+
+    fireEvent.click(screen.getByText('建立帳號'));
+    fireEvent.change(screen.getByPlaceholderText('電子郵件'), { target: { value: 'a@b.com' } });
+    fireEvent.change(screen.getByPlaceholderText('密碼（至少 8 碼）'), {
+      target: { value: 'password1' },
+    });
+    fireEvent.click(screen.getByText('建立帳號'));
+
+    await waitFor(() => expect(upgrade).toHaveBeenCalledWith('a@b.com', 'password1'));
+    await waitFor(() => expect(useSession.getState().user?.isGuest).toBe(false));
   });
 });

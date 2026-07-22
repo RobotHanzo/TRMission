@@ -16,6 +16,12 @@ const mockSubmitRating = jest.fn();
 jest.mock('../../../net/rest', () => ({
   api: { submitRating: (payload: unknown) => mockSubmitRating(payload) },
 }));
+// Not under test here (see ScoreBoard.guestUpgrade.test.tsx); stub it out so importing
+// ScoreBoard doesn't pull in the real session store's push/moderation/secureStore chain.
+jest.mock('../../../store/session', () => ({
+  useSession: (selector: (s: unknown) => unknown) =>
+    selector({ user: null, loading: false, error: null, upgrade: jest.fn() }),
+}));
 
 const snap = (): GameSnapshot =>
   create(GameSnapshotSchema, {

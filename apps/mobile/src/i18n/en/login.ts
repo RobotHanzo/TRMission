@@ -19,5 +19,7 @@ export default {
   guestName: auth.guestName,
   guestNotice: auth.guestNotice,
   upgradeBlurb: auth.upgradeBlurb,
+  endgameGuestNotice: auth.endgameGuestNotice,
+  endgameUpgradeBlurb: auth.endgameUpgradeBlurb,
   createAccount: auth.createAccount,
 } satisfies TranslationShape<typeof zh>;

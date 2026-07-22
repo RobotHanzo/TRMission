@@ -12,6 +12,7 @@ import { ticketById } from '../game/content';
 import { useAnimationsStore } from '../store/animations';
 import { useConfetti } from '../hooks/useConfetti';
 import { useUi } from '../store/ui';
+import { useSession } from '../store/session';
 import { TicketCard } from './TicketCard';
 import { StarRating } from './StarRating';
 import { AdSlot } from './AdSlot';
@@ -61,6 +62,56 @@ function ticketSplit(pf: PlayerFinal): {
 
 type TicketModal = { kind: 'completed' | 'failed'; playerId: string };
 
+/** Post-game nudge for a guest who just played: their result never counted toward the
+ *  leaderboard (guests are excluded server-side, see LeaderboardService.apply). Mirrors
+ *  HomeScreen's GuestUpgradeCard, but the copy calls out the leaderboard specifically. */
+function EndgameGuestUpgrade() {
+  const { t } = useTranslation();
+  const loading = useSession((s) => s.loading);
+  const error = useSession((s) => s.error);
+  const upgrade = useSession((s) => s.upgrade);
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    <div className="home-guest-card scoreboard-guest-card" data-testid="scoreboard-guest-upgrade">
+      <p>{t('endgameGuestNotice')}</p>
+      {!open ? (
+        <button className="link home-guest-link" onClick={() => setOpen(true)}>
+          {t('createAccount')}
+        </button>
+      ) : (
+        <div className="stack">
+          <p className="muted">{t('endgameUpgradeBlurb')}</p>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t('email')}
+            autoComplete="email"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={t('password')}
+            autoComplete="new-password"
+          />
+          <button
+            className="accent"
+            disabled={loading || !email || password.length < 8}
+            onClick={() => void upgrade(email, password)}
+          >
+            {t('createAccount')}
+          </button>
+          {error && <p className="error">{error}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ScoreBoard({
   snapshot,
   onLeave,
@@ -82,6 +133,7 @@ export function ScoreBoard({
   const clearRouteReveal = useAnimationsStore((s) => s.clearRouteReveal);
   const gameId = useUi((s) => s.gameId);
   const roomCode = useUi((s) => s.roomCode);
+  const user = useSession((s) => s.user);
 
   const [ticketModal, setTicketModal] = useState<TicketModal | null>(null);
   const [viewingMap, setViewingMap] = useState<string | null>(null);
@@ -318,6 +370,7 @@ export function ScoreBoard({
             </tbody>
           </table>
         </div>
+        {gameId && roomCode && snapshot.you && user?.isGuest && <EndgameGuestUpgrade />}
         {/* Post-game results: no active gameplay, high dwell — a policy-safe moment. Separated from
             the rematch / rating controls below by its own labelled block so it can't be mis-clicked. */}
         <AdSlot placement="postgame" reserveHeight={250} className="scoreboard-ad" />

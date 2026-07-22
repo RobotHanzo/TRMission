@@ -22,6 +22,8 @@ import { getActiveRoomContext } from '../../game/activeRoom';
 import { hasRatedGame, markGameRated } from '../../game/ratedGames';
 import { openDiscord } from '../../discord';
 import { useAnimationsStore } from '../../store/animations';
+import { useSession } from '../../store/session';
+import { Field, PrimaryButton, SecondaryButton } from '../../theme/chrome';
 import { Confetti } from '../celebration/Confetti';
 import { StarRating } from './StarRating';
 import { TicketCard } from './TicketCard';
@@ -49,6 +51,68 @@ function ticketSplit(pf: PlayerFinal): {
 
 type TicketModal = { kind: 'completed' | 'failed'; playerId: string };
 
+/** Post-game nudge for a guest who just played: their result never counted toward the
+ *  leaderboard (guests are excluded server-side, see LeaderboardService.apply). Ports the web
+ *  EndgameGuestUpgrade / HomeScreen's GuestUpgradeCard, with leaderboard-specific copy. */
+function EndgameGuestUpgrade(): React.JSX.Element {
+  const { t } = useTranslation();
+  const { tokens } = useTheme();
+  const loading = useSession((s) => s.loading);
+  const error = useSession((s) => s.error);
+  const upgrade = useSession((s) => s.upgrade);
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    <View
+      style={[guestStyles.card, { backgroundColor: tokens.surface, borderColor: tokens.line }]}
+      testID="scoreboard-guest-upgrade"
+    >
+      <Text style={[guestStyles.notice, { color: tokens.ink }]}>
+        {t('login.endgameGuestNotice')}
+      </Text>
+      {!open ? (
+        <SecondaryButton title={t('login.createAccount')} onPress={() => setOpen(true)} />
+      ) : (
+        <View style={guestStyles.form}>
+          <Text style={[guestStyles.notice, { color: tokens.inkSoft }]}>
+            {t('login.endgameUpgradeBlurb')}
+          </Text>
+          <Field
+            placeholder={t('login.email')}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            value={email}
+            onChangeText={setEmail}
+            editable={!loading}
+          />
+          <Field
+            placeholder={t('login.password')}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            editable={!loading}
+          />
+          <PrimaryButton
+            title={t('login.createAccount')}
+            disabled={loading || !email || password.length < 8}
+            onPress={() => void upgrade(email, password)}
+          />
+          {error && <Text style={[guestStyles.notice, { color: tokens.danger }]}>{error}</Text>}
+        </View>
+      )}
+    </View>
+  );
+}
+
+const guestStyles = StyleSheet.create({
+  card: { borderWidth: 1, borderRadius: 12, padding: 14, gap: 10, marginBottom: 4 },
+  notice: { fontSize: 12.5, lineHeight: 18 },
+  form: { gap: 8 },
+});
+
 export function ScoreBoard({
   snapshot,
   onLeave,
@@ -70,6 +134,7 @@ export function ScoreBoard({
   const playerName = usePlayerName();
   const setRouteReveal = useAnimationsStore((s) => s.setRouteReveal);
   const clearRouteReveal = useAnimationsStore((s) => s.clearRouteReveal);
+  const user = useSession((s) => s.user);
 
   const [ticketModal, setTicketModal] = useState<TicketModal | null>(null);
   const [viewingMap, setViewingMap] = useState<string | null>(null);
@@ -327,6 +392,8 @@ export function ScoreBoard({
               );
             })}
           </ScrollView>
+
+          {gameId && roomCode && snapshot.you && user?.isGuest === true && <EndgameGuestUpgrade />}
 
           {members && snapshot.you && (onVote !== undefined || onPlayAgain !== undefined) && (
             <View style={styles.rematchRow}>

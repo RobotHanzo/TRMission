@@ -7,6 +7,9 @@ export default {
   playAsGuest: 'Play as guest',
   guestNotice: "You're playing as a guest — create an account to keep your match history.",
   upgradeBlurb: 'Set an email and password for your guest account to keep your match history.',
+  endgameGuestNotice: "Guest results don't count toward the leaderboard — claim this game!",
+  endgameUpgradeBlurb:
+    'Set an email and password to save this result, keep your match history, and appear on the leaderboard.',
   createAccount: 'Create an account',
   email: 'Email',
   signIn: 'Sign in',
