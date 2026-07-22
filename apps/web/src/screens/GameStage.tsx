@@ -44,6 +44,7 @@ import { Board } from '../components/Board';
 import { EventsPanel } from '../components/EventsPanel';
 import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
+import { TeamPoolPanel } from '../components/TeamPoolPanel';
 import { TrainCarCard } from '../components/TrainCarCard';
 import { PlayerTrackers } from '../components/PlayerTrackers';
 import { EndGameVote } from '../components/EndGameVote';
@@ -472,9 +473,7 @@ export function GameStage({
         <span className="event-hive-cards" aria-label={t('events.hiveTitle')}>
           {hive.revealed.map((card, index) => {
             const color = pbToCard(card);
-            return color ? (
-              <TrainCarCard key={`${card}-${index}`} color={color} size={64} />
-            ) : null;
+            return color ? <TrainCarCard key={`${card}-${index}`} color={color} size={64} /> : null;
           })}
         </span>
         <button
@@ -648,6 +647,11 @@ export function GameStage({
         <span className="tray-count">{myPub?.handCount ?? 0}</span>
       </div>
       <PlayerHand hand={snapshot.you?.hand} />
+      <TeamPoolPanel
+        snapshot={snapshot}
+        onPush={(color) => commands?.pushToTeamPool(color)}
+        onTake={(color) => commands?.takeFromTeamPool(color)}
+      />
     </section>
   );
   const ticketsSection = (

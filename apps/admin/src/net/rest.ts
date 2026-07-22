@@ -149,6 +149,7 @@ export interface RoomDetail {
     map: { source: 'official' | 'custom'; id: string };
     allowSpectating: boolean;
     eventsMode: string;
+    teamCount: number;
     unlimitedStationBorrow: boolean;
     secondDrawAfterBlindRainbow: boolean;
     noUnfinishedTicketPenalty: boolean;

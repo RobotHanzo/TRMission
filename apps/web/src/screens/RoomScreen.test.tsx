@@ -92,6 +92,7 @@ const baseRoom = () => ({
     visibility: 'PUBLIC' as 'PUBLIC' | 'INVITE_ONLY',
     map: { source: 'official', mapId: 'taiwan' } as MapSelector,
     eventsMode: 'off' as 'off' | 'light' | 'moderate' | 'intense',
+    teamCount: 0,
     soloWaitForHost: true,
   },
   gameId: undefined as string | undefined,

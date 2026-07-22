@@ -52,6 +52,7 @@ const settings = {
   visibility: 'PUBLIC' as const,
   map: { source: 'official' as const, mapId: 'taiwan' },
   eventsMode: 'off' as const,
+  teamCount: 0,
   soloWaitForHost: true,
 };
 const pubRoom = (code: string, status: RoomView['status'], gameId?: string): RoomView => ({

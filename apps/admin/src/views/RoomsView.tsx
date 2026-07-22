@@ -179,6 +179,10 @@ function RoomDrawer({
               <span className="v">{detail.settings.eventsMode}</span>
             </div>
             <div className="oc-kv">
+              <span className="k">{t('rooms.teamCount')}</span>
+              <span className="v">{detail.settings.teamCount || '—'}</span>
+            </div>
+            <div className="oc-kv">
               <span className="k">{t('rooms.flagUnlimitedStationBorrow')}</span>
               <span className="v">{flag(detail.settings.unlimitedStationBorrow)}</span>
             </div>

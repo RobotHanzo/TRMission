@@ -9,6 +9,7 @@ import { usePlayerName } from '../game/playerName';
 import { SEAT_COLORS } from '../theme/colors';
 import { chatRejectionHintKey } from '../game/chatErrors';
 import { chatPresetKey } from '@trm/client-core';
+import { isTeamGame } from '@trm/client-core/game/teams';
 import { ChatPresetPicker } from './ChatPresetPicker';
 
 const MAX_LEN = 2048;
@@ -25,6 +26,11 @@ export function ChatPanel() {
   const me = snapshot?.you?.playerId ?? null;
   const [draft, setDraft] = useState('');
   const [hint, setHint] = useState<string | null>(null);
+  // Team games get a second channel. It is live-only: the server never persists a team line, so it
+  // cannot resurface to an opponent (or a spectator) in a later reconnect backfill.
+  const teamsOn = snapshot ? isTeamGame(snapshot) : false;
+  const [teamChannel, setTeamChannel] = useState(false);
+  const onTeamChannel = teamsOn && teamChannel;
   const sentAt = useRef<number[]>([]);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +68,7 @@ export function ChatPanel() {
     if (!withinRateLimit()) return;
     const socket = getSocket();
     if (socket) {
-      socket.chat(text.slice(0, MAX_LEN));
+      socket.chat(text.slice(0, MAX_LEN), teamChannel);
       track('chat_send', { kind: 'text', context: 'game' });
     }
     setDraft('');
@@ -73,7 +79,7 @@ export function ChatPanel() {
     if (!withinRateLimit()) return;
     const socket = getSocket();
     if (socket) {
-      socket.chatPreset(id);
+      socket.chatPreset(id, teamChannel);
       track('chat_send', { kind: 'preset', context: 'game' });
     }
     setHint(null);
@@ -83,6 +89,28 @@ export function ChatPanel() {
     <section className="chat-panel">
       <div className="tray-head">
         <h4>{t('chat.heading')}</h4>
+        {teamsOn && (
+          <div className="chat-channels" role="radiogroup" aria-label={t('chat.heading')}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={!teamChannel}
+              className={teamChannel ? 'chat-channel' : 'chat-channel active'}
+              onClick={() => setTeamChannel(false)}
+            >
+              {t('chat.channelAll')}
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={teamChannel}
+              className={teamChannel ? 'chat-channel active' : 'chat-channel'}
+              onClick={() => setTeamChannel(true)}
+            >
+              {t('chat.channelTeam')}
+            </button>
+          </div>
+        )}
       </div>
       <div className="chat-messages" ref={listRef}>
         {messages.length === 0 ? (
@@ -100,13 +128,14 @@ export function ChatPanel() {
                   .join(' ')
               : nameOf({ id: m.playerId, seat, isMe: m.playerId === me });
             return (
-              <div className="chat-msg" key={m.id}>
+              <div className={m.teamOnly ? 'chat-msg is-team' : 'chat-msg'} key={m.id}>
                 <span
                   className="chat-author"
                   style={{
-                    color: isSpectator ? 'var(--tr-ink-soft)' : (SEAT_COLORS[seat % 5] ?? '#888'),
+                    color: isSpectator ? 'var(--tr-ink-soft)' : (SEAT_COLORS[seat % 6] ?? '#888'),
                   }}
                 >
+                  {m.teamOnly && <span className="chat-team-tag">{t('chat.teamTag')}</span>}
                   {author}
                 </span>
                 <span className="chat-text">
@@ -132,7 +161,7 @@ export function ChatPanel() {
           type="text"
           maxLength={MAX_LEN}
           value={draft}
-          placeholder={t('chat.placeholder')}
+          placeholder={onTeamChannel ? t('chat.teamPlaceholder') : t('chat.placeholder')}
           onChange={(e) => setDraft(e.target.value)}
         />
         <button type="submit" disabled={draft.trim().length === 0}>

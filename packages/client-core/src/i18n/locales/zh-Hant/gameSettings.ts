@@ -19,6 +19,18 @@ export default {
   settingSoloWaitForHost: '單人房等待房主',
   settingSoloWaitForHostDesc:
     '房內只有你和機器人時，遊戲會等你行動——沒有回合倒數，也不會自動代抽。',
+  settingTeamMode: '組隊模式',
+  settingTeamModeDesc:
+    '隊友共用路網完成任務、合併計算最長路線，並可看見彼此的任務卡；手牌仍然保密，只能透過隊伍牌池傳遞。',
+  teamModeOff: '各自為戰',
+  teamMode2Teams: '兩隊',
+  teamMode3Teams: '三隊',
+  teamLayoutPairs2: '4 人・2 人一隊',
+  teamLayoutPairs3: '6 人・2 人一隊',
+  teamLayoutTrios2: '6 人・3 人一隊',
+  teamSeatingTitle: '隊伍安排',
+  teamSeatingHint: '拖曳或使用箭頭調整座位順序；隊伍由座位交錯決定。',
+  teamNeedsPlayers: '{{teams}} 隊需要 {{players}} 位玩家（目前 {{seated}} 位）',
   allowSpectating: '允許觀戰',
   roomVisibility: '房間可見度',
   visibility_PUBLIC: '公開',

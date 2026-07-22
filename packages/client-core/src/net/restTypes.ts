@@ -80,6 +80,10 @@ export interface RoomSettings {
   visibility: RoomVisibility;
   map: MapSelector;
   eventsMode: EventsMode;
+  /** Team game: 0 = free-for-all, else the number of teams (2–3). Membership is `seat %
+   *  teamCount`, so arranging teams means reordering seats (`reseatRoom`). Validated against the
+   *  seated player count when the host starts. */
+  teamCount: number;
   /** Solo rooms (host + bots only): wait for the host instead of running the per-turn timer. */
   soloWaitForHost: boolean;
 }

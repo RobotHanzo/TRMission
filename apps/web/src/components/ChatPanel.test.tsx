@@ -37,7 +37,7 @@ describe('ChatPanel', () => {
     render(<ChatPanel />);
     fireEvent.change(screen.getByPlaceholderText('輸入訊息…'), { target: { value: '  hello  ' } });
     fireEvent.click(screen.getByRole('button', { name: '傳送' }));
-    expect(chatSpy).toHaveBeenCalledWith('hello');
+    expect(chatSpy).toHaveBeenCalledWith('hello', false);
     expect((screen.getByPlaceholderText('輸入訊息…') as HTMLInputElement).value).toBe('');
   });
 
@@ -61,7 +61,7 @@ describe('ChatPanel', () => {
     render(<ChatPanel />);
     fireEvent.click(screen.getByRole('button', { name: '快速回覆' }));
     fireEvent.click(screen.getByRole('menuitem', { name: '謝謝！' }));
-    expect(chatPresetSpy).toHaveBeenCalledWith('THANKS');
+    expect(chatPresetSpy).toHaveBeenCalledWith('THANKS', false);
   });
 
   it('tags a spectator (non-seated) message with [旁觀者] + their roster name and a neutral colour', () => {

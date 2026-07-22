@@ -23,9 +23,11 @@ export type LocalGameInput =
   | {
       mode: 'new';
       mapId: string;
-      botCount: 1 | 2 | 3 | 4;
+      botCount: 1 | 2 | 3 | 4 | 5;
       difficulty: BotDifficulty;
       eventsMode: EventsMode;
+      /** Team game: number of teams (omit / 0 for free-for-all). */
+      teamCount?: number;
     }
   | { mode: 'resume'; gameId: string };
 
@@ -90,6 +92,7 @@ export function useLocalGame(
             eventsMode: input.eventsMode,
             gameId: randomGameId(),
             seed: randomSeed(),
+            ...(input.teamCount !== undefined ? { teamCount: input.teamCount } : {}),
           });
           const board = boardForContentHash(setup.config.contentHash);
           session = await LocalGameSession.create(setup, board, store);

@@ -10,6 +10,11 @@ export default {
   tooLong: 'Message too long (max 2048).',
   invalidPreset: 'Unrecognized preset message',
   spectatorTag: '[Spectator]',
+  channelAll: 'All',
+  channelTeam: 'Team',
+  teamTag: '[Team]',
+  teamPlaceholder: 'Message your team…',
+  teamOnlyNote: 'Team messages reach only your teammates and are not kept in the log.',
   presets: {
     GREETING: 'Hello!',
     GOOD_LUCK: 'Good luck, have fun!',

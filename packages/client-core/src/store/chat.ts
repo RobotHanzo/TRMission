@@ -5,6 +5,9 @@ export interface ChatMessage {
   id: number;
   playerId: string;
   content: ChatContent;
+  /** True for a line on the team-only channel. Such a message is only ever delivered to the
+   *  sender's teammates and is never part of the persisted history backfill. */
+  teamOnly?: boolean;
 }
 
 const CAP = 500;
@@ -15,7 +18,7 @@ interface ChatState {
   /** The most recently INGESTED live message (never set by ingestHistory) — lets consumers like the
    *  sound driver react to genuinely new chat only, never to a reconnect's history backfill. */
   lastLive: ChatMessage | null;
-  ingest(msg: { playerId: string; content: ChatContent }): void;
+  ingest(msg: { playerId: string; content: ChatContent; teamOnly?: boolean }): void;
   ingestHistory(msgs: { playerId: string; content: ChatContent }[]): void;
   reset(): void;
 }

@@ -4,8 +4,9 @@ import { Crown, Bot, Eye, Map as MapIcon, X } from 'lucide-react';
 import type { GameSnapshot, PlayerFinal } from '@trm/proto';
 import type { RoomMember } from '../net/rest';
 import { api } from '../net/rest';
-import { SEAT_COLORS } from '../theme/colors';
+import { SEAT_COLORS, teamColor } from '../theme/colors';
 import { seatByPlayer } from '../game/view';
+import { teamStandings } from '@trm/client-core/game/teams';
 import { usePlayerName } from '../game/playerName';
 import { ticketById } from '../game/content';
 import { useAnimationsStore } from '../store/animations';
@@ -118,6 +119,8 @@ export function ScoreBoard({
 
   const seats = seatByPlayer(snapshot);
   const winners = new Set(fs.ranking[0]?.playerIds ?? []);
+  // Team standings (empty in a free-for-all) — the authoritative result in a team game.
+  const teams = teamStandings(snapshot);
   const sorted = [...fs.players].sort((a, b) => b.total - a.total);
   // Only games played with random events carry the ✨ column — an events-off (or pre-events)
   // game would otherwise show an all-zero column.
@@ -190,6 +193,28 @@ export function ScoreBoard({
     <div className="modal-backdrop">
       <div className="modal scoreboard" role="dialog" aria-modal="true">
         <h3>{t('gameOver')}</h3>
+        {teams.length > 0 && (
+          // Team game: the TEAM result is the outcome that matters, so it leads. The per-player
+          // table below still shows each member's own contribution.
+          <div className="team-standings" aria-label={t('teamScoreboard')}>
+            {teams.map((row) => (
+              <div
+                key={row.team}
+                className={row.place === 1 ? 'team-standing winner' : 'team-standing'}
+                style={{ borderColor: teamColor(row.team) }}
+              >
+                <span className="team-standing-name" style={{ color: teamColor(row.team) }}>
+                  {row.place === 1 && <Crown size={14} aria-hidden />}
+                  {t('teamName', { n: row.team + 1 })}
+                </span>
+                <span className="team-standing-members">
+                  {row.memberIds.map((id) => nameOf(id)).join(' · ')}
+                </span>
+                <span className="team-standing-total">{row.total}</span>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="scoreboard-scroll">
           <table>
             <thead>
@@ -215,7 +240,7 @@ export function ScoreBoard({
                       <span className="player-cell">
                         <span
                           className="seat-dot"
-                          style={{ background: SEAT_COLORS[seat % 5] ?? '#888' }}
+                          style={{ background: SEAT_COLORS[seat % 6] ?? '#888' }}
                         />
                         {winners.has(pf.playerId) && <Crown size={14} aria-hidden />}
                         {isBot(pf.playerId) && <Bot size={13} aria-hidden />}

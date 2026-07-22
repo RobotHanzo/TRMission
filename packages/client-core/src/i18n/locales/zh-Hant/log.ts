@@ -15,6 +15,8 @@ export default {
   tookFaceup: '{{name}} 拿取一張車廂卡',
   ticketsKept: '{{name}} 保留了 {{count}} 張任務卡',
   ticketCompleted: '{{name}} 完成任務 {{from}}–{{to}}（+{{points}}）',
+  teamPoolPushed: '{{name}} 放了一張牌進隊伍牌池',
+  teamPoolTaken: '{{name}} 從隊伍牌池取走一張牌',
   passed: '{{name}} 無法行動，跳過',
   endgameDeadlock: '最終回合：已無法再鋪設任何路線',
   endgame: '最終回合：剩餘 {{turns}} 輪',

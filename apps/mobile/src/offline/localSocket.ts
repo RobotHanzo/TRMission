@@ -75,6 +75,12 @@ export class LocalSocket implements GameCommands {
   stopHiveDraw(): void {
     this.send({ case: 'stopHiveDraw', value: {} });
   }
+  pushToTeamPool(color: CardColor): void {
+    this.send({ case: 'pushToTeamPool', value: { color: cardToPb(color) } });
+  }
+  takeFromTeamPool(color: CardColor): void {
+    this.send({ case: 'takeFromTeamPool', value: { color: cardToPb(color) } });
+  }
   pass(): void {
     this.send({ case: 'pass', value: {} });
   }

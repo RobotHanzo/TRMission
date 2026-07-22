@@ -16,6 +16,8 @@ export default {
   tookFaceup: '{{name}} took a train-car card',
   ticketsKept: '{{name}} kept {{count}} ticket(s)',
   ticketCompleted: '{{name}} completed the {{from}}–{{to}} mission (+{{points}})',
+  teamPoolPushed: '{{name}} placed a card in the team pool',
+  teamPoolTaken: '{{name}} took a card from the team pool',
   passed: '{{name}} skipped — no possible moves',
   endgameDeadlock: 'Final round — no more routes can be built',
   endgame: 'Final round — {{turns}} turns left',

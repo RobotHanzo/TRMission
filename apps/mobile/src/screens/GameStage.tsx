@@ -45,6 +45,7 @@ import { EventsPanel } from '../components/game/EventsPanel';
 import { EventPhaseBar, EventTurnActions } from '../components/game/EventActions';
 import { CardMarket } from '../components/game/CardMarket';
 import { PlayerHand } from '../components/game/PlayerHand';
+import { TeamPoolPanel } from '../components/game/TeamPoolPanel';
 import { PlayerTrackers } from '../components/game/PlayerTrackers';
 import { TurnCountdown } from '../components/game/TurnCountdown';
 import { TicketPanel } from '../components/game/TicketPanel';
@@ -323,6 +324,11 @@ export function GameStage({
     <GamePanel>
       <TrayHead title={t('cards')} count={myPub?.handCount ?? 0} />
       <PlayerHand hand={snapshot.you?.hand} />
+      <TeamPoolPanel
+        snapshot={snapshot}
+        onPush={(color) => commands?.pushToTeamPool(color)}
+        onTake={(color) => commands?.takeFromTeamPool(color)}
+      />
     </GamePanel>
   );
   const ticketsSection = (

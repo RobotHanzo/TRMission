@@ -1,6 +1,8 @@
 // Lobby/room membership vocabulary shared by both clients (web uses it flat, mobile nests it
 // under `room.`).
 export default {
+  moveSeatUp: '往前一個座位',
+  moveSeatDown: '往後一個座位',
   host: '房主',
   ready: '已準備',
   notReady: '尚未準備',

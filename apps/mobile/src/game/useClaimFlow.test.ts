@@ -28,6 +28,8 @@ const commandsMock = (): jest.Mocked<GameCommands> => ({
   startHiveDraw: jest.fn(),
   continueHiveDraw: jest.fn(),
   stopHiveDraw: jest.fn(),
+  pushToTeamPool: jest.fn(),
+  takeFromTeamPool: jest.fn(),
   pass: jest.fn(),
   cameraUpdate: jest.fn(),
 });

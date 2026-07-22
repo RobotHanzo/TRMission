@@ -14,7 +14,7 @@ import { LOCAL_HUMAN_ID, type OfflineGameSetup } from './types';
 
 export interface NewOfflineGameOptions {
   readonly mapId: string;
-  readonly botCount: 1 | 2 | 3 | 4;
+  readonly botCount: 1 | 2 | 3 | 4 | 5;
   readonly difficulty: BotDifficulty;
   /** Already clamped to 'off' by the caller when the account lacks the randomEvents feature —
    *  mirrors LobbyService.start's "silent downgrade" so this builder stays a pure function. */
@@ -22,6 +22,11 @@ export interface NewOfflineGameOptions {
   /** Injected randomness (see seed.ts). */
   readonly gameId: string;
   readonly seed: string;
+  /** Team game: 0 (default) = free-for-all, else the number of teams. The human always takes
+   *  seat 0, so with membership = `seat % teamCount` their partners are seats teamCount, 2×… —
+   *  the caller must supply a `botCount` that fills a legal layout (3 bots for 2 teams of 2,
+   *  5 for three pairs or two trios). */
+  readonly teamCount?: number;
 }
 
 /** Mirror of the server's DEFAULT_ROOM_SETTINGS rule-variant flags (room.repo.ts), fed into the
@@ -49,6 +54,9 @@ export function newOfflineSetup(opts: NewOfflineGameOptions): OfflineGameSetup {
     seed: opts.seed,
     players,
     contentHash: map.hash,
+    // Omitted (not set to undefined) in a free-for-all, so the resulting state carries no team
+    // keys and stays byte-identical to a pre-v12 offline save.
+    ...(opts.teamCount !== undefined && opts.teamCount > 0 ? { teamCount: opts.teamCount } : {}),
     ruleParams: {
       ...(map.content.rules ?? {}),
       ...DEFAULT_VARIANT_FLAGS,

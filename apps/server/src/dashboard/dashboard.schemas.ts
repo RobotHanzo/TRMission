@@ -261,6 +261,7 @@ export const DashboardRoomDetailSchema = z.object({
     map: z.object({ source: z.enum(['official', 'custom']), id: z.string() }),
     allowSpectating: z.boolean(),
     eventsMode: z.string(),
+    teamCount: z.number(),
     unlimitedStationBorrow: z.boolean(),
     secondDrawAfterBlindRainbow: z.boolean(),
     noUnfinishedTicketPenalty: z.boolean(),

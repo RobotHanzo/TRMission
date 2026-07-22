@@ -11,10 +11,11 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import type { GameSnapshot, PlayerFinal } from '@trm/proto';
 import type { RoomMember } from '../../net/rest';
 import { api } from '../../net/rest';
-import { seatColor } from '../../theme/colors';
+import { seatColor, teamColor } from '../../theme/colors';
 import { useTheme } from '../../theme/useTheme';
 import { rgba } from '../../theme/shade';
 import { seatByPlayer } from '../../game/view';
+import { teamStandings } from '@trm/client-core/game/teams';
 import { usePlayerName } from '../../game/playerName';
 import { ticketById } from '../../game/content';
 import { getActiveRoomContext } from '../../game/activeRoom';
@@ -120,6 +121,8 @@ export function ScoreBoard({
 
   const seats = seatByPlayer(snapshot);
   const winners = new Set(fs.ranking[0]?.playerIds ?? []);
+  // Team standings (empty in a free-for-all) — the authoritative result in a team game.
+  const teams = teamStandings(snapshot);
   const sorted = [...fs.players].sort((a, b) => b.total - a.total);
   // Only games played with random events carry the ✨ stat — an events-off (or pre-events)
   // game would otherwise show an all-zero column.
@@ -214,6 +217,33 @@ export function ScoreBoard({
         <Confetti active={!ticketModal} />
         <View style={[styles.modal, { backgroundColor: tokens.surface }]}>
           <Text style={[styles.title, { color: tokens.ink }]}>{t('gameOver')}</Text>
+          {teams.length > 0 && (
+            // Team game: the TEAM result leads — it is the outcome that decides the match. The
+            // per-player rows below still show each member's own contribution.
+            <View style={styles.teamStandings}>
+              {teams.map((row) => (
+                <View
+                  key={row.team}
+                  style={[
+                    styles.teamStanding,
+                    { borderColor: teamColor(row.team) },
+                    row.place === 1 && { backgroundColor: rgba(tokens.blue, 0.1) },
+                  ]}
+                >
+                  <Text style={[styles.teamStandingName, { color: teamColor(row.team) }]}>
+                    {t('teamName', { n: row.team + 1 })}
+                  </Text>
+                  <Text
+                    style={[styles.teamStandingMembers, { color: tokens.inkSoft }]}
+                    numberOfLines={1}
+                  >
+                    {row.memberIds.map((id) => nameOf(id)).join(' · ')}
+                  </Text>
+                  <Text style={[styles.teamStandingTotal, { color: tokens.ink }]}>{row.total}</Text>
+                </View>
+              ))}
+            </View>
+          )}
           <ScrollView style={styles.scroll}>
             {sorted.map((pf) => {
               const seat = seatOf(pf.playerId);
@@ -333,12 +363,13 @@ export function ScoreBoard({
           )}
 
           {gameId && roomCode && alreadyRated !== null && (
-            <View style={[styles.ratingBlock, { borderTopColor: tokens.line }]} testID="scoreboard-rating">
+            <View
+              style={[styles.ratingBlock, { borderTopColor: tokens.line }]}
+              testID="scoreboard-rating"
+            >
               <Text style={[styles.ratingLabel, { color: tokens.ink }]}>{t('rateAppPrompt')}</Text>
               {alreadyRated ? (
-                <Text style={[styles.ratingThanks, { color: tokens.ok }]}>
-                  {t('ratingThanks')}
-                </Text>
+                <Text style={[styles.ratingThanks, { color: tokens.ok }]}>{t('ratingThanks')}</Text>
               ) : (
                 <>
                   <View style={styles.ratingRow}>
@@ -442,6 +473,19 @@ export function ScoreBoard({
 }
 
 const styles = StyleSheet.create({
+  teamStandings: { gap: 6, marginBottom: 10 },
+  teamStanding: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderWidth: 2,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  teamStandingName: { fontWeight: '700', fontSize: 13 },
+  teamStandingMembers: { flex: 1, fontSize: 12 },
+  teamStandingTotal: { fontSize: 17, fontWeight: '800' },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',

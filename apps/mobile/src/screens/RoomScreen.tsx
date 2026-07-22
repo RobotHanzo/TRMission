@@ -17,9 +17,9 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { Bot, Crown, UserMinus, X } from 'lucide-react-native';
+import { Bot, ChevronDown, ChevronUp, Crown, UserMinus, X } from 'lucide-react-native';
 import { OFFICIAL_MAPS } from '@trm/map-data';
-import type { EventsMode } from '@trm/shared';
+import { layoutsForPlayerCount, TEAM_LAYOUTS, type EventsMode } from '@trm/shared';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
 import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core/game/chatPresets';
 import type { RootStackParamList } from '../navigation';
@@ -37,7 +37,7 @@ import { useHasFeature, useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
-import { seatColor } from '../theme/colors';
+import { seatColor, teamColor } from '../theme/colors';
 import { useTheme } from '../theme/useTheme';
 import {
   Card,
@@ -190,6 +190,10 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
   const settings = room.settings;
   const settingsLocked = !isHost || room.status !== 'LOBBY';
   const showEventsPicker = isHost ? canConfigureEvents : settings.eventsMode !== 'off';
+  const teamCount = settings.teamCount ?? 0;
+  const teamLayoutOk =
+    teamCount === 0 ||
+    layoutsForPlayerCount(room.members.length).some((l) => l.teamCount === teamCount);
   const otherHumans = room.members.filter((m) => m.userId !== user?.id && !m.isBot);
 
   const memberName = (m: RoomMember): string =>
@@ -219,6 +223,15 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
     void p.then(setRoom).catch((e: Error) => setErr(e.message));
   const setSetting = (patch: Partial<RoomSettings>): void =>
     guard(api.updateRoomSettings(code, patch));
+  /** Swap a player one seat along; with membership = `seat % teamCount`, that changes their side. */
+  const moveSeat = (userId: string, delta: number): void => {
+    const order = [...room.members].sort((a, b) => a.seat - b.seat).map((m) => m.userId);
+    const from = order.indexOf(userId);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= order.length) return;
+    [order[from], order[to]] = [order[to] as string, order[from] as string];
+    guard(api.reseatRoom(code, order));
+  };
 
   const confirm = (title: string, body: string, action: () => void): void =>
     Alert.alert(title, body, [
@@ -286,6 +299,12 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
         {room.members.map((m) => (
           <View key={m.userId} style={styles.memberRow} testID={`member-${m.userId}`}>
             <View style={[styles.seatDot, { backgroundColor: seatColor(m.seat) }]} />
+            {teamCount > 0 && (
+              // Derived from the seat, never stored — reordering seats moves players between sides.
+              <Text style={[styles.teamBadge, { backgroundColor: teamColor(m.seat % teamCount) }]}>
+                {t('game.teamName', { n: (m.seat % teamCount) + 1 })}
+              </Text>
+            )}
             {m.isBot && <Bot size={14} color={tokens.inkSoft} />}
             <Text style={[styles.memberName, { color: tokens.ink }]} numberOfLines={1}>
               {memberName(m)}
@@ -335,6 +354,33 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
                   onPress={() => guard(api.kickPlayer(code, m.userId))}
                 >
                   <UserMinus size={16} color={tokens.inkSoft} />
+                </Pressable>
+              </>
+            )}
+            {isHost && teamCount > 0 && (
+              <>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('room.moveSeatUp')}
+                  disabled={m.seat === 0}
+                  hitSlop={8}
+                  style={styles.iconBtn}
+                  onPress={() => moveSeat(m.userId, -1)}
+                >
+                  <ChevronUp size={16} color={m.seat === 0 ? tokens.line : tokens.inkSoft} />
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('room.moveSeatDown')}
+                  disabled={m.seat === room.members.length - 1}
+                  hitSlop={8}
+                  style={styles.iconBtn}
+                  onPress={() => moveSeat(m.userId, 1)}
+                >
+                  <ChevronDown
+                    size={16}
+                    color={m.seat === room.members.length - 1 ? tokens.line : tokens.inkSoft}
+                  />
                 </Pressable>
               </>
             )}
@@ -478,6 +524,32 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
             }
           />
         )}
+        <SettingRow
+          label={t('room.settingTeamMode')}
+          desc={
+            teamCount > 0 && !teamLayoutOk
+              ? t('room.teamNeedsPlayers', {
+                  teams: teamCount,
+                  players: TEAM_LAYOUTS.filter((l) => l.teamCount === teamCount)
+                    .map((l) => l.playerCount)
+                    .join(' / '),
+                  seated: room.members.length,
+                })
+              : t('room.settingTeamModeDesc')
+          }
+          control={
+            <Chips<'0' | '2' | '3'>
+              options={[
+                { value: '0', label: t('room.teamModeOff') },
+                { value: '2', label: t('room.teamMode2Teams') },
+                { value: '3', label: t('room.teamMode3Teams') },
+              ]}
+              value={String(teamCount) as '0' | '2' | '3'}
+              onChange={(v) => setSetting({ teamCount: Number(v) })}
+              disabled={settingsLocked}
+            />
+          }
+        />
         {room.members.filter((m) => !m.isBot).length === 1 && (
           // Only meaningful (and only shown) while the host is the lone human at the table:
           // the started game then waits for them instead of running the per-turn timer.
@@ -660,6 +732,15 @@ const styles = StyleSheet.create({
   seatDot: { width: 10, height: 10, borderRadius: 5 },
   memberName: { flexShrink: 1, fontSize: 15, fontWeight: '600' },
   readyBadge: { marginLeft: 'auto', fontSize: 12, fontWeight: '700' },
+  teamBadge: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
   iconBtn: { padding: 8 },
   botRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 4 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },

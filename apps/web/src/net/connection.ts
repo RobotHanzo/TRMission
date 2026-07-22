@@ -49,7 +49,8 @@ export function connectGame(ticket: string, ticketSource?: TicketSource): GameSo
       },
       onRejection: (r) =>
         useGame.getState().setRejection({ code: r.code, messageKey: r.messageKey }),
-      onChat: (playerId, content) => useChat.getState().ingest({ playerId, content }),
+      onChat: (playerId, content, teamOnly) =>
+        useChat.getState().ingest({ playerId, content, teamOnly: teamOnly ?? false }),
       onHistory: (events, chat, connectionLog) => {
         useLog.getState().ingestHistory(events, connectionLog);
         useChat.getState().ingestHistory(chat);

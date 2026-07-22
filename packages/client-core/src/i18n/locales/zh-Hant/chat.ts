@@ -9,6 +9,11 @@ export default {
   tooLong: '訊息過長（上限 2048 字）',
   invalidPreset: '無法辨識的預設訊息',
   spectatorTag: '[旁觀者]',
+  channelAll: '全體',
+  channelTeam: '隊伍',
+  teamTag: '[隊伍]',
+  teamPlaceholder: '傳給隊友…',
+  teamOnlyNote: '隊伍訊息只有隊友看得到，且不會留存於紀錄。',
   presets: {
     GREETING: '哈囉！',
     GOOD_LUCK: '祝你好運，玩得開心！',

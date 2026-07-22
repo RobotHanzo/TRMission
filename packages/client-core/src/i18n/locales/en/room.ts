@@ -2,6 +2,8 @@ import type { TranslationShape } from '../../shape';
 import type zh from '../zh-Hant/room';
 
 export default {
+  moveSeatUp: 'Move up one seat',
+  moveSeatDown: 'Move down one seat',
   host: 'Host',
   ready: 'Ready',
   notReady: 'Not ready',

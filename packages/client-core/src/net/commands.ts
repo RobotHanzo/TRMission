@@ -25,6 +25,10 @@ export interface GameCommands {
   startHiveDraw(): void;
   continueHiveDraw(): void;
   stopHiveDraw(): void;
+  /** Team game: move one card from hand into the team pool (free, once per turn). */
+  pushToTeamPool(color: CardColor): void;
+  /** Team game: take one card out of the team pool (counts as a draw). */
+  takeFromTeamPool(color: CardColor): void;
   pass(): void;
   /** Cosmetic camera-framing broadcast; a no-op in the local sandbox. */
   cameraUpdate(view: CameraViewInit): void;

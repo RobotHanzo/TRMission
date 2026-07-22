@@ -35,7 +35,7 @@ export interface SocketHandlers {
   onSnapshot?(snapshot: GameSnapshot): void;
   onEvents?(stateVersion: number, events: GameEvent[]): void;
   onRejection?(rejection: Rejection): void;
-  onChat?(playerId: string, content: ChatContent): void;
+  onChat?(playerId: string, content: ChatContent, teamOnly?: boolean): void;
   /** One-shot backfill of the action-log history + persisted chat + connection-change log on
    *  (re)connect. `afterEventIndex` anchors each connection change to a splice point within
    *  this SAME `events` array. */
@@ -176,7 +176,8 @@ export class GameSocket {
         break;
       case 'chat': {
         const content = env.event.value.content;
-        if (content.case) this.handlers.onChat?.(env.event.value.playerId, content);
+        if (content.case)
+          this.handlers.onChat?.(env.event.value.playerId, content, env.event.value.teamOnly);
         break;
       }
       case 'history':
@@ -239,12 +240,17 @@ export class GameSocket {
   resync(): void {
     this.send({ case: 'resync', value: {} });
   }
-  chat(text: string): void {
-    this.send({ case: 'chat', value: { content: { case: 'text', value: text } } });
+  /** `teamOnly` addresses the sender's teammates only (team games); such lines are ephemeral —
+   *  the server never persists them, so they do not come back in the reconnect backfill. */
+  chat(text: string, teamOnly = false): void {
+    this.send({ case: 'chat', value: { content: { case: 'text', value: text }, teamOnly } });
   }
   /** Send a preset ("canned") chat message by id — resolved to text by every viewer's own i18n. */
-  chatPreset(presetId: string): void {
-    this.send({ case: 'chat', value: { content: { case: 'presetId', value: presetId } } });
+  chatPreset(presetId: string, teamOnly = false): void {
+    this.send({
+      case: 'chat',
+      value: { content: { case: 'presetId', value: presetId }, teamOnly },
+    });
   }
   /** Broadcast this client's camera framing so others can follow (ephemeral, cosmetic). */
   cameraUpdate(view: CameraViewInit): void {
@@ -300,6 +306,12 @@ export class GameSocket {
   }
   stopHiveDraw(): void {
     this.send({ case: 'stopHiveDraw', value: {} });
+  }
+  pushToTeamPool(color: CardColor): void {
+    this.send({ case: 'pushToTeamPool', value: { color: CARD_TO_PB[color] } });
+  }
+  takeFromTeamPool(color: CardColor): void {
+    this.send({ case: 'takeFromTeamPool', value: { color: CARD_TO_PB[color] } });
   }
   pass(): void {
     this.send({ case: 'pass', value: {} });

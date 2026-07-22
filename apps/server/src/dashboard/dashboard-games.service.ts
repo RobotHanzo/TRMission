@@ -362,6 +362,7 @@ export class DashboardGamesService {
             : { source: 'official' as const, id: settings.map.mapId },
         allowSpectating: settings.allowSpectating,
         eventsMode: settings.eventsMode,
+        teamCount: settings.teamCount ?? 0,
         unlimitedStationBorrow: settings.unlimitedStationBorrow,
         secondDrawAfterBlindRainbow: settings.secondDrawAfterBlindRainbow,
         noUnfinishedTicketPenalty: settings.noUnfinishedTicketPenalty,

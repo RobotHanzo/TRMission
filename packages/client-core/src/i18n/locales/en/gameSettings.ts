@@ -23,6 +23,18 @@ export default {
   settingSoloWaitForHost: 'Wait for me (solo room)',
   settingSoloWaitForHostDesc:
     'With only you and bots in the room, the game waits for you — no turn countdown, no auto-draw.',
+  settingTeamMode: 'Team mode',
+  settingTeamModeDesc:
+    'Teammates share one network for tickets, score a single combined longest route, and see each other’s tickets. Hands stay secret — cards only move through the team pool.',
+  teamModeOff: 'Free-for-all',
+  teamMode2Teams: 'Two teams',
+  teamMode3Teams: 'Three teams',
+  teamLayoutPairs2: '4 players · pairs',
+  teamLayoutPairs3: '6 players · pairs',
+  teamLayoutTrios2: '6 players · trios',
+  teamSeatingTitle: 'Team line-up',
+  teamSeatingHint: 'Reorder the seats to set the teams — sides alternate around the table.',
+  teamNeedsPlayers: '{{teams}} teams need {{players}} players ({{seated}} seated)',
   allowSpectating: 'Allow spectating',
   roomVisibility: 'Room visibility',
   visibility_PUBLIC: 'Public',

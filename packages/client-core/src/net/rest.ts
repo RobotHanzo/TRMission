@@ -216,6 +216,10 @@ function buildApi(
       req<RoomView>('POST', `/rooms/${code}/bots/${encodeURIComponent(botId)}/remove`),
     kickPlayer: (code: string, userId: string) =>
       req<RoomView>('POST', `/rooms/${code}/kick/${encodeURIComponent(userId)}`),
+    /** Host-only: reseat the table. Since team membership is `seat % teamCount`, this IS the team
+     *  picker. `userIds` must be a permutation of the current members; human ready flags reset. */
+    reseatRoom: (code: string, userIds: readonly string[]) =>
+      req<RoomView>('POST', `/rooms/${code}/seats`, { userIds }),
     startRoom: (code: string) => req<TicketResult>('POST', `/rooms/${code}/start`),
     startPractice: () => req<PracticeResult>('POST', '/rooms/practice'),
     getTicket: (code: string) => req<TicketResult>('POST', `/rooms/${code}/ticket`),

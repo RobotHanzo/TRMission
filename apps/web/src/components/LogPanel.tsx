@@ -170,6 +170,10 @@ export function LogPanel() {
             })
           : '';
       }
+      case 'teamPoolPushed':
+        return t('log.teamPoolPushed', { name });
+      case 'teamPoolTaken':
+        return t('log.teamPoolTaken', { name });
     }
   };
 

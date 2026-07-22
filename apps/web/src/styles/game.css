@@ -2378,3 +2378,139 @@ button.ticket-card:hover {
     animation: none;
   }
 }
+
+/* ── team mode ─────────────────────────────────────────────────────────────
+   The pool is public information: it renders for every viewer, and its two rows read as
+   "what the team has parked" (take) above "what you can spare" (place). */
+.team-pool {
+  margin-top: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--tr-line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tr-panel) 92%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.team-pool header {
+  align-items: center;
+  font-size: 0.85rem;
+}
+.team-pool-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+  min-height: 1.6rem;
+}
+.team-pool-card {
+  position: relative;
+  width: 2rem;
+  height: 2.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.team-pool-card:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.team-pool-card.is-push {
+  width: 1.7rem;
+  height: 2.1rem;
+  opacity: 0.85;
+}
+.team-pool-card.is-push:disabled {
+  opacity: 0.3;
+}
+.team-pool-qty {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  min-width: 1rem;
+  padding: 0 2px;
+  border-radius: 999px;
+  background: var(--tr-ink);
+  color: var(--tr-panel);
+  font-size: 0.65rem;
+  line-height: 1rem;
+  text-align: center;
+}
+.team-pool-push {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+.team-badge {
+  color: #fff;
+  font-size: 0.7rem;
+}
+.team-standings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+.team-standing {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.45rem 0.7rem;
+  border: 2px solid var(--tr-line);
+  border-radius: 10px;
+}
+.team-standing.winner {
+  background: color-mix(in srgb, var(--tr-ok) 12%, transparent);
+}
+.team-standing-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 700;
+}
+.team-standing-members {
+  color: var(--tr-muted);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.team-standing-total {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.chat-channels {
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid var(--tr-line);
+  border-radius: 999px;
+  padding: 2px;
+}
+.chat-channel {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  color: var(--tr-muted);
+}
+.chat-channel.active {
+  background: var(--tr-accent);
+  color: #fff;
+}
+.chat-msg.is-team {
+  background: color-mix(in srgb, var(--tr-accent) 8%, transparent);
+  border-radius: 6px;
+}
+.chat-team-tag {
+  margin-right: 0.25rem;
+  font-size: 0.68rem;
+  color: var(--tr-accent);
+}

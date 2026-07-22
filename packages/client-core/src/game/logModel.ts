@@ -27,6 +27,8 @@ export type LogKind =
   | 'eventNightMarketSwapped'
   | 'eventPerkChosen'
   | 'eventHiveResolved'
+  | 'teamPoolPushed'
+  | 'teamPoolTaken'
   | 'marketRecycled'
   | 'playerLeft'
   | 'playerReconnected'
@@ -257,6 +259,23 @@ export function entriesFromEvents(events: GameEvent[]): LogDatum[] {
           playerId: ev.value.playerId,
           data: { ticketId: ev.value.ticketId },
           importance: 'highlight',
+        });
+        break;
+      // Team pool moves are public (the pool is open information), so both sides are logged.
+      case 'teamPoolPushed':
+        out.push({
+          kind: 'teamPoolPushed',
+          playerId: ev.value.playerId,
+          data: { team: ev.value.team, card: ev.value.card },
+          importance: 'normal',
+        });
+        break;
+      case 'teamPoolTaken':
+        out.push({
+          kind: 'teamPoolTaken',
+          playerId: ev.value.playerId,
+          data: { team: ev.value.team, card: ev.value.card },
+          importance: 'normal',
         });
         break;
       case 'marketRecycled':

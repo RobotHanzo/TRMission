@@ -1,8 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Crown, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
+import {
+  Bot,
+  ChevronDown,
+  ChevronUp,
+  Crown,
+  Globe,
+  Lock,
+  Map as MapIcon,
+  UserMinus,
+  X,
+} from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
-import type { EventsMode } from '@trm/shared';
+import { layoutsForPlayerCount, TEAM_LAYOUTS, type EventsMode } from '@trm/shared';
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
@@ -20,7 +30,7 @@ import { connectGame } from '../net/connection';
 import { track } from '../lib/analytics';
 import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
-import { SEAT_COLORS } from '../theme/colors';
+import { SEAT_COLORS, teamColor } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { NotificationStack } from '../components/NotificationStack';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -176,6 +186,11 @@ export function RoomScreen() {
   // The host only sees the picker while holding the randomEvents feature; a non-host still sees
   // (read-only) whatever mode the host already configured, so it's never a mystery mid-game.
   const showEventsPicker = isHost ? canConfigureEvents : settings.eventsMode !== 'off';
+  const teamCount = settings.teamCount ?? 0;
+  // Whether the current head-count can actually form this many teams (4p→2, 6p→2 or 3).
+  const teamLayoutOk =
+    teamCount === 0 ||
+    layoutsForPlayerCount(room.members.length).some((l) => l.teamCount === teamCount);
   const setSetting = (patch: Partial<RoomSettings>) => {
     track('room_settings_change', { setting: Object.keys(patch)[0] ?? 'unknown' });
     void guard(api.updateRoomSettings(code, patch));
@@ -206,6 +221,19 @@ export function RoomScreen() {
   };
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
+  /**
+   * Swap a player one seat up/down. Because membership is `seat % teamCount`, a single swap moves
+   * them to the adjacent team — which makes this the whole team picker on web.
+   */
+  const moveSeat = (userId: string, delta: number) => {
+    if (!room) return;
+    const order = [...room.members].sort((a, b) => a.seat - b.seat).map((m) => m.userId);
+    const from = order.indexOf(userId);
+    const to = from + delta;
+    if (from < 0 || to < 0 || to >= order.length) return;
+    [order[from], order[to]] = [order[to] as string, order[from] as string];
+    void guard(api.reseatRoom(code, order));
+  };
   const transferHost = (userId: string) => void guard(api.transferOwnership(code, userId));
   const sendChat = (presetId: string) => {
     track('chat_send', { kind: 'preset', context: 'lobby' });
@@ -273,9 +301,19 @@ export function RoomScreen() {
             <li key={m.userId}>
               <span
                 className="seat-dot"
-                style={{ background: SEAT_COLORS[m.seat % 5] ?? '#888' }}
+                style={{ background: SEAT_COLORS[m.seat % 6] ?? '#888' }}
                 aria-hidden
               />
+              {teamCount > 0 && (
+                // Team membership IS the seat order (`seat % teamCount`), so this badge is derived,
+                // never stored — reordering seats below moves players between sides.
+                <span
+                  className="badge team-badge"
+                  style={{ background: teamColor(m.seat % teamCount) }}
+                >
+                  {t('teamName', { n: (m.seat % teamCount) + 1, ns: 'game' })}
+                </span>
+              )}
               {m.isBot && <Bot size={15} aria-hidden />}
               <span>{memberName(m)}</span>
               {m.userId === room.hostId && <em className="muted">({t('host')})</em>}
@@ -316,6 +354,28 @@ export function RoomScreen() {
                 >
                   <UserMinus size={14} aria-hidden />
                 </button>
+              )}
+              {isHost && teamCount > 0 && (
+                <>
+                  <button
+                    className="icon-btn"
+                    aria-label={t('moveSeatUp')}
+                    title={t('moveSeatUp')}
+                    disabled={m.seat === 0}
+                    onClick={() => moveSeat(m.userId, -1)}
+                  >
+                    <ChevronUp size={14} aria-hidden />
+                  </button>
+                  <button
+                    className="icon-btn"
+                    aria-label={t('moveSeatDown')}
+                    title={t('moveSeatDown')}
+                    disabled={m.seat === room.members.length - 1}
+                    onClick={() => moveSeat(m.userId, 1)}
+                  >
+                    <ChevronDown size={14} aria-hidden />
+                  </button>
+                </>
               )}
             </li>
           ))}
@@ -445,6 +505,39 @@ export function RoomScreen() {
               />
             </div>
           )}
+          <div className="row between setting-row">
+            <span>
+              <strong>{t('settingTeamMode')}</strong>
+              <br />
+              <span className="muted">{t('settingTeamModeDesc')}</span>
+              {teamCount > 0 && !teamLayoutOk && (
+                // The server re-checks this at start; surfacing it here stops the host from
+                // discovering an impossible line-up only when they press Start.
+                <>
+                  <br />
+                  <span className="warn">
+                    {t('teamNeedsPlayers', {
+                      teams: teamCount,
+                      players: TEAM_LAYOUTS.filter((l) => l.teamCount === teamCount)
+                        .map((l) => l.playerCount)
+                        .join(' / '),
+                      seated: room.members.length,
+                    })}
+                  </span>
+                </>
+              )}
+            </span>
+            <Segmented<'0' | '2' | '3'>
+              options={[
+                { value: '0', label: t('teamModeOff') },
+                { value: '2', label: t('teamMode2Teams') },
+                { value: '3', label: t('teamMode3Teams') },
+              ]}
+              value={String(teamCount) as '0' | '2' | '3'}
+              onChange={(v) => setSetting({ teamCount: Number(v) })}
+              ariaLabel={t('settingTeamMode')}
+            />
+          </div>
           {room.members.filter((m) => !m.isBot).length === 1 && (
             // Only meaningful (and only shown) while the host is the lone human at the table:
             // the started game then waits for them instead of running the per-turn timer.

@@ -16,6 +16,7 @@ import { chatRejectionHintKey } from '../../game/chatErrors';
 import { rgba } from '../../theme/shade';
 import { TrayHead } from '../../theme/gameChrome';
 import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core';
+import { isTeamGame } from '@trm/client-core/game/teams';
 import { PlayerActionSheet, canModerate } from './PlayerActionSheet';
 
 const MAX_LEN = 2048;
@@ -34,6 +35,8 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
   const blocked = useModeration((s) => s.blocked);
   const [draft, setDraft] = useState('');
   const [hint, setHint] = useState<string | null>(null);
+  const teamsOn = snapshot ? isTeamGame(snapshot) : false;
+  const [teamChannel, setTeamChannel] = useState(false);
   const [sheetTarget, setSheetTarget] = useState<{ id: string; name: string } | null>(null);
   const sentAt = useRef<number[]>([]);
   const listRef = useRef<ScrollView>(null);
@@ -72,7 +75,7 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
     const text = draft.trim();
     if (!text || disabled) return;
     if (!withinRateLimit()) return;
-    getSocket()?.chat(text.slice(0, MAX_LEN));
+    getSocket()?.chat(text.slice(0, MAX_LEN), teamChannel);
     setDraft('');
     setHint(null);
   };
@@ -80,13 +83,46 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
   const sendPreset = (id: string): void => {
     if (disabled) return;
     if (!withinRateLimit()) return;
-    getSocket()?.chatPreset(id);
+    getSocket()?.chatPreset(id, teamChannel);
     setHint(null);
   };
 
   return (
     <View style={styles.panel}>
       <TrayHead title={t('chat.heading')} />
+      {teamsOn && (
+        // Team games get a second channel. It is live-only: the server never persists a team
+        // line, so it cannot resurface to an opponent in a later reconnect backfill.
+        <View style={styles.channels}>
+          {(
+            [
+              [false, t('chat.channelAll')],
+              [true, t('chat.channelTeam')],
+            ] as const
+          ).map(([value, label]) => (
+            <Pressable
+              key={String(value)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: teamChannel === value }}
+              onPress={() => setTeamChannel(value)}
+              style={[
+                styles.channel,
+                { borderColor: teamChannel === value ? tokens.blue : tokens.line },
+                teamChannel === value && { backgroundColor: `${tokens.blue}22` },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.channelText,
+                  { color: teamChannel === value ? tokens.blue : tokens.inkSoft },
+                ]}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
       <ScrollView ref={listRef} style={styles.messages}>
         {visible.length === 0 ? (
           <Text style={[styles.empty, { color: tokens.inkSoft }]}>{t('chat.empty')}</Text>
@@ -113,10 +149,7 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
                 }}
               >
                 <Text
-                  style={[
-                    styles.author,
-                    { color: isSpectator ? tokens.inkSoft : seatColor(seat) },
-                  ]}
+                  style={[styles.author, { color: isSpectator ? tokens.inkSoft : seatColor(seat) }]}
                 >
                   {author}
                 </Text>
@@ -189,6 +222,9 @@ export function ChatPanel({ disabled = false }: { disabled?: boolean | undefined
 }
 
 const styles = StyleSheet.create({
+  channels: { flexDirection: 'row', gap: 6, marginBottom: 4 },
+  channel: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 2 },
+  channelText: { fontSize: 11, fontWeight: '600' },
   panel: { gap: 4 },
   messages: { maxHeight: 160, minHeight: 60 },
   empty: { fontSize: 12, paddingVertical: 4 },

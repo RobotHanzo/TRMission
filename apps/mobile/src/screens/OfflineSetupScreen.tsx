@@ -5,13 +5,13 @@ import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import { BOT_DIFFICULTIES, type BotDifficulty } from '@trm/bots';
-import type { EventsMode } from '@trm/shared';
+import { layoutsForPlayerCount, type EventsMode } from '@trm/shared';
 import type { RootStackParamList } from '../navigation';
 import { useHasFeature } from '../store/session';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OfflineSetup'>;
 
-const BOT_COUNTS = [1, 2, 3, 4] as const;
+const BOT_COUNTS = [1, 2, 3, 4, 5] as const;
 const EVENTS_MODES = [
   'off',
   'light',
@@ -50,6 +50,7 @@ export function OfflineSetupScreen({ navigation }: Props) {
   // Mirrors DEFAULT_ROOM_SETTINGS.eventsMode; clamped to 'off' at start time if the feature was
   // revoked meanwhile (same "silent downgrade" LobbyService.start applies online).
   const [eventsMode, setEventsMode] = useState<EventsMode>('moderate');
+  const [teamCount, setTeamCount] = useState(0);
 
   return (
     <ScrollView contentContainerStyle={styles.root}>
@@ -74,7 +75,30 @@ export function OfflineSetupScreen({ navigation }: Props) {
             key={n}
             label={String(n)}
             selected={botCount === n}
-            onPress={() => setBotCount(n)}
+            onPress={() => {
+              setBotCount(n);
+              // A layout that no longer divides the table would be refused at start, so drop back
+              // to free-for-all rather than leaving an impossible selection standing.
+              if (
+                teamCount > 0 &&
+                !layoutsForPlayerCount(n + 1).some((l) => l.teamCount === teamCount)
+              )
+                setTeamCount(0);
+            }}
+          />
+        ))}
+      </View>
+
+      <Text style={styles.label}>{t('room.settingTeamMode')}</Text>
+      <Text style={styles.desc}>{t('room.settingTeamModeDesc')}</Text>
+      <View style={styles.row}>
+        {/* Only layouts the current head-count (you + bots) can actually form are offered. */}
+        {[0, ...layoutsForPlayerCount(botCount + 1).map((l) => l.teamCount)].map((n) => (
+          <Choice
+            key={n}
+            label={n === 0 ? t('room.teamModeOff') : t(`room.teamMode${n}Teams`)}
+            selected={teamCount === n}
+            onPress={() => setTeamCount(n)}
           />
         ))}
       </View>
@@ -118,6 +142,7 @@ export function OfflineSetupScreen({ navigation }: Props) {
             botCount,
             difficulty,
             eventsMode: canConfigureEvents ? eventsMode : 'off',
+            ...(teamCount > 0 ? { teamCount } : {}),
           })
         }
       >
