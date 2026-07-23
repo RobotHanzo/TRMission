@@ -1,23 +1,23 @@
 import { useEffect } from 'react';
+import type { CompositeScreenProps } from '@react-navigation/native';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { useTranslation } from 'react-i18next';
 import { Platform } from 'react-native';
 import { consumePendingRoomLink } from './app/roomLink';
 import { BootScreen } from './screens/BootScreen';
 import { GameScreen } from './screens/GameScreen';
-import { HomeScreen } from './screens/HomeScreen';
+import HomeTabs from './HomeTabs';
 import { RoomScreen } from './screens/RoomScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { OfflineSetupScreen } from './screens/OfflineSetupScreen';
 import { OfflineGameScreen } from './screens/OfflineGameScreen';
 import TutorialScreen from './features/tutorial/TutorialScreen';
 import BuilderScreen from './screens/BuilderScreen';
-import { SettingsScreen } from './screens/SettingsScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
-import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import ReplayScreen from './screens/ReplayScreen';
-import EncyclopediaScreen from './screens/EncyclopediaScreen';
 import type { LocalGameInput } from './offline/useLocalGame';
 import { useSession } from './store/session';
 import { useTheme } from './theme/useTheme';
@@ -25,6 +25,7 @@ import { useTheme } from './theme/useTheme';
 export type RootStackParamList = {
   Boot: undefined;
   Login: undefined;
+  /** The floating Liquid Glass tab bar (Home/Encyclopedia/Leaderboard/Settings) — see HomeTabs. */
   Home: undefined;
   Room: { code: string };
   /** The live game (Skia board + the adaptive GameStage HUD). Spectators mint via /spectate. */
@@ -36,17 +37,30 @@ export type RootStackParamList = {
   Tutorial: undefined;
   /** The map-builder WebView (mapBuilder feature; authed stack only). */
   Builder: undefined;
-  /** Device settings + account controls (push/haptics toggles, account deletion). */
-  Settings: undefined;
   /** Finished games (players + spectated) — each replayable row opens the Replay player. */
   History: undefined;
-  /** Player leaderboard (rating/wins/games-played, all-time or this season). */
-  Leaderboard: undefined;
   /** Client-side replay of a finished game through the sandbox GameStage. */
   Replay: { gameId: string };
+};
+
+/** The 4 tabs nested inside the "Home" stack screen (see HomeTabs/HomeTabs.web). */
+export type HomeTabParamList = {
+  Home: undefined;
+  /** Device settings + account controls (push/haptics toggles, account deletion). */
+  Settings: undefined;
+  /** Player leaderboard (rating/wins/games-played, all-time or this season). */
+  Leaderboard: undefined;
   /** The rules encyclopedia: chapter-grouped topics with auto-playing sandbox demos. */
   Encyclopedia: undefined;
 };
+
+/** Screen props for a HomeTabs tab: the tab's own nav prop PLUS the outer stack's (so
+ *  `navigation.navigate('Room' | 'History' | ...)` — a screen outside the tab bar — still
+ *  typechecks; React Navigation resolves it by bubbling up to the parent stack at runtime). */
+export type HomeTabScreenProps<T extends keyof HomeTabParamList> = CompositeScreenProps<
+  NativeBottomTabScreenProps<HomeTabParamList, T>,
+  NativeStackScreenProps<RootStackParamList>
+>;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -99,7 +113,7 @@ export function RootNavigator(): React.JSX.Element {
         <Stack.Screen name="Boot" component={BootScreen} options={{ headerShown: false }} />
       ) : user ? (
         <>
-          <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
           <Stack.Screen name="Room" component={RoomScreen} options={{ title: t('room.title') }} />
           {/* Game surfaces are full-bleed: the stage's floating leave chip replaces the header
               back button (the title still names the browser tab in the web harness). */}
@@ -129,29 +143,14 @@ export function RootNavigator(): React.JSX.Element {
             options={{ title: t('builder.title') }}
           />
           <Stack.Screen
-            name="Settings"
-            component={SettingsScreen}
-            options={{ title: t('settings.title') }}
-          />
-          <Stack.Screen
             name="History"
             component={HistoryScreen}
             options={{ title: t('history.title') }}
           />
           <Stack.Screen
-            name="Leaderboard"
-            component={LeaderboardScreen}
-            options={{ title: t('leaderboard.title') }}
-          />
-          <Stack.Screen
             name="Replay"
             component={ReplayScreen}
             options={{ title: t('history.watchReplay') }}
-          />
-          <Stack.Screen
-            name="Encyclopedia"
-            component={EncyclopediaScreen}
-            options={{ title: t('tutorial.open') }}
           />
         </>
       ) : (

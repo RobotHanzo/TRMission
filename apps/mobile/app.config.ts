@@ -155,6 +155,9 @@ const config: ExpoConfig = {
   plugins: [
     'expo-secure-store',
     'expo-apple-authentication',
+    // Native bottom tab bar (Home/Encyclopedia/Leaderboard/Settings) — a real UITabBarController
+    // on iOS (Liquid Glass on iOS 26) / Material3 tab bar on Android, not a JS-rendered lookalike.
+    'react-native-bottom-tabs',
     ['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }],
     // Brand-coloured status-bar tint for Android notifications (a dedicated white-on-transparent
     // small icon is a designer TODO; until then the default icon is at least tinted).

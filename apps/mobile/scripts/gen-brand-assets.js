@@ -229,3 +229,70 @@ for (const [name, markup] of jobs) {
   console.log(`wrote ${name}`);
 }
 writeIconBundle();
+
+// Bottom-tab-bar glyphs (navigation/HomeTabs.tsx) — Android + the web-harness fallback only; iOS
+// uses SF Symbols directly (zero asset cost), see HomeTabs.tsx. Simple ORIGINAL geometric
+// silhouettes authored in a standard 24-unit icon grid, not vendor icon-set path data (same
+// original-artwork stance as the rest of the brand kit). Solid black on transparent: the tab
+// navigator re-tints them (`tabBarIconRenderingMode: 'automatic'`), so the source colour is inert —
+// only the alpha silhouette matters.
+const TAB_ICON_OUT = 256;
+const tabIconSvg = (body) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${TAB_ICON_OUT}" height="${TAB_ICON_OUT}" viewBox="0 0 24 24">${body}</svg>`;
+
+/** Roof + walls + a punched-out door notch, one continuous outline. */
+function houseGlyph() {
+  return `<path d="M12 3 L21 11 L18.5 11 L18.5 20 L13.5 20 L13.5 14 L10.5 14 L10.5 20 L5.5 20 L5.5 11 L3 11 Z" fill="#000"/>`;
+}
+
+/** Two facing pages + a masked-transparent spine crease down the middle. */
+function bookGlyph() {
+  const pages =
+    'M12 5.5 C10 4.3 6.5 3.7 3 4.2 L3 17.2 C6.5 16.7 10 17.3 12 18.5 ' +
+    'C14 17.3 17.5 16.7 21 17.2 L21 4.2 C17.5 3.7 14 4.3 12 5.5 Z';
+  return `<mask id="book-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+      <path d="${pages}" fill="#fff"/>
+      <line x1="12" y1="5.3" x2="12" y2="18.5" stroke="#000" stroke-width="0.9"/>
+    </mask>
+    <path d="${pages}" fill="#000" mask="url(#book-cut)"/>`;
+}
+
+/** Cup bowl + stem + base, with two stroked handle arcs either side. */
+function trophyGlyph() {
+  return `<path d="M6 4 L18 4 L17 10.5 C17 13.5 14.8 15 12 15 C9.2 15 7 13.5 7 10.5 Z" fill="#000"/>
+    <rect x="11" y="15" width="2" height="3" fill="#000"/>
+    <rect x="8" y="18" width="8" height="2" rx="1" fill="#000"/>
+    <path d="M6 5 C2.5 5 2.5 10 6.5 10.5" stroke="#000" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M18 5 C21.5 5 21.5 10 17.5 10.5" stroke="#000" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+}
+
+/** A ring of 8 teeth (rotated copies of one tooth rect) around a circle, centre punched out. */
+function gearGlyph() {
+  const teeth = Array.from(
+    { length: 8 },
+    (_, i) =>
+      `<rect x="10.7" y="1" width="2.6" height="5" rx="1" transform="rotate(${(i * 360) / 8} 12 12)" fill="#fff"/>`,
+  ).join('');
+  return `<mask id="gear-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+      <circle cx="12" cy="12" r="9" fill="#fff"/>
+      ${teeth}
+      <circle cx="12" cy="12" r="3.2" fill="#000"/>
+    </mask>
+    <rect x="0" y="0" width="24" height="24" fill="#000" mask="url(#gear-cut)"/>`;
+}
+
+function writeTabIcons() {
+  const dir = path.join(ASSETS, 'tabs');
+  fs.mkdirSync(dir, { recursive: true });
+  const glyphs = [
+    ['home.png', houseGlyph()],
+    ['encyclopedia.png', bookGlyph()],
+    ['leaderboard.png', trophyGlyph()],
+    ['settings.png', gearGlyph()],
+  ];
+  for (const [name, body] of glyphs) {
+    fs.writeFileSync(path.join(dir, name), renderPng(tabIconSvg(body)));
+    console.log(`wrote tabs/${name}`);
+  }
+}
+writeTabIcons();

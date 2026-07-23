@@ -1,4 +1,3 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -12,17 +11,8 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  BookOpen,
-  Bot,
-  CirclePlay,
-  GraduationCap,
-  History,
-  Map as MapIcon,
-  Settings,
-  Trophy,
-} from 'lucide-react-native';
-import type { RootStackParamList } from '../navigation';
+import { Bot, CirclePlay, GraduationCap, History, Map as MapIcon } from 'lucide-react-native';
+import type { HomeTabScreenProps } from '../navigation';
 import { api, type RoomView } from '../net/rest';
 import { openDiscord } from '../discord';
 import { useSession } from '../store/session';
@@ -44,7 +34,7 @@ import {
 } from '../theme/chrome';
 import { RADIUS, SPACE, useTheme } from '../theme/useTheme';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type Props = HomeTabScreenProps<'Home'>;
 
 // First-entry gate (mobile adaptation of the web's 0-completed-games check, offline-friendly):
 // the welcome takes over the homepage until the user picks a path or finishes the tutorial.
@@ -446,12 +436,12 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     </Pressable>
   );
 
+  // Encyclopedia/Leaderboard/Settings moved to the floating tab bar (HomeTabs) — linking to them
+  // again from here would just duplicate a destination the tab bar already surfaces. Only the
+  // still push-only destinations (feature-gated Builder, History) remain quick links.
   const pillIcon = { size: 16, color: tokens.inkSoft } as const;
   const linkPills = (
     <View style={styles.pillRow}>
-      {pill('home-encyclopedia', <BookOpen {...pillIcon} />, t('tutorial.open'), () =>
-        navigation.navigate('Encyclopedia'),
-      )}
       {canBuild &&
         pill(
           'home-builder',
@@ -464,13 +454,6 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
         pill('home-history', <History {...pillIcon} />, t('history.title'), () =>
           navigation.navigate('History'),
         )}
-      {online &&
-        pill('home-leaderboard', <Trophy {...pillIcon} />, t('leaderboard.title'), () =>
-          navigation.navigate('Leaderboard'),
-        )}
-      {pill('home-settings', <Settings {...pillIcon} />, t('settings.title'), () =>
-        navigation.navigate('Settings'),
-      )}
     </View>
   );
 

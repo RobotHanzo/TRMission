@@ -3,13 +3,11 @@
 // that auto-plays the lesson's beats with a caption bar — no scrim, no coachmark. The demo runs
 // on its OWN isolated sandbox stores (SandboxProvider) driven by the SHARED encyclopedia machine
 // (@trm/client-core/tutorial/encyclopedia), so web and mobile can never pace differently.
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react-native';
 import { useEncyclopediaDemo } from '@trm/client-core/tutorial/encyclopedia';
-import type { RootStackParamList } from '../navigation';
 import { encyclopediaEntries } from '../features/tutorial/curriculum';
 import type { Lesson } from '../features/tutorial/types';
 import { Specimen } from '../features/tutorial/Specimens';
@@ -17,10 +15,7 @@ import { SandboxProvider } from '../store/sandboxProvider';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useTheme } from '../theme/useTheme';
 import { MutedText } from '../theme/chrome';
-import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
 import { GameStage } from './GameStage';
-
-type Props = NativeStackScreenProps<RootStackParamList, 'Encyclopedia'>;
 
 function EncyclopediaPlayer({ entry }: { entry: Lesson }): React.JSX.Element {
   const { t } = useTranslation();
@@ -129,10 +124,9 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }): React.JSX.Element {
   );
 }
 
-export default function EncyclopediaScreen(_props: Props): React.JSX.Element {
+export default function EncyclopediaScreen(): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
-  const headerPad = useGlassHeaderPad();
   const entries = useMemo(() => encyclopediaEntries(), []);
   const [idx, setIdx] = useState(0);
   // Group entries by chapter, preserving order (web's grouping, rendered as a chip rail).
@@ -150,7 +144,7 @@ export default function EncyclopediaScreen(_props: Props): React.JSX.Element {
   if (!entry) return <View style={styles.fill} />;
 
   return (
-    <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: headerPad }]}>
+    <View style={[styles.fill, { backgroundColor: tokens.paper }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
