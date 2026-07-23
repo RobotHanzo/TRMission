@@ -96,6 +96,14 @@ export interface GameStageProps {
   /** Tutorial only: fires whenever the payment-choice modal opens/closes, so the coachmark can
    *  redirect its spotlight + copy to the payment dialog once the learner's tap opens it. */
   onPendingClaim?: ((kind: 'route' | 'station' | null) => void) | undefined;
+  /** Encyclopedia demo clip: a passive viewing surface. Hides the leave chip (the demo screen
+   *  carries its own navigation) and the turn banner (the viewer never acts), and the compact
+   *  dock starts collapsed so the board is the show. */
+  demo?: boolean | undefined;
+  /** Demo only: the dock tab the CURRENT narration beat talks about (null between HUD beats).
+   *  The compact dock follows it — sliding open on that tab while a beat references a HUD
+   *  panel, tucking back down to its strip after — so the clip choreographs the tray. */
+  demoDock?: DockTabKey | null | undefined;
 }
 
 const RAIL_WIDTH = 360;
@@ -135,6 +143,8 @@ export function GameStage({
   frameTarget,
   actionGate,
   onPendingClaim,
+  demo,
+  demoDock,
 }: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -158,7 +168,8 @@ export function GameStage({
 
   const [dockTab, setDockTab] = useState<DockTabKey>('hand');
   // Compact only: collapse the dock down to its tab bar so the board gets the full window.
-  const [dockCollapsed, setDockCollapsed] = useState(false);
+  // A demo clip starts collapsed — the board is the show; beats reopen it (see demoDock).
+  const [dockCollapsed, setDockCollapsed] = useState(!!demo);
   const [commsTab, setCommsTab] = useState<'rail' | 'log' | 'comms'>('rail');
 
   const version = snapshot.stateVersion;
@@ -235,6 +246,19 @@ export function GameStage({
       setDockCollapsed(false);
     }
   }, [compact, actionGate]);
+
+  // Encyclopedia demo: the dock follows the narration. A beat that talks about a HUD panel
+  // opens its tab; any other beat tucks the dock back down, handing the window to the board.
+  // (A viewer's manual drag still works between beats — the next beat simply re-asserts.)
+  useEffect(() => {
+    if (!compact || !demo) return;
+    if (demoDock) {
+      setDockTab(demoDock);
+      setDockCollapsed(false);
+    } else {
+      setDockCollapsed(true);
+    }
+  }, [compact, demo, demoDock]);
 
   const needKeep =
     (phase === Phase.SETUP_TICKETS || phase === Phase.TICKET_SELECTION) &&
@@ -514,25 +538,32 @@ export function GameStage({
   // centered beside it. The countdown joins only on compact, where no players panel carries it.
   const floatHud = (top: number, withCountdown: boolean) => (
     <View style={[styles.floatStack, { top }]} pointerEvents="box-none">
-      <Pressable
-        style={({ pressed }) => [
-          styles.leaveBtn,
-          {
-            backgroundColor: pressed ? tokens.surface2 : tokens.surface,
-            borderColor: tokens.line,
-            shadowColor: tokens.ink,
-          },
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel={t('leaveGame')}
-        testID="stage-leave"
-        onPress={onLeave}
-      >
-        <ArrowLeft size={20} color={tokens.ink} />
-      </Pressable>
+      {demo ? (
+        // Demo clips navigate through their own chrome — a stage leave chip would be a second,
+        // dead back button. A spacer keeps the chips centered on the board.
+        <View style={styles.floatSpacer} pointerEvents="none" />
+      ) : (
+        <Pressable
+          style={({ pressed }) => [
+            styles.leaveBtn,
+            {
+              backgroundColor: pressed ? tokens.surface2 : tokens.surface,
+              borderColor: tokens.line,
+              shadowColor: tokens.ink,
+            },
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel={t('leaveGame')}
+          testID="stage-leave"
+          onPress={onLeave}
+        >
+          <ArrowLeft size={20} color={tokens.ink} />
+        </Pressable>
+      )}
       <View style={styles.floatChips} pointerEvents="box-none">
         {spectatorBanner}
-        {turnBanner}
+        {/* "Your turn" is wrong for a passive clip — the demo performs every move itself. */}
+        {!demo && turnBanner}
         {eventPhaseBar}
         {withCountdown && <TurnCountdown floating />}
       </View>
@@ -801,7 +832,9 @@ export function GameStage({
                     onPress={() => setCommsTab(key)}
                   >
                     <Text style={[styles.dockTabText, { color: active ? '#fff' : tokens.inkSoft }]}>
-                      {t(key === 'rail' ? 'tabRail' : key === 'log' ? 'log.heading' : 'chat.heading')}
+                      {t(
+                        key === 'rail' ? 'tabRail' : key === 'log' ? 'log.heading' : 'chat.heading',
+                      )}
                     </Text>
                   </Pressable>
                 );

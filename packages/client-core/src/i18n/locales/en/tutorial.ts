@@ -23,6 +23,9 @@ export default {
   prevStep: 'Back',
   nextStep: 'Forward',
   open: 'Encyclopedia',
+  indexHint: 'Each topic plays out on the board as a short demo — pause or step through any time.',
+  contents: 'Contents',
+  steps: '{{n}} steps',
   createGame: 'Create your first game',
   finalTitle: 'Tutorial complete!',
   finalBody:
