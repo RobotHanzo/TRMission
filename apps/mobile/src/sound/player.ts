@@ -78,9 +78,15 @@ export function createSoundPlayer(opts: Opts = {}): SoundPlayer {
       const t = now();
       if (t - (lastPlayed.get(cue) ?? -Infinity) < def.throttleMs) return;
       lastPlayed.set(cue, t);
-      p.volume = Math.max(0, Math.min(1, def.gain * gainScale * volume));
-      void p.seekTo(0);
-      p.play();
+      try {
+        p.volume = Math.max(0, Math.min(1, def.gain * gainScale * volume));
+        void p.seekTo(0);
+        p.play();
+      } catch {
+        // expo-audio's play()/seekTo() are native sync calls that can throw (e.g. iOS audio
+        // session activation failing under an interruption or background state) — a dropped
+        // sound effect must never crash the screen it's decorating.
+      }
     },
 
     setEnabled(on) {

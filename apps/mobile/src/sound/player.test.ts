@@ -68,4 +68,17 @@ describe('sound player', () => {
     p.play('cardDraw', OPPONENT_GAIN); // 0.8 × 0.5 × 0.5
     expect(played.volume).toBeCloseTo(0.2);
   });
+
+  it('swallows a native play() failure (e.g. iOS session activation) instead of throwing', async () => {
+    const createPlayer = (): CuePlayer => ({
+      volume: 0,
+      seekTo: jest.fn(),
+      play: jest.fn(() => {
+        throw new Error('Session activation failed');
+      }),
+    });
+    const p = createSoundPlayer({ createPlayer, configureAudioMode: noMode, now: () => 0 });
+    await p.preload();
+    expect(() => p.play('cardDraw')).not.toThrow();
+  });
 });
