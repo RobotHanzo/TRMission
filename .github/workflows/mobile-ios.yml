@@ -59,9 +59,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # What actually cuts the xcodebuild step (~12 of the ~20min total): RN core,
-      # expo-modules-core, and the autolinked pods recompile identical C/C++/ObjC on every run
-      # today. Must be installed BEFORE `pod install` — react_native_post_install probes
+      # Compile cache for everything still built from source — expo-modules-core, codegen output,
+      # and the autolinked pods; RN core + its third-party deps come prebuilt via the RCT_* flags
+      # on the pod install step below. Must be installed BEFORE `pod install` — react_native_post_install probes
       # `command -v ccache` at pod-install time and only points CC/CXX at RN's ccache wrappers
       # (with the resolved CCACHE_BINARY path baked in) when the binary already exists.
       - name: ccache
@@ -174,6 +174,18 @@ jobs:
           # JS-only OTA fixes until the next store build. A pod-install-time env var is invisible
           # to the fingerprint, and a no-op wherever ccache isn't installed.
           USE_CCACHE: '1'
+          # RN 0.85's official prebuilt binaries (Meta-built, on Maven Central — verified present
+          # for this exact RN version): core + the folly/glog/boost third-party deps skip the two
+          # biggest source compiles outright, and the symbolicate flag downloads their matching
+          # dSYMs into the framework folders so crash symbolication doesn't regress. All three are
+          # read at pod-install time only, auto-revert to building from source when the artifacts
+          # are missing (e.g. right after an RN bump, before Meta publishes), and — like USE_CCACHE
+          # above — are invisible to the OTA runtimeVersion fingerprint. The tarballs land in
+          # Pods/ReactNative{Core,Dependencies}-artifacts, so the Pods cache above carries them
+          # across runs.
+          RCT_USE_PREBUILT_RNCORE: '1'
+          RCT_USE_RN_DEP: '1'
+          RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS: '1'
 
       # The Fastfile hardcodes workspace/scheme "TRMission" (derived from prebuild's
       # HelloWorld→sanitizedName rename). Assert it here so an Expo template change fails in
