@@ -37,6 +37,7 @@ import {
   type Viewport,
   type ZoomBucket,
 } from './camera';
+import { createTapArbiter } from './tapArbiter';
 
 /** Slack past a programmatic glide's duration before the camera counts as settled — covers the
  *  timing curve's tail plus a couple of frames of scheduling. */
@@ -63,7 +64,7 @@ export interface BoardLod {
 export interface BoardCamera {
   /** Reanimated transform for the Skia board <Group> (UI thread). */
   transform: DerivedValue<Transforms3d>;
-  /** Composed pan + pinch + tap + double-tap gesture. */
+  /** Composed pan + pinch + tap gesture (double-tap zoom resolves in the JS tap arbiter). */
   gesture: ComposedGesture;
   /** Quantized zoom state driving MapSceneSkia's counter-scaling. */
   lod: BoardLod;
@@ -202,12 +203,6 @@ export function useBoardCamera(
   const notifyGesture = useCallback(() => {
     opts.onGesture?.();
   }, [opts]);
-  const notifyTap = useCallback(
-    (x: number, y: number) => {
-      opts.onTap?.({ x, y }, { cx: cx.value, cy: cy.value, span: span.value });
-    },
-    [opts, cx, cy, span],
-  );
   const snapTo = useCallback(
     (cam: CameraState) => {
       cx.value = cam.cx;
@@ -258,6 +253,30 @@ export function useBoardCamera(
       animateTo(pinchTo(cam, { x, y }, 1.6, vp, view), 200);
     },
     [cx, cy, span, vp, view, animateTo],
+  );
+
+  // Single-vs-double tap discrimination (tapArbiter.ts — NOT a numberOfTaps(2) recognizer via
+  // Gesture.Exclusive, which drops taps on iOS; see the arbiter's header for the full autopsy).
+  // Latest-value refs so the one arbiter instance survives handler identity changes (a re-created
+  // arbiter would drop a tap pending in its window).
+  const optsRef = useRef(opts);
+  optsRef.current = opts;
+  const zoomAtRef = useRef(zoomAt);
+  zoomAtRef.current = zoomAt;
+  const arbiter = useMemo(
+    () =>
+      createTapArbiter({
+        onSingle: (screen, cam) => optsRef.current.onTap?.(screen, cam),
+        onDouble: (x, y) => zoomAtRef.current(x, y),
+      }),
+    [],
+  );
+  useEffect(() => () => arbiter.dispose(), [arbiter]);
+  const notifyTap = useCallback(
+    (x: number, y: number) => {
+      arbiter.tap(x, y, { cx: cx.value, cy: cy.value, span: span.value });
+    },
+    [arbiter, cx, cy, span],
   );
 
   const currentCamera = useCallback(
@@ -359,17 +378,13 @@ export function useBoardCamera(
           runOnJS(endMotion)();
         }
       });
-    const tap = Gesture.Tap()
-      .maxDuration(250)
-      .onEnd((e, ok) => {
-        if (ok) runOnJS(notifyTap)(e.x, e.y);
-      });
-    const doubleTap = Gesture.Tap()
-      .numberOfTaps(2)
-      .onEnd((e, ok) => {
-        if (ok) runOnJS(zoomAt)(e.x, e.y);
-      });
-    return Gesture.Race(Gesture.Simultaneous(pan, pinch), Gesture.Exclusive(doubleTap, tap));
+    // One tap recognizer, RNGH-default maxDuration (500ms): movement hands the touch to pan via
+    // the Race, a second finger fails the tap on both platforms, and single-vs-double resolves in
+    // notifyTap's JS arbiter — never through Gesture.Exclusive (iOS-broken; see DOUBLE_TAP_MS).
+    const tap = Gesture.Tap().onEnd((e, ok) => {
+      if (ok) runOnJS(notifyTap)(e.x, e.y);
+    });
+    return Gesture.Race(Gesture.Simultaneous(pan, pinch), tap);
   }, [
     vp.w,
     vp.h,
@@ -384,7 +399,6 @@ export function useBoardCamera(
     endMotion,
     notifyGesture,
     notifyTap,
-    zoomAt,
   ]);
 
   return {
