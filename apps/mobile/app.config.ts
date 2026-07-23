@@ -12,9 +12,11 @@ const BUILD_NUMBER = Number(process.env.BUILD_NUMBER ?? 1);
 // `com.googleusercontent.apps.`. That's the reversed iOS OAuth client id (shown as its own value in
 // the Google console). Provisioned at store-setup (P6) via TRM_GOOGLE_IOS_URL_SCHEME; until then a
 // format-valid placeholder lets native builds run — consistent with the Google button no-op'ing
-// until real client ids land (see `extra` below).
+// until real client ids land (see `extra` below). `||` (not `??`): an unset repo variable reaches
+// CI as `''`, not undefined (`${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}`), same gotcha as serverOrigin
+// below — an empty string would sail past `??` and fail the plugin's validation.
 const googleIosUrlScheme =
-  process.env.TRM_GOOGLE_IOS_URL_SCHEME ?? 'com.googleusercontent.apps.placeholder';
+  process.env.TRM_GOOGLE_IOS_URL_SCHEME || 'com.googleusercontent.apps.placeholder';
 
 // One source for the production origin: the deep-link hosts (associated domains / App Links) and
 // the app's API base derive from the same env var so they can never drift apart. `||` (not `??`):
