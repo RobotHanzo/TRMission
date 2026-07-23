@@ -13,6 +13,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { BoardLayout, Locale, Theme, UserPreferences } from '../net/rest';
 import { SERVER_ORIGIN } from '../config';
@@ -21,6 +22,7 @@ import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { useTheme } from '../theme/useTheme';
 import { MutedText, SectionLabel } from '../theme/chrome';
+import { useTabBarPad } from '../hooks/useTabBarPad';
 import { performAccountDeletion } from '../account/deleteAccount';
 import NotificationsRow from './settings/NotificationsRow';
 
@@ -69,6 +71,10 @@ function Chips<T extends string | number>({
 export function SettingsScreen(): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  // Tab screens render full-bleed (no stack header, floating iOS tab bar): the notch row gets
+  // hard padding; the bottom pad lives on the CONTENT so rows scroll out from under the glass bar.
+  const insets = useSafeAreaInsets();
+  const tabBarPad = useTabBarPad();
   const haptics = useSettings((s) => s.haptics);
   const setHaptics = useSettings((s) => s.setHaptics);
   const isGuest = useSession((s) => s.user?.isGuest ?? true);
@@ -111,7 +117,10 @@ export function SettingsScreen(): React.JSX.Element {
   };
 
   return (
-    <ScrollView style={{ backgroundColor: tokens.paper }} contentContainerStyle={styles.container}>
+    <ScrollView
+      style={{ backgroundColor: tokens.paper, paddingTop: insets.top }}
+      contentContainerStyle={[styles.container, { paddingBottom: 40 + tabBarPad }]}
+    >
       <SectionLabel>{t('settings.appearance')}</SectionLabel>
       <Chips<Theme>
         options={[

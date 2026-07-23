@@ -10,6 +10,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Bot, CirclePlay, GraduationCap, History, Map as MapIcon } from 'lucide-react-native';
 import type { HomeTabScreenProps } from '../navigation';
@@ -20,6 +21,7 @@ import { useOnline } from '../hooks/useOnline';
 import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
 import { OfflineHomeSection } from '../offline/OfflineHomeSection';
 import { getTutorialCompletion } from '../features/tutorial/progress';
+import { useTabBarPad } from '../hooks/useTabBarPad';
 import { useCanBuild } from './BuilderScreen';
 import { stageTier } from './stageLayout';
 import {
@@ -195,6 +197,10 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const canBuild = useCanBuild();
   const { width } = useWindowDimensions();
   const wide = stageTier(width) !== 'compact';
+  // Screen already pads the safe-area bottom; the floating iOS tab bar occludes more than that,
+  // so add the difference (0 on Android/web, where the bar takes its own layout space).
+  const insets = useSafeAreaInsets();
+  const tabExtra = Math.max(0, useTabBarPad() - insets.bottom);
   const [rooms, setRooms] = useState<RoomView[]>([]);
   const [publicRooms, setPublicRooms] = useState<RoomView[]>([]);
   const [code, setCode] = useState('');
@@ -279,7 +285,14 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
 
   if (showWelcome) {
     return (
-      <Screen style={styles.container}>
+      // The explicit paddingBottom overrides Screen's own safe-area pad on this View, so it
+      // must re-include insets.bottom under the tab-bar extra.
+      <Screen
+        style={[
+          styles.container,
+          tabExtra > 0 && { paddingBottom: insets.bottom + tabExtra },
+        ]}
+      >
         <WelcomeCard
           name={user?.displayName ?? ''}
           tutorialDone={tutorialDone}
@@ -466,7 +479,10 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   // Phones stay a single scrolling column (unchanged); tablets/desktops split into a web-style
   // two-pane grid — primary room-joining flow on the left, secondary links on the right.
   return (
-    <Screen scroll style={styles.container}>
+    <Screen
+      scroll
+      style={[styles.container, tabExtra > 0 && { paddingBottom: SPACE[4] + tabExtra }]}
+    >
       {header}
       {!online && <OfflineHomeBanner />}
       {!wide && guestCard}

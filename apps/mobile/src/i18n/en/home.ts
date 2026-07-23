@@ -5,6 +5,7 @@ import type zh from '../zh-Hant/home';
 export default {
   ...home,
   title: 'TRMission',
+  tab: 'Home',
   greeting: 'Hi, {{name}}',
   myRooms: 'Active rooms',
   publicRooms: room.publicRooms,

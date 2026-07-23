@@ -6,6 +6,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react-native';
 import { useEncyclopediaDemo } from '@trm/client-core/tutorial/encyclopedia';
 import { encyclopediaEntries } from '../features/tutorial/curriculum';
@@ -15,6 +16,7 @@ import { SandboxProvider } from '../store/sandboxProvider';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useTheme } from '../theme/useTheme';
 import { MutedText } from '../theme/chrome';
+import { useTabBarPad } from '../hooks/useTabBarPad';
 import { GameStage } from './GameStage';
 
 function EncyclopediaPlayer({ entry }: { entry: Lesson }): React.JSX.Element {
@@ -127,6 +129,10 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }): React.JSX.Element {
 export default function EncyclopediaScreen(): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  // Tab screens render full-bleed (no stack header, floating iOS tab bar): reserve the notch
+  // row up top and keep the caption controls clear of the bar down below.
+  const insets = useSafeAreaInsets();
+  const tabBarPad = useTabBarPad();
   const entries = useMemo(() => encyclopediaEntries(), []);
   const [idx, setIdx] = useState(0);
   // Group entries by chapter, preserving order (web's grouping, rendered as a chip rail).
@@ -144,7 +150,12 @@ export default function EncyclopediaScreen(): React.JSX.Element {
   if (!entry) return <View style={styles.fill} />;
 
   return (
-    <View style={[styles.fill, { backgroundColor: tokens.paper }]}>
+    <View
+      style={[
+        styles.fill,
+        { backgroundColor: tokens.paper, paddingTop: insets.top, paddingBottom: tabBarPad },
+      ]}
+    >
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

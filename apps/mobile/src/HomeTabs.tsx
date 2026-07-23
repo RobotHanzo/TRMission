@@ -42,7 +42,7 @@ export default function HomeTabs(): React.JSX.Element {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ tabBarIcon: tabIcon('house.fill', HOME_ICON) }}
+        options={{ title: t('home.tab'), tabBarIcon: tabIcon('house.fill', HOME_ICON) }}
       />
       <Tab.Screen
         name="Encyclopedia"

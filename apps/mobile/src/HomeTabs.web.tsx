@@ -30,7 +30,11 @@ export default function HomeTabs(): React.JSX.Element {
   const { tokens } = useTheme();
   return (
     <Tab.Navigator screenOptions={{ headerShown: false, tabBarActiveTintColor: tokens.blue }}>
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: tabIcon(HOME_ICON) }} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ title: t('home.tab'), tabBarIcon: tabIcon(HOME_ICON) }}
+      />
       <Tab.Screen
         name="Encyclopedia"
         component={EncyclopediaScreen}

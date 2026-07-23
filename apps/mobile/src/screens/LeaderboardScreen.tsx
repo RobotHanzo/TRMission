@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   api,
   type LeaderboardEntry,
@@ -13,6 +14,7 @@ import {
 import { useSession } from '../store/session';
 import { useTheme } from '../theme/useTheme';
 import { ErrorText, MutedText } from '../theme/chrome';
+import { useTabBarPad } from '../hooks/useTabBarPad';
 
 const SCOPES: LeaderboardScopeKind[] = ['allTime', 'season'];
 const METRICS: LeaderboardMetric[] = ['rating', 'wins', 'gamesPlayed'];
@@ -25,6 +27,10 @@ const METRIC_KEY: Record<LeaderboardMetric, string> = {
 export function LeaderboardScreen(): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  // Tab screens render full-bleed (no stack header, floating iOS tab bar): the notch row gets
+  // hard padding; the list instead pads its CONTENT so rows scroll out from under the glass bar.
+  const insets = useSafeAreaInsets();
+  const tabBarPad = useTabBarPad();
   const user = useSession((s) => s.user);
   const [scope, setScope] = useState<LeaderboardScopeKind>('allTime');
   const [metric, setMetric] = useState<LeaderboardMetric>('rating');
@@ -70,7 +76,9 @@ export function LeaderboardScreen(): React.JSX.Element {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: tokens.paper }]}>
+    <View
+      style={[styles.container, { backgroundColor: tokens.paper, paddingTop: insets.top + 16 }]}
+    >
       <View style={styles.tabRow}>
         {SCOPES.map((s) => (
           <Pressable
@@ -107,7 +115,7 @@ export function LeaderboardScreen(): React.JSX.Element {
       <FlatList
         data={rows ?? []}
         keyExtractor={(r) => r.userId}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: 24 + tabBarPad }]}
         ListHeaderComponent={
           mine && !inVisiblePage ? (
             <View
