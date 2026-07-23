@@ -189,6 +189,20 @@ jobs:
           # node_modules build.gradle files individually.
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          # The SAME app-config env as the prebuild step above — the runtime
+          # `Constants.expoConfig.extra` is NOT baked at prebuild: expo-constants' Gradle task
+          # re-evaluates app.config.ts DURING this build and serializes the result into the app's
+          # assets (and expo-updates embeds its manifest the same way). Scoping these vars to
+          # prebuild only shipped binaries with empty extra.google*ClientId, which is exactly the
+          # gate that hides the Google sign-in button (LoginScreen's `!!GOOGLE_WEB_CLIENT_ID`).
+          # Keep both env blocks in lockstep.
+          TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
+          TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
+          TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
+          APP_VERSION: ${{ steps.build_number.outputs.version }}
+          TRM_ANDROID_ABIS: ${{ github.ref_type != 'tag' && 'arm64-v8a,x86_64' || '' }}
         run: |
           ./gradlew :app:bundleRelease -x lintVitalRelease --parallel --build-cache \
             -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.keystore" \

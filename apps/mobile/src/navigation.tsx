@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { Platform } from 'react-native';
+import { consumePendingRoomLink } from './app/roomLink';
 import { BootScreen } from './screens/BootScreen';
 import { GameScreen } from './screens/GameScreen';
 import { HomeScreen } from './screens/HomeScreen';
@@ -60,6 +62,16 @@ export function RootNavigator(): React.JSX.Element {
   const { tokens, dark } = useTheme();
   const booting = useSession((s) => s.booting);
   const user = useSession((s) => s.user);
+
+  // Deliver a stashed room link (App.tsx's cold-start / signed-out capture) the moment the
+  // stack that owns the Room screen is on screen — right after boot for a live session, or
+  // right after login/guest entry when the link arrived signed out. Guards run BEFORE the
+  // consume so an early fire leaves the stash intact for the next state change.
+  useEffect(() => {
+    if (booting || !user || !navigationRef.isReady()) return;
+    const code = consumePendingRoomLink();
+    if (code) navigationRef.navigate('Room', { code });
+  }, [booting, user]);
 
   return (
     // The native-stack header is themed to the app palette (paper/dark), not the OS default white,

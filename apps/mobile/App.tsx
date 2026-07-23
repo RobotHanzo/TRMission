@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import { Linking } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import './src/i18n'; // initialise the i18n singleton before any screen uses useTranslation
@@ -18,6 +19,8 @@ import {
   installNotificationTapHandling,
 } from './src/push/notifications';
 import { useOrientationPolicy } from './src/app/useOrientationPolicy';
+import { stashRoomLink } from './src/app/roomLink';
+import { useSession } from './src/store/session';
 import { useSoundSetup } from './src/hooks/useSoundSetup';
 
 // Registering the deep-link prefixes lets a cold-start OAuth return (/m/callback) or a
@@ -40,6 +43,18 @@ export default function App() {
   useEffect(() => {
     installNotificationHandler();
     return installNotificationTapHandling(navigationRef);
+  }, []);
+  // Room links the `linking` config above can't deliver: the LAUNCH URL resolves while the
+  // auth-gated stack only contains Boot (so the Room route is dropped), and a warm tap while
+  // signed OUT has no Room screen to land on either. Stash those here; RootNavigator applies
+  // the stash once the signed-in stack is live. Warm signed-in taps stay with `linking`.
+  useEffect(() => {
+    void Linking.getInitialURL().then((url) => url && stashRoomLink(url));
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      const s = useSession.getState();
+      if (s.booting || !s.user) stashRoomLink(url);
+    });
+    return () => sub.remove();
   }, []);
   // Phones lock portrait; tablets rotate freely (and must survive live resizing regardless).
   useOrientationPolicy();

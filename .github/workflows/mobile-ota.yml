@@ -37,6 +37,15 @@ jobs:
           # eoas resolves the OTA server from the app config's updates.url origin, so this
           # must be the real deployment's manifest URL (repo variable), not the localhost default.
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          # eoas' `expo export` re-evaluates app.config.ts, and an applied update's manifest
+          # REPLACES the binary's `Constants.expoConfig.extra` at runtime — publishing without
+          # these would wipe the baked Google client ids (hiding the Google sign-in button) and
+          # any non-default server origin from every device that applies the update. Keep in
+          # lockstep with the build lanes' env blocks (mobile-ios.yml / mobile-android.yml).
+          TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
+          TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
+          TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
           # Expo robot token — authenticates eoas + the channel→branch mapping. Updates are
           # signed at SERVE time by the OTA server's mounted private key; CI holds no
           # signing material (there is deliberately no code-signing secret here).

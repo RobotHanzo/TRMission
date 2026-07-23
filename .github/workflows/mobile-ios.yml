@@ -143,6 +143,20 @@ jobs:
         working-directory: apps/mobile
         run: bundle exec fastlane ios beta upload:${{ github.ref_type == 'tag' || inputs.publish == true }}
         env:
+          # The SAME app-config env as the prebuild step above — the runtime
+          # `Constants.expoConfig.extra` is NOT baked at prebuild: expo-constants' Xcode script
+          # phase re-evaluates app.config.ts DURING this gym build and serializes the result
+          # into the app bundle (and expo-updates embeds its manifest the same way). Scoping
+          # these vars to prebuild only shipped binaries with empty extra.google*ClientId,
+          # which is exactly the gate that hides the Google sign-in button (LoginScreen's
+          # `!!GOOGLE_WEB_CLIENT_ID`). Keep both env blocks in lockstep.
+          TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
+          TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
+          TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
+          TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
+          APP_VERSION: ${{ steps.build_number.outputs.version }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
