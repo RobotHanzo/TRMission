@@ -10,13 +10,17 @@
 // fallbacks for older iOS. This replaced the flat light/dark/tinted PNG trio because iOS 26 wraps
 // legacy flat icons in its own glass slab — inset, re-masked and frosted — which is what made the
 // springboard icon look compressed/low-quality. Schema notes: fill-specializations carries the
-// per-appearance tile colour (dark = solid black, per Apple's dark-icon guidance); the layer is a
-// PNG, not an SVG, because SVG layers don't receive the glass treatment (Apple bug FB18097334);
-// the system derives the tinted/mono appearance from the layer's luminance on its own.
+// per-appearance tile (dark = the 'system-dark' preset — Icon Composer's "System Dark" fill, the
+// same dark-grey glass gradient every system app sits on; a hand-picked solid black looked
+// unnaturally void next to them on the springboard); the layer is a PNG, not an SVG, because SVG
+// layers don't receive the glass treatment (Apple bug FB18097334); the system derives the
+// tinted/mono appearance from the layer's luminance on its own.
 //
 // The flat trio (icon-dark.png / icon-tinted.png + icon.png) is still generated as the documented
-// fallback — if actool ever rejects the bundle, point app.config.ts's ios.icon back at it. The
-// dark tile is solid black there too, matching the bundle's dark appearance.
+// fallback — if actool ever rejects the bundle, point app.config.ts's ios.icon back at it. Its
+// dark tile bakes Apple's dark-icon template gradient (#313131→#141414) so the fallback matches
+// the bundle's system-dark appearance (baked, not transparent, so it looks right even if some
+// pipeline flattens the PNG as opaque full-bleed).
 //
 //   node apps/mobile/scripts/gen-brand-assets.js
 //
@@ -47,12 +51,14 @@ const PALETTE_BRAND = {
   windowFill: WHITE,
   rule: DARK,
 };
-// Solid-black tile for the dark appearance (Apple's dark-icon guidance: dark springboard icons sit
-// on a black/near-black tile, not a deepened brand colour) — matches the .icon bundle's dark fill.
-// The baked drop-shadow drops to a whisper of warm brown so the ticket still lifts off pure black.
+// Dark appearance: Apple's dark-icon template gradient (top #313131 → bottom #141414) — the same
+// dark-grey tile the system composites behind its own dark icons, and the flat-trio stand-in for
+// the .icon bundle's 'system-dark' fill. Never pure black: next to system apps a #000 tile reads
+// as an unnatural void. `tile: [top, bottom]` renders as a vertical gradient in badge().
+// The baked drop-shadow drops to a whisper of warm brown so the ticket still lifts off the dark tile.
 const PALETTE_DARK = {
   ...PALETTE_BRAND,
-  tile: '#000000',
+  tile: ['#313131', '#141414'],
   ticketShadow: '#3a1502',
 };
 // De-hued for the Liquid Glass "tinted" slot: the system recolours this with the user's chosen
@@ -111,9 +117,15 @@ function monoMark() {
 }
 
 /** The full logo badge (tile + ticket) at OUT scale, coloured by `p`. `rx` rounds the corners for a
- *  free-standing badge; 0 leaves it full-bleed for the iOS/store icon (the OS applies its own mask). */
+ *  free-standing badge; 0 leaves it full-bleed for the iOS/store icon (the OS applies its own mask).
+ *  `p.tile` is a solid colour, or a `[top, bottom]` pair for a vertical-gradient tile (dark trio). */
 function badge(rx, p = PALETTE_BRAND) {
-  return `<rect width="${OUT}" height="${OUT}" rx="${rx}" fill="${p.tile}"/><g transform="scale(${S})">${ticket(p)}</g>`;
+  const tile = Array.isArray(p.tile)
+    ? `<defs><linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${p.tile[0]}"/><stop offset="1" stop-color="${p.tile[1]}"/>
+      </linearGradient></defs><rect width="${OUT}" height="${OUT}" rx="${rx}" fill="url(#tile)"/>`
+    : `<rect width="${OUT}" height="${OUT}" rx="${rx}" fill="${p.tile}"/>`;
+  return `${tile}<g transform="scale(${S})">${ticket(p)}</g>`;
 }
 
 /** Scale a piece of OUT-space art about the centre by `k` (Android adaptive/monochrome safe zone). */
@@ -167,11 +179,13 @@ function writeIconBundle() {
     renderPng(svg(`<g transform="scale(${S})">${ticket(PALETTE_BRAND, { shadow: false })}</g>`)),
   );
   const manifest = {
-    // Per-appearance tile: brand orange by default, solid black in dark mode (Apple's dark-icon
-    // guidance; the user-facing ask behind this file's dark handling).
+    // Per-appearance tile: brand orange by default; in dark mode the 'system-dark' fill preset —
+    // the bare-string serialization Icon Composer itself writes (verified against shipping .icon
+    // bundles, e.g. UTM's) for the system's standard dark-grey glass gradient, so the dark tile
+    // matches the built-in apps exactly instead of hand-approximating (or flattening to #000).
     'fill-specializations': [
       { value: { solid: srgb(ORANGE) } },
-      { appearance: 'dark', value: { solid: srgb('#000000') } },
+      { appearance: 'dark', value: 'system-dark' },
     ],
     groups: [
       {

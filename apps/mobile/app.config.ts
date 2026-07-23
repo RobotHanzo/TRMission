@@ -55,8 +55,9 @@ const config: ExpoConfig = {
     // withIosIcons copies the bundle into the Xcode project and points
     // ASSETCATALOG_COMPILER_APPICON_NAME at it; Xcode 26's actool (mobile-ios.yml pins macos-26)
     // renders true glass for iOS 26 — no more system-frosted legacy PNG — plus flattened fallbacks
-    // for older iOS, with a solid-black tile in dark mode. If actool ever rejects the bundle,
-    // revert to the still-generated flat trio:
+    // for older iOS, with the system's standard dark-grey tile in dark mode ('system-dark' fill,
+    // matching the built-in apps). If actool ever rejects the bundle, revert to the
+    // still-generated flat trio:
     //   icon: { light: './assets/icon.png', dark: './assets/icon-dark.png', tinted: './assets/icon-tinted.png' }
     icon: './assets/TRMission.icon',
     bundleIdentifier: 'dev.robothanzo.trmission',

@@ -7,9 +7,7 @@
     },
     {
       "appearance": "dark",
-      "value": {
-        "solid": "srgb:0.00000,0.00000,0.00000,1.00000"
-      }
+      "value": "system-dark"
     }
   ],
   "groups": [
