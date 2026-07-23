@@ -4,6 +4,7 @@ import { GameModule } from '../game/game.module';
 import { LobbyModule } from '../lobby/lobby.module';
 import { HistoryModule } from '../history/history.module';
 import { MapsModule } from '../maps/maps.module';
+import { PushModule } from '../push/push.module';
 import { DashboardConfig } from './dashboard-config';
 import { DashboardAccountRepo } from './dashboard-account.repo';
 import { DashboardAuditRepo } from './audit.repo';
@@ -33,6 +34,8 @@ import { DashboardLeaderboardController } from './dashboard-leaderboard.controll
 import { ModerationModule } from '../moderation/moderation.module';
 import { DashboardReportsService } from './dashboard-reports.service';
 import { DashboardReportsController } from './dashboard-reports.controller';
+import { DashboardPushService } from './dashboard-push.service';
+import { DashboardPushController } from './dashboard-push.controller';
 
 // Maintainer dashboard: access control lives in the separate `dashboardAccounts`
 // collection (role + per-account overrides referencing users._id); every mutating
@@ -49,6 +52,7 @@ import { DashboardReportsController } from './dashboard-reports.controller';
     RatingsModule,
     LeaderboardModule,
     ModerationModule,
+    PushModule,
   ],
   controllers: [
     DashboardController,
@@ -61,6 +65,7 @@ import { DashboardReportsController } from './dashboard-reports.controller';
     DashboardRatingsController,
     DashboardLeaderboardController,
     DashboardReportsController,
+    DashboardPushController,
   ],
   providers: [
     DashboardConfig,
@@ -79,6 +84,7 @@ import { DashboardReportsController } from './dashboard-reports.controller';
     DashboardRatingsService,
     DashboardLeaderboardService,
     DashboardReportsService,
+    DashboardPushService,
   ],
   // AccountModule's deletion flow checks maintainer status (the same "revoke access first"
   // protection the ban flow uses) — the repo is the only export; services stay internal.

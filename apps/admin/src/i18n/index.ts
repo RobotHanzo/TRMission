@@ -17,6 +17,7 @@ const zhHant = {
     maintainers: '維護者',
     audit: '稽核',
     purge: '清理',
+    push: '推播測試',
     logout: '登出',
     collapse: '收合選單',
     theme: '切換主題',
@@ -379,6 +380,7 @@ const zhHant = {
       'maintainer.grant': '授權維護者',
       'maintainer.update': '更新維護者',
       'maintainer.revoke': '撤銷維護者',
+      'push.test': '發送測試推播',
     },
   },
   features: {
@@ -426,6 +428,7 @@ const zhHant = {
     'maps.read': '檢視地圖',
     'maps.moderate': '管理地圖',
     'ratings.read': '檢視玩家評分',
+    'push.test': '發送測試推播',
   },
   purge: {
     title: '閒置清理',
@@ -446,6 +449,31 @@ const zhHant = {
     colCapped: '達上限',
     cappedYes: '是',
   },
+  push: {
+    title: '推播測試',
+    description:
+      '對指定帳號已註冊的裝置發送一則真實推播通知(套用正式文案),透過實際的 FCM/APNs 管道發送,' +
+      '用於驗證推播管線是否正常運作,無需真的開一局遊戲。',
+    statusEnabled: '推播已啟用',
+    statusDisabled: '尚未設定推播憑證(FCM/APNs)',
+    targetLabel: '目標帳號',
+    pickUser: '選擇帳號',
+    changeUser: '更換',
+    pickTitle: '選擇帳號',
+    kindLabel: '推播類型',
+    kind: {
+      your_turn: '輪到你了',
+      game_started: '對局開始',
+      game_over: '對局結束',
+      game_paused: '對局暫停',
+    },
+    send: '發送測試推播',
+    resultSent: '已發送至 {{sent}} 台裝置',
+    resultPartial: '已發送至 {{sent}} 台裝置,{{failed}} 台失敗',
+    resultNoDevices: '此帳號尚未註冊任何裝置',
+    resultAllFailed: '所有裝置發送皆失敗',
+    resultDisabled: '推播尚未啟用(伺服器未設定 FCM/APNs 憑證)',
+  },
 };
 
 // Keep the SAME key tree in both languages.
@@ -464,6 +492,7 @@ const en: typeof zhHant = {
     maintainers: 'Maintainers',
     audit: 'Audit',
     purge: 'Purge',
+    push: 'Push test',
     logout: 'Sign out',
     collapse: 'Collapse menu',
     theme: 'Toggle theme',
@@ -833,6 +862,7 @@ const en: typeof zhHant = {
       'maintainer.grant': 'Granted maintainer',
       'maintainer.update': 'Updated maintainer',
       'maintainer.revoke': 'Revoked maintainer',
+      'push.test': 'Sent test push',
     },
   },
   features: {
@@ -881,6 +911,7 @@ const en: typeof zhHant = {
     'maps.read': 'View maps',
     'maps.moderate': 'Manage maps',
     'ratings.read': 'View player ratings',
+    'push.test': 'Send test push notifications',
   },
   purge: {
     title: 'Inactive session purge',
@@ -901,6 +932,32 @@ const en: typeof zhHant = {
     colGames: 'Games',
     colCapped: 'Capped',
     cappedYes: 'Yes',
+  },
+  push: {
+    title: 'Push test',
+    description:
+      "Sends a real push notification (the actual production copy) to one account's " +
+      'registered device(s), through the real FCM/APNs transports — verifies the push ' +
+      'pipeline without staging a whole game.',
+    statusEnabled: 'Push is enabled',
+    statusDisabled: 'No push credentials configured (FCM/APNs)',
+    targetLabel: 'Target account',
+    pickUser: 'Pick account',
+    changeUser: 'Change',
+    pickTitle: 'Select an account',
+    kindLabel: 'Push kind',
+    kind: {
+      your_turn: 'Your turn',
+      game_started: 'Game started',
+      game_over: 'Game over',
+      game_paused: 'Game paused',
+    },
+    send: 'Send test push',
+    resultSent: 'Sent to {{sent}} device(s)',
+    resultPartial: 'Sent to {{sent}} device(s), {{failed}} failed',
+    resultNoDevices: 'No devices registered for this account',
+    resultAllFailed: 'All device deliveries failed',
+    resultDisabled: 'Push is disabled (no FCM/APNs credentials configured server-side)',
   },
 };
 

@@ -24,7 +24,8 @@ export type DashboardAuditAction =
   | 'map.unshare'
   | 'map.transfer'
   | 'config.features'
-  | 'report.resolve';
+  | 'report.resolve'
+  | 'push.test';
 
 export interface AuditTarget {
   type: 'user' | 'game' | 'room' | 'maintainer' | 'map' | 'report';

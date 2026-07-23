@@ -71,32 +71,62 @@ export class PushService {
     try {
       const humans = [...new Set(userIds)].filter((id) => !isBotId(id));
       if (humans.length === 0) return;
-      const rows = await this.devices.listForUsers(humans);
-      if (rows.length === 0) return;
-
-      const locales = new Map<string, PushLocale>();
-      for (const id of humans) {
-        const u = await this.users.findById(id);
-        locales.set(id, u?.preferences?.locale === 'en' ? 'en' : 'zh-Hant');
-      }
-
-      await Promise.all(
-        rows.map(async (row) => {
-          const transport = this.transports.find((t) => t.platform === row.platform);
-          if (!transport) return;
-          const s = STRINGS[kind][locales.get(row.userId) ?? 'zh-Hant'];
-          const msg: PushMessage = { title: s.title, body: s.body, data: { kind, ...data } };
-          const outcome = await transport.send(row._id, msg);
-          if (outcome === 'ok') {
-            this.metrics.pushSent(kind);
-          } else {
-            this.metrics.pushFailed(kind);
-            if (outcome === 'prune') await this.devices.prune(row._id);
-          }
-        }),
-      );
+      await this.deliver(humans, kind, data);
     } catch (e) {
       this.log.warn(`push notify failed: ${(e as Error).message}`);
     }
+  }
+
+  /**
+   * Dashboard "send test push" (`dashboard-push.controller.ts`): fires the same real,
+   * localized delivery path as `notify`, but reports the outcome instead of swallowing it —
+   * an operator needs to tell "push disabled" from "no devices" from "sent to N of M".
+   */
+  async sendTest(
+    userId: string,
+    kind: PushKind,
+  ): Promise<{ enabled: boolean; deviceCount: number; sent: number; failed: number }> {
+    if (!this.enabled) return { enabled: false, deviceCount: 0, sent: 0, failed: 0 };
+    const { deviceCount, sent, failed } = await this.deliver([userId], kind, { test: '1' });
+    return { enabled: true, deviceCount, sent, failed };
+  }
+
+  private async deliver(
+    userIds: string[],
+    kind: PushKind,
+    data: Record<string, string>,
+  ): Promise<{ deviceCount: number; sent: number; failed: number }> {
+    const rows = await this.devices.listForUsers(userIds);
+    if (rows.length === 0) return { deviceCount: 0, sent: 0, failed: 0 };
+
+    const locales = new Map<string, PushLocale>();
+    for (const id of userIds) {
+      const u = await this.users.findById(id);
+      locales.set(id, u?.preferences?.locale === 'en' ? 'en' : 'zh-Hant');
+    }
+
+    let sent = 0;
+    let failed = 0;
+    await Promise.all(
+      rows.map(async (row) => {
+        const transport = this.transports.find((t) => t.platform === row.platform);
+        if (!transport) {
+          failed++;
+          return;
+        }
+        const s = STRINGS[kind][locales.get(row.userId) ?? 'zh-Hant'];
+        const msg: PushMessage = { title: s.title, body: s.body, data: { kind, ...data } };
+        const outcome = await transport.send(row._id, msg);
+        if (outcome === 'ok') {
+          sent++;
+          this.metrics.pushSent(kind);
+        } else {
+          failed++;
+          this.metrics.pushFailed(kind);
+          if (outcome === 'prune') await this.devices.prune(row._id);
+        }
+      }),
+    );
+    return { deviceCount: rows.length, sent, failed };
   }
 }

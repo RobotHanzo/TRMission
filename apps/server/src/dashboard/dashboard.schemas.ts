@@ -343,6 +343,28 @@ export const PurgeStatusSchema = z.object({
   ),
 });
 
+// ---- push -----------------------------------------------------------------------
+
+export const PushKindSchema = z.enum(['your_turn', 'game_started', 'game_over', 'game_paused']);
+
+export const PushStatusSchema = z.object({
+  /** Whether at least one platform transport (FCM/APNs) has credentials configured. */
+  enabled: z.boolean(),
+});
+
+export const PushTestRequestSchema = z.object({
+  userId: z.string(),
+  kind: PushKindSchema,
+});
+export class PushTestRequestDto extends createZodDto(PushTestRequestSchema) {}
+
+export const PushTestResultSchema = z.object({
+  enabled: z.boolean(),
+  deviceCount: z.number(),
+  sent: z.number(),
+  failed: z.number(),
+});
+
 // ---- maps ------------------------------------------------------------------------
 
 export const MapAdminRowSchema = z.object({

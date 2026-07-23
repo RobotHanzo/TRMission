@@ -223,6 +223,17 @@ export interface PurgeStatus {
   }[];
 }
 
+export type PushKind = 'your_turn' | 'game_started' | 'game_over' | 'game_paused';
+export interface PushStatus {
+  enabled: boolean;
+}
+export interface PushTestResult {
+  enabled: boolean;
+  deviceCount: number;
+  sent: number;
+  failed: number;
+}
+
 export type ReportStatusFilter = 'open' | 'resolved' | 'all';
 export interface ReportRow {
   id: string;
@@ -451,6 +462,10 @@ export const api = {
 
   getPurgeStatus: () => req<PurgeStatus>('GET', '/dashboard/purge/status'),
   runPurge: () => req<PurgeRunResult>('POST', '/dashboard/purge/run', {}),
+
+  getPushStatus: () => req<PushStatus>('GET', '/dashboard/push/status'),
+  sendTestPush: (userId: string, kind: PushKind) =>
+    req<PushTestResult>('POST', '/dashboard/push/test', { userId, kind }),
 
   listMaps: (opts: { cursor?: string } = {}) => req<MapsPage>('GET', `/dashboard/maps${qs(opts)}`),
   getMap: (id: string) => req<MapAdminDetail>('GET', `/dashboard/maps/${encodeURIComponent(id)}`),

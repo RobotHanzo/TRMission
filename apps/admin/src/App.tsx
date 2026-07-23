@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import {
   Activity,
+  BellRing,
   ClipboardList,
   DoorOpen,
   Flag,
@@ -34,6 +35,7 @@ import { MaintainersView } from './views/MaintainersView';
 import { AuditView } from './views/AuditView';
 import { PurgeView } from './views/PurgeView';
 import { ReportsView } from './views/ReportsView';
+import { PushView } from './views/PushView';
 import { ToastStack } from './components/ToastStack';
 
 const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof Users }[] = [
@@ -49,6 +51,7 @@ const NAV: { view: AdminView; permission: DashboardPermission; icon: typeof User
   { view: 'maintainers', permission: 'maintainers.read', icon: ShieldCheck },
   { view: 'audit', permission: 'audit.read', icon: ClipboardList },
   { view: 'purge', permission: 'purge.read', icon: Trash2 },
+  { view: 'push', permission: 'push.test', icon: BellRing },
 ];
 
 const ROLE_KEY = {
@@ -82,6 +85,8 @@ function ActiveView({ view }: { view: AdminView }) {
       return <PurgeView />;
     case 'reports':
       return <ReportsView />;
+    case 'push':
+      return <PushView />;
     default:
       return <OverviewView />;
   }
