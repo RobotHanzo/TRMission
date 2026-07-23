@@ -20,6 +20,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {
   ArrowLeft,
+  History,
   Layers,
   MessageSquare,
   Sparkles,
@@ -62,12 +63,13 @@ import { PaymentModal } from '../components/game/PaymentModal';
 import { TicketChooser } from '../components/game/TicketChooser';
 import { TunnelModal } from '../components/game/TunnelModal';
 import { ScoreBoard } from '../components/game/ScoreBoard';
-import { CommsPanel } from '../components/game/CommsPanel';
+import { LogPanel } from '../components/game/LogPanel';
+import { ChatPanel } from '../components/game/ChatPanel';
 import { AnimationLayer } from '../components/game/AnimationLayer';
 import { registerAnimTarget } from '../components/game/animTargets';
 import { RADIUS, useTheme } from '../theme/useTheme';
 import { rgba } from '../theme/shade';
-import { GamePanel, TrayHead } from '../theme/gameChrome';
+import { GamePanel, TrayHead, panelCardStyle } from '../theme/gameChrome';
 import { dockTabs, stageTier, type DockTabKey } from './stageLayout';
 
 export interface GameStageProps {
@@ -115,6 +117,7 @@ const TAB_ICONS: Record<DockTabKey, LucideIcon> = {
   missions: Ticket,
   events: Sparkles,
   players: Users,
+  log: History,
   comms: MessageSquare,
 };
 
@@ -156,7 +159,7 @@ export function GameStage({
   const [dockTab, setDockTab] = useState<DockTabKey>('hand');
   // Compact only: collapse the dock down to its tab bar so the board gets the full window.
   const [dockCollapsed, setDockCollapsed] = useState(false);
-  const [commsTab, setCommsTab] = useState<'rail' | 'comms'>('rail');
+  const [commsTab, setCommsTab] = useState<'rail' | 'log' | 'comms'>('rail');
 
   const version = snapshot.stateVersion;
   useEffect(() => {
@@ -478,8 +481,19 @@ export function GameStage({
       {ticketsSection}
     </>
   );
-  // Chat/comms is a live-multiplayer feature; the offline/tutorial sandbox has none.
-  const comms = sandbox ? <View /> : <CommsPanel chatDisabled={isSpectator} />;
+  // The action log is just a projection of events that already happened, so it's available in
+  // every game — live, offline vs bots, tutorial, or replay. Chat is a live-multiplayer feature
+  // only (there's no one to talk to offline, and replay has no live connection to send over).
+  const logSection = (
+    <View style={[panelCardStyle(tokens), styles.commsCard]}>
+      <LogPanel />
+    </View>
+  );
+  const chatSection = sandbox ? null : (
+    <View style={[panelCardStyle(tokens), styles.commsCard]}>
+      <ChatPanel disabled={isSpectator} />
+    </View>
+  );
 
   const spectatorBanner = isSpectator ? (
     <View
@@ -715,8 +729,10 @@ export function GameStage({
                     <EventsPanel />
                   ) : dockTab === 'players' ? (
                     playersPanel(false)
+                  ) : dockTab === 'log' ? (
+                    logSection
                   ) : (
-                    comms
+                    chatSection
                   )}
                 </ScrollView>
               </Animated.View>
@@ -742,23 +758,22 @@ export function GameStage({
           >
             {railInner}
           </ScrollView>
-          {!sandbox && (
-            <View
-              style={[
-                styles.commsPane,
-                { borderLeftColor: tokens.line, paddingBottom: insets.bottom },
-              ]}
-            >
-              {comms}
-            </View>
-          )}
+          <View
+            style={[
+              styles.commsPane,
+              { borderLeftColor: tokens.line, paddingBottom: insets.bottom },
+            ]}
+          >
+            {logSection}
+            {chatSection}
+          </View>
         </View>
         {overlays}
       </View>
     );
   }
 
-  // two-pane: board + rail, with a rail↔comms tab pair (ports the web narrow-desktop branch).
+  // two-pane: board + rail, with a rail↔log↔comms tab set (ports the web narrow-desktop branch).
   return (
     <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: insets.top }]}>
       <View style={styles.row}>
@@ -767,9 +782,9 @@ export function GameStage({
           {floatHud(8, false)}
         </View>
         <View style={[styles.rail, { borderLeftColor: tokens.line }]}>
-          {!sandbox && (
-            <View style={styles.commsTabs} accessibilityRole="tablist">
-              {(['rail', 'comms'] as const).map((key) => {
+          <View style={styles.commsTabs} accessibilityRole="tablist">
+            {(sandbox ? (['rail', 'log'] as const) : (['rail', 'log', 'comms'] as const)).map(
+              (key) => {
                 const active = commsTab === key;
                 return (
                   <Pressable
@@ -786,15 +801,15 @@ export function GameStage({
                     onPress={() => setCommsTab(key)}
                   >
                     <Text style={[styles.dockTabText, { color: active ? '#fff' : tokens.inkSoft }]}>
-                      {t(key === 'rail' ? 'tabRail' : 'tabComms')}
+                      {t(key === 'rail' ? 'tabRail' : key === 'log' ? 'log.heading' : 'chat.heading')}
                     </Text>
                   </Pressable>
                 );
-              })}
-            </View>
-          )}
+              },
+            )}
+          </View>
           <ScrollView style={styles.fill} contentContainerStyle={styles.railContent}>
-            {commsTab === 'rail' || sandbox ? railInner : comms}
+            {commsTab === 'rail' ? railInner : commsTab === 'log' ? logSection : chatSection}
           </ScrollView>
         </View>
       </View>
@@ -899,7 +914,9 @@ const styles = StyleSheet.create({
     width: COMMS_WIDTH,
     borderLeftWidth: 1,
     padding: 10,
+    gap: 10,
   },
+  commsCard: { flex: 1, gap: 10 },
   commsTabs: {
     flexDirection: 'row',
     gap: 6,

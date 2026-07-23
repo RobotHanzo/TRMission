@@ -17,6 +17,7 @@ describe('dockTabs', () => {
       'draw',
       'missions',
       'players',
+      'log',
       'comms',
     ]);
     expect(dockTabs(true).map((t) => t.key)).toContain('events');
@@ -29,8 +30,15 @@ describe('dockTabs', () => {
       'missions',
       'events',
       'players',
+      'log',
       'comms',
     ]);
+  });
+
+  it('keeps log and comms as separate tabs (log has no live-multiplayer requirement)', () => {
+    const tabs = dockTabs(true);
+    expect(tabs.find((t) => t.key === 'log')?.labelKey).toBe('log.heading');
+    expect(tabs.find((t) => t.key === 'comms')?.labelKey).toBe('chat.heading');
   });
 
   it('carries count sources only on hand and missions', () => {
