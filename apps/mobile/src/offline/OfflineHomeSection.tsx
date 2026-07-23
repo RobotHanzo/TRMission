@@ -6,6 +6,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { officialMapById } from '@trm/map-data';
+import { DepartureRow, PrimaryButton, SectionLabel } from '../theme/chrome';
+import { useTheme } from '../theme/useTheme';
 import { openLocalGameStore } from './localStore';
 import type { LocalGameStorePort, OfflineGameListEntry } from './types';
 
@@ -18,6 +20,7 @@ export interface OfflineHomeSectionProps {
 
 export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSectionProps) {
   const { t, i18n } = useTranslation();
+  const { tokens } = useTheme();
   const zh = i18n.language.startsWith('zh');
   const [entries, setEntries] = useState<OfflineGameListEntry[]>([]);
 
@@ -44,33 +47,20 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
 
   return (
     <View style={styles.section}>
-      <Pressable
-        testID="offline-play-bots"
-        accessibilityRole="button"
-        style={styles.play}
-        onPress={onNewGame}
-      >
-        <Text style={styles.playText}>{t('home.playBots')}</Text>
-      </Pressable>
+      <PrimaryButton testID="offline-play-bots" title={t('home.playBots')} onPress={onNewGame} />
 
       {entries.length > 0 && (
         <View style={styles.list}>
-          <Text style={styles.listTitle}>{t('home.resumeOffline')}</Text>
+          <SectionLabel>{t('home.resumeOffline')}</SectionLabel>
           {entries.map((e) => (
             <View key={e.gameId} style={styles.rowWrap}>
-              <Pressable
+              <DepartureRow
                 testID={`offline-resume-${e.gameId}`}
-                accessibilityRole="button"
                 style={styles.row}
+                title={`${mapName(e.mapId)} · ${t('offline.botsN', { count: e.botCount })}`}
+                desc={`${t('offline.inProgress')} · ${new Date(e.updatedAt).toLocaleString()}`}
                 onPress={() => onResume(e.gameId)}
-              >
-                <Text style={styles.rowTitle}>
-                  {mapName(e.mapId)} · {t('offline.botsN', { count: e.botCount })}
-                </Text>
-                <Text style={styles.rowSub}>
-                  {t('offline.inProgress')} · {new Date(e.updatedAt).toLocaleString()}
-                </Text>
-              </Pressable>
+              />
               <Pressable
                 testID={`offline-delete-${e.gameId}`}
                 accessibilityRole="button"
@@ -78,7 +68,7 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
                 onPress={() => void remove(e.gameId)}
                 style={styles.delete}
               >
-                <Text style={styles.deleteText}>×</Text>
+                <Text style={[styles.deleteText, { color: tokens.inkSoft }]}>×</Text>
               </Pressable>
             </View>
           ))}
@@ -90,20 +80,9 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
 
 const styles = StyleSheet.create({
   section: { gap: 12 },
-  play: {
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: '#0f5fa6',
-    alignItems: 'center',
-    minHeight: 44,
-  },
-  playText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   list: { gap: 8 },
-  listTitle: { fontSize: 14, opacity: 0.7 },
   rowWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  row: { flex: 1, padding: 12, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(0,0,0,0.25)' },
-  rowTitle: { fontSize: 15, fontWeight: '600' },
-  rowSub: { fontSize: 12, opacity: 0.6, marginTop: 2 },
+  row: { flex: 1 },
   delete: { padding: 10, minHeight: 44, justifyContent: 'center' },
-  deleteText: { fontSize: 18, opacity: 0.6 },
+  deleteText: { fontSize: 18 },
 });

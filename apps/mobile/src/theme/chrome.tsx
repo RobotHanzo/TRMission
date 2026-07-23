@@ -61,25 +61,31 @@ export function Screen({
   );
 }
 
-/** The fixed bilingual logotype (mark + stacked wordmark) — ports web's BrandBanner icon+text
- *  lockup 1:1; never switches with locale. */
+/** The fixed bilingual logotype (mark + stacked wordmark) — ports web's BrandBanner lockup 1:1
+ *  (`.brand-banner` in apps/web app.css): the −6° skew, em-derived tracking, and the fixed ember
+ *  orange that never switches with theme or locale. */
 export function BrandWordmark({ size = 'header' }: { size?: 'header' | 'hero' }) {
   const { tokens } = useTheme();
   const hero = size === 'hero';
   const iconSize = hero ? 80 : 36;
+  const zhSize = hero ? 48 : 17;
+  const enSize = hero ? 16 : 7;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: hero ? SPACE[3] : SPACE[2] }}>
       <Image
         source={BRAND_ICON}
         style={{ width: iconSize, height: iconSize, borderRadius: iconSize * 0.22 }}
       />
-      <View>
+      <View style={{ gap: 3 }}>
         <Text
           style={{
-            color: tokens.ember,
+            // Web hardcodes this hex too — the 台鐵任務 line stays this ember in both themes.
+            color: '#e55509',
             fontWeight: '700',
-            fontSize: hero ? 40 : 20,
-            letterSpacing: hero ? 6 : 2,
+            fontSize: zhSize,
+            lineHeight: zhSize,
+            letterSpacing: zhSize * 0.056,
+            transform: [{ skewX: '-6deg' }],
           }}
         >
           台鐵任務
@@ -87,10 +93,10 @@ export function BrandWordmark({ size = 'header' }: { size?: 'header' | 'hero' })
         <Text
           style={{
             color: tokens.brandNavy,
-            fontWeight: '700',
-            fontSize: hero ? 15 : 9,
-            letterSpacing: hero ? 8 : 4,
-            marginTop: hero ? 2 : 0,
+            fontWeight: '600',
+            fontSize: enSize,
+            letterSpacing: enSize * 0.455,
+            transform: [{ skewX: '-6deg' }],
           }}
         >
           TRMISSION
@@ -133,6 +139,104 @@ export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<
     >
       {children}
     </View>
+  );
+}
+
+interface DepartureRowProps {
+  /** A string renders in the row's title voice; pass a node for custom lockups (e.g. a code chip). */
+  title: ReactNode;
+  /** Leading glyph, rendered in a rounded badge (mirrors web's welcome-option-icon). */
+  icon?: ReactNode;
+  desc?: string;
+  /** Inline slot right of the title (status tick, badge). */
+  meta?: ReactNode;
+  /** Bottom boarding line ("開始教學 ›") — welcome tickets use this instead of a button. */
+  cta?: string;
+  /** Right-edge slot; a pressable row without a cta gets a chevron by default. */
+  trailing?: ReactNode;
+  /** Train-line stripe on the left edge: 'accent' marks the recommended departure. */
+  stripe?: 'accent' | 'quiet';
+  onPress?(): void;
+  disabled?: boolean;
+  testID?: string;
+  style?: StyleProp<ViewStyle>;
+}
+
+/** Departure card: the timetable's pressable unit — a hairline ticket with an optional
+ *  train-line stripe on the left edge, title/desc column, and a boarding chevron. Home and
+ *  the welcome takeover list everything boardable (tutorial, offline games, rooms) through it. */
+export function DepartureRow({
+  title,
+  icon,
+  desc,
+  meta,
+  cta,
+  trailing,
+  stripe,
+  onPress,
+  disabled,
+  testID,
+  style,
+}: DepartureRowProps) {
+  const { tokens } = useTheme();
+  const accent = stripe === 'accent';
+  const right =
+    trailing ??
+    (onPress && cta == null ? (
+      <Text style={[styles.depChevron, { color: tokens.inkSoft }]}>›</Text>
+    ) : null);
+  const body = (
+    <>
+      {stripe && (
+        <View
+          style={[styles.depStripe, { backgroundColor: accent ? tokens.accent : tokens.line }]}
+        />
+      )}
+      {icon != null && (
+        <View style={[styles.depIcon, { backgroundColor: tokens.surface2 }]}>{icon}</View>
+      )}
+      <View style={styles.depBody}>
+        <View style={styles.depTitleRow}>
+          {typeof title === 'string' ? (
+            <Text style={[styles.depTitle, { color: tokens.ink }]}>{title}</Text>
+          ) : (
+            title
+          )}
+          {meta}
+        </View>
+        {desc != null && <Text style={[styles.depDesc, { color: tokens.inkSoft }]}>{desc}</Text>}
+        {cta != null && (
+          <Text style={[styles.depCta, { color: accent ? tokens.accent : tokens.ink }]}>
+            {cta} ›
+          </Text>
+        )}
+      </View>
+      {right != null && <View style={styles.depTrailing}>{right}</View>}
+    </>
+  );
+  const surface = {
+    backgroundColor: tokens.surface,
+    borderColor: tokens.line,
+  };
+  if (!onPress) {
+    return <View style={[styles.depRow, surface, style]}>{body}</View>;
+  }
+  return (
+    <Pressable
+      accessibilityRole="button"
+      testID={testID}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.depRow,
+        surface,
+        pressed && styles.pressed,
+        disabled && styles.disabled,
+        style,
+      ]}
+    >
+      {body}
+    </Pressable>
   );
 }
 
@@ -253,6 +357,30 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
+  depRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    borderWidth: 1,
+    borderRadius: RADIUS.md,
+    overflow: 'hidden',
+  },
+  depStripe: { width: 4 },
+  depIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginLeft: 14,
+  },
+  depBody: { flex: 1, padding: 14, gap: 5 },
+  depTitleRow: { flexDirection: 'row', alignItems: 'center', gap: SPACE[2] },
+  depTitle: { fontSize: 16, fontWeight: '700', flexShrink: 1 },
+  depDesc: { fontSize: 14, lineHeight: 20 },
+  depCta: { fontSize: 15, fontWeight: '700', marginTop: 3 },
+  depChevron: { fontSize: 22, fontWeight: '400', lineHeight: 24 },
+  depTrailing: { justifyContent: 'center', paddingRight: 14 },
   glyphRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   glyphHub: {
     width: 16,
