@@ -6,6 +6,7 @@ import { api } from '../net/rest';
 import { SERVER_ORIGIN } from '../config';
 import { useSession } from '../store/session';
 import { useTheme } from '../theme/useTheme';
+import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
 import { BuilderWebView } from './builderWebView';
 
 /** Entry gate: mirror of web's useHasFeature('mapBuilder') — cosmetic; server 403s regardless. */
@@ -23,6 +24,7 @@ export function useCanBuild(): boolean {
 export default function BuilderScreen(): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const headerPad = useGlassHeaderPad();
   const net = useNetInfo();
   const [handoffUrl, setHandoffUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -50,31 +52,42 @@ export default function BuilderScreen(): React.JSX.Element {
 
   if (!online) {
     return (
-      <View style={styles.center} testID="builder-offline">
-        <Text style={[styles.title, { color: tokens.ink }]}>{t('builder.offlineTitle')}</Text>
-        <Text style={[styles.body, { color: tokens.inkSoft }]}>{t('builder.offlineBody')}</Text>
+      <View style={[styles.fill, { paddingTop: headerPad }]}>
+        <View style={styles.center} testID="builder-offline">
+          <Text style={[styles.title, { color: tokens.ink }]}>{t('builder.offlineTitle')}</Text>
+          <Text style={[styles.body, { color: tokens.inkSoft }]}>{t('builder.offlineBody')}</Text>
+        </View>
       </View>
     );
   }
   if (failed) {
     return (
-      <View style={styles.center} testID="builder-error">
-        <Text style={[styles.title, { color: tokens.ink }]}>{t('builder.errorTitle')}</Text>
-        <Text style={[styles.body, { color: tokens.inkSoft }]}>{t('builder.errorBody')}</Text>
+      <View style={[styles.fill, { paddingTop: headerPad }]}>
+        <View style={styles.center} testID="builder-error">
+          <Text style={[styles.title, { color: tokens.ink }]}>{t('builder.errorTitle')}</Text>
+          <Text style={[styles.body, { color: tokens.inkSoft }]}>{t('builder.errorBody')}</Text>
+        </View>
       </View>
     );
   }
   if (!handoffUrl) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator />
+      <View style={[styles.fill, { paddingTop: headerPad }]}>
+        <View style={styles.center}>
+          <ActivityIndicator />
+        </View>
       </View>
     );
   }
-  return <BuilderWebView uri={handoffUrl} />;
+  return (
+    <View style={[styles.fill, { paddingTop: headerPad }]}>
+      <BuilderWebView uri={handoffUrl} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
+  fill: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 8 },
   title: { fontSize: 18, fontWeight: '600' },
   body: { fontSize: 14, textAlign: 'center', opacity: 0.7 },

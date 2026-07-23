@@ -12,12 +12,14 @@ import { useHasFeature } from '../store/session';
 import { useUi } from '../store/ui';
 import { useTheme } from '../theme/useTheme';
 import { ErrorText, MutedText } from '../theme/chrome';
+import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'History'>;
 
 export function HistoryScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const headerPad = useGlassHeaderPad();
   const canReplay = useHasFeature('replayReview');
   const locale = useUi((s) => s.locale);
   const [rows, setRows] = useState<MatchSummary[] | null>(null);
@@ -43,6 +45,8 @@ export function HistoryScreen({ navigation }: Props): React.JSX.Element {
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.paper }]}>
+      {/* Reserves room under the floating iOS Liquid Glass header (navigation.tsx); 0 on Android. */}
+      {headerPad > 0 && <View style={{ height: headerPad }} />}
       {error && <ErrorText>{t('history.loadFailed')}</ErrorText>}
       {rows && rows.length === 0 && <MutedText center>{t('history.empty')}</MutedText>}
       <FlatList

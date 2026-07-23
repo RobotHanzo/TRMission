@@ -34,6 +34,7 @@ import { useReducedMotion } from '../hooks/useReducedMotion';
 import { seatColor } from '../theme/colors';
 import { useTheme } from '../theme/useTheme';
 import { ErrorText, MutedText } from '../theme/chrome';
+import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
 import { GameStage } from './GameStage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Replay'>;
@@ -46,6 +47,7 @@ type LoadState =
 export default function ReplayScreen({ route, navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const headerPad = useGlassHeaderPad();
   const { gameId } = route.params;
   const user = useSession((s) => s.user);
   const setMembers = useRoster((s) => s.setMembers);
@@ -131,20 +133,24 @@ export default function ReplayScreen({ route, navigation }: Props): React.JSX.El
 
   if (load.kind === 'loading') {
     return (
-      <View style={[styles.center, { backgroundColor: tokens.paper }]}>
-        <MutedText center>{t('game.connecting')}</MutedText>
+      <View style={[styles.fill, { paddingTop: headerPad }]}>
+        <View style={[styles.center, { backgroundColor: tokens.paper }]}>
+          <MutedText center>{t('game.connecting')}</MutedText>
+        </View>
       </View>
     );
   }
   if (load.kind === 'error') {
     return (
-      <View style={[styles.center, { backgroundColor: tokens.paper }]}>
-        <ErrorText>{t(load.msgKey)}</ErrorText>
-        <Pressable accessibilityRole="button" onPress={() => navigation.goBack()}>
-          <Text style={[styles.backLink, { color: tokens.blue }]}>
-            {t('history.backToHistory')}
-          </Text>
-        </Pressable>
+      <View style={[styles.fill, { paddingTop: headerPad }]}>
+        <View style={[styles.center, { backgroundColor: tokens.paper }]}>
+          <ErrorText>{t(load.msgKey)}</ErrorText>
+          <Pressable accessibilityRole="button" onPress={() => navigation.goBack()}>
+            <Text style={[styles.backLink, { color: tokens.blue }]}>
+              {t('history.backToHistory')}
+            </Text>
+          </Pressable>
+        </View>
       </View>
     );
   }
@@ -186,6 +192,7 @@ function ReplayStage({
 }): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const headerPad = useGlassHeaderPad();
   const gameStore = useGameStoreApi();
   const logStore = useLogStoreApi();
   const reducedMotion = useReducedMotion();
@@ -209,20 +216,24 @@ function ReplayStage({
 
   if (player.error) {
     return (
-      <View style={[styles.center, { backgroundColor: tokens.paper }]}>
-        <ErrorText>{t('history.notReplayable')}</ErrorText>
-        <Pressable accessibilityRole="button" onPress={onLeave}>
-          <Text style={[styles.backLink, { color: tokens.blue }]}>
-            {t('history.backToHistory')}
-          </Text>
-        </Pressable>
+      <View style={[styles.fill, { paddingTop: headerPad }]}>
+        <View style={[styles.center, { backgroundColor: tokens.paper }]}>
+          <ErrorText>{t('history.notReplayable')}</ErrorText>
+          <Pressable accessibilityRole="button" onPress={onLeave}>
+            <Text style={[styles.backLink, { color: tokens.blue }]}>
+              {t('history.backToHistory')}
+            </Text>
+          </Pressable>
+        </View>
       </View>
     );
   }
   if (!snapshot) {
     return (
-      <View style={[styles.center, { backgroundColor: tokens.paper }]}>
-        <MutedText center>{t('game.connecting')}</MutedText>
+      <View style={[styles.fill, { paddingTop: headerPad }]}>
+        <View style={[styles.center, { backgroundColor: tokens.paper }]}>
+          <MutedText center>{t('game.connecting')}</MutedText>
+        </View>
       </View>
     );
   }
@@ -230,7 +241,7 @@ function ReplayStage({
   const seatOf = new Map(players.map((p) => [p.userId, p.seat]));
 
   return (
-    <View style={styles.fill}>
+    <View style={[styles.fill, { paddingTop: headerPad }]}>
       <View style={styles.stage}>
         <GameStage
           snapshot={snapshot}

@@ -22,6 +22,7 @@ import { useUi } from '../store/ui';
 import { useTheme } from '../theme/useTheme';
 import { MutedText, SectionLabel } from '../theme/chrome';
 import { performAccountDeletion } from '../account/deleteAccount';
+import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
 import NotificationsRow from './settings/NotificationsRow';
 
 const VOLUME_STEPS = [0.25, 0.5, 0.75, 1] as const;
@@ -69,6 +70,7 @@ function Chips<T extends string | number>({
 export function SettingsScreen(): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const headerPad = useGlassHeaderPad();
   const haptics = useSettings((s) => s.haptics);
   const setHaptics = useSettings((s) => s.setHaptics);
   const isGuest = useSession((s) => s.user?.isGuest ?? true);
@@ -112,6 +114,8 @@ export function SettingsScreen(): React.JSX.Element {
 
   return (
     <ScrollView style={{ backgroundColor: tokens.paper }} contentContainerStyle={styles.container}>
+      {/* Reserves room under the floating iOS Liquid Glass header (navigation.tsx); 0 on Android. */}
+      {headerPad > 0 && <View style={{ height: headerPad }} />}
       <SectionLabel>{t('settings.appearance')}</SectionLabel>
       <Chips<Theme>
         options={[

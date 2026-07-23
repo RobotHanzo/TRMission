@@ -1,6 +1,7 @@
 import { createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import { Platform } from 'react-native';
 import { BootScreen } from './screens/BootScreen';
 import { GameScreen } from './screens/GameScreen';
 import { HomeScreen } from './screens/HomeScreen';
@@ -56,7 +57,7 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>();
  */
 export function RootNavigator(): React.JSX.Element {
   const { t } = useTranslation();
-  const { tokens } = useTheme();
+  const { tokens, dark } = useTheme();
   const booting = useSession((s) => s.booting);
   const user = useSession((s) => s.user);
 
@@ -64,13 +65,22 @@ export function RootNavigator(): React.JSX.Element {
     // The native-stack header is themed to the app palette (paper/dark), not the OS default white,
     // so sub-screen headers read as part of the app in both themes. Home hides it entirely — its
     // own BrandWordmark is the header, so the OS bar would only duplicate it as a bare white strip.
+    // On iOS, pushed screens get a real Liquid Glass bar instead: `headerTransparent` + a blur
+    // effect let UIKit render its native iOS 26 glass material rather than a flat colour bar
+    // (each such screen pads its own top content with useGlassHeaderPad()). Android keeps the
+    // flat opaque bar — Liquid Glass is an iOS-only design language.
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: tokens.surface },
         headerTintColor: tokens.ink,
-        headerTitleStyle: { color: tokens.ink, fontWeight: '700' },
+        headerTitleStyle: { fontWeight: '700' },
         headerShadowVisible: false,
         contentStyle: { backgroundColor: tokens.paper },
+        ...(Platform.OS === 'ios'
+          ? {
+              headerTransparent: true,
+              headerBlurEffect: dark ? 'systemChromeMaterialDark' : 'systemChromeMaterialLight',
+            }
+          : { headerStyle: { backgroundColor: tokens.surface } }),
       }}
     >
       {booting ? (

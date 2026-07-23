@@ -15,6 +15,7 @@ import {
 import { useSession } from '../store/session';
 import { useTheme } from '../theme/useTheme';
 import { ErrorText, MutedText } from '../theme/chrome';
+import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Leaderboard'>;
 
@@ -29,6 +30,7 @@ const METRIC_KEY: Record<LeaderboardMetric, string> = {
 export function LeaderboardScreen(_props: Props): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const headerPad = useGlassHeaderPad();
   const user = useSession((s) => s.user);
   const [scope, setScope] = useState<LeaderboardScopeKind>('allTime');
   const [metric, setMetric] = useState<LeaderboardMetric>('rating');
@@ -75,6 +77,8 @@ export function LeaderboardScreen(_props: Props): React.JSX.Element {
 
   return (
     <View style={[styles.container, { backgroundColor: tokens.paper }]}>
+      {/* Reserves room under the floating iOS Liquid Glass header (navigation.tsx); 0 on Android. */}
+      {headerPad > 0 && <View style={{ height: headerPad }} />}
       <View style={styles.tabRow}>
         {SCOPES.map((s) => (
           <Pressable

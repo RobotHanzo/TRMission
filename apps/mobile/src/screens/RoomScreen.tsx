@@ -46,6 +46,7 @@ import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
 import { seatColor } from '../theme/colors';
 import { useTheme } from '../theme/useTheme';
+import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
 import {
   Card,
   ErrorText,
@@ -130,6 +131,7 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
   const canConfigureEvents = useHasFeature('randomEvents');
   const locale = useUi((s) => s.locale);
   const { tokens } = useTheme();
+  const headerPad = useGlassHeaderPad();
 
   const [room, setRoom] = useState<RoomView | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -304,6 +306,8 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
       contentContainerStyle={styles.container}
       keyboardShouldPersistTaps="handled"
     >
+      {/* Reserves room under the floating iOS Liquid Glass header (navigation.tsx); 0 on Android. */}
+      {headerPad > 0 && <View style={{ height: headerPad }} />}
       {/* ── header: the code IS the invite — selectable for copy, one tap to share ── */}
       <View style={styles.headerRow}>
         <Text selectable style={[styles.codeText, { color: tokens.brandNavy }]}>

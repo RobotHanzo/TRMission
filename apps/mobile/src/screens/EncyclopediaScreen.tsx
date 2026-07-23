@@ -17,6 +17,7 @@ import { SandboxProvider } from '../store/sandboxProvider';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useTheme } from '../theme/useTheme';
 import { MutedText } from '../theme/chrome';
+import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
 import { GameStage } from './GameStage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Encyclopedia'>;
@@ -131,6 +132,7 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }): React.JSX.Element {
 export default function EncyclopediaScreen(_props: Props): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const headerPad = useGlassHeaderPad();
   const entries = useMemo(() => encyclopediaEntries(), []);
   const [idx, setIdx] = useState(0);
   // Group entries by chapter, preserving order (web's grouping, rendered as a chip rail).
@@ -148,7 +150,7 @@ export default function EncyclopediaScreen(_props: Props): React.JSX.Element {
   if (!entry) return <View style={styles.fill} />;
 
   return (
-    <View style={[styles.fill, { backgroundColor: tokens.paper }]}>
+    <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: headerPad }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
