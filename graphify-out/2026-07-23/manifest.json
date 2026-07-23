@@ -3955,8 +3955,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/app.config.ts": {
-    "mtime": 1784576628.2989397,
-    "ast_hash": "b24484f4e0495ecb50c3881727b6d4e5",
+    "mtime": 1784793838.2711062,
+    "ast_hash": "de5c381c51bdb595e6756228f4f8e951",
     "semantic_hash": ""
   },
   "apps/mobile/babel.config.js": {
@@ -4130,8 +4130,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/components/OfflineHomeBanner.tsx": {
-    "mtime": 1783869478.4516866,
-    "ast_hash": "89f0bf6a1c5d9016b459f3a6b86ba83e",
+    "mtime": 1784794748.440907,
+    "ast_hash": "17f09792c93f62ab18cc667196729c0f",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/AnimationLayer.tsx": {
@@ -4660,8 +4660,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/offline/OfflineHomeSection.tsx": {
-    "mtime": 1784479905.51377,
-    "ast_hash": "215c5380aa9f1212c47d61f35ae91f3d",
+    "mtime": 1784794744.4061892,
+    "ast_hash": "a95d556cd77abc2d509a630333aecf2b",
     "semantic_hash": ""
   },
   "apps/mobile/src/offline/botDriver.test.ts": {
@@ -4795,8 +4795,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/HomeScreen.tsx": {
-    "mtime": 1784740258.5558982,
-    "ast_hash": "a516bec8a34bca303a19aa31e7e77ee5",
+    "mtime": 1784795267.5865467,
+    "ast_hash": "8842877e13747247602aa9ccf6f5beff",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/LoginScreen.tsx": {
@@ -5225,8 +5225,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-android.yml": {
-    "mtime": 1784576047.7214832,
-    "ast_hash": "3fc2c7a855baa6656761576e3c0df797",
+    "mtime": 1784793881.0887012,
+    "ast_hash": "91e100dd4fa3c6c230b4b66c49b6bfe8",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ci.yml": {
@@ -5235,8 +5235,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ios.yml": {
-    "mtime": 1784492930.720275,
-    "ast_hash": "68bd407aeb8a92905eb82242e8f8c7d5",
+    "mtime": 1784793860.0080948,
+    "ast_hash": "feb88e17187c782529004ea79b4c99b2",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ota.yml": {
@@ -5245,8 +5245,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/CLAUDE.md": {
-    "mtime": 1784711462.617895,
-    "ast_hash": "a2d476a7b8f3a3736a3b62c20c13e5c8",
+    "mtime": 1784787380.2985575,
+    "ast_hash": "1d195ea09d132156b62129f2520c23c5",
     "semantic_hash": ""
   },
   "apps/mobile/assets/sounds/CREDITS.md": {
@@ -5365,8 +5365,8 @@
     "semantic_hash": ""
   },
   "docs/release/mobile-versioning.md": {
-    "mtime": 1783869478.5916815,
-    "ast_hash": "bab874d7729a6d0bcf5e1923ae5d4a69",
+    "mtime": 1784793894.4877436,
+    "ast_hash": "0cf9b9f46aea586f1bf9d003419d66cd",
     "semantic_hash": ""
   },
   "docs/superpowers/plans/2026-07-06-account-deletion.md": {
@@ -5745,38 +5745,38 @@
     "semantic_hash": ""
   },
   "apps/mobile/scripts/gen-brand-assets.js": {
-    "mtime": 1783938477.131083,
-    "ast_hash": "31fdb5a2276b3111dda248b93752ede5",
+    "mtime": 1784792221.561421,
+    "ast_hash": "0ad5fb65c9df2042001825baa3522ca6",
     "semantic_hash": ""
   },
   "apps/mobile/assets/adaptive-icon-monochrome.png": {
-    "mtime": 1783938484.3267725,
+    "mtime": 1784792256.3396606,
     "ast_hash": "e50d8336f6a60da23c1c139df61359cf",
     "semantic_hash": ""
   },
   "apps/mobile/assets/adaptive-icon.png": {
-    "mtime": 1783938484.0487275,
+    "mtime": 1784792256.0267937,
     "ast_hash": "f7bb3cdce0bed5fabae25d04e3cbce13",
     "semantic_hash": ""
   },
   "apps/mobile/assets/icon.png": {
-    "mtime": 1783938483.757218,
+    "mtime": 1784792255.0947666,
     "ast_hash": "2f97b0453e866e112bcad8be44bf004d",
     "semantic_hash": ""
   },
   "apps/mobile/assets/splash-icon-dark.png": {
-    "mtime": 1783938484.9321003,
+    "mtime": 1784792257.0053656,
     "ast_hash": "c41307c48ec7f8d360d4b595ee0c4fcd",
     "semantic_hash": ""
   },
   "apps/mobile/assets/splash-icon.png": {
-    "mtime": 1783938484.6209292,
+    "mtime": 1784792256.6755698,
     "ast_hash": "c41307c48ec7f8d360d4b595ee0c4fcd",
     "semantic_hash": ""
   },
   "apps/mobile/src/theme/chrome.tsx": {
-    "mtime": 1783971639.3278236,
-    "ast_hash": "d004db6a8e58d4d70b7cd6326f4bd307",
+    "mtime": 1784795224.6933386,
+    "ast_hash": "9fc59c9d2fed177e9e3e1fb666577eb6",
     "semantic_hash": ""
   },
   "apps/mobile/src/components/game/TurnBanner.tsx": {
@@ -5880,13 +5880,13 @@
     "semantic_hash": ""
   },
   "docs/release/app-store-connect-setup.md": {
-    "mtime": 1784420909.418159,
-    "ast_hash": "b46f3a4f57fcae1d856b1c8345eb9a2f",
+    "mtime": 1784792880.4236593,
+    "ast_hash": "d97182d206cd780eb7b20db1785229b3",
     "semantic_hash": ""
   },
   "docs/release/play-console-setup.md": {
-    "mtime": 1783971642.4937255,
-    "ast_hash": "92f94040899f5d22f8ab9df0597a8be2",
+    "mtime": 1784792873.0128276,
+    "ast_hash": "59b239e6009da47e0028b2846c6d3c1f",
     "semantic_hash": ""
   },
   "apps/server/src/persistence/engine-compat.ts": {
@@ -6867,6 +6867,21 @@
   "apps/mobile/src/components/game/__tests__/ScoreBoard.guestUpgrade.test.tsx": {
     "mtime": 1784742240.724097,
     "ast_hash": "c135a230f99a74f87e7970943f71468e",
+    "semantic_hash": ""
+  },
+  ".github/workflows/mobile-ios-certs.yml": {
+    "mtime": 1784787249.2797792,
+    "ast_hash": "5299afb947c0b2a9de51522dada8d296",
+    "semantic_hash": ""
+  },
+  "apps/mobile/assets/icon-dark.png": {
+    "mtime": 1784792255.4172766,
+    "ast_hash": "67bec4b186005b50bfd2ad207187dc2a",
+    "semantic_hash": ""
+  },
+  "apps/mobile/assets/icon-tinted.png": {
+    "mtime": 1784792255.7148552,
+    "ast_hash": "0a78577bbc5e1c59b329d1b16283736c",
     "semantic_hash": ""
   }
 }
