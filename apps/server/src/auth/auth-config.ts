@@ -4,6 +4,9 @@ import { env } from '../config/env';
 export type OauthProvider = 'google' | 'discord';
 export const OAUTH_PROVIDERS: readonly OauthProvider[] = ['google', 'discord'];
 
+/** The mobile app's custom URL scheme (`scheme: 'trmission'` in apps/mobile/app.config.ts). */
+const MOBILE_APP_SCHEME = 'trmission';
+
 /** Providers an account identity can be linked under. Apple sits outside OAUTH_PROVIDERS: its
  *  native path is credential-only, and its web/Android redirect flow diverges enough from the
  *  shared PKCE+userinfo machinery (form_post callback, per-request ES256 client_secret, identity
@@ -141,13 +144,21 @@ export class AuthConfig {
     return `${this.redirectBase}/login/callback${qs ? `?${qs}` : ''}`;
   }
 
-  /** Mobile deep-link landing (Universal/App Link): carries a one-time exchange code or error. */
+  /** Mobile deep-link landing: carries a one-time exchange code or error back to the app's
+   *  in-flight OAuth browser session (Discord, and Apple/Google's Android redirect flow).
+   *  MUST be a `trmission://` custom-scheme URL, not an `https://` universal link: iOS's
+   *  ASWebAuthenticationSession (and the Android Custom Tab equivalent) only complete the
+   *  session when the redirect's URL SCHEME matches the one the app registered — Associated
+   *  Domains/App Links are never honored inside that ephemeral session, so an https redirect
+   *  here just loads as an ordinary page instead of returning control to the app. The extra
+   *  leading slash keeps the path at `/m/callback` (matching MOBILE_APP_SCHEME + the app's own
+   *  `scheme: 'trmission'` in apps/mobile/app.config.ts). */
   mobileCallback(params: { code?: string; error?: string }): string {
     const q = new URLSearchParams();
     if (params.code) q.set('code', params.code);
     if (params.error) q.set('error', params.error);
     const qs = q.toString();
-    return `${this.redirectBase}/m/callback${qs ? `?${qs}` : ''}`;
+    return `${MOBILE_APP_SCHEME}:///m/callback${qs ? `?${qs}` : ''}`;
   }
 
   /** The UI hint sent to the web app so it renders only the available entry methods. */

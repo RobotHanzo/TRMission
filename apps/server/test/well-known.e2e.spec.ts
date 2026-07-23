@@ -37,7 +37,7 @@ describe('/.well-known: configured payloads', () => {
   }, 60_000);
   afterAll(() => t.close());
 
-  it('serves the AASA with the /m/callback pattern', async () => {
+  it('serves the AASA with the /room pattern', async () => {
     const res = await request(t.app.getHttpServer())
       .get('/.well-known/apple-app-site-association')
       .expect(200)
@@ -47,7 +47,7 @@ describe('/.well-known: configured payloads', () => {
         details: [
           {
             appIDs: ['FJX3SGU9AL.dev.robothanzo.trmission'],
-            components: [{ '/': '/m/callback*' }],
+            components: [{ '/': '/room/*' }],
           },
         ],
       },

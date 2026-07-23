@@ -44,6 +44,12 @@ interface SessionState {
   /** Drop the in-memory access token + keystore refresh token (P5 reuses on account deletion). */
   clearLocalSession(): Promise<void>;
   clearError(): void;
+  /** Surface a failure from a pre-`run()` step (native picker / system-browser dance) that
+   *  never reaches the credential/exchange call — e.g. Google's native configure/signIn or the
+   *  Discord/Apple browser session throwing before a code is even minted. Without this those
+   *  errors are silent: the button visibly does nothing, which reads as "the feature is missing"
+   *  rather than a specific, fixable failure. */
+  setError(message: string): void;
 }
 
 // Registered accounts are the source of truth for their own display prefs; on sign-in we adopt them
@@ -147,6 +153,7 @@ export const useSession = create<SessionState>()((set, get) => {
     },
     clearLocalSession,
     clearError: () => set({ error: null }),
+    setError: (message) => set({ loading: false, error: message }),
   };
 });
 

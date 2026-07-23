@@ -33,6 +33,7 @@ export function LoginScreen(): React.JSX.Element {
   const login = useSession((s) => s.login);
   const register = useSession((s) => s.register);
   const loginWithAppleCredential = useSession((s) => s.loginWithAppleCredential);
+  const setSessionError = useSession((s) => s.setError);
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -88,6 +89,15 @@ export function LoginScreen(): React.JSX.Element {
       if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return; // user cancelled
       throw e;
     }
+  };
+
+  // Google/Discord/Apple each run a native picker or system-browser dance BEFORE they ever reach
+  // `useSession`'s `run()`-wrapped credential/exchange call, so a failure there (bad iOS client
+  // id, a dismissed/broken browser round trip, ...) throws outside of `run()`'s own try/catch.
+  // Route it into the same `error` banner instead of leaving an unhandled rejection — otherwise
+  // the button just does nothing, which reads as "this sign-in method is missing/broken".
+  const runAuth = (fn: () => Promise<void>): void => {
+    fn().catch((e) => setSessionError(e instanceof Error ? e.message : String(e)));
   };
 
   return (
@@ -162,7 +172,7 @@ export function LoginScreen(): React.JSX.Element {
           <SecondaryButton
             title={t('login.google')}
             icon={<GoogleIcon />}
-            onPress={() => void signInWithGoogle()}
+            onPress={() => runAuth(signInWithGoogle)}
             disabled={loading}
           />
         )}
@@ -170,7 +180,7 @@ export function LoginScreen(): React.JSX.Element {
           <SecondaryButton
             title={t('login.discord')}
             icon={<DiscordIcon />}
-            onPress={() => void signInWithDiscord()}
+            onPress={() => runAuth(signInWithDiscord)}
             disabled={loading}
           />
         )}
@@ -184,14 +194,14 @@ export function LoginScreen(): React.JSX.Element {
             }
             cornerRadius={10}
             style={styles.appleButton}
-            onPress={() => void handleApple()}
+            onPress={() => runAuth(handleApple)}
           />
         )}
         {appleWebOn && (
           <SecondaryButton
             title={t('login.apple')}
             icon={<AppleIcon color={dark ? '#fff' : '#000'} />}
-            onPress={() => void signInWithApple()}
+            onPress={() => runAuth(signInWithApple)}
             disabled={loading}
           />
         )}

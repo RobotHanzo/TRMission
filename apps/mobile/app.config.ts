@@ -109,9 +109,13 @@ const config: ExpoConfig = {
     },
     intentFilters: [
       {
+        // App Link for shared room URLs (e.g. https://trmission.robothanzo.dev/room/ABC123)
+        // so tapping one opens straight into the app instead of Chrome. OAuth does NOT need an
+        // entry here: the mobile OAuth round trip completes via a trmission:// custom-scheme
+        // redirect (see AuthConfig.mobileCallback on the server), never this https App Link.
         action: 'VIEW',
         autoVerify: true,
-        data: [{ scheme: 'https', host: serverHost, pathPrefix: '/m/callback' }],
+        data: [{ scheme: 'https', host: serverHost, pathPrefix: '/room' }],
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],

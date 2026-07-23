@@ -102,8 +102,11 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   **Mobile transport** (no SameSite cookie can reach a native app): `x-trm-client: mobile`
   on any issuance route returns the refresh token in the body; `/auth/refresh` + `/auth/logout`
   take `{refreshToken}` in the body (body-in → body-out, never a cookie). The OAuth redirect
-  flow with `?client=mobile` ends at `/m/callback?code=<single-use exchange code>` (minted in
-  `mobile-code.repo.ts`, redeemed by `POST /auth/mobile/exchange` for a fresh token pair);
+  flow with `?client=mobile` ends at `trmission:///m/callback?code=<single-use exchange code>`
+  — a custom-scheme redirect, not an `https://` universal link: ASWebAuthenticationSession
+  (iOS) and the Android Custom Tab equivalent only complete an in-flight auth session on a
+  URL-scheme match, never via Associated Domains/App Links (`AuthConfig.mobileCallback`). Minted
+  in `mobile-code.repo.ts`, redeemed by `POST /auth/mobile/exchange` for a fresh token pair;
   a signed-in guest is carried via `POST /auth/mobile/carry` → `?carry=` (the cookie-free
   analogue of the refresh-cookie peek). Google ID tokens verify against
   `AuthConfig.googleAudiences()` (web + `GOOGLE_MOBILE_CLIENT_IDS`).
@@ -250,8 +253,12 @@ as Sign in with Apple identity-token audiences — enables `POST /auth/oauth/app
 `APPLE_TEAM_ID` + `APPLE_KEY_ID` + `APPLE_PRIVATE_KEY` (SIWA token revocation during
 `DELETE /auth/me` account deletion; revocation is best-effort per TN3194),
 `APPLE_APP_ID` + `ANDROID_PACKAGE_NAME` + `ANDROID_CERT_SHA256`
-(serve `/.well-known/apple-app-site-association` + `assetlinks.json` for the `/m/callback`
-deep link; unset ⇒ 404). A client sending `x-trm-client: mobile` receives its refresh
+(serve `/.well-known/apple-app-site-association` + `assetlinks.json` scoping the `/room/*`
+Universal/App Link so a shared room URL opens straight into the app; unset ⇒ 404. The mobile
+OAuth round trip does NOT use this file — it completes via a `trmission://` custom-scheme
+redirect, since ASWebAuthenticationSession/Custom Tabs only honor a scheme match mid-session,
+never Associated Domains — see `AuthConfig.mobileCallback`). A client sending
+`x-trm-client: mobile` receives its refresh
 token in the response body (Keychain/Keystore storage) instead of the Strict cookie, and
 `POST /auth/refresh`/`logout` accept `{refreshToken}` in the body. Guest TTLs slide
 forward on refresh. The builder WebView converts a carry code into a web cookie session via

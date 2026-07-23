@@ -6,7 +6,11 @@ import { MobileLinksConfig } from '../config/mobile-links.config';
 /**
  * Deep-link verification files the OS fetches from the web origin. 404 until the app
  * identities are configured, so a deploy without mobile apps serves nothing misleading.
- * The `/m/callback*` pattern must match AuthConfig.mobileCallback.
+ * The `/room/*` component is what lets tapping a shared room link (e.g. from a chat app)
+ * open straight into the app instead of Safari/Chrome — it must match the `Room` route in
+ * apps/mobile's navigation `linking` config. OAuth does NOT need an entry here: the mobile
+ * OAuth round trip completes via a `trmission://` custom-scheme redirect (AuthConfig.
+ * mobileCallback), not a universal/app link — see that method's comment for why.
  */
 @ApiExcludeController()
 @SkipThrottle()
@@ -19,7 +23,7 @@ export class WellKnownController {
     if (!this.links.appleAppId) throw new NotFoundException();
     return {
       applinks: {
-        details: [{ appIDs: [this.links.appleAppId], components: [{ '/': '/m/callback*' }] }],
+        details: [{ appIDs: [this.links.appleAppId], components: [{ '/': '/room/*' }] }],
       },
     };
   }
