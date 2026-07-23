@@ -3,7 +3,6 @@
 # key (ASC_KEY_*) authenticates all three, so no Apple ID password / 2FA is needed anywhere —
 # which is load-bearing: no maintainer owns a Mac, so even the read-write `match` seeding runs
 # headless in CI (mobile-ios-certs.yml → the :certs lane below).
-require "tmpdir"
 require "fileutils"
 
 default_platform(:ios)
@@ -21,24 +20,24 @@ end
 
 # mobile-ios.yml's `pod install` sets RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS=1 so crash symbolication
 # keeps working for RN 0.85's prebuilt core/dependency frameworks — but the fetched dSYMs land
-# nested INSIDE the vendored .framework bundle itself (Frameworks/React.framework/dSYMs/...)
-# instead of alongside it. CocoaPods' Embed Frameworks phase copies that whole tree into the .app
-# as-is, and App Store Connect rejects the raw DWARF binary at upload ("Invalid bundle structure",
-# ITMS 90171). The real dSYMs still ship separately (gym's own TRMission.app.dSYM.zip, built from
-# the .xcarchive), so this is pure bundle pollution — safe to strip from the already-built .ipa. A
-# future RN release that fixes the nesting makes this a no-op (glob just finds nothing to strip).
-def strip_nested_dsyms_from_ipa
-  ipa_path = lane_context[SharedValues::IPA_OUTPUT_PATH]
-  Dir.mktmpdir do |tmp|
-    sh("unzip", "-q", ipa_path, "-d", tmp)
-    nested_dsyms = Dir.glob(File.join(tmp, "Payload/*.app/Frameworks/*.framework/dSYMs"))
-    next if nested_dsyms.empty?
+# nested INSIDE the vendored .framework bundle itself (Pods/.../React.framework/dSYMs/...) instead
+# of alongside it. Left in place, that folder is just another bundle resource by the time Xcode
+# codesigns each embedded framework, so it ends up sealed into the framework's own CodeResources
+# manifest AND copied into the .app by the Embed Frameworks phase — the latter is what App Store
+# Connect rejects at upload ("Invalid bundle structure", ITMS 90171). Stripping it from the
+# already-built/signed .ipa (tried first) trades that error for a worse one: punching a hole in an
+# already-sealed signature ("Missing or invalid signature", ITMS 90034). Stripping it here instead —
+# from the vendored Pods copy, before `gym` ever builds/signs anything — avoids both. This does mean
+# RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS can't do its one job (there's no dSYM left for Xcode to seal
+# or ship), but a build that can't reach TestFlight isn't a usable trade either; revisit once
+# upstream RN stops nesting the dSYM inside the framework it documents alongside. A future RN
+# release that fixes the nesting makes this a no-op (glob just finds nothing to strip).
+def strip_nested_prebuilt_dsyms
+  nested_dsyms = Dir.glob("ios/Pods/**/*.framework/dSYMs")
+  return if nested_dsyms.empty?
 
-    UI.important("Stripping #{nested_dsyms.size} nested dSYMs folder(s) embedded inside .framework bundles (RN prebuilt-framework dSYM bug) before packaging the ipa")
-    nested_dsyms.each { |d| FileUtils.rm_rf(d) }
-    File.delete(ipa_path)
-    Dir.chdir(tmp) { sh("zip", "-qryX", ipa_path, "Payload") }
-  end
+  UI.important("Stripping #{nested_dsyms.size} nested dSYMs folder(s) out of vendored .framework bundles (RN prebuilt-framework dSYM bug) before gym builds/signs")
+  nested_dsyms.each { |d| FileUtils.rm_rf(d) }
 end
 
 platform :ios do
@@ -70,6 +69,8 @@ platform :ios do
       targets: ["TRMission"]
     )
 
+    strip_nested_prebuilt_dsyms
+
     # Workspace/scheme names verified against prebuild's rename logic (@expo/cli
     # renameTemplateAppName: HelloWorld → IOSConfig.XcodeUtils.sanitizedName(name); "TRMission"
     # is already alphanumeric so it passes through unchanged); mobile-ios.yml also asserts the
@@ -83,8 +84,6 @@ platform :ios do
         provisioningProfiles: { BUNDLE_ID => profile_name }
       }
     )
-
-    strip_nested_dsyms_from_ipa
 
     if options[:upload]
       pilot(
