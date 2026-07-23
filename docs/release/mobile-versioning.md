@@ -4,13 +4,15 @@ One monotonically increasing integer, **BUILD_NUMBER**, shared by both platforms
 
 - Android `versionCode` = BUILD_NUMBER
 - iOS `CFBundleVersion` (buildNumber) = BUILD_NUMBER
-- Marketing version (`versionName` / `CFBundleShortVersionString`) is independent semver (1.0.0, 1.0.1, …).
+- Marketing version — Android `versionName` / iOS `CFBundleShortVersionString` — is an independent
+  semver axis, **APP_VERSION** (1.0.0, 1.0.1, …).
 
-CI is the only place BUILD_NUMBER is assigned: the release workflows derive it from the
-release tag (`v<semver>+<build>`; the `+<build>` suffix is the integer) — or, for a manual
-`workflow_dispatch` publish run with no tag, from the `build_number` input — and inject it via
-`app.config.ts` env at `expo prebuild` time. Local dev builds use BUILD_NUMBER=1 and are
-never shipped.
+CI is the only place BUILD_NUMBER and APP_VERSION are assigned: the release workflows derive
+them from the release tag `v<semver>+<build>` (the `<semver>` prefix is APP_VERSION, the
+`+<build>` suffix is BUILD_NUMBER) — or, for a manual `workflow_dispatch` publish run with no
+tag, from the `app_version`/`build_number` inputs — and inject them via `app.config.ts` env
+(`APP_VERSION`/`BUILD_NUMBER`) at `expo prebuild` time. Local dev builds fall back to the
+placeholder `0.1.0`/`1` and are never shipped.
 
 The server's `MOBILE_MIN_BUILD` (served by `GET /version/mobile`, checked at app boot)
 lives in the SAME number space. Rules:

@@ -9,6 +9,14 @@ import path from 'node:path';
 // `expo prebuild` time; local/dev builds fall back to 1 and are never shipped.
 const BUILD_NUMBER = Number(process.env.BUILD_NUMBER ?? 1);
 
+// Marketing version (CFBundleShortVersionString / Android versionName) — an independent semver
+// axis from BUILD_NUMBER above (docs/release/mobile-versioning.md). The release workflows derive
+// it from the release tag's semver prefix (`v<semver>+<build>`) and inject it via this env var at
+// `expo prebuild` time; local/dev builds fall back to the placeholder below and are never shipped.
+// `||` (not `??`): an unset repo variable reaches CI as `''`, not undefined, same gotcha as
+// serverOrigin below — an empty string would sail past `??` and ship as the literal version.
+const APP_VERSION = process.env.APP_VERSION || '0.1.0';
+
 // The google-signin config plugin (without-Firebase mode) VALIDATES `iosUrlScheme` at every config
 // eval — for `expo run:android`/`prebuild` too, not just iOS — and rejects anything not prefixed
 // `com.googleusercontent.apps.`. That's the reversed iOS OAuth client id (shown as its own value in
@@ -31,7 +39,7 @@ const config: ExpoConfig = {
   name: 'TRMission',
   slug: 'trmission',
   scheme: 'trmission', // trmission:// OAuth deep-link fallback (P0 accepts it)
-  version: '0.1.0',
+  version: APP_VERSION,
   orientation: 'default', // tablets unlock; phone default is portrait (enforced per-screen in P2)
   // The shared TRMission rail-ticket mark — the same logo as the web favicon
   // (apps/web/public/icon.svg), ported to the native sizes/masks by scripts/gen-brand-assets.js.

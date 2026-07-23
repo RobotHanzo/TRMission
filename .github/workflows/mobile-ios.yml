@@ -20,6 +20,10 @@ on:
         description: 'BUILD_NUMBER (CFBundleVersion) to stamp — required when publish is enabled, since a manual run has no v<semver>+<build> tag to derive one from (docs/release/mobile-versioning.md)'
         type: string
         default: ''
+      app_version:
+        description: 'APP_VERSION (CFBundleShortVersionString, e.g. 1.0.0) to stamp — required when publish is enabled, since a manual run has no v<semver>+<build> tag to derive one from (docs/release/mobile-versioning.md)'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -47,20 +51,22 @@ jobs:
       # enableScripts repo-wide (that would also re-enable every other dependency's postinstall).
       - run: npx install-skia
 
-      # Same BUILD_NUMBER axis as mobile-android.yml (docs/release/mobile-versioning.md) — keeps
-      # CFBundleVersion in lockstep with versionCode so a `v<semver>+<build>` tag ships one build
-      # number to both stores. Branch pushes stay at the fallback (1); TestFlight will reject a
-      # second upload at the same build number, so don't tag-push twice without bumping +<build>.
-      # A tag push that doesn't match the pattern must fail loudly rather than silently build with
-      # the fallback — see mobile-android.yml's identical guard for why. A manual publish=true
-      # dispatch has no tag to derive a build number from, so it must supply one via the
-      # build_number input instead — same "fail loudly, don't fall back to 1" reasoning.
-      - name: Derive BUILD_NUMBER from the release tag
+      # Same BUILD_NUMBER + APP_VERSION axes as mobile-android.yml (docs/release/mobile-versioning.md)
+      # — keeps CFBundleVersion in lockstep with versionCode and CFBundleShortVersionString with
+      # versionName, so a `v<semver>+<build>` tag ships identical version metadata to both stores.
+      # Branch pushes stay at the fallback (BUILD_NUMBER=1); TestFlight will reject a second upload
+      # at the same build number, so don't tag-push twice without bumping +<build>. A tag push that
+      # doesn't match the pattern must fail loudly rather than silently build with the fallback —
+      # see mobile-android.yml's identical guard for why. A manual publish=true dispatch has no tag
+      # to derive these from, so it must supply both build_number and app_version inputs instead —
+      # same "fail loudly, don't fall back" reasoning.
+      - name: Derive BUILD_NUMBER + APP_VERSION from the release tag
         id: build_number
         run: |
           if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
-            if [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\+([0-9]+)$ ]]; then
-              echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            if [[ "$GITHUB_REF_NAME" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)$ ]]; then
+              echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+              echo "value=${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
             else
               echo "::error::Tag '$GITHUB_REF_NAME' doesn't match v<semver>+<build> (e.g. v1.0.0+1) — refusing to build/publish with the dev fallback BUILD_NUMBER=1. Re-tag as v<semver>+<build>."
               exit 1
@@ -70,6 +76,12 @@ jobs:
               echo "value=${{ inputs.build_number }}" >> "$GITHUB_OUTPUT"
             else
               echo "::error::publish=true requires a numeric build_number input — got '${{ inputs.build_number }}'. Manual dispatch has no v<semver>+<build> tag to derive one from, and TestFlight will reject a re-used build number."
+              exit 1
+            fi
+            if [[ "${{ inputs.app_version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "version=${{ inputs.app_version }}" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::publish=true requires a semver app_version input (e.g. 1.0.0) — got '${{ inputs.app_version }}'."
               exit 1
             fi
           else
@@ -91,6 +103,7 @@ jobs:
           # at app.config.ts's localhost dev default.
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
+          APP_VERSION: ${{ steps.build_number.outputs.version }}
 
       # Keyed on the prebuild-generated Podfile (ios/ itself isn't committed — see the CNG note
       # above), so this only misses when native deps actually change.
