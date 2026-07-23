@@ -18,6 +18,8 @@ export default {
   botsN: '{{count}} bot(s)',
   inProgress: 'In progress',
   delete: 'Delete',
+  deleteConfirmTitle: 'Delete this offline game?',
+  deleteConfirmBody: 'Its progress will be permanently lost.',
   playAgain: 'Play again',
   backHome: 'Back to home',
   cantSave:

@@ -18,6 +18,8 @@ export default {
   botsN: '{{count}} 名電腦玩家',
   inProgress: '進行中',
   delete: '刪除',
+  deleteConfirmTitle: '刪除此離線對局？',
+  deleteConfirmBody: '對局進度將永久遺失，無法復原。',
   playAgain: '再來一局',
   backHome: '回到首頁',
   cantSave: '無法儲存進度——對局仍可繼續，但關閉 App 後將遺失。',

@@ -3,7 +3,7 @@
 // harness). Reloads whenever the screen regains focus (a finished/abandoned game must drop
 // off the list).
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { officialMapById } from '@trm/map-data';
 import { DepartureRow, PrimaryButton, SectionLabel } from '../theme/chrome';
@@ -45,6 +45,13 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
     await reload();
   };
 
+  const confirmRemove = (gameId: string): void => {
+    Alert.alert(t('offline.deleteConfirmTitle'), t('offline.deleteConfirmBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('offline.delete'), style: 'destructive', onPress: () => void remove(gameId) },
+    ]);
+  };
+
   return (
     <View style={styles.section}>
       <PrimaryButton testID="offline-play-bots" title={t('home.playBots')} onPress={onNewGame} />
@@ -65,7 +72,7 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
                 testID={`offline-delete-${e.gameId}`}
                 accessibilityRole="button"
                 accessibilityLabel={t('offline.delete')}
-                onPress={() => void remove(e.gameId)}
+                onPress={() => confirmRemove(e.gameId)}
                 style={styles.delete}
               >
                 <Text style={[styles.deleteText, { color: tokens.inkSoft }]}>×</Text>
