@@ -1,0 +1,35 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "solid": "srgb:0.89804,0.33333,0.03529,1.00000"
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "solid": "srgb:0.00000,0.00000,0.00000,1.00000"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "ticket",
+      "layers": [
+        {
+          "image-name": "ticket.png",
+          "name": "ticket",
+          "glass": true
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "specular": true
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}

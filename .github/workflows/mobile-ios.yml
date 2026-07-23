@@ -30,7 +30,10 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest
+    # macos-26, not macos-latest: the Liquid Glass `.icon` bundle (app.config.ts ios.icon) needs
+    # Xcode 26's actool — the macos-latest label only finishes flipping to macOS 26 during the
+    # June 2026 rollout, and a stray macOS 15 (Xcode 16) runner would fail the asset compile.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1

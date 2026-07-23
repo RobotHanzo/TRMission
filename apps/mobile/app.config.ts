@@ -44,21 +44,21 @@ const config: ExpoConfig = {
   // The shared TRMission rail-ticket mark — the same logo as the web favicon
   // (apps/web/public/icon.svg), ported to the native sizes/masks by scripts/gen-brand-assets.js.
   // Full-bleed square: the OS applies its own mask. Also the Android legacy icon + web favicon
-  // fallback (ios.icon below overrides this trio for iOS specifically).
+  // fallback (ios.icon below overrides this with the Liquid Glass `.icon` bundle for iOS).
   icon: './assets/icon.png',
   // Chrome theming follows the OS + the in-app theme setting (theme/useTheme.ts).
   userInterfaceStyle: 'automatic',
   // New Architecture is the default (and only) mode in RN 0.85 / SDK 56 — no flag needed.
   ios: {
-    // iOS 26 Liquid Glass icon trio (@expo/prebuild-config's withIosIcons): `light` is the brand
-    // mark, `dark` deepens the tile for a dark springboard, `tinted` is de-hued so the system's own
-    // Liquid Glass tint + specular pass reads cleanly (see the header comment in
-    // scripts/gen-brand-assets.js for why this is flat PNGs and not an Icon Composer `.icon` bundle).
-    icon: {
-      light: './assets/icon.png',
-      dark: './assets/icon-dark.png',
-      tinted: './assets/icon-tinted.png',
-    },
+    // iOS 26 Liquid Glass icon: a hand-authored Icon Composer `.icon` bundle (icon.json + a
+    // transparent PNG ticket layer, written by scripts/gen-brand-assets.js — see its header).
+    // withIosIcons copies the bundle into the Xcode project and points
+    // ASSETCATALOG_COMPILER_APPICON_NAME at it; Xcode 26's actool (mobile-ios.yml pins macos-26)
+    // renders true glass for iOS 26 — no more system-frosted legacy PNG — plus flattened fallbacks
+    // for older iOS, with a solid-black tile in dark mode. If actool ever rejects the bundle,
+    // revert to the still-generated flat trio:
+    //   icon: { light: './assets/icon.png', dark: './assets/icon-dark.png', tinted: './assets/icon-tinted.png' }
+    icon: './assets/TRMission.icon',
     bundleIdentifier: 'dev.robothanzo.trmission',
     buildNumber: String(BUILD_NUMBER),
     supportsTablet: true, // iPad; requireFullScreen deliberately unset (iPadOS 26 ignores it)

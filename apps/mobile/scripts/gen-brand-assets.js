@@ -3,15 +3,20 @@
 // perforation edge and a train-cab stamp — on the EMU-orange tile. This is the same artwork the web
 // favicon uses, ported to the sizes/masks the native platforms want, so both clients share one mark.
 //
-// iOS ships three appearance slots for the Liquid Glass icon system (iOS 26 / Xcode 26,
-// `ios.icon` in app.config.ts — @expo/prebuild-config's withIosIcons composites each into
-// Images.xcassets/AppIcon.appiconset): `light` is the brand-colour mark as-is; `dark` deepens the
-// tile so the mark doesn't glare on a dark springboard while staying the same recognisable colours;
-// `tinted` is a de-hued (grayscale) rendering, per Apple HIG, since the system applies its own
-// Liquid Glass tint + specular pass on top and full colour there just gets muddied. No Icon
-// Composer `.icon` bundle (multi-layer glass) — that format's authoring tool is a Mac-only GUI app
-// and this project has no Mac (see apps/mobile/CLAUDE.md); flat per-appearance PNGs are what iOS
-// falls back to and are the only variant this script (or anyone on this project) can produce.
+// iOS ships a REAL Liquid Glass icon: assets/TRMission.icon, an Icon Composer bundle this script
+// hand-authors (icon.json + a transparent 1024px ticket layer). The bundle format is just a folder
+// of JSON + images, so no Mac / Icon Composer GUI is needed to WRITE it — only Xcode 26's actool
+// (the mobile-ios.yml runner) can COMPILE it, rendering true glass for iOS 26 and flattened
+// fallbacks for older iOS. This replaced the flat light/dark/tinted PNG trio because iOS 26 wraps
+// legacy flat icons in its own glass slab — inset, re-masked and frosted — which is what made the
+// springboard icon look compressed/low-quality. Schema notes: fill-specializations carries the
+// per-appearance tile colour (dark = solid black, per Apple's dark-icon guidance); the layer is a
+// PNG, not an SVG, because SVG layers don't receive the glass treatment (Apple bug FB18097334);
+// the system derives the tinted/mono appearance from the layer's luminance on its own.
+//
+// The flat trio (icon-dark.png / icon-tinted.png + icon.png) is still generated as the documented
+// fallback — if actool ever rejects the bundle, point app.config.ts's ios.icon back at it. The
+// dark tile is solid black there too, matching the bundle's dark appearance.
 //
 //   node apps/mobile/scripts/gen-brand-assets.js
 //
@@ -42,12 +47,13 @@ const PALETTE_BRAND = {
   windowFill: WHITE,
   rule: DARK,
 };
-// Same hues, deepened tile/shadow — reads clearly against a dark springboard without losing the
-// brand colour (unlike `tinted`, this is still a colour icon; iOS 26 only swaps to it in dark mode).
+// Solid-black tile for the dark appearance (Apple's dark-icon guidance: dark springboard icons sit
+// on a black/near-black tile, not a deepened brand colour) — matches the .icon bundle's dark fill.
+// The baked drop-shadow drops to a whisper of warm brown so the ticket still lifts off pure black.
 const PALETTE_DARK = {
   ...PALETTE_BRAND,
-  tile: SHADOW,
-  ticketShadow: '#6b2603',
+  tile: '#000000',
+  ticketShadow: '#3a1502',
 };
 // De-hued for the Liquid Glass "tinted" slot: the system recolours this with the user's chosen
 // tint + glass specular, so shape/luminosity contrast is what matters, not the brand's orange.
@@ -77,10 +83,11 @@ const trainStamp = (fill, windowFill, rule) => `<g transform="translate(99,0) sc
   </g>`;
 
 /** The rail-ticket mark in 120-space, coloured by `p` (defaults to the brand palette: white ticket,
- *  orange accents, dark baseline — matches apps/web/public/icon.svg exactly). */
-function ticket(p = PALETTE_BRAND) {
+ *  orange accents, dark baseline — matches apps/web/public/icon.svg exactly). `shadow: false` drops
+ *  the baked drop-shadow for the Liquid Glass layer, where the glass system casts a real one. */
+function ticket(p = PALETTE_BRAND, { shadow = true } = {}) {
   return `<g transform="rotate(-10 60 60)">
-    <path d="${TICKET_BODY}" transform="translate(3,4)" fill="${p.ticketShadow}"/>
+    ${shadow ? `<path d="${TICKET_BODY}" transform="translate(3,4)" fill="${p.ticketShadow}"/>` : ''}
     <path d="${TICKET_BODY}" fill="${p.ticketBody}"/>
     <line x1="82" y1="42" x2="82" y2="78" stroke="${p.accent}" stroke-width="2" stroke-dasharray="3 4"/>
     <circle cx="92" cy="50" r="4" fill="${p.accent}"/>
@@ -142,14 +149,52 @@ function splash() {
   return svg(`<image href="${badgeDataUri}" x="${x}" y="${y}" width="${size}" height="${size}"/>`);
 }
 
+/** #rrggbb → Icon Composer's colour syntax (sRGB components, 5-decimal, alpha always 1). */
+function srgb(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  return `srgb:${r.toFixed(5)},${g.toFixed(5)},${b.toFixed(5)},1.00000`;
+}
+
+/** The iOS 26 Icon Composer bundle (see header): Assets/ticket.png is the mark alone on
+ *  transparency — no tile (icon.json's fill IS the tile) and no baked drop-shadow (the glass
+ *  system casts a dynamic one, configured on the group). Xcode 26's actool compiles it; the
+ *  system supplies the specular pass, the dark springboard swap and the tinted/mono rendering. */
+function writeIconBundle() {
+  const bundle = path.join(ASSETS, 'TRMission.icon');
+  fs.mkdirSync(path.join(bundle, 'Assets'), { recursive: true });
+  fs.writeFileSync(
+    path.join(bundle, 'Assets', 'ticket.png'),
+    renderPng(svg(`<g transform="scale(${S})">${ticket(PALETTE_BRAND, { shadow: false })}</g>`)),
+  );
+  const manifest = {
+    // Per-appearance tile: brand orange by default, solid black in dark mode (Apple's dark-icon
+    // guidance; the user-facing ask behind this file's dark handling).
+    'fill-specializations': [
+      { value: { solid: srgb(ORANGE) } },
+      { appearance: 'dark', value: { solid: srgb('#000000') } },
+    ],
+    groups: [
+      {
+        name: 'ticket',
+        layers: [{ 'image-name': 'ticket.png', name: 'ticket', glass: true }],
+        shadow: { kind: 'neutral', opacity: 0.5 },
+        specular: true,
+      },
+    ],
+    // Square icons on every platform this app ships; no watchOS, so no circles entry.
+    'supported-platforms': { squares: 'shared' },
+  };
+  fs.writeFileSync(path.join(bundle, 'icon.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+  console.log('wrote TRMission.icon (icon.json + Assets/ticket.png)');
+}
+
 const jobs = [
-  // iOS/store icon + Liquid Glass `light` appearance — full-bleed orange tile (no rounding; the OS
-  // masks it, and applies its own Liquid Glass specular/edge treatment on top).
+  // Root icon (Android legacy + web-harness favicon) — full-bleed orange tile, no rounding (the OS
+  // masks it). Also the `light` slot of the flat-PNG iOS fallback trio (see header).
   ['icon.png', svg(badge(0, PALETTE_BRAND))],
-  // Liquid Glass `dark` appearance — deepened tile, same mark (ios.icon.dark in app.config.ts).
+  // Fallback trio `dark` slot — solid-black tile, same mark as the .icon bundle's dark appearance.
   ['icon-dark.png', svg(badge(0, PALETTE_DARK))],
-  // Liquid Glass `tinted` appearance — de-hued so the system's own tint + glass pass reads cleanly
-  // (ios.icon.tinted in app.config.ts).
+  // Fallback trio `tinted` slot — de-hued so the system's own tint + glass pass reads cleanly.
   ['icon-tinted.png', svg(badge(0, PALETTE_TINTED))],
   // Android adaptive foreground — the ticket alone in the ~66% safe zone (transparent; the config's
   // orange backgroundColor is the tile behind it).
@@ -169,3 +214,4 @@ for (const [name, markup] of jobs) {
   fs.writeFileSync(path.join(ASSETS, name), renderPng(markup));
   console.log(`wrote ${name}`);
 }
+writeIconBundle();
