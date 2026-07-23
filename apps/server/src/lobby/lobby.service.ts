@@ -397,6 +397,10 @@ export class LobbyService {
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'started') throw new BadRequestException('game already started');
     if (r === 'forbidden') throw new ForbiddenException('only the host can change settings');
+    if (r === 'too_many_seated')
+      throw new BadRequestException(
+        'too many players are seated for this mode — remove a player first',
+      );
     return toView(r);
   }
 

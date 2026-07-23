@@ -107,7 +107,10 @@ describe('lobby: team mode', () => {
     expect(finalRoom.body.members).toHaveLength(6);
   });
 
-  it('does not shrink an existing larger room when team mode is switched off', async () => {
+  it('does not shrink a room that was CREATED with the larger cap when team mode toggles', async () => {
+    // Created with maxPlayers 6, so 6 is this room's free-for-all ceiling (`baseMaxPlayers`) — the
+    // cap must return to it, not below, when team mode switches off. (Contrast the default 5-seat
+    // room below, whose ceiling is 5.)
     const { host, code } = await roomWithBots(6, 0);
     await setTeams(code, host.token, 3);
     await setTeams(code, host.token, 0);
@@ -116,6 +119,74 @@ describe('lobby: team mode', () => {
       .set(auth(host.token))
       .expect(200);
     expect(room.body.maxPlayers).toBe(6);
+  });
+
+  it('shrinks a default 5-seat room back to 5 when team mode is switched off', async () => {
+    // The inverse of the cap-raise: a default room's ceiling is 5, so once team mode is off the cap
+    // must return to 5 rather than staying inflated at the 6 the 3-team layout needed.
+    const host = await guest('Host');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
+    const code = room.body.code as string;
+    expect(room.body.maxPlayers).toBe(5);
+
+    await setTeams(code, host.token, 3); // cap → 6
+    for (let i = 0; i < 3; i++) {
+      await request(server())
+        .post(`/api/v1/rooms/${code}/bots`)
+        .set(auth(host.token))
+        .send({ difficulty: 'EASY' })
+        .expect(200);
+    }
+    // Four seated (≤ 5), so dropping back to free-for-all is fine and the cap returns to 5.
+    await setTeams(code, host.token, 0);
+    const after = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(host.token))
+      .expect(200);
+    expect(after.body.settings.teamCount).toBe(0);
+    expect(after.body.maxPlayers).toBe(5);
+  });
+
+  it('refuses to drop a filled 6-seat team room back to free-for-all (no 6-player free-for-all)', async () => {
+    // The reported exploit: a default 5-seat room raises its cap to 6 for the 3-team layout; fill
+    // all six seats, then try to switch back to free-for-all (which tops out at 5 seats). Since
+    // there is no evicting an already-seated player, the switch is refused — six players can never
+    // end up sharing a free-for-all room.
+    const host = await guest('Host');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(host.token))
+      .send({})
+      .expect(201);
+    const code = room.body.code as string;
+
+    await setTeams(code, host.token, 3); // cap → 6
+    for (let i = 0; i < 5; i++) {
+      await request(server())
+        .post(`/api/v1/rooms/${code}/bots`)
+        .set(auth(host.token))
+        .send({ difficulty: 'EASY' })
+        .expect(200);
+    }
+    // Six seated (host + 5 bots). Free-for-all can't hold them, so the switch is a 400.
+    await request(server())
+      .patch(`/api/v1/rooms/${code}/settings`)
+      .set(auth(host.token))
+      .send({ teamCount: 0 })
+      .expect(400);
+
+    // The rejected switch did not partially apply: still a 6-seat, 3-team room.
+    const after = await request(server())
+      .get(`/api/v1/rooms/${code}`)
+      .set(auth(host.token))
+      .expect(200);
+    expect(after.body.settings.teamCount).toBe(3);
+    expect(after.body.maxPlayers).toBe(6);
+    expect(after.body.members).toHaveLength(6);
   });
 
   it('starts a 4-player 2-team game and stamps teamCount on the engine state', async () => {

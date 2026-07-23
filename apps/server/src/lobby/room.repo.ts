@@ -98,7 +98,14 @@ export interface RoomDoc {
   hostId: string;
   status: RoomStatus;
   members: RoomMember[];
+  /** The live seat cap the join/add-bot/become-player paths gate on. Raised above
+   *  {@link baseMaxPlayers} to fit the chosen team layout, but recomputed from that base on every
+   *  settings change (see `updateSettings`) so it never stays inflated. */
   maxPlayers: number;
+  /** The seat cap the room was created with — its free-for-all ceiling, and the floor `maxPlayers`
+   *  returns to when team mode is off. Immutable after creation. Absent on rooms created before
+   *  this field existed; callers fall back to the live `maxPlayers`. */
+  baseMaxPlayers?: number;
   settings: RoomSettings;
   gameId?: string;
   seed?: string;
@@ -112,7 +119,12 @@ export interface RoomDoc {
   updatedAt: Date;
 }
 
-export type UpdateSettingsResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
+export type UpdateSettingsResult =
+  | RoomDoc
+  | 'not_found'
+  | 'forbidden'
+  | 'started'
+  | 'too_many_seated';
 
 /** A settings patch from the wire: each field optional and may be explicitly undefined (matches the
  *  zod `.partial()` DTO under exactOptionalPropertyTypes). Undefined values are ignored on merge. */
@@ -233,6 +245,7 @@ export class RoomRepo implements OnModuleInit {
         status: 'LOBBY',
         members: [{ ...host, seat: 0, ready: false }],
         maxPlayers,
+        baseMaxPlayers: maxPlayers,
         settings: { ...DEFAULT_ROOM_SETTINGS },
         createdAt: now,
         updatedAt: now,
@@ -366,15 +379,23 @@ export class RoomRepo implements OnModuleInit {
       if (v !== undefined) (clean as Record<string, unknown>)[k] = v;
     }
     const settings: RoomSettings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings, ...clean };
-    // A team layout must be seatable: e.g. 3 teams' only layout (PAIRS_3) needs a 6-seat table.
-    // Raise the room's cap to fit whatever the chosen team count can require, so a would-be 6th
-    // player can actually join instead of being turned away as "full" before ever reaching the
-    // team-layout check at start. Never shrinks the cap (turning team mode back off keeps it).
-    const requiredSeats = TEAM_LAYOUTS.filter((l) => l.teamCount === settings.teamCount).reduce(
+    // The live cap must fit the CHOSEN mode, recomputed from the created ceiling every time rather
+    // than grown monotonically. A team layout must be seatable (e.g. 3 teams' only layout, PAIRS_3,
+    // needs a 6-seat table), so raise the cap to whatever the chosen team count can require; a
+    // free-for-all falls back to the room's `baseMaxPlayers` ceiling. Growing-but-never-shrinking
+    // was exploitable: pick 3 teams to inflate the cap to 6, fill all six seats, then switch back
+    // to free-for-all — the cap stayed 6, leaving six players in a free-for-all room (and a
+    // startable, out-of-spec 6-player free-for-all, since start skips the layout check off-teams).
+    const base = room.baseMaxPlayers ?? room.maxPlayers;
+    const teamSeats = TEAM_LAYOUTS.filter((l) => l.teamCount === settings.teamCount).reduce(
       (max, l) => Math.max(max, l.playerCount),
       0,
     );
-    const maxPlayers = Math.max(room.maxPlayers, requiredSeats);
+    const maxPlayers = Math.max(base, teamSeats);
+    // Lowering the cap can't evict someone already seated, so a mode whose table is smaller than
+    // the current head-count is refused outright — the host must remove players first. This is the
+    // gate that actually stops a filled team room from collapsing into an over-capacity game.
+    if (maxPlayers < room.members.length) return 'too_many_seated';
     await this.col.updateOne(
       { _id: code, hostId, status: 'LOBBY' },
       { $set: { settings, maxPlayers, updatedAt: new Date() } },
