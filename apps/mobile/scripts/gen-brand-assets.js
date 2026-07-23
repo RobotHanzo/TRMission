@@ -3,6 +3,16 @@
 // perforation edge and a train-cab stamp — on the EMU-orange tile. This is the same artwork the web
 // favicon uses, ported to the sizes/masks the native platforms want, so both clients share one mark.
 //
+// iOS ships three appearance slots for the Liquid Glass icon system (iOS 26 / Xcode 26,
+// `ios.icon` in app.config.ts — @expo/prebuild-config's withIosIcons composites each into
+// Images.xcassets/AppIcon.appiconset): `light` is the brand-colour mark as-is; `dark` deepens the
+// tile so the mark doesn't glare on a dark springboard while staying the same recognisable colours;
+// `tinted` is a de-hued (grayscale) rendering, per Apple HIG, since the system applies its own
+// Liquid Glass tint + specular pass on top and full colour there just gets muddied. No Icon
+// Composer `.icon` bundle (multi-layer glass) — that format's authoring tool is a Mac-only GUI app
+// and this project has no Mac (see apps/mobile/CLAUDE.md); flat per-appearance PNGs are what iOS
+// falls back to and are the only variant this script (or anyone on this project) can produce.
+//
 //   node apps/mobile/scripts/gen-brand-assets.js
 //
 // Writes PNGs straight into ../assets/ (the files app.config.ts references). Rasterised with
@@ -20,6 +30,37 @@ const SHADOW = '#AE3C04'; // ticket drop-shadow
 const WHITE = '#FFFFFF';
 const DARK = '#410200'; // train baseline rule
 
+// Per-appearance palettes for the iOS icon trio (see header comment). `tile`/`ticketShadow` colour
+// the badge's background + the ticket's drop-shadow; `ticketBody` the ticket paper itself; `accent`
+// the perforation dash + rivet drawn on the ticket; `cabFill`/`windowFill`/`rule` the train stamp.
+const PALETTE_BRAND = {
+  tile: ORANGE,
+  ticketShadow: SHADOW,
+  ticketBody: WHITE,
+  accent: ORANGE,
+  cabFill: ORANGE,
+  windowFill: WHITE,
+  rule: DARK,
+};
+// Same hues, deepened tile/shadow — reads clearly against a dark springboard without losing the
+// brand colour (unlike `tinted`, this is still a colour icon; iOS 26 only swaps to it in dark mode).
+const PALETTE_DARK = {
+  ...PALETTE_BRAND,
+  tile: SHADOW,
+  ticketShadow: '#6b2603',
+};
+// De-hued for the Liquid Glass "tinted" slot: the system recolours this with the user's chosen
+// tint + glass specular, so shape/luminosity contrast is what matters, not the brand's orange.
+const PALETTE_TINTED = {
+  tile: '#707070',
+  ticketShadow: '#3a3a3a',
+  ticketBody: WHITE,
+  accent: '#707070',
+  cabFill: '#4a4a4a',
+  windowFill: WHITE,
+  rule: '#1f1f1f',
+};
+
 // The web mark lives in a 120-unit box; scale it up to fill the 1024 master.
 const S = (OUT / 120).toFixed(5);
 const TICKET_BODY =
@@ -35,14 +76,15 @@ const trainStamp = (fill, windowFill, rule) => `<g transform="translate(99,0) sc
     <line x1="29" y1="76" x2="68" y2="76" stroke="${rule}" stroke-width="4" stroke-linecap="round"/>
   </g>`;
 
-/** The full-colour rail-ticket mark in 120-space (white ticket, orange accents, dark baseline). */
-function ticket() {
+/** The rail-ticket mark in 120-space, coloured by `p` (defaults to the brand palette: white ticket,
+ *  orange accents, dark baseline — matches apps/web/public/icon.svg exactly). */
+function ticket(p = PALETTE_BRAND) {
   return `<g transform="rotate(-10 60 60)">
-    <path d="${TICKET_BODY}" transform="translate(3,4)" fill="${SHADOW}"/>
-    <path d="${TICKET_BODY}" fill="${WHITE}"/>
-    <line x1="82" y1="42" x2="82" y2="78" stroke="${ORANGE}" stroke-width="2" stroke-dasharray="3 4"/>
-    <circle cx="92" cy="50" r="4" fill="${ORANGE}"/>
-    ${trainStamp(ORANGE, WHITE, DARK)}
+    <path d="${TICKET_BODY}" transform="translate(3,4)" fill="${p.ticketShadow}"/>
+    <path d="${TICKET_BODY}" fill="${p.ticketBody}"/>
+    <line x1="82" y1="42" x2="82" y2="78" stroke="${p.accent}" stroke-width="2" stroke-dasharray="3 4"/>
+    <circle cx="92" cy="50" r="4" fill="${p.accent}"/>
+    ${trainStamp(p.cabFill, p.windowFill, p.rule)}
   </g>`;
 }
 
@@ -61,10 +103,10 @@ function monoMark() {
   </g>`;
 }
 
-/** The full logo badge (orange tile + ticket) at OUT scale. `rx` rounds the corners for a free-
- *  standing badge; 0 leaves it full-bleed for the iOS/store icon (the OS applies its own mask). */
-function badge(rx) {
-  return `<rect width="${OUT}" height="${OUT}" rx="${rx}" fill="${ORANGE}"/><g transform="scale(${S})">${ticket()}</g>`;
+/** The full logo badge (tile + ticket) at OUT scale, coloured by `p`. `rx` rounds the corners for a
+ *  free-standing badge; 0 leaves it full-bleed for the iOS/store icon (the OS applies its own mask). */
+function badge(rx, p = PALETTE_BRAND) {
+  return `<rect width="${OUT}" height="${OUT}" rx="${rx}" fill="${p.tile}"/><g transform="scale(${S})">${ticket(p)}</g>`;
 }
 
 /** Scale a piece of OUT-space art about the centre by `k` (Android adaptive/monochrome safe zone). */
@@ -101,8 +143,14 @@ function splash() {
 }
 
 const jobs = [
-  // iOS/store icon — full-bleed orange tile (no rounding; the OS masks it).
-  ['icon.png', svg(badge(0))],
+  // iOS/store icon + Liquid Glass `light` appearance — full-bleed orange tile (no rounding; the OS
+  // masks it, and applies its own Liquid Glass specular/edge treatment on top).
+  ['icon.png', svg(badge(0, PALETTE_BRAND))],
+  // Liquid Glass `dark` appearance — deepened tile, same mark (ios.icon.dark in app.config.ts).
+  ['icon-dark.png', svg(badge(0, PALETTE_DARK))],
+  // Liquid Glass `tinted` appearance — de-hued so the system's own tint + glass pass reads cleanly
+  // (ios.icon.tinted in app.config.ts).
+  ['icon-tinted.png', svg(badge(0, PALETTE_TINTED))],
   // Android adaptive foreground — the ticket alone in the ~66% safe zone (transparent; the config's
   // orange backgroundColor is the tile behind it).
   ['adaptive-icon.png', svg(safeZone(0.8, `<g transform="scale(${S})">${ticket()}</g>`))],

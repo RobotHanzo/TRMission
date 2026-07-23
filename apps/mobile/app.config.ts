@@ -35,12 +35,22 @@ const config: ExpoConfig = {
   orientation: 'default', // tablets unlock; phone default is portrait (enforced per-screen in P2)
   // The shared TRMission rail-ticket mark — the same logo as the web favicon
   // (apps/web/public/icon.svg), ported to the native sizes/masks by scripts/gen-brand-assets.js.
-  // Full-bleed square: the OS applies its own mask.
+  // Full-bleed square: the OS applies its own mask. Also the Android legacy icon + web favicon
+  // fallback (ios.icon below overrides this trio for iOS specifically).
   icon: './assets/icon.png',
   // Chrome theming follows the OS + the in-app theme setting (theme/useTheme.ts).
   userInterfaceStyle: 'automatic',
   // New Architecture is the default (and only) mode in RN 0.85 / SDK 56 — no flag needed.
   ios: {
+    // iOS 26 Liquid Glass icon trio (@expo/prebuild-config's withIosIcons): `light` is the brand
+    // mark, `dark` deepens the tile for a dark springboard, `tinted` is de-hued so the system's own
+    // Liquid Glass tint + specular pass reads cleanly (see the header comment in
+    // scripts/gen-brand-assets.js for why this is flat PNGs and not an Icon Composer `.icon` bundle).
+    icon: {
+      light: './assets/icon.png',
+      dark: './assets/icon-dark.png',
+      tinted: './assets/icon-tinted.png',
+    },
     bundleIdentifier: 'dev.robothanzo.trmission',
     buildNumber: String(BUILD_NUMBER),
     supportsTablet: true, // iPad; requireFullScreen deliberately unset (iPadOS 26 ignores it)
