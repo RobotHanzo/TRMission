@@ -17,6 +17,7 @@ import { buildRouteRenderModel, type RouteRenderModel } from '../../board/sceneP
 import { straightRouteGeometry, STRAIGHT_PITCH } from '../../game/routeGeometry';
 import { cityName } from '../../game/content';
 import { SEAT_COLORS } from '../../theme/colors';
+import { useTheme } from '../../theme/useTheme';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { useUi } from '../../store/ui';
 import type { SpecimenSpec } from './types';
@@ -135,6 +136,7 @@ const COMPARE_RESERVE = 64 + 8;
 
 export function RouteCompareSpecimen() {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const rows: Array<['rail' | 'ferry' | 'tunnel', string]> = [
     ['rail', t('tutorial.glossary.rail')],
     ['ferry', t('tutorial.glossary.ferry')],
@@ -144,7 +146,7 @@ export function RouteCompareSpecimen() {
     <View testID="tut-specimen" style={styles.compare}>
       {rows.map(([variant, label]) => (
         <View style={styles.compareRow} key={variant}>
-          <Text style={styles.compareLabel}>{label}</Text>
+          <Text style={[styles.compareLabel, { color: tokens.ink }]}>{label}</Text>
           <RouteCanvas variant={variant} reserve={COMPARE_RESERVE} />
         </View>
       ))}
@@ -176,6 +178,7 @@ export function LocoCardSpecimen() {
  *  difference between a city with and without a station is unmistakable. */
 export function StationSpecimen() {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const locale = useUi((s) => s.locale);
   const builtFill = SEAT_COLORS[0];
   const cities: Array<{ id: string; built: boolean }> = [
@@ -190,14 +193,16 @@ export function StationSpecimen() {
           <View style={styles.stationMarker}>
             {built && <View style={[styles.stationBuiltDot, { backgroundColor: builtFill }]} />}
           </View>
-          <Text style={styles.stationName}>{cityName(id, locale)}</Text>
+          <Text style={[styles.stationName, { color: tokens.ink }]}>{cityName(id, locale)}</Text>
           {built ? (
             <View style={styles.stationBadge}>
               <Check size={11} color="#2e7d32" />
               <Text style={styles.stationBuiltText}>{t('tutorial.stations.specimenBuilt')}</Text>
             </View>
           ) : (
-            <Text style={styles.stationEmptyText}>{t('tutorial.stations.specimenEmpty')}</Text>
+            <Text style={[styles.stationEmptyText, { color: tokens.inkSoft }]}>
+              {t('tutorial.stations.specimenEmpty')}
+            </Text>
           )}
         </View>
       ))}
@@ -232,6 +237,7 @@ function CyclingCard({
 /** The station-cost reference: row 1 = 1 card, row 2 = 2, row 3 = 3 — all of one (cycling) colour. */
 export function StationCostSpecimen() {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const reduced = useReducedMotion();
   const [idx, setIdx] = useState(0);
   useEffect(() => {
@@ -243,7 +249,9 @@ export function StationCostSpecimen() {
     <View testID="tut-specimen" style={styles.costTable}>
       {[1, 2, 3].map((n) => (
         <View style={styles.costRow} key={n}>
-          <Text style={styles.costLabel}>{t(`tutorial.stations.cost${n}`)}</Text>
+          <Text style={[styles.costLabel, { color: tokens.ink }]}>
+            {t(`tutorial.stations.cost${n}`)}
+          </Text>
           <View style={styles.costCards}>
             {Array.from({ length: n }, (_, i) => (
               <CyclingCard key={i} idx={idx} size={30} />
@@ -260,6 +268,7 @@ export function StationCostSpecimen() {
  * scores). Reads the live SCORING_TABLE so it can never drift from the rules.
  */
 export function ScoreTableSpecimen() {
+  const { tokens } = useTheme();
   const rows = (Object.entries(SCORING_TABLE) as [string, number][])
     .map(([len, pts]) => [Number(len), pts] as const)
     .sort((a, b) => a[0] - b[0]);
@@ -272,7 +281,7 @@ export function ScoreTableSpecimen() {
               <View style={styles.scoreCar} key={i} />
             ))}
           </View>
-          <Text style={styles.scorePts}>{pts}</Text>
+          <Text style={[styles.scorePts, { color: tokens.ink }]}>{pts}</Text>
         </View>
       ))}
     </View>
@@ -315,6 +324,7 @@ const CLAIM_CARD_W = 44;
  *  card (reused from the station chapter) meaning "any colour". The exact ×N count is printed
  *  BESIDE the card so the amount stays legible. */
 export function ClaimCostSpecimen() {
+  const { tokens } = useTheme();
   const reduced = useReducedMotion();
   const [idx, setIdx] = useState(0);
   useEffect(() => {
@@ -327,7 +337,7 @@ export function ClaimCostSpecimen() {
       {CLAIM_ROWS.map((row, i) => (
         <View style={styles.claimRow} key={i}>
           <ClaimTrack len={row.len} color={row.kind === 'gray' ? 'GRAY' : row.color} />
-          <Text style={styles.claimArrow}>→</Text>
+          <Text style={[styles.claimArrow, { color: tokens.inkSoft }]}>→</Text>
           {row.kind === 'gray' ? (
             <CyclingCard idx={idx} size={CLAIM_CARD_W} count={row.len} showCount={false} />
           ) : (
@@ -339,7 +349,7 @@ export function ClaimCostSpecimen() {
               showCount={false}
             />
           )}
-          <Text style={styles.claimCount}>×{row.len}</Text>
+          <Text style={[styles.claimCount, { color: tokens.ink }]}>×{row.len}</Text>
         </View>
       ))}
     </View>

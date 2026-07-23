@@ -8,6 +8,7 @@ import { BOT_DIFFICULTIES, type BotDifficulty } from '@trm/bots';
 import { layoutsForPlayerCount, type EventsMode } from '@trm/shared';
 import type { RootStackParamList } from '../navigation';
 import { useHasFeature } from '../store/session';
+import { useTheme, type ChromeTokens } from '../theme/useTheme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OfflineSetup'>;
 
@@ -23,25 +24,34 @@ function Choice({
   label,
   selected,
   onPress,
+  tokens,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
+  tokens: ChromeTokens;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
       onPress={onPress}
-      style={[styles.choice, selected && styles.choiceSelected]}
+      style={[
+        styles.choice,
+        { borderColor: selected ? tokens.blue : tokens.line },
+        selected && { backgroundColor: `${tokens.blue}22` },
+      ]}
     >
-      <Text style={[styles.choiceText, selected && styles.choiceTextSelected]}>{label}</Text>
+      <Text style={[styles.choiceText, { color: selected ? tokens.blue : tokens.ink }]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
 
 export function OfflineSetupScreen({ navigation }: Props) {
   const { t, i18n } = useTranslation();
+  const { tokens } = useTheme();
   const zh = i18n.language.startsWith('zh');
   const canConfigureEvents = useHasFeature('randomEvents');
   const [mapId, setMapId] = useState(OFFICIAL_MAPS[0]!.mapId);
@@ -54,9 +64,9 @@ export function OfflineSetupScreen({ navigation }: Props) {
 
   return (
     <ScrollView contentContainerStyle={styles.root}>
-      <Text style={styles.title}>{t('offline.newGame')}</Text>
+      <Text style={[styles.title, { color: tokens.ink }]}>{t('offline.newGame')}</Text>
 
-      <Text style={styles.label}>{t('offline.map')}</Text>
+      <Text style={[styles.label, { color: tokens.inkSoft }]}>{t('offline.map')}</Text>
       <View style={styles.row}>
         {OFFICIAL_MAPS.map((m) => (
           <Choice
@@ -64,11 +74,12 @@ export function OfflineSetupScreen({ navigation }: Props) {
             label={zh ? m.content.meta.nameZh : m.content.meta.nameEn}
             selected={mapId === m.mapId}
             onPress={() => setMapId(m.mapId)}
+            tokens={tokens}
           />
         ))}
       </View>
 
-      <Text style={styles.label}>{t('offline.botCount')}</Text>
+      <Text style={[styles.label, { color: tokens.inkSoft }]}>{t('offline.botCount')}</Text>
       <View style={styles.row}>
         {BOT_COUNTS.map((n) => (
           <Choice
@@ -85,12 +96,15 @@ export function OfflineSetupScreen({ navigation }: Props) {
               )
                 setTeamCount(0);
             }}
+            tokens={tokens}
           />
         ))}
       </View>
 
-      <Text style={styles.label}>{t('room.settingTeamMode')}</Text>
-      <Text style={styles.desc}>{t('room.settingTeamModeDesc')}</Text>
+      <Text style={[styles.label, { color: tokens.inkSoft }]}>{t('room.settingTeamMode')}</Text>
+      <Text style={[styles.desc, { color: tokens.inkSoft }]}>
+        {t('room.settingTeamModeDesc')}
+      </Text>
       <View style={styles.row}>
         {/* Only layouts the current head-count (you + bots) can actually form are offered. */}
         {[0, ...layoutsForPlayerCount(botCount + 1).map((l) => l.teamCount)].map((n) => (
@@ -99,11 +113,12 @@ export function OfflineSetupScreen({ navigation }: Props) {
             label={n === 0 ? t('room.teamModeOff') : t(`room.teamMode${n}Teams`)}
             selected={teamCount === n}
             onPress={() => setTeamCount(n)}
+            tokens={tokens}
           />
         ))}
       </View>
 
-      <Text style={styles.label}>{t('offline.difficulty')}</Text>
+      <Text style={[styles.label, { color: tokens.inkSoft }]}>{t('offline.difficulty')}</Text>
       <View style={styles.row}>
         {BOT_DIFFICULTIES.map((d) => (
           <Choice
@@ -111,14 +126,15 @@ export function OfflineSetupScreen({ navigation }: Props) {
             label={t(`offline.difficulty${d}`)}
             selected={difficulty === d}
             onPress={() => setDifficulty(d)}
+            tokens={tokens}
           />
         ))}
       </View>
 
       {canConfigureEvents && (
         <>
-          <Text style={styles.label}>{t('offline.events')}</Text>
-          <Text style={styles.desc}>{t('offline.eventsDesc')}</Text>
+          <Text style={[styles.label, { color: tokens.inkSoft }]}>{t('offline.events')}</Text>
+          <Text style={[styles.desc, { color: tokens.inkSoft }]}>{t('offline.eventsDesc')}</Text>
           <View style={styles.row}>
             {EVENTS_MODES.map((m) => (
               <Choice
@@ -126,6 +142,7 @@ export function OfflineSetupScreen({ navigation }: Props) {
                 label={t(`offline.eventsMode_${m}`)}
                 selected={eventsMode === m}
                 onPress={() => setEventsMode(m)}
+                tokens={tokens}
               />
             ))}
           </View>
@@ -134,7 +151,7 @@ export function OfflineSetupScreen({ navigation }: Props) {
 
       <Pressable
         accessibilityRole="button"
-        style={styles.start}
+        style={[styles.start, { backgroundColor: tokens.blue }]}
         onPress={() =>
           navigation.replace('OfflineGame', {
             mode: 'new',
@@ -155,27 +172,23 @@ export function OfflineSetupScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   root: { padding: 20, gap: 8 },
   title: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
-  label: { fontSize: 14, opacity: 0.7, marginTop: 12 },
-  desc: { fontSize: 12, opacity: 0.6, marginTop: 2 },
+  label: { fontSize: 14, marginTop: 12 },
+  desc: { fontSize: 12, marginTop: 2 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   choice: {
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.25)',
     minHeight: 40,
     justifyContent: 'center',
   },
-  choiceSelected: { borderColor: '#0f5fa6', backgroundColor: 'rgba(15,95,166,0.12)' },
   choiceText: { fontSize: 15 },
-  choiceTextSelected: { fontWeight: '700', color: '#0f5fa6' },
   start: {
     marginTop: 24,
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
-    backgroundColor: '#0f5fa6',
     minHeight: 44,
   },
   startText: { fontSize: 16, fontWeight: '700', color: '#fff' },

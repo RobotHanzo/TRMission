@@ -17,6 +17,7 @@ import { TutorialSpotlight } from './TutorialSpotlight';
 import { useSpotlightRects } from './useSpotlightRects';
 import { TutorialTargetsProvider } from './targets';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { useTheme } from '../../theme/useTheme';
 import { markTutorialCompleted } from './progress';
 import type { ActionGate, Lesson, Scope } from './types';
 import type { RootStackParamList } from '../../navigation';
@@ -78,6 +79,7 @@ function TutorialRunner({
   onCreateGame(): void;
 }) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const player = useScenarioPlayer(lesson, useGame);
   const snapshot = useGame((s) => s.snapshot);
   const reduced = useReducedMotion();
@@ -116,7 +118,7 @@ function TutorialRunner({
   if (!snapshot) {
     return (
       <View style={styles.launcher}>
-        <Text style={styles.muted}>{t('game.connecting')}</Text>
+        <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('game.connecting')}</Text>
       </View>
     );
   }

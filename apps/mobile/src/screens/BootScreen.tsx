@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, Text } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { BrandWordmark, Card, MutedText, Screen } from '../theme/chrome';
+import { useTheme } from '../theme/useTheme';
 import { BUILD_NUMBER } from '../config';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
@@ -20,6 +21,7 @@ const releaseSplash = (): void => {
  */
 export function BootScreen(): React.JSX.Element {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const restore = useSession((s) => s.restore);
   const [mustUpdate, setMustUpdate] = useState(false);
 
@@ -48,7 +50,7 @@ export function BootScreen(): React.JSX.Element {
     return (
       <Screen centered style={styles.container}>
         <Card style={styles.updateCard}>
-          <Text style={styles.title}>{t('boot.updateTitle')}</Text>
+          <Text style={[styles.title, { color: tokens.ink }]}>{t('boot.updateTitle')}</Text>
           <MutedText center>{t('boot.updateBody')}</MutedText>
         </Card>
       </Screen>

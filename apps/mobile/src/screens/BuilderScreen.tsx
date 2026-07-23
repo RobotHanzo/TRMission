@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../net/rest';
 import { SERVER_ORIGIN } from '../config';
 import { useSession } from '../store/session';
+import { useTheme } from '../theme/useTheme';
 import { BuilderWebView } from './builderWebView';
 
 /** Entry gate: mirror of web's useHasFeature('mapBuilder') — cosmetic; server 403s regardless. */
@@ -21,6 +22,7 @@ export function useCanBuild(): boolean {
  */
 export default function BuilderScreen(): React.JSX.Element {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const net = useNetInfo();
   const [handoffUrl, setHandoffUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -49,16 +51,16 @@ export default function BuilderScreen(): React.JSX.Element {
   if (!online) {
     return (
       <View style={styles.center} testID="builder-offline">
-        <Text style={styles.title}>{t('builder.offlineTitle')}</Text>
-        <Text style={styles.body}>{t('builder.offlineBody')}</Text>
+        <Text style={[styles.title, { color: tokens.ink }]}>{t('builder.offlineTitle')}</Text>
+        <Text style={[styles.body, { color: tokens.inkSoft }]}>{t('builder.offlineBody')}</Text>
       </View>
     );
   }
   if (failed) {
     return (
       <View style={styles.center} testID="builder-error">
-        <Text style={styles.title}>{t('builder.errorTitle')}</Text>
-        <Text style={styles.body}>{t('builder.errorBody')}</Text>
+        <Text style={[styles.title, { color: tokens.ink }]}>{t('builder.errorTitle')}</Text>
+        <Text style={[styles.body, { color: tokens.inkSoft }]}>{t('builder.errorBody')}</Text>
       </View>
     );
   }

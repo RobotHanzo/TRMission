@@ -15,6 +15,7 @@ import { useRoster } from '../store/roster';
 import { useSession } from '../store/session';
 import { useActiveContent } from '../game/useActiveContent';
 import { resolveContent } from '../game/contentCache';
+import { useTheme } from '../theme/useTheme';
 import { GameStage } from './GameStage';
 import { FeatureIntroOverlay } from '../features/tutorial/FeatureIntroOverlay';
 import { OfflineBanner } from '../components/OfflineBanner';
@@ -26,6 +27,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
 export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const roomCode = route.params.roomCode;
   const { sessionReplaced } = useGameConnection(roomCode, {
     spectator: route.params.spectator,
@@ -178,7 +180,7 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   if (!snapshot || contentStatus === 'loading') {
     return (
       <View style={styles.veil}>
-        <Text style={styles.veilText}>{t('game.connecting')}</Text>
+        <Text style={[styles.veilText, { color: tokens.inkSoft }]}>{t('game.connecting')}</Text>
         <Pressable
           style={styles.linkBtn}
           accessibilityRole="button"
@@ -192,7 +194,7 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
   if (contentStatus === 'error') {
     return (
       <View style={styles.veil}>
-        <Text style={styles.veilText}>{t('game.unknownMap')}</Text>
+        <Text style={[styles.veilText, { color: tokens.inkSoft }]}>{t('game.unknownMap')}</Text>
         <Pressable
           style={styles.linkBtn}
           accessibilityRole="button"

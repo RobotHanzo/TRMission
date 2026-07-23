@@ -10,12 +10,14 @@ import { SandboxProvider } from '../store/sandboxProvider';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useLogStoreApi } from '../store/log';
 import { useLocalGame } from '../offline/useLocalGame';
+import { useTheme } from '../theme/useTheme';
 import { GameStage } from './GameStage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OfflineGame'>;
 
 function OfflineGameView({ route, navigation }: Props) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const game = useGameStoreApi();
   const log = useLogStoreApi();
   const handle = useLocalGame(route.params, { game, log });
@@ -24,15 +26,15 @@ function OfflineGameView({ route, navigation }: Props) {
 
   if (handle.error) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>
+      <View style={[styles.center, { backgroundColor: tokens.paper }]}>
+        <Text style={[styles.errorText, { color: tokens.ink }]}>
           {handle.error === 'engine_version' || handle.error === 'unknown_content'
             ? t('offline.incompatible')
             : t('offline.loadFailed')}
         </Text>
         <Pressable
           accessibilityRole="button"
-          style={styles.cta}
+          style={[styles.cta, { backgroundColor: tokens.blue }]}
           onPress={() => navigation.popToTop()}
         >
           <Text style={styles.ctaText}>{t('offline.backHome')}</Text>
@@ -41,7 +43,7 @@ function OfflineGameView({ route, navigation }: Props) {
     );
   }
   if (!handle.ready || !handle.socket || !snapshot) {
-    return <View style={styles.center} />;
+    return <View style={[styles.center, { backgroundColor: tokens.paper }]} />;
   }
 
   return (
@@ -66,14 +68,14 @@ function OfflineGameView({ route, navigation }: Props) {
         <View style={styles.footer}>
           <Pressable
             accessibilityRole="button"
-            style={styles.cta}
+            style={[styles.cta, { backgroundColor: tokens.blue }]}
             onPress={() => navigation.replace('OfflineSetup')}
           >
             <Text style={styles.ctaText}>{t('offline.playAgain')}</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            style={styles.cta}
+            style={[styles.cta, { backgroundColor: tokens.blue }]}
             onPress={() => navigation.popToTop()}
           >
             <Text style={styles.ctaText}>{t('offline.backHome')}</Text>
@@ -103,7 +105,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 10,
-    backgroundColor: '#0f5fa6',
     minHeight: 44,
     justifyContent: 'center',
   },

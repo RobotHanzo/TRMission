@@ -110,10 +110,11 @@ function SettingRow({
   desc?: string | undefined;
   control: React.ReactNode;
 }) {
+  const { tokens } = useTheme();
   return (
     <View style={styles.settingRow}>
       <View style={styles.settingLabels}>
-        <Text style={styles.settingLabel}>{label}</Text>
+        <Text style={[styles.settingLabel, { color: tokens.ink }]}>{label}</Text>
         {desc ? <MutedText>{desc}</MutedText> : null}
       </View>
       {control}

@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../store/settings';
+import { useTheme } from '../theme/useTheme';
 import { registerDeviceForPush } from './register';
 import { Notifications } from './expoNotifications';
 
@@ -11,6 +12,7 @@ import { Notifications } from './expoNotifications';
  */
 export default function PushPrompt(): React.JSX.Element | null {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const seen = useSettings((s) => s.pushPromptSeen);
   const markSeen = useSettings((s) => s.markPushPromptSeen);
   const setNotifications = useSettings((s) => s.setNotifications);
@@ -27,8 +29,8 @@ export default function PushPrompt(): React.JSX.Element | null {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{t('push.promptTitle')}</Text>
-      <Text style={styles.body}>{t('push.promptBody')}</Text>
+      <Text style={[styles.title, { color: tokens.ink }]}>{t('push.promptTitle')}</Text>
+      <Text style={[styles.body, { color: tokens.inkSoft }]}>{t('push.promptBody')}</Text>
       <View style={styles.row}>
         <Pressable
           testID="push-prompt-dismiss"
@@ -36,7 +38,9 @@ export default function PushPrompt(): React.JSX.Element | null {
           hitSlop={8}
           onPress={markSeen}
         >
-          <Text style={styles.dismiss}>{t('push.promptDismiss')}</Text>
+          <Text style={[styles.dismiss, { color: tokens.inkSoft }]}>
+            {t('push.promptDismiss')}
+          </Text>
         </Pressable>
         <Pressable
           testID="push-prompt-accept"
@@ -44,7 +48,7 @@ export default function PushPrompt(): React.JSX.Element | null {
           hitSlop={8}
           onPress={() => void accept()}
         >
-          <Text style={styles.accept}>{t('push.promptAccept')}</Text>
+          <Text style={[styles.accept, { color: tokens.blue }]}>{t('push.promptAccept')}</Text>
         </Pressable>
       </View>
     </View>

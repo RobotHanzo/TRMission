@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../store/settings';
 import { ensurePushRegistration, unregisterDeviceForPush } from '../../push/register';
 import { Notifications } from '../../push/expoNotifications';
+import { useTheme } from '../../theme/useTheme';
 
 /** The push toggle: ON asks the OS (or routes to system settings when permanently denied),
  *  then registers the native token; OFF deregisters it. The setting only flips on success. */
 export default function NotificationsRow(): React.JSX.Element {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const enabled = useSettings((s) => s.notifications);
   const setNotifications = useSettings((s) => s.setNotifications);
   const [busy, setBusy] = useState(false);
@@ -45,7 +47,7 @@ export default function NotificationsRow(): React.JSX.Element {
 
   return (
     <View style={styles.row}>
-      <Text style={styles.label}>{t('settings.notifications')}</Text>
+      <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.notifications')}</Text>
       <Switch
         testID="notifications-switch"
         value={enabled}
