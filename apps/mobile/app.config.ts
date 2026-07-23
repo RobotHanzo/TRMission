@@ -1,5 +1,6 @@
 import { withDangerousMod, withGradleProperties } from '@expo/config-plugins';
 import type { ExpoConfig } from 'expo/config';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -16,6 +17,20 @@ const BUILD_NUMBER = Number(process.env.BUILD_NUMBER ?? 1);
 // `||` (not `??`): an unset repo variable reaches CI as `''`, not undefined, same gotcha as
 // serverOrigin below — an empty string would sail past `??` and ship as the literal version.
 const APP_VERSION = process.env.APP_VERSION || '0.1.0';
+
+// The commit this binary was built from (Settings → About). `actions/checkout` always leaves a
+// `.git` dir in place (even on a shallow clone HEAD is still resolvable), so this needs no CI
+// plumbing — unlike BUILD_NUMBER/APP_VERSION above it isn't an input the release workflows have to
+// derive and pass through, it falls out of whatever commit is checked out. Never throws: a
+// tarball/archive checkout with no `.git` (or no git binary) just ships 'dev', same fallback as
+// apps/web/apps/admin's VITE_COMMIT_HASH.
+const GIT_COMMIT = (() => {
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  } catch {
+    return 'dev';
+  }
+})();
 
 // The google-signin config plugin (without-Firebase mode) VALIDATES `iosUrlScheme` at every config
 // eval — for `expo run:android`/`prebuild` too, not just iOS — and rejects anything not prefixed
@@ -192,6 +207,7 @@ const config: ExpoConfig = {
   extra: {
     serverOrigin,
     buildNumber: BUILD_NUMBER,
+    gitCommit: GIT_COMMIT,
     // Google Sign-In client ids (native app + the server "web" audience). Real values are
     // provisioned at store-setup time (P6); the server accepts the native ids via
     // GOOGLE_MOBILE_CLIENT_IDS. Empty here ⇒ the Google button no-ops until configured.

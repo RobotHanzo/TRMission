@@ -9,6 +9,8 @@ export default {
   haptics: '震動回饋',
   deleteAccount: '刪除帳號',
   about: '關於',
+  version: '版本',
+  commit: '版本代碼',
   privacyPolicy: '隱私權政策',
   crashReport: '分享上次閃退報告',
   deleteConfirmTitle: '確定要刪除帳號嗎？',

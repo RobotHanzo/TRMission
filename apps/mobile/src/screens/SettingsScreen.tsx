@@ -18,7 +18,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { BoardLayout, Locale, Theme, UserPreferences } from '../net/rest';
-import { SERVER_ORIGIN } from '../config';
+import { APP_VERSION, BUILD_NUMBER, GIT_COMMIT, SERVER_ORIGIN } from '../config';
 import { useSettings } from '../store/settings';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
@@ -28,8 +28,7 @@ import { useTabBarPad } from '../hooks/useTabBarPad';
 import { performAccountDeletion } from '../account/deleteAccount';
 import { formatCrashReport, getLastCrash, type CrashRecord } from '../app/crashCapture';
 import NotificationsRow from './settings/NotificationsRow';
-
-const VOLUME_STEPS = [0.25, 0.5, 0.75, 1] as const;
+import { VolumeSlider } from './settings/VolumeSlider';
 
 /** A row of exclusive chips (same idiom as the lobby's Chips). */
 function Chips<T extends string | number>({
@@ -210,13 +209,17 @@ export function SettingsScreen(): React.JSX.Element {
       {soundEnabled && (
         <>
           <SectionLabel>{t('settings.volume')}</SectionLabel>
-          <Chips<number>
-            options={VOLUME_STEPS.map((v) => ({ value: v, label: `${Math.round(v * 100)}%` }))}
-            value={VOLUME_STEPS.reduce((best, v) =>
-              Math.abs(v - soundVolume) < Math.abs(best - soundVolume) ? v : best,
-            )}
-            onChange={(next) => void setSoundVolume(next)}
-          />
+          <View style={styles.volumeRow}>
+            <VolumeSlider
+              testID="volume-slider"
+              accessibilityLabel={t('settings.volume')}
+              value={soundVolume}
+              onChange={(next) => void setSoundVolume(next)}
+            />
+            <Text style={[styles.volumeValue, { color: tokens.inkSoft }]}>
+              {Math.round(soundVolume * 100)}%
+            </Text>
+          </View>
         </>
       )}
 
@@ -229,6 +232,14 @@ export function SettingsScreen(): React.JSX.Element {
       {/* Store compliance (Apple 5.1.1 / Play): the privacy policy must be reachable IN the app,
           not just from the store listing. Served by the same-origin web app. */}
       <SectionLabel>{t('settings.about')}</SectionLabel>
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.version')}</Text>
+        <MutedText>{`${APP_VERSION} (${BUILD_NUMBER})`}</MutedText>
+      </View>
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.commit')}</Text>
+        <MutedText>{GIT_COMMIT.slice(0, 7)}</MutedText>
+      </View>
       <Pressable
         testID="settings-privacy-policy"
         accessibilityRole="link"
@@ -285,6 +296,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipText: { fontSize: 13, fontWeight: '600' },
+  volumeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 32 },
+  volumeValue: { fontSize: 13, fontWeight: '600', width: 40, textAlign: 'right' },
   deleteRow: { minHeight: 48, justifyContent: 'center', marginTop: 16 },
   deleteText: { fontSize: 15, fontWeight: '600' },
 });

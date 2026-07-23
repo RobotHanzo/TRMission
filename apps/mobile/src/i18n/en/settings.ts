@@ -9,6 +9,8 @@ export default {
   haptics: 'Haptic feedback',
   deleteAccount: 'Delete account',
   about: 'About',
+  version: 'Version',
+  commit: 'Commit',
   privacyPolicy: 'Privacy policy',
   crashReport: 'Share last crash report',
   deleteConfirmTitle: 'Delete your account?',
