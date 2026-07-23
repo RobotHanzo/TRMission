@@ -220,9 +220,13 @@ git push origin v1.0.0+1
 ```
 
 Both `mobile-android.yml` and `mobile-ios.yml` trigger off `tags: ['v*']`. Watch the iOS Action —
-expect `Build (and on a release tag, upload to TestFlight)` to succeed and a new build to appear under TestFlight within
-~15–30 minutes (Apple's processing time, independent of the Action finishing). `pilot` is called
-with `skip_waiting_for_build_processing: true`, so the Action itself won't sit and wait for that.
+expect `Build (and on a release tag or publish=true dispatch, upload to TestFlight)` to succeed
+and a new build to appear under TestFlight within ~15–30 minutes (Apple's processing time,
+independent of the Action finishing). `pilot` is called with `skip_waiting_for_build_processing:
+true`, so the Action itself won't sit and wait for that.
+
+Both workflows also accept a manual `workflow_dispatch` run with `publish: true` (plus a
+`build_number` input) to publish without cutting a release tag — e.g. to retry a rejected upload.
 
 ## 14. Submission + Phased Release
 

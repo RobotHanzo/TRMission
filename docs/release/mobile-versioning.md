@@ -7,8 +7,9 @@ One monotonically increasing integer, **BUILD_NUMBER**, shared by both platforms
 - Marketing version (`versionName` / `CFBundleShortVersionString`) is independent semver (1.0.0, 1.0.1, …).
 
 CI is the only place BUILD_NUMBER is assigned: the release workflows derive it from the
-release tag (`mobile-v<semver>+<build>`; the `+<build>` suffix is the integer) and inject it
-via `app.config.ts` env at `expo prebuild` time. Local dev builds use BUILD_NUMBER=1 and are
+release tag (`v<semver>+<build>`; the `+<build>` suffix is the integer) — or, for a manual
+`workflow_dispatch` publish run with no tag, from the `build_number` input — and inject it via
+`app.config.ts` env at `expo prebuild` time. Local dev builds use BUILD_NUMBER=1 and are
 never shipped.
 
 The server's `MOBILE_MIN_BUILD` (served by `GET /version/mobile`, checked at app boot)

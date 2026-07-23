@@ -170,9 +170,11 @@ Actions). Delete the local `play-key.json` once it's in the secret store and the
 manager backup.
 
 `mobile-android.yml` now decodes it and runs `fastlane android internal` — but **only when the
-triggering ref is a real release tag** (`v<semver>+<build>`, e.g. `v1.0.0+1`); plain pushes to a
-`release/**` branch still build and upload the `.aab` as a CI artifact but skip the Play step
-entirely, so they can't collide on a reused `versionCode`. Push a tag to actually publish:
+triggering ref is a real release tag** (`v<semver>+<build>`, e.g. `v1.0.0+1`) **or** a manual
+`workflow_dispatch` run with `publish: true` (plus a `build_number` input, since a manual run has
+no tag to derive one from); plain pushes to a `release/**` branch, and dispatches without
+`publish`, still build and upload the `.aab` as a CI artifact but skip the Play step entirely, so
+they can't collide on a reused `versionCode`. Push a tag to actually publish:
 
 ```bash
 git tag v1.0.0+1
@@ -181,7 +183,8 @@ git push origin v1.0.0+1
 
 Bump the `+<build>` suffix on every subsequent tag — Play rejects a re-upload at a `versionCode`
 it's already seen (`docs/release/mobile-versioning.md` is the full contract, shared with iOS's
-`CFBundleVersion`).
+`CFBundleVersion`). Use the `workflow_dispatch` `publish`/`build_number` inputs instead of a tag
+when you need to re-publish without cutting a new release (e.g. retrying a rejected upload).
 
 ## 9. Verify the pipeline
 

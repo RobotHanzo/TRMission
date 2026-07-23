@@ -3,13 +3,23 @@ name: mobile-ios
 # macOS runners bill ~10x, so this lane is gated to release branches/tags only. Continuous Native
 # Generation: ios/ is produced by `expo prebuild`, never committed. Signing via fastlane match
 # (certs/profiles in a private git repo, seeded by the mobile-ios-certs workflow — no Mac, no EAS).
-# Every run produces an .ipa artifact; only a real v<semver>+<build> tag also uploads to TestFlight
-# (same publish gate as mobile-android.yml).
+# Every run produces an .ipa artifact; a real v<semver>+<build> tag also uploads to TestFlight, and
+# so does a manual workflow_dispatch run with publish=true + build_number (same publish gate as
+# mobile-android.yml).
 on:
   push:
     branches: ['release/**']
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Upload this build to TestFlight'
+        type: boolean
+        default: false
+      build_number:
+        description: 'BUILD_NUMBER (CFBundleVersion) to stamp — required when publish is enabled, since a manual run has no v<semver>+<build> tag to derive one from (docs/release/mobile-versioning.md)'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -42,7 +52,9 @@ jobs:
       # number to both stores. Branch pushes stay at the fallback (1); TestFlight will reject a
       # second upload at the same build number, so don't tag-push twice without bumping +<build>.
       # A tag push that doesn't match the pattern must fail loudly rather than silently build with
-      # the fallback — see mobile-android.yml's identical guard for why.
+      # the fallback — see mobile-android.yml's identical guard for why. A manual publish=true
+      # dispatch has no tag to derive a build number from, so it must supply one via the
+      # build_number input instead — same "fail loudly, don't fall back to 1" reasoning.
       - name: Derive BUILD_NUMBER from the release tag
         id: build_number
         run: |
@@ -51,6 +63,13 @@ jobs:
               echo "value=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
             else
               echo "::error::Tag '$GITHUB_REF_NAME' doesn't match v<semver>+<build> (e.g. v1.0.0+1) — refusing to build/publish with the dev fallback BUILD_NUMBER=1. Re-tag as v<semver>+<build>."
+              exit 1
+            fi
+          elif [[ "${{ inputs.publish }}" == "true" ]]; then
+            if [[ "${{ inputs.build_number }}" =~ ^[0-9]+$ ]]; then
+              echo "value=${{ inputs.build_number }}" >> "$GITHUB_OUTPUT"
+            else
+              echo "::error::publish=true requires a numeric build_number input — got '${{ inputs.build_number }}'. Manual dispatch has no v<semver>+<build> tag to derive one from, and TestFlight will reject a re-used build number."
               exit 1
             fi
           else
@@ -100,11 +119,13 @@ jobs:
             exit 1
           fi
 
-      # upload:true only on a real release tag — branch/dispatch runs all carry the fallback
-      # BUILD_NUMBER=1, which TestFlight would reject as a duplicate after the first upload.
-      - name: Build (and on a release tag, upload to TestFlight)
+      # upload:true on a real release tag, or on a manual dispatch with publish=true (which supplies
+      # its own build_number input above) — a plain branch push or a dispatch without publish
+      # carries the fallback BUILD_NUMBER=1, which TestFlight would reject as a duplicate after the
+      # first upload.
+      - name: Build (and on a release tag or publish=true dispatch, upload to TestFlight)
         working-directory: apps/mobile
-        run: bundle exec fastlane ios beta upload:${{ github.ref_type == 'tag' }}
+        run: bundle exec fastlane ios beta upload:${{ github.ref_type == 'tag' || inputs.publish == true }}
         env:
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
