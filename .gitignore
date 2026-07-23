@@ -55,6 +55,7 @@ yarn-error.log*
 # misc
 *.local
 te_rules_2015_en.pdf
+trmission.robothanzo.dev-audit-report.pdf
 .playwright-mcp/
 
 # OTA code-signing PRIVATE key (cert is committed; key lives on the OTA server secret mount)
