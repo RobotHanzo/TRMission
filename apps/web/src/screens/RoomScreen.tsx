@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Bot, Crown, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import {
+  effectiveMaxPlayers,
   layoutsForPlayerCount,
   seatOrderMovingToTeam,
   shuffleSeatOrder,
@@ -191,6 +192,17 @@ export function RoomScreen() {
   const setSetting = (patch: Partial<RoomSettings>) => {
     track('room_settings_change', { setting: Object.keys(patch)[0] ?? 'unknown' });
     void guard(api.updateRoomSettings(code, patch));
+  };
+  // Switching to a mode whose table is smaller than the current head-count is rejected server-side
+  // (a filled team room can't collapse into free-for-all — you can't evict a seated player). Predict
+  // it here so the host gets an instant, translated notification instead of a doomed request.
+  const changeTeamCount = (next: number) => {
+    const base = room.baseMaxPlayers ?? room.maxPlayers;
+    if (effectiveMaxPlayers(base, next) < room.members.length) {
+      pushNotification({ variant: 'error', text: t('teamModeTooManySeated') });
+      return;
+    }
+    setSetting({ teamCount: next });
   };
   const RULE_TOGGLES = [
     [
@@ -510,7 +522,7 @@ export function RoomScreen() {
                 { value: '3', label: t('teamMode3Teams') },
               ]}
               value={String(teamCount) as '0' | '2' | '3'}
-              onChange={(v) => setSetting({ teamCount: Number(v) })}
+              onChange={(v) => changeTeamCount(Number(v))}
               ariaLabel={t('settingTeamMode')}
             />
           </div>

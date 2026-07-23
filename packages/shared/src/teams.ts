@@ -33,6 +33,20 @@ export const layoutsForPlayerCount = (n: number): readonly TeamLayout[] =>
   TEAM_LAYOUTS.filter((l) => l.playerCount === n);
 
 /**
+ * The seat cap a room needs for a given team mode: its free-for-all ceiling (`baseMaxPlayers`)
+ * raised to fit the largest table any of the chosen team count's layouts can require (0 teams ⇒
+ * just the ceiling, since no layout matches). The single definition of this rule, shared by the
+ * server (which stores it as the room's live `maxPlayers`) and the lobby UI (which uses it to
+ * predict whether switching modes would strand already-seated players). Recomputed from the base
+ * every time — never grown monotonically — so leaving a team mode restores the ceiling.
+ */
+export const effectiveMaxPlayers = (baseMaxPlayers: number, teamCount: number): number =>
+  TEAM_LAYOUTS.filter((l) => l.teamCount === teamCount).reduce(
+    (max, l) => Math.max(max, l.playerCount),
+    baseMaxPlayers,
+  );
+
+/**
  * A seat's team. Teams are interleaved around the table by construction — seat 0 and seat
  * `teamCount` are partners — so alternation can never be broken by a seat reshuffle, and the
  * lobby's "pick a team" UI is really just "pick a seat".

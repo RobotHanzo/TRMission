@@ -28,6 +28,7 @@ export default {
   spectateDisabledOnlyMember: "You're the only one here — can't spectate",
   becomePlayerDisabledFull: 'Room is full — cannot join as a player',
   fullRoomSpectateNotice: 'Room is full — you joined as a spectator.',
+  teamModeTooManySeated: "This mode can't seat everyone here — remove a player before switching.",
 
   ownerLeaveTitle: 'Leave room',
   ownerLeaveBody:

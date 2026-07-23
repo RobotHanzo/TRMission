@@ -2,9 +2,9 @@ import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
 import { randomInt } from 'node:crypto';
 import type { Collection, Db } from 'mongodb';
 import {
+  effectiveMaxPlayers,
   seatOrderMovingToTeam,
   teamOfSeat,
-  TEAM_LAYOUTS,
   type EventsMode,
   type ChatPresetId,
 } from '@trm/shared';
@@ -387,11 +387,7 @@ export class RoomRepo implements OnModuleInit {
     // to free-for-all — the cap stayed 6, leaving six players in a free-for-all room (and a
     // startable, out-of-spec 6-player free-for-all, since start skips the layout check off-teams).
     const base = room.baseMaxPlayers ?? room.maxPlayers;
-    const teamSeats = TEAM_LAYOUTS.filter((l) => l.teamCount === settings.teamCount).reduce(
-      (max, l) => Math.max(max, l.playerCount),
-      0,
-    );
-    const maxPlayers = Math.max(base, teamSeats);
+    const maxPlayers = effectiveMaxPlayers(base, settings.teamCount);
     // Lowering the cap can't evict someone already seated, so a mode whose table is smaller than
     // the current head-count is refused outright — the host must remove players first. This is the
     // gate that actually stops a filled team room from collapsing into an over-capacity game.

@@ -84,6 +84,7 @@ const baseRoom = () => ({
   hostId: 'host',
   status: 'LOBBY' as 'LOBBY' | 'STARTED' | 'CLOSED',
   maxPlayers: 5,
+  baseMaxPlayers: 5,
   members: [member('host')] as ReturnType<typeof member>[],
   settings: {
     unlimitedStationBorrow: false,
@@ -803,6 +804,44 @@ describe('RoomScreen team selector', () => {
     await screen.findByText('Guest1');
     // Exactly one team isn't g1's own (teamCount=2), so exactly one Join button renders.
     expect(await screen.findAllByRole('button', { name: '加入' })).toHaveLength(1);
+  });
+
+  it('refuses to switch to free-for-all when too many players are seated, with a translated notice', async () => {
+    const sixSeated = [
+      meHost,
+      { userId: 'g1', displayName: 'Guest1', isGuest: true, seat: 1, ready: false },
+      { userId: 'g2', displayName: 'Guest2', isGuest: true, seat: 2, ready: false },
+      { userId: 'g3', displayName: 'Guest3', isGuest: true, seat: 3, ready: false },
+      { userId: 'g4', displayName: 'Guest4', isGuest: true, seat: 4, ready: false },
+      { userId: 'g5', displayName: 'Guest5', isGuest: true, seat: 5, ready: false },
+    ];
+    // A default 5-seat room raised to 6 for the 3-team layout, now filled. Free-for-all tops out at
+    // the 5-seat ceiling, so switching there can't seat all six — the client refuses it up front and
+    // never sends the doomed request.
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({
+        members: sixSeated,
+        maxPlayers: 6,
+        baseMaxPlayers: 5,
+        settings: { ...baseRoom().settings, teamCount: 3 },
+      }),
+    );
+    render(<RoomScreen />);
+    fireEvent.click(await screen.findByRole('radio', { name: '各自為戰' }));
+    expect(mocked.updateRoomSettings).not.toHaveBeenCalled();
+    expect(
+      await screen.findByText('這個模式無法容納目前所有玩家，請先移除玩家再切換。'),
+    ).toBeInTheDocument();
+  });
+
+  it('still switches to free-for-all when the table fits', async () => {
+    mocked.getRoom.mockResolvedValue(teamRoom()); // 4 seated, base 5 — free-for-all (5) fits
+    mocked.updateRoomSettings.mockResolvedValue(teamRoom());
+    render(<RoomScreen />);
+    fireEvent.click(await screen.findByRole('radio', { name: '各自為戰' }));
+    await waitFor(() =>
+      expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', { teamCount: 0 }),
+    );
   });
 });
 

@@ -45,6 +45,10 @@ export interface RoomView {
   hostId: string;
   status: RoomDoc['status'];
   maxPlayers: number;
+  /** The room's created seat ceiling — its free-for-all cap, and the floor the live `maxPlayers`
+   *  returns to when team mode is off. Lets the lobby predict which mode switches would strand
+   *  seated players. */
+  baseMaxPlayers: number;
   members: RoomMember[];
   spectators: RoomSpectator[];
   settings: RoomSettings;
@@ -82,6 +86,7 @@ const toView = (r: RoomDoc): RoomView => {
     hostId: r.hostId,
     status: r.status,
     maxPlayers: r.maxPlayers,
+    baseMaxPlayers: r.baseMaxPlayers ?? r.maxPlayers,
     members: r.members,
     spectators: r.spectators ?? [],
     settings,

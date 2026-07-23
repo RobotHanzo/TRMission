@@ -84,6 +84,8 @@ export const RoomViewSchema = z.object({
   hostId: z.string(),
   status: z.enum(['LOBBY', 'STARTED', 'CLOSED']),
   maxPlayers: z.number(),
+  /** The room's created seat ceiling; the live `maxPlayers` never drops below it. */
+  baseMaxPlayers: z.number(),
   members: z.array(RoomMemberSchema),
   spectators: z.array(RoomSpectatorSchema),
   settings: GameSettingsSchema,

@@ -102,6 +102,10 @@ export interface RoomView {
   hostId: string;
   status: 'LOBBY' | 'STARTED' | 'CLOSED';
   maxPlayers: number;
+  /** The room's created seat ceiling — the floor `maxPlayers` returns to when team mode is off.
+   *  Optional so a newer client tolerates an older server that predates the field (fall back to
+   *  `maxPlayers`). */
+  baseMaxPlayers?: number;
   members: RoomMember[];
   spectators: RoomSpectator[];
   settings: RoomSettings;

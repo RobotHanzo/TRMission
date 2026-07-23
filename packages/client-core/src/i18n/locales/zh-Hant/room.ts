@@ -27,6 +27,7 @@ export default {
   spectateDisabledOnlyMember: '房間裡只剩你一人，無法觀戰',
   becomePlayerDisabledFull: '房間已滿，無法加入遊戲',
   fullRoomSpectateNotice: '房間已滿，你已加入為觀戰者。',
+  teamModeTooManySeated: '這個模式無法容納目前所有玩家，請先移除玩家再切換。',
 
   ownerLeaveTitle: '離開房間',
   ownerLeaveBody: '你是房主。請先將房主移轉給其他玩家再離開，或直接關閉整個房間。',

@@ -20,6 +20,7 @@ import {
 import { Bot, Crown, UserMinus, X } from 'lucide-react-native';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import {
+  effectiveMaxPlayers,
   layoutsForPlayerCount,
   seatOrderMovingToTeam,
   shuffleSeatOrder,
@@ -230,6 +231,18 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
     void p.then(setRoom).catch((e: Error) => setErr(e.message));
   const setSetting = (patch: Partial<RoomSettings>): void =>
     guard(api.updateRoomSettings(code, patch));
+  // Switching to a mode whose table is smaller than the current head-count is rejected server-side
+  // (a filled team room can't collapse into free-for-all — you can't evict a seated player). Predict
+  // it here so the host gets an instant, translated notice instead of a doomed request.
+  const changeTeamCount = (next: number): void => {
+    const base = room.baseMaxPlayers ?? room.maxPlayers;
+    if (effectiveMaxPlayers(base, next) < room.members.length) {
+      setNotice(t('room.teamModeTooManySeated'));
+      return;
+    }
+    setNotice(null); // clear any prior "too many seated" line now that a valid mode was picked
+    setSetting({ teamCount: next });
+  };
   /** Host-assign mode: move `userId` onto `team` via the shared seat-swap primitive (also used
    *  server-side for self-join). A no-op when they're already on that team. */
   const assignToTeam = (userId: string, team: number): void => {
@@ -559,7 +572,7 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
                 { value: '3', label: t('room.teamMode3Teams') },
               ]}
               value={String(teamCount) as '0' | '2' | '3'}
-              onChange={(v) => setSetting({ teamCount: Number(v) })}
+              onChange={(v) => changeTeamCount(Number(v))}
               disabled={settingsLocked}
             />
           }
