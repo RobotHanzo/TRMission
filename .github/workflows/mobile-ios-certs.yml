@@ -1,0 +1,54 @@
+name: mobile-ios-certs
+
+# Provisions (or rotates) the iOS Distribution certificate + App Store provisioning profile into
+# the private match repo. No maintainer owns a Mac, so this is the ONLY place `fastlane match`
+# ever runs read-write — authenticated headlessly by the App Store Connect API key (no Apple ID
+# password/2FA). Run it once after the App ID + secrets exist
+# (docs/release/app-store-connect-setup.md Steps 2–6), then again only when a cert nears expiry
+# (~1 year) or an App ID capability changes (with force=true — a profile is a snapshot of the
+# App ID's capabilities at generation time).
+#
+# Safe on a public repo: workflow_dispatch needs write access, and Actions secrets are never
+# exposed to fork PRs.
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Regenerate the provisioning profile even if a valid one exists (required after enabling a capability on the App ID)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  certs:
+    # match imports the cert into a keychain to verify it (setup_ci provides a disposable one),
+    # so this needs macOS despite doing no build. It's a ~2min job — the 10x runner billing that
+    # gates mobile-ios.yml to releases is irrelevant at this frequency.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: apps/mobile
+
+      # match COMMITS into the certs repo; hosted runners ship git with no identity configured,
+      # and an identity-less `git commit` hard-fails.
+      - name: Give git an identity for the match repo commit
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Provision signing cert + profile into the match repo
+        working-directory: apps/mobile
+        run: bundle exec fastlane ios certs force:${{ inputs.force }}
+        env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}

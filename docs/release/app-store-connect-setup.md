@@ -16,7 +16,8 @@ Bundle id throughout: `dev.robothanzo.trmission` (`apps/mobile/app.config.ts`,
    (`docs/release/play-console-setup.md` Step 1).
 2. Once enrolled, note your **Team ID** (Developer Portal → Membership, or top-right account
    menu) — a 10-character string like `A1B2C3D4E5`. It's reused verbatim in five different places
-   below, so grab it once now: `team_id` in the Appfile, `APPLE_TEAM_ID` (server), `APNS_TEAM_ID`
+   below, so grab it once now: the `APPLE_TEAM_ID` repo **variable** (Step 5, drives CI code
+   signing), `team_id` in the Appfile (local runs only), `APPLE_TEAM_ID` (server), `APNS_TEAM_ID`
    (server), and as the prefix of `APPLE_APP_ID` (`TEAMID.dev.robothanzo.trmission`).
 
 ## 2. Register the App ID + capabilities
@@ -47,50 +48,55 @@ generates is a snapshot of whatever capabilities are enabled at that moment.
 This is the App Store Connect equivalent of Play's "create app" shell — it unlocks TestFlight and
 the metadata/pricing/App Privacy sections referenced below.
 
-## 4. fastlane match — seed the certs/profiles repo (one-time, local)
+## 4. fastlane match — seed the certs/profiles repo (one-time, from CI — no Mac needed)
 
-CI never generates certificates itself; it pulls previously-issued ones from a private git repo
-that only you seed, read-only. Do this from a machine with Xcode/fastlane installed, not CI:
+The build lane pulls previously-issued certs/profiles from a private git repo, read-only. Seeding
+that repo is itself a GitHub Actions job — **`mobile-ios-certs.yml`** (Actions tab →
+mobile-ios-certs → Run workflow), which runs `fastlane ios certs` on a macOS runner authenticated
+by the App Store Connect API key. No Mac, no Apple ID password/2FA anywhere in the flow.
+
+Order matters: Step 2 (the App ID with its three capabilities) and Step 6 (the ASC API key) must
+exist **before** the first run — match creates the cert/profile through the API key, it never
+creates the App ID itself, and the provisioning profile it generates is a snapshot of whatever
+capabilities are enabled at that moment.
 
 1. Create an **empty private git repo** to hold the encrypted certs (e.g.
-   `github.com/<org>/trmission-certificates`). This is a different repo from the app's source.
-2. `apps/mobile/fastlane/Matchfile` already points at `ENV["MATCH_GIT_URL"]` — export it:
-   ```bash
-   export MATCH_GIT_URL="https://github.com/<org>/trmission-certificates.git"
-   export MATCH_PASSWORD="<pick a strong passphrase — encrypts everything in that repo>"
-   export FASTLANE_APPLE_ID="you@example.com"   # local-only, Appfile reads this
-   export APPLE_TEAM_ID="<your Team ID from Step 1>"
-   ```
-3. From `apps/mobile`:
-   ```bash
-   bundle install
-   bundle exec fastlane match appstore
-   ```
-   This prompts for your Apple ID (2FA required), creates a Distribution certificate + an
-   App Store provisioning profile for `dev.robothanzo.trmission`, and pushes both (encrypted with
-   `MATCH_PASSWORD`) into the certs repo. CI (`mobile-ios.yml`) later runs `match(..., readonly:
-true)` — it can read these but never creates or rotates them.
+   `github.com/<org>/trmission-certificates`). This is a different repo from the app's source —
+   and it must stay private: only `MATCH_PASSWORD` encryption stands between its contents and
+   the app's signing identity.
+2. Add the GitHub secrets: the three match secrets (Step 5) and the three ASC secrets (Step 6).
+3. Actions tab → **mobile-ios-certs** → Run workflow (leave `force` off). It creates a
+   Distribution certificate + an App Store provisioning profile for `dev.robothanzo.trmission`
+   and pushes both, `MATCH_PASSWORD`-encrypted, into the certs repo. `mobile-ios.yml` later runs
+   `match(..., readonly: true)` — it can read these but never creates or rotates them.
 4. Save `MATCH_PASSWORD` in the team password manager — it's the only way to decrypt the repo
-   later (rotating certs, onboarding a second machine).
+   later.
 
-Re-run this **read-write** (drop nothing — just re-run the same command) whenever a cert expires
-(~1 year) or a capability changes (Step 2). Task 10 Step 2 of the release plan flags checking
-match certs have >60 days left before each release as a launch-gate item.
+Re-run the workflow whenever a cert nears expiry (~1 year — Task 10 Step 2 of the release plan
+gates each launch on >60 days of validity left), and re-run it with **`force: true`** after
+changing the App ID's capabilities (Step 2) — match won't touch a still-valid profile otherwise,
+and a stale profile silently lacks the new capability.
 
-## 5. GitHub secrets for match
+## 5. GitHub secrets/variables for match + signing
 
 Add three repo secrets (Settings → Secrets and variables → Actions), consumed by
-`mobile-ios.yml`:
+`mobile-ios.yml` and `mobile-ios-certs.yml`:
 
-- `MATCH_GIT_URL` — same value as Step 4
-- `MATCH_PASSWORD` — same value as Step 4
+- `MATCH_GIT_URL` — the certs repo's HTTPS clone URL (Step 4)
+- `MATCH_PASSWORD` — the encryption passphrase (Step 4)
 - `MATCH_GIT_BASIC_AUTHORIZATION` — base64 of `username:personal_access_token` for the certs
-  repo, so CI can clone it over HTTPS non-interactively:
+  repo, so CI can clone (and, in the certs workflow, push to) it over HTTPS non-interactively:
   ```bash
   echo -n "your-github-username:ghp_xxx" | base64
   ```
-  The token needs `repo` scope on that one certs repo (a fine-grained PAT scoped to just that
-  repo is preferable to a classic token with broad `repo` access).
+  The token needs read **and write** contents access on that one certs repo (the seeding
+  workflow pushes commits) — a fine-grained PAT scoped to just that repo is preferable to a
+  classic token with broad `repo` access.
+
+Plus one repo **variable** (not a secret — it's public in the AASA file anyway):
+
+- `APPLE_TEAM_ID` — the Team ID from Step 1. The build lane stamps it into the prebuilt Xcode
+  project (`expo prebuild` emits no team; xcodebuild refuses to archive without one).
 
 ## 6. App Store Connect API key (CI auth for build + TestFlight upload)
 
@@ -156,18 +162,16 @@ real Google/Discord OAuth round trip should return to the app instead of Safari
 (`docs/superpowers/plans/2026-07-06-mobile-p6-release-compliance.md` Task 11 has the exact `curl`
 checks for the server side).
 
-## 10. Verify the Xcode scheme/workspace names
+## 10. Xcode scheme/workspace names — verified
 
-`apps/mobile/fastlane/Fastfile`'s `gym` call has a standing `# NOTE (reground)` comment: it
-assumes `expo prebuild` emits `ios/TRMission.xcworkspace` / scheme `TRMission`. Confirm this once
-against a real prebuild before the first CI run:
-
-```bash
-cd apps/mobile && npx expo prebuild --platform ios --no-install
-ls ios/*.xcworkspace
-```
-
-If the names differ, update the `workspace:`/`scheme:` args in the `gym(...)` call.
+`gym` assumes `ios/TRMission.xcworkspace` / scheme `TRMission`. This is confirmed against
+prebuild's rename logic (`@expo/cli` `renameTemplateAppName`: the template's `HelloWorld` →
+`IOSConfig.XcodeUtils.sanitizedName(name)`, and `name: 'TRMission'` is already alphanumeric so it
+passes through unchanged; `pod install` names the workspace after the project). iOS prebuild
+can't run on Windows to double-check locally, so `mobile-ios.yml` also asserts the workspace
+exists right after `pod install` — if Expo's template naming ever changes, the run fails there in
+seconds with a directory listing, and the fix is updating `workspace:`/`scheme:` in
+`apps/mobile/fastlane/Fastfile`.
 
 ## 11. Store listing, ratings, privacy
 
@@ -216,7 +220,7 @@ git push origin v1.0.0+1
 ```
 
 Both `mobile-android.yml` and `mobile-ios.yml` trigger off `tags: ['v*']`. Watch the iOS Action —
-expect `Build + upload to TestFlight` to succeed and a new build to appear under TestFlight within
+expect `Build (and on a release tag, upload to TestFlight)` to succeed and a new build to appear under TestFlight within
 ~15–30 minutes (Apple's processing time, independent of the Action finishing). `pilot` is called
 with `skip_waiting_for_build_processing: true`, so the Action itself won't sit and wait for that.
 

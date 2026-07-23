@@ -109,6 +109,9 @@ jobs:
           TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          # Baked into AndroidManifest as expo-updates' URL — unset would ship binaries pointing
+          # OTA checks at app.config.ts's localhost dev default.
+          TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
           # Only a real v* tag reaches Play (see the publish step's `if:` below) — everything else
           # (workflow_dispatch, release/** pushes) just needs a build to exist, so scope those down

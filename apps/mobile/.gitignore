@@ -4,6 +4,8 @@
 /ios
 /.expo
 /dist
+# fastlane gym's .ipa output (mobile-ios.yml uploads it as a workflow artifact).
+/build
 *.log
 # RNRepo's local prebuilt-artifact cache (see app.config.ts + .fingerprintignore).
 .rnrepo-cache/

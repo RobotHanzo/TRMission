@@ -106,8 +106,10 @@ const config: ExpoConfig = {
   updates: {
     // Self-hosted expo-open-ota manifest endpoint (docs/mobile/ota.md). The origin is a
     // deploy-time repo variable so dev builds can point at the local compose container.
-    // NEVER an EAS URL — no EAS anywhere in this project.
-    url: process.env.TRM_OTA_URL ?? 'http://localhost:3005/manifest',
+    // NEVER an EAS URL — no EAS anywhere in this project. `||` (not `??`) for the same reason
+    // as serverOrigin above: an unset repo variable reaches CI as '', which `??` would bake in
+    // as a broken updates.url.
+    url: process.env.TRM_OTA_URL || 'http://localhost:3005/manifest',
     enabled: true,
     checkAutomatically: 'ON_LOAD',
     // Launch waits 0ms for the check: stale-while-revalidate. A downloaded update applies on

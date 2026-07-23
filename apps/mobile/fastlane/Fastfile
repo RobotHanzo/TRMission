@@ -1,31 +1,90 @@
 # Self-managed iOS signing + TestFlight delivery — no EAS. `match` pulls certs/profiles from a
 # private git repo; `gym` builds the .ipa; `pilot` uploads to TestFlight. An App Store Connect API
-# key (ASC_KEY_*) authenticates all three, so no Apple ID password / 2FA is needed in CI.
+# key (ASC_KEY_*) authenticates all three, so no Apple ID password / 2FA is needed anywhere —
+# which is load-bearing: no maintainer owns a Mac, so even the read-write `match` seeding runs
+# headless in CI (mobile-ios-certs.yml → the :certs lane below).
 default_platform(:ios)
 
-platform :ios do
-  desc "Build the app and upload it to TestFlight"
-  lane :beta do
-    api_key = app_store_connect_api_key(
-      key_id: ENV["ASC_KEY_ID"],
-      issuer_id: ENV["ASC_ISSUER_ID"],
-      key_content: ENV["ASC_KEY_P8"],
-      is_key_content_base64: true
-    )
+BUNDLE_ID = "dev.robothanzo.trmission"
 
-    # Read-only in CI: certs/profiles are provisioned once locally with `fastlane match appstore`.
+def asc_api_key
+  app_store_connect_api_key(
+    key_id: ENV["ASC_KEY_ID"],
+    issuer_id: ENV["ASC_ISSUER_ID"],
+    key_content: ENV["ASC_KEY_P8"],
+    is_key_content_base64: true
+  )
+end
+
+platform :ios do
+  desc "Build the app; upload to TestFlight only with upload:true (mobile-ios.yml passes it on real release tags)"
+  lane :beta do |options|
+    # GitHub runners boot with the login keychain locked — without a disposable CI keychain,
+    # match's cert import prompts (and hangs/fails). No-op outside CI.
+    setup_ci if ENV["CI"]
+
+    api_key = asc_api_key
+
+    # Read-only: certs/profiles were provisioned into the match repo by the :certs lane.
     match(type: "appstore", readonly: true, api_key: api_key)
 
-    # NOTE (reground): confirm the scheme/workspace names `expo prebuild` generates for this app.
+    # `expo prebuild` emits an Automatic-signing project with no team, which xcodebuild rejects
+    # for device archives ("requires a development team"). Flip the APP TARGET ONLY to manual
+    # signing with the match cert/profile — do not do this via gym xcargs, which would also hit
+    # the Pods resource-bundle targets (they can't take a provisioning profile).
+    team_id = ENV["APPLE_TEAM_ID"].to_s
+    UI.user_error!("APPLE_TEAM_ID must be set (repo variable) — the prebuilt project carries no team id") if team_id.empty?
+    profile_name = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING][BUNDLE_ID]
+    update_code_signing_settings(
+      path: "ios/TRMission.xcodeproj",
+      use_automatic_signing: false,
+      team_id: team_id,
+      code_sign_identity: "Apple Distribution",
+      profile_name: profile_name,
+      bundle_identifier: BUNDLE_ID,
+      targets: ["TRMission"]
+    )
+
+    # Workspace/scheme names verified against prebuild's rename logic (@expo/cli
+    # renameTemplateAppName: HelloWorld → IOSConfig.XcodeUtils.sanitizedName(name); "TRMission"
+    # is already alphanumeric so it passes through unchanged); mobile-ios.yml also asserts the
+    # workspace exists right after `pod install` so a template change fails loudly there.
     gym(
       workspace: "ios/TRMission.xcworkspace",
       scheme: "TRMission",
-      export_method: "app-store"
+      export_method: "app-store",
+      output_directory: "build",
+      export_options: {
+        provisioningProfiles: { BUNDLE_ID => profile_name }
+      }
     )
 
-    pilot(
-      api_key: api_key,
-      skip_waiting_for_build_processing: true
+    if options[:upload]
+      pilot(
+        api_key: api_key,
+        skip_waiting_for_build_processing: true
+      )
+    else
+      # Non-tag runs (workflow_dispatch, release/** pushes) all carry the dev fallback
+      # BUILD_NUMBER=1 — TestFlight rejects duplicate build numbers, so they build-only; the
+      # .ipa lands in build/ and mobile-ios.yml uploads it as a workflow artifact instead.
+      UI.important("upload:false — skipping TestFlight; the .ipa is in build/")
+    end
+  end
+
+  desc "Seed/rotate the Distribution cert + App Store profile in the match repo (run via mobile-ios-certs.yml — no Mac needed)"
+  lane :certs do |options|
+    setup_ci if ENV["CI"]
+    # readonly:false — creates whatever is missing (cert and/or profile) via the ASC API and
+    # pushes it, MATCH_PASSWORD-encrypted, to MATCH_GIT_URL. The App ID must already exist with
+    # its capabilities enabled (docs/release/app-store-connect-setup.md Step 2) — match does not
+    # create bundle ids. force:true regenerates the profile even if one exists — required after
+    # enabling a new capability, since a profile is a snapshot of the App ID's capabilities.
+    match(
+      type: "appstore",
+      readonly: false,
+      force: options[:force] || false,
+      api_key: asc_api_key
     )
   end
 end

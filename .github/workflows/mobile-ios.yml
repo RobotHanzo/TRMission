@@ -2,7 +2,9 @@ name: mobile-ios
 
 # macOS runners bill ~10x, so this lane is gated to release branches/tags only. Continuous Native
 # Generation: ios/ is produced by `expo prebuild`, never committed. Signing via fastlane match
-# (certs/profiles in a private git repo) — no EAS.
+# (certs/profiles in a private git repo, seeded by the mobile-ios-certs workflow — no Mac, no EAS).
+# Every run produces an .ipa artifact; only a real v<semver>+<build> tag also uploads to TestFlight
+# (same publish gate as mobile-android.yml).
 on:
   push:
     branches: ['release/**']
@@ -62,6 +64,13 @@ jobs:
           TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          # iOS-only (unlike mobile-android.yml): the reversed Google OAuth client id becomes a
+          # CFBundleURLScheme in Info.plist — without the real value, Google sign-in can never
+          # return to the app (the placeholder fallback only exists to let builds run pre-P6).
+          TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
+          # Baked into Expo.plist as updates.url — unset would ship binaries pointing OTA checks
+          # at app.config.ts's localhost dev default.
+          TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
 
       # Keyed on the prebuild-generated Podfile (ios/ itself isn't committed — see the CNG note
@@ -80,9 +89,22 @@ jobs:
         working-directory: apps/mobile/ios
         run: pod install
 
-      - name: Build + upload to TestFlight
+      # The Fastfile hardcodes workspace/scheme "TRMission" (derived from prebuild's
+      # HelloWorld→sanitizedName rename). Assert it here so an Expo template change fails in
+      # seconds with a directory listing, not 10+ minutes later inside xcodebuild.
+      - name: Verify the Xcode workspace name the Fastfile expects
+        run: |
+          if [[ ! -d "apps/mobile/ios/TRMission.xcworkspace" ]]; then
+            echo "::error::ios/TRMission.xcworkspace not found — prebuild's naming changed; update workspace:/scheme: in apps/mobile/fastlane/Fastfile"
+            ls apps/mobile/ios
+            exit 1
+          fi
+
+      # upload:true only on a real release tag — branch/dispatch runs all carry the fallback
+      # BUILD_NUMBER=1, which TestFlight would reject as a duplicate after the first upload.
+      - name: Build (and on a release tag, upload to TestFlight)
         working-directory: apps/mobile
-        run: bundle exec fastlane ios beta
+        run: bundle exec fastlane ios beta upload:${{ github.ref_type == 'tag' }}
         env:
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
@@ -90,3 +112,10 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trmission-release-ipa
+          path: apps/mobile/build/*.ipa
+          if-no-files-found: error
