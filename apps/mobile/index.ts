@@ -3,9 +3,14 @@
 import '@expo/metro-runtime';
 import './src/shims';
 import { Platform } from 'react-native';
+import { installCrashCapture } from './src/app/crashCapture';
 import type * as SkiaWebModule from '@shopify/react-native-skia/lib/module/web';
 import type * as ExpoModule from 'expo';
 import type * as AppModule from './App';
+
+// Persist fatal JS errors (message + stack) before RN's release-mode abort — the Apple crash
+// log alone carries only native frames. Installed before the app graph evaluates; no-op on web.
+installCrashCapture();
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 if (Platform.OS === 'web') {

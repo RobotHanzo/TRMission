@@ -10,6 +10,7 @@ export default {
   deleteAccount: '刪除帳號',
   about: '關於',
   privacyPolicy: '隱私權政策',
+  crashReport: '分享上次閃退報告',
   deleteConfirmTitle: '確定要刪除帳號嗎？',
   deleteConfirmBody: '此動作無法復原。你的個人資料將被刪除，對局紀錄將匿名化。',
   deleteConfirmAction: '永久刪除',

@@ -3,11 +3,13 @@
 // glyphs, sound + volume, push toggle, haptics toggle, and in-app account deletion. Guests have
 // no deletion row — a guest account holds nothing its TTL won't reap. Preference changes apply
 // instantly (ui store persists on-device) and then sync to the account (no-op for guests).
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Linking,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Switch,
   Text,
@@ -24,6 +26,7 @@ import { useTheme } from '../theme/useTheme';
 import { MutedText, SectionLabel } from '../theme/chrome';
 import { useTabBarPad } from '../hooks/useTabBarPad';
 import { performAccountDeletion } from '../account/deleteAccount';
+import { formatCrashReport, getLastCrash, type CrashRecord } from '../app/crashCapture';
 import NotificationsRow from './settings/NotificationsRow';
 
 const VOLUME_STEPS = [0.25, 0.5, 0.75, 1] as const;
@@ -99,6 +102,24 @@ export function SettingsScreen(): React.JSX.Element {
     void savePreferences({ theme, colorBlind, locale, boardLayout, ...patch }).catch(
       () => undefined,
     );
+
+  // Crash-capture surface (see app/crashCapture.ts): a persisted last-crash record makes an
+  // extra About row appear so TestFlight/beta testers can share the JS stack with a maintainer —
+  // the Apple crash log alone has no JS frames.
+  const [lastCrash, setLastCrash] = useState<CrashRecord | null>(null);
+  useEffect(() => {
+    void getLastCrash().then(setLastCrash);
+  }, []);
+  const shareCrash = async (): Promise<void> => {
+    if (!lastCrash) return;
+    const report = formatCrashReport(lastCrash);
+    try {
+      await Share.share({ message: report });
+    } catch {
+      // Share sheet unavailable (RNW harness): fall back to an alert the tester can screenshot.
+      Alert.alert(t('settings.crashReport'), report);
+    }
+  };
 
   const runDelete = async (): Promise<void> => {
     const outcome = await performAccountDeletion();
@@ -216,6 +237,16 @@ export function SettingsScreen(): React.JSX.Element {
       >
         <Text style={[styles.label, { color: tokens.blue }]}>{t('settings.privacyPolicy')}</Text>
       </Pressable>
+      {lastCrash && (
+        <Pressable
+          testID="settings-crash-report"
+          accessibilityRole="button"
+          style={styles.row}
+          onPress={() => void shareCrash()}
+        >
+          <Text style={[styles.label, { color: tokens.blue }]}>{t('settings.crashReport')}</Text>
+        </Pressable>
+      )}
 
       {!isGuest && (
         <Pressable

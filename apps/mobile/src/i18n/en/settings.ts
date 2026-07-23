@@ -10,6 +10,7 @@ export default {
   deleteAccount: 'Delete account',
   about: 'About',
   privacyPolicy: 'Privacy policy',
+  crashReport: 'Share last crash report',
   deleteConfirmTitle: 'Delete your account?',
   deleteConfirmBody:
     'This cannot be undone. Your profile is deleted and match records are anonymized.',

@@ -12,6 +12,7 @@ import './src/i18n'; // initialise the i18n singleton before any screen uses use
 // jest-mocked environments must not crash the module load.
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 import { navigationRef, RootNavigator } from './src/navigation';
+import { RootErrorBoundary } from './src/app/RootErrorBoundary';
 import { SERVER_ORIGIN } from './src/config';
 import { watchTokenRotation } from './src/push/register';
 import {
@@ -62,9 +63,11 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <NavigationContainer ref={navigationRef} linking={linking}>
-          <RootNavigator />
-        </NavigationContainer>
+        <RootErrorBoundary>
+          <NavigationContainer ref={navigationRef} linking={linking}>
+            <RootNavigator />
+          </NavigationContainer>
+        </RootErrorBoundary>
         <StatusBar style="auto" />
       </SafeAreaProvider>
     </GestureHandlerRootView>

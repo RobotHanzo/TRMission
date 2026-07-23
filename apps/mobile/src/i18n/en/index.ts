@@ -16,6 +16,7 @@ import type zhHant from '../zh-Hant';
 import boot from './boot';
 import builder from './builder';
 import chat from './chat';
+import crash from './crash';
 import game from './game';
 import home from './home';
 import log from './log';
@@ -54,4 +55,5 @@ export default {
   events,
   errors,
   boot,
+  crash,
 } satisfies TranslationShape<typeof zhHant>;
