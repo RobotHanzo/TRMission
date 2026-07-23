@@ -10,9 +10,17 @@ export interface TutorialCompletion {
   completedAt: string; // ISO-8601
 }
 
-export async function getTutorialCompletion(): Promise<TutorialCompletion | null> {
+// Reachable with no account (pre-login), so the key falls back to a shared, unnamespaced bucket
+// when there's no signed-in user. Once an account exists, its completion is tracked under its own
+// id — otherwise a device that already finished the tutorial under one account (or pre-login)
+// would silently mark it done for every OTHER account that later signs in on the same device.
+function storageKey(userId?: string): string {
+  return userId ? `${KEY}:${userId}` : KEY;
+}
+
+export async function getTutorialCompletion(userId?: string): Promise<TutorialCompletion | null> {
   try {
-    const raw = await AsyncStorage.getItem(KEY);
+    const raw = await AsyncStorage.getItem(storageKey(userId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<TutorialCompletion>;
     return (parsed.scope === 'core' || parsed.scope === 'full') &&
@@ -24,10 +32,10 @@ export async function getTutorialCompletion(): Promise<TutorialCompletion | null
   }
 }
 
-export async function markTutorialCompleted(scope: Scope): Promise<void> {
+export async function markTutorialCompleted(scope: Scope, userId?: string): Promise<void> {
   try {
     await AsyncStorage.setItem(
-      KEY,
+      storageKey(userId),
       JSON.stringify({ scope, completedAt: new Date().toISOString() } satisfies TutorialCompletion),
     );
   } catch {

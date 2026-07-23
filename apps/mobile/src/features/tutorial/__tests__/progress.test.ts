@@ -25,4 +25,11 @@ describe('tutorial completion persistence', () => {
     await AsyncStorage.setItem('trm.tutorial.completed.v1', JSON.stringify({ scope: 'huge' }));
     expect(await getTutorialCompletion()).toBeNull();
   });
+
+  it('scopes completion per account so a fresh account on the same device starts clean', async () => {
+    await markTutorialCompleted('core', 'user-a');
+    expect(await getTutorialCompletion('user-a')).not.toBeNull();
+    expect(await getTutorialCompletion('user-b')).toBeNull();
+    expect(await getTutorialCompletion()).toBeNull();
+  });
 });

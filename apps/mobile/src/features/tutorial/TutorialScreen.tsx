@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useGame } from '../../store/game';
+import { useSession } from '../../store/session';
 import { resetToDefaultContent } from '../../game/catalog';
 import { GameStage } from '../../screens/GameStage';
 import { lessonsForScope } from './curriculum';
@@ -73,6 +74,7 @@ function TutorialRunner({
   onCreateGame(): void;
 }) {
   const { t } = useTranslation();
+  const userId = useSession((s) => s.user?.id);
   const player = useScenarioPlayer(lesson, useGame);
   const snapshot = useGame((s) => s.snapshot);
   const reduced = useReducedMotion();
@@ -103,10 +105,11 @@ function TutorialRunner({
   // must never dim everything while its rect resolves.
   const dimAll = !spotlight || spotlight.kind === 'board';
 
-  // Whole-tutorial completion → persist (offline, fire-and-forget).
+  // Whole-tutorial completion → persist (offline, fire-and-forget). Scoped to the signed-in
+  // account (if any) so it doesn't bleed into other accounts sharing this device.
   useEffect(() => {
-    if (player.done && isLast) void markTutorialCompleted(scope);
-  }, [player.done, isLast, scope]);
+    if (player.done && isLast) void markTutorialCompleted(scope, userId);
+  }, [player.done, isLast, scope, userId]);
 
   if (!snapshot) {
     return (

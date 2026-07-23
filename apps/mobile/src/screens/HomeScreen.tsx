@@ -40,7 +40,11 @@ type Props = HomeTabScreenProps<'Home'>;
 
 // First-entry gate (mobile adaptation of the web's 0-completed-games check, offline-friendly):
 // the welcome takes over the homepage until the user picks a path or finishes the tutorial.
+// Scoped per-account (Home only ever mounts once `user` exists) — otherwise a device that already
+// dismissed the welcome (or finished the tutorial) under one account would skip it for every other,
+// genuinely-new account that later signs in on the same device.
 const WELCOME_SEEN_KEY = 'trm.welcome.seen.v1';
+const welcomeSeenKey = (userId: string): string => `${WELCOME_SEEN_KEY}:${userId}`;
 
 /** Room codes set like train numbers — the departure-board voice for anything joinable. */
 function CodeChip({ code }: { code: string }): React.JSX.Element {
@@ -226,27 +230,29 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   }, []);
 
   useEffect(() => {
+    const userId = user?.id;
     const unsub = navigation.addListener('focus', () => {
       void refresh();
       setFocusKey((k) => k + 1);
-      void getTutorialCompletion().then((c) => {
+      void getTutorialCompletion(userId).then((c) => {
         setTutorialDone(c !== null);
         // A finished tutorial is a resolved onboarding — never re-show the welcome.
         if (c !== null) setShowWelcome(false);
+        else if (!userId) setShowWelcome(false);
         else
-          AsyncStorage.getItem(WELCOME_SEEN_KEY).then(
+          AsyncStorage.getItem(welcomeSeenKey(userId)).then(
             (seen) => setShowWelcome(seen === null),
             () => setShowWelcome(false),
           );
       });
     });
     return unsub;
-  }, [navigation, refresh]);
+  }, [navigation, refresh, user?.id]);
 
   const dismissWelcome = useCallback(() => {
     setShowWelcome(false);
-    void AsyncStorage.setItem(WELCOME_SEEN_KEY, '1').catch(() => undefined);
-  }, []);
+    if (user?.id) void AsyncStorage.setItem(welcomeSeenKey(user.id), '1').catch(() => undefined);
+  }, [user?.id]);
 
   // The public-rooms list stays fresh while the screen is up (web polls the same 5s cadence).
   useEffect(() => {
