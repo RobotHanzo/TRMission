@@ -96,7 +96,7 @@ export function TeamSelector({
                 onPress={() => dropOnColumn(team)}
                 style={[styles.columnHeader, { backgroundColor: teamColor(team) }]}
               >
-                <Text style={styles.columnHeaderText}>{t('game.teamName', { n: team + 1 })}</Text>
+                <Text style={styles.columnHeaderText}>{t('teamName', { n: team + 1 })}</Text>
                 <Text style={styles.columnCount}>{members.length}</Text>
               </Pressable>
               <View style={styles.chipList}>

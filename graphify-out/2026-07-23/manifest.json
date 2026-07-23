@@ -4790,8 +4790,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/GameStage.tsx": {
-    "mtime": 1784801132.8963118,
-    "ast_hash": "d1aabde7b9254c6d0f77b85deedada78",
+    "mtime": 1784804226.8555176,
+    "ast_hash": "9f2d0c3a3d4b2b7da283c562f7bce4e2",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/HomeScreen.tsx": {
@@ -4835,13 +4835,13 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/stageLayout.test.ts": {
-    "mtime": 1783869478.516534,
-    "ast_hash": "ebae749efc323ea8a804bb3dd37e30cc",
+    "mtime": 1784804390.6249564,
+    "ast_hash": "462bc259e6b474be29be7465029e57e7",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/stageLayout.ts": {
-    "mtime": 1783869478.5175352,
-    "ast_hash": "a4100bac676e91dee37f7c80956bbcd4",
+    "mtime": 1784804160.3782287,
+    "ast_hash": "8497d9a8dbfe5246e57bf35b9a46034d",
     "semantic_hash": ""
   },
   "apps/mobile/src/shims.test.ts": {

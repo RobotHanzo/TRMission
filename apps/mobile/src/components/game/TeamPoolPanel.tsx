@@ -40,10 +40,10 @@ export function TeamPoolPanel({ snapshot, onPush, onTake }: Props): React.JSX.El
   const pushUsed = snapshot.you?.teamPushUsed ?? false;
   const full = pool.count >= pool.capacity;
   const hint = pushUsed
-    ? t('game.teamPoolPushUsed')
+    ? t('teamPoolPushUsed')
     : full
-      ? t('game.teamPoolFull')
-      : t('game.teamPoolHint');
+      ? t('teamPoolFull')
+      : t('teamPoolHint');
 
   const inPool = CARD_COLORS.filter((c) => pool.cards[c] > 0);
   const spare = CARD_COLORS.filter((c) => hand[c] > 0);
@@ -52,14 +52,14 @@ export function TeamPoolPanel({ snapshot, onPush, onTake }: Props): React.JSX.El
     <View style={[styles.wrap, { borderColor: tokens.line }]}>
       <View style={styles.head}>
         <Users size={14} color={teamColor(pool.team)} />
-        <Text style={[styles.title, { color: teamColor(pool.team) }]}>{t('game.teamPool')}</Text>
+        <Text style={[styles.title, { color: teamColor(pool.team) }]}>{t('teamPool')}</Text>
         <Text style={[styles.count, { color: tokens.inkSoft }]}>
-          {t('game.teamPoolCount', { n: pool.count, max: pool.capacity })}
+          {t('teamPoolCount', { n: pool.count, max: pool.capacity })}
         </Text>
       </View>
 
       {inPool.length === 0 ? (
-        <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('game.teamPoolEmpty')}</Text>
+        <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('teamPoolEmpty')}</Text>
       ) : (
         <CardRowScroll contentContainerStyle={styles.row}>
           {inPool.map((c) => {
@@ -68,7 +68,7 @@ export function TeamPoolPanel({ snapshot, onPush, onTake }: Props): React.JSX.El
               <Pressable
                 key={c}
                 accessibilityRole="button"
-                accessibilityLabel={`${t('game.teamPoolTake')}: ${c}`}
+                accessibilityLabel={`${t('teamPoolTake')}: ${c}`}
                 accessibilityState={{ disabled: !enabled }}
                 disabled={!enabled}
                 onPress={() => onTake(c)}
@@ -90,7 +90,7 @@ export function TeamPoolPanel({ snapshot, onPush, onTake }: Props): React.JSX.El
               <Pressable
                 key={c}
                 accessibilityRole="button"
-                accessibilityLabel={`${t('game.teamPoolPush')}: ${c}`}
+                accessibilityLabel={`${t('teamPoolPush')}: ${c}`}
                 accessibilityState={{ disabled: !enabled }}
                 disabled={!enabled}
                 onPress={() => onPush(c)}
