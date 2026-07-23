@@ -1,4 +1,4 @@
-import { auth, home, room } from '@trm/client-core/i18n/locales/zh-Hant';
+import { home, room } from '@trm/client-core/i18n/locales/zh-Hant';
 
 // The home screen: the shared home/welcome flow plus mobile-only rows. practiceDesc and
 // footnote are the intentionally mobile-specific welcome copy (offline practice game; the
@@ -17,7 +17,6 @@ export default {
   create: '建立房間',
   playBots: '離線對戰電腦',
   resumeOffline: '繼續離線對局',
-  signOut: auth.signOut,
   play: {
     tutorialTitle: home.tutorialTitle,
     tutorialDesc: home.tutorialDesc,

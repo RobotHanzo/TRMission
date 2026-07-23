@@ -81,6 +81,7 @@ export function SettingsScreen(): React.JSX.Element {
   const setHaptics = useSettings((s) => s.setHaptics);
   const isGuest = useSession((s) => s.user?.isGuest ?? true);
   const savePreferences = useSession((s) => s.savePreferences);
+  const signOut = useSession((s) => s.signOut);
 
   const theme = useUi((s) => s.theme);
   const locale = useUi((s) => s.locale);
@@ -258,6 +259,15 @@ export function SettingsScreen(): React.JSX.Element {
           <Text style={[styles.label, { color: tokens.blue }]}>{t('settings.crashReport')}</Text>
         </Pressable>
       )}
+
+      <Pressable
+        testID="settings-sign-out"
+        accessibilityRole="button"
+        style={styles.row}
+        onPress={() => void signOut()}
+      >
+        <Text style={[styles.label, { color: tokens.danger }]}>{t('settings.signOut')}</Text>
+      </Pressable>
 
       {!isGuest && (
         <Pressable

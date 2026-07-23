@@ -1,4 +1,4 @@
-import { settings } from '@trm/client-core/i18n/locales/en';
+import { auth, settings } from '@trm/client-core/i18n/locales/en';
 import type { TranslationShape } from '@trm/client-core/i18n/shape';
 import type zh from '../zh-Hant/settings';
 
@@ -7,6 +7,7 @@ export default {
   title: 'Settings',
   notifications: 'Push notifications',
   haptics: 'Haptic feedback',
+  signOut: auth.signOut,
   deleteAccount: 'Delete account',
   about: 'About',
   version: 'Version',

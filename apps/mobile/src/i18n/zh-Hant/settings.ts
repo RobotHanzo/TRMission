@@ -1,12 +1,13 @@
-import { settings } from '@trm/client-core/i18n/locales/zh-Hant';
+import { auth, settings } from '@trm/client-core/i18n/locales/zh-Hant';
 
 // The settings screen: the shared appearance/audio vocabulary plus mobile-only rows (push,
-// haptics, about, account deletion).
+// haptics, about, sign-out, account deletion).
 export default {
   ...settings,
   title: '設定',
   notifications: '推播通知',
   haptics: '震動回饋',
+  signOut: auth.signOut,
   deleteAccount: '刪除帳號',
   about: '關於',
   version: '版本',

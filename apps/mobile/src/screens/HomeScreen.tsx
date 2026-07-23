@@ -192,7 +192,6 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
   const user = useSession((s) => s.user);
-  const signOut = useSession((s) => s.signOut);
   const online = useOnline();
   const canBuild = useCanBuild();
   const { width } = useWindowDimensions();
@@ -470,19 +469,10 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     </View>
   );
 
-  const signOutLink = (
-    <Pressable onPress={() => void signOut()}>
-      <Text style={[styles.signOut, { color: tokens.danger }]}>{t('home.signOut')}</Text>
-    </Pressable>
-  );
-
   // Phones stay a single scrolling column (unchanged); tablets/desktops split into a web-style
   // two-pane grid — primary room-joining flow on the left, secondary links on the right.
   return (
-    <Screen
-      scroll
-      style={[styles.container, tabExtra > 0 && { paddingBottom: SPACE[4] + tabExtra }]}
-    >
+    <Screen scroll style={[styles.container, { paddingBottom: SPACE[8] + tabExtra }]}>
       {header}
       {!online && <OfflineHomeBanner />}
       {!wide && guestCard}
@@ -499,7 +489,6 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
             {tutorialRow}
             {guestCard}
             {linkPills}
-            {signOutLink}
           </View>
         </View>
       ) : (
@@ -511,7 +500,6 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
           {joinRow}
           {createButton}
           {linkPills}
-          {signOutLink}
         </>
       )}
     </Screen>
@@ -572,7 +560,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   pillText: { fontSize: 14, fontWeight: '600' },
-  signOut: { textAlign: 'center', marginTop: SPACE[1], paddingVertical: 6 },
   // Two-pane tablet/desktop layout (stageTier !== 'compact', ≥700dp): mirrors web's
   // `.home-grid` (1.6fr rooms/1fr side rail), capped so it doesn't stretch edge-to-edge on
   // large screens (web caps `.app-main.app-main--home` at 980px the same way).

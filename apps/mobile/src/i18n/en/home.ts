@@ -1,4 +1,4 @@
-import { auth, home, room } from '@trm/client-core/i18n/locales/en';
+import { home, room } from '@trm/client-core/i18n/locales/en';
 import type { TranslationShape } from '@trm/client-core/i18n/shape';
 import type zh from '../zh-Hant/home';
 
@@ -15,7 +15,6 @@ export default {
   create: 'Create room',
   playBots: 'Play vs Bots',
   resumeOffline: 'Resume offline games',
-  signOut: auth.signOut,
   play: {
     tutorialTitle: home.tutorialTitle,
     tutorialDesc: home.tutorialDesc,
