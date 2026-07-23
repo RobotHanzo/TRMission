@@ -1,6 +1,7 @@
 name: mobile-ios
 
-# macOS runners bill ~10x, so this lane is gated to release branches/tags only. Continuous Native
+# macOS runners bill ~10x on private plans, so this lane is gated to release branches/tags (plus
+# a twice-weekly cache warm-up on main — see the schedule note below). Continuous Native
 # Generation: ios/ is produced by `expo prebuild`, never committed. Signing via fastlane match
 # (certs/profiles in a private git repo, seeded by the mobile-ios-certs workflow — no Mac, no EAS).
 # Every run produces an .ipa artifact; a real v<semver>+<build> tag also uploads to TestFlight, and
@@ -10,6 +11,14 @@ on:
   push:
     branches: ['release/**']
     tags: ['v*']
+  # GitHub evicts any cache untouched for 7 days, and this lane only fires on release/** + tags —
+  # so between releases the ccache/Pods/node_modules caches age out and the next release build is
+  # cold. A twice-weekly warm-up on main keeps them fresh, same as mobile-android.yml (and free
+  # despite the macOS multiplier: this repo is public, so GitHub-hosted minutes aren't billed).
+  # A scheduled run takes the plain non-tag path — BUILD_NUMBER=1, upload:false — and can never
+  # reach TestFlight.
+  schedule:
+    - cron: '0 4 * * 1,4'
   workflow_dispatch:
     inputs:
       publish:
@@ -34,8 +43,36 @@ jobs:
     # Xcode 26's actool — the macos-latest label only finishes flipping to macOS 26 during the
     # June 2026 rollout, and a stray macOS 15 (Xcode 16) runner would fail the asset compile.
     runs-on: macos-26
+    # Same CI footgun mobile-android.yml documents: CNG regenerates ios/ every run and node_modules
+    # is restored from cache, all with fresh mtimes, so ccache's defaults would miss nearly every
+    # object. Hash the compiler by CONTENT, and add the Xcode-specific sloppiness + depend-mode set
+    # from RN's build-speed docs — clang-modules compiles (this app injects use_modular_headers!,
+    # see app.config.ts) are only cacheable at all with depend_mode plus `modules`/`pch_defines`
+    # sloppiness, and Xcode's -ivfsoverlay/index-store args need their entries too. These env vars
+    # override the ccache config the ccache-action writes.
+    env:
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: clang_index_store,file_stat_matches,include_file_ctime,include_file_mtime,ivfsoverlay,pch_defines,modules,system_headers,time_macros
+      CCACHE_FILECLONE: 'true'
+      CCACHE_DEPEND: 'true'
+      CCACHE_INODECACHE: 'true'
     steps:
       - uses: actions/checkout@v4
+
+      # What actually cuts the xcodebuild step (~12 of the ~20min total): RN core,
+      # expo-modules-core, and the autolinked pods recompile identical C/C++/ObjC on every run
+      # today. Must be installed BEFORE `pod install` — react_native_post_install probes
+      # `command -v ccache` at pod-install time and only points CC/CXX at RN's ccache wrappers
+      # (with the resolved CCACHE_BINARY path baked in) when the binary already exists.
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: mobile-ios
+          # One platform, one arch (device arm64) — proportionally smaller than Android's
+          # 4-ABI 5G. verbose:2 prints `ccache -s` in the post step so the real hit rate is
+          # visible — read it together with the job-level CCACHE_* env above.
+          max-size: 2G
+          verbose: 2
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
@@ -109,20 +146,34 @@ jobs:
           APP_VERSION: ${{ steps.build_number.outputs.version }}
 
       # Keyed on the prebuild-generated Podfile (ios/ itself isn't committed — see the CNG note
-      # above), so this only misses when native deps actually change.
+      # above) PLUS yarn.lock: the Podfile is a near-static template — the actual pod set and
+      # versions come from autolinking over node_modules — so with the Podfile alone in the key a
+      # JS dep bump would restore the same stale exact-match forever and re-run the identical
+      # delta `pod install` on every build without ever saving the updated Pods back.
       - name: Cache CocoaPods
         uses: actions/cache@v4
         with:
           path: |
             ~/Library/Caches/CocoaPods
             apps/mobile/ios/Pods
-          key: cocoapods-${{ hashFiles('apps/mobile/ios/Podfile') }}
+          key: cocoapods-${{ hashFiles('apps/mobile/ios/Podfile') }}-${{ hashFiles('yarn.lock') }}
           restore-keys: |
+            cocoapods-${{ hashFiles('apps/mobile/ios/Podfile') }}-
             cocoapods-
 
       - name: Install CocoaPods
         working-directory: apps/mobile/ios
         run: pod install
+        env:
+          # Expo's Podfile template checks USE_CCACHE before Podfile.properties.json's
+          # apple.ccacheEnabled when deciding whether react_native_post_install wires CC/CXX to
+          # RN's ccache wrappers. Deliberately env-only, NOT expo-build-properties'
+          # ios.ccacheEnabled: that would change the resolved app config and shift the OTA
+          # runtimeVersion fingerprint — exactly what .fingerprintignore keeps RNRepo's
+          # prebuilt-vs-source choice from doing — cutting already-shipped binaries off from
+          # JS-only OTA fixes until the next store build. A pod-install-time env var is invisible
+          # to the fingerprint, and a no-op wherever ccache isn't installed.
+          USE_CCACHE: '1'
 
       # The Fastfile hardcodes workspace/scheme "TRMission" (derived from prebuild's
       # HelloWorld→sanitizedName rename). Assert it here so an Expo template change fails in

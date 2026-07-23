@@ -213,13 +213,20 @@ authorization).
   CNG regenerates `android/` each run) covers the fallback compiles, and **`gradle/actions/setup-gradle`**'s
   build cache the Kotlin/Java/dex tasks; `lintVitalRelease` is skipped, and a twice-weekly scheduled
   warm-up keeps those caches from GitHub's 7-day eviction between infrequent release runs.
-- **`.github/workflows/mobile-ios.yml`** — **macos-latest** (billed ~10x, so release-gated): same
-  tag-derived `BUILD_NUMBER` → `expo prebuild` → `pod install` → `fastlane ios beta` (setup_ci
-  keychain → match readonly → `update_code_signing_settings` flips the app target to manual
-  signing — prebuild emits an Automatic/no-team project — → gym). Every run uploads the `.ipa` as
-  a workflow artifact; `pilot` → TestFlight only on a real `v<semver>+<build>` tag (`upload:true`),
-  mirroring Android's Play gate — non-tag runs all carry BUILD_NUMBER=1, which TestFlight would
-  reject as a duplicate.
+- **`.github/workflows/mobile-ios.yml`** — **macos-26** (pinned: the Liquid Glass `.icon` bundle
+  needs Xcode 26's actool; release-gated): same tag-derived `BUILD_NUMBER` → `expo prebuild` →
+  `pod install` → `fastlane ios beta` (setup_ci keychain → match readonly →
+  `update_code_signing_settings` flips the app target to manual signing — prebuild emits an
+  Automatic/no-team project — → gym). Every run uploads the `.ipa` as a workflow artifact;
+  `pilot` → TestFlight only on a real `v<semver>+<build>` tag (`upload:true`), mirroring
+  Android's Play gate — non-tag runs all carry BUILD_NUMBER=1, which TestFlight would reject as
+  a duplicate. Native-build speed stack: **ccache** covers the xcodebuild compile (enabled via
+  `USE_CCACHE=1` on `pod install` — deliberately an env var, NOT expo-build-properties'
+  `ios.ccacheEnabled`, which would shift the OTA runtimeVersion fingerprint; same
+  `CCACHE_COMPILERCHECK=content` lesson as Android plus the Xcode sloppiness/depend-mode set for
+  clang modules), the Pods cache is keyed on Podfile+yarn.lock, and the same twice-weekly
+  scheduled warm-up as Android keeps the caches inside GitHub's 7-day eviction window (free —
+  the repo is public).
 - **`.github/workflows/mobile-ios-certs.yml`** — workflow_dispatch-only macOS job running
   `fastlane ios certs` (match **read-write**, ASC-API-key auth): seeds/rotates the Distribution
   cert + App Store profile in the private match repo. No maintainer owns a Mac — this workflow is
