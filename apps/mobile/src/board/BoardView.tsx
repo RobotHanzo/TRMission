@@ -53,6 +53,8 @@ const GLOW_MS = 1300;
 const GLOW_WAIT_MS = 2600;
 /** The glow fires once at least this fraction of the route's cars sit inside the viewport. */
 const GLOW_VISIBLE_FRACTION = 0.5;
+/** Trailing debounce on viewport commits — see BoardView.onLayout. */
+const VP_SETTLE_MS = 90;
 
 export interface BoardViewProps {
   snapshot: GameSnapshot;
@@ -80,11 +82,31 @@ export function BoardView(props: BoardViewProps): React.JSX.Element {
   const { dark } = useTheme();
   // The tutorial spotlights the whole board through this container (web `.board-viewport`).
   const anchor = useTutorialAnchor(TUTORIAL_ANCHORS.board);
+  // The compact dock ANIMATES its height, which re-lays this container out on every frame of the
+  // toggle; committing a viewport per frame would re-render the whole camera/scene stack ~15×
+  // in a 240ms travel. The first measurement commits immediately (the camera can't seed without
+  // one); later ones settle through a trailing debounce so the board reframes once, at rest.
+  // Mid-animation only the container HEIGHT moves and the camera's scale is width-based, so the
+  // interim native frames just reveal (or clip) sea below the unchanged transform.
+  const vpTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (vpTimer.current) clearTimeout(vpTimer.current);
+    },
+    [],
+  );
   const onLayout = (e: LayoutChangeEvent): void => {
     const { width, height } = e.nativeEvent.layout;
-    setVp((prev) =>
-      prev && prev.w === width && prev.h === height ? prev : { w: width, h: height },
-    );
+    const commit = (): void =>
+      setVp((prev) =>
+        prev && prev.w === width && prev.h === height ? prev : { w: width, h: height },
+      );
+    if (vpTimer.current) clearTimeout(vpTimer.current);
+    if (!vp) {
+      commit();
+      return;
+    }
+    vpTimer.current = setTimeout(commit, VP_SETTLE_MS);
   };
   return (
     <View

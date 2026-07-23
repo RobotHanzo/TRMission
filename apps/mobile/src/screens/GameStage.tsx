@@ -7,9 +7,17 @@
 // dock/panes are the only layouts that keep the (very vertical) board visible on a handheld.
 // Every chrome surface styles through the ChromeTokens theme (gameChrome.tsx); the timetable
 // panel voice (TrayHead's dashed leader) is shared with the web's .tray-head.
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import {
   ArrowLeft,
   Layers,
@@ -35,6 +43,7 @@ import { gateAllowsTarget, gateFlags, type ActionGate } from '../game/actionGate
 import { TurnBanner } from '../components/game/TurnBanner';
 import { TUTORIAL_ANCHORS, useTutorialAnchor } from '../features/tutorial/targets';
 import { useAnimationDriver } from '../hooks/useAnimationDriver';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 import { useSoundDriver } from '../hooks/useSoundDriver';
 import { useHaptics } from '../game/useHaptics';
 import { useClaimFlow } from '../game/useClaimFlow';
@@ -91,6 +100,13 @@ const RAIL_WIDTH = 360;
 const COMMS_WIDTH = 320;
 /** The boarding-pass dock's rounded lip overlaps the board bottom by this much. */
 const DOCK_OVERLAP = 14;
+/** Dock header (handle + tab bar) height estimate until the first onLayout corrects it — only
+ *  consulted if the dock is collapsed before that measurement lands. */
+const DOCK_HEADER_ESTIMATE = 64;
+/** Dock collapse/expand travel time (Easing.out(cubic), the app's chrome-motion idiom). */
+const DOCK_ANIM_MS = 240;
+/** A header-swipe released faster than this (px/s) commits the swipe's direction outright. */
+const DOCK_FLING_VELOCITY = 420;
 
 /** Tab glyphs for the phone dock (chrome-only Lucide, like the rest of the app UI). */
 const TAB_ICONS: Record<DockTabKey, LucideIcon> = {
@@ -225,6 +241,92 @@ export function GameStage({
     if (phase === Phase.SETUP_TICKETS) commands.keepInitialTickets(ids);
     else commands.keepTickets(ids);
   };
+
+  // ── Dock motion (compact) ── The dock's height is driven by a 0(collapsed)→1(open) progress
+  // shared value so the header can be DRAGGED (height tracks the finger) while handle taps, tab
+  // taps, and the tutorial's pop-open all animate through the same path. React state
+  // (`dockCollapsed`) stays the source of truth for the TARGET: the effect animates progress
+  // toward it, and a drag release writes the settled state back.
+  const reducedMotion = useReducedMotion();
+  const openHeight = Math.round(height * 0.45);
+  const [dockHeaderH, setDockHeaderH] = useState(DOCK_HEADER_ESTIMATE);
+  const collapsedHeight = dockHeaderH + insets.bottom;
+  // The mandatory ticket chooser overrides a collapsed dock — a required choice must stay
+  // visible. Collapsed otherwise shrinks the dock to its tab bar, giving the board the window.
+  const dockOpen = needKeep || !dockCollapsed;
+  const dockProgress = useSharedValue(dockOpen ? 1 : 0);
+  useEffect(() => {
+    dockProgress.value = reducedMotion
+      ? dockOpen
+        ? 1
+        : 0
+      : withTiming(dockOpen ? 1 : 0, {
+          duration: DOCK_ANIM_MS,
+          easing: Easing.out(Easing.cubic),
+        });
+  }, [dockOpen, reducedMotion, dockProgress]);
+  const dockAnimStyle = useAnimatedStyle(
+    () => ({ height: collapsedHeight + dockProgress.value * (openHeight - collapsedHeight) }),
+    [collapsedHeight, openHeight],
+  );
+  // Header swipe: vertical-only activation (activeOffsetY) so tab taps still register, and an
+  // early horizontal fail so the tab bar's own sideways scroll wins its axis.
+  //
+  // The header rides the dock's top edge, so during a drag it follows the pointer — which means
+  // on react-native-web the underlying Pressable still counts the release as a press (native
+  // cancels presses when a pan activates; guard both): handle/tab onPress ignores any press
+  // landing right after a pan touched the dock.
+  const dockDragStamp = useRef(0);
+  const markDockDrag = (): void => {
+    dockDragStamp.current = Date.now();
+  };
+  const dragJustEnded = (): boolean => Date.now() - dockDragStamp.current < 300;
+  const dockDragFrom = useSharedValue(0);
+  const dockPan = Gesture.Pan()
+    .activeOffsetY([-12, 12])
+    .failOffsetX([-16, 16])
+    .onStart(() => {
+      dockDragFrom.value = dockProgress.value;
+      runOnJS(markDockDrag)();
+    })
+    .onUpdate((e) => {
+      const range = openHeight - collapsedHeight;
+      if (range <= 0) return;
+      dockProgress.value = Math.min(1, Math.max(0, dockDragFrom.value - e.translationY / range));
+    })
+    .onEnd((e) => {
+      // A fling commits its direction; a slow release settles to the nearer state. The worklet
+      // animates immediately (state may not change, e.g. released back where it started) and the
+      // state write keeps React — and the needKeep/tutorial effects — in agreement.
+      const toOpen =
+        e.velocityY <= -DOCK_FLING_VELOCITY ||
+        (e.velocityY < DOCK_FLING_VELOCITY && dockProgress.value > 0.5);
+      dockProgress.value = withTiming(toOpen ? 1 : 0, {
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+      });
+      runOnJS(markDockDrag)();
+      runOnJS(setDockCollapsed)(!toOpen);
+    });
+  // Direction-aware tab transitions: the incoming panel fades in with a slide from the side its
+  // tab sits on. Driven manually (shared value reset per tab change) rather than reanimated
+  // entering/exiting layout animations — those silently no-op on the react-native-web harness,
+  // where this stays testable. The layout effect runs pre-paint, so the incoming panel's first
+  // frame is already transparent (a plain effect would flash it fully opaque for a frame).
+  const tabDir = useSharedValue<1 | -1>(1);
+  const tabAnim = useSharedValue(1);
+  useLayoutEffect(() => {
+    if (reducedMotion) {
+      tabAnim.value = 1;
+      return;
+    }
+    tabAnim.value = 0;
+    tabAnim.value = withTiming(1, { duration: 180, easing: Easing.out(Easing.cubic) });
+  }, [dockTab, reducedMotion, tabAnim]);
+  const tabAnimStyle = useAnimatedStyle(() => ({
+    opacity: tabAnim.value,
+    transform: [{ translateX: (1 - tabAnim.value) * 24 * tabDir.value }],
+  }));
   // While choosing tickets the board stays interactive, so softly glow the endpoint cities of the
   // offered tickets to help preview the railways they need.
   const ticketEndpoints = needKeep
@@ -486,20 +588,17 @@ export function GameStage({
         : source === 'missions'
           ? (snapshot.you?.keptTicketIds.length ?? 0)
           : null;
-    // The mandatory ticket chooser overrides a collapsed dock — a required choice must stay
-    // visible. Collapsed otherwise shrinks the dock to its tab bar, giving the board the window.
-    const dockOpen = needKeep || !dockCollapsed;
     return (
       <View style={[styles.fill, { backgroundColor: tokens.paper }]}>
         <View style={styles.fill}>
           {board}
           {floatHud(insets.top + 6, true)}
         </View>
-        <View
+        <Animated.View
           // The dock is the only always-mounted HUD surface on phones (its panels swap by tab).
           // Registering it as a flight anchor gives card draws a destination even while the Hand
           // tab is inactive — otherwise the flight has no `hand` target and silently no-ops.
-          ref={(v) => registerAnimTarget('dock', v)}
+          ref={(v: View | null) => registerAnimTarget('dock', v)}
           collapsable={false}
           style={[
             styles.dock,
@@ -508,7 +607,7 @@ export function GameStage({
               borderColor: tokens.line,
               shadowColor: tokens.ink,
             },
-            dockOpen && { height: Math.round(height * 0.45) },
+            dockAnimStyle,
             { paddingBottom: insets.bottom },
           ]}
         >
@@ -516,76 +615,95 @@ export function GameStage({
             <ScrollView contentContainerStyle={styles.dockPanel}>{chooser}</ScrollView>
           ) : (
             <>
-              {/* The tray's grab handle doubles as the collapse toggle. */}
-              <Pressable
-                style={styles.handleRow}
-                hitSlop={8}
-                accessibilityRole="button"
-                accessibilityLabel={t(dockCollapsed ? 'dockExpand' : 'dockCollapse')}
-                onPress={() => setDockCollapsed((c) => !c)}
-              >
-                <View style={[styles.handle, { backgroundColor: tokens.line }]} />
-              </Pressable>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.dockTabs}
-                contentContainerStyle={styles.dockTabsRow}
-              >
-                {tabs.map(({ key, labelKey, countSource }) => {
-                  const count = countOf(countSource);
-                  const active = dockTab === key;
-                  const Icon = TAB_ICONS[key];
-                  return (
-                    <Pressable
-                      key={key}
-                      style={[
-                        styles.dockTabBtn,
-                        {
-                          backgroundColor: active ? tokens.ember : tokens.surface2,
-                          borderColor: active ? tokens.ember : tokens.line,
-                        },
-                      ]}
-                      accessibilityRole="tab"
-                      accessibilityState={{ selected: active }}
-                      onPress={() => {
-                        setDockTab(key);
-                        // Tapping any tab while collapsed reopens the panel it names.
-                        setDockCollapsed(false);
-                      }}
-                    >
-                      <Icon size={14} color={active ? '#fff' : tokens.inkSoft} />
-                      <Text
-                        style={[styles.dockTabText, { color: active ? '#fff' : tokens.inkSoft }]}
-                      >
-                        {t(labelKey)}
-                      </Text>
-                      {count !== null && (
-                        <View
+              {/* The header (grab handle + tab bar) is the swipe surface: drag it to pull the
+                  dock open or closed; the handle keeps working as a plain tap toggle. */}
+              <GestureDetector gesture={dockPan}>
+                <View
+                  collapsable={false}
+                  onLayout={(e) => setDockHeaderH(Math.round(e.nativeEvent.layout.height))}
+                >
+                  <Pressable
+                    style={styles.handleRow}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={t(dockCollapsed ? 'dockExpand' : 'dockCollapse')}
+                    onPress={() => {
+                      if (dragJustEnded()) return;
+                      setDockCollapsed((c) => !c);
+                    }}
+                  >
+                    <View style={[styles.handle, { backgroundColor: tokens.line }]} />
+                  </Pressable>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.dockTabs}
+                    contentContainerStyle={styles.dockTabsRow}
+                  >
+                    {tabs.map(({ key, labelKey, countSource }, tabIndex) => {
+                      const count = countOf(countSource);
+                      const active = dockTab === key;
+                      const Icon = TAB_ICONS[key];
+                      return (
+                        <Pressable
+                          key={key}
                           style={[
-                            styles.dockTabCount,
+                            styles.dockTabBtn,
                             {
-                              backgroundColor: active
-                                ? 'rgba(255,255,255,0.28)'
-                                : rgba(tokens.ink, 0.08),
+                              backgroundColor: active ? tokens.ember : tokens.surface2,
+                              borderColor: active ? tokens.ember : tokens.line,
                             },
                           ]}
+                          accessibilityRole="tab"
+                          accessibilityState={{ selected: active }}
+                          onPress={() => {
+                            if (dragJustEnded()) return;
+                            const from = tabs.findIndex((tb) => tb.key === dockTab);
+                            if (tabIndex !== from) tabDir.value = tabIndex > from ? 1 : -1;
+                            setDockTab(key);
+                            // Tapping any tab while collapsed reopens the panel it names.
+                            setDockCollapsed(false);
+                          }}
                         >
+                          <Icon size={14} color={active ? '#fff' : tokens.inkSoft} />
                           <Text
                             style={[
-                              styles.dockTabCountText,
+                              styles.dockTabText,
                               { color: active ? '#fff' : tokens.inkSoft },
                             ]}
                           >
-                            {count}
+                            {t(labelKey)}
                           </Text>
-                        </View>
-                      )}
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
-              {dockOpen && (
+                          {count !== null && (
+                            <View
+                              style={[
+                                styles.dockTabCount,
+                                {
+                                  backgroundColor: active
+                                    ? 'rgba(255,255,255,0.28)'
+                                    : rgba(tokens.ink, 0.08),
+                                },
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.dockTabCountText,
+                                  { color: active ? '#fff' : tokens.inkSoft },
+                                ]}
+                              >
+                                {count}
+                              </Text>
+                            </View>
+                          )}
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              </GestureDetector>
+              {/* Always mounted (clipped to ~0 height while collapsed) so the panel is already in
+                  place as a drag reveals it; content swaps by tab under the fade/slide style. */}
+              <Animated.View style={[styles.dockPanelWrap, tabAnimStyle]}>
                 <ScrollView contentContainerStyle={styles.dockPanel}>
                   {dockTab === 'hand' ? (
                     handSection
@@ -601,10 +719,10 @@ export function GameStage({
                     comms
                   )}
                 </ScrollView>
-              )}
+              </Animated.View>
             </>
           )}
-        </View>
+        </Animated.View>
         {overlays}
       </View>
     );
@@ -764,6 +882,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dockTabCountText: { fontSize: 11, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  // Fills whatever height the animated dock leaves under the header; the child ScrollView clips
+  // its content to that (→ zero-height, invisible while collapsed).
+  dockPanelWrap: { flex: 1 },
   dockPanel: { padding: 10, gap: 10 },
   rail: {
     width: RAIL_WIDTH,
