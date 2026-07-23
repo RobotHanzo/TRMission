@@ -158,7 +158,7 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
   const isLastBeat = total > 0 && index === total - 1;
   const pos = coachPosition(spotRects, width, height);
   const sideDocked = pos === 'left' || pos === 'right';
-  const progress = total > 0 ? Math.round(((index + 1) / total) * 100) : 0;
+  const progress = total > 0 ? Math.round((Math.min(index + 1, total) / total) * 100) : 0;
   const coachW = Math.min(22 * 16, width - 24);
 
   // A side-docked coach sits ADJACENT to its (tall) target rather than at the far screen edge, so
@@ -471,7 +471,12 @@ const styles = StyleSheet.create({
   finaleTitle: { color: INK, fontSize: 17, fontWeight: '700', textAlign: 'center' },
   specimen: { backgroundColor: 'rgba(255,255,255,0.94)', borderRadius: 10, padding: 8 },
   body: { color: INK, fontSize: 14, lineHeight: 20 },
-  progressTrack: { height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.14)' },
+  progressTrack: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    overflow: 'hidden',
+  },
   progressFill: { height: 4, borderRadius: 2, backgroundColor: ACCENT },
   actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   linkBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 40 },

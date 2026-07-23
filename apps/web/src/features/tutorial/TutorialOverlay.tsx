@@ -49,7 +49,7 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
       ? coachPosition(spotRects, window.innerWidth, window.innerHeight)
       : 'bottom';
   const sideDocked = pos === 'left' || pos === 'right';
-  const progress = total > 0 ? Math.round(((index + 1) / total) * 100) : 0;
+  const progress = total > 0 ? Math.round((Math.min(index + 1, total) / total) * 100) : 0;
 
   // A side-docked coach sits ADJACENT to its (tall) target rather than at the far screen edge, so it
   // reads as attached to what it highlights — the map or the ticket chooser — clamped on-screen.
