@@ -51,6 +51,13 @@ gitignored and a drift between it and the `.proto` is a CI failure.
 - **If a worktree is used for a task, merge it back to `main` locally once all phases/tasks in
   that task are done** — don't leave finished worktree work stranded on its branch.
 
+## Plans
+
+Implementation plans for this repo live in `docs/plans/`, one file per plan named
+`YYYY-MM-DD-<topic>.md` (date the plan was written + short kebab-case topic). When you produce a
+plan for work in this repo — plan mode or otherwise — save it there under that naming scheme, not
+in `~/.claude/plans/` or anywhere else.
+
 ## Monorepo layout & build order
 
 ```
