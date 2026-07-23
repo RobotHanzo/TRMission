@@ -14,6 +14,12 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 );
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// The themed launcher (Screen) reads safe-area insets even though GameStage itself is mocked
+// below — no SafeAreaProvider is mounted in this tree, so stub the hook directly.
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
 // The coachmark's RN `Animated` motion (entrance/fade/pulse/progress-glide) is driven by the RN
 // jest preset's own real-timer rAF polyfill, NOT `jest.useFakeTimers()` — left running, dozens of
 // beats' worth of loops blow well past this test's fixed per-test timeout. All motion is designed

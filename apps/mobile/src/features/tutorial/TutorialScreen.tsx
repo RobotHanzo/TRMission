@@ -3,7 +3,7 @@
 // spotlight overlay. Fully offline; reachable without an account. Mirrors the web
 // TutorialScreen beat-for-beat (gate derivation, dimAll rule, lesson hand-off).
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +17,7 @@ import { TutorialSpotlight } from './TutorialSpotlight';
 import { useSpotlightRects } from './useSpotlightRects';
 import { TutorialTargetsProvider } from './targets';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
+import { Card, LinkButton, MutedText, PrimaryButton, Screen, SecondaryButton } from '../../theme/chrome';
 import { useTheme } from '../../theme/useTheme';
 import { markTutorialCompleted } from './progress';
 import type { ActionGate, Lesson, Scope } from './types';
@@ -26,34 +27,27 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 function TutorialLauncher({ onPick, onExit }: { onPick(scope: Scope): void; onExit(): void }) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   return (
-    <View style={styles.launcher}>
-      <View style={styles.launcherCard}>
-        <Text style={styles.title}>{t('tutorial.title')}</Text>
-        <Text style={styles.muted}>{t('tutorial.intro')}</Text>
-        <Pressable
-          accessibilityRole="button"
+    <Screen centered style={styles.launcher}>
+      <Card style={styles.launcherCard}>
+        <Text style={[styles.title, { color: tokens.ink }]}>{t('tutorial.title')}</Text>
+        <MutedText>{t('tutorial.intro')}</MutedText>
+        <PrimaryButton
           testID="tut-scope-full"
-          style={[styles.btn, styles.btnAccent]}
+          title={t('tutorial.full')}
           onPress={() => onPick('full')}
-        >
-          <Text style={styles.btnAccentText}>{t('tutorial.full')}</Text>
-        </Pressable>
-        <Text style={styles.mutedSmall}>{t('tutorial.fullDesc')}</Text>
-        <Pressable
-          accessibilityRole="button"
+        />
+        <MutedText>{t('tutorial.fullDesc')}</MutedText>
+        <SecondaryButton
           testID="tut-scope-core"
-          style={styles.btn}
+          title={t('tutorial.quickstart')}
           onPress={() => onPick('core')}
-        >
-          <Text style={styles.btnText}>{t('tutorial.quickstart')}</Text>
-        </Pressable>
-        <Text style={styles.mutedSmall}>{t('tutorial.quickstartDesc')}</Text>
-        <Pressable accessibilityRole="button" testID="tut-launcher-exit" onPress={onExit}>
-          <Text style={styles.link}>{t('tutorial.exit')}</Text>
-        </Pressable>
-      </View>
-    </View>
+        />
+        <MutedText>{t('tutorial.quickstartDesc')}</MutedText>
+        <LinkButton testID="tut-launcher-exit" title={t('tutorial.exit')} onPress={onExit} />
+      </Card>
+    </Screen>
   );
 }
 
@@ -79,7 +73,6 @@ function TutorialRunner({
   onCreateGame(): void;
 }) {
   const { t } = useTranslation();
-  const { tokens } = useTheme();
   const player = useScenarioPlayer(lesson, useGame);
   const snapshot = useGame((s) => s.snapshot);
   const reduced = useReducedMotion();
@@ -117,9 +110,9 @@ function TutorialRunner({
 
   if (!snapshot) {
     return (
-      <View style={styles.launcher}>
-        <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('game.connecting')}</Text>
-      </View>
+      <Screen centered style={styles.launcher}>
+        <MutedText>{t('game.connecting')}</MutedText>
+      </Screen>
     );
   }
 
@@ -210,31 +203,9 @@ export default function TutorialScreen() {
   );
 }
 
-// Light-theme launcher matching the P1 Home surfaces (blue primary, bordered secondary).
+// Themed launcher (Screen/Card/*Button chrome primitives) matching the P1 Home surfaces.
 const styles = StyleSheet.create({
-  launcher: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  launcherCard: {
-    width: '100%',
-    maxWidth: 360,
-    borderRadius: 16,
-    padding: 20,
-    gap: 10,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
+  launcher: { alignItems: 'center', justifyContent: 'center', padding: 24 },
+  launcherCard: { width: '100%', maxWidth: 360 },
   title: { fontSize: 22, fontWeight: '700' },
-  muted: { opacity: 0.75 },
-  mutedSmall: { opacity: 0.6, fontSize: 12 },
-  btn: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
-  btnAccent: { borderWidth: 0, backgroundColor: '#0f5fa6' },
-  btnText: { fontWeight: '600' },
-  btnAccentText: { fontWeight: '700', color: '#fff' },
-  link: { textDecorationLine: 'underline', textAlign: 'center', marginTop: 6 },
 });
