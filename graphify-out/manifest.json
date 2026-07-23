@@ -3955,8 +3955,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/app.config.ts": {
-    "mtime": 1784576628.2989397,
-    "ast_hash": "b24484f4e0495ecb50c3881727b6d4e5",
+    "mtime": 1784787294.3883007,
+    "ast_hash": "57b9b5b3bd72383b364a492e0652c185",
     "semantic_hash": ""
   },
   "apps/mobile/babel.config.js": {
@@ -5225,8 +5225,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-android.yml": {
-    "mtime": 1784576047.7214832,
-    "ast_hash": "3fc2c7a855baa6656761576e3c0df797",
+    "mtime": 1784787299.0826097,
+    "ast_hash": "09166ec3851ac43997178d98034a7666",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ci.yml": {
@@ -5235,8 +5235,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ios.yml": {
-    "mtime": 1784492930.720275,
-    "ast_hash": "68bd407aeb8a92905eb82242e8f8c7d5",
+    "mtime": 1784787278.6920922,
+    "ast_hash": "759dfcb408be6f6c3dea7696766558b3",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ota.yml": {
@@ -5245,8 +5245,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/CLAUDE.md": {
-    "mtime": 1784711462.617895,
-    "ast_hash": "a2d476a7b8f3a3736a3b62c20c13e5c8",
+    "mtime": 1784787380.2985575,
+    "ast_hash": "1d195ea09d132156b62129f2520c23c5",
     "semantic_hash": ""
   },
   "apps/mobile/assets/sounds/CREDITS.md": {
@@ -5880,8 +5880,8 @@
     "semantic_hash": ""
   },
   "docs/release/app-store-connect-setup.md": {
-    "mtime": 1784420909.418159,
-    "ast_hash": "b46f3a4f57fcae1d856b1c8345eb9a2f",
+    "mtime": 1784787367.9920993,
+    "ast_hash": "8ee8475b447cabded4025d2b56b70fea",
     "semantic_hash": ""
   },
   "docs/release/play-console-setup.md": {
@@ -6867,6 +6867,11 @@
   "apps/mobile/src/components/game/__tests__/ScoreBoard.guestUpgrade.test.tsx": {
     "mtime": 1784742240.724097,
     "ast_hash": "c135a230f99a74f87e7970943f71468e",
+    "semantic_hash": ""
+  },
+  ".github/workflows/mobile-ios-certs.yml": {
+    "mtime": 1784787249.2797792,
+    "ast_hash": "5299afb947c0b2a9de51522dada8d296",
     "semantic_hash": ""
   }
 }
