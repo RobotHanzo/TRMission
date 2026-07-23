@@ -4707,6 +4707,7 @@ __metadata:
     react-native-webview: "npm:13.16.1"
     react-native-worklets: "npm:0.8.3"
     react-test-renderer: "npm:19.2.3"
+    sf-symbols-typescript: "npm:^2.2.0"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vitest: "npm:^2.1.8"
     zustand: "npm:^5.0.2"
@@ -13277,7 +13278,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sf-symbols-typescript@npm:^2.0.0, sf-symbols-typescript@npm:^2.1.0":
+"sf-symbols-typescript@npm:^2.0.0, sf-symbols-typescript@npm:^2.1.0, sf-symbols-typescript@npm:^2.2.0":
   version: 2.2.0
   resolution: "sf-symbols-typescript@npm:2.2.0"
   checksum: 10/8623e148bf86151692d3ccb3149122c091b256162a39f4c4f78472811ffe92e3c77a83841a7381a5dc0bc6505ebb73e7ca8901cb077004872d7ee1cb4e5be9d4
