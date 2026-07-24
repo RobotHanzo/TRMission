@@ -17,7 +17,7 @@ client catalog, Mongo seed) is derived from it. Commands: `yarn workspace @trm/m
   `OFFICIAL_MAPS[0]`; add future official maps here, each with its own authored tables and hash).
 - `validate.ts` — `validate()` enforces the structural invariants the engine relies on: connected
   graph, no unreachable node, ferry/locomotive/length rules, ticket endpoints exist, no length-5/7
-  routes. **Run the tests after any content edit** — they assert these. `validateGeography()` and
+  routes. The test suite asserts them all. `validateGeography()` and
   `validateForPlay()` (below) additionally cover custom-map content that never goes through this file.
 - `graph.ts` — `shortestDistances()`: all-pairs Dijkstra over the route graph (min length per city
   pair), used by mission auto-generation.

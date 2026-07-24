@@ -58,6 +58,26 @@ Implementation plans for this repo live in `docs/plans/`, one file per plan name
 plan for work in this repo — plan mode or otherwise — save it there under that naming scheme, not
 in `~/.claude/plans/` or anywhere else.
 
+## Working style
+
+Defaults for agent work here; apply with judgement (unlike **Load-bearing decisions** below, which
+are binding).
+
+- **Run the gates; don't stack a verification pass on top.** Each area's `CLAUDE.md` names its
+  invariants (replay digests, the redaction choke point, `CONTENT_HASH`, the codec's four-way
+  lock-step); `yarn typecheck`/`lint`/`test` plus the golden and property suites are what prove
+  them. Run the ones your change touches and report what they actually printed. A second
+  self-review sweep, or a verifier subagent on top of a green suite, buys nothing here.
+- **Delegate sparingly.** A subagent re-establishes context from scratch on a monorepo this size,
+  and other sessions may already be sharing this worktree. Fan out only for genuinely independent
+  tracks — a wide cross-package sweep, unrelated packages in parallel — and do reads, edits, and
+  single-package work directly. Give any code-exploring subagent the graphify rules below.
+- **Don't tidy on the way past.** The shapes here are deliberate: a rename, an extracted helper, or
+  a tempting cleanup can move a `stateDigest`, a `CONTENT_HASH`, or a proto contract. Change what
+  the task needs and leave adjacent code alone unless asked.
+- **Keep written output short.** Plans, docs, and commit/PR bodies carry the decisions and the
+  reasons behind them — not a recap of everything read along the way.
+
 ## Monorepo layout & build order
 
 ```

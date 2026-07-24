@@ -105,8 +105,7 @@ Natural Earth 1:110m land dataset (`geo/worldData.ts`, public domain); the resul
 **before** it's ever hashed, so re-publishing an untouched draft produces the same `contentHash`.
 Mission auto-generation calls `@trm/map-data`'s `generateTickets` directly (seeded — same seed always
 reproduces the same list, so "reroll" is just bumping the seed). This entire feature is one lazy
-route chunk (`App.tsx`) — it must never inflate the main bundle; re-check chunk sizes after touching
-anything under `features/builder/`.
+route chunk (`App.tsx`) — it must never inflate the main bundle.
 
 - `game/` — view-only helpers (payment enumeration via the engine's `previewScore`/selectors, tunnel,
   cards, seat mapping). These mirror the server for optimistic preview but the server is authority.
