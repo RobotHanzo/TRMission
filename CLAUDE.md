@@ -72,9 +72,6 @@ are binding).
   and other sessions may already be sharing this worktree. Fan out only for genuinely independent
   tracks — a wide cross-package sweep, unrelated packages in parallel — and do reads, edits, and
   single-package work directly. Give any code-exploring subagent the graphify rules below.
-- **Don't tidy on the way past.** The shapes here are deliberate: a rename, an extracted helper, or
-  a tempting cleanup can move a `stateDigest`, a `CONTENT_HASH`, or a proto contract. Change what
-  the task needs and leave adjacent code alone unless asked.
 - **Keep written output short.** Plans, docs, and commit/PR bodies carry the decisions and the
   reasons behind them — not a recap of everything read along the way.
 
