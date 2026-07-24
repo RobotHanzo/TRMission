@@ -10,6 +10,7 @@ import { TUTORIAL_ANCHORS, useTutorialTargets } from './targets';
 import { boardAnchorRects } from './boardRects';
 import { useBoardCameraReader, type ReadBoardCamera } from './cameraBridge';
 import { cityById, routeById } from '../../game/content';
+import { ROUTE_GEOMETRY } from '../../game/routeGeometry';
 
 /** How long after a beat change to keep re-measuring (web: rAF window of the same length —
  *  covers the 600ms auto-pan glide with slack). */
@@ -104,7 +105,9 @@ export function useSpotlightRects(
     const tick = (): void => {
       if (!alive) return;
       const cam = read();
-      push(cam ? boardAnchorRects(spotlight, cityById, routeById, cam, boardRect!) : []);
+      push(
+        cam ? boardAnchorRects(spotlight, cityById, routeById, cam, boardRect!, ROUTE_GEOMETRY) : [],
+      );
       if (Date.now() - started <= TRACK_MS) raf = requestAnimationFrame(tick);
     };
     const resolveBoard = (): void => {

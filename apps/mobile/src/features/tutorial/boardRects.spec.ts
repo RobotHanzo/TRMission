@@ -25,6 +25,30 @@ describe('boardSpaceRect', () => {
     expect(boardSpaceRect({ kind: 'route', ids: ['R999'] }, cities, routes)).toBeNull();
     expect(boardSpaceRect({ kind: 'cities', ids: ['atlantis'] }, cities, routes)).toBeNull();
   });
+  it("a bowed route's bbox reaches past its endpoint chord to the curve's apex", () => {
+    // The board never draws a route as a straight endpoint-to-endpoint line — every route bows
+    // (an authored curve, or an automatic one arcing around an intruding city), and ferries/
+    // tunnels routinely carry a sizeable bow. A slot/mid south of the chord (board y grows south)
+    // must widen the bbox past what the two endpoint cities alone would give.
+    const geometry = new Map([
+      [
+        'R16',
+        {
+          path: '',
+          slots: [{ x: 32, y: 30, angle: 0, len: 1 }],
+          mid: { x: 32, y: 30 },
+          perp: { x: 0, y: 0 },
+        },
+      ],
+    ]);
+    const r = boardSpaceRect({ kind: 'route', ids: ['R16'] }, cities, routes, geometry)!;
+    expect(r).toEqual({ x: 28, y: 18, w: 8, h: 14 }); // maxY pulled from 26 to 30 by the apex
+  });
+  it('falls back to the endpoint-only bbox when a route is missing from the geometry map', () => {
+    const geometry = new Map(); // R16 absent
+    const r = boardSpaceRect({ kind: 'route', ids: ['R16'] }, cities, routes, geometry)!;
+    expect(r).toEqual({ x: 28, y: 18, w: 8, h: 10 });
+  });
 });
 
 describe('projectBoardRect', () => {

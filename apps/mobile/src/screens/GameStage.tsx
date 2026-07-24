@@ -229,11 +229,20 @@ export function GameStage({
     flow.pickCity(cityId);
   };
 
-  // Tutorial on compact: a beat awaiting a market action must surface the Draw tab — its target
-  // would otherwise sit inside an unselected (unmounted) dock panel and the learner would stall.
+  // Interactive tutorial on compact: the dock follows the narration, same rule as the demo effect
+  // below — a beat awaiting a market action must surface the Draw tab (its target would otherwise
+  // sit inside an unselected, unmounted dock panel and the learner would stall), while a
+  // claim/build-station/tunnel/info beat instead tucks the dock away so the spotlighted route or
+  // city on the board isn't sitting underneath it, unreachable by tap. Guarded off `demo`: the
+  // encyclopedia's own effect below (which additionally knows which HUD tab a beat references)
+  // owns dock state there.
   const compact = tier === 'compact';
   useEffect(() => {
-    if (!compact || !actionGate || actionGate === 'locked') return;
+    if (!compact || demo || !actionGate) return;
+    if (actionGate === 'locked') {
+      setDockCollapsed(true);
+      return;
+    }
     const expect = actionGate.t;
     if (
       expect === 'DRAW_ANY' ||
@@ -244,8 +253,10 @@ export function GameStage({
       setDockTab('draw');
       // A collapsed dock would leave the beat's target off-screen — pop it back open.
       setDockCollapsed(false);
+    } else {
+      setDockCollapsed(true);
     }
-  }, [compact, actionGate]);
+  }, [compact, demo, actionGate]);
 
   // Encyclopedia demo: the dock follows the narration. A beat that talks about a HUD panel
   // opens its tab; any other beat tucks the dock back down, handing the window to the board.

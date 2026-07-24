@@ -140,6 +140,10 @@ const ACCENT = '#ee6b1f';
 const SURFACE = '#22262c';
 const INK = '#e9ecf1';
 const INK_DIM = 'rgba(233, 236, 241, 0.65)';
+// The specimen's own subtle "elevated" tint (web parity: color-mix(text 4%, transparent)) — a
+// faint lift off SURFACE, not an opaque light card. A solid near-white box here (the previous
+// value) ignored this coachmark's own dark palette and read as a stray light-mode leftover.
+const SPECIMEN_BG = 'rgba(233, 236, 241, 0.06)';
 
 export function TutorialOverlay(props: TutorialOverlayProps) {
   const { t } = useTranslation();
@@ -469,7 +473,7 @@ const styles = StyleSheet.create({
   exitBtn: { padding: 2 },
   finaleBadge: { alignItems: 'center' },
   finaleTitle: { color: INK, fontSize: 17, fontWeight: '700', textAlign: 'center' },
-  specimen: { backgroundColor: 'rgba(255,255,255,0.94)', borderRadius: 10, padding: 8 },
+  specimen: { backgroundColor: SPECIMEN_BG, borderRadius: 10, padding: 8 },
   body: { color: INK, fontSize: 14, lineHeight: 20 },
   progressTrack: {
     height: 4,

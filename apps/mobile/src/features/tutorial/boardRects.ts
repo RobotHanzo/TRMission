@@ -5,6 +5,7 @@
 import type { Spotlight } from './types';
 import type { FlatRect } from './focus';
 import type { BoardTransform, BoardProjection } from '../../game/boardView';
+import type { RouteGeometry } from '../../game/routeGeometry';
 
 export interface BoardCameraSample {
   transform: BoardTransform;
@@ -19,30 +20,49 @@ type RouteEnds = { a: string; b: string };
 const CITY_PAD_BU = 3;
 const ROUTE_PAD_BU = 2;
 
-/** Board-space (0–100) bbox for a cities/route spotlight; null when nothing resolves. */
+/** Board-space (0–100) bbox for a cities/route spotlight; null when nothing resolves. A route's
+ *  bbox is taken from its REAL rendered curve (car slots + apex), not just its two endpoint
+ *  cities — the board draws every route as a quadratic-Bézier bow (an express bypass arcing
+ *  around an intruding city, or an authored curve — routinely the case for ferries/tunnels, which
+ *  often need to clear geography), so a chord-only bbox can miss the curve by several board units
+ *  and the spotlight hole ends up nowhere near the drawn track. `routeGeometryById` is optional so
+ *  a route the geometry map doesn't know about still falls back to the endpoint-only bbox. */
 export function boardSpaceRect(
   spotlight: BoardSpotlight,
   cityById: ReadonlyMap<string, CityPoint>,
   routeById: ReadonlyMap<string, RouteEnds>,
+  routeGeometryById?: ReadonlyMap<string, RouteGeometry>,
 ): { x: number; y: number; w: number; h: number } | null {
-  const cityIds =
-    spotlight.kind === 'route'
-      ? spotlight.ids.flatMap((rid) => {
-          const r = routeById.get(rid);
-          return r ? [r.a, r.b] : [];
-        })
-      : spotlight.ids;
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
-  for (const cid of cityIds) {
-    const c = cityById.get(cid);
-    if (!c) continue;
-    minX = Math.min(minX, c.x);
-    maxX = Math.max(maxX, c.x);
-    minY = Math.min(minY, c.y);
-    maxY = Math.max(maxY, c.y);
+  const extend = (x: number, y: number): void => {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  };
+  if (spotlight.kind === 'cities') {
+    for (const cid of spotlight.ids) {
+      const c = cityById.get(cid);
+      if (c) extend(c.x, c.y);
+    }
+  } else {
+    for (const rid of spotlight.ids) {
+      const r = routeById.get(rid);
+      if (r) {
+        const a = cityById.get(r.a);
+        const b = cityById.get(r.b);
+        if (a) extend(a.x, a.y);
+        if (b) extend(b.x, b.y);
+      }
+      const geo = routeGeometryById?.get(rid);
+      if (geo) {
+        extend(geo.mid.x, geo.mid.y);
+        for (const s of geo.slots) extend(s.x, s.y);
+      }
+    }
   }
   if (!Number.isFinite(minX)) return null;
   const pad = spotlight.kind === 'route' ? ROUTE_PAD_BU : CITY_PAD_BU;
@@ -74,6 +94,7 @@ export function boardAnchorRects(
   routeById: ReadonlyMap<string, RouteEnds>,
   cam: BoardCameraSample,
   viewport: FlatRect,
+  routeGeometryById?: ReadonlyMap<string, RouteGeometry>,
 ): FlatRect[] {
   if (spotlight.kind === 'cities') {
     return spotlight.ids.flatMap((id) => {
@@ -88,6 +109,6 @@ export function boardAnchorRects(
       return [projectBoardRect(bu, cam, viewport)];
     });
   }
-  const bb = boardSpaceRect(spotlight, cityById, routeById);
+  const bb = boardSpaceRect(spotlight, cityById, routeById, routeGeometryById);
   return bb ? [projectBoardRect(bb, cam, viewport)] : [];
 }

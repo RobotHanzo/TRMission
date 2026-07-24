@@ -393,13 +393,19 @@ export function Specimen({ spec }: { spec: SpecimenSpec }) {
   // canvases fall back to their natural size until then.
   const [avail, setAvail] = useState<number | undefined>(undefined);
   return (
-    <View onLayout={(e) => setAvail(e.nativeEvent.layout.width)}>
+    // `alignSelf: 'stretch'` forces a definite width regardless of the caller's own alignItems
+    // (several wrap this in an `alignItems: 'center'` card, which otherwise shrink-wraps this
+    // View to its content's natural size). Without it, a `flex: 1` row inside a specimen (the
+    // station-cost label, the score-table car row) collapses to near-zero width during that
+    // intrinsic-size measurement pass and its CJK text wraps one character per line.
+    <View style={styles.root} onLayout={(e) => setAvail(e.nativeEvent.layout.width)}>
       <SpecimenWidthCtx.Provider value={avail}>{renderSpecimen(spec)}</SpecimenWidthCtx.Provider>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { alignSelf: 'stretch' },
   centered: { alignItems: 'center' },
   compare: { gap: 2 },
   compareRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
