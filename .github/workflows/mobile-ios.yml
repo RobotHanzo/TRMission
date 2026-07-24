@@ -187,6 +187,34 @@ jobs:
           RCT_USE_RN_DEP: '1'
           RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS: '1'
 
+      # RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS above places each fetched dSYM at
+      # React.xcframework/<slice>/React.framework/dSYMs/ (facebook/react-native's own
+      # scripts/cocoapods/rncore.rb, slice_dsym_dest) — nested one level INSIDE the framework
+      # bundle, instead of alongside it as a sibling of the slice's .framework the way Apple's
+      # xcframework Info.plist DebugSymbolsPath convention expects. Left there, it rides along as
+      # ordinary bundle content when Xcode embeds+codesigns the framework, and App Store Connect
+      # rejects the shipped .app for it ("Invalid bundle structure", ITMS 90171 — this broke
+      # v0.1.14+14's first TestFlight upload attempt). It must be stripped from this exact Pods
+      # copy, BEFORE the "Build" step below ever runs xcodebuild: stripping it from the already
+      # zipped-and-signed .ipa afterwards was tried and made things worse (it punches a hole in a
+      # signature Xcode already sealed over the folder — ITMS 90034, "Missing or invalid
+      # signature" — v0.1.14+14's second attempt). The `find`/`echo` output here is deliberately
+      # unconditional (not gated behind "if found") so a still-failing next run has real on-disk
+      # evidence to work from instead of another guess. No dSYM survives for Xcode to seal or
+      # ship — this trades away RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS's one job until upstream RN
+      # stops nesting the dSYM inside the framework it documents alongside; a build that can't
+      # reach TestFlight isn't a usable alternative. A future RN release that fixes the nesting
+      # makes this a no-op (find just prints nothing to remove).
+      - name: Strip nested dSYMs from vendored prebuilt frameworks (RN dSYM/codesign bug workaround)
+        working-directory: apps/mobile/ios
+        run: |
+          echo "--- dSYM-related paths under Pods before cleanup ---"
+          find Pods \( -iname 'dSYMs' -o -iname '*.dSYM' \) 2>/dev/null
+          echo "--- stripping nested dSYMs dirs (path */<name>.framework/dSYMs) ---"
+          find Pods -type d -path '*.framework/dSYMs' -print -exec rm -rf {} +
+          echo "--- dSYM-related paths under Pods after cleanup (should exclude anything under a .framework) ---"
+          find Pods \( -iname 'dSYMs' -o -iname '*.dSYM' \) 2>/dev/null
+
       # The Fastfile hardcodes workspace/scheme "TRMission" (derived from prebuild's
       # HelloWorld→sanitizedName rename). Assert it here so an Expo template change fails in
       # seconds with a directory listing, not 10+ minutes later inside xcodebuild.
