@@ -1480,8 +1480,8 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1784694292.6359894,
-    "ast_hash": "ae6dad2779a3fd8f6d6490473e600579",
+    "mtime": 1784830736.197712,
+    "ast_hash": "b4176ac72960fcd4902dd557306fd34d",
     "semantic_hash": ""
   },
   "README.md": {
@@ -4285,8 +4285,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/TutorialScreen.tsx": {
-    "mtime": 1784803042.429773,
-    "ast_hash": "96ab18b2474ae31edcd8f91f637d1759",
+    "mtime": 1784833858.100859,
+    "ast_hash": "b8a7170c5a4d944f9c7757714e3a14ef",
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/TutorialSpotlight.tsx": {
@@ -4305,8 +4305,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/__tests__/TutorialScreen.walkthrough.test.tsx": {
-    "mtime": 1783974390.2758188,
-    "ast_hash": "d344b55787581dbf932817a6a3699cb0",
+    "mtime": 1784831266.8445778,
+    "ast_hash": "9b38879ca1b9994a69dd1f954e610369",
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/__tests__/TutorialSpotlight.test.tsx": {
@@ -4315,8 +4315,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/__tests__/progress.test.ts": {
-    "mtime": 1783869478.4694717,
-    "ast_hash": "032ebff5661c73e13913d4532b4da191",
+    "mtime": 1784833932.2945397,
+    "ast_hash": "45973085c5d0dee502f87025e5f6ab0a",
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/__tests__/targets.test.tsx": {
@@ -4365,8 +4365,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/progress.ts": {
-    "mtime": 1783869478.4734712,
-    "ast_hash": "9681d7e2c633589d83c3a86d88890707",
+    "mtime": 1784833838.3687608,
+    "ast_hash": "0d99213dfd2f51adac7569f3318c8642",
     "semantic_hash": ""
   },
   "apps/mobile/src/features/tutorial/scenarios.spec.ts": {
@@ -4795,8 +4795,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/HomeScreen.tsx": {
-    "mtime": 1784824378.2597404,
-    "ast_hash": "b0e36565a1f0e4f1e4a92991581dc1b3",
+    "mtime": 1784833876.5061762,
+    "ast_hash": "e69b224a9188ec87172309e02fbc1432",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/LoginScreen.tsx": {
@@ -4820,8 +4820,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/SettingsScreen.tsx": {
-    "mtime": 1784827245.1256068,
-    "ast_hash": "2c74368678252f4c6ae03eb38fa152f6",
+    "mtime": 1784833406.464621,
+    "ast_hash": "687c413b02de9cd4d4ebc792dcf81ef2",
     "semantic_hash": ""
   },
   "apps/mobile/src/screens/settings/NotificationsRow.test.tsx": {
@@ -5235,8 +5235,8 @@
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ios.yml": {
-    "mtime": 1784826509.2177494,
-    "ast_hash": "9d9fa1c9cb0f28a279d8b4efb0f57ce3",
+    "mtime": 1784852261.0471709,
+    "ast_hash": "51b6e4b66d900dc7057574f219f01231",
     "semantic_hash": ""
   },
   ".github/workflows/mobile-ota.yml": {
@@ -6155,8 +6155,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/en/home.ts": {
-    "mtime": 1784824390.007007,
-    "ast_hash": "bc5c58cf497daa0df551767aa8c3540f",
+    "mtime": 1784833376.2609627,
+    "ast_hash": "2d19a9dfcd2c26fa74b03c55b42c0c43",
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/en/index.ts": {
@@ -6195,8 +6195,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/en/settings.ts": {
-    "mtime": 1784827253.4465456,
-    "ast_hash": "b61881fe77e09167def8f067f71093b5",
+    "mtime": 1784833387.932912,
+    "ast_hash": "8f9ce312f0a17aecdce854ee60eb435c",
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/en/ui.ts": {
@@ -6225,8 +6225,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/zh-Hant/home.ts": {
-    "mtime": 1784824384.883652,
-    "ast_hash": "fcf6bd9a25e7c410e776d4916a954ba5",
+    "mtime": 1784833369.0892313,
+    "ast_hash": "c1d2458227658cbe8c4eea4213416674",
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/zh-Hant/index.ts": {
@@ -6265,8 +6265,8 @@
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/zh-Hant/settings.ts": {
-    "mtime": 1784827249.5238092,
-    "ast_hash": "487bbd80fed7d644b9130b27c313c609",
+    "mtime": 1784833383.0342398,
+    "ast_hash": "7207926a174b18021bf2f8acf2a05b6e",
     "semantic_hash": ""
   },
   "apps/mobile/src/i18n/zh-Hant/ui.ts": {
@@ -7017,6 +7017,91 @@
   "apps/mobile/src/screens/settings/VolumeSlider.tsx": {
     "mtime": 1784827182.595407,
     "ast_hash": "48d576d231ee4cbe6d90311d69ac341b",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-06-27-development-plan.md": {
+    "mtime": 1784830722.8850594,
+    "ast_hash": "250f3b4ae59fb525d0081d34634efb7e",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-06-28-login-flow-rebuild.md": {
+    "mtime": 1784830722.6242073,
+    "ast_hash": "b31a1466df2fffbd90a44aace57c849a",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-06-29-parallel-route-option-and-settings-ui.md": {
+    "mtime": 1784830722.912848,
+    "ast_hash": "ff90c217c9a1920937e0a268e6a4a7f8",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-06-29-taiwan-geographic-boundary.md": {
+    "mtime": 1784830722.9382253,
+    "ast_hash": "f2494ee950a4eab6206e12c14eb7a184",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-06-29-tunnel-texture-sleeper-hatch.md": {
+    "mtime": 1784830722.5690124,
+    "ast_hash": "ba5f478a229e43ca8352662a74744ee9",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-06-29-tutorial-and-encyclopedia.md": {
+    "mtime": 1784830722.778903,
+    "ast_hash": "5f5293ad7639c8dfcd7b26fc4e6a18d7",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-02-custom-map-system.md": {
+    "mtime": 1784830722.597152,
+    "ast_hash": "2899825a710677aecc6aa5d3ce79648a",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-02-game-replay-system.md": {
+    "mtime": 1784830722.7532837,
+    "ast_hash": "6075e94ea41c21d24395d144b6ba6c45",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-03-web-mobile-layouts.md": {
+    "mtime": 1784830722.5427163,
+    "ast_hash": "1902e240214d33cea4b685afe60b7819",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-04-maintainer-dashboard.md": {
+    "mtime": 1784830722.702824,
+    "ast_hash": "3219c35870a63ac8d7ca9255818ff8b5",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-04-random-events-system.md": {
+    "mtime": 1784830722.650413,
+    "ast_hash": "04065ea2d08d9a7f09ba7ed82266c234",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-13-shared-client-core-parity.md": {
+    "mtime": 1784830722.8316705,
+    "ast_hash": "bb181fdfacafa5dbd9769cc1a427e4e3",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-20-mobile-pinch-zoom-performance.md": {
+    "mtime": 1784830722.6765966,
+    "ast_hash": "905f759f87ffda3a15fd3eb8640e1024",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-22-leaderboard.md": {
+    "mtime": 1784830722.5149593,
+    "ast_hash": "286de6159518b1376051f9f7e9e595dc",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-22-team-selector-redesign.md": {
+    "mtime": 1784830722.8050685,
+    "ast_hash": "1fcb46366aa23697e0b29fc4c811ca7c",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-23-admin-push-notification-tester.md": {
+    "mtime": 1784830722.8589618,
+    "ast_hash": "c9fe182cd7bf2c560a2999c4fca5a89c",
+    "semantic_hash": ""
+  },
+  "docs/plans/2026-07-23-ios-liquid-glass-tab-bar.md": {
+    "mtime": 1784830722.7268555,
+    "ast_hash": "8a503035434364d57645e28e72042a7e",
     "semantic_hash": ""
   }
 }
