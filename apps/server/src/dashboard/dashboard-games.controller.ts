@@ -81,10 +81,15 @@ export class DashboardGamesController {
 
   @Post('games/:gameId/replay-ticket')
   @HttpCode(200)
-  @RequirePermission('games.viewReplay')
+  @RequirePermission('games.readLog')
   @ApiOperation({
     summary: "Mint a short-lived ticket to view a game's replay in apps/web",
-    description: 'Works for COMPLETED and TERMINATED games. 409 for LIVE (nothing to replay yet).',
+    description:
+      'Works for COMPLETED and TERMINATED games. 409 for LIVE (nothing to replay yet). ' +
+      'Requires games.readLog: the ticket redeems the same unredacted action log as ' +
+      '/log and /replay, so it needs that moderator-tier permission — the viewer-tier ' +
+      'games.viewReplay it was previously (and incorrectly) gated on let any viewer read ' +
+      "any finished game's full hidden-information action log.",
   })
   mintReplayTicket(@Param('gameId') gameId: string, @CurrentUser() actor: AuthUser) {
     return this.games.mintReplayTicket(actor, gameId);

@@ -34,6 +34,7 @@ async function grantDashboard(userId: string, role: 'viewer' | 'moderator' | 'ad
 }
 
 let viewer: { token: string; id: string };
+let moderator: { token: string; id: string };
 let noPerm: { token: string; id: string };
 let board: Board;
 let completedGameId: string;
@@ -44,6 +45,8 @@ beforeAll(async () => {
   board = taiwanBoard();
   viewer = await registered('viewer@example.com', 'Viewer');
   await grantDashboard(viewer.id, 'viewer');
+  moderator = await registered('moderator@example.com', 'Moderator');
+  await grantDashboard(moderator.id, 'moderator');
   noPerm = await registered('noperm@example.com', 'NoPerm');
 
   // A fully COMPLETED game, driven to GAME_OVER through the hub like history-replay.e2e.spec.ts.
@@ -165,29 +168,37 @@ beforeAll(async () => {
 afterAll(() => t.close());
 
 describe('POST /dashboard/games/:gameId/replay-ticket', () => {
-  it('403s without games.viewReplay', async () => {
+  it('404s without any dashboard account', async () => {
     // noPerm holds no dashboardAccounts record at all, so DashboardGuard's nondisclosing
     // posture returns 404 here (not 403) — the same "titled 403s, asserts 404" shape as
-    // dashboard-maps.e2e.spec.ts's identical case. games.viewReplay is viewer-tier (the
-    // lowest role), so every *actual* dashboard account already holds it — there is no
-    // "proven maintainer lacking this permission" case to construct for this route.
+    // dashboard-maps.e2e.spec.ts's identical case.
     await request(server())
       .post(`/api/v1/dashboard/games/${completedGameId}/replay-ticket`)
       .set(auth(noPerm.token))
       .expect(404);
   });
 
+  it('403s a viewer — minting redeems the same unredacted action log games.readLog gates', async () => {
+    // Regression test for the viewer-tier ticket-minting bypass: the ticket this route
+    // mints is redeemed at GET /history/:gameId/admin-replay for the full action log —
+    // the same payload games.readLog gates on /dashboard/games/:id/log and .../replay.
+    await request(server())
+      .post(`/api/v1/dashboard/games/${completedGameId}/replay-ticket`)
+      .set(auth(viewer.token))
+      .expect(403);
+  });
+
   it('404s an unknown game', async () => {
     await request(server())
       .post('/api/v1/dashboard/games/nope/replay-ticket')
-      .set(auth(viewer.token))
+      .set(auth(moderator.token))
       .expect(404);
   });
 
-  it('mints a ticket for a COMPLETED game (viewer permission is enough)', async () => {
+  it('mints a ticket for a COMPLETED game (moderator/games.readLog permission)', async () => {
     const res = await request(server())
       .post(`/api/v1/dashboard/games/${completedGameId}/replay-ticket`)
-      .set(auth(viewer.token))
+      .set(auth(moderator.token))
       .expect(200);
     expect(typeof res.body.ticket).toBe('string');
   });
@@ -195,7 +206,7 @@ describe('POST /dashboard/games/:gameId/replay-ticket', () => {
   it('mints a ticket for a TERMINATED game', async () => {
     const res = await request(server())
       .post(`/api/v1/dashboard/games/${terminatedGameId}/replay-ticket`)
-      .set(auth(viewer.token))
+      .set(auth(moderator.token))
       .expect(200);
     expect(typeof res.body.ticket).toBe('string');
   });
@@ -204,7 +215,7 @@ describe('POST /dashboard/games/:gameId/replay-ticket', () => {
 async function mintTicket(gameId: string): Promise<string> {
   const res = await request(server())
     .post(`/api/v1/dashboard/games/${gameId}/replay-ticket`)
-    .set(auth(viewer.token))
+    .set(auth(moderator.token))
     .expect(200);
   return res.body.ticket;
 }
