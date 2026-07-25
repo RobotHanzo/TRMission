@@ -132,7 +132,7 @@ Two communication planes:
   **Scalar** at `/docs`. A `POST /rooms/:code/start` mints a short-lived **ws-game ticket** (JWT)
   that the client presents as its first WS frame (`ClientHello`) to bind a socket to a seat.
 
-The engine⇄proto⇄wire seam lives in `apps/server/src/codec/`. The hub
+The engine⇄proto⇄wire seam lives in `packages/codec` (`@trm/codec`). The hub
 (`apps/server/src/ws/hub.ts`) is the critical loop: decode → serialize through a per-game queue →
 write-ahead persist → commit on the engine → fan out a **per-recipient redacted snapshot**.
 
@@ -163,5 +163,6 @@ These mirror the ADRs in the development plan; treat them as binding.
 
 ## Server env vars
 
-The full env-var reference (core, mobile/push, auth/OAuth) lives in `apps/server/CLAUDE.md` —
-read it before configuring or running the server.
+Core vars (Mongo, `JWT_SECRET`, CORS, cookies) are in `apps/server/CLAUDE.md`, which also indexes the
+per-area docs that own the rest (auth/OAuth, push, bots/turn timer, dashboard, mobile deep links).
+Every one is parsed in `apps/server/src/config/env.ts`.
