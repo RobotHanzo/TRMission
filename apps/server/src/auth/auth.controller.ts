@@ -108,6 +108,25 @@ export class AuthController {
     return req.headers['x-trm-client'] === 'mobile';
   }
 
+  /**
+   * True when a top-level navigation was initiated by a DIFFERENT site — the signature of a
+   * login-CSRF against `mobile-web-handoff`. The OAuth routes bind their round-trip with the
+   * `trm_oauth` nonce cookie, but the handoff has no browser-side "start" step to plant one: the
+   * carry code is minted by the native app over Bearer and the WebView then loads the URL directly,
+   * so mint and redemption live in different contexts and no cookie can bind them. Instead we lean
+   * on Fetch Metadata — the app's WebView loads the handoff as a top-level navigation with no
+   * initiator (`Sec-Fetch-Site: none`), whereas an attacker page forcing the victim's browser here
+   * yields `Sec-Fetch-Site: cross-site`/`same-site`. The `Sec-Fetch-*` headers are forbidden header
+   * names, so page script can neither forge nor strip them. A request that omits the header (a
+   * pre-Fetch-Metadata client) is allowed, so this only ever rejects a navigation that explicitly
+   * declares itself cross-/same-site — the legit WebView flow (Sec-Fetch-Site: none) is unaffected.
+   */
+  private isCrossSiteNavigation(req: Request): boolean {
+    const site = req.headers['sec-fetch-site'];
+    const value = Array.isArray(site) ? site[0] : site;
+    return value === 'cross-site' || value === 'same-site';
+  }
+
   private finish(
     req: Request,
     res: Response,
@@ -295,6 +314,12 @@ export class AuthController {
    * NEW web session family and sets the normal Strict refresh cookie, then lands on /maps.
    * The app's own body-token family is never touched. Errors redirect (never 500 a
    * top-level navigation) with no cookie.
+   *
+   * Login-CSRF guard: this route issues a session from a bare GET carrying only a query-string
+   * capability, so a cross-site top-level navigation must never complete it (an attacker could
+   * otherwise plant their own carry-code session into a victim's browser). We reject a cross-/
+   * same-site navigation via Fetch Metadata BEFORE redeeming, so a forged request cannot even burn
+   * a code — see isCrossSiteNavigation for why a nonce-cookie round-trip is not available here.
    */
   @Get('mobile-web-handoff')
   @ApiExcludeEndpoint()
@@ -303,6 +328,10 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
+    if (this.isCrossSiteNavigation(req)) {
+      res.redirect(this.authConfig.webCallback({ error: 'forbidden' }));
+      return;
+    }
     const userId = await this.mobileCodes.redeem('carry', code);
     const user = userId ? await this.users.findById(userId) : null;
     if (!user) {
