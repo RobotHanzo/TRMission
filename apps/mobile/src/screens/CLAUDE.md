@@ -19,6 +19,15 @@ as web), and `useHaptics` (`../game/CLAUDE.md`).
 Live Activities are driven from **GameScreen**, never GameStage (the offline sandbox and tutorial
 also render GameStage) — see `apps/mobile/modules/live-activity/CLAUDE.md`.
 
+## First entry (`WelcomeScreen.tsx` + `../HomeRoot.tsx`, issue #59)
+
+The `Home` root-stack route renders **`HomeRoot`**, not `HomeTabs`: it reads the tutorial-completion
+and per-account `trm.welcome.seen.v1` flags, then mounts either the welcome takeover or the tab bar
+(paper-blank for the frame in between, so neither surface flashes). Every path out of the takeover
+writes the seen flag. Keep the takeover **outside** the tab navigator — onboarding asks a question
+with three answers on screen, and a tab bar under it offers four more destinations that all silently
+skip it. That placement is also what keeps first-run ad-free (see Ads below) by construction.
+
 ## Map builder (`BuilderScreen.tsx`)
 
 Feature-gated by `user.features` containing `mapBuilder` (`useCanBuild`). The builder itself is
@@ -52,7 +61,8 @@ conditionally hidden (`AdPrivacyRow`, the `adFree` switch, `LiveActivityRow`) mu
 
 ## Ads
 
-`<AdBanner />` docks on the four **browse** screens only — Home (not its welcome takeover),
-`EncyclopediaIndex` (not the player), Leaderboard, History — and `OfflineGameScreen` fires the one
+`<AdBanner />` docks on the four **browse** screens only — Home (the welcome takeover is a separate
+screen and never gets one), `EncyclopediaIndex` (not the player), Leaderboard, History — and
+`OfflineGameScreen` fires the one
 interstitial when a FINISHED game is left. Every other screen is deliberately ad-free; that list is
 a policy boundary, so read `../ads/CLAUDE.md` before adding a placement.

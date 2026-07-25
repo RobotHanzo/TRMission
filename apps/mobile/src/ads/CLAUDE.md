@@ -14,7 +14,7 @@ Only two placements exist, and the list is a policy boundary, not a backlog:
 - **`interstitial.ts`** — one full-screen ad when a **finished** offline vs-bots game is left.
 
 Never on the live game, the room lobby, the tutorial, the Encyclopedia _player_, replay, boot/login,
-or the Home welcome takeover. AdMob forbids ads that interfere with navigation or core content, and
+or the first-entry welcome takeover. AdMob forbids ads that interfere with navigation or core content, and
 banners beside interactive controls; the interstitial rules also forbid app-load/exit placement and
 back-to-back ads. **Adding a placement means re-reading those rules, not copying an existing call.**
 

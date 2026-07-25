@@ -26,10 +26,11 @@ function tabIcon(sfSymbol: SFSymbol, png: number): () => AppleIcon | number {
 /**
  * The app's 4 primary destinations as a floating native tab bar — a real `UITabBarController` on
  * iOS (rendered with the system's Liquid Glass material on iOS 26+, no manual opt-in needed) and
- * a Material3 bottom bar on Android. This is the "Home" screen's component in the outer stack
- * (navigation.tsx); everything else (Room, Game, History, Replay, Builder, Tutorial,
- * OfflineSetup/Game) stays a push screen in that outer stack, which hides this bar entirely while
- * active — standard nested-navigator behaviour, no extra wiring needed.
+ * a Material3 bottom bar on Android. This is what the "Home" screen of the outer stack renders
+ * once HomeRoot's first-entry welcome takeover is resolved (navigation.tsx → HomeRoot.tsx);
+ * everything else (Room, Game, History, Replay, Builder, Tutorial, OfflineSetup/Game) stays a push
+ * screen in that outer stack, which hides this bar entirely while active — standard
+ * nested-navigator behaviour, no extra wiring needed.
  *
  * Metro resolves this file on iOS/Android; `HomeTabs.web.tsx` is the JS-rendered fallback for the
  * react-native-web Playwright harness (native tab bars don't run in a browser).

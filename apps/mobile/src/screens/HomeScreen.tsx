@@ -1,21 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Alert,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Bot, CirclePlay, GraduationCap, History, Map as MapIcon } from 'lucide-react-native';
+import { GraduationCap, History, Map as MapIcon } from 'lucide-react-native';
 import type { HomeTabScreenProps } from '../navigation';
 import { api, type RoomView } from '../net/rest';
-import { openDiscord } from '../discord';
 import { useSession } from '../store/session';
 import { useOnline } from '../hooks/useOnline';
 import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
@@ -30,7 +19,6 @@ import {
   DepartureRow,
   Field,
   PrimaryButton,
-  RouteGlyph,
   Screen,
   SecondaryButton,
   SectionLabel,
@@ -39,14 +27,6 @@ import { RADIUS, SPACE, useTheme } from '../theme/useTheme';
 
 type Props = HomeTabScreenProps<'Home'>;
 
-// First-entry gate (mobile adaptation of the web's 0-completed-games check, offline-friendly):
-// the welcome takes over the homepage until the user picks a path or finishes the tutorial.
-// Scoped per-account (Home only ever mounts once `user` exists) — otherwise a device that already
-// dismissed the welcome (or finished the tutorial) under one account would skip it for every other,
-// genuinely-new account that later signs in on the same device.
-const WELCOME_SEEN_KEY = 'trm.welcome.seen.v1';
-const welcomeSeenKey = (userId: string): string => `${WELCOME_SEEN_KEY}:${userId}`;
-
 /** Room codes set like train numbers — the departure-board voice for anything joinable. */
 function CodeChip({ code }: { code: string }): React.JSX.Element {
   const { tokens } = useTheme();
@@ -54,88 +34,6 @@ function CodeChip({ code }: { code: string }): React.JSX.Element {
     <Text style={[styles.codeChip, { backgroundColor: tokens.surface2, color: tokens.ink }]}>
       {code}
     </Text>
-  );
-}
-
-/** First entry: shown instead of the homepage (ports the web WelcomeScreen — learn / practice /
- *  jump in, with the tutorial-recommendation nudge on the skip paths). Each path is a departure
- *  ticket; the recommended one carries the accent stripe. */
-function WelcomeCard({
-  name,
-  tutorialDone,
-  onStartTutorial,
-  onPractice,
-  onContinue,
-}: {
-  name: string;
-  tutorialDone: boolean;
-  onStartTutorial(): void;
-  onPractice(): void;
-  onContinue(): void;
-}): React.JSX.Element {
-  const { t } = useTranslation();
-  const { tokens } = useTheme();
-  const { width } = useWindowDimensions();
-  const wide = stageTier(width) !== 'compact';
-
-  // Practice/jump-in without the tutorial completed → recommend it once (native dialog).
-  const recommend = (proceed: () => void): void => {
-    if (tutorialDone) {
-      proceed();
-      return;
-    }
-    Alert.alert(t('home.tutorialRecommend.title'), t('home.tutorialRecommend.body'), [
-      { text: t('home.tutorialRecommend.goToTutorial'), onPress: onStartTutorial },
-      { text: t('home.tutorialRecommend.continueAnyway'), onPress: proceed },
-    ]);
-  };
-
-  return (
-    <ScrollView contentContainerStyle={styles.welcome}>
-      <View style={styles.welcomeBrand}>
-        <BrandWordmark size="hero" />
-        <RouteGlyph />
-      </View>
-      <Text style={[styles.welcomeTitle, { color: tokens.ink }]}>
-        {t('home.welcome.title', { name })}
-      </Text>
-      <Text style={[styles.welcomeSubtitle, { color: tokens.inkSoft }]}>
-        {t('home.welcome.subtitle')}
-      </Text>
-      <View style={[styles.welcomeOptions, wide && styles.welcomeOptionsWide]}>
-        <DepartureRow
-          stripe="accent"
-          icon={<GraduationCap size={22} color={tokens.accent} />}
-          title={t('home.welcome.learnTitle')}
-          desc={t('home.welcome.learnDesc')}
-          cta={t('home.welcome.learnCta')}
-          onPress={onStartTutorial}
-          style={wide && styles.welcomeOptionWide}
-        />
-        <DepartureRow
-          stripe="quiet"
-          icon={<Bot size={22} color={tokens.inkSoft} />}
-          title={t('home.welcome.practiceTitle')}
-          desc={t('home.welcome.practiceDesc')}
-          cta={t('home.welcome.practiceCta')}
-          onPress={() => recommend(onPractice)}
-          style={wide && styles.welcomeOptionWide}
-        />
-        <DepartureRow
-          stripe="quiet"
-          icon={<CirclePlay size={22} color={tokens.inkSoft} />}
-          title={t('home.welcome.skipTitle')}
-          desc={t('home.welcome.skipDesc')}
-          cta={t('home.welcome.skipCta')}
-          onPress={() => recommend(onContinue)}
-          style={wide && styles.welcomeOptionWide}
-        />
-      </View>
-      <SecondaryButton title={t('home.welcome.discordCta')} onPress={openDiscord} />
-      <Text style={[styles.welcomeFootnote, { color: tokens.inkSoft }]}>
-        {t('home.welcome.footnote')}
-      </Text>
-    </ScrollView>
   );
 }
 
@@ -212,8 +110,6 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   const [focusKey, setFocusKey] = useState(0);
   // Loaded on focus: returning from the tutorial's finale must light the badge immediately.
   const [tutorialDone, setTutorialDone] = useState(false);
-  // First-entry welcome takeover: null while unknown (no flash either way).
-  const [showWelcome, setShowWelcome] = useState<boolean | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -233,25 +129,10 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
     const unsub = navigation.addListener('focus', () => {
       void refresh();
       setFocusKey((k) => k + 1);
-      void getTutorialCompletion(userId).then((c) => {
-        setTutorialDone(c !== null);
-        // A finished tutorial is a resolved onboarding — never re-show the welcome.
-        if (c !== null) setShowWelcome(false);
-        else if (!userId) setShowWelcome(false);
-        else
-          AsyncStorage.getItem(welcomeSeenKey(userId)).then(
-            (seen) => setShowWelcome(seen === null),
-            () => setShowWelcome(false),
-          );
-      });
+      void getTutorialCompletion(userId).then((c) => setTutorialDone(c !== null));
     });
     return unsub;
   }, [navigation, refresh, user?.id]);
-
-  const dismissWelcome = useCallback(() => {
-    setShowWelcome(false);
-    if (user?.id) void AsyncStorage.setItem(welcomeSeenKey(user.id), '1').catch(() => undefined);
-  }, [user?.id]);
 
   // The public-rooms list stays fresh while the screen is up (web polls the same 5s cadence).
   useEffect(() => {
@@ -286,30 +167,6 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       setBusy(false);
     }
   };
-
-  if (showWelcome) {
-    return (
-      // The explicit paddingBottom overrides Screen's own safe-area pad on this View, so it
-      // must re-include insets.bottom under the tab-bar extra.
-      <Screen
-        style={[styles.container, tabExtra > 0 && { paddingBottom: insets.bottom + tabExtra }]}
-      >
-        <WelcomeCard
-          name={user?.displayName ?? ''}
-          tutorialDone={tutorialDone}
-          onStartTutorial={() => {
-            dismissWelcome();
-            navigation.navigate('Tutorial');
-          }}
-          onPractice={() => {
-            dismissWelcome();
-            navigation.navigate('OfflineSetup');
-          }}
-          onContinue={dismissWelcome}
-        />
-      </Screen>
-    );
-  }
 
   const header = (
     <View style={[styles.header, { borderBottomColor: tokens.line }]}>
@@ -476,8 +333,8 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
   //
   // The banner docks BELOW the scroll view rather than floating over it: the create/join controls
   // live at the end of that column, and an overlay on top of them is precisely the accidental-click
-  // shape AdMob's banner guidance rules out. It is also absent from the welcome takeover above —
-  // first-run onboarding stays ad-free.
+  // shape AdMob's banner guidance rules out. The first-entry welcome takeover never reaches this
+  // screen at all (HomeRoot gates it), so first-run onboarding stays ad-free by construction.
   return (
     <View style={styles.root}>
       <Screen scroll style={[styles.container, { paddingBottom: SPACE[8] + tabExtra }]}>
@@ -586,27 +443,4 @@ const styles = StyleSheet.create({
   },
   gridMain: { flex: 1.6, gap: SPACE[3] },
   gridSide: { flex: 1, gap: SPACE[3] },
-  // The welcome takeover: station-sign hero (wordmark + route glyph), centered announcement,
-  // then the three departure tickets. Vertically centered on tall phones; scrolls when short.
-  welcome: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    gap: SPACE[3],
-    paddingVertical: SPACE[6],
-  },
-  welcomeBrand: { alignItems: 'center', gap: SPACE[4], marginBottom: SPACE[2] },
-  welcomeTitle: { fontSize: 24, fontWeight: '800', textAlign: 'center', letterSpacing: 0.5 },
-  welcomeSubtitle: { fontSize: 15, lineHeight: 22, textAlign: 'center' },
-  welcomeOptions: { gap: SPACE[3], marginTop: SPACE[2], marginBottom: SPACE[2] },
-  // Row layout on tablet/desktop (mirrors web's `.welcome-options` ≥701px row), capped to a
-  // comfortable reading width instead of stretching three cards edge-to-edge.
-  welcomeOptionsWide: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    width: '100%',
-    maxWidth: 900,
-    gap: SPACE[4],
-  },
-  welcomeOptionWide: { flex: 1 },
-  welcomeFootnote: { fontSize: 13, textAlign: 'center', marginTop: SPACE[1] },
 });

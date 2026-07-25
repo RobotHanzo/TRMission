@@ -9,7 +9,7 @@ import { Platform } from 'react-native';
 import { consumePendingRoomLink } from './app/roomLink';
 import { BootScreen } from './screens/BootScreen';
 import { GameScreen } from './screens/GameScreen';
-import HomeTabs from './HomeTabs';
+import HomeRoot from './HomeRoot';
 import { RoomScreen } from './screens/RoomScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { OfflineSetupScreen } from './screens/OfflineSetupScreen';
@@ -25,7 +25,8 @@ import { useTheme } from './theme/useTheme';
 export type RootStackParamList = {
   Boot: undefined;
   Login: undefined;
-  /** The floating Liquid Glass tab bar (Home/Encyclopedia/Leaderboard/Settings) — see HomeTabs. */
+  /** The floating Liquid Glass tab bar (Home/Encyclopedia/Leaderboard/Settings) — see HomeTabs —
+   *  behind the first-entry welcome takeover that gates it (HomeRoot). */
   Home: undefined;
   Room: { code: string };
   /** The live game (Skia board + the adaptive GameStage HUD). Spectators mint via /spectate. */
@@ -139,7 +140,7 @@ export function RootNavigator(): React.JSX.Element {
               to the raw route name — "Home" — for a screen that sets none (issue #56). */}
           <Stack.Screen
             name="Home"
-            component={HomeTabs}
+            component={HomeRoot}
             options={{ title: t('home.tab'), headerShown: false }}
           />
           <Stack.Screen name="Room" component={RoomScreen} options={{ title: t('room.title') }} />

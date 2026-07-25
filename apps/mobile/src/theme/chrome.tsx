@@ -47,16 +47,14 @@ export function Screen({
       </ScrollView>
     );
   }
+  // The inset pad and the caller's `style` must sit on SEPARATE views (the scroll branch above gets
+  // that for free — pad on the ScrollView, style on the content container). Flattened onto one view
+  // they don't add up, they fight: Yoga resolves a padding edge longhand-first, so `paddingLeft: 0`
+  // from a portrait inset silently beats the caller's `paddingHorizontal`, and the screen loses its
+  // side margin entirely (issue #59).
   return (
-    <View
-      style={[
-        { flex: 1, backgroundColor: tokens.paper },
-        pad,
-        centered && styles.centeredContent,
-        style,
-      ]}
-    >
-      {children}
+    <View style={[{ flex: 1, backgroundColor: tokens.paper }, pad]}>
+      <View style={[styles.fill, centered && styles.centeredContent, style]}>{children}</View>
     </View>
   );
 }
@@ -346,6 +344,7 @@ export function ErrorText({ children }: PropsWithChildren) {
 
 const styles = StyleSheet.create({
   scrollContent: { flexGrow: 1, padding: SPACE[6] },
+  fill: { flex: 1 },
   centeredContent: { justifyContent: 'center' },
   card: {
     borderWidth: 1,
