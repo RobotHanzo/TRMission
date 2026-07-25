@@ -189,20 +189,31 @@ private struct StatPill: View {
 
 /// The seat-coloured dot that carries "whose turn" into the smallest presentations; ringed when the
 /// turn is the viewer's own, which is the one thing this whole activity exists to make glanceable.
+///
+/// The ring is drawn *inside* this view's own bounds (`strokeBorder` within a reserved outer frame,
+/// never a negatively-padded overlay): every Dynamic Island region clips to its bounds, so anything
+/// painted outside the frame comes back with a flat edge shaved off it. The outer box is reserved
+/// whether or not the ring is showing, so the dot doesn't shift when the turn flips.
 private struct SeatDot: View {
   let color: Color
   let ringed: Bool
+  /// Diameter of the dot itself; the ring lives in the reserved margin around it.
   let size: CGFloat
 
+  private static let ringGap: CGFloat = 2
+  private static let ringWidth: CGFloat = 2
+  private var outer: CGFloat { size + (Self.ringGap + Self.ringWidth) * 2 }
+
   var body: some View {
-    Circle()
-      .fill(ringed ? Palette.orange : color)
-      .frame(width: size, height: size)
-      .overlay(
-        Circle()
-          .stroke(Palette.orange.opacity(ringed ? 1 : 0), lineWidth: 2)
-          .padding(-3)
-      )
+    ZStack {
+      Circle()
+        .strokeBorder(Palette.orange, lineWidth: Self.ringWidth)
+        .opacity(ringed ? 1 : 0)
+      Circle()
+        .fill(ringed ? Palette.orange : color)
+        .frame(width: size, height: size)
+    }
+    .frame(width: outer, height: outer)
   }
 }
 
