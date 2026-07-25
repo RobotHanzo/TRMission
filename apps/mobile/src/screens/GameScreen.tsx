@@ -14,6 +14,7 @@ import { useGame } from '../store/game';
 import { useRoster } from '../store/roster';
 import { useSession } from '../store/session';
 import { useActiveContent } from '../game/useActiveContent';
+import { useLiveActivity } from '../game/useLiveActivity';
 import { resolveContent } from '../game/contentCache';
 import { useTheme } from '../theme/useTheme';
 import { GameStage } from './GameStage';
@@ -76,6 +77,10 @@ export function GameScreen({ route, navigation }: Props): React.JSX.Element {
       setActiveRoomContext({});
     };
   }, [activeGameId, roomCode]);
+
+  // iOS Live Activity for this game (lock screen + Dynamic Island). No-op off iOS, and only for a
+  // seated player — see useLiveActivity for why it lives here rather than in GameStage.
+  useLiveActivity(activeGameId, roomCode);
 
   // Poll the room every 2s throughout live play: this keeps the roster in sync with spectators
   // who join mid-game (so chat can name them) as well as the rematch vote tally once the game

@@ -354,6 +354,12 @@ function buildApi(
     registerDevice: (platform: 'ios' | 'android', token: string) =>
       req<void>('POST', '/me/devices', { platform, token }),
     removeDevice: (token: string) => req<void>('DELETE', '/me/devices', { token }),
+    // iOS Live Activity (mobile only): the ActivityKit push token for ONE game, so the server can
+    // keep the Dynamic Island current while the app is suspended (issue #43). Registering a token
+    // for a game the caller isn't seated in is inert — the server pushes seat-derived content only.
+    registerLiveActivity: (gameId: string, token: string) =>
+      req<void>('POST', '/me/live-activities', { gameId, token }),
+    removeLiveActivity: (token: string) => req<void>('DELETE', '/me/live-activities', { token }),
     myBlocks: () => req<BlockList>('GET', '/me/blocks'),
     blockUser: (userId: string) => req<void>('PUT', `/me/blocks/${encodeURIComponent(userId)}`, {}),
     unblockUser: (userId: string) =>

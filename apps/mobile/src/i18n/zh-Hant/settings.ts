@@ -7,6 +7,8 @@ export default {
   title: '設定',
   notifications: '推播通知',
   haptics: '震動回饋',
+  liveActivities: '即時動態',
+  liveActivitiesHint: '在鎖定畫面與動態島顯示對局進度，輪到你時一看就知道。',
   signOut: auth.signOut,
   deleteAccount: '刪除帳號',
   about: '關於',

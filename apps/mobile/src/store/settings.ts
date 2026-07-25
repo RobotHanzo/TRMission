@@ -13,9 +13,14 @@ interface SettingsState {
   notifications: boolean;
   /** The contextual post-first-game permission prompt fires at most once. */
   pushPromptSeen: boolean;
+  /** iOS Live Activity for the game in progress (lock screen + Dynamic Island). Needs no OS
+   *  permission — it is on unless the user turns Live Activities off for the app in Settings — so
+   *  unlike `notifications` it defaults ON, and this flag is the in-app opt-out. */
+  liveActivities: boolean;
   setHaptics(v: boolean): void;
   setNotifications(v: boolean): void;
   markPushPromptSeen(): void;
+  setLiveActivities(v: boolean): void;
 }
 
 export const useSettings = create<SettingsState>()(
@@ -24,9 +29,11 @@ export const useSettings = create<SettingsState>()(
       haptics: true,
       notifications: false,
       pushPromptSeen: false,
+      liveActivities: true,
       setHaptics: (haptics) => set({ haptics }),
       setNotifications: (notifications) => set({ notifications }),
       markPushPromptSeen: () => set({ pushPromptSeen: true }),
+      setLiveActivities: (liveActivities) => set({ liveActivities }),
     }),
     { name: 'trm-settings', storage: createJSONStorage(() => AsyncStorage) },
   ),

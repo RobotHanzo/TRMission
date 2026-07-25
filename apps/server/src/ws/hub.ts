@@ -62,12 +62,35 @@ interface ConnectionLogRecord {
   afterActionCount: number;
 }
 
+/** One socketless human's seat + own figures, for their iOS Live Activity (issue #43). */
+export interface LiveActivityRecipient {
+  playerId: string;
+  seat: number;
+  trainCars: number;
+  routePoints: number;
+}
+
+/** A turn change (or game end) as the Live Activity's content state needs it. Numbers only — the
+ *  card carries no names, no cards and nothing else from anyone's hidden state. */
+export interface LiveActivityUpdate {
+  gameId: string;
+  /** Seat on the clock; -1 = nobody (game over). */
+  currentSeat: number;
+  finalTurnsRemaining: number;
+  over: boolean;
+  /** Epoch seconds this turn lapses at (0 = no clock), so the widget can tick on its own. */
+  turnEndsAt: number;
+  recipients: LiveActivityRecipient[];
+}
+
 /** Framework-free push seam (the Nest PushService is adapted into this by game.module). */
 export interface PushSink {
   yourTurn(gameId: string, playerId: string): void;
   gameOver(gameId: string, playerIds: string[]): void;
   /** The game was marked inactive (auto-play paused) — nudge its socketless humans back. */
   gamePaused?(gameId: string, playerIds: string[]): void;
+  /** Refresh the iOS Live Activity of every seated human whose app can't do it itself. */
+  liveActivity?(update: LiveActivityUpdate): void;
 }
 
 /** Framework-free leaderboard seam (the Nest LeaderboardService is adapted into this by
@@ -1835,6 +1858,51 @@ export class GameHub {
     }
   }
 
+  /**
+   * Live Activity refresh (issue #43), fired off the same commit fan-out as the your-turn push and
+   * on the same triggers: a turn handover or the end of the game. Deliberately AFTER
+   * `scheduleTurnTimeout` in `broadcast`, so the deadline it publishes is the new turn's.
+   *
+   * Only seated humans with NO live socket are addressed — a connected app updates its own activity
+   * from the snapshot it just received, and pushing to it as well would burn ActivityKit's update
+   * budget for nothing.
+   */
+  private maybeLiveActivity(match: Match, events: readonly GameEvent[]): void {
+    const push = this.push?.liveActivity?.bind(this.push);
+    if (!push) return;
+    if (!events.some((ev) => ev.e === 'TURN_STARTED' || ev.e === 'GAME_ENDED')) return;
+
+    const gameId = match.session.gameId;
+    const members = this.members.get(gameId);
+    const state = match.session.raw();
+    const recipients: LiveActivityRecipient[] = [];
+    for (const player of match.session.turnOrder) {
+      const id = player as string;
+      if (isBotId(id) || members?.has(id)) continue;
+      const row = state.players[id];
+      if (!row) continue;
+      recipients.push({
+        playerId: id,
+        seat: row.seat,
+        trainCars: row.trainCars,
+        routePoints: row.routePoints,
+      });
+    }
+    if (recipients.length === 0) return;
+
+    const over = match.session.phase === 'GAME_OVER';
+    const current = match.session.currentPlayer;
+    const deadline = this.turnDeadlines.get(gameId);
+    push({
+      gameId,
+      currentSeat: over || !current ? -1 : (state.players[current as string]?.seat ?? -1),
+      finalTurnsRemaining: over || !state.endgame.triggered ? 0 : state.endgame.finalTurnsRemaining,
+      over,
+      turnEndsAt: deadline ? Math.round(deadline.at / 1000) : 0,
+      recipients,
+    });
+  }
+
   private broadcast(
     match: Match,
     events: readonly GameEvent[],
@@ -1843,6 +1911,7 @@ export class GameHub {
   ): void {
     this.maybeNotify(match, events);
     this.scheduleTurnTimeout(match);
+    this.maybeLiveActivity(match, events);
     const members = this.members.get(match.session.gameId);
     if (!members) return;
     const version = match.session.stateVersion;

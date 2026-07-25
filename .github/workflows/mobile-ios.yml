@@ -226,6 +226,31 @@ jobs:
             exit 1
           fi
 
+      # The Live Activity widget extension (issue #43) is injected into the CNG project by
+      # plugins/withLiveActivity.js. If a future Expo template change makes that plugin a silent
+      # no-op, the build would still succeed and ship an app whose Dynamic Island card simply never
+      # appears — so assert the target and its sources here, where the failure is legible.
+      - name: Verify the Live Activity widget target was injected
+        run: |
+          proj="apps/mobile/ios/TRMission.xcodeproj/project.pbxproj"
+          for needle in "TRMissionWidget" "com.apple.product-type.app-extension" "TRMissionLiveActivityWidget.swift"; do
+            if ! grep -q "$needle" "$proj"; then
+              echo "::error::$needle missing from the generated Xcode project — withLiveActivity.js did not inject the widget extension"
+              exit 1
+            fi
+          done
+          for f in TRMissionWidgetBundle.swift TRMissionLiveActivityWidget.swift TRMissionActivityAttributes.swift TRMissionWidget-Info.plist; do
+            if [[ ! -f "apps/mobile/ios/TRMissionWidget/$f" ]]; then
+              echo "::error::apps/mobile/ios/TRMissionWidget/$f was not copied by withLiveActivity.js"
+              ls -R apps/mobile/ios/TRMissionWidget || true
+              exit 1
+            fi
+          done
+          if ! grep -q "NSSupportsLiveActivities" apps/mobile/ios/TRMission/Info.plist; then
+            echo "::error::NSSupportsLiveActivities missing from the app Info.plist — ActivityKit will refuse to start an activity"
+            exit 1
+          fi
+
       # upload:true on a real release tag, or on a manual dispatch with publish=true (which supplies
       # its own build_number input above) — a plain branch push or a dispatch without publish
       # carries the fallback BUILD_NUMBER=1, which TestFlight would reject as a duplicate after the

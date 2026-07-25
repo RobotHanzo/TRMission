@@ -27,6 +27,7 @@ import { MutedText, SectionLabel } from '../theme/chrome';
 import { useTabBarPad } from '../hooks/useTabBarPad';
 import { performAccountDeletion } from '../account/deleteAccount';
 import { formatCrashReport, getLastCrash, type CrashRecord } from '../app/crashCapture';
+import LiveActivityRow from './settings/LiveActivityRow';
 import NotificationsRow from './settings/NotificationsRow';
 import { VolumeSlider } from './settings/VolumeSlider';
 
@@ -229,6 +230,8 @@ export function SettingsScreen(): React.JSX.Element {
         <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.haptics')}</Text>
         <Switch testID="haptics-switch" value={haptics} onValueChange={setHaptics} />
       </View>
+      {/* iOS only (renders null elsewhere): the in-game lock screen / Dynamic Island card. */}
+      <LiveActivityRow />
 
       {/* Store compliance (Apple 5.1.1 / Play): the privacy policy must be reachable IN the app,
           not just from the store listing. Served by the same-origin web app. */}

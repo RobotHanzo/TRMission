@@ -4,13 +4,16 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createTestApp, type TestApp } from './app';
 import { PushService } from '../src/push/push.service';
 import { DeviceRepo } from '../src/push/device.repo';
+import { LiveActivityRepo } from '../src/push/live-activity.repo';
 import { UserRepo } from '../src/auth/user.repo';
 import { MetricsService } from '../src/observability/metrics.service';
 import {
   apnsBody,
+  apnsLiveActivityBody,
   fcmBody,
   ApnsProviderToken,
   ApnsTransport,
+  type LiveActivityState,
   type PushDelivery,
   type PushMessage,
   type PushTransport,
@@ -18,11 +21,30 @@ import {
 
 class FakeTransport implements PushTransport {
   sent: { token: string; msg: PushMessage }[] = [];
+  activities: { token: string; state: LiveActivityState; event: 'update' | 'end' }[] = [];
   result: PushDelivery = 'ok';
   constructor(readonly platform: 'ios' | 'android') {}
   async send(token: string, msg: PushMessage): Promise<PushDelivery> {
     this.sent.push({ token, msg });
     return this.result;
+  }
+  async sendLiveActivity(
+    token: string,
+    state: LiveActivityState,
+    event: 'update' | 'end',
+  ): Promise<PushDelivery> {
+    this.activities.push({ token, state, event });
+    return this.result;
+  }
+}
+
+/** An Android-only transport: no `sendLiveActivity` at all (the iOS-only shape of the feature). */
+class FakeAndroidTransport implements PushTransport {
+  readonly platform = 'android' as const;
+  sent: { token: string; msg: PushMessage }[] = [];
+  async send(token: string, msg: PushMessage): Promise<PushDelivery> {
+    this.sent.push({ token, msg });
+    return 'ok';
   }
 }
 
@@ -55,6 +77,7 @@ const buildService = (transports: PushTransport[]): PushService =>
     t.app.get(UserRepo),
     t.app.get(MetricsService),
     transports,
+    t.app.get(LiveActivityRepo),
   );
 
 describe('push service fan-out', () => {
@@ -105,6 +128,100 @@ describe('push service fan-out', () => {
   });
 });
 
+describe('live activity fan-out (issue #43)', () => {
+  const update = (over: boolean, recipients: { playerId: string; seat: number }[]) => ({
+    gameId: 'game-la-1',
+    currentSeat: 1,
+    finalTurnsRemaining: 0,
+    over,
+    turnEndsAt: 1_700_000_000,
+    recipients: recipients.map((r) => ({ ...r, trainCars: 30 + r.seat, routePoints: 7 + r.seat })),
+  });
+  const token = (n: number) => `${n}`.repeat(64);
+
+  it("pushes each activity its OWN player's figures, and nothing to a stranger's row", async () => {
+    const ios = new FakeTransport('ios');
+    const svc = buildService([ios]);
+    const repo = t.app.get(LiveActivityRepo);
+
+    const seated = await guest();
+    const other = await guest();
+    const outsider = await guest();
+    await repo.upsert(seated, 'game-la-1', token(1));
+    await repo.upsert(other, 'game-la-1', token(2));
+    // A token registered against a game this account isn't seated in: the hub never lists it as a
+    // recipient, so it must receive nothing at all (hidden-information guard).
+    await repo.upsert(outsider, 'game-la-1', token(3));
+
+    const res = await svc.updateLiveActivities(
+      update(false, [
+        { playerId: seated, seat: 0 },
+        { playerId: other, seat: 2 },
+      ]),
+    );
+
+    expect(res).toMatchObject({ activityCount: 3, sent: 2, failed: 0 });
+    expect(ios.activities.map((a) => a.token).sort()).toEqual([token(1), token(2)]);
+    const mine = ios.activities.find((a) => a.token === token(1));
+    expect(mine?.state).toEqual({
+      currentSeat: 1,
+      myTrains: 30,
+      myScore: 7,
+      finalTurnsRemaining: 0,
+      over: false,
+      turnEndsAt: 1_700_000_000,
+    });
+    expect(ios.activities.find((a) => a.token === token(2))?.state.myTrains).toBe(32);
+    expect(mine?.event).toBe('update');
+  });
+
+  it('game over ends the cards and forgets every token for that game', async () => {
+    const ios = new FakeTransport('ios');
+    const svc = buildService([ios]);
+    const repo = t.app.get(LiveActivityRepo);
+
+    const seated = await guest();
+    await repo.upsert(seated, 'game-la-1', token(4));
+    await svc.updateLiveActivities(update(true, [{ playerId: seated, seat: 0 }]));
+
+    expect(ios.activities.map((a) => a.event)).toEqual(['end']);
+    expect(await repo.listForGame('game-la-1')).toHaveLength(0);
+  });
+
+  it('prunes a token APNs declares dead', async () => {
+    const ios = new FakeTransport('ios');
+    ios.result = 'prune';
+    const svc = buildService([ios]);
+    const repo = t.app.get(LiveActivityRepo);
+
+    const seated = await guest();
+    await repo.upsert(seated, 'game-la-2', token(5));
+    const res = await svc.updateLiveActivities({
+      ...update(false, [{ playerId: seated, seat: 0 }]),
+      gameId: 'game-la-2',
+    });
+
+    expect(res).toMatchObject({ sent: 0, failed: 1 });
+    expect(await repo.listForGame('game-la-2')).toHaveLength(0);
+  });
+
+  it('is a no-op with no iOS transport (Android-only credentials, or push disabled)', async () => {
+    const repo = t.app.get(LiveActivityRepo);
+    const seated = await guest();
+    await repo.upsert(seated, 'game-la-3', token(6));
+
+    const android = new FakeAndroidTransport();
+    const res = await buildService([android]).updateLiveActivities({
+      ...update(false, [{ playerId: seated, seat: 0 }]),
+      gameId: 'game-la-3',
+    });
+    expect(res).toEqual({ activityCount: 0, sent: 0, failed: 0 });
+    expect(android.sent).toHaveLength(0);
+    // The rows survive: the feature is just off, not invalid.
+    expect(await repo.listForGame('game-la-3')).toHaveLength(1);
+  });
+});
+
 describe('transport request shapes (pure helpers)', () => {
   const msg: PushMessage = { title: 'T', body: 'B', data: { kind: 'your_turn', gameId: 'g' } };
 
@@ -124,6 +241,31 @@ describe('transport request shapes (pure helpers)', () => {
       kind: 'your_turn',
       gameId: 'g',
     });
+  });
+
+  // The `content-state` keys ARE the Swift ContentState's property names
+  // (apps/mobile/modules/live-activity/ios/TRMissionActivityAttributes.swift). A rename on either
+  // side decodes to nothing and blanks the widget with no error anywhere, so pin them here.
+  const state: LiveActivityState = {
+    currentSeat: 2,
+    myTrains: 31,
+    myScore: 18,
+    finalTurnsRemaining: 0,
+    over: false,
+    turnEndsAt: 1_700_000_075,
+  };
+
+  it('apns live activity: timestamp + event + content-state, no dismissal date on an update', () => {
+    expect(apnsLiveActivityBody(state, 'update', 1_700_000_000)).toEqual({
+      aps: { timestamp: 1_700_000_000, event: 'update', 'content-state': state },
+    });
+  });
+
+  it('apns live activity: an `end` carries a dismissal date so the card retires itself', () => {
+    const body = apnsLiveActivityBody({ ...state, over: true }, 'end', 1_700_000_000);
+    const aps = body.aps as Record<string, unknown>;
+    expect(aps.event).toBe('end');
+    expect(aps['dismissal-date']).toBeGreaterThan(1_700_000_000);
   });
 });
 

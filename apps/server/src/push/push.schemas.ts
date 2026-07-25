@@ -17,6 +17,15 @@ import { createZodDto } from 'nestjs-zod';
 const IOS_TOKEN_RE = /^[0-9a-fA-F]{64,200}$/;
 const FCM_TOKEN_RE = /^[A-Za-z0-9_:-]{16,4096}$/;
 
+/**
+ * An ActivityKit push token (issue #43) is hex like a device token but materially longer — a fresh
+ * one is minted per Live Activity. Same reason for constraining it as above: it is spliced into the
+ * outbound APNs `:path` (`ApnsTransport.sendLiveActivity`, which re-checks this shape).
+ */
+const LIVE_ACTIVITY_TOKEN_RE = /^[0-9a-fA-F]{64,512}$/;
+/** Game ids are `randomUUID()` (lobby.service) — accept exactly that shape, nothing else. */
+const GAME_ID_RE = /^[0-9a-fA-F-]{36}$/;
+
 export const RegisterDeviceSchema = z
   .object({
     platform: z.enum(['ios', 'android']),
@@ -34,5 +43,13 @@ export const RegisterDeviceSchema = z
   });
 export const RemoveDeviceSchema = z.object({ token: z.string().min(1).max(4096) });
 
+export const RegisterLiveActivitySchema = z.object({
+  gameId: z.string().regex(GAME_ID_RE, 'invalid game id'),
+  token: z.string().regex(LIVE_ACTIVITY_TOKEN_RE, 'invalid live activity push token format'),
+});
+export const RemoveLiveActivitySchema = z.object({ token: z.string().min(1).max(512) });
+
 export class RegisterDeviceDto extends createZodDto(RegisterDeviceSchema) {}
 export class RemoveDeviceDto extends createZodDto(RemoveDeviceSchema) {}
+export class RegisterLiveActivityDto extends createZodDto(RegisterLiveActivitySchema) {}
+export class RemoveLiveActivityDto extends createZodDto(RemoveLiveActivitySchema) {}

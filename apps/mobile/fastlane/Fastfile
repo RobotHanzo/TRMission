@@ -6,6 +6,11 @@
 default_platform(:ios)
 
 BUNDLE_ID = "dev.robothanzo.trmission"
+# The Live Activity widget extension (issue #43) — its own bundle id, App ID, and profile. The
+# target + bundle id are created at prebuild time by apps/mobile/plugins/withLiveActivity.js; keep
+# these three constants in step with TARGET_NAME/BUNDLE_SUFFIX there.
+WIDGET_TARGET = "TRMissionWidget"
+WIDGET_BUNDLE_ID = "#{BUNDLE_ID}.LiveActivity"
 
 def asc_api_key
   app_store_connect_api_key(
@@ -29,21 +34,29 @@ platform :ios do
     match(type: "appstore", readonly: true, api_key: api_key)
 
     # `expo prebuild` emits an Automatic-signing project with no team, which xcodebuild rejects
-    # for device archives ("requires a development team"). Flip the APP TARGET ONLY to manual
-    # signing with the match cert/profile — do not do this via gym xcargs, which would also hit
-    # the Pods resource-bundle targets (they can't take a provisioning profile).
+    # for device archives ("requires a development team"). Flip the APP and WIDGET targets — and
+    # only those — to manual signing with their own match profiles; do not do this via gym xcargs,
+    # which would also hit the Pods resource-bundle targets (they can't take a provisioning
+    # profile). Each target gets its own call: one bundle id / profile pair per target.
     team_id = ENV["APPLE_TEAM_ID"].to_s
     UI.user_error!("APPLE_TEAM_ID must be set (repo variable) — the prebuilt project carries no team id") if team_id.empty?
-    profile_name = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING][BUNDLE_ID]
-    update_code_signing_settings(
-      path: "ios/TRMission.xcodeproj",
-      use_automatic_signing: false,
-      team_id: team_id,
-      code_sign_identity: "Apple Distribution",
-      profile_name: profile_name,
-      bundle_identifier: BUNDLE_ID,
-      targets: ["TRMission"]
-    )
+    profiles = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    profile_name = profiles[BUNDLE_ID]
+    widget_profile_name = profiles[WIDGET_BUNDLE_ID]
+    if widget_profile_name.nil?
+      UI.user_error!("no match profile for #{WIDGET_BUNDLE_ID} — dispatch mobile-ios-certs (force:true) after adding the App ID; see docs/release/app-store-connect-setup.md")
+    end
+    { BUNDLE_ID => ["TRMission", profile_name], WIDGET_BUNDLE_ID => [WIDGET_TARGET, widget_profile_name] }.each do |bundle_id, (target, profile)|
+      update_code_signing_settings(
+        path: "ios/TRMission.xcodeproj",
+        use_automatic_signing: false,
+        team_id: team_id,
+        code_sign_identity: "Apple Distribution",
+        profile_name: profile,
+        bundle_identifier: bundle_id,
+        targets: [target]
+      )
+    end
 
     # Workspace/scheme names verified against prebuild's rename logic (@expo/cli
     # renameTemplateAppName: HelloWorld → IOSConfig.XcodeUtils.sanitizedName(name); "TRMission"
@@ -55,7 +68,11 @@ platform :ios do
       export_method: "app-store",
       output_directory: "build",
       export_options: {
-        provisioningProfiles: { BUNDLE_ID => profile_name }
+        # Both bundles: exporting an .ipa whose embedded .appex has no mapping fails the export.
+        provisioningProfiles: {
+          BUNDLE_ID => profile_name,
+          WIDGET_BUNDLE_ID => widget_profile_name
+        }
       }
     )
 
@@ -76,10 +93,11 @@ platform :ios do
   lane :certs do |options|
     setup_ci if ENV["CI"]
     # readonly:false — creates whatever is missing (cert and/or profile) via the ASC API and
-    # pushes it, MATCH_PASSWORD-encrypted, to MATCH_GIT_URL. The App ID must already exist with
-    # its capabilities enabled (docs/release/app-store-connect-setup.md Step 2) — match does not
-    # create bundle ids. force:true regenerates the profile even if one exists — required after
-    # enabling a new capability, since a profile is a snapshot of the App ID's capabilities.
+    # pushes it, MATCH_PASSWORD-encrypted, to MATCH_GIT_URL. Both App IDs (app + Live Activity
+    # widget extension, see the Matchfile) must already exist with their capabilities enabled
+    # (docs/release/app-store-connect-setup.md Step 2) — match does not create bundle ids.
+    # force:true regenerates the profiles even if they exist — required after enabling a new
+    # capability, since a profile is a snapshot of the App ID's capabilities.
     match(
       type: "appstore",
       readonly: false,

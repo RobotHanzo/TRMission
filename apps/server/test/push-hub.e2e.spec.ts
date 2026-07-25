@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { taiwanBoard, CONTENT_HASH, type GameConfig, type PlayerSeed } from '@trm/engine';
 import { asPlayerId, type PlayerId, type SeatIndex } from '@trm/shared';
 import { GameRegistry } from '../src/game/game-registry';
-import { GameHub, type PushSink } from '../src/ws/hub';
+import { GameHub, type LiveActivityUpdate, type PushSink } from '../src/ws/hub';
 import { makeDevTicket } from '../src/ws/ticket';
 import type { BotProfile } from '@trm/bots';
 import { encodeClient, actionToCommand, pickAction } from './helpers';
@@ -12,17 +12,22 @@ const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
 interface RecordingSink extends PushSink {
   yourTurnCalls: { gameId: string; playerId: string }[];
   gameOverCalls: { gameId: string; playerIds: string[] }[];
+  liveActivityCalls: LiveActivityUpdate[];
 }
 
 const recordingSink = (): RecordingSink => {
   const sink: RecordingSink = {
     yourTurnCalls: [],
     gameOverCalls: [],
+    liveActivityCalls: [],
     yourTurn(gameId, playerId) {
       sink.yourTurnCalls.push({ gameId, playerId });
     },
     gameOver(gameId, playerIds) {
       sink.gameOverCalls.push({ gameId, playerIds });
+    },
+    liveActivity(update) {
+      sink.liveActivityCalls.push(update);
     },
   };
   return sink;
@@ -103,6 +108,9 @@ describe('hub push triggers', () => {
       }
     }
     expect(sink.yourTurnCalls).toEqual([]); // connected the whole time → no reminder
+    // Live Activity (issue #43) rides the same trigger and the same socketless rule: while the human
+    // is connected their own app updates the card, so the server must not spend update budget on it.
+    expect(sink.liveActivityCalls).toEqual([]);
 
     // Phase B (disconnected): bots play on; the next TURN_STARTED(human) must push.
     hub.closeConnection('hc');
@@ -112,6 +120,21 @@ describe('hub push triggers', () => {
       await tick();
     }
     expect(sink.yourTurnCalls[0]).toEqual({ gameId: 'push-yt', playerId: 'human' });
+
+    // Disconnected: each turn change now carries THEIR seat + own figures — and no names, no cards,
+    // nothing else from anyone's hidden state.
+    const update = sink.liveActivityCalls[0];
+    expect(update?.gameId).toBe('push-yt');
+    expect(update?.recipients).toEqual([
+      {
+        playerId: 'human',
+        seat: 0,
+        trainCars: expect.any(Number),
+        routePoints: expect.any(Number),
+      },
+    ]);
+    expect(update?.over).toBe(false);
+    expect(update?.currentSeat).toBeGreaterThanOrEqual(0);
   }, 30_000);
 
   it('pushes game-over to a socketless human iff a bot move ends the game', async () => {

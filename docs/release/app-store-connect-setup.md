@@ -32,6 +32,18 @@ Developer Portal → **Certificates, IDs & Profiles → Identifiers → +** → 
   - **Associated Domains** (Universal Links for `/m/callback`, same posture as Android App Links)
   - **Push Notifications**
 
+Then register a **second** App ID for the Live Activity widget extension (issue #43 — the extension
+is a separate bundle, and `gym` cannot export an .ipa whose embedded `.appex` has no profile):
+
+- Bundle ID: **Explicit**, `dev.robothanzo.trmission.LiveActivity`
+- Description: `TRMission Live Activity`
+- Capabilities: **none** — the extension only renders ActivityKit content handed to it by the app or
+  by APNs. (Live Activities themselves need no entitlement; the app's `NSSupportsLiveActivities`
+  Info.plist key, set in `app.config.ts`, is the whole opt-in, and their APNs updates ride the app's
+  existing Push Notifications capability and APNs key.)
+
+Both ids are listed in `fastlane/Matchfile`, so Step 4 provisions a profile for each.
+
 Do this **before** Step 4 (`fastlane match`) — the distribution provisioning profile match
 generates is a snapshot of whatever capabilities are enabled at that moment.
 
@@ -55,10 +67,12 @@ that repo is itself a GitHub Actions job — **`mobile-ios-certs.yml`** (Actions
 mobile-ios-certs → Run workflow), which runs `fastlane ios certs` on a macOS runner authenticated
 by the App Store Connect API key. No Mac, no Apple ID password/2FA anywhere in the flow.
 
-Order matters: Step 2 (the App ID with its three capabilities) and Step 6 (the ASC API key) must
-exist **before** the first run — match creates the cert/profile through the API key, it never
-creates the App ID itself, and the provisioning profile it generates is a snapshot of whatever
-capabilities are enabled at that moment.
+Order matters: Step 2 (**both** App IDs — the app with its three capabilities, and the Live Activity
+extension) and Step 6 (the ASC API key) must exist **before** the first run — match creates the
+cert/profiles through the API key, it never creates the App ID itself, and each provisioning profile
+it generates is a snapshot of whatever capabilities are enabled at that moment. If the widget App ID
+is added later, re-dispatch this workflow with `force: true`; the build lane fails fast with
+"no match profile for …LiveActivity" until it exists.
 
 1. Create an **empty private git repo** to hold the encrypted certs (e.g.
    `github.com/<org>/trmission-certificates`). This is a different repo from the app's source —

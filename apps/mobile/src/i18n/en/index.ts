@@ -20,6 +20,7 @@ import crash from './crash';
 import game from './game';
 import home from './home';
 import log from './log';
+import liveActivity from './liveActivity';
 import login from './login';
 import moderation from './moderation';
 import offline from './offline';
@@ -42,6 +43,7 @@ export default {
   report,
   settings,
   push,
+  liveActivity,
   builder,
   offline,
   login,

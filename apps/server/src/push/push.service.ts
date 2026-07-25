@@ -3,9 +3,34 @@ import { isBotId } from '@trm/bots';
 import { UserRepo } from '../auth/user.repo';
 import { MetricsService } from '../observability/metrics.service';
 import { DeviceRepo } from './device.repo';
-import { PUSH_TRANSPORTS, type PushMessage, type PushTransport } from './push.transports';
+import { LiveActivityRepo } from './live-activity.repo';
+import {
+  PUSH_TRANSPORTS,
+  type LiveActivityState,
+  type PushMessage,
+  type PushTransport,
+} from './push.transports';
 
 export type PushKind = 'your_turn' | 'game_started' | 'game_over' | 'game_paused';
+
+/** One seated human whose Live Activity the server has to keep current, plus their own figures. */
+export interface LiveActivityRecipient {
+  /** The engine player id, which for a human seat IS the account id (`userDevices.userId`). */
+  playerId: string;
+  seat: number;
+  trainCars: number;
+  routePoints: number;
+}
+
+/** What the hub hands over on a turn change / game end (structurally its own `PushSink` type). */
+export interface LiveActivityUpdate {
+  gameId: string;
+  currentSeat: number;
+  finalTurnsRemaining: number;
+  over: boolean;
+  turnEndsAt: number;
+  recipients: LiveActivityRecipient[];
+}
 
 type PushLocale = 'zh-Hant' | 'en';
 
@@ -43,6 +68,7 @@ export class PushService {
     private readonly users: UserRepo,
     private readonly metrics: MetricsService,
     @Inject(PUSH_TRANSPORTS) private readonly transports: PushTransport[],
+    private readonly liveActivities: LiveActivityRepo,
   ) {}
 
   get enabled(): boolean {
@@ -63,6 +89,69 @@ export class PushService {
 
   notifyGamePaused(gameId: string, userIds: string[]): void {
     void this.notify(userIds, 'game_paused', { gameId });
+  }
+
+  /**
+   * Fire-and-forget seam for the hub's Live Activity trigger (issue #43) — same posture as the
+   * notify wrappers above: a stale Dynamic Island must never be able to disturb the game loop.
+   */
+  refreshLiveActivities(update: LiveActivityUpdate): void {
+    void this.updateLiveActivities(update).catch((e: unknown) =>
+      this.log.warn(`live activity update failed: ${(e as Error).message}`),
+    );
+  }
+
+  /**
+   * Push per-recipient Live Activity content to every registered activity for one game.
+   *
+   * Two things are load-bearing here:
+   *  - `recipients` is the hub's list of seated humans with NO live socket. A row whose account is
+   *    not in it gets nothing — which is simultaneously the "their own app is updating it" skip and
+   *    the hidden-information guard: registering a token against someone else's game buys silence,
+   *    not that game's state.
+   *  - the content is derived from the RECIPIENT's own row, so two players' cards never carry each
+   *    other's figures.
+   */
+  async updateLiveActivities(
+    update: LiveActivityUpdate,
+  ): Promise<{ activityCount: number; sent: number; failed: number }> {
+    const transport = this.transports.find((t) => t.platform === 'ios');
+    const send = transport?.sendLiveActivity?.bind(transport);
+    if (!send) return { activityCount: 0, sent: 0, failed: 0 };
+
+    const rows = await this.liveActivities.listForGame(update.gameId);
+    if (rows.length === 0) return { activityCount: 0, sent: 0, failed: 0 };
+
+    const byUser = new Map(update.recipients.map((r) => [r.playerId, r]));
+    const event = update.over ? 'end' : 'update';
+    let sent = 0;
+    let failed = 0;
+    await Promise.all(
+      rows.map(async (row) => {
+        const own = byUser.get(row.userId);
+        if (!own) return;
+        const state: LiveActivityState = {
+          currentSeat: update.currentSeat,
+          myTrains: own.trainCars,
+          myScore: own.routePoints,
+          finalTurnsRemaining: update.finalTurnsRemaining,
+          over: update.over,
+          turnEndsAt: update.turnEndsAt,
+        };
+        const outcome = await send(row._id, state, event);
+        if (outcome === 'ok') {
+          sent++;
+          this.metrics.pushSent('live_activity');
+        } else {
+          failed++;
+          this.metrics.pushFailed('live_activity');
+          if (outcome === 'prune') await this.liveActivities.prune(row._id);
+        }
+      }),
+    );
+    // The game is over: every card was just ended, so no row can describe a live activity anymore.
+    if (update.over) await this.liveActivities.deleteForGame(update.gameId);
+    return { activityCount: rows.length, sent, failed };
   }
 
   /** Awaitable core (tests await it; the wrappers above are the fire-and-forget seams). */

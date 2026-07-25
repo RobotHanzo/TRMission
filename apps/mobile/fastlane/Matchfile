@@ -4,4 +4,7 @@
 git_url(ENV["MATCH_GIT_URL"])
 storage_mode("git")
 type("appstore")
-app_identifier(["dev.robothanzo.trmission"])
+# Both targets: the app and the Live Activity widget extension (issue #43). An app extension is a
+# separate bundle id and needs its own App Store profile — without this second entry `gym` fails the
+# archive's embedded .appex with "no profile for ...LiveActivity".
+app_identifier(["dev.robothanzo.trmission", "dev.robothanzo.trmission.LiveActivity"])

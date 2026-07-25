@@ -148,6 +148,18 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   live socket, re-checked at fire time) and **game-over** (absent humans only) off the same
   `broadcast` fan-out bots share; **game-started** fires from `LobbyService.start`. Metrics:
   `trm_push_sent_total`/`trm_push_failed_total` by kind.
+  **iOS Live Activities** (issue #43) reuse the same APNs credentials: `POST/DELETE
+/me/live-activities` registers one ActivityKit token per activity per game (`liveActivities`,
+  token = `_id`, 12h TTL = ActivityKit's own ceiling), and the hub's `PushSink.liveActivity`
+  fires on TURN_STARTED / GAME_ENDED for seated humans with **no live socket** (a connected app
+  updates its own card; pushing anyway would burn Apple's update budget). `ApnsTransport
+.sendLiveActivity` posts to the `<bundleId>.push-type.liveactivity` topic with
+  `apns-push-type: liveactivity`; GAME_ENDED sends `event: "end"` + a dismissal date and drops the
+  game's rows. Two invariants: the payload is **numbers and booleans only** (seat index, the
+  recipient's own trains/points, a turn deadline — no names, no cards), and content is built from
+  the RECIPIENT's own row, so a token registered against a game its account isn't seated in
+  receives nothing at all. Its `content-state` keys are the mobile Swift `ContentState`'s property
+  names — see `apps/mobile/CLAUDE.md`.
 - `src/lobby/` — rooms lifecycle with atomic seat CAS; `RoomSettings.map` selects
   `{source:'official', mapId}` or `{source:'custom', customMapId}` (default: official Taiwan).
   `start` resolves the selector via `MapsService.resolveForStart` (validates a custom draft, hashes

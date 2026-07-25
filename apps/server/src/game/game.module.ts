@@ -64,6 +64,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
             yourTurn: (gameId, playerId) => push.notifyYourTurn(gameId, playerId),
             gameOver: (gameId, playerIds) => push.notifyGameOver(gameId, playerIds),
             gamePaused: (gameId, playerIds) => push.notifyGamePaused(gameId, playerIds),
+            liveActivity: (update) => push.refreshLiveActivities(update),
           },
           yourTurnDelayMs: env.pushYourTurnDelayMs,
           leaderboard: { onGameOver: (gameId) => leaderboard.onGameOver(gameId) },

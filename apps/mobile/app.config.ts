@@ -84,6 +84,15 @@ const config: ExpoConfig = {
       // TestFlight/App Store submissions don't stall on the manual prompt.
       usesNonExemptEncryption: false,
     },
+    infoPlist: {
+      // Live Activities (issue #43): the in-game turn card on the lock screen + Dynamic Island.
+      // ActivityKit refuses to start an activity without the first key; the second lifts the
+      // update budget for an app whose activity legitimately changes on every turn (the server
+      // still only pushes to players whose socket is gone — see PushService.updateLiveActivities).
+      // The widget extension that renders them is injected by plugins/withLiveActivity.js.
+      NSSupportsLiveActivities: true,
+      NSSupportsLiveActivitiesFrequentUpdates: true,
+    },
     // Apple privacy manifest (ITMS-91053): the required-reason APIs this app's dependency graph
     // touches — AsyncStorage/UserDefaults (CA92.1), file timestamps (expo-updates/sqlite/
     // file-system, C617.1), free disk space (E174.1), system boot time (uptime clocks, 35F9.1).
@@ -193,6 +202,10 @@ const config: ExpoConfig = {
         },
       },
     ],
+    // Injects the Live Activity widget-extension target into the CNG-generated Xcode project
+    // (issue #43) and copies the shared ActivityKit contract into it. Kept BEFORE RNRepo, which
+    // wants to run last, and after everything that could still rename the app target.
+    './plugins/withLiveActivity',
     // RNRepo swaps source compilation of the covered autolinked native modules (Skia, Reanimated,
     // Worklets, gesture-handler, screens) for prebuilt, GPG-signed AARs from its public Maven — the
     // dominant cost of the Android CI native build. Anything uncovered (e.g. expo-modules-core on RN

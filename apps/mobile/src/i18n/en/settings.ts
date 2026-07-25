@@ -7,6 +7,9 @@ export default {
   title: 'Settings',
   notifications: 'Push notifications',
   haptics: 'Haptic feedback',
+  liveActivities: 'Live Activity',
+  liveActivitiesHint:
+    'Show the game on your lock screen and Dynamic Island, so you can see at a glance when it is your turn.',
   signOut: auth.signOut,
   deleteAccount: 'Delete account',
   about: 'About',
