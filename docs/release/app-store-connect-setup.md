@@ -207,15 +207,20 @@ keywords,privacy_url,support_url}.txt` are already committed. Enter them once by
   Step 4) — email, display name, avatar URL, user id, push token, game history, chat/UGC — **plus
   the AdMob additions** (issue #50): **Identifiers → Device ID** and **Usage Data → Product
   Interaction**, both for **Third-Party Advertising**, and both flagged **used for tracking**.
-  Answer **yes** to "Does this app use data for tracking?"; `app.config.ts`'s privacy manifest
-  already declares `NSPrivacyTracking: true` to match. Google's own disclosure table for the Mobile
-  Ads SDK is at developers.google.com/admob/ios/privacy/data-disclosure — check it at submission
-  time rather than trusting this line.
+  Answer **yes** to "Does this app use data for tracking?" — that questionnaire, not the privacy
+  manifest, is what the store listing shows. The manifest's matching disclosure is the Device ID
+  entry flagged `NSPrivacyCollectedDataTypeTracking: true`; its top-level `NSPrivacyTracking` flag
+  is deliberately `false` (next bullet). Google's own disclosure table for the Mobile Ads SDK is at
+  developers.google.com/admob/ios/privacy/data-disclosure — check it at submission time rather than
+  trusting this line.
 - **ATT**: the app requests App Tracking Transparency (prompt copy is the plugin's
   `userTrackingUsageDescription` in `app.config.ts`). Reviewers do test that the prompt appears and
   that denying it doesn't break the app — it doesn't: consent-gated ads simply go non-personalized.
-  `NSPrivacyTrackingDomains` is deliberately **empty**; see the comment in `app.config.ts` before
-  "fixing" it, since listing Google's domains there blocks them whenever ATT is denied.
+  `NSPrivacyTracking` is **false** with an empty `NSPrivacyTrackingDomains`, mirroring the Google
+  Mobile Ads SDK's own manifest; read the comment in `app.config.ts` before "fixing" either. Setting
+  the flag true forces a domain list (**ITMS-91064**, which rejected 0.2.18 build 18), and iOS blocks
+  every listed domain whenever ATT is denied — which would cost us all ad fill, not just
+  personalization.
 - **Export compliance**: the app only uses standard TLS (no custom crypto), so it qualifies as
   exempt. Optionally set `ios: { config: { usesNonExemptEncryption: false } }` in
   `apps/mobile/app.config.ts` to skip the export-compliance prompt on every TestFlight build

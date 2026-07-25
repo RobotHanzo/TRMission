@@ -51,7 +51,10 @@ Read the one for the area you're touching (Claude Code loads them on demand):
   (upstream invertase#863), so keep the caret off until Expo's own Kotlin catches up. Its config plugin's props are literals in
   `app.config.ts`, never env, because plugin props feed the OTA fingerprint. **Adding the plugin
   changed that fingerprint**: the first OTA after it landed needs a fresh native build on both
-  stores. AdMob is also what flipped `NSPrivacyTracking` to true and unblocked Android's `AD_ID`.
+  stores. AdMob is also what unblocked Android's `AD_ID` and put Device ID (flagged as tracking) in
+  the iOS privacy manifest — while the manifest's top-level `NSPrivacyTracking` stays **false** with
+  no tracking domains, mirroring the Mobile Ads SDK's own manifest. That pairing is load-bearing:
+  see the comment in `app.config.ts` before touching either key (ITMS-91064).
 - **No EAS, no Expo push service, no _paid_ SaaS.** Builds run in GitHub Actions + fastlane; OTA (P5)
   is self-hosted; push (P0 server) is direct FCM/APNs — the app only registers native device tokens.
   Free / open-source hosted services are allowed where they neither bill nor lock us in (e.g. RNRepo's

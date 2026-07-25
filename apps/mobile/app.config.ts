@@ -226,17 +226,29 @@ const config: ExpoConfig = {
     // Those three are app-functionality-only and NOT linked to identity (the only identifier
     // attached is the server-minted account id, and `sendDefaultPii: false` keeps IPs off events).
     //
-    // AdMob (issue #50) is what flips NSPrivacyTracking to true: personalized ads use the IDFA
+    // AdMob (issue #50) is why the device id is declared below: personalized ads use the IDFA
     // across apps, which is tracking as ATT defines it, so the app requests ATT (see
-    // `userTrackingUsageDescription` on the plugin below) and declares the device id it collects.
+    // `userTrackingUsageDescription` on the plugin below) and declares the device id it collects,
+    // flagged NSPrivacyCollectedDataTypeTracking.
     //
-    // NSPrivacyTrackingDomains stays EMPTY on purpose, and duplicating Google's ad domains here
-    // would be a revenue bug, not extra diligence: iOS BLOCKS connections to domains listed in
-    // this key whenever ATT is not granted. The Google Mobile Ads SDK ships its own privacy
-    // manifest declaring exactly which of its domains do tracking, and Xcode merges it into the
-    // app's privacy report — so the SDK's own list is both authoritative and already there.
+    // The top-level NSPrivacyTracking flag nevertheless stays FALSE, with an empty
+    // NSPrivacyTrackingDomains — do not "fix" this pair, they are one decision:
+    //   * Apple rejects any build whose NSPrivacyTracking is true unless NSPrivacyTrackingDomains
+    //     names at least one domain (ITMS-91064; it took down 0.2.18 build 18, which shipped
+    //     true + []). So true is not a free extra disclosure — it forces a domain list.
+    //   * iOS BLOCKS connections to every listed domain whenever ATT is not granted. Listing
+    //     Google's ad domains would kill ad fill for the ATT-denied majority, not just
+    //     personalization — a revenue bug wearing diligence as a costume.
+    //   * There is no honest list to give: GoogleMobileAds.framework/PrivacyInfo.xcprivacy (13.x)
+    //     declares DeviceID with …TypeTracking=true and purpose ThirdPartyAdvertising, and sets
+    //     NO NSPrivacyTracking key and NO NSPrivacyTrackingDomains key at all. Xcode merges the
+    //     SDK's manifest into the app's privacy report, so mirroring its shape is what keeps our
+    //     declaration in step with the SDK that actually does the collecting.
+    // The IDFA-for-tracking disclosure therefore lives where Apple reads it for the store listing:
+    // the collected-data-type entry below plus App Store Connect's App Privacy questionnaire
+    // (answered "yes, used for tracking" — docs/release/app-store-connect-setup.md).
     privacyManifests: {
-      NSPrivacyTracking: true,
+      NSPrivacyTracking: false,
       NSPrivacyTrackingDomains: [],
       NSPrivacyCollectedDataTypes: [
         {

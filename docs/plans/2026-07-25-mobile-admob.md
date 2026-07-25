@@ -39,11 +39,16 @@ tap proceeds immediately.
 **Personalized ads with ATT.** Consequences, all landed here:
 
 - `android.blockedPermissions` no longer blocks `com.google.android.gms.permission.AD_ID`.
-- `NSPrivacyTracking: true`; `expo-tracking-transparency` requests ATT after the UMP form.
-- `NSPrivacyTrackingDomains` stays **empty on purpose**. iOS blocks connections to domains listed
-  there when ATT is denied, and the Google Mobile Ads SDK already ships its own privacy manifest
-  declaring its tracking domains correctly. Duplicating them here would kill ad fill for every
-  ATT-denied user.
+- `expo-tracking-transparency` requests ATT after the UMP form; the privacy manifest declares
+  Device ID with `NSPrivacyCollectedDataTypeTracking: true`.
+- The manifest's top-level `NSPrivacyTracking` is **false** and `NSPrivacyTrackingDomains`
+  **empty** — one decision, not two. _(Corrected 2026-07-26: this plan originally said
+  `NSPrivacyTracking: true`, which Apple rejected as **ITMS-91064** on 0.2.18 build 18. True
+  requires at least one tracking domain, and iOS blocks connections to every listed domain when
+  ATT is denied, so a list would kill all ad fill for ATT-denied users, not just personalization.
+  And there is no list to copy: `GoogleMobileAds.framework/PrivacyInfo.xcprivacy` sets neither key —
+  it declares its tracking solely through the Device ID data type, which is the shape we now
+  mirror.)_
 - Both stores' privacy declarations change (docs/release/{play-console,app-store-connect}-setup.md)
   and the privacy policy gains a mobile-ads paragraph (`apps/web/src/screens/PrivacyScreen.tsx`).
 
