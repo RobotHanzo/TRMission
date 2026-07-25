@@ -110,6 +110,31 @@ describe('LocalGameSession', () => {
     expect(session.isGameOver).toBe(false);
   });
 
+  // Offline team games (#41): the human takes seat 0 and partners with the bot on seat 2, so a
+  // team table is a plain GameConfig.teamCount away — nothing about the local loop is
+  // free-for-all-only. Guards that the bots (which score the team-pool actions) and the redacted
+  // projection both cope with it end to end.
+  it('plays a team game (2 teams of 2) through to a finished scoreboard', async () => {
+    const store = new InMemoryLocalGameStore();
+    const setup = newOfflineSetup({
+      mapId: 'taiwan',
+      botCount: 3,
+      difficulty: 'MEDIUM',
+      eventsMode: 'off',
+      gameId: 'local:teams-1',
+      seed: 'offline-team-seed',
+      teamCount: 2,
+    });
+    expect(setup.config.teamCount).toBe(2);
+    const session = await LocalGameSession.create(setup, board, store);
+    await playToGameOver(session);
+
+    const snap = session.projectHuman();
+    expect(snap.gameSettings?.teamCount).toBe(2);
+    expect(snap.finalScores).toBeDefined();
+    expect(store.games.get('local:teams-1')!.status).toBe('COMPLETED');
+  });
+
   it('keeps the in-memory game alive when persistence fails (storage full)', async () => {
     const store = new InMemoryLocalGameStore();
     const session = await LocalGameSession.create(makeSetup('local:test-4'), board, store);

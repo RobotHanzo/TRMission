@@ -57,6 +57,39 @@ describe('OfflineSetupScreen', () => {
     );
   });
 
+  // Regression (#41): the picker used to offer only the layouts the CURRENT bot count could form,
+  // so the default 2-bot table showed a lone "free-for-all" chip and read as "offline games can't
+  // do teams". Every mode is offered; picking one moves the bot count to a table that fits.
+  it('offers every team mode and snaps the bot count to a table that can form it', () => {
+    useSession.setState({ user: { ...baseUser, features: [] }, booting: false });
+    const replace = jest.fn();
+    renderScreen(replace);
+
+    expect(screen.getByText('兩隊')).toBeTruthy();
+    expect(screen.getByText('三隊')).toBeTruthy();
+
+    fireEvent.press(screen.getByText('三隊'));
+    expect(screen.getByText('6 人・2 人一隊')).toBeTruthy(); // three pairs
+    fireEvent.press(screen.getByText('開始對局'));
+    expect(replace).toHaveBeenCalledWith(
+      'OfflineGame',
+      expect.objectContaining({ teamCount: 3, botCount: 5 }),
+    );
+  });
+
+  it('drops back to free-for-all when the bot count can no longer form the chosen layout', () => {
+    useSession.setState({ user: { ...baseUser, features: [] }, booting: false });
+    const replace = jest.fn();
+    renderScreen(replace);
+
+    fireEvent.press(screen.getByText('兩隊'));
+    fireEvent.press(screen.getByText('4')); // 5 players — no layout divides it
+    fireEvent.press(screen.getByText('開始對局'));
+    const params = replace.mock.calls[0]![1] as Record<string, unknown>;
+    expect(params).toMatchObject({ botCount: 4 });
+    expect(params.teamCount).toBeUndefined();
+  });
+
   it('lets a randomEvents holder pick an intensity and threads it into the new game', () => {
     useSession.setState({ user: { ...baseUser, features: ['randomEvents'] }, booting: false });
     const replace = jest.fn();
