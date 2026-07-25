@@ -13,6 +13,7 @@ import {
   type DashboardAccountDoc,
   type DashboardAccountPatch,
 } from './dashboard-account.repo';
+import type { DashboardActor } from './dashboard.guard';
 import { AuditService } from './audit.service';
 
 const overridesOf = (doc: DashboardAccountDoc | DashboardAccountPatch) => ({
@@ -71,10 +72,36 @@ export class DashboardMaintainersService {
    * covers self-demotion, self-permission-stripping, and most lockout paths), and the
    * last owner can never be demoted. The count check is a benign TOCTOU race between
    * two concurrent owners — no transactions in this codebase; boot seeding re-heals.
+   *
+   * The actor can never grant more authority than they themselves hold: the resulting
+   * effective permission set of the patch must be a subset of the actor's own current
+   * effective permissions, and only an owner may mint another owner (the role carries
+   * implicit protections — last-owner, no self-demotion — beyond a permission bundle).
+   * This bounds escalation without blocking legitimate demotions: an actor may still
+   * patch a target down to (or within) their own authority even if the target currently
+   * holds permissions the actor doesn't.
    */
-  async put(actor: AuthUser, userId: string, patch: DashboardAccountPatch) {
+  async put(
+    actor: AuthUser,
+    actorDashboard: DashboardActor,
+    userId: string,
+    patch: DashboardAccountPatch,
+  ) {
     if (userId === actor.userId) {
       throw new ForbiddenException('another owner must change your own access');
+    }
+    if (patch.role === 'owner' && actorDashboard.role !== 'owner') {
+      throw new ForbiddenException('only an owner can grant the owner role');
+    }
+    const requested = effectivePermissions(
+      patch.role,
+      patch.extraPermissions,
+      patch.deniedPermissions,
+    );
+    for (const permission of requested) {
+      if (!actorDashboard.permissions.has(permission)) {
+        throw new ForbiddenException(`cannot grant a permission you do not hold: ${permission}`);
+      }
     }
     const user = await this.users.findById(userId);
     if (!user) throw new NotFoundException('user not found');

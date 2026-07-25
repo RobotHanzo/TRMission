@@ -187,6 +187,68 @@ describe('maintainers CRUD', () => {
       .expect(200);
   });
 
+  it('bounds a maintainers.write holder by their own effective permissions', async () => {
+    // Owner delegates maintainers.write to a moderator (a realistic non-default delegation —
+    // by default only owners reach this endpoint at all, per the guard's @RequirePermission).
+    const mod = await registered('mod@example.com', 'Mod');
+    await request(server())
+      .put(`/api/v1/dashboard/maintainers/${mod.userId}`)
+      .set(auth(owner.token))
+      .send({ role: 'moderator', extraPermissions: ['maintainers.write'] })
+      .expect(200);
+
+    // Cannot mint a second owner for an account they control, even though they hold
+    // maintainers.write — role: 'owner' is reserved to actual owners.
+    const escOwner = await registered('esc-owner@example.com', 'EscOwner');
+    await request(server())
+      .put(`/api/v1/dashboard/maintainers/${escOwner.userId}`)
+      .set(auth(mod.token))
+      .send({ role: 'owner' })
+      .expect(403);
+
+    // Cannot grant a permission they don't personally hold (purge.run is admin+ only;
+    // moderator doesn't have it even via their maintainers.write extra grant).
+    const escPerm = await registered('esc-perm@example.com', 'EscPerm');
+    await request(server())
+      .put(`/api/v1/dashboard/maintainers/${escPerm.userId}`)
+      .set(auth(mod.token))
+      .send({ role: 'viewer', extraPermissions: ['purge.run'] })
+      .expect(403);
+
+    // Still CAN grant a permission they do hold (games.terminate is in MODERATOR_PERMISSIONS).
+    const legitGrant = await registered('legit-grant@example.com', 'LegitGrant');
+    const granted = await request(server())
+      .put(`/api/v1/dashboard/maintainers/${legitGrant.userId}`)
+      .set(auth(mod.token))
+      .send({ role: 'viewer', extraPermissions: ['games.terminate'] })
+      .expect(200);
+    expect(granted.body.permissions).toContain('games.terminate');
+
+    // Still CAN demote an existing higher-privileged account down to something within
+    // their own authority, even though the target currently holds more than the actor.
+    const legitDemote = await registered('legit-demote@example.com', 'LegitDemote');
+    await request(server())
+      .put(`/api/v1/dashboard/maintainers/${legitDemote.userId}`)
+      .set(auth(owner.token))
+      .send({ role: 'admin' })
+      .expect(200);
+    const demoted = await request(server())
+      .put(`/api/v1/dashboard/maintainers/${legitDemote.userId}`)
+      .set(auth(mod.token))
+      .send({ role: 'viewer' })
+      .expect(200);
+    expect(demoted.body.role).toBe('viewer');
+
+    // No regression for the real owner flow: still unrestricted (owner, any permission).
+    const ownerRegression = await registered('owner-regression@example.com', 'OwnerRegression');
+    const grantedOwner = await request(server())
+      .put(`/api/v1/dashboard/maintainers/${ownerRegression.userId}`)
+      .set(auth(owner.token))
+      .send({ role: 'viewer', extraPermissions: ['purge.run'] })
+      .expect(200);
+    expect(grantedOwner.body.permissions).toContain('purge.run');
+  });
+
   it('the audit repo is append-only by surface', () => {
     const repo = t.app.get(DashboardAuditRepo) as unknown as Record<string, unknown>;
     expect(repo.update).toBeUndefined();

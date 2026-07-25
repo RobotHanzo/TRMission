@@ -1,10 +1,20 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Put,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { apiSchema } from '../openapi/openapi';
 import { AccessTokenGuard } from '../auth/access-token.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthUser } from '../auth/auth.types';
-import { DashboardGuard } from './dashboard.guard';
+import { DashboardGuard, type DashboardRequest } from './dashboard.guard';
 import { RequirePermission } from './require-permission.decorator';
 import { DashboardMaintainersService } from './dashboard-maintainers.service';
 import {
@@ -35,16 +45,19 @@ export class DashboardMaintainersController {
     summary: 'Grant or update dashboard access (owner only)',
     description:
       'Full replacement of the record: role + optional extra/denied permission overrides. ' +
-      'Refuses self-modification and demoting the last owner.',
+      'Refuses self-modification, demoting the last owner, granting owner as a non-owner, ' +
+      "and granting any permission beyond the actor's own effective set.",
   })
   @ApiBody({ schema: apiSchema(MaintainerPutSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(MaintainerRowSchema) })
   put(
     @Param('userId') userId: string,
     @CurrentUser() actor: AuthUser,
+    @Req() req: DashboardRequest,
     @Body() body: MaintainerPutDto,
   ) {
-    return this.maintainers.put(actor, userId, {
+    // DashboardGuard has already resolved the actor's own effective grant onto the request.
+    return this.maintainers.put(actor, req.dashboard!, userId, {
       role: body.role,
       ...(body.extraPermissions?.length ? { extraPermissions: body.extraPermissions } : {}),
       ...(body.deniedPermissions?.length ? { deniedPermissions: body.deniedPermissions } : {}),
