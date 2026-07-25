@@ -23,7 +23,7 @@ async function guest(displayName: string) {
   const res = await request(server()).post('/api/v1/auth/guest').send({ displayName }).expect(201);
   return { token: res.body.accessToken, id: res.body.user.id as string };
 }
-async function grantDashboard(userId: string, role: 'viewer' | 'moderator' | 'admin') {
+async function grantDashboard(userId: string, role: 'viewer' | 'moderator' | 'admin' | 'owner') {
   await t.db.collection('dashboardAccounts').insertOne({
     _id: userId,
     role,
@@ -36,6 +36,7 @@ async function grantDashboard(userId: string, role: 'viewer' | 'moderator' | 'ad
 let viewer: { token: string; id: string };
 let moderator: { token: string; id: string };
 let noPerm: { token: string; id: string };
+let owner: { token: string; id: string };
 let board: Board;
 let completedGameId: string;
 let terminatedGameId: string;
@@ -48,6 +49,10 @@ beforeAll(async () => {
   moderator = await registered('moderator@example.com', 'Moderator');
   await grantDashboard(moderator.id, 'moderator');
   noPerm = await registered('noperm@example.com', 'NoPerm');
+  // owner: needed to revoke another maintainer's dashboardAccounts record for the
+  // instant-revocation admin-replay test below (maintainers.write is owner-only).
+  owner = await registered('owner@example.com', 'Owner');
+  await grantDashboard(owner.id, 'owner');
 
   // A fully COMPLETED game, driven to GAME_OVER through the hub like history-replay.e2e.spec.ts.
   const host = await guest('Host');
@@ -220,25 +225,94 @@ async function mintTicket(gameId: string): Promise<string> {
   return res.body.ticket;
 }
 
+// The ticket rides in a header, not `?ticket=` — see admin-replay.guard.ts.
+const withTicket = (ticket: string) => ({ 'x-trm-admin-ticket': ticket });
+
 describe('GET /history/:gameId/admin-replay', () => {
-  it('404s with no ticket, a garbage ticket, or a ticket scoped to a different game', async () => {
-    await request(server()).get(`/api/v1/history/${completedGameId}/admin-replay`).expect(404);
+  it('401s with no bearer session at all, even carrying a valid ticket', async () => {
+    const ticket = await mintTicket(completedGameId);
     await request(server())
       .get(`/api/v1/history/${completedGameId}/admin-replay`)
-      .query({ ticket: 'garbage' })
+      .set(withTicket(ticket))
+      .expect(401);
+  });
+
+  it('404s with no ticket header, a garbage ticket, or a ticket scoped to a different game', async () => {
+    await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .set(auth(viewer.token))
+      .expect(404);
+    await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .set(auth(viewer.token))
+      .set(withTicket('garbage'))
       .expect(404);
     const ticketForOther = await mintTicket(terminatedGameId);
     await request(server())
       .get(`/api/v1/history/${completedGameId}/admin-replay`)
-      .query({ ticket: ticketForOther })
+      .set(auth(viewer.token))
+      .set(withTicket(ticketForOther))
       .expect(404);
+  });
+
+  it('404s the old `?ticket=` query-string form — the header is now the only accepted transport', async () => {
+    const ticket = await mintTicket(completedGameId);
+    await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .set(auth(viewer.token))
+      .query({ ticket })
+      .expect(404);
+  });
+
+  it('404s when a DIFFERENT maintainer presents a ticket minted for someone else, even holding games.viewReplay themselves', async () => {
+    const otherViewer = await registered('other-viewer@example.com', 'OtherViewer');
+    await grantDashboard(otherViewer.id, 'viewer');
+    const ticket = await mintTicket(completedGameId); // minted for `viewer`, not `otherViewer`
+    await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .set(auth(otherViewer.token))
+      .set(withTicket(ticket))
+      .expect(404);
+  });
+
+  it('404s once the minting maintainer’s dashboard access is revoked mid-window (instant revocation)', async () => {
+    const revocable = await registered('revocable-replay@example.com', 'Revocable');
+    await grantDashboard(revocable.id, 'viewer');
+    const ticket = (
+      await request(server())
+        .post(`/api/v1/dashboard/games/${completedGameId}/replay-ticket`)
+        .set(auth(revocable.token))
+        .expect(200)
+    ).body.ticket;
+
+    // Access revoked AFTER minting, while the (5-minute) ticket is still unexpired.
+    await request(server())
+      .delete(`/api/v1/dashboard/maintainers/${revocable.id}`)
+      .set(auth(owner.token))
+      .expect(204);
+
+    await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .set(auth(revocable.token)) // the access token itself is still valid — only dashboard access was revoked
+      .set(withTicket(ticket))
+      .expect(404);
+  });
+
+  it('mint -> immediate use by the same maintainer still works (legitimate flow, header form)', async () => {
+    const ticket = await mintTicket(completedGameId);
+    await request(server())
+      .get(`/api/v1/history/${completedGameId}/admin-replay`)
+      .set(auth(viewer.token))
+      .set(withTicket(ticket))
+      .expect(200);
   });
 
   it('returns the COMPLETED payload: winners + completedAt, no terminatedAt', async () => {
     const ticket = await mintTicket(completedGameId);
     const res = await request(server())
       .get(`/api/v1/history/${completedGameId}/admin-replay`)
-      .query({ ticket })
+      .set(auth(viewer.token))
+      .set(withTicket(ticket))
       .expect(200);
     expect(res.body.gameId).toBe(completedGameId);
     expect(res.body.status).toBe('COMPLETED');
@@ -254,7 +328,8 @@ describe('GET /history/:gameId/admin-replay', () => {
     const ticket = await mintTicket(terminatedGameId);
     const res = await request(server())
       .get(`/api/v1/history/${terminatedGameId}/admin-replay`)
-      .query({ ticket })
+      .set(auth(viewer.token))
+      .set(withTicket(ticket))
       .expect(200);
     expect(res.body.gameId).toBe(terminatedGameId);
     expect(res.body.status).toBe('TERMINATED');

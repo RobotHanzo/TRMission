@@ -75,7 +75,12 @@ export interface RestClient {
   setAccessToken(t: string | null): void;
   setOnTokenChange(cb: (t: string | null) => void): void;
   /** The raw JSON request helper, for app-local endpoints not in the shared surface. */
-  req<T>(method: string, path: string, body?: unknown): Promise<T>;
+  req<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    extraHeaders?: Record<string, string>,
+  ): Promise<T>;
 }
 
 export type RestApi = ReturnType<typeof buildApi>;
@@ -123,10 +128,16 @@ export function createRestClient(transport: RestTransport): RestClient {
     return fetch(url, { ...init, ...opts, headers: headers(init.headers) });
   }
 
-  async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
+  async function req<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    extraHeaders?: Record<string, string>,
+  ): Promise<T> {
     const res = await raw(`/api/v1${path}`, {
       method,
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...(extraHeaders ? { headers: extraHeaders } : {}),
     });
     if (!res.ok) {
       const detail = (await res.json().catch(() => ({}))) as { message?: string };
@@ -159,7 +170,12 @@ export function createRestClient(transport: RestTransport): RestClient {
 // platform exercises today (e.g. mobileCarry, push devices on mobile; the builder's map CRUD on
 // web) are still defined for both: the server is the same and the unused ones simply aren't called.
 function buildApi(
-  req: <T>(method: string, path: string, body?: unknown) => Promise<T>,
+  req: <T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    extraHeaders?: Record<string, string>,
+  ) => Promise<T>,
   capture: (r: AuthResult) => Promise<AuthResult>,
   transport: RestTransport,
   setAccessToken: (t: string | null) => void,
@@ -263,15 +279,22 @@ function buildApi(
         `/history/${encodeURIComponent(gameId)}/visibility`,
         { visibility },
       ),
+    // The ticket rides in a header, not `?ticket=` — a URL query param ends up in proxy/CDN
+    // access logs and browser history, which is exactly the bearer-capability leak this ticket
+    // handoff must avoid (see admin-replay.guard.ts / admin-spectate.guard.ts).
     adminReplay: (gameId: string, ticket: string) =>
       req<AdminReplayPayload>(
         'GET',
-        `/history/${encodeURIComponent(gameId)}/admin-replay?ticket=${encodeURIComponent(ticket)}`,
+        `/history/${encodeURIComponent(gameId)}/admin-replay`,
+        undefined,
+        { 'x-trm-admin-ticket': ticket },
       ),
     adminSpectate: (gameId: string, ticket: string) =>
       req<AdminSpectatePayload>(
         'GET',
-        `/history/${encodeURIComponent(gameId)}/admin-spectate?ticket=${encodeURIComponent(ticket)}`,
+        `/history/${encodeURIComponent(gameId)}/admin-spectate`,
+        undefined,
+        { 'x-trm-admin-ticket': ticket },
       ),
 
     // ── leaderboard ─────────────────────────────────────────────────────────

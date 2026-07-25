@@ -1,20 +1,24 @@
 import { Controller, Get, NotFoundException, Param, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { HistoryRepo } from './history.repo';
 import { AdminReplayTicketGuard } from './admin-replay.guard';
+import { AccessTokenGuard } from '../auth/access-token.guard';
 
 @ApiTags('history')
+@ApiBearerAuth('access-token')
 @Controller('api/v1/history')
 export class AdminReplayController {
   constructor(private readonly repo: HistoryRepo) {}
 
   @Get(':gameId/admin-replay')
-  @UseGuards(AdminReplayTicketGuard)
+  @UseGuards(AccessTokenGuard, AdminReplayTicketGuard)
   @ApiOperation({
     summary: 'Ticket-authorized replay for maintainers',
     description:
-      'Bypasses membership entirely — authorized solely by a minted admin-replay ticket. ' +
-      'Works for COMPLETED and TERMINATED games (the player-facing /replay stays COMPLETED-only).',
+      'Bypasses membership entirely — authorized by a minted admin-replay ticket (sent via the ' +
+      "x-trm-admin-ticket header) presented by the maintainer it was minted for, whose dashboard " +
+      'access is re-checked on every request. Works for COMPLETED and TERMINATED games (the ' +
+      'player-facing /replay stays COMPLETED-only).',
   })
   async adminReplay(@Param('gameId') gameId: string) {
     const data = await this.repo.loadReplayForAdmin(gameId);

@@ -1,21 +1,25 @@
 import { Controller, Get, NotFoundException, Param, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { HistoryRepo } from './history.repo';
 import { AdminSpectateTicketGuard } from './admin-spectate.guard';
+import { AccessTokenGuard } from '../auth/access-token.guard';
 
 @ApiTags('history')
+@ApiBearerAuth('access-token')
 @Controller('api/v1/history')
 export class AdminSpectateController {
   constructor(private readonly repo: HistoryRepo) {}
 
   @Get(':gameId/admin-spectate')
-  @UseGuards(AdminSpectateTicketGuard)
+  @UseGuards(AccessTokenGuard, AdminSpectateTicketGuard)
   @ApiOperation({
     summary: 'Ticket-authorized player roster for the live /admin-spectate web route',
     description:
-      'Authorized solely by a valid spectator ws-game ticket for this game — resolves display ' +
-      'names/bot flags only; the live game state itself streams over the WebSocket using the ' +
-      'same ticket.',
+      'Authorized by a valid spectator ws-game ticket for this game (sent via the ' +
+      'x-trm-admin-ticket header) presented by the maintainer it was minted for, whose ' +
+      'games.spectateLive access is re-checked on every request — resolves display names/bot ' +
+      'flags only; the live game state itself streams over the WebSocket using the same ticket ' +
+      'presented in the first frame (unaffected by this guard).',
   })
   async adminSpectate(@Param('gameId') gameId: string) {
     const data = await this.repo.loadSpectateRoster(gameId);

@@ -20,7 +20,7 @@ async function guest(displayName: string) {
   const res = await request(server()).post('/api/v1/auth/guest').send({ displayName }).expect(201);
   return { token: res.body.accessToken, id: res.body.user.id as string };
 }
-async function grantDashboard(userId: string, role: 'viewer' | 'moderator' | 'admin') {
+async function grantDashboard(userId: string, role: 'viewer' | 'moderator' | 'admin' | 'owner') {
   await t.db.collection('dashboardAccounts').insertOne({
     _id: userId,
     role,
@@ -68,12 +68,17 @@ async function startedRoom(
 
 let viewer: { token: string; id: string };
 let noPerm: { token: string; id: string };
+let owner: { token: string; id: string };
 
 beforeAll(async () => {
   t = await createTestApp();
   viewer = await registered('spectate-viewer@example.com', 'Viewer');
   await grantDashboard(viewer.id, 'viewer');
   noPerm = await registered('spectate-noperm@example.com', 'NoPerm');
+  // owner: needed to revoke another maintainer's dashboardAccounts record for the
+  // instant-revocation admin-spectate test below (maintainers.write is owner-only).
+  owner = await registered('spectate-owner@example.com', 'Owner');
+  await grantDashboard(owner.id, 'owner');
 }, 60_000);
 afterAll(() => t.close());
 
@@ -119,6 +124,9 @@ describe('POST /dashboard/games/:gameId/spectate-ticket', () => {
   });
 });
 
+// The ticket rides in a header, not `?ticket=` — see admin-spectate.guard.ts.
+const withTicket = (ticket: string) => ({ 'x-trm-admin-ticket': ticket });
+
 describe('force-spectating a LIVE game via the dashboard', () => {
   it('mints a ticket that joins even when the room disables spectating, and serves the roster', async () => {
     const { code, gameId } = await startedRoom({ allowSpectating: false });
@@ -137,16 +145,20 @@ describe('force-spectating a LIVE game via the dashboard', () => {
       .expect(200);
     const ticket: string = mint.body.ticket;
 
-    // Roster fetch, authorized solely by that same ticket.
+    // Roster fetch: header-carried ticket, presented by the maintainer session it was minted
+    // for, whose games.spectateLive access is re-checked per request.
     const roster = await request(server())
       .get(`/api/v1/history/${gameId}/admin-spectate`)
-      .query({ ticket })
+      .set(auth(viewer.token))
+      .set(withTicket(ticket))
       .expect(200);
     expect(roster.body.players.map((p: { displayName?: string }) => p.displayName)).toContain(
       'Host',
     );
 
-    // The ws-game ticket itself binds a live spectator connection exactly like a real one.
+    // The ws-game ticket itself binds a live spectator connection exactly like a real one — the
+    // first-frame ClientHello handoff is a different, session-less-by-design mechanism shared
+    // by every player/spectator and is untouched by this guard's header/session tightening.
     const hub = t.app.get(GameHub);
     const frames: ServerEnvelope[] = [];
     hub.openConnection('admin-spectate-conn', (bytes) => frames.push(decodeServer(bytes)));
@@ -160,21 +172,51 @@ describe('force-spectating a LIVE game via the dashboard', () => {
     expect(snap!.event.case === 'snapshot' && snap!.event.value.snapshot?.you).toBeFalsy();
   });
 
-  it('roster fetch 404s with no ticket, a garbage ticket, or a ticket scoped to a different game', async () => {
+  it('roster fetch 401s with no bearer session at all, even carrying a valid ticket', async () => {
+    const { gameId } = await startedRoom();
+    const mint = await request(server())
+      .post(`/api/v1/dashboard/games/${gameId}/spectate-ticket`)
+      .set(auth(viewer.token))
+      .expect(200);
+    await request(server())
+      .get(`/api/v1/history/${gameId}/admin-spectate`)
+      .set(withTicket(mint.body.ticket))
+      .expect(401);
+  });
+
+  it('roster fetch 404s with no ticket header, a garbage ticket, or a ticket scoped to a different game', async () => {
     const { gameId } = await startedRoom();
     const { gameId: otherGameId } = await startedRoom();
     const mintOther = await request(server())
       .post(`/api/v1/dashboard/games/${otherGameId}/spectate-ticket`)
       .set(auth(viewer.token))
       .expect(200);
-    await request(server()).get(`/api/v1/history/${gameId}/admin-spectate`).expect(404);
     await request(server())
       .get(`/api/v1/history/${gameId}/admin-spectate`)
-      .query({ ticket: 'garbage' })
+      .set(auth(viewer.token))
       .expect(404);
     await request(server())
       .get(`/api/v1/history/${gameId}/admin-spectate`)
-      .query({ ticket: mintOther.body.ticket })
+      .set(auth(viewer.token))
+      .set(withTicket('garbage'))
+      .expect(404);
+    await request(server())
+      .get(`/api/v1/history/${gameId}/admin-spectate`)
+      .set(auth(viewer.token))
+      .set(withTicket(mintOther.body.ticket))
+      .expect(404);
+  });
+
+  it('roster fetch 404s the old `?ticket=` query-string form — the header is now the only accepted transport', async () => {
+    const { gameId } = await startedRoom();
+    const mint = await request(server())
+      .post(`/api/v1/dashboard/games/${gameId}/spectate-ticket`)
+      .set(auth(viewer.token))
+      .expect(200);
+    await request(server())
+      .get(`/api/v1/history/${gameId}/admin-spectate`)
+      .set(auth(viewer.token))
+      .query({ ticket: mint.body.ticket })
       .expect(404);
   });
 
@@ -186,7 +228,45 @@ describe('force-spectating a LIVE game via the dashboard', () => {
       .expect(200);
     await request(server())
       .get(`/api/v1/history/${gameId}/admin-spectate`)
-      .query({ ticket: seatTicket.body.ticket })
+      .set(auth(host.token))
+      .set(withTicket(seatTicket.body.ticket))
+      .expect(404);
+  });
+
+  it('roster fetch 404s when a DIFFERENT maintainer presents a ticket minted for someone else, even holding games.spectateLive themselves', async () => {
+    const { gameId } = await startedRoom();
+    const mint = await request(server())
+      .post(`/api/v1/dashboard/games/${gameId}/spectate-ticket`)
+      .set(auth(viewer.token))
+      .expect(200);
+    const otherViewer = await registered('spectate-other-viewer@example.com', 'OtherViewer');
+    await grantDashboard(otherViewer.id, 'viewer');
+    await request(server())
+      .get(`/api/v1/history/${gameId}/admin-spectate`)
+      .set(auth(otherViewer.token))
+      .set(withTicket(mint.body.ticket))
+      .expect(404);
+  });
+
+  it('roster fetch 404s once the minting maintainer’s dashboard access is revoked mid-window (instant revocation)', async () => {
+    const { gameId } = await startedRoom();
+    const revocable = await registered('revocable-spectate@example.com', 'Revocable');
+    await grantDashboard(revocable.id, 'viewer');
+    const mint = await request(server())
+      .post(`/api/v1/dashboard/games/${gameId}/spectate-ticket`)
+      .set(auth(revocable.token))
+      .expect(200);
+
+    // Access revoked AFTER minting, while the (45-second) ticket is still unexpired.
+    await request(server())
+      .delete(`/api/v1/dashboard/maintainers/${revocable.id}`)
+      .set(auth(owner.token))
+      .expect(204);
+
+    await request(server())
+      .get(`/api/v1/history/${gameId}/admin-spectate`)
+      .set(auth(revocable.token)) // the access token itself is still valid — only dashboard access was revoked
+      .set(withTicket(mint.body.ticket))
       .expect(404);
   });
 });
