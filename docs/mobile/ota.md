@@ -245,7 +245,8 @@ Triggers: manual dispatch (channel choice `production`/`preview`) or a `mobile-o
 (always `production`). The pinned publish command as it runs in CI:
 
 ```bash
-npx --yes eoas@3.0.5 publish --branch <channel> --nonInteractive --outputDir dist --message "<ref>"
+npx --yes eoas@3.0.5 publish --branch <channel> --nonInteractive \
+  --packageRunner npx-native-only --outputDir dist --message "<ref>"
 ```
 
 - `EXPO_TOKEN` (repo **secret**): Expo robot token — eoas auth + channel→branch mapping.
@@ -257,8 +258,18 @@ npx --yes eoas@3.0.5 publish --branch <channel> --nonInteractive --outputDir dis
 - There is **no code-signing secret in CI** — signing happens at serve time on the OTA server.
 - eoas runs its own `expo export`; the workflow keeps the exported `dist/` plus
   `runtime-versions.json` (the per-platform runtime versions the update targets) as a 30-day artifact.
+- `--packageRunner npx-native-only` points eoas at a pass-through shim the workflow writes onto
+  `PATH`, which appends `--platform android --platform ios` to the `expo export` it spawns (and only
+  to that — `expo config` goes through untouched). Without it the export also builds a **web** bundle:
+  `platforms` is auto-derived from the installed `react-native-web` (the RNW harness), and
+  `@expo/cli`'s `createMetadataJson` then skips web outright, so the bundle is discarded after
+  costing ~114s of a ~185s export. **Do not "fix" this by editing `platforms` in `app.config.ts`** —
+  the resolved app config is a fingerprint input, so that would strand every installed binary.
 - The lane does **not** pass `--disableRepositoryCheck`, so every generated file must be gitignored —
   `eoas publish` aborts on a dirty tree with `Commit all changes. Aborting...`.
+- The pre-publish typecheck is scoped to the packages whose code can end up in the bundle
+  (`--filter='!@trm/web' --filter='!@trm/admin' --filter='!@trm/server'`); those three apps ship
+  nothing here and `@trm/web`'s Vite build dominated the gate.
 
 ## Forced-update gate vs OTA (who wins, and why both exist)
 

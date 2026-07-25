@@ -49,6 +49,13 @@ lanes below are self-managed signing with **no EAS** — app context: `apps/mobi
 - **`mobile-ota.yml`** — JS-only OTA publish to the self-hosted expo-open-ota server
   (`eoas publish`; runbook + forced-update interplay in `docs/mobile/ota.md`). Native changes are
   fenced automatically by `runtimeVersion: fingerprint` — old binaries just never see the update.
+  Publish speed stack (no caches — see **Cache scoping**): the export is pinned to **android+ios**
+  via a `--packageRunner` shim, because `platforms` is auto-derived from the installed
+  `react-native-web` and the resulting web bundle is discarded by `createMetadataJson` after
+  bundling — free to skip, and unlike editing the app config it doesn't move the fingerprint;
+  `eoas` is npx-prefetched in the background of the runtime-version step; and the typecheck gate is
+  scoped to the packages that can reach the bundle (`!@trm/{web,admin,server}` — negative filters,
+  since `src/offline` imports `@trm/bots` without declaring it).
 
 ## Cache scoping (issue #46)
 

@@ -27,7 +27,47 @@ jobs:
       - uses: ./.github/actions/setup-yarn
       # proto codegen must exist before any workspace build (src/gen is gitignored).
       - run: yarn workspace @trm/proto generate
-      - run: yarn typecheck
+
+      # Only the packages that can actually END UP in this update. apps/{web,admin,server} cannot —
+      # the lane ships one Metro bundle of @trm/mobile — and checking them was ~12s of the job, most
+      # of it @trm/web's Vite build (turbo's `typecheck` dependsOn `^build`). Negative filters rather
+      # than `--filter=@trm/mobile...` on purpose: src/offline imports @trm/bots without declaring
+      # it in apps/mobile/package.json, so a dependency-graph filter would silently drop it.
+      - name: Typecheck everything that can reach the bundle
+        run: yarn turbo run typecheck --filter='!@trm/web' --filter='!@trm/admin' --filter='!@trm/server'
+
+      # `expo export` with no --platform exports every platform in the RESOLVED app config, and
+      # `platforms` is auto-derived from what's installed — react-native-web (the RNW desktop
+      # harness, apps/mobile/CLAUDE.md) puts `web` in it. So every publish also bundled an 8.3MB web
+      # bundle that @expo/cli then throws away: createMetadataJson does `if (platform === 'web')
+      # return metadata`, so it never enters metadata.json, is never uploaded, and no device can
+      # ever receive it. It only competed with the android/ios bundles for the runner's 4 vCPUs —
+      # measured at `Web Bundled 114015ms` inside a 185s export.
+      #
+      # Dropping `web` from `platforms` in app.config.ts would be the obvious fix and is NOT safe:
+      # the resolved config feeds the runtimeVersion fingerprint, so it would strand every installed
+      # binary — issue #55 again. Constrain the export at the CLI instead. `expo export --platform`
+      # is repeatable, and eoas spawns the Expo CLI through a configurable "package runner"
+      # (`<runner> expo <subcommand> …`, verified in eoas 3.0.5 publish.js + lib/expoConfig.js), so a
+      # pass-through shim can append the platform list to `export` alone and leave `expo config`
+      # untouched. eoas' runner validator rejects anything but bare words — no slashes — hence a
+      # binary on PATH rather than a path to a script. If a future eoas changes that spawn shape the
+      # shim just passes everything through, i.e. it degrades to today's behaviour, never to a
+      # broken publish.
+      - name: Shim eoas' Expo CLI runner so the export skips the web platform
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          cat > "$RUNNER_TEMP/bin/npx-native-only" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          if [ "${1-}" = expo ] && [ "${2-}" = export ]; then
+            exec npx "$@" --platform android --platform ios
+          fi
+          exec npx "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/bin/npx-native-only"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+
       # Traceability: the runtime versions this update actually targets — resolved exactly the way
       # eoas resolves them (the project's own expo-updates CLI, PER PLATFORM, managed workflow
       # because android/ios are CNG). Deliberately not `npx @expo/fingerprint .`: that hashes the
@@ -58,10 +98,20 @@ jobs:
           TRM_SENTRY_REPLAY_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_SAMPLE_RATE }}
           TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE }}
         run: |
+          # Prime the npx cache for the publish step while the fingerprints resolve. Installing
+          # eoas + its dependency tree is ~16s of dead time at the head of that step and depends on
+          # nothing in this project; the identical spec string resolves to the same ~/.npm/_npx
+          # entry, so the real invocation below starts instantly. Waited on explicitly (not bare
+          # `wait`, which swallows child status) so a failed download fails HERE rather than
+          # halfway through a publish.
+          npx --yes eoas@3.0.5 --version >/dev/null &
+          eoas_prefetch=$!
           for platform in android ios; do
             npx expo-updates runtimeversion:resolve --platform "$platform" --workflow managed \
               | jq -c --arg platform "$platform" '{($platform): .runtimeVersion}'
           done | jq -s add | tee runtime-versions.json
+          wait "$eoas_prefetch"
+
       - name: Publish to the OTA server
         working-directory: apps/mobile
         env:
@@ -115,9 +165,10 @@ jobs:
           # EXPO_TOKEN — verified in eoas 3.0.5 dist/lib/auth.js). Keep using the Expo robot token:
           # the server already authenticates against the Expo API for channel→branch mapping.
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        # eoas runs its own `expo export` (both platforms) before uploading — no separate
-        # export step; --outputDir retains the exported bundle for the artifact below.
-        # Tag pushes have no inputs → production.
+        # eoas runs its own `expo export` before uploading — no separate export step; --outputDir
+        # retains the exported bundle for the artifact below. --packageRunner routes that export
+        # through the shim installed above, which pins it to android+ios (see that step for why the
+        # app config can't express this). Tag pushes have no inputs → production.
         #
         # The CLI is PINNED to the same version as the deployed server image (docs/mobile/ota.md):
         # eoas and expo-open-ota ship from one repo and only work in matched pairs — the upload route
@@ -128,6 +179,7 @@ jobs:
           npx --yes eoas@3.0.5 publish
           --branch ${{ inputs.channel || 'production' }}
           --nonInteractive
+          --packageRunner npx-native-only
           --outputDir dist
           --message "${{ github.ref_name }}"
       - uses: actions/upload-artifact@v4
