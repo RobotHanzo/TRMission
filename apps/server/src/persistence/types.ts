@@ -14,6 +14,9 @@ export interface StoredConfig {
   contentHash: string;
   ruleParams?: Partial<RuleParams>;
   shuffleTurnOrder?: boolean;
+  /** Widened-RNG-key flag (CWE-331, engine ≥ v13). MUST round-trip: `initGame` reads it via the
+   *  restored config, so dropping it would recompute the narrow stream and fail digest recovery. */
+  wideSeed?: boolean;
 }
 
 /** Server-side per-match behaviour flags (never engine rule params — the engine stays unaware). */
@@ -182,6 +185,7 @@ export function configToStored(c: GameConfig): StoredConfig {
     contentHash: c.contentHash,
     ...(c.ruleParams ? { ruleParams: c.ruleParams } : {}),
     ...(c.shuffleTurnOrder !== undefined ? { shuffleTurnOrder: c.shuffleTurnOrder } : {}),
+    ...(c.wideSeed !== undefined ? { wideSeed: c.wideSeed } : {}),
   };
 }
 
@@ -192,5 +196,6 @@ export function storedToConfig(s: StoredConfig): GameConfig {
     contentHash: s.contentHash,
     ...(s.ruleParams ? { ruleParams: s.ruleParams } : {}),
     ...(s.shuffleTurnOrder !== undefined ? { shuffleTurnOrder: s.shuffleTurnOrder } : {}),
+    ...(s.wideSeed !== undefined ? { wideSeed: s.wideSeed } : {}),
   };
 }

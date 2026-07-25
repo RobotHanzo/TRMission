@@ -19,6 +19,10 @@ describe('replay version compatibility', () => {
     // v12 (team mode) joined the window: its rules are gated on `GameConfig.teamCount`, which no
     // pre-v12 log can carry, so older logs still replay byte-identically.
     expect(isReplayVersionCompatible(12, SCHEMA_VERSION)).toBe(true);
-    expect(isReplayVersionCompatible(13, SCHEMA_VERSION)).toBe(false);
+    // v13 (widened RNG key, CWE-331) also joined the window: it activates only when
+    // `GameConfig.wideSeed` is set, which no pre-v13 log can carry, so older logs still replay
+    // byte-identically.
+    expect(isReplayVersionCompatible(13, SCHEMA_VERSION)).toBe(true);
+    expect(isReplayVersionCompatible(14, SCHEMA_VERSION)).toBe(false);
   });
 });

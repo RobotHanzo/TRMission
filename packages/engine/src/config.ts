@@ -22,6 +22,14 @@ export interface GameConfig {
   readonly ruleParams?: Partial<RuleParams>;
   /** If true, the starting turn order is RNG-shuffled (else uses `players` order). */
   readonly shuffleTurnOrder?: boolean;
+  /**
+   * Widen the seeded PRNG key to ≥128 bits (CWE-331). Absent/false ⇒ the historical narrow 32-bit
+   * key, so pre-v13 games replay byte-identically; new games set it so an observer of the genesis
+   * state can no longer brute-force deck order and hidden hands from a 2^32 keyspace. Must round-trip
+   * through persistence unchanged (it drives `makeRng` in `initGame`), or recovery/replay would
+   * recompute the wrong stream. Engine ≥ v13.
+   */
+  readonly wideSeed?: boolean;
   /** Pins the game to exact authored content (ADR A6/A13). */
   readonly contentHash: string;
 }

@@ -537,6 +537,9 @@ export class LobbyService {
       // Seeded off `config.seed` in `initGame`'s fixed RNG order, so replay stays byte-identical.
       // In a team game the engine turns this into a ROTATION so partners keep alternating.
       shuffleTurnOrder: true,
+      // Widen the PRNG key to ≥128 bits (CWE-331): the 122-bit `seed` above must not be
+      // recoverable from a 2^32 offline search of the genesis state (deck order = every hand).
+      wideSeed: true,
       ...(teamCount > 0 ? { teamCount } : {}),
       ruleParams: {
         ...mapRules,

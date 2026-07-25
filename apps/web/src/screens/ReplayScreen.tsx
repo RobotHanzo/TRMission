@@ -93,6 +93,8 @@ export default function ReplayScreen() {
           ...(payload.config.shuffleTurnOrder !== undefined
             ? { shuffleTurnOrder: payload.config.shuffleTurnOrder }
             : {}),
+          // CWE-331: apply the widened-RNG-key flag so a v13 replay reproduces the wide stream.
+          ...(payload.config.wideSeed !== undefined ? { wideSeed: payload.config.wideSeed } : {}),
         };
         setLoad({ kind: 'ready', payload, board, config, actions: payload.actions as Action[] });
       })

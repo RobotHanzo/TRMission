@@ -18,7 +18,15 @@ export async function seedDevGame(
   ];
   const officialMap = OFFICIAL_MAPS[0];
   if (!officialMap) throw new Error('no official maps registered');
-  const config: GameConfig = { seed: 'dev-seed-1', players, contentHash: officialMap.hash };
+  // Widen the PRNG key to ≥128 bits (CWE-331), consistent with every other "new game" producer
+  // (LobbyService.start, mobile offline newGame) — the dev demo game should not be left on the
+  // narrow 32-bit path just because it isn't attacker-reachable in normal deployment.
+  const config: GameConfig = {
+    seed: 'dev-seed-1',
+    players,
+    contentHash: officialMap.hash,
+    wideSeed: true,
+  };
   await hub.createMatch(gameId, buildBoard(officialMap.content), config);
 
   const ticketMap: Record<string, string> = {};

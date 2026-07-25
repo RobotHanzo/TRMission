@@ -33,7 +33,10 @@ function buildTeams(config: GameConfig): PlayerId[][] | undefined {
 
 export function initGame(board: Board, config: GameConfig): GameState {
   const ruleParams = { ...DEFAULT_RULE_PARAMS, ...(config.ruleParams ?? {}) };
-  let rng = makeRng(config.seed);
+  // `wideSeed` widens the PRNG key to ≥128 bits (CWE-331); absent ⇒ the narrow key, byte-identical
+  // to a pre-v13 game. The flag comes from the persisted config, so replay/recovery reproduce the
+  // exact same stream. The RNG consumption order below is unchanged either way.
+  let rng = makeRng(config.seed, config.wideSeed ?? false);
 
   // (1) Turn order. A team game seats partners interleaved (`seat % teamCount`), so turn order
   // must stay seat-ascending or teams would stop alternating; it is randomised by ROTATION only

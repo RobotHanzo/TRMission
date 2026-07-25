@@ -54,6 +54,10 @@ export function newOfflineSetup(opts: NewOfflineGameOptions): OfflineGameSetup {
     seed: opts.seed,
     players,
     contentHash: map.hash,
+    // Widen the PRNG key to ≥128 bits (CWE-331), mirroring LobbyService.start — a new offline save
+    // is engine v13 and keys its shuffles on the full seed, not a 32-bit collapse of it. The flag
+    // is serialized whole into the offline setup, so resume recomputes the same wide stream.
+    wideSeed: true,
     // Omitted (not set to undefined) in a free-for-all, so the resulting state carries no team
     // keys and stays byte-identical to a pre-v12 offline save.
     ...(opts.teamCount !== undefined && opts.teamCount > 0 ? { teamCount: opts.teamCount } : {}),

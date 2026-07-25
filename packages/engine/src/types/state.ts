@@ -221,7 +221,15 @@ export const SCHEMA_VERSION = 1;
 // PUSH_TO_TEAM_POOL free action + TAKE_FROM_TEAM_POOL draw). Every new behavior is gated on the
 // optional `teams` state key, which only `GameConfig.teamCount` can produce, so a free-for-all
 // game carries no team keys and replays byte-identically to v9–v11.
-export const ENGINE_VERSION = 12;
+// v13: widened RNG key (CWE-331). A game seed is a 122-bit randomUUID(), but the narrow PRNG key
+// collapsed it to a single uint32 (`RngState.seed`), so every hidden shuffle (deck, hands, ticket
+// decks) was recoverable by a 2^32 offline search of the genesis state. New games now key the
+// stream on ≥128 bits via the optional `rng.key` lanes (from `@trm/shared`'s wide `makeRng`),
+// selected by the new optional `GameConfig.wideSeed`. The wide path is gated on that flag, which no
+// pre-v13 persisted config carries, so v9–v12 logs replay byte-identically (their `rng` has no
+// `key` lane and the narrow stream is unchanged); only the KEY WIDTH differs for new games, the
+// PRNG consumption order is identical, and `RngState` stays integer-serializable.
+export const ENGINE_VERSION = 13;
 
 /**
  * Which persisted engine majors THIS engine can replay/recover byte-identically — the single gate
@@ -243,7 +251,9 @@ export const ENGINE_VERSION = 12;
  * is set — impossible in any persisted pre-v12 config — so v9/v10/v11 logs replay byte-identically
  * (the optional `teams`/`teamPools` state keys and the `turn.teamPushUsed` flag are never
  * populated for them, and no RuleParams field was added, which would have changed every digest).
- * Only extend this list for a new version when the change is provably inert for every version
- * already listed.
+ * v13's widened RNG activates only when `GameConfig.wideSeed` is set — impossible in any persisted
+ * pre-v13 config — so v9–v12 logs replay byte-identically (their `rng` carries no `key` lane and
+ * the narrow PRNG stream is unchanged). Only extend this list for a new version when the change is
+ * provably inert for every version already listed.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11, 12];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11, 12, 13];

@@ -176,6 +176,9 @@ export interface ReplayPayload {
     contentHash: string;
     ruleParams?: Record<string, unknown>;
     shuffleTurnOrder?: boolean;
+    /** Widened-RNG-key flag (CWE-331, engine ≥ v13); must be applied when rebuilding the
+     *  GameConfig or a v13 replay recomputes the narrow stream and diverges. */
+    wideSeed?: boolean;
   };
   engineVersion: number;
   schemaVersion: number;
