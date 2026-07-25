@@ -617,8 +617,17 @@ describe('RoomScreen spectating', () => {
   it('hides Spectate from the host who is the only member', async () => {
     mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
     render(<RoomScreen />);
-    await screen.findByRole('button', { name: '我準備好了' });
+    await screen.findByRole('button', { name: '離開房間' });
     expect(screen.queryByRole('button', { name: '觀戰' })).toBeNull();
+  });
+
+  it('drops the ready button when the host is the only human, and lets them start', async () => {
+    const bot = { ...member('bot:1'), isBot: true, ready: true };
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me'), bot] }));
+    render(<RoomScreen />);
+    const startBtn = await screen.findByRole('button', { name: '開始遊戲' });
+    expect(startBtn).not.toBeDisabled();
+    expect(screen.queryByRole('button', { name: '我準備好了' })).toBeNull();
   });
 
   it('hides Spectate from the host even with other members present', async () => {

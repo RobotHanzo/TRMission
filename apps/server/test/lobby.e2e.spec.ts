@@ -79,6 +79,28 @@ describe('lobby: room lifecycle + ws-ticket handoff', () => {
     expect(frames.some((f) => f.event.case === 'welcome')).toBe(true);
     expect(frames.some((f) => f.event.case === 'snapshot')).toBe(true);
   });
+
+  it('starts a solo-human room with bots without any ready-up', async () => {
+    const a = await guest('Solo');
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(a.token))
+      .send({})
+      .expect(201);
+    const code: string = room.body.code;
+    await request(server())
+      .post(`/api/v1/rooms/${code}/bots`)
+      .set(auth(a.token))
+      .send({ difficulty: 'EASY' })
+      .expect(200);
+
+    // The host never readied — a table whose only human is the host skips the handshake.
+    const started = await request(server())
+      .post(`/api/v1/rooms/${code}/start`)
+      .set(auth(a.token))
+      .expect(200);
+    expect(started.body.gameId).toBeTruthy();
+  });
 });
 
 describe('lobby: host kicks a player', () => {

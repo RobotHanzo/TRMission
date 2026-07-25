@@ -28,6 +28,7 @@ import {
   type EventsMode,
 } from '@trm/shared';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
+import { canStartRoom, isSoloHumanRoom } from '@trm/client-core/game/roomReady';
 import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core/game/chatPresets';
 import type { RootStackParamList } from '../navigation';
 import {
@@ -196,7 +197,8 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
   const me = room.members.find((m) => m.userId === user?.id);
   const mySpectator = room.spectators.find((s) => s.userId === user?.id);
   const isHost = room.hostId === user?.id;
-  const allReady = room.members.length >= 2 && room.members.every((m) => m.ready);
+  const soloHuman = isSoloHumanRoom(room.members);
+  const allReady = canStartRoom(room.members);
   const canAddBot = isHost && room.members.length < room.maxPlayers;
   const settings = room.settings;
   const settingsLocked = !isHost || room.status !== 'LOBBY';
@@ -692,7 +694,7 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
 
       {/* ── actions ── */}
       <View style={styles.actions}>
-        {me && (
+        {me && !soloHuman && (
           <SecondaryButton
             title={me.ready ? t('room.cancelReady') : t('room.markReady')}
             onPress={() => guard(api.setReady(code, !me.ready))}

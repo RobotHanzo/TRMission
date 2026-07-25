@@ -13,6 +13,7 @@ import {
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
+import { canStartRoom, isSoloHumanRoom } from '@trm/client-core/game/roomReady';
 import {
   api,
   type RoomView,
@@ -165,7 +166,8 @@ export function RoomScreen() {
   const isHost = room.hostId === user?.id;
   // A shareable link that drops a friend straight into this room (joins on open, after login).
   const roomLink = `${window.location.origin}/room/${code}`;
-  const allReady = room.members.length >= 2 && room.members.every((m) => m.ready);
+  const soloHuman = isSoloHumanRoom(room.members);
+  const allReady = canStartRoom(room.members);
   const canAddBot = isHost && room.members.length < room.maxPlayers;
 
   const memberName = (m: RoomMember): string =>
@@ -597,7 +599,7 @@ export function RoomScreen() {
         )}
 
         <div className="row">
-          {me && (
+          {me && !soloHuman && (
             <button className={me.ready ? 'danger' : 'success'} onClick={toggleReady}>
               {me.ready ? t('cancelReady') : t('markReady')}
             </button>

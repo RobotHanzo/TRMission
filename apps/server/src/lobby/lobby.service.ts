@@ -518,7 +518,10 @@ export class LobbyService {
     if (room.hostId !== user.userId) throw new ForbiddenException('only the host can start');
     if (room.status !== 'LOBBY') throw new BadRequestException('game already started');
     if (room.members.length < 2) throw new BadRequestException('need at least 2 players');
-    if (!room.members.every((m) => m.ready))
+    // Bots are always ready, so a table whose only human is the host has nobody to coordinate
+    // with — the ready handshake is skipped there (the clients hide the button to match).
+    const humans = room.members.filter((m) => !m.isBot);
+    if (humans.length > 1 && !room.members.every((m) => m.ready))
       throw new BadRequestException('all players must be ready');
     // Team layout must divide the table exactly. Checked HERE (not just in the settings PATCH)
     // because players can join or leave after the host picks a layout.
