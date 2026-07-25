@@ -14,27 +14,42 @@ export class RatingsRepo implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.col.createIndex({ gameId: 1 });
+    // One rating per user per game — `upsert` below updates the existing row on a
+    // resubmission instead of inserting a duplicate.
+    await this.col.createIndex({ userId: 1, gameId: 1 }, { unique: true });
     await this.col.createIndex({ userId: 1, createdAt: -1 });
     await this.col.createIndex({ createdAt: -1 });
   }
 
-  async insert(
+  /**
+   * One rating per {userId, gameId}: a resubmission (there's no "edit my rating" UI, but a
+   * retried/repeated POST from the same user for the same game is otherwise indistinguishable
+   * from an edit) updates the existing row's stars/text/roomId in place rather than inserting
+   * a duplicate — the unique index above makes that the only possible outcome, and keeping the
+   * endpoint idempotent avoids surfacing a spurious 409 to a legitimate retry. `createdAt` is
+   * preserved from the first submission via $setOnInsert.
+   */
+  async upsert(
     userId: string,
     gameId: string,
     roomId: string,
     stars: number,
     text?: string,
   ): Promise<GameRatingDoc> {
-    const doc: GameRatingDoc = {
-      _id: randomUUID(),
-      userId,
-      gameId,
-      roomId,
-      stars,
-      ...(text ? { text } : {}),
-      createdAt: new Date(),
-    };
-    await this.col.insertOne(doc);
+    const set: Record<string, unknown> = { roomId, stars };
+    const unset: Record<string, ''> = {};
+    if (text) set.text = text;
+    else unset.text = '';
+    const doc = await this.col.findOneAndUpdate(
+      { userId, gameId },
+      {
+        $set: set,
+        ...(Object.keys(unset).length ? { $unset: unset } : {}),
+        $setOnInsert: { _id: randomUUID(), createdAt: new Date() },
+      },
+      { upsert: true, returnDocument: 'after' },
+    );
+    if (!doc) throw new Error('upsert returned no document');
     return doc;
   }
 

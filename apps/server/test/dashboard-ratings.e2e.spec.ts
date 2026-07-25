@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { createTestApp, type TestApp } from './app';
+import type { MatchHistoryDoc } from '../src/persistence/types';
 
 let t: TestApp;
 const server = () => t.app.getHttpServer();
@@ -32,6 +33,24 @@ beforeAll(async () => {
   viewer = await registered('rviewer@example.com', 'Viewer');
   await grantDashboard(viewer.id, 'viewer');
   rater = await registered('rater@example.com', 'Rater');
+
+  // The submit endpoint only accepts a rating for a game the caller actually played/spectated
+  // — seed the archive rows it checks membership against before rating g1/g2.
+  for (const gameId of ['g1', 'g2']) {
+    await t.db.collection<MatchHistoryDoc>('matchHistory').insertOne({
+      _id: gameId,
+      players: [{ userId: rater.id, seat: 0 }],
+      turnOrder: [rater.id],
+      seed: 's',
+      contentHash: 'x',
+      finalScores: {
+        players: [{ playerId: rater.id, total: 0 }],
+        ranking: [[rater.id]],
+      } as unknown as MatchHistoryDoc['finalScores'],
+      winners: [rater.id],
+      completedAt: new Date(),
+    });
+  }
 
   await request(server())
     .post('/api/v1/ratings')
