@@ -24,6 +24,13 @@ export const MatchSummarySchema = z.object({
   replayable: z.boolean(),
 });
 
+// A single game's scoreboard detail. Deliberately narrower than the archive doc: no `seed`,
+// `turnOrder`, or full `spectators[]` roster — those stay behind the /replay route's
+// replayReview-feature / link-visibility gate, matched here by exposing only `visibility`.
+export const MatchDetailSchema = MatchSummarySchema.extend({
+  visibility: ReplayVisibilitySchema,
+});
+
 export const ReplayPlayerSchema = HistoryPlayerSchema.extend({
   isBot: z.boolean().optional(),
   difficulty: z.enum(['EASY', 'MEDIUM', 'HARD', 'HELL']).optional(),

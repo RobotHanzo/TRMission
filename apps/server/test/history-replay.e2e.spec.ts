@@ -163,6 +163,43 @@ describe('GET /api/v1/history/:gameId', () => {
     await request(server()).get(`/api/v1/history/${gameId}`).set(auth(outsider.token)).expect(404);
     await request(server()).get(`/api/v1/history/${gameId}`).expect(401);
   });
+
+  // Regression for the scoreboard-detail leak: this route must project a DTO, not the raw
+  // matchHistory doc, so a member/spectator without replayReview still can't pull the
+  // replay-reconstruction inputs (seed + turnOrder = deck order = every opening hand) or the
+  // full spectator roster off it — those stay behind /replay's own gate, exercised below.
+  it('never leaks seed/turnOrder/the spectator roster, for a player OR a spectator', async () => {
+    for (const token of [member.token, watcher.token]) {
+      const res = await request(server())
+        .get(`/api/v1/history/${gameId}`)
+        .set(auth(token))
+        .expect(200);
+      expect(res.body).not.toHaveProperty('seed');
+      expect(res.body).not.toHaveProperty('turnOrder');
+      expect(res.body).not.toHaveProperty('contentHash');
+      expect(res.body).not.toHaveProperty('spectators');
+
+      // Legitimate scoreboard fields are still present and correct.
+      expect(res.body.gameId).toBe(gameId);
+      expect(res.body.finalScores.players).toHaveLength(2);
+      expect(res.body.winners.length).toBeGreaterThan(0);
+      expect(res.body.players).toHaveLength(2);
+      expect(typeof res.body.completedAt).toBe('string');
+      expect(res.body.replayable).toBe(true);
+      expect(['private', 'link']).toContain(res.body.visibility);
+    }
+
+    const asPlayer = await request(server())
+      .get(`/api/v1/history/${gameId}`)
+      .set(auth(member.token))
+      .expect(200);
+    expect(asPlayer.body.role).toBe('player');
+    const asSpectator = await request(server())
+      .get(`/api/v1/history/${gameId}`)
+      .set(auth(watcher.token))
+      .expect(200);
+    expect(asSpectator.body.role).toBe('spectator');
+  });
 });
 
 describe('GET /api/v1/history/:gameId/replay', () => {

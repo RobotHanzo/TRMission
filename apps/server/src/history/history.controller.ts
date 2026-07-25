@@ -12,6 +12,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nes
 import { z } from 'zod';
 import { HistoryRepo } from './history.repo';
 import {
+  MatchDetailSchema,
   MatchSummarySchema,
   ReplayPayloadSchema,
   SetVisibilityDto,
@@ -45,8 +46,12 @@ export class HistoryController {
   @Get(':gameId')
   @UseGuards(AccessTokenGuard)
   @ApiOperation({ summary: 'One finished game (scoreboard) — members and spectators only' })
+  @ApiResponse({ status: 200, schema: apiSchema(MatchDetailSchema) })
   async get(@Param('gameId') gameId: string, @CurrentUser() user: AuthUser) {
     // 404 (not 403) for non-members: don't reveal whether the game exists.
+    // `getForUser` returns a projected DTO — never the raw archive doc — so `seed`, `turnOrder`,
+    // and the full `spectators[]` roster never reach the wire here; those stay gated behind
+    // `/replay`'s replayReview feature / link-visibility check.
     const doc = await this.repo.getForUser(gameId, user.userId);
     if (!doc) throw new NotFoundException('game not found');
     return doc;

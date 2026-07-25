@@ -30,6 +30,18 @@ export interface MatchSummary {
   replayable: boolean;
 }
 
+/**
+ * Single-game scoreboard detail — deliberately narrower than `MatchHistoryDoc`. It must never
+ * carry `seed`, `turnOrder`, or the full `spectators[]` roster: those are exactly the
+ * replay-reconstruction inputs (and membership list) that the sibling `/replay` route gates
+ * behind the `replayReview` feature / link visibility, so this endpoint must not become an
+ * alternate, ungated path to them.
+ */
+export interface MatchDetail extends MatchSummary {
+  /** 'link' = viewable by anyone holding the URL; 'private' (default) = replayReview members only. */
+  visibility: ReplayVisibility;
+}
+
 export interface ReplayData {
   config: StoredConfig;
   engineVersion: number;
@@ -158,12 +170,47 @@ export class HistoryRepo {
     }));
   }
 
-  /** The archive doc IF the user played or spectated it; null otherwise (→ 404 upstream). */
-  getForUser(gameId: string, userId: string): Promise<MatchHistoryDoc | null> {
-    return this.col.findOne({
+  /**
+   * The scoreboard detail IF the user played or spectated it; null otherwise (→ 404 upstream).
+   * Projects to `MatchDetail` — see its doc comment for what is deliberately withheld.
+   */
+  async getForUser(gameId: string, userId: string): Promise<MatchDetail | null> {
+    const doc = await this.col.findOne({
       _id: gameId,
       $or: [{ 'players.userId': userId }, { spectators: userId }],
     });
+    if (!doc) return null;
+
+    // Legacy archives predate the engineVersion stamp — read it off the game doc instead.
+    let engineVersion = doc.engineVersion;
+    if (engineVersion === undefined) {
+      const game = await this.games.findOne({ _id: doc._id }, { projection: { engineVersion: 1 } });
+      engineVersion = game?.engineVersion;
+    }
+    const [replayable] = await this.replayableFlags([
+      { contentHash: doc.contentHash, engineVersion },
+    ]);
+    const names = await this.displayNames(doc.players.map((p) => p.userId));
+
+    return {
+      gameId: doc._id,
+      players: doc.players.map((p) => {
+        const displayName = names.get(p.userId);
+        return {
+          userId: p.userId,
+          seat: p.seat,
+          ...(displayName !== undefined ? { displayName } : {}),
+        };
+      }),
+      winners: doc.winners,
+      completedAt: doc.completedAt.toISOString(),
+      role: doc.players.some((p) => p.userId === userId)
+        ? ('player' as const)
+        : ('spectator' as const),
+      finalScores: doc.finalScores,
+      replayable: replayable ?? false,
+      visibility: doc.replayVisibility === 'link' ? 'link' : 'private',
+    };
   }
 
   /** The archive doc with no membership filter — the caller decides access (replay visibility). */
