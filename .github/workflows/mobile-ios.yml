@@ -11,14 +11,16 @@ on:
   push:
     branches: ['release/**']
     tags: ['v*']
-  # GitHub evicts any cache untouched for 7 days, and this lane only fires on release/** + tags —
-  # so between releases the ccache/Pods/node_modules caches age out and the next release build is
-  # cold. A twice-weekly warm-up on main keeps them fresh, same as mobile-android.yml (and free
-  # despite the macOS multiplier: this repo is public, so GitHub-hosted minutes aren't billed).
-  # A scheduled run takes the plain non-tag path — BUILD_NUMBER=1, upload:false — and can never
-  # reach TestFlight.
+  # Actions caches are ref-scoped: a run reads only its own ref's caches plus the default branch's,
+  # so a cache saved on a release tag is unreadable by every later tag. The only ccache/Pods entries
+  # a release build can restore are the ones a main-branch run leaves behind — that is what this
+  # warm-up is for (and it is free despite the macOS multiplier: this repo is public, so
+  # GitHub-hosted minutes aren't billed). A scheduled run takes the plain non-tag path —
+  # BUILD_NUMBER=1, upload:false — and can never reach TestFlight. Daily, not twice-weekly (issue
+  # #46): the shared 10GB repo cache budget evicts these entries by LRU well before GitHub's 7-day
+  # idle expiry.
   schedule:
-    - cron: '0 4 * * 1,4'
+    - cron: '0 4 * * *'
   workflow_dispatch:
     inputs:
       publish:
@@ -50,7 +52,20 @@ jobs:
     # see app.config.ts) are only cacheable at all with depend_mode plus `modules`/`pch_defines`
     # sloppiness, and Xcode's -ivfsoverlay/index-store args need their entries too. These env vars
     # override the ccache config the ccache-action writes.
+    #
+    # CCACHE_DIR is issue #46: every iOS build up to 2026-07-25 finished with `Cacheable calls: 0`
+    # — ccache was never consulted once, despite pod install printing "[Ccache]: Setting CC, LD,
+    # CXX & LDPLUSPLUS" and gym compiling 330 C/ObjC/C++ units. RN routes CC/CXX through
+    # node_modules/react-native/scripts/xcode/ccache-clang.sh, which force-exports
+    # CCACHE_CONFIGPATH to its OWN scripts/xcode/ccache.conf unless the variable is already set.
+    # That file declares no cache_dir, so objects would land in ccache's default
+    # (~/Library/Caches/ccache) while the action restores/saves/reports on $GITHUB_WORKSPACE/.ccache.
+    # An explicit CCACHE_DIR outranks BOTH config files and pins every path to the one the action
+    # actually persists. CCACHE_BINARY (set below, once ccache is installed) is the wrapper's other
+    # trapdoor: it is `exec $CCACHE_BINARY clang "$@"`, so an empty value silently execs plain
+    # clang and the build succeeds with no cache and no warning.
     env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: clang_index_store,file_stat_matches,include_file_ctime,include_file_mtime,ivfsoverlay,pch_defines,modules,system_headers,time_macros
       CCACHE_FILECLONE: 'true'
@@ -73,6 +88,20 @@ jobs:
           # visible — read it together with the job-level CCACHE_* env above.
           max-size: 2G
           verbose: 2
+          # Same rule as mobile-android.yml (issue #46): a tag ref is built once and never read
+          # again, so saving to it only burns the repo's shared 10GB budget and evicts main's entry
+          # — the only one a release build can actually restore.
+          save: ${{ github.ref_type != 'tag' }}
+
+      # react_native_post_install writes ccache's path into the Pods project as an Xcode BUILD
+      # SETTING named CCACHE_BINARY, which is not exported into the environment of the compiler
+      # tasks Xcode spawns — leaving `exec $CCACHE_BINARY clang "$@"` in RN's wrapper to run bare
+      # clang. Exporting it as a real env var here (after the action above has installed ccache, so
+      # `command -v` resolves) closes that gap. Harmless if Xcode does export the build setting:
+      # both resolve to the same binary.
+      - name: Export ccache's path for RN's ccache-clang wrapper
+        run: echo "CCACHE_BINARY=$(command -v ccache)" >> "$GITHUB_ENV"
+
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'

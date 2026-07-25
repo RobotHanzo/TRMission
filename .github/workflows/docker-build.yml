@@ -81,5 +81,16 @@ jobs:
           # cache below, both of which are readable by anyone with repo read access.
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+          # Registry cache, not type=gha (issue #46). A repo gets ONE 10GB Actions cache budget
+          # shared by every workflow, and `type=gha,mode=max` here had grown to 5.9GB across 155
+          # blob entries — pushing the repo to 11.5GB, i.e. permanently over the limit, so GitHub
+          # LRU-evicted continuously. These blobs are re-read on every main push and so stay warm,
+          # while the mobile lanes' ccache (~280MB, touched only on release days) was always the
+          # coldest entry and died within hours of every warm-up — the direct cause of the 0%
+          # ccache hit rate on both mobile lanes. Moving the layer cache to GHCR takes the repo to
+          # ~5.6GB, under the limit, so nothing gets evicted early any more; it costs nothing for a
+          # public repo and buildkit's dedup keeps the pushed cache from growing without bound
+          # (unlike the Actions cache, which only ever accumulated). ignore-error keeps a registry
+          # hiccup on export from failing an otherwise-good image build.
+          cache-from: type=registry,ref=ghcr.io/${{ steps.owner.outputs.name }}/trmission-${{ matrix.image }}:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ steps.owner.outputs.name }}/trmission-${{ matrix.image }}:buildcache,mode=max,ignore-error=true

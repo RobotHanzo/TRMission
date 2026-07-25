@@ -17,8 +17,8 @@ lanes below are self-managed signing with **no EAS** — app context: `apps/mobi
   (Skia/Reanimated/Worklets/gesture-handler/screens; `expo-modules-core` still builds from source on
   RN 0.85), **ccache** (`CCACHE_COMPILERCHECK=content` — the default `mtime` missed everything because
   CNG regenerates `android/` each run) covers the fallback compiles, and **`gradle/actions/setup-gradle`**'s
-  build cache the Kotlin/Java/dex tasks; `lintVitalRelease` is skipped, and a twice-weekly scheduled
-  warm-up keeps those caches from GitHub's 7-day eviction between infrequent release runs.
+  build cache the Kotlin/Java/dex tasks; `lintVitalRelease` is skipped, and a daily scheduled
+  warm-up on main keeps those caches alive between infrequent release runs (see **Cache scoping**).
 - **`mobile-ios.yml`** — **macos-26** (pinned: the Liquid Glass `.icon` bundle needs Xcode 26's
   actool; release-gated): same tag-derived `BUILD_NUMBER` → `expo prebuild` → `pod install` →
   `fastlane ios beta` (setup_ci keychain → match readonly → `update_code_signing_settings` flips
@@ -32,9 +32,10 @@ lanes below are self-managed signing with **no EAS** — app context: `apps/mobi
   keeps working), **ccache** covers what still compiles from source (enabled via `USE_CCACHE=1` on
   `pod install` — deliberately an env var, NOT expo-build-properties' `ios.ccacheEnabled`, which
   would shift the OTA runtimeVersion fingerprint; same `CCACHE_COMPILERCHECK=content` lesson as
-  Android plus the Xcode sloppiness/depend-mode set for clang modules), the Pods cache is keyed on
-  Podfile+yarn.lock, and the same twice-weekly scheduled warm-up as Android keeps the caches inside
-  GitHub's 7-day eviction window (free — the repo is public).
+  Android plus the Xcode sloppiness/depend-mode set for clang modules, and the `CCACHE_DIR` +
+  `CCACHE_BINARY` pins that RN's `ccache-clang.sh` wrapper needs — see **Cache scoping**), the Pods
+  cache is keyed on Podfile+yarn.lock, and the same daily scheduled warm-up as Android keeps the
+  caches alive (free — the repo is public).
 - **`mobile-ios-certs.yml`** — workflow_dispatch-only macOS job running `fastlane ios certs` (match
   **read-write**, ASC-API-key auth): seeds/rotates the Distribution cert + App Store profiles (one
   per bundle id in the Matchfile: the app + the Live Activity widget extension) in the private match
@@ -46,6 +47,34 @@ lanes below are self-managed signing with **no EAS** — app context: `apps/mobi
 - **`mobile-ota.yml`** — JS-only OTA publish to the self-hosted expo-open-ota server
   (`eoas publish`; runbook + forced-update interplay in `docs/mobile/ota.md`). Native changes are
   fenced automatically by `runtimeVersion: fingerprint` — old binaries just never see the update.
+
+## Cache scoping (issue #46)
+
+Two properties of GitHub's cache decide whether any of the caches above ever pay off, and both bit
+this repo hard enough to hold ccache at a **0% hit rate on every mobile build**:
+
+- **Caches are ref-scoped.** A run can read only its own ref's caches plus the default branch's.
+  The mobile lanes fire on `v<semver>+<build>` **tags** — a fresh, write-once ref every release —
+  so a cache saved by one release build is unreadable by the next. **Only the daily main-branch
+  warm-up leaves an entry that release builds can restore.** That is why the schedules exist; they
+  are not a nice-to-have. Both lanes therefore pass `save: ${{ github.ref_type != 'tag' }}`: a
+  tag-scoped save is dead on arrival and only crowds the budget below.
+- **One 10GB budget, shared by every workflow, evicted by LRU.** `docker-build.yml` had grown to
+  5.9GB of `type=gha` buildkit blobs, putting the repo permanently over the limit. Those blobs are
+  re-read on every main push and stay warm; ccache (~280MB, touched only on release days) was
+  always the coldest entry and was evicted within hours of each warm-up. The docker layer cache now
+  goes to GHCR (`type=registry`) instead, taking the repo back under the limit. **Before adding any
+  large new cache, check `gh api repos/:owner/:repo/actions/cache/usage` — going over the limit
+  doesn't fail anything loudly, it just silently starves the caches that are used least often.**
+
+Debugging a bad hit rate: read the ccache-action's **"Restore cache"** group first. `No cache found`
+means there was nothing to hit and the `ccache -s` numbers are just reporting that faithfully — go
+look at scoping and eviction, not at `CCACHE_*` tuning. `Cacheable calls: 0` is the _other_ failure
+and means the compiler never reached ccache at all: on iOS that was RN's `ccache-clang.sh` wrapper,
+which force-sets `CCACHE_CONFIGPATH` to its own bundled conf (no `cache_dir`, so objects land
+outside the directory the action saves) and runs `exec $CCACHE_BINARY clang "$@"`, silently
+degrading to bare clang when that variable is empty. `CCACHE_DIR` and `CCACHE_BINARY` in the job env
+outrank both.
 
 ## Required mobile secrets / variables
 

@@ -20,13 +20,17 @@ on:
         description: 'APP_VERSION (versionName, e.g. 1.0.0) to stamp — required when publish is enabled, since a manual run has no v<semver>+<build> tag to derive one from (docs/release/mobile-versioning.md)'
         type: string
         default: ''
-  # GitHub evicts any cache untouched for 7 days, and this lane only fires on release/** + tags —
-  # so between releases the ccache + Gradle build cache age out and the next release build is cold.
-  # A twice-weekly warm-up build on main keeps both caches fresh. It runs the cheap 2-ABI dev path
-  # (non-tag ⇒ TRM_ANDROID_ABIS scoped down, BUILD_NUMBER=1) and never publishes to Play (every
-  # publish step is gated on github.ref_type == 'tag' or a manual publish=true dispatch).
+  # Actions caches are scoped per ref, and a run can only read its OWN ref's caches plus the
+  # default branch's — so a cache saved on refs/tags/v0.1.15+15 is unreadable by every later tag.
+  # The ONLY ccache entry any release build can restore is the one a main-branch run leaves behind,
+  # which is what this warm-up is for. It runs the cheap 2-ABI dev path (non-tag ⇒ TRM_ANDROID_ABIS
+  # scoped down, BUILD_NUMBER=1) and never publishes to Play (every publish step is gated on
+  # github.ref_type == 'tag' or a manual publish=true dispatch). Daily, not twice-weekly (issue
+  # #46): the shared 10GB repo cache budget means the entry is LRU-evicted long before GitHub's
+  # 7-day idle expiry — the 2026-07-23 warm-up was gone within 17h, and every release build from
+  # then on compiled cold at 0% hits.
   schedule:
-    - cron: '0 3 * * 1,4'
+    - cron: '0 3 * * *'
 
 permissions:
   contents: read
@@ -37,10 +41,13 @@ jobs:
     # ccache defaults to compiler_check=mtime, but this workflow regenerates android/ (CNG),
     # restores node_modules from cache, and re-provisions the NDK toolchain every run — all with
     # fresh mtimes — so the default treats the compiler/inputs as changed and misses nearly every
-    # object (why the native phase stayed slow "even with ccache"). Hash the compiler by CONTENT,
-    # and tell ccache that __DATE__/__TIME__ and include-file timestamps are not real inputs, so
-    # cached objects actually survive across runs. RN's build-speed docs call out this exact CI
-    # footgun. These env vars override the ccache config the ccache-action writes.
+    # object. Hash the compiler by CONTENT, and tell ccache that __DATE__/__TIME__ and include-file
+    # timestamps are not real inputs, so cached objects actually survive across runs. RN's
+    # build-speed docs call out this exact CI footgun. These env vars override the ccache config
+    # the ccache-action writes. NOTE (issue #46): these are necessary but not sufficient — a 0%
+    # hit rate here is almost always the GitHub cache layer, not ccache's config. Check the
+    # ccache-action's "Restore cache" group FIRST: "No cache found" means there was nothing to hit
+    # and `ccache -s` is just reporting that faithfully.
     env:
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros,include_file_mtime,include_file_ctime
@@ -74,6 +81,12 @@ jobs:
           # so the real hit rate is visible — read it together with the job-level CCACHE_* env above.
           max-size: 5G
           verbose: 2
+          # Restore everywhere, save only from a branch (issue #46). A tag ref is built once and
+          # never again, so its ~280MB save is unreadable by every future run — while still
+          # counting against the repo's shared 10GB cache budget and pushing the one entry that
+          # IS readable (main's, from the warm-up above) further down the LRU eviction queue.
+          # Branch refs keep saving: release/** gets pushed repeatedly and can reuse its own.
+          save: ${{ github.ref_type != 'tag' }}
 
       - uses: ruby/setup-ruby@v1
         with:
