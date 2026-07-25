@@ -587,6 +587,109 @@ describe('auth: OAuth (Google + Discord, bound by email)', () => {
     expect(cb.headers.location).toContain('error=invalid_state');
     expect(refreshCookie(cb)).toBe('');
   });
+
+  // F34: the PKCE code_verifier must never travel inside the (signed-but-unencrypted) state JWT —
+  // only an opaque server-side handle does. Round 2 additionally guards the handle's redemption
+  // timing: a request merely presenting a well-formed handle+nonce (no real provider code) must
+  // not be able to destroy the verifier record a genuine, still-in-flight login needs.
+  describe('PKCE verifier storage', () => {
+    const decodeStatePayload = (state: string): Record<string, unknown> =>
+      JSON.parse(Buffer.from(state.split('.')[1] ?? '', 'base64url').toString('utf8')) as Record<
+        string,
+        unknown
+      >;
+
+    it('keeps the verifier out of the decoded state JWT payload — only an opaque handle rides along', async () => {
+      const start = await request(oServer()).get('/api/v1/auth/oauth/google/start').expect(302);
+      const state = new URL(locationOf(start)).searchParams.get('state') ?? '';
+      const payload = decodeStatePayload(state);
+      expect('codeVerifier' in payload).toBe(false);
+      expect(typeof payload.codeVerifierHandle).toBe('string');
+      expect((payload.codeVerifierHandle as string).length).toBeGreaterThan(0);
+    });
+
+    it('creates a TTL index on the server-side verifier store', async () => {
+      const indexes = await o.db.collection('oauthPkceVerifiers').indexes();
+      const ttl = indexes.find((idx) => idx.key && idx.key.expiresAt === 1);
+      expect(ttl).toBeDefined();
+      expect(ttl?.expireAfterSeconds).toBe(0);
+    });
+
+    it('consumes the stored verifier only on success — a second attempt after a real success fails', async () => {
+      fake.fail = false;
+      fake.profile = {
+        sub: 'g-pkce-once',
+        email: 'pkce-once@example.com',
+        emailVerified: true,
+        displayName: 'PkceOnce',
+        avatarUrl: null,
+      };
+      const start = await request(oServer()).get('/api/v1/auth/oauth/google/start').expect(302);
+      const state = new URL(locationOf(start)).searchParams.get('state');
+      const nonceCookie = pickCookie(start, 'trm_oauth');
+
+      const first = await request(oServer())
+        .get('/api/v1/auth/oauth/google/callback')
+        .query({ code: 'real-code', state })
+        .set('Cookie', nonceCookie)
+        .expect(302);
+      expect(refreshCookie(first)).toContain('trm_refresh=');
+
+      // Same state + nonce again: the record was deleted by the first, successful exchange.
+      const second = await request(oServer())
+        .get('/api/v1/auth/oauth/google/callback')
+        .query({ code: 'real-code', state })
+        .set('Cookie', nonceCookie)
+        .expect(302);
+      expect(second.headers.location).toContain('error=invalid_state');
+      expect(refreshCookie(second)).toBe('');
+    });
+
+    it('a forged garbage-code probe off a leaked state cannot block the real victim login (round-2 griefing gap)', async () => {
+      // The victim's browser starts the flow — this mints the state + the server-side record.
+      fake.fail = false;
+      fake.profile = null;
+      const start = await request(oServer()).get('/api/v1/auth/oauth/google/start').expect(302);
+      const state = new URL(locationOf(start)).searchParams.get('state') ?? '';
+
+      // The attacker only ever observes this leaked `state` (browser history / proxy log /
+      // referrer — the exact channel F34 assumes). Its JWT payload is signed but NOT encrypted,
+      // so the nonce is plain cleartext readable without ever touching the real cookie header.
+      const nonce = decodeStatePayload(state).nonce as string;
+      const forgedCookie = `trm_oauth=${nonce}`;
+
+      // Attacker's forged probe: a raw HTTP client hand-crafting the cookie header (no browser
+      // needed — SameSite only restricts automatic attachment), the leaked state, and a garbage
+      // code that a real provider would never accept.
+      fake.fail = true;
+      const probe = await request(oServer())
+        .get('/api/v1/auth/oauth/google/callback')
+        .query({ code: 'attacker-garbage-code', state })
+        .set('Cookie', forgedCookie)
+        .expect(302);
+      expect(probe.headers.location).toContain('error=exchange_failed');
+      expect(refreshCookie(probe)).toBe('');
+
+      // The REAL victim's browser now completes the actual provider login with the genuine code.
+      // If the attacker's failed probe had consumed the verifier record, this would now fail with
+      // invalid_state instead of succeeding.
+      fake.fail = false;
+      fake.profile = {
+        sub: 'g-victim',
+        email: 'victim@example.com',
+        emailVerified: true,
+        displayName: 'Victim',
+        avatarUrl: null,
+      };
+      const real = await request(oServer())
+        .get('/api/v1/auth/oauth/google/callback')
+        .query({ code: 'real-victim-code', state })
+        .set('Cookie', forgedCookie)
+        .expect(302);
+      expect(real.headers.location).toContain('/login/callback');
+      expect(refreshCookie(real)).toContain('trm_refresh=');
+    });
+  });
 });
 
 describe('auth: Google credential sign-in (One Tap / rendered button)', () => {

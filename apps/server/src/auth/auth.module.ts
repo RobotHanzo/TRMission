@@ -9,6 +9,7 @@ import { UserRepo } from './user.repo';
 import { FeatureDefaultsRepo } from './feature-defaults.repo';
 import { SessionRepo } from './session.repo';
 import { MobileCodeRepo } from './mobile-code.repo';
+import { OauthPkceRepo } from './oauth-pkce.repo';
 import { AccessTokenGuard } from './access-token.guard';
 import { FeatureGuard } from './feature.guard';
 import { AuthConfig } from './auth-config';
@@ -29,6 +30,7 @@ import { APPLE_REDIRECT_CLIENT, FetchAppleRedirectClient } from './apple-redirec
     FeatureDefaultsRepo,
     SessionRepo,
     MobileCodeRepo,
+    OauthPkceRepo,
     AccessTokenGuard,
     FeatureGuard,
     AuthConfig,

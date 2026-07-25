@@ -1,11 +1,13 @@
 import { Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { createHash, randomBytes } from 'node:crypto';
+import { env } from '../config/env';
 import { AuthConfig, type IdentityProvider, type OauthProvider } from './auth-config';
 import { TokenService } from './token.service';
 import { AuthService } from './auth.service';
 import { UserRepo, type UserDoc } from './user.repo';
 import { SessionRepo } from './session.repo';
 import { MobileCodeRepo } from './mobile-code.repo';
+import { OauthPkceRepo } from './oauth-pkce.repo';
 import { OAUTH_HTTP, type OauthHttp } from './oauth.http';
 import { GOOGLE_ID_TOKEN_VERIFIER, type GoogleIdTokenVerifier } from './google-id-token.verifier';
 import { APPLE_ID_TOKEN_VERIFIER, type AppleIdTokenVerifier } from './apple-id-token.verifier';
@@ -70,6 +72,7 @@ export class OauthService {
     private readonly users: UserRepo,
     private readonly sessions: SessionRepo,
     private readonly mobileCodes: MobileCodeRepo,
+    private readonly pkce: OauthPkceRepo,
     @Inject(OAUTH_HTTP) private readonly http: OauthHttp,
     @Inject(GOOGLE_ID_TOKEN_VERIFIER) private readonly verifier: GoogleIdTokenVerifier,
     @Inject(APPLE_ID_TOKEN_VERIFIER) private readonly appleVerifier: AppleIdTokenVerifier,
@@ -98,25 +101,30 @@ export class OauthService {
   /**
    * Build the provider authorization URL + the CSRF nonce to set as the `trm_oauth` cookie. Caller
    * is responsible for confirming the provider is enabled (the controller does, returning 404).
+   *
+   * The PKCE verifier is minted and kept server-side (`OauthPkceRepo`, TTL-matched to the signed
+   * state); only an opaque handle to it rides in `state` (F34 — a JWT payload is base64url, not
+   * confidential, so the raw verifier must never travel there).
    */
-  buildAuthorize(
+  async buildAuthorize(
     provider: OauthProvider,
     redirect: string | undefined,
     guestUserId?: string,
     mobile = false,
     mobileChallenge?: string,
-  ): { url: string; nonce: string } | null {
+  ): Promise<{ url: string; nonce: string } | null> {
     const cfg = this.authConfig.provider(provider);
     if (!cfg) return null;
 
     const nonce = base64url(randomBytes(24));
     const codeVerifier = base64url(randomBytes(32));
     const codeChallenge = base64url(createHash('sha256').update(codeVerifier).digest());
+    const codeVerifierHandle = await this.pkce.mint(codeVerifier, env.oauthStateTtlMs);
     const state = this.tokens.signOauthState({
       provider,
       redirect: safeRedirect(redirect),
       nonce,
-      codeVerifier,
+      codeVerifierHandle,
       ...(guestUserId ? { guestUserId } : {}),
       ...(mobile ? { mobile: true } : {}),
       ...(mobileChallenge ? { mobileChallenge } : {}),
@@ -163,18 +171,41 @@ export class OauthService {
     const cfg = this.authConfig.provider(provider);
     if (!cfg) return { ok: false, error: 'provider_disabled', redirect, mobile };
 
+    // codeVerifierHandle is absent only for the Apple state shape (which never reaches this
+    // provider-generic path — see handleAppleRedirectCallback), so an absent handle here means a
+    // malformed/foreign state; peek(undefined) below returns null and falls into invalid_state.
+    const handle = payload.codeVerifierHandle;
+
+    // Non-destructive read (F34 round-2): a request merely bearing a well-formed handle+nonce —
+    // e.g. a forged probe replaying a leaked authorize/callback URL with a garbage `code` — must
+    // not be able to consume the verifier a real, still-in-flight login needs. The record is only
+    // deleted below, once the provider token exchange this same request performs has actually
+    // succeeded.
+    const codeVerifier = await this.pkce.peek(handle);
+    if (codeVerifier === null || !handle) {
+      return { ok: false, error: 'invalid_state', redirect, mobile };
+    }
+
     let profile;
     try {
       profile = await this.http.getProfile(
         cfg,
         code,
         this.authConfig.callbackUrl(provider),
-        payload.codeVerifier,
+        codeVerifier,
       );
     } catch (e) {
+      // Exchange failed — garbage/forged code, an already-used or expired real code, or a
+      // provider-side error. We can't distinguish an attacker's probe from a genuine failure here,
+      // so in every case the verifier record is left alone: only a request whose exchange actually
+      // succeeds may consume it (see below). A genuine retry mints a fresh authorize flow anyway.
       this.log.warn(`${provider} code exchange failed: ${(e as Error).message}`);
       return { ok: false, error: 'exchange_failed', redirect, mobile };
     }
+    // The token exchange succeeded — this authorization code is now spent at the provider, so the
+    // verifier record has no further legitimate use. Consume it now, before any downstream
+    // account-resolution outcome, so it can never be redeemed a second time.
+    await this.pkce.consume(handle);
     if (!profile.email || !profile.emailVerified || !profile.sub) {
       return { ok: false, error: 'email_unverified', redirect, mobile };
     }
@@ -207,8 +238,8 @@ export class OauthService {
    * Build Apple's authorization URL + the CSRF nonce for the SIWA web/Android redirect flow.
    * `response_mode=form_post` is REQUIRED whenever the name/email scope is requested — the
    * callback arrives as a cross-site POST (see handleAppleRedirectCallback's nonce rules).
-   * Apple ignores PKCE, so the state carries an empty codeVerifier; identity comes from the
-   * id_token the token exchange returns.
+   * Apple ignores PKCE entirely, so the state carries no codeVerifierHandle; identity comes from
+   * the id_token the token exchange returns.
    */
   buildAppleAuthorize(
     redirect: string | undefined,
@@ -223,7 +254,6 @@ export class OauthService {
       provider: 'apple',
       redirect: safeRedirect(redirect),
       nonce,
-      codeVerifier: '',
       ...(guestUserId ? { guestUserId } : {}),
       ...(mobile ? { mobile: true } : {}),
       ...(mobileChallenge ? { mobileChallenge } : {}),

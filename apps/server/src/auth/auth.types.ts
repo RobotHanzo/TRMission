@@ -55,17 +55,20 @@ export interface AdminReplayTicketPayload {
 /**
  * Signed, short-lived OAuth `state`. It survives the cross-site round-trip to the provider (where
  * cookies under `/api/v1/auth` are not sent), so anything the callback needs — the post-login
- * redirect target, the CSRF nonce (double-submitted against the `trm_oauth` cookie), the PKCE
- * verifier, and the guest id to upgrade in place — is carried inside it. The signature makes it
- * unforgeable; the nonce cookie binds it to the browser that started the flow.
+ * redirect target, the CSRF nonce (double-submitted against the `trm_oauth` cookie), an opaque
+ * handle to the server-held PKCE verifier, and the guest id to upgrade in place — is carried
+ * inside it. The signature makes it unforgeable; the nonce cookie binds it to the browser that
+ * started the flow. A JWT payload is base64url, not confidential, so the PKCE verifier itself is
+ * never placed here (F34) — it lives server-side in `OauthPkceRepo`, keyed by this handle.
  */
 export interface OauthStatePayload {
   kind: 'oauth-state';
   provider: 'google' | 'discord' | 'apple';
   redirect: string;
   nonce: string;
-  /** PKCE verifier — empty string for Apple, which ignores PKCE (identity comes from the id_token). */
-  codeVerifier: string;
+  /** Opaque handle into `OauthPkceRepo` — absent for Apple, which ignores PKCE entirely
+   *  (identity comes from the id_token, not a code exchanged with a verifier). */
+  codeVerifierHandle?: string;
   guestUserId?: string;
   /** Set when the flow started with ?client=mobile: the callback hands off via /m/callback. */
   mobile?: boolean;

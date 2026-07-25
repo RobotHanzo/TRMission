@@ -572,7 +572,7 @@ export class AuthController {
     const guestUserId = mobile
       ? await this.oauth.guestIdFromCarryCode(carry)
       : await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
-    const built = this.oauth.buildAuthorize(
+    const built = await this.oauth.buildAuthorize(
       provider,
       redirect,
       guestUserId,
