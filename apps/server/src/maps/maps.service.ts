@@ -11,10 +11,11 @@ import {
   validateForPlay,
   validateGeography,
 } from '@trm/map-data';
-import type { MapRules } from '@trm/map-data';
+import type { CityDef, MapGeography, MapRules, RouteDef } from '@trm/map-data';
 import { CustomMapRepo } from './custom-map.repo';
 import { MapContentRepo } from './map-content.repo';
 import { assembleContent, type CustomMapDoc, type MapDraft } from './maps.types';
+import { UserRepo } from '../auth/user.repo';
 
 export interface MapSummary {
   id: string;
@@ -34,6 +35,19 @@ export interface SharedMapView {
   nameZh: string;
   nameEn: string;
   draft: MapDraft;
+}
+
+/** The anonymous OG/crawler preview projection: only what a rendered thumbnail + meta
+ *  card need — names, drawable geometry, and a mission COUNT. Deliberately narrower than
+ *  {@link SharedMapView}: never the tickets' endpoints/values, auspicious pairs, or house
+ *  rules, since nothing on that surface needs them. */
+export interface SharedMapPreview {
+  nameZh: string;
+  nameEn: string;
+  cities: CityDef[];
+  routes: RouteDef[];
+  geography?: MapGeography;
+  ticketCount: number;
 }
 
 export interface OfficialMapSummary {
@@ -64,6 +78,7 @@ export class MapsService {
   constructor(
     private readonly maps: CustomMapRepo,
     private readonly content: MapContentRepo,
+    private readonly users: UserRepo,
   ) {}
 
   async list(ownerId: string): Promise<MapSummary[]> {
@@ -118,6 +133,30 @@ export class MapsService {
     const doc = await this.maps.findByShareCode(code);
     if (!doc) throw new NotFoundException('map not found');
     return { nameZh: doc.nameZh, nameEn: doc.nameEn, draft: doc.draft };
+  }
+
+  /**
+   * The anonymous OG/crawler preview surface's ONLY entry point into map data — deliberately
+   * distinct from {@link peekByCode}, which is gated on the CALLER holding `mapBuilder` (an
+   * OG crawler never authenticates, so there is no caller feature to check). Instead this
+   * checks the map's OWNER's *current* `mapBuilder` grant on every call: a dashboard revoke
+   * of the owner's feature must take this anonymous path out of service too, the same way it
+   * already does for `GET /api/v1/maps/shared/:code`. Returns null (never throws) for an
+   * unknown code or a feature-less owner, so a crawler sees a graceful "nothing here" — not
+   * an error, not data — exactly like every other OG lookup degrades.
+   */
+  async peekForPreview(code: string): Promise<SharedMapPreview | null> {
+    const doc = await this.maps.findByShareCode(code);
+    if (!doc) return null;
+    if (!(await this.users.hasFeature(doc.ownerId, 'mapBuilder'))) return null;
+    return {
+      nameZh: doc.nameZh,
+      nameEn: doc.nameEn,
+      cities: doc.draft.cities,
+      routes: doc.draft.routes,
+      ...(doc.draft.geography !== undefined ? { geography: doc.draft.geography } : {}),
+      ticketCount: doc.draft.tickets.length,
+    };
   }
 
   async cloneByCode(code: string, ownerId: string): Promise<MapDetail> {

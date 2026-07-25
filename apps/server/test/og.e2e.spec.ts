@@ -9,6 +9,7 @@ import request from 'supertest';
 import { createTestApp, type TestApp } from './app';
 import type { GameDoc, MatchHistoryDoc } from '../src/persistence/types';
 import { escapeXml, estimateWidth, fitText } from '../src/og/card-svg';
+import { MapsService } from '../src/maps/maps.service';
 
 let t: TestApp;
 const server = () => t.app.getHttpServer();
@@ -229,6 +230,7 @@ describe('replay cards respect replay visibility', () => {
 describe('shared-map cards', () => {
   let shareCode: string;
   let authorToken: string;
+  let authorId: string;
   let mapId: string;
 
   beforeAll(async () => {
@@ -238,9 +240,10 @@ describe('shared-map cards', () => {
       .send({ email: 'author@example.tw', password: 'hunter2hunter2', displayName: '地圖作者' })
       .expect(201);
     authorToken = reg.body.accessToken;
+    authorId = reg.body.user.id;
     await t.db
       .collection('users')
-      .updateOne({ _id: reg.body.user.id } as never, { $set: { features: ['mapBuilder'] } });
+      .updateOne({ _id: authorId } as never, { $set: { features: ['mapBuilder'] } });
 
     const created = await request(server())
       .post('/api/v1/maps')
@@ -283,7 +286,11 @@ describe('shared-map cards', () => {
               isTunnel: false,
             },
           ],
-          tickets: [],
+          // A real mission + a house-rule tweak — neither is rendered anywhere on the OG
+          // surface, so the preview-safe projection test below asserts they never leave
+          // MapsService.peekForPreview at all (only their COUNT does, via ticketCount).
+          tickets: [{ id: 't1', a: 'c1', b: 'c4', value: 7, deck: 'LONG' }],
+          rules: { trainCarsStart: 30 },
           geography: {
             baseView: { x: 0, y: 0, w: 100, h: 100 },
             land: [
@@ -322,6 +329,50 @@ describe('shared-map cards', () => {
     expect(res.text).toContain('4 個車站');
     expect(res.text).toContain(`/api/v1/og/map/${shareCode}.png`);
     expect(res.text).toContain(`0;url=/maps?code=${shareCode}`);
+  });
+
+  it('the preview-safe projection carries only names/geometry/counts — never ticket endpoints, house rules, or ownerId', async () => {
+    const preview = await t.app.get(MapsService).peekForPreview(shareCode);
+    expect(preview).not.toBeNull();
+    expect(preview).toMatchObject({
+      nameZh: '幻想群島',
+      nameEn: 'Fantasy Isles',
+      ticketCount: 1,
+    });
+    expect(Object.keys(preview!).sort()).toEqual(
+      ['cities', 'geography', 'nameEn', 'nameZh', 'routes', 'ticketCount'].sort(),
+    );
+    expect(preview).not.toHaveProperty('ownerId');
+    expect(preview).not.toHaveProperty('tickets');
+    expect(preview).not.toHaveProperty('draft');
+    expect(preview).not.toHaveProperty('rules');
+    expect(preview).not.toHaveProperty('auspiciousPairs');
+  });
+
+  it("degrades to the generic card/meta once the map OWNER's mapBuilder feature is revoked, even though the share code itself is untouched and the caller is anonymous", async () => {
+    // Simulates a dashboard revoke of the AUTHOR's mapBuilder grant. The caller of this
+    // surface is always anonymous (a crawler), so there is no caller-side feature to check —
+    // this proves the OWNER's current grant is what gates it instead.
+    await t.db
+      .collection('users')
+      .updateOne({ _id: authorId } as never, { $unset: { features: '' } });
+
+    const png = await request(server()).get(`/api/v1/og/map/${shareCode}.png`).expect(200);
+    expect(expectPng(png.body).equals(sitePng)).toBe(true);
+
+    const page = await request(server())
+      .get(`/api/v1/og/page?path=/maps&code=${shareCode}`)
+      .expect(200);
+    expect(page.text).not.toContain('幻想群島');
+    expect(page.text).toContain('/api/v1/og/site.png');
+
+    // Restore: the SAME, never-revoked share code renders again immediately — proving the
+    // prior degrade was the owner's feature check, not the code itself being invalidated.
+    await t.db
+      .collection('users')
+      .updateOne({ _id: authorId } as never, { $set: { features: ['mapBuilder'] } });
+    const restored = await request(server()).get(`/api/v1/og/map/${shareCode}.png`).expect(200);
+    expect(expectPng(restored.body).equals(sitePng)).toBe(false);
   });
 
   it('unknown or revoked codes degrade to the generic card and site meta', async () => {

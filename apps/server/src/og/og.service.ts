@@ -104,8 +104,12 @@ export class OgService {
         nameZh: shared.nameZh,
         nameEn: shared.nameEn,
         code,
-        map: shared.draft,
-        missionCount: shared.draft.tickets.length,
+        map: {
+          cities: shared.cities,
+          routes: shared.routes,
+          ...(shared.geography !== undefined ? { geography: shared.geography } : {}),
+        },
+        missionCount: shared.ticketCount,
       }),
     );
   }
@@ -148,8 +152,8 @@ export class OgService {
       return {
         title: `分享地圖 ${shared.nameZh} · ${SITE_TITLE}`,
         description:
-          `${shared.nameZh} ${shared.nameEn} — ${shared.draft.cities.length} 個車站、` +
-          `${shared.draft.routes.length} 條路線。Clone this custom TRMission map with code ${shareCode.toUpperCase()}.`,
+          `${shared.nameZh} ${shared.nameEn} — ${shared.cities.length} 個車站、` +
+          `${shared.routes.length} 條路線。Clone this custom TRMission map with code ${shareCode.toUpperCase()}.`,
         imagePath: `/api/v1/og/map/${encodeURIComponent(shareCode)}.png`,
         path: `/maps?code=${encodeURIComponent(shareCode)}`,
       };
@@ -241,13 +245,16 @@ export class OgService {
     }
   }
 
-  /** A shared map by its code, or null (revoked/unknown → the generic card, like rooms). */
+  /** A shared map's preview-safe projection, or null (revoked/unknown/owner's `mapBuilder`
+   *  no longer granted → the generic card, like rooms). Goes through `peekForPreview`, never
+   *  `peekByCode` — this caller is always anonymous, so the owner's CURRENT feature grant is
+   *  checked server-side in place of a caller-side gate (see MapsService.peekForPreview). */
   private async sharedMapOrNull(code: string) {
     if (!SHARE_CODE.test(code)) return null;
     try {
-      return await this.maps.peekByCode(code);
+      return await this.maps.peekForPreview(code);
     } catch (e) {
-      if (!(e instanceof NotFoundException)) this.log.warn(`map card lookup failed: ${e}`);
+      this.log.warn(`map card lookup failed: ${e}`);
       return null;
     }
   }
