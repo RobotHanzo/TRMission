@@ -111,6 +111,69 @@ describe('auth: register + login + validation', () => {
   });
 });
 
+describe('auth: lastLoginIp audit trail (CF-Connecting-IP validation)', () => {
+  it('persists a well-formed IPv4/IPv6 CF-Connecting-IP as lastLoginIp', async () => {
+    const reg = await request(server())
+      .post('/api/v1/auth/register')
+      .set('CF-Connecting-IP', '203.0.113.7')
+      .send({ email: 'ipgood@example.com', password: 'password123', displayName: 'IpGood' })
+      .expect(201);
+    const afterRegister = await t.db
+      .collection('users')
+      .findOne({ _id: reg.body.user.id as never });
+    expect(afterRegister?.lastLoginIp).toBe('203.0.113.7');
+
+    const login = await request(server())
+      .post('/api/v1/auth/login')
+      .set('CF-Connecting-IP', '2001:db8::1')
+      .send({ email: 'ipgood@example.com', password: 'password123' })
+      .expect(200);
+    const afterLogin = await t.db
+      .collection('users')
+      .findOne({ _id: login.body.user.id as never });
+    expect(afterLogin?.lastLoginIp).toBe('2001:db8::1');
+  });
+
+  it('rejects a non-IP CF-Connecting-IP instead of persisting attacker-chosen text verbatim', async () => {
+    const spoofed = '8.8.8.8; DROP TABLE users-- not an ip at all';
+    const reg = await request(server())
+      .post('/api/v1/auth/register')
+      .set('CF-Connecting-IP', spoofed)
+      .send({ email: 'ipbad@example.com', password: 'password123', displayName: 'IpBad' })
+      .expect(201);
+    const stored = await t.db.collection('users').findOne({ _id: reg.body.user.id as never });
+    expect(stored?.lastLoginIp).not.toBe(spoofed);
+  });
+
+  it('rejects an oversized garbage CF-Connecting-IP value', async () => {
+    const junk = '1'.repeat(4096);
+    const guest = await request(server())
+      .post('/api/v1/auth/guest')
+      .set('CF-Connecting-IP', junk)
+      .send({})
+      .expect(201);
+    const stored = await t.db.collection('users').findOne({ _id: guest.body.user.id as never });
+    expect(stored?.lastLoginIp).not.toBe(junk);
+  });
+
+  it('rejects a well-formed IP with trailing extra characters (e.g. an appended port)', async () => {
+    const guest = await request(server())
+      .post('/api/v1/auth/guest')
+      .set('CF-Connecting-IP', '8.8.8.8:1234')
+      .send({})
+      .expect(201);
+    const stored = await t.db.collection('users').findOne({ _id: guest.body.user.id as never });
+    expect(stored?.lastLoginIp).not.toBe('8.8.8.8:1234');
+  });
+
+  it('still records a sane lastLoginIp for a legitimate request with no CF header at all', async () => {
+    const guest = await request(server()).post('/api/v1/auth/guest').send({}).expect(201);
+    const stored = await t.db.collection('users').findOne({ _id: guest.body.user.id as never });
+    expect(typeof stored?.lastLoginIp).toBe('string');
+    expect(stored?.lastLoginIp?.length).toBeGreaterThan(0);
+  });
+});
+
 describe('auth: refresh rotation + reuse detection', () => {
   it('rotates the refresh cookie and burns the family on reuse', async () => {
     const guest = await request(server()).post('/api/v1/auth/guest').send({}).expect(201);
