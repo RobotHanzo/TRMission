@@ -6,6 +6,11 @@ updates are code-signed with our own certificate, and `runtimeVersion: { policy:
 fences every update to binaries with an identical native surface. JS/assets only — Apple
 3.3.2-compliant.
 
+This file is the **mechanism**: the pinned upstream contract, the app config, the forced-update
+interplay, rollback, fallbacks. For standing the server up on a real host (keys, TLS origin, Expo
+credentials, Portainer/Swarm service, repo variables, verification), follow
+[docs/release/ota-server-setup.md](../release/ota-server-setup.md).
+
 ## Pinned upstream contract (recorded 2026-07-12, Task 9 Step 1)
 
 Upstream moves faster than our plans; everything below was read from the release/README current at

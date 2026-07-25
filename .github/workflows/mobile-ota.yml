@@ -28,6 +28,8 @@ jobs:
       # proto codegen must exist before any workspace build (src/gen is gitignored).
       - run: yarn workspace @trm/proto generate
       - run: yarn typecheck
+      # Writes into the workspace, so the path is gitignored on purpose (apps/mobile/.gitignore):
+      # the publish step below aborts on a dirty working tree, and an untracked file here fails it.
       - name: Record the fingerprint runtime version (traceability)
         working-directory: apps/mobile
         run: npx @expo/fingerprint . | tee fingerprint.json
