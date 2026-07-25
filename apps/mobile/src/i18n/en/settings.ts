@@ -55,6 +55,18 @@ export default {
   adPrivacy: 'Ad privacy options',
   crashReport: 'Share last crash report',
   crashReportHint: 'Send a maintainer the technical details of the last crash.',
+  // Check for updates (OTA)
+  checkForUpdates: 'Check for updates',
+  updateUpToDate: 'Up to date',
+  updateFailed: 'Check failed',
+  updateUnavailable: 'Not in this build',
+  updateRestart: 'Restart to apply',
+  updateReadyTitle: 'Update downloaded',
+  updateReadyBody: 'Restart the app to apply this update.',
+  updateLater: 'Later',
+  updateRestartNow: 'Restart now',
+  updatesFootnote:
+    'The app checks for updates every time it starts. An update changes the app itself — no new store download needed.',
   deleteConfirmTitle: 'Delete your account?',
   deleteConfirmBody:
     'This cannot be undone. Your profile is deleted and match records are anonymized.',

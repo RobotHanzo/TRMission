@@ -40,7 +40,9 @@ the header because it carries its own title.
 timetable leader (the `theme/gameChrome` idiom), so the added layer hides no answer — keep that
 property when adding a group. Pages: `AppearanceScreen`, `SoundScreen`, `NotificationsScreen`,
 `PrivacyScreen`, `AccountScreen`, `AboutScreen`, built from `settings/chrome.tsx`
-(`SettingsPage` / `SettingsGroup` / `SettingsRow` / `ChoiceRow` / `NavRow`).
+(`SettingsPage` / `SettingsGroup` / `SettingsRow` / `ChoiceRow` / `NavRow`). About's `UpdateRow` is
+the on-demand OTA check (`../ota.ts`, mechanism in `docs/mobile/ota.md`) — the same check the app
+runs at every cold start, collapsed into one press plus an opt-in restart.
 
 Rows divide themselves with a top hairline unless passed `first`, so a group whose members are
 conditionally hidden (`AdPrivacyRow`, the `adFree` switch, `LiveActivityRow`) must have the

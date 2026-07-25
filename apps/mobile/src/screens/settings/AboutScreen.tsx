@@ -7,6 +7,7 @@ import { APP_VERSION, BUILD_NUMBER, GIT_COMMIT } from '../../config';
 import { formatCrashReport, getLastCrash, type CrashRecord } from '../../app/crashCapture';
 import { useGlassHeaderPad } from '../../hooks/useGlassHeaderPad';
 import { RowValue, SettingsGroup, SettingsPage, SettingsRow } from './chrome';
+import UpdateRow from './UpdateRow';
 
 export default function AboutScreen(): React.JSX.Element {
   const { t } = useTranslation();
@@ -43,6 +44,12 @@ export default function AboutScreen(): React.JSX.Element {
           label={t('settings.commit')}
           trailing={<RowValue>{GIT_COMMIT.slice(0, 7)}</RowValue>}
         />
+      </SettingsGroup>
+
+      {/* Sits under the version rows because that is what it changes — the commit above becomes the
+          published bundle's once an update applies. */}
+      <SettingsGroup footnote={t('settings.updatesFootnote')}>
+        <UpdateRow first />
       </SettingsGroup>
 
       {lastCrash && (

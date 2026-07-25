@@ -219,6 +219,16 @@ expo-open-ota signs manifests **at serve time** with the private key mounted int
   is narrowed by `apps/mobile/fingerprint.config.js` (release versions and `extra` are skipped —
   see the section above); editing that file re-dates every runtime version.
 
+### Manual check (Settings ▸ About)
+
+`apps/mobile/src/ota.ts` + `screens/settings/UpdateRow.tsx`: check → download → restart, on demand.
+It adds no mechanism — the launch-time check already does all three, just spread across two
+launches; the row collapses that into one press for a user who has been told a fix is out.
+`Updates.isEnabled` gates it, and the `ERR_UPDATES_DISABLED` rejection a dev client, Expo Go and the
+RNW harness throw is reported as "not in this build", never as a failure. The restart is always the
+user's call (they may be mid-game) — declining still applies the update on the next cold start.
+A roll back to the embedded bundle arrives as its own result shape and is treated as an update.
+
 ## Local smoke
 
 ```bash
