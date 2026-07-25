@@ -267,7 +267,7 @@ describe('GET /history/:gameId/admin-replay', () => {
   it('404s when a DIFFERENT maintainer presents a ticket minted for someone else, even holding games.viewReplay themselves', async () => {
     const otherViewer = await registered('other-viewer@example.com', 'OtherViewer');
     await grantDashboard(otherViewer.id, 'viewer');
-    const ticket = await mintTicket(completedGameId); // minted for `viewer`, not `otherViewer`
+    const ticket = await mintTicket(completedGameId); // minted for `moderator`, not `otherViewer`
     await request(server())
       .get(`/api/v1/history/${completedGameId}/admin-replay`)
       .set(auth(otherViewer.token))
@@ -277,7 +277,8 @@ describe('GET /history/:gameId/admin-replay', () => {
 
   it('404s once the minting maintainer’s dashboard access is revoked mid-window (instant revocation)', async () => {
     const revocable = await registered('revocable-replay@example.com', 'Revocable');
-    await grantDashboard(revocable.id, 'viewer');
+    // moderator, not viewer: minting a replay ticket requires games.readLog (F9).
+    await grantDashboard(revocable.id, 'moderator');
     const ticket = (
       await request(server())
         .post(`/api/v1/dashboard/games/${completedGameId}/replay-ticket`)
@@ -302,7 +303,7 @@ describe('GET /history/:gameId/admin-replay', () => {
     const ticket = await mintTicket(completedGameId);
     await request(server())
       .get(`/api/v1/history/${completedGameId}/admin-replay`)
-      .set(auth(viewer.token))
+      .set(auth(moderator.token))
       .set(withTicket(ticket))
       .expect(200);
   });
@@ -311,7 +312,7 @@ describe('GET /history/:gameId/admin-replay', () => {
     const ticket = await mintTicket(completedGameId);
     const res = await request(server())
       .get(`/api/v1/history/${completedGameId}/admin-replay`)
-      .set(auth(viewer.token))
+      .set(auth(moderator.token))
       .set(withTicket(ticket))
       .expect(200);
     expect(res.body.gameId).toBe(completedGameId);
@@ -328,7 +329,7 @@ describe('GET /history/:gameId/admin-replay', () => {
     const ticket = await mintTicket(terminatedGameId);
     const res = await request(server())
       .get(`/api/v1/history/${terminatedGameId}/admin-replay`)
-      .set(auth(viewer.token))
+      .set(auth(moderator.token))
       .set(withTicket(ticket))
       .expect(200);
     expect(res.body.gameId).toBe(terminatedGameId);

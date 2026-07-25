@@ -238,7 +238,16 @@ describe('GameHub ban check: DB cost of a burst of hellos is bounded (Objection 
     await Promise.all(connIds.map((id) => w.hub.receive(id, helloBytes('g-burst', 'p1', -1, 1))));
 
     expect(banGuard.calls).toBe(1);
-    for (const id of connIds) expect(rejections(w, id)).toHaveLength(0);
+    // Not a ban rejection on any of them — that is what this test is about. F27 separately caps
+    // concurrent spectator sockets per ticket identity, so the older sockets in this burst are
+    // evicted with SESSION_REPLACED; that eviction is orthogonal to the ban check and must not be
+    // confused with one.
+    for (const id of connIds) {
+      for (const env of rejections(w, id)) {
+        if (env.event.case !== 'rejection') throw new Error('unreachable');
+        expect(env.event.value.code).toBe(RejectionCode.SESSION_REPLACED);
+      }
+    }
   });
 
   it("re-reads the DB once the cached verdict's TTL expires", async () => {

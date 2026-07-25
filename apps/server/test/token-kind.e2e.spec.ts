@@ -46,7 +46,7 @@ describe('access-token kind binding (F24)', () => {
       provider: 'google',
       redirect: '/',
       nonce: 'nonce-value',
-      codeVerifier: 'verifier-value',
+      codeVerifierHandle: 'handle-value',
     });
     await request(server())
       .get('/api/v1/auth/me')
@@ -82,7 +82,7 @@ describe('access-token kind binding (F24)', () => {
       provider: 'google',
       redirect: '/',
       nonce: 'nonce-value',
-      codeVerifier: 'verifier-value',
+      codeVerifierHandle: 'handle-value',
     });
     await request(server())
       .post('/api/v1/reports/player')
