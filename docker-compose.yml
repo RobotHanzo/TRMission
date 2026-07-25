@@ -17,6 +17,8 @@
 # monitoring/prometheus/prometheus.yml targets host.docker.internal:3001, i.e. a server
 # started on the host via `yarn workspace @trm/server dev` — repoint it at `server:3001`
 # if you're scraping the `full` profile's containerized server instead.
+# GRAFANA_ADMIN_PASSWORD must be set to a real password — there is no insecure default, and the
+# grafana service's entrypoint refuses to start otherwise (see its definition below).
 services:
   mongo:
     image: mongo:7
@@ -194,14 +196,30 @@ services:
     depends_on:
       - prometheus
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      # No insecure default: an empty/unset value here falls straight through to Grafana's own
+      # built-in "admin" password (verified against a real grafana/grafana:latest container — an
+      # empty GF_SECURITY_ADMIN_PASSWORD does NOT refuse to start or generate a random password).
+      # The entrypoint below refuses to start unless a real password is set.
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-}
       GF_AUTH_ANONYMOUS_ENABLED: 'false'
+    # The upstream image's own entrypoint (/run.sh) has no startup validation of
+    # GF_SECURITY_ADMIN_PASSWORD, so an unconfigured deployment would otherwise silently boot with
+    # the (removed) guessable "admin" default above. Wrap it in a pre-flight check: refuse to exec
+    # the real entrypoint unless GRAFANA_ADMIN_PASSWORD is set to something other than "admin".
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        if [ -z "$$GF_SECURITY_ADMIN_PASSWORD" ] || [ "$$GF_SECURITY_ADMIN_PASSWORD" = "admin" ]; then
+          echo 'FATAL: GRAFANA_ADMIN_PASSWORD is unset (or the guessable "admin" default). Set a real password before starting the grafana service.' >&2
+          exit 1
+        fi
+        exec /run.sh
     volumes:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
       - trm-grafana-data:/var/lib/grafana
     ports:
-      - '3000:3000'
+      - '127.0.0.1:3000:3000'
     restart: unless-stopped
 
 volumes:
