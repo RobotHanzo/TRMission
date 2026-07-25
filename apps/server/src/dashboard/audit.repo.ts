@@ -1,5 +1,5 @@
 import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
-import { ObjectId, type Collection, type Db } from 'mongodb';
+import { ObjectId, type Collection, type Db, type Filter } from 'mongodb';
 import { MONGO_DB } from '../db/tokens';
 
 export type DashboardAuditAction =
@@ -68,7 +68,14 @@ export class DashboardAuditRepo implements OnModuleInit {
 
   /** Reverse-chronological page; `cursor` is the `_id` of the last entry of the prior page. */
   async list(limit: number, cursor?: string): Promise<AuditEntryDoc[]> {
-    const filter = cursor ? { _id: { $lt: new ObjectId(cursor) } } : {};
+    let filter: Filter<AuditEntryDoc> = {};
+    if (cursor) {
+      try {
+        filter = { _id: { $lt: new ObjectId(cursor) } };
+      } catch {
+        /* malformed cursor → first page (cursors are a convenience, not state) */
+      }
+    }
     return this.col.find(filter).sort({ _id: -1 }).limit(limit).toArray();
   }
 
