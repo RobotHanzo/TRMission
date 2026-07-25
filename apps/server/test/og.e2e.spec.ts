@@ -144,6 +144,22 @@ describe('GET /api/v1/og/page', () => {
     }
   });
 
+  it('never reflects a cross-origin ?path= into og:url / canonical / meta-refresh (open-redirect)', async () => {
+    // Each of these begins with '/' (so the old prefix-only test passed) yet resolves cross-origin
+    // under the WHATWG URL parser: '\' is treated as '/', and tab/CR/LF are stripped before parse.
+    for (const q of [
+      '?path=/%5Cevil.example', // '/\evil.example'
+      '?path=/%09//evil.example', // '/<TAB>//evil.example' → '///evil.example'
+      '?path=//evil.example',
+      '?path=/%0d%0a//evil.example', // CR/LF-laced
+    ]) {
+      const res = await request(server()).get(`/api/v1/og/page${q}`).expect(200);
+      expect(res.text).not.toContain('evil.example');
+      // Degrades to the safe root target, matching how unknown paths are handled.
+      expect(res.text).toContain('content="0;url=/">');
+    }
+  });
+
   it('builds absolute URLs from the forwarded proto + host', async () => {
     const res = await request(server())
       .get('/api/v1/og/page?path=/')

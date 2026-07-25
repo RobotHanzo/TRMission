@@ -12,32 +12,13 @@ import { APPLE_ID_TOKEN_VERIFIER, type AppleIdTokenVerifier } from './apple-id-t
 import { APPLE_REDIRECT_CLIENT, type AppleRedirectClient } from './apple-redirect.client';
 import { APPLE_BASE_URL } from './apple-client-secret';
 import type { IssuedAuth, Locale } from './auth.types';
+import { safeRedirect } from './safe-redirect';
+
+// Re-exported for backwards compatibility: `safeRedirect` now lives in ./safe-redirect so the
+// unauthenticated OG page renderer can reuse the exact same same-origin guard (see og.service.ts).
+export { safeRedirect };
 
 const base64url = (b: Buffer): string => b.toString('base64url');
-
-/** True if the string contains any C0 control char or DEL (CR/LF included). */
-const hasControlChar = (s: string): boolean => {
-  for (let i = 0; i < s.length; i++) {
-    const c = s.charCodeAt(i);
-    if (c < 0x20 || c === 0x7f) return true;
-  }
-  return false;
-};
-
-/**
- * Constrain a post-login redirect to a same-origin path so the flow can't be turned into an
- * open redirect. The value is already URL-decoded by the query parser; we deliberately do NOT
- * decode again (double-decoding is a classic bypass). Anything non-conforming falls back to '/'.
- */
-export const safeRedirect = (p: unknown): string => {
-  // `p` is `string | undefined` by type, but a raw @Query param can arrive as an array/object
-  // (e.g. ?redirect=/a&redirect=/b) — guard the type before any string method runs.
-  if (typeof p !== 'string' || p.length > 512) return '/';
-  if (!p.startsWith('/') || p.startsWith('//')) return '/';
-  if (p.includes('\\') || p.includes('://')) return '/';
-  if (hasControlChar(p)) return '/'; // reject CR/LF & control chars (header-injection guard)
-  return p;
-};
 
 const isDuplicateKey = (e: unknown): boolean => (e as { code?: number })?.code === 11000;
 

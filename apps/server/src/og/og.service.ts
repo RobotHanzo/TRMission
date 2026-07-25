@@ -9,6 +9,7 @@ import type { Collection, Db } from 'mongodb';
 import { Resvg } from '@resvg/resvg-js';
 import { resolveContentByHash } from '@trm/map-data';
 import { MONGO_DB } from '../db/tokens';
+import { safeRedirect } from '../auth/safe-redirect';
 import { LobbyService } from '../lobby/lobby.service';
 import { HistoryRepo } from '../history/history.repo';
 import { MapsService } from '../maps/maps.service';
@@ -113,7 +114,11 @@ export class OgService {
    *  `shareCode` is the `?code=` of a shared-map link (/maps?code=…) — nginx and the Vite dev
    *  plugin forward it alongside the rewritten `path`. */
   async pageMeta(rawPath: string | undefined, shareCode?: string): Promise<PageMeta> {
-    const path = typeof rawPath === 'string' && /^\/(?!\/)/.test(rawPath) ? rawPath : '/';
+    // Same-origin guard: `path` is reflected into og:url / <link rel=canonical> and the human
+    // meta-refresh target, so an ad-hoc "starts with /" test is not enough — '/\host', '//host',
+    // and tab/CR/LF-laced paths all resolve cross-origin under the WHATWG URL parser. Reuse the
+    // hardened validator (rejects those → '/'); an unrecognised path still falls to the site meta.
+    const path = safeRedirect(rawPath);
     const site: PageMeta = {
       title: SITE_TITLE,
       description: SITE_DESCRIPTION,
