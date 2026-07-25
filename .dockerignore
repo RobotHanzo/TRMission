@@ -8,5 +8,6 @@
 .yarn/install-state.gz
 te_rules_2015_en.pdf
 **/*.log
-.env
-.env.*
+**/.env
+**/.env.*
+!**/.env.example
