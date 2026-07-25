@@ -25,8 +25,6 @@ export class Connection {
    *  cold-game recovery), so a second hello pipelined on this same connection before the first
    *  has bound is rejected/no-op'd too, not only after `binding` is finally set. */
   helloInFlight = false;
-  /** Wall-clock timestamps of recent chat sends, for the per-connection rate limit. */
-  chatTimes: number[] = [];
 
   constructor(
     readonly id: string,

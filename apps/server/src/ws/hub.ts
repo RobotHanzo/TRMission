@@ -166,6 +166,15 @@ const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms
 const CHAT_MAX_LEN = 2048;
 const CHAT_RATE_MAX = 5;
 const CHAT_RATE_WINDOW_MS = 5000;
+/** Hard cap on a game's chat log — both the in-memory `chatLog` (what `sendHistory` ever replays
+ *  in HistoryReplay) and, going forward, the number of chat docs persisted per game. Past the cap
+ *  new chat is refused outright (itself rate-limited, so the refusal can't become a new flood
+ *  vector) rather than dropping the oldest line, since chat is an append-only transcript. */
+const CHAT_LOG_MAX = 500;
+/** Concurrent spectator sockets allowed per (gameId, ticket playerId) — a spectator ticket can be
+ *  bound from any number of tabs/devices, and each bound socket gets the full chat-log replay on
+ *  hello, so an uncapped ticket multiplies that replay cost for free. Oldest socket is evicted. */
+const SPECTATOR_MAX_PER_TICKET = 4;
 
 /** Default TTL for `GameHub`'s in-memory ban-verdict cache (see `banCacheTtlMs`). */
 const DEFAULT_BAN_CACHE_TTL_MS = 5_000;
@@ -238,6 +247,11 @@ export class GameHub {
   private readonly lastCamera = new Map<string, { playerId: string; view: CameraView }>();
   /** gameId → ordered chat lines (replayed in HistoryReplay; persisted via the store). */
   private readonly chatLog = new Map<string, ChatEntry[]>();
+  /** gameId → (playerId → recent chat send timestamps), for the rate limit. Keyed on the durable
+   *  seat/ticket identity rather than the ephemeral Connection, so reconnecting — or opening a
+   *  second socket on the same ticket — doesn't hand a sender a fresh window. Lifecycle-matched to
+   *  `chatLog`/`members`: created with the match, dropped on eviction. */
+  private readonly chatRateLimits = new Map<string, Map<string, number[]>>();
   /**
    * gameId → ordered player-connection changes (replayed in HistoryReplay). In-memory only —
    * ephemeral cosmetic bookkeeping (like `lastCamera`), never engine actions, never persisted:
@@ -304,6 +318,7 @@ export class GameHub {
   ): Promise<Match> {
     this.members.set(gameId, new Map());
     this.chatLog.set(gameId, []);
+    this.chatRateLimits.set(gameId, new Map());
     this.connectionLog.set(gameId, []);
     const match = this.registry.create(gameId, board, config);
     if (bots.length > 0) this.bots.set(gameId, new Map(bots.map((b) => [b.playerId, b])));
@@ -393,9 +408,17 @@ export class GameHub {
     const match = this.registry.adopt(gameId, session);
     if (!this.members.has(gameId)) this.members.set(gameId, new Map());
     if (!this.connectionLog.has(gameId)) this.connectionLog.set(gameId, []);
+    if (!this.chatRateLimits.has(gameId)) this.chatRateLimits.set(gameId, new Map());
     if (this.store && !this.chatLog.has(gameId)) {
       try {
-        this.chatLog.set(gameId, await this.store.loadChat(gameId));
+        const loaded = await this.store.loadChat(gameId);
+        // Truncate at load, not just going forward: a game whose persisted chat already exceeded
+        // the cap (e.g. it grew unbounded before CHAT_LOG_MAX existed) must not resurrect an
+        // unbounded in-memory log here — `sendHistory` replays this array whole in HistoryReplay on
+        // every reconnect/spectate-join, so loading it uncapped would keep re-serializing the full
+        // backlog for the rest of the game's resident lifetime. The underlying `gameChats`
+        // collection is untouched — this only bounds what the hub keeps resident/replays.
+        this.chatLog.set(gameId, loaded.length > CHAT_LOG_MAX ? loaded.slice(-CHAT_LOG_MAX) : loaded);
       } catch {
         this.chatLog.set(gameId, []); // non-fatal: chat is cosmetic
       }
@@ -435,6 +458,7 @@ export class GameHub {
     this.spectators.delete(gameId);
     this.bots.delete(gameId);
     this.chatLog.delete(gameId);
+    this.chatRateLimits.delete(gameId);
     this.connectionLog.delete(gameId);
     for (const timer of this.leaveTimers.get(gameId)?.values() ?? []) clearTimeout(timer);
     this.leaveTimers.delete(gameId);
@@ -905,6 +929,23 @@ export class GameHub {
         set = new Set();
         this.spectators.set(binding.gameId, set);
       }
+      // Cap concurrent spectator sockets per ticket identity — otherwise one ticket opening many
+      // sockets multiplies the per-connection HistoryReplay chat-log fan-out for free. Evict the
+      // oldest first (set iteration order is insertion order).
+      const sameTicket = [...set].filter((c) => c.binding?.player === player);
+      while (sameTicket.length >= SPECTATOR_MAX_PER_TICKET) {
+        const oldest = sameTicket.shift()!;
+        set.delete(oldest);
+        oldest.send(
+          rejectionFrame(
+            0,
+            RejectionCode.SESSION_REPLACED,
+            'errors:sessionReplaced',
+            'too many spectator connections for this ticket',
+          ),
+        );
+        oldest.terminate(SESSION_REPLACED_CLOSE_CODE, 'spectator_limit');
+      }
       set.add(conn);
       // Persist who spectated — grants post-game history/replay access. Never for seated
       // players (a member can mint a spectate ticket; their role stays "player").
@@ -1004,6 +1045,8 @@ export class GameHub {
     teamOnly = false,
   ): Promise<void> {
     if (!conn.binding) return; // unbound → no chat
+    const gameId = conn.binding.gameId;
+    const playerId = conn.binding.player as string;
 
     let toSend: ChatContent;
     if (content.case === 'text') {
@@ -1034,8 +1077,16 @@ export class GameHub {
     }
 
     const now = Date.now();
-    conn.chatTimes = conn.chatTimes.filter((ts) => now - ts < CHAT_RATE_WINDOW_MS);
-    if (conn.chatTimes.length >= CHAT_RATE_MAX) {
+    // Keyed on (gameId, playerId), not the ephemeral Connection: a reconnect (or a second socket
+    // bound to the same ticket) must share the same window rather than each getting its own fresh
+    // budget.
+    const perGameRateLimits = this.chatRateLimits.get(gameId) ?? new Map<string, number[]>();
+    this.chatRateLimits.set(gameId, perGameRateLimits);
+    const recentSends = (perGameRateLimits.get(playerId) ?? []).filter(
+      (ts) => now - ts < CHAT_RATE_WINDOW_MS,
+    );
+    if (recentSends.length >= CHAT_RATE_MAX) {
+      perGameRateLimits.set(playerId, recentSends);
       conn.send(
         rejectionFrame(
           clientSeq,
@@ -1046,10 +1097,9 @@ export class GameHub {
       );
       return;
     }
-    conn.chatTimes.push(now);
+    recentSends.push(now);
+    perGameRateLimits.set(playerId, recentSends);
 
-    const gameId = conn.binding.gameId;
-    const playerId = conn.binding.player as string;
     const members = this.members.get(gameId);
 
     // Team channel: deliver to the sender's side only. Deliberately EPHEMERAL — not appended to
@@ -1069,6 +1119,14 @@ export class GameHub {
     }
 
     const log = this.chatLog.get(gameId) ?? [];
+    if (log.length >= CHAT_LOG_MAX) {
+      // Refuse rather than drop the oldest line — chat is an append-only transcript, and the
+      // refusal itself still went through the rate limit above, so it can't become a new flood.
+      conn.send(
+        rejectionFrame(clientSeq, RejectionCode.RATE_LIMITED, 'errors:chatLogFull', 'chat log full'),
+      );
+      return;
+    }
     const seq = log.length;
     log.push({ playerId, content: toSend, ts: now });
     this.chatLog.set(gameId, log);
@@ -1424,7 +1482,12 @@ export class GameHub {
       afterEventIndex: wireBoundaries[c.afterActionCount] ?? wireEvents.length,
     }));
     const chat = this.chatLog.get(gameId) ?? [];
-    conn.send(historyReplayFrame(wireEvents, chat, match.session.stateVersion, connectionLog));
+    // Defense-in-depth: `chatLog` is bounded to CHAT_LOG_MAX at every point it's populated
+    // (creation, the truncated recovery backfill, and the capped onChat push), but HistoryReplay is
+    // the actual fan-out chokepoint this bound exists to protect — reslice here too so it holds even
+    // if some future path ever sets `chatLog` without going through the truncated backfill.
+    const bounded = chat.length > CHAT_LOG_MAX ? chat.slice(-CHAT_LOG_MAX) : chat;
+    conn.send(historyReplayFrame(wireEvents, bounded, match.session.stateVersion, connectionLog));
   }
 
   private clearYourTurnTimer(gameId: string): void {
