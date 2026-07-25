@@ -123,7 +123,9 @@ describe('withLiveActivity: widget extension injection', () => {
       // time — the extension is not a pod target, so RN's $(REACT_NATIVE_PATH)-relative wrapper
       // path expands to nothing there and the archive can't spawn a compiler.
       for (const key of ['CC', 'LD', 'CXX', 'LDPLUSPLUS']) {
-        expect(settings[key]).toContain('$(DT_TOOLCHAIN_DIR)');
+        expect(settings[key]).toBe(
+          `"$(DT_TOOLCHAIN_DIR)/usr/bin/clang${key === 'CXX' || key === 'LDPLUSPLUS' ? '++' : ''}"`,
+        );
       }
       // ActivityKit needs 16.1+; the template's own floor is well past that.
       expect(Number.parseFloat(settings.IPHONEOS_DEPLOYMENT_TARGET ?? '0')).toBeGreaterThanOrEqual(
@@ -257,6 +259,25 @@ describe('withLiveActivity: widget extension injection', () => {
     expect(targetByName(reparsed, TARGET_NAME).target).toBeTruthy();
     expect(targetByName(reparsed, APP_NAME).target).toBeTruthy();
     expect(apply(reparsed, iosRoot)).toBe(false);
+  });
+
+  // `xcode`'s parser round-trips values it should never have written: a scalar holding `$(…)` must
+  // be quoted, and CocoaPods' stricter parser rejects the ENTIRE project when it isn't
+  // (`Nanaimo::Reader::ParseError - Dictionary missing ';' after key-value pair for "CC", found
+  // "("`) — which kills `pod install`, not just the archive. So check the written text directly.
+  it('quotes every scalar build setting that interpolates a build variable', () => {
+    const { project, iosRoot } = stageProject();
+    apply(project, iosRoot);
+
+    const offenders = project
+      .writeSync()
+      .split('\n')
+      // Scalar assignments only: `KEY = value;`. Arrays/dicts open with ( or { and span lines.
+      .map((line) => /^\s*([A-Za-z_][\w.[\]]*)\s*=\s*(.+);\s*$/.exec(line.trim()))
+      .filter((m): m is RegExpExecArray => m !== null)
+      .map(([, key, value]) => [key, value.replace(/\s*\/\*.*\*\/\s*$/, '')] as const)
+      .filter(([, value]) => value.includes('$(') && !value.startsWith('"'));
+    expect(offenders).toEqual([]);
   });
 
   // The in-memory project is not the artifact — Xcode reads the SERIALIZED one, and the writer's

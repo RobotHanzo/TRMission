@@ -224,10 +224,12 @@ function applyLiveActivityTarget(project, opts) {
       // `/../../../../node_modules/react-native/scripts/xcode/ccache-clang.sh` and failed the
       // archive with "unable to spawn process". A target-level value wins over the project-level
       // one, and RN only ever touches the project level, so this survives `pod install`.
-      CC: '$(DT_TOOLCHAIN_DIR)/usr/bin/clang',
-      LD: '$(DT_TOOLCHAIN_DIR)/usr/bin/clang',
-      CXX: '$(DT_TOOLCHAIN_DIR)/usr/bin/clang++',
-      LDPLUSPLUS: '$(DT_TOOLCHAIN_DIR)/usr/bin/clang++',
+      // Quoted: a bare `$(…)` scalar is not valid pbxproj — CocoaPods' stricter parser rejects the
+      // whole project with `Dictionary missing ';' after key-value pair for "CC", found "("`.
+      CC: '"$(DT_TOOLCHAIN_DIR)/usr/bin/clang"',
+      LD: '"$(DT_TOOLCHAIN_DIR)/usr/bin/clang"',
+      CXX: '"$(DT_TOOLCHAIN_DIR)/usr/bin/clang++"',
+      LDPLUSPLUS: '"$(DT_TOOLCHAIN_DIR)/usr/bin/clang++"',
     });
   }
 
