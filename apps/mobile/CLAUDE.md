@@ -117,6 +117,13 @@ on the RNW web harness.
 - The plugin is passed **no props**: org/project/token come from `SENTRY_ORG`/`SENTRY_PROJECT`/
   `SENTRY_AUTH_TOKEN` at build time, which keeps the plugin entry (and so the OTA fingerprint)
   identical whether or not a Sentry account is configured.
+- **`metro.config.js` must use `getSentryExpoConfig`, never `getDefaultConfig` + `withSentryConfig`.**
+  The latter is Sentry's bare-RN path: it wraps Expo's `serializer.customSerializer` in its own, and
+  on Metro 0.84 (SDK 56) Expo's serializer result is no longer the shape Sentry expects, so every
+  **release** bundle dies in `determineDebugIdFromBundleSource` ("Cannot read properties of
+  undefined (reading 'match')"). Dev bundling early-returns before that code, so the breakage is
+  invisible until `createBundleReleaseJsAndAssets` runs in CI — verify a config change with
+  `npx expo export:embed --platform android --dev false ...`, not with `expo start`.
 - **Adding the dependency changed the `runtimeVersion` fingerprint**: the first OTA published after
   this landed needs a fresh native build on both stores first, or no installed binary will match it.
 - `TRM_SENTRY_*` must be set on **every** env block that re-evaluates `app.config.ts` — both store
