@@ -28,8 +28,10 @@ lanes below are self-managed signing with **no EAS** — app context: `apps/mobi
   BUILD_NUMBER=1, which TestFlight would reject as a duplicate. Native-build speed stack: **RN 0.85
   official prebuilt binaries** (`RCT_USE_PREBUILT_RNCORE=1` + `RCT_USE_RN_DEP=1` at `pod install` —
   Meta-built core and folly/glog/boost tarballs from Maven Central, auto-reverting to source when
-  absent, with `RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS=1` fetching their dSYMs so crash symbolication
-  keeps working), **ccache** covers what still compiles from source (enabled via `USE_CCACHE=1` on
+  absent; `RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS` stays **unset** — it nests each dSYM inside
+  `React.framework`, which App Store Connect rejects (ITMS 90171), and a build-time re-extract
+  undoes any later cleanup, so React core symbolication is off until upstream RN moves the dSYM
+  beside the framework), **ccache** covers what still compiles from source (enabled via `USE_CCACHE=1` on
   `pod install` — deliberately an env var, NOT expo-build-properties' `ios.ccacheEnabled`, which
   would shift the OTA runtimeVersion fingerprint; same `CCACHE_COMPILERCHECK=content` lesson as
   Android plus the Xcode sloppiness/depend-mode set for clang modules, and the `CCACHE_DIR` +

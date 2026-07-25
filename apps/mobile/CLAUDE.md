@@ -43,8 +43,12 @@ Read the one for the area you're touching (Claude Code loads them on demand):
 - **React Navigation 7** native-stack (not Expo Router — few screens, heavily custom UI).
 - **jest 29** (NOT 30): `jest-expo@56` is a jest-29 preset; a jest-30 runtime collides with its
   jest-29 internals. Keep the whole `jest*` stack on 29.
-- **Google AdMob** (`react-native-google-mobile-ads`, issue #50) — two placements only, both
-  policy-bounded; `src/ads/CLAUDE.md` is the contract. Its config plugin's props are literals in
+- **Google AdMob** (`react-native-google-mobile-ads`, **pinned exact to 16.3.4**, issue #50) — two
+  placements only, both policy-bounded; `src/ads/CLAUDE.md` is the contract. The pin is load-bearing:
+  16.4.0 bumps the native SDK to play-services-ads 25.4.0, whose Kotlin metadata is 2.3.0 and cannot
+  be read by Expo SDK 56 / RN 0.85's Kotlin 2.1.20 toolchain (`:react-native-google-mobile-ads:`
+  `compileReleaseKotlin` fails). Bumping `kotlinVersion` instead breaks other autolinked modules
+  (upstream invertase#863), so keep the caret off until Expo's own Kotlin catches up. Its config plugin's props are literals in
   `app.config.ts`, never env, because plugin props feed the OTA fingerprint. **Adding the plugin
   changed that fingerprint**: the first OTA after it landed needs a fresh native build on both
   stores. AdMob is also what flipped `NSPrivacyTracking` to true and unblocked Android's `AD_ID`.

@@ -5351,7 +5351,7 @@ __metadata:
     react-native-bottom-tabs: "npm:^1.4.0"
     react-native-confetti-cannon: "npm:^1.5.2"
     react-native-gesture-handler: "npm:~2.31.1"
-    react-native-google-mobile-ads: "npm:^16.4.0"
+    react-native-google-mobile-ads: "npm:16.3.4"
     react-native-reanimated: "npm:4.3.1"
     react-native-safe-area-context: "npm:~5.7.0"
     react-native-screens: "npm:4.25.2"
@@ -13223,9 +13223,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-google-mobile-ads@npm:^16.4.0":
-  version: 16.4.0
-  resolution: "react-native-google-mobile-ads@npm:16.4.0"
+"react-native-google-mobile-ads@npm:16.3.4":
+  version: 16.3.4
+  resolution: "react-native-google-mobile-ads@npm:16.3.4"
   dependencies:
     "@iabtcf/core": "npm:^1.5.6"
     use-deep-compare-effect: "npm:^1.8.1"
@@ -13234,7 +13234,7 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/d545345b17a94f12d40ec8e4ef95c1fbd82acd374264c5aab71066b5ef1d98fe6f44da36e9dc7a1c1ecf286e77d90feea423dda09f93809353e7d3a622fe4193
+  checksum: 10/1854a5e11076e1375730c2e75079ab9997fa0464d800d938a802ac2e9e0c94b9cb1505354a49003050d13411b0bfacc6e233cad919902b5206c5642a85874eaa
   languageName: node
   linkType: hard
 

@@ -99,6 +99,17 @@ platform :ios do
       }
     )
 
+    # App Store Connect rejects an .app that carries a dSYM nested inside an embedded framework
+    # ("Invalid bundle structure", ITMS 90171 — mobile-ios.yml's strip step has the full history).
+    # altool only says so ~10 minutes into pilot's upload, and only on the tag runs that upload at
+    # all, so assert it here instead: every run pays a one-second `unzip -Z1`, and a regression is
+    # named where it was caused rather than at the end of a release.
+    ipa = lane_context[SharedValues::IPA_OUTPUT_PATH]
+    nested_dsyms = `unzip -Z1 "#{ipa}" '*.framework/dSYMs/*' 2>/dev/null`.split("\n")
+    unless nested_dsyms.empty?
+      UI.user_error!("#{nested_dsyms.length} dSYM entries are nested inside embedded frameworks — App Store Connect would reject this build (ITMS 90171). First: #{nested_dsyms.first}. Check mobile-ios.yml's `pod install` env (RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS must stay unset) and its Pods cache namespace.")
+    end
+
     if options[:upload]
       pilot(
         api_key: api_key,

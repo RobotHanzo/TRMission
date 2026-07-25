@@ -200,16 +200,22 @@ jobs:
       # versions come from autolinking over node_modules — so with the Podfile alone in the key a
       # JS dep bump would restore the same stale exact-match forever and re-run the identical
       # delta `pod install` on every build without ever saving the updated Pods back.
+      #
+      # The `-v2-` namespace exists to make every pre-v0.2.18 entry unreachable, restore-keys
+      # included: those caches hold Pods/ReactNativeCore-artifacts tarballs that
+      # RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS repacked with a dSYM nested inside React.framework, and
+      # the build-time re-extract described in the strip step below would put it straight back into
+      # a shipped .app. Bump the namespace again if anything else ever poisons a cached Pods tree.
       - name: Cache CocoaPods
         uses: actions/cache@v4
         with:
           path: |
             ~/Library/Caches/CocoaPods
             apps/mobile/ios/Pods
-          key: cocoapods-${{ hashFiles('apps/mobile/ios/Podfile') }}-${{ hashFiles('yarn.lock') }}
+          key: cocoapods-v2-${{ hashFiles('apps/mobile/ios/Podfile') }}-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-            cocoapods-${{ hashFiles('apps/mobile/ios/Podfile') }}-
-            cocoapods-
+            cocoapods-v2-${{ hashFiles('apps/mobile/ios/Podfile') }}-
+            cocoapods-v2-
 
       - name: Install CocoaPods
         working-directory: apps/mobile/ios
@@ -226,35 +232,49 @@ jobs:
           USE_CCACHE: '1'
           # RN 0.85's official prebuilt binaries (Meta-built, on Maven Central — verified present
           # for this exact RN version): core + the folly/glog/boost third-party deps skip the two
-          # biggest source compiles outright, and the symbolicate flag downloads their matching
-          # dSYMs into the framework folders so crash symbolication doesn't regress. All three are
-          # read at pod-install time only, auto-revert to building from source when the artifacts
-          # are missing (e.g. right after an RN bump, before Meta publishes), and — like USE_CCACHE
-          # above — are invisible to the OTA runtimeVersion fingerprint. The tarballs land in
-          # Pods/ReactNative{Core,Dependencies}-artifacts, so the Pods cache above carries them
-          # across runs.
+          # biggest source compiles outright. Both are read at pod-install time only, auto-revert to
+          # building from source when the artifacts are missing (e.g. right after an RN bump, before
+          # Meta publishes), and — like USE_CCACHE above — are invisible to the OTA runtimeVersion
+          # fingerprint. The tarballs land in Pods/ReactNative{Core,Dependencies}-artifacts, so the
+          # Pods cache above carries them across runs.
+          #
+          # RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS is deliberately NOT set (it was, through
+          # v0.2.17+17). Its one job is to fetch the matching dSYMs — but rncore.rb merges them
+          # INTO the framework tarball, at React.xcframework/<slice>/React.framework/dSYMs, and
+          # every copy that then reaches a shipped .app is an App Store Connect rejection
+          # (ITMS 90171). The strip step below records why nothing downstream can undo that, so
+          # React core symbolication stays off until upstream RN puts the dSYM beside the framework
+          # instead of inside it. Expo's own pods already do it that way (<slice>/dSYMs) and are
+          # unaffected.
           RCT_USE_PREBUILT_RNCORE: '1'
           RCT_USE_RN_DEP: '1'
-          RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS: '1'
 
-      # RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS above places each fetched dSYM at
-      # React.xcframework/<slice>/React.framework/dSYMs/ (facebook/react-native's own
-      # scripts/cocoapods/rncore.rb, slice_dsym_dest) — nested one level INSIDE the framework
-      # bundle, instead of alongside it as a sibling of the slice's .framework the way Apple's
-      # xcframework Info.plist DebugSymbolsPath convention expects. Left there, it rides along as
-      # ordinary bundle content when Xcode embeds+codesigns the framework, and App Store Connect
-      # rejects the shipped .app for it ("Invalid bundle structure", ITMS 90171 — this broke
-      # v0.1.14+14's first TestFlight upload attempt). It must be stripped from this exact Pods
-      # copy, BEFORE the "Build" step below ever runs xcodebuild: stripping it from the already
-      # zipped-and-signed .ipa afterwards was tried and made things worse (it punches a hole in a
-      # signature Xcode already sealed over the folder — ITMS 90034, "Missing or invalid
-      # signature" — v0.1.14+14's second attempt). The `find`/`echo` output here is deliberately
-      # unconditional (not gated behind "if found") so a still-failing next run has real on-disk
-      # evidence to work from instead of another guess. No dSYM survives for Xcode to seal or
-      # ship — this trades away RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS's one job until upstream RN
-      # stops nesting the dSYM inside the framework it documents alongside; a build that can't
-      # reach TestFlight isn't a usable alternative. A future RN release that fixes the nesting
-      # makes this a no-op (find just prints nothing to remove).
+      # A dSYM nested one level INSIDE a .framework bundle (rather than beside it, the way Apple's
+      # xcframework DebugSymbolsPath convention and every Expo pod do it) rides along as ordinary
+      # bundle content when Xcode embeds + codesigns that framework, and App Store Connect rejects
+      # the shipped .app for it: "Invalid bundle structure", ITMS 90171. Three real upload attempts
+      # mapped out where it can and cannot be undone:
+      #
+      #  - v0.1.14+14 #1 — RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS put it there (react-native's
+      #    scripts/cocoapods/rncore.rb, slice_dsym_dest) and the .app shipped it. Rejected.
+      #  - v0.1.14+14 #2 — stripping it out of the already zipped-and-signed .ipa punches a hole in
+      #    a seal Xcode had made over the folder: ITMS 90034, "Missing or invalid signature".
+      #    Nothing may be removed after signing.
+      #  - v0.2.17+17 — this step, stripping the unpacked Pods copy before xcodebuild, looked
+      #    right (its find output proved all three React.xcframework slices went away) and the
+      #    .app STILL shipped the dSYM. Cause: React-Core-prebuilt carries its own before_compile
+      #    script phase ("[RNCore] Replace React Native Core for the right configuration", i.e.
+      #    scripts/replace-rncore-version.js), which for a Release build wipes this directory and
+      #    re-extracts the Release framework tarball over it — and the tarball is precisely what
+      #    rncore.rb merged the dSYMs into. Whatever a pod-install-time cleanup does, the build
+      #    undoes 12 seconds later. (v0.2.16+16 slipped through only because its restored Pods
+      #    cache already carried a Release .last_build_configuration, so the re-extract no-oped.)
+      #
+      # So the fix is upstream of all of this: don't ask for the dSYMs at all (see the pod install
+      # env above), which leaves nothing to strip anywhere. This step stays as a cheap tripwire —
+      # it costs a second, its output is unconditional so a still-failing run has real on-disk
+      # evidence instead of another guess, and with the flag unset it now prints nothing to remove.
+      # The .ipa itself is asserted clean in the Fastfile, after gym and before pilot.
       - name: Strip nested dSYMs from vendored prebuilt frameworks (RN dSYM/codesign bug workaround)
         working-directory: apps/mobile/ios
         run: |
