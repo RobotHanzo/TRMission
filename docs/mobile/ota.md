@@ -26,7 +26,7 @@ pin time. Re-verify this table before bumping the image.
 | Var                                | Required           | Purpose                                                                                                                                                         |
 | ---------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `BASE_URL`                         | yes                | Public origin clients reach the server at; manifest/asset URLs are built from it.                                                                               |
-| `JWT_SECRET`                       | yes                | Signs the server's own upload/dashboard tokens. Independent of the app server's `JWT_SECRET`.                                                                   |
+| `JWT_SECRET`                       | yes                | Signs the server's own upload/dashboard tokens. Independent of the app server's `JWT_SECRET`. Set via the compose `TRM_OTA_JWT_SECRET` var — there is no insecure default; the container's entrypoint refuses to start `expo-open-ota` if it's unset or still the old placeholder value. |
 | `EXPO_APP_ID`                      | yes                | Expo project id — used with `EXPO_ACCESS_TOKEN` to authenticate `eoas publish` and map channels→branches via the Expo API. Serving itself is fully self-hosted. |
 | `EXPO_ACCESS_TOKEN`                | yes                | Expo access token (robot token) for the above.                                                                                                                  |
 | `CACHE_MODE`                       | —                  | `local` (in-process cache; no Redis needed at our scale).                                                                                                       |
@@ -87,7 +87,7 @@ expo-open-ota signs manifests **at serve time** with the private key mounted int
 ## Local smoke (verified 2026-07-12 against v2.3.21)
 
 ```bash
-EXPO_APP_ID=<expo-project-id> EXPO_ACCESS_TOKEN=<robot-token> \
+EXPO_APP_ID=<expo-project-id> EXPO_ACCESS_TOKEN=<robot-token> TRM_OTA_JWT_SECRET=<a-real-secret> \
   docker compose --profile full up -d ota
 curl -si http://localhost:3005/hc            # → 200 (empty body)
 curl -si http://localhost:3005/manifest \

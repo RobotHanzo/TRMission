@@ -143,7 +143,10 @@ services:
     environment:
       # Public origin clients reach this server at (updates.url = <BASE_URL>/manifest).
       BASE_URL: ${TRM_OTA_BASE_URL:-http://localhost:3005}
-      JWT_SECRET: ${TRM_OTA_JWT_SECRET:-dev-insecure-change-me}
+      # No insecure default: JWT_SECRET signs this server's own upload/dashboard tokens
+      # (docs/mobile/ota.md), so an unset/placeholder value would let anyone reachable mint an
+      # accepted upload token. The entrypoint below refuses to start unless a real secret is set.
+      JWT_SECRET: ${TRM_OTA_JWT_SECRET:-}
       # Expo API is used only for publish auth + channel→branch mapping (npx eoas publish);
       # the update serving itself is fully self-hosted.
       EXPO_APP_ID: ${EXPO_APP_ID:-}
@@ -154,6 +157,18 @@ services:
       KEYS_STORAGE_TYPE: local
       PUBLIC_LOCAL_EXPO_KEY_PATH: /keys/public-key.pem
       PRIVATE_LOCAL_EXPO_KEY_PATH: /keys/private-key.pem
+    # The upstream image's own CMD is `/app/main` with no startup validation of JWT_SECRET, so an
+    # unconfigured deployment would otherwise silently accept tokens signed with the (removed)
+    # default above. Wrap it in a pre-flight check: refuse to exec the real server unless
+    # TRM_OTA_JWT_SECRET is set to something other than the old committed placeholder.
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        if [ -z "$$JWT_SECRET" ] || [ "$$JWT_SECRET" = "dev-insecure-change-me" ]; then
+          echo 'FATAL: TRM_OTA_JWT_SECRET is unset (or still the old insecure placeholder). Set a real secret before starting the ota service — see docs/mobile/ota.md.' >&2
+          exit 1
+        fi
+        exec /app/main
     volumes:
       - trm-ota-data:/updates
       - ./apps/mobile/certs/keys:/keys:ro
