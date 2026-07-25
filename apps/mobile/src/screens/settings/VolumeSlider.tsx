@@ -28,8 +28,15 @@ export function VolumeSlider({ value, onChange, testID, accessibilityLabel }: Pr
   const pan = useMemo(
     () =>
       PanResponder.create({
+        // Claim on CAPTURE and refuse termination: this lives inside the settings ScrollView,
+        // which otherwise takes the responder over as soon as the finger moves — leaving the
+        // slider tappable but not draggable.
+        onStartShouldSetPanResponderCapture: () => true,
+        onMoveShouldSetPanResponderCapture: () => true,
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
+        onPanResponderTerminationRequest: () => false,
+        onShouldBlockNativeResponder: () => true,
         onPanResponderGrant: (e) => {
           const w = widthRef.current;
           const next = w > 0 ? clamp01(e.nativeEvent.locationX / w) : valueRef.current;
