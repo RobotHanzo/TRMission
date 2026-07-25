@@ -105,7 +105,23 @@ export class LobbyService {
     private readonly maps: MapsService,
     private readonly users: UserRepo,
     private readonly push: PushService,
-  ) {}
+  ) {
+    // Wired here (rather than GameModule) to avoid a module import cycle: LobbyModule already
+    // depends on GameModule, so GameModule can't depend back on RoomRepo. This lets the hub
+    // re-check a spectator's userId against the room's live ban list on every `hello`, instead of
+    // trusting a standalone ws-ticket for its whole TTL (a ticket minted before a kick must not
+    // keep granting spectator access afterward).
+    this.hub.setSpectatorGate((gameId, userId) => this.isSpectatorAuthorized(gameId, userId));
+  }
+
+  /** Whether `userId` is still allowed to hold a spectator connection to `gameId` — false only
+   *  when the linked room explicitly banned them (a host kick). No linked room (e.g. a match
+   *  created outside the normal lobby flow) has nothing to check against, so it fails open. */
+  private async isSpectatorAuthorized(gameId: string, userId: string): Promise<boolean> {
+    const room = await this.rooms.findByGameId(gameId);
+    if (!room) return true;
+    return !(room.bannedUserIds?.includes(userId) ?? false);
+  }
 
   /**
    * Ban chokepoint for the ws-ticket paths (start / ticket / spectate): a banned user's
@@ -190,6 +206,7 @@ export class LobbyService {
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'started') throw new BadRequestException('game already started');
     if (r === 'full') throw new BadRequestException('room is full');
+    if (r === 'banned') throw new ForbiddenException('you have been removed from this room');
     if (r === 'already') return this.get(code);
     return toView(r);
   }
@@ -353,13 +370,16 @@ export class LobbyService {
     return toView(r);
   }
 
-  /** Host removes another player from the room. */
+  /** Host removes another player from the room. A removed target is banned from the room going
+   *  forward (see `RoomRepo.kick`); if they currently hold a live spectator connection to this
+   *  room's game, drop it immediately rather than waiting for their ws-ticket to expire. */
   async kick(code: string, user: AuthUser, targetId: string): Promise<RoomView> {
     const r = await this.rooms.kick(code, user.userId, targetId);
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'started') throw new BadRequestException('game already started');
     if (r === 'forbidden') throw new ForbiddenException('only the host can remove players');
     if (r === 'invalid') throw new BadRequestException('cannot remove that player');
+    if (r.gameId) this.hub.dropSpectator(r.gameId, targetId);
     return toView(r);
   }
 
@@ -618,6 +638,9 @@ export class LobbyService {
     if (!room.gameId) throw new BadRequestException('game has not started');
     if (this.seatOf(room, user.userId) >= 0) {
       throw new ForbiddenException('players cannot spectate their own game');
+    }
+    if (room.bannedUserIds?.includes(user.userId)) {
+      throw new ForbiddenException('you have been removed from this room');
     }
     await this.rooms.recordSpectator(code, {
       userId: user.userId,

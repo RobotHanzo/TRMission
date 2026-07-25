@@ -186,6 +186,12 @@ export class GameHub {
   private readonly members = new Map<string, Map<string, Connection>>();
   /** gameId → spectator connections (seat -1): receive public snapshots/events, can never act. */
   private readonly spectators = new Map<string, Set<Connection>>();
+  /** Optional re-authorization hook consulted on every spectator `hello` (not just once at ticket
+   *  mint time): false means the caller's userId is no longer allowed to spectate this game (e.g.
+   *  a room-level kick since the ws-ticket was issued). Registered by `LobbyService` — kept
+   *  optional/unset here so `GameHub` stays framework-free and isn't directly coupled to
+   *  `RoomRepo` (see `setSpectatorGate`). */
+  private spectatorGate?: (gameId: string, userId: string) => Promise<boolean> | boolean;
   private readonly verifier: TicketVerifier;
   private readonly store: GameStorePort | undefined;
   private readonly boardResolver: (config: GameConfig) => Board | Promise<Board>;
@@ -479,6 +485,39 @@ export class GameHub {
     this.connections.set(id, conn);
     this.metrics.connectionOpened();
     return conn;
+  }
+
+  /** Register the re-authorization hook `onHello`'s spectator branch consults on every bind (see
+   *  the field doc above). Framework-free `GameHub` has no `RoomRepo` of its own, so `LobbyService`
+   *  wires this in its own constructor rather than GameModule reaching back into LobbyModule. */
+  setSpectatorGate(gate: (gameId: string, userId: string) => Promise<boolean> | boolean): void {
+    this.spectatorGate = gate;
+  }
+
+  /**
+   * Force-drop any LIVE spectator connection for `userId` in `gameId` right now, rather than
+   * waiting for their ws-ticket to expire or for them to reconnect (which `onHello`'s
+   * `spectatorGate` check alone would already refuse). Used when a host kicks a currently-watching
+   * spectator. Mirrors the SESSION_REPLACED close pattern used when a seat is claimed by a new
+   * connection: a rejection frame, then a close code the client treats as "do not auto-reconnect".
+   * A no-op if that userId holds no live spectator connection here.
+   */
+  dropSpectator(gameId: string, userId: string): void {
+    const set = this.spectators.get(gameId);
+    if (!set) return;
+    for (const conn of set) {
+      if ((conn.binding?.player as string | undefined) !== userId) continue;
+      set.delete(conn);
+      conn.send(
+        rejectionFrame(
+          0,
+          RejectionCode.UNAUTHENTICATED,
+          'errors:unauthenticated',
+          'removed from this room',
+        ),
+      );
+      conn.terminate(SESSION_REPLACED_CLOSE_CODE, 'spectator_revoked');
+    }
   }
 
   closeConnection(id: string): void {
@@ -800,9 +839,25 @@ export class GameHub {
     // Spectator binding (seat -1): no seat, projected as a null viewer (no SelfView). Never added
     // to `members`, so it cannot act and never receives private events.
     if (binding.seat < 0) {
+      // Re-authorize against the LIVE room on every bind, rather than trusting the ws-ticket for
+      // its whole TTL — a ticket minted before a room-level kick must not keep granting spectator
+      // access afterward (an already-bound spectator is instead dropped immediately by `kick`
+      // itself via `dropSpectator`; this is the gate for a fresh/reconnecting hello).
+      if (this.spectatorGate && !(await this.spectatorGate(binding.gameId, binding.playerId))) {
+        conn.send(
+          rejectionFrame(
+            clientSeq,
+            RejectionCode.UNAUTHENTICATED,
+            'errors:unauthenticated',
+            'not authorized to spectate this game',
+          ),
+        );
+        return;
+      }
       // Second ban check, immediately before the bind point: closes the window where a ban landed
-      // (synchronously poisoning the cache) while the above `recoverMatch` await was in flight —
-      // now an in-memory cache read, so re-checking here is effectively free.
+      // (synchronously poisoning the cache) while the above `recoverMatch`/`spectatorGate` awaits
+      // were in flight — now an in-memory cache read, so re-checking here is effectively free.
+      // Deliberately ordered LAST so no await separates it from the bind.
       if (await this.isBanned(binding.playerId)) {
         this.rejectBanned(conn, clientSeq);
         return;

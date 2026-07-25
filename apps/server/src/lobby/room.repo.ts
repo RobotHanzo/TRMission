@@ -115,6 +115,11 @@ export interface RoomDoc {
    *  post-start spectate ticket (`LobbyService.spectateTicket`). One list for both paths, so
    *  a spectator's identity is known everywhere regardless of how they came to be watching. */
   spectators?: RoomSpectator[];
+  /** Users the host has explicitly kicked from this room — checked by every path that would
+   *  otherwise (re)admit a userId as a member or spectator (`join`, `becomePlayer`,
+   *  `LobbyService.spectateTicket`, `recordSpectator`). Scoped to this room only; permanent for
+   *  the room's lifetime (never cleared by a rematch back to LOBBY). */
+  bannedUserIds?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -130,7 +135,7 @@ export type UpdateSettingsResult =
  *  zod `.partial()` DTO under exactOptionalPropertyTypes). Undefined values are ignored on merge. */
 export type RoomSettingsPatch = { [K in keyof RoomSettings]?: RoomSettings[K] | undefined };
 
-export type JoinResult = RoomDoc | 'not_found' | 'full' | 'started' | 'already';
+export type JoinResult = RoomDoc | 'not_found' | 'full' | 'started' | 'already' | 'banned';
 export type AddBotResult = RoomDoc | 'not_found' | 'full' | 'started' | 'forbidden';
 export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 export type KickResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
@@ -269,6 +274,7 @@ export class RoomRepo implements OnModuleInit {
       const room = await this.col.findOne({ _id: code });
       if (!room) return 'not_found';
       if (room.status !== 'LOBBY') return 'started';
+      if (room.bannedUserIds?.includes(member.userId)) return 'banned';
       if (room.members.some((m) => m.userId === member.userId)) return 'already';
       if (room.spectators?.some((s) => s.userId === member.userId)) return room;
 
@@ -598,19 +604,48 @@ export class RoomRepo implements OnModuleInit {
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
 
-  /** Host-only: remove another member or spectator (human or bot) and keep seats contiguous.
-   *  The host cannot kick themselves — leaving is a separate, host-transferring path. */
+  /**
+   * Host-only: remove another member or spectator (human or bot) and keep seats contiguous.
+   * The host cannot kick themselves — leaving is a separate, host-transferring path. Every
+   * successful kick also permanently bans the target from this room (`bannedUserIds`), so a
+   * removed member/spectator can't simply rejoin or re-mint a spectate ticket a moment later —
+   * that ban is what `join`/`becomePlayer`/`LobbyService.spectateTicket`/`recordSpectator` check.
+   *
+   * A STARTED room's SEATED players stay governed by the in-game vote/timeout/takeover machinery
+   * (kicking a seated player mid-game is a larger change than this — out of scope here), so that
+   * case still returns 'started'. A SPECTATOR of a STARTED room, though, previously had no remedy
+   * at all once the game began (the host could neither kick them nor disable spectating), so that
+   * case is now allowed through regardless of room status.
+   */
   async kick(code: string, hostId: string, targetId: string): Promise<KickResult> {
     const room = await this.col.findOne({ _id: code });
     if (!room) return 'not_found';
-    if (room.status !== 'LOBBY') return 'started';
     if (room.hostId !== hostId) return 'forbidden';
     if (targetId === hostId) return 'invalid';
 
-    if (room.spectators?.some((s) => s.userId === targetId)) {
+    const isSpectator = room.spectators?.some((s) => s.userId === targetId) ?? false;
+
+    if (room.status !== 'LOBBY') {
+      if (!isSpectator) return 'started';
       await this.col.updateOne(
         { _id: code },
-        { $pull: { spectators: { userId: targetId } }, $set: { updatedAt: new Date() } },
+        {
+          $pull: { spectators: { userId: targetId } },
+          $addToSet: { bannedUserIds: targetId },
+          $set: { updatedAt: new Date() },
+        },
+      );
+      return (await this.col.findOne({ _id: code })) ?? 'not_found';
+    }
+
+    if (isSpectator) {
+      await this.col.updateOne(
+        { _id: code },
+        {
+          $pull: { spectators: { userId: targetId } },
+          $addToSet: { bannedUserIds: targetId },
+          $set: { updatedAt: new Date() },
+        },
       );
       return (await this.col.findOne({ _id: code })) ?? 'not_found';
     }
@@ -621,7 +656,10 @@ export class RoomRepo implements OnModuleInit {
       .map((m, i) => ({ ...m, seat: i }));
     await this.col.updateOne(
       { _id: code },
-      { $set: { members: remaining, updatedAt: new Date() } },
+      {
+        $set: { members: remaining, updatedAt: new Date() },
+        $addToSet: { bannedUserIds: targetId },
+      },
     );
     return (await this.col.findOne({ _id: code })) ?? 'not_found';
   }
@@ -803,6 +841,10 @@ export class RoomRepo implements OnModuleInit {
       if (room.status !== 'LOBBY') return 'started';
       const spectator = room.spectators?.find((s) => s.userId === userId);
       if (!spectator) return 'not_spectator';
+      // Defense in depth: a kicked spectator is removed from `spectators` in the same update that
+      // bans them, so this should be unreachable in practice — kept anyway in case a future path
+      // ever adds to `bannedUserIds` without also pulling the matching spectator entry.
+      if (room.bannedUserIds?.includes(userId)) return 'not_spectator';
       if (room.members.length >= room.maxPlayers) return 'full';
 
       const seat = room.members.length;
@@ -825,10 +867,17 @@ export class RoomRepo implements OnModuleInit {
 
   /** Idempotent: records a spectator identity if not already present. Called both indirectly
    *  (via `becomeSpectator`, above) and directly by `LobbyService.spectateTicket`, so every path
-   *  that watches a room's game ends up in the one list. */
+   *  that watches a room's game ends up in the one list. `LobbyService.spectateTicket` already
+   *  refuses a banned userId before reaching here; the `bannedUserIds` exclusion on the filter is
+   *  defense in depth so this chokepoint can never record a banned user even if some future caller
+   *  forgets that check. */
   async recordSpectator(code: string, spectator: RoomSpectator): Promise<void> {
     await this.col.updateOne(
-      { _id: code, 'spectators.userId': { $ne: spectator.userId } },
+      {
+        _id: code,
+        'spectators.userId': { $ne: spectator.userId },
+        bannedUserIds: { $ne: spectator.userId },
+      },
       { $push: { spectators: spectator } },
     );
   }
