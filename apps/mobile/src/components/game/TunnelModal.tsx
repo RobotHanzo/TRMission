@@ -75,6 +75,8 @@ interface Props {
   playedColor?: PbCardColor | undefined;
   /** A non-claimant viewer: watches the reveal, but sees only a read-only surcharge combination. */
   spectator?: boolean | undefined;
+  /** Playback (replay): nothing here can resolve the tunnel, so the dialog needs a plain Close. */
+  onDismiss?: (() => void) | undefined;
   onCommit(p: Payment): void;
   onAbort(): void;
 }
@@ -96,6 +98,7 @@ export function TunnelModal({
   options,
   playedColor,
   spectator = false,
+  onDismiss,
   onCommit,
   onAbort,
 }: Props) {
@@ -139,7 +142,7 @@ export function TunnelModal({
   }, [showResult, extraRequired]);
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onAbort}>
+    <Modal visible transparent animationType="fade" onRequestClose={onDismiss ?? onAbort}>
       <View style={styles.backdrop}>
         <View style={[styles.modal, { backgroundColor: tokens.surface }]}>
           <Text style={[styles.title, { color: tokens.ink }]}>{t('tunnel')}</Text>
@@ -233,6 +236,16 @@ export function TunnelModal({
                   <Text style={[styles.abortText, { color: tokens.danger }]}>{t('abort')}</Text>
                 </Pressable>
               </View>
+            </View>
+          )}
+
+          {/* Playback: available from the first frame (not held back with the result) — this modal
+              covers the replay transport, so waiting out the reveal must never be the only way on. */}
+          {onDismiss && (
+            <View style={styles.row}>
+              <Pressable style={styles.abortBtn} accessibilityRole="button" onPress={onDismiss}>
+                <Text style={[styles.abortText, { color: tokens.blue }]}>{t('close')}</Text>
+              </Pressable>
             </View>
           )}
         </View>

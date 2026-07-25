@@ -29,7 +29,7 @@ import {
   paymentToProto,
   type Payment,
 } from '../game/payments';
-import { enumerateTunnelExtra } from '../game/tunnel';
+import { enumerateTunnelExtra, useTunnelReveal } from '../game/tunnel';
 import { isChatRejectionKey } from '../game/chatErrors';
 import {
   skyLanternSurcharge,
@@ -411,7 +411,12 @@ export function GameStage({
       )
     : undefined;
 
-  const tunnelMine = phase === Phase.TUNNEL_PENDING && snapshot.pendingTunnel?.playerId === me;
+  // Playback (replay): no commands ⇒ nothing on screen can resolve a pending tunnel, so the reveal
+  // is spectated (never interactive, whoever's perspective is being viewed) and dismissible.
+  const playback = !commands;
+  const tunnelReveal = useTunnelReveal(snapshot, playback);
+  const tunnelMine =
+    !playback && phase === Phase.TUNNEL_PENDING && snapshot.pendingTunnel?.playerId === me;
   const tunnelExtras =
     tunnelMine && snapshot.pendingTunnel
       ? enumerateTunnelExtra(
@@ -857,13 +862,14 @@ export function GameStage({
       {/* The tunnel reveal is public, so everyone watches the draw + surcharge. Only the
           claimant gets the interactive payment options (their hand stays secret); spectators
           see a read-only colour-only surcharge combination instead. */}
-      {phase === Phase.TUNNEL_PENDING && snapshot.pendingTunnel && (
+      {tunnelReveal.visible && snapshot.pendingTunnel && (
         <TunnelModal
           revealed={snapshot.pendingTunnel.revealed}
           extraRequired={snapshot.pendingTunnel.extraRequired}
           playedColor={snapshot.pendingTunnel.playedColor}
           options={tunnelExtras}
           spectator={!tunnelMine}
+          onDismiss={playback ? tunnelReveal.dismiss : undefined}
           onCommit={(p) => {
             commands?.resolveTunnel(true, paymentToProto(p));
             setTunnelBase(null);

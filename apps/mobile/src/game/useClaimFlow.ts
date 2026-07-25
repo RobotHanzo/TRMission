@@ -140,8 +140,12 @@ export function useClaimFlow(snapshot: GameSnapshot, commands: GameCommands | nu
     setClaim(null);
   };
 
+  // Playback (replay) has no commands, so the reveal is never interactive there — even when the
+  // viewed perspective IS the claimant, the payment/abort buttons could resolve nothing.
   const tunnelMine =
-    snapshot.phase === Phase.TUNNEL_PENDING && snapshot.pendingTunnel?.playerId === me;
+    commands !== null &&
+    snapshot.phase === Phase.TUNNEL_PENDING &&
+    snapshot.pendingTunnel?.playerId === me;
   const tunnelExtras =
     tunnelMine && snapshot.pendingTunnel
       ? enumerateTunnelExtra(

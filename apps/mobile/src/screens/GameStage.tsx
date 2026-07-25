@@ -39,6 +39,7 @@ import { ticketById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
 import { isMyTurn } from '../game/view';
 import { isChatRejectionKey } from '../game/chatErrors';
+import { useTunnelReveal } from '../game/tunnel';
 import { eventRejectionHintKey, hasActiveEvent } from '../game/events';
 import { gateAllowsTarget, gateFlags, type ActionGate } from '../game/actionGate';
 import { TurnBanner } from '../components/game/TurnBanner';
@@ -210,6 +211,11 @@ export function GameStage({
   const marketCanDraw = canDraw && allow.draw;
 
   const flow = useClaimFlow(snapshot, commands);
+  // Playback (replay): no commands ⇒ nothing on screen can resolve a pending tunnel, so the reveal
+  // is spectated (see flow.tunnelMine) and gets a Close of its own — this modal covers the replay
+  // transport, so it would otherwise be stuck on screen (issue #45).
+  const playback = !commands;
+  const tunnelReveal = useTunnelReveal(snapshot, playback);
   // Tutorial: let the coachmark know a payment choice just opened (or closed), so it can redirect
   // its spotlight + copy to the dialog instead of the map target that opened it.
   const claimKind = flow.claim?.kind ?? null;
@@ -603,13 +609,14 @@ export function GameStage({
       )}
       {/* The tunnel reveal is public — everyone watches; only the claimant gets the interactive
           payment options (their hand stays secret). */}
-      {phase === Phase.TUNNEL_PENDING && snapshot.pendingTunnel && (
+      {tunnelReveal.visible && snapshot.pendingTunnel && (
         <TunnelModal
           revealed={snapshot.pendingTunnel.revealed}
           extraRequired={snapshot.pendingTunnel.extraRequired}
           playedColor={snapshot.pendingTunnel.playedColor}
           options={flow.tunnelExtras}
           spectator={!flow.tunnelMine}
+          onDismiss={playback ? tunnelReveal.dismiss : undefined}
           onCommit={flow.onTunnelCommit}
           onAbort={flow.onTunnelAbort}
         />
