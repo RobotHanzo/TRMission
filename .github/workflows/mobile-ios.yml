@@ -142,6 +142,11 @@ jobs:
           # Baked into Expo.plist as updates.url — unset would ship binaries pointing OTA checks
           # at app.config.ts's localhost dev default.
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          # Baked as the expo-app-id request header (which app on the OTA server this binary asks
+          # about). It is a runtimeVersion fingerprint input, so it MUST match mobile-ota.yml's
+          # publish env — a store build without it targets a different runtime version than the
+          # updates published with it, and would silently never see them.
+          TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
           APP_VERSION: ${{ steps.build_number.outputs.version }}
 
@@ -271,6 +276,7 @@ jobs:
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
           TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
           APP_VERSION: ${{ steps.build_number.outputs.version }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}

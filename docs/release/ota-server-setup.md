@@ -14,17 +14,18 @@ only so the OTA server can authenticate a publish and map channel→branch throu
 
 ## 0. Order of operations (this one bites)
 
-`updates.url` is **baked into the binary at `expo prebuild` time** from the `TRM_OTA_URL` repo
-variable ([mobile-android.yml:143](../../.github/workflows/mobile-android.yml#L143),
-[mobile-ios.yml:144](../../.github/workflows/mobile-ios.yml#L144)). A store build produced while
-that variable is unset ships `http://localhost:3005/manifest` and **can never receive an update** —
-no OTA can fix an OTA URL. The only repair is another store release.
+`updates.url` and the `expo-app-id` header are **baked into the binary at `expo prebuild` time** from
+the `TRM_OTA_URL` / `TRM_OTA_APP_ID` repo variables
+([mobile-android.yml](../../.github/workflows/mobile-android.yml),
+[mobile-ios.yml](../../.github/workflows/mobile-ios.yml)). A store build produced while those are
+unset ships `http://localhost:3005/manifest` and **can never receive an update** — no OTA can fix an
+OTA URL. The only repair is another store release.
 
 So, in order:
 
 1. Private key on the host (§2) — it must match the committed certificate.
 2. Container + TLS origin live and answering (§3–§6).
-3. `TRM_OTA_URL` + `EXPO_TOKEN` set on the repo (§7).
+3. `TRM_OTA_URL` + `TRM_OTA_APP_ID` + `EXPO_TOKEN` set on the repo (§7).
 4. **Then** cut the store release. Binaries from that build onward are OTA-capable.
 5. Publish updates (§9).
 
@@ -125,23 +126,24 @@ surface to defend for no operational gain here.
 
 ## 5. Pin the image, then deploy the service
 
-`docker-compose.yml` references `ghcr.io/axelmarciano/expo-open-ota:latest`, but the env contract in
-this repo was pinned and verified against **v2.3.21**. Checked against GHCR on 2026-07-25:
+Never deploy `:latest` — it moves between **incompatible generations**. This deployment runs the v3
+line. Checked against GHCR on 2026-07-25:
 
-| Tag       | Digest                                                                                 |
-| --------- | -------------------------------------------------------------------------------------- |
-| `v2.3.21` | `sha256:de09a283642323ebcd677f236b5a6145b83749ae7b6b5864a9976d1e33960905`              |
-| `latest`  | `sha256:c6f37d3e1edc5e8f8372e4353bf09ef0524248688a362a6c0bada113001019d7` (= `v3.0.5`) |
+| Tag       | Digest                                                                                                    |
+| --------- | --------------------------------------------------------------------------------------------------------- |
+| `v3.0.5`  | `sha256:c6f37d3e1edc5e8f8372e4353bf09ef0524248688a362a6c0bada113001019d7` (= what `latest` was)           |
+| `v2.3.21` | `sha256:de09a283642323ebcd677f236b5a6145b83749ae7b6b5864a9976d1e33960905` (the previous, single-app line) |
 
-Upstream has since shipped a 3.x line whose README describes a different architecture (a control
-plane with PostgreSQL, per-app API tokens). **Deploy the digest-pinned v2.3.21 image**; adopting 3.x
-is a deliberate re-pin exercise — re-verify the env table in docs/mobile/ota.md first.
+The publish CLI is pinned to the **same** version in `mobile-ota.yml` (`eoas@3.0.5`) because the two
+ship from one repo and only work in matched pairs — mismatch symptoms are in §9. Bump them together
+or not at all, and re-verify the env table in docs/mobile/ota.md when you do.
 
-The publish CLI is pinned to the **same** version in `mobile-ota.yml` (`eoas@2.3.21`) because the two
-ship from one repo and only work in matched pairs (§9). Bump them together or not at all.
+v3 is multi-app: the app is selected by the `expo-app-id` request header, and uploads are app-scoped
+(`/<appId>/requestUploadUrl/<branch>`). A client that sends **no** app id is still served, from the
+server's own `EXPO_APP_ID` — which is why a local dev build with no `TRM_OTA_APP_ID` keeps working.
 
 ```
-image: ghcr.io/axelmarciano/expo-open-ota@sha256:de09a283642323ebcd677f236b5a6145b83749ae7b6b5864a9976d1e33960905
+image: ghcr.io/axelmarciano/expo-open-ota@sha256:c6f37d3e1edc5e8f8372e4353bf09ef0524248688a362a6c0bada113001019d7
 ```
 
 ### Production (Portainer / Docker Swarm)
@@ -153,7 +155,7 @@ services (Swarm secrets instead of a bind mount, so the key never sits on disk i
 ```yaml
 services:
   ota:
-    image: ghcr.io/axelmarciano/expo-open-ota@sha256:de09a283642323ebcd677f236b5a6145b83749ae7b6b5864a9976d1e33960905
+    image: ghcr.io/axelmarciano/expo-open-ota@sha256:c6f37d3e1edc5e8f8372e4353bf09ef0524248688a362a6c0bada113001019d7
     environment:
       BASE_URL: ${TRM_OTA_BASE_URL}
       JWT_SECRET: ${TRM_OTA_JWT_SECRET}
@@ -257,45 +259,65 @@ a header, not the path.
 
 ## 7. GitHub settings
 
-| Kind         | Name          | Value                                                     |
-| ------------ | ------------- | --------------------------------------------------------- |
-| **Variable** | `TRM_OTA_URL` | `https://ota.<domain>/manifest` (full manifest URL, §1)   |
-| **Secret**   | `EXPO_TOKEN`  | The §3 robot token — `eoas` auth + channel→branch mapping |
+| Kind         | Name             | Value                                                                       |
+| ------------ | ---------------- | --------------------------------------------------------------------------- |
+| **Variable** | `TRM_OTA_URL`    | `https://ota.<domain>/manifest` (full manifest URL, §1)                     |
+| **Variable** | `TRM_OTA_APP_ID` | The Expo **project id** — the same value as the server's `EXPO_APP_ID` (§3) |
+| **Secret**   | `EXPO_TOKEN`     | The §3 robot token — `eoas` auth + channel→branch mapping                   |
 
-There is deliberately **no code-signing secret in CI**: manifests are signed serve-side by the key
-from §2.
+`TRM_OTA_APP_ID` is a variable, not a secret: it is a public identifier that ships inside every
+binary as the `expo-app-id` header. There is deliberately **no code-signing secret in CI** either —
+manifests are signed serve-side by the key from §2.
 
-Two consequences worth knowing:
+Consequences worth knowing:
 
-- `TRM_OTA_URL` is consumed by the **store build lanes too** (§0), not just `mobile-ota.yml`.
+- Both variables are consumed by the **store build lanes too** (§0), not just `mobile-ota.yml`.
+- **Both are runtimeVersion fingerprint inputs.** `updates.url` and `updates.requestHeaders` feed the
+  fingerprint, so a store binary built with different values than the publish targets a different
+  runtime version and silently never sees the update. All three mobile lanes therefore pass the same
+  pair; don't set one and forget another (measured evidence in docs/mobile/ota.md).
 - Neither store lane sets `TRM_OTA_CHANNEL`, so every store binary requests the **`production`**
-  channel. A `preview` publish only reaches binaries built locally with
-  `TRM_OTA_CHANNEL=preview`; it is not a staging ring for TestFlight/internal-track builds.
+  channel. A `preview` publish only reaches binaries built locally with `TRM_OTA_CHANNEL=preview` —
+  and because the channel is _also_ a fingerprint input, the OTA lane bakes the channel it publishes
+  to. It is not a staging ring for TestFlight/internal-track builds.
 
 ## 8. Verify the deployment
 
 ```bash
 curl -si https://ota.<domain>/hc                     # → 200, empty body
 
-# Runtime version the current tree targets (any mismatch = "no update available" by design):
-npx @expo/fingerprint apps/mobile
+# The runtime version the current tree targets — PER PLATFORM, resolved the way eoas resolves it.
+# NOT `npx @expo/fingerprint`: that whole-project hash is a different value and never appears in a
+# manifest, so probing with it reports "no update" for a version nothing was published under.
+cd apps/mobile
+npx expo-updates runtimeversion:resolve --platform android --workflow managed
 
 curl -si https://ota.<domain>/manifest \
   -H 'expo-protocol-version: 1' \
   -H 'expo-channel-name: production' \
-  -H 'expo-runtime-version: <fingerprint>' \
-  -H 'expo-platform: android'
+  -H 'expo-runtime-version: <runtimeVersion from above>' \
+  -H 'expo-platform: android' \
+  -H 'expo-app-id: <TRM_OTA_APP_ID>'
+```
+
+Or let the CLI do both shapes for you — it probes with and without the app id and tells you which
+clients the server serves:
+
+```bash
+cd apps/mobile && npx --yes eoas@3.0.5 doctor --channel production
 ```
 
 Expected before the first publish: a valid expo-updates protocol response (a "no update available"
 directive is a **pass**). Failures that mean something specific:
 
-| Symptom                               | Cause                                                                   |
-| ------------------------------------- | ----------------------------------------------------------------------- |
-| Connection refused / nginx HTML error | Proxy or container not up                                               |
-| Container exits at boot (crash loop)  | Missing `EXPO_ACCESS_TOKEN`, or the `JWT_SECRET` pre-flight guard fired |
-| `400 No channel name provided`        | The `expo-channel-name` header was dropped by the proxy                 |
-| `500 … GraphQL … 401 Unauthorized`    | Bad/expired Expo token, or `EXPO_APP_ID` isn't that token's project     |
+| Symptom                                              | Cause                                                                                    |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Connection refused / nginx HTML error                | Proxy or container not up                                                                |
+| Container exits at boot (crash loop)                 | Missing `EXPO_ACCESS_TOKEN`, or the `JWT_SECRET` pre-flight guard fired                  |
+| `400 No channel name provided`                       | The `expo-channel-name` header was dropped by the proxy                                  |
+| `500 … GraphQL … 401 Unauthorized`                   | Bad/expired Expo token, or `EXPO_APP_ID` isn't that token's project                      |
+| `400 … "invalid app id"`                             | `expo-app-id` missing/wrong on a route that requires it (uploads are `/<appId>/…` on v3) |
+| `404 page not found` on `/requestUploadUrl/<branch>` | A **v2 CLI against a v3 server** — the route is app-scoped now; pin the CLI to the image |
 
 End-to-end on a device is the real acceptance bar: publish (§9), cold-start the app once (it
 downloads in the background — `fallbackToCacheTimeout: 0` never blocks launch), then cold-start
@@ -304,22 +326,29 @@ again — the update applies on the **second** start.
 ## 9. First publish
 
 Run **mobile-ota** (Actions → Run workflow → channel `production`), or push a `mobile-ota-v*` tag.
-It typechecks, records the fingerprint, and runs `npx eoas publish` — which does its own
-`expo export`, so there is no separate export step. Manual equivalent from a workstation:
+It typechecks, records the per-platform runtime versions, and runs `npx eoas publish` — which does its
+own `expo export`, so there is no separate export step. Manual equivalent from a workstation:
 
 ```bash
 cd apps/mobile
 TRM_OTA_URL=https://ota.<domain>/manifest \
+TRM_OTA_APP_ID=<expo project id> \
 TRM_SERVER_ORIGIN=<production origin> \
 TRM_GOOGLE_WEB_CLIENT_ID=… TRM_GOOGLE_IOS_CLIENT_ID=… TRM_GOOGLE_IOS_URL_SCHEME=… \
 EXPO_TOKEN=<robot-token> \
-  npx --yes eoas@2.3.21 publish --branch production --nonInteractive --outputDir dist --message "manual"
+  npx --yes eoas@3.0.5 publish --branch production --nonInteractive --outputDir dist --message "manual"
 ```
 
-**Keep the CLI version pinned to the server's.** Unpinned `npx eoas` floats to the 3.x
-control-plane line and fails with `Your Expo config is missing the 'expo-app-id' entry in
-updates.requestHeaders` — do not "fix" that by adding the header (it is baked into the binary and
-shifts the runtimeVersion fingerprint); pin the CLI, or upgrade CLI **and** server together.
+**Keep the CLI version pinned to the server's**, in both directions:
+
+| Mismatch                  | Failure                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| v2 CLI → v3 server        | `Failed to request upload URL: 404 page not found` (uploads are `/<appId>/…` on v3) |
+| v3 CLI → v2-shaped config | `Your Expo config is missing the 'expo-app-id' entry in updates.requestHeaders`     |
+
+The `EXPO_TOKEN` name is right even though the CLI's error text says `EXPO_ACCESS_TOKEN`: eoas 3.x
+reads `EXPO_TOKEN` on its Expo auth path, and only switches to the server's own token mode when
+`EOO_TOKEN` is set.
 
 The `TRM_*` build vars are not optional decoration: an applied update's manifest **replaces**
 `Constants.expoConfig.extra` on device, so publishing without them wipes the baked Google client ids
@@ -327,7 +356,7 @@ and server origin from every phone that applies it.
 
 `eoas publish` **refuses to run on a dirty working tree** (`Commit all changes. Aborting...`) — it
 lists the offending paths, and anything generated into the tree before it counts. That is why
-`apps/mobile/fingerprint.json` is gitignored; keep it that way, and commit or stash local work before
+`apps/mobile/runtime-versions.json` is gitignored; keep it that way, and commit or stash local work before
 publishing by hand.
 
 Rollback = republish the previous known-good bundle to the same channel (updates are immutable;
@@ -354,6 +383,7 @@ newest wins). See docs/mobile/ota.md.
 - [ ] Private key on the host, SPKI hash matches the committed certificate (§2)
 - [ ] Container running the digest-pinned image, `/hc` → 200 (§5, §8)
 - [ ] `https://ota.<domain>/manifest` answers a protocol response through TLS (§6, §8)
-- [ ] `TRM_OTA_URL` variable + `EXPO_TOKEN` secret set on the repo (§7)
+- [ ] `TRM_OTA_URL` + `TRM_OTA_APP_ID` variables and the `EXPO_TOKEN` secret set on the repo (§7)
+- [ ] CLI pin in `mobile-ota.yml` matches the deployed image version (§5)
 - [ ] Store release cut **after** those were set (§0)
 - [ ] One update published and verified applying on a real device across two cold starts (§8, §9)

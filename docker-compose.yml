@@ -144,11 +144,13 @@ services:
   # and must never be committed (apps/mobile/certs/keys/ is gitignored).
   ota:
     profiles: ['full']
-    # PINNED, not floating: `latest` now resolves to the 3.x line (a multi-app control-plane rewrite
-    # that wants an `expo-app-id` request header + its own datastore), which this env block and the
-    # app's single-app config do not speak. The publish CLI in mobile-ota.yml is pinned to the same
-    # version — they ship from one repo and only work in matched pairs (docs/mobile/ota.md).
-    image: ghcr.io/axelmarciano/expo-open-ota:v2.3.21
+    # PINNED, not floating (`latest` moves between incompatible generations): the deployment runs the
+    # v3 line, where the server is multi-app — the app is selected by an `expo-app-id` request header
+    # and uploads are app-scoped (<origin>/<appId>/requestUploadUrl/<branch>). The publish CLI in
+    # mobile-ota.yml is pinned to the SAME version: they ship from one repo and only work in matched
+    # pairs (docs/mobile/ota.md). The env below is the stateless-mode contract — v3 keeps serving
+    # clients that send no app id by falling back to EXPO_APP_ID, which is what local dev builds are.
+    image: ghcr.io/axelmarciano/expo-open-ota:v3.0.5
     environment:
       # Public origin clients reach this server at (updates.url = <BASE_URL>/manifest).
       BASE_URL: ${TRM_OTA_BASE_URL:-http://localhost:3005}

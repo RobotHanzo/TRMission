@@ -50,6 +50,19 @@ const googleIosUrlScheme =
 const serverOrigin = process.env.TRM_SERVER_ORIGIN || 'https://trmission.robothanzo.dev';
 const serverHost = new URL(serverOrigin).hostname;
 
+// The OTA server's app identity (expo-open-ota v3 is multi-app; the id is the Expo project id, the
+// same value as the server's own EXPO_APP_ID env). Sent as the `expo-app-id` request header and
+// required by `eoas publish` to resolve the app it is publishing to.
+//
+// Deliberately OMITTED when unset rather than defaulted to '': an empty header is not the same as no
+// header — the server serves a request with no app id by falling back to its EXPO_APP_ID (that is the
+// pre-v3 "v1 client" shape, which is exactly what a local dev build wants), while a blank one is an
+// invalid app id. `updates.requestHeaders` IS a runtimeVersion fingerprint input (@expo/fingerprint
+// only ever drops `updates.url`), so a build with this set and one without it target different
+// runtime versions — CI must set it for BOTH the store lanes and the OTA publish, or a published
+// update becomes invisible to the binary it was meant for. See docs/mobile/ota.md.
+const otaAppId = process.env.TRM_OTA_APP_ID || undefined;
+
 const config: ExpoConfig = {
   name: 'TRMission',
   slug: 'trmission',
@@ -170,8 +183,12 @@ const config: ExpoConfig = {
     // SERVE time with the private key mounted on the server (never in CI, never committed).
     codeSigningCertificate: './certs/certificate.pem',
     codeSigningMetadata: { keyid: 'main', alg: 'rsa-v1_5-sha256' },
-    // expo-open-ota resolves the update branch from this channel header (production|preview).
-    requestHeaders: { 'expo-channel-name': process.env.TRM_OTA_CHANNEL ?? 'production' },
+    // expo-open-ota resolves the update branch from this channel header (production|preview), and
+    // v3 resolves WHICH APP from expo-app-id (see otaAppId above for why it is spread, not defaulted).
+    requestHeaders: {
+      'expo-channel-name': process.env.TRM_OTA_CHANNEL ?? 'production',
+      ...(otaAppId ? { 'expo-app-id': otaAppId } : {}),
+    },
   },
   // An OTA can never land on an incompatible native build: the fingerprint hashes the whole
   // native surface (modules, SDK, config plugins), so mismatched binaries ignore the update.

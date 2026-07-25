@@ -11,21 +11,36 @@ interplay, rollback, fallbacks. For standing the server up on a real host (keys,
 credentials, Portainer/Swarm service, repo variables, verification), follow
 [docs/release/ota-server-setup.md](../release/ota-server-setup.md).
 
-## Pinned upstream contract (recorded 2026-07-12, Task 9 Step 1)
+## Pinned upstream contract (v3 line — re-pinned 2026-07-25, verified against the deployment)
 
-Upstream moves faster than our plans; everything below was read from the release/README current at
-pin time. Re-verify this table before bumping the image.
+Upstream moves faster than our plans. The original pin (2026-07-12) was the v2 single-app line;
+the deployed server is v3, so the whole contract was re-verified against the live host and the
+published CLI tarballs. **Server and CLI ship from one repo and only work in matched pairs** — bump
+them together, never one alone.
 
-| Item              | Pinned value                                                                                |
-| ----------------- | ------------------------------------------------------------------------------------------- |
-| Release           | `v2.3.21`                                                                                   |
-| Publish CLI       | `eoas@2.3.21` — pinned in lockstep with the server (see "Publish mechanism" below)          |
-| Docker image      | `ghcr.io/axelmarciano/expo-open-ota:v2.3.21` (version tags DO exist — corrected 2026-07-25) |
-| Container port    | `3000` (host-mapped to `3005` in compose)                                                   |
-| Manifest endpoint | `GET /manifest` — this is what `updates.url` points at                                      |
-| Health check      | `GET /hc`                                                                                   |
-| Assets            | `GET /assets`                                                                               |
-| Upload            | `POST /requestUploadUrl/{BRANCH}` + friends — driven by the `eoas` CLI, not called by hand  |
+| Item              | Pinned value                                                                                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Release           | `v3.0.5`                                                                                                                                                                                         |
+| Publish CLI       | `eoas@3.0.5` — pinned in `mobile-ota.yml`, in lockstep with the image                                                                                                                            |
+| Docker image      | `ghcr.io/axelmarciano/expo-open-ota:v3.0.5` (version tags DO exist — the old "none published" note was wrong)                                                                                    |
+| Container port    | `3000` (host-mapped to `3005` in compose)                                                                                                                                                        |
+| Manifest endpoint | `GET /manifest` — what `updates.url` points at                                                                                                                                                   |
+| App selection     | `expo-app-id` request header = the **Expo project id** (the server's own `EXPO_APP_ID`). Omit it and the server falls back to `EXPO_APP_ID` — that "v1 client" path is what local dev builds use |
+| Health check      | `GET /hc`                                                                                                                                                                                        |
+| Assets            | `GET /assets`                                                                                                                                                                                    |
+| Upload            | `POST /{APP_ID}/requestUploadUrl/{BRANCH}` → `…/uploadLocalFile` → `…/markUpdateAsUploaded/{BRANCH}` — **app-scoped in v3** (v2 had no `/{APP_ID}` segment), driven by the CLI, never by hand    |
+| Publish auth      | `EOO_TOKEN` (server-dashboard token) switches the CLI to "eoo" mode; otherwise it reads `EXPO_TOKEN`. We use the Expo robot token                                                                |
+| Dashboard         | `GET /dashboard/` — present on v3; not used by us                                                                                                                                                |
+
+### How this was verified (2026-07-25)
+
+Live host, not documentation: `/manifest` with `expo-channel-name` + `expo-platform` +
+`expo-runtime-version` returns `200 multipart/mixed` `{"type":"noUpdateAvailable"}` **without** any
+app-id header (so the `EXPO_APP_ID` fallback works), `POST /api/apps` → `401`, and
+`POST /api/requestUploadUrl/production` → `{"detail":"invalid app id"}` (it read `requestUploadUrl`
+as an app id — that is the `/{APP_ID}/…` route shape). The v2 path `POST /requestUploadUrl/production`
+→ `404 page not found`, which is the failure the v2-pinned CLI hit. Auth/appId/route behaviour was
+read from the published `eoas` tarballs (`dist/lib/auth.js`, `dist/commands/publish.js`).
 
 ### Env contract (compose `ota` service)
 
@@ -45,24 +60,59 @@ pin time. Re-verify this table before bumping the image.
 
 ### Publish mechanism
 
-`npx eoas@2.3.21 publish --branch <branch> --nonInteractive [--platform ios|android|all] [--message …]`,
+`npx eoas@3.0.5 publish --branch <branch> --nonInteractive [--platform ios|android|all] [--message …]`,
 authenticated by an `EXPO_TOKEN` env var. **eoas runs its own `expo export`** — CI needs no
 separate export step. Channels (what the app requests via the `expo-channel-name` header) map to
 branches in the Expo dashboard; we use `production` and `preview` as both channel and branch names.
 
-**The version pin is load-bearing, not tidiness.** The CLI and the server ship from one repo and move
-together, so the CLI must match the deployed image. Unpinned `npx eoas` resolves to the 3.x line (the
-multi-app control-plane rewrite), which refuses this config outright:
+**The version pin is load-bearing, not tidiness.** Unpinned `npx eoas` floats across generations and
+breaks in both directions:
 
-```
-Your Expo config is missing the 'expo-app-id' entry in updates.requestHeaders.
-Fix: run 'npx eoas init' to migrate, or pin to the previous CLI via 'npx eoas@1 ...'.
+- a **v2 CLI against the v3 server** posts to `/requestUploadUrl/<branch>` and gets
+  `Failed to request upload URL: 404 page not found`;
+- a **v3 CLI against a v2-shaped config** (no `expo-app-id`) aborts with
+  `Your Expo config is missing the 'expo-app-id' entry in updates.requestHeaders`.
+
+New v3 flags worth knowing: `--rollout-percentage` (progressive rollout, progressed from the
+dashboard), `--dumpSourcemap`, and `--disableRepositoryCheck`. We deliberately do **not** pass the
+last one — the clean-tree check is what keeps a published bundle equal to a commit; generated files
+are gitignored instead.
+
+### `updates.requestHeaders` is a fingerprint input (this fences updates)
+
+Both header values feed the runtimeVersion, so they must match between the store build and the
+publish. Measured on this project 2026-07-25 (`npx @expo/fingerprint .`):
+
+| Config                                      | Hash        |
+| ------------------------------------------- | ----------- |
+| no `expo-app-id`                            | `643948f6…` |
+| with `expo-app-id`                          | `dbfc9bbb…` |
+| with `expo-app-id`, different `TRM_OTA_URL` | `bd1e4857…` |
+
+`@expo/fingerprint` only drops `updates.url` under the `ExpoConfigEASProject` source-skip, which is
+**not** enabled by default — so even the URL moves the hash. Consequences, all enforced in CI:
+
+- `TRM_OTA_APP_ID` must be set for the store lanes **and** the OTA lane (mobile-android/ios/ota.yml).
+- `TRM_OTA_CHANNEL` must be the channel being published to, or a `preview` publish stamps a
+  production-flavoured runtime version that no preview binary can match.
+- Locally, `TRM_OTA_APP_ID` unset means the header is **omitted** (not blank) — the v1-client shape
+  the server still serves via its `EXPO_APP_ID` fallback.
+
+### The recorded runtime version is per-platform
+
+`npx @expo/fingerprint .` hashes the whole project across all platforms and yields a value that never
+appears in a manifest. The real runtime version is what `expo-updates` computes per platform, which is
+also exactly what eoas calls (`dist/lib/runtimeVersion.js` → the project's own CLI):
+
+```bash
+cd apps/mobile
+npx expo-updates runtimeversion:resolve --platform android --workflow managed   # → {"runtimeVersion":…}
 ```
 
-Verified 2026-07-25 by unpacking the published tarballs: `expo-app-id` appears in `3.0.5` and in
-neither `2.3.21` nor `2.3.22` (nor `1.0.39`) — the error's "v2+" wording is imprecise, 2.x is fine.
-Do **not** satisfy it by adding the header: `updates.requestHeaders` is baked into the binary and is a
-fingerprint input, so it would shift every runtime version _and_ still need a v3 server behind it.
+`--workflow managed` because `android/`/`ios/` are CNG (that mode ignores the native dirs, so a
+prebuilt tree and a clean one agree). Same tree, 2026-07-25: android `63e96d17…`, ios `7e888eb0…` —
+different per platform, and both different from the whole-project hash above. `mobile-ota.yml` records
+these two values as `runtime-versions.json`; use them when probing `/manifest` by hand.
 
 ### Code-signing decision: serve-time signing
 
@@ -104,7 +154,7 @@ expo-open-ota signs manifests **at serve time** with the private key mounted int
 - `runtimeVersion: { policy: 'fingerprint' }` — any native change (module/SDK/config-plugin)
   changes the fingerprint, so old binaries simply never see the new bundle.
 
-## Local smoke (verified 2026-07-12 against v2.3.21)
+## Local smoke
 
 ```bash
 EXPO_APP_ID=<expo-project-id> EXPO_ACCESS_TOKEN=<robot-token> TRM_OTA_JWT_SECRET=<a-real-secret> \
@@ -112,9 +162,15 @@ EXPO_APP_ID=<expo-project-id> EXPO_ACCESS_TOKEN=<robot-token> TRM_OTA_JWT_SECRET
 curl -si http://localhost:3005/hc            # → 200 (empty body)
 curl -si http://localhost:3005/manifest \
   -H "expo-protocol-version: 1" -H "expo-channel-name: production" \
-  -H "expo-runtime-version: <fingerprint>" -H "expo-platform: android"
+  -H "expo-runtime-version: <per-platform runtime version>" -H "expo-platform: android"
 # Expect an expo-updates-protocol response; connection refused or an HTML error page is not OK.
+# `{"type":"noUpdateAvailable"}` is a PASS — it means the protocol, channel and app resolved.
 ```
+
+Get `<per-platform runtime version>` from `npx expo-updates runtimeversion:resolve` (above), not from
+`@expo/fingerprint`, or the probe will report no update for a runtime version nothing was published
+under. On v3 you can also let the CLI do it: `npx eoas@3.0.5 doctor --channel production` probes the
+server both as a v1 client (no app id) and a v2 client (with it) and reports which shapes are served.
 
 What this proves without real Expo credentials is recorded in the appendix at the bottom.
 
@@ -124,15 +180,20 @@ Triggers: manual dispatch (channel choice `production`/`preview`) or a `mobile-o
 (always `production`). The pinned publish command as it runs in CI:
 
 ```bash
-npx --yes eoas@2.3.21 publish --branch <channel> --nonInteractive --outputDir dist --message "<ref>"
+npx --yes eoas@3.0.5 publish --branch <channel> --nonInteractive --outputDir dist --message "<ref>"
 ```
 
 - `EXPO_TOKEN` (repo **secret**): Expo robot token — eoas auth + channel→branch mapping.
 - `TRM_OTA_URL` (repo **variable**): the deployment's full manifest URL; eoas derives the OTA
   server origin from the app config's `updates.url`, so this must be set for the publish step.
+- `TRM_OTA_APP_ID` (repo **variable**): the Expo project id, baked as `expo-app-id`. v3 resolves both
+  the upload route and the app from it; also a fingerprint input, hence set in all three mobile lanes.
+- `TRM_OTA_CHANNEL`: set to the channel being published to, for the fingerprint reason above.
 - There is **no code-signing secret in CI** — signing happens at serve time on the OTA server.
-- eoas runs its own `expo export`; the workflow keeps the exported `dist/` plus the recorded
-  `fingerprint.json` (the runtime version the update targets) as a 30-day artifact.
+- eoas runs its own `expo export`; the workflow keeps the exported `dist/` plus
+  `runtime-versions.json` (the per-platform runtime versions the update targets) as a 30-day artifact.
+- The lane does **not** pass `--disableRepositoryCheck`, so every generated file must be gitignored —
+  `eoas publish` aborts on a dirty tree with `Commit all changes. Aborting...`.
 
 ## Forced-update gate vs OTA (who wins, and why both exist)
 

@@ -141,6 +141,11 @@ jobs:
           # Baked into AndroidManifest as expo-updates' URL — unset would ship binaries pointing
           # OTA checks at app.config.ts's localhost dev default.
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          # Baked as the expo-app-id request header (which app on the OTA server this binary asks
+          # about). It is a runtimeVersion fingerprint input, so it MUST match mobile-ota.yml's
+          # publish env — a store build without it targets a different runtime version than the
+          # updates published with it, and would silently never see them.
+          TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
           APP_VERSION: ${{ steps.build_number.outputs.version }}
           # Only a real v* tag reaches Play (see the publish step's `if:` below) — everything else
@@ -200,6 +205,7 @@ jobs:
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
           APP_VERSION: ${{ steps.build_number.outputs.version }}
           TRM_ANDROID_ABIS: ${{ github.ref_type != 'tag' && 'arm64-v8a,x86_64' || '' }}

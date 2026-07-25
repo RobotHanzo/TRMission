@@ -28,17 +28,49 @@ jobs:
       # proto codegen must exist before any workspace build (src/gen is gitignored).
       - run: yarn workspace @trm/proto generate
       - run: yarn typecheck
-      # Writes into the workspace, so the path is gitignored on purpose (apps/mobile/.gitignore):
-      # the publish step below aborts on a dirty working tree, and an untracked file here fails it.
-      - name: Record the fingerprint runtime version (traceability)
+      # Traceability: the runtime versions this update actually targets — resolved exactly the way
+      # eoas resolves them (the project's own expo-updates CLI, PER PLATFORM, managed workflow
+      # because android/ios are CNG). Deliberately not `npx @expo/fingerprint .`: that hashes the
+      # whole project across all platforms and yields a different value than any manifest ever
+      # carries, which makes it useless for "did my probe target the right runtime version".
+      #
+      # The env must match the publish step below: the runtime version is computed from the
+      # evaluated app config, so a missing var here would record versions nothing was published under.
+      # Writes into the workspace, so the path is gitignored (apps/mobile/.gitignore) — the publish
+      # step aborts on a dirty working tree, and an untracked file here fails the whole lane.
+      - name: Record the runtime versions this update targets (traceability)
         working-directory: apps/mobile
-        run: npx @expo/fingerprint . | tee fingerprint.json
+        env:
+          TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
+          TRM_OTA_CHANNEL: ${{ inputs.channel || 'production' }}
+          TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
+          TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
+          TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
+        run: |
+          for platform in android ios; do
+            npx expo-updates runtimeversion:resolve --platform "$platform" --workflow managed \
+              | jq -c --arg platform "$platform" '{($platform): .runtimeVersion}'
+          done | jq -s add | tee runtime-versions.json
       - name: Publish to the OTA server
         working-directory: apps/mobile
         env:
           # eoas resolves the OTA server from the app config's updates.url origin, so this
           # must be the real deployment's manifest URL (repo variable), not the localhost default.
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
+          # The app the update belongs to (expo-open-ota v3 is multi-app). `eoas publish` reads it
+          # from the config's updates.requestHeaders['expo-app-id'] and posts to
+          # <origin>/<appId>/requestUploadUrl/<branch>; without it the publish aborts. It is also a
+          # fingerprint input, so it must match the store lanes exactly (mobile-android/ios.yml).
+          TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
+          # Bake the channel we are publishing TO. `expo-channel-name` lives in
+          # updates.requestHeaders, which is a fingerprint input — so exporting with the default
+          # `production` while publishing to `preview` would stamp the update with the
+          # production-flavoured runtime version, and no preview binary would ever match it.
+          # (Store binaries set nothing and therefore bake `production`, matching a production
+          # publish; a `preview` ring only works for binaries built with TRM_OTA_CHANNEL=preview.)
+          TRM_OTA_CHANNEL: ${{ inputs.channel || 'production' }}
           # eoas' `expo export` re-evaluates app.config.ts, and an applied update's manifest
           # REPLACES the binary's `Constants.expoConfig.extra` at runtime — publishing without
           # these would wipe the baked Google client ids (hiding the Google sign-in button) and
@@ -51,20 +83,24 @@ jobs:
           # Expo robot token — authenticates eoas + the channel→branch mapping. Updates are
           # signed at SERVE time by the OTA server's mounted private key; CI holds no
           # signing material (there is deliberately no code-signing secret here).
+          #
+          # eoas 3.x picks its auth from the env: EOO_TOKEN (a token minted by the OTA server's own
+          # dashboard) switches it to "eoo" mode, otherwise it falls back to the Expo path, which
+          # reads exactly this EXPO_TOKEN (its error string says EXPO_ACCESS_TOKEN; the code reads
+          # EXPO_TOKEN — verified in eoas 3.0.5 dist/lib/auth.js). Keep using the Expo robot token:
+          # the server already authenticates against the Expo API for channel→branch mapping.
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         # eoas runs its own `expo export` (both platforms) before uploading — no separate
         # export step; --outputDir retains the exported bundle for the artifact below.
         # Tag pushes have no inputs → production.
         #
         # The CLI is PINNED to the same version as the deployed server image (docs/mobile/ota.md):
-        # eoas and expo-open-ota ship from one repo and move together. Unpinned `npx eoas` floats to
-        # the 3.x line, which is the multi-app control-plane rewrite — it demands an `expo-app-id`
-        # entry in `updates.requestHeaders` and aborts against this single-app config
-        # ("Fix: run 'npx eoas init' to migrate"). Adding that header is NOT a workaround: it is
-        # baked into the binary, shifts the runtimeVersion fingerprint, and needs a v3 server.
+        # eoas and expo-open-ota ship from one repo and only work in matched pairs — the upload route
+        # moved to <origin>/<appId>/requestUploadUrl/<branch> in v3, so a v2 CLI against a v3 server
+        # 404s and a v3 CLI against a v2-shaped config aborts on the missing expo-app-id.
         # Bump this only together with the server image, then re-verify per docs/release/ota-server-setup.md.
         run: >-
-          npx --yes eoas@2.3.21 publish
+          npx --yes eoas@3.0.5 publish
           --branch ${{ inputs.channel || 'production' }}
           --nonInteractive
           --outputDir dist
@@ -74,5 +110,5 @@ jobs:
           name: ota-bundle-${{ github.run_number }}
           path: |
             apps/mobile/dist
-            apps/mobile/fingerprint.json
+            apps/mobile/runtime-versions.json
           retention-days: 30

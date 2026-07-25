@@ -6,9 +6,10 @@
 /dist
 # fastlane gym's .ipa output (mobile-ios.yml uploads it as a workflow artifact).
 /build
-# `npx @expo/fingerprint .` output, recorded by mobile-ota.yml for traceability (uploaded as a
-# workflow artifact). This MUST stay ignored: `eoas publish` refuses to run on a dirty working tree
-# ("Commit all changes. Aborting..."), so an untracked fingerprint.json fails the whole OTA lane.
+# Runtime-version / fingerprint records written by mobile-ota.yml for traceability (uploaded as a
+# workflow artifact). These MUST stay ignored: `eoas publish` refuses to run on a dirty working tree
+# ("Commit all changes. Aborting..."), so an untracked record file fails the whole OTA lane.
+/runtime-versions.json
 /fingerprint.json
 *.log
 # RNRepo's local prebuilt-artifact cache (see app.config.ts + .fingerprintignore).

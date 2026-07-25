@@ -251,10 +251,13 @@ Repo **variables**: `TRM_SERVER_ORIGIN`, `TRM_GOOGLE_WEB_CLIENT_ID`, `TRM_GOOGLE
 google-signin config plugin validates it at every config eval, so `expo prebuild`/`run:android` need
 it set or fall back to a format-valid placeholder; see `app.config.ts`).
 
-OTA lane: repo variable `TRM_OTA_URL` (the deployment's full `/manifest` URL) + secret
+OTA lane: repo variables `TRM_OTA_URL` (the deployment's full `/manifest` URL) and `TRM_OTA_APP_ID`
+(the Expo project id, baked as the `expo-app-id` header — expo-open-ota v3 is multi-app) + secret
 `EXPO_TOKEN` (Expo robot token — eoas auth/channel mapping only; there is **no** signing
 secret in CI, manifests are signed at serve time by the OTA server's mounted key, and
-`apps/mobile/certs/keys/` must never be committed).
+`apps/mobile/certs/keys/` must never be committed). **Both variables are also set by the store
+lanes**: `updates.url` and `updates.requestHeaders` are runtimeVersion fingerprint inputs, so a
+binary built without them targets a different runtime version than the updates published with them.
 
 Android **secrets**: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
 `ANDROID_KEY_PASSWORD` (signing), `PLAY_JSON_KEY_BASE64` (base64 Play service-account JSON —
@@ -406,9 +409,14 @@ committed `certs/certificate.pem` (`fallbackToCacheTimeout: 0` — stale-while-r
 forced-update gate `GET /version/mobile` is independent and still runs every boot).
 `updates.url` comes from `TRM_OTA_URL` (default: the local compose `ota` service,
 `http://localhost:3005/manifest`); the channel is baked at build time via the
-`expo-channel-name` request header (`TRM_OTA_CHANNEL`, default `production`). Full contract,
-runbook, rollback, and fallbacks: `docs/mobile/ota.md`. The private key in `certs/keys/` is
-gitignored and must never be committed.
+`expo-channel-name` request header (`TRM_OTA_CHANNEL`, default `production`), and the app is selected
+by `expo-app-id` from `TRM_OTA_APP_ID` — **omitted, not blanked, when unset**, which is the "v1
+client" shape the server still serves from its own `EXPO_APP_ID` (so local dev builds keep working).
+Everything in `updates.requestHeaders` feeds the runtimeVersion fingerprint, so the OTA lane and the
+store lanes must bake identical values. The deployed server and the `eoas` CLI are pinned to the same
+version (v3.0.5) because they only work in matched pairs. Full contract, runbook, rollback, and
+fallbacks: `docs/mobile/ota.md`; host setup: `docs/release/ota-server-setup.md`. The private key in
+`certs/keys/` is gitignored and must never be committed.
 
 ## Orientation & layout tiers (`src/app/useOrientationPolicy.ts`)
 
