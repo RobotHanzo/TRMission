@@ -393,8 +393,10 @@ describe('auth: OAuth (Google + Discord, bound by email)', () => {
     expect(res.headers.location).toContain('accounts.google.com');
   });
 
-  it('auto-links a second sign-in (same verified email) to the same account', async () => {
-    // Pre-existing password account.
+  it('does NOT link an OAuth sign-in into an unverified password account (F2) — separate account', async () => {
+    // Pre-existing PASSWORD account: its email was never proven (there is no email-verification
+    // flow), so a later OAuth sign-in on the same address must NOT be auto-linked into it —
+    // otherwise whoever pre-registered the email would capture the real owner's provider session.
     const reg = await request(oServer())
       .post('/api/v1/auth/register')
       .send({ email: 'link@example.com', password: 'password123', displayName: 'Linker' })
@@ -415,7 +417,51 @@ describe('auth: OAuth (Google + Discord, bound by email)', () => {
       .get('/api/v1/auth/me')
       .set('Authorization', `Bearer ${r.body.accessToken}`)
       .expect(200);
-    expect(me.body.id).toBe(reg.body.user.id); // same account, bound by email
+    expect(me.body.id).not.toBe(reg.body.user.id); // a SEPARATE account, not the password one
+
+    // The password account is untouched — it still authenticates with its own credentials.
+    const login = await request(oServer())
+      .post('/api/v1/auth/login')
+      .send({ email: 'link@example.com', password: 'password123' })
+      .expect(200);
+    expect(login.body.user.id).toBe(reg.body.user.id);
+  });
+
+  it('auto-links a second provider into an account whose email a provider already verified', async () => {
+    // First sign-in creates a provider-backed account (its email IS proven by the provider).
+    const first = await runOauth('google', {
+      sub: 'g-xlink-1',
+      email: 'xlink@example.com',
+      emailVerified: true,
+      displayName: 'XLinker',
+      avatarUrl: null,
+    });
+    const r1 = await request(oServer())
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', refreshCookie(first))
+      .expect(200);
+    const me1 = await request(oServer())
+      .get('/api/v1/auth/me')
+      .set('Authorization', `Bearer ${r1.body.accessToken}`)
+      .expect(200);
+
+    // A DIFFERENT provider on the same verified email links into that same account.
+    const second = await runOauth('discord', {
+      sub: 'd-xlink-1',
+      email: 'xlink@example.com',
+      emailVerified: true,
+      displayName: 'XLinker-Discord',
+      avatarUrl: null,
+    });
+    const r2 = await request(oServer())
+      .post('/api/v1/auth/refresh')
+      .set('Cookie', refreshCookie(second))
+      .expect(200);
+    const me2 = await request(oServer())
+      .get('/api/v1/auth/me')
+      .set('Authorization', `Bearer ${r2.body.accessToken}`)
+      .expect(200);
+    expect(me2.body.id).toBe(me1.body.id); // cross-provider linking preserved for verified emails
   });
 
   it('upgrades a signed-in guest in place (same id, keeps history)', async () => {
@@ -514,7 +560,7 @@ describe('auth: Google credential sign-in (One Tap / rendered button)', () => {
     expect(refreshCookie(res)).toContain('trm_refresh=');
   });
 
-  it('auto-links a credential sign-in to an existing account with the same verified email', async () => {
+  it('does NOT link a credential sign-in into an unverified password account (F2) — separate account', async () => {
     const reg = await request(oServer())
       .post('/api/v1/auth/register')
       .send({ email: 'credlink@example.com', password: 'password123', displayName: 'CredLinker' })
@@ -530,7 +576,7 @@ describe('auth: Google credential sign-in (One Tap / rendered button)', () => {
       .post('/api/v1/auth/oauth/google/credential')
       .send({ credential: 'fake-jwt' })
       .expect(200);
-    expect(res.body.user.id).toBe(reg.body.user.id);
+    expect(res.body.user.id).not.toBe(reg.body.user.id); // separate account; password one untouched
   });
 
   it('upgrades a signed-in guest in place', async () => {

@@ -76,6 +76,11 @@ export class UserRepo implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.col.createIndex({ email: 1 }, { unique: true, sparse: true });
+    // Resolve a returning OAuth account by its provider identity (see findByOauth). Sparse — only
+    // the minority of docs that have linked a provider carry these keys.
+    await this.col.createIndex({ 'oauth.google': 1 }, { sparse: true });
+    await this.col.createIndex({ 'oauth.discord': 1 }, { sparse: true });
+    await this.col.createIndex({ 'oauth.apple': 1 }, { sparse: true });
     await this.col.createIndex({ guestExpiresAt: 1 }, { expireAfterSeconds: 0 });
     await this.col.createIndex({ createdAt: -1 }); // dashboard user listing/new-signup counts
   }
@@ -86,6 +91,14 @@ export class UserRepo implements OnModuleInit {
 
   findByEmail(email: string): Promise<UserDoc | null> {
     return this.col.findOne({ email: email.toLowerCase() });
+  }
+
+  /**
+   * Resolve an account by a linked provider identity — the authoritative key for an OAuth login (a
+   * provider `sub` is stable and unique per provider), independent of the account's current email.
+   */
+  findByOauth(provider: IdentityProvider, sub: string): Promise<UserDoc | null> {
+    return this.col.findOne({ [`oauth.${provider}`]: sub });
   }
 
   async createGuest(displayName: string, locale: Locale): Promise<UserDoc> {
@@ -358,9 +371,16 @@ export class UserRepo implements OnModuleInit {
       .toArray();
   }
 
-  /** Create a passwordless registered user from a verified OAuth profile. */
+  /**
+   * Create a passwordless registered user from a verified OAuth profile. `email` is `null` only for
+   * the safety fallback where the provider's email is already held by a DIFFERENT, email-unverified
+   * (password-only) account: the provider identity is still verified, but binding the taken email
+   * would violate the unique-email index AND risk cross-account capture (this server has no
+   * email-verification flow), so the new account is stored without an email and is resolved on
+   * future logins by its provider identity (`findByOauth`).
+   */
   async createOauthUser(
-    email: string,
+    email: string | null,
     displayName: string,
     provider: IdentityProvider,
     sub: string,
@@ -372,7 +392,7 @@ export class UserRepo implements OnModuleInit {
       displayName,
       isGuest: false,
       preferences: { ...DEFAULT_PREFERENCES, locale },
-      email: email.toLowerCase(),
+      ...(email ? { email: email.toLowerCase() } : {}),
       oauth: { [provider]: sub },
       ...(avatarUrl ? { avatarUrl } : {}),
       tokenVersion: 0,

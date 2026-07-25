@@ -41,6 +41,15 @@ export const safeRedirect = (p: unknown): string => {
 
 const isDuplicateKey = (e: unknown): boolean => (e as { code?: number })?.code === 11000;
 
+/**
+ * True once an account already holds at least one linked provider identity — proof that a provider
+ * verified this account's email at least once. A password-only account never has one, and this
+ * server has no email-verification flow, so treat that account's email as UNVERIFIED: it must not
+ * capture a fresh OAuth sign-in on the same address (CWE-287 pre-registration account hijacking).
+ */
+const hasLinkedOauthIdentity = (u: UserDoc): boolean =>
+  !!u.oauth && Object.keys(u.oauth).length > 0;
+
 /** Provider display names ⇒ a clean, length-bounded account display name. */
 const cleanDisplayName = (raw: string, email: string): string => {
   const trimmed = raw.trim();
@@ -147,7 +156,9 @@ export class OauthService {
   /**
    * Verify the round-trip (signed state + nonce cookie), exchange the code, require a verified
    * email, then resolve the account: (a) upgrade a live guest in place when the email is unused,
-   * (b) auto-link & sign into the existing same-email account, or (c) create a new passwordless one.
+   * (b) auto-link & sign into an existing same-email account ONLY when that account's email was
+   * already provider-verified (else a separate account is created), or (c) create a new
+   * passwordless one.
    */
   async handleCallback(
     provider: OauthProvider,
@@ -382,6 +393,16 @@ export class OauthService {
   ): Promise<UserDoc> {
     const locale: Locale = 'zh-Hant';
 
+    // (0) Returning provider identity → resolve by (provider, sub), the authoritative key for an
+    // OAuth account. Runs first so a linked identity always maps back to its OWN account and never
+    // re-links onto (or duplicates against) a same-email account; also refreshes the avatar.
+    const byIdentity = await this.users.findByOauth(provider, sub);
+    if (byIdentity) {
+      return (
+        (await this.users.linkOauthIdentity(byIdentity._id, provider, sub, avatarUrl)) ?? byIdentity
+      );
+    }
+
     // (a) Logged-in guest + unused email → upgrade in place (keep id + match history).
     if (guestUserId && !(await this.users.findByEmail(email))) {
       try {
@@ -404,11 +425,25 @@ export class OauthService {
       }
     }
 
-    // (b) Same verified email already exists → auto-link the provider identity (refresh avatar).
+    // (b) An account already holds this email. Auto-link the provider identity ONLY when that
+    // account's email was already provider-verified (it holds a linked OAuth identity). A
+    // password-only account's email is UNVERIFIED — linking a fresh identity into it would hand
+    // whoever pre-registered the address a session on the real owner's provider sign-in (F2), so
+    // instead create a SEPARATE account for this identity (emailless: the address is taken).
     const existing = await this.users.findByEmail(email);
     if (existing) {
-      return (
-        (await this.users.linkOauthIdentity(existing._id, provider, sub, avatarUrl)) ?? existing
+      if (hasLinkedOauthIdentity(existing)) {
+        return (
+          (await this.users.linkOauthIdentity(existing._id, provider, sub, avatarUrl)) ?? existing
+        );
+      }
+      return this.users.createOauthUser(
+        null,
+        cleanDisplayName(rawName, email),
+        provider,
+        sub,
+        locale,
+        avatarUrl,
       );
     }
 
@@ -425,8 +460,23 @@ export class OauthService {
     } catch (e) {
       if (isDuplicateKey(e)) {
         const raced = await this.users.findByEmail(email);
-        if (raced)
-          return (await this.users.linkOauthIdentity(raced._id, provider, sub, avatarUrl)) ?? raced;
+        if (raced) {
+          // Same verified-email gate as (b): only adopt the raced account when its email was
+          // provider-proven; an unverified password claim gets a separate emailless account.
+          if (hasLinkedOauthIdentity(raced)) {
+            return (
+              (await this.users.linkOauthIdentity(raced._id, provider, sub, avatarUrl)) ?? raced
+            );
+          }
+          return this.users.createOauthUser(
+            null,
+            cleanDisplayName(rawName, email),
+            provider,
+            sub,
+            locale,
+            avatarUrl,
+          );
+        }
       }
       throw e;
     }

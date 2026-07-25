@@ -80,7 +80,7 @@ describe('apple credential sign-in', () => {
     expect(res.body.user.displayName).toBe('localpart');
   });
 
-  it('auto-links to an existing account with the same verified email', async () => {
+  it('does NOT link an Apple credential into an unverified password account (F2) — separate account', async () => {
     const reg = await request(server())
       .post('/api/v1/auth/register')
       .send({ email: 'applelink@example.com', password: 'password123', displayName: 'Linker' })
@@ -96,7 +96,7 @@ describe('apple credential sign-in', () => {
       .post('/api/v1/auth/oauth/apple/credential')
       .send({ identityToken: 'fake-apple-jwt' })
       .expect(200);
-    expect(res.body.user.id).toBe(reg.body.user.id);
+    expect(res.body.user.id).not.toBe(reg.body.user.id); // separate account; password one untouched
   });
 
   it('upgrades a mobile guest in place via the body refresh token', async () => {
