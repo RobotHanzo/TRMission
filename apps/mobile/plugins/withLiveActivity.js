@@ -214,6 +214,20 @@ function applyLiveActivityTarget(project, opts) {
       // manual signing with the match profiles right before gym (see fastlane/Fastfile).
       CODE_SIGN_STYLE: 'Automatic',
       ...(teamId ? { DEVELOPMENT_TEAM: teamId } : {}),
+      // Pin the compiler/linker back to the toolchain default for THIS target.
+      //
+      // `react_native_post_install`'s ccache wiring (USE_CCACHE=1 on the pod install step in
+      // mobile-ios.yml) writes CC/LD/CXX/LDPLUSPLUS as `$(REACT_NATIVE_PATH)/scripts/xcode/
+      // ccache-clang.sh` onto the PROJECT-level build configurations, which every target inherits —
+      // but REACT_NATIVE_PATH/PODS_ROOT are defined only in the Pods xcconfigs, and this extension
+      // is not a CocoaPods target. It therefore inherited a path that expands to
+      // `/../../../../node_modules/react-native/scripts/xcode/ccache-clang.sh` and failed the
+      // archive with "unable to spawn process". A target-level value wins over the project-level
+      // one, and RN only ever touches the project level, so this survives `pod install`.
+      CC: '$(DT_TOOLCHAIN_DIR)/usr/bin/clang',
+      LD: '$(DT_TOOLCHAIN_DIR)/usr/bin/clang',
+      CXX: '$(DT_TOOLCHAIN_DIR)/usr/bin/clang++',
+      LDPLUSPLUS: '$(DT_TOOLCHAIN_DIR)/usr/bin/clang++',
     });
   }
 

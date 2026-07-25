@@ -119,6 +119,12 @@ describe('withLiveActivity: widget extension injection', () => {
       expect(settings.INFOPLIST_FILE).toBe(`"${TARGET_NAME}/${TARGET_NAME}-Info.plist"`);
       expect(settings.GENERATE_INFOPLIST_FILE).toBe('NO');
       expect(settings.SKIP_INSTALL).toBe('YES');
+      // Must override the project-level compiler/linker RN's ccache pass installs at pod-install
+      // time — the extension is not a pod target, so RN's $(REACT_NATIVE_PATH)-relative wrapper
+      // path expands to nothing there and the archive can't spawn a compiler.
+      for (const key of ['CC', 'LD', 'CXX', 'LDPLUSPLUS']) {
+        expect(settings[key]).toContain('$(DT_TOOLCHAIN_DIR)');
+      }
       // ActivityKit needs 16.1+; the template's own floor is well past that.
       expect(Number.parseFloat(settings.IPHONEOS_DEPLOYMENT_TARGET ?? '0')).toBeGreaterThanOrEqual(
         16.1,
