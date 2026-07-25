@@ -29,7 +29,7 @@ import type { GameRegistry, Match } from '../game/game-registry';
 import { GameSession, type Prepared } from '../game/game-session';
 import { Connection, type CloseFn, type Sink } from './connection';
 import { DevTicketVerifier, type TicketVerifier } from './ticket';
-import type { GameStorePort } from '../persistence/types';
+import { GameNotLiveError, type GameStorePort } from '../persistence/types';
 import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
 import { chooseBotAction, isBotId, type BotProfile } from '@trm/bots';
 import { botStepDelayMs } from './bot-pacing';
@@ -177,7 +177,11 @@ const DEFAULT_TURN_TIMEOUT_MS = 75_000;
 const DEFAULT_AUTOPLAY_PAUSE_AFTER = 5;
 const DEFAULT_BOT_TAKEOVER_AFTER = 3;
 
-type BotMoveOutcome = 'moved' | 'noLegalAction' | 'persistFailed';
+// 'gameNotLive': the store rejected the write because the game's persisted status is no
+// longer LIVE (a resurrected zombie from the F20 race, or a termination that landed mid-turn).
+// Distinct from 'persistFailed' (a transient infra error) — the driver must treat it as
+// terminal, not reschedule another attempt.
+type BotMoveOutcome = 'moved' | 'noLegalAction' | 'persistFailed' | 'gameNotLive';
 
 export class GameHub {
   private readonly log = new Logger('bots');
@@ -379,6 +383,13 @@ export class GameHub {
     } catch (err) {
       throw new GameUnrecoverableError(gameId, `replay failed: ${describeError(err)}`);
     }
+    // Re-read the status immediately before publishing into the registry — zero await between
+    // this check and `registry.adopt` below. `loadForRecovery`'s own read happened before the
+    // (possibly slow) board resolve + replay above, so a maintainer's termination racing this
+    // call could have landed in that gap. This doesn't make the gate atomic with the publish
+    // (there's no transaction spanning the DB read and the in-memory registry write), but it
+    // shrinks the window from "the whole recovery path" down to a single point read (F20).
+    if ((await this.store.getStatus(gameId)) === 'TERMINATED') return null;
     const match = this.registry.adopt(gameId, session);
     if (!this.members.has(gameId)) this.members.set(gameId, new Map());
     if (!this.connectionLog.has(gameId)) this.connectionLog.set(gameId, []);
@@ -1242,8 +1253,12 @@ export class GameHub {
    * later": a transient persist failure gets a few in-process retries and then a delayed
    * re-drive (self-heals once the store recovers); a policy that finds no legal action at
    * all falls back to PASS directly against the reducer (`botMove`) before giving up, since
-   * PASS is guaranteed legal whenever no other move is (rule A15). Either failure mode is
-   * metered via `botDriverStalled` — it should never fire outside of injected-failure tests.
+   * PASS is guaranteed legal whenever no other move is (rule A15). A persist rejection because
+   * the game is no longer LIVE (F20: a maintainer's termination, including one a racing
+   * reconnect resurrected into memory) is terminal, never transient — rescheduling it would
+   * retry forever since nothing else will ever evict this match, so it's evicted here instead.
+   * Every failure mode is metered via `botDriverStalled` — it should never fire outside of
+   * injected-failure tests (or, for `game_not_live`, outside the F20 race itself).
    */
   private async driveBots(gameId: string): Promise<void> {
     const bots = this.bots.get(gameId);
@@ -1272,8 +1287,20 @@ export class GameHub {
           );
           this.metrics.botDriverStalled('persist_failed');
           this.scheduleBotDriverRetry(gameId);
+        } else if (outcome === 'gameNotLive') {
+          // Terminal, not transient: the game's persisted status is no longer LIVE, so nothing
+          // will ever make this write succeed. Rescheduling (like 'persistFailed' does) would
+          // retry forever — evictMatch's own eviction already ran before this resurrection
+          // completed, so nothing else will clear this match out of the registry. Clean it up
+          // here instead of leaving a zombie match churning on a timer indefinitely.
+          this.log.warn(
+            `game ${gameId} is no longer LIVE; evicting the resurrected match instead of rescheduling bot ${profile.playerId}`,
+          );
+          this.metrics.botDriverStalled('game_not_live');
+          await this.evictMatch(gameId, 'This game is no longer live.');
         }
-        break; // 'noLegalAction' (even PASS failed), or persist retries exhausted.
+        break; // 'noLegalAction' (even PASS failed), 'gameNotLive' (evicted above), or persist
+        // retries exhausted.
       }
     } finally {
       this.driving.delete(gameId);
@@ -1345,7 +1372,7 @@ export class GameHub {
     this.metrics.commandReceived();
     const startedAt = performance.now();
     const applied = await this.applyPrepared(match, action, prep);
-    if (!applied.ok) return 'persistFailed';
+    if (!applied.ok) return applied.error instanceof GameNotLiveError ? 'gameNotLive' : 'persistFailed';
     this.broadcast(match, prep.events, null, 0);
     this.metrics.commandApplied((performance.now() - startedAt) / 1000);
     return 'moved';

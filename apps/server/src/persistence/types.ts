@@ -139,6 +139,24 @@ export interface MatchHistoryDoc {
   completedAt: Date;
 }
 
+/**
+ * Thrown by `GameStorePort.appendAction` when a game's persisted `status` is no longer
+ * `'LIVE'` at write time — most commonly a maintainer's forced termination racing a reconnect
+ * that resurrected the match into memory (`loadForRecovery` + `registry.adopt`; see F20).
+ * Distinct from a transient infra failure: a caller driving retries (the bot driver) must
+ * treat this as terminal — stop retrying and evict the resurrected match — rather than
+ * scheduling another attempt.
+ */
+export class GameNotLiveError extends Error {
+  constructor(
+    readonly gameId: string,
+    readonly status: GameDoc['status'] | undefined,
+  ) {
+    super(`game ${gameId} is not LIVE (status=${status ?? 'unknown'}); refusing to append action`);
+    this.name = 'GameNotLiveError';
+  }
+}
+
 export interface GameStorePort {
   createGame(
     gameId: string,

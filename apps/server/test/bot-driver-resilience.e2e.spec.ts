@@ -6,7 +6,7 @@ import { GameRegistry } from '../src/game/game-registry';
 import { GameHub } from '../src/ws/hub';
 import type { BotProfile } from '@trm/bots';
 import type { MetricsHooks } from '../src/observability/hooks';
-import type { ChatEntry, GameStorePort } from '../src/persistence/types';
+import { GameNotLiveError, type ChatEntry, type GameStorePort } from '../src/persistence/types';
 
 const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
 
@@ -47,11 +47,38 @@ class FlakyStore implements GameStorePort {
   }
 }
 
+/**
+ * A store whose `appendAction` always rejects with `GameNotLiveError` — simulating a match that
+ * a racing maintainer termination already marked TERMINATED before this write, e.g. a zombie the
+ * F20 recovery-race resurrected into memory. Distinct from `FlakyStore`'s generic/transient
+ * failures: the driver must treat this as terminal, never reschedule.
+ */
+class NotLiveStore implements GameStorePort {
+  appendCount = 0;
+  async createGame(): Promise<void> {}
+  async appendAction(gameId: string): Promise<void> {
+    this.appendCount++;
+    throw new GameNotLiveError(gameId, 'TERMINATED');
+  }
+  async recordCompletion(): Promise<void> {}
+  async getStatus(): Promise<'TERMINATED'> {
+    return 'TERMINATED';
+  }
+  async addSpectator(): Promise<void> {}
+  async loadForRecovery(): Promise<null> {
+    return null;
+  }
+  async appendChat(): Promise<void> {}
+  async loadChat(): Promise<ChatEntry[]> {
+    return [];
+  }
+}
+
 function stallCounter(): {
-  stalls: { no_legal_action: number; persist_failed: number };
+  stalls: { no_legal_action: number; persist_failed: number; game_not_live: number };
   metrics: MetricsHooks;
 } {
-  const stalls = { no_legal_action: 0, persist_failed: 0 };
+  const stalls = { no_legal_action: 0, persist_failed: 0, game_not_live: 0 };
   const metrics: MetricsHooks = {
     commandReceived() {},
     commandRejected() {},
@@ -125,5 +152,33 @@ describe('bot driver resilience: transient persist failures never permanently fr
 
     await waitUntil(() => match.session.raw().actionSeq > 0);
     expect(store.appendCount).toBeGreaterThan(5); // recovered and kept going past the flaky window
+  });
+
+  it('evicts a zombie match instead of rescheduling when the game is no longer LIVE (F20)', async () => {
+    const board = taiwanBoard();
+    const { config, bots } = allBotConfig('not-live');
+    const store = new NotLiveStore();
+    const { stalls, metrics } = stallCounter();
+    const registry = new GameRegistry();
+
+    const hub = new GameHub(registry, {
+      store,
+      metrics,
+      botMoveDelayMs: 0,
+      botPersistRetryDelayMs: 0,
+      botDriverRescheduleMs: 5,
+    });
+    await hub.createMatch('not-live', board, config, bots);
+
+    // Unlike a transient failure, a single rejection is enough: no in-process retries, and the
+    // match is evicted from the registry rather than left resident for a rescheduled re-drive.
+    await waitUntil(() => stalls.game_not_live >= 1);
+    expect(stalls.persist_failed).toBe(0);
+    expect(registry.get('not-live')).toBeUndefined();
+
+    // Confirm there really is no reschedule: appendCount stays flat well past botDriverRescheduleMs.
+    const countAfterEviction = store.appendCount;
+    await new Promise((r) => setTimeout(r, 50));
+    expect(store.appendCount).toBe(countAfterEviction);
   });
 });

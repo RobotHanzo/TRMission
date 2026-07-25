@@ -129,7 +129,7 @@ export class MetricsService implements MetricsHooks {
   leakBlocked(): void {
     this.leaks.inc();
   }
-  botDriverStalled(reason: 'no_legal_action' | 'persist_failed'): void {
+  botDriverStalled(reason: 'no_legal_action' | 'persist_failed' | 'game_not_live'): void {
     this.botStalls.inc({ reason });
   }
   recoveryFailed(): void {

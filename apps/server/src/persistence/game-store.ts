@@ -10,6 +10,7 @@ import type { BotProfile } from '@trm/bots';
 import {
   configToStored,
   storedToConfig,
+  GameNotLiveError,
   type GameStorePort,
   type RecoveryData,
   type GameDoc,
@@ -97,6 +98,17 @@ export class MongoGameStore implements GameStorePort {
     state: GameState,
   ): Promise<void> {
     const now = new Date();
+    // Gate FIRST, before any durable write: a game whose status has already moved off LIVE
+    // (most commonly a maintainer's forced termination) must never gain a new gameEvents/
+    // gameSnapshots row — not even one a racing reconnect resurrected into memory via
+    // loadForRecovery + registry.adopt (F20). This is a point read rather than a true
+    // cross-collection CAS — there are no multi-document transactions here (every write for a
+    // game is already serialized by its own command queue, ADR A2) — so a narrow residual race
+    // remains between this check and the writes below; the status:'LIVE' filter on the final
+    // games.updateOne is a second, best-effort check against exactly that window.
+    const status = await this.getStatus(gameId);
+    if (status !== 'LIVE') throw new GameNotLiveError(gameId, status);
+
     // Unique (gameId, seq): a duplicate/replayed action can never be appended twice.
     await this.events.insertOne(
       { gameId, seq, action, stateDigest, ts: now },
@@ -110,10 +122,11 @@ export class MongoGameStore implements GameStorePort {
         { writeConcern: { w: 'majority' } },
       );
     }
-    await this.games.updateOne(
-      { _id: gameId },
+    const res = await this.games.updateOne(
+      { _id: gameId, status: 'LIVE' },
       { $set: { currentSeq: seq, engineVersion: state.engineVersion, updatedAt: now } },
     );
+    if (res.matchedCount === 0) throw new GameNotLiveError(gameId, undefined);
   }
 
   async recordCompletion(gameId: string, finalState: GameState): Promise<void> {

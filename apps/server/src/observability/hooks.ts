@@ -10,11 +10,14 @@ export interface MetricsHooks {
   leakBlocked(): void;
   /**
    * Incremented when the bot driver can't make progress on a bot's turn: either the policy (plus
-   * the PASS fallback) found no legal action at all, or a write-ahead persist kept failing. Should
-   * stay at 0 — an increase means a match may be stuck waiting on a turn nothing will ever prompt
-   * again (see `GameHub.driveBots`).
+   * the PASS fallback) found no legal action at all, a write-ahead persist kept failing, or the
+   * persist was rejected because the game is no longer LIVE (a maintainer's termination, possibly
+   * one a racing reconnect resurrected into memory — F20; the driver evicts the match on this one
+   * rather than rescheduling). Should stay at 0 — an increase means a match may be stuck (or, for
+   * `game_not_live`, was just cleaned up) waiting on a turn nothing will ever prompt again (see
+   * `GameHub.driveBots`).
    */
-  botDriverStalled(reason: 'no_legal_action' | 'persist_failed'): void;
+  botDriverStalled(reason: 'no_legal_action' | 'persist_failed' | 'game_not_live'): void;
   /**
    * A persisted game could not be brought back (incompatible engine major, or a snapshot+tail that
    * no longer replays). The affected players can't resume that game — alert on any increase.

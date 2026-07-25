@@ -7,7 +7,7 @@ import type { GameConfig, PlayerSeed } from '@trm/engine';
 import { asPlayerId, type PlayerId } from '@trm/shared';
 import type { ServerEnvelope } from '@trm/proto';
 import { ensureIndexes, MongoGameStore } from '../src/persistence/game-store';
-import type { GameDoc } from '../src/persistence/types';
+import { GameNotLiveError, type GameDoc } from '../src/persistence/types';
 import { GameSession } from '../src/game/game-session';
 import { GameRegistry } from '../src/game/game-registry';
 import { GameHub } from '../src/ws/hub';
@@ -216,6 +216,44 @@ describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
         prep.prepared.state,
       ),
     ).rejects.toThrow();
+  });
+
+  it('refuses to append to a TERMINATED game, writing no event/snapshot row at all (F20)', async () => {
+    const config = configFor('persist-terminated');
+    const live = new GameSession('g6', board, config);
+    await store.createGame('g6', config, live.raw(), live.digest());
+
+    const state = live.raw();
+    const actor = live.turnOrder.find((p) => live.hasPendingOffer(p))!;
+    const prep = live.prepare(pickAction(board, state, actor));
+    if (!prep.ok) throw new Error('setup');
+    const action = pickAction(board, state, actor);
+
+    // Simulate a maintainer's forced termination racing this write.
+    await db
+      .collection<GameDoc>('games')
+      .updateOne({ _id: 'g6' }, { $set: { status: 'TERMINATED' } });
+
+    await expect(
+      store.appendAction(
+        'g6',
+        prep.prepared.stateVersion,
+        action,
+        prep.prepared.digest,
+        prep.prepared.state,
+      ),
+    ).rejects.toThrow(GameNotLiveError);
+
+    // The gate runs BEFORE any durable write — a rejected append must leave the event log and
+    // snapshot collections exactly as they were, not just make the caller see a thrown error.
+    const eventCount = await db.collection('gameEvents').countDocuments({ gameId: 'g6' });
+    expect(eventCount).toBe(0);
+    const snapCount = await db.collection('gameSnapshots').countDocuments({ gameId: 'g6' });
+    expect(snapCount).toBe(1); // only the genesis snapshot from createGame, nothing from the append
+
+    // And the games doc's own bookkeeping (currentSeq) never advanced either.
+    const game = await db.collection<GameDoc>('games').findOne({ _id: 'g6' });
+    expect(game?.currentSeq).toBe(0);
   });
 
   it('recovers an in-flight game against its archived content version, not the current map', async () => {
