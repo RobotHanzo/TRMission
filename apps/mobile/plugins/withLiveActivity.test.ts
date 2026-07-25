@@ -252,4 +252,30 @@ describe('withLiveActivity: widget extension injection', () => {
     expect(targetByName(reparsed, APP_NAME).target).toBeTruthy();
     expect(apply(reparsed, iosRoot)).toBe(false);
   });
+
+  // The in-memory project is not the artifact — Xcode reads the SERIALIZED one, and the writer's
+  // omitEmptyValues defaults to false, so a key holding `undefined` lands as the literal string.
+  // `path = undefined` on the widget group is what made a real archive resolve its sources to
+  // `ios/undefined/TRMissionWidget/…` ("Build input files cannot be found") while every in-memory
+  // assertion above still passed.
+  it('serializes no `undefined` values, so Xcode resolves the sources at the project root', () => {
+    const { project, iosRoot, pbxPath } = stageProject();
+    apply(project, iosRoot);
+    const written = project.writeSync();
+    expect(written).not.toContain('undefined');
+
+    fs.writeFileSync(pbxPath, written);
+    const reparsed = xcode.project(pbxPath);
+    reparsed.parseSync();
+    const groups = reparsed.hash.project.objects.PBXGroup as Record<
+      string,
+      { name?: string; path?: string }
+    >;
+    const group = Object.keys(groups)
+      .filter((k) => !k.endsWith('_comment'))
+      .map((k) => groups[k])
+      .find((g) => g?.name === TARGET_NAME);
+    expect(group).toBeTruthy();
+    expect('path' in (group as object)).toBe(false);
+  });
 });

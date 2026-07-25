@@ -53,6 +53,30 @@ function nativeTargetByName(project, name) {
 }
 
 /**
+ * Delete every key whose value is `undefined` from the objects this plugin created.
+ *
+ * The pbxproj writer's `omitEmptyValues` defaults to FALSE, so a key that exists but is undefined is
+ * serialized as the literal string `undefined`. That is not cosmetic: `path = undefined` on the
+ * widget's group made Xcode resolve its sources to `ios/undefined/TRMissionWidget/…` and fail the
+ * archive with "Build input files cannot be found" — while the in-memory project still looked
+ * perfect, which is why the plugin's own test now asserts on the SERIALIZED output.
+ *
+ * A sweep over every section is safe: entries parsed from an existing project only ever hold
+ * strings/arrays/objects, so this can only touch what the `xcode` helpers just added.
+ */
+function dropUndefinedValues(project) {
+  for (const section of Object.values(project.hash.project.objects)) {
+    if (!section || typeof section !== 'object') continue;
+    for (const entry of Object.values(section)) {
+      if (!entry || typeof entry !== 'object') continue;
+      for (const key of Object.keys(entry)) {
+        if (entry[key] === undefined) delete entry[key];
+      }
+    }
+  }
+}
+
+/**
  * Every XCBuildConfiguration belonging to one target, found through the target's own
  * buildConfigurationList — matching on PRODUCT_NAME would also catch the app's configs whenever a
  * future rename made the two names collide.
@@ -157,6 +181,7 @@ function applyLiveActivityTarget(project, opts) {
 
   // A named group with NO path: its children already carry paths relative to the project root
   // (`TRMissionWidget/…`), and giving the group a path too would resolve them one level deeper.
+  // `undefined` here is not the same as absent — see dropUndefinedValues, called at the end.
   const group = project.addPbxGroup([...sourceFiles, relative(INFO_PLIST)], TARGET_NAME, undefined);
   // Hang it off the project's own mainGroup (read from PBXProject rather than guessed by shape).
   const mainGroupKey = project.getFirstProject()?.firstProject?.mainGroup;
@@ -191,6 +216,10 @@ function applyLiveActivityTarget(project, opts) {
       ...(teamId ? { DEVELOPMENT_TEAM: teamId } : {}),
     });
   }
+
+  // Last, over everything the `xcode` helpers just added: an undefined value would otherwise reach
+  // the file as the literal `undefined`.
+  dropUndefinedValues(project);
 
   return true;
 }
