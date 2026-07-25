@@ -9,6 +9,7 @@ import type { UserFeature } from '@trm/shared';
 import type { AuthUser } from '../auth/auth.types';
 import { UserRepo, type UserDoc } from '../auth/user.repo';
 import { SessionRepo } from '../auth/session.repo';
+import { GameHub } from '../ws/hub';
 import { RoomRepo } from '../lobby/room.repo';
 import { HistoryRepo } from '../history/history.repo';
 import { CustomMapRepo } from '../maps/custom-map.repo';
@@ -51,6 +52,7 @@ export class DashboardUsersService {
     private readonly maps: CustomMapRepo,
     private readonly purge: PurgeService,
     private readonly ratings: RatingsRepo,
+    private readonly hub: GameHub,
   ) {}
 
   async list(query: {
@@ -94,9 +96,13 @@ export class DashboardUsersService {
   }
 
   /**
-   * Ban: set the disabled marker, then revoke every refresh family — new sessions,
-   * refreshes, and ws-game tickets are refused immediately. Already-minted access
-   * tokens stay valid for up to 15 minutes on read-only REST (documented window).
+   * Ban: poison the hub's in-memory ban cache + drop any live realtime session for this account
+   * (`GameHub.revokeUser` — synchronous, so it's the very first thing that happens once the ban is
+   * actually authorized), set the disabled marker, then revoke every refresh family — new
+   * sessions, refreshes, and ws-game tickets are refused immediately. Already-minted access
+   * tokens stay valid for up to 15 minutes on read-only REST (documented window). Without the hub
+   * call a banned player's already-open WebSocket kept working indefinitely (this session's own
+   * realtime access was never actually revoked, only future ticket-minting was).
    */
   async disable(actor: AuthUser, userId: string, reason?: string) {
     if (userId === actor.userId) throw new ForbiddenException('you cannot ban yourself');
@@ -105,6 +111,7 @@ export class DashboardUsersService {
     if (await this.accounts.findById(userId)) {
       throw new ConflictException('target holds dashboard access — revoke it first');
     }
+    this.hub.revokeUser(userId);
     await this.users.setDisabled(userId, actor.userId, reason);
     await this.sessions.revokeAllForUser(userId);
     await this.audit.log(actor, 'user.ban', { type: 'user', id: userId }, reason ? { reason } : {});
@@ -115,6 +122,7 @@ export class DashboardUsersService {
     const target = await this.users.findById(userId);
     if (!target) throw new NotFoundException('user not found');
     await this.users.clearDisabled(userId);
+    this.hub.clearBanCache(userId);
     await this.audit.log(actor, 'user.unban', { type: 'user', id: userId });
     return this.detail(userId);
   }

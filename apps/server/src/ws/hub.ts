@@ -19,6 +19,7 @@ import {
   isChatPresetId,
   messageKeyFor,
   SESSION_REPLACED_CLOSE_CODE,
+  ACCOUNT_DISABLED_CLOSE_CODE,
 } from '@trm/shared';
 import type { PlayerId } from '@trm/shared';
 import { boardForContentHash, ENGINE_VERSION, teammates } from '@trm/engine';
@@ -77,6 +78,15 @@ export interface LeaderboardSink {
   onGameOver(gameId: string): Promise<void>;
 }
 
+/**
+ * Framework-free ban-status seam (adapted from `UserRepo.isDisabled` by game.module, so the hub
+ * stays framework-free) — the authoritative DB read behind GameHub's in-memory ban cache. Consulted
+ * on a cache miss/expiry only; see `GameHub.isBanned`.
+ */
+export interface BanGuardPort {
+  isDisabled(userId: string): Promise<boolean>;
+}
+
 /** Why a game's per-turn auto-play was suspended. */
 export type PauseReason = 'afk_streak' | 'no_humans_connected';
 
@@ -116,6 +126,15 @@ export interface GameHubOptions {
   /** Debounce before a dropped connection is logged as "left" in the action log, ms (default 20s;
    *  a reconnect within this window — e.g. a page reload — never surfaces at all). */
   playerLeftDelayMs?: number;
+  /** DB-backed ban check consulted by `onHello` (through the in-memory ban cache). Absent = ban
+   *  enforcement at the ws layer is a no-op (same opt-in posture as `store`/`push`); wired from
+   *  `UserRepo.isDisabled` in game.module. */
+  banGuard?: BanGuardPort;
+  /** How long a cached ban verdict is trusted before the next hello re-reads the DB, ms (default
+   *  5s). Bounds the per-user DB cost of a burst of hellos on one ws-game ticket (replayable
+   *  across unlimited connections until it expires, with nothing else rate-limiting new hellos) to
+   *  roughly one `banGuard.isDisabled` read per window rather than one per hello/connection. */
+  banCacheTtlMs?: number;
 }
 
 export type EndGameResult =
@@ -147,6 +166,9 @@ const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms
 const CHAT_MAX_LEN = 2048;
 const CHAT_RATE_MAX = 5;
 const CHAT_RATE_WINDOW_MS = 5000;
+
+/** Default TTL for `GameHub`'s in-memory ban-verdict cache (see `banCacheTtlMs`). */
+const DEFAULT_BAN_CACHE_TTL_MS = 5_000;
 
 const DEFAULT_BOT_PERSIST_RETRIES = 3;
 const DEFAULT_BOT_PERSIST_RETRY_DELAY_MS = 500;
@@ -223,6 +245,20 @@ export class GameHub {
   private readonly playerLeftDelayMs: number;
   /** gameId → pending your-turn reminder (one per game — there is one current player). */
   private readonly pushTimers = new Map<string, NodeJS.Timeout>();
+  private readonly banGuard: BanGuardPort | undefined;
+  private readonly banCacheTtlMs: number;
+  /**
+   * userId → cached ban verdict + when it expires. A hit is a synchronous Map read (no DB cost) —
+   * see `isBanned`. Actively (not just passively TTL-expired) poisoned to `true` by `revokeUser`
+   * the instant a ban lands, and dropped entirely by `clearBanCache` on unban. Per-process, like
+   * every other piece of live-game bookkeeping this hub holds in memory (`GameRegistry`, members,
+   * spectators, ...) — this codebase already has no cross-instance consistency story for live game
+   * state, so this cache isn't introducing a new class of problem.
+   */
+  private readonly banCache = new Map<string, { banned: boolean; expiresAt: number }>();
+  /** userId → an in-flight `banGuard.isDisabled` read, so a burst of concurrent hellos landing on
+   *  a cold/expired cache entry for the same user collapses into a single DB round trip. */
+  private readonly banLookups = new Map<string, Promise<boolean>>();
 
   constructor(
     private readonly registry: GameRegistry,
@@ -245,6 +281,8 @@ export class GameHub {
     this.leaderboard = options.leaderboard;
     this.yourTurnDelayMs = options.yourTurnDelayMs ?? 15_000;
     this.playerLeftDelayMs = options.playerLeftDelayMs ?? 20_000;
+    this.banGuard = options.banGuard;
+    this.banCacheTtlMs = options.banCacheTtlMs ?? DEFAULT_BAN_CACHE_TTL_MS;
   }
 
   async createMatch(
@@ -516,6 +554,113 @@ export class GameHub {
     this.leftNotice.set(gameId, notices);
   }
 
+  // ── ban enforcement ──────────────────────────────────────────────────────────
+  //
+  // A ws-game ticket is a signed JWT that stays replayable across unlimited connections for its
+  // whole TTL, and nothing else rate-limits new connections/hellos — so `onHello` cannot afford an
+  // unconditional per-hello DB read (that alone would be a fresh, unthrottled amplification path
+  // for anyone holding one ticket). Instead it consults `isBanned`, which is cache-backed: a hit is
+  // a synchronous Map read, and only a miss/expiry ever reaches `banGuard.isDisabled`. The cache is
+  // also the closer for the ticket-parse-time check's own TOCTOU window: `revokeUser` (the ban
+  // path) poisons it SYNCHRONOUSLY, before dropping any live connections, so a hello that already
+  // passed its first ban check and is now merely awaiting cold-game recovery still sees the ban at
+  // its second check, immediately before it actually binds (see `onHello`).
+
+  /**
+   * Cache-backed ban check. A cache hit (including one synchronously poisoned by a concurrent
+   * `revokeUser`) never touches the DB; a miss/expiry falls back to `banGuard.isDisabled` and
+   * repopulates the cache, with concurrent misses for the same user collapsed into one DB read.
+   * Absent a configured `banGuard` (e.g. a hub built without one in a unit test) this is always
+   * `false` — ban enforcement at the ws layer is opt-in, same posture as `store`/`push`.
+   */
+  private async isBanned(userId: string): Promise<boolean> {
+    const cached = this.banCache.get(userId);
+    if (cached && cached.expiresAt > Date.now()) return cached.banned;
+    const banGuard = this.banGuard;
+    if (!banGuard) return false;
+
+    let inFlight = this.banLookups.get(userId);
+    if (!inFlight) {
+      inFlight = banGuard
+        .isDisabled(userId)
+        .then((banned) => {
+          this.cacheBanVerdict(userId, banned);
+          return banned;
+        })
+        .finally(() => {
+          this.banLookups.delete(userId);
+        });
+      this.banLookups.set(userId, inFlight);
+    }
+    return inFlight;
+  }
+
+  /** Write a DB-sourced ban verdict into the cache — never letting a slower "not banned" answer
+   *  clobber a fresher (or synchronously poisoned) `true` that landed while the read was in flight. */
+  private cacheBanVerdict(userId: string, banned: boolean): void {
+    const existing = this.banCache.get(userId);
+    if (existing && existing.expiresAt > Date.now() && existing.banned && !banned) return;
+    this.banCache.set(userId, { banned, expiresAt: Date.now() + this.banCacheTtlMs });
+  }
+
+  /** Shared rejection for a banned hello/connection — used at both `onHello` check points and by
+   *  `revokeUser`'s live-drop, so the wire contract stays identical everywhere it fires. */
+  private rejectBanned(conn: Connection, ackClientSeq: number): void {
+    conn.send(
+      rejectionFrame(
+        ackClientSeq,
+        RejectionCode.UNAUTHENTICATED,
+        'errors:unauthenticated',
+        'account disabled',
+      ),
+    );
+  }
+
+  /**
+   * Ban enforcement (dashboard `users.ban`): poison the cache for this user FIRST — a synchronous
+   * Map write, no DB round trip — so it wins any race against a hello concurrently in flight for
+   * them, then drop every currently bound connection of theirs (seated or spectating) across every
+   * resident game. Called by `DashboardUsersService.disable` alongside `sessions.revokeAllForUser`,
+   * since revoking refresh tokens alone leaves an already-open socket untouched — the bug this
+   * finding is about. Returns how many connections were dropped (tests assert on this).
+   *
+   * The one window this cannot close: a hello that had ALREADY fully bound (both ban checks passed
+   * and `conn.binding` was set) strictly before this method ran. That connection is caught by this
+   * scan like any other. Only a hello that finishes binding AFTER this poison+scan has already run
+   * could still slip through — but by then the cache read that hello's second check performs has
+   * already been poisoned, so it cannot reach that point banned. This is the same irreducible
+   * check-then-act boundary every revocation system has (nothing can retroactively invalidate work
+   * that fully completed before the revocation began); the second pre-bind re-check in `onHello` is
+   * what shrinks the gap down to exactly that boundary instead of the wider "still awaiting an
+   * unrelated I/O call" window a single early check alone would leave open.
+   */
+  revokeUser(userId: string): number {
+    this.poisonBanCache(userId);
+    let dropped = 0;
+    for (const conn of this.connections.values()) {
+      if (!conn.binding || (conn.binding.player as string) !== userId) continue;
+      this.rejectBanned(conn, 0);
+      conn.terminate(ACCOUNT_DISABLED_CLOSE_CODE, 'account_disabled');
+      dropped++;
+    }
+    return dropped;
+  }
+
+  /** Synchronous cache write — see `revokeUser`. Long TTL-independent of DB timing: this write IS
+   *  the authoritative "banned" answer from the instant it happens, regardless of when (or whether
+   *  yet) `setDisabled`'s Mongo write becomes visible to a subsequent `banGuard.isDisabled` read. */
+  private poisonBanCache(userId: string): void {
+    this.banCache.set(userId, { banned: true, expiresAt: Date.now() + this.banCacheTtlMs });
+  }
+
+  /** Un-ban (dashboard `users.unban`): drop the cached verdict rather than writing `false`, so the
+   *  next hello for this user re-reads the authoritative DB state instead of trusting an answer
+   *  that could itself be racing `clearDisabled`'s write — and so nobody is stuck failing hellos
+   *  for the remainder of a stale banned TTL. Called by `DashboardUsersService.enable`. */
+  clearBanCache(userId: string): void {
+    this.banCache.delete(userId);
+  }
+
   /**
    * Entry point for every inbound frame. It NEVER rejects: an unexpected throw anywhere downstream
    * would otherwise surface as an unhandled rejection and take the whole process down (the socket
@@ -615,6 +760,14 @@ export class GameHub {
       );
       return;
     }
+
+    // First ban check: right after ticket parsing, before any recovery I/O. Cache-backed (cheap
+    // even for a burst of hellos on one replayable ticket) — see the "ban enforcement" section.
+    if (await this.isBanned(binding.playerId)) {
+      this.rejectBanned(conn, clientSeq);
+      return;
+    }
+
     let match = this.registry.get(binding.gameId);
     if (!match) {
       try {
@@ -647,6 +800,13 @@ export class GameHub {
     // Spectator binding (seat -1): no seat, projected as a null viewer (no SelfView). Never added
     // to `members`, so it cannot act and never receives private events.
     if (binding.seat < 0) {
+      // Second ban check, immediately before the bind point: closes the window where a ban landed
+      // (synchronously poisoning the cache) while the above `recoverMatch` await was in flight —
+      // now an in-memory cache read, so re-checking here is effectively free.
+      if (await this.isBanned(binding.playerId)) {
+        this.rejectBanned(conn, clientSeq);
+        return;
+      }
       conn.binding = { gameId: binding.gameId, player, seat: -1 };
       conn.lastClientSeq = Math.max(conn.lastClientSeq, clientSeq);
       let set = this.spectators.get(binding.gameId);
@@ -696,6 +856,13 @@ export class GameHub {
         ),
       );
       prev.terminate(SESSION_REPLACED_CLOSE_CODE, 'session_replaced');
+    }
+
+    // Second ban check, immediately before the bind point — same rationale as the spectator branch
+    // above: cheap (cache read) insurance against a ban landing during the `recoverMatch` await.
+    if (await this.isBanned(binding.playerId)) {
+      this.rejectBanned(conn, clientSeq);
+      return;
     }
 
     conn.binding = { gameId: binding.gameId, player, seat: binding.seat };

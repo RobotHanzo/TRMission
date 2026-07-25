@@ -271,6 +271,13 @@ export class UserRepo implements OnModuleInit {
     );
   }
 
+  /** Per-request ban check (projection-only point read) — the DB-backed source of truth behind
+   *  GameHub's in-memory ban cache (`GameHub.BanGuardPort`), consulted on a cache miss/expiry. */
+  async isDisabled(userId: string): Promise<boolean> {
+    const doc = await this.col.findOne({ _id: userId }, { projection: { disabledAt: 1 } });
+    return !!doc?.disabledAt;
+  }
+
   /**
    * Hard-delete an account (dashboard `users.delete`). Session revocation and owned-map
    * cleanup are the caller's job; `matchHistory` is intentionally retained as the

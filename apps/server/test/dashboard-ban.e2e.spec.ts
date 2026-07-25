@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { ACCOUNT_DISABLED_CLOSE_CODE } from '@trm/shared';
+import { RejectionCode, type ServerEnvelope } from '@trm/proto';
 import { createTestApp, refreshCookie, type TestApp } from './app';
+import { GameHub } from '../src/ws/hub';
+import { decodeServer, encodeClient } from './helpers';
 
 let t: TestApp;
 const server = () => t.app.getHttpServer();
@@ -156,4 +160,82 @@ describe('ban enforcement', () => {
       .send({})
       .expect(403);
   });
+
+  // F15: revoking refresh tokens alone leaves an already-open WebSocket untouched. The dashboard
+  // ban flow must also reach into the live GameHub and drop the banned player's realtime session.
+  it('bans a live in-game player: their bound WebSocket is force-closed, not merely their refresh tokens', async () => {
+    const victim = await registered('live-victim@example.com', 'LiveVic');
+    const other = await request(server())
+      .post('/api/v1/auth/guest')
+      .send({ displayName: 'Other2' })
+      .expect(201);
+    const room = await request(server())
+      .post('/api/v1/rooms')
+      .set(auth(victim.token))
+      .send({})
+      .expect(201);
+    const code = room.body.code;
+    await request(server())
+      .post(`/api/v1/rooms/${code}/join`)
+      .set(auth(other.body.accessToken))
+      .expect(200);
+    for (const tok of [victim.token, other.body.accessToken]) {
+      await request(server())
+        .post(`/api/v1/rooms/${code}/ready`)
+        .set(auth(tok))
+        .send({ ready: true })
+        .expect(200);
+    }
+    const started = await request(server())
+      .post(`/api/v1/rooms/${code}/start`)
+      .set(auth(victim.token))
+      .expect(200);
+
+    // Bind the victim's real seat over real protobuf bytes, through the app's actual GameHub.
+    const hub = t.app.get(GameHub);
+    const frames: ServerEnvelope[] = [];
+    let terminated: [number, string] | undefined;
+    hub.openConnection(
+      'live-victim-conn',
+      (b) => frames.push(decodeServer(b)),
+      (closeCode, reason) => {
+        terminated = [closeCode, reason];
+      },
+    );
+    await hub.receive(
+      'live-victim-conn',
+      encodeClient(1, {
+        case: 'hello',
+        value: { ticket: started.body.ticket, protocolVersion: 1 },
+      }),
+    );
+    expect(frames.some((f) => f.event.case === 'welcome')).toBe(true);
+
+    await request(server())
+      .post(`/api/v1/dashboard/users/${victim.userId}/disable`)
+      .set(auth(moderator.token))
+      .send({ reason: 'live griefing' })
+      .expect(200);
+
+    expect(terminated).toEqual([ACCOUNT_DISABLED_CLOSE_CODE, 'account_disabled']);
+    expect(
+      frames.some(
+        (f) => f.event.case === 'rejection' && f.event.value.code === RejectionCode.UNAUTHENTICATED,
+      ),
+    ).toBe(true);
+
+    // And a fresh hello on the very same (still-valid) ticket is refused too — the ban cache, not
+    // just the dropped connection, is what actually enforces this.
+    const laterFrames: ServerEnvelope[] = [];
+    hub.openConnection('live-victim-conn-2', (b) => laterFrames.push(decodeServer(b)));
+    await hub.receive(
+      'live-victim-conn-2',
+      encodeClient(1, {
+        case: 'hello',
+        value: { ticket: started.body.ticket, protocolVersion: 1 },
+      }),
+    );
+    expect(laterFrames.some((f) => f.event.case === 'welcome')).toBe(false);
+    expect(laterFrames.some((f) => f.event.case === 'rejection')).toBe(true);
+  }, 60_000);
 });

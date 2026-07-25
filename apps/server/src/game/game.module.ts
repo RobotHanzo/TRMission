@@ -7,6 +7,7 @@ import { JwtTicketVerifier } from '../ws/jwt-ticket';
 import { GAME_STORE } from '../db/tokens';
 import type { GameStorePort } from '../persistence/types';
 import { TokenService } from '../auth/token.service';
+import { UserRepo } from '../auth/user.repo';
 import { AuthModule } from '../auth/auth.module';
 import { MetricsService } from '../observability/metrics.service';
 import { MapsModule } from '../maps/maps.module';
@@ -47,6 +48,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
         mapContents: MapContentRepo,
         push: PushService,
         leaderboard: LeaderboardService,
+        users: UserRepo,
       ) =>
         new GameHub(registry, {
           store,
@@ -65,6 +67,9 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
           },
           yourTurnDelayMs: env.pushYourTurnDelayMs,
           leaderboard: { onGameOver: (gameId) => leaderboard.onGameOver(gameId) },
+          // Backs the hub's in-memory ban cache (`onHello`'s ban check); `DashboardUsersService`
+          // pokes the cache directly (`revokeUser`/`clearBanCache`) on ban/unban.
+          banGuard: { isDisabled: (userId) => users.isDisabled(userId) },
         }),
       inject: [
         GameRegistry,
@@ -74,6 +79,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
         MapContentRepo,
         PushService,
         LeaderboardService,
+        UserRepo,
       ],
     },
   ],
