@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { env } from '../config/env';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AuthBootstrap } from './auth-bootstrap';
 import { TokenService } from './token.service';
 import { UserRepo } from './user.repo';
 import { FeatureDefaultsRepo } from './feature-defaults.repo';
@@ -22,6 +23,7 @@ import { APPLE_REDIRECT_CLIENT, FetchAppleRedirectClient } from './apple-redirec
   controllers: [AuthController],
   providers: [
     AuthService,
+    AuthBootstrap,
     TokenService,
     UserRepo,
     FeatureDefaultsRepo,

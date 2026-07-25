@@ -12,6 +12,25 @@ import { TokenService } from './token.service';
 import type { MapFeatureKey } from '@trm/shared';
 import type { IssuedAuth, Locale, PublicUser, UserPreferences } from './auth.types';
 
+/** Fixed input for the login timing-oracle mitigation's dummy verification target — see
+ *  `login` below. It's never a real password; any fixed string works. */
+const DUMMY_PASSWORD_SEED = 'trm-login-timing-mitigation-dummy-password';
+
+/** Memoized once computed (see `getDummyPasswordHash`). `AuthBootstrap` forces that first
+ *  computation during server bootstrap — before the app accepts connections (see
+ *  auth-bootstrap.ts) — so even the very first miss-path login after process start costs
+ *  the same as every later one. */
+let dummyPasswordHash: Promise<string> | undefined;
+
+/** Argon2id hash of a fixed, never-real password. `login` verifies against this whenever
+ *  there is no real `passwordHash` to check (unknown email, or an OAuth-only/passwordless
+ *  account), so a miss pays the same argon2id cost as a hit and POST /auth/login stops being
+ *  a timing oracle for account existence (CWE-208). */
+function getDummyPasswordHash(): Promise<string> {
+  dummyPasswordHash ??= hash(DUMMY_PASSWORD_SEED);
+  return dummyPasswordHash;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -77,9 +96,20 @@ export class AuthService {
     return this.issue(user, ip);
   }
 
+  /** Forces the dummy password hash (see `getDummyPasswordHash` above) to be computed and
+   *  memoized. Called once by `AuthBootstrap` during server bootstrap, before the app accepts
+   *  connections — see auth-bootstrap.ts for why. */
+  async warmDummyPasswordHash(): Promise<void> {
+    await getDummyPasswordHash();
+  }
+
   async login(email: string, password: string, ip?: string): Promise<IssuedAuth> {
     const user = await this.users.findByEmail(email);
-    if (!user?.passwordHash || !(await verify(user.passwordHash, password))) {
+    // Always run argon2 verification, even when there's no real hash to check (unknown
+    // email, or a passwordless OAuth-only account): a miss must pay the same cost as a hit,
+    // or POST /auth/login becomes a timing oracle for account existence (CWE-208).
+    const verified = await verify(user?.passwordHash ?? (await getDummyPasswordHash()), password);
+    if (!user?.passwordHash || !verified) {
       throw new UnauthorizedException('invalid credentials');
     }
     return this.issue(user, ip);
