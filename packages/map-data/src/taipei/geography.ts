@@ -172,7 +172,4 @@ export const TAIPEI_GEOGRAPHY: MapGeography = {
     ring.map(([x, y]) => [x, y] as [number, number]),
   ),
   crop: { lonMin: 121.29, lonMax: 122.01, latMin: 24.68, latMax: 25.29 },
-  // The network is dense in the basin, so a mission reads far better cropped to its two stops
-  // than as the whole region shrunk into a card.
-  defaultTicketView: { mode: 'auto' },
 };
