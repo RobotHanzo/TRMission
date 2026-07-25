@@ -85,6 +85,15 @@ export class ApnsProviderToken {
   }
 }
 
+/**
+ * An APNs device token is a fixed-length hex string (32 bytes / 64 hex chars on current APNs; a
+ * generous upper bound is kept for older/alternate encodings). Enforced again here — on top of
+ * the registration-time check in `push.schemas.ts` — because `token` is spliced verbatim into the
+ * outbound HTTP/2 `:path` pseudo-header below: a row written before that schema validation
+ * existed must not be able to reintroduce request-line injection via this sink.
+ */
+const APNS_TOKEN_RE = /^[0-9a-fA-F]{64,200}$/;
+
 /** Direct APNs over Node's built-in HTTP/2 client — token auth needs no APNs library. */
 export class ApnsTransport implements PushTransport {
   readonly platform = 'ios' as const;
@@ -96,6 +105,10 @@ export class ApnsTransport implements PushTransport {
   }
 
   async send(token: string, msg: PushMessage): Promise<PushDelivery> {
+    if (!APNS_TOKEN_RE.test(token)) {
+      this.log.warn('apns send skipped: malformed device token');
+      return 'error';
+    }
     try {
       const bearer = await this.provider.get();
       return await new Promise<PushDelivery>((resolve) => {

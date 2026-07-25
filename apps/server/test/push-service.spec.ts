@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { createTestApp, type TestApp } from './app';
@@ -9,6 +9,8 @@ import { MetricsService } from '../src/observability/metrics.service';
 import {
   apnsBody,
   fcmBody,
+  ApnsProviderToken,
+  ApnsTransport,
   type PushDelivery,
   type PushMessage,
   type PushTransport,
@@ -122,5 +124,44 @@ describe('transport request shapes (pure helpers)', () => {
       kind: 'your_turn',
       gameId: 'g',
     });
+  });
+});
+
+describe('ApnsTransport sink-level token validation (defense in depth)', () => {
+  // `token` is spliced verbatim into the outbound HTTP/2 `:path`; this re-checks the same
+  // hex-token shape as `RegisterDeviceSchema` so a row written before that schema validation
+  // existed can't reintroduce request-line injection through this sink. Asserted independently
+  // of the schema by spying on the provider-token fetch: a malformed token must never get far
+  // enough to mint a bearer token or open a session to Apple.
+  const msg: PushMessage = { title: 'T', body: 'B', data: {} };
+
+  it('refuses a path-traversal-shaped token without ever contacting APNs', async () => {
+    const transport = new ApnsTransport();
+    const getSpy = vi.spyOn(ApnsProviderToken.prototype, 'get');
+    const outcome = await transport.send('../../1/apps/com.example.app', msg);
+    expect(outcome).toBe('error');
+    expect(getSpy).not.toHaveBeenCalled();
+    getSpy.mockRestore();
+  });
+
+  it('refuses a right-length-but-non-hex token without ever contacting APNs', async () => {
+    const transport = new ApnsTransport();
+    const getSpy = vi.spyOn(ApnsProviderToken.prototype, 'get');
+    const outcome = await transport.send('z'.repeat(64), msg);
+    expect(outcome).toBe('error');
+    expect(getSpy).not.toHaveBeenCalled();
+    getSpy.mockRestore();
+  });
+
+  it('passes a well-formed 64-hex-char device token through to the send path', async () => {
+    const transport = new ApnsTransport();
+    // No APNs credentials are configured in the test env, so the provider-token fetch itself
+    // fails (empty ES256 key) and `send` still resolves 'error' — the point here is only that,
+    // unlike the malformed cases above, the well-formed token reaches that call at all.
+    const getSpy = vi.spyOn(ApnsProviderToken.prototype, 'get');
+    const outcome = await transport.send('a'.repeat(64), msg);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(outcome).toBe('error');
+    getSpy.mockRestore();
   });
 });
