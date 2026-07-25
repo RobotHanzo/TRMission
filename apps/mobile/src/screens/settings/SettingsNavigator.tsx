@@ -18,6 +18,17 @@ import SoundScreen from './SoundScreen';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
+/** How far from the leading edge a swipe-back may START on a page that owns a horizontal drag.
+ *  iOS 26 pops on a rightward swipe ANYWHERE in the content (react-native-screens defers to UIKit's
+ *  `interactiveContentPopGestureRecognizer`, and leaves its response distance unconstrained), so on
+ *  Sound a rightward drag of the volume slider popped back to the index instead of raising the
+ *  volume (issue #52). 20pt is the classic screen-edge zone and clears the slider, which starts
+ *  35pt in (page padding 20 + card border 1 + row padding 14). This is checked in
+ *  `gestureRecognizerShouldBegin`, so unlike disabling the gesture from the slider's own
+ *  `onPanResponderGrant` it cannot lose the race with a gesture that already began. iOS-only;
+ *  Android ignores it. */
+const SWIPE_BACK_EDGE = 20;
+
 export default function SettingsNavigator(): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens, dark } = useTheme();
@@ -50,7 +61,10 @@ export default function SettingsNavigator(): React.JSX.Element {
       <Stack.Screen
         name="SettingsSound"
         component={SoundScreen}
-        options={{ title: t('settings.soundGroup') }}
+        options={{
+          title: t('settings.soundGroup'),
+          gestureResponseDistance: { end: SWIPE_BACK_EDGE },
+        }}
       />
       <Stack.Screen
         name="SettingsNotifications"
