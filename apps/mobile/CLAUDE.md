@@ -233,9 +233,12 @@ authorization).
   the repo is public).
 - **`.github/workflows/mobile-ios-certs.yml`** — workflow_dispatch-only macOS job running
   `fastlane ios certs` (match **read-write**, ASC-API-key auth): seeds/rotates the Distribution
-  cert + App Store profile in the private match repo. No maintainer owns a Mac — this workflow is
-  the only place signing assets are ever generated. Dispatch with `force: true` after changing
-  App ID capabilities; re-run before certs expire (~1 year).
+  cert + App Store profiles (one per bundle id in the Matchfile: the app + the Live Activity widget
+  extension) in the private match repo. No maintainer owns a Mac — this workflow is the only place
+  signing assets are ever generated. Dispatch with `force: true` after changing App ID capabilities
+  or adding a target; re-run before certs expire (~1 year). `match` never creates App IDs, so the
+  lane creates the widget's capability-less one itself via the ASC API (`ensure_bundle_id`) — the
+  app's own App ID stays manual, since its capabilities have to be enabled in the portal anyway.
 - **`.github/workflows/mobile-ota.yml`** — JS-only OTA publish to the self-hosted
   expo-open-ota server (`eoas publish`; runbook + forced-update interplay in
   `docs/mobile/ota.md`). Native changes are fenced automatically by
