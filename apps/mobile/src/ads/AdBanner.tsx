@@ -14,6 +14,12 @@ import { adUnitId } from './ads';
 import { GMA } from './googleMobileAds';
 import { useAdsVisible } from './useAdsVisible';
 
+/** Clearance between the unit and the floating iOS tab bar. Scroll CONTENT may end flush with that
+ *  bar (it scrolls under the glass, which is the point), but a fixed dock that stops exactly on its
+ *  top edge reads as sliding underneath it — the pill floats, and its glass shadow bleeds upward
+ *  over whatever is directly above (issue #54). */
+const TAB_BAR_GAP = 8;
+
 /**
  * Docked banner. Renders as a normal flow element at the END of a screen's column, so it can never
  * overlap the content above it (an anchored overlay would sit on top of the create/join controls —
@@ -53,7 +59,13 @@ function LoadedAdBanner({ tabBar }: { tabBar: boolean }): React.JSX.Element | nu
       style={[
         styles.dock,
         filled && { borderTopColor: tokens.line, borderTopWidth: StyleSheet.hairlineWidth },
-        { paddingBottom: tabBar ? tabBarPad : insets.bottom },
+        // Paints the page colour itself: the strip it reserves for the floating tab bar sits
+        // OUTSIDE the host screen's own scroll container, so an unpainted dock leaves a bare
+        // black band under the page (issue #54).
+        {
+          backgroundColor: tokens.paper,
+          paddingBottom: tabBar ? tabBarPad + TAB_BAR_GAP : insets.bottom,
+        },
       ]}
     >
       {/* AdMob requires ads be distinguishable from app content; the same label web's AdSlot uses. */}
