@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildBoard } from '@trm/engine';
 import { TAIPEI_CONTENT, TAIPEI_CONTENT_HASH, TAIPEI_RULES } from '@trm/map-data';
-import { A, B, driveGame, totalScore } from './helpers';
+import { A, B, driveGame } from './helpers';
 
 const taipeiOpts = {
   board: buildBoard(TAIPEI_CONTENT),
@@ -21,9 +21,16 @@ describe('Greater Taipei board', () => {
       checkDeterminism: true,
     });
     expect(state.finalScores).not.toBeNull();
-    // Both seats score — a map where a bot can never build anything would still "finish".
-    expect(totalScore(state, A as string)).toBeGreaterThan(0);
-    expect(totalScore(state, B as string)).toBeGreaterThan(0);
+    // Both seats actually BUILT — a map where a bot can never claim anything would still
+    // "finish". (The net total can legitimately go negative on unfinished missions, so the
+    // gate is route points, not the scoreboard.)
+    for (const id of [A, B]) {
+      const line = state.finalScores?.players.find((p) => p.playerId === id);
+      expect({ id: id as string, built: (line?.routePoints ?? 0) > 0 }).toEqual({
+        id: id as string,
+        built: true,
+      });
+    }
   });
 
   it('finishes across seeds, at HELL, and with intense random events', () => {

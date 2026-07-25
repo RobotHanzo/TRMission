@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 `@trm/map-data` is the **single authored source of truth** for official content (ADR A13) — two
-bundled maps, Taiwan (36 cities / 77 routes / 84 tickets) and Greater Taipei (44 / 83 / 56) — and is
+bundled maps, Taiwan (36 cities / 77 routes / 84 tickets) and Greater Taipei (38 / 72 / 56) — and is
 also the shared library backing **user-authored custom maps** (validation, mission auto-generation).
 All of them draw on the same `GameContent` shape, `hashContent`, and `validate()`. Everything else
 (engine board, client catalog, Mongo seed) is derived from it. Commands:
@@ -19,11 +19,21 @@ All of them draw on the same `GameContent` shape, `hashContent`, and `validate()
   no `forkGeography` (a fork seeds straight from `content.geography`) and it renders through the
   generic `CustomGeography` path on every client rather than Taiwan's hand-drawn silhouette. Its
   ids are prefixed (`tp_*`, `TPR*`, `TPL*`/`TPS*`) so a route/city id in a log or a replay names
-  exactly one map. Adding a third official map means: a directory here, a `CONTENT_REGISTRY`
-  entry (recovery resolves a persisted game's board through it), and an `OFFICIAL_MAPS` entry —
-  the room settings selectors, the fork flow, and both clients' bundled content caches all
-  iterate that list, so nothing else needs touching. Keep Taiwan at `OFFICIAL_MAPS[0]`: the dev
-  seed, the health endpoint, and the room-settings default all fall back to it.
+  exactly one map.
+  **Its geography is generated, not drawn**: `geography.ts`'s land + three city-border rings are
+  the baked output of the map builder's own pipeline —
+  `apps/web/src/features/builder/geo/world.ts`'s `citiesToGeography(['TW-TPE','TW-TPQ','TW-KEE'],
+true)` over Natural Earth admin-1 polygons — and every stop's coordinate is its real lon/lat
+  pushed through the same `geo/projection.ts` + crop. That coupling is what `test/taipei.spec.ts`
+  guards (each stop inside its own city, ferries over water, no route crossing another): change a
+  stop by hand and it will drift out of its city. To refresh either side, re-run that call and
+  re-project the stops — don't nudge one without the other. The values are baked as literals so
+  this package keeps no dependency on the builder or its dataset.
+  Adding a third official map means: a directory here, a `CONTENT_REGISTRY` entry (recovery
+  resolves a persisted game's board through it), and an `OFFICIAL_MAPS` entry — the room settings
+  selectors, the fork flow, and both clients' bundled content caches all iterate that list, so
+  nothing else needs touching. Keep Taiwan at `OFFICIAL_MAPS[0]`: the dev seed, the health
+  endpoint, and the room-settings default all fall back to it.
 - `validate.ts` — `validate()` enforces the structural invariants the engine relies on: connected
   graph, no unreachable node, ferry/locomotive/length rules, ticket endpoints exist, no length-5/7
   routes. The test suite asserts them all. `validateGeography()` and

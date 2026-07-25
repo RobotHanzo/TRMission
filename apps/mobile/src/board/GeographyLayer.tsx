@@ -71,6 +71,14 @@ export function GeographyLayer({
         : [],
     [geography],
   );
+  // Cosmetic political-border overlay (the web's `.country-border`), drawn on top of the land.
+  const borderRings = useMemo<SkPath[]>(
+    () =>
+      (geography?.borders ?? [])
+        .map((ring) => Skia.Path.MakeFromSVGString(smoothClosedPath(ring)))
+        .filter((p): p is SkPath => !!p),
+    [geography],
+  );
   const grat = useMemo(() => graticule(view), [view.x, view.y, view.w, view.h]);
   const gratW = D.graticuleW * inv;
 
@@ -162,25 +170,41 @@ export function GeographyLayer({
           </Group>
         </>
       ) : (
-        customRings.map((ring, i) => (
-          <Group key={`ring${i}`}>
+        <>
+          {customRings.map((ring, i) => (
+            <Group key={`ring${i}`}>
+              <Path
+                path={ring}
+                style="stroke"
+                strokeWidth={D.landSurfW}
+                color={P.sea}
+                opacity={D.landSurfOpacity}
+              />
+              <Path path={ring} color={P.land} />
+              <Path
+                path={ring}
+                style="stroke"
+                strokeWidth={D.landStrokeW}
+                strokeJoin="round"
+                color={P.coast}
+              />
+            </Group>
+          ))}
+          {borderRings.map((ring, i) => (
             <Path
+              key={`border${i}`}
               path={ring}
               style="stroke"
-              strokeWidth={D.landSurfW}
-              color={P.sea}
-              opacity={D.landSurfOpacity}
-            />
-            <Path path={ring} color={P.land} />
-            <Path
-              path={ring}
-              style="stroke"
-              strokeWidth={D.landStrokeW}
-              strokeJoin="round"
+              strokeWidth={D.countryBorderW}
               color={P.coast}
-            />
-          </Group>
-        ))
+              opacity={D.countryBorderOpacity}
+            >
+              <DashPathEffect
+                intervals={D.countryBorderDash.split(' ').map(Number) as [number, number]}
+              />
+            </Path>
+          ))}
+        </>
       )}
     </Group>
   );
