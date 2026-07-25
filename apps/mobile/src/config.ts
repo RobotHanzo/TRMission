@@ -11,6 +11,9 @@ const extra = (Constants.expoConfig?.extra ?? {}) as {
   sentryTracesSampleRate?: string;
   sentryReplaySampleRate?: string;
   sentryReplayErrorSampleRate?: string;
+  admobEnabled?: boolean;
+  admobBannerUnitId?: string;
+  admobOfflineGameEndUnitId?: string;
 };
 
 /** Absolute origin of the TRMission server (the app is not served same-origin). */
@@ -45,3 +48,12 @@ export const SENTRY_TRACES_SAMPLE_RATE = extra.sentryTracesSampleRate;
 export const SENTRY_REPLAY_SAMPLE_RATE = extra.sentryReplaySampleRate;
 /** Fraction of ERRORING sessions whose buffered replay is kept. Default 0 — see app/sentry.ts. */
 export const SENTRY_REPLAY_ERROR_SAMPLE_RATE = extra.sentryReplayErrorSampleRate;
+
+// Google AdMob (src/ads/). All three are LITERALS in app.config.ts's ADMOB block, not env vars —
+// see the comment there for why (config-plugin props are an OTA fingerprint input).
+/** Master switch. False ⇒ no ad renders, nothing preloads, the Mobile Ads SDK is never initialised. */
+export const ADMOB_ENABLED = extra.admobEnabled === true;
+/** Anchored adaptive banner unit (Home / Encyclopedia contents / Leaderboard / History). */
+export const ADMOB_BANNER_UNIT_ID = extra.admobBannerUnitId ?? '';
+/** Interstitial unit shown on leaving a finished offline vs-bots game. */
+export const ADMOB_OFFLINE_GAME_END_UNIT_ID = extra.admobOfflineGameEndUnitId ?? '';

@@ -63,6 +63,92 @@ const serverHost = new URL(serverOrigin).hostname;
 // update becomes invisible to the binary it was meant for. See docs/mobile/ota.md.
 const otaAppId = process.env.TRM_OTA_APP_ID || undefined;
 
+// Google AdMob (issue #50) — checked-in static config, the mobile twin of apps/web's
+// `config/adsense.ts`. NOT secret: the app id sits in the Android manifest / Info.plist and every
+// ad-unit id is compiled into the binary, so an env var would protect nothing.
+//
+// Env vars would actively HURT here. The app ids go to the react-native-google-mobile-ads config
+// plugin, and **plugin props feed the OTA runtimeVersion fingerprint** — env-derived ids would make
+// the fingerprint depend on which CI lane evaluated this file, the same lockstep trap documented for
+// TRM_SENTRY_* and the Google client ids (docs/mobile/ota.md). Literals are identical on every lane
+// by construction. The runtime reads the unit ids back off `extra` (src/config.ts → src/ads/).
+//
+// To turn ads off, flip `enabled`: it is the master switch, so the ids can stay checked in.
+const ADMOB = {
+  /** Master switch. False ⇒ no ad renders, nothing preloads, the SDK is never initialised. */
+  enabled: false,
+  // The AdMob *app* ids (`ca-app-pub-…~…`, tilde). The native SDK CRASHES at startup without a
+  // syntactically valid one, which is why these are Google's documented sample app ids rather than
+  // empty strings until the real app is registered in the AdMob console.
+  androidAppId: 'ca-app-pub-3940256099942544~3347511713',
+  iosAppId: 'ca-app-pub-3940256099942544~1458002511',
+  // Ad-*unit* ids (`ca-app-pub-…/…`, slash), '' ⇒ that placement renders nothing. `__DEV__` builds
+  // ignore these and use Google's TestIds (src/ads/ads.ts), so no developer can click a live ad.
+  /** Anchored adaptive banner docked on the browse surfaces (Home / Encyclopedia contents /
+   *  Leaderboard / History). One unit for all four — same shape, never on screen together. */
+  bannerUnitId: '',
+  /** Interstitial shown on leaving a FINISHED offline vs-bots game (capped, src/ads/interstitial.ts). */
+  offlineGameEndUnitId: '',
+};
+
+// SKAdNetwork ids for the networks Google may serve through
+// (https://developers.google.com/admob/ios/3p-skadnetworks). A publisher lists these in Info.plist
+// so advertisers on those networks can attribute installs driven by ads shown in THIS app — which
+// is what makes their demand biddable on our inventory. Purely additive: an id for a network we
+// never serve is inert. Unrelated to NSPrivacyTrackingDomains (see the privacy manifest below).
+const ADMOB_SKADNETWORK_IDS = [
+  'cstr6suwn9.skadnetwork', // Google's own
+  '4fzdc2evr5.skadnetwork',
+  '2fnua5tdw4.skadnetwork',
+  'ydx93a7ass.skadnetwork',
+  'p78axxw29g.skadnetwork',
+  'v72qych5uu.skadnetwork',
+  'ludvb6z3bs.skadnetwork',
+  'cp8zw746q7.skadnetwork',
+  '3sh42y64q3.skadnetwork',
+  'c6k4g5qg8m.skadnetwork',
+  's39g8k73mm.skadnetwork',
+  'wg4vff78zm.skadnetwork',
+  '3qy4746246.skadnetwork',
+  'f38h382jlk.skadnetwork',
+  'hs6bdukanm.skadnetwork',
+  'mlmmfzh3r3.skadnetwork',
+  'v4nxqhlyqp.skadnetwork',
+  'wzmmz9fp6w.skadnetwork',
+  'su67r6k2v3.skadnetwork',
+  'yclnxrl5pm.skadnetwork',
+  't38b2kh725.skadnetwork',
+  '7ug5zh24hu.skadnetwork',
+  'gta9lk7p23.skadnetwork',
+  'vutu7akeur.skadnetwork',
+  'y5ghdn5j9k.skadnetwork',
+  'v9wttpbfk9.skadnetwork',
+  'n38lu8286q.skadnetwork',
+  '47vhws6wlr.skadnetwork',
+  'kbd757ywx3.skadnetwork',
+  '9t245vhmpl.skadnetwork',
+  'a2p9lx4jpn.skadnetwork',
+  '22mmun2rn5.skadnetwork',
+  '44jx6755aq.skadnetwork',
+  'k674qkevps.skadnetwork',
+  '4468km3ulz.skadnetwork',
+  '2u9pt9hc89.skadnetwork',
+  '8s468mfl3y.skadnetwork',
+  'klf5c3l5u5.skadnetwork',
+  'ppxm28t8ap.skadnetwork',
+  'kbmxgpxpgc.skadnetwork',
+  'uw77j35x4d.skadnetwork',
+  '578prtvx9j.skadnetwork',
+  '4dzt52r2t5.skadnetwork',
+  'tl55sbb4fm.skadnetwork',
+  'c3frkrj4fj.skadnetwork',
+  'e5fvkxwrpn.skadnetwork',
+  '8c4e2ghe7u.skadnetwork',
+  '3rd42ekr43.skadnetwork',
+  '97r2b46745.skadnetwork',
+  '3qcr597p9d.skadnetwork',
+];
+
 const config: ExpoConfig = {
   name: 'TRMission',
   slug: 'trmission',
@@ -109,16 +195,34 @@ const config: ExpoConfig = {
     // Apple privacy manifest (ITMS-91053): the required-reason APIs this app's dependency graph
     // touches — AsyncStorage/UserDefaults (CA92.1), file timestamps (expo-updates/sqlite/
     // file-system, C617.1), free disk space (E174.1), system boot time (uptime clocks, 35F9.1).
-    // No tracking, no tracking domains; App Store Connect's App Privacy questionnaire (accounts,
-    // UGC, push tokens — no ads/analytics) is filled separately per docs/release/*.
+    // App Store Connect's App Privacy questionnaire (accounts, UGC, push tokens, advertising) is
+    // filled separately per docs/release/*.
     // Sentry (issue #44) collects crash, performance and other diagnostic data — declared below.
-    // All three are app-functionality-only, NOT linked to identity (the only identifier attached
-    // is the server-minted account id, and `sendDefaultPii: false` keeps IPs off the events) and
-    // NOT used for tracking, which is why NSPrivacyTracking stays false.
+    // Those three are app-functionality-only and NOT linked to identity (the only identifier
+    // attached is the server-minted account id, and `sendDefaultPii: false` keeps IPs off events).
+    //
+    // AdMob (issue #50) is what flips NSPrivacyTracking to true: personalized ads use the IDFA
+    // across apps, which is tracking as ATT defines it, so the app requests ATT (see
+    // `userTrackingUsageDescription` on the plugin below) and declares the device id it collects.
+    //
+    // NSPrivacyTrackingDomains stays EMPTY on purpose, and duplicating Google's ad domains here
+    // would be a revenue bug, not extra diligence: iOS BLOCKS connections to domains listed in
+    // this key whenever ATT is not granted. The Google Mobile Ads SDK ships its own privacy
+    // manifest declaring exactly which of its domains do tracking, and Xcode merges it into the
+    // app's privacy report — so the SDK's own list is both authoritative and already there.
     privacyManifests: {
-      NSPrivacyTracking: false,
+      NSPrivacyTracking: true,
       NSPrivacyTrackingDomains: [],
       NSPrivacyCollectedDataTypes: [
+        {
+          // The advertising identifier the Google Mobile Ads SDK reads once ATT is granted.
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeDeviceID',
+          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeTracking: true,
+          NSPrivacyCollectedDataTypePurposes: [
+            'NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising',
+          ],
+        },
         {
           NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeCrashData',
           NSPrivacyCollectedDataTypeLinked: false,
@@ -179,9 +283,11 @@ const config: ExpoConfig = {
         category: ['BROWSABLE', 'DEFAULT'],
       },
     ],
-    // No ads/analytics anywhere in the app: block the advertising-id permission outright so a
-    // transitive Play Services dependency can never re-add it behind the Data-safety form's back.
-    blockedPermissions: ['com.google.android.gms.permission.AD_ID'],
+    // `com.google.android.gms.permission.AD_ID` used to be blocked here ("no ads/analytics
+    // anywhere"). Issue #50 reverses that: the Google Mobile Ads SDK declares the permission and
+    // needs it to serve PERSONALIZED ads on Android 13+ (blocked ⇒ the advertising id reads back
+    // as all-zeroes and every request degrades to non-personalized). Play's Data-safety form
+    // declares the advertising id accordingly — docs/release/play-console-setup.md.
   },
   web: {
     // Desktop-browser harness so agents (Playwright) can exercise the mobile UI — not a shipped
@@ -250,6 +356,22 @@ const config: ExpoConfig = {
     // NOTE: adding this dependency at all changes the fingerprint, so the first OTA after this
     // lands needs a fresh native build on both stores (docs/mobile/ota.md).
     '@sentry/react-native/expo',
+    // Google AdMob (issue #50). Unlike Sentry above, this plugin's props MUST be passed — the
+    // native SDK crashes at startup without an app id — so they come from the checked-in static
+    // config (src/ads/config.ts), never from env: plugin props are a runtimeVersion fingerprint
+    // input, and an env-derived id would give the OTA lane a different fingerprint from the store
+    // lanes. `userTrackingUsageDescription` is the ATT prompt copy; expo-tracking-transparency is
+    // a plain dependency (no plugin entry of its own) so exactly one plugin writes that key.
+    [
+      'react-native-google-mobile-ads',
+      {
+        androidAppId: ADMOB.androidAppId,
+        iosAppId: ADMOB.iosAppId,
+        userTrackingUsageDescription:
+          '允許追蹤後，你看到的廣告會更貼近你的興趣。· Allowing tracking lets the ads you see be more relevant to you.',
+        skAdNetworkItems: ADMOB_SKADNETWORK_IDS,
+      },
+    ],
     // Injects the Live Activity widget-extension target into the CNG-generated Xcode project
     // (issue #43) and copies the shared ActivityKit contract into it. Kept BEFORE RNRepo, which
     // wants to run last, and after everything that could still rename the app target.
@@ -282,6 +404,13 @@ const config: ExpoConfig = {
     sentryTracesSampleRate: process.env.TRM_SENTRY_TRACES_SAMPLE_RATE ?? '',
     sentryReplaySampleRate: process.env.TRM_SENTRY_REPLAY_SAMPLE_RATE ?? '',
     sentryReplayErrorSampleRate: process.env.TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE ?? '',
+    // AdMob runtime config (src/config.ts → src/ads/). Literals from the ADMOB block above, so the
+    // plugin's app ids and the units the app requests against can never drift — and unlike the
+    // TRM_* vars around them these are lane-independent, so an OTA manifest's `extra` (which
+    // REPLACES the binary's) can never disagree with the native app id baked into the build.
+    admobEnabled: ADMOB.enabled,
+    admobBannerUnitId: ADMOB.bannerUnitId,
+    admobOfflineGameEndUnitId: ADMOB.offlineGameEndUnitId,
   },
 };
 

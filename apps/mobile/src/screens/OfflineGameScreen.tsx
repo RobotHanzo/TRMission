@@ -1,11 +1,13 @@
 // Offline play: LocalGameSession → isolated sandbox stores → the SAME GameStage as online.
 // GAME_OVER scoring is P2's victory UI, driven by the snapshot exactly as a live game;
 // this screen only adds offline banners + post-game CTAs.
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Phase } from '@trm/proto';
 import type { RootStackParamList } from '../navigation';
+import { preloadInterstitial, showInterstitial } from '../ads/interstitial';
 import { SandboxProvider } from '../store/sandboxProvider';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useLogStoreApi } from '../store/log';
@@ -23,6 +25,26 @@ function OfflineGameView({ route, navigation }: Props) {
   const handle = useLocalGame(route.params, { game, log });
   const snapshot = useGameStore((s) => s.snapshot);
   const phase = snapshot?.phase;
+  const gameOver = phase === Phase.GAME_OVER;
+  // `leaving` keeps the post-game CTAs disabled while the ad is on its way up, so a second tap
+  // can't queue a second navigation behind the full-screen ad.
+  const [leaving, setLeaving] = useState(false);
+
+  // The end of an offline game is the app's one genuine stage boundary, so it is the app's one
+  // interstitial (docs/plans/2026-07-25-mobile-admob.md). Fetch it the moment the scoreboard
+  // appears — an ad that arrives after the player has already tapped away is wasted, and AdMob's
+  // guidance is explicit about preloading before the transition point.
+  useEffect(() => {
+    if (gameOver) preloadInterstitial();
+  }, [gameOver]);
+
+  // Show on the explicit tap (never automatically on GAME_OVER), then navigate once it closes. The
+  // caps live in ads/interstitial.ts and it always resolves — a missing or wedged ad just means the
+  // player leaves immediately.
+  const leaveVia = (go: () => void): void => {
+    setLeaving(true);
+    void showInterstitial().finally(go);
+  };
 
   if (handle.error) {
     return (
@@ -64,19 +86,23 @@ function OfflineGameView({ route, navigation }: Props) {
         commands={handle.socket}
         onLeave={() => navigation.popToTop()}
       />
-      {phase === Phase.GAME_OVER && (
+      {gameOver && (
         <View style={styles.footer}>
           <Pressable
             accessibilityRole="button"
-            style={[styles.cta, { backgroundColor: tokens.blue }]}
-            onPress={() => navigation.replace('OfflineSetup')}
+            accessibilityState={{ disabled: leaving }}
+            disabled={leaving}
+            style={[styles.cta, { backgroundColor: tokens.blue }, leaving && styles.ctaBusy]}
+            onPress={() => leaveVia(() => navigation.replace('OfflineSetup'))}
           >
             <Text style={styles.ctaText}>{t('offline.playAgain')}</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            style={[styles.cta, { backgroundColor: tokens.blue }]}
-            onPress={() => navigation.popToTop()}
+            accessibilityState={{ disabled: leaving }}
+            disabled={leaving}
+            style={[styles.cta, { backgroundColor: tokens.blue }, leaving && styles.ctaBusy]}
+            onPress={() => leaveVia(() => navigation.popToTop())}
           >
             <Text style={styles.ctaText}>{t('offline.backHome')}</Text>
           </Pressable>
@@ -108,5 +134,6 @@ const styles = StyleSheet.create({
     minHeight: 44,
     justifyContent: 'center',
   },
+  ctaBusy: { opacity: 0.5 },
   ctaText: { color: '#fff', fontWeight: '700' },
 });

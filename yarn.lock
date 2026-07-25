@@ -2566,6 +2566,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iabtcf/core@npm:^1.5.6":
+  version: 1.5.6
+  resolution: "@iabtcf/core@npm:1.5.6"
+  checksum: 10/8e43f5b5b4c8e21f5f51d24e40836e7432c65eb6d832dbcc51a8124a817004b544766ec4dc9f1813e9a06082e0af4f1865aca37e0f34f9945a80bb23344c0460
+  languageName: node
+  linkType: hard
+
 "@isaacs/fs-minipass@npm:^4.0.0":
   version: 4.0.1
   resolution: "@isaacs/fs-minipass@npm:4.0.1"
@@ -5328,6 +5335,7 @@ __metadata:
     expo-splash-screen: "npm:~56.0.12"
     expo-sqlite: "npm:~56.0.5"
     expo-status-bar: "npm:~56.0.4"
+    expo-tracking-transparency: "npm:~56.0.5"
     expo-updates: "npm:~56.0.21"
     expo-web-browser: "npm:~56.0.5"
     fast-text-encoding: "npm:^1.0.6"
@@ -5343,6 +5351,7 @@ __metadata:
     react-native-bottom-tabs: "npm:^1.4.0"
     react-native-confetti-cannon: "npm:^1.5.2"
     react-native-gesture-handler: "npm:~2.31.1"
+    react-native-google-mobile-ads: "npm:^16.4.0"
     react-native-reanimated: "npm:4.3.1"
     react-native-safe-area-context: "npm:~5.7.0"
     react-native-screens: "npm:4.25.2"
@@ -8112,7 +8121,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dequal@npm:^2.0.3":
+"dequal@npm:^2.0.2, dequal@npm:^2.0.3":
   version: 2.0.3
   resolution: "dequal@npm:2.0.3"
   checksum: 10/6ff05a7561f33603df87c45e389c9ac0a95e3c056be3da1a0c4702149e3a7f6fe5ffbb294478687ba51a9e95f3a60e8b6b9005993acd79c292c7d15f71964b6b
@@ -9149,6 +9158,16 @@ __metadata:
   version: 56.0.0
   resolution: "expo-structured-headers@npm:56.0.0"
   checksum: 10/0c6d8d9eee028e30ba48cf91341d1f1df674db19cb679f74463c05f37f15c01602ea85ebab404808b1cd0e0e96ef47edd8cc75308f538c772c4dc1dda4a6b7af
+  languageName: node
+  linkType: hard
+
+"expo-tracking-transparency@npm:~56.0.5":
+  version: 56.0.5
+  resolution: "expo-tracking-transparency@npm:56.0.5"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: 10/722fc691febf4df4e998572aab616b742080ce7828a373c588b5d35eb292779dbb58b211b97878f307c4e746744a5871f46a35489ebaae6d1f130f92de059d42
   languageName: node
   linkType: hard
 
@@ -13204,6 +13223,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-google-mobile-ads@npm:^16.4.0":
+  version: 16.4.0
+  resolution: "react-native-google-mobile-ads@npm:16.4.0"
+  dependencies:
+    "@iabtcf/core": "npm:^1.5.6"
+    use-deep-compare-effect: "npm:^1.8.1"
+  peerDependencies:
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10/d545345b17a94f12d40ec8e4ef95c1fbd82acd374264c5aab71066b5ef1d98fe6f44da36e9dc7a1c1ecf286e77d90feea423dda09f93809353e7d3a622fe4193
+  languageName: node
+  linkType: hard
+
 "react-native-is-edge-to-edge@npm:^1.3.1":
   version: 1.3.1
   resolution: "react-native-is-edge-to-edge@npm:1.3.1"
@@ -15134,6 +15168,18 @@ __metadata:
     querystringify: "npm:^2.1.1"
     requires-port: "npm:^1.0.0"
   checksum: 10/c9e96bc8c5b34e9f05ddfeffc12f6aadecbb0d971b3cc26015b58d5b44676a99f50d5aeb1e5c9e61fa4d49961ae3ab1ae997369ed44da51b2f5ac010d188e6ad
+  languageName: node
+  linkType: hard
+
+"use-deep-compare-effect@npm:^1.8.1":
+  version: 1.8.1
+  resolution: "use-deep-compare-effect@npm:1.8.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.12.5"
+    dequal: "npm:^2.0.2"
+  peerDependencies:
+    react: ">=16.13"
+  checksum: 10/1b16c391ebd3378c38ab298fdf86c82183fc1125c24ae43c2fe73c0184ab5527e22d42ddaeddde8dc8b50b0a8e5752d262e0a6eb8e49c67369d76d86b9d655ac
   languageName: node
   linkType: hard
 

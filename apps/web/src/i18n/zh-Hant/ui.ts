@@ -17,6 +17,4 @@ export default {
   exitFullscreen: '退出全螢幕',
   commsTabsLabel: '面板切換',
   dockTabsLabel: '遊戲面板切換',
-  hideAds: '隱藏廣告',
-  hideAdsDesc: '關閉全站廣告顯示。',
 };

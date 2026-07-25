@@ -116,7 +116,7 @@ export function PrivacyScreen() {
         <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noreferrer">
           Google 廣告技術與隱私
         </a>
-        。行動應用程式（iOS／Android）不透過 Google AdSense 投放廣告。
+        。
         <br />
         The web app displays ads served by Google AdSense. Google and its advertising partners may
         use cookies or device identifiers to serve personalized or non-personalized ads based on
@@ -129,7 +129,33 @@ export function PrivacyScreen() {
         <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noreferrer">
           How Google uses advertising cookies
         </a>
-        . The mobile apps (iOS/Android) do not serve ads through Google AdSense.
+        .
+      </p>
+
+      <p>
+        行動應用程式（iOS／Android）透過 Google AdMob
+        投放廣告，僅出現在大廳、百科目錄、排行榜與對局紀錄等瀏覽頁面，以及單機對弈結束後；
+        <strong>遊戲進行中的畫面、房間、教學與重播完全沒有廣告</strong>
+        。AdMob 可能使用你的廣告識別碼（iOS 的 IDFA／Android 的廣告 ID）投放個人化廣告；在 iOS
+        上，我們只有在你於「App
+        追蹤透明度」對話框中同意後才會使用該識別碼，拒絕不會影響任何遊戲功能，只會改為投放非個人化廣告。適用歐洲經濟區、英國及部分美國州別法規時，我們會顯示
+        Google 使用者訊息平台（UMP）同意視窗，你也可以隨時於應用程式的
+        <strong>設定 → 廣告隱私選項</strong>
+        重新開啟並修改選擇。廣告內容與版位無法存取你的手牌、車票、聊天內容或其他遊戲機密資訊。
+        <br />
+        The mobile apps (iOS/Android) serve ads through Google AdMob, limited to browsing screens
+        (lobby, encyclopedia contents, leaderboard, match history) and the end of an offline
+        vs-computer game.{' '}
+        <strong>
+          There are no ads during live play, in rooms, in the tutorial, or in replays.
+        </strong>{' '}
+        AdMob may use your advertising identifier (IDFA on iOS, Advertising ID on Android) to serve
+        personalized ads. On iOS we only use it if you agree in the App Tracking Transparency
+        dialog; declining changes nothing about gameplay and simply switches you to non-personalized
+        ads. Where the EEA, UK or certain US state laws apply we show Google&apos;s User Messaging
+        Platform (UMP) consent dialog, and you can reopen and change your choice any time from{' '}
+        <strong>Settings → Ad privacy options</strong> in the app. Ad content and placements have{' '}
+        <strong>no</strong> access to your hand, tickets, chat, or other game-secret data.
       </p>
 
       <h3>保留與刪除 · Retention &amp; deletion</h3>

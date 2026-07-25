@@ -13,6 +13,7 @@ import { useUi } from '../store/ui';
 import { useTheme } from '../theme/useTheme';
 import { ErrorText, MutedText } from '../theme/chrome';
 import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
+import { AdBanner } from '../ads/AdBanner';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'History'>;
 
@@ -92,6 +93,8 @@ export function HistoryScreen({ navigation }: Props): React.JSX.Element {
           </View>
         )}
       />
+      {/* A browse list, not a play surface — the one banner placement class (ads/AdBanner.tsx). */}
+      <AdBanner />
     </View>
   );
 }

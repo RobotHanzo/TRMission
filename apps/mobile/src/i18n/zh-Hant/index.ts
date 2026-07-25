@@ -11,6 +11,7 @@ import {
   report,
   tutorial,
 } from '@trm/client-core/i18n/locales/zh-Hant';
+import ads from './ads';
 import boot from './boot';
 import builder from './builder';
 import chat from './chat';
@@ -58,4 +59,5 @@ export default {
   errors,
   boot,
   crash,
+  ads,
 };

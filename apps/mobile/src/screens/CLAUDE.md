@@ -30,4 +30,12 @@ Offline/error/loading states have testIDs `builder-offline`/`builder-error`.
 
 ## Settings (`SettingsScreen.tsx`)
 
-Rows and the store behind them: `../store/CLAUDE.md`.
+Rows and the store behind them: `../store/CLAUDE.md`. `settings/AdPrivacyRow` and the `adFree`-gated
+hide-ads switch: `../ads/CLAUDE.md`.
+
+## Ads
+
+`<AdBanner />` docks on the four **browse** screens only — Home (not its welcome takeover),
+`EncyclopediaIndex` (not the player), Leaderboard, History — and `OfflineGameScreen` fires the one
+interstitial when a FINISHED game is left. Every other screen is deliberately ad-free; that list is
+a policy boundary, so read `../ads/CLAUDE.md` before adding a placement.

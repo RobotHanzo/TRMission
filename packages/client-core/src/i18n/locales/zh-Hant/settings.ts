@@ -13,4 +13,7 @@ export default {
   sound: '音效',
   volume: '音量',
   language: '語言',
+  // The ad opt-out, shown to both clients only for accounts holding the `adFree` feature.
+  hideAds: '隱藏廣告',
+  hideAdsDesc: '關閉廣告顯示。',
 };

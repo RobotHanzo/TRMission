@@ -16,6 +16,7 @@ export default {
   version: 'Version',
   commit: 'Commit',
   privacyPolicy: 'Privacy policy',
+  adPrivacy: 'Ad privacy options',
   crashReport: 'Share last crash report',
   deleteConfirmTitle: 'Delete your account?',
   deleteConfirmBody:

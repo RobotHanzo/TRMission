@@ -13,6 +13,7 @@ import {
 } from '@trm/client-core/i18n/locales/en';
 import type { TranslationShape } from '@trm/client-core/i18n/shape';
 import type zhHant from '../zh-Hant';
+import ads from './ads';
 import boot from './boot';
 import builder from './builder';
 import chat from './chat';
@@ -58,4 +59,5 @@ export default {
   errors,
   boot,
   crash,
+  ads,
 } satisfies TranslationShape<typeof zhHant>;

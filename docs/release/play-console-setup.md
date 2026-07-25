@@ -49,11 +49,20 @@ rather than improvising in the Console:
   User-Generated Content** (custom maps). Expected outcome: Everyone / PEGI 3 with an interaction
   disclosure.
 - **Target audience**: not primarily designed for children; standard age range.
-- **Data safety form**: use the exact table in Task 9 Step 4 (email, display name, avatar URL,
-  user id, push token, game history, chat/UGC — nothing else, no ads/analytics/tracking SDKs).
+- **Data safety form**: the table in Task 9 Step 4 (email, display name, avatar URL, user id, push
+  token, game history, chat/UGC) **plus the AdMob additions** (issue #50): declare
+  **Device or other IDs** — collected, not shared by us, purpose **Advertising or marketing**, not
+  optional — and **App interactions** for the same purpose. The Google Mobile Ads SDK declares the
+  rest of its own collection; ours is the advertising id it reads.
   Deletion URL: `https://<production origin>/account/delete`.
-- **Ads**: declare no ads. **Government app / COVID-19 app / financial features / news app**: all
-  no.
+- **Ads**: declare **contains ads** (the app serves AdMob banners + one interstitial — see
+  `apps/mobile/src/ads/CLAUDE.md`). This also puts the "Contains ads" badge on the store listing.
+  **Government app / COVID-19 app / financial features / news app**: all no.
+- **Advertising ID declaration** (App content → Advertising ID): **yes**, used for **Advertising or
+  marketing** + **Analytics**. `com.google.android.gms.permission.AD_ID` is no longer blocked in
+  `app.config.ts`; blocking it would silently degrade every request to non-personalized.
+- **Target audience**: keep "not primarily designed for children" — with ads present, declaring a
+  child audience would pull the app into the Families ads programme and its certified-SDK list.
 - **EU DSA**: declare **non-trader** status.
 - **Privacy policy URL**: `https://<production origin>/privacy`.
 - Support email: a real monitored mailbox (this also has to replace the

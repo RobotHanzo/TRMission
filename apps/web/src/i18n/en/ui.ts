@@ -18,6 +18,4 @@ export default {
   exitFullscreen: 'Exit fullscreen',
   commsTabsLabel: 'Panel tabs',
   dockTabsLabel: 'Game panels',
-  hideAds: 'Hide ads',
-  hideAdsDesc: 'Turn off advertisements across the site.',
 } satisfies TranslationShape<typeof zh>;

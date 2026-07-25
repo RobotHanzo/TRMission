@@ -22,6 +22,7 @@ import { OfflineHomeBanner } from '../components/OfflineHomeBanner';
 import { OfflineHomeSection } from '../offline/OfflineHomeSection';
 import { getTutorialCompletion } from '../features/tutorial/progress';
 import { useTabBarPad } from '../hooks/useTabBarPad';
+import { AdBanner } from '../ads/AdBanner';
 import { useCanBuild } from './BuilderScreen';
 import { stageTier } from './stageLayout';
 import {
@@ -472,42 +473,53 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
 
   // Phones stay a single scrolling column (unchanged); tablets/desktops split into a web-style
   // two-pane grid — primary room-joining flow on the left, secondary links on the right.
+  //
+  // The banner docks BELOW the scroll view rather than floating over it: the create/join controls
+  // live at the end of that column, and an overlay on top of them is precisely the accidental-click
+  // shape AdMob's banner guidance rules out. It is also absent from the welcome takeover above —
+  // first-run onboarding stays ad-free.
   return (
-    <Screen scroll style={[styles.container, { paddingBottom: SPACE[8] + tabExtra }]}>
-      {header}
-      {!online && <OfflineHomeBanner />}
-      {!wide && guestCard}
-      {wide ? (
-        <View style={styles.grid}>
-          <View style={styles.gridMain}>
+    <View style={styles.root}>
+      <Screen scroll style={[styles.container, { paddingBottom: SPACE[8] + tabExtra }]}>
+        {header}
+        {!online && <OfflineHomeBanner />}
+        {!wide && guestCard}
+        {wide ? (
+          <View style={styles.grid}>
+            <View style={styles.gridMain}>
+              {offlineSection}
+              {myRoomsSection}
+              {publicRoomsSection}
+              {joinRow}
+              {createButton}
+            </View>
+            <View style={styles.gridSide}>
+              {tutorialRow}
+              {guestCard}
+              {linkPills}
+            </View>
+          </View>
+        ) : (
+          <>
             {offlineSection}
+            {tutorialRow}
             {myRoomsSection}
             {publicRoomsSection}
             {joinRow}
             {createButton}
-          </View>
-          <View style={styles.gridSide}>
-            {tutorialRow}
-            {guestCard}
             {linkPills}
-          </View>
-        </View>
-      ) : (
-        <>
-          {offlineSection}
-          {tutorialRow}
-          {myRoomsSection}
-          {publicRoomsSection}
-          {joinRow}
-          {createButton}
-          {linkPills}
-        </>
-      )}
-    </Screen>
+          </>
+        )}
+      </Screen>
+      <AdBanner tabBar />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  // Wraps Screen + the docked ad banner. Screen paints the paper background itself, so this stays
+  // a bare flex column.
+  root: { flex: 1 },
   container: { paddingVertical: SPACE[4], paddingHorizontal: SPACE[6], gap: SPACE[3] },
   header: {
     flexDirection: 'row',

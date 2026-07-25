@@ -201,10 +201,21 @@ keywords,privacy_url,support_url}.txt` are already committed. Enter them once by
 - **Age rating questionnaire**: no violence/gambling; the UGC question ("unrestricted
   user-generated content?") is **No** — declare "Infrequent/Mild User Generated Content" given the
   report/block moderation surface already shipped; enable the Communication Safety disclosure if
-  prompted.
+  prompted. Ads are capped to `MaxAdContentRating.G` in code (`src/ads/ads.ts`) so ad content can
+  never outrank the app's own rating.
 - **App Privacy (the "nutrition label")**: same data table as Play's Data Safety form (Task 9
-  Step 4) — email, display name, avatar URL, user id, push token, game history, chat/UGC; nothing
-  else, no tracking. Declare data **not** used for tracking and no third-party ad/analytics SDKs.
+  Step 4) — email, display name, avatar URL, user id, push token, game history, chat/UGC — **plus
+  the AdMob additions** (issue #50): **Identifiers → Device ID** and **Usage Data → Product
+  Interaction**, both for **Third-Party Advertising**, and both flagged **used for tracking**.
+  Answer **yes** to "Does this app use data for tracking?"; `app.config.ts`'s privacy manifest
+  already declares `NSPrivacyTracking: true` to match. Google's own disclosure table for the Mobile
+  Ads SDK is at developers.google.com/admob/ios/privacy/data-disclosure — check it at submission
+  time rather than trusting this line.
+- **ATT**: the app requests App Tracking Transparency (prompt copy is the plugin's
+  `userTrackingUsageDescription` in `app.config.ts`). Reviewers do test that the prompt appears and
+  that denying it doesn't break the app — it doesn't: consent-gated ads simply go non-personalized.
+  `NSPrivacyTrackingDomains` is deliberately **empty**; see the comment in `app.config.ts` before
+  "fixing" it, since listing Google's domains there blocks them whenever ATT is denied.
 - **Export compliance**: the app only uses standard TLS (no custom crypto), so it qualifies as
   exempt. Optionally set `ios: { config: { usesNonExemptEncryption: false } }` in
   `apps/mobile/app.config.ts` to skip the export-compliance prompt on every TestFlight build

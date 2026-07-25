@@ -14,4 +14,6 @@ export default {
   sound: 'Sound',
   volume: 'Volume',
   language: 'Language',
+  hideAds: 'Hide ads',
+  hideAdsDesc: 'Turn off advertisements.',
 } satisfies TranslationShape<typeof zh>;

@@ -31,6 +31,7 @@ import {
   SkipForward,
 } from 'lucide-react-native';
 import { useEncyclopediaDemo } from '@trm/client-core/tutorial/encyclopedia';
+import { AdBanner } from '../ads/AdBanner';
 import { encyclopediaEntries } from '../features/tutorial/curriculum';
 import type { Beat, Lesson } from '../features/tutorial/types';
 import { Specimen } from '../features/tutorial/Specimens';
@@ -171,6 +172,9 @@ function EncyclopediaIndex({
           </View>
         </View>
       </ScrollView>
+      {/* Contents page only. The player below runs a live sandbox demo — an interactive board is
+          exactly where AdMob's banner guidance says an ad must not be. */}
+      <AdBanner tabBar />
     </View>
   );
 }

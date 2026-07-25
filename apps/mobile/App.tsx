@@ -22,6 +22,7 @@ import {
 } from './src/push/notifications';
 import { useOrientationPolicy } from './src/app/useOrientationPolicy';
 import { stashRoomLink } from './src/app/roomLink';
+import { initAds } from './src/ads/ads';
 import { useSession } from './src/store/session';
 import * as Sentry from '@sentry/react-native';
 import { useSoundSetup } from './src/hooks/useSoundSetup';
@@ -42,6 +43,16 @@ const linking = {
 function App() {
   // FCM/APNs rotate device tokens; keep the server registry current for the app's lifetime.
   useEffect(() => watchTokenRotation(), []);
+
+  // AdMob comes up once the boot chain has released the splash — NOT from index.ts like Sentry.
+  // Its first steps are the UMP consent form and the iOS ATT prompt, both native modals: Apple
+  // requires the app to be foregrounded and visible before ATT is requested, and stacking a consent
+  // sheet on top of the splash would ask a user to decide about an app they have not seen yet.
+  // Runs once (initAds self-guards) and never rejects.
+  const booting = useSession((s) => s.booting);
+  useEffect(() => {
+    if (!booting) void initAds();
+  }, [booting]);
 
   // Which account hit the error — the id only, never a display name or email (no-op without a DSN).
   const userId = useSession((s) => s.user?.id ?? null);

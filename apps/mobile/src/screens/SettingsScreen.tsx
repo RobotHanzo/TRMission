@@ -20,13 +20,14 @@ import { useTranslation } from 'react-i18next';
 import type { BoardLayout, Locale, Theme, UserPreferences } from '../net/rest';
 import { APP_VERSION, BUILD_NUMBER, GIT_COMMIT, SERVER_ORIGIN } from '../config';
 import { useSettings } from '../store/settings';
-import { useSession } from '../store/session';
+import { useHasFeature, useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { useTheme } from '../theme/useTheme';
 import { MutedText, SectionLabel } from '../theme/chrome';
 import { useTabBarPad } from '../hooks/useTabBarPad';
 import { performAccountDeletion } from '../account/deleteAccount';
 import { formatCrashReport, getLastCrash, type CrashRecord } from '../app/crashCapture';
+import AdPrivacyRow from './settings/AdPrivacyRow';
 import LiveActivityRow from './settings/LiveActivityRow';
 import NotificationsRow from './settings/NotificationsRow';
 import { VolumeSlider } from './settings/VolumeSlider';
@@ -83,6 +84,12 @@ export function SettingsScreen(): React.JSX.Element {
   const isGuest = useSession((s) => s.user?.isGuest ?? true);
   const savePreferences = useSession((s) => s.savePreferences);
   const signOut = useSession((s) => s.signOut);
+  // The ad opt-out only appears for accounts granted the `adFree` feature from the maintainer
+  // dashboard — same gate as web's SettingsModal, and useAdsVisible enforces it independently so
+  // the stored flag alone can never suppress ads.
+  const canHideAds = useHasFeature('adFree');
+  const hideAds = useUi((s) => s.hideAds);
+  const setHideAds = useUi((s) => s.setHideAds);
 
   const theme = useUi((s) => s.theme);
   const locale = useUi((s) => s.locale);
@@ -232,6 +239,22 @@ export function SettingsScreen(): React.JSX.Element {
       </View>
       {/* iOS only (renders null elsewhere): the in-game lock screen / Dynamic Island card. */}
       <LiveActivityRow />
+
+      {canHideAds && (
+        <View style={styles.row}>
+          <View style={styles.rowLabels}>
+            <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.hideAds')}</Text>
+            <MutedText>{t('settings.hideAdsDesc')}</MutedText>
+          </View>
+          <Switch
+            testID="hide-ads-switch"
+            value={hideAds}
+            onValueChange={(v) => void setHideAds(v)}
+          />
+        </View>
+      )}
+      {/* Re-open the ad consent form. Renders null wherever UMP requires no such form. */}
+      <AdPrivacyRow />
 
       {/* Store compliance (Apple 5.1.1 / Play): the privacy policy must be reachable IN the app,
           not just from the store listing. Served by the same-origin web app. */}

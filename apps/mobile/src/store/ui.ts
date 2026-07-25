@@ -13,6 +13,7 @@ const BOARD_LAYOUT_KEY = 'trm.boardLayout';
 const FOLLOW_ACTING_KEY = 'trm.followActing';
 const SOUND_ENABLED_KEY = 'trm.soundEnabled';
 const SOUND_VOLUME_KEY = 'trm.soundVolume';
+const HIDE_ADS_KEY = 'trm.hideAds';
 
 const THEMES: readonly Theme[] = ['system', 'light', 'dark'];
 const LOCALES: readonly Locale[] = ['zh-Hant', 'en'];
@@ -29,6 +30,10 @@ interface UiState {
   followActing: boolean;
   soundEnabled: boolean;
   soundVolume: number;
+  /** Ad opt-out — per-device (AsyncStorage only, never account-synced), ported from web's ui store.
+   *  The toggle that sets it is gated behind the `adFree` account feature and `useAdsVisible` only
+   *  honours it for accounts that hold that feature, so a stray stored flag can't suppress ads. */
+  hideAds: boolean;
   /** True once AsyncStorage has been read on boot. */
   hydrated: boolean;
   hydrate(): Promise<void>;
@@ -39,6 +44,7 @@ interface UiState {
   setFollowActing(followActing: boolean): Promise<void>;
   setSoundEnabled(soundEnabled: boolean): Promise<void>;
   setSoundVolume(soundVolume: number): Promise<void>;
+  setHideAds(hideAds: boolean): Promise<void>;
   /** Adopt a registered account's server-side prefs on sign-in. */
   applyPreferences(prefs: UserPreferences): void;
 }
@@ -51,19 +57,29 @@ export const useUi = create<UiState>()((set) => ({
   followActing: true,
   soundEnabled: true,
   soundVolume: 0.6,
+  hideAds: false,
   hydrated: false,
   async hydrate() {
     try {
-      const [theme, locale, colorBlind, boardLayout, followActing, soundEnabled, soundVolume] =
-        await AsyncStorage.multiGet([
-          THEME_KEY,
-          LOCALE_KEY,
-          COLOR_BLIND_KEY,
-          BOARD_LAYOUT_KEY,
-          FOLLOW_ACTING_KEY,
-          SOUND_ENABLED_KEY,
-          SOUND_VOLUME_KEY,
-        ]);
+      const [
+        theme,
+        locale,
+        colorBlind,
+        boardLayout,
+        followActing,
+        soundEnabled,
+        soundVolume,
+        hideAds,
+      ] = await AsyncStorage.multiGet([
+        THEME_KEY,
+        LOCALE_KEY,
+        COLOR_BLIND_KEY,
+        BOARD_LAYOUT_KEY,
+        FOLLOW_ACTING_KEY,
+        SOUND_ENABLED_KEY,
+        SOUND_VOLUME_KEY,
+        HIDE_ADS_KEY,
+      ]);
       const nextLocale = oneOf(LOCALES, locale[1], 'zh-Hant');
       const vol = soundVolume[1] != null ? Number(soundVolume[1]) : NaN;
       set({
@@ -74,6 +90,7 @@ export const useUi = create<UiState>()((set) => ({
         followActing: followActing[1] == null ? true : followActing[1] === '1',
         soundEnabled: soundEnabled[1] == null ? true : soundEnabled[1] === '1',
         soundVolume: Number.isFinite(vol) ? Math.max(0, Math.min(1, vol)) : 0.6,
+        hideAds: hideAds[1] === '1',
         hydrated: true,
       });
       if (i18n.language !== nextLocale) await i18n.changeLanguage(nextLocale);
@@ -110,6 +127,10 @@ export const useUi = create<UiState>()((set) => ({
     const soundVolume = Math.max(0, Math.min(1, v));
     set({ soundVolume });
     await AsyncStorage.setItem(SOUND_VOLUME_KEY, String(soundVolume)).catch(() => undefined);
+  },
+  async setHideAds(hideAds) {
+    set({ hideAds });
+    await AsyncStorage.setItem(HIDE_ADS_KEY, hideAds ? '1' : '0').catch(() => undefined);
   },
   applyPreferences(prefs) {
     set({

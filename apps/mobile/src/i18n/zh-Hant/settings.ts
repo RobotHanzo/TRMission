@@ -15,6 +15,7 @@ export default {
   version: '版本',
   commit: '版本代碼',
   privacyPolicy: '隱私權政策',
+  adPrivacy: '廣告隱私選項',
   crashReport: '分享上次閃退報告',
   deleteConfirmTitle: '確定要刪除帳號嗎？',
   deleteConfirmBody: '此動作無法復原。你的個人資料將被刪除，對局紀錄將匿名化。',

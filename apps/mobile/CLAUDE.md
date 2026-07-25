@@ -26,6 +26,7 @@ Read the one for the area you're touching (Claude Code loads them on demand):
 | Offline games + bots                         | `src/offline/CLAUDE.md`           |
 | Tutorial (P4)                                | `src/features/tutorial/CLAUDE.md` |
 | Push notifications, Expo Go gate             | `src/push/CLAUDE.md`              |
+| AdMob placements, consent/ATT, opt-out       | `src/ads/CLAUDE.md`               |
 | Moderation, settings, session stores         | `src/store/CLAUDE.md`             |
 | Haptics, game view logic                     | `src/game/CLAUDE.md`              |
 | Orientation & layout tiers                   | `src/app/CLAUDE.md`               |
@@ -42,6 +43,11 @@ Read the one for the area you're touching (Claude Code loads them on demand):
 - **React Navigation 7** native-stack (not Expo Router — few screens, heavily custom UI).
 - **jest 29** (NOT 30): `jest-expo@56` is a jest-29 preset; a jest-30 runtime collides with its
   jest-29 internals. Keep the whole `jest*` stack on 29.
+- **Google AdMob** (`react-native-google-mobile-ads`, issue #50) — two placements only, both
+  policy-bounded; `src/ads/CLAUDE.md` is the contract. Its config plugin's props are literals in
+  `app.config.ts`, never env, because plugin props feed the OTA fingerprint. **Adding the plugin
+  changed that fingerprint**: the first OTA after it landed needs a fresh native build on both
+  stores. AdMob is also what flipped `NSPrivacyTracking` to true and unblocked Android's `AD_ID`.
 - **No EAS, no Expo push service, no _paid_ SaaS.** Builds run in GitHub Actions + fastlane; OTA (P5)
   is self-hosted; push (P0 server) is direct FCM/APNs — the app only registers native device tokens.
   Free / open-source hosted services are allowed where they neither bill nor lock us in (e.g. RNRepo's

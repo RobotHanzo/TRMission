@@ -15,6 +15,7 @@ import { useSession } from '../store/session';
 import { useTheme } from '../theme/useTheme';
 import { ErrorText, MutedText } from '../theme/chrome';
 import { useTabBarPad } from '../hooks/useTabBarPad';
+import { AdBanner } from '../ads/AdBanner';
 
 const SCOPES: LeaderboardScopeKind[] = ['allTime', 'season'];
 const METRICS: LeaderboardMetric[] = ['rating', 'wins', 'gamesPlayed'];
@@ -164,6 +165,10 @@ export function LeaderboardScreen(): React.JSX.Element {
           ) : null
         }
       />
+      {/* Docked below the list, never beside the scope/metric controls. It carries the floating tab
+          bar's height itself; the list keeps its own copy so the layout still clears the bar on the
+          (common) no-banner path — ads off, no fill, or an adFree opt-out. */}
+      <AdBanner tabBar />
     </View>
   );
 }
