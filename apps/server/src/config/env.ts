@@ -131,13 +131,17 @@ export const env = {
   oauthStateTtlMs: Number(process.env.OAUTH_STATE_TTL_MS ?? 10 * 60 * 1000),
 
   /**
-   * Maintainer-dashboard bootstrap: comma-separated emails granted the `owner` dashboard role at
-   * boot (registered, non-guest accounts only). Authoritative on every boot — re-asserts owner if
-   * one was accidentally demoted. An email registered after boot is picked up on the next restart.
+   * Maintainer-dashboard bootstrap: comma-separated `users._id` values granted the `owner`
+   * dashboard role at boot (registered, non-guest accounts only). Authoritative on every boot —
+   * re-asserts owner if one was accidentally demoted. Seeded by id, NOT email: `POST /auth/register`
+   * lets any anonymous caller claim an arbitrary unverified email, so an email match would let
+   * whoever registers a configured address first grab the owner role; a `users._id` is a
+   * server-minted random id the caller never chooses, so only the account the operator actually
+   * intends is ever granted. An id registered after boot is picked up on the next restart.
    */
-  dashboardOwnerEmails: (process.env.DASHBOARD_OWNER_EMAILS ?? '')
+  dashboardOwnerIds: (process.env.DASHBOARD_OWNER_IDS ?? '')
     .split(',')
-    .map((s) => s.trim().toLowerCase())
+    .map((s) => s.trim())
     .filter(Boolean),
 
   // Background purge of stale LOBBY rooms / LIVE games (dashboard/purge.service.ts). On by

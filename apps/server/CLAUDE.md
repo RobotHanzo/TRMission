@@ -192,7 +192,9 @@ flag on `UserDoc`; the role→permission taxonomy lives in `@trm/shared` (`effec
 so server guard and admin UI can't drift. `DashboardGuard` runs after `AccessTokenGuard` and reads
 the collection **per request** (revocation is instant; nothing is embedded in tokens): guest or
 no record → 404 (nondisclosing), missing `@RequirePermission(...)` permission → 403.
-`DASHBOARD_OWNER_EMAILS` seeds owners at boot (idempotent, self-healing, audited). Every mutation
+`DASHBOARD_OWNER_IDS` seeds owners at boot by exact `users._id` (idempotent, self-healing, audited)
+— by id, not email, since anyone can self-register an arbitrary unverified email via
+`POST /auth/register`. Every mutation
 appends to `dashboardAudit` via `AuditService` — that repo exposes only `append`/`list` (append-only
 by surface; a spec pins it).
 
@@ -240,8 +242,8 @@ and recorded on the game doc's `seatControlLog`; the player's next action or reb
 default 3, `<=0` disables; solo rooms can instead disable the timer entirely via the
 `soloWaitForHost` room setting, stamped as `matchOptions.turnTimerDisabled` on the game),
 `JWT_ACCESS_TTL`, `WS_TICKET_TTL`, `REFRESH_TTL_MS`, `GUEST_TTL_MS`,
-`DASHBOARD_OWNER_EMAILS` (comma list of registered emails granted the `owner` dashboard role at
-every boot; other maintainers are managed from the dashboard itself).
+`DASHBOARD_OWNER_IDS` (comma list of registered accounts' `users._id`, NOT emails, granted the
+`owner` dashboard role at every boot; other maintainers are managed from the dashboard itself).
 
 Mobile clients: `MOBILE_MIN_BUILD` (forced-update floor served at `GET /version/mobile`),
 `GOOGLE_MOBILE_CLIENT_IDS` (comma list — extra ID-token audiences for the iOS/Android

@@ -3,7 +3,7 @@ import { env } from '../config/env';
 
 /** Test-only overrides so specs can exercise bootstrap without mutating frozen `env`. */
 export interface DashboardConfigOverrides {
-  ownerEmails?: string[];
+  ownerIds?: string[];
 }
 
 /**
@@ -13,12 +13,10 @@ export interface DashboardConfigOverrides {
  */
 @Injectable()
 export class DashboardConfig {
-  /** Emails granted the `owner` role at boot (lowercased). */
-  readonly ownerEmails: readonly string[];
+  /** `users._id` values granted the `owner` role at boot. Not emails — see env.ts. */
+  readonly ownerIds: readonly string[];
 
   constructor(@Optional() overrides?: DashboardConfigOverrides) {
-    this.ownerEmails = (overrides?.ownerEmails ?? env.dashboardOwnerEmails).map((e) =>
-      e.trim().toLowerCase(),
-    );
+    this.ownerIds = (overrides?.ownerIds ?? env.dashboardOwnerIds).map((id) => id.trim());
   }
 }
