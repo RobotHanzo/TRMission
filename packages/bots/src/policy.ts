@@ -34,6 +34,7 @@ import {
   longestTrailWithPath,
   partnersOf,
   teamOf,
+  sideHoldsParallelTrack,
 } from '@trm/engine';
 import type { Action, Board, GameState, TrailEdge } from '@trm/engine';
 import { TRAIN_COLORS, CARD_COLORS, buildDeckComposition } from '@trm/shared';
@@ -613,6 +614,9 @@ function buildContext(board: Board, state: GameState, botId: PlayerId, knobs: Kn
       for (const route of board.content.routes) {
         if (state.ownership[route.id as string]) continue;
         if (route.color === 'GRAY') continue;
+        // The side already holds a track of this parallel group ⇒ nobody on it can claim this one,
+        // so hoarding its colour for the partner is wasted.
+        if (sideHoldsParallelTrack(board, state, botId, route.id)) continue;
         if (route.a === t.a || route.b === t.a || route.a === t.b || route.b === t.b)
           partnerNeeds.add(route.color);
       }
@@ -826,13 +830,21 @@ function contestedTrailEndpoints(
  * counts as 'owned' — it really is part of the bot's network for ticket completion — which is the
  * single change that makes path-finding, ticket planning, and `connectedByOwned` all team-aware,
  * and stops the bot from treating its own partner as a blocking rival.
+ *
+ * The flip side of that shared network is the one-track-per-side rule: an unowned track whose
+ * parallel group already holds one of the SIDE's routes can never be claimed by this bot, so it is
+ * unusable rather than 'open'. Planning through it would build a corridor the engine then refuses.
  */
 function routeUsable(ctx: Ctx, routeId: string): 'owned' | 'open' | 'enemy' | null {
   const cell = ctx.state.ownership[routeId];
-  if (!cell) return 'open';
+  if (!cell) {
+    return sideHoldsParallelTrack(ctx.board, ctx.state, ctx.botId, routeId as RouteId)
+      ? null
+      : 'open';
+  }
   if ('owner' in cell)
     return cell.owner === ctx.botId || ctx.partners.has(cell.owner as string) ? 'owned' : 'enemy';
-  return null; // locked double-route sibling
+  return null; // locked parallel-group sibling
 }
 
 /** Are two cities connected purely through routes the bot already owns? (ticket completion) */

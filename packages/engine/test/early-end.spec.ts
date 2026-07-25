@@ -4,7 +4,7 @@ import { initGame } from '../src/setup';
 import { reduce } from '../src/reduce';
 import { replay, stateDigest } from '../src/serialize';
 import { checkInvariants } from '../src/invariants';
-import type { GameState } from '../src/types/state';
+import { ENGINE_VERSION, type GameState } from '../src/types/state';
 import { makeConfig } from './helpers';
 
 describe('server-authorized early game end', () => {
@@ -18,7 +18,7 @@ describe('server-authorized early game end', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.state.turn.phase).toBe('GAME_OVER');
-    expect(result.value.state.engineVersion).toBe(13);
+    expect(result.value.state.engineVersion).toBe(ENGINE_VERSION);
     expect(result.value.state.actionSeq).toBe(state.actionSeq + 1);
     expect(result.value.state.finalScores?.players).toHaveLength(3);
     expect(result.value.events).toEqual([{ e: 'GAME_ENDED', visibility: 'PUBLIC' }]);
@@ -44,7 +44,7 @@ describe('server-authorized early game end', () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value.state.engineVersion).toBe(13);
+    expect(result.value.state.engineVersion).toBe(ENGINE_VERSION);
   });
 
   it('rejects an end action attributed to someone outside the game', () => {

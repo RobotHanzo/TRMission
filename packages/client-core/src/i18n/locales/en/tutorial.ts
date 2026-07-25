@@ -65,7 +65,7 @@ export default {
     intro:
       'Routes come in three kinds: ordinary railways, sea ferries, and mountain tunnels. Compare how they look below:',
     double:
-      'Double routes: two parallel lines between two cities. With 2–3 players, claiming one locks the other; with 4–5, both stay open. You can never own both of a pair.',
+      'Double routes: two parallel lines between two cities. With 2–3 players, claiming one locks the other; with 4–5, both stay open. Your side can never hold more than one track of a group — in a team game a partner’s track counts as yours.',
     ferry:
       'Ferry routes (to the islands): your payment must include enough locomotives — the icons show how many.',
     tunnel:

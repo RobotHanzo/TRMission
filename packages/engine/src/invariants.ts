@@ -2,6 +2,7 @@ import type { CardColor } from '@trm/shared';
 import { CARD_COLORS } from '@trm/shared';
 import type { Board } from './board';
 import type { GameState } from './types/state';
+import { oneParallelTrackPerSide, sameTeam } from './teams';
 
 /**
  * Conservation & exclusivity invariants. Returns a list of violated-invariant messages (empty
@@ -59,14 +60,18 @@ export function checkInvariants(board: Board, state: GameState): string[] {
     }
   }
 
-  // 3. Ownership exclusivity: no player owns two members of a parallel group.
+  // 3. Ownership exclusivity: no SIDE holds two members of a parallel group (v14+; pre-v14 team
+  //    games and every free-for-all reduce to "no PLAYER holds two" — see oneParallelTrackPerSide).
+  const perSide = oneParallelTrackPerSide(state);
   for (const [routeId, cell] of Object.entries(state.ownership)) {
     if ('owner' in cell) {
       for (const other of board.parallelGroup.get(routeId) ?? []) {
         const sc = state.ownership[other as string];
-        if (sc && 'owner' in sc && sc.owner === cell.owner) {
+        if (!sc || !('owner' in sc)) continue;
+        const conflict = perSide ? sameTeam(state, sc.owner, cell.owner) : sc.owner === cell.owner;
+        if (conflict) {
           problems.push(
-            `parallel-route exclusivity: ${cell.owner as string} owns both ${routeId} and ${other as string}`,
+            `parallel-route exclusivity: ${routeId} (${cell.owner as string}) and ${other as string} (${sc.owner as string}) are the same side`,
           );
         }
       }

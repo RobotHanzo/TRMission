@@ -37,7 +37,7 @@ describe('history: replay-compat engine-version allowlist (plan risk R1)', () =>
     expect(byId.get('g-v8')?.replayable).toBe(false);
   });
 
-  it('allowlists v9 plus additive v10 END_GAME, content-gated v11 broken rails, config-gated v12 teams and v13 wide RNG', () => {
-    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toEqual([9, 10, 11, 12, 13]);
+  it('allowlists v9 plus additive v10 END_GAME, content-gated v11 broken rails, config-gated v12 teams and v13 wide RNG, and state-version-gated v14 per-side parallel tracks', () => {
+    expect(REPLAY_COMPATIBLE_ENGINE_VERSIONS).toEqual([9, 10, 11, 12, 13, 14]);
   });
 });

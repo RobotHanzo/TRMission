@@ -128,6 +128,9 @@ export {
   teamPool,
   teamPoolCount,
   teamPoolHasRoom,
+  oneParallelTrackPerSide,
+  sideHoldsParallelTrack,
+  TEAM_PARALLEL_EXCLUSIVITY_ENGINE_VERSION,
 } from './teams';
 
 // Re-export the canonical content + helpers for convenience.

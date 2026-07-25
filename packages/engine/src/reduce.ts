@@ -64,6 +64,7 @@ import {
   teamPoolHasRoom,
   withTeamPool,
   teamOwnedConnectivityEdges,
+  sideHoldsParallelTrack,
 } from './teams';
 
 export interface ReduceOutput {
@@ -557,11 +558,12 @@ function claimPreconditions(
       );
     }
   }
-  for (const other of groupMembersOf(board, routeId)) {
-    const oc = state.ownership[other as string];
-    if (oc && 'owner' in oc && oc.owner === player) {
-      return err(violation('DOUBLE_ROUTE_OWN_BOTH', 'cannot own two tracks of a parallel route'));
-    }
+  // One track per SIDE: in a team game a partner's track bars the rest of the group for the whole
+  // team, not just for the player who claimed it (v14+; see sideHoldsParallelTrack).
+  if (sideHoldsParallelTrack(board, state, player, routeId)) {
+    return err(
+      violation('DOUBLE_ROUTE_OWN_BOTH', 'your side already holds a track of this parallel route'),
+    );
   }
   return ok(route);
 }

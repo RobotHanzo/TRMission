@@ -6,6 +6,7 @@ import {
   type PlayerId,
   type CardColor,
 } from '@trm/shared';
+import type { RouteDef } from '@trm/map-data';
 import { taiwanBoard, CONTENT_HASH } from '../src/taiwan';
 import type { Board } from '../src/board';
 import type { GameConfig } from '../src/config';
@@ -236,6 +237,114 @@ describe('team mode — shared network', () => {
     expect(p2?.longestBonus).toBe(0);
     expect(teamA?.longestBonus).toBe(state.ruleParams.longestPathBonus);
     expect(finals.teamRanking?.flat().sort()).toEqual([0, 1]);
+  });
+});
+
+describe('team mode — one parallel track per side', () => {
+  /** The two tracks of the first double-route pair on the map (never a tunnel/ferry by authoring). */
+  function doublePair(board: Board): [RouteDef, RouteDef] {
+    const group = board.content.routes.find((r) => r.doubleGroup !== undefined)?.doubleGroup;
+    const members = board.content.routes.filter((r) => r.doubleGroup === group);
+    if (members.length !== 2) throw new Error('expected a 2-member double group');
+    return members as [RouteDef, RouteDef];
+  }
+
+  /** `first` claims one track, then `second` tries the other. Returns the second attempt. */
+  function claimBothTracks(
+    teamCount: number | undefined,
+    second: PlayerId,
+    engineVersion?: number,
+  ) {
+    const { board, config } = cfg(4, teamCount);
+    const [t1, t2] = doublePair(board);
+    const p0 = asPlayerId('p0');
+    let state = readyState(initGame(board, config), p0);
+    if (engineVersion !== undefined) state = { ...state, engineVersion };
+    state = grantFromDeck(state, p0, 'LOCOMOTIVE', t1.length);
+    state = grantFromDeck(state, second, 'LOCOMOTIVE', t2.length);
+    const first = reduce(board, state, {
+      t: 'CLAIM_ROUTE',
+      player: p0,
+      routeId: t1.id,
+      payment: { color: null, colorCount: 0, locomotives: t1.length },
+    });
+    if (!first.ok) throw new Error(`first claim rejected: ${first.error.code}`);
+    // 4 players ⇒ openTrackCount is 2, so the sibling stays open rather than locking.
+    expect(first.value.state.ownership[t2.id as string]).toBeUndefined();
+    const after = readyState(first.value.state, second);
+    return {
+      board,
+      before: after,
+      sibling: t2,
+      result: reduce(board, after, {
+        t: 'CLAIM_ROUTE',
+        player: second,
+        routeId: t2.id,
+        payment: { color: null, colorCount: 0, locomotives: t2.length },
+      }),
+    };
+  }
+
+  it("rejects a partner's claim on the other track of a double", () => {
+    const { result } = claimBothTracks(2, asPlayerId('p2'));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe('DOUBLE_ROUTE_OWN_BOTH');
+  });
+
+  it('still lets an OPPONENT take the other track', () => {
+    const { result } = claimBothTracks(2, asPlayerId('p1'));
+    expect(result.ok).toBe(true);
+  });
+
+  it('leaves the free-for-all rule per player — a non-partner may take the other track', () => {
+    const { result } = claimBothTracks(undefined, asPlayerId('p2'));
+    expect(result.ok).toBe(true);
+  });
+
+  it('keeps the pre-v14 per-player rule for a persisted v13 team log (replay compatibility)', () => {
+    const { result } = claimBothTracks(2, asPlayerId('p2'), 13);
+    expect(result.ok).toBe(true);
+  });
+
+  it('drops the sibling from the partner’s legalActions and from PASS legality', () => {
+    const { board, before, sibling } = claimBothTracks(2, asPlayerId('p2'));
+    const p2 = asPlayerId('p2');
+    const claims = legalActions(board, before, p2).filter(
+      (a) => a.t === 'CLAIM_ROUTE' && a.routeId === sibling.id,
+    );
+    expect(claims).toEqual([]);
+    // The partner is not out of moves — the sibling simply isn't one of them.
+    expect(hasAnyLegalMove(board, before, p2)).toBe(true);
+  });
+
+  it('flags a v14 team state where partners hold both tracks as an invariant violation', () => {
+    const { board, config } = cfg(4, 2);
+    const [t1, t2] = doublePair(board);
+    const base = initGame(board, config);
+    const held = {
+      ...base,
+      ownership: {
+        [t1.id as string]: { owner: asPlayerId('p0') },
+        [t2.id as string]: { owner: asPlayerId('p2') },
+      },
+    };
+    // Ownership is stitched in by hand, so ignore the train-conservation noise that follows from it.
+    const exclusivity = (s: GameState) =>
+      checkInvariants(board, s).filter((p) => p.startsWith('parallel-route exclusivity'));
+    expect(exclusivity(held).length).toBeGreaterThan(0);
+    // Same ownership under a v13 stamp is healthy — that game was played under the old rule.
+    expect(exclusivity({ ...held, engineVersion: 13 })).toEqual([]);
+    // And two OPPONENTS holding one track each is healthy at every version.
+    expect(
+      exclusivity({
+        ...held,
+        ownership: {
+          [t1.id as string]: { owner: asPlayerId('p0') },
+          [t2.id as string]: { owner: asPlayerId('p1') },
+        },
+      }),
+    ).toEqual([]);
   });
 });
 

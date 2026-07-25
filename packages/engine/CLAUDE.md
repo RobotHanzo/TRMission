@@ -52,6 +52,13 @@ Teammates see each other's kept tickets, but never each other's hands: cards mov
 only through the public per-team pool (`PUSH_TO_TEAM_POOL` is free once per turn and is deliberately
 excluded from `hasAnyLegalMove` so A15 termination survives; `TAKE_FROM_TEAM_POOL` is a draw).
 
+Parallel-track exclusivity is a rule about **sides**, not players (v14): a team may hold at most ONE
+track of a double/triple, so a partner's track bars the rest of the group for the whole team.
+`sideHoldsParallelTrack` in `teams.ts` is the single predicate behind the claim gate, its
+`canClaimAnyRoute` mirror, the ownership invariant, and `@trm/bots`' path-finding. It reads
+`state.engineVersion`, so a persisted v12/v13 team log keeps replaying under the per-player rule it
+was played on — that per-game pin is what lets 12/13 stay in `REPLAY_COMPATIBLE_ENGINE_VERSIONS`.
+
 **Adding no `RuleParams` field was deliberate** — `stateDigest` covers `ruleParams`, so a new key
 there would change every existing game's digest and break the replay allowlist. All team state is
 optional keys (`teams`, `teamPools`, `turn.teamPushUsed`) that only `GameConfig.teamCount` can

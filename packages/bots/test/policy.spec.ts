@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { initGame, taiwanBoard, CONTENT_HASH } from '@trm/engine';
+import type { SeatIndex } from '@trm/shared';
 import type { GameConfig, GameState } from '@trm/engine';
-import { isBotId, BOT_ID_PREFIX, BOT_DIFFICULTIES } from '../src';
+import { chooseBotAction, isBotId, BOT_ID_PREFIX, BOT_DIFFICULTIES } from '../src';
 import type { BotDifficulty } from '../src';
-import { A, B, driveGame, totalScore } from './helpers';
+import { A, B, C, D, driveGame, driveTeamGame, totalScore } from './helpers';
 
 /** Drive a full 2-bot game with per-step determinism checks (see helpers.ts). */
 function driveToCompletion(
@@ -60,6 +62,50 @@ describe('@trm/bots', () => {
     }
     expect(wins).toBeGreaterThanOrEqual(5);
     expect(margin).toBeGreaterThan(0);
+  });
+
+  it('drives a full 4-bot / 2-team game to completion with only legal, deterministic picks', () => {
+    const state = driveTeamGame('bots-team-spec', 'HELL');
+    expect(state.finalScores?.teams).toHaveLength(2);
+  });
+
+  it('never routes a claim into a parallel track its own side already holds', () => {
+    const board = taiwanBoard();
+    const group = board.content.routes.find((r) => r.doubleGroup !== undefined)?.doubleGroup;
+    const [t1, t2] = board.content.routes.filter((r) => r.doubleGroup === group);
+    if (!t1 || !t2) throw new Error('expected a double-route pair on the Taiwan board');
+    const seats = [A, B, C, D];
+    let state = initGame(board, {
+      seed: 'bots-team-parallel',
+      players: seats.map((id, seat) => ({ id, seat: seat as SeatIndex })),
+      teamCount: 2,
+      contentHash: CONTENT_HASH,
+    });
+    // A's partner (C) holds one track; A is flush with wilds and on turn.
+    state = {
+      ...state,
+      ownership: { [t1.id as string]: { owner: C } },
+      players: Object.fromEntries(
+        Object.entries(state.players).map(([id, p]) => [
+          id,
+          {
+            ...p,
+            pendingTicketOffer: null,
+            ...(id === (A as string) ? { hand: { ...p.hand, LOCOMOTIVE: 12 } } : {}),
+          },
+        ]),
+      ),
+      turn: {
+        orderIndex: state.turnOrder.indexOf(A),
+        phase: 'AWAIT_ACTION',
+        cardsDrawnThisTurn: 0,
+      },
+    };
+    for (const difficulty of BOT_DIFFICULTIES) {
+      const action = chooseBotAction(board, state, A, difficulty);
+      expect(action).not.toBeNull();
+      expect(action?.t === 'CLAIM_ROUTE' && action.routeId === t2.id).toBe(false);
+    }
   });
 
   it('exposes the id helpers and the difficulty roster', () => {

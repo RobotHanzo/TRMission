@@ -229,7 +229,12 @@ export const SCHEMA_VERSION = 1;
 // pre-v13 persisted config carries, so v9–v12 logs replay byte-identically (their `rng` has no
 // `key` lane and the narrow stream is unchanged); only the KEY WIDTH differs for new games, the
 // PRNG consumption order is identical, and `RngState` stays integer-serializable.
-export const ENGINE_VERSION = 13;
+// v14: parallel-track exclusivity is a rule about SIDES, not players — one team may hold at most
+// ONE track of a double/triple, where v12/v13 let each partner take one. The switch is gated on
+// `state.engineVersion` (stamped at genesis, never changed mid-game) rather than applied globally,
+// so a persisted v12/v13 team log keeps replaying under the per-player rule it was played on and
+// stays byte-identical. Free-for-all games are unaffected at every version: a side is one player.
+export const ENGINE_VERSION = 14;
 
 /**
  * Which persisted engine majors THIS engine can replay/recover byte-identically — the single gate
@@ -253,7 +258,9 @@ export const ENGINE_VERSION = 13;
  * populated for them, and no RuleParams field was added, which would have changed every digest).
  * v13's widened RNG activates only when `GameConfig.wideSeed` is set — impossible in any persisted
  * pre-v13 config — so v9–v12 logs replay byte-identically (their `rng` carries no `key` lane and
- * the narrow PRNG stream is unchanged). Only extend this list for a new version when the change is
+ * the narrow PRNG stream is unchanged). v14's per-side parallel-track rule reads the replayed
+ * state's OWN `engineVersion`, so a v9–v13 log is evaluated under the per-player rule it was played
+ * on and replays byte-identically. Only extend this list for a new version when the change is
  * provably inert for every version already listed.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11, 12, 13];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11, 12, 13, 14];

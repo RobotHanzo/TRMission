@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { Phase, type ServerEnvelope } from '@trm/proto';
+import { ENGINE_VERSION } from '@trm/engine';
 import { createTestApp, type TestApp } from './app';
 import { decodeServer, encodeClient } from './helpers';
 import { GameHub } from '../src/ws/hub';
@@ -94,14 +95,14 @@ describe('lobby: vote to end the active game', () => {
     expect(await t.db.collection('games').findOne({ _id: gameId } as never)).toMatchObject({
       status: 'COMPLETED',
       currentSeq: 1,
-      engineVersion: 13,
+      engineVersion: ENGINE_VERSION,
     });
     expect(await t.db.collection('gameEvents').findOne({ gameId, seq: 1 } as never)).toMatchObject({
       action: { t: 'END_GAME', player: host.id },
     });
     expect(await t.db.collection('matchHistory').findOne({ _id: gameId } as never)).toMatchObject({
       _id: gameId,
-      engineVersion: 13,
+      engineVersion: ENGINE_VERSION,
     });
 
     // A completed game keeps its room in STARTED for the scoreboard/rematch flow, but neither a
@@ -170,11 +171,11 @@ describe('lobby: vote to end the active game', () => {
 
     expect(decided.body.members.filter((m: { wantsEnd?: boolean }) => m.wantsEnd).length).toBe(3);
     expect(registry.get(gameId)?.session.phase).toBe('GAME_OVER');
-    expect(registry.get(gameId)?.session.raw().engineVersion).toBe(13);
+    expect(registry.get(gameId)?.session.raw().engineVersion).toBe(ENGINE_VERSION);
     expect(await t.db.collection('games').findOne({ _id: gameId } as never)).toMatchObject({
       status: 'COMPLETED',
       currentSeq: 1,
-      engineVersion: 13,
+      engineVersion: ENGINE_VERSION,
     });
   });
 

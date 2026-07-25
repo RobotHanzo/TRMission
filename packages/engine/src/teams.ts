@@ -1,6 +1,7 @@
-import type { PlayerId, CardColor } from '@trm/shared';
+import type { PlayerId, CardColor, RouteId } from '@trm/shared';
 import { CARD_COLORS, TEAM_POOL_CAPACITY } from '@trm/shared';
 import type { Board } from './board';
+import { groupMembersOf } from './board';
 import type { GameState } from './types/state';
 import type { Edge } from './graph/connectivity';
 import type { TrailEdge } from './graph/longestTrail';
@@ -83,6 +84,40 @@ export function ownedBySide(state: GameState, routeId: string, player: PlayerId)
   const cell = state.ownership[routeId];
   if (!cell || !('owner' in cell)) return false;
   return sameTeam(state, cell.owner, player);
+}
+
+/**
+ * Engine major from which parallel-track exclusivity became a rule about SIDES rather than about
+ * players: one team may hold at most ONE track of a double/triple, not one per member. v12/v13 team
+ * games were played (and persisted) under the per-player rule, so the switch is pinned per game on
+ * `state.engineVersion` — stamped at genesis and never touched mid-game — which is what keeps their
+ * logs replaying byte-identically under v14 and lets 12/13 stay in the replay allowlist.
+ */
+export const TEAM_PARALLEL_EXCLUSIVITY_ENGINE_VERSION = 14;
+
+/** Does this game apply parallel-track exclusivity per SIDE (v14+) rather than per player? */
+export const oneParallelTrackPerSide = (state: GameState): boolean =>
+  state.engineVersion >= TEAM_PARALLEL_EXCLUSIVITY_ENGINE_VERSION;
+
+/**
+ * Does `player`'s SIDE already hold a track of `routeId`'s parallel group? The single answer behind
+ * the claim gate (`reduce`), its PASS-legality mirror (`legality`), the state invariant, and the
+ * bot's path-finding, so none of them can drift. A free-for-all — and any pre-v14 team game — reads
+ * as the historical "does this PLAYER already hold one", because `sameTeam` is identity there.
+ */
+export function sideHoldsParallelTrack(
+  board: Board,
+  state: GameState,
+  player: PlayerId,
+  routeId: RouteId,
+): boolean {
+  const perSide = oneParallelTrackPerSide(state);
+  for (const other of groupMembersOf(board, routeId)) {
+    const cell = state.ownership[other as string];
+    if (!cell || !('owner' in cell)) continue;
+    if (perSide ? sameTeam(state, cell.owner, player) : cell.owner === player) return true;
+  }
+  return false;
 }
 
 /** A team's face-up pool, or an all-zero hand when this is not a team game. */

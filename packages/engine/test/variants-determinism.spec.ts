@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 13 (widened ≥128-bit RNG key for new games)', () => {
-    expect(ENGINE_VERSION).toBe(13);
+  it('is engine version 14 (one parallel track per SIDE, not per player)', () => {
+    expect(ENGINE_VERSION).toBe(14);
   });
 
   it('replays byte-identically under each variant', () => {

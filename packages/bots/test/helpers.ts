@@ -5,11 +5,14 @@
 import { initGame, legalActions, reduce, taiwanBoard, CONTENT_HASH } from '@trm/engine';
 import type { Board, GameConfig, GameState } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
+import type { SeatIndex } from '@trm/shared';
 import { chooseBotAction } from '../src';
 import type { BotDifficulty } from '../src';
 
 export const A = asPlayerId('bot:a');
 export const B = asPlayerId('bot:b');
+export const C = asPlayerId('bot:c');
+export const D = asPlayerId('bot:d');
 
 export interface DriveOpts {
   readonly ruleParams?: GameConfig['ruleParams'];
@@ -56,6 +59,37 @@ export function driveGame(
     state = r.value.state;
   }
   throw new Error(`2-bot game did not finish within 3000 actions (seed ${seed})`);
+}
+
+/**
+ * Drive a full 4-bot / 2-team game to GAME_OVER at one difficulty, checking every pick is legal and
+ * deterministic. Exercises the team-aware branches of the policy (shared network, the team pool, and
+ * the one-parallel-track-per-side rule) that a 2-player free-for-all never reaches.
+ */
+export function driveTeamGame(seed: string, difficulty: BotDifficulty): GameState {
+  const board = taiwanBoard();
+  const seats = [A, B, C, D];
+  const config: GameConfig = {
+    seed,
+    players: seats.map((id, seat) => ({ id, seat: seat as SeatIndex })),
+    teamCount: 2,
+    contentHash: CONTENT_HASH,
+  };
+  let state = initGame(board, config);
+  for (let steps = 0; steps < 6000; steps++) {
+    if (state.turn.phase === 'GAME_OVER') return state;
+    const actor = seats.find((p) => legalActions(board, state, p).length > 0);
+    if (!actor) throw new Error(`no actor has a legal move (seed ${seed})`);
+    const action = chooseBotAction(board, state, actor, difficulty);
+    if (!action) throw new Error(`bot returned null with legal moves (seed ${seed})`);
+    const again = chooseBotAction(board, state, actor, difficulty);
+    if (JSON.stringify(again) !== JSON.stringify(action))
+      throw new Error(`non-deterministic pick (seed ${seed}): ${JSON.stringify(action)}`);
+    const r = reduce(board, state, action);
+    if (!r.ok) throw new Error(`illegal bot action (seed ${seed}): ${JSON.stringify(action)}`);
+    state = r.value.state;
+  }
+  throw new Error(`4-bot team game did not finish within 6000 actions (seed ${seed})`);
 }
 
 /** Final total for one player; throws if the game has no scoreboard or the player is missing. */

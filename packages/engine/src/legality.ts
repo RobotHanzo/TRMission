@@ -2,11 +2,10 @@ import type { PlayerId, CardColor } from '@trm/shared';
 import { TRAIN_COLORS } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import type { Board } from './board';
-import { groupMembersOf } from './board';
 import type { GameState } from './types/state';
 import type { CardCounts } from './hand';
 import { getPlayer } from './reducers/common';
-import { teamOf, teamPoolCount } from './teams';
+import { teamOf, teamPoolCount, sideHoldsParallelTrack } from './teams';
 import {
   allSeatsReservedActive,
   claimsSuspended,
@@ -74,11 +73,7 @@ export function canClaimAnyRoute(board: Board, state: GameState, player: PlayerI
       if (!repair) continue;
       if (repair.exclusiveTurnEnds > 0 && repair.by !== player) continue;
     }
-    const ownsGroupMember = groupMembersOf(board, route.id).some((other) => {
-      const sc = state.ownership[other as string];
-      return sc && 'owner' in sc && sc.owner === player;
-    });
-    if (ownsGroupMember) continue;
+    if (sideHoldsParallelTrack(board, state, player, route.id)) continue;
     if (p.trainCars < route.length) continue;
     // Try every reduction level, not just the deepest one: a ferry's locomotive floor can make the
     // fully-reduced requirement unpayable while a shallower reduction (or none) still affords a

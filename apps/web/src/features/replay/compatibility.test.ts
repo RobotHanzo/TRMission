@@ -23,6 +23,10 @@ describe('replay version compatibility', () => {
     // `GameConfig.wideSeed` is set, which no pre-v13 log can carry, so older logs still replay
     // byte-identically.
     expect(isReplayVersionCompatible(13, SCHEMA_VERSION)).toBe(true);
-    expect(isReplayVersionCompatible(14, SCHEMA_VERSION)).toBe(false);
+    // v14 (one parallel track per SIDE) also joined the window: the rule reads the replayed state's
+    // own `engineVersion`, so a v9–v13 log is still evaluated under the per-player rule it was
+    // played on and replays byte-identically.
+    expect(isReplayVersionCompatible(14, SCHEMA_VERSION)).toBe(true);
+    expect(isReplayVersionCompatible(15, SCHEMA_VERSION)).toBe(false);
   });
 });
