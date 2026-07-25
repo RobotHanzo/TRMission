@@ -10,6 +10,7 @@ import { createTestApp, type TestApp } from './app';
 import type { GameDoc, MatchHistoryDoc } from '../src/persistence/types';
 import { escapeXml, estimateWidth, fitText } from '../src/og/card-svg';
 import { MapsService } from '../src/maps/maps.service';
+import { env } from '../src/config/env';
 
 let t: TestApp;
 const server = () => t.app.getHttpServer();
@@ -105,33 +106,47 @@ describe('GET /api/v1/og/site.png', () => {
 
 describe('search-engine surface (nginx rewrites /robots.txt + /sitemap.xml here)', () => {
   it('robots.txt allows the OG renderer but blocks the rest of the API + maintainer routes', async () => {
-    const res = await request(server())
-      .get('/api/v1/og/robots.txt')
-      .set('X-Forwarded-Proto', 'https')
-      .set('Host', 'play.example.tw')
-      .expect(200);
+    const res = await request(server()).get('/api/v1/og/robots.txt').expect(200);
     expect(res.headers['content-type']).toContain('text/plain');
     expect(res.text).toContain('User-agent: *');
     expect(res.text).toContain('Allow: /api/v1/og/');
     expect(res.text).toContain('Disallow: /api/');
     expect(res.text).toContain('Disallow: /admin/');
-    expect(res.text).toContain('Sitemap: https://play.example.tw/sitemap.xml');
+    expect(res.text).toContain(`Sitemap: ${env.oauthRedirectBase}/sitemap.xml`);
     // Preview bots must keep fetching share targets — never disallowed.
     expect(res.text).not.toMatch(/Disallow: \/(room|replay|maps)/);
   });
 
-  it('sitemap.xml lists only the public pages, absolutised from the forwarded host', async () => {
+  it('robots.txt ignores a spoofed X-Forwarded-Host/Host and always uses the configured origin', async () => {
     const res = await request(server())
-      .get('/api/v1/og/sitemap.xml')
+      .get('/api/v1/og/robots.txt')
       .set('X-Forwarded-Proto', 'https')
-      .set('Host', 'play.example.tw')
+      .set('X-Forwarded-Host', 'evil.example')
+      .set('Host', 'evil.example')
       .expect(200);
+    expect(res.text).toContain(`Sitemap: ${env.oauthRedirectBase}/sitemap.xml`);
+    expect(res.text).not.toContain('evil.example');
+  });
+
+  it('sitemap.xml lists only the public pages, absolutised from the configured origin', async () => {
+    const res = await request(server()).get('/api/v1/og/sitemap.xml').expect(200);
     expect(res.headers['content-type']).toContain('xml');
     for (const path of ['/', '/tutorial', '/login', '/privacy']) {
-      expect(res.text).toContain(`<loc>https://play.example.tw${path}</loc>`);
+      expect(res.text).toContain(`<loc>${env.oauthRedirectBase}${path}</loc>`);
     }
     expect(res.text).not.toContain('/room/');
     expect(res.text).not.toContain('/replay/');
+  });
+
+  it('sitemap.xml ignores a spoofed X-Forwarded-Host and always uses the configured origin', async () => {
+    const res = await request(server())
+      .get('/api/v1/og/sitemap.xml')
+      .set('X-Forwarded-Proto', 'https')
+      .set('X-Forwarded-Host', 'evil.example')
+      .set('Host', 'evil.example')
+      .expect(200);
+    expect(res.text).toContain(`<loc>${env.oauthRedirectBase}/</loc>`);
+    expect(res.text).not.toContain('evil.example');
   });
 });
 
@@ -161,14 +176,22 @@ describe('GET /api/v1/og/page', () => {
     }
   });
 
-  it('builds absolute URLs from the forwarded proto + host', async () => {
+  it('builds absolute URLs from the configured origin, not the request', async () => {
+    const res = await request(server()).get('/api/v1/og/page?path=/').expect(200);
+    expect(res.text).toContain(`content="${env.oauthRedirectBase}/api/v1/og/site.png"`);
+    expect(res.text).toContain(`content="${env.oauthRedirectBase}/"`);
+  });
+
+  it('ignores a spoofed X-Forwarded-Host/Host and still uses the configured origin', async () => {
     const res = await request(server())
       .get('/api/v1/og/page?path=/')
       .set('X-Forwarded-Proto', 'https')
-      .set('Host', 'play.example.tw')
+      .set('X-Forwarded-Host', 'evil.example')
+      .set('Host', 'evil.example')
       .expect(200);
-    expect(res.text).toContain('content="https://play.example.tw/api/v1/og/site.png"');
-    expect(res.text).toContain('content="https://play.example.tw/"');
+    expect(res.text).toContain(`content="${env.oauthRedirectBase}/api/v1/og/site.png"`);
+    expect(res.text).toContain(`content="${env.oauthRedirectBase}/"`);
+    expect(res.text).not.toContain('evil.example');
   });
 
   it('room links unfurl with the code, host, and the room card image', async () => {
