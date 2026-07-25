@@ -105,7 +105,10 @@ this surface; a device smoke is still the real acceptance bar.
   `board/BoardCanvas.web.tsx` + `board/webFonts.ts`, `components/game/CardRowScroll.web.tsx`.
   Gated to `null` on web like under Expo Go: `push/expoNotifications.ts`,
   `auth/googleSigninModule.ts`. Apple auth needs no gate (`requireOptionalNativeModule` stub;
-  `isAvailableAsync()` → false).
+  `isAvailableAsync()` → false). **`ads/googleMobileAds.web.ts` must stay a real file split**, not
+  just a `Platform.OS` branch: Metro still resolves the `require()` inside such a branch when
+  bundling for web, and `react-native-google-mobile-ads` imports `react-native/Libraries/…`
+  internals that Expo's web resolver rejects — the whole web bundle fails to build.
 - **Alerts**: RNW's `Alert.alert` is a silent no-op, so `src/web/alertShim.ts` (installed from the
   web entry branch) maps it onto `window.confirm`/`window.alert` — OK runs the LAST non-cancel
   button, Cancel the `style: 'cancel'` one. Playwright must handle these as native dialogs

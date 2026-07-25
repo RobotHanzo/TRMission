@@ -64,6 +64,11 @@ native module is never bundled there), so every surface renders nothing and ever
 same shape as `../push/expoNotifications.ts`. Backed by `__mocks__/react-native-google-mobile-ads.js`
 and `__mocks__/expo-tracking-transparency.js`.
 
+Unlike the push gate, web needs a real **file split** (`googleMobileAds.web.ts`) on top of the
+runtime `Platform.OS` branch. Metro resolves the `require('react-native-google-mobile-ads')` inside
+that branch even for a web bundle, and the package imports `react-native/Libraries/…` internals that
+Expo's web resolver rejects outright — so without the split the whole harness bundle fails to build.
+
 ## Gotcha
 
 `showInterstitial()` reads its persisted cap **before** registering ad listeners, so a test that
