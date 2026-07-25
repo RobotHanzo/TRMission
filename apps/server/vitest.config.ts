@@ -18,8 +18,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['test/**/*.spec.ts'],
-    // Bots play instantly in tests (no inter-move delay) so games finish fast.
-    env: { TRM_BOT_DELAY_MS: '0' },
+    // Bots play instantly in tests (no inter-move delay) so games finish fast. A dummy JWT_SECRET
+    // satisfies the fail-closed check in src/config/env.ts (real deployments must set a strong one).
+    env: { TRM_BOT_DELAY_MS: '0', JWT_SECRET: 'test-jwt-secret-not-a-real-secret-vitest-only' },
     // Full-game e2e specs boot a Nest app + mongodb-memory-server; the 5s default
     // is tight under CI runner contention even though it's comfortable locally.
     testTimeout: 20000,

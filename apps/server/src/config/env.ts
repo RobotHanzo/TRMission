@@ -1,6 +1,29 @@
 // Minimal typed runtime config.
 const day = 24 * 60 * 60 * 1000;
 
+/** Minimum acceptable JWT signing-key length (chars). Below this the boot fails closed. */
+const JWT_SECRET_MIN_LENGTH = 32;
+/** Publicly-known dev/default secrets that must never sign real credentials. */
+const INSECURE_JWT_SECRETS = ['dev-insecure-secret-change-me', 'dev-insecure-change-me'];
+
+/**
+ * The single HS256 key that signs every server-minted credential (access tokens, ws-game tickets,
+ * admin-replay tickets, OAuth state). Read with NO fallback: a missing, too-short, or known-default
+ * secret fails the boot rather than silently signing every token with a literal that is public in
+ * this repository — which would let anyone forge tokens for any account or seat (CWE-798). Set
+ * JWT_SECRET to a strong random value of at least JWT_SECRET_MIN_LENGTH chars in every deployment.
+ */
+function requireJwtSecret(): string {
+  const secret = process.env.JWT_SECRET ?? '';
+  if (secret.length < JWT_SECRET_MIN_LENGTH || INSECURE_JWT_SECRETS.includes(secret)) {
+    throw new Error(
+      `JWT_SECRET is unset, too short, or a known insecure default. Set JWT_SECRET to a strong ` +
+        `random value of at least ${JWT_SECRET_MIN_LENGTH} characters before starting the server.`,
+    );
+  }
+  return secret;
+}
+
 export const env = {
   port: Number(process.env.PORT ?? 3001),
   mongoUrl: process.env.MONGO_URL ?? 'mongodb://localhost:27017',
@@ -38,8 +61,9 @@ export const env = {
   /** Debounce before a your-turn push to a socketless player (ms; 0 = immediate). */
   pushYourTurnDelayMs: Number(process.env.PUSH_YOUR_TURN_DELAY_MS ?? 15_000),
 
-  // Auth (Step C). The default secret is for local dev only — set JWT_SECRET in prod.
-  jwtSecret: process.env.JWT_SECRET ?? 'dev-insecure-secret-change-me',
+  // Auth (Step C). Read with no fallback and validated at boot (see requireJwtSecret above): a
+  // missing/weak/known-default JWT_SECRET fails the boot instead of signing tokens with a public key.
+  jwtSecret: requireJwtSecret(),
   accessTtl: process.env.JWT_ACCESS_TTL ?? '15m',
   /** ws-game ticket lifetime (short — it's redeemed immediately for a socket). */
   wsTicketTtl: process.env.WS_TICKET_TTL ?? '45s',
