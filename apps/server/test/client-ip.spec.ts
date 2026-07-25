@@ -49,15 +49,13 @@ describe('clientIp', () => {
   });
 
   it('rejects a well-formed IP with a trailing injection payload', () => {
-    expect(
-      clientIp(fakeReq({ 'cf-connecting-ip': '8.8.8.8; DROP TABLE users' }, '10.0.0.1')),
-    ).toBe('10.0.0.1');
+    expect(clientIp(fakeReq({ 'cf-connecting-ip': '8.8.8.8; DROP TABLE users' }, '10.0.0.1'))).toBe(
+      '10.0.0.1',
+    );
   });
 
   it('rejects an IP with a trailing port (not itself a valid literal)', () => {
-    expect(clientIp(fakeReq({ 'cf-connecting-ip': '8.8.8.8:1234' }, '10.0.0.1'))).toBe(
-      '10.0.0.1',
-    );
+    expect(clientIp(fakeReq({ 'cf-connecting-ip': '8.8.8.8:1234' }, '10.0.0.1'))).toBe('10.0.0.1');
   });
 
   it('rejects an empty string header and falls back', () => {
@@ -65,8 +63,8 @@ describe('clientIp', () => {
   });
 
   it('ignores a duplicated header (array value) rather than trusting it', () => {
-    expect(
-      clientIp(fakeReq({ 'cf-connecting-ip': ['203.0.113.7', '8.8.8.8'] }, '10.0.0.1')),
-    ).toBe('10.0.0.1');
+    expect(clientIp(fakeReq({ 'cf-connecting-ip': ['203.0.113.7', '8.8.8.8'] }, '10.0.0.1'))).toBe(
+      '10.0.0.1',
+    );
   });
 });

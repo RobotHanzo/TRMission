@@ -115,7 +115,12 @@ class CountingStore implements GameStorePort {
   }
 }
 
-const helloFrame = (gameId: string, playerId: string, seat: number, clientSeq: number): Uint8Array =>
+const helloFrame = (
+  gameId: string,
+  playerId: string,
+  seat: number,
+  clientSeq: number,
+): Uint8Array =>
   encodeClient(clientSeq, {
     case: 'hello',
     value: { ticket: makeDevTicket({ gameId, playerId, seat }), protocolVersion: 1 },
@@ -191,7 +196,9 @@ describe('hello / recoverMatch single-flight (F12 round 2)', () => {
     const live = new GameSession(gameId, board, config);
     await inner.createGame(gameId, config, live.raw(), live.digest());
     // Stamp an engine major the current engine refuses to resume (see recovery-engine-compat spec).
-    await db.collection<GameDoc>('games').updateOne({ _id: gameId }, { $set: { engineVersion: 8 } });
+    await db
+      .collection<GameDoc>('games')
+      .updateOne({ _id: gameId }, { $set: { engineVersion: 8 } });
 
     const store = new CountingStore(inner);
     let recoveryFailures = 0;

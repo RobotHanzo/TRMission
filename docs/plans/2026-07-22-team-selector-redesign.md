@@ -3,7 +3,7 @@
 ## Context
 
 Team mode (`RoomSettings.teamCount`) already exists end-to-end — engine, wire, and both clients —
-but the lobby's *team-assignment* UX is a bare-bones leftover: the flat player list grows a colored
+but the lobby's _team-assignment_ UX is a bare-bones leftover: the flat player list grows a colored
 badge and two chevron buttons (`RoomScreen.tsx:299-382`) that let the host nudge one player one seat
 at a time. There's no way for players to pick their own side, no bulk/random shuffle, and the visual
 design doesn't read as "these are the two teams" — it reads as "here's a list with a tag on it."
@@ -34,9 +34,9 @@ colored departure board per line) without adding new imagery or fonts.
 - `.team-chip`: the existing member-row content (seat dot, bot icon, name, host/you tags,
   ready/bot badge, host's kick/transfer/remove-bot icon buttons — unchanged from today) restyled as
   a card row inside its column. Host powers (kick/transfer/remove bot) stay available in **every**
-  assignment mode; only the *team-move* affordance changes per mode.
+  assignment mode; only the _team-move_ affordance changes per mode.
 - Interaction model — **tap-to-select, tap-to-place** (not drag-and-drop): clicking a chip in
-  host-assign mode "picks it up" (`.team-chip.selected`, small lift + outline); clicking a *different*
+  host-assign mode "picks it up" (`.team-chip.selected`, small lift + outline); clicking a _different_
   column swaps that player in. This is one interaction model implementable identically with
   `<button>`/`Pressable` on both platforms — no new dependency, fully keyboard/touch accessible.
   Self-join mode instead shows a small "Join" button on each column that isn't your own.
@@ -73,11 +73,11 @@ export function seatOrderMovingToTeam(
   userId: string,
   targetTeam: number,
   teamCount: number,
-): string[] | null
+): string[] | null;
 
 /** A random full reseat (Fisher–Yates over the current members) — used by the host's shuffle
  *  button. Math.random is fine here: this is UI-triggered lobby cosmetics, not `@trm/engine`. */
-export function shuffleSeatOrder(members: readonly { userId: string }[]): string[]
+export function shuffleSeatOrder(members: readonly { userId: string }[]): string[];
 ```
 
 `seatOrderMovingToTeam` is the one seat-swap primitive reused three ways: server-side by the new
@@ -103,7 +103,7 @@ strictly host-only, untouched). Add one narrow endpoint instead of loosening `re
 - `apps/server/src/lobby/lobby.controller.ts`: `POST :code/team` → `lobby.joinTeam(...)`, same shape
   as the `:code/seats` route right above it (`lobby.controller.ts:201-208`).
 - `packages/client-core/src/net/rest.ts`: `joinTeam: (code, team) => req<RoomView>('POST', \`/rooms/${code}/team\`, { team })`,
-  next to `reseatRoom` (`rest.ts:219-222`).
+next to `reseatRoom` (`rest.ts:219-222`).
 
 ## Web (`apps/web`)
 
@@ -149,7 +149,7 @@ strictly host-only, untouched). Add one narrow endpoint instead of loosening `re
   swaps exactly two members' seats/ready flags; 403/400 for `mode_disabled`/`invalid_team`/
   `not_member`; still-host-only `reseat` behavior is unchanged (existing cases keep passing).
 - `yarn workspace @trm/web test` / `yarn workspace @trm/mobile test` — updated `RoomScreen` specs
-  + new `TeamSelector` unit tests per platform.
+  - new `TeamSelector` unit tests per platform.
 - `yarn typecheck && yarn lint` at the repo root (new field touches server/shared/client-core/web/mobile).
 - Manual: `yarn workspace @trm/server dev` + `yarn workspace @trm/web dev`, open two guest tabs in a
   6-seat room, turn on team mode, exercise all three assignment modes end-to-end (shuffle as host;

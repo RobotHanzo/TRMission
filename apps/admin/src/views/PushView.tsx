@@ -86,8 +86,7 @@ export function PushView() {
           <span className="v">
             {target ? (
               <>
-                {target.displayName}{' '}
-                <span className="oc-mono oc-muted">{shortId(target.id)}</span>{' '}
+                {target.displayName} <span className="oc-mono oc-muted">{shortId(target.id)}</span>{' '}
                 <button className="oc-btn" onClick={() => setPicking(true)}>
                   {t('push.changeUser')}
                 </button>

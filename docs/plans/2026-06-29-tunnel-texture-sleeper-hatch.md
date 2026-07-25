@@ -3,23 +3,23 @@
 ## Context
 
 Tunnel routes on the board currently get a single thin dashed line (`.tunnel-track`) drawn
-*under* the train cars; the cars are shortened (`SLOT_FILL_TUNNEL = 0.62`) so the dashes peek
+_under_ the train cars; the cars are shortened (`SLOT_FILL_TUNNEL = 0.62`) so the dashes peek
 through the gaps. The user reports this cue is hard to see — and it is, for three reasons:
 
 1. **Too thin** — `stroke-width: 0.55px * --inv-scale`.
-2. **Mostly hidden** — only the tiny `1 1` dashes that land *between* cars are visible; the rest
+2. **Mostly hidden** — only the tiny `1 1` dashes that land _between_ cars are visible; the rest
    sits behind the cars.
 3. **No relation to the cars** — the fixed `1 1` board-unit rhythm reads as faint speckles, not a
    deliberate texture.
 
-Note the color (`#5c5346`) is *not* the problem: the roadbed (`.bed`) is light in **both** light
+Note the color (`#5c5346`) is _not_ the problem: the roadbed (`.bed`) is light in **both** light
 and dark themes (`#fffdf8` / `#ddd8cc`), so a fixed dark stroke is correct for both — no theme
 override needed.
 
 **Chosen direction (user-approved): "sleeper hatch."** Turn the cue into bold dark railroad
 sleeper ties that cross the whole roadbed — visible in every gap and poking just past the top/bottom
 edges of the cars. It's the most unmistakably "railway," the most legible at any zoom, theme-correct,
-and (crucially) it stays *within* the roadbed width so it never collides with double-track siblings.
+and (crucially) it stays _within_ the roadbed width so it never collides with double-track siblings.
 
 ```
    ‖    ‖    ‖    ‖    ‖

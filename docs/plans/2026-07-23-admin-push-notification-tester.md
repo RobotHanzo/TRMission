@@ -17,15 +17,18 @@ test the real thing.
 ## Backend
 
 **`packages/shared/src/dashboard.ts`**
+
 - Add `'push.test'` to `DASHBOARD_PERMISSIONS`.
 - Add it to `ADMIN_PERMISSIONS` only (same tier as `users.features`/`config.features`/
   `maps.moderate` — this pushes a real notification to a real device, not a moderator-tier action).
 
 **`apps/server/src/dashboard/audit.repo.ts`**
+
 - Add `'push.test'` to the `DashboardAuditAction` union (every dashboard mutation is audited; a
   test send touches a real user's device and should be traceable to the operator who fired it).
 
 **`apps/server/src/push/push.service.ts`**
+
 - Refactor: extract the existing `notify()` device-fan-out loop into a private
   `deliver(userIds, kind, data): Promise<{deviceCount, sent, failed}>`. `notify()` calls it and
   discards the result (unchanged fire-and-forget behavior for game-critical callers). Add a new
@@ -43,6 +46,7 @@ test the real thing.
   `AccountSelectorModal`).
 
 **`apps/server/src/dashboard/dashboard.schemas.ts`**
+
 - Add `PushTestRequestSchema` (`userId: z.string()`, `kind: z.enum(['your_turn','game_started','game_over','game_paused'])`) and its DTO type, mirroring `ModerationReasonSchema`/`ModerationReasonDto`.
 - Add `PushStatusSchema` (`{ enabled: z.boolean() }`) and `PushTestResultSchema`
   (`{ enabled: z.boolean(), deviceCount: z.number(), sent: z.number(), failed: z.number() }`),
@@ -50,6 +54,7 @@ test the real thing.
 
 **`apps/server/src/dashboard/dashboard-push.controller.ts`** (new, same shape as
 `dashboard-purge.controller.ts`)
+
 - `@Get('status')` `@RequirePermission('push.test')` → `{ enabled: this.push.enabled }`.
 - `@Post('test')` `@RequirePermission('push.test')` → body `PushTestRequestDto` → calls
   `push.sendTest(userId, kind)`, then `audit.log(actor, 'push.test', {type:'user', id: userId}, {kind, ...result})`, returns the result.
@@ -57,10 +62,12 @@ test the real thing.
   dashboard controller).
 
 **`apps/server/src/dashboard/dashboard.module.ts`**
+
 - Import `PushModule` (exports `PushService`, already used the same way by `game.module.ts`) and
   register `DashboardPushController`.
 
 **Tests**
+
 - `apps/server/test/dashboard-push.e2e.spec.ts`, following `dashboard-purge.e2e.spec.ts`'s
   pattern (register admin + moderator dashboard accounts, `guest()` helper, `t.db` assertions):
   moderator gets 403 on both routes; status reflects `PushService.enabled` (false with no env
@@ -73,9 +80,11 @@ test the real thing.
 ## Admin frontend (`apps/admin`)
 
 **`src/store/ui.ts`**
+
 - Add `'push'` to the `AdminView` union and to `parsePath`'s regex (alongside `purge`).
 
 **`src/net/rest.ts`**
+
 - Add `type PushKind = 'your_turn' | 'game_started' | 'game_over' | 'game_paused';` (kept local —
   four literals used only for a `<select>`, not worth a `@trm/shared` round-trip).
 - Add `interface PushStatus { enabled: boolean }` and
@@ -86,6 +95,7 @@ test the real thing.
 
 **`src/views/PushView.tsx`** (new — modeled on `PurgeView.tsx` for the load/status/toast shape and
 `FeaturesView.tsx` for the account-picker shape)
+
 - On mount: `api.getPushStatus()` → a `SignalBadge` ("clear" if enabled, "stop" + explanatory text
   if not — no FCM/APNs credentials configured server-side).
 - `AccountSelectorModal` (default `filter: 'registered'`) to pick the target account; show the
@@ -100,10 +110,12 @@ test the real thing.
 - Gate the whole view the same way `PurgeView` gates its run button: `useSession((s) => s.hasPermission('push.test'))`.
 
 **`src/App.tsx`**
+
 - Import `PushView`, add `{ view: 'push', permission: 'push.test', icon: BellRing }` to `NAV`
   (import `BellRing` from `lucide-react`), add the `case 'push': return <PushView />;` arm.
 
 **`src/i18n/index.ts`**
+
 - Add `nav.push` (both locales).
 - Add a `push` block (title, statusEnabled/statusDisabled, pickUser, changeUser, kindLabel, the 4
   kind labels, send) in both the zh-Hant and en tables.
@@ -116,6 +128,7 @@ test the real thing.
   match whatever `PurgeView`'s toast calls do, i.e. `pushToast('success'|'error', t('toast....'))`).
 
 **Tests**
+
 - `src/views/PushView.test.tsx`, mirroring `PurgeView.test.tsx`'s `stubFetch` pattern: renders
   status, hides the send action without `push.test`, picks a user via the (already-tested)
   `AccountSelectorModal`, sends, and asserts the right toast per response shape

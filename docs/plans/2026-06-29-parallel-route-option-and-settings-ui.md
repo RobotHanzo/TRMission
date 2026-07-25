@@ -26,6 +26,7 @@ The new field flows the same path as the existing three rule variants. Proposed 
 **`doubleRouteSingleFor23`** (boolean).
 
 **Engine (rule logic):**
+
 - `packages/shared/src/constants.ts` — add `doubleRouteSingleFor23: boolean` to `RuleParams` and to
   `DEFAULT_RULE_PARAMS` (default **`true`** = vanilla behavior preserved).
 - `packages/engine/src/config.ts` — change `variantForPlayerCount` to take the flag:
@@ -39,6 +40,7 @@ The new field flows the same path as the existing three rule variants. Proposed 
   (see `docs/superpowers/specs/2026-06-28-per-game-settings-design.md`).
 
 **Display projection (keep the codec 1:1 with the other 3 variants):**
+
 - `packages/engine/src/types/view.ts` — add the field to `RedactedView.settings`.
 - `packages/engine/src/selectors.ts` (~254) — project `state.ruleParams.doubleRouteSingleFor23`.
 - `packages/proto/proto/trmission/v1/common.proto` — add `bool double_route_single_for23 = 4;` to
@@ -46,6 +48,7 @@ The new field flows the same path as the existing three rule variants. Proposed 
 - `apps/server/src/codec/snapshot.ts` (~133) — map the field into `gameSettings`.
 
 **Lobby plumbing (host-editable setting):**
+
 - `apps/server/src/lobby/room.repo.ts` — add to `RoomSettings` + `DEFAULT_ROOM_SETTINGS`.
 - `apps/server/src/lobby/lobby.schemas.ts` — add `doubleRouteSingleFor23: z.boolean()` to
   `GameSettingsSchema`.
@@ -58,6 +61,7 @@ The new field flows the same path as the existing three rule variants. Proposed 
 ## Change 2 — New defaults
 
 In `apps/server/src/lobby/room.repo.ts` `DEFAULT_ROOM_SETTINGS`:
+
 - `visibility: 'PUBLIC'` → `'INVITE_ONLY'`
 - `unlimitedStationBorrow: false` → `true`
 - `doubleRouteSingleFor23: true` (new; ON by default — preserves current 2–3 player behavior)
@@ -72,6 +76,7 @@ In `apps/server/src/lobby/room.repo.ts` `DEFAULT_ROOM_SETTINGS`:
 
 The Settings modal (`apps/web/src/components/SettingsModal.tsx`) already contains both patterns we
 need, as inline markup styled by classes in `apps/web/src/styles/app.css`:
+
 - a **switch** — `<button role="switch">` + `.switch-knob` (lines 163–172, 189–198; CSS `.switch` /
   `.switch.on` / `.switch-knob`).
 - a **segmented selector** — `.segmented` `role="radiogroup"` of `<button role="radio">` for
@@ -80,6 +85,7 @@ need, as inline markup styled by classes in `apps/web/src/styles/app.css`:
 There is no shared UI-primitives folder yet, so we create one and extract both.
 
 **Extract two reusable components (`apps/web/src/components/ui/`):**
+
 - `Switch.tsx` — props `{ checked, onChange, label (aria), disabled? }`; renders the existing
   `<button role="switch">` + `.switch-knob` markup (reuse existing CSS, no new styles).
 - `Segmented.tsx` — generic over a value `T`; props
@@ -91,6 +97,7 @@ There is no shared UI-primitives folder yet, so we create one and extract both.
 `<Segmented>`; colour-blind / sound → `<Switch>`.
 
 **Lobby (`apps/web/src/screens/RoomScreen.tsx`):**
+
 - Replace the three `RULE_TOGGLES` raw `<input type="checkbox">` (lines 241–255) and the
   `allowSpectating` checkbox (256–266) with `<Switch>`. Add the new `doubleRouteSingleFor23` entry
   to the `RULE_TOGGLES` table so it renders as a switch row automatically.

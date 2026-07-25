@@ -418,7 +418,10 @@ export class GameHub {
         // every reconnect/spectate-join, so loading it uncapped would keep re-serializing the full
         // backlog for the rest of the game's resident lifetime. The underlying `gameChats`
         // collection is untouched — this only bounds what the hub keeps resident/replays.
-        this.chatLog.set(gameId, loaded.length > CHAT_LOG_MAX ? loaded.slice(-CHAT_LOG_MAX) : loaded);
+        this.chatLog.set(
+          gameId,
+          loaded.length > CHAT_LOG_MAX ? loaded.slice(-CHAT_LOG_MAX) : loaded,
+        );
       } catch {
         this.chatLog.set(gameId, []); // non-fatal: chat is cosmetic
       }
@@ -1123,7 +1126,12 @@ export class GameHub {
       // Refuse rather than drop the oldest line — chat is an append-only transcript, and the
       // refusal itself still went through the rate limit above, so it can't become a new flood.
       conn.send(
-        rejectionFrame(clientSeq, RejectionCode.RATE_LIMITED, 'errors:chatLogFull', 'chat log full'),
+        rejectionFrame(
+          clientSeq,
+          RejectionCode.RATE_LIMITED,
+          'errors:chatLogFull',
+          'chat log full',
+        ),
       );
       return;
     }
@@ -1430,7 +1438,8 @@ export class GameHub {
     this.metrics.commandReceived();
     const startedAt = performance.now();
     const applied = await this.applyPrepared(match, action, prep);
-    if (!applied.ok) return applied.error instanceof GameNotLiveError ? 'gameNotLive' : 'persistFailed';
+    if (!applied.ok)
+      return applied.error instanceof GameNotLiveError ? 'gameNotLive' : 'persistFailed';
     this.broadcast(match, prep.events, null, 0);
     this.metrics.commandApplied((performance.now() - startedAt) / 1000);
     return 'moved';

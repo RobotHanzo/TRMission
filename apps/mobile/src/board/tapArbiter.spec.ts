@@ -53,10 +53,7 @@ describe('tapArbiter', () => {
     expect(onSingle).toHaveBeenCalledWith({ x: 100, y: 200 }, CAM_A);
     vi.advanceTimersByTime(DOUBLE_TAP_MS);
     expect(onSingle).toHaveBeenCalledTimes(2);
-    expect(onSingle).toHaveBeenLastCalledWith(
-      { x: 100 + DOUBLE_TAP_SLOP_PX + 1, y: 200 },
-      CAM_B,
-    );
+    expect(onSingle).toHaveBeenLastCalledWith({ x: 100 + DOUBLE_TAP_SLOP_PX + 1, y: 200 }, CAM_B);
     expect(onDouble).not.toHaveBeenCalled();
   });
 

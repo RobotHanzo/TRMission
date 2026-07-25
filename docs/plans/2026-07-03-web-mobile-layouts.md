@@ -7,7 +7,8 @@ media queries are 920px in `game.css` and 900px in `replay.css`), and several la
 widths that overflow a 360–430px viewport. The goal: **every page usable and viewable on mobile
 phones** (portrait ~360–430px, touch), with desktop pixel-identical.
 
-Exploration confirmed the hard part is *layout only*:
+Exploration confirmed the hard part is _layout only_:
+
 - The viewport meta is already correct (`index.html:5`); design tokens exist (`styles/tokens.css`).
 - All gameplay is click/tap-based (no hover-gated functionality; hover is decoration only).
 - Board pan/pinch-zoom already works on touch via `react-zoom-pan-pinch` (both the game `Board.tsx`
@@ -27,7 +28,7 @@ rail + 21em inspector restacked; Replay needs minor polish.
 - **Phone breakpoint: `@media (max-width: 700px)`**, sitting under the existing 920px tier
   (700–920px tablet behavior unchanged). TS twin: `export const PHONE_QUERY = '(max-width: 700px)'`
   in `src/hooks/useMediaQuery.ts`; each CSS block gets a `/* phone tier — keep in sync with
-  PHONE_QUERY */` comment. Media queries live in each feature's own CSS file (existing convention).
+PHONE_QUERY */` comment. Media queries live in each feature's own CSS file (existing convention).
   Exception: EncyclopediaModal keeps its pre-existing 680px block — extend it, don't move it.
 - **`(pointer: coarse)` for hit-target enlargement only** (≥40px icon buttons/tabs), never layout —
   desktop mice are `pointer: fine`, so desktop stays pixel-identical. (App convention is 32px
@@ -35,7 +36,7 @@ rail + 21em inspector restacked; Replay needs minor polish.
 - **Additive CSS first; JSX changes only where structure must differ** (game dock, header name span,
   App main class), gated with `useMediaQuery(PHONE_QUERY)` like the existing `wide` gate. jsdom
   returns `false` from `useMediaQuery` → all existing tests keep exercising the desktop DOM.
-- **Source order matters**: new ≤700px blocks in `game.css` must sit *after* the ≤920px block
+- **Source order matters**: new ≤700px blocks in `game.css` must sit _after_ the ≤920px block
   (`game.css:1205`) — equal specificity, later wins.
 - Every new user-facing string gets zh-Hant + en entries in `src/i18n/index.ts`.
 
@@ -72,32 +73,69 @@ Highest everyday value, almost pure CSS.
 ```css
 /* phone tier — keep in sync with PHONE_QUERY */
 @media (max-width: 700px) {
-  .app-header { padding: var(--tr-space-2) var(--tr-space-3); gap: var(--tr-space-2); }
-  .header-actions { flex-wrap: wrap; justify-content: flex-end; }
-  .user-chip-name { display: none; }                /* avatar/icon-only chip */
-  .header-status { min-width: 0; gap: var(--tr-space-2); }  /* min-width:0 so the label can shrink */
-  .turn-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .app-main { padding: var(--tr-space-4) var(--tr-space-3); }
+  .app-header {
+    padding: var(--tr-space-2) var(--tr-space-3);
+    gap: var(--tr-space-2);
+  }
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .user-chip-name {
+    display: none;
+  } /* avatar/icon-only chip */
+  .header-status {
+    min-width: 0;
+    gap: var(--tr-space-2);
+  } /* min-width:0 so the label can shrink */
+  .turn-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .app-main {
+    padding: var(--tr-space-4) var(--tr-space-3);
+  }
 
   /* Room + Settings: setting rows wrap; the map picker stacks its controls full-width. */
-  .setting-row { flex-wrap: wrap; row-gap: var(--tr-space-2); }
-  .setting-row > .row { flex: 1 1 100%; flex-wrap: wrap; min-width: 0; }
-  .setting-row select { flex: 1 1 100%; min-width: 0; }
-  .member-list li { flex-wrap: wrap; }
+  .setting-row {
+    flex-wrap: wrap;
+    row-gap: var(--tr-space-2);
+  }
+  .setting-row > .row {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .setting-row select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .member-list li {
+    flex-wrap: wrap;
+  }
 }
 ```
 
-   This fixes RoomScreen's map row (`RoomScreen.tsx:285-342`) with **no RoomScreen JSX change**
-   (label keeps line 1; Segmented + `<select>` drop to a full-width line 2) and covers
-   SettingsModal rows for free.
-3. `styles/history.css` — append:
+This fixes RoomScreen's map row (`RoomScreen.tsx:285-342`) with **no RoomScreen JSX change**
+(label keeps line 1; Segmented + `<select>` drop to a full-width line 2) and covers
+SettingsModal rows for free. 3. `styles/history.css` — append:
 
 ```css
 @media (max-width: 700px) {
-  .history-row { flex-wrap: wrap; }
-  .history-meta { min-width: 0; }
-  .history-players { flex: 1 1 100%; order: 3; }
-  .history-row > button { margin-left: auto; }
+  .history-row {
+    flex-wrap: wrap;
+  }
+  .history-meta {
+    min-width: 0;
+  }
+  .history-players {
+    flex: 1 1 100%;
+    order: 3;
+  }
+  .history-row > button {
+    margin-left: auto;
+  }
 }
 ```
 
@@ -105,8 +143,13 @@ Highest everyday value, almost pure CSS.
 
 ```css
 @media (max-width: 700px) {
-  .maps-screen .row { flex-wrap: wrap; }
-  .maps-screen .row > input { flex: 1 1 10em; min-width: 0; }
+  .maps-screen .row {
+    flex-wrap: wrap;
+  }
+  .maps-screen .row > input {
+    flex: 1 1 10em;
+    min-width: 0;
+  }
 }
 ```
 
@@ -160,8 +203,9 @@ phone ? (
 ) : sandbox ? ( /* unchanged */ ) : wide ? ( /* unchanged */ ) : ( /* unchanged tabbed rail */ )
 ```
 
-   - No `.game-hand-strip` renders on phone (it only exists in the other branches — verify).
-   - PaymentModal / TunnelModal / ScoreBoard / Toasts / AnimationLayer / overlay: untouched.
+- No `.game-hand-strip` renders on phone (it only exists in the other branches — verify).
+- PaymentModal / TunnelModal / ScoreBoard / Toasts / AnimationLayer / overlay: untouched.
+
 3. `src/components/Board.tsx` — **`MapControls` is defined here (line 418), not a separate file.**
    Render the fullscreen button (lines 486–493) only when `document.fullscreenEnabled` (iPhone
    Safari has no element Fullscreen API — hide the dead button).
@@ -172,42 +216,94 @@ phone ? (
       the sandbox keeps the ≤920 stacked column so tutorial/enc anchors stay mounted.
       Must come AFTER the ≤920 block (equal specificity). Keep in sync with PHONE_QUERY. ── */
 @media (max-width: 700px) {
-  .app-main--live.app-main--game {          /* re-assert what the ≤920 block relaxed */
-    overflow: hidden; display: flex; padding: var(--tr-space-2);
+  .app-main--live.app-main--game {
+    /* re-assert what the ≤920 block relaxed */
+    overflow: hidden;
+    display: flex;
+    padding: var(--tr-space-2);
   }
   .game--dock {
     --tr-dock-h: min(34dvh, 300px);
-    display: grid; height: auto; gap: var(--tr-space-2);
+    display: grid;
+    height: auto;
+    gap: var(--tr-space-2);
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-areas: 'banner' 'board' 'dock';   /* empty banner row collapses to 0 */
+    grid-template-areas: 'banner' 'board' 'dock'; /* empty banner row collapses to 0 */
   }
-  .game--dock .spectator-banner { grid-area: banner; }
-  .game--dock .game-board { min-height: 0; }
-  .game--dock .board-viewport { min-height: 200px; }   /* relax the 360px floor (game.css:237) */
+  .game--dock .spectator-banner {
+    grid-area: banner;
+  }
+  .game--dock .game-board {
+    min-height: 0;
+  }
+  .game--dock .board-viewport {
+    min-height: 200px;
+  } /* relax the 360px floor (game.css:237) */
   .game-dock {
-    grid-area: dock; display: flex; flex-direction: column; gap: var(--tr-space-1);
-    min-height: 0; padding-bottom: env(safe-area-inset-bottom, 0px);
+    grid-area: dock;
+    display: flex;
+    flex-direction: column;
+    gap: var(--tr-space-1);
+    min-height: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  .dock-tabs { display: flex; gap: var(--tr-space-1); }
+  .dock-tabs {
+    display: flex;
+    gap: var(--tr-space-1);
+  }
   .dock-tabs button {
-    flex: 1; min-width: 0; min-height: 40px; padding: var(--tr-space-1); font-size: 0.8rem;
-    display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-    white-space: nowrap; overflow: hidden;
-    background: var(--tr-surface-2); border: 1px solid var(--tr-line);
+    flex: 1;
+    min-width: 0;
+    min-height: 40px;
+    padding: var(--tr-space-1);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    background: var(--tr-surface-2);
+    border: 1px solid var(--tr-line);
   }
-  .dock-tabs button.active { background: var(--tr-ember); border-color: var(--tr-ember); color: #fff; }
-  .dock-panel { height: var(--tr-dock-h); overflow-y: auto; display: flex; flex-direction: column; gap: var(--tr-space-2); }
-  .game-dock--chooser { --tr-dock-h: min(55dvh, 480px); }
-  .game-dock--chooser .dock-panel { height: auto; max-height: var(--tr-dock-h); }
+  .dock-tabs button.active {
+    background: var(--tr-ember);
+    border-color: var(--tr-ember);
+    color: #fff;
+  }
+  .dock-panel {
+    height: var(--tr-dock-h);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--tr-space-2);
+  }
+  .game-dock--chooser {
+    --tr-dock-h: min(55dvh, 480px);
+  }
+  .game-dock--chooser .dock-panel {
+    height: auto;
+    max-height: var(--tr-dock-h);
+  }
   /* Hand keeps full-size 132px cards; sideways thumb-scroll instead of wrapping. */
-  .dock-panel .hand { flex-wrap: nowrap; overflow-x: auto; padding-bottom: var(--tr-space-1); }
+  .dock-panel .hand {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--tr-space-1);
+  }
   /* Toasts clear the dock instead of covering the tab bar (Toast renders inside .game, so it
      inherits --tr-dock-h). */
-  .game--dock .toast { bottom: calc(var(--tr-dock-h, 0px) + 72px); }
-  .game--dock .toast.toast-notice { bottom: calc(var(--tr-dock-h, 0px) + 120px); }
+  .game--dock .toast {
+    bottom: calc(var(--tr-dock-h, 0px) + 72px);
+  }
+  .game--dock .toast.toast-notice {
+    bottom: calc(var(--tr-dock-h, 0px) + 120px);
+  }
   /* 3-card payment rows overflow a 360px modal — let them wrap. */
-  .card-options .payment-card { flex-wrap: wrap; }
+  .card-options .payment-card {
+    flex-wrap: wrap;
+  }
 }
 ```
 
@@ -215,11 +311,11 @@ phone ? (
    (`cards` → Hand tab, `tickets` → Missions tab, `tabComms` → Log·Chat tab); add only what's
    missing, e.g.:
 
-   | key | zh-Hant | en |
-   |---|---|---|
+   | key             | zh-Hant      | en          |
+   | --------------- | ------------ | ----------- |
    | `dockTabsLabel` | 遊戲面板切換 | Game panels |
-   | `dockDraw` | 抽牌 | Draw |
-   | `dockPlayers` | 玩家 | Players |
+   | `dockDraw`      | 抽牌         | Draw        |
+   | `dockPlayers`   | 玩家         | Players     |
 
 6. Tests: new `GameStage` phone test — stub `window.matchMedia` (`matches: query === PHONE_QUERY`,
    with `addEventListener`/`removeEventListener` no-ops), render with an existing snapshot fixture,
@@ -233,12 +329,24 @@ Commit: `feat(web): phone game layout — board + bottom tabbed dock`
 `styles/tutorial.css` — extend the **existing** `@media (max-width: 680px)` block (line 447):
 
 ```css
-  .enc-demo-stage { height: auto; }
-  .enc-demo-stage .game { height: auto; }
-  /* Two-class specificity beats game.css's ≤920 .game-board{min-height:60vh}. */
-  .enc-demo-stage .game-board { min-height: 200px; height: 34vh; }
-  .enc-demo-stage .board-viewport { min-height: 200px; }
-  .enc-demo-stage .game-rail { max-height: 240px; overflow-y: auto; }
+.enc-demo-stage {
+  height: auto;
+}
+.enc-demo-stage .game {
+  height: auto;
+}
+/* Two-class specificity beats game.css's ≤920 .game-board{min-height:60vh}. */
+.enc-demo-stage .game-board {
+  min-height: 200px;
+  height: 34vh;
+}
+.enc-demo-stage .board-viewport {
+  min-height: 200px;
+}
+.enc-demo-stage .game-rail {
+  max-height: 240px;
+  overflow-y: auto;
+}
 ```
 
 The demo sandbox already collapses to a column at ≤920px; these rules size board/rail inside the
@@ -254,11 +362,23 @@ Commit: `fix(web): encyclopedia demo board + tutorial pass at phone widths`
 
 ```css
 @media (max-width: 700px) {
-  .replay { gap: var(--tr-space-2); }
+  .replay {
+    gap: var(--tr-space-2);
+  }
   /* Page scrolls on phones (≤900 stack); keep transport controls reachable. */
-  .replay-controls { flex-wrap: wrap; position: sticky; bottom: 0; z-index: 10; }
-  .replay-scrubber { flex: 1 1 100%; order: 9; }   /* scrubber gets its own full-width row */
-  .replay-step { margin-left: auto; }
+  .replay-controls {
+    flex-wrap: wrap;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+  .replay-scrubber {
+    flex: 1 1 100%;
+    order: 9;
+  } /* scrubber gets its own full-width row */
+  .replay-step {
+    margin-left: auto;
+  }
 }
 ```
 
@@ -274,19 +394,58 @@ Commit: `fix(web): phone-tier replay controls`
 ```css
 @media (max-width: 700px) {
   /* …phase 1 maps rules… */
-  .editor-screen { height: auto; }                 /* page scrolls (≤920 shell) */
-  .editor-body { flex-direction: column; }
+  .editor-screen {
+    height: auto;
+  } /* page scrolls (≤920 shell) */
+  .editor-body {
+    flex-direction: column;
+  }
   /* Stage rail becomes a horizontal station strip across the top. */
-  .editor-stage-rail { flex-direction: row; width: 100%; overflow-x: auto; }
-  .editor-stage-line { left: 20px; right: 20px; top: 18px; bottom: auto; width: auto; height: 2px; }
-  .editor-stage-btn { flex: 1 0 auto; flex-direction: column; gap: 2px; padding: var(--tr-space-1); }
-  .editor-stage-label { font-size: 0.72em; }
-  .editor-main { overflow: visible; }
-  .editor-stage-layout { flex-direction: column; height: auto; }
-  .editor-canvas-wrap { flex: none; height: 55dvh; min-height: 280px; }
-  .editor-inspector { width: 100%; overflow: visible; }   /* stacked below the canvas */
-  .editor-name-group { flex: 1 1 100%; }
-  .editor-name-input { min-width: 0; flex: 1 1 6em; }
+  .editor-stage-rail {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .editor-stage-line {
+    left: 20px;
+    right: 20px;
+    top: 18px;
+    bottom: auto;
+    width: auto;
+    height: 2px;
+  }
+  .editor-stage-btn {
+    flex: 1 0 auto;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--tr-space-1);
+  }
+  .editor-stage-label {
+    font-size: 0.72em;
+  }
+  .editor-main {
+    overflow: visible;
+  }
+  .editor-stage-layout {
+    flex-direction: column;
+    height: auto;
+  }
+  .editor-canvas-wrap {
+    flex: none;
+    height: 55dvh;
+    min-height: 280px;
+  }
+  .editor-inspector {
+    width: 100%;
+    overflow: visible;
+  } /* stacked below the canvas */
+  .editor-name-group {
+    flex: 1 1 100%;
+  }
+  .editor-name-input {
+    min-width: 0;
+    flex: 1 1 6em;
+  }
 }
 ```
 

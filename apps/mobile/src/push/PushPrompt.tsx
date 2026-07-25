@@ -38,9 +38,7 @@ export default function PushPrompt(): React.JSX.Element | null {
           hitSlop={8}
           onPress={markSeen}
         >
-          <Text style={[styles.dismiss, { color: tokens.inkSoft }]}>
-            {t('push.promptDismiss')}
-          </Text>
+          <Text style={[styles.dismiss, { color: tokens.inkSoft }]}>{t('push.promptDismiss')}</Text>
         </Pressable>
         <Pressable
           testID="push-prompt-accept"

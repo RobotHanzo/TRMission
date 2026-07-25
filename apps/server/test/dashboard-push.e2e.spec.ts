@@ -47,7 +47,10 @@ afterAll(() => t.close());
 
 describe('dashboard push test-send', () => {
   it('403s a moderator on status and test (admin-tier permission)', async () => {
-    await request(server()).get('/api/v1/dashboard/push/status').set(auth(moderator.token)).expect(403);
+    await request(server())
+      .get('/api/v1/dashboard/push/status')
+      .set(auth(moderator.token))
+      .expect(403);
     await request(server())
       .post('/api/v1/dashboard/push/test')
       .set(auth(moderator.token))

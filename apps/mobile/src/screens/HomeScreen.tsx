@@ -160,9 +160,7 @@ function GuestUpgradeCard(): React.JSX.Element {
         <SecondaryButton title={t('login.createAccount')} onPress={() => setOpen(true)} />
       ) : (
         <View style={styles.guestForm}>
-          <Text style={[styles.rowMeta, { color: tokens.inkSoft }]}>
-            {t('login.upgradeBlurb')}
-          </Text>
+          <Text style={[styles.rowMeta, { color: tokens.inkSoft }]}>{t('login.upgradeBlurb')}</Text>
           <Field
             placeholder={t('login.email')}
             autoCapitalize="none"
@@ -293,10 +291,7 @@ export function HomeScreen({ navigation }: Props): React.JSX.Element {
       // The explicit paddingBottom overrides Screen's own safe-area pad on this View, so it
       // must re-include insets.bottom under the tab-bar extra.
       <Screen
-        style={[
-          styles.container,
-          tabExtra > 0 && { paddingBottom: insets.bottom + tabExtra },
-        ]}
+        style={[styles.container, tabExtra > 0 && { paddingBottom: insets.bottom + tabExtra }]}
       >
         <WelcomeCard
           name={user?.displayName ?? ''}

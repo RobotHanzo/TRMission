@@ -14,6 +14,7 @@ Google + Discord OAuth (bound by email), makes each entry method independently t
 var, and dresses the login page with a blurred in-game map backdrop.
 
 **Confirmed product decisions (from the user):**
+
 - Three **independent** toggles: `AUTH_PASSWORD_LOGIN_ENABLED`, `AUTH_GUEST_ENABLED`, and each OAuth
   provider (enabled iff its client id + secret are both set).
 - A logged-in **guest** who signs in with OAuth (email unused) is **upgraded in place** — same `_id`
@@ -75,7 +76,7 @@ Require a present, verified email.
   (`exchangeCode`, `fetchProfile`) normalizing to `{ sub, email, emailVerified, displayName }`. The
   only seam that hits the network → e2e overrides it.
 - **`apps/server/src/auth/oauth.service.ts`** (new) — `buildAuthorize(provider, redirect,
-  guestUserId?)` (validate redirect, gen nonce + PKCE, sign state, build authorize URL) and
+guestUserId?)` (validate redirect, gen nonce + PKCE, sign state, build authorize URL) and
   `handleCallback(provider, code, state, nonceCookie)`: verify state signature + provider +
   `nonce === cookie`, exchange code, fetch profile, require verified email, then resolve account:
   **(a)** state has `guestUserId` & still a guest & email unused → `attachOauthToGuest`; **(b)** else
@@ -89,11 +90,12 @@ Require a present, verified email.
     Mark `@ApiExcludeEndpoint()` (browser redirects, not JSON).
 
 **Security invariants (must hold):**
+
 - **`trm_oauth` nonce cookie is `SameSite=Lax`** (httpOnly, `secure: env.cookieSecure`,
   `path:/api/v1/auth/oauth`, ~10 min). **Not `Strict`** — the callback is a cross-site top-level
   navigation, and a Strict cookie would be withheld, breaking every callback.
-- **`trm_refresh` stays `SameSite=Strict`** — it is *set* in the cross-site callback response (fine)
-  and *read* by the subsequent **same-origin** `/auth/refresh` fetch (fine). This relies on the web
+- **`trm_refresh` stays `SameSite=Strict`** — it is _set_ in the cross-site callback response (fine)
+  and _read_ by the subsequent **same-origin** `/auth/refresh` fetch (fine). This relies on the web
   app and API being the **same registrable domain** (they are: nginx serves `/api` + the SPA on one
   origin). Document this as a hard deployment constraint.
 - **Open-redirect guard**: validate `redirect` is a same-origin path (starts with single `/`, no
@@ -151,7 +153,7 @@ Require a present, verified email.
   which flip with `data-theme`.
 - **`styles/app.css`** (or a new `login.css`) — `.login-screen` (full viewport, centered),
   `.login-backdrop` (`position:absolute; inset:0; filter:blur(8px); opacity:.5;
-  transform:scale(1.08); overflow:hidden; pointer-events:none`), `.login-scrim` (token gradient
+transform:scale(1.08); overflow:hidden; pointer-events:none`), `.login-scrim` (token gradient
   toward `--tr-paper` for card legibility in both themes), `.oauth-btn`/`.oauth-divider`.
 - **`i18n/index.ts`** — add zh-Hant + en strings: `continueWithGoogle`, `continueWithDiscord`,
   `orContinueWith`, `authUnavailable`, `oauthError`, `signingIn`, `backToLogin` (+ any login title).
@@ -197,6 +199,7 @@ yarn workspace @trm/web build
 
 Manual (dev): `docker compose up -d mongo`, then `yarn workspace @trm/server dev` +
 `yarn workspace @trm/web dev`; drive `http://localhost:5173` via the browser MCP:
+
 - Logged out `/` → redirects to `/login?redirect=%2F`; screenshot the blurred map backdrop + card;
   toggle dark mode → backdrop tokens flip.
 - Guest login → lands on `/`. Deep-link: `/room/ABCD` logged out → `/login?redirect=%2Froom%2FABCD`

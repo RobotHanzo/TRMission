@@ -27,14 +27,14 @@ One doc per `(userId, scope)`, `scope` is `'allTime'` or `` `season:${YYYY-MM}` 
 
 ```ts
 interface PlayerStatsDoc {
-  _id: string;          // `${userId}:${scope}`
+  _id: string; // `${userId}:${scope}`
   userId: string;
-  scope: string;         // 'allTime' | 'season:2026-07'
-  rating: number;        // Elo-style, default 1500
+  scope: string; // 'allTime' | 'season:2026-07'
+  rating: number; // Elo-style, default 1500
   gamesPlayed: number;
   wins: number;
   losses: number;
-  version: number;       // optimistic-concurrency counter for the rating CAS retry
+  version: number; // optimistic-concurrency counter for the rating CAS retry
   updatedAt: Date;
 }
 ```
@@ -50,28 +50,29 @@ duplicate-key error (already processed) — no flag needs adding to `MatchHistor
 ## Rating algorithm (`apps/server/src/leaderboard/elo.ts`, pure + unit-tested)
 
 Not placed in `@trm/shared` — per that package's own CLAUDE.md, shared is for things that must
-stay identical *across* engine/wire/DB/UI; Elo is computed and consumed only inside the server, so
+stay identical _across_ engine/wire/DB/UI; Elo is computed and consumed only inside the server, so
 it stays local, same as e.g. `dashboard.ts`'s permission math stays in `packages/shared` only
 because admin UI and server both need it (Elo has no second consumer).
 
 **Multiplayer pairwise Elo** (a standard generalization for >2 participants): each participant is
-compared against every *other rated* participant as an independent pairwise Elo match using each
+compared against every _other rated_ participant as an independent pairwise Elo match using each
 side's current rating, `expected = 1/(1+10^((theirRating-mine)/400))`, `actual` = 1/0.5/0 for
-win/tie/loss (ties = same equivalence group in `FinalScoreboard.ranking`). Delta = `k * mean(actual
-- expected)` over all *rated* opponents (bots/guests are simply never included as participants, so
-a player whose only "opponents" are bots/guests gets an empty opponent set and a delta of exactly
-0 — no special-case code needed, and no farming-by-stomping-bots).
+win/tie/loss (ties = same equivalence group in `FinalScoreboard.ranking`). Delta = `k \* mean(actual
 
-- **Team games**: reduce each team to one virtual participant (`rating` = average of its *rated*
+- expected)` over all _rated_ opponents (bots/guests are simply never included as participants, so
+  a player whose only "opponents" are bots/guests gets an empty opponent set and a delta of exactly
+  0 — no special-case code needed, and no farming-by-stomping-bots).
+
+- **Team games**: reduce each team to one virtual participant (`rating` = average of its _rated_
   members' current ratings in that scope, `rank` from `teamRanking`), run the same pairwise formula
   between teams, then apply the resulting team delta identically to every rated member — mirrors
   the engine's own "team is a unit" posture (`packages/engine/src/teams.ts`).
 - **K-factor**: provisional `40` for a player/scope's first 20 games, `20` after — read off the
   same rating doc already being fetched, no extra query.
-- Win/loss/games-played counters are simple, not Elo-gated: every *rated* participant gets
+- Win/loss/games-played counters are simple, not Elo-gated: every _rated_ participant gets
   `gamesPlayed += 1` and `wins += 1` xor `losses += 1` regardless of whether their opponents were
   bots (so a solo-vs-bots regular still shows up on the games-played/win-count boards — only the
-  *rating* board requires a rated opponent to move at all).
+  _rating_ board requires a rated opponent to move at all).
 
 **Eligibility ("rated")**: `!isBotId(id)` (from `@trm/bots`, already the exclusion idiom used in
 `purge.service.ts`/`push.service.ts`) **and** the id resolves to a `UserDoc` with `isGuest === false`
@@ -87,7 +88,11 @@ calling `store.recordCompletion(...)` non-fatally whenever `prepared.state.turn.
 
 ```ts
 if (this.store && prepared.state.turn.phase === 'GAME_OVER') {
-  try { await this.store.recordCompletion(match.session.gameId, prepared.state); } catch { /* ... */ }
+  try {
+    await this.store.recordCompletion(match.session.gameId, prepared.state);
+  } catch {
+    /* ... */
+  }
   void this.leaderboard?.onGameOver(match.session.gameId).catch(() => {});
 }
 ```
@@ -130,7 +135,7 @@ New Nest module: `leaderboard.repo.ts` (the two collections + indexes + query/ca
   same cursor idiom as `dashboard-ratings.service.ts`/`persistence/cursor.ts`.
 - `GET /api/v1/leaderboard/me?scope=&metric=` — the caller's own standing even off the visible
   page (`countDocuments({scope, [metric]: {$gt: mine}}) + 1` for rank — fine at this scale).
-- Guard: plain `AccessTokenGuard` (guests *can view*, matching History's "signed in, any account"
+- Guard: plain `AccessTokenGuard` (guests _can view_, matching History's "signed in, any account"
   precedent — they just never appear as rows themselves).
 - Cascade: `AccountDeletionService` (`apps/server/src/account/account-deletion.service.ts`) gets a
   new `leaderboard: LeaderboardRepo` dependency and a `deleteByUser` call alongside the existing
@@ -139,7 +144,7 @@ New Nest module: `leaderboard.repo.ts` (the two collections + indexes + query/ca
 ## Admin dashboard (read-only, mirrors `RatingsView`)
 
 - New `leaderboard.read` permission in `packages/shared/src/dashboard.ts`'s `DASHBOARD_PERMISSIONS`
-  + `VIEWER_PERMISSIONS` (same tier as `ratings.read`).
+  - `VIEWER_PERMISSIONS` (same tier as `ratings.read`).
 - `apps/server/src/dashboard/dashboard-leaderboard.service.ts` +
   `dashboard-leaderboard.controller.ts` under `api/v1/dashboard/leaderboard`, gated
   `@RequirePermission('leaderboard.read')`, reusing `LeaderboardRepo`'s query methods plus
@@ -149,7 +154,7 @@ New Nest module: `leaderboard.repo.ts` (the two collections + indexes + query/ca
 
 ## Web + Mobile (shared client-core, screen logic stays per-platform — the History precedent)
 
-`packages/client-core`'s shared surface for History is *only* the REST method + wire types + i18n
+`packages/client-core`'s shared surface for History is _only_ the REST method + wire types + i18n
 namespace — both `HistoryScreen.tsx`s independently fetch-in-`useEffect` and render natively. This
 feature follows that exact division:
 

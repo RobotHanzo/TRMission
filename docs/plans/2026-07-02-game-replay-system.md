@@ -29,11 +29,13 @@
 ### Task 1: Server — spectator persistence in the store
 
 **Files:**
+
 - Modify: `apps/server/src/persistence/types.ts`
 - Modify: `apps/server/src/persistence/game-store.ts`
 - Test (create): `apps/server/test/spectators.spec.ts`
 
 **Interfaces:**
+
 - Consumes: existing `MongoGameStore`, `ensureIndexes`, engine `initGame`/`reduce`/`stateDigest`/`ENGINE_VERSION`, test helper `pickAction` (`apps/server/test/helpers.ts:82`).
 - Produces: `GameStorePort.addSpectator(gameId: string, userId: string): Promise<void>`; `GameDoc.spectators?: string[]`; `MatchHistoryDoc.spectators?: string[]` and `MatchHistoryDoc.engineVersion?: number`; matchHistory index `{ spectators: 1, completedAt: -1 }`. Task 2 (hub) and Task 3 (repo) rely on these exact names.
 
@@ -178,9 +180,9 @@ In `apps/server/src/persistence/game-store.ts`:
 In `ensureIndexes`, after the existing matchHistory index add:
 
 ```ts
-  await db
-    .collection<MatchHistoryDoc>('matchHistory')
-    .createIndex({ spectators: 1, completedAt: -1 });
+await db
+  .collection<MatchHistoryDoc>('matchHistory')
+  .createIndex({ spectators: 1, completedAt: -1 });
 ```
 
 Add the method to `MongoGameStore` (after `recordCompletion`):
@@ -222,10 +224,12 @@ git commit -m "feat(server): persist spectators on games and the completion arch
 ### Task 2: Server — hub records spectators on hello
 
 **Files:**
+
 - Modify: `apps/server/src/ws/hub.ts` (spectator branch of `onHello`, ~line 248–264)
 - Test: `apps/server/test/spectators.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `GameStorePort.addSpectator` (Task 1), `match.session.turnOrder` (existing, see hub.ts:266), `makeDevTicket` (`src/ws/ticket`), `encodeClient` (test helpers).
 - Produces: every spectator `hello` for a non-seated user lands in `GameDoc.spectators`.
 
@@ -292,12 +296,12 @@ Expected: FAIL — `doc?.spectators` is `undefined` (nothing recorded yet).
 In `apps/server/src/ws/hub.ts`, inside the spectator branch of `onHello` (the `if (binding.seat < 0) {` block), immediately after `set.add(conn);` add:
 
 ```ts
-      // Persist who spectated — grants post-game history/replay access. Never for seated
-      // players (a member can mint a spectate ticket; their role stays "player").
-      // Fire-and-forget: a store hiccup must not break the hello path (same posture as chat).
-      if (this.store && !match.session.turnOrder.includes(player)) {
-        void this.store.addSpectator(binding.gameId, binding.playerId).catch(() => {});
-      }
+// Persist who spectated — grants post-game history/replay access. Never for seated
+// players (a member can mint a spectate ticket; their role stays "player").
+// Fire-and-forget: a store hiccup must not break the hello path (same posture as chat).
+if (this.store && !match.session.turnOrder.includes(player)) {
+  void this.store.addSpectator(binding.gameId, binding.playerId).catch(() => {});
+}
 ```
 
 - [ ] **Step 4: Run the tests**
@@ -317,12 +321,14 @@ git commit -m "feat(server): record spectators on the game doc at ws bind"
 ### Task 3: Server — history authz fix + extended list
 
 **Files:**
+
 - Create: `apps/server/src/history/history.schemas.ts`
 - Modify: `apps/server/src/history/history.repo.ts` (rework)
 - Modify: `apps/server/src/history/history.controller.ts`
 - Test (create): `apps/server/test/history-replay.e2e.spec.ts`
 
 **Interfaces:**
+
 - Consumes: Tasks 1–2; `apiSchema` (`src/openapi/openapi.ts:23`); `AccessTokenGuard`/`@CurrentUser()`; `UserDoc` (`src/auth/user.repo.ts:10`); `boardForContentHash`, `ENGINE_VERSION` (`@trm/engine`); e2e patterns from `test/lobby-spectate.e2e.spec.ts` and `test/wire-game.e2e.spec.ts`.
 - Produces (Tasks 4 and 6–7 rely on these):
   - `GET /api/v1/history` → `MatchSummary[]` where `MatchSummary = { gameId, players: {userId, seat, displayName?}[], winners: string[], completedAt: string(ISO), role: 'player'|'spectator', finalScores, replayable: boolean }`
@@ -747,10 +753,12 @@ git commit -m "feat(server): history list covers spectated games; membership-gat
 ### Task 4: Server — replay payload endpoint
 
 **Files:**
+
 - Modify: `apps/server/src/history/history.controller.ts`
 - Test: `apps/server/test/history-replay.e2e.spec.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: `HistoryRepo.loadReplay` / `getForUser` / `displayNames` (Task 3), `ReplayPayloadSchema` (Task 3), `storedToConfig` (`src/persistence/types.ts:118`).
 - Produces: `GET /api/v1/history/:gameId/replay` → `{ gameId, config: StoredConfig, engineVersion, schemaVersion, actions: Action[], players: {userId, seat, displayName?, isBot?, difficulty?}[], winners, completedAt, finalDigest? }`. The web client (Tasks 6/9) consumes this shape verbatim.
 
@@ -814,10 +822,7 @@ describe('GET /api/v1/history/:gameId/replay', () => {
       winners: [],
       completedAt: now,
     });
-    await request(server())
-      .get('/api/v1/history/live-1/replay')
-      .set(auth(host.token))
-      .expect(404);
+    await request(server()).get('/api/v1/history/live-1/replay').set(auth(host.token)).expect(404);
   });
 });
 ```
@@ -887,12 +892,14 @@ git commit -m "feat(server): replay payload endpoint for finished games"
 ### Task 5: Web — contextual log store
 
 **Files:**
+
 - Modify: `apps/web/src/store/log.ts`
 - Modify: `apps/web/src/components/LogPanel.tsx`
 - Modify: `apps/web/src/store/sandboxProvider.tsx`
 - Test: `apps/web/src/store/log.test.ts` (extend)
 
 **Interfaces:**
+
 - Consumes: the contextual-store pattern in `apps/web/src/store/game.ts:82-103` (copy it exactly).
 - Produces: `createLogStore(): LogStoreApi`, `LogStoreProvider`, `useLogStore(selector)`, `useLogStoreApi()`, `type LogStoreApi` — Task 8/9 rely on these names. `useLog` singleton and `net/connection.ts` stay untouched.
 
@@ -906,7 +913,10 @@ import { createLogStore } from './log';
 describe('contextual log store', () => {
   it('createLogStore returns an isolated instance (singleton untouched)', () => {
     const iso = createLogStore();
-    iso.setState({ entries: [{ id: 1, kind: 'gameStarted', playerId: null, data: {} }], nextId: 2 });
+    iso.setState({
+      entries: [{ id: 1, kind: 'gameStarted', playerId: null, data: {} }],
+      nextId: 2,
+    });
     expect(iso.getState().entries).toHaveLength(1);
     expect(useLog.getState().entries).toHaveLength(0);
   });
@@ -986,6 +996,7 @@ export function useLogStoreApi(): LogStoreApi {
 ```
 
 In `apps/web/src/components/LogPanel.tsx`:
+
 - change `import { useLog } from '../store/log';` → `import { useLogStore } from '../store/log';`
 - change `import { useGame } from '../store/game';` → `import { useGameStore } from '../store/game';`
 - change `const entries = useLog((s) => s.entries);` → `const entries = useLogStore((s) => s.entries);`
@@ -1035,6 +1046,7 @@ git commit -m "refactor(web): contextual log store so sandboxed views get an iso
 ### Task 6: Web — REST types, routes, header entry, i18n keys
 
 **Files:**
+
 - Modify: `apps/web/src/net/rest.ts`
 - Modify: `apps/web/src/store/ui.ts`
 - Modify: `apps/web/src/App.tsx`
@@ -1043,6 +1055,7 @@ git commit -m "refactor(web): contextual log store so sandboxed views get an iso
 - Test: `apps/web/src/store/ui.test.ts` (extend)
 
 **Interfaces:**
+
 - Produces (Tasks 7–9 rely on these): `View` includes `'history' | 'replay'`; `useUi` state `replayGameId: string | null`; actions `enterHistory()`, `enterReplay(gameId)`; REST types `MatchSummary`, `HistoryPlayer`, `ReplayPlayerMeta`, `ReplayPayload`; `api.history()`, `api.replay(gameId)`; i18n namespace `history.*`.
 
 - [ ] **Step 1: Write the failing routing tests**
@@ -1050,41 +1063,39 @@ git commit -m "refactor(web): contextual log store so sandboxed views get an iso
 Append inside the `describe('ui store routing', ...)` block of `apps/web/src/store/ui.test.ts`:
 
 ```ts
-  it('enterHistory pushes /history, sets the view, and disconnects any live game', () => {
-    useUi.getState().enterHistory();
-    expect(useUi.getState().view).toBe('history');
-    expect(path()).toBe('/history');
-    expect(disconnectGame).toHaveBeenCalled();
-  });
+it('enterHistory pushes /history, sets the view, and disconnects any live game', () => {
+  useUi.getState().enterHistory();
+  expect(useUi.getState().view).toBe('history');
+  expect(path()).toBe('/history');
+  expect(disconnectGame).toHaveBeenCalled();
+});
 
-  it('enterReplay pushes /replay/:id and records the game id', () => {
-    useUi.getState().enterReplay('game-9');
-    expect(useUi.getState().view).toBe('replay');
-    expect(useUi.getState().replayGameId).toBe('game-9');
-    expect(path()).toBe('/replay/game-9');
-  });
+it('enterReplay pushes /replay/:id and records the game id', () => {
+  useUi.getState().enterReplay('game-9');
+  expect(useUi.getState().view).toBe('replay');
+  expect(useUi.getState().replayGameId).toBe('game-9');
+  expect(path()).toBe('/replay/game-9');
+});
 
-  it('syncFromUrl(authed) on /replay/:id restores the replay view', () => {
-    window.history.replaceState(null, '', '/replay/game-9');
-    useUi.getState().syncFromUrl(true);
-    expect(useUi.getState().view).toBe('replay');
-    expect(useUi.getState().replayGameId).toBe('game-9');
-  });
+it('syncFromUrl(authed) on /replay/:id restores the replay view', () => {
+  window.history.replaceState(null, '', '/replay/game-9');
+  useUi.getState().syncFromUrl(true);
+  expect(useUi.getState().view).toBe('replay');
+  expect(useUi.getState().replayGameId).toBe('game-9');
+});
 
-  it('syncFromUrl(not authed) on /history gates to /login remembering the target', () => {
-    window.history.replaceState(null, '', '/history');
-    useUi.getState().syncFromUrl(false);
-    expect(useUi.getState().view).toBe('login');
-    expect(window.location.pathname + window.location.search).toBe(
-      '/login?redirect=%2Fhistory',
-    );
-  });
+it('syncFromUrl(not authed) on /history gates to /login remembering the target', () => {
+  window.history.replaceState(null, '', '/history');
+  useUi.getState().syncFromUrl(false);
+  expect(useUi.getState().view).toBe('login');
+  expect(window.location.pathname + window.location.search).toBe('/login?redirect=%2Fhistory');
+});
 
-  it('goHome clears a replay id', () => {
-    useUi.getState().enterReplay('game-9');
-    useUi.getState().goHome();
-    expect(useUi.getState().replayGameId).toBeNull();
-  });
+it('goHome clears a replay id', () => {
+  useUi.getState().enterReplay('game-9');
+  useUi.getState().goHome();
+  expect(useUi.getState().replayGameId).toBeNull();
+});
 ```
 
 - [ ] **Step 2: Run to verify failure**
@@ -1097,6 +1108,7 @@ Expected: FAIL — `enterHistory` is not a function.
 In `apps/web/src/store/ui.ts`:
 
 1. View union:
+
 ```ts
 export type View =
   | 'home'
@@ -1110,6 +1122,7 @@ export type View =
 ```
 
 2. After `const TUTORIAL_PATH = '/tutorial';` add:
+
 ```ts
 const HISTORY_PATH = '/history';
 const REPLAY_PATH = /^\/replay\/([^/]+)$/;
@@ -1121,6 +1134,7 @@ export const replayIdFromPath = (): string | null => {
 ```
 
 3. In `UiState`, after `ticket: string | null;` add `replayGameId: string | null;` and after `enterTutorial(): void;` add:
+
 ```ts
   /** Open the game-history screen (finished games the user played or spectated). */
   enterHistory(): void;
@@ -1133,6 +1147,7 @@ export const replayIdFromPath = (): string | null => {
 5. Add `replayGameId: null` to **every existing `set()` call that already sets `roomCode: null`** (there are seven: `goHome`, `enterTutorial`, `navigateLogin`, `navigateAfterAuth` ×2 branches, and the `syncFromUrl` branches for tutorial / loginCallback / login-unauthed / home).
 
 6. New actions (place after `enterTutorial`):
+
 ```ts
   enterHistory: () => {
     disconnectGame();
@@ -1147,49 +1162,51 @@ export const replayIdFromPath = (): string | null => {
 ```
 
 7. In `syncFromUrl`, insert **before** the `const code = roomCodeFromPath();` line:
+
 ```ts
-    // History + replay are account-scoped — gate unauthenticated visitors like rooms.
-    if (path === HISTORY_PATH) {
-      if (!authed) {
-        get().navigateLogin(HISTORY_PATH);
-        return;
-      }
-      disconnectGame();
-      set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
-      return;
-    }
-    const replayId = replayIdFromPath();
-    if (replayId) {
-      if (!authed) {
-        get().navigateLogin(`/replay/${encodeURIComponent(replayId)}`);
-        return;
-      }
-      disconnectGame();
-      set({
-        view: 'replay',
-        replayGameId: replayId,
-        roomCode: null,
-        gameId: null,
-        ticket: null,
-      });
-      return;
-    }
+// History + replay are account-scoped — gate unauthenticated visitors like rooms.
+if (path === HISTORY_PATH) {
+  if (!authed) {
+    get().navigateLogin(HISTORY_PATH);
+    return;
+  }
+  disconnectGame();
+  set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  return;
+}
+const replayId = replayIdFromPath();
+if (replayId) {
+  if (!authed) {
+    get().navigateLogin(`/replay/${encodeURIComponent(replayId)}`);
+    return;
+  }
+  disconnectGame();
+  set({
+    view: 'replay',
+    replayGameId: replayId,
+    roomCode: null,
+    gameId: null,
+    ticket: null,
+  });
+  return;
+}
 ```
 
 8. In `navigateAfterAuth`, after the room-code branch and before `replacePath('/');` add (so a gated deep link resumes after sign-in):
+
 ```ts
-    if (target === HISTORY_PATH) {
-      replacePath(HISTORY_PATH);
-      set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
-      return;
-    }
-    const replayId = REPLAY_PATH.exec(target)?.[1];
-    if (replayId) {
-      const id = decodeURIComponent(replayId);
-      replacePath(`/replay/${encodeURIComponent(id)}`);
-      set({ view: 'replay', replayGameId: id, roomCode: null, gameId: null, ticket: null });
-      return;
-    }
+if (target === HISTORY_PATH) {
+  replacePath(HISTORY_PATH);
+  set({ view: 'history', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  return;
+}
+const replayId = REPLAY_PATH.exec(target)?.[1];
+if (replayId) {
+  const id = decodeURIComponent(replayId);
+  replacePath(`/replay/${encodeURIComponent(id)}`);
+  set({ view: 'replay', replayGameId: id, roomCode: null, gameId: null, ticket: null });
+  return;
+}
 ```
 
 - [ ] **Step 4: Implement `rest.ts`**
@@ -1247,21 +1264,28 @@ And replace the `history:` entry in `api` with:
 - [ ] **Step 5: Implement `App.tsx` + `AppHeader.tsx` + i18n keys**
 
 `apps/web/src/App.tsx`:
+
 - add `import { HistoryScreen } from './screens/HistoryScreen';` (created in Task 7 — to keep this task compiling, create the placeholder screen now, full version in Task 7; see below) and `const ReplayScreen = lazy(() => import('./screens/ReplayScreen'));` next to the other lazy screens.
 - change `const isGameLayout = view === 'game' || view === 'tutorial';` → `const isGameLayout = view === 'game' || view === 'tutorial' || view === 'replay';`
 - add render branches after `{view === 'room' && <RoomScreen />}`:
+
 ```tsx
-            {view === 'history' && <HistoryScreen />}
-            {view === 'replay' && (
-              <Suspense fallback={<div className="card">{t('connecting')}</div>}>
-                <ReplayScreen />
-              </Suspense>
-            )}
+{
+  view === 'history' && <HistoryScreen />;
+}
+{
+  view === 'replay' && (
+    <Suspense fallback={<div className="card">{t('connecting')}</div>}>
+      <ReplayScreen />
+    </Suspense>
+  );
+}
 ```
 
 To keep this task independently green, create minimal stubs (fully replaced by Tasks 7/9):
 
 `apps/web/src/screens/HistoryScreen.tsx`:
+
 ```tsx
 import { useTranslation } from 'react-i18next';
 
@@ -1278,6 +1302,7 @@ export function HistoryScreen() {
 ```
 
 `apps/web/src/screens/ReplayScreen.tsx`:
+
 ```tsx
 export default function ReplayScreen() {
   return null;
@@ -1285,24 +1310,25 @@ export default function ReplayScreen() {
 ```
 
 `apps/web/src/components/AppHeader.tsx`:
+
 - add `History` to the lucide import list;
 - add `const enterHistory = useUi((s) => s.enterHistory);` next to the other `useUi` selectors;
 - insert before the encyclopedia button:
+
 ```tsx
-        {user && view !== 'login' && view !== 'loginCallback' && !inGame && (
-          <button
-            onClick={enterHistory}
-            aria-label={t('history.title')}
-            title={t('history.title')}
-          >
-            <History size={16} aria-hidden />
-          </button>
-        )}
+{
+  user && view !== 'login' && view !== 'loginCallback' && !inGame && (
+    <button onClick={enterHistory} aria-label={t('history.title')} title={t('history.title')}>
+      <History size={16} aria-hidden />
+    </button>
+  );
+}
 ```
 
 `apps/web/src/i18n/index.ts` — add a nested `history` block to **both** locale objects (alongside the other top-level groups such as `log`):
 
 zh-Hant:
+
 ```ts
       history: {
         title: '對局紀錄',
@@ -1322,6 +1348,7 @@ zh-Hant:
 ```
 
 en:
+
 ```ts
       history: {
         title: 'Game history',
@@ -1360,11 +1387,13 @@ git commit -m "feat(web): /history and /replay routes, header entry, replay REST
 ### Task 7: Web — History screen
 
 **Files:**
+
 - Modify: `apps/web/src/screens/HistoryScreen.tsx` (replace the Task-6 stub)
 - Create: `apps/web/src/styles/history.css`
 - Test (create): `apps/web/src/screens/HistoryScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `api.history()`, `MatchSummary` (Task 6), `useUi.enterReplay`, i18n `history.*`.
 - Produces: the list UI. No exports consumed elsewhere.
 
@@ -1610,21 +1639,23 @@ git commit -m "feat(web): game-history screen listing played and spectated games
 ### Task 8: Web — the replay player hook
 
 **Files:**
+
 - Create: `apps/web/src/features/replay/useReplayPlayer.ts`
 - Test (create): `apps/web/src/features/replay/useReplayPlayer.test.ts`
 
 **Interfaces:**
+
 - Consumes: `@trm/engine` (`initGame`, `reduce`, `redactFor`, `cloneState`, `stateDigest`), `@trm/codec` (`viewToSnapshot`, `eventToProto`) — the exact projection recipe of `net/sandboxSocket.ts:70-79`; `GameStoreApi` (`store/game.ts:88`), `LogStoreApi` (Task 5).
 - Produces (Task 9 relies on this exact shape):
 
 ```ts
 export interface ReplayControls {
-  step: number;          // actions applied, 0..total
+  step: number; // actions applied, 0..total
   total: number;
   playing: boolean;
   viewer: PlayerId | null; // null = public/spectator projection
   atEnd: boolean;
-  error: boolean;        // an action failed to replay (version skew) — UI shows a friendly card
+  error: boolean; // an action failed to replay (version skew) — UI shows a friendly card
   setViewer(viewer: PlayerId | null): void;
   play(): void;
   pause(): void;
@@ -1725,7 +1756,11 @@ describe('useReplayPlayer', () => {
     act(() => hook.result.current.seek(37));
     expect(hook.result.current.step).toBe(37);
     const rep = replay(board, config, actions.slice(0, 37));
-    const expected = viewToSnapshot(redactFor(board, rep.state, asPlayerId('p1')), 37, asPlayerId('p1'));
+    const expected = viewToSnapshot(
+      redactFor(board, rep.state, asPlayerId('p1')),
+      37,
+      asPlayerId('p1'),
+    );
     expect(game.getState().snapshot).toEqual(expected);
     // Backward seek must work despite applySnapshot's stale-version guard (store reset first).
     act(() => hook.result.current.seek(0));
@@ -2008,12 +2043,14 @@ git commit -m "feat(web): replay player hook — step/seek/autoplay over the loc
 ### Task 9: Web — Replay screen, perspective switcher, control bar
 
 **Files:**
+
 - Modify: `apps/web/src/screens/ReplayScreen.tsx` (replace the Task-6 stub)
 - Create: `apps/web/src/features/replay/PerspectiveSwitcher.tsx`
 - Create: `apps/web/src/styles/replay.css`
 - Test (create): `apps/web/src/screens/ReplayScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useReplayPlayer` (Task 8), `api.replay`/`ReplayPayload` (Task 6), `SandboxProvider` (Task 5 version), `GameStage` (`screens/GameStage.tsx:51` — `commands: null`, `sandbox`), `LogPanel` (contextual, Task 5), `useRoster.setMembers/clear` (`store/roster.ts`), `usePlayerName` (`game/playerName.ts`), `SEAT_COLORS` (`theme/colors.ts:51`, a `string[]`), `boardForContentHash`/`ENGINE_VERSION`/`SCHEMA_VERSION` (`@trm/engine`), `asPlayerId` (`@trm/shared`), tutorial i18n keys for the buttons.
 - Produces: the `/replay/:gameId` screen (default export, lazy-loaded from App.tsx).
 
@@ -2472,6 +2509,7 @@ git commit -m "feat(web): replay player screen with timeline, log and perspectiv
 ### Task 10: Docs, full validation, manual verification
 
 **Files:**
+
 - Modify: `apps/server/CLAUDE.md`
 - Modify: `apps/web/CLAUDE.md`
 

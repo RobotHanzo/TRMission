@@ -18,7 +18,14 @@ import { TutorialSpotlight } from './TutorialSpotlight';
 import { useSpotlightRects } from './useSpotlightRects';
 import { TutorialTargetsProvider } from './targets';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
-import { Card, LinkButton, MutedText, PrimaryButton, Screen, SecondaryButton } from '../../theme/chrome';
+import {
+  Card,
+  LinkButton,
+  MutedText,
+  PrimaryButton,
+  Screen,
+  SecondaryButton,
+} from '../../theme/chrome';
 import { useTheme } from '../../theme/useTheme';
 import { markTutorialCompleted } from './progress';
 import type { ActionGate, Lesson, Scope } from './types';

@@ -64,13 +64,14 @@ mode ≠ off. `stableStringify` drops `undefined` keys, so off-mode digests cont
 All gates read "undefined ⇒ off" so in-flight v4 games recover safely under the v5 binary.
 
 New `packages/engine/src/types/events-state.ts`:
+
 - `RandomEventKind` = `TYPHOON_LANDFALL | TYPHOON_DAY_OFF | VIRAL_HOTSPOT | CHARTER_SPECIAL |
-  SKY_LANTERN | AFTERSHOCK | RAILWAY_GALA | STAMP_RALLY`.
+SKY_LANTERN | AFTERSHOCK | RAILWAY_GALA | STAMP_RALLY`.
 - `EventScheduleEntry { id, kind, startRound, durationRounds, telegraphed, routeIds?, region?,
-  cityId?, charter?{a,b,points} }` — **the schedule array is hidden info, like the seed**.
+cityId?, charter?{a,b,points} }` — **the schedule array is hidden info, like the seed**.
 - `EventsState { mode, roundIndex, nextIdx, schedule, suppressed[], active: ActiveEvent[],
-  hotspots: Record<cityId, 1|2>, charters: CharterContract[], reopenBonus: RouteId[],
-  freeStation?: {untilRound} }`.
+hotspots: Record<cityId, 1|2>, charters: CharterContract[], reopenBonus: RouteId[],
+freeStation?: {untilRound} }`.
 - Stamp Rally needs no per-player state — "network cities" derive from `state.ownership`
   pre/post-claim.
 
@@ -119,16 +120,16 @@ still pure.
 Helpers: `closedRouteIds`, `claimsSuspended`, `stationsSuspended`, `skyLanternSurcharge`,
 `tunnelRevealCount`, `dayOffDrawLimit`, `freeStationAvailable`, `applyClaimEventEffects`.
 
-| Event | Enforcement |
-|---|---|
-| Typhoon closure | `claimPreconditions` rejects closed routes → `ROUTE_CLOSED_BY_EVENT`; **`hasAnyLegalMove` (reduce.ts:666-693) must mirror it** or PASS legality diverges and players/bots strand. Reopen +2 on first claim (incl. tunnel commit) via `reopenBonus`, emits `EVENT_BONUS{REOPEN}`. |
-| Day Off | Claim/station rejected → `EVENT_CLAIMS_SUSPENDED`/`EVENT_STATIONS_SUSPENDED`; draw limit +1 (3 picks; face-up loco rules unchanged); `hasAnyLegalMove` skips claim/station while suspended. |
-| Sky Lantern | Cost = length **+1** of the paid colour (locos ok): `extraCards` param through `validateRoutePayment` (payments.ts) AND **both payment enumerators** — engine `enumeratePayments` (selectors.ts) and web `apps/web/src/game/payments.ts` — else zero claim candidates are generated in-region (enumerate-then-filter). Points doubled via `pointsOverride` on `applyClaimEffects` (rides `ROUTE_CLAIMED.pointsAwarded`). Tunnel surcharge applies to base payment only. |
-| Aftershock | `beginTunnel` reveals ruleParams+1 cards; abort path (`applyResolveTunnel !commit`, reduce.ts:496-511 — verified: revealed→discard, hand untouched) draws 1 blind consolation card before `endTurn`. |
-| Hotspot | Post-claim: +level per marked endpoint → `EVENT_BONUS{HOTSPOT}`. |
-| Charter | Post-claim/tunnel-commit while open: own-edges-only union-find (reuse `graph/connectivity.ts`; station borrows excluded in v1, documented) → `wonBy`, +points, `EVENT_BONUS{CHARTER}`. |
-| Gala station | `applyBuildStation` accepts the empty payment when `freeStationAvailable`, consumes it, `EVENT_BONUS{FREE_STATION}`; zero-payment candidate added in `legalActions` + web `enumerateStationPayments`. |
-| Stamp Rally | Post-claim: each endpoint not in pre-claim network → +1, `EVENT_BONUS{STAMP}`. |
+| Event           | Enforcement                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Typhoon closure | `claimPreconditions` rejects closed routes → `ROUTE_CLOSED_BY_EVENT`; **`hasAnyLegalMove` (reduce.ts:666-693) must mirror it** or PASS legality diverges and players/bots strand. Reopen +2 on first claim (incl. tunnel commit) via `reopenBonus`, emits `EVENT_BONUS{REOPEN}`.                                                                                                                                                                                        |
+| Day Off         | Claim/station rejected → `EVENT_CLAIMS_SUSPENDED`/`EVENT_STATIONS_SUSPENDED`; draw limit +1 (3 picks; face-up loco rules unchanged); `hasAnyLegalMove` skips claim/station while suspended.                                                                                                                                                                                                                                                                             |
+| Sky Lantern     | Cost = length **+1** of the paid colour (locos ok): `extraCards` param through `validateRoutePayment` (payments.ts) AND **both payment enumerators** — engine `enumeratePayments` (selectors.ts) and web `apps/web/src/game/payments.ts` — else zero claim candidates are generated in-region (enumerate-then-filter). Points doubled via `pointsOverride` on `applyClaimEffects` (rides `ROUTE_CLAIMED.pointsAwarded`). Tunnel surcharge applies to base payment only. |
+| Aftershock      | `beginTunnel` reveals ruleParams+1 cards; abort path (`applyResolveTunnel !commit`, reduce.ts:496-511 — verified: revealed→discard, hand untouched) draws 1 blind consolation card before `endTurn`.                                                                                                                                                                                                                                                                    |
+| Hotspot         | Post-claim: +level per marked endpoint → `EVENT_BONUS{HOTSPOT}`.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Charter         | Post-claim/tunnel-commit while open: own-edges-only union-find (reuse `graph/connectivity.ts`; station borrows excluded in v1, documented) → `wonBy`, +points, `EVENT_BONUS{CHARTER}`.                                                                                                                                                                                                                                                                                  |
+| Gala station    | `applyBuildStation` accepts the empty payment when `freeStationAvailable`, consumes it, `EVENT_BONUS{FREE_STATION}`; zero-payment candidate added in `legalActions` + web `enumerateStationPayments`.                                                                                                                                                                                                                                                                   |
+| Stamp Rally     | Post-claim: each endpoint not in pre-claim network → +1, `EVENT_BONUS{STAMP}`.                                                                                                                                                                                                                                                                                                                                                                                          |
 
 All bonuses land in `PlayerState.routePoints` (existing running score); each is an itemized
 `EVENT_BONUS` event. New engine events (`types/events.ts`): `EVENT_ANNOUNCED`, `EVENT_STARTED`,
@@ -166,6 +167,7 @@ every step so the hub's PASS fallback (`hub.ts:664`) never stalls.
 
 Snapshot-driven; the client re-derives nothing (closed routes, resolved region route lists,
 hotspots, charters all arrive on the snapshot).
+
 - `net/rest.ts`: `RoomSettings.eventsMode`, `api.getRoomsConfig()`.
 - `RoomScreen.tsx`: flag-gated intensity `Segmented` picker in the game-settings fieldset.
 - New `components/EventsPanel.tsx` (active events + dimmed forecast row) and
@@ -191,34 +193,34 @@ identically; only a benign finalDigest warn fires).
 
 ## V1 starter events (8)
 
-| # | Event | 中文 | Arrival | Effect |
-|---|-------|------|---------|--------|
-| 1 | Typhoon Landfall | 颱風登陸 | Telegraphed | 2–3 seeded UNCLAIMED routes in one seeded region close for 2 rounds; claimed routes untouched. After reopening, first claim of each +2. |
-| 2 | Typhoon Day Off | 颱風假 | Telegraphed | 1 round: no claims/stations; draw turns get 1 extra pick (3 total; face-up loco still ends turn). |
-| 3 | Sky Lantern Night | 天燈之夜 | Telegraphed | 2 rounds: region routes score DOUBLE but cost +1 matching card (locos ok). |
-| 4 | Aftershock Advisory | 餘震特報 | Telegraphed | 1 round: tunnels reveal 4 cards (not 3); aborting draws 1 blind consolation card. |
-| 5 | Viral Hotspot | 爆紅打卡站 | Surprise | Seeded city permanently +1 per touching claim (stacks to 2). |
-| 6 | Charter Special | 觀光專開列車 | Surprise | Public contract: connect two seeded cities (BFS ≥ 4 apart) for 6–10 pts, first-come; expires after 4 rounds. |
-| 7 | Railway Anniversary Gala | 鐵路節慶典 | Surprise | Instant: everyone draws 1 blind card; next round first station built by anyone is free. |
-| 8 | Stamp Rally Week | 鐵道集章週 | Surprise | 3 rounds: each NEW city added to your network +1 immediately. |
+| #   | Event                    | 中文         | Arrival     | Effect                                                                                                                                  |
+| --- | ------------------------ | ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Typhoon Landfall         | 颱風登陸     | Telegraphed | 2–3 seeded UNCLAIMED routes in one seeded region close for 2 rounds; claimed routes untouched. After reopening, first claim of each +2. |
+| 2   | Typhoon Day Off          | 颱風假       | Telegraphed | 1 round: no claims/stations; draw turns get 1 extra pick (3 total; face-up loco still ends turn).                                       |
+| 3   | Sky Lantern Night        | 天燈之夜     | Telegraphed | 2 rounds: region routes score DOUBLE but cost +1 matching card (locos ok).                                                              |
+| 4   | Aftershock Advisory      | 餘震特報     | Telegraphed | 1 round: tunnels reveal 4 cards (not 3); aborting draws 1 blind consolation card.                                                       |
+| 5   | Viral Hotspot            | 爆紅打卡站   | Surprise    | Seeded city permanently +1 per touching claim (stacks to 2).                                                                            |
+| 6   | Charter Special          | 觀光專開列車 | Surprise    | Public contract: connect two seeded cities (BFS ≥ 4 apart) for 6–10 pts, first-come; expires after 4 rounds.                            |
+| 7   | Railway Anniversary Gala | 鐵路節慶典   | Surprise    | Instant: everyone draws 1 blind card; next round first station built by anyone is free.                                                 |
+| 8   | Stamp Rally Week         | 鐵道集章週   | Surprise    | 3 rounds: each NEW city added to your network +1 immediately.                                                                           |
 
 ## Future catalog (documented, NOT in v1 — include in the M7 design doc)
 
-| Event | 中文 | Sketch | Extra machinery |
-|-------|------|--------|-----------------|
-| Lantern Host City | 燈會主辦城 | Roaming +6 marker; scorer relocates it into own network; game-long race. | Relocation follow-up action (new phase) + proto + bots. |
-| Bento Rush | 排骨便當開賣 | Collect city tokens; spend as +2 pts or 1-card wild in a claim. | Token inventory; payment extension in both enumerators + proto Payment + bots. |
-| Slope Repair Order | 邊坡搶修令 | Spend a turn + 2 matching cards to repair a route (+3) else it closes 3 rounds. | New REPAIR action (reducer/legalActions/scoreAction/proto/rejections). |
-| Station-Front Night Market | 站前夜市開張 | Swap 1 hand card for 1 market card as a free pre-action near the city. | Free-action turn sub-step + once-per-turn marker. |
-| Goddess Procession | 遶境進香 | 5-city palanquin advances each round; claims at its city draw a card + blessing; most blessings +4. | Path state + round-advance + deferred scoring; heavy UI. |
-| Spring Festival Rush | 春節返鄉潮 | 2 rounds: reversed turn order; ticket draws offer 4-keep-1. | Turn-order scheduler change (endgame-countdown risk); parameterized offers. |
-| Rolling-Stock Allocation Day | 配車調度日 | Reverse-score-order draft of one perk (claim discount / draw 2 / event-repair permit). | New draft Phase + perk inventory + bot draft policy. |
-| Hive of Sparks | 蜂炮試膽 | Push-your-luck draw: flip up to 4, consecutive same colour busts to 1 kept. | Multi-step draw sub-action (new phase) + proto + bots. |
-| Breakthrough Boring Machine | 潛盾機貫通 | From reveal, tunnels reveal only 2 cards; era card buried in bottom deck third. | Deck marker-card mechanism. |
-| Interim Operations Report | 期中營運報告 | Scoring pulse: current longest trail +3; +1 per 3 claimed routes. | Deck markers + mid-game budgeted longest-trail call. |
-| Harvest Festival Express | 豐年祭加開列車 | 3 rounds: east-coast claims +1; market refresh on 3-of-a-colour. | Market-refresh rule ext. Near-v1 feasible. |
-| All Seats Reserved | 全車對號入座 | 1 round: face-up locos untakeable; +1 extra loco on a claim = +2. | Face-up validation flag + surcharge branch. Near-v1 feasible. |
-| Lucky Ticket Stub | 吉祥票根 | First to connect an authored auspicious city pair +5. | Authored pairs in map-data (CONTENT_HASH bump). Near-v1 feasible. |
+| Event                        | 中文           | Sketch                                                                                              | Extra machinery                                                                |
+| ---------------------------- | -------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Lantern Host City            | 燈會主辦城     | Roaming +6 marker; scorer relocates it into own network; game-long race.                            | Relocation follow-up action (new phase) + proto + bots.                        |
+| Bento Rush                   | 排骨便當開賣   | Collect city tokens; spend as +2 pts or 1-card wild in a claim.                                     | Token inventory; payment extension in both enumerators + proto Payment + bots. |
+| Slope Repair Order           | 邊坡搶修令     | Spend a turn + 2 matching cards to repair a route (+3) else it closes 3 rounds.                     | New REPAIR action (reducer/legalActions/scoreAction/proto/rejections).         |
+| Station-Front Night Market   | 站前夜市開張   | Swap 1 hand card for 1 market card as a free pre-action near the city.                              | Free-action turn sub-step + once-per-turn marker.                              |
+| Goddess Procession           | 遶境進香       | 5-city palanquin advances each round; claims at its city draw a card + blessing; most blessings +4. | Path state + round-advance + deferred scoring; heavy UI.                       |
+| Spring Festival Rush         | 春節返鄉潮     | 2 rounds: reversed turn order; ticket draws offer 4-keep-1.                                         | Turn-order scheduler change (endgame-countdown risk); parameterized offers.    |
+| Rolling-Stock Allocation Day | 配車調度日     | Reverse-score-order draft of one perk (claim discount / draw 2 / event-repair permit).              | New draft Phase + perk inventory + bot draft policy.                           |
+| Hive of Sparks               | 蜂炮試膽       | Push-your-luck draw: flip up to 4, consecutive same colour busts to 1 kept.                         | Multi-step draw sub-action (new phase) + proto + bots.                         |
+| Breakthrough Boring Machine  | 潛盾機貫通     | From reveal, tunnels reveal only 2 cards; era card buried in bottom deck third.                     | Deck marker-card mechanism.                                                    |
+| Interim Operations Report    | 期中營運報告   | Scoring pulse: current longest trail +3; +1 per 3 claimed routes.                                   | Deck markers + mid-game budgeted longest-trail call.                           |
+| Harvest Festival Express     | 豐年祭加開列車 | 3 rounds: east-coast claims +1; market refresh on 3-of-a-colour.                                    | Market-refresh rule ext. Near-v1 feasible.                                     |
+| All Seats Reserved           | 全車對號入座   | 1 round: face-up locos untakeable; +1 extra loco on a claim = +2.                                   | Face-up validation flag + surcharge branch. Near-v1 feasible.                  |
+| Lucky Ticket Stub            | 吉祥票根       | First to connect an authored auspicious city pair +5.                                               | Authored pairs in map-data (CONTENT_HASH bump). Near-v1 feasible.              |
 
 ## Milestones (each independently landable; engine lands dark until M5)
 

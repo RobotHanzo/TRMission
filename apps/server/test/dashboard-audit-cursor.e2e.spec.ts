@@ -53,9 +53,27 @@ beforeAll(async () => {
   newestId = newest.toHexString();
 
   await t.db.collection<AuditEntryDoc>('dashboardAudit').insertMany([
-    { _id: oldest, actorId: 'system:env', actorName: 'system', action: 'bootstrap.grant', at: new Date() },
-    { _id: middle, actorId: 'system:env', actorName: 'system', action: 'bootstrap.grant', at: new Date() },
-    { _id: newest, actorId: 'system:env', actorName: 'system', action: 'bootstrap.grant', at: new Date() },
+    {
+      _id: oldest,
+      actorId: 'system:env',
+      actorName: 'system',
+      action: 'bootstrap.grant',
+      at: new Date(),
+    },
+    {
+      _id: middle,
+      actorId: 'system:env',
+      actorName: 'system',
+      action: 'bootstrap.grant',
+      at: new Date(),
+    },
+    {
+      _id: newest,
+      actorId: 'system:env',
+      actorName: 'system',
+      action: 'bootstrap.grant',
+      at: new Date(),
+    },
   ]);
 }, 60_000);
 afterAll(() => t.close());

@@ -9,6 +9,7 @@ Glass tab bar (rounded pill, translucent, icons+labels, e.g. Home/Inbox/Explore/
 primary way to reach the homepage's sibling pages, not a header tweak.
 
 User decisions made this session:
+
 - Tab set: **Home, Encyclopedia, Leaderboard, Settings** (4 tabs). History stays a push-in from
   Home, same as Room/Game/Replay/Builder today.
 - Build it on **real native Liquid Glass** (not a JS/BlurView lookalike): `react-native-bottom-tabs`

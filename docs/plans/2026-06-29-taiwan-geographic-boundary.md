@@ -25,9 +25,11 @@ Use `WebFetch` to get a simplified Taiwan outline. Primary source (simplified Na
 ```
 https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson
 ```
+
 Filter `properties.ADMIN == "Taiwan"` or `properties.ISO_A2 == "TW"`. Use the exterior ring of the main island polygon only (skip any inner rings; multipolygons take the largest polygon by vertex count = main island).
 
 Fallback source if the above is too large:
+
 ```
 https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson
 ```

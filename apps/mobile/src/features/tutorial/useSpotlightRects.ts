@@ -106,7 +106,9 @@ export function useSpotlightRects(
       if (!alive) return;
       const cam = read();
       push(
-        cam ? boardAnchorRects(spotlight, cityById, routeById, cam, boardRect!, ROUTE_GEOMETRY) : [],
+        cam
+          ? boardAnchorRects(spotlight, cityById, routeById, cam, boardRect!, ROUTE_GEOMETRY)
+          : [],
       );
       if (Date.now() - started <= TRACK_MS) raf = requestAnimationFrame(tick);
     };

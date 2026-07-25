@@ -128,9 +128,7 @@ describe('auth: lastLoginIp audit trail (CF-Connecting-IP validation)', () => {
       .set('CF-Connecting-IP', '2001:db8::1')
       .send({ email: 'ipgood@example.com', password: 'password123' })
       .expect(200);
-    const afterLogin = await t.db
-      .collection('users')
-      .findOne({ _id: login.body.user.id as never });
+    const afterLogin = await t.db.collection('users').findOne({ _id: login.body.user.id as never });
     expect(afterLogin?.lastLoginIp).toBe('2001:db8::1');
   });
 

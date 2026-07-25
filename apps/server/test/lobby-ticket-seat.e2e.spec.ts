@@ -196,9 +196,7 @@ describe('LobbyService.ticket(): seat comes from the engine, membership comes fr
       .post(`/api/v1/rooms/${code}/leave`)
       .set(auth(b.token))
       .expect(200);
-    expect(
-      afterLeave.body.members.find((m: { userId: string }) => m.userId === c.id).seat,
-    ).toBe(1);
+    expect(afterLeave.body.members.find((m: { userId: string }) => m.userId === c.id).seat).toBe(1);
 
     const cTicket = (
       await request(server()).post(`/api/v1/rooms/${code}/ticket`).set(auth(c.token)).expect(200)

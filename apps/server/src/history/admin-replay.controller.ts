@@ -16,7 +16,7 @@ export class AdminReplayController {
     summary: 'Ticket-authorized replay for maintainers',
     description:
       'Bypasses membership entirely — authorized by a minted admin-replay ticket (sent via the ' +
-      "x-trm-admin-ticket header) presented by the maintainer it was minted for, whose dashboard " +
+      'x-trm-admin-ticket header) presented by the maintainer it was minted for, whose dashboard ' +
       'access is re-checked on every request. Works for COMPLETED and TERMINATED games (the ' +
       'player-facing /replay stays COMPLETED-only).',
   })

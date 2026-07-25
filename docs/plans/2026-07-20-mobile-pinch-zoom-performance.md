@@ -14,18 +14,19 @@ ducks the vectors (shows the cheap texture) `while motionSV && !zoomingSV` — t
 changes the span, the code deliberately shows the full live vector picture every single frame for
 the rest of the gesture, so the user always sees pixel-crisp routes/labels while zooming. That's
 the lag: every frame of an active pinch redraws every route, every dashed line (the graticule grid
-+ ferry dashes, both using `DashPathEffect`, which is recomputed at *replay* time, not baked in),
-and every visible city label as **two** stacked Skia `Paragraph`s (fill + stroke halo) — on a real
-Android GPU, at up to 120Hz, that's the reported jank.
+
+- ferry dashes, both using `DashPathEffect`, which is recomputed at _replay_ time, not baked in),
+  and every visible city label as **two** stacked Skia `Paragraph`s (fill + stroke halo) — on a real
+  Android GPU, at up to 120Hz, that's the reported jank.
 
 Confirmed with the user: this is observed on a **physical Android device**. Confirmed direction:
 extend the same raster-texture trick that already works for panning to zooming too, rather than a
 ground-up rewrite — this mirrors what `apps/web` and the `react-native-web` harness already do for
-*both* pan and zoom (`BoardCanvas.web.tsx` moves a static canvas via a free CSS transform and only
+_both_ pan and zoom (`BoardCanvas.web.tsx` moves a static canvas via a free CSS transform and only
 repaints at settle); native only ever extended that trick to panning.
 
 **Hard constraint discovered during investigation:** `cam.settled` and `cam.zoomingSV`
-(`useBoardCamera.ts`) are *also* consumed as-is by `BoardCanvas.web.tsx`, which has its own
+(`useBoardCamera.ts`) are _also_ consumed as-is by `BoardCanvas.web.tsx`, which has its own
 independently-tuned, documented ("three hard-won invariants") strategy that relies on `settled`
 meaning "camera actually at rest" and `zoomingSV` meaning "exclude zoom from mid-pan repaint
 checks." Neither may be repurposed or have their update cadence changed — a new, additive field is
@@ -34,7 +35,7 @@ required for native's mid-gesture raster refresh instead of touching `settled`/`
 ## Approach
 
 Reuse the **existing** mid-gesture LOD-requantize cadence (`MID_GESTURE_LOD_RATIO = 1.12` in
-`useBoardCamera.ts`, already throttling track-weight/label-tier updates during a pinch) to *also*
+`useBoardCamera.ts`, already throttling track-weight/label-tier updates during a pinch) to _also_
 refresh the raster snapshot at each of those same checkpoints, and let `MapSceneSkia`'s vector-duck
 apply during zoom too, not just pan. No new ratio constant needed — the throttling infrastructure
 already exists and already fires at exactly the right cadence; it just isn't feeding the raster
@@ -51,6 +52,7 @@ produce a real raster. This is not something to hand-tune further up front.
 ## Changes
 
 **`apps/mobile/src/board/useBoardCamera.ts`**
+
 - Add `snapshotCam: CameraState` to the `BoardCamera` interface/return — the camera checkpoint the
   raster snapshot should be rendered for. Updated at the same points `lod` already is:
   - In the `useAnimatedReaction` span watcher's mid-gesture branch (where it currently does
@@ -66,11 +68,13 @@ produce a real raster. This is not something to hand-tune further up front.
   new mid-gesture zoom-raster refresh.
 
 **`apps/mobile/src/board/BoardView.tsx`**
+
 - `raster` (~line 400): derive from `cam.snapshotCam` instead of `cam.settled`.
 - Update the adjacent comment ("re-derived at every camera settle") to reflect that it now also
   updates at mid-gesture LOD checkpoints during zoom.
 
 **`apps/mobile/src/board/MapSceneSkia.tsx`**
+
 - `vectorGuard` (~line 332-336): drop the `&& !(zoomingSV?.value ?? false)` exclusion so the
   snapshot ducks the vectors during **any** motion (pan or zoom) once a snapshot exists.
 - The `zoomingSV` prop becomes unused inside this file. Since `cam.zoomingSV` itself must stay
@@ -83,9 +87,10 @@ produce a real raster. This is not something to hand-tune further up front.
   pan-only one.
 
 **`apps/mobile/CLAUDE.md`**
-- Update the "Motion rendering is split by gesture kind" paragraph (currently: *"pinch-zoom
+
+- Update the "Motion rendering is split by gesture kind" paragraph (currently: _"pinch-zoom
   renders live vectors that follow the gesture in real time instead of magnifying a
-  fixed-resolution texture"*) to describe the new behavior: the raster snapshot now also covers
+  fixed-resolution texture"_) to describe the new behavior: the raster snapshot now also covers
   zoom, refreshed at the existing LOD-requantize checkpoints, with live vectors only when no
   snapshot exists yet or the camera is genuinely at rest.
 

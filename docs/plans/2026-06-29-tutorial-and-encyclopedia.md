@@ -2,7 +2,7 @@
 
 ## Context
 
-TRMission (台鐵任務) is a multiplayer reimplementation of *Ticket to Ride: Europe* mechanics
+TRMission (台鐵任務) is a multiplayer reimplementation of _Ticket to Ride: Europe_ mechanics
 themed on Taiwan's railways. A new player today is dropped straight into a server game with no
 guidance — every rule (drawing rules, ferries, tunnels, stations, ticket penalties, longest trail,
 endgame) must be learned by trial and error. There is **no existing tutorial, onboarding, or help
@@ -10,12 +10,12 @@ content anywhere** in the codebase.
 
 This plan adds two features:
 
-1. **Tutorial mode** — an *interactive sandbox* that runs a **real local game** by importing the
+1. **Tutorial mode** — an _interactive sandbox_ that runs a **real local game** by importing the
    pure `@trm/engine` into the web client. The learner performs real actions; the engine validates
    every move (so it can never teach a wrong rule). Scripted opponent moves play between the
    learner's turns to demonstrate flow. At launch the learner chooses **Full curriculum** or
    **Quickstart (core)** scope.
-2. **In-game Encyclopedia** — a help button (available *during a live game*) that opens a
+2. **In-game Encyclopedia** — a help button (available _during a live game_) that opens a
    categorized index where each entry is a **short board replay demo + a concise rules blurb**.
    "Replay a specific part" = re-seed the same deterministic scenario, replay its scripted action
    prefix to a checkpoint, then play that lesson's beats.
@@ -25,11 +25,13 @@ components, same controller) — the only difference is whether a "beat" waits f
 (`await`) or auto-plays a scripted action (`auto`).
 
 ### Confirmed decisions
+
 - **Interactive sandbox** via local `@trm/engine` (not hand-authored snapshots).
 - **Encyclopedia entries = replay demo + short text.**
 - **Learner picks scope at start** (Full vs Quickstart).
 
 ### Why this is feasible (verified)
+
 - `@trm/engine` is a pure, deterministic, browser-safe reducer (`initGame`, `reduce`, `redactFor`,
   `replay`, `legalActions`, `taiwanBoard`, `CONTENT_HASH` — `packages/engine/src/index.ts`).
 - The web render stack (`Board`, `CardMarket`, `PlayerTrackers`, `TicketPanel`, `PaymentModal`,
@@ -37,7 +39,7 @@ components, same controller) — the only difference is whether a "beat" waits f
   `GameEvent`. The codec that produces those (`viewToSnapshot`, `eventToProto`) lives in
   `apps/server/src/codec/` and is **100% pure** (no Nest/IO) → extractable into a shared package.
 - The action seam is `getSocket().<method>()`; a `SandboxSocket` mirroring that method surface can
-  apply actions to a local engine and feed the *same* stores → the entire existing board/animation
+  apply actions to a local engine and feed the _same_ stores → the entire existing board/animation
   stack renders a local game unchanged.
 
 ---
@@ -49,105 +51,117 @@ whether it appears in **Quickstart (C)** and/or **Full (F)**. **`enc`** marks le
 become Encyclopedia entries (replay demo + blurb). Rule numbers/constants below are confirmed from
 `packages/shared/src/constants.ts` (`DEFAULT_RULE_PARAMS`) and the engine.
 
-### Ch.0 — Goal & overview  *(C, F)*
-- **0.1 The objective** — build railways across Taiwan, complete secret mission tickets, score the
-  most points. *(C,F, enc)*
-- **0.2 The map** — 46 cities (39 main island + 7 offshore islands), routes between adjacent cities;
-  pan/zoom the board. *(C,F)*
-- **0.3 Where points come from** — preview: claimed routes, completed tickets, station bonus,
-  longest-trail bonus. *(C,F, enc)*
+### Ch.0 — Goal & overview _(C, F)_
 
-### Ch.1 — Components & setup  *(C, F)*
+- **0.1 The objective** — build railways across Taiwan, complete secret mission tickets, score the
+  most points. _(C,F, enc)_
+- **0.2 The map** — 46 cities (39 main island + 7 offshore islands), routes between adjacent cities;
+  pan/zoom the board. _(C,F)_
+- **0.3 Where points come from** — preview: claimed routes, completed tickets, station bonus,
+  longest-trail bonus. _(C,F, enc)_
+
+### Ch.1 — Components & setup _(C, F)_
+
 - **1.1 Train cards** — 8 colours **incl. PURPLE (never PINK)** + **LOCOMOTIVE** wild; deck = 12 per
-  colour + 14 locomotives. *(C,F, enc)*
-- **1.2 Your supply** — start with **45 trains**, **3 stations**, **4 cards**. *(C,F)*
+  colour + 14 locomotives. _(C,F, enc)_
+- **1.2 Your supply** — start with **45 trains**, **3 stations**, **4 cards**. _(C,F)_
 - **1.3 What a mission ticket is** — a ticket names **two cities** (its endpoints); connecting them
   end-to-end with an unbroken chain of **your own** claimed routes by game end earns the ticket's
   **stated points** (failing to connect them loses those points — detailed in 7.2). Tickets are
-  **secret from opponents**. *(C,F, enc)*
+  **secret from opponents**. _(C,F, enc)_
 - **1.4 Initial ticket draft** — offered **1 long + 3 short**, must **keep ≥ 2**; rejects go to the
-  bottom of their decks. *(C,F, enc)* — interactive: learner keeps tickets in `TicketChooser`.
+  bottom of their decks. _(C,F, enc)_ — interactive: learner keeps tickets in `TicketChooser`.
 
-### Ch.2 — The turn  *(C, F)*
+### Ch.2 — The turn _(C, F)_
+
 - **2.1 One action per turn** — a turn is exactly one of: draw cards / claim a route / build a
-  station / draw tickets. Turn-order indicator. *(C,F, enc)*
+  station / draw tickets. Turn-order indicator. _(C,F, enc)_
 
-### Ch.3 — Drawing train cards  *(C, F)*
-- **3.1 Market + deck** — 5 face-up slots + the blind deck. *(C,F)*
-- **3.2 Draw two** — take two cards (face-up or blind) to end the turn. *(C,F, enc)* — interactive.
+### Ch.3 — Drawing train cards _(C, F)_
+
+- **3.1 Market + deck** — 5 face-up slots + the blind deck. _(C,F)_
+- **3.2 Draw two** — take two cards (face-up or blind) to end the turn. _(C,F, enc)_ — interactive.
 - **3.3 Face-up locomotive rule** — taking a face-up locomotive costs your **whole turn** (can't
-  take a 2nd card); a locomotive may **not** be the 2nd face-up card. *(F, enc)*
+  take a 2nd card); a locomotive may **not** be the 2nd face-up card. _(F, enc)_
 - **3.4 Blind locomotive** — a locomotive drawn blind as the first card ends the draw (default
-  rule). *(F, enc)*
+  rule). _(F, enc)_
 - **3.5 Market recycle** — if **3+ locomotives** are face-up, the whole market is discarded &
-  redrawn. *(F, enc)* — auto demo.
-- **3.6 Deck reshuffle** — when the deck empties, the discard pile is reshuffled. *(F, enc)* — auto.
+  redrawn. _(F, enc)_ — auto demo.
+- **3.6 Deck reshuffle** — when the deck empties, the discard pile is reshuffled. _(F, enc)_ — auto.
 
-### Ch.4 — Claiming routes (core)  *(C, F)*
-- **4.1 Claim a route** — pay *length* cards of the route's colour; one train car per segment.
-  *(C,F, enc)* — interactive (uses `PaymentModal`).
-- **4.2 Locomotives are wild** — substitute for any colour. *(C,F, enc)*
-- **4.3 Gray routes** — pay any single colour. *(C,F, enc)*
-- **4.4 Route scoring** — immediate points by length: **1→1, 2→2, 3→4, 4→7, 6→15, 8→21**. *(C,F,
-  enc)* — auto demo with score floats.
-- **4.5 Insufficient cards** — what happens when you can't pay (shortfall hint). *(F)*
+### Ch.4 — Claiming routes (core) _(C, F)_
 
-### Ch.5 — Special routes  *(F)*
+- **4.1 Claim a route** — pay _length_ cards of the route's colour; one train car per segment.
+  _(C,F, enc)_ — interactive (uses `PaymentModal`).
+- **4.2 Locomotives are wild** — substitute for any colour. _(C,F, enc)_
+- **4.3 Gray routes** — pay any single colour. _(C,F, enc)_
+- **4.4 Route scoring** — immediate points by length: **1→1, 2→2, 3→4, 4→7, 6→15, 8→21**. _(C,F,
+  enc)_ — auto demo with score floats.
+- **4.5 Insufficient cards** — what happens when you can't pay (shortfall hint). _(F)_
+
+### Ch.5 — Special routes _(F)_
+
 - **5.1 Double (parallel) routes** — two lines between the same cities; in **2–3 player** games
   claiming one **locks** the sibling; in **4–5 player** both stay open; you can never own both
-  siblings. *(F, enc)* — auto demo staged at 2p (`SINGLE_ONLY`).
+  siblings. _(F, enc)_ — auto demo staged at 2p (`SINGLE_ONLY`).
 - **5.2 Ferry routes** — require a **minimum number of locomotives** (the loco slots) in payment.
-  *(F, enc)* — interactive claim of an island ferry.
+  _(F, enc)_ — interactive claim of an island ferry.
 - **5.3 Tunnel routes** — pay the route's length like any route (**locomotives are allowed in the
   payment**); then **3 cards are revealed** from the deck. Each revealed card that is a
-  **locomotive** *or* matches the **colour you paid with** adds **+1** to a surcharge you must
+  **locomotive** _or_ matches the **colour you paid with** adds **+1** to a surcharge you must
   **additionally pay** (in that same colour or locomotives) — or **abort** the claim for free (your
-  base cards stay in hand). *(F, enc)* — interactive (uses `TunnelModal`).
+  base cards stay in hand). _(F, enc)_ — interactive (uses `TunnelModal`).
 
-### Ch.6 — Stations  *(F)*
+### Ch.6 — Stations _(F)_
+
 - **6.1 Build a station** — placed in a city to **borrow one opponent route** there at game end
   (helps complete tickets). Cost escalates: **1st = 1, 2nd = 2, 3rd = 3** cards that must be a
   **single unified colour** (locomotives wild) — e.g. the 2nd station needs **two cards of the same
-  colour**; one station per city. *(F, enc)* — interactive.
+  colour**; one station per city. _(F, enc)_ — interactive.
 - **6.2 The station trade-off** — each **unused** station is worth **+4** at game end, so building
-  one costs you that bonus — build only when it saves a ticket. *(F, enc)*
+  one costs you that bonus — build only when it saves a ticket. _(F, enc)_
 
-### Ch.7 — Mission tickets in depth  *(C, F)*
+### Ch.7 — Mission tickets in depth _(C, F)_
+
 - **7.1 Completing a ticket** — connect its two cities with a continuous chain of **your** routes
-  (or via a station borrow) by game end for **+points**. *(C,F, enc)* — interactive: claim the last
+  (or via a station borrow) by game end for **+points**. _(C,F, enc)_ — interactive: claim the last
   link, see the completion sweep + fanfare.
-- **7.2 The penalty** — an **unfinished** ticket **subtracts** its points. *(C,F, enc)*
-- **7.3 Draw more tickets** — spend a turn to draw **3**, keep **≥ 1**. *(F, enc)* — interactive.
-- **7.4 Hidden information** — your tickets/hand are secret; opponents show counts only. *(F, enc)*
+- **7.2 The penalty** — an **unfinished** ticket **subtracts** its points. _(C,F, enc)_
+- **7.3 Draw more tickets** — spend a turn to draw **3**, keep **≥ 1**. _(F, enc)_ — interactive.
+- **7.4 Hidden information** — your tickets/hand are secret; opponents show counts only. _(F, enc)_
 - **7.5 Forced ticket draw** — once **all your kept tickets are completed** (no incomplete mission
   remains), the engine **automatically draws new tickets at the start of your turn** — your turn
   opens straight into the ticket chooser (draw **3**, keep **≥ 1**), so you never play without an
-  objective. *(F, enc)* — interactive (the auto-opened `TicketChooser`). **New engine rule** — see
+  objective. _(F, enc)_ — interactive (the auto-opened `TicketChooser`). **New engine rule** — see
   §"Engine rule change — forced ticket re-draw".
 
-### Ch.8 — Longest trail  *(F)*
+### Ch.8 — Longest trail _(F)_
+
 - **8.1 Longest continuous trail** — the player with the longest unbroken trail (no segment reused)
-  earns **+10** at game end; ties break to earliest in turn order. *(F, enc)* — auto demo with the
+  earns **+10** at game end; ties break to earliest in turn order. _(F, enc)_ — auto demo with the
   trail highlight (reuse the scoreboard route-reveal).
 
-### Ch.9 — Endgame & scoring  *(C, F)*
-- **9.1 Endgame trigger** — when a player drops to **≤ 2 trains**, every player (incl. the trigger)
-  takes **one final turn**. *(C,F, enc)* — auto demo with the "final round" cue.
-- **9.2 All-pass ending** — a full round of passes also ends the game (pass is only legal with no
-  other move). *(F, enc)*
-- **9.3 Final scoring** — route points (already counted) + ticket net (completed − failed) + station
-  bonus (+4 each unused) + longest-trail (+10). *(C,F, enc)* — auto demo to `ScoreBoard`.
-- **9.4 Tiebreakers** — score → most tickets → fewest stations used → holds longest trail. *(F,
-  enc)*
+### Ch.9 — Endgame & scoring _(C, F)_
 
-### Ch.10 — Strategy tips (light, optional)  *(F)*
-- **10.1 Play to your tickets; manage your hand; race vs. block; mind the station bonus.** *(F)* —
+- **9.1 Endgame trigger** — when a player drops to **≤ 2 trains**, every player (incl. the trigger)
+  takes **one final turn**. _(C,F, enc)_ — auto demo with the "final round" cue.
+- **9.2 All-pass ending** — a full round of passes also ends the game (pass is only legal with no
+  other move). _(F, enc)_
+- **9.3 Final scoring** — route points (already counted) + ticket net (completed − failed) + station
+  bonus (+4 each unused) + longest-trail (+10). _(C,F, enc)_ — auto demo to `ScoreBoard`.
+- **9.4 Tiebreakers** — score → most tickets → fewest stations used → holds longest trail. _(F,
+  enc)_
+
+### Ch.10 — Strategy tips (light, optional) _(F)_
+
+- **10.1 Play to your tickets; manage your hand; race vs. block; mind the station bonus.** _(F)_ —
   short info beats, no new rules.
 
 **Quickstart (core) path** = 0.1, 0.3, 1.x, 2.1, 3.1–3.2, 4.1–4.4, 7.1–7.2, 9.1, 9.3.
 **Full** = all of the above.
 
 ### Encyclopedia index (grouped tabs)
+
 Basics (Ch.0–2) · Cards & Drawing (Ch.3) · Routes (Ch.4) · Special Routes (Ch.5) · Stations (Ch.6)
 · Tickets (Ch.7) · Longest Trail (Ch.8) · Endgame & Scoring (Ch.9). Each entry = the lesson's replay
 demo (auto/click-to-step) + its `blurbKey` text. Openable from the in-game header button.
@@ -157,6 +171,7 @@ demo (auto/click-to-step) + its `blurbKey` text. Openable from the in-game heade
 ## Architecture
 
 ### Shared scenario-player core
+
 Both features share four layers:
 
 1. **`SandboxSocket`** (`apps/web/src/net/sandboxSocket.ts`) — a local-engine driver that
@@ -191,6 +206,7 @@ Both features share four layers:
    WebSocket game keeps running untouched behind the modal.
 
 ### Codec extraction → new `@trm/codec` package
+
 Extract `apps/server/src/codec/` (`enums.ts`, `snapshot.ts`, `events.ts`, `commands.ts`,
 `frames.ts`, `index.ts`) verbatim into **`packages/codec/`** (`@trm/codec`), depending on
 `@trm/engine` + `@trm/proto` + `@trm/shared` + `@bufbuild/protobuf`. TS-source export (no build
@@ -202,6 +218,7 @@ both `apps/server` and `apps/web` `package.json`. This honors the project's "sin
 projection is the only thing that reaches the wire" principle — sharing, not duplicating, the codec.
 
 ### Rendering reuse — `GameStage`
+
 Extract the board+HUD body and action handlers from `apps/web/src/screens/GameScreen.tsx` into a
 presentational `GameStage` (`{ snapshot, commands: GameCommands, sandbox?, overlay?, onLeave? }`)
 that reads `useGameStore()`. `GameScreen` becomes a thin shell (keeps connect/roster/rejection
@@ -212,6 +229,7 @@ with `commands = SandboxSocket` and an `overlay` (the coachmark/spotlight). `Boa
 (`Board.tsx:327`, uses `useControls().setTransform`).
 
 ### Engine rule change — forced ticket re-draw (rule 7.5)
+
 A new rule in `@trm/engine`: when a turn begins for a player whose **kept tickets are all already
 completed** (zero incomplete missions, judged by the live own-track `completedTickets` set), the
 engine **auto-initiates a ticket draw** instead of opening `AWAIT_ACTION` — the player's turn starts
@@ -237,15 +255,18 @@ next turn auto-opens the chooser).
 ## New files
 
 **Package**
+
 - `packages/codec/{package.json,tsconfig.json,CLAUDE.md}` + `src/{enums,snapshot,events,commands,frames,index}.ts` (moved) + `test/codec.spec.ts` (moved).
 
 **Web — sandbox & shared stage**
+
 - `apps/web/src/net/commands.ts` — `GameCommands` interface (shared by `GameSocket` + `SandboxSocket`) + `fromProtoPayment` helper.
 - `apps/web/src/net/sandboxSocket.ts` — the local-engine driver.
 - `apps/web/src/screens/GameStage.tsx` — presentational board+HUD extracted from `GameScreen`.
 - `apps/web/src/store/sandboxProvider.tsx` — fresh store instances + sandbox animation driver for the in-game encyclopedia.
 
 **Web — tutorial/encyclopedia feature (lazy-loaded chunk)**
+
 - `apps/web/src/features/tutorial/types.ts` — Lesson/Beat/Spotlight/Framing/ExpectSpec model.
 - `apps/web/src/features/tutorial/useScenarioPlayer.ts` — beat controller.
 - `apps/web/src/store/tutorial.ts` — session store: chosen scope, lesson list/indices, completed set persisted to `localStorage` (`trm.tutorialSeen`, `trm.tutorialProgress`).
@@ -261,6 +282,7 @@ next turn auto-opens the chooser).
 - `apps/web/src/i18n/tutorial.ts` — `tutorial.*` namespaced zh-Hant + en strings (own module).
 
 **Tests**
+
 - `packages/engine/test/forcedTicketDraw.spec.ts` — rule 7.5: a player with all kept tickets completed auto-enters `TICKET_SELECTION` at turn start; both-decks-empty falls back to `AWAIT_ACTION`; no infinite re-force.
 - `apps/web/src/features/tutorial/scenarios/scenarios.test.ts` — replay every lesson's prefix + auto/expected actions through `reduce`, assert `.ok` (scenario-rot guard).
 - `apps/web/src/net/sandboxSocket.test.ts` — action → bound store snapshot/events update.
@@ -286,6 +308,7 @@ next turn auto-opens the chooser).
 ---
 
 ## Reuse map
+
 - **Engine** (`@trm/engine`): `initGame`/`reduce`/`redactFor`/`legalActions`/`enumerateClaimPayments`/`taiwanBoard`/`CONTENT_HASH`/`hasAnyLegalMove`.
 - **Codec** (`@trm/codec`): `viewToSnapshot`/`eventToProto`/`phaseToPb`/`cardOrNullToPb` — the only RedactedView→wire path.
 - **Render components** (pure props): `Board`, `CardMarket`, `PlayerHand`, `PlayerTrackers`, `TicketPanel`, `TicketChooser` (collapsible "peek" pattern → encyclopedia compact layout), `PaymentModal`, `TunnelModal`, `ScoreBoard`.
@@ -298,6 +321,7 @@ next turn auto-opens the chooser).
 ---
 
 ## Build sequence
+
 0. **Engine rule 7.5** (self-contained, land first): implement forced ticket re-draw in `@trm/engine`, bump `ENGINE_VERSION`, add `forcedTicketDraw.spec.ts`, regenerate golden-replay digests. Gate: `yarn workspace @trm/engine test` green. Commit.
 1. **Extract `@trm/codec`** (pure refactor): new package, move 6 files + spec, repoint 4 imports + 2 `package.json`s. Gate: `yarn workspace @trm/server typecheck && test` (esp. `codec`, `wire-game.e2e`) green. Commit.
 2. **Wire engine+codec into web**: add deps; smoke test `viewToSnapshot(redactFor(initGame(taiwanBoard(), cfg), viewer), …)` runs under Vite/vitest.
@@ -313,6 +337,7 @@ next turn auto-opens the chooser).
 ---
 
 ## Risks & mitigations
+
 - **Bundle bloat** — import `@trm/engine`/`@trm/codec` only from the lazily-imported tutorial chunk; `App.tsx` uses `React.lazy`/`Suspense`. Confirm a separate chunk via `vite build`.
 - **Live game must stay pristine** while the in-game encyclopedia is open — isolated `create*Store()` instances via `SandboxProvider`; `SandboxSocket` does no I/O; `Board sandbox` suppresses camera broadcast/follow. Live singletons + WebSocket never written.
 - **Scenario rot** — `scenarios.test.ts` replays every scenario through the real reducer, so any rule/content/`CONTENT_HASH` change that breaks a script fails CI, not users.
@@ -325,6 +350,7 @@ next turn auto-opens the chooser).
 ---
 
 ## Verification
+
 - **Engine rule 7.5**: `yarn workspace @trm/engine test --run forcedTicketDraw` + the full engine suite (golden-replay digests regenerated and green).
 - **Unit**: `yarn workspace @trm/web test --run sandboxSocket` and `--run scenarios` (replay all lessons, assert `.ok` + expected end-state); `useScenarioPlayer` advancement test.
 - **No regression**: `yarn workspace @trm/web test` (existing `GameScreen`/`Board`/`ScoreBoard`/`useAnimationDriver` specs) + `yarn workspace @trm/server test` (codec + `wire-game.e2e` through `@trm/codec`).

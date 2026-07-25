@@ -9,6 +9,7 @@ tickets) with an **auto-generate** button — and the platform must also be revi
 maps** can ship. The builder UI is a significant new surface.
 
 **Product decisions (confirmed with user):**
+
 - World base = **bundled public-domain world vector** (Natural Earth), cropped client-side, rendered in the existing cartographic style.
 - Sharing = **by link/code**: maps are private; a share code lets another user peek + **clone** into their own list.
 - Authoring = **registered accounts only** (guests play but don't author; guest users are TTL-expired in Mongo).
@@ -37,8 +38,15 @@ plus a web refactor away from the bundled-Taiwan singleton.
      land: readonly (readonly (readonly [number, number])[])[]; // rings, 0-100 space, 2-dp rounded
      crop: { lonMin: number; lonMax: number; latMin: number; latMax: number };
    }
-   const MAP_RULE_KEYS = ['trainCarsStart','stationsPerPlayer','longestPathBonus','stationBonus',
-     'initialLongOffer','initialShortOffer','ticketDrawCount'] as const;
+   const MAP_RULE_KEYS = [
+     'trainCarsStart',
+     'stationsPerPlayer',
+     'longestPathBonus',
+     'stationBonus',
+     'initialLongOffer',
+     'initialShortOffer',
+     'ticketDrawCount',
+   ] as const;
    type MapRules = Partial<Pick<RuleParams, (typeof MAP_RULE_KEYS)[number]>>;
    ```
 
@@ -100,6 +108,7 @@ plus a web refactor away from the bundled-Taiwan singleton.
 ## Phases (each independently shippable; commit per phase after validation)
 
 ### Phase 1 — map-data foundations (no consumer changes)
+
 - `packages/map-data/src/types.ts` — `MapGeography`, `MAP_RULE_KEYS`, `MapRules`, optional fields on `GameContent`.
 - `packages/map-data/src/index.ts` — hash spread-if-defined; `OFFICIAL_MAPS` + `officialMapById`.
 - `packages/map-data/src/validate.ts` — `validateGeography(geo): string[]` (finite coords in [-50,150],
@@ -115,6 +124,7 @@ plus a web refactor away from the bundled-Taiwan singleton.
   `generate.spec.ts` (same seed ⇒ identical; sufficiency; endpoint coverage).
 
 ### Phase 2 — server: map selector + async board resolver (official-only; gameplay identical)
+
 - `room.repo.ts` — `MapSelector`, `RoomSettings.map`, default `{source:'official', mapId:'taiwan'}`.
 - `lobby.schemas.ts` — `MapSelectorSchema` (zod discriminated union) into `GameSettingsSchema`/`RoomView` (+ resolved `mapName {zh,en}` for display).
 - `lobby.service.ts` — `start` resolves official selector via `officialMapById` (custom branch → 400 until Phase 3); replaces hardcoded `CONTENT_HASH`/`taiwanBoard()` (`:164,:179`).
@@ -123,7 +133,9 @@ plus a web refactor away from the bundled-Taiwan singleton.
 - Tests: settings PATCH round-trip + invalid mapId 400; start still pins Taiwan hash; recovery specs green.
 
 ### Phase 3 — server: maps module (REST + custom start + async replayability)
+
 New `apps/server/src/maps/` following lobby/auth patterns (zod → `createZodDto`, `@ApiTags` etc.):
+
 - `maps.schemas.ts` — `MapDraftSchema` with hard caps (cities ≤120, routes ≤300, tickets ≤200, names ≤60,
   finite numbers, `MapRulesSchema` bounded by `RULE_BOUNDS`, geography caps mirroring `validateGeography`).
 - `custom-map.repo.ts` / `map-content.repo.ts` — incl. `insertIfAbsent` (swallow E11000) and
@@ -131,7 +143,7 @@ New `apps/server/src/maps/` following lobby/auth patterns (zod → `createZodDto
 - `maps.service.ts` — CRUD w/ ownership; `mintShareCode` (roomCode alphabet, len 8, unique-retry);
   `peekByCode` (never leaks ownerId); `cloneByCode` (deep copy, strip shareCode, name + ' (副本)');
   `resolveForStart(selector, hostUserId)` — assemble draft → `assertValidContent` + `validateGeography`
-  + `validateForPlay` (errors ⇒ 400) → `hashContent` → `mapContents.insertIfAbsent` → `{board, contentHash, mapRules}`.
+  - `validateForPlay` (errors ⇒ 400) → `hashContent` → `mapContents.insertIfAbsent` → `{board, contentHash, mapRules}`.
 - `maps.controller.ts` — `GET/POST /api/v1/maps`, `GET/PUT/DELETE /:id`, `POST/DELETE /:id/share`,
   `GET /shared/:code`, `POST /shared/:code/clone`, `GET /content/:hash`. All `AccessTokenGuard`;
   authoring routes + new `auth/registered-user.guard.ts`.
@@ -144,6 +156,7 @@ New `apps/server/src/maps/` following lobby/auth patterns (zod → `createZodDto
   map to completion, replay loads, **draft deleted → replay still works**); hub recovery via `mapContents`.
 
 ### Phase 4 — web: catalog refactor (zero visible change)
+
 - New `game/catalog.ts` (`ContentCatalog`, `buildCatalog`, `TAIWAN_CATALOG`), `game/contentCache.ts`
   (hash-keyed `resolveContent` — bundled sync path, REST fallback; per-hash status store),
   `components/CatalogContext.tsx` (defaults Taiwan; composes with `SandboxProvider`).
@@ -155,11 +168,13 @@ New `apps/server/src/maps/` following lobby/auth patterns (zod → `createZodDto
   after switching to B is harmless — cache is hash-keyed, no singleton).
 
 ### Phase 5 — web: map picker + custom play/replay
+
 - `net/rest.ts` (`RoomSettings.map`, `MapsApi`), `RoomScreen.tsx` picker in the game-settings fieldset
   (Segmented 官方/自訂 + host's map list; non-hosts see resolved map name), `GameScreen` loading veil
   until `useCatalog(snapshot.contentHash)` ready, i18n keys (zh-Hant + en) in `src/i18n/index.ts`.
 
 ### Phase 6 — web: builder (sub-phases; **invoke the frontend-design skill before building the UI**)
+
 - 6a: `/maps` list + editor shell + Stops/Routes stages on blank canvas — `features/builder/`:
   `MapsScreen`, `editor/EditorScreen`, `editor/store.ts` (zustand: draft, stage, selection, undo ≤50,
   debounced 2s autosave PUT), `editor/EditorCanvas.tsx` (TransformWrapper + boardView CTM projection;
@@ -180,6 +195,7 @@ New `apps/server/src/maps/` following lobby/auth patterns (zod → `createZodDto
   (cascade deletes, double-pair invariants), ValidationPanel rendering, missions determinism.
 
 ### Phase 7 — hardening
+
 Root `yarn turbo run typecheck lint test build`; verify main web chunk unchanged (builder is its own
 chunk); update `packages/map-data/CLAUDE.md` (hash-extension rule; stale 46/90/46 counts → 39/68/42)
 and server/web CLAUDE.md sections.
@@ -187,6 +203,7 @@ and server/web CLAUDE.md sections.
 ## Mission auto-generation spec (deterministic)
 
 `generateTickets(cities, routes, { seed, longCount=6, shortCount=36, shortMinDistance=4 }): TicketDef[]`
+
 1. Graph: undirected, weight = min route length per city pair; all-pairs Dijkstra (V ≤ 120).
 2. Candidates: all pairs with finite distance `d`, sorted `(d desc, pairKey asc)` — total order.
 3. Value = `d` (+1 if either endpoint `isIsland`), clamped ≥ 2.
@@ -197,6 +214,7 @@ and server/web CLAUDE.md sections.
    so `validateForPlay` passes for 5 players.
 
 ## Risks
+
 - **Pinned hashes**: v2 hex `6eab6c6d…` must survive the `hashContent` change (spread-if-defined
   guarantees it; `hash-extension.spec.ts` + new v3 pin are the CI gates). Never rename/reorder digest keys.
 - **Hidden info**: board content is public to all seats/spectators — no `redactFor`/wire change; keep
@@ -212,6 +230,7 @@ and server/web CLAUDE.md sections.
 - **Geometry determinism**: round coords to 2 dp **before** hashing (re-publish of untouched draft ⇒ same hash).
 
 ## Verification
+
 - Per phase: `yarn workspace @trm/map-data|@trm/server|@trm/web test / typecheck / lint`
   (server tests use mongodb-memory-server — no Docker needed); `yarn workspace @trm/server test --run wire-game`
   after server phases (leak gate); `yarn workspace @trm/web build` for chunk inspection; Phase 7 root turbo run.

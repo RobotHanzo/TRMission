@@ -39,11 +39,7 @@ export function TeamPoolPanel({ snapshot, onPush, onTake }: Props): React.JSX.El
   const hand = handFromCounts(snapshot.you?.hand);
   const pushUsed = snapshot.you?.teamPushUsed ?? false;
   const full = pool.count >= pool.capacity;
-  const hint = pushUsed
-    ? t('teamPoolPushUsed')
-    : full
-      ? t('teamPoolFull')
-      : t('teamPoolHint');
+  const hint = pushUsed ? t('teamPoolPushUsed') : full ? t('teamPoolFull') : t('teamPoolHint');
 
   const inPool = CARD_COLORS.filter((c) => pool.cards[c] > 0);
   const spare = CARD_COLORS.filter((c) => hand[c] > 0);
