@@ -1,339 +1,156 @@
-// Device + game settings (ports the web SettingsModal option lists) plus the store-mandated
-// account controls (Apple 5.1.1(v) / Play): appearance, language, board layout, colour-blind
-// glyphs, sound + volume, push toggle, haptics toggle, and in-app account deletion. Guests have
-// no deletion row — a guest account holds nothing its TTL won't reap. Preference changes apply
-// instantly (ui store persists on-device) and then sync to the account (no-op for guests).
-import { useEffect, useState } from 'react';
-import {
-  Alert,
-  Linking,
-  Pressable,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// The settings INDEX (issue #47): a departure board of the five groups, each stating what it is
+// currently set to, plus the account plate that leads to sign-out and deletion. Every group is a
+// pushed page inside the Settings tab's own stack (screens/settings/SettingsNavigator.tsx) — the
+// tab bar stays put, so a settings detour never loses the player their place in the app.
+//
+// The dashed leader running from each group name out to its value is the point of the layout:
+// the reader can answer "what is my sound set to?" from the index, so pushing the controls one
+// level down costs them nothing.
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import type { BoardLayout, Locale, Theme, UserPreferences } from '../net/rest';
-import { APP_VERSION, BUILD_NUMBER, GIT_COMMIT, SERVER_ORIGIN } from '../config';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Bell, ChevronRight, Info, Palette, ShieldCheck, Volume2 } from 'lucide-react-native';
+import { APP_VERSION } from '../config';
+import type { SettingsStackParamList } from '../navigation';
 import { useSettings } from '../store/settings';
-import { useHasFeature, useSession } from '../store/session';
+import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { useTheme } from '../theme/useTheme';
-import { MutedText, SectionLabel } from '../theme/chrome';
-import { useTabBarPad } from '../hooks/useTabBarPad';
-import { performAccountDeletion } from '../account/deleteAccount';
-import { formatCrashReport, getLastCrash, type CrashRecord } from '../app/crashCapture';
-import AdPrivacyRow from './settings/AdPrivacyRow';
-import LiveActivityRow from './settings/LiveActivityRow';
-import NotificationsRow from './settings/NotificationsRow';
-import { VolumeSlider } from './settings/VolumeSlider';
+import { MutedText } from '../theme/chrome';
+import { NavRow, SettingsGroup, SettingsPage } from './settings/chrome';
+import { AccountAvatar } from './settings/identity';
 
-/** A row of exclusive chips (same idiom as the lobby's Chips). */
-function Chips<T extends string | number>({
-  options,
-  value,
-  onChange,
-  testIDPrefix,
-}: {
-  options: readonly { value: T; label: string }[];
-  value: T;
-  onChange(v: T): void;
-  testIDPrefix?: string;
-}) {
-  const { tokens } = useTheme();
-  return (
-    <View style={styles.chips}>
-      {options.map((o) => {
-        const on = o.value === value;
-        return (
-          <Pressable
-            key={String(o.value)}
-            testID={testIDPrefix ? `${testIDPrefix}-${String(o.value)}` : undefined}
-            accessibilityRole="button"
-            accessibilityState={{ selected: on }}
-            onPress={() => onChange(o.value)}
-            style={[
-              styles.chip,
-              { borderColor: on ? tokens.blue : tokens.line },
-              on && { backgroundColor: `${tokens.blue}22` },
-            ]}
-          >
-            <Text style={[styles.chipText, { color: on ? tokens.blue : tokens.ink }]}>
-              {o.label}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
+type Props = NativeStackScreenProps<SettingsStackParamList, 'SettingsIndex'>;
 
-export function SettingsScreen(): React.JSX.Element {
+export function SettingsScreen({ navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
-  // Tab screens render full-bleed (no stack header, floating iOS tab bar): the notch row gets
-  // hard padding; the bottom pad lives on the CONTENT so rows scroll out from under the glass bar.
+  // A tab screen renders full-bleed (no stack header, floating iOS tab bar): the notch row gets
+  // hard padding, while SettingsPage puts the bottom pad on the CONTENT so rows scroll out from
+  // under the glass bar.
   const insets = useSafeAreaInsets();
-  const tabBarPad = useTabBarPad();
-  const haptics = useSettings((s) => s.haptics);
-  const setHaptics = useSettings((s) => s.setHaptics);
-  const isGuest = useSession((s) => s.user?.isGuest ?? true);
-  const savePreferences = useSession((s) => s.savePreferences);
-  const signOut = useSession((s) => s.signOut);
-  // The ad opt-out only appears for accounts granted the `adFree` feature from the maintainer
-  // dashboard — same gate as web's SettingsModal, and useAdsVisible enforces it independently so
-  // the stored flag alone can never suppress ads.
-  const canHideAds = useHasFeature('adFree');
-  const hideAds = useUi((s) => s.hideAds);
-  const setHideAds = useUi((s) => s.setHideAds);
+
+  const user = useSession((s) => s.user);
+  const isGuest = user?.isGuest ?? true;
 
   const theme = useUi((s) => s.theme);
   const locale = useUi((s) => s.locale);
-  const colorBlind = useUi((s) => s.colorBlind);
-  const boardLayout = useUi((s) => s.boardLayout);
   const soundEnabled = useUi((s) => s.soundEnabled);
   const soundVolume = useUi((s) => s.soundVolume);
-  const setTheme = useUi((s) => s.setTheme);
-  const setLocale = useUi((s) => s.setLocale);
-  const setColorBlind = useUi((s) => s.setColorBlind);
-  const setBoardLayout = useUi((s) => s.setBoardLayout);
-  const setSoundEnabled = useUi((s) => s.setSoundEnabled);
-  const setSoundVolume = useUi((s) => s.setSoundVolume);
+  const notifications = useSettings((s) => s.notifications);
+  const onlyWhenAway = useSettings((s) => s.notifyOnlyWhenAway);
 
-  // Apply immediately for snappy feedback, then sync the full set to the account (guests
-  // persist on-device only). Spreading current values keeps every preference in the payload.
-  const persist = (patch: Partial<UserPreferences>): void =>
-    void savePreferences({ theme, colorBlind, locale, boardLayout, ...patch }).catch(
-      () => undefined,
-    );
-
-  // Crash-capture surface (see app/crashCapture.ts): a persisted last-crash record makes an
-  // extra About row appear so TestFlight/beta testers can share the JS stack with a maintainer —
-  // the Apple crash log alone has no JS frames.
-  const [lastCrash, setLastCrash] = useState<CrashRecord | null>(null);
-  useEffect(() => {
-    void getLastCrash().then(setLastCrash);
-  }, []);
-  const shareCrash = async (): Promise<void> => {
-    if (!lastCrash) return;
-    const report = formatCrashReport(lastCrash);
-    try {
-      await Share.share({ message: report });
-    } catch {
-      // Share sheet unavailable (RNW harness): fall back to an alert the tester can screenshot.
-      Alert.alert(t('settings.crashReport'), report);
-    }
-  };
-
-  const runDelete = async (): Promise<void> => {
-    const outcome = await performAccountDeletion();
-    if (outcome === 'failed') Alert.alert(t('settings.deleteFailed'));
-    // 'deleted' clears the session; the auth-gated navigator swaps to the login stack itself.
-  };
-  const confirmDelete = (): void => {
-    Alert.alert(t('settings.deleteConfirmTitle'), t('settings.deleteConfirmBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('settings.deleteConfirmAction'),
-        style: 'destructive',
-        onPress: () => void runDelete(),
-      },
-    ]);
-  };
+  const themeLabel = t(
+    theme === 'light'
+      ? 'settings.themeLight'
+      : theme === 'dark'
+        ? 'settings.themeDark'
+        : 'settings.themeSystem',
+  );
+  const appearanceValue = `${themeLabel} · ${locale === 'en' ? 'English' : '中文'}`;
+  const soundValue = soundEnabled
+    ? `${t('settings.on')} · ${Math.round(soundVolume * 100)}%`
+    : t('settings.off');
+  const notificationsValue = !notifications
+    ? t('settings.off')
+    : onlyWhenAway
+      ? t('settings.onlyWhenAwayShort')
+      : t('settings.on');
 
   return (
-    <ScrollView
-      style={{ backgroundColor: tokens.paper, paddingTop: insets.top }}
-      contentContainerStyle={[styles.container, { paddingBottom: 40 + tabBarPad }]}
-    >
-      <SectionLabel>{t('settings.appearance')}</SectionLabel>
-      <Chips<Theme>
-        options={[
-          { value: 'system', label: t('settings.themeSystem') },
-          { value: 'light', label: t('settings.themeLight') },
-          { value: 'dark', label: t('settings.themeDark') },
-        ]}
-        value={theme}
-        onChange={(next) => {
-          void setTheme(next);
-          persist({ theme: next });
-        }}
-        testIDPrefix="theme"
-      />
-
-      <SectionLabel>{t('settings.language')}</SectionLabel>
-      <Chips<Locale>
-        options={[
-          { value: 'zh-Hant', label: '中文' },
-          { value: 'en', label: 'English' },
-        ]}
-        value={locale}
-        onChange={(next) => {
-          void setLocale(next);
-          persist({ locale: next });
-        }}
-        testIDPrefix="locale"
-      />
-
-      <SectionLabel>{t('settings.layout')}</SectionLabel>
-      <Chips<BoardLayout>
-        options={[
-          { value: 'rail', label: t('settings.layoutRail') },
-          { value: 'tray', label: t('settings.layoutTray') },
-        ]}
-        value={boardLayout}
-        onChange={(next) => {
-          void setBoardLayout(next);
-          persist({ boardLayout: next });
-        }}
-      />
-
-      <View style={styles.row}>
-        <View style={styles.rowLabels}>
-          <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.colorBlind')}</Text>
-          <MutedText>{t('settings.colorBlindDesc')}</MutedText>
-        </View>
-        <Switch
-          testID="colorblind-switch"
-          value={colorBlind}
-          onValueChange={(next) => {
-            void setColorBlind(next);
-            persist({ colorBlind: next });
-          }}
-        />
+    <SettingsPage topPad={insets.top} testID="settings-index">
+      <View style={styles.head}>
+        <Text style={[styles.title, { color: tokens.ink }]}>{t('settings.title')}</Text>
+        <MutedText>{t('settings.indexHint')}</MutedText>
       </View>
-
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.sound')}</Text>
-        <Switch
-          testID="sound-switch"
-          value={soundEnabled}
-          onValueChange={(next) => void setSoundEnabled(next)}
-        />
-      </View>
-      {soundEnabled && (
-        <>
-          <SectionLabel>{t('settings.volume')}</SectionLabel>
-          <View style={styles.volumeRow}>
-            <VolumeSlider
-              testID="volume-slider"
-              accessibilityLabel={t('settings.volume')}
-              value={soundVolume}
-              onChange={(next) => void setSoundVolume(next)}
-            />
-            <Text style={[styles.volumeValue, { color: tokens.inkSoft }]}>
-              {Math.round(soundVolume * 100)}%
-            </Text>
-          </View>
-        </>
-      )}
-
-      <NotificationsRow />
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.haptics')}</Text>
-        <Switch testID="haptics-switch" value={haptics} onValueChange={setHaptics} />
-      </View>
-      {/* iOS only (renders null elsewhere): the in-game lock screen / Dynamic Island card. */}
-      <LiveActivityRow />
-
-      {canHideAds && (
-        <View style={styles.row}>
-          <View style={styles.rowLabels}>
-            <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.hideAds')}</Text>
-            <MutedText>{t('settings.hideAdsDesc')}</MutedText>
-          </View>
-          <Switch
-            testID="hide-ads-switch"
-            value={hideAds}
-            onValueChange={(v) => void setHideAds(v)}
-          />
-        </View>
-      )}
-      {/* Re-open the ad consent form. Renders null wherever UMP requires no such form. */}
-      <AdPrivacyRow />
-
-      {/* Store compliance (Apple 5.1.1 / Play): the privacy policy must be reachable IN the app,
-          not just from the store listing. Served by the same-origin web app. */}
-      <SectionLabel>{t('settings.about')}</SectionLabel>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.version')}</Text>
-        <MutedText>{`${APP_VERSION} (${BUILD_NUMBER})`}</MutedText>
-      </View>
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.commit')}</Text>
-        <MutedText>{GIT_COMMIT.slice(0, 7)}</MutedText>
-      </View>
-      <Pressable
-        testID="settings-privacy-policy"
-        accessibilityRole="link"
-        style={styles.row}
-        onPress={() => void Linking.openURL(`${SERVER_ORIGIN}/privacy`)}
-      >
-        <Text style={[styles.label, { color: tokens.blue }]}>{t('settings.privacyPolicy')}</Text>
-      </Pressable>
-      {lastCrash && (
-        <Pressable
-          testID="settings-crash-report"
-          accessibilityRole="button"
-          style={styles.row}
-          onPress={() => void shareCrash()}
-        >
-          <Text style={[styles.label, { color: tokens.blue }]}>{t('settings.crashReport')}</Text>
-        </Pressable>
-      )}
 
       <Pressable
-        testID="settings-sign-out"
+        testID="settings-nav-account"
         accessibilityRole="button"
-        style={styles.row}
-        onPress={() => void signOut()}
+        onPress={() => navigation.navigate('SettingsAccount')}
+        style={({ pressed }) => [
+          styles.account,
+          {
+            backgroundColor: pressed ? tokens.surface2 : tokens.surface,
+            borderColor: tokens.line,
+            shadowColor: tokens.ink,
+          },
+        ]}
       >
-        <Text style={[styles.label, { color: tokens.danger }]}>{t('settings.signOut')}</Text>
+        <AccountAvatar name={user?.displayName ?? ''} url={user?.avatarUrl} size={44} />
+        <View style={styles.accountText}>
+          <Text style={[styles.accountName, { color: tokens.ink }]} numberOfLines={1}>
+            {user?.displayName ?? t('settings.signedOut')}
+          </Text>
+          <Text style={[styles.accountSub, { color: tokens.inkSoft }]} numberOfLines={1}>
+            {isGuest ? t('settings.guestAccount') : (user?.email ?? t('settings.memberAccount'))}
+          </Text>
+        </View>
+        <ChevronRight size={18} color={tokens.inkSoft} />
       </Pressable>
 
-      {!isGuest && (
-        <Pressable
-          testID="settings-delete-account"
-          accessibilityRole="button"
-          style={styles.deleteRow}
-          onPress={confirmDelete}
-        >
-          <Text style={[styles.deleteText, { color: tokens.danger }]}>
-            {t('settings.deleteAccount')}
-          </Text>
-        </Pressable>
-      )}
-    </ScrollView>
+      <SettingsGroup title={t('settings.playGroup')}>
+        <NavRow
+          first
+          icon={Palette}
+          testID="settings-nav-appearance"
+          title={t('settings.appearance')}
+          value={appearanceValue}
+          onPress={() => navigation.navigate('SettingsAppearance')}
+        />
+        <NavRow
+          icon={Volume2}
+          testID="settings-nav-sound"
+          title={t('settings.soundGroup')}
+          value={soundValue}
+          onPress={() => navigation.navigate('SettingsSound')}
+        />
+        <NavRow
+          icon={Bell}
+          testID="settings-nav-notifications"
+          title={t('settings.notifications')}
+          value={notificationsValue}
+          onPress={() => navigation.navigate('SettingsNotifications')}
+        />
+      </SettingsGroup>
+
+      <SettingsGroup title={t('settings.appGroup')}>
+        <NavRow
+          first
+          icon={ShieldCheck}
+          testID="settings-nav-privacy"
+          title={t('settings.adsGroup')}
+          onPress={() => navigation.navigate('SettingsPrivacy')}
+        />
+        <NavRow
+          icon={Info}
+          testID="settings-nav-about"
+          title={t('settings.about')}
+          value={APP_VERSION}
+          onPress={() => navigation.navigate('SettingsAbout')}
+        />
+      </SettingsGroup>
+    </SettingsPage>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, gap: 8, paddingBottom: 40 },
-  row: {
+  head: { gap: 4, paddingHorizontal: 4 },
+  title: { fontSize: 28, fontWeight: '700', letterSpacing: 0.5 },
+  account: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: 12,
-    minHeight: 48,
-  },
-  rowLabels: { flexShrink: 1, gap: 2 },
-  label: { fontSize: 15, fontWeight: '600' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: {
     borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    minHeight: 36,
-    justifyContent: 'center',
+    borderRadius: 14,
+    padding: 12,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  chipText: { fontSize: 13, fontWeight: '600' },
-  volumeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 32 },
-  volumeValue: { fontSize: 13, fontWeight: '600', width: 40, textAlign: 'right' },
-  deleteRow: { minHeight: 48, justifyContent: 'center', marginTop: 16 },
-  deleteText: { fontSize: 15, fontWeight: '600' },
+  accountText: { flex: 1, gap: 2 },
+  accountName: { fontSize: 16, fontWeight: '700' },
+  accountSub: { fontSize: 12 },
 });

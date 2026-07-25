@@ -28,10 +28,25 @@ the screen fetches a single-use carry code (`api.mobileCarry()`) and points the 
 Strict-cookie web session and 302s to `/maps` — the one sanctioned native→web session handoff.
 Offline/error/loading states have testIDs `builder-offline`/`builder-error`.
 
-## Settings (`SettingsScreen.tsx`)
+## Settings (`SettingsScreen.tsx` + `settings/`, issue #47)
 
-Rows and the store behind them: `../store/CLAUDE.md`. `settings/AdPrivacyRow` and the `adFree`-gated
-hide-ads switch: `../ads/CLAUDE.md`.
+A grouped **index** plus one pushed page per group, all inside the Settings tab's **own native
+stack** (`settings/SettingsNavigator.tsx`, routes in `SettingsStackParamList`). Nested in the tab,
+not the root stack, so drilling in keeps the floating tab bar — and the six leaf routes stay out of
+the root param list. Header theming mirrors `navigation.tsx` (Liquid Glass on iOS); the index hides
+the header because it carries its own title.
+
+`SettingsScreen` is the index only. Every row states its **current value** next to a dashed
+timetable leader (the `theme/gameChrome` idiom), so the added layer hides no answer — keep that
+property when adding a group. Pages: `AppearanceScreen`, `SoundScreen`, `NotificationsScreen`,
+`PrivacyScreen`, `AccountScreen`, `AboutScreen`, built from `settings/chrome.tsx`
+(`SettingsPage` / `SettingsGroup` / `SettingsRow` / `ChoiceRow` / `NavRow`).
+
+Rows divide themselves with a top hairline unless passed `first`, so a group whose members are
+conditionally hidden (`AdPrivacyRow`, the `adFree` switch, `LiveActivityRow`) must have the
+**screen** decide which one leads — see `PrivacyScreen`. Store behind the rows:
+`../store/CLAUDE.md`; the ad rows: `../ads/CLAUDE.md`; the quiet-while-playing rule:
+`../push/CLAUDE.md`.
 
 ## Ads
 

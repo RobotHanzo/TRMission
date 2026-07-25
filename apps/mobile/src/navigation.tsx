@@ -46,12 +46,33 @@ export type RootStackParamList = {
 /** The 4 tabs nested inside the "Home" stack screen (see HomeTabs/HomeTabs.web). */
 export type HomeTabParamList = {
   Home: undefined;
-  /** Device settings + account controls (push/haptics toggles, account deletion). */
+  /** Device settings + account controls — itself a stack (see SettingsStackParamList). */
   Settings: undefined;
   /** Player leaderboard (rating/wins/games-played, all-time or this season). */
   Leaderboard: undefined;
   /** The rules encyclopedia: chapter-grouped topics with auto-playing sandbox demos. */
   Encyclopedia: undefined;
+};
+
+/**
+ * The Settings tab's own stack (screens/settings/SettingsNavigator.tsx): a grouped index plus one
+ * page per group. Nested inside the tab, so drilling in keeps the floating tab bar.
+ */
+export type SettingsStackParamList = {
+  /** The grouped index — every row states its current value, then pushes its page. */
+  SettingsIndex: undefined;
+  /** Theme, language, board layout, colour-blind glyphs. */
+  SettingsAppearance: undefined;
+  /** Sound on/off, volume, haptics. */
+  SettingsSound: undefined;
+  /** Push opt-in, the quiet-while-playing rule, the iOS Live Activity. */
+  SettingsNotifications: undefined;
+  /** Ad opt-out (feature-gated), UMP privacy options (region-gated), privacy policy. */
+  SettingsPrivacy: undefined;
+  /** Identity, sign out, in-app account deletion. */
+  SettingsAccount: undefined;
+  /** Version/commit + the last crash report. */
+  SettingsAbout: undefined;
 };
 
 /** Screen props for a HomeTabs tab: the tab's own nav prop PLUS the outer stack's (so

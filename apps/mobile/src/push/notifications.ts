@@ -1,6 +1,7 @@
 import type { NavigationContainerRefWithCurrent } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation';
 import { api } from '../net/rest';
+import { useSettings } from '../store/settings';
 import { Notifications } from './expoNotifications';
 
 /** Server payload contract (apps/server/src/push/push.service.ts): data = {kind, gameId, roomCode?}. */
@@ -16,13 +17,36 @@ export const setActiveGameId = (id: string | null): void => {
   activeGameId = id;
 };
 
-/** Foreground policy: never banner the game the player is already looking at. */
+/**
+ * Foreground display policy. Two independent reasons to stay quiet:
+ *
+ *  1. **always** — the game the player is already looking at. Their own screen is the
+ *     notification.
+ *  2. **`notifyOnlyWhenAway`** (issue #48, default ON) — ANY game push while the app is open,
+ *     so notifications only ever arrive when the player is actually away. Turning it off falls
+ *     back to rule 1 alone.
+ *
+ * The server already skips your-turn/game-over/game-paused for a player holding a live socket
+ * (`apps/server/src/push/CLAUDE.md`), so rule 2 is what covers everything it cannot see: the
+ * game-started fan-out to a room you are staring at, a push racing a reconnect, and turns in a
+ * SECOND game while you play a first.
+ *
+ * "Is the player here?" is answered by the handler running AT ALL — `setNotificationHandler` is
+ * only consulted for a notification that arrives while the app is foregrounded. Deliberately NOT
+ * an `AppState.currentState === 'active'` check on top: iOS reports `inactive` while a banner is
+ * being presented, which would silently punch a hole in the rule.
+ */
+export function suppressInForeground(data: PushData): boolean {
+  if (typeof data.gameId === 'string' && data.gameId === activeGameId) return true;
+  return useSettings.getState().notifyOnlyWhenAway;
+}
+
 export function installNotificationHandler(): void {
   if (!Notifications) return;
   Notifications.setNotificationHandler({
     handleNotification: (n) => {
       const data = (n.request.content.data ?? {}) as PushData;
-      const suppress = typeof data.gameId === 'string' && data.gameId === activeGameId;
+      const suppress = suppressInForeground(data);
       return Promise.resolve({
         shouldShowBanner: !suppress,
         shouldShowList: !suppress,

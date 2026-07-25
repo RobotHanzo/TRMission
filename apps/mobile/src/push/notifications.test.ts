@@ -12,6 +12,7 @@ jest.mock('../net/rest', () => ({
   api: { getMyRooms: (...a: unknown[]) => mockGetMyRooms(...a) },
 }));
 
+import { useSettings } from '../store/settings';
 import {
   installNotificationHandler,
   navigateForPush,
@@ -22,25 +23,41 @@ import {
 const notif = (data: Record<string, unknown>) => ({ request: { content: { data } } }) as never;
 
 describe('foreground display policy', () => {
-  it('suppresses the banner for the game currently on screen, shows it otherwise', async () => {
+  // The handler under test IS the foreground path — expo only consults it for a notification
+  // that lands while the app is open.
+  const banner = async (data: Record<string, unknown>): Promise<boolean> => {
     installNotificationHandler();
-    const handler = mockSetNotificationHandler.mock.calls[0]![0] as {
+    const handler = mockSetNotificationHandler.mock.calls.at(-1)![0] as {
       handleNotification: (n: unknown) => Promise<{ shouldShowBanner: boolean }>;
     };
-    setActiveGameId('g1');
-    expect(
-      (await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g1' })))
-        .shouldShowBanner,
-    ).toBe(false);
-    expect(
-      (await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g2' })))
-        .shouldShowBanner,
-    ).toBe(true);
+    return (await handler.handleNotification(notif(data))).shouldShowBanner;
+  };
+
+  afterEach(() => {
     setActiveGameId(null);
-    expect(
-      (await handler.handleNotification(notif({ kind: 'your_turn', gameId: 'g1' })))
-        .shouldShowBanner,
-    ).toBe(true);
+    useSettings.setState({ notifyOnlyWhenAway: true });
+  });
+
+  it('always suppresses the banner for the game currently on screen', async () => {
+    useSettings.setState({ notifyOnlyWhenAway: false });
+    setActiveGameId('g1');
+    expect(await banner({ kind: 'your_turn', gameId: 'g1' })).toBe(false);
+    expect(await banner({ kind: 'your_turn', gameId: 'g2' })).toBe(true);
+    setActiveGameId(null);
+    expect(await banner({ kind: 'your_turn', gameId: 'g1' })).toBe(true);
+  });
+
+  it('notifyOnlyWhenAway (default) suppresses every game push while the app is open', async () => {
+    // Issue #48: a turn in a SECOND game, and a game_started for a room you are sitting in,
+    // both stay quiet — the player is right here.
+    expect(await banner({ kind: 'your_turn', gameId: 'g2' })).toBe(false);
+    expect(await banner({ kind: 'game_started', gameId: 'g3', roomCode: 'ABCD' })).toBe(false);
+    expect(await banner({})).toBe(false);
+  });
+
+  it('turning notifyOnlyWhenAway off restores the on-screen-game-only rule', async () => {
+    useSettings.setState({ notifyOnlyWhenAway: false });
+    expect(await banner({ kind: 'your_turn', gameId: 'g2' })).toBe(true);
   });
 });
 

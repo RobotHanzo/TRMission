@@ -7,7 +7,7 @@ import type { HomeTabParamList } from './navigation';
 import { HomeScreen } from './screens/HomeScreen';
 import EncyclopediaScreen from './screens/EncyclopediaScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
-import { SettingsScreen } from './screens/SettingsScreen';
+import SettingsNavigator from './screens/settings/SettingsNavigator';
 import { useTheme } from './theme/useTheme';
 import HOME_ICON from '../assets/tabs/home.png';
 import ENCYCLOPEDIA_ICON from '../assets/tabs/encyclopedia.png';
@@ -62,7 +62,7 @@ export default function HomeTabs(): React.JSX.Element {
       />
       <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsNavigator}
         options={{
           title: t('settings.title'),
           tabBarIcon: tabIcon('gearshape.fill', SETTINGS_ICON),

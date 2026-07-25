@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { Alert, Linking, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Linking, Switch } from 'react-native';
+import { Bell } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../store/settings';
 import { ensurePushRegistration, unregisterDeviceForPush } from '../../push/register';
 import { Notifications } from '../../push/expoNotifications';
-import { useTheme } from '../../theme/useTheme';
+import { SettingsRow } from './chrome';
 
 /** The push toggle: ON asks the OS (or routes to system settings when permanently denied),
  *  then registers the native token; OFF deregisters it. The setting only flips on success. */
-export default function NotificationsRow(): React.JSX.Element {
+export default function NotificationsRow({ first }: { first?: boolean }): React.JSX.Element {
   const { t } = useTranslation();
-  const { tokens } = useTheme();
   const enabled = useSettings((s) => s.notifications);
   const setNotifications = useSettings((s) => s.setNotifications);
   const [busy, setBusy] = useState(false);
@@ -46,24 +46,19 @@ export default function NotificationsRow(): React.JSX.Element {
   };
 
   return (
-    <View style={styles.row}>
-      <Text style={[styles.label, { color: tokens.ink }]}>{t('settings.notifications')}</Text>
-      <Switch
-        testID="notifications-switch"
-        value={enabled}
-        disabled={busy}
-        onValueChange={(v) => void onToggle(v)}
-      />
-    </View>
+    <SettingsRow
+      first={first ?? false}
+      icon={Bell}
+      label={t('settings.notifications')}
+      hint={t('settings.notificationsHint')}
+      trailing={
+        <Switch
+          testID="notifications-switch"
+          value={enabled}
+          disabled={busy}
+          onValueChange={(v) => void onToggle(v)}
+        />
+      }
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 48,
-  },
-  label: { fontSize: 15 },
-});

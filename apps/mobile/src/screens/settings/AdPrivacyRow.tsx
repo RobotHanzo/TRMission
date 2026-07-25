@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { SlidersHorizontal } from 'lucide-react-native';
 import { showAdPrivacyOptions, useAds } from '../../ads/ads';
-import { useTheme } from '../../theme/useTheme';
+import { SettingsRow } from './chrome';
 
 /**
  * Re-opens the UMP consent (privacy options) form.
@@ -12,24 +12,18 @@ import { useTheme } from '../../theme/useTheme';
  * that never worked would be worse than no row. Same "hide when not applicable" shape as
  * `LiveActivityRow` off iOS.
  */
-export default function AdPrivacyRow(): React.JSX.Element | null {
+export default function AdPrivacyRow({ first }: { first?: boolean }): React.JSX.Element | null {
   const { t } = useTranslation();
-  const { tokens } = useTheme();
   const required = useAds((s) => s.privacyOptionsRequired);
   if (!required) return null;
   return (
-    <Pressable
+    <SettingsRow
+      first={first ?? false}
+      tone="link"
+      icon={SlidersHorizontal}
       testID="settings-ad-privacy"
-      accessibilityRole="button"
-      style={styles.row}
+      label={t('settings.adPrivacy')}
       onPress={() => void showAdPrivacyOptions()}
-    >
-      <Text style={[styles.label, { color: tokens.blue }]}>{t('settings.adPrivacy')}</Text>
-    </Pressable>
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', minHeight: 48 },
-  label: { fontSize: 15, fontWeight: '600' },
-});

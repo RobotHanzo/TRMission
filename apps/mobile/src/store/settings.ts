@@ -11,6 +11,10 @@ interface SettingsState {
   haptics: boolean;
   /** User intent for push. Actual delivery also needs OS permission + a registered token. */
   notifications: boolean;
+  /** Hold back push notifications while the app is open — deliver only once the player is away
+   *  (issue #48). Defaults ON: a banner about a game you are sitting in front of is noise. The
+   *  rule is applied by the foreground handler in `../push/notifications.ts`. */
+  notifyOnlyWhenAway: boolean;
   /** The contextual post-first-game permission prompt fires at most once. */
   pushPromptSeen: boolean;
   /** iOS Live Activity for the game in progress (lock screen + Dynamic Island). Needs no OS
@@ -19,6 +23,7 @@ interface SettingsState {
   liveActivities: boolean;
   setHaptics(v: boolean): void;
   setNotifications(v: boolean): void;
+  setNotifyOnlyWhenAway(v: boolean): void;
   markPushPromptSeen(): void;
   setLiveActivities(v: boolean): void;
 }
@@ -28,10 +33,12 @@ export const useSettings = create<SettingsState>()(
     (set) => ({
       haptics: true,
       notifications: false,
+      notifyOnlyWhenAway: true,
       pushPromptSeen: false,
       liveActivities: true,
       setHaptics: (haptics) => set({ haptics }),
       setNotifications: (notifications) => set({ notifications }),
+      setNotifyOnlyWhenAway: (notifyOnlyWhenAway) => set({ notifyOnlyWhenAway }),
       markPushPromptSeen: () => set({ pushPromptSeen: true }),
       setLiveActivities: (liveActivities) => set({ liveActivities }),
     }),

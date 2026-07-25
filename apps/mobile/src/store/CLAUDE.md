@@ -15,10 +15,13 @@ with its `canModerate`). Reports POST `/reports/player` with `gameId`/`roomCode`
 `../game/activeRoom.ts` (set by GameScreen alongside the push-suppression id; display-only, never
 authorization).
 
-## Settings (`settings.ts` + `../screens/SettingsScreen.tsx`)
+## Settings (`settings.ts` + `../screens/settings/`)
 
-Zustand persist key `trm-settings` (haptics **on**, notifications **off**, live activities **on**,
-`pushPromptSeen` false by default). `LiveActivityRow` renders nothing off iOS and needs no OS
+Zustand persist key `trm-settings` (haptics **on**, notifications **off**, `notifyOnlyWhenAway`
+**on**, live activities **on**, `pushPromptSeen` false by default). `notifyOnlyWhenAway` (issue #48)
+holds push back while the app is open — the rule lives in `../push/notifications.ts`, not here.
+The screen is a grouped index + one page per group (`../screens/CLAUDE.md`).
+`LiveActivityRow` renders nothing off iOS and needs no OS
 permission — Live Activities are allowed unless the user switches them off for the app in iOS
 Settings (`areLiveActivitiesEnabled()` is checked at start time), so it is a plain default-on toggle,
 unlike the push row. `NotificationsRow` toggle ON = OS permission request (permanently denied ⇒

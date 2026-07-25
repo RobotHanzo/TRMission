@@ -1,22 +1,53 @@
 import { auth, settings } from '@trm/client-core/i18n/locales/zh-Hant';
 
-// The settings screen: the shared appearance/audio vocabulary plus mobile-only rows (push,
-// haptics, about, sign-out, account deletion).
+// 設定：共用的外觀／音效詞彙，加上手機專屬的分組索引與各分頁（通知、震動、廣告與隱私、帳號、關於）。
 export default {
   ...settings,
   title: '設定',
-  notifications: '推播通知',
+  indexHint: '每一項都會顯示目前的設定值。',
+  // 索引分組
+  playGroup: '遊戲體驗',
+  appGroup: '應用程式',
+  accountGroup: '帳號',
+  soundGroup: '音效與震動',
+  boardGroup: '遊戲畫面',
+  adsGroup: '廣告與隱私',
+  hapticsGroup: '震動',
+  on: '開啟',
+  off: '關閉',
+  // 外觀
+  theme: '主題',
+  layoutHint: '對局畫面把控制面板放在哪一側。',
+  // 音效與震動
+  hapticsHint: '搶下路線、隧道翻牌、完成任務與對局結束時，手機會震一下。',
   haptics: '震動回饋',
+  // 通知
+  notifications: '推播通知',
+  notificationsHint: '輪到你、對局開始或結束時通知你。',
+  notificationsFootnote: '推播由伺服器直接送出；關閉後，這台裝置會取消註冊。',
+  onlyWhenAway: '僅在離開時通知',
+  onlyWhenAwayShort: '僅離開時',
+  onlyWhenAwayHint: 'App 開著的時候不打擾你，離開後照常送達。',
   liveActivities: '即時動態',
   liveActivitiesHint: '在鎖定畫面與動態島顯示對局進度，輪到你時一看就知道。',
+  // 帳號
   signOut: auth.signOut,
+  signedOut: '尚未登入',
+  guestAccount: '訪客帳號',
+  memberAccount: '正式帳號',
+  guestFootnote: '訪客帳號只存在這台裝置上，登出後就找不回來了。到首頁可以升級成正式帳號。',
   deleteAccount: '刪除帳號',
+  deleteFootnote: '刪除後無法復原。',
+  // 廣告與隱私
+  adsFootnote: '我們只在瀏覽畫面顯示廣告，對局進行中不會。',
+  // 關於
   about: '關於',
   version: '版本',
   commit: '版本代碼',
   privacyPolicy: '隱私權政策',
   adPrivacy: '廣告隱私選項',
   crashReport: '分享上次閃退報告',
+  crashReportHint: '把上次閃退的技術細節傳給維護者，有助於找出原因。',
   deleteConfirmTitle: '確定要刪除帳號嗎？',
   deleteConfirmBody: '此動作無法復原。你的個人資料將被刪除，對局紀錄將匿名化。',
   deleteConfirmAction: '永久刪除',
