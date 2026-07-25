@@ -261,7 +261,7 @@
       "label": "Monorepo layout & build order",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L81",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "claude_monorepo_layout_build_order",
       "community": 159,
@@ -271,7 +271,7 @@
       "label": "The big picture",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L123",
+      "source_location": "L120",
       "_origin": "ast",
       "id": "claude_the_big_picture",
       "community": 159,
@@ -281,7 +281,7 @@
       "label": "Load-bearing decisions (these bite if you don't know them)",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L142",
+      "source_location": "L139",
       "_origin": "ast",
       "id": "claude_load_bearing_decisions_these_bite_if_you_don_t_know_them",
       "community": 159,
@@ -291,7 +291,7 @@
       "label": "Server env vars",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L167",
+      "source_location": "L164",
       "_origin": "ast",
       "id": "claude_server_env_vars",
       "community": 159,
@@ -301,7 +301,7 @@
       "label": "graphify",
       "file_type": "document",
       "source_file": "CLAUDE.md",
-      "source_location": "L172",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "claude_graphify",
       "community": 159,
@@ -313,9 +313,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "apps_web_claude",
       "community": 252,
-      "norm_label": "claude.md"
+      "norm_label": "claude.md",
+      "id": "apps_web_claude"
     },
     {
       "label": "CLAUDE.md",
@@ -323,9 +323,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "apps_web_claude_claude_md",
       "community": 252,
-      "norm_label": "claude.md"
+      "norm_label": "claude.md",
+      "id": "apps_web_claude_claude_md"
     },
     {
       "label": "State model: snapshot is authoritative",
@@ -333,9 +333,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L17",
       "_origin": "ast",
-      "id": "apps_web_claude_state_model_snapshot_is_authoritative",
       "community": 252,
-      "norm_label": "state model: snapshot is authoritative"
+      "norm_label": "state model: snapshot is authoritative",
+      "id": "apps_web_claude_state_model_snapshot_is_authoritative"
     },
     {
       "label": "Net layer",
@@ -343,9 +343,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L36",
       "_origin": "ast",
-      "id": "apps_web_claude_net_layer",
       "community": 252,
-      "norm_label": "net layer"
+      "norm_label": "net layer",
+      "id": "apps_web_claude_net_layer"
     },
     {
       "label": "Rendering & content",
@@ -353,9 +353,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L55",
       "_origin": "ast",
-      "id": "apps_web_claude_rendering_content",
       "community": 252,
-      "norm_label": "rendering & content"
+      "norm_label": "rendering & content",
+      "id": "apps_web_claude_rendering_content"
     },
     {
       "label": "Custom map builder (`features/builder/`, lazy-loaded)",
@@ -363,9 +363,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L85",
       "_origin": "ast",
-      "id": "apps_web_claude_custom_map_builder_features_builder_lazy_loaded",
       "community": 252,
-      "norm_label": "custom map builder (`features/builder/`, lazy-loaded)"
+      "norm_label": "custom map builder (`features/builder/`, lazy-loaded)",
+      "id": "apps_web_claude_custom_map_builder_features_builder_lazy_loaded"
     },
     {
       "label": "Player identity",
@@ -373,9 +373,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L122",
       "_origin": "ast",
-      "id": "apps_web_claude_player_identity",
       "community": 252,
-      "norm_label": "player identity"
+      "norm_label": "player identity",
+      "id": "apps_web_claude_player_identity"
     },
     {
       "label": "CLAUDE.md",
@@ -383,9 +383,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "packages_map_data_claude",
       "community": 258,
-      "norm_label": "claude.md"
+      "norm_label": "claude.md",
+      "id": "packages_map_data_claude"
     },
     {
       "label": "CLAUDE.md",
@@ -393,9 +393,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "packages_map_data_claude_claude_md",
       "community": 258,
-      "norm_label": "claude.md"
+      "norm_label": "claude.md",
+      "id": "packages_map_data_claude_claude_md"
     },
     {
       "label": "Structure & invariants",
@@ -403,9 +403,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L12",
       "_origin": "ast",
-      "id": "packages_map_data_claude_structure_invariants",
       "community": 258,
-      "norm_label": "structure & invariants"
+      "norm_label": "structure & invariants",
+      "id": "packages_map_data_claude_structure_invariants"
     },
     {
       "label": "The critical gotcha: CONTENT_HASH and the version registry",
@@ -413,9 +413,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L33",
       "_origin": "ast",
-      "id": "packages_map_data_claude_the_critical_gotcha_content_hash_and_the_version_registry",
       "community": 258,
-      "norm_label": "the critical gotcha: content_hash and the version registry"
+      "norm_label": "the critical gotcha: content_hash and the version registry",
+      "id": "packages_map_data_claude_the_critical_gotcha_content_hash_and_the_version_registry"
     },
     {
       "label": "Extending `GameContent` without breaking old hashes",
@@ -423,9 +423,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L65",
       "_origin": "ast",
-      "id": "packages_map_data_claude_extending_gamecontent_without_breaking_old_hashes",
       "community": 258,
-      "norm_label": "extending `gamecontent` without breaking old hashes"
+      "norm_label": "extending `gamecontent` without breaking old hashes",
+      "id": "packages_map_data_claude_extending_gamecontent_without_breaking_old_hashes"
     },
     {
       "label": "TODO.md",
@@ -84392,7 +84392,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "CLAUDE.md",
-      "source_location": "L172",
+      "source_location": "L169",
       "weight": 1.0,
       "source": "claude_claude_md",
       "target": "claude_graphify",
@@ -84402,7 +84402,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "CLAUDE.md",
-      "source_location": "L142",
+      "source_location": "L139",
       "weight": 1.0,
       "source": "claude_claude_md",
       "target": "claude_load_bearing_decisions_these_bite_if_you_don_t_know_them",
@@ -84412,7 +84412,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "CLAUDE.md",
-      "source_location": "L81",
+      "source_location": "L78",
       "weight": 1.0,
       "source": "claude_claude_md",
       "target": "claude_monorepo_layout_build_order",
@@ -84432,7 +84432,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "CLAUDE.md",
-      "source_location": "L167",
+      "source_location": "L164",
       "weight": 1.0,
       "source": "claude_claude_md",
       "target": "claude_server_env_vars",
@@ -84442,7 +84442,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "CLAUDE.md",
-      "source_location": "L123",
+      "source_location": "L120",
       "weight": 1.0,
       "source": "claude_claude_md",
       "target": "claude_the_big_picture",
@@ -84464,9 +84464,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "apps_web_claude",
-      "target": "apps_web_claude_claude_md",
-      "confidence_score": 1.0
+      "target": "apps_web_claude_claude_md"
     },
     {
       "relation": "contains",
@@ -84474,9 +84474,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L85",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "apps_web_claude_claude_md",
-      "target": "apps_web_claude_custom_map_builder_features_builder_lazy_loaded",
-      "confidence_score": 1.0
+      "target": "apps_web_claude_custom_map_builder_features_builder_lazy_loaded"
     },
     {
       "relation": "contains",
@@ -84484,9 +84484,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "apps_web_claude_claude_md",
-      "target": "apps_web_claude_net_layer",
-      "confidence_score": 1.0
+      "target": "apps_web_claude_net_layer"
     },
     {
       "relation": "contains",
@@ -84494,9 +84494,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "apps_web_claude_claude_md",
-      "target": "apps_web_claude_player_identity",
-      "confidence_score": 1.0
+      "target": "apps_web_claude_player_identity"
     },
     {
       "relation": "contains",
@@ -84504,9 +84504,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "apps_web_claude_claude_md",
-      "target": "apps_web_claude_rendering_content",
-      "confidence_score": 1.0
+      "target": "apps_web_claude_rendering_content"
     },
     {
       "relation": "contains",
@@ -84514,9 +84514,9 @@
       "source_file": "apps/web/CLAUDE.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "apps_web_claude_claude_md",
-      "target": "apps_web_claude_state_model_snapshot_is_authoritative",
-      "confidence_score": 1.0
+      "target": "apps_web_claude_state_model_snapshot_is_authoritative"
     },
     {
       "relation": "contains",
@@ -84524,9 +84524,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "packages_map_data_claude",
-      "target": "packages_map_data_claude_claude_md",
-      "confidence_score": 1.0
+      "target": "packages_map_data_claude_claude_md"
     },
     {
       "relation": "contains",
@@ -84534,9 +84534,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L65",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "packages_map_data_claude_claude_md",
-      "target": "packages_map_data_claude_extending_gamecontent_without_breaking_old_hashes",
-      "confidence_score": 1.0
+      "target": "packages_map_data_claude_extending_gamecontent_without_breaking_old_hashes"
     },
     {
       "relation": "contains",
@@ -84544,9 +84544,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "packages_map_data_claude_claude_md",
-      "target": "packages_map_data_claude_structure_invariants",
-      "confidence_score": 1.0
+      "target": "packages_map_data_claude_structure_invariants"
     },
     {
       "relation": "contains",
@@ -84554,9 +84554,9 @@
       "source_file": "packages/map-data/CLAUDE.md",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "packages_map_data_claude_claude_md",
-      "target": "packages_map_data_claude_the_critical_gotcha_content_hash_and_the_version_registry",
-      "confidence_score": 1.0
+      "target": "packages_map_data_claude_the_critical_gotcha_content_hash_and_the_version_registry"
     },
     {
       "relation": "contains",
@@ -295897,5 +295897,5 @@
       "source_file": "docs/superpowers/specs/2026-07-02-replay-camera-follow-design.md"
     }
   ],
-  "built_at_commit": "07b407ca59c2d7c01906cb8d55ec73fb1f8a8795"
+  "built_at_commit": "bfe5da59f029913498d1832d0eaded9ab12d8fb8"
 }

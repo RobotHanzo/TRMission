@@ -1480,8 +1480,8 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1784917036.4123595,
-    "ast_hash": "acab17284bccc62aaf9669a341b73d4b",
+    "mtime": 1784919057.0009012,
+    "ast_hash": "92f501640c382337a8272660fd818157",
     "semantic_hash": ""
   },
   "README.md": {
@@ -1495,8 +1495,8 @@
     "semantic_hash": ""
   },
   "apps/web/CLAUDE.md": {
-    "mtime": 1783899103.2173512,
-    "ast_hash": "6186bf35b2f3899d0b3222cd0f9f4ae9",
+    "mtime": 1784919046.6553342,
+    "ast_hash": "0ab6c0225558a7fc3c1ea6623a52c385",
     "semantic_hash": ""
   },
   "apps/web/index.html": {
@@ -1605,8 +1605,8 @@
     "semantic_hash": ""
   },
   "packages/map-data/CLAUDE.md": {
-    "mtime": 1783411484.4300468,
-    "ast_hash": "f1cb86a6c567a954713056c0b927c507",
+    "mtime": 1784919045.5664108,
+    "ast_hash": "b4493a55a973239398ff6de325303c05",
     "semantic_hash": ""
   },
   "packages/proto/CLAUDE.md": {
@@ -7575,18 +7575,18 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/auth/apple.ts": {
-    "mtime": 1784916861.2956834,
-    "ast_hash": "4f244b58273d9117bf0ed9ae63664f45",
+    "mtime": 1784917651.7288787,
+    "ast_hash": "112082212b12db55c91f9845907d70f1",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/auth/discord.test.ts": {
-    "mtime": 1784916861.2956834,
-    "ast_hash": "831ca1267f609c9a97d4468205d39ce9",
+    "mtime": 1784917399.204183,
+    "ast_hash": "c9124674bb3f284f21fbe9486f31595f",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/auth/discord.ts": {
-    "mtime": 1784916861.2956834,
-    "ast_hash": "ad7a2ce6a5dabc87ad4e8ac18a4f1db4",
+    "mtime": 1784917651.7161584,
+    "ast_hash": "cece0bea21e1d20ca368480919a767e4",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/auth/google.ts": {
@@ -8885,8 +8885,8 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/store/session.ts": {
-    "mtime": 1784916861.377897,
-    "ast_hash": "3262a7c0c89e8c8b84dae12a2a4d2386",
+    "mtime": 1784917651.7541971,
+    "ast_hash": "db34c438e0480ac6afd6b5334626c85a",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/store/settings.test.ts": {
@@ -9015,8 +9015,8 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/auth.controller.ts": {
-    "mtime": 1784916861.526748,
-    "ast_hash": "1db4c788f37a3ff76b35f0e8160da202",
+    "mtime": 1784917651.4843922,
+    "ast_hash": "e7cce26e5062e0ba43ace6db2e76099b",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/auth.module.ts": {
@@ -9025,8 +9025,8 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/auth.schemas.ts": {
-    "mtime": 1784916861.5277505,
-    "ast_hash": "2aef562f3ce7dea1f05552a933bb004d",
+    "mtime": 1784917651.5211625,
+    "ast_hash": "2f6beb8cf1c3541b01a182164b590ac3",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/auth.service.ts": {
@@ -9035,8 +9035,8 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/auth.types.ts": {
-    "mtime": 1784916861.5277505,
-    "ast_hash": "ddda0d209363d41418d83cdb1b5913af",
+    "mtime": 1784917651.5006514,
+    "ast_hash": "39298061ca0349c2225e8d4ba3d3bc8a",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/client-ip.ts": {
@@ -9060,8 +9060,8 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/mobile-code.repo.ts": {
-    "mtime": 1784916861.5292573,
-    "ast_hash": "5027ef771547ea0bc57ccb3002e1d39a",
+    "mtime": 1784917651.5299308,
+    "ast_hash": "564e61db96718d75b2adc5004f3823c4",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/oauth.http.ts": {
@@ -9070,8 +9070,8 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/oauth.service.ts": {
-    "mtime": 1784916861.530267,
-    "ast_hash": "e7fb8dc291939b614335860a08182a46",
+    "mtime": 1784917651.5669305,
+    "ast_hash": "494f0011de6c478b21faa67e3139e650",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/src/auth/registered-user.guard.ts": {
@@ -9685,13 +9685,13 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/test/auth-apple.e2e.spec.ts": {
-    "mtime": 1784916861.5701163,
-    "ast_hash": "37da20ebccb7edcbb3b22251b2d52630",
+    "mtime": 1784917734.6605592,
+    "ast_hash": "5a053477c133537d2efff828b0a7ae8e",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/test/auth-mobile.e2e.spec.ts": {
-    "mtime": 1784916861.5701163,
-    "ast_hash": "dec2b2cc93c5f49ba98f4c5f610c4e4d",
+    "mtime": 1784917700.829995,
+    "ast_hash": "35a4952181d0354db15499dd98f994c9",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/server/test/auth.e2e.spec.ts": {
@@ -11945,8 +11945,8 @@
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/packages/client-core/src/net/rest.ts": {
-    "mtime": 1784916862.5263774,
-    "ast_hash": "60da546045199acfc32f5bd993573bf9",
+    "mtime": 1784917651.6898377,
+    "ast_hash": "576a0e08b758e9e59c4e2196d76b3963",
     "semantic_hash": ""
   },
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/packages/client-core/src/net/restTypes.ts": {
@@ -14027,6 +14027,36 @@
   "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/web/public/sounds/your-turn.mp3": {
     "mtime": 1784916861.603578,
     "ast_hash": "019aa8592b5cdd00eefdecf6a567fcbd",
+    "semantic_hash": ""
+  },
+  "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/auth/apple.test.ts": {
+    "mtime": 1784917410.3162494,
+    "ast_hash": "0e67b5ab5e8c38322f257a5fb5d6a6c3",
+    "semantic_hash": ""
+  },
+  "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/auth/pkce.test.ts": {
+    "mtime": 1784917419.1477566,
+    "ast_hash": "d87c991e06ab791e3fb6d15453ad1233",
+    "semantic_hash": ""
+  },
+  "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/apps/mobile/src/auth/pkce.ts": {
+    "mtime": 1784917325.6321063,
+    "ast_hash": "983cd9bb16372736ff9130c04d4f2567",
+    "semantic_hash": ""
+  },
+  "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/packages/proto/src/gen/trmission/v1/client_pb.ts": {
+    "mtime": 1784917612.0946229,
+    "ast_hash": "d7c2076a89ee266cfeabf9af2efb6e40",
+    "semantic_hash": ""
+  },
+  "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/packages/proto/src/gen/trmission/v1/common_pb.ts": {
+    "mtime": 1784917612.0946229,
+    "ast_hash": "1571b4a01cdc8c17d96446522ebd3236",
+    "semantic_hash": ""
+  },
+  "CLAUDE-SECURITY-20260724-011445/.claude-security-run/patch-20260724-055721/scratch-F16/packages/proto/src/gen/trmission/v1/server_pb.ts": {
+    "mtime": 1784917612.0946229,
+    "ast_hash": "f7cf3afbd1944cef04fe9e5adc591e54",
     "semantic_hash": ""
   }
 }
