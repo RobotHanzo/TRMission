@@ -13,6 +13,28 @@ yarn workspace @trm/mobile test         # jest (jest-expo preset)
 TRM_SERVER_ORIGIN=http://<lan-ip>:3001 yarn workspace @trm/mobile start   # point at a dev server
 ```
 
+## Where the per-area docs live
+
+Read the one for the area you're touching (Claude Code loads them on demand):
+
+| Area                                         | Doc                               |
+| -------------------------------------------- | --------------------------------- |
+| Skia board, camera, LOD, hit-testing         | `src/board/CLAUDE.md`             |
+| GameStage seam, layout tiers, builder screen | `src/screens/CLAUDE.md`           |
+| In-game components, animation layer          | `src/components/game/CLAUDE.md`   |
+| REST/WS transport, auth methods              | `src/net/CLAUDE.md`               |
+| Offline games + bots                         | `src/offline/CLAUDE.md`           |
+| Tutorial (P4)                                | `src/features/tutorial/CLAUDE.md` |
+| Push notifications, Expo Go gate             | `src/push/CLAUDE.md`              |
+| Moderation, settings, session stores         | `src/store/CLAUDE.md`             |
+| Haptics, game view logic                     | `src/game/CLAUDE.md`              |
+| Orientation & layout tiers                   | `src/app/CLAUDE.md`               |
+| Live Activities (iOS)                        | `modules/live-activity/CLAUDE.md` |
+| CNG config plugins (pbxproj injection)       | `plugins/CLAUDE.md`               |
+| jest mock infrastructure                     | `__mocks__/CLAUDE.md`             |
+| Build/release/OTA lanes + CI secrets         | `.github/workflows/CLAUDE.md`     |
+| OTA mechanism, runbook, rollback             | `docs/mobile/ota.md`              |
+
 ## Stack & pins
 
 - **Expo SDK 56** (RN 0.85, React 19.2, New Architecture, Hermes). `expo-*` modules use SDK 56's
@@ -28,58 +50,6 @@ TRM_SERVER_ORIGIN=http://<lan-ip>:3001 yarn workspace @trm/mobile start   # poin
   re-aligns with the design spec, which already scoped the ban to "no _paid_ SaaS in the delivery chain."
 - Yarn 4 `nodeLinker: node-modules` (Metro can't resolve PnP). `apps/mobile/{android,ios,.expo}` are
   git-ignored — Continuous Native Generation regenerates them via `expo prebuild` in CI.
-
-## Web harness (react-native-web — for desktop/Playwright testing, NOT a shipped surface)
-
-`yarn workspace @trm/mobile web` serves the app at http://localhost:8081 so agents can drive the
-mobile UI with Playwright. Guest login, lobby/online play, offline bot games, and the tutorial all
-work end-to-end (the Skia board renders through CanvasKit wasm). Never trade native quality for
-this surface; a device smoke is still the real acceptance bar.
-
-- **Pointing at a server**: `TRM_SERVER_ORIGIN=http://localhost:3001 yarn workspace @trm/mobile web`,
-  and start the server with `CORS_ORIGINS=http://localhost:8081` — the browser enforces CORS where
-  native clients don't. The origin bakes into the bundle at TRANSFORM time and survives Metro
-  restarts in the transform cache: after changing it, start once with
-  `npx expo start --web --clear`.
-- **Entry** (`index.ts` web branch): CanvasKit must finish loading before the app graph EVALUATES
-  (Skia's web modules read `global.CanvasKit` at import), so App is `require`d only after
-  `LoadSkiaWeb` resolves. `scripts/setup-web.js` copies `canvaskit.wasm` → `public/` (gitignored);
-  the `web` script runs it automatically.
-- **Platform splits** (Metro resolves `.web.ts(x)` on web; jest/native never see them — they're
-  typechecked standalone): `net/secureStore.web.ts` (refresh token in localStorage),
-  `offline/localStore.web.ts` (in-memory saves — a reload loses offline games),
-  `screens/builderWebView.web.tsx` (iframe), `board/BoardCanvas.web.tsx` (the board's camera —
-  see the board section). Gated to `null` on web like under Expo Go:
-  `push/expoNotifications.ts`, `auth/googleSigninModule.ts`. Apple auth needs no gate
-  (`requireOptionalNativeModule` stub; `isAvailableAsync()` → false).
-- **Board gestures on web**: there is no UI thread in a browser — a Reanimated-driven Skia
-  transform would force a full CanvasKit-wasm redraw per gesture frame. `BoardCanvas.web.tsx`
-  instead paints the canvas at the settled camera and moves it with a composited CSS transform
-  (`react-zoom-pan-pinch`-style, like the web client); a wheel listener feeds `cam.wheelZoom`
-  (focal-anchored; RNGH covers mouse drag + double-click). Its header documents three
-  load-bearing invariants — full-scene COVERAGE within a GPU budget (+ a mid-pan repaint
-  watcher), the frame-ATOMIC baseline swap (kills the wrong-zoom flash at settle), and
-  device-PIXEL-GRID snapping of resting translations (a fractional CSS translate resamples the
-  raster into blur). The settled-raster snapshot is skipped on web (`BoardView`'s
-  `USE_GESTURE_RASTER`), and replaced static Pictures are disposed two frames late
-  (`useStaticMapPicture.disposePicture`) because CanvasKit's draw loop is decoupled from React
-  commits — an immediate dispose throws `BindingError: Cannot pass deleted object`.
-- **Board label fonts on web** (`board/webFonts.ts`): CanvasKit cannot see system fonts, and
-  RNSkia's web `ParagraphBuilder.Make` THROWS without a font provider — so city labels only
-  exist once the Noto Sans TC faces (copied to `public/fonts/` by `setup-web.js`) are fetched
-  and registered. The provider is a RECORD dep of the static map Picture (a one-shot offscreen
-  render would otherwise never re-record when fonts land), and `Skia.ParagraphBuilder.Make`
-  must be called as a METHOD — the web factory reads `this.CanvasKit`, so an unbound alias
-  throws (native happens to tolerate it). Loader breadcrumb: `window.__trmFonts`.
-- **Card rows on web** (`components/game/CardRowScroll.web.tsx`): browsers don't scroll an
-  overflowing row with a plain wheel or mouse drag — the web variant adds both (drag swallows
-  the resulting click past a slop) while native keeps the plain horizontal ScrollView.
-- **Alerts**: RNW's `Alert.alert` is a silent no-op, so `src/web/alertShim.ts` (installed from the
-  web entry branch) maps it onto `window.confirm`/`window.alert` — OK runs the LAST non-cancel
-  button, Cancel the `style: 'cancel'` one. Playwright must handle these as native dialogs
-  (`browser_handle_dialog` / `page.on('dialog')`).
-- **Selectors**: RNW emits `testID` as `data-testid`; the accessibility tree mirrors RN
-  accessibility props (roles/labels), so a11y snapshots are the primary way to target UI.
 
 ## Monorepo resolution (metro.config.js)
 
@@ -100,327 +70,45 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
 3. Engine `cloneState` (in `@trm/engine`) has a `structuredClone`→JSON fallback for Hermes; the JSON
    path stays byte-identical so golden-replay digests hold.
 
-## Board & game stage (P2)
+## Web harness (react-native-web — for desktop/Playwright testing, NOT a shipped surface)
 
-- **Span-based camera** (`src/board/camera.ts` + `useBoardCamera.ts`): the camera IS the wire
-  descriptor `{cx, cy, span}` (board units; span = visible board-width) — identical to the
-  protobuf `CameraView`, so the myTurn camera broadcast and opponent camera-follow need zero
-  projection math. Reanimated shared values drive a single Skia `<Group transform>`; gestures
-  (pan/pinch, gesture-handler) mutate `cx/cy/span` on the UI thread.
-- **Throttled LOD, not per-frame styles**: continuous zoom moves the GPU transform every frame;
-  the React tree re-renders only when the LOD re-quantizes (`cam.lod.{bucket,inv,marker}`) —
-  at every settle, plus a threshold-throttled handful of times WHILE a zoom is in flight
-  (`MID_GESTURE_LOD_RATIO` in `useBoardCamera.ts`), so track weights / markers / label tiers
-  follow a pinch near-continuously. `HOME_SCALE_EQUIV = 2.4` anchors the span→scale-equivalent
-  mapping. Never write JS-side styles per frame (the web's known jank source).
-- **The Canvas host is platform-split** (`board/BoardCanvas.tsx` / `.web.tsx`): native drives the
-  Skia `<Group>` transform from the camera's shared values (UI thread, per-frame, device-proven);
-  web must NOT redraw per frame — see "Board gestures on web" in the web-harness section. Both
-  implement the same `BoardCanvasProps` contract; keep them in sync.
-- **Motion rendering blits a raster snapshot for BOTH pan and zoom** (`useStaticMapPicture.ts` +
-  `MapSceneSkia`'s `motionSV` guard): while any gesture is in flight the cached vector Picture
-  ducks off-screen (a per-frame `translateX` quick-reject — no React) and the board draws the
-  rasterized snapshot instead, one textured quad per frame, avoiding the full vector redraw
-  (every route, every dashed line, every label's stroke-halo Paragraph) that made native
-  pinch-zoom disproportionately laggy versus web/RNW (whose `BoardCanvas.web.tsx` gets an
-  equivalent cheap-texture-during-zoom effect for free from the browser's CSS-transform
-  compositor). The snapshot is rendered ONCE per gesture, at the last settle (`cam.settled`,
-  `useStaticMapImage`), and then simply scaled/translated by the live GPU transform for the
-  _entire_ pan or pinch — it deliberately does NOT re-rasterize mid-gesture. A mid-gesture
-  refresh (keyed to the `MID_GESTURE_LOD_RATIO` checkpoints) was tried and reverted:
-  `useStaticMapImage`'s offscreen pass records the whole static Picture into a surface up to
-  4096px² and reads it back to CPU (`makeNonTextureImage`), which is expensive enough by design
-  ("taken while the user is idle", per its own header comment) that firing it several times
-  during one pinch stalled the JS thread worse than the live-vector redraw it replaced. The
-  texture can go soft at the far end of a large zoom instead; the crisp vector Picture takes
-  back over the instant the gesture is genuinely at rest, or before any snapshot has ever been
-  produced. `cam.zoomingSV` keeps its original settle-only semantics unchanged —
-  `BoardCanvas.web.tsx` depends on it as-is for its own separate mid-pan-repaint strategy.
-- **Manual hit-testing** (`src/board/hitTest.ts`, pure + unit-tested): Skia children aren't
-  touch targets; a tap projects screen→board through the current camera and hit-tests routes
-  (segment distance) and cities (radius) against the shared geometry.
-- **One map scene** (`src/board/MapSceneSkia.tsx`): geography → routes → cities → labels →
-  sweep overlays, purely presentational (mirrors web `MapScene.tsx`); every board surface
-  renders through it. `BoardView` owns the Canvas, camera, glow/sweep timers, camera
-  sync/follow, and the framers.
-- **GameStage prop contract is the P3/P4 seam** (`src/screens/GameStage.tsx`): web-compatible
-  `snapshot`/`commands` (`GameCommands` — live `GameSocket` or the offline/tutorial sandbox)
-  plus `sandbox`/`frameTarget`/`overlay`/`spotlightCities`/`actionGate`. Adaptive tiers by
-  width (`stageLayout.ts`): compact <700dp docks the HUD under a full-bleed board; 700–999
-  two-pane (rail ↔ comms tabs); ≥1000 three-pane (dedicated comms column). Don't change this
-  surface without checking the offline (P3) and tutorial (P4) callers.
-- **Drivers**: `useAnimationDriver` (store→store; card flights/sweeps/floats/banners render in
-  `components/game/AnimationLayer.tsx` via the measured `animTargets` registry) and
-  `useSoundDriver` (expo-audio port — SDK 56 removed expo-av; same `SoundPlayer` interface as
-  web) both mount once in GameStage.
-- **jest mocks**: hand-rolled `__mocks__` for `@shopify/react-native-skia` (component stubs +
-  truthy `SkPath`) and `lucide-react-native` (Proxy stubs — it ships `.mjs` outside the
-  transform), the official `react-native-reanimated/mock`, and a composed `jest.resolver.js`
-  (worklets `.native`-extension strip + the RN resolver) so reanimated 4 imports run under
-  jest-expo. gesture-handler is covered by jest-expo's own setup.
-- **react-native-svg fallback stance**: the P2 Task 1 device spike returned **GO** for Skia.
-  The documented NO-GO fallback (react-native-svg under a single root transform) is
-  _documented, not planned_ — see the P2 plan (Task 1) before ever revisiting renderers; do
-  not silently switch.
+`yarn workspace @trm/mobile web` serves the app at http://localhost:8081 so agents can drive the
+mobile UI with Playwright. Guest login, lobby/online play, offline bot games, and the tutorial all
+work end-to-end (the Skia board renders through CanvasKit wasm). Never trade native quality for
+this surface; a device smoke is still the real acceptance bar.
 
-## Net layer — the shared core + mobile transport
-
-The REST client, `GameSocket`, and `SandboxSocket` live in `@trm/client-core`; the app-side
-`net/rest.ts`/`net/socket.ts` are the mobile TRANSPORT + re-export shims:
-
-- `net/rest.ts` — builds the shared client with the mobile `RestTransport`: an **absolute** base
-  (`SERVER_ORIGIN`, no same-origin cookie jar), the `x-trm-client: mobile` header, and
-  **token-in-body refresh**. The access token lives in memory inside the shared core; the refresh
-  token lives in the OS keystore (`net/secureStore.ts`, `expo-secure-store`). A 401 rotates via
-  `POST /auth/refresh {refreshToken}` under the core's single-flight guard; issuance and rotation
-  persist tokens through the transport hooks.
-- `net/connection.ts` — constructs the shared `GameSocket` with `WS_URL` and a `TicketRefresh`
-  (the room code from `useGameConnection`) so every in-socket reconnect re-mints a fresh
-  short-TTL ws ticket instead of replaying the expired seed one.
-- `store/session.ts` — port with a keystore-aware `restore()` (fast-paths when no refresh token
-  exists), `loginWithApple`/`DiscordExchange`, `signInMethod` tracking, and push register/unregister.
-- Auth screens drive all five P0 methods: guest, email/password, Google (native SDK → ID token),
-  Apple (iOS, `expo-apple-authentication`), Discord (system browser → `/m/callback` exchange code).
-
-Strings are `x-trm-client: mobile`, deep-link scheme `trmission://`, OAuth return path `/m/callback`
-— all matching the landed P0 server.
-
-## Moderation (`src/store/moderation.ts` — Apple 1.2 / Play UGC)
-
-The account's client-side mute list mirrored locally (hydrated on sign-in/restore, `reset()` on
-sign-out; optimistic block/unblock with rollback via `PUT/DELETE /me/blocks/:userId`). Blocking is
-display-only: `ChatPanel` filters blocked authors' messages (text AND presets) and
-`usePlayerName` masks their UGC display name back to `P{seat+1}` — game state is never touched.
-Long-press on a tracker row or chat message opens `PlayerActionSheet` (report with the 7
-`REPORT_CATEGORIES` from `@trm/shared` + block/unblock; never for yourself or `bot:` ids — gate
-with its `canModerate`). Reports POST `/reports/player` with `gameId`/`roomCode` context read from
-`game/activeRoom.ts` (set by GameScreen alongside the push-suppression id; display-only, never
-authorization).
-
-## CI lanes (self-managed signing, no EAS)
-
-- **`.github/workflows/mobile-ci.yml`** — ubuntu, PRs touching `apps/mobile/**`/`packages/**`:
-  `typecheck` + `lint` + `test` (fast JS gate; the whole-repo CI also covers mobile via turbo).
-- **`.github/workflows/mobile-android.yml`** — ubuntu, `release/**` + tags: derives `BUILD_NUMBER`
-  from a `v<semver>+<build>` tag (branch pushes fall back to 1) → `expo prebuild` → Gradle
-  `bundleRelease` signed via AGP injected-signing properties → `.aab` artifact → on a real tag only,
-  `fastlane android internal` publishes to Play's **internal testing track** (never production —
-  promote locally with `fastlane android promote`). One-time Play Console + service-account setup:
-  `docs/release/play-console-setup.md`. Native-build speed stack: **RNRepo** prebuilt artifacts
-  (`@rnrepo/expo-config-plugin`) replace source compilation of the covered autolinked modules
-  (Skia/Reanimated/Worklets/gesture-handler/screens; `expo-modules-core` still builds from source on
-  RN 0.85), **ccache** (`CCACHE_COMPILERCHECK=content` — the default `mtime` missed everything because
-  CNG regenerates `android/` each run) covers the fallback compiles, and **`gradle/actions/setup-gradle`**'s
-  build cache the Kotlin/Java/dex tasks; `lintVitalRelease` is skipped, and a twice-weekly scheduled
-  warm-up keeps those caches from GitHub's 7-day eviction between infrequent release runs.
-- **`.github/workflows/mobile-ios.yml`** — **macos-26** (pinned: the Liquid Glass `.icon` bundle
-  needs Xcode 26's actool; release-gated): same tag-derived `BUILD_NUMBER` → `expo prebuild` →
-  `pod install` → `fastlane ios beta` (setup_ci keychain → match readonly →
-  `update_code_signing_settings` flips the app target to manual signing — prebuild emits an
-  Automatic/no-team project — → gym). Every run uploads the `.ipa` as a workflow artifact;
-  `pilot` → TestFlight only on a real `v<semver>+<build>` tag (`upload:true`), mirroring
-  Android's Play gate — non-tag runs all carry BUILD_NUMBER=1, which TestFlight would reject as
-  a duplicate. Native-build speed stack: **RN 0.85 official prebuilt binaries**
-  (`RCT_USE_PREBUILT_RNCORE=1` + `RCT_USE_RN_DEP=1` at `pod install` — Meta-built core and
-  folly/glog/boost tarballs from Maven Central, auto-reverting to source when absent, with
-  `RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS=1` fetching their dSYMs so crash symbolication keeps
-  working), **ccache** covers what still compiles from source (enabled via
-  `USE_CCACHE=1` on `pod install` — deliberately an env var, NOT expo-build-properties'
-  `ios.ccacheEnabled`, which would shift the OTA runtimeVersion fingerprint; same
-  `CCACHE_COMPILERCHECK=content` lesson as Android plus the Xcode sloppiness/depend-mode set for
-  clang modules), the Pods cache is keyed on Podfile+yarn.lock, and the same twice-weekly
-  scheduled warm-up as Android keeps the caches inside GitHub's 7-day eviction window (free —
-  the repo is public).
-- **`.github/workflows/mobile-ios-certs.yml`** — workflow_dispatch-only macOS job running
-  `fastlane ios certs` (match **read-write**, ASC-API-key auth): seeds/rotates the Distribution
-  cert + App Store profiles (one per bundle id in the Matchfile: the app + the Live Activity widget
-  extension) in the private match repo. No maintainer owns a Mac — this workflow is the only place
-  signing assets are ever generated. Dispatch with `force: true` after changing App ID capabilities
-  or adding a target; re-run before certs expire (~1 year). `match` never creates App IDs, so the
-  lane creates the widget's capability-less one itself via the ASC API (`ensure_bundle_id`) — the
-  app's own App ID stays manual, since its capabilities have to be enabled in the portal anyway.
-- **`.github/workflows/mobile-ota.yml`** — JS-only OTA publish to the self-hosted
-  expo-open-ota server (`eoas publish`; runbook + forced-update interplay in
-  `docs/mobile/ota.md`). Native changes are fenced automatically by
-  `runtimeVersion: fingerprint` — old binaries just never see the update.
-
-### Required CI secrets / variables
-
-Repo **variables**: `TRM_SERVER_ORIGIN`, `TRM_GOOGLE_WEB_CLIENT_ID`, `TRM_GOOGLE_IOS_CLIENT_ID`,
-`TRM_GOOGLE_IOS_URL_SCHEME` (the reversed iOS OAuth client id, `com.googleusercontent.apps.*` — the
-google-signin config plugin validates it at every config eval, so `expo prebuild`/`run:android` need
-it set or fall back to a format-valid placeholder; see `app.config.ts`).
-
-OTA lane: repo variables `TRM_OTA_URL` (the deployment's full `/manifest` URL) and `TRM_OTA_APP_ID`
-(the Expo project id, baked as the `expo-app-id` header — expo-open-ota v3 is multi-app) + secret
-`EXPO_TOKEN` (Expo robot token — eoas auth/channel mapping only; there is **no** signing
-secret in CI, manifests are signed at serve time by the OTA server's mounted key, and
-`apps/mobile/certs/keys/` must never be committed). **Both variables are also set by the store
-lanes**: `updates.url` and `updates.requestHeaders` are runtimeVersion fingerprint inputs, so a
-binary built without them targets a different runtime version than the updates published with them.
-
-Android **secrets**: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
-`ANDROID_KEY_PASSWORD` (signing), `PLAY_JSON_KEY_BASE64` (base64 Play service-account JSON —
-Play Developer API access for `fastlane android internal`; provisioning steps in
-`docs/release/play-console-setup.md`).
-
-iOS **secrets**: `MATCH_GIT_URL`, `MATCH_PASSWORD`, `MATCH_GIT_BASIC_AUTHORIZATION` (fastlane match
-repo — the PAT needs write access, the certs workflow pushes), `ASC_KEY_ID`, `ASC_ISSUER_ID`,
-`ASC_KEY_P8` (base64 App Store Connect API key). Plus repo **variable** `APPLE_TEAM_ID` (public in
-the AASA file anyway; the beta lane stamps it into the prebuilt project as `DEVELOPMENT_TEAM`).
-
-Seed the match repo by dispatching `mobile-ios-certs` once the App ID + ASC key exist
-(`docs/release/app-store-connect-setup.md` Steps 2–6); the build lane consumes it read-only. The
-Xcode workspace/scheme names (`TRMission`) are verified against prebuild's rename logic and
-asserted in-workflow right after `pod install`.
-
-## Offline vs bots (`src/offline/`)
-
-Serverless mirror of the server's authoritative loop. `localGameSession.ts` runs the real
-`@trm/engine` with `@trm/bots` driving bot seats, appends every accepted action to an
-event-sourced expo-sqlite log **before** committing (write-ahead, `(game_id, seq)` PK =
-double-apply guard), and the UI only ever sees `redactFor(human)` → `viewToSnapshot` into
-the sandbox stores — `GameStage` cannot tell online from offline. Resume digest-verifies
-the log and **truncates** a corrupt tail (server recovery aborts instead; offline must
-never crash into a corrupt save). Version pins: `engineVersion` + registered `contentHash`
-refuse cross-version resume. Randomness (seed/gameId) comes from `expo-crypto` in
-`seed.ts` ONLY — never inside game logic. Bundled official maps only (custom-map offline
-is deferred — docs/TODO.md). Pure core (no RN imports) → jest-testable off-device;
-`inMemoryStore.ts` is the port double.
-
-## Tutorial (`src/features/tutorial/`)
-
-The interactive tutorial is fully offline: lessons are scripted scenarios over a REAL local
-`@trm/engine` game (the shared `SandboxSocket` → engine `reduce` → `redactFor` → `viewToSnapshot`
-→ the standard game store → GameStage). The tutorial core (`types`/`curriculum`/`focus`/
-`useScenarioPlayer` + `i18n/tutorial`) lives in **`@trm/client-core`** (single source, shared with
-web; the old byte-copy parity contract is retired) — the anchor-id strings inside it are
-simultaneously the web's CSS selectors and this app's `TutorialTargetRegistry` anchor ids
-(`targets.tsx`).
-HUD spotlights measure ref-registered Views via `measureInWindow` (`useTutorialAnchor`, keep
-`collapsable={false}`); city/route spotlights are computed from board geometry projected
-through the camera (`boardRects.ts`; `cameraBridge.ts` is the only file that may touch camera
-internals). The scrim is a Skia even-odd path (`scrim.ts` + `TutorialSpotlight`). Completion
-persists to AsyncStorage (`progress.ts`, key `trm.tutorial.completed.v1`); the Home entry and
-the whole flow work with no account and no network. Pure logic tests are vitest `*.spec.ts`;
-RN components are jest-expo `*.test.tsx` — keep the globs disjoint.
-
-## Map builder (`src/screens/BuilderScreen.tsx`)
-
-Feature-gated by `user.features` containing `mapBuilder` (`useCanBuild`). The builder itself is
-the web app inside a `react-native-webview` (`sharedCookiesEnabled` + `thirdPartyCookiesEnabled`):
-the screen fetches a single-use carry code (`api.mobileCarry()`) and points the WebView at
-`GET ${SERVER_ORIGIN}/api/v1/auth/mobile-web-handoff?code=…`, which converts it into a normal
-Strict-cookie web session and 302s to `/maps` — the one sanctioned native→web session handoff.
-Offline/error/loading states have testIDs `builder-offline`/`builder-error`.
-
-## Push (`src/push/`)
-
-`register.ts` owns the token lifecycle — its module path is load-bearing (the session store's
-tests mock it): `ensurePushRegistration()` is permission-GATED and **never requests** permission
-itself (that only happens from an explicit user gesture in `PushPrompt`/`NotificationsRow`);
-`registerDeviceForPush()` adds the `settings.notifications` gate (the session-start hook);
-`unregisterDeviceForPush()` runs before logout; `watchTokenRotation()` re-registers on FCM/APNs
-rotation. Payload contract is exactly `{kind, gameId, roomCode?}`. `notifications.ts`: the
-foreground handler suppresses banners for the game you're looking at (`setActiveGameId`, fed
-from `RoomView.gameId` by GameScreen); `navigateForPush` is async because the nav route is
-`Game {roomCode}` while `your_turn`/`game_over` carry only `gameId` — it resolves via
-`api.getMyRooms()` (vanished room = no-op). `PushPrompt` is the one-shot contextual card at
-game-over (`pushPromptSeen`).
-
-**Expo Go gotcha:** never `import * as Notifications from 'expo-notifications'` directly —
-`expo-notifications`'s own auto-registration side effect calls `addPushTokenListener` at IMPORT
-time, which throws under Expo Go on Android (SDK 53 dropped remote push from Expo Go). All 4
-call sites (`register.ts`, `notifications.ts`, `PushPrompt.tsx`, `NotificationsRow.tsx`) import
-the lazy, `isRunningInExpoGo()`-gated `Notifications` from `push/expoNotifications.ts` instead —
-`null` under Expo Go (push no-ops), the real module in dev/production builds. Same pattern in
-`auth/googleSigninModule.ts` for `@react-native-google-signin/google-signin` (a third-party
-native module never bundled in Expo Go at all, unlike `expo-*` packages). Both are backed by
-`apps/mobile/__mocks__/expo.js`, which forces `isRunningInExpoGo()` false under jest (jest-expo's
-own native-module automock otherwise reports `ExpoGo` present) while delegating every other
-export to the real `expo` package — don't narrow that mock further without checking who else
-imports from `expo` (e.g. `expo-sqlite` pulls `requireNativeModule` through it).
-
-## Live Activities (iOS only — issue #43)
-
-The game in progress on the lock screen / Dynamic Island: whose turn it is (own turn called out in
-EMU orange), the viewer's own trains + points, the last-round chip, and a `Text(timerInterval:)`
-turn countdown that ticks **without** any update.
-
-Four pieces, and the seam between them is one contract in three languages:
-
-- `modules/live-activity/` — a **local Expo module** (autolinked from `./modules`, `platforms:
-["apple"]`). `ios/TrmLiveActivityModule.swift` owns at most ONE activity (`start` on a live one
-  updates in place), re-adopts a still-running activity on cold start, and emits `onPushToken` /
-  `onStateChange`. `index.ts` is the JS face: every call no-ops to `null`/`false` where the native
-  module is absent (Android, RNW harness, Expo Go), so callers need no `Platform` checks.
-- `ios-live-activity/` — the widget extension's SwiftUI (`ActivityConfiguration` + lock-screen and
-  Dynamic Island presentations) and its `Info.plist`.
-- `plugins/withLiveActivity.js` — because `ios/` is CNG, the extension **target** is injected into
-  the generated pbxproj on every prebuild (via the `xcode` lib @expo/config-plugins already ships),
-  and `TRMissionActivityAttributes.swift` is COPIED from the module into the widget folder so both
-  targets compile one declaration. Three `xcode` API traps are handled and pinned by
-  `withLiveActivity.test.ts` (which runs the plugin against a real SDK-56 template pbxproj fixture —
-  `expo prebuild -p ios` refuses to run off macOS): `pbxTargetByName` can't find a target `addTarget`
-  created (its section comment is quoted), `addTargetDependency` silently no-ops unless the
-  PBXTargetDependency/PBXContainerItemProxy sections already exist, and `addTarget` returns
-  `{uuid, pbxNativeTarget}` — passing the wrapper to a configuration lookup drops every build
-  setting. `mobile-ios.yml` re-asserts the same shape after a real prebuild.
-- `src/game/liveActivity.ts` (pure, tested) + `useLiveActivity.ts` (the driver, mounted from
-  **GameScreen** — never GameStage, which the offline sandbox and tutorial also render).
-
-**The contract**: static attributes carry the LOCALIZED per-seat turn labels + seat colours (the
-widget formats and localizes nothing — i18n stays in i18next), and `ContentState` carries numbers
-and booleans only. That is what lets the **server** push updates while the app is suspended
-(`POST /me/live-activities` registers the ActivityKit token; the hub pushes
-`apns-push-type: liveactivity` on turn changes to players whose socket is gone — see
-`apps/server/src/push/`). Keep `ContentState` field-for-field identical across
-`TRMissionActivityAttributes.swift`, `modules/live-activity/index.ts`, and the server's
-`apnsLiveActivityBody`: a mismatch decodes to nothing and blanks the card with no error anywhere.
-
-Delivery: the extension is a second bundle id (`…trmission.LiveActivity`) and therefore a second App
-ID + provisioning profile — listed in `fastlane/Matchfile`, signed per-target by the beta lane, and
-registered per `docs/release/app-store-connect-setup.md` Step 2. Push-to-start is deliberately not
-implemented (the app starts the activity when you enter a game).
-
-## Haptics (`src/game/haptics.ts` + `useHaptics.ts`)
-
-`cuesForEvents` is a pure event→cue map (routeClaimed / tunnelRevealed / ticketCompleted /
-gameEnded) so it stays vitest-testable; `useHaptics` fires expo-haptics behind
-`settings.haptics`, mounted in GameStage next to the sound driver with the same
-`lastBatch.seq` once-per-batch idiom.
-
-## Settings (`src/store/settings.ts` + `src/screens/SettingsScreen.tsx`)
-
-Zustand persist key `trm-settings` (haptics **on**, notifications **off**, live activities **on**,
-`pushPromptSeen` false by default). `LiveActivityRow` renders nothing off iOS and needs no OS
-permission — Live Activities are allowed unless the user switches them off for the app in iOS
-Settings (`areLiveActivitiesEnabled()` is checked at start time), so it is a plain default-on toggle,
-unlike the push row. `NotificationsRow` toggle ON = OS permission request (permanently denied ⇒
-alert → `Linking.openSettings()`) then `ensurePushRegistration`; OFF = unregister the device.
-Account deletion (hidden for guests, store-compliance requirement): two-step confirm →
-`performAccountDeletion` (`src/account/deleteAccount.ts`) — fresh SIWA authorization code when
-available (cancel proceeds without), push unregister, `DELETE /auth/me`, local session clear.
+- **Pointing at a server**: `TRM_SERVER_ORIGIN=http://localhost:3001 yarn workspace @trm/mobile web`,
+  and start the server with `CORS_ORIGINS=http://localhost:8081` — the browser enforces CORS where
+  native clients don't. The origin bakes into the bundle at TRANSFORM time and survives Metro
+  restarts in the transform cache: after changing it, start once with
+  `npx expo start --web --clear`.
+- **Entry** (`index.ts` web branch): CanvasKit must finish loading before the app graph EVALUATES
+  (Skia's web modules read `global.CanvasKit` at import), so App is `require`d only after
+  `LoadSkiaWeb` resolves. `scripts/setup-web.js` copies `canvaskit.wasm` → `public/` (gitignored);
+  the `web` script runs it automatically.
+- **Platform splits** (Metro resolves `.web.ts(x)` on web; jest/native never see them — they're
+  typechecked standalone), each documented in its area's doc: `net/secureStore.web.ts`,
+  `offline/localStore.web.ts`, `screens/builderWebView.web.tsx` (iframe),
+  `board/BoardCanvas.web.tsx` + `board/webFonts.ts`, `components/game/CardRowScroll.web.tsx`.
+  Gated to `null` on web like under Expo Go: `push/expoNotifications.ts`,
+  `auth/googleSigninModule.ts`. Apple auth needs no gate (`requireOptionalNativeModule` stub;
+  `isAvailableAsync()` → false).
+- **Alerts**: RNW's `Alert.alert` is a silent no-op, so `src/web/alertShim.ts` (installed from the
+  web entry branch) maps it onto `window.confirm`/`window.alert` — OK runs the LAST non-cancel
+  button, Cancel the `style: 'cancel'` one. Playwright must handle these as native dialogs
+  (`browser_handle_dialog` / `page.on('dialog')`).
+- **Selectors**: RNW emits `testID` as `data-testid`; the accessibility tree mirrors RN
+  accessibility props (roles/labels), so a11y snapshots are the primary way to target UI.
 
 ## OTA updates (expo-updates + self-hosted expo-open-ota)
 
 `app.config.ts` pins `runtimeVersion: { policy: 'fingerprint' }` and code-signing against the
 committed `certs/certificate.pem` (`fallbackToCacheTimeout: 0` — stale-while-revalidate; the
-forced-update gate `GET /version/mobile` is independent and still runs every boot).
-`updates.url` comes from `TRM_OTA_URL` (default: the local compose `ota` service,
-`http://localhost:3005/manifest`); the channel is baked at build time via the
-`expo-channel-name` request header (`TRM_OTA_CHANNEL`, default `production`), and the app is selected
-by `expo-app-id` from `TRM_OTA_APP_ID` — **omitted, not blanked, when unset**, which is the "v1
-client" shape the server still serves from its own `EXPO_APP_ID` (so local dev builds keep working).
-Everything in `updates.requestHeaders` feeds the runtimeVersion fingerprint, so the OTA lane and the
-store lanes must bake identical values. The deployed server and the `eoas` CLI are pinned to the same
-version (v3.0.5) because they only work in matched pairs. Full contract, runbook, rollback, and
-fallbacks: `docs/mobile/ota.md`; host setup: `docs/release/ota-server-setup.md`. The private key in
-`certs/keys/` is gitignored and must never be committed.
-
-## Orientation & layout tiers (`src/app/useOrientationPolicy.ts`)
-
-Phones (smallest window side < 600dp) lock PORTRAIT_UP; tablets stay unlocked — and Android 16+
-ignores lock requests on ≥600dp anyway, so every screen must survive free rotation/resize.
-`stageTier` (compact < 700dp ≤ two-pane < 1000dp ≤ three-pane) is measured from live window
-width, never device type.
+forced-update gate `GET /version/mobile` is independent and still runs every boot). `updates.url`
+comes from `TRM_OTA_URL`, the channel from `TRM_OTA_CHANNEL` (`expo-channel-name` header), the app
+from `TRM_OTA_APP_ID` (`expo-app-id` header — **omitted, not blanked, when unset**).
+**Everything in `updates.requestHeaders` feeds the runtimeVersion fingerprint**, so the OTA lane and
+the store lanes must bake identical values; the deployed server and the `eoas` CLI are pinned to the
+same version because they only work in matched pairs. The private key in `certs/keys/` is gitignored
+and must never be committed. Full contract, runbook, rollback, fallbacks: `docs/mobile/ota.md`;
+host setup: `docs/release/ota-server-setup.md`.
