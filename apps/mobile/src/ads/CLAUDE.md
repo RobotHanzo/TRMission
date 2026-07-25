@@ -29,7 +29,13 @@ requests would otherwise run at once.
 **literals**, surfaced to the runtime through `extra` (→ `src/config.ts`). Not env vars:
 config-plugin props feed the OTA **runtimeVersion fingerprint**, so an env-derived app id would give
 the OTA lane a different fingerprint from the store lanes — the same lockstep trap as `TRM_SENTRY_*`
-and the Google client ids. `enabled: false` ships until an AdMob account exists.
+and the Google client ids. `enabled` is the master switch.
+
+**Unit ids are per-platform (`{ android, ios }`), and that is not optional.** An ad unit belongs to
+exactly one AdMob _app_, and the Android and iOS entries are separate AdMob apps — an Android unit
+id does not exist inside the iOS app, so requesting it there never fills. Every placement therefore
+has to be created twice in the console. Both ids ship in both binaries (they are public); `adUnitId`
+picks by `Platform.OS`. A blank id for one platform just means that placement renders nothing there.
 
 `adUnitId()` returns Google's `TestIds` under `__DEV__` **regardless** of what is checked in:
 clicking a live ad on your own inventory is invalid traffic that can suspend the account.

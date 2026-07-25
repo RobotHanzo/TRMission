@@ -52,20 +52,29 @@ app is general-audience, not primarily child-directed, and CHILD is a legal cert
 
 ## Config lives in the repo, not in env
 
-`src/config/admob.ts` is checked-in static config, exactly like web's `config/adsense.ts` — app ids
-and unit ids are not secret (they ship inside the binary regardless). This also sidesteps the trap
-that bit Sentry and the Google client ids: **config-plugin props feed the OTA runtimeVersion
-fingerprint**, so env-derived ids would make the fingerprint depend on which lane evaluated
-`app.config.ts`. Static constants are identical on every lane by construction.
+`app.config.ts`'s `ADMOB` block is checked-in static config, in the spirit of web's
+`config/adsense.ts` — app ids and unit ids are not secret (they ship inside the binary regardless).
+This also sidesteps the trap that bit Sentry and the Google client ids: **config-plugin props feed
+the OTA runtimeVersion fingerprint**, so env-derived ids would make the fingerprint depend on which
+lane evaluated `app.config.ts`. Static constants are identical on every lane by construction.
 
-`enabled: false` is the master switch and ships off until an AdMob account exists; the checked-in app
-ids are Google's documented sample ids until then. `__DEV__` builds always substitute `TestIds`, so
-a developer can never click a live ad.
+It lives in `app.config.ts` rather than a module both it and the runtime import, because Expo's
+config loader only transpiles the entry file — a nested relative `.ts` import from `app.config.ts`
+fails to resolve at all. The runtime reads the values back off `extra`, the same route as every
+other config value in this app.
+
+`enabled` is the master switch. `__DEV__` builds always substitute `TestIds`, so a developer can
+never click a live ad.
+
+**Unit ids are per-platform.** An ad unit belongs to exactly one AdMob _app_, and Android and iOS
+are separate AdMob apps, so each placement is created twice in the console and stored as
+`{ android, ios }`; `adUnitId()` picks by `Platform.OS`. A single shared id would silently no-fill
+on one of the two platforms.
 
 ## Shape
 
 ```
-src/config/admob.ts     static config (master switch, app ids, per-placement unit ids)
+app.config.ts's ADMOB    static config (master switch, app ids, per-placement × per-platform units)
 src/ads/googleMobileAds.ts  lazy native-module gate (null on web harness / Expo Go)
 src/ads/ads.ts          UMP consent → ATT → mobileAds().initialize(); useAds() store
 src/ads/AdBanner.tsx    the one banner component (focus-gated, adFree-aware)

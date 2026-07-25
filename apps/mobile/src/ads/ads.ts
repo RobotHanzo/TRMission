@@ -5,15 +5,21 @@
 // called from `index.ts` like Sentry is: the UMP consent form and the ATT prompt are native modals,
 // and Apple requires the app to be visibly foregrounded before ATT is requested. App.tsx fires it
 // once the boot chain has released the splash.
+import { Platform } from 'react-native';
 import { create } from 'zustand';
-import { ADMOB_BANNER_UNIT_ID, ADMOB_ENABLED, ADMOB_OFFLINE_GAME_END_UNIT_ID } from '../config';
+import { ADMOB_ENABLED, ADMOB_UNITS } from '../config';
 import { GMA, TrackingTransparency } from './googleMobileAds';
 
-/** Every placement in the app. One ad unit each; see app.config.ts's ADMOB block. */
+/** Every placement in the app. One ad unit per platform each; see app.config.ts's ADMOB block. */
 export type AdPlacement = 'banner' | 'offlineGameEnd';
 
 /**
- * The unit id for a placement, or '' when it is not configured (⇒ that placement renders nothing).
+ * The unit id for a placement on THIS platform, or '' when it is not configured (⇒ that placement
+ * renders nothing).
+ *
+ * Per-platform because an ad unit belongs to exactly one AdMob app, and the Android and iOS apps are
+ * separate AdMob apps — an Android unit id does not exist inside the iOS app, so requesting it there
+ * simply never fills. Both ids ship in both binaries (they are public), and this picks.
  *
  * `__DEV__` always resolves to Google's test units regardless of what is checked in: clicking a
  * live ad on your own inventory is invalid traffic and can get the AdMob account suspended, so a
@@ -24,7 +30,11 @@ export function adUnitId(placement: AdPlacement): string {
   if (__DEV__) {
     return placement === 'banner' ? GMA.TestIds.ADAPTIVE_BANNER : GMA.TestIds.INTERSTITIAL;
   }
-  return placement === 'banner' ? ADMOB_BANNER_UNIT_ID : ADMOB_OFFLINE_GAME_END_UNIT_ID;
+  const units = ADMOB_UNITS[placement];
+  if (!units) return '';
+  // Anything that is neither iOS nor Android (the RNW harness) has no inventory of its own; GMA is
+  // already null there, so this is belt-and-braces.
+  return Platform.OS === 'ios' ? units.ios : Platform.OS === 'android' ? units.android : '';
 }
 
 interface AdsState {

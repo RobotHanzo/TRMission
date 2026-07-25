@@ -3,8 +3,13 @@
 jest.mock('../config', () => ({
   ...jest.requireActual('../config'),
   ADMOB_ENABLED: true,
+  ADMOB_UNITS: {
+    banner: { android: 'android-banner', ios: 'ios-banner' },
+    offlineGameEnd: { android: 'android-interstitial', ios: 'ios-interstitial' },
+  },
 }));
 
+import { Platform } from 'react-native';
 import GMA, {
   AdsConsent,
   AdsConsentPrivacyOptionsRequirementStatus,
@@ -117,5 +122,31 @@ describe('adUnitId', () => {
     // a developer build must be incapable of reaching one.
     expect(adUnitId('banner')).toBe(TestIds.ADAPTIVE_BANNER);
     expect(adUnitId('offlineGameEnd')).toBe(TestIds.INTERSTITIAL);
+  });
+
+  describe('in a release build', () => {
+    const dev = __DEV__;
+    beforeAll(() => {
+      (globalThis as unknown as { __DEV__: boolean }).__DEV__ = false;
+    });
+    afterAll(() => {
+      (globalThis as unknown as { __DEV__: boolean }).__DEV__ = dev;
+    });
+
+    // An ad unit belongs to exactly ONE AdMob app, and the Android and iOS apps are separate apps —
+    // serving the other platform's id would simply never fill. Assert both directions so a
+    // regression to a single shared unit id can't pass.
+    it("picks this platform's unit, never the other platform's", () => {
+      const [mine, theirs] =
+        Platform.OS === 'ios' ? ['ios-banner', 'android-banner'] : ['android-banner', 'ios-banner'];
+      expect(adUnitId('banner')).toBe(mine);
+      expect(adUnitId('banner')).not.toBe(theirs);
+    });
+
+    it('keeps the two placements on their own units', () => {
+      const suffix = Platform.OS === 'ios' ? 'ios' : 'android';
+      expect(adUnitId('banner')).toBe(`${suffix}-banner`);
+      expect(adUnitId('offlineGameEnd')).toBe(`${suffix}-interstitial`);
+    });
   });
 });

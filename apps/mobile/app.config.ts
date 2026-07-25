@@ -76,19 +76,35 @@ const otaAppId = process.env.TRM_OTA_APP_ID || undefined;
 // To turn ads off, flip `enabled`: it is the master switch, so the ids can stay checked in.
 const ADMOB = {
   /** Master switch. False ⇒ no ad renders, nothing preloads, the SDK is never initialised. */
-  enabled: false,
+  enabled: true,
   // The AdMob *app* ids (`ca-app-pub-…~…`, tilde). The native SDK CRASHES at startup without a
-  // syntactically valid one, which is why these are Google's documented sample app ids rather than
-  // empty strings until the real app is registered in the AdMob console.
-  androidAppId: 'ca-app-pub-3940256099942544~3347511713',
-  iosAppId: 'ca-app-pub-3940256099942544~1458002511',
-  // Ad-*unit* ids (`ca-app-pub-…/…`, slash), '' ⇒ that placement renders nothing. `__DEV__` builds
-  // ignore these and use Google's TestIds (src/ads/ads.ts), so no developer can click a live ad.
-  /** Anchored adaptive banner docked on the browse surfaces (Home / Encyclopedia contents /
-   *  Leaderboard / History). One unit for all four — same shape, never on screen together. */
-  bannerUnitId: '',
-  /** Interstitial shown on leaving a FINISHED offline vs-bots game (capped, src/ads/interstitial.ts). */
-  offlineGameEndUnitId: '',
+  // syntactically valid one — before the real app was registered these carried Google's documented
+  // sample app ids for exactly that reason.
+  androidAppId: 'ca-app-pub-6497728947722029~2041113047',
+  iosAppId: 'ca-app-pub-6497728947722029~7046027715',
+  // Ad-*unit* ids (`ca-app-pub-…/…`, slash), '' ⇒ that placement renders nothing on that platform.
+  //
+  // Per-platform because an ad unit belongs to ONE AdMob app, and the two apps above are separate
+  // AdMob apps: an Android unit id simply does not exist inside the iOS app, so requesting it there
+  // never fills. Create each placement twice in the console — once under the Android app, once under
+  // the iOS app — and paste both. `src/ads/ads.ts` picks by `Platform.OS`.
+  //
+  // `__DEV__` builds ignore all of these and use Google's TestIds, so no developer can click a live ad.
+  units: {
+    /** Anchored adaptive banner docked on the browse surfaces (Home / Encyclopedia contents /
+     *  Leaderboard / History). One unit per platform covers all four — same shape, and they are
+     *  never on screen together. UNIT TYPE: Banner. */
+    banner: {
+      android: 'ca-app-pub-6497728947722029/2512488973',
+      ios: 'ca-app-pub-6497728947722029/3633998958',
+    },
+    /** Shown on leaving a FINISHED offline vs-bots game (capped, src/ads/interstitial.ts).
+     *  UNIT TYPE: Interstitial. */
+    offlineGameEnd: {
+      android: 'ca-app-pub-6497728947722029/1805766175',
+      ios: 'ca-app-pub-6497728947722029/3554107902',
+    },
+  },
 };
 
 // SKAdNetwork ids for the networks Google may serve through
@@ -408,9 +424,9 @@ const config: ExpoConfig = {
     // plugin's app ids and the units the app requests against can never drift — and unlike the
     // TRM_* vars around them these are lane-independent, so an OTA manifest's `extra` (which
     // REPLACES the binary's) can never disagree with the native app id baked into the build.
-    admobEnabled: ADMOB.enabled,
-    admobBannerUnitId: ADMOB.bannerUnitId,
-    admobOfflineGameEndUnitId: ADMOB.offlineGameEndUnitId,
+    // Both platforms' unit ids ship in both binaries; `src/ads/ads.ts` picks by Platform.OS. The
+    // unused half is a public id compiled into a binary that never requests it — nothing to protect.
+    admob: { enabled: ADMOB.enabled, units: ADMOB.units },
   },
 };
 
