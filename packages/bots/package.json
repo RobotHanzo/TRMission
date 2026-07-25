@@ -15,6 +15,7 @@
     "@trm/shared": "workspace:*"
   },
   "devDependencies": {
+    "@trm/map-data": "workspace:*",
     "@trm/tsc7": "workspace:*",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^2.1.8"

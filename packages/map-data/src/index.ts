@@ -4,6 +4,7 @@ import { CITIES } from './cities';
 import { ROUTES } from './routes';
 import { TICKETS } from './tickets';
 import { taiwanForkGeography } from './taiwan-geography';
+import { TAIPEI_CONTENT } from './taipei';
 import { CONTENT_V2 } from './archive/v2';
 import { CONTENT_V3 } from './archive/v3';
 import { CONTENT_V4 } from './archive/v4';
@@ -20,6 +21,7 @@ export * from './geometry';
 export * from './ticket-view';
 export * from './taiwan-geography';
 export * from './render-tokens';
+export * from './taipei';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',
@@ -64,15 +66,18 @@ export function hashContent(content: GameContent): string {
 /** Hash of the current canonical content. New games are stamped with this. */
 export const CONTENT_HASH: string = hashContent(TAIWAN_CONTENT);
 
+/** Hash of the current Greater Taipei content — the second official map (see `src/taipei/`). */
+export const TAIPEI_CONTENT_HASH: string = hashContent(TAIPEI_CONTENT);
+
 /**
- * Every published content version, current and archived, keyed by its content hash. Content
- * is immutable once published: editing the map ships a *new* version (bump `meta.version`)
- * and keeps the prior one here, so a persisted game can always rebuild the exact board it was
- * created against. Recovery resolves a game's stored `contentHash` through this map — a
- * content change therefore never breaks an in-flight game's replay.
+ * Every published content version of every official map, current and archived, keyed by its
+ * content hash. Content is immutable once published: editing a map ships a *new* version (bump
+ * its `meta.version`) and keeps the prior one here, so a persisted game can always rebuild the
+ * exact board it was created against. Recovery resolves a game's stored `contentHash` through
+ * this map — a content change therefore never breaks an in-flight game's replay.
  */
 export const CONTENT_REGISTRY: ReadonlyMap<string, GameContent> = new Map(
-  [CONTENT_V2, CONTENT_V3, CONTENT_V4, CONTENT_V5, TAIWAN_CONTENT].map(
+  [CONTENT_V2, CONTENT_V3, CONTENT_V4, CONTENT_V5, TAIWAN_CONTENT, TAIPEI_CONTENT].map(
     (c) => [hashContent(c), c] as const,
   ),
 );
@@ -91,13 +96,20 @@ export interface OfficialMap {
   readonly forkGeography?: MapGeography;
 }
 
-/** Every map shipped by TRMission itself (as opposed to a user-authored custom map). */
+/** Every map shipped by TRMission itself (as opposed to a user-authored custom map). The first
+ *  entry is the default an unconfigured room/dev seed falls back to — keep Taiwan there. */
 export const OFFICIAL_MAPS: readonly OfficialMap[] = [
   {
     mapId: MAP_META.mapId,
     content: TAIWAN_CONTENT,
     hash: CONTENT_HASH,
     forkGeography: taiwanForkGeography(),
+  },
+  // Greater Taipei carries its own `geography`, so a fork seeds straight from the content.
+  {
+    mapId: TAIPEI_CONTENT.meta.mapId,
+    content: TAIPEI_CONTENT,
+    hash: TAIPEI_CONTENT_HASH,
   },
 ];
 

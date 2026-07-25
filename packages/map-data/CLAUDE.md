@@ -2,19 +2,28 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-`@trm/map-data` is the **single authored source of truth** for official content (ADR A13) — the
-bundled Taiwan map is a 39-city graph, 68 route segments, and 42 destination tickets — and is also
-the shared library backing **user-authored custom maps** (validation, mission auto-generation). Both
-draw on the same `GameContent` shape, `hashContent`, and `validate()`. Everything else (engine board,
-client catalog, Mongo seed) is derived from it. Commands: `yarn workspace @trm/map-data test` /
-`… typecheck` / `… lint`.
+`@trm/map-data` is the **single authored source of truth** for official content (ADR A13) — two
+bundled maps, Taiwan (36 cities / 77 routes / 84 tickets) and Greater Taipei (44 / 83 / 56) — and is
+also the shared library backing **user-authored custom maps** (validation, mission auto-generation).
+All of them draw on the same `GameContent` shape, `hashContent`, and `validate()`. Everything else
+(engine board, client catalog, Mongo seed) is derived from it. Commands:
+`yarn workspace @trm/map-data test` / `… typecheck` / `… lint`.
 
 ## Structure & invariants
 
 - `cities.ts` / `routes.ts` / `tickets.ts` — the authored tables for the bundled Taiwan map.
   `index.ts` assembles them into `TAIWAN_CONTENT`, derives `CONTENT_HASH`, and exports
-  `OFFICIAL_MAPS` / `officialMapById()` — the registry of maps that ship with the game (Taiwan is
-  `OFFICIAL_MAPS[0]`; add future official maps here, each with its own authored tables and hash).
+  `OFFICIAL_MAPS` / `officialMapById()` — the registry of maps that ship with the game.
+- `taipei/` — the second official map (Greater Taipei, `mapId: 'taipei'`), with the same table
+  layout plus its own `geography.ts`. It carries `geography` and `rules` **as content**, so it has
+  no `forkGeography` (a fork seeds straight from `content.geography`) and it renders through the
+  generic `CustomGeography` path on every client rather than Taiwan's hand-drawn silhouette. Its
+  ids are prefixed (`tp_*`, `TPR*`, `TPL*`/`TPS*`) so a route/city id in a log or a replay names
+  exactly one map. Adding a third official map means: a directory here, a `CONTENT_REGISTRY`
+  entry (recovery resolves a persisted game's board through it), and an `OFFICIAL_MAPS` entry —
+  the room settings selectors, the fork flow, and both clients' bundled content caches all
+  iterate that list, so nothing else needs touching. Keep Taiwan at `OFFICIAL_MAPS[0]`: the dev
+  seed, the health endpoint, and the room-settings default all fall back to it.
 - `validate.ts` — `validate()` enforces the structural invariants the engine relies on: connected
   graph, no unreachable node, ferry/locomotive/length rules, ticket endpoints exist, no length-5/7
   routes. The test suite asserts them all. `validateGeography()` and
@@ -37,10 +46,15 @@ ticket, or `MAP_META.version` produces a new hash. A persisted game stores the h
 against, and recovery rebuilds its board from the **content registry** keyed by that hash — so an
 in-flight game always replays against its original map, even after the current content has moved on.
 
-To change the map **without breaking already-persisted games**:
+This applies per official map: `TAIPEI_CONTENT_HASH` pins Greater Taipei exactly the way
+`CONTENT_HASH` pins Taiwan, and `test/taipei.spec.ts` pins its v1 hash the same way
+`test/versions.spec.ts` pins Taiwan's.
 
-1. Edit the live tables (`cities.ts` / `routes.ts` / `tickets.ts`) and **bump `MAP_META.version`** —
-   content is immutable once published, so a change ships a _new_ version, never a mutation in place.
+To change a map **without breaking already-persisted games**:
+
+1. Edit the live tables (`cities.ts` / `routes.ts` / `tickets.ts`, or `taipei/*`) and **bump that
+   map's `meta.version`** — content is immutable once published, so a change ships a _new_ version,
+   never a mutation in place.
 2. Freeze the prior version as an immutable snapshot under `src/archive/` (see `archive/v2.ts`) and
    register it in `CONTENT_REGISTRY` (`index.ts`). The snapshot must capture every table that diverged
    as a full literal; tables that are byte-identical to the live ones may be referenced, **but** pin

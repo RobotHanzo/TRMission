@@ -4566,6 +4566,7 @@ __metadata:
   resolution: "@trm/bots@workspace:packages/bots"
   dependencies:
     "@trm/engine": "workspace:*"
+    "@trm/map-data": "workspace:*"
     "@trm/shared": "workspace:*"
     "@trm/tsc7": "workspace:*"
     typescript: "npm:@typescript/typescript6@^6.0.2"

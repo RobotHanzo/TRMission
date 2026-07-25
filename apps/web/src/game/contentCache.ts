@@ -1,10 +1,11 @@
 import { asCityId, asRouteId, asTicketId } from '@trm/shared';
 import type { RouteLength } from '@trm/shared';
-import { TAIWAN_CONTENT, CONTENT_HASH } from '@trm/map-data';
+import { OFFICIAL_MAPS } from '@trm/map-data';
 import type { CityTier, GameContent } from '@trm/map-data';
 import { api, type MapContentDto } from '../net/rest';
 
-const bundled = new Map<string, GameContent>([[CONTENT_HASH, TAIWAN_CONTENT]]);
+/** Every official map ships in the bundle, so its content resolves with no network call. */
+const bundled = new Map<string, GameContent>(OFFICIAL_MAPS.map((m) => [m.hash, m.content]));
 const cache = new Map<string, GameContent>();
 const inflight = new Map<string, Promise<GameContent>>();
 
@@ -51,7 +52,7 @@ function contentFromDto(dto: MapContentDto): GameContent {
 }
 
 /**
- * Resolve a contentHash to its GameContent: the bundled Taiwan content resolves synchronously
+ * Resolve a contentHash to its GameContent: the bundled official maps resolve synchronously
  * with no network call; anything else is fetched once from `/maps/content/:hash` (immutable, so
  * a resolved hash is cached forever) and de-duped across concurrent callers.
  */

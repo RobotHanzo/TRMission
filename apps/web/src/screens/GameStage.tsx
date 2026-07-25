@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { CardColor as PbCardColor, Phase, type GameSnapshot } from '@trm/proto';
 import { CARD_COLORS, type CardColor } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
-import { CONTENT_HASH } from '@trm/map-data';
+import { OFFICIAL_MAPS } from '@trm/map-data';
 import { track } from '../lib/analytics';
 import type { RoomMember } from '../net/rest';
 import { useGameStore, type RejectionInfo } from '../store/game';
@@ -213,10 +213,14 @@ export function GameStage({
     return { player_count: players.length, bot_count, human_count: players.length - bot_count };
   };
   const mapId = snapshot.contentHash;
-  // Client-side heuristic: only the bundled Taiwan content is recognised as "official"; any other
-  // hash (custom map, or a server-official map the client doesn't bundle) reads as "custom".
-  const mapSource: 'official' | 'custom' =
-    snapshot.contentHash === CONTENT_HASH ? 'official' : 'custom';
+  // Client-side heuristic: only the bundled official maps are recognised as "official"; any other
+  // hash (custom map, an archived map version, or a server-official map this build doesn't ship)
+  // reads as "custom".
+  const mapSource: 'official' | 'custom' = OFFICIAL_MAPS.some(
+    (m) => m.hash === snapshot.contentHash,
+  )
+    ? 'official'
+    : 'custom';
   const markFirstAction = (action: string): void => {
     if (sandbox || !gameId || firstActionRef.current === gameId) return;
     firstActionRef.current = gameId;

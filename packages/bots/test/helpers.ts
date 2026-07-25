@@ -1,6 +1,7 @@
-// Shared driver for bot-vs-bot test games: plays a full 2-bot match on the Taiwan board and
-// throws (with the seed in the message) on any illegal or non-deterministic pick, so both the
-// CI specs and the opt-in strength harness fail loudly with the offending seed.
+// Shared driver for bot-vs-bot test games: plays a full 2-bot match (on the Taiwan board unless
+// `opts.board` names another) and throws (with the seed in the message) on any illegal or
+// non-deterministic pick, so both the CI specs and the opt-in strength harness fail loudly with
+// the offending seed.
 import { initGame, legalActions, reduce, taiwanBoard, CONTENT_HASH } from '@trm/engine';
 import type { Board, GameConfig, GameState } from '@trm/engine';
 import { asPlayerId } from '@trm/shared';
@@ -14,6 +15,9 @@ export interface DriveOpts {
   readonly ruleParams?: GameConfig['ruleParams'];
   /** Re-pick every action and require the identical choice (pure function of state + botId). */
   readonly checkDeterminism?: boolean;
+  /** Play on another official board instead of Taiwan (must be paired with its content hash). */
+  readonly board?: Board;
+  readonly contentHash?: string;
 }
 
 /** Drive a full 2-bot game to GAME_OVER, each seat with its own difficulty. */
@@ -23,14 +27,14 @@ export function driveGame(
   difficultyB: BotDifficulty,
   opts: DriveOpts = {},
 ): GameState {
-  const board: Board = taiwanBoard();
+  const board: Board = opts.board ?? taiwanBoard();
   const config: GameConfig = {
     seed,
     players: [
       { id: A, seat: 0 },
       { id: B, seat: 1 },
     ],
-    contentHash: CONTENT_HASH,
+    contentHash: opts.contentHash ?? CONTENT_HASH,
     ...(opts.ruleParams ? { ruleParams: opts.ruleParams } : {}),
   };
   let state = initGame(board, config);
