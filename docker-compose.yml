@@ -141,7 +141,11 @@ services:
       # it in the bundle is fine; changing it means rebuilding the image.
       args:
         SENTRY_DSN: ${WEB_SENTRY_DSN:-}
+        ADMIN_SENTRY_DSN: ${ADMIN_SENTRY_DSN:-}
         SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
+        SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-}
+        SENTRY_REPLAY_SAMPLE_RATE: ${SENTRY_REPLAY_SAMPLE_RATE:-}
+        SENTRY_REPLAY_ERROR_SAMPLE_RATE: ${SENTRY_REPLAY_ERROR_SAMPLE_RATE:-}
     depends_on:
       - server
     ports:

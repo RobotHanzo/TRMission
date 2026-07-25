@@ -17,12 +17,19 @@ ENV VITE_COMMIT_HASH=$GIT_COMMIT
 # maps themselves are deleted right after upload (vite.config.ts), so they are never served.
 # Everything here is optional: unset ⇒ no reporting, no upload, unchanged output.
 ARG SENTRY_DSN=
+ARG ADMIN_SENTRY_DSN=
 ARG SENTRY_ENVIRONMENT=
+ARG SENTRY_TRACES_SAMPLE_RATE=
+ARG SENTRY_REPLAY_SAMPLE_RATE=
+ARG SENTRY_REPLAY_ERROR_SAMPLE_RATE=
 ARG SENTRY_ORG=
 ARG SENTRY_PROJECT=
 ARG SENTRY_ADMIN_PROJECT=
 ENV VITE_SENTRY_DSN=$SENTRY_DSN \
     VITE_SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT \
+    VITE_SENTRY_TRACES_SAMPLE_RATE=$SENTRY_TRACES_SAMPLE_RATE \
+    VITE_SENTRY_REPLAY_SAMPLE_RATE=$SENTRY_REPLAY_SAMPLE_RATE \
+    VITE_SENTRY_REPLAY_ERROR_SAMPLE_RATE=$SENTRY_REPLAY_ERROR_SAMPLE_RATE \
     SENTRY_ORG=$SENTRY_ORG \
     SENTRY_PROJECT=$SENTRY_PROJECT \
     SENTRY_ADMIN_PROJECT=$SENTRY_ADMIN_PROJECT
@@ -58,8 +65,13 @@ RUN yarn workspace @trm/proto generate
 RUN --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)" \
     yarn workspace @trm/web build
+# The dashboard is its own Sentry project, so it overrides the DSN for this step only. Otherwise
+# admin events would land in the WEB project while admin's source maps upload to the admin one, and
+# every admin stack trace would come out unsymbolicated. Its upload target is read separately from
+# SENTRY_ADMIN_PROJECT by apps/admin/vite.config.ts, so only the DSN needs overriding here.
 RUN --mount=type=secret,id=sentry_auth_token \
     SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)" \
+    VITE_SENTRY_DSN="$ADMIN_SENTRY_DSN" \
     yarn workspace @trm/admin build
 
 FROM nginx:alpine AS run

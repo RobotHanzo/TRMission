@@ -101,16 +101,18 @@ repo — the PAT needs write access, the certs workflow pushes), `ASC_KEY_ID`, `
 `ASC_KEY_P8` (base64 App Store Connect API key). Plus repo **variable** `APPLE_TEAM_ID` (public in
 the AASA file anyway; the beta lane stamps it into the prebuilt project as `DEVELOPMENT_TEAM`).
 
-Sentry (issue #44), **all optional** — an unconfigured repo builds exactly as today. Repo
-**variables**: `TRM_SENTRY_DSN`, `TRM_SENTRY_ENVIRONMENT`, `TRM_SENTRY_TRACES_SAMPLE_RATE` (they
-land in `extra`, i.e. app runtime config), plus `SENTRY_ORG` and `SENTRY_MOBILE_PROJECT`; secret
+Sentry (issue #44), **all optional** — an unconfigured repo builds exactly as today. Full setup
+walkthrough: `docs/release/sentry-setup.md`. Repo **variables**: the `TRM_SENTRY_*` set (`_DSN`,
+`_ENVIRONMENT`, `_TRACES_SAMPLE_RATE`, `_REPLAY_SAMPLE_RATE`, `_REPLAY_ERROR_SAMPLE_RATE`), which
+land in `extra` (app runtime config), plus `SENTRY_ORG` and `SENTRY_MOBILE_PROJECT`; secret
 `SENTRY_AUTH_TOKEN` (source-map/debug-symbol upload — with it unset the lanes export
 `SENTRY_DISABLE_AUTO_UPLOAD=true` so the injected upload phase can't fail the build). Like the
-Google client ids, **the `TRM_SENTRY_*` trio must be set on the OTA lane too**: an applied update's
-manifest replaces the binary's `extra`, so publishing without them would strip the DSN off every
-device that takes the update. The web/admin images take the equivalent values as Docker build args
-in `docker-build.yml`, with the auth token passed as a BuildKit **secret** rather than a build arg
-(a build arg is recorded in the layer metadata and the `type=gha` cache).
+Google client ids, **every `TRM_SENTRY_*` var must be set on the OTA lane too**: an applied
+update's manifest replaces the binary's `extra`, so publishing without them would strip the DSN off
+every device that takes the update. The web/admin images take the equivalent values as Docker build
+args in `docker-build.yml`, with the auth token passed as a BuildKit **secret** rather than a build
+arg — a build arg is baked into the stage's layer metadata, which now ships to a public GHCR
+buildcache tag.
 
 Seed the match repo by dispatching `mobile-ios-certs` once the App ID + ASC key exist
 (`docs/release/app-store-connect-setup.md` Steps 2–6); the build lane consumes it read-only. The

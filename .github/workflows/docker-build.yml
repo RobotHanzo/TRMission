@@ -72,13 +72,18 @@ jobs:
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             SENTRY_DSN=${{ vars.WEB_SENTRY_DSN }}
+            ADMIN_SENTRY_DSN=${{ vars.ADMIN_SENTRY_DSN }}
             SENTRY_ENVIRONMENT=${{ vars.SENTRY_ENVIRONMENT }}
+            SENTRY_TRACES_SAMPLE_RATE=${{ vars.SENTRY_TRACES_SAMPLE_RATE }}
+            SENTRY_REPLAY_SAMPLE_RATE=${{ vars.SENTRY_REPLAY_SAMPLE_RATE }}
+            SENTRY_REPLAY_ERROR_SAMPLE_RATE=${{ vars.SENTRY_REPLAY_ERROR_SAMPLE_RATE }}
             SENTRY_ORG=${{ vars.SENTRY_ORG }}
             SENTRY_PROJECT=${{ vars.SENTRY_WEB_PROJECT }}
             SENTRY_ADMIN_PROJECT=${{ vars.SENTRY_ADMIN_PROJECT }}
           # The upload token is a real secret, so it is mounted into the build steps rather than
-          # passed as a build arg — an arg is recorded in the layer metadata AND in the `type=gha`
-          # cache below, both of which are readable by anyone with repo read access.
+          # passed as a build arg — an arg is recorded in the stage layer metadata, which now ships
+          # to a PUBLIC GHCR buildcache tag (see the cache note below). A build arg here would be
+          # world-readable.
           secrets: |
             sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
           # Registry cache, not type=gha (issue #46). A repo gets ONE 10GB Actions cache budget

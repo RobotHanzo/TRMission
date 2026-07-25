@@ -158,6 +158,8 @@ jobs:
           TRM_SENTRY_DSN: ${{ vars.TRM_SENTRY_DSN }}
           TRM_SENTRY_ENVIRONMENT: ${{ vars.TRM_SENTRY_ENVIRONMENT }}
           TRM_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.TRM_SENTRY_TRACES_SAMPLE_RATE }}
+          TRM_SENTRY_REPLAY_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_SAMPLE_RATE }}
+          TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE }}
           # Source-map + debug-symbol upload, run by the Sentry build phase the config plugin
           # injects. With no auth token SENTRY_DISABLE_AUTO_UPLOAD keeps that phase from failing
           # the build for anyone without a Sentry account.
@@ -238,6 +240,8 @@ jobs:
           TRM_SENTRY_DSN: ${{ vars.TRM_SENTRY_DSN }}
           TRM_SENTRY_ENVIRONMENT: ${{ vars.TRM_SENTRY_ENVIRONMENT }}
           TRM_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.TRM_SENTRY_TRACES_SAMPLE_RATE }}
+          TRM_SENTRY_REPLAY_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_SAMPLE_RATE }}
+          TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE }}
           # Source-map + debug-symbol upload, run by the Sentry build phase the config plugin
           # injects. With no auth token SENTRY_DISABLE_AUTO_UPLOAD keeps that phase from failing
           # the build for anyone without a Sentry account.

@@ -55,6 +55,8 @@ jobs:
           TRM_SENTRY_DSN: ${{ vars.TRM_SENTRY_DSN }}
           TRM_SENTRY_ENVIRONMENT: ${{ vars.TRM_SENTRY_ENVIRONMENT }}
           TRM_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.TRM_SENTRY_TRACES_SAMPLE_RATE }}
+          TRM_SENTRY_REPLAY_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_SAMPLE_RATE }}
+          TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE }}
         run: |
           for platform in android ios; do
             npx expo-updates runtimeversion:resolve --platform "$platform" --workflow managed \
@@ -94,6 +96,8 @@ jobs:
           TRM_SENTRY_DSN: ${{ vars.TRM_SENTRY_DSN }}
           TRM_SENTRY_ENVIRONMENT: ${{ vars.TRM_SENTRY_ENVIRONMENT }}
           TRM_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.TRM_SENTRY_TRACES_SAMPLE_RATE }}
+          TRM_SENTRY_REPLAY_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_SAMPLE_RATE }}
+          TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE }}
           # Source-map upload for the OTA bundle `expo export` produces. With no auth token
           # SENTRY_DISABLE_AUTO_UPLOAD keeps it from failing the publish for anyone without a
           # Sentry account.
