@@ -1,7 +1,8 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import { LEGAL_PATHS, splitLegalNotice } from '@trm/client-core/legal';
 import { GOOGLE_WEB_CLIENT_ID, SERVER_ORIGIN } from '../config';
 import { signInWithApple } from '../auth/apple';
 import { signInWithDiscord } from '../auth/discord';
@@ -26,7 +27,7 @@ import { SPACE, useTheme } from '../theme/useTheme';
 /** The five sign-in methods P0 exposes: guest, email/password, Google, Apple (iOS), Discord. */
 export function LoginScreen(): React.JSX.Element {
   const { t } = useTranslation();
-  const { dark } = useTheme();
+  const { dark, tokens } = useTheme();
   const error = useSession((s) => s.error);
   const loading = useSession((s) => s.loading);
   const playAsGuest = useSession((s) => s.playAsGuest);
@@ -214,12 +215,30 @@ export function LoginScreen(): React.JSX.Element {
         </View>
       )}
 
-      {/* Store compliance: the privacy policy is reachable from the sign-in surface too. */}
+      {/* Issue #51 + store compliance: the sign-in surface says what signing in agrees to, and
+          both documents are reachable from it. Served by the web app on the same origin. */}
       <View style={styles.footer}>
-        <LinkButton
-          title={t('settings.privacyPolicy')}
-          onPress={() => void Linking.openURL(`${SERVER_ORIGIN}/privacy`)}
-        />
+        <Text style={[styles.legal, { color: tokens.inkSoft }]}>
+          {splitLegalNotice(t('login.legalNotice'), {
+            terms: t('login.termsOfService'),
+            privacy: t('login.privacyPolicy'),
+          }).map((seg, i) => {
+            const doc = seg.doc;
+            return doc ? (
+              <Text
+                key={i}
+                accessibilityRole="link"
+                testID={`login-legal-${doc}`}
+                style={[styles.legalLink, { color: tokens.blue }]}
+                onPress={() => void Linking.openURL(`${SERVER_ORIGIN}${LEGAL_PATHS[doc]}`)}
+              >
+                {seg.text}
+              </Text>
+            ) : (
+              <Text key={i}>{seg.text}</Text>
+            );
+          })}
+        </Text>
       </View>
     </Screen>
   );
@@ -232,5 +251,7 @@ const styles = StyleSheet.create({
   providers: { alignSelf: 'center', width: '100%', maxWidth: 420, gap: SPACE[2] },
   appleButton: { height: 48, width: '100%' },
   spinner: { marginTop: SPACE[3] },
-  footer: { marginTop: SPACE[4], alignItems: 'center' },
+  footer: { marginTop: SPACE[6], alignSelf: 'center', maxWidth: 420 },
+  legal: { fontSize: 12, lineHeight: 18, textAlign: 'center' },
+  legalLink: { textDecorationLine: 'underline' },
 });

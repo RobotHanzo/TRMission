@@ -2,7 +2,8 @@
 // screen — not the rows — decides which one leads the group and skips the divider.
 import { useTranslation } from 'react-i18next';
 import { Linking, Switch } from 'react-native';
-import { FileText, Megaphone } from 'lucide-react-native';
+import { FileText, Megaphone, Scale } from 'lucide-react-native';
+import { LEGAL_PATHS } from '@trm/client-core/legal';
 import { SERVER_ORIGIN } from '../../config';
 import { useAds } from '../../ads/ads';
 import { useGlassHeaderPad } from '../../hooks/useGlassHeaderPad';
@@ -49,7 +50,15 @@ export default function PrivacyScreen(): React.JSX.Element {
           icon={FileText}
           testID="settings-privacy-policy"
           label={t('settings.privacyPolicy')}
-          onPress={() => void Linking.openURL(`${SERVER_ORIGIN}/privacy`)}
+          onPress={() => void Linking.openURL(`${SERVER_ORIGIN}${LEGAL_PATHS.privacy}`)}
+        />
+        {/* The other half of what sign-in agreed to (issue #51) — same page the login notice links. */}
+        <SettingsRow
+          tone="link"
+          icon={Scale}
+          testID="settings-terms"
+          label={t('settings.termsOfService')}
+          onPress={() => void Linking.openURL(`${SERVER_ORIGIN}${LEGAL_PATHS.terms}`)}
         />
       </SettingsGroup>
     </SettingsPage>

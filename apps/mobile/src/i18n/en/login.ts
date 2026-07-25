@@ -22,4 +22,7 @@ export default {
   endgameGuestNotice: auth.endgameGuestNotice,
   endgameUpgradeBlurb: auth.endgameUpgradeBlurb,
   createAccount: auth.createAccount,
+  legalNotice: auth.legalNotice,
+  termsOfService: auth.termsOfService,
+  privacyPolicy: auth.privacyPolicy,
 } satisfies TranslationShape<typeof zh>;

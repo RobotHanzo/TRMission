@@ -45,6 +45,7 @@ export default {
   version: '版本',
   commit: '版本代碼',
   privacyPolicy: '隱私權政策',
+  termsOfService: auth.termsOfService,
   adPrivacy: '廣告隱私選項',
   crashReport: '分享上次閃退報告',
   crashReportHint: '把上次閃退的技術細節傳給維護者，有助於找出原因。',

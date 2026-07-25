@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { LEGAL_PATHS } from '@trm/client-core/legal';
 import type { Theme, Locale, BoardLayout, UserPreferences } from '../net/rest';
 import { disconnectGame } from '../net/connection';
 import { isAdminTarget, goToAdmin } from '../lib/adminApp';
@@ -25,7 +26,8 @@ export type View =
   | 'maps'
   | 'mapEditor'
   | 'deleteAccount'
-  | 'privacy';
+  | 'privacy'
+  | 'terms';
 
 // --- URL routing -----------------------------------------------------------
 // The browser path is the durable source of truth for *where* the user is:
@@ -47,7 +49,8 @@ const ADMIN_SPECTATE_PATH = /^\/admin-spectate\/([^/]+)$/;
 const MAPS_PATH = '/maps';
 const MAP_EDITOR_PATH = /^\/maps\/([^/]+)\/edit$/;
 const DELETE_ACCOUNT_PATH = '/account/delete';
-const PRIVACY_PATH = '/privacy';
+const PRIVACY_PATH = LEGAL_PATHS.privacy;
+const TERMS_PATH = LEGAL_PATHS.terms;
 
 export const roomCodeFromPath = (): string | null => {
   const code = ROOM_PATH.exec(window.location.pathname)?.[1];
@@ -102,6 +105,7 @@ export const isHomeColdLoadPath = (): boolean => {
     path === MAPS_PATH ||
     mapEditorIdFromPath() ||
     path === PRIVACY_PATH ||
+    path === TERMS_PATH ||
     path === DELETE_ACCOUNT_PATH ||
     roomCodeFromPath()
   );
@@ -273,6 +277,8 @@ interface UiState {
   enterLogin(): void;
   /** Open the public privacy policy in-app (it is also cold-loadable at /privacy). */
   enterPrivacy(): void;
+  /** Open the public terms of service in-app (it is also cold-loadable at /terms). */
+  enterTerms(): void;
   /** After any successful sign-in, resume the `?redirect=` target (default home). */
   navigateAfterAuth(): void;
   /** Reconcile the view with the current browser path (initial load + back/forward). */
@@ -390,6 +396,11 @@ export const useUi = create<UiState>()((set, get) => ({
     disconnectGame();
     pushPath(PRIVACY_PATH);
     set({ view: 'privacy', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  },
+  enterTerms: () => {
+    disconnectGame();
+    pushPath(TERMS_PATH);
+    set({ view: 'terms', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
   navigateAfterAuth: () => {
     const target = readRedirectParam();
@@ -574,6 +585,12 @@ export const useUi = create<UiState>()((set, get) => ({
     if (path === PRIVACY_PATH) {
       disconnectGame();
       set({ view: 'privacy', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+      return;
+    }
+    // Public terms of service — likewise signed out (both clients' sign-in notice links here).
+    if (path === TERMS_PATH) {
+      disconnectGame();
+      set({ view: 'terms', roomCode: null, gameId: null, ticket: null, replayGameId: null });
       return;
     }
     // Account deletion (Play Data-safety URL): the login gate is the re-auth for cold visits.

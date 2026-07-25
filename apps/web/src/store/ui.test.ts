@@ -89,6 +89,20 @@ describe('ui store routing', () => {
     expect(path()).toBe('/privacy');
   });
 
+  it('enterTerms pushes /terms and sets the view', () => {
+    useUi.getState().enterTerms();
+    expect(useUi.getState().view).toBe('terms');
+    expect(path()).toBe('/terms');
+  });
+
+  // Both clients' sign-in notice links straight here, so a signed-out cold load must render it.
+  it('syncFromUrl on /terms renders the terms page while signed out', () => {
+    window.history.replaceState(null, '', '/terms');
+    useUi.getState().syncFromUrl(false);
+    expect(useUi.getState().view).toBe('terms');
+    expect(path()).toBe('/terms');
+  });
+
   it('syncFromUrl on / (authed) yields the home view', () => {
     useUi.setState({ view: 'room', roomCode: 'ABCD' });
     window.history.replaceState(null, '', '/');

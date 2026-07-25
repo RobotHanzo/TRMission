@@ -13,6 +13,7 @@ export default {
     maps: '自訂地圖 · 台鐵任務 TRMission',
     mapEditor: '地圖編輯器 · 台鐵任務 TRMission',
     privacy: '隱私權政策 · 台鐵任務 TRMission',
+    terms: '服務條款 · 台鐵任務 TRMission',
     deleteAccount: '刪除帳號 · 台鐵任務 TRMission',
   },
   descriptions: {
@@ -20,5 +21,6 @@ export default {
     login: '登入台鐵任務 — 以訪客、電子郵件、Google 或 Discord 帳號開始遊戲。',
     tutorial: '5 分鐘互動教學：學會抽車廂卡、佔領路線與任務計分。免登入即可開始。',
     privacy: '台鐵任務的隱私權政策：我們收集哪些資料、如何使用，以及如何刪除帳號與資料。',
+    terms: '台鐵任務的服務條款：帳號規範、使用規則、使用者產生內容、免責聲明與聯絡方式。',
   },
 };

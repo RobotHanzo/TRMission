@@ -588,6 +588,16 @@
 .login-head p {
   margin: 0;
 }
+/* Sign-in small print: the last thing in the card, quieter and smaller than the form. */
+.login-legal {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+.login-legal a {
+  color: var(--tr-blue);
+}
 
 /* OAuth */
 .oauth-divider {

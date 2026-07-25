@@ -50,4 +50,11 @@ describe('LandingScreen (signed-out /)', () => {
       '/account/delete',
     );
   });
+
+  it('links the terms of service beside them', () => {
+    render(<LandingScreen />);
+    fireEvent.click(screen.getAllByRole('button', { name: '服務條款' })[0]!);
+    expect(useUi.getState().view).toBe('terms');
+    expect(window.location.pathname).toBe('/terms');
+  });
 });

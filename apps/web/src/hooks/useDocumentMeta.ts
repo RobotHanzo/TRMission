@@ -14,6 +14,7 @@ const CANONICAL: Partial<Record<View, string>> = {
   login: '/login',
   tutorial: '/tutorial',
   privacy: '/privacy',
+  terms: '/terms',
 };
 
 // Every view resolves to a title key; the ticketed maintainer views and the OAuth
@@ -34,6 +35,7 @@ const TITLE_KEY: Record<View, string> = {
   mapEditor: 'seo.titles.mapEditor',
   deleteAccount: 'seo.titles.deleteAccount',
   privacy: 'seo.titles.privacy',
+  terms: 'seo.titles.terms',
 };
 
 const DESC_KEY: Partial<Record<View, string>> = {
@@ -42,6 +44,7 @@ const DESC_KEY: Partial<Record<View, string>> = {
   loginCallback: 'seo.descriptions.login',
   tutorial: 'seo.descriptions.tutorial',
   privacy: 'seo.descriptions.privacy',
+  terms: 'seo.descriptions.terms',
 };
 
 const JSONLD_ID = 'trm-jsonld';

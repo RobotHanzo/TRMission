@@ -16,6 +16,7 @@ export default {
     maps: 'Custom maps · TRMission 台鐵任務',
     mapEditor: 'Map editor · TRMission 台鐵任務',
     privacy: 'Privacy policy · TRMission 台鐵任務',
+    terms: 'Terms of service · TRMission 台鐵任務',
     deleteAccount: 'Delete account · TRMission 台鐵任務',
   },
   descriptions: {
@@ -25,5 +26,7 @@ export default {
       'A 5-minute interactive tutorial: learn drawing cards, claiming routes, and mission scoring. No sign-in needed.',
     privacy:
       'The TRMission privacy policy: what data we collect, how it is used, and how to delete your account and data.',
+    terms:
+      'The TRMission terms of service: account rules, acceptable use, user-generated content, disclaimers, and how to reach us.',
   },
 } satisfies TranslationShape<typeof zh>;

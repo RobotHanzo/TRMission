@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { LEGAL_PATHS, splitLegalNotice } from '@trm/client-core/legal';
 import { useSession } from '../store/session';
 import { useUi, readRedirectParam } from '../store/ui';
 import { api, type AuthConfig, type OauthProvider } from '../net/rest';
@@ -293,6 +294,23 @@ export function LoginScreen() {
         )}
 
         {error && <p className="error">{error}</p>}
+
+        {/* Sign-in small print (issue #51). New tabs, not in-app navigation: reading the terms
+            must never discard a half-typed sign-in form. */}
+        <p className="login-legal muted">
+          {splitLegalNotice(t('legalNotice'), {
+            terms: t('termsOfService'),
+            privacy: t('privacyPolicy'),
+          }).map((seg, i) =>
+            seg.doc ? (
+              <a key={i} href={LEGAL_PATHS[seg.doc]} target="_blank" rel="noreferrer">
+                {seg.text}
+              </a>
+            ) : (
+              <span key={i}>{seg.text}</span>
+            ),
+          )}
+        </p>
       </div>
     </div>
   );

@@ -131,7 +131,7 @@ describe('search-engine surface (nginx rewrites /robots.txt + /sitemap.xml here)
   it('sitemap.xml lists only the public pages, absolutised from the configured origin', async () => {
     const res = await request(server()).get('/api/v1/og/sitemap.xml').expect(200);
     expect(res.headers['content-type']).toContain('xml');
-    for (const path of ['/', '/tutorial', '/login', '/privacy']) {
+    for (const path of ['/', '/tutorial', '/login', '/privacy', '/terms']) {
       expect(res.text).toContain(`<loc>${env.oauthRedirectBase}${path}</loc>`);
     }
     expect(res.text).not.toContain('/room/');

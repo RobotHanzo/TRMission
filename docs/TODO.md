@@ -20,10 +20,6 @@
   add a content-hash cache so downloaded custom maps work offline.
 - **Maestro E2E smoke flows** — stretch goal from the v1 test strategy (login → lobby →
   claim-a-route happy path on device).
-- **Terms of Service / Community Guidelines page** — the UGC surface has block/report and a
-  privacy policy (`/privacy`, linked in-app), but no ToS/EULA page yet; Apple reviewers of
-  UGC apps sometimes ask for one. Content needs an owner decision — draft `/terms`, then link
-  it beside the privacy row in mobile Settings + LoginScreen.
 - **Android notification small icon** — `expo-notifications` is configured with the brand
   `color` only; a proper white-on-transparent small-icon asset needs a designer pass
   (`['expo-notifications', { icon, color }]`).

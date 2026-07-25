@@ -51,6 +51,7 @@ export default {
   version: 'Version',
   commit: 'Commit',
   privacyPolicy: 'Privacy policy',
+  termsOfService: auth.termsOfService,
   adPrivacy: 'Ad privacy options',
   crashReport: 'Share last crash report',
   crashReportHint: 'Send a maintainer the technical details of the last crash.',

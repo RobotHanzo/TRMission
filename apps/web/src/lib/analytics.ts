@@ -116,6 +116,7 @@ const SCREEN_TO_PATH: Record<View, string> = {
   mapEditor: '/maps/:id/edit',
   deleteAccount: '/account/delete',
   privacy: '/privacy',
+  terms: '/terms',
 };
 
 export function trackPageView(screen: View): void {

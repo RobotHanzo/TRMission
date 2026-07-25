@@ -67,6 +67,27 @@ describe('LoginScreen', () => {
     expect(await screen.findByText('目前沒有可用的登入方式，請稍後再試。')).toBeInTheDocument();
   });
 
+  // Issue #51: signing in has to state what it agrees to, with both documents one tap away.
+  it('shows the legal small print, linking the terms and the privacy policy', async () => {
+    vi.spyOn(api, 'config').mockResolvedValue({
+      passwordLogin: true,
+      guest: true,
+      providers: { google: false, discord: false, apple: false },
+    });
+    render(<LoginScreen />);
+
+    expect(
+      await screen.findByText(/登入或以訪客身分遊玩，即表示你同意我們的/, { exact: false }),
+    ).toBeInTheDocument();
+    const terms = screen.getByRole('link', { name: '服務條款' });
+    const privacy = screen.getByRole('link', { name: '隱私權政策' });
+    expect(terms).toHaveAttribute('href', '/terms');
+    expect(privacy).toHaveAttribute('href', '/privacy');
+    // A new tab: reading them must not discard a half-typed form.
+    expect(terms).toHaveAttribute('target', '_blank');
+    expect(privacy).toHaveAttribute('target', '_blank');
+  });
+
   it("renders Google's rendered button and fires One Tap once GSI loads", async () => {
     window.history.replaceState(null, '', '/login');
     const accounts = { initialize: vi.fn(), prompt: vi.fn(), renderButton: vi.fn() };

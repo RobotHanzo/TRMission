@@ -14,4 +14,7 @@ export default {
   email: 'Email',
   signIn: 'Sign in',
   signOut: 'Sign out',
+  legalNotice: 'By signing in or playing as a guest, you agree to our {terms} and {privacy}.',
+  termsOfService: 'Terms of service',
+  privacyPolicy: 'Privacy policy',
 } satisfies TranslationShape<typeof zh>;

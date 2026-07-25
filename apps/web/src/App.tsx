@@ -13,6 +13,7 @@ import { LandingScreen } from './screens/LandingScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { LoginCallback } from './screens/LoginCallback';
 import { PrivacyScreen } from './screens/PrivacyScreen';
+import { TermsScreen } from './screens/TermsScreen';
 import './styles/app.css';
 import './styles/home.css';
 
@@ -165,6 +166,7 @@ export function App() {
             {view === 'leaderboard' && <LeaderboardScreen />}
             {view === 'deleteAccount' && <DeleteAccountScreen />}
             {view === 'privacy' && <PrivacyScreen />}
+            {view === 'terms' && <TermsScreen />}
             {view === 'maps' && <MapsScreen />}
             {view === 'mapEditor' && <MapEditorScreen />}
             {view === 'replay' && <ReplayScreen />}

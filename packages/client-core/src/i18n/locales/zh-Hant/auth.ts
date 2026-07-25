@@ -12,4 +12,9 @@ export default {
   email: '電子郵件',
   signIn: '登入',
   signOut: '登出',
+  // The sign-in small print. `{terms}`/`{privacy}` are split into links by `splitLegalNotice`
+  // (single braces on purpose — i18next only interpolates `{{…}}`).
+  legalNotice: '登入或以訪客身分遊玩，即表示你同意我們的{terms}與{privacy}。',
+  termsOfService: '服務條款',
+  privacyPolicy: '隱私權政策',
 };
