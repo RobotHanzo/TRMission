@@ -19,6 +19,7 @@ import type zhHant from '../zh-Hant';
 import authWeb from './auth';
 import builder from './builder';
 import chat from './chat';
+import crash from './crash';
 import deleteAccount from './deleteAccount';
 import gameWeb from './game';
 import history from './history';
@@ -52,6 +53,7 @@ export default {
   errors,
   log,
   chat,
+  crash,
   report,
   history,
   leaderboard,

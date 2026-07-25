@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { DatabaseModule } from './db/database.module';
@@ -24,9 +25,13 @@ import { OpenApiHolder } from './openapi/openapi.holder';
 
 // REST control plane: observability, database, auth, lobby, match history, the
 // realtime hub (DI), health, and API docs. A global ZodValidationPipe validates every
-// request body; a global ThrottlerGuard rate-limits the API (infra routes opt out).
+// request body; a global ThrottlerGuard rate-limits the API (infra routes opt out); a global
+// SentryGlobalFilter reports unhandled exceptions (it delegates to Nest's BaseExceptionFilter,
+// so HttpExceptions keep their status/body and are NOT reported as errors).
 @Module({
   imports: [
+    // Inert unless src/instrument.ts brought Sentry up with a DSN — see observability/sentry.ts.
+    SentryModule.forRoot(),
     ObservabilityModule,
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 240 }]),
     DatabaseModule,
@@ -47,6 +52,7 @@ import { OpenApiHolder } from './openapi/openapi.holder';
   providers: [
     OpenApiHolder,
     MobileLinksConfig,
+    { provide: APP_FILTER, useClass: SentryGlobalFilter },
     { provide: APP_PIPE, useClass: ZodValidationPipe },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],

@@ -6,6 +6,27 @@
 FROM node:24-slim AS build
 ARG GIT_COMMIT=dev
 ENV VITE_COMMIT_HASH=$GIT_COMMIT
+
+# Sentry (issue #44). Both bundles are static, so their config is BAKED HERE, not read from the
+# container's environment at runtime. A DSN is a public ingest endpoint (not a credential) and is
+# meant to ship in the bundle, so it rides in as a plain build arg.
+#
+# The source-map upload token does NOT: it arrives as a BuildKit secret mounted onto the two build
+# steps below, never as an ARG/ENV — a build arg is recorded in the stage's layer metadata and in
+# the GitHub Actions build cache, which would leak the token to anyone who can read either. The
+# maps themselves are deleted right after upload (vite.config.ts), so they are never served.
+# Everything here is optional: unset ⇒ no reporting, no upload, unchanged output.
+ARG SENTRY_DSN=
+ARG SENTRY_ENVIRONMENT=
+ARG SENTRY_ORG=
+ARG SENTRY_PROJECT=
+ARG SENTRY_ADMIN_PROJECT=
+ENV VITE_SENTRY_DSN=$SENTRY_DSN \
+    VITE_SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT \
+    SENTRY_ORG=$SENTRY_ORG \
+    SENTRY_PROJECT=$SENTRY_PROJECT \
+    SENTRY_ADMIN_PROJECT=$SENTRY_ADMIN_PROJECT
+
 WORKDIR /app
 RUN corepack enable
 
@@ -32,8 +53,14 @@ RUN --mount=type=cache,target=/root/.yarn/berry/cache,sharing=locked \
 
 COPY . .
 RUN yarn workspace @trm/proto generate
-RUN yarn workspace @trm/web build
-RUN yarn workspace @trm/admin build
+# `|| true`: no secret mounted (the normal case for anyone without a Sentry account) leaves the
+# token empty, which makes vite.config.ts skip the upload plugin entirely.
+RUN --mount=type=secret,id=sentry_auth_token \
+    SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)" \
+    yarn workspace @trm/web build
+RUN --mount=type=secret,id=sentry_auth_token \
+    SENTRY_AUTH_TOKEN="$(cat /run/secrets/sentry_auth_token 2>/dev/null || true)" \
+    yarn workspace @trm/admin build
 
 FROM nginx:alpine AS run
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf

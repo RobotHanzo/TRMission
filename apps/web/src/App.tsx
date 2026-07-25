@@ -7,6 +7,7 @@ import { useLeaveWarning } from './hooks/useLeaveWarning';
 import { usePageViewTracking } from './hooks/usePageViewTracking';
 import { useSoundSetup } from './hooks/useSoundSetup';
 import { useDocumentMeta } from './hooks/useDocumentMeta';
+import { setSentryGameContext, setSentryUser } from './observability/report';
 import { HomeScreen } from './screens/HomeScreen';
 import { LandingScreen } from './screens/LandingScreen';
 import { LoginScreen } from './screens/LoginScreen';
@@ -56,6 +57,8 @@ export function App() {
   const restore = useSession((s) => s.restore);
   const canBuild = useHasFeature('mapBuilder');
   const goHome = useUi((s) => s.goHome);
+  const roomCode = useUi((s) => s.roomCode);
+  const gameId = useUi((s) => s.gameId);
 
   useLeaveWarning();
   usePageViewTracking();
@@ -78,6 +81,15 @@ export function App() {
   useEffect(() => {
     void restore();
   }, [restore]);
+
+  // Tell Sentry WHO and WHICH match, so a report is actionable. Ids only — no display name, no
+  // email, and nothing from the game snapshot (all no-ops without a DSN).
+  useEffect(() => {
+    setSentryUser(user?.id ?? null);
+  }, [user?.id]);
+  useEffect(() => {
+    setSentryGameContext({ ...(gameId ? { gameId } : {}), ...(roomCode ? { roomCode } : {}) });
+  }, [gameId, roomCode]);
 
   // Once the session probe settles, adopt the view from the URL exactly once — this is
   // what turns a hard reload of /room/:code back into that lobby/game.

@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --env-file=.env --watch --import @swc-node/register/esm-register src/main.ts",
-    "start": "node --import @swc-node/register/esm-register src/main.ts",
+    "dev": "node --env-file=.env --watch --import ./instrument.mjs src/main.ts",
+    "start": "node --import ./instrument.mjs src/main.ts",
     "typecheck": "tsc7 --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -23,6 +23,7 @@
     "@nestjs/throttler": "^6.5.0",
     "@node-rs/argon2": "^2.0.2",
     "@resvg/resvg-js": "^2.6.2",
+    "@sentry/nestjs": "^10.68.0",
     "@trm/bots": "workspace:*",
     "@trm/codec": "workspace:*",
     "@trm/engine": "workspace:*",

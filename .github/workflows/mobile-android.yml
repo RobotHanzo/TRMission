@@ -138,6 +138,20 @@ jobs:
           TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          # Sentry (issue #44) — every one optional; unset ⇒ the SDK is never initialised and the
+          # upload steps no-op. TRM_SENTRY_* land in `extra` (runtime config, read by
+          # src/config.ts) and so must appear in EVERY block that re-evaluates app.config.ts,
+          # exactly like the Google client ids above.
+          TRM_SENTRY_DSN: ${{ vars.TRM_SENTRY_DSN }}
+          TRM_SENTRY_ENVIRONMENT: ${{ vars.TRM_SENTRY_ENVIRONMENT }}
+          TRM_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.TRM_SENTRY_TRACES_SAMPLE_RATE }}
+          # Source-map + debug-symbol upload, run by the Sentry build phase the config plugin
+          # injects. With no auth token SENTRY_DISABLE_AUTO_UPLOAD keeps that phase from failing
+          # the build for anyone without a Sentry account.
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_MOBILE_PROJECT }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DISABLE_AUTO_UPLOAD: ${{ secrets.SENTRY_AUTH_TOKEN == '' && 'true' || 'false' }}
           # Baked into AndroidManifest as expo-updates' URL — unset would ship binaries pointing
           # OTA checks at app.config.ts's localhost dev default.
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
@@ -204,6 +218,20 @@ jobs:
           TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
+          # Sentry (issue #44) — every one optional; unset ⇒ the SDK is never initialised and the
+          # upload steps no-op. TRM_SENTRY_* land in `extra` (runtime config, read by
+          # src/config.ts) and so must appear in EVERY block that re-evaluates app.config.ts,
+          # exactly like the Google client ids above.
+          TRM_SENTRY_DSN: ${{ vars.TRM_SENTRY_DSN }}
+          TRM_SENTRY_ENVIRONMENT: ${{ vars.TRM_SENTRY_ENVIRONMENT }}
+          TRM_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.TRM_SENTRY_TRACES_SAMPLE_RATE }}
+          # Source-map + debug-symbol upload, run by the Sentry build phase the config plugin
+          # injects. With no auth token SENTRY_DISABLE_AUTO_UPLOAD keeps that phase from failing
+          # the build for anyone without a Sentry account.
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_MOBILE_PROJECT }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DISABLE_AUTO_UPLOAD: ${{ secrets.SENTRY_AUTH_TOKEN == '' && 'true' || 'false' }}
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
           TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}

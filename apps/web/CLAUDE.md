@@ -119,6 +119,33 @@ route chunk (`App.tsx`) — it must never inflate the main bundle.
   re-projects the same step for another seat; seeks rebuild silently (no animations), forward
   steps animate.
 
+## Error reporting (`observability/`, issue #44)
+
+- `components/AppErrorBoundary.tsx` wraps `<App/>` in `main.tsx`. Without it an uncaught render
+  throw blanks the page. Inline styles + strings read defensively off the i18n singleton, because
+  the crash screen has to survive the stylesheet or i18n being the thing that broke.
+- **`observability/report.ts` is the only observability module the app graph may import.** It holds
+  no `@sentry/*` import and dynamically imports `observability/sentry.ts` only after seeing a
+  `VITE_SENTRY_DSN`. Vite inlines that build-time var, so a DSN-less build makes the whole import
+  dead code and the ~92 kB gzipped SDK **is not in the bundle at all**; a configured build fetches
+  it in an async chunk instead of blocking boot. A static `@sentry/react` import from a component
+  or store silently undoes both — don't add one.
+- `observability/sentry.ts` — the SDK setup (`start()`), reached only through the façade. Browser
+  tracing + Session Replay. Replays of ordinary sessions default to **off**
+  (`VITE_SENTRY_REPLAY_SAMPLE_RATE=0`); only an erroring session's buffered replay is kept. The
+  trade-off of lazy loading: errors thrown in the first tick or two of boot are dropped, not queued
+  (a queue would be one more place for game state to sit).
+- **`observability/secrets.ts`'s `SECRET_CLASS` is load-bearing.** Session Replay records the live
+  DOM, and a maintainer reviewing a replay may be seated at the same table — an unmasked hand is a
+  live anti-cheat leak, not just a privacy one. `PlayerHand`, `TicketPanel`, `TicketChooser` and
+  `PaymentModal`'s option list carry the class and are `block`ed outright (text masking is not
+  enough — the secret is the card colours and route shapes). **Any new UI that renders `you.hand`,
+  kept/offered missions, or anything derived from them must carry it too.**
+- Everything on the wire to Sentry goes through `@trm/shared`'s `scrubTelemetryEvent`, the same
+  denylist the server and mobile use.
+- Source maps upload only when `SENTRY_AUTH_TOKEN` is set at build time (`vite.config.ts`); they
+  are deleted right after upload and never served.
+
 ## Player identity
 
 Snapshots carry player ids only (no display names). **Bots are detected by the `bot:` id prefix**

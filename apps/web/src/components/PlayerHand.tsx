@@ -3,6 +3,7 @@ import { CARD_COLORS } from '@trm/shared';
 import type { CardCounts } from '@trm/proto';
 import { handFromCounts } from '../game/payments';
 import { TrainCarCard } from './TrainCarCard';
+import { SECRET_CLASS } from '../observability/secrets';
 
 /** The player's hand as a row of big train-car cards, one per colour held. */
 export function PlayerHand({ hand }: { hand: CardCounts | undefined }) {
@@ -10,7 +11,8 @@ export function PlayerHand({ hand }: { hand: CardCounts | undefined }) {
   const h = handFromCounts(hand);
   const present = CARD_COLORS.filter((c) => h[c] > 0);
   return (
-    <div className="hand" data-anim="hand">
+    // SECRET_CLASS: this is the viewer's hidden hand — Session Replay must not record it.
+    <div className={`hand ${SECRET_CLASS}`} data-anim="hand">
       {present.length === 0 ? (
         <span className="muted">{t('noCards')}</span>
       ) : (

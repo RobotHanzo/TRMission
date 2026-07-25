@@ -149,6 +149,11 @@ These mirror the ADRs in the development plan; treat them as binding.
   projection is the only thing that should ever reach the wire, backed by a runtime egress guard and
   the `trm_security_leak_blocked_total` metric (alert on any increase). Raw `GameState` must never
   be serialized to a client.
+- **Telemetry is the OTHER way state leaves the process**, so it gets the same treatment.
+  `@trm/shared`'s `telemetry.ts` is the single denylist (hands, kept missions, deck order, RNG seed,
+  tokens, cookies, emails) and every surface's Sentry `beforeSend` runs it — server, web, admin,
+  mobile. `apps/web`'s `SECRET_CLASS` additionally blocks the hand/mission trays from Session
+  Replay. Sentry is DSN-gated everywhere: unset ⇒ never initialised.
 - **swc, not tsx.** NestJS DI resolves constructor deps from emitted decorator metadata, which
   esbuild/tsx does **not** produce. Server `dev`/`start` run via `@swc-node/register`; vitest uses
   `unplugin-swc`. Don't switch these to tsx/esbuild — DI silently breaks at runtime.

@@ -49,6 +49,16 @@ export const env = {
   /** Force-update floor for the mobile app: builds below this are told to update. 0 = off. */
   mobileMinBuild: Number(process.env.MOBILE_MIN_BUILD ?? 0),
 
+  // Sentry (src/observability/sentry.ts). Entirely opt-in: an unset DSN means `Sentry.init` is
+  // never called and the SDK stays inert, so tests, CI, local dev, and self-hosters need no
+  // Sentry account. Read here rather than in the SDK so every var has one parse point.
+  /** Sentry DSN. Unset ⇒ error reporting and tracing are off. */
+  sentryDsn: process.env.SENTRY_DSN ?? '',
+  /** Sentry environment tag; defaults to NODE_ENV, else 'development'. */
+  sentryEnvironment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV ?? 'development',
+  /** Fraction of requests traced (0–1, clamped). Raw string — parsed by `telemetrySampleRate`. */
+  sentryTracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
+
   // Mobile push (src/push). Each platform enables only when ALL of its credentials are set.
   fcmProjectId: process.env.FCM_PROJECT_ID ?? '',
   fcmClientEmail: process.env.FCM_CLIENT_EMAIL ?? '',

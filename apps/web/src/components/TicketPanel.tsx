@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { TicketCard } from './TicketCard';
+import { SECRET_CLASS } from '../observability/secrets';
 
 interface Props {
   ticketIds: string[];
@@ -17,7 +18,8 @@ export function TicketPanel({ ticketIds, completedIds }: Props) {
   const ordered = [...ticketIds].sort((a, b) => Number(isDone(a)) - Number(isDone(b)));
 
   return (
-    <div className="ticket-cards">
+    // SECRET_CLASS: kept missions stay secret until scoring — Session Replay must not record them.
+    <div className={`ticket-cards ${SECRET_CLASS}`}>
       {ordered.map((id) => (
         <TicketCard key={id} ticketId={id} completed={isDone(id)} />
       ))}

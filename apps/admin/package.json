@@ -13,6 +13,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@sentry/react": "^10.68.0",
     "@trm/map-data": "workspace:*",
     "@trm/shared": "workspace:*",
     "i18next": "^24.2.0",
@@ -23,6 +24,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@sentry/vite-plugin": "^5.4.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",

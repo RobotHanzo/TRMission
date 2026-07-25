@@ -10,6 +10,7 @@ import { TokenService } from '../auth/token.service';
 import { UserRepo } from '../auth/user.repo';
 import { AuthModule } from '../auth/auth.module';
 import { MetricsService } from '../observability/metrics.service';
+import { SentryErrorReporter } from '../observability/error-reporter';
 import { MapsModule } from '../maps/maps.module';
 import { MapContentRepo } from '../maps/map-content.repo';
 import { PushModule } from '../push/push.module';
@@ -49,11 +50,13 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
         push: PushService,
         leaderboard: LeaderboardService,
         users: UserRepo,
+        reporter: SentryErrorReporter,
       ) =>
         new GameHub(registry, {
           store,
           verifier: new JwtTicketVerifier(tokens),
           metrics,
+          reporter,
           botMoveDelayMs: env.botMoveDelayMs,
           turnTimeoutMs: env.turnTimeoutMs,
           autoPlayPauseAfter: env.autoPlayPauseAfter,
@@ -81,6 +84,7 @@ function makeBoardResolver(mapContents: MapContentRepo): (config: GameConfig) =>
         PushService,
         LeaderboardService,
         UserRepo,
+        SentryErrorReporter,
       ],
     },
   ],

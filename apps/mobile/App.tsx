@@ -13,6 +13,7 @@ import './src/i18n'; // initialise the i18n singleton before any screen uses use
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 import { navigationRef, RootNavigator } from './src/navigation';
 import { RootErrorBoundary } from './src/app/RootErrorBoundary';
+import { navigationIntegration, setSentryUser } from './src/app/sentry';
 import { SERVER_ORIGIN } from './src/config';
 import { watchTokenRotation } from './src/push/register';
 import {
@@ -22,6 +23,7 @@ import {
 import { useOrientationPolicy } from './src/app/useOrientationPolicy';
 import { stashRoomLink } from './src/app/roomLink';
 import { useSession } from './src/store/session';
+import * as Sentry from '@sentry/react-native';
 import { useSoundSetup } from './src/hooks/useSoundSetup';
 
 // Registering the deep-link prefixes lets a cold-start OAuth return (/m/callback) or a
@@ -37,9 +39,13 @@ const linking = {
   },
 };
 
-export default function App() {
+function App() {
   // FCM/APNs rotate device tokens; keep the server registry current for the app's lifetime.
   useEffect(() => watchTokenRotation(), []);
+
+  // Which account hit the error — the id only, never a display name or email (no-op without a DSN).
+  const userId = useSession((s) => s.user?.id ?? null);
+  useEffect(() => setSentryUser(userId), [userId]);
   // Foreground display policy + notification-tap deep links (warm and cold start).
   useEffect(() => {
     installNotificationHandler();
@@ -64,7 +70,12 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <RootErrorBoundary>
-          <NavigationContainer ref={navigationRef} linking={linking}>
+          <NavigationContainer
+            ref={navigationRef}
+            linking={linking}
+            // Names screen-to-screen transactions for Sentry tracing; no-op without a DSN.
+            onReady={() => navigationIntegration.registerNavigationContainer(navigationRef)}
+          >
             <RootNavigator />
           </NavigationContainer>
         </RootErrorBoundary>
@@ -73,3 +84,7 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+
+// `Sentry.wrap` installs the SDK's own touch/navigation breadcrumbs and the auto-performance
+// root span around the whole tree. Inert until `initSentry()` has run with a DSN.
+export default Sentry.wrap(App);

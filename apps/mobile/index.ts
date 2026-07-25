@@ -4,6 +4,7 @@ import '@expo/metro-runtime';
 import './src/shims';
 import { Platform } from 'react-native';
 import { installCrashCapture } from './src/app/crashCapture';
+import { initSentry } from './src/app/sentry';
 import type * as SkiaWebModule from '@shopify/react-native-skia/lib/module/web';
 import type * as ExpoModule from 'expo';
 import type * as AppModule from './App';
@@ -11,6 +12,11 @@ import type * as AppModule from './App';
 // Persist fatal JS errors (message + stack) before RN's release-mode abort — the Apple crash
 // log alone carries only native frames. Installed before the app graph evaluates; no-op on web.
 installCrashCapture();
+
+// Online crash/perf reporting, installed next so it covers the app graph too. Independent of the
+// local capture above by design (see src/app/sentry.ts) and a no-op with no DSN or on the web
+// harness.
+initSentry();
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 if (Platform.OS === 'web') {

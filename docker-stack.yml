@@ -54,6 +54,11 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-1}
       # Maintainer dashboard owners (comma-separated users._id values, NOT emails; served at /admin/).
       DASHBOARD_OWNER_IDS: ${DASHBOARD_OWNER_IDS:-}
+      # Sentry (issue #44) — entirely opt-in: an unset DSN means the SDK is never initialised.
+      # SENTRY_TRACES_SAMPLE_RATE is 0–1 (default 0.1); /metrics and /healthz are never traced.
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-}
     ports:
       - '3001:3001'
     deploy:
@@ -61,6 +66,8 @@ services:
         condition: any
 
   web:
+    # The web/admin bundles bake their Sentry DSN at BUILD time (Vite), so there is nothing to set
+    # here — pass --build-arg SENTRY_DSN=... when building the image.
     image: <registry>/trm-web:latest # replace with your image
     ports:
       - '8080:80'

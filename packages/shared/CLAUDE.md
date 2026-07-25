@@ -25,6 +25,13 @@ UI. Commands: `yarn workspace @trm/shared test` / `… typecheck` / `… lint`.
 - `ids.ts` — branded id types (`PlayerId`, `RouteId`, `CityId`, `TicketId`, `SeatIndex`) + `asPlayerId`
   etc. Branding is what keeps raw strings from being passed where a typed id is expected.
 - `roomCode.ts` — room-code alphabet/generation (no easily-confused glyphs).
+- `telemetry.ts` — the **single scrubbing denylist** for anything shipped to an error/monitoring
+  backend (Sentry, issue #44), applied from all four surfaces' `beforeSend`. It lives here for the
+  same reason `errors.ts` does: four copies would drift, and this one is a security boundary — a
+  hand, a kept mission, a deck order or the RNG seed in a crash report is an anti-cheat leak, not
+  just a privacy one. Deliberately **dependency-free**: typed against a structural event shape so
+  adding it never pulls a Sentry package into the engine-adjacent graph. Add a new secret field to
+  `GameState`/`SelfView` ⇒ add its key name here.
 
 ## Conventions
 

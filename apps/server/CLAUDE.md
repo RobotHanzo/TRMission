@@ -57,6 +57,29 @@ Wires helmet (CSP off so Scalar's CDN loads — tighten in prod), cookie-parser,
 attaches the ws server, and builds the OpenAPI doc from the live app (Scalar at `/docs`, JSON at
 `/api/openapi.json`). Metrics at `/metrics` (prom-client, `src/observability/`).
 
+## Observability (`src/observability/`)
+
+Two signals, wired at the same call sites: **metrics** say how often, **error reports** say what.
+
+- `metrics.service.ts` / `hooks.ts` — prom-client at `/metrics`.
+- `sentry.ts` + `instrument.mjs` — Sentry, opt-in via `SENTRY_DSN` (unset ⇒ `Sentry.init` is never
+  called and the whole SDK is inert). `instrument.mjs` is the process's **first `--import`**
+  (`node --import ./instrument.mjs src/main.ts`): under ESM the module graph is linked before any
+  of it evaluates, so an import inside `main.ts` would lose the race against `http`/`mongodb` and
+  produce no spans. It is `.mjs` and not `.ts` because `@swc-node/register`'s ESM resolver resolves
+  a relative specifier against `dirname(parentURL)` — for a `--import` the parentURL is the cwd
+  **directory**, so `--import ./src/instrument.ts` lands one level too high and fails to resolve.
+  Loading a plain `.mjs` first goes through Node's own resolver, and it registers swc for the rest
+  of the process. **Do not "simplify" this back into `main.ts`.**
+- `error-reporter.ts` — the framework-free `ErrorReporter` port (same shape as `MetricsHooks`,
+  `NOOP_REPORTER` by default so tests stay silent), wired into `GameHub` for the four
+  "should stay 0" events: the `receive` catch-all, unrecoverable games, bot-driver stalls, and
+  `leak_blocked` — which reports at **fatal** with the two seat ids and nothing else, because
+  attaching the snapshot would commit the very leak the guard just stopped.
+
+Nothing reaches Sentry unscrubbed: `beforeSend`/`beforeSendTransaction`/`beforeBreadcrumb` all run
+`@trm/shared`'s `scrubTelemetryEvent`, the single denylist shared with web/admin/mobile.
+
 ## Env vars (core)
 
 `src/config/env.ts` is the single parse point for all of them.
@@ -69,6 +92,9 @@ known-dev-default value **fails the boot** rather than signing with a public lit
 
 `COOKIE_SECURE` — the Secure attribute on `trm_refresh` + the OAuth/Apple nonce cookies; defaults to
 **on**, set to `0` only to opt out for an http-only deployment.
+
+`SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE` — all optional; an unset DSN turns
+error reporting and tracing off entirely (see Observability above).
 
 Everything else belongs to an area: auth/OAuth/token TTLs → `src/auth/CLAUDE.md`; bots + turn timer →
 `src/ws/CLAUDE.md`; push/APNs/FCM → `src/push/CLAUDE.md`; `DASHBOARD_OWNER_IDS` + purge →

@@ -65,7 +65,21 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # Sentry (issue #44). All optional — an unconfigured repo builds exactly as before.
+          # The DSN/environment/org/project are baked into the web+admin bundles or their upload
+          # config; they are public by design. Ignored by the server image, which reads SENTRY_*
+          # from its runtime environment instead.
           build-args: |
             GIT_COMMIT=${{ github.sha }}
+            SENTRY_DSN=${{ vars.WEB_SENTRY_DSN }}
+            SENTRY_ENVIRONMENT=${{ vars.SENTRY_ENVIRONMENT }}
+            SENTRY_ORG=${{ vars.SENTRY_ORG }}
+            SENTRY_PROJECT=${{ vars.SENTRY_WEB_PROJECT }}
+            SENTRY_ADMIN_PROJECT=${{ vars.SENTRY_ADMIN_PROJECT }}
+          # The upload token is a real secret, so it is mounted into the build steps rather than
+          # passed as a build arg — an arg is recorded in the layer metadata AND in the `type=gha`
+          # cache below, both of which are readable by anyone with repo read access.
+          secrets: |
+            sentry_auth_token=${{ secrets.SENTRY_AUTH_TOKEN }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}

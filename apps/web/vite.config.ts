@@ -1,6 +1,29 @@
 import { defineConfig } from 'vitest/config';
-import type { Connect, Plugin } from 'vite';
+import type { Connect, Plugin, PluginOption } from 'vite';
 import react from '@vitejs/plugin-react';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
+
+// Source-map upload for readable Sentry stack traces. Entirely opt-in: without SENTRY_AUTH_TOKEN
+// (a build-machine secret — never an import.meta.env key, which would ship it in the bundle) the
+// plugin is not installed and the build is byte-for-byte what it was before Sentry existed.
+// Maps are generated only for the upload and deleted afterwards, so they are never served publicly.
+const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN ?? '';
+const uploadSourceMaps = sentryAuthToken !== '';
+const sentryPlugins = (): PluginOption[] =>
+  uploadSourceMaps
+    ? [
+        sentryVitePlugin({
+          authToken: sentryAuthToken,
+          // Omitted rather than undefined: sentry-cli falls back to its own SENTRY_ORG lookup.
+          ...(process.env.SENTRY_ORG ? { org: process.env.SENTRY_ORG } : {}),
+          project: process.env.SENTRY_PROJECT ?? 'trmission-web',
+          // Must match `release` in src/observability/sentry.ts, or the maps bind to nothing.
+          release: { name: process.env.VITE_COMMIT_HASH ?? 'dev' },
+          sourcemaps: { filesToDeleteAfterUpload: ['./dist/**/*.map'] },
+          telemetry: false,
+        }),
+      ]
+    : [];
 
 // Dev proxies REST + WebSocket to the NestJS server so the app is same-origin.
 // Override VITE_SERVER_HOST when the server runs in a Docker sibling container.
@@ -53,8 +76,9 @@ function ogPreviewPlugin(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), ogPreviewPlugin()],
+  plugins: [react(), ogPreviewPlugin(), ...sentryPlugins()],
   build: {
+    sourcemap: uploadSourceMaps ? 'hidden' : false,
     rollupOptions: {
       output: {
         // Split the big, stable third-party libs out of the app chunk so they cache across
@@ -63,9 +87,17 @@ export default defineConfig({
         // heavy map-data/engine geometry is on the landing critical path anyway.
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
+          // Session Replay's recorder is the single biggest piece of the Sentry SDK and is reached
+          // ONLY through the lazily-imported src/observability/replay.ts. Leave it unassigned so
+          // Rollup keeps it in that async chunk — naming a chunk here would hoist it back onto the
+          // landing critical path, which is what this rule set exists to prevent.
+          if (/[\\/]@sentry[\\/]replay(-canvas)?[\\/]/.test(id)) return undefined;
           if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'react';
           if (/[\\/]node_modules[\\/](i18next|react-i18next)[\\/]/.test(id)) return 'i18n';
           if (id.includes('@bufbuild')) return 'protobuf';
+          // The rest of the Sentry SDK changes on its own release cadence — its own chunk so it
+          // caches across app deploys instead of invalidating them.
+          if (id.includes('@sentry')) return 'sentry';
           return 'vendor';
         },
       },

@@ -31,6 +31,7 @@ import { Connection, type CloseFn, type Sink } from './connection';
 import { DevTicketVerifier, type TicketVerifier } from './ticket';
 import { GameNotLiveError, type GameStorePort } from '../persistence/types';
 import { NOOP_METRICS, type MetricsHooks } from '../observability/hooks';
+import { NOOP_REPORTER, type ErrorReporter } from '../observability/error-reporter';
 import { chooseBotAction, isBotId, type BotProfile } from '@trm/bots';
 import { botStepDelayMs } from './bot-pacing';
 import { chooseTimeoutAction, turnActor } from './turn-timeout';
@@ -119,6 +120,9 @@ export interface GameHubOptions {
   /** May be async — custom-map recovery resolves content from Mongo, not just the static registry. */
   boardResolver?: (config: GameConfig) => Board | Promise<Board>;
   metrics?: MetricsHooks;
+  /** Where the loop's "should never happen" failures are reported (Sentry in production, the
+   *  no-op in tests). Paired with `metrics` — the counters say how often, this says what. */
+  reporter?: ErrorReporter;
   /** Pause between consecutive bot moves so humans can follow the action (0 in tests). */
   botMoveDelayMs?: number;
   /** Per-turn time limit (ms); on lapse the server auto-plays a default action for the current
@@ -232,6 +236,7 @@ export class GameHub {
   private readonly store: GameStorePort | undefined;
   private readonly boardResolver: (config: GameConfig) => Board | Promise<Board>;
   private readonly metrics: MetricsHooks;
+  private readonly reporter: ErrorReporter;
   private readonly botMoveDelayMs: number;
   private readonly turnTimeoutMs: number;
   /** gameId → pending per-turn timeout (one per game — there is one player on the clock). */
@@ -316,6 +321,7 @@ export class GameHub {
     this.boardResolver =
       options.boardResolver ?? ((config: GameConfig) => boardForContentHash(config.contentHash));
     this.metrics = options.metrics ?? NOOP_METRICS;
+    this.reporter = options.reporter ?? NOOP_REPORTER;
     this.botMoveDelayMs = options.botMoveDelayMs ?? 600;
     this.turnTimeoutMs = options.turnTimeoutMs ?? DEFAULT_TURN_TIMEOUT_MS;
     this.autoPlayPauseAfter = options.autoPlayPauseAfter ?? DEFAULT_AUTOPLAY_PAUSE_AFTER;
@@ -798,6 +804,10 @@ export class GameHub {
     } catch (err) {
       this.log.error(`unhandled error while processing a frame: ${describeError(err)}`);
       this.metrics.internalError?.();
+      this.reporter.capture(err, 'ws.receive', {
+        gameId: this.connections.get(connId)?.binding?.gameId,
+        player: this.connections.get(connId)?.binding?.player,
+      });
       this.connections
         .get(connId)
         ?.send(
@@ -903,6 +913,7 @@ export class GameHub {
         // The game is dead, the server is fine. Say so instead of dying (issues #22, #26).
         this.log.error(err.message);
         this.metrics.recoveryFailed?.();
+        this.reporter.capture(err, 'hub.recovery_failed', { gameId: binding.gameId });
         conn.send(
           rejectionFrame(
             clientSeq,
@@ -1375,6 +1386,11 @@ export class GameHub {
             `persist kept failing for bot ${profile.playerId} in game ${gameId} after ${this.botPersistRetries + 1} attempts; rescheduling driver`,
           );
           this.metrics.botDriverStalled('persist_failed');
+          this.reporter.captureMessage(
+            'bot driver stalled: write-ahead persist kept failing',
+            'hub.bot_driver_stalled',
+            { reason: 'persist_failed', gameId, bot: profile.playerId },
+          );
           this.scheduleBotDriverRetry(gameId);
         } else if (outcome === 'gameNotLive') {
           // Terminal, not transient: the game's persisted status is no longer LIVE, so nothing
@@ -1449,6 +1465,16 @@ export class GameHub {
           `bot ${profile.playerId} has no legal action (including PASS) in game ${match.session.gameId} phase ${match.session.phase}`,
         );
         this.metrics.botDriverStalled('no_legal_action');
+        this.reporter.captureMessage(
+          'bot driver stalled: no legal action, not even PASS',
+          'hub.bot_driver_stalled',
+          {
+            reason: 'no_legal_action',
+            gameId: match.session.gameId,
+            bot: profile.playerId,
+            phase: match.session.phase,
+          },
+        );
         return 'noLegalAction';
       }
       this.log.warn(
@@ -1481,6 +1507,15 @@ export class GameHub {
     // Egress guard (defence in depth): a snapshot's private `you` must be the recipient's.
     if (snap.you && snap.you.playerId !== (player as string | null)) {
       this.metrics.leakBlocked();
+      // The one alarm in this file that is a SECURITY event, so it reports at 'fatal'. Only the
+      // two seat ids travel — reporting the snapshot itself would commit the very leak the guard
+      // just stopped.
+      this.reporter.captureMessage(
+        'hidden-info egress blocked: snapshot `you` addressed to the wrong seat',
+        'hub.leak_blocked',
+        { gameId: match.session.gameId, expected: player, actual: snap.you.playerId },
+        'fatal',
+      );
       return;
     }
     conn.send(snapshotFrame(snap), ack);

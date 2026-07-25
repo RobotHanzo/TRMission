@@ -98,6 +98,22 @@ publish. Measured on this project 2026-07-25 (`npx @expo/fingerprint .`):
 - Locally, `TRM_OTA_APP_ID` unset means the header is **omitted** (not blank) — the v1-client shape
   the server still serves via its `EXPO_APP_ID` fallback.
 
+### Sentry changed the fingerprint (2026-07-25, issue #44)
+
+`@sentry/react-native` is a native dependency, so adding it moved the runtimeVersion for both
+platforms. **The first OTA published after that change needs a fresh native build on both stores
+first** — until a binary carrying the new fingerprint is out there, nothing matches the update.
+
+The `'@sentry/react-native/expo'` config plugin is deliberately passed **no props**: organization,
+project and auth token come from `SENTRY_ORG`/`SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN` at build time, so
+the plugin entry — and therefore the fingerprint — is identical whether or not an operator has a
+Sentry account. Do not move those into `app.config.ts`; it would make the runtime version depend on
+the builder's environment.
+
+`TRM_SENTRY_DSN`/`_ENVIRONMENT`/`_TRACES_SAMPLE_RATE` ride in `extra` (not a fingerprint input), but
+follow the same lockstep rule as the Google client ids for the reason in the section above: the
+publish lane must set them or an applied update wipes them from the device.
+
 ### The recorded runtime version is per-platform
 
 `npx @expo/fingerprint .` hashes the whole project across all platforms and yields a value that never

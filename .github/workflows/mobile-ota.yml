@@ -48,6 +48,13 @@ jobs:
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
           TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
+          # Sentry (issue #44) — every one optional; unset ⇒ the SDK is never initialised and the
+          # upload steps no-op. TRM_SENTRY_* land in `extra` (runtime config, read by
+          # src/config.ts) and so must appear in EVERY block that re-evaluates app.config.ts,
+          # exactly like the Google client ids above.
+          TRM_SENTRY_DSN: ${{ vars.TRM_SENTRY_DSN }}
+          TRM_SENTRY_ENVIRONMENT: ${{ vars.TRM_SENTRY_ENVIRONMENT }}
+          TRM_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.TRM_SENTRY_TRACES_SAMPLE_RATE }}
         run: |
           for platform in android ios; do
             npx expo-updates runtimeversion:resolve --platform "$platform" --workflow managed \
@@ -80,6 +87,20 @@ jobs:
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}
           TRM_GOOGLE_IOS_CLIENT_ID: ${{ vars.TRM_GOOGLE_IOS_CLIENT_ID }}
           TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
+          # Sentry (issue #44) — every one optional; unset ⇒ the SDK is never initialised and the
+          # upload steps no-op. TRM_SENTRY_* land in `extra` (runtime config, read by
+          # src/config.ts) and so must appear in EVERY block that re-evaluates app.config.ts,
+          # exactly like the Google client ids above.
+          TRM_SENTRY_DSN: ${{ vars.TRM_SENTRY_DSN }}
+          TRM_SENTRY_ENVIRONMENT: ${{ vars.TRM_SENTRY_ENVIRONMENT }}
+          TRM_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.TRM_SENTRY_TRACES_SAMPLE_RATE }}
+          # Source-map upload for the OTA bundle `expo export` produces. With no auth token
+          # SENTRY_DISABLE_AUTO_UPLOAD keeps it from failing the publish for anyone without a
+          # Sentry account.
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_MOBILE_PROJECT }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DISABLE_AUTO_UPLOAD: ${{ secrets.SENTRY_AUTH_TOKEN == '' && 'true' || 'false' }}
           # Expo robot token — authenticates eoas + the channel→branch mapping. Updates are
           # signed at SERVE time by the OTA server's mounted private key; CI holds no
           # signing material (there is deliberately no code-signing secret here).

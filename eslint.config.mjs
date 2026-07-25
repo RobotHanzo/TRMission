@@ -110,6 +110,14 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'off',
     },
   },
+  // apps/server/instrument.mjs: plain Node ESM, loaded by node itself via `--import` before any
+  // TS transform exists (see apps/server/CLAUDE.md). Not covered by the `*.config.*` ignore above.
+  {
+    files: ['apps/server/instrument.mjs'],
+    languageOptions: {
+      globals: { console: 'readonly', process: 'readonly' },
+    },
+  },
   // Tests may use whatever they need.
   {
     files: ['**/*.{spec,test}.ts', '**/test/**/*.ts'],

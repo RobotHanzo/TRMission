@@ -94,6 +94,21 @@ via **signal aspects** (`clear`/`caution`/`stop`, railway semaphore colours) thr
 always paired with a text label, never colour alone. All component class names are `oc-`-prefixed;
 follow that convention for new UI rather than introducing a new prefix or a CSS-in-JS approach.
 
+## Error reporting (`observability/sentry.ts`, issue #44)
+
+`components/AdminErrorBoundary.tsx` wraps `<App/>` in `main.tsx` — without it an uncaught render
+throw leaves a maintainer on a blank page mid-incident. It uses inline styles and reads its strings
+defensively off the i18n singleton, so it still renders when the tokens/CSS or the i18n init is the
+thing that broke.
+
+Sentry is opt-in via the build-time `VITE_SENTRY_DSN` and mirrors `apps/web`'s contract exactly,
+including the lazy-load façade: `observability/report.ts` carries no `@sentry/*` import and pulls in
+`observability/sentry.ts` only once it has seen a DSN, so a DSN-less build doesn't ship the SDK at
+all. Beyond that: `sendDefaultPii: false`, everything through `@trm/shared`'s
+`scrubTelemetryEvent`, tracing on, and Session Replay recorded **only** for erroring sessions.
+`maskAllText`/`maskAllInputs` stay on — this surface is full of account data. No LIVE game's hidden
+state ever reaches this app, so there is no board-specific block list to maintain here.
+
 ## Testing
 
 `vitest.setup.ts` polyfills `window.matchMedia` (jsdom lacks it; the theme resolver touches it) and

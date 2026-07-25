@@ -9,6 +9,7 @@ import { soundPlayer } from '../sound/player';
 import { TicketCard } from './TicketCard';
 import { PlayerHand } from './PlayerHand';
 import { TicketPanel } from './TicketPanel';
+import { SECRET_CLASS } from '../observability/secrets';
 
 // Deal-in tick cadence, kept in step with `.ticket-deal-in` in animations.css (0.12s stagger).
 const DEAL_STAGGER_MS = TICKET_DEAL_STAGGER_MS;
@@ -119,7 +120,9 @@ export function TicketChooser({
   };
 
   return (
-    <section className="ticket-chooser" aria-label={t('chooseTickets')}>
+    // SECRET_CLASS: the offer on the table plus the peek trays below it are all this viewer's
+    // hidden state — Session Replay must not record any of it.
+    <section className={`ticket-chooser ${SECRET_CLASS}`} aria-label={t('chooseTickets')}>
       <div className="tray-head">
         <h4>{t('chooseTickets')}</h4>
         <span className="tray-count">{kept.size}</span>

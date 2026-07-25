@@ -8,6 +8,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { useTranslation } from 'react-i18next';
 import { recordBoundaryError } from './crashCapture';
+import { captureAppError } from './sentry';
 
 function CrashFallback({ onRetry }: { onRetry(): void }): React.JSX.Element {
   const { t } = useTranslation();
@@ -48,7 +49,9 @@ export class RootErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: unknown, info: ErrorInfo): void {
+    // Local first (works offline, survives a wedged network), then the online report.
     recordBoundaryError(error, info.componentStack ?? undefined);
+    captureAppError(error, 'mobile.render');
   }
 
   private readonly retry = (): void => {

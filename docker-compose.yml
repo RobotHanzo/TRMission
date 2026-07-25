@@ -119,6 +119,11 @@ services:
       # Maintainer dashboard: comma-separated users._id values (NOT emails) granted the owner
       # role at boot (accounts must already be registered; served at /admin/ by the web container).
       DASHBOARD_OWNER_IDS: ${DASHBOARD_OWNER_IDS:-}
+      # Sentry (issue #44) — entirely opt-in: an unset DSN means the SDK is never initialised.
+      # SENTRY_TRACES_SAMPLE_RATE is 0–1 (default 0.1); /metrics and /healthz are never traced.
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-}
     depends_on:
       mongo:
         condition: service_healthy
@@ -131,6 +136,12 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      # The web + admin bundles are static: their Sentry config is BAKED AT BUILD TIME by Vite,
+      # not read from the container's environment. A DSN is a public ingest endpoint, so shipping
+      # it in the bundle is fine; changing it means rebuilding the image.
+      args:
+        SENTRY_DSN: ${WEB_SENTRY_DSN:-}
+        SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
     depends_on:
       - server
     ports:

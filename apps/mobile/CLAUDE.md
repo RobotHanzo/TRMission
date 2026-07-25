@@ -48,6 +48,9 @@ Read the one for the area you're touching (Claude Code loads them on demand):
   public GPG-signed prebuilt-artifact Maven via `@rnrepo/expo-config-plugin`, used to cut the Android
   CI native build; it auto-falls back to source per library). EAS and any paid relay stay out. This
   re-aligns with the design spec, which already scoped the ban to "no _paid_ SaaS in the delivery chain."
+  **Sentry** (issue #44) sits inside that carve-out: it is not in the delivery chain, its free tier
+  is sufficient, and it is self-hostable — and the whole integration is DSN-gated, so a build with
+  no DSN never talks to it at all.
 - Yarn 4 `nodeLinker: node-modules` (Metro can't resolve PnP). `apps/mobile/{android,ios,.expo}` are
   git-ignored — Continuous Native Generation regenerates them via `expo prebuild` in CI.
 
@@ -99,6 +102,32 @@ this surface; a device smoke is still the real acceptance bar.
   (`browser_handle_dialog` / `page.on('dialog')`).
 - **Selectors**: RNW emits `testID` as `data-testid`; the accessibility tree mirrors RN
   accessibility props (roles/labels), so a11y snapshots are the primary way to target UI.
+
+## Error reporting (`src/app/sentry.ts`, issue #44)
+
+`@sentry/react-native` + its `'@sentry/react-native/expo'` config plugin. Opt-in via
+`TRM_SENTRY_DSN` → `extra.sentryDsn` → `src/config.ts`; unset ⇒ `Sentry.init` is never called.
+Initialised from `index.ts` right after the shims and `installCrashCapture()`, and skipped entirely
+on the RNW web harness.
+
+- **`crashCapture.ts` stays.** It is the offline/TestFlight fallback (AsyncStorage → Settings share
+  sheet) and needs no network or account; Sentry is the online path. `RootErrorBoundary` writes the
+  local record **first**, then reports. Deliberately independent — a wedged network must not cost us
+  the report we already have locally.
+- The plugin is passed **no props**: org/project/token come from `SENTRY_ORG`/`SENTRY_PROJECT`/
+  `SENTRY_AUTH_TOKEN` at build time, which keeps the plugin entry (and so the OTA fingerprint)
+  identical whether or not a Sentry account is configured.
+- **Adding the dependency changed the `runtimeVersion` fingerprint**: the first OTA published after
+  this landed needs a fresh native build on both stores first, or no installed binary will match it.
+- `TRM_SENTRY_*` must be set on **every** env block that re-evaluates `app.config.ts` — both store
+  lanes AND the OTA publish lane, because an applied update's manifest replaces the binary's
+  `extra`. Same lockstep rule as the Google client ids.
+- **Mobile Session Replay is wired but OFF** (both sample rates default to 0). It records the
+  screen, which on a hidden-information game includes the player's hand, and the Skia board is a
+  single native view whose masking has not been verified on a device. Verify masking on a real
+  device before raising either rate.
+- The iOS privacy manifest declares crash/performance/other-diagnostic collection (not linked to
+  identity, not tracking) — keep it in step if the SDK's collection changes.
 
 ## OTA updates (expo-updates + self-hosted expo-open-ota)
 

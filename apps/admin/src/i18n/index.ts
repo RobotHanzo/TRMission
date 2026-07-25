@@ -474,6 +474,14 @@ const zhHant = {
     resultAllFailed: '所有裝置發送皆失敗',
     resultDisabled: '推播尚未啟用(伺服器未設定 FCM/APNs 憑證)',
   },
+  // The root error boundary's recovery screen (components/AdminErrorBoundary.tsx).
+  crash: {
+    title: '發生了一點問題',
+    body: '主控台遇到未預期的錯誤。請再試一次;若持續發生,請重新整理頁面。',
+    retry: '再試一次',
+    reload: '重新整理頁面',
+    reference: '錯誤代碼',
+  },
 };
 
 // Keep the SAME key tree in both languages.
@@ -958,6 +966,13 @@ const en: typeof zhHant = {
     resultNoDevices: 'No devices registered for this account',
     resultAllFailed: 'All device deliveries failed',
     resultDisabled: 'Push is disabled (no FCM/APNs credentials configured server-side)',
+  },
+  crash: {
+    title: 'Something went wrong',
+    body: 'The dashboard hit an unexpected error. Try again — if it keeps happening, reload the page.',
+    retry: 'Try again',
+    reload: 'Reload page',
+    reference: 'Reference',
   },
 };
 

@@ -1,5 +1,6 @@
 // Learn more: https://docs.expo.dev/guides/monorepo/
 const { getDefaultConfig } = require('expo/metro-config');
+const { withSentryConfig } = require('@sentry/react-native/metro');
 const path = require('node:path');
 
 const projectRoot = __dirname;
@@ -21,4 +22,6 @@ config.resolver.nodeModulesPaths = [
 // bump that flips the default fails loud here instead of at bundle time.
 config.resolver.unstable_enablePackageExports = true;
 
-module.exports = config;
+// Stamps a debug id into the bundle + source map so the maps uploaded by the release lanes bind
+// to the exact bundle that shipped. Harmless when Sentry is unconfigured — it only adds the id.
+module.exports = withSentryConfig(config);

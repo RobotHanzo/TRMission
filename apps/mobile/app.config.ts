@@ -111,10 +111,33 @@ const config: ExpoConfig = {
     // file-system, C617.1), free disk space (E174.1), system boot time (uptime clocks, 35F9.1).
     // No tracking, no tracking domains; App Store Connect's App Privacy questionnaire (accounts,
     // UGC, push tokens — no ads/analytics) is filled separately per docs/release/*.
+    // Sentry (issue #44) collects crash, performance and other diagnostic data — declared below.
+    // All three are app-functionality-only, NOT linked to identity (the only identifier attached
+    // is the server-minted account id, and `sendDefaultPii: false` keeps IPs off the events) and
+    // NOT used for tracking, which is why NSPrivacyTracking stays false.
     privacyManifests: {
       NSPrivacyTracking: false,
       NSPrivacyTrackingDomains: [],
-      NSPrivacyCollectedDataTypes: [],
+      NSPrivacyCollectedDataTypes: [
+        {
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeCrashData',
+          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeTracking: false,
+          NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+        },
+        {
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypePerformanceData',
+          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeTracking: false,
+          NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+        },
+        {
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeOtherDiagnosticData',
+          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeTracking: false,
+          NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+        },
+      ],
       NSPrivacyAccessedAPITypes: [
         {
           NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryUserDefaults',
@@ -219,6 +242,14 @@ const config: ExpoConfig = {
         },
       },
     ],
+    // Error/performance monitoring (issue #44). Deliberately passed NO props: the plugin falls
+    // back to the SENTRY_ORG / SENTRY_PROJECT / SENTRY_AUTH_TOKEN environment variables at BUILD
+    // time, which keeps the plugin entry — and therefore the OTA runtimeVersion fingerprint —
+    // identical whether or not a Sentry account is configured. Passing organization/project here
+    // would stamp them into the config and make the fingerprint depend on the operator's env.
+    // NOTE: adding this dependency at all changes the fingerprint, so the first OTA after this
+    // lands needs a fresh native build on both stores (docs/mobile/ota.md).
+    '@sentry/react-native/expo',
     // Injects the Live Activity widget-extension target into the CNG-generated Xcode project
     // (issue #43) and copies the shared ActivityKit contract into it. Kept BEFORE RNRepo, which
     // wants to run last, and after everything that could still rename the app target.
@@ -243,6 +274,14 @@ const config: ExpoConfig = {
     // GOOGLE_MOBILE_CLIENT_IDS. Empty here ⇒ the Google button no-ops until configured.
     googleWebClientId: process.env.TRM_GOOGLE_WEB_CLIENT_ID ?? '',
     googleIosClientId: process.env.TRM_GOOGLE_IOS_CLIENT_ID ?? '',
+    // Sentry runtime config (src/config.ts → src/app/sentry.ts). A DSN is a public ingest
+    // endpoint, not a credential; the source-map auth token is a build-time env var and never
+    // appears here. Empty DSN ⇒ the SDK is never initialised.
+    sentryDsn: process.env.TRM_SENTRY_DSN ?? '',
+    sentryEnvironment: process.env.TRM_SENTRY_ENVIRONMENT ?? '',
+    sentryTracesSampleRate: process.env.TRM_SENTRY_TRACES_SAMPLE_RATE ?? '',
+    sentryReplaySampleRate: process.env.TRM_SENTRY_REPLAY_SAMPLE_RATE ?? '',
+    sentryReplayErrorSampleRate: process.env.TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE ?? '',
   },
 };
 

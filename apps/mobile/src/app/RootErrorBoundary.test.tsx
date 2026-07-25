@@ -9,6 +9,7 @@ jest.mock('expo-splash-screen', () => ({
 import { fireEvent, render } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import '../i18n';
+import * as Sentry from '@sentry/react-native';
 import { RootErrorBoundary } from './RootErrorBoundary';
 import { getLastCrash } from './crashCapture';
 
@@ -40,6 +41,12 @@ describe('RootErrorBoundary', () => {
       const rec = await getLastCrash();
       expect(rec?.message).toBe('Error: kaboom');
       expect(rec?.source).toBe('boundary');
+
+      // The local record above is the offline fallback; the same error also goes out to Sentry
+      // (a no-op without a DSN — __mocks__/@sentry/react-native.js stands in for the uninit'd SDK).
+      expect(Sentry.captureException).toHaveBeenCalled();
+      const [reported] = (Sentry.captureException as jest.Mock).mock.calls[0] as [unknown];
+      expect((reported as Error).message).toBe('kaboom');
     } finally {
       quiet.mockRestore();
     }

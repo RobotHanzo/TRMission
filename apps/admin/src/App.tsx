@@ -21,6 +21,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { DashboardPermission } from '@trm/shared';
 import { useSession } from './store/session';
+import { setSentryUser } from './observability/report';
 import { useUi, type AdminView } from './store/ui';
 import { DeniedView } from './views/DeniedView';
 import { OverviewView } from './views/OverviewView';
@@ -103,6 +104,12 @@ export default function App() {
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
+
+  // Which maintainer hit the error — the account id only, never their display name or email
+  // (no-op without a Sentry DSN).
+  useEffect(() => {
+    setSentryUser(session.user?.id ?? null);
+  }, [session.user?.id]);
 
   if (session.phase === 'booting' || session.phase === 'unauthenticated') {
     return <div className="oc-gate oc-muted">{t('common.loading')}</div>;

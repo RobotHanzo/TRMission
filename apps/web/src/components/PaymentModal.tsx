@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { CARD_COLOR_TOKENS } from '../theme/colors';
 import type { Payment } from '../game/payments';
 import { TrainCarCard } from './TrainCarCard';
+import { SECRET_CLASS } from '../observability/secrets';
 
 interface Props {
   title: string;
@@ -49,7 +50,8 @@ export function PaymentModal({ title, options, onPick, onCancel }: Props) {
         {options.length === 0 ? (
           <p className="muted">{t('cannotAfford')}</p>
         ) : (
-          <ul className="payment-options card-options">
+          // SECRET_CLASS: every option here is a readout of the viewer's hidden hand.
+          <ul className={`payment-options card-options ${SECRET_CLASS}`}>
             {options.map((p, i) => (
               <li key={i}>
                 {(() => {
