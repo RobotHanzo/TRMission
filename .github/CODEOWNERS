@@ -1,0 +1,6 @@
+# Claude Code hook configuration executes shell/Python on every agent tool
+# call and can inject arbitrary text into agent context. Changes here
+# require review sign-off.
+/.claude/settings.json @RobotHanzo
+/.claude/settings.local.json @RobotHanzo
+/.claude/hooks/ @RobotHanzo
