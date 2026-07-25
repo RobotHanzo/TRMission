@@ -1,12 +1,13 @@
 // The encyclopedia's calm auto-playing demo driver, shared web+mobile: pacing, the on-behalf
-// performance of `await` beats (the demo has no learner), and the play/pause/step/loop machine
-// over useScenarioPlayer. Each platform renders its own chrome around the returned controls.
+// performance of `await` beats (a playing clip has no learner), the interaction gate that lets a
+// PAUSED clip's viewer perform the narrated step themselves instead, and the play/pause/step/loop
+// machine over useScenarioPlayer. Each platform renders its own chrome around the returned controls.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { asPlayerId } from '@trm/shared';
 import { legalActions } from '@trm/engine';
 import type { SandboxSocket } from '../net/sandboxSocket';
 import type { GameStoreApi } from '../store/game';
-import type { ExpectSpec, Lesson } from './types';
+import type { ActionGate, Beat, ExpectSpec, Lesson } from './types';
 import { useScenarioPlayer, type PerformAwait, type ScenarioPlayer } from './useScenarioPlayer';
 
 // Calm auto-advance pacing for the read-first demo (ms). `info` beats linger long enough to read
@@ -16,8 +17,9 @@ export const INFO_MS = 4200;
 export const AWAIT_MS = 1600;
 export const LOOP_PAUSE_MS = 3400;
 
-/** Perform an `await` beat on the viewer's behalf (the encyclopedia demo has no learner, so it
- *  plays the highlighted move for them). CLAIM_ROUTE/BUILD_STATION pick the first legal payment
+/** Perform an `await` beat on the viewer's behalf (a playing clip has no learner, so it plays the
+ *  highlighted move for them — a paused one waits for their own click instead, see `demoGate`).
+ *  CLAIM_ROUTE/BUILD_STATION pick the first legal payment
  *  for the beat's target (mirrors what the guided tutorial's real learner would click);
  *  RESOLVE_TUNNEL stays unsupported — that demo is authored as an `auto` beat instead. */
 export function performAwait(cmd: SandboxSocket, expect: ExpectSpec, viewer: string): void {
@@ -61,6 +63,14 @@ export function performAwait(cmd: SandboxSocket, expect: ExpectSpec, viewer: str
   }
 }
 
+/** The demo stage's interaction gate. An `await` beat keeps exactly the affordance it narrates live
+ *  — its caption is written for a learner ("click the highlighted route to claim it"), and a PAUSED
+ *  clip never reaches the auto-perform, so the viewer's own click is then the only way that step
+ *  can happen. Everything else locks the HUD, so a stray tap can't derail the script. */
+export function demoGate(beat: Beat | null): ActionGate {
+  return beat && beat.mode === 'await' ? beat.expect : 'locked';
+}
+
 export interface EncyclopediaDemo {
   player: ScenarioPlayer;
   playing: boolean;
@@ -68,10 +78,18 @@ export interface EncyclopediaDemo {
   /** Pause, then rebuild-and-replay to the neighbouring beat. */
   stepTo(target: number): void;
   restartAndPlay(): void;
+  /** Pass to the stage as `actionGate` — see `demoGate`. */
+  gate: ActionGate;
+  /** Wire to the stage's `onPendingClaim`: while the viewer's own tap holds a payment dialog open,
+   *  suspend the auto-perform so it can't claim the target out from under their choice. */
+  onPendingClaim(kind: 'route' | 'station' | null): void;
 }
 
 export function useEncyclopediaDemo(entry: Lesson, store: GameStoreApi): EncyclopediaDemo {
   const [playing, setPlaying] = useState(true);
+  // The viewer's own tap opened a payment dialog on an `await` beat: hold the auto-perform until
+  // they resolve (or dismiss) it, so both can't claim the same target.
+  const [heldByViewer, setHeldByViewer] = useState(false);
   // Paused → `auto` beats hold their frame too (so stepping/pausing freezes the whole demo).
   const player = useScenarioPlayer(entry, store, playing);
   // A stable ref so the single timer effect always acts on the latest player API without having
@@ -89,18 +107,25 @@ export function useEncyclopediaDemo(entry: Lesson, store: GameStoreApi): Encyclo
   const stepTo = useCallback(
     (target: number): void => {
       setPlaying(false);
+      setHeldByViewer(false); // the seek rebuilds the sandbox; any dialog it held is moot
       playerRef.current.seek(target, performAwaitBeat);
     },
     [performAwaitBeat],
   );
   const restartAndPlay = useCallback((): void => {
     playerRef.current.restart();
+    setHeldByViewer(false);
     setPlaying(true);
   }, []);
+  const onPendingClaim = useCallback(
+    (kind: 'route' | 'station' | null): void => setHeldByViewer(kind !== null),
+    [],
+  );
 
   // The one calm driver. While playing: an `info` beat waits a readable moment then advances; an
-  // `await` beat is performed for the viewer; an `auto` beat is already advanced inside the
-  // scenario player. When the clip finishes it loops back to the start after a gentle pause.
+  // `await` beat is performed for the viewer (unless they are mid-payment-dialog on it themselves);
+  // an `auto` beat is already advanced inside the scenario player. When the clip finishes it loops
+  // back to the start after a gentle pause.
   useEffect(() => {
     if (!playing) return;
     const p = playerRef.current;
@@ -116,12 +141,20 @@ export function useEncyclopediaDemo(entry: Lesson, store: GameStoreApi): Encyclo
     }
     if (b.mode === 'await') {
       const cmd = p.commands;
-      if (!cmd) return;
+      if (!cmd || heldByViewer) return;
       const id = setTimeout(() => performAwait(cmd, b.expect, entry.viewer), AWAIT_MS);
       return () => clearTimeout(id);
     }
     return; // 'auto' beats self-advance in useScenarioPlayer
-  }, [playing, player.index, player.done, entry.viewer]);
+  }, [playing, player.index, player.done, entry.viewer, heldByViewer]);
 
-  return { player, playing, setPlaying, stepTo, restartAndPlay };
+  return {
+    player,
+    playing,
+    setPlaying,
+    stepTo,
+    restartAndPlay,
+    gate: demoGate(player.beat),
+    onPendingClaim,
+  };
 }

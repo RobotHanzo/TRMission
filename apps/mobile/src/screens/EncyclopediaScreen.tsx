@@ -233,7 +233,8 @@ function EncyclopediaPlayer({
   const tabBarPad = useTabBarPad();
   const reduced = useReducedMotion();
   const store = useGameStoreApi(); // the isolated store provided by SandboxProvider
-  const { player, playing, setPlaying, stepTo, restartAndPlay } = useEncyclopediaDemo(entry, store);
+  const { player, playing, setPlaying, stepTo, restartAndPlay, gate, onPendingClaim } =
+    useEncyclopediaDemo(entry, store);
   const snapshot = useGameStore((s) => s.snapshot);
   const beat = player.beat;
   const spotlight = beat?.spotlight;
@@ -257,8 +258,12 @@ function EncyclopediaPlayer({
             sandbox
             demo
             demoDock={dockTabForBeat(beat)}
-            // The demo performs every move itself; the viewer's board/market taps stay inert.
-            actionGate="locked"
+            // A playing clip performs its own moves, but an `await` beat's caption is written for a
+            // learner ("click the highlighted route…") and a PAUSED clip never reaches that
+            // auto-perform — so the beat's own affordance stays tappable and the viewer can follow
+            // the instruction. Every other tap is still inert (see `demoGate`).
+            actionGate={gate}
+            onPendingClaim={onPendingClaim}
             onLeave={onBack}
             spotlightCities={spotlightCities}
             frameTarget={frameTarget}
@@ -347,6 +352,7 @@ function EncyclopediaPlayer({
             </Text>
             <View style={styles.spacer} />
             <RoundBtn
+              testID="enc-prev-step"
               label={t('tutorial.prevStep')}
               disabled={player.index <= 0}
               onPress={() => stepTo(player.index - 1)}
@@ -367,6 +373,7 @@ function EncyclopediaPlayer({
               {playing ? <Pause size={22} color="#fff" /> : <Play size={22} color="#fff" />}
             </Pressable>
             <RoundBtn
+              testID="enc-next-step"
               label={t('tutorial.nextStep')}
               disabled={player.index >= player.total - 1}
               onPress={() => stepTo(player.index + 1)}

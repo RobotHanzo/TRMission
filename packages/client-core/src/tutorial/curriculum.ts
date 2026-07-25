@@ -4,8 +4,8 @@
 // perform (keep tickets, draw a card) — the claim practice targets R42 (Pingtung–Chaozhou,
 // GRAY length 1) and the station practice targets Taipei's first station (cost 1), both affordable
 // with any single card. Both are `await` beats: the learner performs the real click themselves (the
-// guided tutorial waits for it; the encyclopedia's read-only demo auto-performs it for the viewer —
-// see `performAwait` in EncyclopediaModal.tsx).
+// guided tutorial waits for it; the encyclopedia's demo auto-performs it while playing and accepts
+// the viewer's own click while paused — see `performAwait`/`demoGate` in `encyclopedia.ts`).
 import { asPlayerId, type SeatIndex } from '@trm/shared';
 import type { Action, GameState } from '@trm/engine';
 import type { Lesson, Scope } from './types';

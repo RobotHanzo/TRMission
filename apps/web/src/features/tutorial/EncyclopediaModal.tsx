@@ -3,7 +3,8 @@
 // them a calm, self-contained board demo that auto-plays the lesson's beats with an in-panel caption
 // bar. Unlike the full-screen tutorial it has NO dim scrim and NO floating coachmark — the demo is a
 // quiet clip contained entirely inside the modal. It runs on its OWN isolated sandbox stores (via
-// SandboxProvider), so the live game underneath keeps running untouched.
+// SandboxProvider), so the live game underneath keeps running untouched. Interaction is gated to
+// whatever the current beat narrates (`demoGate`), shared with mobile's encyclopedia tab.
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pause, Play, RotateCcw, SkipBack, SkipForward, X } from 'lucide-react';
@@ -20,7 +21,8 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
   const { t } = useTranslation();
   const store = useGameStoreApi(); // the isolated store provided by SandboxProvider
   // The calm auto-play/step/loop machine is shared with mobile (client-core encyclopedia).
-  const { player, playing, setPlaying, stepTo, restartAndPlay } = useEncyclopediaDemo(entry, store);
+  const { player, playing, setPlaying, stepTo, restartAndPlay, gate, onPendingClaim } =
+    useEncyclopediaDemo(entry, store);
   const snapshot = useGameStore((s) => s.snapshot);
   const beat = player.beat;
   const spotlight = beat?.spotlight;
@@ -46,6 +48,12 @@ function EncyclopediaPlayer({ entry }: { entry: Lesson }) {
           onLeave={() => {}}
           spotlightCities={spotlightCities}
           frameTarget={frameTarget}
+          // An `await` beat's caption is written for a learner ("click the highlighted route…") and
+          // a PAUSED clip never reaches the auto-perform, so that beat's own affordance stays
+          // clickable; every other click is inert, which also stops a stray one from derailing the
+          // scripted scenario mid-clip (see `demoGate`).
+          actionGate={gate}
+          onPendingClaim={onPendingClaim}
         />
       </div>
       <div className="enc-caption">
