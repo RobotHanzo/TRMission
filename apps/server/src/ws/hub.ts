@@ -455,6 +455,31 @@ export class GameHub {
   }
 
   /**
+   * The engine's authoritative seat for a member of a game — derived from the frozen
+   * `turnOrder`, never the mutable room document (whose seat numbers can renumber after a
+   * `RoomRepo.leave` once the game has started). Returns `null` when the game can't be resolved
+   * at all, or when `playerId` never held a seat in it.
+   *
+   * Recovers the match from the store when it isn't currently resident (same fast-path/fallback
+   * shape as `isGameOver`/`endGame`) — a cold recovery replays a full snapshot + action tail, so
+   * callers MUST already have confirmed `playerId` is a legitimate member of the room via a cheap
+   * local check before calling this. It is not a safe existence probe for an arbitrary caller.
+   */
+  async seatOf(gameId: string, playerId: PlayerId): Promise<number | null> {
+    let match = this.registry.get(gameId);
+    if (!match) {
+      try {
+        match = (await this.recoverMatch(gameId)) ?? undefined;
+      } catch (err) {
+        if (!(err instanceof GameUnrecoverableError)) throw err;
+        return null;
+      }
+    }
+    if (!match) return null;
+    return match.session.seatOf(playerId);
+  }
+
+  /**
    * Complete a live game immediately after the room-level vote authorizes it. The synthetic
    * END_GAME action travels through the same queue and write-ahead path as gameplay commands, so
    * recovery and replay reproduce the scored GAME_OVER state exactly. The room service owns

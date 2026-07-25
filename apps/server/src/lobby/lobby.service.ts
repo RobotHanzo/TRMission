@@ -658,8 +658,21 @@ export class LobbyService {
     await this.assertNotDisabled(user.userId);
     const room = await this.require(code);
     if (!room.gameId) throw new BadRequestException('game has not started');
-    const seat = this.seatOf(room, user.userId);
-    if (seat < 0) throw new ForbiddenException('not a member of this game');
+    // Presence-only check against the already-fetched room doc, BEFORE any hub/DB interaction: a
+    // true non-member gets an instant, purely local rejection with zero engine recovery
+    // triggered — `hub.seatOf` recovers the match from durable storage when it isn't resident,
+    // which is expensive and must never be forceable on demand against an arbitrary room code by
+    // someone who was never seated in it. A STARTED room's seated membership can only ever shrink
+    // (`RoomRepo.leave` no-ops outside LOBBY / a finished game), never grow, so a non-member here
+    // can never later appear in `room.members` — this gate is stable and non-racy.
+    if (!room.members.some((m) => m.userId === user.userId)) {
+      throw new ForbiddenException('not a member of this game');
+    }
+    // Presence confirmed — now derive the actual SEAT NUMBER from the engine's frozen turnOrder,
+    // never the mutable room doc, whose seat numbers can renumber after a leave/rejoin once the
+    // game has started (see `RoomRepo.leave`).
+    const seat = await this.hub.seatOf(room.gameId, asPlayerId(user.userId));
+    if (seat == null || seat < 0) throw new ForbiddenException('not a member of this game');
     return { gameId: room.gameId, ticket: this.ticketFor(room.gameId, user.userId, seat) };
   }
 

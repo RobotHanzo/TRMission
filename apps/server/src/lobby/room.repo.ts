@@ -325,49 +325,62 @@ export class RoomRepo implements OnModuleInit {
    *  leaving a LOBBY: a spectator just drops off `spectators`; a seated member drops the member,
    *  keeps seats contiguous, and transfers host or closes exactly as before. A no-op for anything
    *  else — a still-LIVE game's seats are governed by the in-game vote/timeout machinery, not
-   *  this endpoint. */
+   *  this endpoint — AND for a caller who isn't a member/spectator of the room at all.
+   *
+   *  Atomic retry loop, same shape as `join`/`addBot`/`becomePlayer`: every write is CAS-guarded
+   *  on the exact status and member-count this decision was based on, so a `leave` that read the
+   *  room while still LOBBY can never land its whole-array overwrite after a concurrent
+   *  `markStarted` has already frozen the engine's seat assignment from a different snapshot — the
+   *  write's precondition fails, and the retry re-reads the now-STARTED room and correctly no-ops. */
   async leave(code: string, userId: string, gameIsOver = false): Promise<RoomDoc | null> {
-    const room = await this.col.findOne({ _id: code });
-    if (!room) return null;
-    if (room.status !== 'LOBBY' && !(room.status === 'STARTED' && gameIsOver)) return room;
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const room = await this.col.findOne({ _id: code });
+      if (!room) return null;
+      if (room.status !== 'LOBBY' && !(room.status === 'STARTED' && gameIsOver)) return room;
 
-    if (room.spectators?.some((s) => s.userId === userId)) {
-      await this.col.updateOne(
-        { _id: code },
-        { $pull: { spectators: { userId } }, $set: { updatedAt: new Date() } },
-      );
-      return this.col.findOne({ _id: code });
-    }
+      const isSpectator = room.spectators?.some((s) => s.userId === userId) ?? false;
+      const isMember = room.members.some((m) => m.userId === userId);
+      if (!isSpectator && !isMember) return room; // not a member/spectator of this room: no-op
 
-    const remaining = room.members
-      .filter((m) => m.userId !== userId)
-      .map((m, i) => ({ ...m, seat: i }));
-    if (remaining.length === 0) {
-      await this.col.updateOne(
-        { _id: code },
-        { $set: { status: 'CLOSED', members: [], updatedAt: new Date() } },
-      );
-    } else if (room.hostId === userId) {
-      const nextHuman = remaining.find((m) => !m.isBot);
-      if (!nextHuman) {
-        // Host leaving a room with only bots left — close it (there is no such thing as a bot host).
-        await this.col.updateOne(
-          { _id: code },
-          { $set: { status: 'CLOSED', members: [], updatedAt: new Date() } },
+      if (isSpectator) {
+        const res = await this.col.updateOne(
+          { _id: code, status: room.status, 'spectators.userId': userId },
+          { $pull: { spectators: { userId } }, $set: { updatedAt: new Date() } },
         );
-      } else {
-        await this.col.updateOne(
-          { _id: code },
-          { $set: { members: remaining, hostId: nextHuman.userId, updatedAt: new Date() } },
-        );
+        if (res.modifiedCount === 1) return this.col.findOne({ _id: code });
+        continue; // raced — retry with a fresh read
       }
-    } else {
-      await this.col.updateOne(
-        { _id: code },
-        { $set: { members: remaining, updatedAt: new Date() } },
-      );
+
+      const remaining = room.members
+        .filter((m) => m.userId !== userId)
+        .map((m, i) => ({ ...m, seat: i }));
+      const guard = { _id: code, status: room.status, members: { $size: room.members.length } };
+      let res;
+      if (remaining.length === 0) {
+        res = await this.col.updateOne(guard, {
+          $set: { status: 'CLOSED', members: [], updatedAt: new Date() },
+        });
+      } else if (room.hostId === userId) {
+        const nextHuman = remaining.find((m) => !m.isBot);
+        if (!nextHuman) {
+          // Host leaving a room with only bots left — close it (there is no such thing as a bot host).
+          res = await this.col.updateOne(guard, {
+            $set: { status: 'CLOSED', members: [], updatedAt: new Date() },
+          });
+        } else {
+          res = await this.col.updateOne(guard, {
+            $set: { members: remaining, hostId: nextHuman.userId, updatedAt: new Date() },
+          });
+        }
+      } else {
+        res = await this.col.updateOne(guard, {
+          $set: { members: remaining, updatedAt: new Date() },
+        });
+      }
+      if (res.modifiedCount === 1) return this.col.findOne({ _id: code });
+      // raced — retry with a fresh read
     }
-    return this.col.findOne({ _id: code });
+    throw new Error('leave contention');
   }
 
   /** Host-only, LOBBY-only: merge a settings patch onto the room. */
@@ -615,53 +628,53 @@ export class RoomRepo implements OnModuleInit {
    * (kicking a seated player mid-game is a larger change than this — out of scope here), so that
    * case still returns 'started'. A SPECTATOR of a STARTED room, though, previously had no remedy
    * at all once the game began (the host could neither kick them nor disable spectating), so that
-   * case is now allowed through regardless of room status.
+   * case is allowed through regardless of room status.
+   *
+   * Atomic retry loop, same shape as `join`/`addBot`/`becomePlayer`: the members-array write is
+   * CAS-guarded on LOBBY status and member-count, so a kick decided against a stale LOBBY read
+   * can never land after a concurrent `markStarted` has already frozen the engine's seat
+   * assignment — the write's precondition fails and the retry re-reads the now-STARTED room,
+   * returning 'started' instead of corrupting it. The spectator write needs no status guard: it
+   * touches only `spectators`/`bannedUserIds`, never seats, and is legal at any status anyway.
    */
   async kick(code: string, hostId: string, targetId: string): Promise<KickResult> {
-    const room = await this.col.findOne({ _id: code });
-    if (!room) return 'not_found';
-    if (room.hostId !== hostId) return 'forbidden';
-    if (targetId === hostId) return 'invalid';
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const room = await this.col.findOne({ _id: code });
+      if (!room) return 'not_found';
+      if (room.hostId !== hostId) return 'forbidden';
+      if (targetId === hostId) return 'invalid';
 
-    const isSpectator = room.spectators?.some((s) => s.userId === targetId) ?? false;
+      if (room.spectators?.some((s) => s.userId === targetId)) {
+        const res = await this.col.updateOne(
+          { _id: code, 'spectators.userId': targetId },
+          {
+            $pull: { spectators: { userId: targetId } },
+            $addToSet: { bannedUserIds: targetId },
+            $set: { updatedAt: new Date() },
+          },
+        );
+        if (res.modifiedCount === 1) return (await this.col.findOne({ _id: code })) ?? 'not_found';
+        continue; // raced — retry with a fresh read
+      }
 
-    if (room.status !== 'LOBBY') {
-      if (!isSpectator) return 'started';
-      await this.col.updateOne(
-        { _id: code },
+      // Seated members can only be removed before the engine freezes the seat assignment.
+      if (room.status !== 'LOBBY') return 'started';
+
+      if (!room.members.some((m) => m.userId === targetId)) return 'invalid';
+      const remaining = room.members
+        .filter((m) => m.userId !== targetId)
+        .map((m, i) => ({ ...m, seat: i }));
+      const res = await this.col.updateOne(
+        { _id: code, status: 'LOBBY', members: { $size: room.members.length } },
         {
-          $pull: { spectators: { userId: targetId } },
+          $set: { members: remaining, updatedAt: new Date() },
           $addToSet: { bannedUserIds: targetId },
-          $set: { updatedAt: new Date() },
         },
       );
-      return (await this.col.findOne({ _id: code })) ?? 'not_found';
+      if (res.modifiedCount === 1) return (await this.col.findOne({ _id: code })) ?? 'not_found';
+      // raced — retry with a fresh read
     }
-
-    if (isSpectator) {
-      await this.col.updateOne(
-        { _id: code },
-        {
-          $pull: { spectators: { userId: targetId } },
-          $addToSet: { bannedUserIds: targetId },
-          $set: { updatedAt: new Date() },
-        },
-      );
-      return (await this.col.findOne({ _id: code })) ?? 'not_found';
-    }
-
-    if (!room.members.some((m) => m.userId === targetId)) return 'invalid';
-    const remaining = room.members
-      .filter((m) => m.userId !== targetId)
-      .map((m, i) => ({ ...m, seat: i }));
-    await this.col.updateOne(
-      { _id: code },
-      {
-        $set: { members: remaining, updatedAt: new Date() },
-        $addToSet: { bannedUserIds: targetId },
-      },
-    );
-    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+    throw new Error('kick contention');
   }
 
   /** Any seated member (not just the host) records their advisory rematch preference. */
@@ -764,31 +777,41 @@ export class RoomRepo implements OnModuleInit {
   /** A seated non-host member gives up their seat to watch instead: everything but their identity
    *  moves out of `members` into `spectators` and seats renumber. Blocked for the host (owners
    *  can't spectate — they leave via transfer/close), if they're the room's only member (nothing
-   *  left to seat), or if spectating is disabled (they'd be orphaned once the game starts). */
+   *  left to seat), or if spectating is disabled (they'd be orphaned once the game starts).
+   *
+   *  Atomic retry loop, same shape as `join`/`addBot`/`becomePlayer`: the members-array write is
+   *  CAS-guarded on LOBBY status and member-count, so a demote decided against a stale LOBBY read
+   *  can never land after a concurrent `markStarted` has already frozen the engine's seat
+   *  assignment — the write's precondition fails and the retry re-reads the now-STARTED room,
+   *  returning 'started' instead of corrupting it. */
   async becomeSpectator(code: string, userId: string): Promise<BecomeSpectatorResult> {
-    const room = await this.col.findOne({ _id: code });
-    if (!room) return 'not_found';
-    if (room.status !== 'LOBBY') return 'started';
-    const leaving = room.members.find((m) => m.userId === userId);
-    if (!leaving) return 'not_member';
-    if (room.hostId === userId) return 'is_host';
-    if (room.members.length <= 1) return 'only_member';
-    const settings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
-    if (!settings.allowSpectating) return 'spectating_disabled';
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const room = await this.col.findOne({ _id: code });
+      if (!room) return 'not_found';
+      if (room.status !== 'LOBBY') return 'started';
+      const leaving = room.members.find((m) => m.userId === userId);
+      if (!leaving) return 'not_member';
+      if (room.hostId === userId) return 'is_host';
+      if (room.members.length <= 1) return 'only_member';
+      const settings = { ...DEFAULT_ROOM_SETTINGS, ...room.settings };
+      if (!settings.allowSpectating) return 'spectating_disabled';
 
-    const remaining = room.members
-      .filter((m) => m.userId !== userId)
-      .map((m, i) => ({ ...m, seat: i }));
-    const spectator: RoomSpectator = {
-      userId: leaving.userId,
-      displayName: leaving.displayName,
-      isGuest: leaving.isGuest,
-    };
-    await this.col.updateOne(
-      { _id: code },
-      { $set: { members: remaining }, $push: { spectators: spectator } },
-    );
-    return (await this.col.findOne({ _id: code })) ?? 'not_found';
+      const remaining = room.members
+        .filter((m) => m.userId !== userId)
+        .map((m, i) => ({ ...m, seat: i }));
+      const spectator: RoomSpectator = {
+        userId: leaving.userId,
+        displayName: leaving.displayName,
+        isGuest: leaving.isGuest,
+      };
+      const res = await this.col.updateOne(
+        { _id: code, status: 'LOBBY', members: { $size: room.members.length } },
+        { $set: { members: remaining }, $push: { spectators: spectator } },
+      );
+      if (res.modifiedCount === 1) return (await this.col.findOne({ _id: code })) ?? 'not_found';
+      // raced — retry with a fresh read
+    }
+    throw new Error('becomeSpectator contention');
   }
 
   /** Host-only, LOBBY-only: hand ownership to another seated, non-bot member. */
