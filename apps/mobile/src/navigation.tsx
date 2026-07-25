@@ -134,7 +134,14 @@ export function RootNavigator(): React.JSX.Element {
         <Stack.Screen name="Boot" component={BootScreen} options={{ headerShown: false }} />
       ) : user ? (
         <>
-          <Stack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
+          {/* Header hidden (HomeTabs is its own chrome), but the title still matters: a pushed
+              screen's long-pressed back button shows UIKit's back-history menu, which falls back
+              to the raw route name — "Home" — for a screen that sets none (issue #56). */}
+          <Stack.Screen
+            name="Home"
+            component={HomeTabs}
+            options={{ title: t('home.tab'), headerShown: false }}
+          />
           <Stack.Screen name="Room" component={RoomScreen} options={{ title: t('room.title') }} />
           {/* Game surfaces are full-bleed: the stage's floating leave chip replaces the header
               back button (the title still names the browser tab in the web harness). */}

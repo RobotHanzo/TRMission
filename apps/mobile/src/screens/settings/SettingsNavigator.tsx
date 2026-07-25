@@ -48,10 +48,14 @@ export default function SettingsNavigator(): React.JSX.Element {
           : { headerStyle: { backgroundColor: tokens.surface } }),
       }}
     >
+      {/* The index draws its own title, so the OS header stays hidden — but `title` is still
+          required: long-pressing a pushed page's back button opens UIKit's back-history menu,
+          whose entry falls back to the raw ROUTE NAME when a screen sets no title, leaking
+          "SettingsIndex" into the UI (issue #56). */}
       <Stack.Screen
         name="SettingsIndex"
         component={SettingsScreen}
-        options={{ headerShown: false }}
+        options={{ title: t('settings.title'), headerShown: false }}
       />
       <Stack.Screen
         name="SettingsAppearance"

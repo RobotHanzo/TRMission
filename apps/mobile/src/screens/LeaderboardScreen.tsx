@@ -3,7 +3,7 @@
 // guests/bots never appear as rows.
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   api,
@@ -39,11 +39,12 @@ export function LeaderboardScreen(): React.JSX.Element {
   const [cursor, setCursor] = useState<string | null>(null);
   const [mine, setMine] = useState<LeaderboardEntry | null>(null);
   const [error, setError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(
-    (append: string | null) => {
+    (append: string | null): Promise<void> => {
       setError(false);
-      Promise.all([
+      return Promise.all([
         api.leaderboard({ scope, metric, ...(append ? { cursor: append } : {}) }),
         append ? null : api.myLeaderboardStanding({ scope, metric }),
       ])
@@ -58,7 +59,15 @@ export function LeaderboardScreen(): React.JSX.Element {
   );
 
   useEffect(() => {
-    load(null);
+    void load(null);
+  }, [load]);
+
+  // Pull to refresh: standings move while the screen sits open on a tab that never unmounts, and
+  // the board has no other way to re-fetch. Drops back to page one (the cursor is only meaningful
+  // for the page sequence it came from) and re-reads your own standing along with it.
+  const refresh = useCallback(() => {
+    setRefreshing(true);
+    void load(null).finally(() => setRefreshing(false));
   }, [load]);
 
   const metricValue = (r: LeaderboardEntry): number =>
@@ -117,6 +126,15 @@ export function LeaderboardScreen(): React.JSX.Element {
         data={rows ?? []}
         keyExtractor={(r) => r.userId}
         contentContainerStyle={[styles.list, { paddingBottom: 24 + tabBarPad }]}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={tokens.inkSoft}
+            colors={[tokens.blue]}
+            progressBackgroundColor={tokens.surface}
+          />
+        }
         ListHeaderComponent={
           mine && !inVisiblePage ? (
             <View

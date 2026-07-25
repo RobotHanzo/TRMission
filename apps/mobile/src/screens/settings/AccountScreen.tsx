@@ -38,7 +38,7 @@ export default function AccountScreen(): React.JSX.Element {
   return (
     <SettingsPage topPad={headerPad} testID="settings-account">
       <View style={styles.identity}>
-        <AccountAvatar name={user?.displayName ?? ''} size={56} />
+        <AccountAvatar name={user?.displayName ?? ''} url={user?.avatarUrl} size={56} />
         <View style={styles.identityText}>
           <Text style={[styles.name, { color: tokens.ink }]} numberOfLines={1}>
             {user?.displayName ?? t('settings.signedOut')}
