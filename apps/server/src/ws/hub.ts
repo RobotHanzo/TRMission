@@ -196,6 +196,8 @@ export class GameHub {
   private readonly bots = new Map<string, Map<string, BotProfile>>();
   /** gameIds with an in-flight bot driver loop (prevents overlapping drivers). */
   private readonly driving = new Set<string>();
+  /** gameId → in-flight `recoverMatch` attempt (single-flight; see `recoverMatch`). */
+  private readonly recovering = new Map<string, Promise<Match | null>>();
   /**
    * gameId → the most recent camera framing seen for that game, so a member who
    * (re)connects or toggles "follow" mid-turn gets the acting player's view at once.
@@ -276,11 +278,37 @@ export class GameHub {
   /**
    * Rehydrate a persisted game into memory (crash recovery / lazy load on reconnect).
    *
+   * Single-flight per gameId: concurrent callers — pipelined hellos racing this same
+   * connection's `helloInFlight` guard is not enough on its own (two DIFFERENT connections can
+   * still both reach here for the same cold game, e.g. two players reconnecting right after a
+   * redeploy) — join the ONE in-flight attempt instead of each replaying from genesis and each
+   * calling `GameRegistry.adopt()`, which would otherwise unconditionally clobber the registry
+   * slot per caller and leave earlier callers holding a `match` no longer reachable via
+   * `registry.get` (F12). The map entry is removed once the attempt settles, success or
+   * failure, so a later genuinely-new recovery for this gameId (e.g. after the match ends and
+   * is later replayed) starts fresh rather than joining a stale settled promise.
+   *
    * Throws `GameUnrecoverableError` when the game cannot be resumed — an engine major the current
    * engine can't run, or a snapshot+tail that fails to replay. Callers must handle it: it means
    * "this game is dead", not "the server is broken".
    */
   async recoverMatch(gameId: string): Promise<Match | null> {
+    const inFlight = this.recovering.get(gameId);
+    if (inFlight) return inFlight;
+    const attempt = this.recoverMatchOnce(gameId);
+    this.recovering.set(gameId, attempt);
+    const clear = (): void => {
+      if (this.recovering.get(gameId) === attempt) this.recovering.delete(gameId);
+    };
+    // Attached directly to `attempt` (not a further `.catch`/`.finally` chain) so this reaction
+    // itself both handles a rejection (nothing left dangling/unhandled) and never throws —
+    // `attempt` is still returned as-is below, so every joined caller observes the real outcome
+    // and takes its own success/error branch.
+    attempt.then(clear, clear);
+    return attempt;
+  }
+
+  private async recoverMatchOnce(gameId: string): Promise<Match | null> {
     if (!this.store) return null;
     const data = await this.store.loadForRecovery(gameId);
     if (!data) return null;
@@ -555,7 +583,26 @@ export class GameHub {
 
   // ── routing ────────────────────────────────────────────────────────────────
 
+  /**
+   * A hello is a once-per-connection bind. Reject/no-op a second one outright: either the
+   * connection is already bound (the common repeat-hello case), or an earlier hello on this
+   * SAME connection is still in flight — e.g. suspended awaiting `recoverMatch`'s cold-game
+   * replay. `helloInFlight` is set synchronously, before that `await`, so a hello pipelined
+   * right behind the first on one socket can never slip through the gap while the first is
+   * still suspended and unbound (F12): without this, each one would independently reach the
+   * expensive `sendHistory` genesis replay below.
+   */
   private async onHello(conn: Connection, clientSeq: number, ticket: string): Promise<void> {
+    if (conn.binding || conn.helloInFlight) return;
+    conn.helloInFlight = true;
+    try {
+      await this.handleHello(conn, clientSeq, ticket);
+    } finally {
+      conn.helloInFlight = false;
+    }
+  }
+
+  private async handleHello(conn: Connection, clientSeq: number, ticket: string): Promise<void> {
     const binding = this.verifier.verify(ticket);
     if (!binding) {
       conn.send(
