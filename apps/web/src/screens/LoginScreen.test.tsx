@@ -15,6 +15,20 @@ describe('LoginScreen', () => {
   beforeEach(() => useSession.setState({ user: null, error: null, loading: false }));
   afterEach(() => vi.restoreAllMocks());
 
+  // Issue #60: the card is headed by the fixed bilingual logotype, not the locale's t('appName').
+  it('heads the card with the brand banner', async () => {
+    vi.spyOn(api, 'config').mockResolvedValue({
+      passwordLogin: true,
+      guest: true,
+      providers: { google: false, discord: false, apple: false },
+    });
+    render(<LoginScreen />);
+
+    const heading = await screen.findByRole('heading', { level: 1 });
+    expect(heading).toHaveTextContent('台鐵任務');
+    expect(heading).toHaveTextContent('TRMISSION');
+  });
+
   it('renders only the enabled methods (guest + Google, no password)', async () => {
     vi.spyOn(api, 'config').mockResolvedValue({
       passwordLogin: false,

@@ -4,6 +4,7 @@ import { LEGAL_PATHS, splitLegalNotice } from '@trm/client-core/legal';
 import { useSession } from '../store/session';
 import { useUi, readRedirectParam } from '../store/ui';
 import { api, type AuthConfig, type OauthProvider } from '../net/rest';
+import { BrandBanner } from '../components/BrandBanner';
 import { MapBackdrop } from '../components/MapBackdrop';
 import { loadGoogleIdentityServices, googleLocale } from '../net/google';
 
@@ -182,7 +183,7 @@ export function LoginScreen() {
       <div className="login-scrim" aria-hidden />
       <div className="login-card card stack">
         <div className="login-head">
-          <h1>{t('appName')}</h1>
+          <BrandBanner size="hero" as="h1" className="login-brand" />
           <p className="muted">{t('tagline')}</p>
         </div>
 

@@ -73,15 +73,20 @@
 .brand-banner--header .brand-banner-en {
   font-size: 7px;
 }
-.brand-banner--hero .brand-banner-icon {
-  width: 80px;
-  height: 80px;
-}
-.brand-banner--hero .brand-banner-zh {
+/* One scale knob: every hero dimension derives from this font-size, so a surface that can't spare
+   the full 48px (the login card on a phone) overrides just this and the lockup keeps its ratios. */
+.brand-banner--hero {
   font-size: 48px;
 }
+.brand-banner--hero .brand-banner-icon {
+  width: 1.667em;
+  height: 1.667em;
+}
+.brand-banner--hero .brand-banner-zh {
+  font-size: 1em;
+}
 .brand-banner--hero .brand-banner-en {
-  font-size: 16px;
+  font-size: 0.333em;
 }
 .header-actions {
   display: flex;
@@ -582,8 +587,20 @@
   width: 100%;
   max-width: 380px;
 }
+/* The logotype is the card's title (issue #60), not the locale-switching t('appName'). The card is
+   380px at most and narrower on a phone, so the hero lockup tracks the viewport instead of
+   overflowing it — 48px only once there's room for it. */
+.login-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.login-head .login-brand {
+  font-size: clamp(30px, 10.5vw, 48px);
+}
 .login-head h1 {
-  margin: 0 0 var(--tr-space-1);
+  margin: 0 0 var(--tr-space-2);
 }
 .login-head p {
   margin: 0;
