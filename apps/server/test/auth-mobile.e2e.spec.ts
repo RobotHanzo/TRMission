@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { createHash, randomBytes } from 'node:crypto';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
   createTestApp,
@@ -9,6 +10,15 @@ import {
   OAUTH_TEST_CONFIG,
   type TestApp,
 } from './app';
+import { MobileCodeRepo } from '../src/auth/mobile-code.repo';
+
+/** F16: a PKCE-style app-binding verifier/challenge pair, mirroring how the mobile app derives
+ *  them in apps/mobile/src/auth/pkce.ts (hex verifier, SHA-256 hex digest challenge). */
+const pkcePair = (): { verifier: string; challenge: string } => {
+  const verifier = randomBytes(32).toString('hex');
+  const challenge = createHash('sha256').update(verifier).digest('hex');
+  return { verifier, challenge };
+};
 
 let sharedMongod: MongoMemoryServer;
 beforeAll(async () => {
@@ -163,7 +173,8 @@ describe('mobile OAuth handoff: one-time code round trip', () => {
       .expect(201);
     expect(carry.body.code).toBeTruthy();
 
-    // System browser: start → provider → callback.
+    // System browser: start → provider → callback. The app generates a PKCE-style verifier and
+    // sends only its challenge (F16) — the exchange code minted below is bound to it.
     fake.profile = {
       sub: 'g-mob-1',
       email: 'mobileguest@example.com',
@@ -172,9 +183,10 @@ describe('mobile OAuth handoff: one-time code round trip', () => {
       avatarUrl: null,
     };
     fake.fail = false;
+    const { verifier, challenge } = pkcePair();
     const start = await request(oServer())
       .get('/api/v1/auth/oauth/google/start')
-      .query({ client: 'mobile', carry: carry.body.code })
+      .query({ client: 'mobile', carry: carry.body.code, challenge })
       .expect(302);
     const state = new URL(locationOf(start)).searchParams.get('state');
     const cb = await request(oServer())
@@ -190,10 +202,13 @@ describe('mobile OAuth handoff: one-time code round trip', () => {
     expect(code).toBeTruthy();
     expect(refreshCookie(cb)).toBe('');
 
-    // Exchange: tokens in the body, guest upgraded in place (same id).
+    // Exchange with the correct verifier: tokens in the body, guest upgraded in place (same id).
+    // (The "wrong verifier" / "co-installed app only has the code" case is covered by its own
+    // test below — redemption burns the code even on a failed attempt, so it can't be probed
+    // against this same code without consuming it before the real exchange runs.)
     const ex = await request(oServer())
       .post('/api/v1/auth/mobile/exchange')
-      .send({ code })
+      .send({ code, verifier })
       .expect(200);
     expect(ex.body.user.id).toBe(guest.body.user.id);
     expect(ex.body.user.isGuest).toBe(false);
@@ -201,14 +216,75 @@ describe('mobile OAuth handoff: one-time code round trip', () => {
     expect(ex.body.accessToken).toBeTruthy();
     expect(ex.body.refreshToken).toBeTruthy();
 
-    // The code is single-use.
-    await request(oServer()).post('/api/v1/auth/mobile/exchange').send({ code }).expect(401);
+    // The code is single-use — even the correct verifier can't redeem it a second time.
+    await request(oServer())
+      .post('/api/v1/auth/mobile/exchange')
+      .send({ code, verifier })
+      .expect(401);
 
     // The returned refresh token works on the body transport.
     await request(oServer())
       .post('/api/v1/auth/refresh')
       .send({ refreshToken: ex.body.refreshToken })
       .expect(200);
+  });
+
+  it('rejects the wrong verifier at exchange, and burns the code (F16)', async () => {
+    fake.profile = {
+      sub: 'g-mob-verifier',
+      email: 'wrongverifier@example.com',
+      emailVerified: true,
+      displayName: 'WrongVerifier',
+      avatarUrl: null,
+    };
+    fake.fail = false;
+    const { challenge } = pkcePair();
+    const wrongVerifier = pkcePair().verifier; // a different, unrelated verifier
+    const start = await request(oServer())
+      .get('/api/v1/auth/oauth/google/start')
+      .query({ client: 'mobile', challenge })
+      .expect(302);
+    const state = new URL(locationOf(start)).searchParams.get('state');
+    const cb = await request(oServer())
+      .get('/api/v1/auth/oauth/google/callback')
+      .query({ code: 'auth-code', state })
+      .set('Cookie', pickCookie(start, 'trm_oauth'))
+      .expect(302);
+    const code = new URL(locationOf(cb)).searchParams.get('code');
+
+    await request(oServer())
+      .post('/api/v1/auth/mobile/exchange')
+      .send({ code, verifier: wrongVerifier })
+      .expect(401);
+  });
+
+  it('rejects a missing verifier at exchange (schema validation, 400)', async () => {
+    const res = await request(oServer())
+      .post('/api/v1/auth/mobile/exchange')
+      .send({ code: 'whatever' })
+      .expect(400);
+    expect(res.body).toBeTruthy();
+  });
+
+  it('rejects redemption of an exchange code that was minted with no challenge at all', async () => {
+    const repo = o.app.get(MobileCodeRepo);
+    const code = await repo.mint('exchange', 'some-user-id', 60_000); // no challenge argument
+    const { verifier } = pkcePair();
+    // Any verifier — even a well-formed one — must fail closed against a challenge-less code.
+    await request(oServer())
+      .post('/api/v1/auth/mobile/exchange')
+      .send({ code, verifier })
+      .expect(401);
+  });
+
+  it('rejects a mobile start with no challenge (fails closed rather than minting an unbound code)', async () => {
+    const start = await request(oServer())
+      .get('/api/v1/auth/oauth/google/start')
+      .query({ client: 'mobile' })
+      .expect(302);
+    const loc = new URL(locationOf(start));
+    expect(loc.pathname).toBe('/m/callback');
+    expect(loc.searchParams.get('error')).toBe('invalid_request');
   });
 
   it('mobile error paths land on /m/callback with an error param', async () => {
@@ -219,9 +295,10 @@ describe('mobile OAuth handoff: one-time code round trip', () => {
       displayName: 'Nope',
       avatarUrl: null,
     };
+    const { challenge } = pkcePair();
     const start = await request(oServer())
       .get('/api/v1/auth/oauth/google/start')
-      .query({ client: 'mobile' })
+      .query({ client: 'mobile', challenge })
       .expect(302);
     const state = new URL(locationOf(start)).searchParams.get('state');
     const cb = await request(oServer())

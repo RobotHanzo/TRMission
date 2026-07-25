@@ -189,8 +189,10 @@ function buildApi(
         refreshToken: (await transport.readRefreshToken?.()) ?? undefined,
       }).then(capture),
     mobileCarry: () => req<MobileCarryResult>('POST', '/auth/mobile/carry'),
-    mobileExchange: (code: string) =>
-      req<AuthResult>('POST', '/auth/mobile/exchange', { code }).then(capture),
+    // `verifier` is the F16 app-binding PKCE-style proof: the caller must hold the same secret
+    // whose SHA-256 hex digest it sent as `?challenge=` when it started the OAuth flow.
+    mobileExchange: (code: string, verifier: string) =>
+      req<AuthResult>('POST', '/auth/mobile/exchange', { code, verifier }).then(capture),
     me: () => req<PublicUser>('GET', '/auth/me'),
     updatePreferences: (prefs: UserPreferences) =>
       req<PublicUser>('PATCH', '/auth/me/preferences', prefs),

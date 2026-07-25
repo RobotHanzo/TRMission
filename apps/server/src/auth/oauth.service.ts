@@ -56,7 +56,7 @@ const appleNameFromUserField = (userField: string | undefined): string | undefin
 };
 
 export type CallbackResult =
-  | { ok: true; user: UserDoc; redirect: string; mobile: boolean }
+  | { ok: true; user: UserDoc; redirect: string; mobile: boolean; mobileChallenge?: string }
   | { ok: false; error: string; redirect: string; mobile?: boolean };
 
 @Injectable()
@@ -104,6 +104,7 @@ export class OauthService {
     redirect: string | undefined,
     guestUserId?: string,
     mobile = false,
+    mobileChallenge?: string,
   ): { url: string; nonce: string } | null {
     const cfg = this.authConfig.provider(provider);
     if (!cfg) return null;
@@ -118,6 +119,7 @@ export class OauthService {
       codeVerifier,
       ...(guestUserId ? { guestUserId } : {}),
       ...(mobile ? { mobile: true } : {}),
+      ...(mobileChallenge ? { mobileChallenge } : {}),
     });
 
     const params = new URLSearchParams({
@@ -189,7 +191,13 @@ export class OauthService {
         profile.avatarUrl,
         payload.guestUserId,
       );
-      return { ok: true, user, redirect, mobile };
+      return {
+        ok: true,
+        user,
+        redirect,
+        mobile,
+        ...(payload.mobileChallenge ? { mobileChallenge: payload.mobileChallenge } : {}),
+      };
     } catch {
       return { ok: false, error: 'server_error', redirect, mobile };
     }
@@ -206,6 +214,7 @@ export class OauthService {
     redirect: string | undefined,
     guestUserId?: string,
     mobile = false,
+    mobileChallenge?: string,
   ): { url: string; nonce: string } | null {
     if (!this.authConfig.appleRedirectEnabled) return null;
 
@@ -217,6 +226,7 @@ export class OauthService {
       codeVerifier: '',
       ...(guestUserId ? { guestUserId } : {}),
       ...(mobile ? { mobile: true } : {}),
+      ...(mobileChallenge ? { mobileChallenge } : {}),
     });
 
     const params = new URLSearchParams({
@@ -287,7 +297,13 @@ export class OauthService {
         profile.avatarUrl,
         payload.guestUserId,
       );
-      return { ok: true, user, redirect, mobile };
+      return {
+        ok: true,
+        user,
+        redirect,
+        mobile,
+        ...(payload.mobileChallenge ? { mobileChallenge: payload.mobileChallenge } : {}),
+      };
     } catch {
       return { ok: false, error: 'server_error', redirect, mobile };
     }

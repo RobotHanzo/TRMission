@@ -81,6 +81,10 @@ const randomGuestName = (): string => `旅客${randomInt(1000, 10000)}`;
 const EXCHANGE_CODE_TTL_MS = 60_000;
 const asProvider = (p: string): OauthProvider | null =>
   (OAUTH_PROVIDERS as readonly string[]).includes(p) ? (p as OauthProvider) : null;
+// F16: the mobile app's PKCE-style app-binding challenge — a SHA-256 hex digest (64 lowercase hex
+// chars), matching the verifier shape MobileExchangeSchema requires at redemption.
+const isValidChallenge = (s: string | undefined): s is string =>
+  typeof s === 'string' && /^[0-9a-f]{64}$/.test(s);
 
 @ApiTags('auth')
 @Controller('api/v1/auth')
@@ -296,7 +300,7 @@ export class AuthController {
   @ApiBody({ schema: apiSchema(MobileExchangeSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(MobileAuthResultSchema) })
   async mobileExchange(@Body() body: MobileExchangeDto, @Req() req: Request) {
-    const userId = await this.mobileCodes.redeem('exchange', body.code);
+    const userId = await this.mobileCodes.redeem('exchange', body.code, body.verifier);
     if (!userId) throw new UnauthorizedException('invalid or expired code');
     const user = await this.users.findById(userId);
     if (!user) throw new UnauthorizedException('user not found');
@@ -441,6 +445,7 @@ export class AuthController {
     @Query('redirect') redirect: string | undefined,
     @Query('client') client: string | undefined,
     @Query('carry') carry: string | undefined,
+    @Query('challenge') challenge: string | undefined,
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
@@ -451,10 +456,22 @@ export class AuthController {
       res.redirect(failUrl('provider_disabled'));
       return;
     }
+    // F16: a mobile flow must arrive with an app-generated PKCE-style challenge, or the exchange
+    // code this flow eventually mints would be redeemable by any co-installed app that intercepts
+    // the trmission:// deep link — fail closed rather than minting an unbound code.
+    if (mobile && !isValidChallenge(challenge)) {
+      res.redirect(failUrl('invalid_request'));
+      return;
+    }
     const guestUserId = mobile
       ? await this.oauth.guestIdFromCarryCode(carry)
       : await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
-    const built = this.oauth.buildAppleAuthorize(redirect, guestUserId, mobile);
+    const built = this.oauth.buildAppleAuthorize(
+      redirect,
+      guestUserId,
+      mobile,
+      mobile ? challenge : undefined,
+    );
     if (!built) {
       res.redirect(failUrl('provider_disabled'));
       return;
@@ -498,11 +515,13 @@ export class AuthController {
       return;
     }
     if (result.mobile) {
-      // No cookie can survive the system-browser → app hop; hand off a single-use code instead.
+      // No cookie can survive the system-browser → app hop; hand off a single-use code instead,
+      // bound (F16) to the challenge the app supplied at /oauth/apple/start.
       const exchangeCode = await this.mobileCodes.mint(
         'exchange',
         result.user._id,
         EXCHANGE_CODE_TTL_MS,
+        result.mobileChallenge,
       );
       res.redirect(this.authConfig.mobileCallback({ code: exchangeCode }));
       return;
@@ -526,6 +545,7 @@ export class AuthController {
     @Query('redirect') redirect: string | undefined,
     @Query('client') client: string | undefined,
     @Query('carry') carry: string | undefined,
+    @Query('challenge') challenge: string | undefined,
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
@@ -539,13 +559,26 @@ export class AuthController {
       );
       return;
     }
+    // F16: a mobile flow must arrive with an app-generated PKCE-style challenge, or the exchange
+    // code this flow eventually mints would be redeemable by any co-installed app that intercepts
+    // the trmission:// deep link — fail closed rather than minting an unbound code.
+    if (mobile && !isValidChallenge(challenge)) {
+      res.redirect(this.authConfig.mobileCallback({ error: 'invalid_request' }));
+      return;
+    }
     // A logged-in guest is carried into the flow so the callback can upgrade them in place.
     // Web: identified from the refresh cookie (sent on this same-site navigation). Mobile:
     // the system browser holds no app session — the app pre-minted a single-use carry code.
     const guestUserId = mobile
       ? await this.oauth.guestIdFromCarryCode(carry)
       : await this.oauth.guestIdFromRefresh(req.cookies?.[REFRESH_COOKIE]);
-    const built = this.oauth.buildAuthorize(provider, redirect, guestUserId, mobile);
+    const built = this.oauth.buildAuthorize(
+      provider,
+      redirect,
+      guestUserId,
+      mobile,
+      mobile ? challenge : undefined,
+    );
     if (!built) {
       res.redirect(
         mobile
@@ -594,11 +627,13 @@ export class AuthController {
       return;
     }
     if (result.mobile) {
-      // No cookie can survive the system-browser → app hop; hand off a single-use code instead.
+      // No cookie can survive the system-browser → app hop; hand off a single-use code instead,
+      // bound (F16) to the challenge the app supplied at /oauth/:provider/start.
       const exchangeCode = await this.mobileCodes.mint(
         'exchange',
         result.user._id,
         EXCHANGE_CODE_TTL_MS,
+        result.mobileChallenge,
       );
       res.redirect(this.authConfig.mobileCallback({ code: exchangeCode }));
       return;

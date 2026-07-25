@@ -3,6 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { API_BASE } from '../config';
 import { api } from '../net/rest';
 import { useSession } from '../store/session';
+import { generatePkcePair } from './pkce';
 
 // The custom-scheme return the system browser redirects to. P0 accepts both this and the
 // /m/callback universal link; ASWebAuthenticationSession/Custom Tabs close on either.
@@ -15,13 +16,16 @@ const firstParam = (v: string | string[] | undefined): string | undefined =>
  * Discord has no native SDK, so we run the server's web OAuth dance in a system browser and hand a
  * one-time exchange code back through the deep link:
  *   [carry] a signed-in guest mints a single-use code so the callback can upgrade them in place →
- *   open `${API_BASE}/auth/oauth/discord/start?client=mobile&carry=<code>` →
+ *   generate a PKCE-style verifier/challenge pair (F16 — binds redemption to this app instance,
+ *   since any co-installed app can also register the trmission:// scheme) →
+ *   open `${API_BASE}/auth/oauth/discord/start?client=mobile&challenge=<c>&carry=<code>` →
  *   the browser returns `trmission://…?code=<c>` (or `…/m/callback?code=<c>`) →
- *   redeem the code for a token pair (which sets the session).
+ *   redeem the code + verifier for a token pair (which sets the session).
  */
 export async function signInWithDiscord(): Promise<void> {
   const carry = useSession.getState().user ? (await api.mobileCarry()).code : undefined;
-  let startUrl = `${API_BASE}/auth/oauth/discord/start?client=mobile`;
+  const { verifier, challenge } = await generatePkcePair();
+  let startUrl = `${API_BASE}/auth/oauth/discord/start?client=mobile&challenge=${challenge}`;
   if (carry) startUrl += `&carry=${encodeURIComponent(carry)}`;
 
   const result = await WebBrowser.openAuthSessionAsync(startUrl, RETURN_URL);
@@ -33,5 +37,5 @@ export async function signInWithDiscord(): Promise<void> {
   const code = firstParam(queryParams?.code);
   if (!code) throw new Error('discord sign-in did not return a code');
 
-  await useSession.getState().loginWithDiscordExchange(code);
+  await useSession.getState().loginWithDiscordExchange(code, verifier);
 }

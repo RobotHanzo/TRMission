@@ -68,6 +68,15 @@ export interface OauthStatePayload {
   guestUserId?: string;
   /** Set when the flow started with ?client=mobile: the callback hands off via /m/callback. */
   mobile?: boolean;
+  /**
+   * App-binding PKCE-style challenge (F16 hardening) — distinct from `codeVerifier` above, which
+   * only secures the server's own exchange with the OAuth provider. This is a SHA-256 hex digest
+   * the MOBILE APP generated before starting this flow (`?challenge=` on `/oauth/:provider/start`);
+   * it is carried through to the minted exchange code so `POST /auth/mobile/exchange` can demand
+   * the matching verifier back, binding redemption to the app instance that started the flow
+   * rather than to whoever merely catches the `trmission://` deep link.
+   */
+  mobileChallenge?: string;
 }
 
 export interface PublicUser {

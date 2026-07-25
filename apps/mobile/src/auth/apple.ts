@@ -3,6 +3,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { API_BASE } from '../config';
 import { api } from '../net/rest';
 import { useSession } from '../store/session';
+import { generatePkcePair } from './pkce';
 
 // The custom-scheme return the system browser redirects to (same contract as auth/discord.ts).
 const RETURN_URL = 'trmission://';
@@ -16,13 +17,16 @@ const firstParam = (v: string | string[] | undefined): string | undefined =>
  * a one-time exchange code back through the deep link — the same dance as Discord, against the
  * dedicated `/auth/oauth/apple/*` routes (enabled when the server has an Apple Services ID):
  *   [carry] a signed-in guest mints a single-use code so the callback can upgrade them in place →
- *   open `${API_BASE}/auth/oauth/apple/start?client=mobile&carry=<code>` →
+ *   generate a PKCE-style verifier/challenge pair (F16 — binds redemption to this app instance,
+ *   since any co-installed app can also register the trmission:// scheme) →
+ *   open `${API_BASE}/auth/oauth/apple/start?client=mobile&challenge=<c>&carry=<code>` →
  *   the browser returns `trmission://…?code=<c>` (or `…/m/callback?code=<c>`) →
- *   redeem the code for a token pair (which sets the session).
+ *   redeem the code + verifier for a token pair (which sets the session).
  */
 export async function signInWithApple(): Promise<void> {
   const carry = useSession.getState().user ? (await api.mobileCarry()).code : undefined;
-  let startUrl = `${API_BASE}/auth/oauth/apple/start?client=mobile`;
+  const { verifier, challenge } = await generatePkcePair();
+  let startUrl = `${API_BASE}/auth/oauth/apple/start?client=mobile&challenge=${challenge}`;
   if (carry) startUrl += `&carry=${encodeURIComponent(carry)}`;
 
   const result = await WebBrowser.openAuthSessionAsync(startUrl, RETURN_URL);
@@ -34,5 +38,5 @@ export async function signInWithApple(): Promise<void> {
   const code = firstParam(queryParams?.code);
   if (!code) throw new Error('apple sign-in did not return a code');
 
-  await useSession.getState().loginWithAppleExchange(code);
+  await useSession.getState().loginWithAppleExchange(code, verifier);
 }

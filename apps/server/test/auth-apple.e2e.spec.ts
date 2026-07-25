@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
+import { createHash, randomBytes } from 'node:crypto';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
   createTestApp,
@@ -9,6 +10,14 @@ import {
   OAUTH_TEST_CONFIG,
   type TestApp,
 } from './app';
+
+/** F16: a PKCE-style app-binding verifier/challenge pair, mirroring how the mobile app derives
+ *  them in apps/mobile/src/auth/pkce.ts (hex verifier, SHA-256 hex digest challenge). */
+const pkcePair = (): { verifier: string; challenge: string } => {
+  const verifier = randomBytes(32).toString('hex');
+  const challenge = createHash('sha256').update(verifier).digest('hex');
+  return { verifier, challenge };
+};
 
 let sharedMongod: MongoMemoryServer;
 beforeAll(async () => {
@@ -256,7 +265,7 @@ describe('apple redirect flow (web + android)', () => {
     expect(rVerifier.lastAudience).toEqual(['dev.robothanzo.trmission', SERVICES_ID]);
   });
 
-  it('mobile round trip: callback hands off a single-use exchange code', async () => {
+  it('mobile round trip: callback hands off a single-use exchange code bound to the app verifier (F16)', async () => {
     rClient.idToken = 'fake-redirect-id-token';
     rVerifier.profile = {
       sub: 'apple-android-1',
@@ -265,7 +274,8 @@ describe('apple redirect flow (web + android)', () => {
       displayName: '',
       avatarUrl: null,
     };
-    const { state, cookie } = await startFlow('?client=mobile');
+    const { verifier, challenge } = pkcePair();
+    const { state, cookie } = await startFlow(`?client=mobile&challenge=${challenge}`);
     const cb = await request(rServer())
       .post('/api/v1/auth/oauth/apple/callback')
       .set('Cookie', cookie)
@@ -277,13 +287,25 @@ describe('apple redirect flow (web + android)', () => {
     const exchangeCode = loc.searchParams.get('code');
     expect(exchangeCode).toBeTruthy();
 
+    // (A co-installed app that only caught the deep link — has the code, not the verifier —
+    // can't redeem it; that F16 attack scenario is covered by its own auth-mobile.e2e.spec.ts
+    // test, since redemption burns the code even on a failed attempt.)
     const exchanged = await request(rServer())
       .post('/api/v1/auth/mobile/exchange')
       .set('x-trm-client', 'mobile')
-      .send({ code: exchangeCode })
+      .send({ code: exchangeCode, verifier })
       .expect(200);
     expect(exchanged.body.user.email).toBe('appleandroid@example.com');
     expect(exchanged.body.refreshToken).toBeTruthy();
+  });
+
+  it('rejects a mobile start with no challenge (fails closed rather than minting an unbound code)', async () => {
+    const res = await request(rServer())
+      .get('/api/v1/auth/oauth/apple/start?client=mobile')
+      .expect(302);
+    const loc = new URL(String(res.headers.location));
+    expect(loc.pathname).toBe('/m/callback');
+    expect(loc.searchParams.get('error')).toBe('invalid_request');
   });
 
   it('rejects a tampered state', async () => {

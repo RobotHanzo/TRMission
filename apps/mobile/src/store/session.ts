@@ -31,10 +31,13 @@ interface SessionState {
   upgrade(email: string, password: string): Promise<void>;
   loginWithGoogleCredential(credential: string): Promise<void>;
   loginWithAppleCredential(identityToken: string, fullName?: string): Promise<void>;
-  /** Complete the Discord handoff: redeem the one-time exchange code for a token pair. */
-  loginWithDiscordExchange(code: string): Promise<void>;
-  /** Complete the Android Apple handoff (browser redirect flow): redeem the exchange code. */
-  loginWithAppleExchange(code: string): Promise<void>;
+  /** Complete the Discord handoff: redeem the one-time exchange code for a token pair.
+   *  `verifier` is the PKCE-style app-binding secret generated before the flow started
+   *  (see `auth/pkce.ts`) — required so only this app instance can redeem the code. */
+  loginWithDiscordExchange(code: string, verifier: string): Promise<void>;
+  /** Complete the Android Apple handoff (browser redirect flow): redeem the exchange code
+   *  with its matching PKCE-style verifier (see `loginWithDiscordExchange`). */
+  loginWithAppleExchange(code: string, verifier: string): Promise<void>;
   /** Persist display prefs to a registered account (guests stay AsyncStorage-only). */
   savePreferences(prefs: UserPreferences): Promise<void>;
   /** Record that a map-feature intro (e.g. broken rail) was shown. Non-fatal on failure — the
@@ -124,8 +127,10 @@ export const useSession = create<SessionState>()((set, get) => {
       run('google', () => api.googleCredential(credential)),
     loginWithAppleCredential: (identityToken, fullName) =>
       run('apple', () => api.appleCredential(identityToken, fullName)),
-    loginWithDiscordExchange: (code) => run('discord', () => api.mobileExchange(code)),
-    loginWithAppleExchange: (code) => run('apple', () => api.mobileExchange(code)),
+    loginWithDiscordExchange: (code, verifier) =>
+      run('discord', () => api.mobileExchange(code, verifier)),
+    loginWithAppleExchange: (code, verifier) =>
+      run('apple', () => api.mobileExchange(code, verifier)),
     async savePreferences(prefs) {
       const u = get().user;
       if (!u || u.isGuest) return; // guests persist via AsyncStorage only

@@ -32,7 +32,13 @@ export const GoogleCredentialSchema = z.object({
 });
 export const RefreshSchema = z.object({ refreshToken: z.string().min(1).optional() });
 export const LogoutSchema = z.object({ refreshToken: z.string().min(1).optional() });
-export const MobileExchangeSchema = z.object({ code: z.string().min(1) });
+// `verifier` is the F16 app-binding PKCE-style proof: the mobile app's own secret, whose SHA-256
+// hex digest it sent as `?challenge=` to `/oauth/:provider/start`. Required so a co-installed app
+// that only intercepts the `trmission://` deep-link code cannot redeem it on its own.
+export const MobileExchangeSchema = z.object({
+  code: z.string().min(1),
+  verifier: z.string().regex(/^[0-9a-f]{64}$/),
+});
 export const DeleteAccountSchema = z.object({
   /** Apple 5.1.1(v)/TN3194: a fresh SIWA authorizationCode so the server can revoke tokens. */
   appleAuthorizationCode: z.string().min(1).optional(),
