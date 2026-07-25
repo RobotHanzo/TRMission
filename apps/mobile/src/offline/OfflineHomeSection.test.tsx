@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { Alert, type AlertButton } from 'react-native';
 import '../i18n';
 import { taiwanBoard } from '@trm/engine';
@@ -60,10 +60,15 @@ describe('OfflineHomeSection', () => {
       expect(alertSpy).toHaveBeenCalledTimes(1);
       expect(await store.loadGame('local:home-2')).not.toBeNull();
 
+      // The confirm button fires an async delete → reload → setState chain. Drive it inside
+      // act() so the re-render is FLUSHED rather than polled for — waitFor's 1s budget is a
+      // coin flip on a loaded CI runner.
       const buttons = alertSpy.mock.calls[0][2] as AlertButton[];
-      buttons.find((b) => b.style === 'destructive')!.onPress!();
+      await act(async () => {
+        buttons.find((b) => b.style === 'destructive')!.onPress!();
+      });
 
-      await waitFor(() => expect(screen.queryByTestId('offline-resume-local:home-2')).toBeNull());
+      expect(screen.queryByTestId('offline-resume-local:home-2')).toBeNull();
       expect(await store.loadGame('local:home-2')).toBeNull();
     } finally {
       alertSpy.mockRestore();
