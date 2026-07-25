@@ -144,7 +144,11 @@ services:
   # and must never be committed (apps/mobile/certs/keys/ is gitignored).
   ota:
     profiles: ['full']
-    image: ghcr.io/axelmarciano/expo-open-ota:latest
+    # PINNED, not floating: `latest` now resolves to the 3.x line (a multi-app control-plane rewrite
+    # that wants an `expo-app-id` request header + its own datastore), which this env block and the
+    # app's single-app config do not speak. The publish CLI in mobile-ota.yml is pinned to the same
+    # version — they ship from one repo and only work in matched pairs (docs/mobile/ota.md).
+    image: ghcr.io/axelmarciano/expo-open-ota:v2.3.21
     environment:
       # Public origin clients reach this server at (updates.url = <BASE_URL>/manifest).
       BASE_URL: ${TRM_OTA_BASE_URL:-http://localhost:3005}

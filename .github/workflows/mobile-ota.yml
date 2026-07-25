@@ -55,8 +55,16 @@ jobs:
         # eoas runs its own `expo export` (both platforms) before uploading — no separate
         # export step; --outputDir retains the exported bundle for the artifact below.
         # Tag pushes have no inputs → production.
+        #
+        # The CLI is PINNED to the same version as the deployed server image (docs/mobile/ota.md):
+        # eoas and expo-open-ota ship from one repo and move together. Unpinned `npx eoas` floats to
+        # the 3.x line, which is the multi-app control-plane rewrite — it demands an `expo-app-id`
+        # entry in `updates.requestHeaders` and aborts against this single-app config
+        # ("Fix: run 'npx eoas init' to migrate"). Adding that header is NOT a workaround: it is
+        # baked into the binary, shifts the runtimeVersion fingerprint, and needs a v3 server.
+        # Bump this only together with the server image, then re-verify per docs/release/ota-server-setup.md.
         run: >-
-          npx --yes eoas publish
+          npx --yes eoas@2.3.21 publish
           --branch ${{ inputs.channel || 'production' }}
           --nonInteractive
           --outputDir dist

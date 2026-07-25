@@ -137,6 +137,9 @@ Upstream has since shipped a 3.x line whose README describes a different archite
 plane with PostgreSQL, per-app API tokens). **Deploy the digest-pinned v2.3.21 image**; adopting 3.x
 is a deliberate re-pin exercise — re-verify the env table in docs/mobile/ota.md first.
 
+The publish CLI is pinned to the **same** version in `mobile-ota.yml` (`eoas@2.3.21`) because the two
+ship from one repo and only work in matched pairs (§9). Bump them together or not at all.
+
 ```
 image: ghcr.io/axelmarciano/expo-open-ota@sha256:de09a283642323ebcd677f236b5a6145b83749ae7b6b5864a9976d1e33960905
 ```
@@ -310,8 +313,13 @@ TRM_OTA_URL=https://ota.<domain>/manifest \
 TRM_SERVER_ORIGIN=<production origin> \
 TRM_GOOGLE_WEB_CLIENT_ID=… TRM_GOOGLE_IOS_CLIENT_ID=… TRM_GOOGLE_IOS_URL_SCHEME=… \
 EXPO_TOKEN=<robot-token> \
-  npx --yes eoas publish --branch production --nonInteractive --outputDir dist --message "manual"
+  npx --yes eoas@2.3.21 publish --branch production --nonInteractive --outputDir dist --message "manual"
 ```
+
+**Keep the CLI version pinned to the server's.** Unpinned `npx eoas` floats to the 3.x
+control-plane line and fails with `Your Expo config is missing the 'expo-app-id' entry in
+updates.requestHeaders` — do not "fix" that by adding the header (it is baked into the binary and
+shifts the runtimeVersion fingerprint); pin the CLI, or upgrade CLI **and** server together.
 
 The `TRM_*` build vars are not optional decoration: an applied update's manifest **replaces**
 `Constants.expoConfig.extra` on device, so publishing without them wipes the baked Google client ids

@@ -16,15 +16,16 @@ credentials, Portainer/Swarm service, repo variables, verification), follow
 Upstream moves faster than our plans; everything below was read from the release/README current at
 pin time. Re-verify this table before bumping the image.
 
-| Item              | Pinned value                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------ |
-| Release           | `v2.3.21`                                                                                  |
-| Docker image      | `ghcr.io/axelmarciano/expo-open-ota:latest` (no version-tagged images published)           |
-| Container port    | `3000` (host-mapped to `3005` in compose)                                                  |
-| Manifest endpoint | `GET /manifest` — this is what `updates.url` points at                                     |
-| Health check      | `GET /hc`                                                                                  |
-| Assets            | `GET /assets`                                                                              |
-| Upload            | `POST /requestUploadUrl/{BRANCH}` + friends — driven by the `eoas` CLI, not called by hand |
+| Item              | Pinned value                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------- |
+| Release           | `v2.3.21`                                                                                   |
+| Publish CLI       | `eoas@2.3.21` — pinned in lockstep with the server (see "Publish mechanism" below)          |
+| Docker image      | `ghcr.io/axelmarciano/expo-open-ota:v2.3.21` (version tags DO exist — corrected 2026-07-25) |
+| Container port    | `3000` (host-mapped to `3005` in compose)                                                   |
+| Manifest endpoint | `GET /manifest` — this is what `updates.url` points at                                      |
+| Health check      | `GET /hc`                                                                                   |
+| Assets            | `GET /assets`                                                                               |
+| Upload            | `POST /requestUploadUrl/{BRANCH}` + friends — driven by the `eoas` CLI, not called by hand  |
 
 ### Env contract (compose `ota` service)
 
@@ -44,10 +45,24 @@ pin time. Re-verify this table before bumping the image.
 
 ### Publish mechanism
 
-`npx eoas publish --branch <branch> --nonInteractive [--platform ios|android|all] [--message …]`,
+`npx eoas@2.3.21 publish --branch <branch> --nonInteractive [--platform ios|android|all] [--message …]`,
 authenticated by an `EXPO_TOKEN` env var. **eoas runs its own `expo export`** — CI needs no
 separate export step. Channels (what the app requests via the `expo-channel-name` header) map to
 branches in the Expo dashboard; we use `production` and `preview` as both channel and branch names.
+
+**The version pin is load-bearing, not tidiness.** The CLI and the server ship from one repo and move
+together, so the CLI must match the deployed image. Unpinned `npx eoas` resolves to the 3.x line (the
+multi-app control-plane rewrite), which refuses this config outright:
+
+```
+Your Expo config is missing the 'expo-app-id' entry in updates.requestHeaders.
+Fix: run 'npx eoas init' to migrate, or pin to the previous CLI via 'npx eoas@1 ...'.
+```
+
+Verified 2026-07-25 by unpacking the published tarballs: `expo-app-id` appears in `3.0.5` and in
+neither `2.3.21` nor `2.3.22` (nor `1.0.39`) — the error's "v2+" wording is imprecise, 2.x is fine.
+Do **not** satisfy it by adding the header: `updates.requestHeaders` is baked into the binary and is a
+fingerprint input, so it would shift every runtime version _and_ still need a v3 server behind it.
 
 ### Code-signing decision: serve-time signing
 
@@ -109,7 +124,7 @@ Triggers: manual dispatch (channel choice `production`/`preview`) or a `mobile-o
 (always `production`). The pinned publish command as it runs in CI:
 
 ```bash
-npx --yes eoas publish --branch <channel> --nonInteractive --outputDir dist --message "<ref>"
+npx --yes eoas@2.3.21 publish --branch <channel> --nonInteractive --outputDir dist --message "<ref>"
 ```
 
 - `EXPO_TOKEN` (repo **secret**): Expo robot token — eoas auth + channel→branch mapping.
