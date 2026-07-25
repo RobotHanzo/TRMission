@@ -28,6 +28,7 @@ export interface AuthUser {
 
 /** Access-token JWT payload. */
 export interface JwtPayload {
+  kind: 'access';
   sub: string;
   name: string;
   guest: boolean;

@@ -20,6 +20,15 @@ export class AccessTokenGuard implements CanActivate {
     if (!header?.startsWith('Bearer ')) throw new UnauthorizedException('missing bearer token');
     try {
       const payload = this.tokens.verifyAccess(header.slice(7));
+      // Defense in depth on top of the `kind` check in verifyAccess: refuse to trust a payload
+      // whose identity fields aren't the shape signAccess always produces.
+      if (
+        typeof payload.sub !== 'string' ||
+        typeof payload.name !== 'string' ||
+        typeof payload.guest !== 'boolean'
+      ) {
+        throw new Error('malformed access token payload');
+      }
       req.user = { userId: payload.sub, displayName: payload.name, isGuest: payload.guest };
       return true;
     } catch {

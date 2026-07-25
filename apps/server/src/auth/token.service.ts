@@ -19,6 +19,7 @@ export class TokenService {
 
   signAccess(user: UserDoc): string {
     const payload: JwtPayload = {
+      kind: 'access',
       sub: user._id,
       name: user.displayName,
       guest: user.isGuest,
@@ -27,8 +28,15 @@ export class TokenService {
     return this.jwt.sign(payload, { expiresIn: env.accessTtl as Ttl });
   }
 
+  // Every other token kind minted by this service (ws-game ticket, admin-replay ticket, OAuth
+  // state) shares this same HS256 key, so a valid signature alone doesn't prove a token was
+  // *meant* to authenticate a REST call — only the `kind` discriminator does. Reject anything
+  // that isn't explicitly an access token, same as the other verifiers below reject a foreign
+  // `kind` for their own token type.
   verifyAccess(token: string): JwtPayload {
-    return this.jwt.verify<JwtPayload>(token);
+    const payload = this.jwt.verify<JwtPayload>(token);
+    if (payload.kind !== 'access') throw new Error('not an access token');
+    return payload;
   }
 
   signWsTicket(input: { gameId: string; playerId: string; seat: number }): string {
