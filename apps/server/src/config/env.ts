@@ -72,7 +72,11 @@ export const env = {
   adminReplayTicketTtl: process.env.ADMIN_REPLAY_TICKET_TTL ?? '5m',
   refreshTtlMs: Number(process.env.REFRESH_TTL_MS ?? 30 * day),
   guestTtlMs: Number(process.env.GUEST_TTL_MS ?? 30 * day),
-  cookieSecure: process.env.COOKIE_SECURE === '1',
+  /** Refresh/OAuth-nonce cookies get the `Secure` attribute by default (assumes the app is
+   *  served over HTTPS in production, directly or behind a TLS-terminating proxy). Set
+   *  COOKIE_SECURE=0 to opt OUT for local http-only dev — modern browsers already accept
+   *  Secure cookies on http://localhost, so this normally isn't even needed there. */
+  cookieSecure: process.env.COOKIE_SECURE !== '0',
   /** CORS allowlist (comma-separated). Empty ⇒ reflect dev origin. */
   corsOrigins: (process.env.CORS_ORIGINS ?? '').split(',').filter(Boolean),
 

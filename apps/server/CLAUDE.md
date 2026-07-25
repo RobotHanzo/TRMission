@@ -127,9 +127,12 @@ disappear from history, only unreplayable would, and it never is (see `src/maps/
   (`apple-client-secret.ts`, shared with the revoker), identity from the token response's
   `id_token` (no userinfo; exchange seam `apple-redirect.client.ts`, faked in e2e), and a
   `response_mode=form_post` callback that arrives as a CROSS-SITE POST — so its nonce cookie
-  (`trm_oauth_apple`) is SameSite=None/HTTPS-only, and over dev http the signed short-TTL
-  state alone binds the round-trip. `?client=mobile` hands off via the same `/m/callback`
-  exchange-code path Discord uses (Android runs this flow in a system browser).
+  (`trm_oauth_apple`) is SameSite=None/HTTPS-only. The callback ALWAYS requires that cookie to
+  match the signed state's nonce — this CSRF binding is a security invariant, independent of
+  `COOKIE_SECURE` (which only governs the cookie's own Secure attribute; Apple requires the
+  redirect flow's Return URL to be HTTPS, so a legitimate round trip always carries it).
+  `?client=mobile` hands off via the same `/m/callback` exchange-code path Discord uses
+  (Android runs this flow in a system browser).
   **Account deletion**: `DELETE /auth/me` (Bearer; optional `{appleAuthorizationCode}` from a
   fresh SIWA re-auth for token revocation, best-effort). Cascade in `src/account/`: deletes
   users/authSessions/customMaps drafts, leaves LOBBY rooms via `RoomRepo.leave`, `$pull`s
@@ -228,7 +231,9 @@ JSON at `/api/openapi.json`). Validation + OpenAPI schemas come from **one zod s
 ## Env vars
 
 `PORT`, `MONGO_URL`, `MONGO_DB`, `JWT_SECRET` (set in prod), `CORS_ORIGINS` (comma list),
-`COOKIE_SECURE`, `TRM_PERSISTENCE` (`0` = in-memory, no auth/lobby), `TRM_DEV_GAME` (`1` = seed a
+`COOKIE_SECURE` (Secure attribute on `trm_refresh` + the OAuth/Apple nonce cookies; defaults to
+**on** — set to `0` only to opt out for an http-only deployment), `TRM_PERSISTENCE` (`0` =
+in-memory, no auth/lobby), `TRM_DEV_GAME` (`1` = seed a
 demo game on boot), `TRM_BOT_DELAY_MS` (pause between bot moves; `0` in tests),
 `TRM_TURN_TIMEOUT_MS` (per-turn budget before the server auto-plays a default action; `0` disables),
 `TRM_AUTOPLAY_PAUSE_AFTER` (consecutive timed-out human turns before a game is marked inactive and

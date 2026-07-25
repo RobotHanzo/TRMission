@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { env } from '../src/config/env';
 import {
   createTestApp,
   refreshCookie,
@@ -639,5 +640,29 @@ describe('auth: Google credential sign-in (One Tap / rendered button)', () => {
       .send({ credential: 'fake-jwt' })
       .expect(403);
     await d.close();
+  });
+});
+
+describe('auth: trm_refresh cookie Secure attribute follows env.cookieSecure', () => {
+  const fullRefreshCookie = (res: { headers: Record<string, unknown> }): string => {
+    const sc = res.headers['set-cookie'] as string[] | undefined;
+    return sc?.find((s) => s.startsWith('trm_refresh=')) ?? '';
+  };
+
+  it('is Secure by default (COOKIE_SECURE unset in the test env)', async () => {
+    expect(env.cookieSecure).toBe(true); // sanity: the default this test relies on
+    const res = await request(server()).post('/api/v1/auth/guest').send({}).expect(201);
+    expect(fullRefreshCookie(res)).toMatch(/;\s*Secure/i);
+  });
+
+  it('drops Secure when cookieSecure is explicitly turned off', async () => {
+    const original = env.cookieSecure;
+    Object.assign(env, { cookieSecure: false });
+    try {
+      const res = await request(server()).post('/api/v1/auth/guest').send({}).expect(201);
+      expect(fullRefreshCookie(res)).not.toMatch(/;\s*Secure/i);
+    } finally {
+      Object.assign(env, { cookieSecure: original });
+    }
   });
 });

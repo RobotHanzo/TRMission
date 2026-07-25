@@ -476,8 +476,9 @@ export class AuthController {
       res.redirect(failUrl('provider_disabled'));
       return;
     }
-    // SameSite=None only sticks as Secure — over dev http browsers drop it and the signed state
-    // alone binds the round-trip (see handleAppleRedirectCallback's nonce rule).
+    // SameSite=None only sticks as Secure; env.cookieSecure governs solely this cookie's own
+    // Secure/SameSite attributes, never whether handleAppleRedirectCallback requires it to
+    // match — that CSRF binding is unconditional (see its docstring).
     res.cookie(APPLE_NONCE_COOKIE, built.nonce, {
       httpOnly: true,
       secure: env.cookieSecure,
@@ -504,7 +505,6 @@ export class AuthController {
       state,
       userField,
       nonceCookie,
-      env.cookieSecure,
     );
     if (!result.ok) {
       res.redirect(

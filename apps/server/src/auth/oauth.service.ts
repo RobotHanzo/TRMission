@@ -243,17 +243,19 @@ export class OauthService {
   /**
    * The Apple form_post callback: verify the signed state, exchange the code for an id_token,
    * verify it against every accepted audience, and resolve the account exactly like the shared
-   * redirect flow. Nonce rule: Apple's callback is a CROSS-SITE POST, which no Lax cookie rides —
-   * the Apple nonce cookie is SameSite=None and only exists over HTTPS (`requireNonce` =
-   * cookieSecure). A present cookie must always match; over dev http the signed short-TTL state
-   * is the sole CSRF binding (documented dev limitation).
+   * redirect flow. Nonce rule: the `trm_oauth_apple` cookie minted at /start must ALWAYS be
+   * present and match the signed state's nonce — this CSRF binding is a security invariant, not
+   * something environments can opt out of. It is deliberately independent of `env.cookieSecure`
+   * (which only controls that cookie's own Secure/SameSite attributes, see appleStart): Apple
+   * requires the redirect flow's Return URL to be HTTPS, so a legitimate round trip always
+   * carries the cookie, and a request that arrives without it (or with a mismatched one) is
+   * rejected regardless of deployment configuration.
    */
   async handleAppleRedirectCallback(
     code: string | undefined,
     state: string | undefined,
     userField: string | undefined,
     nonceCookie: string | undefined,
-    requireNonce: boolean,
   ): Promise<CallbackResult> {
     if (!code || !state) return { ok: false, error: 'invalid_request', redirect: '/' };
 
@@ -263,7 +265,7 @@ export class OauthService {
     }
     const redirect = safeRedirect(payload.redirect);
     const mobile = !!payload.mobile;
-    if (nonceCookie ? nonceCookie !== payload.nonce : requireNonce) {
+    if (nonceCookie !== payload.nonce) {
       return { ok: false, error: 'invalid_state', redirect, mobile };
     }
     if (!this.authConfig.appleRedirectEnabled) {

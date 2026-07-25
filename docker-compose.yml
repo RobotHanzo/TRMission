@@ -92,6 +92,9 @@ services:
       MONGO_DB: trmission
       JWT_SECRET: ${JWT_SECRET:-dev-insecure-change-me}
       CORS_ORIGINS: http://localhost:8080
+      # Refresh/OAuth-nonce cookies get Secure by default (assumes HTTPS in front of this
+      # container, e.g. a TLS-terminating proxy). Only set to 0 for an http-only deployment.
+      COOKIE_SECURE: ${COOKIE_SECURE:-1}
       # Auth-method toggles (default on). Set to 0 to disable.
       AUTH_PASSWORD_LOGIN_ENABLED: ${AUTH_PASSWORD_LOGIN_ENABLED:-1}
       AUTH_GUEST_ENABLED: ${AUTH_GUEST_ENABLED:-1}

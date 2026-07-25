@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { createHash, randomBytes } from 'node:crypto';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { env } from '../src/config/env';
 import {
   createTestApp,
   refreshCookie,
@@ -326,6 +327,27 @@ describe('apple redirect flow (web + android)', () => {
       .send({ code: 'c', state })
       .expect(302);
     expect(String(res.headers.location)).toContain('error=invalid_state');
+  });
+
+  it('rejects a callback with no nonce cookie at all, regardless of cookieSecure', async () => {
+    // The nonce/CSRF binding on the Apple redirect flow must not become optional just because
+    // env.cookieSecure is off (e.g. a http-only deployment) — it is a security invariant, not
+    // derived from that flag. Force cookieSecure off here and confirm a callback that arrives
+    // without ever presenting the nonce cookie is still rejected, exactly like the mismatched
+    // case above.
+    const original = env.cookieSecure;
+    Object.assign(env, { cookieSecure: false });
+    try {
+      const { state } = await startFlow();
+      const res = await request(rServer())
+        .post('/api/v1/auth/oauth/apple/callback')
+        .type('form')
+        .send({ code: 'c', state })
+        .expect(302);
+      expect(String(res.headers.location)).toContain('error=invalid_state');
+    } finally {
+      Object.assign(env, { cookieSecure: original });
+    }
   });
 
   it('redirects with exchange_failed when Apple rejects the code', async () => {

@@ -38,6 +38,10 @@ services:
       MONGO_DB: trmission
       JWT_SECRET: ${JWT_SECRET}            # set in Portainer env vars
       CORS_ORIGINS: http://localhost:8080
+      # Refresh/OAuth-nonce cookies get Secure by default (assumes HTTPS in front of this
+      # service, e.g. a TLS-terminating proxy/load balancer). Only set to 0 for an http-only
+      # deployment.
+      COOKIE_SECURE: ${COOKIE_SECURE:-1}
       # Maintainer dashboard owners (comma-separated users._id values, NOT emails; served at /admin/).
       DASHBOARD_OWNER_IDS: ${DASHBOARD_OWNER_IDS:-}
     ports:
