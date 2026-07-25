@@ -48,8 +48,8 @@ gitignored and a drift between it and the `.proto` is a CI failure.
   changes into your commit.
 - **Stay on `main`.** Don't switch branches (`git checkout`/`switch`) unless the user explicitly
   asks for a different branch for that task.
-- **If a worktree is used for a task, merge it back to `main` locally once all phases/tasks in
-  that task are done** — don't leave finished worktree work stranded on its branch.
+- **If a worktree is used for a task, merge it back to `main` locally once all phases/tasks in that task are done**.
+- **Close GitHub issues after addressing them**.
 
 ## Plans
 
