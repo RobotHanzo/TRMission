@@ -11,6 +11,7 @@ import { SessionRepo } from './session.repo';
 import { MobileCodeRepo } from './mobile-code.repo';
 import { OauthPkceRepo } from './oauth-pkce.repo';
 import { AccessTokenGuard } from './access-token.guard';
+import { ActiveAccountGuard } from './active-account.guard';
 import { FeatureGuard } from './feature.guard';
 import { AuthConfig } from './auth-config';
 import { OauthService } from './oauth.service';
@@ -32,6 +33,7 @@ import { APPLE_REDIRECT_CLIENT, FetchAppleRedirectClient } from './apple-redirec
     MobileCodeRepo,
     OauthPkceRepo,
     AccessTokenGuard,
+    ActiveAccountGuard,
     FeatureGuard,
     AuthConfig,
     OauthService,
@@ -46,6 +48,7 @@ import { APPLE_REDIRECT_CLIENT, FetchAppleRedirectClient } from './apple-redirec
   exports: [
     TokenService,
     AccessTokenGuard,
+    ActiveAccountGuard,
     FeatureGuard,
     UserRepo,
     FeatureDefaultsRepo,

@@ -171,3 +171,96 @@ describe('reports: custom map by share code', () => {
       .expect(404);
   });
 });
+
+// A dashboard ban stamps UserDoc.disabledAt (see users.ban / DashboardUsersService); the
+// already-issued access token otherwise keeps working for the rest of its TTL by design
+// (apps/server/CLAUDE.md's "Ban" section — AccessTokenGuard itself stays untouched so REST
+// reads stay available). These moderation routes are writes, so they must reject once
+// disabledAt is set, without touching that documented read-only window.
+describe('a banned account cannot use moderation writes, but keeps its read-only window', () => {
+  async function ban(userId: string) {
+    await t.db
+      .collection('users')
+      .updateOne({ _id: userId as never }, { $set: { disabledAt: new Date() } });
+  }
+
+  it('rejects report/player, report/map, and block-list writes (401) once banned', async () => {
+    const banned = await guest('SoonBanned');
+    const target = await guest('Target');
+
+    // Works pre-ban (sanity).
+    await request(server())
+      .put(`/api/v1/me/blocks/${target.userId}`)
+      .set(auth(banned.token))
+      .expect(204);
+    await request(server())
+      .delete(`/api/v1/me/blocks/${target.userId}`)
+      .set(auth(banned.token))
+      .expect(204);
+
+    await ban(banned.userId);
+
+    // The documented read-only window: GET still works with the pre-ban access token.
+    await request(server()).get('/api/v1/me/blocks').set(auth(banned.token)).expect(200);
+
+    // Writes are now refused, even though the token itself is still otherwise valid.
+    await request(server())
+      .post('/api/v1/reports/player')
+      .set(auth(banned.token))
+      .send({ userId: target.userId, category: 'SPAM' })
+      .expect(401);
+    await request(server())
+      .put(`/api/v1/me/blocks/${target.userId}`)
+      .set(auth(banned.token))
+      .expect(401);
+    await request(server())
+      .delete(`/api/v1/me/blocks/${target.userId}`)
+      .set(auth(banned.token))
+      .expect(401);
+  });
+
+  it('rejects report/map for a banned reporter (401), independent of the share code itself', async () => {
+    const owner = await registered('map-owner@example.com', 'Owner');
+    await t.db
+      .collection('users')
+      .updateOne({ _id: owner.userId as never }, { $set: { features: ['mapBuilder'] } });
+    const map = await request(server())
+      .post('/api/v1/maps')
+      .set(auth(owner.token))
+      .send({ nameZh: '測試地圖二', nameEn: 'Test Map 2' })
+      .expect(201);
+    const share = await request(server())
+      .post(`/api/v1/maps/${map.body.id}/share`)
+      .set(auth(owner.token))
+      .expect(200);
+    const code = share.body.shareCode as string;
+
+    const reporter = await guest('BannedMapReporter');
+    await ban(reporter.userId);
+
+    await request(server())
+      .post('/api/v1/reports/map')
+      .set(auth(reporter.token))
+      .send({ shareCode: code, category: 'SPAM' })
+      .expect(401);
+  });
+
+  it('a non-banned account is unaffected: reports and block-list writes still succeed', async () => {
+    const active = await guest('StillActive');
+    const target = await guest('StillTarget');
+
+    await request(server())
+      .post('/api/v1/reports/player')
+      .set(auth(active.token))
+      .send({ userId: target.userId, category: 'SPAM' })
+      .expect(201);
+    await request(server())
+      .put(`/api/v1/me/blocks/${target.userId}`)
+      .set(auth(active.token))
+      .expect(204);
+    await request(server())
+      .delete(`/api/v1/me/blocks/${target.userId}`)
+      .set(auth(active.token))
+      .expect(204);
+  });
+});

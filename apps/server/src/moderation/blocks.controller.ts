@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../auth/access-token.guard';
+import { ActiveAccountGuard } from '../auth/active-account.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { UserRepo } from '../auth/user.repo';
 import { apiSchema } from '../openapi/openapi';
@@ -37,8 +38,13 @@ export class BlocksController {
     return { blockedUserIds: await this.users.listBlockedUsers(user.userId) };
   }
 
+  // Mutating: composes ActiveAccountGuard so a just-banned account's still-valid access
+  // token can't keep mutating its own block list for the rest of its TTL (see
+  // ActiveAccountGuard's doc comment / apps/server/CLAUDE.md's "Ban" section). `list()`
+  // above stays on AccessTokenGuard alone — it's the documented read-only window.
   @Put(':userId')
   @HttpCode(204)
+  @UseGuards(ActiveAccountGuard)
   @ApiOperation({ summary: 'Block (mute) a user. Idempotent.' })
   async add(@CurrentUser() user: AuthUser, @Param('userId') targetId: string): Promise<void> {
     if (targetId === user.userId) throw new BadRequestException('cannot block yourself');
@@ -50,6 +56,7 @@ export class BlocksController {
 
   @Delete(':userId')
   @HttpCode(204)
+  @UseGuards(ActiveAccountGuard)
   @ApiOperation({ summary: 'Unblock a user. Idempotent.' })
   async remove(@CurrentUser() user: AuthUser, @Param('userId') targetId: string): Promise<void> {
     await this.users.removeBlockedUser(user.userId, targetId);

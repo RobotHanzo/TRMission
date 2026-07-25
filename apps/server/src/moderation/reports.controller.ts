@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../auth/access-token.guard';
+import { ActiveAccountGuard } from '../auth/active-account.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { UserRepo } from '../auth/user.repo';
 import { CustomMapRepo } from '../maps/custom-map.repo';
@@ -29,9 +30,14 @@ import type { AuthUser } from '../auth/auth.types';
  * anyone holding a share code must be able to report its content — the code itself is
  * the capability, the same posture as GET /maps/content/:hash.
  */
+// Both routes below are mutating writes (append to the moderator queue), so the whole
+// controller composes ActiveAccountGuard after AccessTokenGuard: a just-banned account's
+// still-valid access token can no longer file reports for the rest of its TTL. See
+// ActiveAccountGuard's doc comment / apps/server/CLAUDE.md's "Ban" section for why
+// AccessTokenGuard itself stays untouched (read-only REST intentionally stays available).
 @ApiTags('moderation')
 @Controller('api/v1/reports')
-@UseGuards(AccessTokenGuard)
+@UseGuards(AccessTokenGuard, ActiveAccountGuard)
 @ApiBearerAuth('access-token')
 export class ReportsController {
   constructor(

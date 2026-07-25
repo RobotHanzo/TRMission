@@ -271,11 +271,13 @@ export class UserRepo implements OnModuleInit {
     );
   }
 
-  /** Per-request ban check (projection-only point read) — the DB-backed source of truth behind
-   *  GameHub's in-memory ban cache (`GameHub.BanGuardPort`), consulted on a cache miss/expiry. */
+  /** Per-request ban check (single indexed point read, projection-only). Two consumers: the
+   *  DB-backed source of truth behind GameHub's in-memory ban cache (`GameHub.BanGuardPort`),
+   *  consulted on a cache miss/expiry, and `ActiveAccountGuard`, which uses it to bound mutating
+   *  routes to the documented ban posture. */
   async isDisabled(userId: string): Promise<boolean> {
     const doc = await this.col.findOne({ _id: userId }, { projection: { disabledAt: 1 } });
-    return !!doc?.disabledAt;
+    return doc?.disabledAt != null;
   }
 
   /**
