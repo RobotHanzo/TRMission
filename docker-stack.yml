@@ -17,8 +17,11 @@ version: "3.8"
 services:
   mongo:
     image: mongo:7
-    ports:
-      - "27017:27017"
+    # No published port: the server service reaches this over the stack's internal
+    # overlay network at mongodb://mongo:27017 (see the `server` service's MONGO_URL
+    # below). Do not publish 27017 here — Mongo runs with no authentication configured,
+    # so exposing it on the host/ingress network gives anyone who can route to the node
+    # unauthenticated read/write on the game database.
     volumes:
       - trm-mongo-data:/data/db
     healthcheck:
