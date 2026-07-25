@@ -17,7 +17,7 @@ const touchEvent = (x: number, t: number, startX = x) => {
     previousTimeStamp: 0,
   };
   return {
-    nativeEvent: { touches: [{ identifier: 0 }], locationX: x, locationY: 0 },
+    nativeEvent: { touches: [{ identifier: 0 }], locationX: x, locationY: 0, pageX: x, pageY: 0 },
     touchHistory: {
       touchBank: [touch],
       numberActiveTouches: 1,
@@ -48,6 +48,31 @@ describe('VolumeSlider', () => {
     expect(onChange).toHaveBeenLastCalledWith(0.1);
     view.props.onResponderMove(touchEvent(120, 1, 20));
     expect(onChange).toHaveBeenLastCalledWith(0.6);
+  });
+
+  it('keeps tracking after the emitted value re-renders the screen', () => {
+    // The real caller (SoundScreen) writes to a store and passes a fresh inline `onChange` on every
+    // render, so each emitted value re-renders the slider mid-drag. If that rebuilds the
+    // PanResponder, the next move gets a virgin gestureState and the thumb sticks at the press.
+    const onChange = jest.fn();
+    const { rerender } = render(
+      <VolumeSlider testID="volume-slider" value={0} onChange={onChange} />,
+    );
+    const view = screen.getByTestId('volume-slider');
+    view.props.onLayout({ nativeEvent: { layout: { width: 200 } } });
+    const onResponderMove = view.props.onResponderMove;
+
+    view.props.onStartShouldSetResponderCapture(touchEvent(0, 0));
+    view.props.onResponderGrant(touchEvent(20, 0));
+    expect(onChange).toHaveBeenLastCalledWith(0.1);
+
+    const afterRerender = jest.fn();
+    rerender(<VolumeSlider testID="volume-slider" value={0.1} onChange={afterRerender} />);
+    const next = screen.getByTestId('volume-slider');
+    expect(next.props.onResponderMove).toBe(onResponderMove); // same responder, live gestureState
+
+    next.props.onResponderMove(touchEvent(120, 1, 20));
+    expect(afterRerender).toHaveBeenLastCalledWith(0.6); // absolute, not a one-frame nudge
   });
 
   it('reports its value to assistive tech', () => {

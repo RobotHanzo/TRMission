@@ -23,8 +23,16 @@ export function VolumeSlider({ value, onChange, testID, accessibilityLabel }: Pr
   const widthRef = useRef(0);
   const valueRef = useRef(value);
   valueRef.current = value;
-  const dragStartRef = useRef(value);
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+  const dragStartRef = useRef({ pageX: 0, value });
 
+  // Built ONCE, and everything mutable is read through a ref. PanResponder keeps the live
+  // gestureState in its closure, so depending on the caller's `onChange` rebuilt the responder on
+  // every emitted value (each one re-renders the screen, which re-creates its inline handler) and
+  // handed the next move a virgin gestureState — leaving the slider stuck at the press even after
+  // #39 stopped the ScrollView stealing the gesture. Drag is measured off raw pageX for the same
+  // reason: absolute positions can't drift the way an accumulated gestureState.dx can.
   const pan = useMemo(
     () =>
       PanResponder.create({
@@ -40,16 +48,17 @@ export function VolumeSlider({ value, onChange, testID, accessibilityLabel }: Pr
         onPanResponderGrant: (e) => {
           const w = widthRef.current;
           const next = w > 0 ? clamp01(e.nativeEvent.locationX / w) : valueRef.current;
-          dragStartRef.current = next;
-          onChange(next);
+          dragStartRef.current = { pageX: e.nativeEvent.pageX, value: next };
+          onChangeRef.current(next);
         },
-        onPanResponderMove: (_e, gesture) => {
+        onPanResponderMove: (e) => {
           const w = widthRef.current;
           if (w <= 0) return;
-          onChange(clamp01(dragStartRef.current + gesture.dx / w));
+          const start = dragStartRef.current;
+          onChangeRef.current(clamp01(start.value + (e.nativeEvent.pageX - start.pageX) / w));
         },
       }),
-    [onChange],
+    [],
   );
 
   const onLayout = (e: LayoutChangeEvent): void => {
