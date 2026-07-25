@@ -158,3 +158,13 @@ the store lanes must bake identical values; the deployed server and the `eoas` C
 same version because they only work in matched pairs. The private key in `certs/keys/` is gitignored
 and must never be committed. Full contract, runbook, rollback, fallbacks: `docs/mobile/ota.md`;
 host setup: `docs/release/ota-server-setup.md`.
+
+`fingerprint.config.js` narrows what the fingerprint hashes to the native surface —
+`sourceSkips: ['ExpoConfigVersions', 'ExpoConfigExtraSection']`. Both skips are load-bearing
+(issue #55): by default `@expo/fingerprint` hashes `version`/`versionCode`/`buildNumber` and the
+whole `extra` block, which the store lanes stamp per release and the OTA lane cannot, so no publish
+could ever match a shipped binary. Two rules follow. **Nothing the app must trust across an update
+may come from `extra` or `expoConfig.version`** — `src/config.ts` reads `BUILD_NUMBER`/`APP_VERSION`
+off the native binary via expo-application, because the forced-update gate compares that build
+number against the server's `minBuild`. And **editing `fingerprint.config.js` changes every runtime
+version**, so the next OTA after such a change needs a fresh native build on both stores first.

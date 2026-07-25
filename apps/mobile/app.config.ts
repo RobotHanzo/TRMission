@@ -8,6 +8,12 @@ import path from 'node:path';
 // the native versionCode/CFBundleVersion (docs/release/mobile-versioning.md). The release workflows
 // derive it from the release tag (`v<semver>+<build>`) and inject it via this env var at
 // `expo prebuild` time; local/dev builds fall back to 1 and are never shipped.
+//
+// Only the NATIVE stamping matters. The gate reads the build number back off the installed binary
+// via expo-application, not off `extra`/`expoConfig` — an applied OTA update replaces those with
+// whatever the publish lane evaluated (which has no release tag, so: this fallback). See
+// src/config.ts and docs/mobile/ota.md. Skipped from the runtimeVersion fingerprint by
+// fingerprint.config.js, so a version bump alone never fences an update off.
 const BUILD_NUMBER = Number(process.env.BUILD_NUMBER ?? 1);
 
 // Marketing version (CFBundleShortVersionString / Android versionName) — an independent semver
@@ -57,8 +63,9 @@ const serverHost = new URL(serverOrigin).hostname;
 // Deliberately OMITTED when unset rather than defaulted to '': an empty header is not the same as no
 // header — the server serves a request with no app id by falling back to its EXPO_APP_ID (that is the
 // pre-v3 "v1 client" shape, which is exactly what a local dev build wants), while a blank one is an
-// invalid app id. `updates.requestHeaders` IS a runtimeVersion fingerprint input (@expo/fingerprint
-// only ever drops `updates.url`), so a build with this set and one without it target different
+// invalid app id. `updates.requestHeaders` IS a runtimeVersion fingerprint input (the whole
+// `updates` block is; fingerprint.config.js only skips the version axes and `extra`), so a build
+// with this set and one without it target different
 // runtime versions — CI must set it for BOTH the store lanes and the OTA publish, or a published
 // update becomes invisible to the binary it was meant for. See docs/mobile/ota.md.
 const otaAppId = process.env.TRM_OTA_APP_ID || undefined;
@@ -69,9 +76,11 @@ const otaAppId = process.env.TRM_OTA_APP_ID || undefined;
 //
 // Env vars would actively HURT here. The app ids go to the react-native-google-mobile-ads config
 // plugin, and **plugin props feed the OTA runtimeVersion fingerprint** — env-derived ids would make
-// the fingerprint depend on which CI lane evaluated this file, the same lockstep trap documented for
-// TRM_SENTRY_* and the Google client ids (docs/mobile/ota.md). Literals are identical on every lane
-// by construction. The runtime reads the unit ids back off `extra` (src/config.ts → src/ads/).
+// the fingerprint depend on which CI lane evaluated this file, and a store binary would stop
+// matching its own OTA updates (the issue-#55 failure mode, docs/mobile/ota.md). Literals are
+// identical on every lane by construction. The runtime reads the unit ids back off `extra`
+// (src/config.ts → src/ads/) — that half is fingerprint-skipped, but an applied update still
+// replaces it, which is the separate lockstep rule TRM_SENTRY_* and the Google client ids follow.
 //
 // To turn ads off, flip `enabled`: it is the master switch, so the ids can stay checked in.
 const ADMOB = {
@@ -403,8 +412,15 @@ const config: ExpoConfig = {
     // runtimeVersion. Companion `@rnrepo/build-tools` is a direct dep too (hoisted node_modules).
     '@rnrepo/expo-config-plugin',
   ],
+  // Pure JS-visible runtime config, read back through src/config.ts. Two properties to keep in
+  // mind: an applied OTA update REPLACES this whole block with the publish lane's evaluation of it
+  // (so every env var feeding it must be set on that lane too), and it is skipped from the
+  // runtimeVersion fingerprint (fingerprint.config.js) — nothing native may hang off it.
   extra: {
     serverOrigin,
+    // Fallback only, for the RNW web harness: on a device src/config.ts reads the build number off
+    // the native binary (expo-application), because this copy arrives from whichever bundle is
+    // running and the OTA lane has no release tag to stamp (issue #55).
     buildNumber: BUILD_NUMBER,
     gitCommit: GIT_COMMIT,
     // Google Sign-In client ids (native app + the server "web" audience). Real values are

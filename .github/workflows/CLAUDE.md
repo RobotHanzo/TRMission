@@ -92,6 +92,10 @@ CI, manifests are signed at serve time by the OTA server's mounted key, and
 `apps/mobile/certs/keys/` must never be committed). **Both variables are also set by the store
 lanes**: `updates.url` and `updates.requestHeaders` are runtimeVersion fingerprint inputs, so a
 binary built without them targets a different runtime version than the updates published with them.
+`BUILD_NUMBER`/`APP_VERSION` are the deliberate exception — the store lanes stamp them from the
+release tag and the OTA lane has none, so `apps/mobile/fingerprint.config.js` skips the version axes
+(and `extra`) out of the fingerprint entirely. Without that skip no publish could ever match a
+shipped binary, which is exactly what issue #55 was (docs/mobile/ota.md).
 
 Android **secrets**: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`,
 `ANDROID_KEY_PASSWORD` (signing), `PLAY_JSON_KEY_BASE64` (base64 Play service-account JSON —

@@ -110,9 +110,55 @@ the plugin entry — and therefore the fingerprint — is identical whether or n
 Sentry account. Do not move those into `app.config.ts`; it would make the runtime version depend on
 the builder's environment.
 
-`TRM_SENTRY_DSN`/`_ENVIRONMENT`/`_TRACES_SAMPLE_RATE` ride in `extra` (not a fingerprint input), but
-follow the same lockstep rule as the Google client ids for the reason in the section above: the
-publish lane must set them or an applied update wipes them from the device.
+`TRM_SENTRY_DSN`/`_ENVIRONMENT`/`_TRACES_SAMPLE_RATE` ride in `extra` (no longer a fingerprint input —
+see the next section), but follow the same lockstep rule as the Google client ids: the publish lane
+must set them or an applied update wipes them from the device.
+
+### `fingerprint.config.js` — why the version axes and `extra` are skipped (2026-07-26, issue #55)
+
+`apps/mobile/fingerprint.config.js` sets `sourceSkips: ['ExpoConfigVersions', 'ExpoConfigExtraSection']`.
+Without it OTA could never work at all, and this is why:
+
+`@expo/fingerprint`'s default source skips are just
+`PackageJsonAndroidAndIosScriptsIfNotContainRun` — so `version`, `android.versionCode`,
+`ios.buildNumber` **and the whole `extra` block** were hashed into every runtime version. Those are
+exactly the fields the store lanes inject per release (`APP_VERSION`/`BUILD_NUMBER` from the tag) and
+the OTA lane does not, plus `extra.gitCommit`, which changes on every commit. Net effect, measured
+2026-07-26 on one unchanged tree (`expo-updates runtimeversion:resolve --platform ios`):
+
+| Env                                               | Runtime version |
+| ------------------------------------------------- | --------------- |
+| OTA lane (no version vars → `0.1.0` / build `1`)  | `88f7773b…`     |
+| store lane (`APP_VERSION=0.2.17 BUILD_NUMBER=17`) | `325656c1…`     |
+
+The only differing fingerprint source between the two was the `expoConfig` contents. That is the
+issue-#55 symptom: `No update found for runtimeVersion: 571ca74d… in branch: production` — a
+TestFlight binary asking for a runtime version no publish could ever stamp, because the publish lane
+has no release tag to derive one from. With the skips in place both envs resolve to the same hash
+(ios `0f11a22f…`, android `1040c08b…` on that tree).
+
+Neither skip loses native coverage:
+
+- **`ExpoConfigVersions`** — a marketing-version/build-number bump is a release axis, not a native
+  surface change. It must NOT fence an update off; that is what the forced-update gate is for
+  (`docs/release/mobile-versioning.md`).
+- **`ExpoConfigExtraSection`** — `extra` is pure JS-visible runtime config, and an applied update
+  replaces it on the device anyway, so hashing it was backwards. Every value in there with a native
+  counterpart is still hashed through that counterpart: the AdMob app ids via the config-plugin
+  props, `serverOrigin` via `associatedDomains` / the Android intent filters, the iOS Google client
+  id via the google-signin plugin's `iosUrlScheme`.
+
+Two consequences to keep in mind:
+
+- **Adding the config changed every runtime version** (it removes inputs), so — exactly like the
+  Sentry change above — the first OTA after it needs a fresh native build on both stores first.
+- **Nothing the app must trust across an update may be read from `extra` or `expoConfig.version`
+  any more.** `src/config.ts` takes `BUILD_NUMBER`/`APP_VERSION` from **expo-application** (the
+  native `CFBundleVersion` / `versionCode`), because the forced-update gate compares that build
+  number against `GET /version/mobile.minBuild` — reading the manifest's copy would make every
+  updated device report the OTA lane's placeholder build `1` and wall itself off behind the
+  update-required screen. `extra.gitCommit` is deliberately left manifest-scoped: after an update
+  it names the commit the running JS came from, which is what Settings → About should show.
 
 ### The recorded runtime version is per-platform
 
@@ -126,9 +172,10 @@ npx expo-updates runtimeversion:resolve --platform android --workflow managed   
 ```
 
 `--workflow managed` because `android/`/`ios/` are CNG (that mode ignores the native dirs, so a
-prebuilt tree and a clean one agree). Same tree, 2026-07-25: android `63e96d17…`, ios `7e888eb0…` —
-different per platform, and both different from the whole-project hash above. `mobile-ota.yml` records
-these two values as `runtime-versions.json`; use them when probing `/manifest` by hand.
+prebuilt tree and a clean one agree). Measured 2026-07-26 with `fingerprint.config.js` in place:
+android `1040c08b…`, ios `0f11a22f…` — different per platform, and both different from the
+whole-project hash above. `mobile-ota.yml` records these two values as `runtime-versions.json`; use
+them when probing `/manifest` by hand.
 
 ### Code-signing decision: serve-time signing
 
@@ -168,7 +215,9 @@ expo-open-ota signs manifests **at serve time** with the private key mounted int
   applies on the next cold start. The forced-update gate (`GET /version/mobile`) still runs every
   boot and is independent of OTA (see the interplay section below, completed in Task 10).
 - `runtimeVersion: { policy: 'fingerprint' }` — any native change (module/SDK/config-plugin)
-  changes the fingerprint, so old binaries simply never see the new bundle.
+  changes the fingerprint, so old binaries simply never see the new bundle. What counts as an input
+  is narrowed by `apps/mobile/fingerprint.config.js` (release versions and `extra` are skipped —
+  see the section above); editing that file re-dates every runtime version.
 
 ## Local smoke
 

@@ -146,7 +146,17 @@ jobs:
 
       - name: Prebuild the Android native project
         working-directory: apps/mobile
-        run: npx expo prebuild --platform android --no-install
+        # The runtime-version record shares this step so it shares its env verbatim: the fingerprint
+        # is computed from the evaluated app config, so a record resolved under a different env
+        # would name a runtime version this binary never asks for. Traceability only, never a gate
+        # (issue #55) — compare it against mobile-ota.yml's runtime-versions.json; a publish whose
+        # value differs is invisible to this build, which is the whole OTA failure mode.
+        run: |
+          npx expo prebuild --platform android --no-install
+          npx expo-updates runtimeversion:resolve --platform android --workflow managed \
+            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log("Android runtimeVersion: `"+JSON.parse(s).runtimeVersion+"`"))' \
+            >> "$GITHUB_STEP_SUMMARY" \
+            || echo 'Android runtimeVersion: could not be resolved (record only, build unaffected)' >> "$GITHUB_STEP_SUMMARY"
         env:
           TRM_SERVER_ORIGIN: ${{ vars.TRM_SERVER_ORIGIN }}
           TRM_GOOGLE_WEB_CLIENT_ID: ${{ vars.TRM_GOOGLE_WEB_CLIENT_ID }}

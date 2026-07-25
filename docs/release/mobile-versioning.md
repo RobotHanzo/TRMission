@@ -14,6 +14,12 @@ tag, from the `app_version`/`build_number` inputs — and inject them via `app.c
 (`APP_VERSION`/`BUILD_NUMBER`) at `expo prebuild` time. Local dev builds fall back to the
 placeholder `0.1.0`/`1` and are never shipped.
 
+The app reads its own build number back off the **native binary** (`expo-application`'s
+`nativeBuildVersion` → `src/config.ts`), never off `Constants.expoConfig.extra`: an applied OTA
+update replaces the whole expo config with the publish lane's evaluation of it, and that lane has no
+release tag — so a manifest-sourced build number would read as the `1` placeholder on every updated
+device and trip the gate below (issue #55; `docs/mobile/ota.md`).
+
 The server's `MOBILE_MIN_BUILD` (served by `GET /version/mobile`, checked at app boot)
 lives in the SAME number space. Rules:
 

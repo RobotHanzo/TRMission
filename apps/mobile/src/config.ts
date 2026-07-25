@@ -1,3 +1,4 @@
+import * as Application from 'expo-application';
 import Constants from 'expo-constants';
 
 const extra = (Constants.expoConfig?.extra ?? {}) as {
@@ -23,11 +24,21 @@ export const SERVER_ORIGIN = extra.serverOrigin ?? 'https://trmission.robothanzo
 export const API_BASE = `${SERVER_ORIGIN}/api/v1`;
 /** Realtime WebSocket endpoint (protobuf frames). */
 export const WS_URL = `${SERVER_ORIGIN.replace(/^http/, 'ws')}/ws`;
+// Version identity comes from the NATIVE binary (expo-application reads CFBundleShortVersionString /
+// CFBundleVersion / versionName / versionCode straight off the installed app), NOT from
+// `Constants.expoConfig`: an applied OTA update REPLACES the whole expoConfig — `version` and the
+// `extra` block included — with the values the publish lane happened to evaluate. The OTA lane has
+// no release tag to derive them from, so trusting the config would make every updated device report
+// the placeholder `0.1.0` / build 1 and the forced-update gate below would wall the app off as
+// hopelessly old (issue #55). The `extra`/config values stay as the fallback for the RNW web
+// harness, where expo-application has no native side and returns null.
 /** Marketing version (CFBundleShortVersionString / Android versionName), e.g. "0.1.0". */
-export const APP_VERSION = Constants.expoConfig?.version ?? 'dev';
+export const APP_VERSION =
+  Application.nativeApplicationVersion ?? Constants.expoConfig?.version ?? 'dev';
 /** This binary's build number — the axis GET /version/mobile.minBuild gates against. */
-export const BUILD_NUMBER = extra.buildNumber ?? 0;
-/** Full SHA of the commit this binary was built from (app.config.ts's GIT_COMMIT) — 'dev' outside
+export const BUILD_NUMBER = Number(Application.nativeBuildVersion) || (extra.buildNumber ?? 0);
+/** Full SHA of the commit the JS currently running was built from (app.config.ts's GIT_COMMIT) —
+ *  the binary's own commit until an OTA update applies, the published bundle's after. 'dev' outside
  *  a git checkout. Settings → About shows a short prefix, mirroring the admin dashboard's
  *  server/web commit rows. */
 export const GIT_COMMIT = extra.gitCommit ?? 'dev';
