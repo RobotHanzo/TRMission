@@ -25,11 +25,12 @@ const HELLO_TIMEOUT_MS = 15_000;
 const POLICY_VIOLATION_CLOSE_CODE = 1008;
 
 export interface AttachWsServerOptions {
-  /** Origins allowed to complete the ws upgrade. A request that sends no Origin header at all
+  /** EXTRA cross-origin origins allowed to complete the ws upgrade, on top of the same-origin
+   *  requests `isSameOrigin` always admits. A request that sends no Origin header at all
    *  (only browsers send one; native/mobile clients never do) is always allowed through — only a
-   *  PRESENT-but-disallowed Origin is rejected. Defaults to CORS_ORIGINS; an empty list means no
-   *  allowlist is configured (the dev default) and every origin is accepted, matching main.ts's
-   *  REST CORS posture (`enableCors` is skipped entirely when `CORS_ORIGINS` is unset). */
+   *  PRESENT, cross-origin, non-allowlisted Origin is rejected. Defaults to CORS_ORIGINS; an empty
+   *  list means no allowlist is configured (the dev default) and every origin is accepted, matching
+   *  main.ts's REST CORS posture (`enableCors` is skipped entirely when `CORS_ORIGINS` is unset). */
   allowedOrigins?: readonly string[];
   /** ms an unbound connection is given to send a valid hello before being closed. */
   helloTimeoutMs?: number;
@@ -52,10 +53,18 @@ export function attachWsServer(
     path,
     maxPayload,
     verifyClient: (info, callback) => {
-      if (!info.origin || allowedOrigins.length === 0 || allowedOrigins.includes(info.origin)) {
+      if (
+        !info.origin ||
+        isSameOrigin(info.origin, info.req.headers.host) ||
+        allowedOrigins.length === 0 ||
+        allowedOrigins.includes(info.origin)
+      ) {
         callback(true);
         return;
       }
+      log.warn(
+        `ws upgrade rejected: origin ${info.origin} not allowed (host ${String(info.req.headers.host)})`,
+      );
       callback(false, 403, 'origin not allowed');
     },
   });
@@ -108,6 +117,40 @@ export function attachWsServer(
   });
 
   return wss;
+}
+
+/**
+ * True when the browser's `Origin` names the very host it sent this request to — i.e. the page
+ * opening the socket is served by this same deployment.
+ *
+ * This is admitted unconditionally, ahead of the allowlist, because a same-origin upgrade is
+ * exactly what the allowlist is NOT about. `CORS_ORIGINS` describes *cross*-origin browser
+ * clients; in the shipped topology nginx serves the SPA and proxies `/api` + `/ws` from one
+ * origin, so CORS is never exercised and `CORS_ORIGINS` is routinely unset or stale (the deploy
+ * templates carried `http://localhost:8080` long after the real origin moved). Keying the ws
+ * upgrade off that value turned a dormant misconfiguration into "every browser is refused at the
+ * handshake while native clients, which send no Origin, keep working".
+ *
+ * Safe against the cross-site-hijacking (CSWSH) case the check exists for, because that threat is
+ * strictly browser-driven: a browser sets both headers itself and will not let attacker.example
+ * send `Host: our.host` — so `Origin.host === Host` holds only for our own pages. A non-browser
+ * caller can spoof both, but it can equally just omit `Origin`, which is already (and must remain)
+ * allowed for native clients — so this concedes nothing that wasn't already reachable.
+ *
+ * Compared on host (name + port), not scheme: TLS terminates at the proxy, so the server sees
+ * plain http and a scheme comparison would reject every real https client.
+ */
+function isSameOrigin(origin: string, host: string | undefined): boolean {
+  if (!host) return false;
+  let originHost: string;
+  try {
+    // Opaque origins serialize as the literal "null" (sandboxed iframe, file://) — `new URL`
+    // throws on it, so those fall through to the allowlist rather than passing as same-origin.
+    originHost = new URL(origin).host;
+  } catch {
+    return false;
+  }
+  return originHost !== '' && originHost.toLowerCase() === host.toLowerCase();
 }
 
 function toUint8(data: RawData): Uint8Array {

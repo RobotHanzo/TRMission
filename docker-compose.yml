@@ -93,7 +93,10 @@ services:
       MONGO_URL: mongodb://mongo:27017
       MONGO_DB: trmission
       JWT_SECRET: ${JWT_SECRET:-dev-insecure-change-me}
-      CORS_ORIGINS: http://localhost:8080
+      # Cross-origin browser clients only: the web container serves the SPA and proxies /api + /ws
+      # from one origin, so same-origin play needs no entry here (the ws upgrade admits same-origin
+      # requests itself; REST CORS never engages). Override for a real deployment's public origin.
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
       # Refresh/OAuth-nonce cookies get Secure by default (assumes HTTPS in front of this
       # container, e.g. a TLS-terminating proxy). Only set to 0 for an http-only deployment.
       COOKIE_SECURE: ${COOKIE_SECURE:-1}

@@ -12,7 +12,7 @@
 #   2. Set JWT_SECRET in Portainer → Stacks → Environment variables
 #      (or via `docker secret` and reference it below).
 #
-version: "3.8"
+version: '3.8'
 
 services:
   mongo:
@@ -25,7 +25,7 @@ services:
     volumes:
       - trm-mongo-data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,13 +34,20 @@ services:
         condition: any
 
   server:
-    image: <registry>/trm-server:latest   # replace with your image
+    image: <registry>/trm-server:latest # replace with your image
     environment:
-      PORT: "3001"
+      PORT: '3001'
       MONGO_URL: mongodb://mongo:27017
       MONGO_DB: trmission
-      JWT_SECRET: ${JWT_SECRET}            # set in Portainer env vars
-      CORS_ORIGINS: http://localhost:8080
+      JWT_SECRET: ${JWT_SECRET} # set in Portainer env vars
+      # Cross-origin browser clients only. The web tier serves the SPA and proxies /api + /ws from
+      # ONE origin, so a same-origin deployment needs nothing here — the ws upgrade admits
+      # same-origin requests on its own (ws-server.ts) and REST CORS never engages. Set it to your
+      # public origin (e.g. https://trmission.example) only if something cross-origin must connect.
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      # Public base URL the browser reaches this stack at — required for the OAuth round trip
+      # (provider redirect_uri + post-callback redirect). Must be the origin serving the SPA.
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE:-}
       # Refresh/OAuth-nonce cookies get Secure by default (assumes HTTPS in front of this
       # service, e.g. a TLS-terminating proxy/load balancer). Only set to 0 for an http-only
       # deployment.
@@ -48,15 +55,15 @@ services:
       # Maintainer dashboard owners (comma-separated users._id values, NOT emails; served at /admin/).
       DASHBOARD_OWNER_IDS: ${DASHBOARD_OWNER_IDS:-}
     ports:
-      - "3001:3001"
+      - '3001:3001'
     deploy:
       restart_policy:
         condition: any
 
   web:
-    image: <registry>/trm-web:latest      # replace with your image
+    image: <registry>/trm-web:latest # replace with your image
     ports:
-      - "8080:80"
+      - '8080:80'
     deploy:
       restart_policy:
         condition: any

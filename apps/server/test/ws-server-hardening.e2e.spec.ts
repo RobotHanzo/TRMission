@@ -129,6 +129,51 @@ describe('ws transport hardening', () => {
     await new Promise<void>((r) => http.close(() => r()));
   });
 
+  // The shipped topology serves the SPA and proxies /ws from ONE origin, so browsers always send
+  // an Origin naming the host they connected to. Keying the upgrade purely off CORS_ORIGINS — a
+  // value a same-origin deployment has no reason to set correctly — refused every browser in
+  // production while native clients (no Origin) kept working. Same-origin must never depend on it.
+  it('allows a same-origin upgrade even when the allowlist names only other origins', async () => {
+    const http = createServer();
+    const hub = await makeHub();
+    attachWsServer(http, hub, '/ws', { allowedOrigins: ['http://localhost:8080'] });
+    const port = await listen(http);
+
+    // Exactly what a browser on this deployment sends: Origin's host === the Host it requested.
+    const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`, {
+      origin: `http://127.0.0.1:${port}`,
+    });
+    await new Promise<void>((resolve, reject) => {
+      ws.on('open', () => resolve());
+      ws.on('error', reject);
+      ws.on('unexpected-response', () => reject(new Error('same-origin upgrade was refused')));
+    });
+    ws.close();
+
+    await new Promise<void>((r) => http.close(() => r()));
+  });
+
+  it('still rejects a cross-origin upgrade that merely resembles the host', async () => {
+    const http = createServer();
+    const hub = await makeHub();
+    attachWsServer(http, hub, '/ws', { allowedOrigins: ['https://trmission.example'] });
+    const port = await listen(http);
+
+    // Same host name, different port ⇒ a different origin, and a bare "null" (sandboxed iframe /
+    // file://) is opaque, never same-origin. Neither may ride in on the same-origin allowance.
+    for (const origin of [`http://127.0.0.1:${port + 1}`, 'null']) {
+      const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`, { origin });
+      const failed = await new Promise<boolean>((resolve) => {
+        ws.on('open', () => resolve(false));
+        ws.on('error', () => resolve(true));
+        ws.on('unexpected-response', () => resolve(true));
+      });
+      expect(failed, `origin ${origin} must not be treated as same-origin`).toBe(true);
+    }
+
+    await new Promise<void>((r) => http.close(() => r()));
+  });
+
   it('allows the upgrade when Origin is allowlisted, and when Origin is absent (native clients)', async () => {
     const http = createServer();
     const hub = await makeHub();
