@@ -22,7 +22,7 @@ import {
   TAIWAN_LAND_PATH,
   TAIWAN_CENTRAL_RANGE_PATH,
   TAIWAN_ISLANDS,
-  smoothClosedPath,
+  smoothCoastPath,
   type MapGeography,
   type MapPalette,
 } from '@trm/map-data';
@@ -66,7 +66,7 @@ export function GeographyLayer({
     () =>
       geography
         ? geography.land
-            .map((ring) => Skia.Path.MakeFromSVGString(smoothClosedPath(ring)))
+            .map((ring) => Skia.Path.MakeFromSVGString(smoothCoastPath(ring)))
             .filter((p): p is SkPath => !!p)
         : [],
     [geography],
@@ -75,7 +75,7 @@ export function GeographyLayer({
   const borderRings = useMemo<SkPath[]>(
     () =>
       (geography?.borders ?? [])
-        .map((ring) => Skia.Path.MakeFromSVGString(smoothClosedPath(ring)))
+        .map((ring) => Skia.Path.MakeFromSVGString(smoothCoastPath(ring)))
         .filter((p): p is SkPath => !!p),
     [geography],
   );

@@ -12,6 +12,7 @@ import { SandboxProvider } from '../store/sandboxProvider';
 import { useGameStore, useGameStoreApi } from '../store/game';
 import { useLogStoreApi } from '../store/log';
 import { useLocalGame } from '../offline/useLocalGame';
+import { useActiveContent } from '../game/useActiveContent';
 import { useTheme } from '../theme/useTheme';
 import { GameStage } from './GameStage';
 
@@ -24,6 +25,11 @@ function OfflineGameView({ route, navigation }: Props) {
   const log = useLogStoreApi();
   const handle = useLocalGame(route.params, { game, log });
   const snapshot = useGameStore((s) => s.snapshot);
+  // Make the game's own map the active catalog, exactly as GameScreen does for a live game.
+  // Without this the board keeps whatever content was last active (Taiwan, the bundled default)
+  // and renders the wrong map entirely for any other official map (#53). Offline play is limited
+  // to bundled maps, so this always resolves synchronously — but the unmount reset still matters.
+  const contentStatus = useActiveContent(snapshot?.contentHash);
   const phase = snapshot?.phase;
   const gameOver = phase === Phase.GAME_OVER;
   // `leaving` keeps the post-game CTAs disabled while the ad is on its way up, so a second tap
@@ -64,7 +70,7 @@ function OfflineGameView({ route, navigation }: Props) {
       </View>
     );
   }
-  if (!handle.ready || !handle.socket || !snapshot) {
+  if (!handle.ready || !handle.socket || !snapshot || contentStatus !== 'ready') {
     return <View style={[styles.center, { backgroundColor: tokens.paper }]} />;
   }
 

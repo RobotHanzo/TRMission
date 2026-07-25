@@ -1,5 +1,5 @@
 // A mission (destination ticket) card (ports the web TicketCard): a mini-map preview of the two
-// endpoint cities over the Taiwan board, a ticket stub with the city pair, and the point value.
+// endpoint cities over the active board, a ticket stub with the city pair, and the point value.
 // Long routes wear an EMU-blue livery, short routes a warm ember one. With `onToggle` the card
 // becomes a pressable toggle (used while choosing tickets). Theme-aware like the web's
 // var(--tr-*)-driven .ticket-card: the card chrome and the mini-map both follow light/dark.
@@ -52,6 +52,7 @@ export function TicketCard({ ticketId, selected, onToggle, disabled, completed }
           aId={def.a as string}
           bId={def.b as string}
           toneHex={toneHex}
+          view={def.view}
           palette={palette}
           surface={tokens.surface}
         />

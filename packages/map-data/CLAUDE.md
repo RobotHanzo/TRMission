@@ -43,6 +43,12 @@ true)` over Natural Earth admin-1 polygons — and every stop's coordinate is it
 - `generate.ts` — `generateTickets()`: deterministic mission auto-generation (seeded via
   `@trm/shared`'s counter PRNG — same seed always produces the same ticket list) plus `RULE_BOUNDS`,
   the min/max clamp for every tunable in `MapRules`.
+- `geometry.ts` — the pure route/coastline math every renderer draws through, including BOTH
+  closed-ring smoothings: `smoothClosedPath` (uniform Catmull–Rom, for the dense hand-authored
+  Taiwan silhouette) and `smoothCoastPath` (centripetal, for a cropped-world map's sparse land and
+  border rings — the two are not interchangeable, and its own doc comment says why). Web, the Skia
+  board, both mission-card previews and the server's OG card all resolve here, so no surface can
+  render a different coastline from another.
 - `render-tokens.ts` — the shared cartography render tokens: `MAP_PALETTE_LIGHT/DARK`, `MAP_INKS`,
   `ROUTE_COLOR_HEX`/`LIVERY_COLORS`, `MAP_DIMS`, and `mapCssVars()` (the `--m-*` custom-property
   map the web board CSS resolves). Consumed by the web's `MapScene`/`game.css`/`theme/colors.ts`

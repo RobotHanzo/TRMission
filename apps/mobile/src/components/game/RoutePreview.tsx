@@ -1,21 +1,26 @@
-// A miniature of the Taiwan board for a mission card (ports the web RoutePreview): the island
+// A miniature of the ACTIVE board for a mission card (ports the web RoutePreview): the map
 // silhouette and the faint rail web for context, then the two ticket endpoints pinned and joined
 // by a gentle neutral arc (no specific path is implied — any connection scores). Mirrors the
 // web's rp-* classes, which resolve through the theme's --tr-* variables — so the caller passes
 // the active map palette (light/dark) plus the chrome surface + tone colours.
+//
+// "Active" is load-bearing: the silhouette, the viewBox and the network all come from the catalog
+// the current game swapped in (game/catalog.ts), never from a Taiwan constant — otherwise every
+// Greater Taipei mission card draws its stops over the wrong island (#53).
 import { useMemo } from 'react';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 import {
   MAP_PALETTE_LIGHT,
-  TAIWAN_BASE_VIEW,
+  smoothCoastPath,
+  ticketRect,
   TAIWAN_CENTRAL_RANGE_PATH,
   TAIWAN_ISLANDS,
   TAIWAN_LAND_PATH,
   type MapPalette,
+  type TicketView,
 } from '@trm/map-data';
 import { CITIES, ROUTES, cityById } from '../../game/content';
-
-const VIEWBOX = `${TAIWAN_BASE_VIEW.x} ${TAIWAN_BASE_VIEW.y} ${TAIWAN_BASE_VIEW.w} ${TAIWAN_BASE_VIEW.h}`;
+import { ACTIVE_BASE_VIEW, ACTIVE_GEOGRAPHY } from '../../game/catalog';
 
 /** Every route as a faint hairline, drawn once — pure cartographic context. */
 const networkPath = (): string => {
@@ -33,6 +38,9 @@ interface Props {
   bId: string;
   /** Connection tint — EMU blue for long routes, ember for short (the web --tr-blue/--tr-ember). */
   toneHex: string;
+  /** Per-ticket displayed-area override, resolved against the map default carried on the active
+   *  geography. `undefined` ⇒ inherit that default. */
+  view?: TicketView | undefined;
   /** The active cartography palette (light/dark) — the web's --tr-sea/land/coast/relief. */
   palette?: MapPalette | undefined;
   /** The chrome surface colour for the arc casing + pin rings (the web --tr-surface). */
@@ -43,13 +51,28 @@ export function RoutePreview({
   aId,
   bId,
   toneHex,
+  view,
   palette: P = MAP_PALETTE_LIGHT,
   surface = MAP_PALETTE_LIGHT.surface,
 }: Props) {
   const net = useMemo(networkPath, []);
+  const geography = ACTIVE_GEOGRAPHY;
+  const landPaths = useMemo(
+    () => (geography ? geography.land.map(smoothCoastPath) : []),
+    [geography],
+  );
   const a = cityById.get(aId);
   const b = cityById.get(bId);
   if (!a || !b) return null;
+
+  const rect = ticketRect(
+    view !== undefined ? { view } : {},
+    a,
+    b,
+    ACTIVE_BASE_VIEW,
+    geography ?? undefined,
+  );
+  const viewBox = `${rect.x} ${rect.y} ${rect.w} ${rect.h}`;
 
   // A gentle arc bowed perpendicular to the A–B line so it reads as "a connection",
   // never as one prescribed route.
@@ -65,29 +88,48 @@ export function RoutePreview({
   const arc = `M${a.x} ${a.y} Q${cxp} ${cyp} ${b.x} ${b.y}`;
 
   return (
-    <Svg viewBox={VIEWBOX} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-      <Path d={TAIWAN_LAND_PATH} fill="none" stroke={P.sea} strokeWidth={2.2} opacity={0.5} />
-      <Path
-        d={TAIWAN_LAND_PATH}
-        fill={P.land}
-        stroke={P.coast}
-        strokeWidth={0.5}
-        strokeLinejoin="round"
-      />
-      <Path d={TAIWAN_CENTRAL_RANGE_PATH} fill={P.relief} opacity={0.5} />
-      <G>
-        {TAIWAN_ISLANDS.map((isl, i) => (
-          <Circle
-            key={i}
-            cx={isl.cx}
-            cy={isl.cy}
-            r={isl.r}
+    <Svg viewBox={viewBox} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+      {geography ? (
+        // A custom/cropped-world map: one smoothed ring per landmass, no relief/islands (those are
+        // hand-tuned Taiwan decorations with no generic equivalent) — same split as web's rp-geo.
+        <G>
+          {landPaths.map((d, i) => (
+            <Path
+              key={i}
+              d={d}
+              fill={P.land}
+              stroke={P.coast}
+              strokeWidth={0.5}
+              strokeLinejoin="round"
+            />
+          ))}
+        </G>
+      ) : (
+        <>
+          <Path d={TAIWAN_LAND_PATH} fill="none" stroke={P.sea} strokeWidth={2.2} opacity={0.5} />
+          <Path
+            d={TAIWAN_LAND_PATH}
             fill={P.land}
             stroke={P.coast}
-            strokeWidth={0.4}
+            strokeWidth={0.5}
+            strokeLinejoin="round"
           />
-        ))}
-      </G>
+          <Path d={TAIWAN_CENTRAL_RANGE_PATH} fill={P.relief} opacity={0.5} />
+          <G>
+            {TAIWAN_ISLANDS.map((isl, i) => (
+              <Circle
+                key={i}
+                cx={isl.cx}
+                cy={isl.cy}
+                r={isl.r}
+                fill={P.land}
+                stroke={P.coast}
+                strokeWidth={0.4}
+              />
+            ))}
+          </G>
+        </>
+      )}
 
       <Path
         d={net}
