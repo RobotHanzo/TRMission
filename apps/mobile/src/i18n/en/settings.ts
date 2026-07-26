@@ -21,7 +21,7 @@ export default {
   layoutHint: 'Which side of the game screen the controls sit on.',
   // Sound & haptics
   hapticsHint:
-    'A short buzz when you claim a route, reveal a tunnel, finish a mission, or the game ends.',
+    'A short buzz when you claim a route, reveal a tunnel, finish a mission, the game ends, or you pull a list down to refresh it.',
   haptics: 'Haptic feedback',
   // Notifications
   notifications: 'Push notifications',

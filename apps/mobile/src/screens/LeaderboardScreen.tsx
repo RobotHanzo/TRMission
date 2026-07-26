@@ -15,6 +15,7 @@ import { useSession } from '../store/session';
 import { useTheme } from '../theme/useTheme';
 import { ErrorText, MutedText } from '../theme/chrome';
 import { useTabBarPad } from '../hooks/useTabBarPad';
+import { useRefreshHaptics } from '../hooks/useRefreshHaptics';
 import { AdBanner } from '../ads/AdBanner';
 
 const SCOPES: LeaderboardScopeKind[] = ['allTime', 'season'];
@@ -64,11 +65,14 @@ export function LeaderboardScreen(): React.JSX.Element {
 
   // Pull to refresh: standings move while the screen sits open on a tab that never unmounts, and
   // the board has no other way to re-fetch. Drops back to page one (the cursor is only meaningful
-  // for the page sequence it came from) and re-reads your own standing along with it.
-  const refresh = useCallback(() => {
-    setRefreshing(true);
-    void load(null).finally(() => setRefreshing(false));
-  }, [load]);
+  // for the page sequence it came from) and re-reads your own standing along with it. The buzz
+  // (issue #61) confirms the drag took while the thumb still covers the spinner.
+  const refresh = useRefreshHaptics(
+    useCallback(() => {
+      setRefreshing(true);
+      void load(null).finally(() => setRefreshing(false));
+    }, [load]),
+  );
 
   const metricValue = (r: LeaderboardEntry): number =>
     metric === 'rating' ? r.rating : metric === 'wins' ? r.wins : r.gamesPlayed;

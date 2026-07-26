@@ -7,7 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * PATCH /auth/me/preferences). Haptics/notifications are per-device by nature.
  */
 interface SettingsState {
-  /** Haptic feedback on game beats (route claim, tunnel reveal, ticket completion, game end). */
+  /** Haptic feedback: the game beats (route claim, tunnel reveal, ticket completion, game end)
+   *  and the pull-to-refresh drag (issue #61) — one switch for everything that vibrates. */
   haptics: boolean;
   /** User intent for push. Actual delivery also needs OS permission + a registered token. */
   notifications: boolean;
