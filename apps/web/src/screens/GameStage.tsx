@@ -47,6 +47,7 @@ import { PlayerHand } from '../components/PlayerHand';
 import { TeamPoolPanel } from '../components/TeamPoolPanel';
 import { TrainCarCard } from '../components/TrainCarCard';
 import { PlayerTrackers } from '../components/PlayerTrackers';
+import { PlayerCard } from '../components/PlayerCard';
 import { EndGameVote } from '../components/EndGameVote';
 import { TurnCountdown } from '../components/TurnCountdown';
 import { TicketPanel } from '../components/TicketPanel';
@@ -158,6 +159,11 @@ export function GameStage({
   // mounted; the tutorial is NOT a sandbox and runs the dock — see the actionGate effect below.
   const phone = useMediaQuery(PHONE_QUERY) && !sandbox;
   const [dockTab, setDockTab] = useState<DockTab>('hand');
+  // The player card (issue #14) opens from a tracker row and is rendered at stage level, so it can
+  // dock over the whole rail column (desktop) / rise as a sheet (phone) instead of being trapped
+  // inside the scrolling rail. Clicking the open row again closes it.
+  const [inspectedId, setInspectedId] = useState<string | null>(null);
+  const inspectPlayer = (id: string): void => setInspectedId((cur) => (cur === id ? null : id));
   // Tutorial on phone: a beat awaiting a market action must surface the Draw tab — its target
   // would otherwise sit inside an unselected (unmounted) dock panel and the learner would stall.
   useEffect(() => {
@@ -201,6 +207,12 @@ export function GameStage({
   const myTurn = isMyTurn(snapshot);
   const canAct = myTurn && phase === Phase.AWAIT_ACTION;
   const canDraw = myTurn && (phase === Phase.AWAIT_ACTION || phase === Phase.DRAWING_CARDS);
+
+  // The scoreboard owns the board's route highlight at game over — a player card left open would
+  // fight it for the same reveal slot.
+  useEffect(() => {
+    if (phase === Phase.GAME_OVER) setInspectedId(null);
+  }, [phase]);
 
   // --- analytics (LIVE games only; the tutorial/encyclopedia/replay sandbox never fires these) ---
   const startedRef = useRef<string | null>(null);
@@ -539,7 +551,7 @@ export function GameStage({
   const trackers = (
     <div className="hud-block">
       <TurnCountdown />
-      <PlayerTrackers snapshot={snapshot} />
+      <PlayerTrackers snapshot={snapshot} onInspect={inspectPlayer} inspectedId={inspectedId} />
     </div>
   );
   const endVoteSection = endVote ? <div className="hud-block">{endVote}</div> : null;
@@ -841,6 +853,14 @@ export function GameStage({
             <div className="game-hand-strip">{handSection}</div>
           )}
         </>
+      )}
+
+      {inspectedId && (
+        <PlayerCard
+          snapshot={snapshot}
+          playerId={inspectedId}
+          onClose={() => setInspectedId(null)}
+        />
       )}
 
       {claim && (

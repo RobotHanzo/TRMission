@@ -63,6 +63,7 @@ export const RoomMemberSchema = z.object({
   isGuest: z.boolean(),
   seat: z.number(),
   ready: z.boolean(),
+  avatarUrl: z.string().optional(),
   isBot: z.boolean().optional(),
   difficulty: botDifficulty.optional(),
   wantsRematch: z.boolean().optional(),

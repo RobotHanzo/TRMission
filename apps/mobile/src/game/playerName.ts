@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { playerAvatar, type PlayerAvatar } from '@trm/client-core/game/playerAvatar';
 import { useRoster } from '../store/roster';
 import { useModeration } from '../store/moderation';
 
@@ -19,5 +20,29 @@ export function usePlayerName(): (player: { id: string; seat: number; isMe?: boo
     if (blocked.has(id)) return `P${seat + 1}`;
     if (m?.displayName) return m.displayName;
     return `P${seat + 1}`;
+  };
+}
+
+/**
+ * How to picture a player: their account picture, or a bot / guest glyph, or the initial of the
+ * label `usePlayerName` resolved. A blocked player's picture is suppressed for the same reason
+ * their name is — it is UGC, and it would undo the masking the name already applied.
+ */
+export function usePlayerAvatar(): (player: {
+  id: string;
+  seat: number;
+  displayName: string;
+}) => PlayerAvatar {
+  const byId = useRoster((s) => s.byId);
+  const blocked = useModeration((s) => s.blocked);
+  return ({ id, displayName }) => {
+    const m = byId[id];
+    return playerAvatar({
+      displayName,
+      isBot: m?.isBot ?? id.startsWith('bot:'),
+      isGuest: m?.isGuest,
+      avatarUrl: m?.avatarUrl,
+      masked: blocked.has(id),
+    });
   };
 }

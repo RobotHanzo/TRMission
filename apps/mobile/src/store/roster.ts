@@ -9,6 +9,9 @@ import type { RoomMember, RoomSpectator } from '../net/rest';
 export interface RosterEntry {
   displayName: string;
   isBot?: boolean;
+  isGuest?: boolean;
+  /** OAuth profile picture, when the account has one — the tracker rows and player card show it. */
+  avatarUrl?: string;
   difficulty?: RoomMember['difficulty'];
   isSpectator?: boolean;
 }

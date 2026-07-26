@@ -58,6 +58,7 @@ import { CardMarket } from '../components/game/CardMarket';
 import { PlayerHand } from '../components/game/PlayerHand';
 import { TeamPoolPanel } from '../components/game/TeamPoolPanel';
 import { PlayerTrackers } from '../components/game/PlayerTrackers';
+import { PlayerCard } from '../components/game/PlayerCard';
 import { TurnCountdown } from '../components/game/TurnCountdown';
 import { TicketPanel } from '../components/game/TicketPanel';
 import { PaymentModal } from '../components/game/PaymentModal';
@@ -172,6 +173,10 @@ export function GameStage({
   // A demo clip starts collapsed — the board is the show; beats reopen it (see demoDock).
   const [dockCollapsed, setDockCollapsed] = useState(!!demo);
   const [commsTab, setCommsTab] = useState<'rail' | 'log' | 'comms'>('rail');
+  // The player card (issue #14) opens from a tracker row. Held here, not in PlayerTrackers, so the
+  // sheet is mounted with the other stage overlays and survives a dock tab / tier change.
+  const [inspectedId, setInspectedId] = useState<string | null>(null);
+  const inspectPlayer = (id: string): void => setInspectedId((cur) => (cur === id ? null : id));
 
   const version = snapshot.stateVersion;
   useEffect(() => {
@@ -492,7 +497,7 @@ export function GameStage({
     <GamePanel>
       <TrayHead title={t('dockPlayers')} count={snapshot.players.length} />
       {withCountdown && <TurnCountdown />}
-      <PlayerTrackers snapshot={snapshot} />
+      <PlayerTrackers snapshot={snapshot} onInspect={inspectPlayer} inspectedId={inspectedId} />
     </GamePanel>
   );
 
@@ -619,6 +624,14 @@ export function GameStage({
           onDismiss={playback ? tunnelReveal.dismiss : undefined}
           onCommit={flow.onTunnelCommit}
           onAbort={flow.onTunnelAbort}
+        />
+      )}
+      {/* The scoreboard owns the board's route highlight at game over, so the card yields to it. */}
+      {inspectedId && phase !== Phase.GAME_OVER && (
+        <PlayerCard
+          snapshot={snapshot}
+          playerId={inspectedId}
+          onClose={() => setInspectedId(null)}
         />
       )}
       {phase === Phase.GAME_OVER && (

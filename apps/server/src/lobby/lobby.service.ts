@@ -182,13 +182,23 @@ export class LobbyService {
     return this.maps.resolveForStart(map, maxPlayers);
   }
 
+  /** The account's OAuth profile picture, if it has one. The access token carries only
+   *  id/name/guest, so this is read from the user record — on room create/join only, never on a
+   *  hot path. Guests never have one, so they skip the lookup entirely. */
+  private async avatarOf(user: AuthUser): Promise<string | undefined> {
+    if (user.isGuest) return undefined;
+    return (await this.users.findById(user.userId))?.avatarUrl ?? undefined;
+  }
+
   async create(user: AuthUser, maxPlayers = 5): Promise<RoomView> {
+    const avatarUrl = await this.avatarOf(user);
     const host: RoomMember = {
       userId: user.userId,
       displayName: user.displayName,
       isGuest: user.isGuest,
       seat: 0,
       ready: false,
+      ...(avatarUrl ? { avatarUrl } : {}),
     };
     return toView(await this.rooms.create(host, maxPlayers));
   }
@@ -198,10 +208,12 @@ export class LobbyService {
   }
 
   async join(code: string, user: AuthUser): Promise<RoomView> {
+    const avatarUrl = await this.avatarOf(user);
     const r = await this.rooms.join(code, {
       userId: user.userId,
       displayName: user.displayName,
       isGuest: user.isGuest,
+      ...(avatarUrl ? { avatarUrl } : {}),
     });
     if (r === 'not_found') throw new NotFoundException('room not found');
     if (r === 'started') throw new BadRequestException('game already started');

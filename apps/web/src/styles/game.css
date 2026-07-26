@@ -858,21 +858,73 @@
   flex-direction: column;
   gap: var(--tr-space-1);
 }
+.tracker-slot {
+  display: flex;
+}
+/* A row carries the two numbers read at a glance (score + train cars); the rest of the player's
+   state opens in the .player-card. `--seat` is set inline per row. */
 .tracker {
+  position: relative;
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: var(--tr-space-2);
-  padding: var(--tr-space-1) var(--tr-space-2);
+  padding: 7px var(--tr-space-2) 8px;
   border: 1px solid var(--tr-line);
   border-radius: var(--tr-radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  /* After `font: inherit` — the shorthand would otherwise reset line-height to the body's. */
+  line-height: 1.15;
   font-size: 0.85em;
+  text-align: left;
+  overflow: hidden;
+}
+button.tracker {
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+}
+button.tracker:hover {
+  background: color-mix(in srgb, var(--tr-ink) 5%, transparent);
 }
 .tracker.current {
   border-color: var(--tr-ember);
   background: color-mix(in srgb, var(--tr-ember) 8%, transparent);
 }
+.tracker.inspected {
+  border-color: var(--tr-blue);
+}
 .tracker-name {
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The player's picture, ringed in their seat colour — the identity mark that replaced the old
+   plain seat dot. The ring carries the same colour as this player's routes on the board. */
+.seat-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--seat);
+  background: var(--tr-surface-2);
+  color: var(--tr-ink-soft);
+  font-weight: 700;
+  line-height: 1;
+  overflow: hidden;
+}
+.seat-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 .tracker-team {
   flex: none;
@@ -882,16 +934,326 @@
   padding: 1px 7px;
   border-radius: 999px;
 }
-.tracker-stats {
-  margin-left: auto;
-  display: flex;
-  gap: var(--tr-space-2);
-  color: var(--tr-ink-soft);
-}
-.tracker-stats span {
+.tracker-cars {
+  margin-inline-start: auto;
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  min-width: 3.4ch;
+  justify-content: flex-end;
+  font-variant-numeric: tabular-nums;
+  color: var(--tr-ink-soft);
+}
+.tracker.low .tracker-cars {
+  color: var(--tr-ember);
+  font-weight: 700;
+}
+.tracker-score {
+  flex: none;
+  min-width: 3.1ch;
+  text-align: end;
+  font-size: 1.35em;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+/* The row's own baseline is the rolling-stock gauge: it shortens as this player spends train
+   cars, and goes ember once the supply is low enough that the endgame is in sight. */
+.tracker-gauge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3px;
+  background: color-mix(in srgb, var(--tr-ink) 8%, transparent);
+}
+.tracker-gauge i {
+  display: block;
+  height: 100%;
+  background: var(--seat);
+}
+.tracker.low .tracker-gauge i {
+  background: var(--tr-ember);
+}
+
+/* ── Player card (issue #14) ──────────────────────────────────────────────────────────────
+   Docks over the whole rail column instead of opening a centred modal: its primary action
+   highlights the player's network on the board, so the board must stay readable (and pannable)
+   while the card is open. Rendered at stage level, so it is not trapped inside the scrolling
+   rail. `--seat` is set inline. On a phone it becomes a bottom sheet over the dock. */
+.player-card {
+  grid-area: rail;
+  z-index: 20;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  scrollbar-width: thin;
+  scrollbar-color: var(--tr-line) transparent;
+  animation: pcard-in 0.16s ease-out;
+}
+@keyframes pcard-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+}
+.pcard-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-3);
+  border-bottom: 1px solid var(--tr-line);
+  background: var(--tr-surface-2);
+}
+.pcard-who {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pcard-name {
+  margin: 0;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-1);
+  flex-wrap: wrap;
+}
+.pcard-chip {
+  flex: none;
+  color: #fff;
+  background: var(--tr-ember);
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.pcard-meta {
+  margin: 0;
+  font-size: 0.75em;
+  letter-spacing: 0.05em;
+  color: var(--tr-ink-soft);
+}
+.pcard-head .icon-button {
+  margin-inline-start: auto;
+  flex: none;
+}
+.pcard-sec {
+  padding: var(--tr-space-3);
+  border-bottom: 1px solid var(--tr-line);
+}
+.pcard-sec:last-child {
+  border-bottom: 0;
+}
+.pcard-label {
+  margin: 0 0 var(--tr-space-2);
+  font-size: 0.7em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--tr-ink-soft);
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-1);
+}
+.pcard-public {
+  border: 1px solid var(--tr-line);
+  border-radius: 999px;
+  padding: 0 6px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.pcard-total {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--tr-space-1);
+}
+.pcard-total b {
+  font-size: 2.1em;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.pcard-total span {
+  font-size: 0.8em;
+  color: var(--tr-ink-soft);
+}
+.pcard-ledger {
+  margin: var(--tr-space-2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85em;
+}
+.pcard-ledger div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--tr-space-2);
+  color: var(--tr-ink-soft);
+}
+/* A dotted leader between label and figure — the same timetable voice as the tray heads. */
+.pcard-ledger dt {
+  flex: 1;
+  min-width: 0;
+  border-bottom: 1px dotted var(--tr-line);
+}
+.pcard-ledger dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--tr-ink);
+  font-variant-numeric: tabular-nums;
+}
+.pcard-cars {
+  margin: 0 0 var(--tr-space-2);
+  display: flex;
+  align-items: baseline;
+  gap: var(--tr-space-1);
+}
+.pcard-cars b {
+  font-size: 1.4em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.pcard-cars span {
+  font-size: 0.85em;
+  color: var(--tr-ink-soft);
+}
+.pcard-cars em {
+  margin-inline-start: auto;
+  font-style: normal;
+  font-size: 0.78em;
+  font-weight: 600;
+  color: var(--tr-ember);
+}
+.pcard-gauge {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--tr-ink) 8%, transparent);
+  overflow: hidden;
+}
+.pcard-gauge i {
+  display: block;
+  height: 100%;
+  background: var(--seat);
+}
+.pcard-gauge.low i {
+  background: var(--tr-ember);
+}
+.pcard-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--tr-line);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  overflow: hidden;
+}
+.pcard-grid div {
+  background: var(--tr-surface);
+  padding: 6px var(--tr-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.pcard-grid dt {
+  font-size: 0.72em;
+  color: var(--tr-ink-soft);
+}
+.pcard-grid dd {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.pcard-grid dd small {
+  font-size: 0.7em;
+  font-weight: 400;
+  color: var(--tr-ink-soft);
+}
+.pcard-net,
+.pcard-resources,
+.pcard-empty {
+  margin: 0;
+  font-size: 0.85em;
+  color: var(--tr-ink-soft);
+}
+.pcard-net {
+  margin-bottom: var(--tr-space-2);
+}
+.pcard-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tr-space-1);
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--tr-accent);
+  border-color: color-mix(in srgb, var(--tr-accent) 55%, var(--tr-line));
+  background: color-mix(in srgb, var(--tr-accent) 8%, var(--tr-surface));
+}
+.pcard-action.on {
+  background: var(--tr-blue);
+  border-color: var(--tr-blue);
+  color: #fff;
+}
+.pcard-tickets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.85em;
+}
+.pcard-tickets li {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-1);
+}
+/* The line between two city names reads as the track that completed the mission. */
+.pcard-rail {
+  flex: 1;
+  min-width: var(--tr-space-4);
+  border-top: 1px solid var(--tr-line);
+}
+.pcard-tickets b {
+  color: var(--tr-ok);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Phone: the card rises as a bottom sheet over the dock. No scrim — the board stays readable
+   and pannable, so a revealed network can actually be followed. */
+.game--dock .player-card {
+  position: fixed;
+  grid-area: auto;
+  inset: auto 0 0 0;
+  max-height: 62dvh;
+  border-inline: 0;
+  border-bottom: 0;
+  border-radius: var(--tr-radius-lg) var(--tr-radius-lg) 0 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: pcard-up 0.18s ease-out;
+}
+@keyframes pcard-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .player-card {
+    animation: none;
+  }
 }
 
 .end-vote {

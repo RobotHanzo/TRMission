@@ -57,6 +57,9 @@ export interface RoomMember {
   isGuest: boolean;
   seat: number;
   ready: boolean;
+  /** OAuth profile picture, when the account has one (absent for guests, bots, and password
+   *  accounts). Public alongside the display name — both are already shown at the table. */
+  avatarUrl?: string;
   isBot?: boolean;
   difficulty?: BotDifficulty;
   wantsRematch?: boolean;

@@ -1,5 +1,7 @@
 import { TAIWAN_CONTENT } from '@trm/map-data';
 import type { CityDef, CityTier, GameContent, RouteDef, TicketDef } from '@trm/map-data';
+import { DEFAULT_RULE_PARAMS } from '@trm/shared';
+import type { RuleParams } from '@trm/shared';
 import type { Locale } from '../net/restTypes';
 
 // The active board content. Starts as Taiwan (the bundled default) and is reassigned by
@@ -16,6 +18,14 @@ export let cityById = new Map(CITIES.map((c) => [c.id as string, c]));
 export let routeById = new Map(ROUTES.map((r) => [r.id as string, r]));
 export let ticketById = new Map(TICKETS.map((t) => [t.id as string, t]));
 
+/**
+ * The active content's resolved rule params. A custom map may tune `trainCarsStart` (and the
+ * other MAP_RULE_KEYS) and the wire carries none of them — `GameSettings` publishes only the
+ * variant booleans — so display code that needs a rule constant reads it from here rather than
+ * hardcoding the Taiwan default. Live like the tables above, and swapped by the same setter.
+ */
+export let ACTIVE_RULES: RuleParams = DEFAULT_RULE_PARAMS;
+
 /** Called only by game/catalog.ts's setActiveContent — swaps the active board content's tables. */
 export function applyContentTables(content: GameContent): void {
   CITIES = content.cities;
@@ -24,6 +34,7 @@ export function applyContentTables(content: GameContent): void {
   cityById = new Map(CITIES.map((c) => [c.id as string, c]));
   routeById = new Map(ROUTES.map((r) => [r.id as string, r]));
   ticketById = new Map(TICKETS.map((t) => [t.id as string, t]));
+  ACTIVE_RULES = content.rules ? { ...DEFAULT_RULE_PARAMS, ...content.rules } : DEFAULT_RULE_PARAMS;
 }
 
 export const cityName = (id: string, locale: Locale): string => {
