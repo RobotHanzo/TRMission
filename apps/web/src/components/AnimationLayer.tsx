@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAnimationsStore, type Flight, type Float, type TicketCue } from '../store/animations';
 import { useGameStore } from '../store/game';
 import { useReducedMotion } from '../hooks/useReducedMotion';
-import { SEAT_COLORS } from '../theme/colors';
+import { seatColor } from '../theme/colors';
 import { FlyingCard } from './FlyingCard';
 import { TicketCard } from './TicketCard';
 import { TicketFanfare } from './TicketFanfare';
@@ -14,7 +14,6 @@ import { NotificationStack } from './NotificationStack';
 
 const rectOf = (selector: string): DOMRect | null =>
   document.querySelector(selector)?.getBoundingClientRect() ?? null;
-const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
 
 // Cards travel at hand-card size (not the tiny deck/slot footprint), so the draw reads clearly.
 const CARD_W = 120;

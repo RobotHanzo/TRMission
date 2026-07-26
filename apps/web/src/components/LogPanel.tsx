@@ -6,7 +6,7 @@ import { useLogStore } from '../store/log';
 import { useGameStore } from '../store/game';
 import { useUi } from '../store/ui';
 import { usePlayerName } from '../game/playerName';
-import { SEAT_COLORS, CARD_COLOR_TOKENS, LOCOMOTIVE_GRADIENT } from '../theme/colors';
+import { seatColor, CARD_COLOR_TOKENS, LOCOMOTIVE_GRADIENT } from '../theme/colors';
 import { cityName, routeById, ticketLabel } from '../game/content';
 import { eventNameKey } from '../game/events';
 import type { CardColor } from '@trm/shared';
@@ -193,11 +193,7 @@ export function LogPanel() {
               return (
                 <div key={e.id} className={`log-line log-${e.importance}`}>
                   {seat !== null && (
-                    <span
-                      className="log-dot"
-                      style={{ background: SEAT_COLORS[seat % 5] ?? '#888' }}
-                      aria-hidden
-                    />
+                    <span className="log-dot" style={{ background: seatColor(seat) }} aria-hidden />
                   )}
                   <span className="log-text">{lineText(e)}</span>
                   {e.kind === 'tookFaceup' && color && (

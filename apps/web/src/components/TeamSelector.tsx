@@ -2,7 +2,7 @@ import { useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Crown, Shuffle, UserMinus, X } from 'lucide-react';
 import type { RoomView, RoomMember, RoomSettings } from '../net/rest';
-import { SEAT_COLORS, teamColor } from '../theme/colors';
+import { seatColor, teamColor } from '../theme/colors';
 
 type TeamAssignMode = RoomSettings['teamAssignMode'];
 
@@ -137,7 +137,7 @@ export function TeamSelector({
                     <>
                       <span
                         className="seat-dot"
-                        style={{ background: SEAT_COLORS[m.seat % 6] ?? '#888' }}
+                        style={{ background: seatColor(m.seat) }}
                         aria-hidden
                       />
                       {m.isBot && <Bot size={15} aria-hidden />}

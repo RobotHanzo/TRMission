@@ -2,11 +2,9 @@ import { useCallback, useEffect, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import confetti from 'canvas-confetti';
 import { ticketById } from '../game/content';
-import { SEAT_COLORS } from '../theme/colors';
+import { seatColor } from '../theme/colors';
 import type { Fanfare } from '../store/animations';
 import { TicketCard } from './TicketCard';
-
-const seatColor = (seat: number): string => SEAT_COLORS[seat % 5] ?? '#888';
 
 interface Props {
   fanfare: Fanfare;

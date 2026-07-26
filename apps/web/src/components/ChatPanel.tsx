@@ -6,7 +6,7 @@ import { useRoster } from '../store/roster';
 import { getSocket } from '../net/connection';
 import { track } from '../lib/analytics';
 import { usePlayerName } from '../game/playerName';
-import { SEAT_COLORS } from '../theme/colors';
+import { seatColor } from '../theme/colors';
 import { chatRejectionHintKey } from '../game/chatErrors';
 import { chatPresetKey } from '@trm/client-core';
 import { isTeamGame } from '@trm/client-core/game/teams';
@@ -132,7 +132,7 @@ export function ChatPanel() {
                 <span
                   className="chat-author"
                   style={{
-                    color: isSpectator ? 'var(--tr-ink-soft)' : (SEAT_COLORS[seat % 6] ?? '#888'),
+                    color: isSpectator ? 'var(--tr-ink-soft)' : seatColor(seat),
                   }}
                 >
                   {m.teamOnly && <span className="chat-team-tag">{t('chat.teamTag')}</span>}

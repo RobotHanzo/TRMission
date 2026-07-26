@@ -28,7 +28,7 @@ import { connectGame } from '../net/connection';
 import { track } from '../lib/analytics';
 import { soundPlayer } from '../sound/player';
 import { OPPONENT_GAIN } from '../sound/cues';
-import { SEAT_COLORS } from '../theme/colors';
+import { seatColor } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { NotificationStack } from '../components/NotificationStack';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -320,11 +320,7 @@ export function RoomScreen() {
           <ul className="member-list">
             {room.members.map((m) => (
               <li key={m.userId}>
-                <span
-                  className="seat-dot"
-                  style={{ background: SEAT_COLORS[m.seat % 6] ?? '#888' }}
-                  aria-hidden
-                />
+                <span className="seat-dot" style={{ background: seatColor(m.seat) }} aria-hidden />
                 {m.isBot && <Bot size={15} aria-hidden />}
                 <span>{memberName(m)}</span>
                 {m.userId === room.hostId && <em className="muted">({t('host')})</em>}

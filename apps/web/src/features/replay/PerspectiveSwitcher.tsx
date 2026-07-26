@@ -5,7 +5,7 @@ import { Eye } from 'lucide-react';
 import { asPlayerId, type PlayerId } from '@trm/shared';
 import type { ReplayPlayerMeta } from '../../net/rest';
 import { usePlayerName } from '../../game/playerName';
-import { SEAT_COLORS } from '../../theme/colors';
+import { seatColor } from '../../theme/colors';
 
 export function PerspectiveSwitcher({
   players,
@@ -40,7 +40,7 @@ export function PerspectiveSwitcher({
             >
               <span
                 className="perspective-dot"
-                style={{ background: SEAT_COLORS[p.seat] ?? '#888' }}
+                style={{ background: seatColor(p.seat) }}
                 aria-hidden
               />
               {nameOf({ id: p.userId, seat: p.seat })}

@@ -4,7 +4,7 @@ import { Crown, Bot, Eye, Map as MapIcon, X } from 'lucide-react';
 import type { GameSnapshot, PlayerFinal } from '@trm/proto';
 import type { RoomMember } from '../net/rest';
 import { api } from '../net/rest';
-import { SEAT_COLORS, teamColor } from '../theme/colors';
+import { seatColor, teamColor } from '../theme/colors';
 import { seatByPlayer } from '../game/view';
 import { teamStandings } from '@trm/client-core/game/teams';
 import { usePlayerName } from '../game/playerName';
@@ -290,10 +290,7 @@ export function ScoreBoard({
                   <tr key={pf.playerId} className={winners.has(pf.playerId) ? 'winner' : ''}>
                     <td className="player">
                       <span className="player-cell">
-                        <span
-                          className="seat-dot"
-                          style={{ background: SEAT_COLORS[seat % 6] ?? '#888' }}
-                        />
+                        <span className="seat-dot" style={{ background: seatColor(seat) }} />
                         {winners.has(pf.playerId) && <Crown size={14} aria-hidden />}
                         {isBot(pf.playerId) && <Bot size={13} aria-hidden />}
                         <span className="player-name" title={name}>
