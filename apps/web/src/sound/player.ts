@@ -29,6 +29,24 @@ interface Opts {
  */
 const RESUME_GRACE_MS = 2500;
 
+/**
+ * `resume()` fails two different ways and neither is actionable: some engines throw synchronously,
+ * and iOS WebKit rejects with `InvalidStateError` ("Failed to start the audio device") when the OS
+ * won't hand the webview an audio device at all — routine inside in-app browsers. Sound simply
+ * stays off; a rejection must never escape as an unhandled rejection (it reaches Sentry as a
+ * stackless crash report). Resolves true only when the context actually came back.
+ */
+const safeResume = (c: AudioContext): Promise<boolean> => {
+  try {
+    return c.resume().then(
+      () => true,
+      () => false,
+    );
+  } catch {
+    return Promise.resolve(false);
+  }
+};
+
 const defaultCreateContext = (): AudioContext | null => {
   const g = globalThis as unknown as {
     AudioContext?: typeof AudioContext;
@@ -88,7 +106,7 @@ export function createSoundPlayer(opts: Opts = {}): SoundPlayer {
 
     unlock() {
       const c = ensureContext();
-      if (c && c.state === 'suspended') void c.resume();
+      if (c && c.state === 'suspended') void safeResume(c);
     },
 
     play(cue, gainScale = 1) {
@@ -119,24 +137,15 @@ export function createSoundPlayer(opts: Opts = {}): SoundPlayer {
       // and every queued source blasts at once whenever the context finally resumes. Play only
       // if the resume lands while the cue is still fresh; a dropped cue is NOT charged to the
       // throttle window, so it can't swallow the next real play after the context comes back.
-      let resumed: Promise<void>;
-      try {
-        resumed = c.resume();
-      } catch {
-        return;
-      }
-      void resumed
-        .then(() => {
-          if (!enabled || c.state !== 'running') return;
-          const rt = now();
-          if (rt - t > RESUME_GRACE_MS) return;
-          if (rt - (lastPlayed.get(cue) ?? -Infinity) < def.throttleMs) return;
-          lastPlayed.set(cue, rt);
-          start();
-        })
-        .catch(() => {
-          /* resume rejected (no user activation yet) — cue dropped */
-        });
+      void safeResume(c).then((ok) => {
+        // ok === false: no user activation yet, or no audio device — cue dropped.
+        if (!ok || !enabled || c.state !== 'running') return;
+        const rt = now();
+        if (rt - t > RESUME_GRACE_MS) return;
+        if (rt - (lastPlayed.get(cue) ?? -Infinity) < def.throttleMs) return;
+        lastPlayed.set(cue, rt);
+        start();
+      });
     },
 
     schedule(cue, inMs, gainScale = 1) {

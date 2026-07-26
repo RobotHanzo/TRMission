@@ -91,6 +91,42 @@ describe('sound player', () => {
     expect(ctx.resume).toHaveBeenCalled();
   });
 
+  // iOS WebKit rejects resume() with InvalidStateError ("Failed to start the audio device") in
+  // in-app browsers; unlock() is wired to every pointerdown, so an unattended rejection there is a
+  // stackless crash report on the first tap. vitest swallows process-level unhandledRejection, so
+  // watch whether unlock attaches a rejection handler at all.
+  it('unlock attends to a rejected resume instead of leaking an unhandled rejection', async () => {
+    const { ctx } = mockContext();
+    const rejection = Promise.reject(
+      new DOMException('Failed to start the audio device', 'InvalidStateError'),
+    );
+    let handled = false;
+    ctx.resume = vi.fn(() => ({
+      then: (ok?: () => void, err?: () => void) => {
+        handled ||= Boolean(err);
+        return rejection.then(ok, err);
+      },
+      catch: (err: () => void) => {
+        handled = true;
+        return rejection.catch(err);
+      },
+    })) as unknown as typeof ctx.resume;
+    const p = createSoundPlayer({ createContext: () => ctx as unknown as AudioContext });
+    expect(() => p.unlock()).not.toThrow();
+    await flush();
+    expect(handled).toBe(true);
+    await rejection.catch(() => {});
+  });
+
+  it('unlock survives a resume that throws synchronously', () => {
+    const { ctx } = mockContext();
+    ctx.resume = vi.fn(() => {
+      throw new Error('no audio device');
+    }) as unknown as typeof ctx.resume;
+    const p = createSoundPlayer({ createContext: () => ctx as unknown as AudioContext });
+    expect(() => p.unlock()).not.toThrow();
+  });
+
   it('never queues a source on a suspended context; plays once a prompt resume lands', async () => {
     const { ctx, starts } = mockContext();
     let resolveResume!: () => void;
