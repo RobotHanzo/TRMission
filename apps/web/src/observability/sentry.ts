@@ -40,6 +40,12 @@ const IGNORED_ERRORS = [
   /^NetworkError when attempting to fetch resource/,
   'Failed to fetch',
   'Load failed',
+  // In-app browsers (chat apps, social apps) run the page inside their own WKWebView and inject a
+  // native bridge into it — `sendDataToNative`/`sendPageHideMessage` reaching for
+  // `window.webkit.messageHandlers`. When the host tears the bridge down the throw is attributed to
+  // our document, so it can't be filtered by URL (TRMISSION-WEB-1). We never touch that API, so any
+  // mention of it is somebody else's script.
+  /messageHandlers/,
 ];
 const DENY_URLS = [
   /extensions\//i,

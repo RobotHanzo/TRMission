@@ -1,10 +1,9 @@
 // Settings ▸ Ads & privacy. Two of the three rows only exist for some accounts/regions, so the
 // screen — not the rows — decides which one leads the group and skips the divider.
 import { useTranslation } from 'react-i18next';
-import { Linking, Switch } from 'react-native';
+import { Switch } from 'react-native';
 import { FileText, Megaphone, Scale } from 'lucide-react-native';
-import { LEGAL_PATHS } from '@trm/client-core/legal';
-import { SERVER_ORIGIN } from '../../config';
+import { openLegalDoc } from '../../legal';
 import { useAds } from '../../ads/ads';
 import { useGlassHeaderPad } from '../../hooks/useGlassHeaderPad';
 import { useHasFeature } from '../../store/session';
@@ -50,7 +49,7 @@ export default function PrivacyScreen(): React.JSX.Element {
           icon={FileText}
           testID="settings-privacy-policy"
           label={t('settings.privacyPolicy')}
-          onPress={() => void Linking.openURL(`${SERVER_ORIGIN}${LEGAL_PATHS.privacy}`)}
+          onPress={() => openLegalDoc('privacy')}
         />
         {/* The other half of what sign-in agreed to (issue #51) — same page the login notice links. */}
         <SettingsRow
@@ -58,7 +57,7 @@ export default function PrivacyScreen(): React.JSX.Element {
           icon={Scale}
           testID="settings-terms"
           label={t('settings.termsOfService')}
-          onPress={() => void Linking.openURL(`${SERVER_ORIGIN}${LEGAL_PATHS.terms}`)}
+          onPress={() => openLegalDoc('terms')}
         />
       </SettingsGroup>
     </SettingsPage>

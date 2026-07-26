@@ -1,9 +1,10 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, Platform, StyleSheet, Text, View } from 'react-native';
-import { LEGAL_PATHS, splitLegalNotice } from '@trm/client-core/legal';
-import { GOOGLE_WEB_CLIENT_ID, SERVER_ORIGIN } from '../config';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
+import { splitLegalNotice } from '@trm/client-core/legal';
+import { GOOGLE_WEB_CLIENT_ID } from '../config';
+import { openLegalDoc } from '../legal';
 import { signInWithApple } from '../auth/apple';
 import { signInWithDiscord } from '../auth/discord';
 import { signInWithGoogle } from '../auth/google';
@@ -230,7 +231,7 @@ export function LoginScreen(): React.JSX.Element {
                 accessibilityRole="link"
                 testID={`login-legal-${doc}`}
                 style={[styles.legalLink, { color: tokens.blue }]}
-                onPress={() => void Linking.openURL(`${SERVER_ORIGIN}${LEGAL_PATHS[doc]}`)}
+                onPress={() => openLegalDoc(doc)}
               >
                 {seg.text}
               </Text>

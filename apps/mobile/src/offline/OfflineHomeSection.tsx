@@ -24,10 +24,16 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
   const zh = i18n.language.startsWith('zh');
   const [entries, setEntries] = useState<OfflineGameListEntry[]>([]);
 
+  // Best-effort: a store that won't open costs you the resume list, not the Play-vs-Bots entry
+  // (and never an unhandled rejection — this runs from an effect and an Alert callback).
   const reload = useCallback(async () => {
-    const s = store ?? (await openLocalGameStore());
-    const all = await s.listGames();
-    setEntries(all.filter((e) => e.status === 'LIVE'));
+    try {
+      const s = store ?? (await openLocalGameStore());
+      const all = await s.listGames();
+      setEntries(all.filter((e) => e.status === 'LIVE'));
+    } catch {
+      setEntries([]);
+    }
   }, [store]);
 
   useEffect(() => {
@@ -40,8 +46,12 @@ export function OfflineHomeSection({ onNewGame, onResume, store }: OfflineHomeSe
   };
 
   const remove = async (gameId: string): Promise<void> => {
-    const s = store ?? (await openLocalGameStore());
-    await s.deleteGame(gameId);
+    try {
+      const s = store ?? (await openLocalGameStore());
+      await s.deleteGame(gameId);
+    } catch {
+      /* the row stays; reload below re-states what actually persisted */
+    }
     await reload();
   };
 

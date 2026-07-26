@@ -14,4 +14,12 @@ refuse cross-version resume. Randomness (seed/gameId) comes from `expo-crypto` i
 is deferred — docs/TODO.md). Pure core (no RN imports) → jest-testable off-device;
 `inMemoryStore.ts` is the port double.
 
+**One sqlite handle per process.** `openLocalGameStore()` memoizes; never call
+`SQLite.openDatabaseAsync` a second time for the same file. expo-sqlite hands each open its own JS
+handle over ONE ref-counted native database, and that native object closes the sqlite pointer on
+release without consulting the ref count — so GC'ing any spare handle kills every live one
+(`NativeDatabase.execAsync ... rejected` / `java.lang.NullPointerException`). Callers open freely
+(Home remounts its resume list on every focus), and store failures degrade to an empty list, never
+an unhandled rejection.
+
 Web harness split: `localStore.web.ts` is in-memory (a reload loses offline games).
