@@ -13,6 +13,7 @@ import {
   fcmBody,
   ApnsProviderToken,
   ApnsTransport,
+  PUSH_TRANSPORTS,
   type LiveActivityState,
   type PushDelivery,
   type PushMessage,
@@ -126,6 +127,69 @@ describe('push service fan-out', () => {
     expect(svc.enabled).toBe(false);
     await expect(svc.notify(['nobody'], 'game_started', {})).resolves.toBeUndefined();
   });
+
+  // Issue #63: the client's routes are room-keyed and the hub only knows game ids, so the room
+  // code is resolved HERE. Without it a game_over tap can never find its game — /rooms/mine, the
+  // client's own fallback, lists LIVE games only.
+  describe('room code stamping (issue #63)', () => {
+    const setup = async (resolver: (gameId: string) => Promise<string | null>) => {
+      const android = new FakeTransport('android');
+      const svc = buildService([android]);
+      svc.setRoomCodeResolver(resolver);
+      const u = await guest();
+      await t.app.get(DeviceRepo).upsert(u, 'android', `tok-rc-${u}`);
+      return { android, svc, u };
+    };
+
+    it('stamps the resolved room code onto every game payload', async () => {
+      const { android, svc, u } = await setup(async () => 'WXYZ');
+      await svc.notify([u], 'game_over', { gameId: 'g-over' });
+      expect(android.sent[0]?.msg.data).toEqual({
+        kind: 'game_over',
+        gameId: 'g-over',
+        roomCode: 'WXYZ',
+      });
+    });
+
+    it('leaves the payload alone when the room is gone, or the resolver fails', async () => {
+      const gone = await setup(async () => null);
+      await gone.svc.notify([gone.u], 'your_turn', { gameId: 'g-gone' });
+      expect(gone.android.sent[0]?.msg.data).toEqual({ kind: 'your_turn', gameId: 'g-gone' });
+
+      const broken = await setup(() => Promise.reject(new Error('mongo down')));
+      await broken.svc.notify([broken.u], 'your_turn', { gameId: 'g-broken' });
+      expect(broken.android.sent[0]?.msg.data).toEqual({ kind: 'your_turn', gameId: 'g-broken' });
+    });
+
+    it('never overrides a code the caller already knows (game_started)', async () => {
+      const { android, svc, u } = await setup(async () => 'WRONG');
+      await svc.notify([u], 'game_started', { gameId: 'g-start', roomCode: 'RIGHT' });
+      expect(android.sent[0]?.msg.data).toMatchObject({ roomCode: 'RIGHT' });
+    });
+
+    // The resolver above is only useful if the real app actually wires one: LobbyModule adapts
+    // RoomRepo into it on init, because PushModule can't depend on LobbyModule (which imports it).
+    it('is wired from the rooms collection by the booted app', async () => {
+      await t.db.collection('rooms').insertOne({ _id: 'RM01', gameId: 'g-wired' } as never);
+      // Push is credential-gated off in tests, so the env-built transport list is empty: enable
+      // exactly one for this assertion, then put it back.
+      const transports = t.app.get<PushTransport[]>(PUSH_TRANSPORTS);
+      const fake = new FakeTransport('android');
+      transports.push(fake);
+      try {
+        const u = await guest();
+        await t.app.get(DeviceRepo).upsert(u, 'android', 'tok-wired');
+        await t.app.get(PushService).notify([u], 'your_turn', { gameId: 'g-wired' });
+        expect(fake.sent[0]?.msg.data).toEqual({
+          kind: 'your_turn',
+          gameId: 'g-wired',
+          roomCode: 'RM01',
+        });
+      } finally {
+        transports.length = 0;
+      }
+    });
+  });
 });
 
 describe('live activity fan-out (issue #43)', () => {
@@ -235,11 +299,13 @@ describe('transport request shapes (pure helpers)', () => {
     });
   });
 
-  it('apns: aps.alert + custom keys at the top level', () => {
+  // Load-bearing shape, not a style choice: expo-notifications reads a REMOTE notification's
+  // `content.data` from `userInfo["body"]` and nothing else, so custom keys spread at the payload
+  // top level reach the app as no data — and every iOS tap opens the app but not the game (#63).
+  it('apns: aps.alert + the custom data nested under `body` (the expo-notifications contract)', () => {
     expect(apnsBody(msg)).toEqual({
       aps: { alert: { title: 'T', body: 'B' }, sound: 'default' },
-      kind: 'your_turn',
-      gameId: 'g',
+      body: { kind: 'your_turn', gameId: 'g' },
     });
   });
 

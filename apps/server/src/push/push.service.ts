@@ -34,6 +34,14 @@ export interface LiveActivityUpdate {
 
 type PushLocale = 'zh-Hant' | 'en';
 
+/**
+ * Resolves the room code of a game (null when the room is gone / already rematched). Wired from
+ * `RoomRepo.findByGameId` by LobbyModule — the module that owns both — because PushModule must
+ * not depend on LobbyModule, which imports it. Same "adapt the Nest service into a plain port"
+ * idiom as the hub's sinks in game.module.
+ */
+export type RoomCodeResolver = (gameId: string) => Promise<string | null>;
+
 const STRINGS: Record<PushKind, Record<PushLocale, { title: string; body: string }>> = {
   your_turn: {
     'zh-Hant': { title: '台鐵任務', body: '輪到你了！' },
@@ -73,6 +81,13 @@ export class PushService {
 
   get enabled(): boolean {
     return this.transports.length > 0;
+  }
+
+  private resolveRoomCode: RoomCodeResolver | null = null;
+
+  /** Injected once by LobbyModule at init; absent = payloads carry whatever the caller passed. */
+  setRoomCodeResolver(resolver: RoomCodeResolver): void {
+    this.resolveRoomCode = resolver;
   }
 
   notifyYourTurn(gameId: string, playerId: string): void {
@@ -160,10 +175,23 @@ export class PushService {
     try {
       const humans = [...new Set(userIds)].filter((id) => !isBotId(id));
       if (humans.length === 0) return;
-      await this.deliver(humans, kind, data);
+      await this.deliver(humans, kind, await this.withRoomCode(data));
     } catch (e) {
       this.log.warn(`push notify failed: ${(e as Error).message}`);
     }
+  }
+
+  /**
+   * Stamp the room code onto every game payload (issue #63). The mobile client's routes are
+   * room-keyed while the hub only ever knows game ids, and `GET /rooms/mine` — the client's own
+   * fallback lookup — lists LIVE games only, so a `game_over` tap could never resolve its room
+   * after the fact. Resolving here also spares the tap a round trip, which is what makes a
+   * cold-start tap land on the game rather than racing the session restore.
+   */
+  private async withRoomCode(data: Record<string, string>): Promise<Record<string, string>> {
+    if (!data.gameId || data.roomCode || !this.resolveRoomCode) return data;
+    const code = await this.resolveRoomCode(data.gameId).catch(() => null);
+    return code ? { ...data, roomCode: code } : data;
   }
 
   /**

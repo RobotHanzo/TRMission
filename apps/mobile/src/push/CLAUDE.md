@@ -8,10 +8,25 @@ tests mock it): `ensurePushRegistration()` is permission-GATED and **never reque
 itself (that only happens from an explicit user gesture in `PushPrompt`/`NotificationsRow`);
 `registerDeviceForPush()` adds the `settings.notifications` gate (the session-start hook);
 `unregisterDeviceForPush()` runs before logout; `watchTokenRotation()` re-registers on FCM/APNs
-rotation. Payload contract is exactly `{kind, gameId, roomCode?}`. `navigateForPush` is async because the nav route is
-`Game {roomCode}` while `your_turn`/`game_over` carry only `gameId` — it resolves via
-`api.getMyRooms()` (vanished room = no-op). `PushPrompt` is the one-shot contextual card at
-game-over (`pushPromptSeen`).
+rotation. Payload contract is exactly `{kind, gameId, roomCode}`. `PushPrompt` is the one-shot
+contextual card at game-over (`pushPromptSeen`).
+
+**Tap → screen** (`navigateForPush`, issue #63). `game_started` opens the ROOM (its screen owns the
+join/ticket flow and its poll carries you into the game); `your_turn`/`game_paused`/`game_over` open
+`Game {roomCode}` — including `game_over`, whose finished game the Game screen already handles
+(results + the rematch poll). Mobile routes are room-keyed while the hub only knows game ids, so the
+**server** stamps `roomCode` on every payload (`apps/server/src/push/CLAUDE.md`). The
+`api.getMyRooms()` lookup is only a fallback for a payload minted before it did, and it can never
+resolve a `game_over`: `/rooms/mine` lists LIVE games only. That is also why `navigateForPush` is
+async.
+
+**A tap can arrive before there is anywhere to navigate to.** The cold-start tap (the response that
+launched the process) is delivered while `BootScreen` owns the only route, and a tap taken while
+signed out has no Game/Room screen either — React Navigation drops both, and an unrestored session
+has no Bearer for the fallback lookup. So `installNotificationTapHandling(nav, canNavigate)` takes
+App.tsx's `!booting && user` test and **stashes** anything it can't deliver; `RootNavigator` flushes
+it with `deliverPendingPush` from the same effect that applies a stashed room link
+(`../app/roomLink.ts`) — one seam, two sources.
 
 **Foreground display policy** (`suppressInForeground`) — two independent reasons to stay quiet:
 always for the game you're looking at (`setActiveGameId`, fed from `RoomView.gameId` by

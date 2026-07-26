@@ -59,10 +59,18 @@ export const fcmBody = (token: string, msg: PushMessage): { message: Record<stri
   message: { token, notification: { title: msg.title, body: msg.body }, data: msg.data },
 });
 
-/** APNs request body (exported pure for tests): custom keys ride at the top level. */
+/**
+ * APNs request body (exported pure for tests). The custom data rides under the top-level `body`
+ * key and NOWHERE else: for a remote notification, expo-notifications reads
+ * `notification.request.content.data` from `userInfo["body"]` alone
+ * (`serializedNotificationData` in its iOS `NotificationRecords.swift`), so keys spread at the
+ * payload top level reach the app as no data at all — which is exactly why iOS notification taps
+ * used to open the app but never the game (issue #63). Android needs no such wrapper: expo's
+ * `NotificationSerializer` copies a non-Expo FCM `data` map through as-is.
+ */
 export const apnsBody = (msg: PushMessage): Record<string, unknown> => ({
   aps: { alert: { title: msg.title, body: msg.body }, sound: 'default' },
-  ...msg.data,
+  body: msg.data,
 });
 
 /** How long the final "game over" card lingers before iOS retires it (matches the app's own end). */

@@ -14,7 +14,9 @@ jest.mock('../net/rest', () => ({
 
 import { useSettings } from '../store/settings';
 import {
+  deliverPendingPush,
   installNotificationHandler,
+  installNotificationTapHandling,
   navigateForPush,
   setActiveGameId,
   type PushData,
@@ -68,6 +70,13 @@ describe('navigateForPush', () => {
     mockGetMyRooms.mockReset();
   });
 
+  it('a game_started with no room code still opens the game it names', async () => {
+    // Every real game_started carries one; this is only the older-payload / odd-payload path.
+    mockGetMyRooms.mockResolvedValue([{ code: 'ZZZZ', gameId: 'g1', status: 'STARTED' }]);
+    await navigateForPush(nav as never, { kind: 'game_started', gameId: 'g1' } as PushData);
+    expect(nav.navigate).toHaveBeenCalledWith('Game', { roomCode: 'ZZZZ' });
+  });
+
   it('game_started goes straight to the room (its screen owns the join/ticket flow)', async () => {
     await navigateForPush(
       nav as never,
@@ -81,14 +90,25 @@ describe('navigateForPush', () => {
     expect(mockGetMyRooms).not.toHaveBeenCalled();
   });
 
-  it('your_turn / game_over resolve the room by gameId and open the game', async () => {
-    // Mobile routes are room-keyed (Game: {roomCode}); the payload carries only the gameId.
+  it("opens the game straight from the payload's own roomCode, with no lookup at all", async () => {
+    // The server stamps roomCode on every game payload (issue #63) — including game_over, whose
+    // game is already ENDED and so can never be found in /rooms/mine.
+    for (const kind of ['your_turn', 'game_over', 'game_paused'] as const) {
+      nav.navigate.mockClear();
+      await navigateForPush(nav as never, { kind, gameId: 'g1', roomCode: 'ZZZZ' } as PushData);
+      expect(nav.navigate).toHaveBeenCalledWith('Game', { roomCode: 'ZZZZ' });
+    }
+    expect(mockGetMyRooms).not.toHaveBeenCalled();
+  });
+
+  it('falls back to resolving the room by gameId (payload from an older server)', async () => {
+    // Mobile routes are room-keyed (Game: {roomCode}); such a payload carries only the gameId.
     mockGetMyRooms.mockResolvedValue([{ code: 'ZZZZ', gameId: 'g1', status: 'STARTED' }]);
     await navigateForPush(nav as never, { kind: 'your_turn', gameId: 'g1' } as PushData);
     expect(nav.navigate).toHaveBeenCalledWith('Game', { roomCode: 'ZZZZ' });
 
     nav.navigate.mockClear();
-    await navigateForPush(nav as never, { kind: 'game_over', gameId: 'g1' } as PushData);
+    await navigateForPush(nav as never, { kind: 'game_paused', gameId: 'g1' } as PushData);
     expect(nav.navigate).toHaveBeenCalledWith('Game', { roomCode: 'ZZZZ' });
   });
 
@@ -105,5 +125,62 @@ describe('navigateForPush', () => {
   it('garbage payloads are ignored', async () => {
     await navigateForPush(nav as never, {} as PushData);
     expect(nav.navigate).not.toHaveBeenCalled();
+    await navigateForPush(nav as never, { kind: 'nonsense' } as never);
+    expect(nav.navigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('tap handling before the signed-in stack exists (issue #63)', () => {
+  const nav = { navigate: jest.fn(), isReady: () => true };
+  const response = (data: Record<string, unknown>) => ({ notification: notif(data) });
+
+  beforeEach(() => {
+    nav.navigate.mockClear();
+    mockAddResponseListener.mockClear();
+    mockGetLastResponse.mockReset().mockResolvedValue(null);
+  });
+  afterEach(async () => {
+    // Never let a stash leak into the next test.
+    await deliverPendingPush({ navigate: jest.fn(), isReady: () => true } as never);
+  });
+
+  /** The warm-tap listener expo was handed by the last install call. */
+  const tap = (data: Record<string, unknown>): void =>
+    (mockAddResponseListener.mock.calls.at(-1)![0] as (r: unknown) => void)(response(data));
+
+  it('navigates immediately for a tap taken while the signed-in stack is live', () => {
+    installNotificationTapHandling(nav as never, () => true);
+    tap({ kind: 'your_turn', gameId: 'g1', roomCode: 'ZZZZ' });
+    expect(nav.navigate).toHaveBeenCalledWith('Game', { roomCode: 'ZZZZ' });
+  });
+
+  it('stashes a tap taken while booting / signed out, then delivers it once', async () => {
+    installNotificationTapHandling(nav as never, () => false);
+    tap({ kind: 'your_turn', gameId: 'g1', roomCode: 'ZZZZ' });
+    expect(nav.navigate).not.toHaveBeenCalled();
+
+    await deliverPendingPush(nav as never);
+    expect(nav.navigate).toHaveBeenCalledWith('Game', { roomCode: 'ZZZZ' });
+
+    nav.navigate.mockClear();
+    await deliverPendingPush(nav as never);
+    expect(nav.navigate).not.toHaveBeenCalled();
+  });
+
+  it('holds the COLD-START tap (the response that launched the process) the same way', async () => {
+    mockGetLastResponse.mockResolvedValue(response({ kind: 'game_started', roomCode: 'ABCD' }));
+    installNotificationTapHandling(nav as never, () => false);
+    await new Promise<void>((r) => setTimeout(r, 0)); // let the cold-start lookup settle
+    expect(nav.navigate).not.toHaveBeenCalled();
+
+    await deliverPendingPush(nav as never);
+    expect(nav.navigate).toHaveBeenCalledWith('Room', { code: 'ABCD' });
+  });
+
+  it('unsubscribes the warm listener on teardown', () => {
+    const remove = jest.fn();
+    mockAddResponseListener.mockReturnValueOnce({ remove });
+    installNotificationTapHandling(nav as never, () => true)();
+    expect(remove).toHaveBeenCalled();
   });
 });

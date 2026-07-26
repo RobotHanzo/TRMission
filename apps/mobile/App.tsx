@@ -57,10 +57,15 @@ function App() {
   // Which account hit the error — the id only, never a display name or email (no-op without a DSN).
   const userId = useSession((s) => s.user?.id ?? null);
   useEffect(() => setSentryUser(userId), [userId]);
-  // Foreground display policy + notification-tap deep links (warm and cold start).
+  // Foreground display policy + notification-tap deep links (warm and cold start). A tap that
+  // arrives before the signed-in stack exists (cold start, or signed out) can't navigate — same
+  // constraint as the room links below — so it is stashed and RootNavigator delivers it.
   useEffect(() => {
     installNotificationHandler();
-    return installNotificationTapHandling(navigationRef);
+    return installNotificationTapHandling(navigationRef, () => {
+      const s = useSession.getState();
+      return !s.booting && !!s.user;
+    });
   }, []);
   // Room links the `linking` config above can't deliver: the LAUNCH URL resolves while the
   // auth-gated stack only contains Boot (so the Room route is dropped), and a warm tap while

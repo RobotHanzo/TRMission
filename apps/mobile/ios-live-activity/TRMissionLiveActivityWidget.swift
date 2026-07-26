@@ -16,12 +16,23 @@ private enum Palette {
 /// flag, and a self-ticking turn countdown. Content arrives either from the app (foreground, through
 /// the local `TrmLiveActivity` module) or straight from the server over APNs while the app is
 /// suspended — same `ContentState` either way.
+///
+/// Tapping the card opens the game it is about (issue #63) rather than wherever the app was left:
+/// `trmission://room/CODE` is the app's existing room deep link (App.tsx's `linking` prefixes plus
+/// the `app/roomLink.ts` cold-start stash), and the room screen's poll carries a seated player
+/// straight into a STARTED game. The room code is static attribute data, so no `ContentState` field
+/// is needed for it — the payload stays numbers and booleans only.
 struct TRMissionLiveActivityWidget: Widget {
+  private static func gameURL(_ roomCode: String) -> URL? {
+    URL(string: "trmission://room/\(roomCode)")
+  }
+
   var body: some WidgetConfiguration {
     ActivityConfiguration(for: TRMissionActivityAttributes.self) { context in
       LockScreenView(attributes: context.attributes, state: context.state)
         .activityBackgroundTint(Palette.paper)
         .activitySystemActionForegroundColor(Palette.orange)
+        .widgetURL(Self.gameURL(context.attributes.roomCode))
     } dynamicIsland: { context in
       let model = TurnModel(attributes: context.attributes, state: context.state)
       return DynamicIsland {
@@ -79,6 +90,9 @@ struct TRMissionLiveActivityWidget: Widget {
       } minimal: {
         SeatDot(color: model.seatColor, ringed: model.isMyTurn, size: 10)
       }
+      // Where a tap on the expanded island goes; the compact/minimal presentations open the app
+      // through this same URL (they take no destination of their own).
+      .widgetURL(Self.gameURL(context.attributes.roomCode))
       .keylineTint(model.isMyTurn ? Palette.orange : model.seatColor)
     }
   }

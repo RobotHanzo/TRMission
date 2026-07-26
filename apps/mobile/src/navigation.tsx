@@ -7,6 +7,7 @@ import type { NativeBottomTabScreenProps } from '@bottom-tabs/react-navigation';
 import { useTranslation } from 'react-i18next';
 import { Platform } from 'react-native';
 import { consumePendingRoomLink } from './app/roomLink';
+import { deliverPendingPush } from './push/notifications';
 import { BootScreen } from './screens/BootScreen';
 import { GameScreen } from './screens/GameScreen';
 import HomeRoot from './HomeRoot';
@@ -102,11 +103,14 @@ export function RootNavigator(): React.JSX.Element {
   // Deliver a stashed room link (App.tsx's cold-start / signed-out capture) the moment the
   // stack that owns the Room screen is on screen — right after boot for a live session, or
   // right after login/guest entry when the link arrived signed out. Guards run BEFORE the
-  // consume so an early fire leaves the stash intact for the next state change.
+  // consume so an early fire leaves the stash intact for the next state change. A notification
+  // tap taken in that same window (issue #63) rides the identical seam — and goes last, so a
+  // deliberate tap wins if somehow both are pending.
   useEffect(() => {
     if (booting || !user || !navigationRef.isReady()) return;
     const code = consumePendingRoomLink();
     if (code) navigationRef.navigate('Room', { code });
+    void deliverPendingPush(navigationRef);
   }, [booting, user]);
 
   return (

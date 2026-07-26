@@ -30,6 +30,12 @@ and booleans only. That is what lets the **server** push updates while the app i
 `TRMissionActivityAttributes.swift`, `modules/live-activity/index.ts`, and the server's
 `apnsLiveActivityBody`: a mismatch decodes to nothing and blanks the card with no error anywhere.
 
+**Tapping the card** opens the game, not just the app (issue #63): both presentations set
+`.widgetURL("trmission://room/<roomCode>")` from the STATIC attributes — the room deep link the app
+already handles (`App.tsx` `linking` + `src/app/roomLink.ts`), whose room screen poll then carries a
+seated player into the live game. No `ContentState` field is involved, so the pushed payload stays
+numbers and booleans only.
+
 Delivery: the extension is a second bundle id (`…trmission.LiveActivity`) and therefore a second App
 ID + provisioning profile — listed in `fastlane/Matchfile`, signed per-target by the beta lane, and
 registered per `docs/release/app-store-connect-setup.md` Step 2. Push-to-start is deliberately not
