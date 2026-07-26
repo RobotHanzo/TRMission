@@ -19,8 +19,8 @@ function ownEdgesOf(board: Board, state: GameState, pid: string) {
 }
 
 describe('rule-variant determinism & version', () => {
-  it('is engine version 14 (one parallel track per SIDE, not per player)', () => {
-    expect(ENGINE_VERSION).toBe(14);
+  it("is engine version 15 (a side's stations are shared)", () => {
+    expect(ENGINE_VERSION).toBe(15);
   });
 
   it('replays byte-identically under each variant', () => {

@@ -96,6 +96,8 @@ export { currentPlayerId, endTurn } from './turn';
 export {
   computeFinalScores,
   evaluatePlayerTickets,
+  evaluateSideTickets,
+  ticketDetailsByPlayer,
   longestTrailRouteIdsFor,
   stationBorrowEdges,
 } from './scoring';
@@ -130,7 +132,10 @@ export {
   teamPoolHasRoom,
   oneParallelTrackPerSide,
   sideHoldsParallelTrack,
+  sharedTeamStations,
+  stationSideOf,
   TEAM_PARALLEL_EXCLUSIVITY_ENGINE_VERSION,
+  TEAM_SHARED_STATIONS_ENGINE_VERSION,
 } from './teams';
 
 // Re-export the canonical content + helpers for convenience.

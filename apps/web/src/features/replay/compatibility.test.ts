@@ -27,6 +27,9 @@ describe('replay version compatibility', () => {
     // own `engineVersion`, so a v9–v13 log is still evaluated under the per-player rule it was
     // played on and replays byte-identically.
     expect(isReplayVersionCompatible(14, SCHEMA_VERSION)).toBe(true);
-    expect(isReplayVersionCompatible(15, SCHEMA_VERSION)).toBe(false);
+    // v15 (a side's stations are shared) reads that same per-game `engineVersion`, so a v9–v14 log
+    // keeps scoring stations privately to their builder and replays byte-identically.
+    expect(isReplayVersionCompatible(15, SCHEMA_VERSION)).toBe(true);
+    expect(isReplayVersionCompatible(16, SCHEMA_VERSION)).toBe(false);
   });
 });

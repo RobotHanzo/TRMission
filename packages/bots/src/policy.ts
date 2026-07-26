@@ -35,6 +35,7 @@ import {
   partnersOf,
   teamOf,
   sideHoldsParallelTrack,
+  stationSideOf,
 } from '@trm/engine';
 import type { Action, Board, GameState, TrailEdge } from '@trm/engine';
 import { TRAIN_COLORS, CARD_COLORS, buildDeckComposition } from '@trm/shared';
@@ -163,6 +164,9 @@ interface Ctx {
   /** Colours the bot's partners still need for THEIR tickets — derived from their kept tickets
    *  (shared in team mode) and the public board, never from a partner's hidden hand. */
   readonly partnerNeeds: ReadonlySet<TrainColor>;
+  /** Cities where the bot can already borrow through a standing station — its own, plus its
+   *  partners' once the side shares stations (engine v15+). */
+  readonly borrowCities: ReadonlySet<string>;
 }
 
 /** Pick the bot's move for the current state, or null if it has nothing to do right now. */
@@ -623,6 +627,12 @@ function buildContext(board: Board, state: GameState, botId: PlayerId, knobs: Kn
     }
   }
 
+  // Stations the bot may borrow through: its own, plus its partners' where the side shares them.
+  const stationSide = stationSideOf(state, botId);
+  const borrowCities = new Set(
+    state.stations.filter((s) => stationSide.includes(s.playerId)).map((s) => s.cityId as string),
+  );
+
   const ctx: Ctx = {
     board,
     state,
@@ -631,6 +641,7 @@ function buildContext(board: Board, state: GameState, botId: PlayerId, knobs: Kn
     partners,
     team: teamOf(state, botId),
     partnerNeeds,
+    borrowCities,
     hand,
     trainCars: self?.trainCars ?? 0,
     keptTickets,
@@ -699,8 +710,7 @@ function planPath(
   const path = shortestUsablePath(ctx, from, to, opts);
   if (path || ctx.knobs.planning < 3) return path;
   const self = ctx.state.players[ctx.botId as string];
-  const canStation =
-    (self?.stationsRemaining ?? 0) > 0 || ctx.state.stations.some((s) => s.playerId === ctx.botId);
+  const canStation = (self?.stationsRemaining ?? 0) > 0 || ctx.borrowCities.size > 0;
   if (!canStation) return null;
   return shortestUsablePath(ctx, from, to, { ...opts, maxBorrows: 1 });
 }
@@ -904,9 +914,6 @@ function shortestUsablePath(
 ): { cost: number; routeIds: string[]; borrowCity: string | null } | null {
   if (from === to) return { cost: 0, routeIds: [], borrowCity: null };
   const maxBorrows = opts?.maxBorrows ?? 0;
-  const ownStations = new Set(
-    ctx.state.stations.filter((s) => s.playerId === ctx.botId).map((s) => s.cityId as string),
-  );
   const built =
     ctx.state.ruleParams.stationsPerPlayer -
     (ctx.state.players[ctx.botId as string]?.stationsRemaining ??
@@ -957,9 +964,9 @@ function shortestUsablePath(
         if (borrows >= maxBorrows) continue;
         nextBorrows = borrows + 1;
         borrowCity = city;
-        // An existing own station is nearly free; a new one costs cards + the unused-station
-        // bonus it forfeits (approximated in route-length units).
-        step = ownStations.has(city) ? 0.5 : 3 + built;
+        // A station already standing here (the side's, once they are shared) is nearly free; a new
+        // one costs cards + the unused-station bonus it forfeits (in route-length units).
+        step = ctx.borrowCities.has(city) ? 0.5 : 3 + built;
       }
 
       const nk = key(next, nextBorrows);

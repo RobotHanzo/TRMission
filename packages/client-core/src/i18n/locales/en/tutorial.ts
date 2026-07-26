@@ -76,7 +76,7 @@ export default {
   stations: {
     title: 'Stations',
     blurb: 'Build a station to borrow rival routes at game end.',
-    what: "To build a station: click a city on the map, then pay train cards. At game end a station 'borrows' the rival routes there to help connect a ticket. One station per city.",
+    what: "To build a station: click a city on the map, then pay train cards. At game end a station 'borrows' the rival routes there to help connect a ticket. One station per city. In a team game your side's stations are shared — a partner's station borrows for you too, though each station still lends just one route to the team.",
     cost: 'A station is paid in a single colour: 1 card for your first, 2 for the second, 3 for the third (locomotives wild).',
     try: 'Your turn: click the highlighted Taipei on the map to build a station there.',
     bonus:

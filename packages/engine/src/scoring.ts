@@ -6,7 +6,7 @@ import type { TrailEdge } from './graph/longestTrail';
 import { evaluateTickets } from './graph/connectivity';
 import type { Edge } from './graph/connectivity';
 import { UnionFind } from './graph/unionFind';
-import { teamOwnedEdges, ownedBySide } from './teams';
+import { teamOwnedEdges, ownedBySide, stationSideOf, sharedTeamStations, teamOf } from './teams';
 
 /**
  * The routes backing a player's network, as graph edges (length-weighted for the trail bonus).
@@ -40,15 +40,18 @@ function borrowCandidatesForCity(
   return out;
 }
 
-/** All non-locked opponent edges incident to any city where `playerId` built a station (deduped). */
+/**
+ * All non-locked opponent edges incident to any city with a station `playerId` may borrow through
+ * (deduped). From v15 that is the whole SIDE's stations — a partner's station borrows on your
+ * behalf, just as their track already extends your network; before v15, and in any free-for-all,
+ * `stationSideOf` is just `[playerId]`, so this is the historical own-stations-only set.
+ */
 export function stationBorrowEdges(board: Board, state: GameState, playerId: PlayerId): Edge[] {
+  const side = stationSideOf(state, playerId);
   const out: Edge[] = [];
   const seen = new Set<string>();
   for (const s of state.stations) {
-    // Own stations only, even in a team game: a partner's stations serve THEIR tickets. Pooling
-    // them would also blow up the borrow-assignment enumeration (≤3 stations × ≤7 options is what
-    // keeps `evaluateTickets` exhaustive; a trio would make it 7^9).
-    if (s.playerId !== playerId) continue;
+    if (!side.includes(s.playerId)) continue;
     for (const e of borrowCandidatesForCity(board, state, s.cityId as string, playerId)) {
       const key = e.a < e.b ? `${e.a}|${e.b}` : `${e.b}|${e.a}`;
       if (!seen.has(key)) {
@@ -75,53 +78,103 @@ export interface PlayerTicketDetail {
  * exactly which kept tickets are completed under the chosen assignment. The completed set is the
  * authoritative basis for the end-game gains/losses breakdown — unlike the in-game public
  * `completedTickets`, which is own-track only and can omit a borrow-completed ticket.
+ *
+ * A thin read of {@link evaluateSideTickets}: from v15 a team's tickets are scored TOGETHER because
+ * they draw on one shared pool of station borrows, so a single player's row cannot be computed in
+ * isolation. Callers scoring several players (`computeFinalScores`, `redactFor`) should solve each
+ * side once and read the rows out of that map instead of calling this per player.
  */
 export function evaluatePlayerTickets(
   board: Board,
   state: GameState,
   playerId: PlayerId,
 ): PlayerTicketDetail {
-  const player = state.players[playerId as string];
-  if (!player) return { net: 0, completed: 0, completedTicketIds: [] };
+  return (
+    evaluateSideTickets(board, state, playerId).get(playerId as string) ?? {
+      net: 0,
+      completed: 0,
+      completedTicketIds: [],
+    }
+  );
+}
 
+/**
+ * The end-game ticket result for every member of `member`'s SIDE, keyed by player id.
+ *
+ * The side's stations each grant ONE borrowed opponent edge, and from v15 those stations are shared,
+ * so the borrows are a single budget spent across the whole team: we solve ONE assignment that
+ * maximises the SIDE's net and then read each member's row off the resulting network. A member's own
+ * row can therefore be worse than it would be alone — the team total is what the scoreboard ranks.
+ * In a free-for-all (and in a pre-v15 team game) the side is one player, so this is exactly the
+ * historical per-player computation, right down to the enumeration order.
+ */
+export function evaluateSideTickets(
+  board: Board,
+  state: GameState,
+  member: PlayerId,
+): ReadonlyMap<string, PlayerTicketDetail> {
+  const side = stationSideOf(state, member);
   const cityIds = board.cityIds.map((c) => c as string);
-  const edges = ownedEdges(board, state, playerId);
+  const edges = ownedEdges(board, state, member);
   const stationCities = state.stations
-    .filter((s) => s.playerId === playerId)
+    .filter((s) => side.includes(s.playerId))
     .map((s) => s.cityId as string);
-  const borrowCandidates = new Map<string, Edge[]>();
-  for (const city of stationCities) {
-    borrowCandidates.set(city, borrowCandidatesForCity(board, state, city, playerId));
-  }
-  const goals = player.keptTickets
-    .map((id) => {
-      const t = board.ticketById.get(id as string);
-      return t ? { id, a: t.a as string, b: t.b as string, value: t.value } : null;
-    })
-    .filter((g): g is { id: TicketId; a: string; b: string; value: number } => g !== null);
 
-  // Unlimited-borrow variant: every station borrows ALL its incident opponent edges, so completion
-  // is a single monotonic union — no per-station optimisation. This matches the locked completion
-  // set maintained mid-game (the monotonicity invariant), so banked == final.
-  if (state.ruleParams.unlimitedStationBorrow) {
-    const uf = new UnionFind(cityIds);
-    for (const e of edges) uf.union(e.u, e.v);
-    for (const e of stationBorrowEdges(board, state, playerId)) uf.union(e.a, e.b);
-    let net = 0;
-    let completed = 0;
-    const completedTicketIds: TicketId[] = [];
+  // Every member's kept tickets, in turn order then kept order — a fixed, digest-safe sequence.
+  const goals: { owner: string; id: TicketId; a: string; b: string; value: number }[] = [];
+  const rows = new Map<
+    string,
+    { net: number; completed: number; completedTicketIds: TicketId[] }
+  >();
+  for (const pid of state.turnOrder) {
+    if (!side.includes(pid)) continue;
+    const player = state.players[pid as string];
+    if (!player) continue;
+    rows.set(pid as string, { net: 0, completed: 0, completedTicketIds: [] });
+    for (const id of player.keptTickets) {
+      const t = board.ticketById.get(id as string);
+      if (t)
+        goals.push({
+          owner: pid as string,
+          id,
+          a: t.a as string,
+          b: t.b as string,
+          value: t.value,
+        });
+    }
+  }
+
+  /** Split the goals back onto their owners under a settled network. */
+  const attribute = (uf: UnionFind): ReadonlyMap<string, PlayerTicketDetail> => {
     for (const g of goals) {
+      const row = rows.get(g.owner);
+      if (!row) continue;
       if (uf.connected(g.a, g.b)) {
-        net += g.value;
-        completed += 1;
-        completedTicketIds.push(g.id);
+        row.net += g.value;
+        row.completed += 1;
+        row.completedTicketIds.push(g.id);
       } else if (!state.ruleParams.noUnfinishedTicketPenalty) {
-        net -= g.value;
+        row.net -= g.value;
       }
     }
-    return { net, completed, completedTicketIds };
+    return rows;
+  };
+
+  const uf = new UnionFind(cityIds);
+  for (const e of edges) uf.union(e.u, e.v);
+
+  // Unlimited-borrow variant: every station borrows ALL its incident opponent edges, so completion
+  // is a single monotonic union — no assignment to optimise. This matches the locked completion set
+  // maintained mid-game (the monotonicity invariant), so banked == final.
+  if (state.ruleParams.unlimitedStationBorrow) {
+    for (const e of stationBorrowEdges(board, state, member)) uf.union(e.a, e.b);
+    return attribute(uf);
   }
 
+  const borrowCandidates = new Map<string, Edge[]>();
+  for (const city of stationCities) {
+    borrowCandidates.set(city, borrowCandidatesForCity(board, state, city, member));
+  }
   const ticketEval = evaluateTickets({
     ownEdges: edges.map((e) => ({ a: e.u, b: e.v })),
     stationCities,
@@ -131,14 +184,10 @@ export function evaluatePlayerTickets(
     noUnfinishedTicketPenalty: state.ruleParams.noUnfinishedTicketPenalty,
   });
 
-  // Re-derive which tickets are connected under the chosen borrow assignment so the listed
-  // tickets always reconcile with `net`/`completed`.
-  const uf = new UnionFind(cityIds);
-  for (const e of edges) uf.union(e.u, e.v);
+  // Score over the chosen assignment rather than trusting its totals, so each member's listed
+  // tickets always reconcile with their own net (and their sum with the team's).
   for (const b of ticketEval.borrows) if (b) uf.union(b.a, b.b);
-  const completedTicketIds = goals.filter((g) => uf.connected(g.a, g.b)).map((g) => g.id);
-
-  return { net: ticketEval.net, completed: ticketEval.completed, completedTicketIds };
+  return attribute(uf);
 }
 
 /**
@@ -165,8 +214,30 @@ export function longestTrailRouteIdsFor(
   return longestTrailWithPath(edges).edges.map((i) => routeOf[i] as RouteId);
 }
 
+/**
+ * Ticket rows for every player, solving each SIDE's shared borrow assignment exactly once. Keyed on
+ * the side rather than the player because from v15 a team's rows all come out of one solve — calling
+ * {@link evaluatePlayerTickets} per player would redo a trio's search three times.
+ */
+export function ticketDetailsByPlayer(
+  board: Board,
+  state: GameState,
+): ReadonlyMap<string, PlayerTicketDetail> {
+  const out = new Map<string, PlayerTicketDetail>();
+  const solvedSides = new Set<string>();
+  for (const playerId of state.turnOrder) {
+    const team = sharedTeamStations(state) ? teamOf(state, playerId) : null;
+    const key = team === null ? `p:${playerId as string}` : `t:${team}`;
+    if (solvedSides.has(key)) continue;
+    solvedSides.add(key);
+    for (const [pid, row] of evaluateSideTickets(board, state, playerId)) out.set(pid, row);
+  }
+  return out;
+}
+
 export function computeFinalScores(board: Board, state: GameState): FinalScoreboard {
   const { stationsPerPlayer, stationBonus, longestPathBonus } = state.ruleParams;
+  const ticketDetails = ticketDetailsByPlayer(board, state);
 
   const trailLengths = new Map<string, number>();
   const blessingCounts = state.turnOrder.map(
@@ -182,7 +253,11 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
     const trailLen = longestTrail(edges);
     trailLengths.set(playerId as string, trailLen);
 
-    const ticketDetail = evaluatePlayerTickets(board, state, playerId);
+    const ticketDetail = ticketDetails.get(playerId as string) ?? {
+      net: 0,
+      completed: 0,
+      completedTicketIds: [],
+    };
 
     const stationsUsed = stationsPerPlayer - player.stationsRemaining;
     const unusedStations = player.stationsRemaining;

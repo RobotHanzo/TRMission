@@ -120,6 +120,30 @@ export function sideHoldsParallelTrack(
   return false;
 }
 
+/**
+ * Engine major from which a side's STATIONS are shared: from v15 a partner's station borrows on
+ * your behalf too, and the side's stations spend their one-borrow-each budget on a SINGLE
+ * assignment serving every member's tickets. v12–v14 team games were played (and persisted) with
+ * stations private to their builder, so — exactly like
+ * {@link TEAM_PARALLEL_EXCLUSIVITY_ENGINE_VERSION} — the switch is pinned per game on
+ * `state.engineVersion`, which is what keeps their logs replaying byte-identically under v15.
+ */
+export const TEAM_SHARED_STATIONS_ENGINE_VERSION = 15;
+
+/** Does this game share a side's stations (v15+) rather than keeping them private to the builder? */
+export const sharedTeamStations = (state: GameState): boolean =>
+  state.engineVersion >= TEAM_SHARED_STATIONS_ENGINE_VERSION;
+
+/**
+ * Whose stations `player` may borrow through — and therefore whose tickets share the resulting
+ * borrow assignment. `[player]` in a free-for-all AND in a pre-v15 team game (stations private to
+ * their builder); the whole side from v15. Order follows {@link teammates}, so it is
+ * digest-deterministic.
+ */
+export function stationSideOf(state: GameState, player: PlayerId): readonly PlayerId[] {
+  return sharedTeamStations(state) ? teammates(state, player) : [player];
+}
+
 /** A team's face-up pool, or an all-zero hand when this is not a team game. */
 export function teamPool(state: GameState, team: number): Readonly<Record<CardColor, number>> {
   const pool = state.teamPools?.[team];

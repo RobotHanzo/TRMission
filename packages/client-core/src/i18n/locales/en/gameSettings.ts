@@ -25,7 +25,7 @@ export default {
     'With only you and bots in the room, the game waits for you — no turn countdown, no auto-draw.',
   settingTeamMode: 'Team mode',
   settingTeamModeDesc:
-    'Teammates share one network for tickets, score a single combined longest route, and see each other’s tickets. Hands stay secret — cards only move through the team pool.',
+    'Teammates share one network for tickets, share their stations, score a single combined longest route, and see each other’s tickets. Hands stay secret — cards only move through the team pool.',
   teamModeOff: 'Free-for-all',
   teamMode2Teams: 'Two teams',
   teamMode3Teams: 'Three teams',

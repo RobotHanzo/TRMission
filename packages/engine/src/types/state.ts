@@ -234,7 +234,13 @@ export const SCHEMA_VERSION = 1;
 // `state.engineVersion` (stamped at genesis, never changed mid-game) rather than applied globally,
 // so a persisted v12/v13 team log keeps replaying under the per-player rule it was played on and
 // stays byte-identical. Free-for-all games are unaffected at every version: a side is one player.
-export const ENGINE_VERSION = 14;
+// v15: a side's STATIONS are shared — a partner's station borrows on your behalf, and the team's
+// stations spend their one-borrow-each budget on a SINGLE assignment maximising the SIDE's ticket
+// net (so a member's own row can be worse than it would be alone; the team total is what ranks).
+// Like v14 this is gated on `state.engineVersion`, so a v12–v14 team log keeps scoring stations
+// privately and replays byte-identically. Free-for-all games are unaffected: a side is one player,
+// and the shared solve reduces to the historical per-player one, enumeration order included.
+export const ENGINE_VERSION = 15;
 
 /**
  * Which persisted engine majors THIS engine can replay/recover byte-identically — the single gate
@@ -260,7 +266,9 @@ export const ENGINE_VERSION = 14;
  * pre-v13 config — so v9–v12 logs replay byte-identically (their `rng` carries no `key` lane and
  * the narrow PRNG stream is unchanged). v14's per-side parallel-track rule reads the replayed
  * state's OWN `engineVersion`, so a v9–v13 log is evaluated under the per-player rule it was played
- * on and replays byte-identically. Only extend this list for a new version when the change is
- * provably inert for every version already listed.
+ * on and replays byte-identically. v15's shared-station rule reads that same per-game `engineVersion`
+ * — it changes mid-game `completedTickets` (under `unlimitedStationBorrow`) and the final scoreboard,
+ * both of which are digested, so the pin is what keeps a v9–v14 log byte-identical. Only extend this
+ * list for a new version when the change is provably inert for every version already listed.
  */
-export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11, 12, 13, 14];
+export const REPLAY_COMPATIBLE_ENGINE_VERSIONS: readonly number[] = [9, 10, 11, 12, 13, 14, 15];

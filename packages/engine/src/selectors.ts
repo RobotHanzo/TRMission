@@ -16,7 +16,7 @@ import {
   canUseNightMarketSwap,
 } from './events/effects';
 import { ownConnectedTicketIds } from './graph/connectivity';
-import { evaluatePlayerTickets, longestTrailRouteIdsFor } from './scoring';
+import { ticketDetailsByPlayer, longestTrailRouteIdsFor } from './scoring';
 import { teamOf, teamPool, sameTeam, teamOwnedConnectivityEdges } from './teams';
 import type { TicketId } from '@trm/shared';
 
@@ -350,13 +350,15 @@ export function redactFor(board: Board, state: GameState, viewer: PlayerId | nul
 
   // Enrich the stored final scoreboard with display-only derivations (gains/losses split and the
   // longest-trail route ids). Computed here, at the projection boundary, so `GameState` stays minimal.
+  // One shared solve per side: a team's ticket rows all fall out of a single borrow assignment.
+  const ticketDetails = state.finalScores === null ? null : ticketDetailsByPlayer(board, state);
   const finalScores: RedactedFinalScoreboard | null =
     state.finalScores === null
       ? null
       : {
           players: state.finalScores.players.map((pf) => ({
             ...pf,
-            completedTicketIds: evaluatePlayerTickets(board, state, pf.playerId).completedTicketIds,
+            completedTicketIds: ticketDetails?.get(pf.playerId as string)?.completedTicketIds ?? [],
             longestTrailRouteIds: longestTrailRouteIdsFor(board, state, pf.playerId),
           })),
           ranking: state.finalScores.ranking,

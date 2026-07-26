@@ -59,6 +59,17 @@ track of a double/triple, so a partner's track bars the rest of the group for th
 `state.engineVersion`, so a persisted v12/v13 team log keeps replaying under the per-player rule it
 was played on — that per-game pin is what lets 12/13 stay in `REPLAY_COMPATIBLE_ENGINE_VERSIONS`.
 
+**Stations are shared across a side too (v15)**, pinned the same way (`sharedTeamStations` /
+`stationSideOf`). A partner's station borrows on your behalf, and because each station still lends
+exactly ONE route, the side's borrows are a single budget: `evaluateSideTickets` solves **one**
+assignment maximising the SIDE's ticket net and reads every member's row off the result, so a
+member's own row can be worse than it would be alone. Call `ticketDetailsByPlayer` when scoring
+several players (it solves each side once); `evaluatePlayerTickets` is a per-player read of the same
+solve. Up to 9 stations (a trio × 3) is why `evaluateTickets` contracts the own network into
+components, collapses equivalent borrow options, and prunes with a greedy floor + a reachability
+bound instead of enumerating the product — `connectivity.spec.ts` cross-checks it against the old
+exhaustive enumeration, which is what makes v9–v14 replays byte-identical.
+
 **Adding no `RuleParams` field was deliberate** — `stateDigest` covers `ruleParams`, so a new key
 there would change every existing game's digest and break the replay allowlist. All team state is
 optional keys (`teams`, `teamPools`, `turn.teamPushUsed`) that only `GameConfig.teamCount` can
