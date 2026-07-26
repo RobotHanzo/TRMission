@@ -6,7 +6,9 @@ lanes below are self-managed signing with **no EAS** — app context: `apps/mobi
 ## Mobile lanes
 
 - **`mobile-ci.yml`** — ubuntu, PRs touching `apps/mobile/**`/`packages/**`: `typecheck` + `lint` +
-  `test` (fast JS gate; the whole-repo CI also covers mobile via turbo).
+  `test` (fast JS gate; the whole-repo CI also covers mobile via turbo), plus
+  `scripts/fingerprintEnv.js --audit` (the OTA runtimeVersion env contract — see **Required mobile
+  secrets / variables**).
 - **`mobile-android.yml`** — ubuntu, `release/**` + tags: derives `BUILD_NUMBER` from a
   `v<semver>+<build>` tag (branch pushes fall back to 1) → `expo prebuild` → Gradle
   `bundleRelease` signed via AGP injected-signing properties → `.aab` artifact → on a real tag only,
@@ -91,6 +93,17 @@ Repo **variables**: `TRM_SERVER_ORIGIN`, `TRM_GOOGLE_WEB_CLIENT_ID`, `TRM_GOOGLE
 `TRM_GOOGLE_IOS_URL_SCHEME` (the reversed iOS OAuth client id, `com.googleusercontent.apps.*` — the
 google-signin config plugin validates it at every config eval, so `expo prebuild`/`run:android` need
 it set or fall back to a format-valid placeholder; see `apps/mobile/app.config.ts`).
+
+**Fingerprint-input env vars (issue #62).** `TRM_GOOGLE_IOS_URL_SCHEME`, `TRM_OTA_APP_ID`,
+`TRM_OTA_CHANNEL`, `TRM_OTA_URL`, `TRM_SERVER_ORIGIN` reach the OTA `runtimeVersion` fingerprint, so
+**every env block that evaluates `app.config.ts` for a shipped artifact must set all five** — both
+store lanes' prebuild AND build steps, and both of the OTA lane's steps. The build step is the
+load-bearing one: expo-updates bakes the runtime version during Gradle assemble / the gym build,
+from the config as re-evaluated there. `TRM_GOOGLE_IOS_URL_SCHEME` is the trap — its native effect
+is iOS-only, but it is a config-PLUGIN PROP and `plugins` is platform-agnostic, so it is hashed for
+Android too; `mobile-android.yml` never set it, so no Android device ever received an OTA. `apps/mobile/scripts/fingerprintEnv.js --assert` (in every one of those blocks) fails a lane
+that forgets one, and `--audit` (mobile-ci.yml) fails a PR that makes a new env var reach the
+fingerprint without adding it to the list. Full write-up: `docs/mobile/ota.md`.
 
 OTA lane: repo variables `TRM_OTA_URL` (the deployment's full `/manifest` URL) and `TRM_OTA_APP_ID`
 (the Expo project id, baked as the `expo-app-id` header — expo-open-ota v3 is multi-app) + secret

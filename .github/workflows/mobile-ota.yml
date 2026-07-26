@@ -98,6 +98,10 @@ jobs:
           TRM_SENTRY_REPLAY_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_SAMPLE_RATE }}
           TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE: ${{ vars.TRM_SENTRY_REPLAY_ERROR_SAMPLE_RATE }}
         run: |
+          # Every env var that feeds the fingerprint must be set here, or this publish targets a
+          # runtime version built from placeholder fallbacks that no store binary ever computes
+          # (issue #62 — the store side of that gate is in mobile-{android,ios}.yml).
+          node scripts/fingerprintEnv.js --assert
           # Prime the npx cache for the publish step while the fingerprints resolve. Installing
           # eoas + its dependency tree is ~16s of dead time at the head of that step and depends on
           # nothing in this project; the identical spec string resolves to the same ~/.npm/_npx
@@ -175,13 +179,14 @@ jobs:
         # moved to <origin>/<appId>/requestUploadUrl/<branch> in v3, so a v2 CLI against a v3 server
         # 404s and a v3 CLI against a v2-shaped config aborts on the missing expo-app-id.
         # Bump this only together with the server image, then re-verify per docs/release/ota-server-setup.md.
-        run: >-
-          npx --yes eoas@3.0.5 publish
-          --branch ${{ inputs.channel || 'production' }}
-          --nonInteractive
-          --packageRunner npx-native-only
-          --outputDir dist
-          --message "${{ github.ref_name }}"
+        run: |
+          node scripts/fingerprintEnv.js --assert
+          npx --yes eoas@3.0.5 publish \
+            --branch ${{ inputs.channel || 'production' }} \
+            --nonInteractive \
+            --packageRunner npx-native-only \
+            --outputDir dist \
+            --message "${{ github.ref_name }}"
       - uses: actions/upload-artifact@v4
         with:
           name: ota-bundle-${{ github.run_number }}

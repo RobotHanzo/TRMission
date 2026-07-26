@@ -161,7 +161,13 @@ comes from `TRM_OTA_URL`, the channel from `TRM_OTA_CHANNEL` (`expo-channel-name
 from `TRM_OTA_APP_ID` (`expo-app-id` header — **omitted, not blanked, when unset**).
 **Everything in `updates.requestHeaders` feeds the runtimeVersion fingerprint**, so the OTA lane and
 the store lanes must bake identical values; the deployed server and the `eoas` CLI are pinned to the
-same version because they only work in matched pairs. The private key in `certs/keys/` is gitignored
+same version because they only work in matched pairs. More generally, **any env var this file reads
+into a fingerprint-visible field makes the runtime version depend on which lane evaluated the file**
+— `TRM_GOOGLE_IOS_URL_SCHEME` is the one that bit us (a config-plugin prop, so hashed for Android
+even though its native effect is iOS-only: `mobile-android.yml` never set it, so no Android device
+ever saw an OTA — issue #62). `scripts/fingerprintEnv.js` is the gate: `--assert` in
+every CI env block that evaluates this config, `--audit` on mobile-ci to keep its list of required
+vars equal to the set that actually reaches the fingerprint. The private key in `certs/keys/` is gitignored
 and must never be committed. Full contract, runbook, rollback, fallbacks: `docs/mobile/ota.md`;
 host setup: `docs/release/ota-server-setup.md`.
 

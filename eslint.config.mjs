@@ -26,6 +26,8 @@ export default tseslint.config(
       'apps/mobile/scripts/gen-brand-assets.js',
       // plain CommonJS node script run by the `web` package.json script (not app code).
       'apps/mobile/scripts/setup-web.js',
+      // plain CommonJS node script run directly by the release/OTA lanes (see issue #62).
+      'apps/mobile/scripts/fingerprintEnv.js',
       // Expo config plugins: CommonJS by necessity (Expo `require`s them from app.config.ts's
       // `plugins` array, outside any TS transform). Their logic is covered by *.test.ts instead.
       'apps/mobile/plugins/*.js',

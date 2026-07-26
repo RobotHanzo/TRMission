@@ -93,6 +93,7 @@ publish. Measured on this project 2026-07-25 (`npx @expo/fingerprint .`):
 **not** enabled by default — so even the URL moves the hash. Consequences, all enforced in CI:
 
 - `TRM_OTA_APP_ID` must be set for the store lanes **and** the OTA lane (mobile-android/ios/ota.yml).
+  It is one of the vars `scripts/fingerprintEnv.js --assert` gates on — see the issue-#62 section.
 - `TRM_OTA_CHANNEL` must be the channel being published to, or a `preview` publish stamps a
   production-flavoured runtime version that no preview binary can match.
 - Locally, `TRM_OTA_APP_ID` unset means the header is **omitted** (not blank) — the v1-client shape
@@ -159,6 +160,50 @@ Two consequences to keep in mind:
   updated device report the OTA lane's placeholder build `1` and wall itself off behind the
   update-required screen. `extra.gitCommit` is deliberately left manifest-scoped: after an update
   it names the commit the running JS came from, which is what Settings → About should show.
+
+### Every fingerprint-input env var must be set by EVERY lane (2026-07-26, issue #62)
+
+The two sections above are instances of one rule: the fingerprint hashes the **evaluated** app
+config, so any env var `app.config.ts` reads into a field the fingerprint sees makes the runtime
+version depend on which lane evaluated the file. Miss one in a single lane and that lane's output is
+unreachable — silently, with every workflow green.
+
+That is what happened to Android. `mobile-android.yml` never set `TRM_GOOGLE_IOS_URL_SCHEME`,
+because the value's _native_ effect is iOS-only (a `CFBundleURLScheme` in `Info.plist`) — but it is
+passed as a **config-plugin prop**, and `plugins` is platform-agnostic, so it is hashed for both
+platforms. Every Android binary from the store lane baked the
+`com.googleusercontent.apps.placeholder` fallback; every publish used the real value. Measured on
+one unchanged tree, `expo-updates runtimeversion:resolve --platform android --workflow managed`:
+
+| Env                           | Runtime version |
+| ----------------------------- | --------------- |
+| store lane (no `…URL_SCHEME`) | `217ebeeb…`     |
+| OTA lane (real `…URL_SCHEME`) | `d8bc5d2a…`     |
+
+Every Android binary this lane has ever built shipped that way, so no Android device ever saw an
+OTA, while iOS — which set the var on both sides — worked throughout. `v0.2.19+19` is the release
+that made it visible: the update reached iOS and no Android device at all, which is what issue #62
+opened on. (Prebuild is **not** the culprit, which was the first
+suspicion: resolving after `expo prebuild --platform android` gives `d8bc5d2a…` too. `--workflow
+managed` ignores the native dirs, so a prebuilt tree and a clean one agree, as documented below.)
+
+`apps/mobile/scripts/fingerprintEnv.js` now enforces the rule from both sides:
+
+- `--assert` runs inside **every** env block that evaluates the config for a shipped artifact — both
+  store lanes' prebuild _and_ build steps (the build step is the load-bearing one: expo-updates
+  bakes the runtime version during Gradle assemble / the gym build, from the config as re-evaluated
+  there) and both of the OTA lane's steps. A lane missing a var fails in seconds.
+- `--audit` runs on `mobile-ci` and keeps the required list honest: it evaluates the config once
+  with a unique sentinel in every env var `app.config.ts` reads and checks which sentinels survive
+  into the hashed projection, failing if that set differs from the declared list. A PR that routes a
+  new env var into a native or plugin field fails there instead of six weeks later.
+
+The current list is `TRM_GOOGLE_IOS_URL_SCHEME`, `TRM_OTA_APP_ID`, `TRM_OTA_CHANNEL`, `TRM_OTA_URL`,
+`TRM_SERVER_ORIGIN` — 5 of the 15 env vars the config reads. `TRM_OTA_CHANNEL` is spelled out as
+`production` in the store lanes rather than left to the config default, so no fingerprint input is
+ever supplied by accident. The other 10 (the Google client ids, `TRM_SENTRY_*`, `BUILD_NUMBER`,
+`APP_VERSION`, `TRM_ANDROID_ABIS`, …) reach only `extra`, the version axes, or a Gradle mod, and are
+skipped or invisible — but they still have their own lockstep rules for **runtime** config, above.
 
 ### The recorded runtime version is per-platform
 

@@ -36,3 +36,9 @@ jobs:
       - run: yarn workspace @trm/mobile lint
       - run: yarn workspace @trm/mobile test
       - run: yarn workspace @trm/mobile test:pure
+      # The OTA runtimeVersion contract (issue #62): asserts the env vars the release lanes are
+      # required to set are EXACTLY the ones that reach the fingerprint. A PR that routes a new env
+      # var into a native or config-plugin field fails here, rather than shipping a store binary
+      # whose fingerprint no publish can reproduce — which is invisible until an OTA silently
+      # reaches nobody. Evaluates the app config once; no native build, ~5s.
+      - run: node apps/mobile/scripts/fingerprintEnv.js --audit

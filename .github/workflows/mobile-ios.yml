@@ -161,10 +161,13 @@ jobs:
         working-directory: apps/mobile
         # The runtime-version record shares this step so it shares its env verbatim: the fingerprint
         # is computed from the evaluated app config, so a record resolved under a different env
-        # would name a runtime version this binary never asks for. Traceability only, never a gate
-        # (issue #55) — compare it against mobile-ota.yml's runtime-versions.json; a publish whose
-        # value differs is invisible to this build, which is the whole OTA failure mode.
+        # would name a runtime version this binary never asks for. The record is traceability only —
+        # compare it against mobile-ota.yml's runtime-versions.json; a publish whose value differs is
+        # invisible to this build, which is the whole OTA failure mode. What IS a gate is the assert
+        # below: it fails the lane when any fingerprint-input env var is missing from this block
+        # (issue #62 — that is exactly how mobile-android.yml shipped unreachable binaries).
         run: |
+          node scripts/fingerprintEnv.js --assert
           npx expo prebuild --platform ios --no-install
           npx expo-updates runtimeversion:resolve --platform ios --workflow managed \
             | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log("iOS runtimeVersion: `"+JSON.parse(s).runtimeVersion+"`"))' \
@@ -190,9 +193,11 @@ jobs:
           SENTRY_PROJECT: ${{ vars.SENTRY_MOBILE_PROJECT }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DISABLE_AUTO_UPLOAD: ${{ secrets.SENTRY_AUTH_TOKEN == '' && 'true' || 'false' }}
-          # iOS-only (unlike mobile-android.yml): the reversed Google OAuth client id becomes a
-          # CFBundleURLScheme in Info.plist — without the real value, Google sign-in can never
-          # return to the app (the placeholder fallback only exists to let builds run pre-P6).
+          # The reversed Google OAuth client id becomes a CFBundleURLScheme in Info.plist — without
+          # the real value, Google sign-in can never return to the app (the placeholder fallback
+          # only exists to let builds run pre-P6). Its NATIVE effect is iOS-only, but it is passed
+          # as a config-PLUGIN PROP and `plugins` is platform-agnostic, so it is hashed into BOTH
+          # platforms' runtimeVersion — mobile-android.yml needs it just as much (issue #62).
           TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
           # Baked into Expo.plist as updates.url — unset would ship binaries pointing OTA checks
           # at app.config.ts's localhost dev default.
@@ -202,6 +207,10 @@ jobs:
           # publish env — a store build without it targets a different runtime version than the
           # updates published with it, and would silently never see them.
           TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
+          # Store binaries are the production ring. Spelled out rather than left to app.config.ts's
+          # default because it is an `expo-channel-name` request header and so a fingerprint input:
+          # the assert above requires every one of those to be set deliberately by the lane.
+          TRM_OTA_CHANNEL: production
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
           APP_VERSION: ${{ steps.build_number.outputs.version }}
 
@@ -337,7 +346,9 @@ jobs:
       # first upload.
       - name: Build (and on a release tag or publish=true dispatch, upload to TestFlight)
         working-directory: apps/mobile
-        run: bundle exec fastlane ios beta upload:${{ github.ref_type == 'tag' || inputs.publish == true }}
+        run: |
+          node scripts/fingerprintEnv.js --assert
+          bundle exec fastlane ios beta upload:${{ github.ref_type == 'tag' || inputs.publish == true }}
         env:
           # The SAME app-config env as the prebuild step above — the runtime
           # `Constants.expoConfig.extra` is NOT baked at prebuild: expo-constants' Xcode script
@@ -365,9 +376,14 @@ jobs:
           SENTRY_PROJECT: ${{ vars.SENTRY_MOBILE_PROJECT }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DISABLE_AUTO_UPLOAD: ${{ secrets.SENTRY_AUTH_TOKEN == '' && 'true' || 'false' }}
+          # Fingerprint inputs — see the prebuild step for what each one does. THIS block is the
+          # load-bearing one: the runtimeVersion a device reports is the one expo-updates'
+          # createUpdatesResources script phase bakes during the gym build below, from the config
+          # as re-evaluated HERE.
           TRM_GOOGLE_IOS_URL_SCHEME: ${{ vars.TRM_GOOGLE_IOS_URL_SCHEME }}
           TRM_OTA_URL: ${{ vars.TRM_OTA_URL }}
           TRM_OTA_APP_ID: ${{ vars.TRM_OTA_APP_ID }}
+          TRM_OTA_CHANNEL: production
           BUILD_NUMBER: ${{ steps.build_number.outputs.value }}
           APP_VERSION: ${{ steps.build_number.outputs.version }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
