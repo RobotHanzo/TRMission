@@ -8,6 +8,7 @@ import {
   game as gameShared,
   history,
   leaderboard,
+  moderation,
   report,
   tutorial,
 } from '@trm/client-core/i18n/locales/zh-Hant';
@@ -21,7 +22,6 @@ import home from './home';
 import log from './log';
 import liveActivity from './liveActivity';
 import login from './login';
-import moderation from './moderation';
 import offline from './offline';
 import push from './push';
 import room from './room';

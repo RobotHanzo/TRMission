@@ -14,12 +14,14 @@ import {
   isLowOnTrains,
   trainSupplyFraction,
 } from '@trm/client-core/game/playerCard';
+import { canModerate } from '../store/moderation';
 import { seatColor, teamColor } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
 import { useUi } from '../store/ui';
 import { usePlayerAvatar, usePlayerName } from '../game/playerName';
 import { cityName, ticketLabel } from '../game/content';
 import { SeatAvatar } from './SeatAvatar';
+import { PlayerActionDialog } from './PlayerActionDialog';
 
 export function PlayerCard({
   snapshot,
@@ -37,6 +39,7 @@ export function PlayerCard({
   const setRouteReveal = useAnimationsStore((s) => s.setRouteReveal);
   const clearRouteReveal = useAnimationsStore((s) => s.clearRouteReveal);
   const [revealed, setRevealed] = useState(false);
+  const [reporting, setReporting] = useState(false);
 
   // Esc closes, matching the app's other dismissible overlays.
   useEffect(() => {
@@ -54,7 +57,8 @@ export function PlayerCard({
   const view = playerCardView(snapshot, playerId);
   if (!view) return null;
 
-  const isMe = playerId === snapshot.you?.playerId;
+  const me = snapshot.you?.playerId ?? null;
+  const isMe = playerId === me;
   const name = nameOf({ id: playerId, seat: view.seat, isMe });
   const seat = seatColor(view.seat);
   const low = isLowOnTrains(view.trainCars);
@@ -202,6 +206,18 @@ export function PlayerCard({
             {view.resources.map((r) => t(`events.${r.key}`, { n: r.n })).join(' · ')}
           </p>
         </section>
+      )}
+
+      {canModerate(playerId, me) && (
+        <footer className="pcard-foot">
+          <button type="button" className="link pcard-report" onClick={() => setReporting(true)}>
+            {t('moderation.reportPlayer')}
+          </button>
+        </footer>
+      )}
+
+      {reporting && (
+        <PlayerActionDialog target={{ id: playerId, name }} onClose={() => setReporting(false)} />
       )}
     </aside>
   );

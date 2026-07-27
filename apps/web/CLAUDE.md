@@ -149,6 +149,26 @@ route chunk (`App.tsx`) — it must never inflate the main bundle.
 ## Player identity
 
 Snapshots carry player ids only (no display names). **Bots are detected by the `bot:` id prefix**
-(`id.startsWith('bot:')`) to show a bot badge in trackers/scoreboard; human players render as
-`P{seat+1}` / "you". Room member display names (incl. bot difficulty labels) come from the lobby
-REST view, not the in-game snapshot.
+(`id.startsWith('bot:')`) to show a bot glyph in trackers/scoreboard; human players render as
+`P{seat+1}` / "you". Room member display names, pictures (`avatarUrl`), and bot difficulty labels
+come from the lobby REST view, not the in-game snapshot. `game/playerName.ts` owns both resolvers
+(`usePlayerName` / `usePlayerAvatar`); `components/SeatAvatar.tsx` renders the result ringed in the
+player's seat colour.
+
+## Moderation (`store/moderation.ts`, Apple 1.2 / Play UGC)
+
+The account's block list mirrored locally — the store itself is `@trm/client-core`'s
+`createModerationStore` (shared with mobile), bound here to the web REST client. Hydrated on
+sign-in/restore and `reset()` on sign-out (`store/session.ts`); optimistic block/unblock with
+rollback via `PUT/DELETE /me/blocks/:userId`.
+
+**Blocking is display-only.** `ChatPanel` filters a blocked author's messages (text AND presets),
+and `usePlayerName`/`usePlayerAvatar` mask their display name back to `P{seat+1}` and suppress
+their picture — both are UGC, so masking one without the other leaks the identity back. Game
+state, seating, and matchmaking are never touched: a blocked opponent stays at the table.
+
+`components/PlayerActionDialog.tsx` is the report/block surface (the 7 `REPORT_CATEGORIES` from
+`@trm/shared`), opened from the player card's report action and from a chat line's flag button.
+**Never offer it for yourself or a `bot:` id** — gate the call site with `canModerate`. Reports
+POST `/reports/player` with the `gameId`/`roomCode` the reporter is looking at, read from
+`store/ui.ts`; that context is display-only for moderators and never an authorization input.

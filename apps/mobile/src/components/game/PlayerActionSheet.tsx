@@ -1,6 +1,7 @@
 // Report / block action sheet (Apple 1.2 / Play UGC). Opens from a long-press on a
-// player tracker row or a chat message. Never offered for yourself or for bots —
-// gate with canModerate() at the call site before opening.
+// player tracker row or a chat message, and from the player card's report action. Never
+// offered for yourself or for bots — gate with canModerate() at the call site before opening.
+// The web equivalent is apps/web's PlayerActionDialog; both share the moderation store.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -11,9 +12,7 @@ import { rgba } from '../../theme/shade';
 import { useModeration } from '../../store/moderation';
 import { getActiveRoomContext } from '../../game/activeRoom';
 
-/** Report/block applies to real other humans only — bots and yourself are out of scope. */
-export const canModerate = (targetId: string, meId: string | null): boolean =>
-  targetId !== meId && !targetId.startsWith('bot:');
+export { canModerate } from '../../store/moderation';
 
 const MSG_MAX = 1000;
 

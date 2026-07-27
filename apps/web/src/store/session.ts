@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { MapFeatureKey, UserFeature } from '@trm/shared';
 import { api, setOnTokenChange, type PublicUser, type UserPreferences } from '../net/rest';
 import { useUi } from './ui';
+import { useModeration } from './moderation';
 import { track } from '../lib/analytics';
 
 interface SessionState {
@@ -49,6 +50,8 @@ export const useSession = create<SessionState>()((set, get) => {
       const r = await action();
       set({ user: r.user, loading: false });
       hydratePrefs(r.user);
+      // Mirror the account's block list so chat filtering works from the first game.
+      void useModeration.getState().hydrate();
       onSuccess?.();
     } catch (e) {
       set({ loading: false, error: (e as Error).message });
@@ -68,6 +71,7 @@ export const useSession = create<SessionState>()((set, get) => {
         const user = await api.me();
         set({ user, booting: false });
         hydratePrefs(user);
+        void useModeration.getState().hydrate();
       } catch {
         set({ user: null, booting: false });
       }
@@ -102,6 +106,7 @@ export const useSession = create<SessionState>()((set, get) => {
       // `user`, so it must see the signed-out state immediately — not after the network round-trip
       // (otherwise it briefly treats the user as still logged in and lands them on a blank home).
       set({ user: null, accessToken: null });
+      useModeration.getState().reset();
       track('logout', {});
       await api.logout().catch(() => undefined);
     },

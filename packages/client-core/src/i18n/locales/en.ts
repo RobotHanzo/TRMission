@@ -15,6 +15,7 @@ export { default as history } from './en/history';
 export { default as home } from './en/home';
 export { default as leaderboard } from './en/leaderboard';
 export { default as log } from './en/log';
+export { default as moderation } from './en/moderation';
 export { default as report } from './en/report';
 export { default as room } from './en/room';
 export { default as settings } from './en/settings';

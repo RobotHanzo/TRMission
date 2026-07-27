@@ -15,6 +15,7 @@ export { default as history } from './zh-Hant/history';
 export { default as home } from './zh-Hant/home';
 export { default as leaderboard } from './zh-Hant/leaderboard';
 export { default as log } from './zh-Hant/log';
+export { default as moderation } from './zh-Hant/moderation';
 export { default as report } from './zh-Hant/report';
 export { default as room } from './zh-Hant/room';
 export { default as settings } from './zh-Hant/settings';

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Flag } from 'lucide-react';
 import { useChat } from '../store/chat';
 import { useGame } from '../store/game';
 import { useRoster } from '../store/roster';
+import { canModerate, useModeration } from '../store/moderation';
 import { getSocket } from '../net/connection';
 import { track } from '../lib/analytics';
 import { usePlayerName } from '../game/playerName';
@@ -11,6 +13,7 @@ import { chatRejectionHintKey } from '../game/chatErrors';
 import { chatPresetKey } from '@trm/client-core';
 import { isTeamGame } from '@trm/client-core/game/teams';
 import { ChatPresetPicker } from './ChatPresetPicker';
+import { PlayerActionDialog } from './PlayerActionDialog';
 
 const MAX_LEN = 2048;
 const RATE_MAX = 5;
@@ -23,9 +26,11 @@ export function ChatPanel() {
   const rejection = useGame((s) => s.rejection);
   const nameOf = usePlayerName();
   const rosterById = useRoster((s) => s.byId);
+  const blocked = useModeration((s) => s.blocked);
   const me = snapshot?.you?.playerId ?? null;
   const [draft, setDraft] = useState('');
   const [hint, setHint] = useState<string | null>(null);
+  const [reportTarget, setReportTarget] = useState<{ id: string; name: string } | null>(null);
   // Team games get a second channel. It is live-only: the server never persists a team line, so it
   // cannot resurface to an opponent (or a spectator) in a later reconnect backfill.
   const teamsOn = snapshot ? isTeamGame(snapshot) : false;
@@ -34,10 +39,13 @@ export function ChatPanel() {
   const sentAt = useRef<number[]>([]);
   const listRef = useRef<HTMLDivElement>(null);
 
+  // Blocked authors are muted client-side: their free text AND presets never render.
+  const visible = messages.filter((m) => !blocked.has(m.playerId));
+
   useEffect(() => {
     const el = listRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length]);
+  }, [visible.length]);
 
   // Surface a server-side chat rejection (length / rate limit / unknown preset) as inline chat
   // feedback instead of the generic action toast. Client guards usually prevent it ever firing.
@@ -113,10 +121,10 @@ export function ChatPanel() {
         )}
       </div>
       <div className="chat-messages" ref={listRef}>
-        {messages.length === 0 ? (
+        {visible.length === 0 ? (
           <p className="chat-empty">{t('chat.empty')}</p>
         ) : (
-          messages.map((m) => {
+          visible.map((m) => {
             const seat = seatOf(m.playerId);
             // A null seat means a spectator author (never a seated player): tag them "[旁觀者]" and
             // use their roster display name — NOT the seat-0 "P{seat+1}" fallback, which would
@@ -143,6 +151,17 @@ export function ChatPanel() {
                     ? t(chatPresetKey(m.content.value))
                     : m.content.value}
                 </span>
+                {canModerate(m.playerId, me) && (
+                  <button
+                    type="button"
+                    className="chat-report"
+                    aria-label={t('moderation.reportPlayer')}
+                    title={t('moderation.reportPlayer')}
+                    onClick={() => setReportTarget({ id: m.playerId, name: author })}
+                  >
+                    <Flag size={12} aria-hidden />
+                  </button>
+                )}
               </div>
             );
           })
@@ -168,6 +187,9 @@ export function ChatPanel() {
           {t('chat.send')}
         </button>
       </form>
+      {reportTarget && (
+        <PlayerActionDialog target={reportTarget} onClose={() => setReportTarget(null)} />
+      )}
     </section>
   );
 }
