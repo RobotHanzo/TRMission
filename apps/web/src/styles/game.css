@@ -1519,6 +1519,17 @@ button.tracker:hover {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+/* A quiet instruction hanging off the leader where a count would sit (e.g. "tap for details"). */
+.tray-hint {
+  order: 1;
+  color: var(--tr-ink-soft);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+/* .hud-block already gaps its children — the head's own margin would double it. */
+.hud-block .tray-head {
+  margin-bottom: 0;
+}
 
 .hand {
   display: flex;

@@ -550,6 +550,12 @@ export function GameStage({
     ) : null;
   const trackers = (
     <div className="hud-block">
+      {/* The panel's timetable head — it also carries the affordance for issue #14's player card,
+          since a row shows only two numbers and everything else is behind a click. */}
+      <div className="tray-head">
+        <h4>{t('dockPlayers')}</h4>
+        <span className="tray-hint">{t('inspectHint')}</span>
+      </div>
       <TurnCountdown />
       <PlayerTrackers snapshot={snapshot} onInspect={inspectPlayer} inspectedId={inspectedId} />
     </div>

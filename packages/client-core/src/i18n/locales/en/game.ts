@@ -66,6 +66,7 @@ export default {
   // Player card (issue #14) — the tracker row keeps score + train cars; everything else lives here.
   playerCard: 'Player details',
   inspectPlayer: "View {{name}}'s details",
+  inspectHint: 'Tap for details',
   nowTurn: 'Now',
   seatNumber: 'Seat {{n}}',
   currentScore: 'Current score',

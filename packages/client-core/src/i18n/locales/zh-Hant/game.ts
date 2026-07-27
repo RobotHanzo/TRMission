@@ -65,6 +65,7 @@ export default {
   // Player card (issue #14) — the tracker row keeps score + train cars; everything else lives here.
   playerCard: '玩家詳情',
   inspectPlayer: '查看 {{name}} 的詳情',
+  inspectHint: '點一下查看詳情',
   nowTurn: '現在',
   seatNumber: '第 {{n}} 席',
   currentScore: '目前分數',

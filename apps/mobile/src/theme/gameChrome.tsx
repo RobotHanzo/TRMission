@@ -36,10 +36,13 @@ export function CountPill({ value }: { value: number | string }) {
 export function TrayHead({
   title,
   count,
+  hint,
   right,
 }: {
   title: string;
   count?: number | undefined;
+  /** A quiet instruction where the count would sit (web `.tray-hint`), e.g. "tap for details". */
+  hint?: string | undefined;
   /** Extra trailing content after the pill (e.g. a header action). */
   right?: ReactNode;
 }) {
@@ -48,6 +51,11 @@ export function TrayHead({
     <View style={styles.trayHead}>
       <Text style={[styles.trayTitle, { color: tokens.ink }]}>{title}</Text>
       <DashedLeader color={tokens.line} />
+      {hint !== undefined && (
+        <Text style={[styles.trayHint, { color: tokens.inkSoft }]} numberOfLines={1}>
+          {hint}
+        </Text>
+      )}
       {count !== undefined && <CountPill value={count} />}
       {right}
     </View>
@@ -93,6 +101,7 @@ const styles = StyleSheet.create({
   leaderDash: { width: 6, height: 1 },
   trayHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   trayTitle: { fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
+  trayHint: { flexShrink: 1, fontSize: 11 },
   countPill: {
     minWidth: 22,
     height: 22,

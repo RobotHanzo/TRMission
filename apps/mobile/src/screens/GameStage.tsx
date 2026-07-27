@@ -495,7 +495,9 @@ export function GameStage({
   // board on compact, atop the players panel on the pane tiers.
   const playersPanel = (withCountdown: boolean) => (
     <GamePanel>
-      <TrayHead title={t('dockPlayers')} count={snapshot.players.length} />
+      {/* The head carries the affordance for issue #14's player card rather than a count: a row
+          shows only two numbers, and the count is already the number of rows below it. */}
+      <TrayHead title={t('dockPlayers')} hint={t('inspectHint')} />
       {withCountdown && <TurnCountdown />}
       <PlayerTrackers snapshot={snapshot} onInspect={inspectPlayer} inspectedId={inspectedId} />
     </GamePanel>

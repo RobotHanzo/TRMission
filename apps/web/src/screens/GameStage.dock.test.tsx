@@ -73,6 +73,14 @@ describe('GameStage phone dock (live game at ≤700px)', () => {
     expect(document.querySelector('.dock-panel .comms')).not.toBeNull();
   });
 
+  it('heads the players panel with its title and the tap-for-details hint (issue #66)', () => {
+    render(<GameStage snapshot={baseSnap()} commands={null} onLeave={() => {}} />);
+    fireEvent.click(screen.getByRole('tab', { name: '玩家' }));
+    const head = document.querySelector('.dock-panel .tray-head');
+    expect(head?.textContent).toContain('玩家');
+    expect(head?.textContent).toContain('點一下查看詳情');
+  });
+
   it('ticket drafting replaces the tabs with the chooser', () => {
     const offered = [...ticketById.keys()].slice(0, 3) as string[];
     const snap = baseSnap();
