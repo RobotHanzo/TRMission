@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { Canvas, Group } from '@shopify/react-native-skia';
 import { Check } from 'lucide-react-native';
 import { TRAIN_COLORS, SCORING_TABLE, type CardColor } from '@trm/shared';
-import { MAP_PALETTE_LIGHT } from '@trm/map-data';
+import { MAP_PALETTE_DARK, MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { TrainCarCard } from '../../components/game/TrainCarCard';
 import { TicketCard } from '../../components/game/TicketCard';
 import { RouteLayer } from '../../board/RouteLayer';
@@ -53,6 +53,14 @@ function fitPx(natural: number, boardW: number, avail: number | undefined, reser
   return Math.max(1, Math.min(natural, (avail - reserve) / boardW));
 }
 
+/** The cartography palette the specimens paint with. The live board picks this the same way
+ *  (BoardView), and the web glossary gets it for free — its SVG inherits the themed `--m-*` vars.
+ *  Pinned to light, a specimen's paper roadbed and city markers stay a cream pill on a dark
+ *  coachmark or feature-intro card (issue #67). */
+function useMapPalette() {
+  return useTheme().dark ? MAP_PALETTE_DARK : MAP_PALETTE_LIGHT;
+}
+
 /** One synthetic straight route rendered through the board's own model builder + painter. */
 function trackModel(
   id: string,
@@ -92,6 +100,7 @@ function RouteCanvas({
 }) {
   const count = variant === 'tunnel' ? 4 : 3;
   const px = fitPx(SPEC_PX, SPEC_W, useContext(SpecimenWidthCtx), reserve);
+  const palette = useMapPalette();
   const models =
     variant === 'double'
       ? [
@@ -113,7 +122,7 @@ function RouteCanvas({
   return (
     <Canvas style={{ width: SPEC_W * px, height: SPEC_H * px }}>
       <Group transform={[{ scale: px }]}>
-        <RouteLayer model={models} inv={SPEC_INV} />
+        <RouteLayer model={models} inv={SPEC_INV} palette={palette} />
       </Group>
     </Canvas>
   );
@@ -179,6 +188,7 @@ export function LocoCardSpecimen() {
 export function StationSpecimen() {
   const { t } = useTranslation();
   const { tokens } = useTheme();
+  const palette = useMapPalette();
   const locale = useUi((s) => s.locale);
   const builtFill = SEAT_COLORS[0];
   const cities: Array<{ id: string; built: boolean }> = [
@@ -190,7 +200,12 @@ export function StationSpecimen() {
     <View testID="tut-specimen" style={styles.stationRow}>
       {cities.map(({ id, built }) => (
         <View style={styles.stationChip} key={id}>
-          <View style={styles.stationMarker}>
+          <View
+            style={[
+              styles.stationMarker,
+              { backgroundColor: palette.surface, borderColor: palette.ink },
+            ]}
+          >
             {built && <View style={[styles.stationBuiltDot, { backgroundColor: builtFill }]} />}
           </View>
           <Text style={[styles.stationName, { color: tokens.ink }]}>{cityName(id, locale)}</Text>
@@ -300,11 +315,12 @@ function ClaimTrack({ len, color }: { len: number; color: string }) {
   const w = len * STRAIGHT_PITCH + pad * 2;
   const h = 3;
   const px = fitPx(CLAIM_TRACK_PX, w, useContext(SpecimenWidthCtx), CLAIM_RESERVE);
+  const palette = useMapPalette();
   const models = trackModel(`claim-${color}-${len}`, color, len, {}, w / 2, h / 2);
   return (
     <Canvas style={{ width: w * px, height: h * px }}>
       <Group transform={[{ scale: px }]}>
-        <RouteLayer model={models} inv={SPEC_INV} />
+        <RouteLayer model={models} inv={SPEC_INV} palette={palette} />
       </Group>
     </Canvas>
   );
@@ -423,9 +439,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: MAP_PALETTE_LIGHT.surface,
     borderWidth: 2,
-    borderColor: MAP_PALETTE_LIGHT.ink,
     alignItems: 'center',
     justifyContent: 'center',
   },

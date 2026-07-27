@@ -3,6 +3,9 @@
 // e.g. broken rails. GameScreen mounts the overlay once the game's content is ready; any dismissal
 // (finishing or skipping) persists BOTH to the account and to the on-device mirror, so it never
 // shows twice even for offline sessions.
+// The card is chrome, not game canvas, so it styles through useTheme() like every other modal here
+// — the web dialog gets the same for free from `.modal`'s var(--tr-*) (it was a hardcoded white
+// sheet floating over the dark board, issue #67).
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -10,31 +13,44 @@ import type { GameContent } from '@trm/map-data';
 import { pendingFeatureIntros, type FeatureIntroDef } from './featureIntro';
 import { Specimen } from './Specimens';
 import { useSession } from '../../store/session';
+import { useTheme } from '../../theme/useTheme';
 import { addSeenFeatureIntro, getSeenFeatureIntros } from './featureIntroSeen';
 
 function FeatureIntroCard({ intro, onClose }: { intro: FeatureIntroDef; onClose: () => void }) {
   const { t } = useTranslation();
+  const { tokens } = useTheme();
   const [page, setPage] = useState(0);
   const cur = intro.pages[page]!;
   const last = page === intro.pages.length - 1;
   return (
     <View style={styles.veil} testID="feature-intro">
-      <View style={styles.card} accessibilityViewIsModal>
-        <Text style={styles.eyebrow}>{t('tutorial.featureIntro.heading')}</Text>
-        <Text style={styles.title}>{t(intro.titleKey)}</Text>
+      <View
+        testID="feature-intro-card"
+        style={[
+          styles.card,
+          { backgroundColor: tokens.surface, borderColor: tokens.line, shadowColor: tokens.ink },
+        ]}
+        accessibilityViewIsModal
+      >
+        <Text style={[styles.eyebrow, { color: tokens.inkSoft }]}>
+          {t('tutorial.featureIntro.heading')}
+        </Text>
+        <Text style={[styles.title, { color: tokens.ink }]}>{t(intro.titleKey)}</Text>
         {cur.specimen && (
           <View style={styles.specimen}>
             <Specimen spec={cur.specimen} />
           </View>
         )}
-        <Text style={styles.body}>{t(cur.textKey)}</Text>
+        <Text style={[styles.body, { color: tokens.ink }]}>{t(cur.textKey)}</Text>
         <View style={styles.controls}>
-          <Text style={styles.progress}>
+          <Text style={[styles.progress, { color: tokens.inkSoft }]}>
             {t('tutorial.featureIntro.pageOf', { page: page + 1, total: intro.pages.length })}
           </Text>
           {!last && (
             <Pressable accessibilityRole="button" style={styles.linkBtn} onPress={onClose}>
-              <Text style={styles.linkText}>{t('tutorial.featureIntro.skip')}</Text>
+              <Text style={[styles.linkText, { color: tokens.blue }]}>
+                {t('tutorial.featureIntro.skip')}
+              </Text>
             </Pressable>
           )}
           {page > 0 && (
@@ -43,12 +59,14 @@ function FeatureIntroCard({ intro, onClose }: { intro: FeatureIntroDef; onClose:
               style={styles.linkBtn}
               onPress={() => setPage((p) => p - 1)}
             >
-              <Text style={styles.linkText}>{t('tutorial.prevStep')}</Text>
+              <Text style={[styles.linkText, { color: tokens.blue }]}>
+                {t('tutorial.prevStep')}
+              </Text>
             </Pressable>
           )}
           <Pressable
             accessibilityRole="button"
-            style={styles.primaryBtn}
+            style={[styles.primaryBtn, { backgroundColor: tokens.blue }]}
             onPress={() => (last ? onClose() : setPage((p) => p + 1))}
           >
             <Text style={styles.primaryText}>
@@ -122,9 +140,12 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     width: '100%',
     borderRadius: 12,
-    backgroundColor: '#fff',
+    borderWidth: 1,
     padding: 20,
     gap: 10,
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
   eyebrow: {
@@ -132,17 +153,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
     textTransform: 'uppercase',
-    opacity: 0.55,
   },
   title: { fontSize: 17, fontWeight: '700' },
   specimen: { alignItems: 'center', paddingVertical: 4 },
-  body: { fontSize: 14, opacity: 0.8, lineHeight: 20 },
+  body: { fontSize: 14, lineHeight: 20 },
   controls: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  progress: { flex: 1, fontSize: 12, opacity: 0.55 },
+  progress: { flex: 1, fontSize: 12 },
   linkBtn: { paddingHorizontal: 10, paddingVertical: 8 },
-  linkText: { fontSize: 14, fontWeight: '600', color: '#1d4ed8' },
+  linkText: { fontSize: 14, fontWeight: '600' },
   primaryBtn: {
-    backgroundColor: '#1d4ed8',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 10,

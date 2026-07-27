@@ -81,7 +81,8 @@ export interface RouteLayerProps {
   repairedRoutes?: ReadonlySet<string> | undefined;
   /** Track-weight counter-scale (web --inv-scale). */
   inv: number;
-  /** Themed cartography palette (light default keeps specimens/tests on the classic look). */
+  /** Themed cartography palette (light default keeps tests on the classic look; the tutorial
+   *  glossary passes the resolved one, so its roadbed follows the theme — issue #67). */
   palette?: MapPalette | undefined;
 }
 
