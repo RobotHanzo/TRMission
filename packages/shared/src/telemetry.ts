@@ -9,6 +9,12 @@
  * seed that predicts every future draw. `redactFor` guards the wire; this guards telemetry, which is
  * the other way state leaves the process.
  *
+ * It is deliberately NARROW. A scrubber that eats everything produces reports nobody can act on:
+ * the account behind an error, the address a mail send failed for, the IP a burst of rejections
+ * came from are all things a maintainer needs, and they are our own users' data held under our own
+ * privacy policy. Only three families are withheld — game secrets, credentials, and the
+ * advertising/tracking identifiers the app stores' policies govern. See `SENSITIVE_KEY`.
+ *
  * Deliberately dependency-free (no Sentry import): it is typed against a structural event shape so
  * `@trm/shared` stays consumable by the engine-adjacent packages.
  */
@@ -27,28 +33,36 @@ const MAX_STRING = 4096;
  * so `hand` also covers `playerHand`/`hands` via the alternation below rather than by substring
  * (which would swallow innocent keys like `handler` or `deckId`).
  *
- * Three families:
+ * Three families, and nothing beyond them:
  *  - **Game secrets** — every `GameState`/`SelfView` field that `redactFor` exists to withhold.
- *  - **Credentials** — anything that would let the reader act as somebody else.
- *  - **PII** — direct identifiers; a `userId` is fine (it is what makes a report actionable), an
- *    email address is not.
+ *    Add a new secret field there ⇒ add its key name here.
+ *  - **Credentials** — anything that would let the reader act as somebody else (or push to
+ *    somebody else's device).
+ *  - **Store-policy identifiers** — the advertising/tracking ids Apple's ATT and Play's Data
+ *    Safety rules govern. They are never needed to debug, and the only place one may legitimately
+ *    travel is the consented ad SDK itself.
+ *
+ * Ordinary identifiers are deliberately NOT here: `email`, `userId`, `displayName`, IP address.
+ * They are what makes a report actionable — "which account hit this, from where" — and they are
+ * our own users' data, disclosed by our own privacy policy and covered by the stores' declarations.
+ * Do not re-add them to buy a feeling of safety; it costs every future investigation.
  */
 const SENSITIVE_KEY =
-  /^(?:.*_)?(?:(?:player|self|opponent|team|my|your)?hands?|keptTickets?|pendingTicketOffer|ticketDeck(?:Long|Short)?|ticketDiscard|deck|drawPile|discard(?:Pile)?|rng|rngState|seed|selfView|you|gameState|secretState|token|tokens|accessToken|refreshToken|idToken|jwt|ticket|authorization|auth|cookie|cookies|setCookie|password|passwordHash|secret|clientSecret|privateKey|apiKey|dsn|sessionId|email|emails|ip|ipAddress|remoteAddr|phone)$/i;
+  /^(?:.*_)?(?:(?:player|self|opponent|team|my|your)?hands?|keptTickets?|pendingTicketOffer|ticketDeck(?:Long|Short)?|ticketDiscard|deck|drawPile|discard(?:Pile)?|rng|rngState|seed|selfView|you|gameState|secretState|token|tokens|accessToken|refreshToken|idToken|deviceToken|pushToken|jwt|ticket|credential|credentials|authorization|auth|cookie|cookies|setCookie|password|passwordHash|secret|clientSecret|privateKey|apiKey|dsn|idfa|idfv|advertisingId|advertisingIdentifier|adId|gaid|appSetId)$/i;
 
-/** Query-string parameters stripped from any URL that reaches telemetry. */
+/** Query-string parameters stripped from any URL that reaches telemetry — OAuth/ws-game
+ *  credentials only. A `?redirect=` or `?email=` stays: both are what the request was about. */
 const SENSITIVE_QUERY =
-  /^(?:ticket|token|access_token|id_token|refresh_token|code|state|nonce|key|secret|password|email|redirect_uri)$/i;
+  /^(?:ticket|token|access_token|id_token|refresh_token|code|state|nonce|key|secret|password)$/i;
 
 /** Free-text patterns worth redacting wherever they appear — an exception message or a breadcrumb
- *  can carry a credential the key-name pass never sees (e.g. `failed to verify eyJhbGci…`). */
+ *  can carry a CREDENTIAL the key-name pass never sees (e.g. `failed to verify eyJhbGci…`).
+ *  Credentials only: "no account for a@b.com" is the useful half of that message, not the risk. */
 const TEXT_PATTERNS: readonly RegExp[] = [
   // JSON Web Tokens (ws-game tickets, access tokens, OAuth id_tokens).
   /\beyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\b/g,
   // `Bearer <opaque>` / `Basic <base64>` authorization values.
   /\b(?:Bearer|Basic)\s+[A-Za-z0-9._~+/=-]{8,}/gi,
-  // Email addresses.
-  /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g,
 ];
 
 export function isSensitiveTelemetryKey(key: string): boolean {

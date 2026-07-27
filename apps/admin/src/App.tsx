@@ -105,11 +105,21 @@ export default function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  // Which maintainer hit the error — the account id only, never their display name or email
-  // (no-op without a Sentry DSN).
+  // Which maintainer hit the error — id, email and display name (no-op without a Sentry DSN).
+  const userId = session.user?.id;
+  const userEmail = session.user?.email;
+  const userName = session.user?.displayName;
   useEffect(() => {
-    setSentryUser(session.user?.id ?? null);
-  }, [session.user?.id]);
+    setSentryUser(
+      userId
+        ? {
+            id: userId,
+            ...(userEmail ? { email: userEmail } : {}),
+            ...(userName ? { username: userName } : {}),
+          }
+        : null,
+    );
+  }, [userId, userEmail, userName]);
 
   if (session.phase === 'booting' || session.phase === 'unauthenticated') {
     return <div className="oc-gate oc-muted">{t('common.loading')}</div>;

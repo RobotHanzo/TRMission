@@ -220,24 +220,43 @@ and the RNG seed are secrets the server exists to withhold — and a maintainer 
 from a **live** match may be sitting at that same table. So telemetry is treated as the second
 egress path alongside the wire, and gets the same structural guard.
 
+The guard is **narrow on purpose** (2026-07). Three families never leave the process, and nothing
+else does — a report you can't attribute to an account, an address or an IP is a report nobody can
+act on.
+
 - `packages/shared/src/telemetry.ts` is the **single denylist**, run from every surface's
-  `beforeSend`, `beforeSendTransaction` and `beforeBreadcrumb`. It drops values by key name (hands,
-  kept/offered missions, deck, discard, ticket decks, `rng`, `seed`, `selfView`, tokens, tickets,
-  cookies, passwords, emails, IPs), strips sensitive query parameters from URLs, and redacts JWTs /
-  bearer credentials / email addresses found in free text. It is depth-, breadth- and cycle-bounded.
-- `sendDefaultPii: false` everywhere, so the SDKs never attach IPs, cookies or request bodies on
-  their own initiative.
-- The only identifier attached to an event is the **server-minted account id** — never a display
-  name, email or IP.
-- Web Session Replay `block`s the hand and mission trays outright via `SECRET_CLASS`
-  (`apps/web/src/observability/secrets.ts`). Text masking is not enough there: the secret is the
-  card _colours_ and route shapes, which survive text masking.
+  `beforeSend`, `beforeSendTransaction` and `beforeBreadcrumb`. It drops values by key name:
+  1. **game secrets** — hands, kept/offered missions, deck, discard, ticket decks, `rng`, `seed`,
+     `selfView`, `gameState`;
+  2. **credentials** — tokens, ws-game tickets, push/device tokens, JWTs, cookies, passwords, API
+     keys and private keys (also stripped from URL query strings, and matched as JWT / `Bearer …`
+     patterns in free text);
+  3. **advertising identifiers** — `idfa`, `idfv`, `advertisingId`, `gaid`, `appSetId`, which the
+     App Store's ATT rules and Play's Data Safety policy govern and which nothing here needs.
+
+  It is depth-, breadth- and cycle-bounded.
+
+- **Ordinary identifiers are sent, deliberately.** Account id, email, display name and IP address
+  reach Sentry: they answer "who hit this, from where", they are our own users' data under our own
+  privacy policy, and both stores' data declarations already cover diagnostics. `sendDefaultPii` is
+  **on** for server/web/admin, and web + admin attach `{ id, email, username }` as the Sentry user.
+- **Mobile is the exception**: it still attaches the account id only and keeps
+  `sendDefaultPii: false`. Not caution for its own sake — the iOS privacy manifest in
+  `apps/mobile/app.config.ts` declares crash/performance/diagnostic data as **not linked to
+  identity**, and raising that means editing the manifest, which changes the OTA fingerprint and so
+  needs a fresh native build on both stores first. Do those together or not at all.
+- Session Replay masking is **off** on web and admin — a replay of grey boxes only tells you that
+  something went wrong, which the error already said. Web still `block`s the hand and mission trays
+  outright via `SECRET_CLASS` (`apps/web/src/observability/secrets.ts`); that one is anti-cheat, not
+  privacy, and text masking would not have covered it anyway (the secret is the card _colours_ and
+  route shapes). `input[type=password]` is masked by rrweb unconditionally.
 - The server's hidden-information egress guard reports at `fatal` with **only** the two seat ids —
   attaching the snapshot would commit the very leak the guard just blocked.
 
 **If you add UI that renders the viewer's hand or missions, it must carry `SECRET_CLASS`. If you add
 a secret field to `GameState`/`SelfView`, add its key name to `telemetry.ts`.** Both rules are
-covered by tests in `packages/shared/src/telemetry.test.ts`.
+covered by tests in `packages/shared/src/telemetry.test.ts` — which also pins the other direction:
+`email`/`ip` must stay readable.
 
 ## 9. Mobile Session Replay — off, and why
 

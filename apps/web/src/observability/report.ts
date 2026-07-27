@@ -13,15 +13,23 @@
  * latest value is held here and applied once the SDK is live.
  */
 
+/** Who hit the error. Identifiers, deliberately: an account id alone forces a DB lookup before
+ *  anyone can even tell whether a report matters. Guests have no email — the id carries them. */
+export interface TelemetryUser {
+  id: string;
+  email?: string;
+  username?: string;
+}
+
 /** The subset of `./sentry` this façade drives, once it has loaded. */
 export interface SentryHandle {
   captureException(error: unknown, componentStack?: string): string;
-  setUser(userId: string | null): void;
+  setUser(user: TelemetryUser | null): void;
   setGameContext(context: { gameId?: string; roomCode?: string } | null): void;
 }
 
 let handle: SentryHandle | null = null;
-let pendingUser: string | null = null;
+let pendingUser: TelemetryUser | null = null;
 let pendingGame: { gameId?: string; roomCode?: string } | null = null;
 let started = false;
 
@@ -56,10 +64,10 @@ export function reportRenderError(error: unknown, componentStack?: string): stri
   return handle ? handle.captureException(error, componentStack) : null;
 }
 
-/** Attach (or clear) the signed-in account id. Id only — never a display name, email, or IP. */
-export function setSentryUser(userId: string | null): void {
-  pendingUser = userId;
-  handle?.setUser(userId);
+/** Attach (or clear) the signed-in account — id, email and display name. */
+export function setSentryUser(user: TelemetryUser | null): void {
+  pendingUser = user;
+  handle?.setUser(user);
 }
 
 /** Tag the game/room a report came from, so in-game errors group by match. Null clears it. */

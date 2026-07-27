@@ -32,6 +32,11 @@ UI. Commands: `yarn workspace @trm/shared test` / `… typecheck` / `… lint`.
   just a privacy one. Deliberately **dependency-free**: typed against a structural event shape so
   adding it never pulls a Sentry package into the engine-adjacent graph. Add a new secret field to
   `GameState`/`SelfView` ⇒ add its key name here.
+  It is equally deliberately **narrow**: exactly three families are withheld — game secrets,
+  credentials, and the ad/tracking identifiers the app stores' policies govern. Ordinary
+  identifiers (`email`, `userId`, `displayName`, IP) are sent, because a report nobody can
+  attribute is a report nobody can act on. Both directions are pinned by `telemetry.test.ts`; don't
+  re-add an identifier to the denylist without changing that test on purpose.
 
 ## Conventions
 

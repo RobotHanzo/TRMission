@@ -7,14 +7,22 @@
  * bundle). Same contract as apps/web's `observability/report.ts`.
  */
 
+/** Which maintainer hit the error. Identifiers, deliberately — on a surface with a handful of
+ *  operators, "which one" is usually the fastest route to "what were they doing". */
+export interface TelemetryUser {
+  id: string;
+  email?: string;
+  username?: string;
+}
+
 /** The subset of `./sentry` this façade drives, once it has loaded. */
 export interface SentryHandle {
   captureException(error: unknown, componentStack?: string): string;
-  setUser(userId: string | null): void;
+  setUser(user: TelemetryUser | null): void;
 }
 
 let handle: SentryHandle | null = null;
-let pendingUser: string | null = null;
+let pendingUser: TelemetryUser | null = null;
 let started = false;
 
 /** Start Sentry if `VITE_SENTRY_DSN` is set. Called once from `main.tsx`. Idempotent. */
@@ -43,8 +51,8 @@ export function reportRenderError(error: unknown, componentStack?: string): stri
   return handle ? handle.captureException(error, componentStack) : null;
 }
 
-/** Attach (or clear) the signed-in maintainer's account id — the id only, never their email. */
-export function setSentryUser(userId: string | null): void {
-  pendingUser = userId;
-  handle?.setUser(userId);
+/** Attach (or clear) the signed-in maintainer — id, email and display name. */
+export function setSentryUser(user: TelemetryUser | null): void {
+  pendingUser = user;
+  handle?.setUser(user);
 }

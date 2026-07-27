@@ -83,11 +83,23 @@ export function App() {
     void restore();
   }, [restore]);
 
-  // Tell Sentry WHO and WHICH match, so a report is actionable. Ids only — no display name, no
-  // email, and nothing from the game snapshot (all no-ops without a DSN).
+  // Tell Sentry WHO and WHICH match, so a report is actionable: the account's id, email and
+  // display name — never anything from the game snapshot (all no-ops without a DSN). Read as three
+  // scalars so the effect doesn't re-fire on every unrelated session-store update.
+  const userId = user?.id;
+  const userEmail = user?.email;
+  const userName = user?.displayName;
   useEffect(() => {
-    setSentryUser(user?.id ?? null);
-  }, [user?.id]);
+    setSentryUser(
+      userId
+        ? {
+            id: userId,
+            ...(userEmail ? { email: userEmail } : {}),
+            ...(userName ? { username: userName } : {}),
+          }
+        : null,
+    );
+  }, [userId, userEmail, userName]);
   useEffect(() => {
     setSentryGameContext({ ...(gameId ? { gameId } : {}), ...(roomCode ? { roomCode } : {}) });
   }, [gameId, roomCode]);

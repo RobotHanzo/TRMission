@@ -5,7 +5,8 @@
 //   2. NOTHING leaves this process unscrubbed. This is a hidden-information game: a hand, a kept
 //      ticket, a deck order, or the RNG seed reaching an error backend is an anti-cheat problem,
 //      not just a privacy one. `scrubTelemetryEvent` (@trm/shared) is the single denylist, shared
-//      with the web/admin/mobile clients so the four can't drift.
+//      with the web/admin/mobile clients so the four can't drift. It withholds game secrets,
+//      credentials and ad identifiers — and nothing else, so who/where/what stays legible.
 //
 // Must be initialised BEFORE the app graph imports `http`/`mongodb` — see src/instrument.ts.
 import * as Sentry from '@sentry/nestjs';
@@ -40,9 +41,11 @@ export function initSentry(): boolean {
     // The commit already baked into the image (CI build-arg → Docker ENV); ties an event to a
     // source tree without introducing a second provenance axis.
     release: env.gitCommit,
-    // Never let the SDK attach IPs, cookies, or request bodies on its own — everything that
-    // reaches an event goes through the denylist below, deliberately.
-    sendDefaultPii: false,
+    // Let the SDK attach the request context (client IP, headers, body) it collects by default:
+    // "which account, from where, with what payload" is most of what makes a 500 diagnosable, and
+    // the pieces of it that ARE dangerous — `cookie`, `authorization`, `password` — are dropped by
+    // key name in the denylist below rather than by suppressing the whole envelope.
+    sendDefaultPii: true,
     // A sampler rather than a flat `tracesSampleRate` (which it would supersede anyway) so the
     // infra pollers can be dropped outright instead of eating the quota at the same rate as play.
     tracesSampler: ({ name }) =>

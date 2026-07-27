@@ -34,13 +34,16 @@ describe('isSensitiveTelemetryKey', () => {
     }
   });
 
-  it('denies credentials and direct identifiers', () => {
+  it('denies credentials', () => {
     for (const key of [
       'token',
       'accessToken',
       'refreshToken',
+      'pushToken',
+      'deviceToken',
       'jwt',
       'ticket',
+      'credential',
       'authorization',
       'cookie',
       'password',
@@ -48,9 +51,13 @@ describe('isSensitiveTelemetryKey', () => {
       'secret',
       'clientSecret',
       'privateKey',
-      'email',
-      'ip',
     ]) {
+      expect(isSensitiveTelemetryKey(key), key).toBe(true);
+    }
+  });
+
+  it('denies the advertising identifiers the store policies govern', () => {
+    for (const key of ['idfa', 'idfv', 'advertisingId', 'adId', 'gaid', 'appSetId']) {
       expect(isSensitiveTelemetryKey(key), key).toBe(true);
     }
   });
@@ -71,6 +78,22 @@ describe('isSensitiveTelemetryKey', () => {
       'market',
       'ownership',
       'engineVersion',
+    ]) {
+      expect(isSensitiveTelemetryKey(key), key).toBe(false);
+    }
+  });
+
+  // The 2026-07 narrowing: a report nobody can attribute to an account is a report nobody can act
+  // on. These are our own users' data, disclosed by our own privacy policy — not secrets.
+  it('leaves ordinary identifiers alone', () => {
+    for (const key of [
+      'email',
+      'emails',
+      'ip',
+      'ipAddress',
+      'remoteAddr',
+      'phone',
+      'displayName',
     ]) {
       expect(isSensitiveTelemetryKey(key), key).toBe(false);
     }
@@ -134,7 +157,7 @@ describe('scrubTelemetryValue', () => {
 });
 
 describe('scrubTelemetryText', () => {
-  it('redacts JWTs, bearer credentials and email addresses in free text', () => {
+  it('redacts JWTs and bearer credentials in free text', () => {
     const jwt = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1MSJ9.c2lnbmF0dXJlLWhlcmU';
     expect(scrubTelemetryText(`ticket ${jwt} rejected`)).toBe(
       `ticket ${TELEMETRY_REDACTED} rejected`,
@@ -142,8 +165,11 @@ describe('scrubTelemetryText', () => {
     expect(scrubTelemetryText('Authorization: Bearer abcdef0123456789')).toBe(
       `Authorization: ${TELEMETRY_REDACTED}`,
     );
+  });
+
+  it('keeps an email address — it is the actionable half of the message', () => {
     expect(scrubTelemetryText('no account for player@example.com')).toBe(
-      `no account for ${TELEMETRY_REDACTED}`,
+      'no account for player@example.com',
     );
   });
 
@@ -170,7 +196,7 @@ describe('scrubTelemetryUrl', () => {
 describe('scrubTelemetryEvent', () => {
   it('scrubs message, exception values, request, breadcrumbs, extra, tags and user', () => {
     const event = scrubTelemetryEvent({
-      message: 'login failed for a@b.com',
+      message: 'login failed for a@b.com with bad ticket eyJhbGciOiJIUzI1NiJ9.eyJhIjoxfQ.c2ln',
       exception: { values: [{ value: 'bad ticket eyJhbGciOiJIUzI1NiJ9.eyJhIjoxfQ.c2ln' }] },
       request: {
         url: 'https://trm.example/login?token=abc',
@@ -181,10 +207,10 @@ describe('scrubTelemetryEvent', () => {
       breadcrumbs: [{ message: 'ws hello', data: { ticket: 'abc', gameId: 'g1' } }],
       extra: { hand: { RED: 2 }, seat: 1 },
       tags: { gameId: 'g1' },
-      user: { id: 'u1', email: 'a@b.com' },
+      user: { id: 'u1', email: 'a@b.com', ip_address: '203.0.113.7' },
     });
 
-    expect(event.message).toBe(`login failed for ${TELEMETRY_REDACTED}`);
+    expect(event.message).toBe(`login failed for a@b.com with bad ticket ${TELEMETRY_REDACTED}`);
     expect(event.exception?.values?.[0]?.value).toBe(`bad ticket ${TELEMETRY_REDACTED}`);
     expect(event.request?.url).toBe(`https://trm.example/login?token=${TELEMETRY_REDACTED}`);
     expect(event.request?.query_string).toBe(`token=${TELEMETRY_REDACTED}&next=/room/AAAAA`);
@@ -196,7 +222,8 @@ describe('scrubTelemetryEvent', () => {
     expect(event.breadcrumbs?.[0]?.data).toEqual({ ticket: TELEMETRY_REDACTED, gameId: 'g1' });
     expect(event.extra).toEqual({ hand: TELEMETRY_REDACTED, seat: 1 });
     expect(event.tags).toEqual({ gameId: 'g1' });
-    expect(event.user).toEqual({ id: 'u1', email: TELEMETRY_REDACTED });
+    // The user context survives intact — that is the whole point of attaching it.
+    expect(event.user).toEqual({ id: 'u1', email: 'a@b.com', ip_address: '203.0.113.7' });
   });
 
   it('is a no-op on an empty event', () => {
@@ -206,9 +233,11 @@ describe('scrubTelemetryEvent', () => {
 
 describe('scrubTelemetryBreadcrumb', () => {
   it('applies the same denylist to a single crumb', () => {
-    expect(scrubTelemetryBreadcrumb({ message: 'hi a@b.com', data: { hand: {} } })).toEqual({
-      message: `hi ${TELEMETRY_REDACTED}`,
-      data: { hand: TELEMETRY_REDACTED },
+    expect(
+      scrubTelemetryBreadcrumb({ message: 'hi a@b.com', data: { hand: {}, email: 'a@b.com' } }),
+    ).toEqual({
+      message: 'hi a@b.com',
+      data: { hand: TELEMETRY_REDACTED, email: 'a@b.com' },
     });
   });
 });

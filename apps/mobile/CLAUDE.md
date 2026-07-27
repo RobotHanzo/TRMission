@@ -151,6 +151,13 @@ on the RNW web harness.
   device before raising either rate.
 - The iOS privacy manifest declares crash/performance/other-diagnostic collection (not linked to
   identity, not tracking) — keep it in step if the SDK's collection changes.
+- **Mobile stays id-only, unlike web/admin.** The shared denylist was narrowed in 2026-07 so
+  identifiers (email, IP) reach Sentry, and web/admin now attach `{ id, email, username }` with
+  `sendDefaultPii: true`. This surface deliberately did **not** follow: it still sets
+  `sendDefaultPii: false` and `Sentry.setUser({ id })`, because linking diagnostics to identity
+  means flipping `NSPrivacyCollectedDataTypeLinked` and declaring Email Address in
+  `app.config.ts` — which changes the OTA fingerprint, so it needs a fresh native build on both
+  stores. Do the manifest edit and the SDK change in the same release or neither.
 
 ## OTA updates (expo-updates + self-hosted expo-open-ota)
 

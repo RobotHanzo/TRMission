@@ -7,8 +7,9 @@
 //
 // Everything leaving the page goes through `@trm/shared`'s scrubber, the same denylist the server
 // and mobile use, because this is a hidden-information game: a hand or a mission list in a crash
-// report is an anti-cheat problem, not just a privacy one. Replay gets a second, structural guard
-// on top — see SECRET_CLASS.
+// report is an anti-cheat problem, not just a privacy one. That denylist is deliberately narrow —
+// game secrets, credentials, ad identifiers — so who/where/what stays legible. Replay gets a
+// second, structural guard on top, and it is the ONLY masking left here: see SECRET_CLASS.
 import {
   browserTracingIntegration,
   captureException,
@@ -89,7 +90,10 @@ export function start(): SentryHandle {
     environment: env.VITE_SENTRY_ENVIRONMENT ?? (env.DEV ? 'development' : 'production'),
     // Same commit the About panel shows, baked by the Docker build-arg.
     release: env.VITE_COMMIT_HASH ?? 'dev',
-    sendDefaultPii: false,
+    // Let the SDK attach the request context it collects by default (notably the client IP). It is
+    // an identifier, not a secret — abuse bursts and region-specific breakage are invisible without
+    // one — and everything it attaches still passes through the denylist below.
+    sendDefaultPii: true,
     tracesSampleRate: telemetrySampleRate(
       env.VITE_SENTRY_TRACES_SAMPLE_RATE,
       DEFAULT_TRACES_SAMPLE_RATE,
@@ -107,12 +111,17 @@ export function start(): SentryHandle {
     integrations: [
       browserTracingIntegration(),
       replayIntegration({
-        // Belt: every text node and input value is masked, every image/video blocked.
-        maskAllText: true,
-        maskAllInputs: true,
-        blockAllMedia: true,
-        // Braces: the hand / mission trays are BLOCKED outright, not merely text-masked — their
-        // secret is the card colours and route shapes, which survive text masking. See secrets.ts.
+        // A replay whose every label, name and number is a grey box shows only that SOMETHING went
+        // wrong — which is the one thing the error already told us. So the blanket masks are off
+        // and the guard is targeted instead.
+        maskAllText: false,
+        maskAllInputs: false,
+        blockAllMedia: false,
+        // The hand / mission trays are BLOCKED outright — the only real leak on this surface, and
+        // an anti-cheat one: a maintainer may be seated at that very table, and the secret is the
+        // card colours and route shapes, which survive text masking anyway. See secrets.ts.
+        // (`input[type=password]` is masked by rrweb unconditionally — that is not what
+        // `maskAllInputs` controls.)
         block: [`.${SECRET_CLASS}`],
       }),
     ],
@@ -124,7 +133,7 @@ export function start(): SentryHandle {
   return {
     captureException: (error, componentStack) =>
       captureException(error, { contexts: { react: { componentStack } } }),
-    setUser: (userId) => setUser(userId ? { id: userId } : null),
+    setUser: (user) => setUser(user),
     setGameContext: (context) => {
       setTag('trm.gameId', context?.gameId ?? undefined);
       setTag('trm.roomCode', context?.roomCode ?? undefined);

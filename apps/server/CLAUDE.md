@@ -78,7 +78,10 @@ Two signals, wired at the same call sites: **metrics** say how often, **error re
   attaching the snapshot would commit the very leak the guard just stopped.
 
 Nothing reaches Sentry unscrubbed: `beforeSend`/`beforeSendTransaction`/`beforeBreadcrumb` all run
-`@trm/shared`'s `scrubTelemetryEvent`, the single denylist shared with web/admin/mobile.
+`@trm/shared`'s `scrubTelemetryEvent`, the single denylist shared with web/admin/mobile. That
+denylist withholds game secrets, credentials and ad identifiers only — `sendDefaultPii` is **on**,
+so request context (client IP, headers, body) rides along and the dangerous keys inside it
+(`cookie`, `authorization`, `password`) are dropped by name rather than by suppressing the lot.
 
 ## Env vars (core)
 

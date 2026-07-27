@@ -84,7 +84,14 @@ export function initSentry(): boolean {
   return true;
 }
 
-/** Attach (or clear) the signed-in account id — the id only, never a display name or email. */
+/**
+ * Attach (or clear) the signed-in account id — the id only, never a display name or email.
+ *
+ * Web and admin attach `{ id, email, username }` (and `sendDefaultPii: true`); this surface stays
+ * id-only on purpose. The iOS privacy manifest in `app.config.ts` declares diagnostics as NOT
+ * linked to identity, and changing that declaration changes the OTA fingerprint — so raising this
+ * means shipping a fresh native build on both stores in the same release. See apps/mobile/CLAUDE.md.
+ */
 export function setSentryUser(userId: string | null): void {
   if (!isLive()) return;
   Sentry.setUser(userId ? { id: userId } : null);

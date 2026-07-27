@@ -104,10 +104,12 @@ thing that broke.
 Sentry is opt-in via the build-time `VITE_SENTRY_DSN` and mirrors `apps/web`'s contract exactly,
 including the lazy-load façade: `observability/report.ts` carries no `@sentry/*` import and pulls in
 `observability/sentry.ts` only once it has seen a DSN, so a DSN-less build doesn't ship the SDK at
-all. Beyond that: `sendDefaultPii: false`, everything through `@trm/shared`'s
-`scrubTelemetryEvent`, tracing on, and Session Replay recorded **only** for erroring sessions.
-`maskAllText`/`maskAllInputs` stay on — this surface is full of account data. No LIVE game's hidden
-state ever reaches this app, so there is no board-specific block list to maintain here.
+all. Beyond that: everything goes through `@trm/shared`'s `scrubTelemetryEvent` (game secrets,
+credentials and ad identifiers — nothing else), tracing on, and Session Replay recorded **only**
+for erroring sessions. `sendDefaultPii: true` and the signed-in maintainer is attached as
+`{ id, email, username }`. Replay masking is **off**: no LIVE game's hidden state reaches this app,
+and the account data that does is exactly what an operator needs to see to reconstruct what they
+were doing — so there is no block list to maintain here either.
 
 ## Testing
 

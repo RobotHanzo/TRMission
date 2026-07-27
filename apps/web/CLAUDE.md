@@ -135,14 +135,18 @@ route chunk (`App.tsx`) — it must never inflate the main bundle.
   (`VITE_SENTRY_REPLAY_SAMPLE_RATE=0`); only an erroring session's buffered replay is kept. The
   trade-off of lazy loading: errors thrown in the first tick or two of boot are dropped, not queued
   (a queue would be one more place for game state to sit).
-- **`observability/secrets.ts`'s `SECRET_CLASS` is load-bearing.** Session Replay records the live
-  DOM, and a maintainer reviewing a replay may be seated at the same table — an unmasked hand is a
-  live anti-cheat leak, not just a privacy one. `PlayerHand`, `TicketPanel`, `TicketChooser` and
-  `PaymentModal`'s option list carry the class and are `block`ed outright (text masking is not
-  enough — the secret is the card colours and route shapes). **Any new UI that renders `you.hand`,
+- **`observability/secrets.ts`'s `SECRET_CLASS` is load-bearing — and it is now the ONLY replay
+  masking on this surface.** `maskAllText`/`maskAllInputs`/`blockAllMedia` are off (a replay of grey
+  boxes says only that something broke, which the error already said). Session Replay records the
+  live DOM, and a maintainer reviewing a replay may be seated at the same table, so `PlayerHand`,
+  `TicketPanel`, `TicketChooser` and `PaymentModal`'s option list carry the class and are `block`ed
+  outright — an unmasked hand is a live anti-cheat leak, and text masking never covered it anyway
+  (the secret is the card colours and route shapes). **Any new UI that renders `you.hand`,
   kept/offered missions, or anything derived from them must carry it too.**
 - Everything on the wire to Sentry goes through `@trm/shared`'s `scrubTelemetryEvent`, the same
-  denylist the server and mobile use.
+  denylist the server and mobile use — game secrets, credentials and ad identifiers only.
+  Identifiers are sent on purpose: `sendDefaultPii: true`, and `App.tsx` attaches
+  `{ id, email, username }` as the Sentry user so a report says which account hit it.
 - `lib/preloadRecovery.ts` (installed from `main.tsx`) answers Vite's `vite:preloadError`: every
   route is a lazy chunk, so a tab left open across a redeploy asks for asset hashes that no longer
   exist and crashes the root boundary. It reloads once per minute-window to pick up the new

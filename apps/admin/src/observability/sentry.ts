@@ -4,10 +4,11 @@
 // façade everything else talks to. A static import would put ~92 kB gzipped on the boot critical
 // path of a build that may well have no DSN at all.
 //
-// Same contract as apps/web's, with a different masking rationale: the dashboard is where
-// operator-visible account data lives (ids, emails, ban state, audit entries), and a LIVE game's
-// hidden state never reaches this surface — so `maskAllText` is the guard, with no board-specific
-// block list to maintain.
+// Same contract as apps/web's. A LIVE game's hidden state never reaches this surface, and the
+// account data that does (ids, emails, ban state, audit entries) is exactly what an operator needs
+// to see in a replay to understand what they were doing when it broke — so nothing here is masked
+// and there is no board-specific block list to maintain. This is a maintainer-only app behind a
+// permission model; replays are error-triggered only.
 import {
   browserTracingIntegration,
   captureException,
@@ -40,7 +41,9 @@ export function start(): SentryHandle {
     dsn: env.VITE_SENTRY_DSN,
     environment: env.VITE_SENTRY_ENVIRONMENT ?? (env.DEV ? 'development' : 'production'),
     release: env.VITE_COMMIT_HASH ?? 'dev',
-    sendDefaultPii: false,
+    // Identifiers (notably the client IP) are signal, not secrets — everything still passes
+    // through `@trm/shared`'s denylist below.
+    sendDefaultPii: true,
     tracesSampleRate: telemetrySampleRate(
       env.VITE_SENTRY_TRACES_SAMPLE_RATE,
       DEFAULT_TRACES_SAMPLE_RATE,
@@ -56,7 +59,7 @@ export function start(): SentryHandle {
     ignoreErrors: IGNORED_ERRORS,
     integrations: [
       browserTracingIntegration(),
-      replayIntegration({ maskAllText: true, maskAllInputs: true, blockAllMedia: true }),
+      replayIntegration({ maskAllText: false, maskAllInputs: false, blockAllMedia: false }),
     ],
     beforeSend: (event) => scrubTelemetryEvent(event),
     beforeSendTransaction: (event) => scrubTelemetryEvent(event),
@@ -66,6 +69,6 @@ export function start(): SentryHandle {
   return {
     captureException: (error, componentStack) =>
       captureException(error, { contexts: { react: { componentStack } } }),
-    setUser: (userId) => setUser(userId ? { id: userId } : null),
+    setUser: (user) => setUser(user),
   };
 }
