@@ -17,6 +17,8 @@ vi.mock('../net/rest', async (importOriginal) => {
       putUserFeatures: vi.fn(),
       getDefaultFeatures: vi.fn(),
       putDefaultFeatures: vi.fn(),
+      getOfficialMaps: vi.fn(),
+      putOfficialMaps: vi.fn(),
     },
   };
 });
@@ -26,7 +28,14 @@ const mocked = api as unknown as {
   putUserFeatures: ReturnType<typeof vi.fn>;
   getDefaultFeatures: ReturnType<typeof vi.fn>;
   putDefaultFeatures: ReturnType<typeof vi.fn>;
+  getOfficialMaps: ReturnType<typeof vi.fn>;
+  putOfficialMaps: ReturnType<typeof vi.fn>;
 };
+
+const OFFICIAL_MAPS = [
+  { mapId: 'taiwan', nameZh: '台灣本島與離島', nameEn: 'Taiwan & Outlying Islands', enabled: true },
+  { mapId: 'taipei', nameZh: '大台北', nameEn: 'Greater Taipei', enabled: true },
+];
 
 const row = (over: Partial<UserRow> = {}): UserRow => ({
   id: 'u1',
@@ -65,7 +74,9 @@ describe('FeaturesView', () => {
     render(<FeaturesView />);
     await screen.findByText('功能開通');
     expect(mocked.getDefaultFeatures).not.toHaveBeenCalled();
+    expect(mocked.getOfficialMaps).not.toHaveBeenCalled();
     expect(screen.queryByText('預設功能旗標')).not.toBeInTheDocument();
+    expect(screen.queryByText('官方地圖')).not.toBeInTheDocument();
   });
 
   it('loads and saves the default-flags panel with config.features', async () => {
@@ -75,9 +86,28 @@ describe('FeaturesView', () => {
     mocked.listFeaturedUsers.mockResolvedValue({ users: [] });
     mocked.getDefaultFeatures.mockResolvedValue({ features: ['randomEvents'] });
     mocked.putDefaultFeatures.mockResolvedValue({ features: ['randomEvents', 'mapBuilder'] });
+    mocked.getOfficialMaps.mockResolvedValue({ maps: OFFICIAL_MAPS });
     render(<FeaturesView />);
     expect(await screen.findByText('預設功能旗標')).toBeInTheDocument();
-    fireEvent.click(await screen.findByText('儲存'));
+    // Two save buttons on the page now (feature defaults, then official maps) — in that order.
+    fireEvent.click((await screen.findAllByRole('button', { name: '儲存' }))[0]!);
     expect(mocked.putDefaultFeatures).toHaveBeenCalledWith(['randomEvents']);
+  });
+
+  it('switches an official map off and saves the remaining enabled set', async () => {
+    useSession.setState({
+      permissions: new Set(['users.read', 'users.features', 'config.features']),
+    });
+    mocked.listFeaturedUsers.mockResolvedValue({ users: [] });
+    mocked.getDefaultFeatures.mockResolvedValue({ features: [] });
+    mocked.getOfficialMaps.mockResolvedValue({ maps: OFFICIAL_MAPS });
+    mocked.putOfficialMaps.mockResolvedValue({
+      maps: [OFFICIAL_MAPS[0]!, { ...OFFICIAL_MAPS[1]!, enabled: false }],
+    });
+    render(<FeaturesView />);
+    expect(await screen.findByText('官方地圖')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('大台北'));
+    fireEvent.click((await screen.findAllByRole('button', { name: '儲存' }))[1]!);
+    expect(mocked.putOfficialMaps).toHaveBeenCalledWith(['taiwan']);
   });
 });

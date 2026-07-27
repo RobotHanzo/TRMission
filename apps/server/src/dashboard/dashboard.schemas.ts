@@ -143,6 +143,23 @@ export const ConfigFeaturesPutSchema = z.object({
 });
 export class ConfigFeaturesPutDto extends createZodDto(ConfigFeaturesPutSchema) {}
 
+export const ConfigOfficialMapsSchema = z.object({
+  maps: z.array(
+    z.object({
+      mapId: z.string(),
+      nameZh: z.string(),
+      nameEn: z.string(),
+      enabled: z.boolean(),
+    }),
+  ),
+});
+/** The maps that should stay ON — the server stores the complement, so an official map added in
+ *  a later release ships enabled instead of silently missing from a saved allowlist. */
+export const ConfigOfficialMapsPutSchema = z.object({
+  enabledMapIds: z.array(z.string().min(1).max(40)).max(64),
+});
+export class ConfigOfficialMapsPutDto extends createZodDto(ConfigOfficialMapsPutSchema) {}
+
 // ---- games / rooms ------------------------------------------------------------------
 
 export const DashboardGameRowSchema = z.object({

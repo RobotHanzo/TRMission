@@ -20,7 +20,6 @@ import {
   ScrollText,
   Users,
 } from 'lucide-react-native';
-import { OFFICIAL_MAPS } from '@trm/map-data';
 import type { EventsMode } from '@trm/shared';
 import {
   HOUSE_RULES,
@@ -29,6 +28,7 @@ import {
   type RoomSettingsGroupId,
   type TranslateSetting,
 } from '@trm/client-core/game/roomSettingsMenu';
+import { firstOfficialMapId, officialMapOptions } from '@trm/client-core/game/officialMaps';
 import type { Locale, MapSummary, RoomSettings, RoomVisibility } from '../../net/rest';
 import { useTheme } from '../../theme/useTheme';
 import { Card, SectionLabel } from '../../theme/chrome';
@@ -57,6 +57,8 @@ interface Props {
   seatedCount: number;
   /** The host's own custom maps (null while still loading). */
   myMaps: MapSummary[] | null;
+  /** Official maps currently on offer, from the server (null = not loaded; offer them all). */
+  officialMapIds: string[] | null;
   /** The selected map's display name, resolved against the active locale. */
   mapName: string;
   locale: Locale;
@@ -165,6 +167,7 @@ function GroupControls({
   canBuild,
   showSoloWait,
   myMaps,
+  officialMapIds,
   mapName,
   locale,
   onChange,
@@ -181,6 +184,11 @@ function GroupControls({
         <SettingsRow first label={t('room.mapLabel')} trailing={<RowText>{mapName}</RowText>} />
       );
     }
+    const officialMaps = officialMapOptions(
+      officialMapIds,
+      locale,
+      settings.map.source === 'official' ? settings.map.mapId : undefined,
+    );
     return (
       <>
         {canBuild && (
@@ -194,8 +202,8 @@ function GroupControls({
             value={settings.map.source}
             onChange={(src) => {
               if (src === 'official') {
-                const first = OFFICIAL_MAPS[0];
-                if (first) onChange({ map: { source: 'official', mapId: first.mapId } });
+                const first = firstOfficialMapId(officialMapIds);
+                if (first) onChange({ map: { source: 'official', mapId: first } });
               } else if (myMaps && myMaps.length > 0) {
                 onChange({ map: { source: 'custom', customMapId: myMaps[0]!.id } });
               }
@@ -206,10 +214,7 @@ function GroupControls({
           <ChoiceRow
             first={!canBuild}
             label={t('room.mapOfficial')}
-            options={OFFICIAL_MAPS.map((m) => ({
-              value: m.mapId,
-              label: name({ nameZh: m.content.meta.nameZh, nameEn: m.content.meta.nameEn }),
-            }))}
+            options={officialMaps.map((m) => ({ value: m.mapId, label: m.label }))}
             value={settings.map.mapId}
             onChange={(mapId) => onChange({ map: { source: 'official', mapId } })}
           />

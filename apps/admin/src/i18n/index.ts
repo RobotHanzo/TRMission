@@ -49,6 +49,7 @@ const zhHant = {
     userDeleted: '帳號已刪除',
     tutorialReset: '已重置教學狀態',
     featuresSaved: '功能開通已儲存',
+    officialMapsSaved: '官方地圖開放狀態已儲存',
     gameTerminated: '對局已強制終止',
     gameDeleted: '對局已刪除',
     roomClosed: '房間已關閉',
@@ -369,6 +370,7 @@ const zhHant = {
       'user.unban': '解除停權',
       'user.features': '調整功能開通',
       'config.features': '調整預設功能旗標',
+      'config.officialMaps': '調整官方地圖開放狀態',
       'user.delete': '刪除使用者',
       'game.terminate': '終止對局',
       'game.delete': '刪除對局',
@@ -394,6 +396,9 @@ const zhHant = {
     save: '儲存',
     defaultsTitle: '預設功能旗標',
     defaultsDesc: '在此開啟的功能會套用到所有尚未被個別授權的帳號。',
+    mapsTitle: '官方地圖',
+    mapsDesc:
+      '關閉的地圖不會出現在房間設定中，也無法用來開始新對局；已進行中的對局與回放不受影響。至少須保留一張地圖。',
   },
   feature: {
     replayReview: '重播檢視',
@@ -532,6 +537,7 @@ const en: typeof zhHant = {
     userDeleted: 'Account deleted',
     tutorialReset: 'Tutorial status reset',
     featuresSaved: 'Feature access saved',
+    officialMapsSaved: 'Official map availability saved',
     gameTerminated: 'Game force-terminated',
     gameDeleted: 'Game deleted',
     roomClosed: 'Room closed',
@@ -859,6 +865,7 @@ const en: typeof zhHant = {
       'user.unban': 'Re-enabled user',
       'user.features': 'Changed feature access',
       'config.features': 'Changed default feature flags',
+      'config.officialMaps': 'Changed official map availability',
       'user.delete': 'Deleted user',
       'game.terminate': 'Terminated game',
       'game.delete': 'Deleted game',
@@ -885,6 +892,11 @@ const en: typeof zhHant = {
     defaultsTitle: 'Default feature flags',
     defaultsDesc:
       'Features enabled here apply to every account that has not been granted them individually.',
+    mapsTitle: 'Official maps',
+    mapsDesc:
+      'A map switched off here disappears from the room settings picker and cannot start a new ' +
+      'game; games already running on it, and their replays, are unaffected. At least one map ' +
+      'must stay on.',
   },
   feature: {
     replayReview: 'Replay viewing',

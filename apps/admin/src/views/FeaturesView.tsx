@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UserFeature } from '@trm/shared';
-import { api, type UserRow } from '../net/rest';
+import { api, type OfficialMapRow, type UserRow } from '../net/rest';
 import { useSession } from '../store/session';
 import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { FeatureToggles } from '../components/FeatureToggles';
+import { OfficialMapToggles } from '../components/OfficialMapToggles';
 import { Drawer } from '../components/Drawer';
 import { shortId } from '../lib/fmt';
 
@@ -16,6 +17,7 @@ export function FeaturesView() {
   const [picking, setPicking] = useState(false);
   const [editing, setEditing] = useState<UserRow | null>(null);
   const [defaults, setDefaults] = useState<UserFeature[] | null>(null);
+  const [officialMaps, setOfficialMaps] = useState<OfficialMapRow[] | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -33,6 +35,7 @@ export function FeaturesView() {
   useEffect(() => {
     if (!canEditDefaults) return;
     void api.getDefaultFeatures().then((r) => setDefaults(r.features));
+    void api.getOfficialMaps().then((r) => setOfficialMaps(r.maps));
   }, [canEditDefaults]);
 
   return (
@@ -44,6 +47,14 @@ export function FeaturesView() {
           <h2>{t('features.defaultsTitle')}</h2>
           <p className="oc-muted">{t('features.defaultsDesc')}</p>
           <FeatureToggles target={{ kind: 'defaults', onSaved: setDefaults }} initial={defaults} />
+        </section>
+      )}
+
+      {canEditDefaults && officialMaps && (
+        <section>
+          <h2>{t('features.mapsTitle')}</h2>
+          <p className="oc-muted">{t('features.mapsDesc')}</p>
+          <OfficialMapToggles initial={officialMaps} onSaved={setOfficialMaps} />
         </section>
       )}
 

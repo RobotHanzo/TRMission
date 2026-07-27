@@ -71,6 +71,7 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
   const [ownerLeaveOpen, setOwnerLeaveOpen] = useState(false);
   const [chatDraft, setChatDraft] = useState('');
   const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
+  const [officialMapIds, setOfficialMapIds] = useState<string[] | null>(null);
 
   // The host's own custom maps for the picker — lazily, only for a mapBuilder holder
   // (the endpoint 403s without the feature).
@@ -81,6 +82,16 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
       .then(setMyMaps)
       .catch(() => setMyMaps([]));
   }, [user, canBuild]);
+
+  // Which official maps are on offer right now (a maintainer can switch one off). Null on
+  // failure keeps every bundled map listed — the server is the gate, not this list.
+  useEffect(() => {
+    if (!user) return;
+    api
+      .enabledOfficialMapIds()
+      .then(({ mapIds }) => setOfficialMapIds(mapIds))
+      .catch(() => setOfficialMapIds(null));
+  }, [user]);
 
   // The shared lobby poll: join-via-link, kick detection, auto-spectate, start handoff.
   useEffect(() => {
@@ -404,6 +415,7 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
         showSoloWait={room.members.filter((m) => !m.isBot).length === 1}
         seatedCount={room.members.length}
         myMaps={myMaps}
+        officialMapIds={officialMapIds}
         mapName={mapName}
         locale={locale}
         onChange={setSetting}

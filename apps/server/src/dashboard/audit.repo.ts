@@ -24,6 +24,7 @@ export type DashboardAuditAction =
   | 'map.unshare'
   | 'map.transfer'
   | 'config.features'
+  | 'config.officialMaps'
   | 'report.resolve'
   | 'push.test';
 

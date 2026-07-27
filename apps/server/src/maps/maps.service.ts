@@ -14,6 +14,7 @@ import {
 import type { CityDef, MapGeography, MapRules, RouteDef } from '@trm/map-data';
 import { CustomMapRepo } from './custom-map.repo';
 import { MapContentRepo } from './map-content.repo';
+import { OfficialMapConfigRepo } from './official-map-config.repo';
 import { assembleContent, type CustomMapDoc, type MapDraft } from './maps.types';
 import { UserRepo } from '../auth/user.repo';
 
@@ -58,6 +59,14 @@ export interface OfficialMapSummary {
   routes: number;
 }
 
+/** One official map as the dashboard sees it: every shipped map, switched on or off. */
+export interface OfficialMapAvailability {
+  mapId: string;
+  nameZh: string;
+  nameEn: string;
+  enabled: boolean;
+}
+
 const toSummary = (m: CustomMapDoc): MapSummary => ({
   id: m._id,
   nameZh: m.nameZh,
@@ -78,6 +87,7 @@ export class MapsService {
   constructor(
     private readonly maps: CustomMapRepo,
     private readonly content: MapContentRepo,
+    private readonly officialConfig: OfficialMapConfigRepo,
     private readonly users: UserRepo,
   ) {}
 
@@ -172,8 +182,10 @@ export class MapsService {
     return toDetail(updated ?? doc);
   }
 
-  listOfficial(): OfficialMapSummary[] {
-    return OFFICIAL_MAPS.map((m) => ({
+  /** The fork picker: only maps players are currently allowed to play (and therefore fork). */
+  async listOfficial(): Promise<OfficialMapSummary[]> {
+    const disabled = new Set(await this.officialConfig.getDisabled());
+    return OFFICIAL_MAPS.filter((m) => !disabled.has(m.mapId)).map((m) => ({
       mapId: m.mapId,
       nameZh: m.content.meta.nameZh,
       nameEn: m.content.meta.nameEn,
@@ -182,13 +194,69 @@ export class MapsService {
     }));
   }
 
+  /**
+   * Which official maps a room may currently be set to — the clients' picker list. Every shipped
+   * map is offered unless a maintainer switched it off from the dashboard; the same set is
+   * enforced server-side on the settings PATCH and again at game start, so this is a display
+   * convenience, never the gate. Maps already committed to a started game keep resolving by
+   * contentHash, so switching one off never touches a live game or a replay.
+   */
+  async enabledOfficialMapIds(): Promise<string[]> {
+    const disabled = new Set(await this.officialConfig.getDisabled());
+    return OFFICIAL_MAPS.filter((m) => !disabled.has(m.mapId)).map((m) => m.mapId);
+  }
+
+  async isOfficialMapEnabled(mapId: string): Promise<boolean> {
+    return !(await this.officialConfig.getDisabled()).includes(mapId);
+  }
+
+  /** The map a new room starts on: the shipped default, or the first still-enabled map if a
+   *  maintainer switched the default off (a room can never be created onto a disabled map). */
+  async defaultOfficialMapId(): Promise<string> {
+    const enabled = await this.enabledOfficialMapIds();
+    const shipped = OFFICIAL_MAPS[0]?.mapId ?? '';
+    return enabled.includes(shipped) ? shipped : (enabled[0] ?? shipped);
+  }
+
+  /** Every shipped official map with its on/off state — the dashboard's editor list. */
+  async officialMapAvailability(): Promise<OfficialMapAvailability[]> {
+    const disabled = new Set(await this.officialConfig.getDisabled());
+    return OFFICIAL_MAPS.map((m) => ({
+      mapId: m.mapId,
+      nameZh: m.content.meta.nameZh,
+      nameEn: m.content.meta.nameEn,
+      enabled: !disabled.has(m.mapId),
+    }));
+  }
+
+  /** Replace the enabled set (the dashboard sends what should stay ON; the complement is what
+   *  gets stored). Rejects unknown ids and an empty set — with no official map left, every new
+   *  room and every practice game would be unstartable. */
+  async setOfficialMapAvailability(enabledMapIds: string[]): Promise<OfficialMapAvailability[]> {
+    const wanted = new Set(enabledMapIds);
+    for (const id of wanted) {
+      if (!officialMapById(id)) throw new BadRequestException(`unknown official map: ${id}`);
+    }
+    if (wanted.size === 0) {
+      throw new BadRequestException('at least one official map must stay enabled');
+    }
+    await this.officialConfig.setDisabled(
+      OFFICIAL_MAPS.filter((m) => !wanted.has(m.mapId)).map((m) => m.mapId),
+    );
+    return this.officialMapAvailability();
+  }
+
   /** Fork an official map into a new custom-map draft owned by `ownerId`. Copies cities/routes/
    *  tickets/rules straight through; geography is the map's own (world-cropped official maps) or
    *  its generated silhouette (Taiwan's `forkGeography`). Nothing is published to `mapContents` —
    *  that still happens only at game start. */
   async forkOfficial(mapId: string, ownerId: string): Promise<MapDetail> {
     const official = officialMapById(mapId);
-    if (!official) throw new NotFoundException('official map not found');
+    // A map a maintainer switched off is not on offer at all — same 404 as one that never
+    // existed, so the picker and this route agree on what "official map" means.
+    if (!official || !(await this.isOfficialMapEnabled(mapId))) {
+      throw new NotFoundException('official map not found');
+    }
     const { content, forkGeography } = official;
     const doc = await this.maps.create(
       randomUUID(),

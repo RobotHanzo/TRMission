@@ -3,7 +3,11 @@
 `src/lobby/` is the rooms lifecycle with **atomic seat CAS** (`room.repo.ts`).
 
 `RoomSettings.map` selects `{source:'official', mapId}` or `{source:'custom', customMapId}` (default:
-official Taiwan).
+official Taiwan — or the first map still on offer, since a maintainer can switch official maps off;
+`create` resolves that so a room is never born onto a map it could not start on, which is all that
+keeps `startPractice` alive when the default is off). Selecting an official map is checked on the
+settings PATCH **and** again at `start`: switched-off maps 400 on both, and a LOBBY room sitting on
+one also drops out of the public listing. Availability mechanics: `src/maps/CLAUDE.md`.
 
 `start` resolves the selector via `MapsService.resolveForStart` (validates a custom draft, hashes it,
 and publishes it to `mapContents` **before the game exists**), builds the `GameConfig` — including

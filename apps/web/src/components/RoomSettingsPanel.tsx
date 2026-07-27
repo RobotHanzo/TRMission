@@ -20,7 +20,6 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import { OFFICIAL_MAPS } from '@trm/map-data';
 import type { EventsMode } from '@trm/shared';
 import {
   HOUSE_RULES,
@@ -29,6 +28,7 @@ import {
   type RoomSettingsGroupId,
   type TranslateSetting,
 } from '@trm/client-core/game/roomSettingsMenu';
+import { firstOfficialMapId, officialMapOptions } from '@trm/client-core/game/officialMaps';
 import type { MapSummary, RoomSettings, RoomVisibility } from '../net/rest';
 import type { Locale } from '../store/ui';
 import { Switch } from './ui/Switch';
@@ -56,6 +56,8 @@ interface Props {
   seatedCount: number;
   /** The host's own custom maps (null while still loading). */
   myMaps: MapSummary[] | null;
+  /** Official maps currently on offer, from the server (null = not loaded; offer them all). */
+  officialMapIds: string[] | null;
   /** The selected map's display name, resolved against the active locale. */
   mapName: string;
   locale: Locale;
@@ -143,6 +145,7 @@ function GroupControls({
   canBuild,
   showSoloWait,
   myMaps,
+  officialMapIds,
   mapName,
   locale,
   locked,
@@ -156,6 +159,11 @@ function GroupControls({
   if (group === 'map') {
     // A member who can't edit reads the resolved name; the host gets source + list.
     if (locked) return <p className="rsm-readout">{mapName}</p>;
+    const officialMaps = officialMapOptions(
+      officialMapIds,
+      locale,
+      settings.map.source === 'official' ? settings.map.mapId : undefined,
+    );
     return (
       <div className="setting stack">
         <Segmented<'official' | 'custom'>
@@ -170,8 +178,8 @@ function GroupControls({
           value={settings.map.source}
           onChange={(src) => {
             if (src === 'official') {
-              const first = OFFICIAL_MAPS[0];
-              if (first) onChange({ map: { source: 'official', mapId: first.mapId } });
+              const first = firstOfficialMapId(officialMapIds);
+              if (first) onChange({ map: { source: 'official', mapId: first } });
             } else if (myMaps && myMaps.length > 0) {
               onChange({ map: { source: 'custom', customMapId: myMaps[0]!.id } });
             } else {
@@ -186,9 +194,9 @@ function GroupControls({
             value={settings.map.mapId}
             onChange={(e) => onChange({ map: { source: 'official', mapId: e.target.value } })}
           >
-            {OFFICIAL_MAPS.map((m) => (
+            {officialMaps.map((m) => (
               <option key={m.mapId} value={m.mapId}>
-                {locale === 'en' ? m.content.meta.nameEn : m.content.meta.nameZh}
+                {m.label}
               </option>
             ))}
           </select>

@@ -243,6 +243,10 @@ export const OfficialMapSummarySchema = z.object({
   routes: z.number(),
 });
 
+export const EnabledOfficialMapsSchema = z.object({
+  mapIds: z.array(z.string()),
+});
+
 export const SharedMapViewSchema = z.object({
   nameZh: z.string(),
   nameEn: z.string(),

@@ -19,11 +19,28 @@ never token claims.
 Share/clone go through an 8-char share code (`mintShareCode` / `peekByCode` / `cloneByCode`);
 peek/clone responses are shaped to never leak `ownerId` or another user's map list.
 
-## The one ungated route
+## Official-map availability (a third collection)
+
+- **`officialMapConfig`** — one singleton doc holding the **disabled** official `mapId`s, edited from
+  the dashboard's Features panel (`GET/PUT /dashboard/config/official-maps`, permission
+  `config.features`). Storing the negative is deliberate: a map added to `OFFICIAL_MAPS` in a later
+  release ships on offer instead of going missing from a saved allowlist. Read fresh on every use,
+  never cached; the set can never be emptied (`setOfficialMapAvailability` 400s).
+
+Switching a map off takes it out of `listOfficial()` (the fork picker), `forkOfficial` (404, same as
+a map that never existed), and the clients' room-settings picker — but the gate is the lobby: it
+re-checks on the settings PATCH **and** again at start (`src/lobby/CLAUDE.md`). Nothing retroactive:
+a running game and its replay resolve their board from the `contentHash` they were created with, so a
+switch-off never touches them.
+
+## The ungated routes
 
 `GET /content/:hash` lives on `MapsContentController` **OUTSIDE** the feature gate — a plain
 `AccessTokenGuard` route, so any authenticated viewer (guests included) may fetch content by its hash;
 **the hash itself is the unguessable capability**. Gating it would break live custom-map games and
 replays for other players.
+
+`GET /official/enabled` sits on the same controller for the same reason: every host picks a map from
+that list, and map authoring has nothing to do with it.
 
 Reporting a map by share code is likewise outside the gate — see `src/moderation/CLAUDE.md`.

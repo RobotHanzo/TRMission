@@ -31,6 +31,11 @@ Every mutation appends to `dashboardAudit` via `AuditService` — that repo expo
   closes. `loadForRecovery` refuses TERMINATED (reconnects can't resurrect) and `recordCompletion`
   CASes on LIVE (a racing bot game-over can't overwrite). Terminated games are never archived or
   replayable.
+- **Global config** (`config.features`, admin+): two singletons the admin app's Features panel edits —
+  `PUT /dashboard/config/features` (default feature flags) and `PUT /dashboard/config/official-maps`
+  (which shipped maps players may pick; at least one must stay on, and a switch-off never touches a
+  running game or its replay — `src/maps/CLAUDE.md`). Audited as `config.features` /
+  `config.officialMaps` with before/after.
 - **Lockout protections**: self-modification of your own maintainer record is always 403; the last
   owner can't be demoted/revoked (409); maintainers can't be banned until their access is revoked
   (`src/account/CLAUDE.md` — deletion returns 409 for the same reason).

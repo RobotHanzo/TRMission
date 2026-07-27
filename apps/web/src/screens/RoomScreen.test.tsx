@@ -45,6 +45,7 @@ vi.mock('../net/rest', () => {
       startRoom: vi.fn(),
       updateRoomSettings: vi.fn(),
       listMaps: vi.fn(() => Promise.resolve([])),
+      enabledOfficialMapIds: vi.fn(() => Promise.resolve({ mapIds: ['taiwan', 'taipei'] })),
       sendRoomChat: vi.fn(),
       watchRoom: vi.fn(),
       rejoinRoom: vi.fn(),
@@ -393,6 +394,21 @@ describe('RoomScreen map picker', () => {
       expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', {
         map: { source: 'custom', customMapId: 'm1' },
       }),
+    );
+  });
+
+  it('drops an official map the server has switched off from the host picker', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    (api.enabledOfficialMapIds as ReturnType<typeof vi.fn>).mockResolvedValue({
+      mapIds: ['taiwan'],
+    });
+    render(<RoomScreen />);
+    await openSettingsGroup(/^地圖/);
+    const select = await screen.findByRole('combobox', { name: '官方' });
+    await waitFor(() =>
+      expect([...select.querySelectorAll('option')].map((o) => o.getAttribute('value'))).toEqual([
+        'taiwan',
+      ]),
     );
   });
 

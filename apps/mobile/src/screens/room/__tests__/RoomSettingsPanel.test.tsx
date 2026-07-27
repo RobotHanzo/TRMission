@@ -38,6 +38,7 @@ const renderPanel = (over: Partial<React.ComponentProps<typeof RoomSettingsPanel
       showSoloWait={false}
       seatedCount={2}
       myMaps={null}
+      officialMapIds={null}
       mapName="台灣本島與離島"
       locale="zh-Hant"
       onChange={onChange}
@@ -111,5 +112,12 @@ describe('RoomSettingsPanel group pages', () => {
     renderPanel({ locked: true });
     fireEvent.press(screen.getByTestId('room-settings-nav-map'));
     expect(screen.getAllByText('台灣本島與離島').length).toBeGreaterThan(0);
+  });
+
+  it('leaves an official map the server switched off out of the host picker', () => {
+    renderPanel({ officialMapIds: ['taiwan'] });
+    fireEvent.press(screen.getByTestId('room-settings-nav-map'));
+    expect(screen.getAllByText('台灣本島與離島').length).toBeGreaterThan(0);
+    expect(screen.queryByText('大台北')).toBeNull();
   });
 });

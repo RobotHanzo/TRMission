@@ -156,6 +156,9 @@ export class LobbyService {
       if (!officialMapById(selector.mapId)) {
         throw new BadRequestException(`unknown official map: ${selector.mapId}`);
       }
+      if (!(await this.maps.isOfficialMapEnabled(selector.mapId))) {
+        throw new BadRequestException(`official map is unavailable: ${selector.mapId}`);
+      }
       return;
     }
     await this.assertCustomMapAllowed(selector, callerUserId);
@@ -171,6 +174,12 @@ export class LobbyService {
     if (selector.source === 'official') {
       const official = officialMapById(selector.mapId);
       if (!official) throw new BadRequestException(`unknown official map: ${selector.mapId}`);
+      // Re-checked at start, not just on the settings PATCH: a room can be sitting in LOBBY on a
+      // map a maintainer switched off in the meantime. Already-started games are untouched —
+      // they resolve their board from the contentHash they were created with.
+      if (!(await this.maps.isOfficialMapEnabled(selector.mapId))) {
+        throw new BadRequestException(`official map is unavailable: ${selector.mapId}`);
+      }
       return {
         board: buildBoard(official.content),
         contentHash: official.hash,
@@ -200,7 +209,14 @@ export class LobbyService {
       ready: false,
       ...(avatarUrl ? { avatarUrl } : {}),
     };
-    return toView(await this.rooms.create(host, maxPlayers));
+    // A maintainer can switch the shipped default map off; a room must never be born onto a map
+    // it cannot start on (practice games never touch the settings PATCH at all).
+    const mapId = await this.maps.defaultOfficialMapId();
+    const map: MapSelector | undefined =
+      DEFAULT_ROOM_SETTINGS.map.source === 'official' && DEFAULT_ROOM_SETTINGS.map.mapId === mapId
+        ? undefined
+        : { source: 'official', mapId };
+    return toView(await this.rooms.create(host, maxPlayers, map));
   }
 
   async get(code: string): Promise<RoomView> {
@@ -442,9 +458,9 @@ export class LobbyService {
   }
 
   /** Public rooms for the home screen (no auth required). Excludes rooms whose map or engine
-   *  version can no longer be resolved by this server — a LOBBY room whose selected map has
-   *  since disappeared (an official map removed from the registry, or the host's custom draft
-   *  deleted), or a STARTED room whose linked game was persisted under a no-longer-supported
+   *  version can no longer be resolved by this server — a LOBBY room whose selected map is no
+   *  longer on offer (an official map removed from the registry or switched off by a maintainer,
+   *  or the host's custom draft deleted), or a STARTED room whose linked game was persisted under a no-longer-supported
    *  engine major or an unresolvable content hash. Such a room can never be joined/spectated
    *  successfully, so it would only be a dead entry in the list. `findPublic` overfetches its
    *  candidate pool so trimming back to `PUBLIC_ROOMS_LIMIT` here still returns a full page
@@ -495,8 +511,9 @@ export class LobbyService {
     const unresolvedHashes = startedHashes.filter((hash) => !staticallyResolved.get(hash));
 
     // Independent lookups against different collections — run concurrently rather than
-    // paying two sequential round-trips on this hot, unauthenticated, frequently-polled endpoint.
-    const [existingCustomMaps, publishedContent] = await Promise.all([
+    // paying three sequential round-trips on this hot, unauthenticated, frequently-polled endpoint.
+    const [enabledOfficial, existingCustomMaps, publishedContent] = await Promise.all([
+      this.maps.enabledOfficialMapIds(),
       lobbyCustomIds.length > 0
         ? this.maps.existingCustomMapIds(lobbyCustomIds)
         : Promise.resolve(new Set<string>()),
@@ -509,7 +526,7 @@ export class LobbyService {
       if (r.status === 'LOBBY') {
         const selector = selectorOf(r);
         return selector.source === 'official'
-          ? officialMapById(selector.mapId) !== undefined
+          ? enabledOfficial.includes(selector.mapId)
           : existingCustomMaps.has(selector.customMapId);
       }
       const meta = r.game?.[0];

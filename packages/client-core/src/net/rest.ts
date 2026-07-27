@@ -330,6 +330,9 @@ function buildApi(
     // ── custom maps ─────────────────────────────────────────────────────────
     listMaps: () => req<MapSummary[]>('GET', '/maps'),
     listOfficialMaps: () => req<OfficialMapSummary[]>('GET', '/maps/official'),
+    // Which bundled official maps a room may currently be set to (maintainers can switch one
+    // off from the dashboard). Ungated — every host needs it, mapBuilder or not.
+    enabledOfficialMapIds: () => req<{ mapIds: string[] }>('GET', '/maps/official/enabled'),
     forkOfficialMap: (mapId: string) =>
       req<MapDetail>('POST', `/maps/fork/${encodeURIComponent(mapId)}`),
     createMap: (nameZh: string, nameEn: string) =>

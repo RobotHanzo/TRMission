@@ -244,7 +244,9 @@ export class RoomRepo implements OnModuleInit {
       .toArray();
   }
 
-  async create(host: RoomMember, maxPlayers: number): Promise<RoomDoc> {
+  /** `map` overrides the default selector — the caller passes one when the shipped default map
+   *  is not currently on offer (`LobbyService.create`). */
+  async create(host: RoomMember, maxPlayers: number, map?: MapSelector): Promise<RoomDoc> {
     const now = new Date();
     for (let i = 0; i < 8; i++) {
       const doc: RoomDoc = {
@@ -254,7 +256,7 @@ export class RoomRepo implements OnModuleInit {
         members: [{ ...host, seat: 0, ready: false }],
         maxPlayers,
         baseMaxPlayers: maxPlayers,
-        settings: { ...DEFAULT_ROOM_SETTINGS },
+        settings: { ...DEFAULT_ROOM_SETTINGS, ...(map ? { map } : {}) },
         createdAt: now,
         updatedAt: now,
       };

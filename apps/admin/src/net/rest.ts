@@ -42,6 +42,15 @@ export interface Overview {
   };
 }
 
+/** One map that ships with the game, and whether players may currently pick it. Names come from
+ *  the server so the dashboard bundle never pulls in the map content tables. */
+export interface OfficialMapRow {
+  mapId: string;
+  nameZh: string;
+  nameEn: string;
+  enabled: boolean;
+}
+
 export interface UserRow {
   id: string;
   displayName: string;
@@ -395,6 +404,9 @@ export const api = {
   getDefaultFeatures: () => req<{ features: UserFeature[] }>('GET', '/dashboard/config/features'),
   putDefaultFeatures: (features: UserFeature[]) =>
     req<{ features: UserFeature[] }>('PUT', '/dashboard/config/features', { features }),
+  getOfficialMaps: () => req<{ maps: OfficialMapRow[] }>('GET', '/dashboard/config/official-maps'),
+  putOfficialMaps: (enabledMapIds: string[]) =>
+    req<{ maps: OfficialMapRow[] }>('PUT', '/dashboard/config/official-maps', { enabledMapIds }),
 
   listGames: (opts: { status?: string; cursor?: string } = {}) =>
     req<GamesPage>('GET', `/dashboard/games${qs(opts)}`),

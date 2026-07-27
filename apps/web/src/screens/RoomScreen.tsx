@@ -72,6 +72,7 @@ export function RoomScreen() {
   const [kicked, setKicked] = useState(false);
   const [chatDraft, setChatDraft] = useState('');
   const [myMaps, setMyMaps] = useState<MapSummary[] | null>(null);
+  const [officialMapIds, setOfficialMapIds] = useState<string[] | null>(null);
   const pushNotification = useAnimationsStore((s) => s.pushNotification);
   const {
     open: leaveOpen,
@@ -103,6 +104,16 @@ export function RoomScreen() {
       .then(setMyMaps)
       .catch(() => setMyMaps([]));
   }, [user, canBuild]);
+
+  // Which official maps are on offer right now (a maintainer can switch one off). Null on
+  // failure keeps every bundled map listed — the server is the gate, not this list.
+  useEffect(() => {
+    if (!user) return;
+    api
+      .enabledOfficialMapIds()
+      .then(({ mapIds }) => setOfficialMapIds(mapIds))
+      .catch(() => setOfficialMapIds(null));
+  }, [user]);
 
   // Poll the room (lobby push is a later enhancement); auto-enter the game when started. The
   // join/kick/spectate/terminal semantics live in client-core's startLobbyPoll (shared with
@@ -368,6 +379,7 @@ export function RoomScreen() {
           showSoloWait={room.members.filter((m) => !m.isBot).length === 1}
           seatedCount={room.members.length}
           myMaps={myMaps}
+          officialMapIds={officialMapIds}
           mapName={mapDisplayName(settings.map, myMaps, room.mapName, locale)}
           locale={locale}
           onChange={setSetting}

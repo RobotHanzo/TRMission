@@ -33,7 +33,9 @@ true)` over Natural Earth admin-1 polygons — and every stop's coordinate is it
   resolves a persisted game's board through it), and an `OFFICIAL_MAPS` entry — the room settings
   selectors, the fork flow, and both clients' bundled content caches all iterate that list, so
   nothing else needs touching. Keep Taiwan at `OFFICIAL_MAPS[0]`: the dev seed, the health
-  endpoint, and the room-settings default all fall back to it.
+  endpoint, and the room-settings default all fall back to it. A new entry ships **on offer**:
+  which of these maps players may actually pick is a maintainer switch stored server-side
+  (`apps/server/src/maps/CLAUDE.md`), and it holds the disabled ids, never an allowlist.
 - `validate.ts` — `validate()` enforces the structural invariants the engine relies on: connected
   graph, no unreachable node, ferry/locomotive/length rules, ticket endpoints exist, no length-5/7
   routes. The test suite asserts them all. `validateGeography()` and
