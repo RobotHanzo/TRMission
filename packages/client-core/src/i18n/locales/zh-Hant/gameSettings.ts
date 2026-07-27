@@ -1,6 +1,20 @@
 // Room game-settings vocabulary (house rules, visibility, waiting states).
 export default {
   gameSettings: '遊戲設定',
+  // 設定看板（issue #64）：分組名稱、唯讀提示，以及索引列使用的規則簡稱——
+  // 讓多一層的分頁不會遮住「現在設定成什麼」這個答案。
+  houseRulesGroup: '行車規則',
+  houseRulesAllOff: '全部關閉',
+  roomAccessGroup: '房間開放',
+  spectatingOn: '開放觀戰',
+  spectatingOff: '不開放觀戰',
+  settingsHostOnly: '只有房主可以變更設定。',
+  settingsBack: '所有遊戲設定',
+  ruleShortStationBorrow: '車站借用',
+  ruleShortSecondDraw: '彩虹後再抽',
+  ruleShortNoPenalty: '未完成不扣分',
+  ruleShortSingleParallel: '平行單線',
+  ruleShortSoloWait: '等待房主',
   mapLabel: '地圖',
   mapOfficial: '官方',
   mapCustom: '自訂',

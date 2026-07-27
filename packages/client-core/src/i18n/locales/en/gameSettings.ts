@@ -3,6 +3,20 @@ import type zh from '../zh-Hant/gameSettings';
 
 export default {
   gameSettings: 'Game settings',
+  // The settings board (issue #64): group names, the read-only notice, and the short rule labels
+  // the index strings together so drilling into a group never hides what it is set to.
+  houseRulesGroup: 'House rules',
+  houseRulesAllOff: 'All off',
+  roomAccessGroup: 'Room access',
+  spectatingOn: 'Spectators welcome',
+  spectatingOff: 'No spectators',
+  settingsHostOnly: 'Only the host can change these.',
+  settingsBack: 'All game settings',
+  ruleShortStationBorrow: 'Station borrowing',
+  ruleShortSecondDraw: 'Second draw',
+  ruleShortNoPenalty: 'No ticket penalty',
+  ruleShortSingleParallel: 'Single parallel',
+  ruleShortSoloWait: 'Waits for you',
   mapLabel: 'Map',
   mapOfficial: 'Official',
   mapCustom: 'Custom',

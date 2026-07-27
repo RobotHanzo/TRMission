@@ -20,6 +20,170 @@
   opacity: 0.85;
 }
 
+/* ── The game-settings board (issue #64) ───────────────────────────────────────
+   A layered menu: an index of groups, each stating what it is currently set to on
+   a dotted timetable leader, over one page per group. Mirrors the mobile Settings
+   tab; the groups and their values come from @trm/client-core, shared with mobile. */
+.game-settings {
+  gap: var(--tr-space-3);
+}
+.rsm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--tr-space-2);
+}
+.rsm-head h3 {
+  margin: 0;
+}
+/* The board is posted, not owned: everyone in the room reads it, only the host writes it. */
+.rsm-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tr-space-1);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--tr-surface-2);
+  color: var(--tr-ink-soft);
+  font-size: 0.8em;
+}
+.rsm-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tr-space-1);
+  padding: 4px 8px 4px 4px;
+  border: none;
+  background: none;
+  color: var(--tr-accent);
+  font-weight: 600;
+}
+.rsm-back:hover {
+  background: var(--tr-surface-2);
+}
+
+.rsm-board {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rsm-board > li + li .rsm-row {
+  border-top: 1px solid var(--tr-line);
+}
+.rsm-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-3);
+  min-height: 52px;
+  padding: var(--tr-space-2) var(--tr-space-1);
+  border: none;
+  border-radius: 0;
+  background: none;
+  text-align: start;
+  color: var(--tr-ink);
+}
+.rsm-row:hover {
+  background: var(--tr-surface-2);
+}
+.rsm-badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--tr-radius-sm);
+  background: var(--tr-surface-2);
+  color: var(--tr-accent);
+}
+.rsm-name {
+  flex: none;
+  font-weight: 600;
+}
+/* The signature: a dotted rule running from the group's name out to its value, so the index
+   answers "what is this table set to?" and the extra layer hides nothing. */
+.rsm-leader {
+  flex: 1 1 var(--tr-space-6);
+  min-width: var(--tr-space-3);
+  height: 0;
+  border-bottom: 1px dotted var(--tr-line);
+}
+.rsm-value {
+  flex: 0 1 auto;
+  min-width: 0;
+  color: var(--tr-ink-soft);
+  font-size: 0.9em;
+  font-weight: 600;
+  text-align: end;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rsm-go {
+  flex: none;
+  color: var(--tr-ink-soft);
+  transition: translate 120ms ease;
+}
+.rsm-row:hover .rsm-go {
+  translate: 2px 0;
+}
+
+.rsm-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-4);
+  animation: rsm-enter 160ms ease-out;
+}
+.rsm-page-title {
+  margin: 0;
+}
+.rsm-controls {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+/* Hairline-divided rows, like the mobile settings pages — a group page is a list of decisions,
+   not a paragraph of them. */
+.rsm-controls > * + * {
+  margin-top: var(--tr-space-4);
+  padding-top: var(--tr-space-4);
+  border-top: 1px solid var(--tr-line);
+}
+.rsm-readout {
+  margin: 0;
+  font-weight: 600;
+}
+.warn,
+.rsm-warn {
+  color: var(--tr-ember);
+  font-size: 0.85em;
+}
+.rsm-warn {
+  margin: 0;
+  padding-inline-start: 42px; /* badge width + row gap, so it hangs under the group name */
+}
+.rsm-page > .rsm-warn {
+  padding-inline-start: 0;
+}
+
+@keyframes rsm-enter {
+  from {
+    opacity: 0;
+    translate: var(--tr-space-3) 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rsm-page {
+    animation: none;
+  }
+  .rsm-go {
+    transition: none;
+  }
+}
+
 /* The lobby has no action log, so the chat-panel fills the whole card instead of the
    in-game 45% split, and doesn't need the top border game.css gives it as a divider
    from the log panel above it. */

@@ -59,6 +59,17 @@ conditionally hidden (`AdPrivacyRow`, the `adFree` switch, `LiveActivityRow`) mu
 `../store/CLAUDE.md`; the ad rows: `../ads/CLAUDE.md`; the quiet-while-playing rule:
 `../push/CLAUDE.md`.
 
+## Lobby game settings (`room/RoomSettingsPanel.tsx`, issue #64)
+
+The room's settings are the same layered board, built from the **same `settings/chrome.tsx`
+primitives** — index rows stating each group's current value, one page per group. Which groups
+exist, their order, and how each value reads come from `@trm/client-core`'s `roomSettingsMenu`,
+shared with `apps/web`'s `components/RoomSettingsPanel.tsx`; only the rendering is per-platform.
+A group's page is a **Modal, not a pushed route**: `RoomScreen` owns the poll that keeps
+`settings` live, so the page has to render inside it. Everyone can open a group and read it —
+`locked` (non-host, or a started room) makes the controls read-only rather than hiding them, and
+the index says why.
+
 ## Ads
 
 `<AdBanner />` docks on the four **browse** screens only — Home (the welcome takeover is a separate

@@ -105,6 +105,12 @@ const baseRoom = () => ({
   chat: [] as { userId: string; presetId?: string; text?: string; ts: number }[],
 });
 
+/** The game settings are a layered board (issue #64): the index states each group's current value,
+ *  the controls live one press in. Every settings assertion opens its group first. */
+const openSettingsGroup = async (name: string | RegExp) => {
+  fireEvent.click(await screen.findByRole('button', { name }));
+};
+
 const mocked = api as unknown as {
   getRoom: ReturnType<typeof vi.fn>;
   getTicket: ReturnType<typeof vi.fn>;
@@ -232,12 +238,30 @@ describe('RoomScreen copy link', () => {
 });
 
 describe('RoomScreen game settings panel', () => {
+  it('states each group’s current value on the index, so nothing is hidden by the extra layer', async () => {
+    mocked.getRoom.mockResolvedValue(
+      room({
+        hostId: 'u-me',
+        members: [member('u-me')],
+        mapName: { zh: '台灣本島與離島', en: 'Taiwan & Outlying Islands' },
+      }),
+    );
+    render(<RoomScreen />);
+    // Rules: only doubleRouteSingleFor23 is on in the base room; solo-wait joins it because the
+    // host is the lone human. Access reads visibility + spectating together.
+    await screen.findByRole('button', { name: /行車規則.*平行單線 · 等待房主/ });
+    await screen.findByRole('button', { name: /地圖.*台灣本島與離島/ });
+    await screen.findByRole('button', { name: /組隊模式.*各自為戰/ });
+    await screen.findByRole('button', { name: /房間開放.*公開 · 開放觀戰/ });
+  });
+
   it('lets the host toggle a rule variant via updateRoomSettings', async () => {
     mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
     mocked.updateRoomSettings.mockResolvedValue(
       room({ hostId: 'u-me', members: [member('u-me')] }),
     );
     render(<RoomScreen />);
+    await openSettingsGroup(/行車規則/);
     const toggle = await screen.findByRole('switch', { name: '車站無限借用路線' });
     expect(toggle).not.toBeDisabled();
     fireEvent.click(toggle);
@@ -249,6 +273,8 @@ describe('RoomScreen game settings panel', () => {
   it('disables the settings controls for a non-host', async () => {
     mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
     render(<RoomScreen />);
+    await screen.findByText('只有房主可以變更設定。');
+    await openSettingsGroup(/行車規則/);
     const toggle = await screen.findByRole('switch', { name: '車站無限借用路線' });
     expect(toggle).toBeDisabled();
   });
@@ -259,6 +285,7 @@ describe('RoomScreen game settings panel', () => {
       room({ hostId: 'u-me', members: [member('u-me')] }),
     );
     render(<RoomScreen />);
+    await openSettingsGroup(/行車規則/);
     const toggle = await screen.findByRole('switch', { name: '2–3 人限用單線平行路線' });
     expect(toggle).toHaveAttribute('aria-checked', 'true'); // default is on
     fireEvent.click(toggle);
@@ -273,19 +300,29 @@ describe('RoomScreen game settings panel', () => {
       room({ hostId: 'u-me', members: [member('u-me')] }),
     );
     render(<RoomScreen />);
+    await openSettingsGroup(/房間開放/);
     const inviteOnly = await screen.findByRole('radio', { name: '僅限邀請' });
     fireEvent.click(inviteOnly);
     expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', { visibility: 'INVITE_ONLY' });
   });
+
+  it('returns to the index from a group page', async () => {
+    mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
+    render(<RoomScreen />);
+    await openSettingsGroup(/房間開放/);
+    expect(screen.queryByRole('button', { name: /行車規則/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '所有遊戲設定' }));
+    await screen.findByRole('button', { name: /行車規則/ });
+  });
 });
 
 describe('RoomScreen random-events picker', () => {
-  it('hides the intensity picker from a host without the randomEvents feature', async () => {
+  it('keeps the group off the board entirely for a host without the randomEvents feature', async () => {
     useSession.setState({ user: { ...ME, features: [] }, booting: false });
     mocked.getRoom.mockResolvedValue(room({ hostId: 'u-me', members: [member('u-me')] }));
     render(<RoomScreen />);
-    await screen.findByText('遊戲設定'); // settings fieldset is on screen
-    expect(screen.queryByRole('radio', { name: '強烈' })).toBeNull();
+    await screen.findByText('遊戲設定'); // the settings board is on screen
+    expect(screen.queryByRole('button', { name: /隨機事件/ })).toBeNull();
   });
 
   it('shows an editable picker for a host holding the randomEvents feature, patching eventsMode', async () => {
@@ -295,6 +332,7 @@ describe('RoomScreen random-events picker', () => {
       room({ hostId: 'u-me', members: [member('u-me')] }),
     );
     render(<RoomScreen />);
+    await openSettingsGroup(/隨機事件/);
     const intense = await screen.findByRole('radio', { name: '強烈' });
     expect(intense).not.toBeDisabled();
     fireEvent.click(intense);
@@ -309,15 +347,16 @@ describe('RoomScreen random-events picker', () => {
       }),
     );
     render(<RoomScreen />);
+    await openSettingsGroup(/隨機事件/);
     const intense = await screen.findByRole('radio', { name: '強烈' });
     expect(intense).toBeDisabled();
   });
 
-  it('hides the picker from a non-host while the room is still on the default off mode', async () => {
+  it('keeps the group off the board for a non-host while the room is still on the default off mode', async () => {
     mocked.getRoom.mockResolvedValue(room({ members: [member('host'), member('u-me')] }));
     render(<RoomScreen />);
     await screen.findByText('遊戲設定');
-    expect(screen.queryByRole('radio', { name: '強烈' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /隨機事件/ })).toBeNull();
   });
 });
 
@@ -347,6 +386,7 @@ describe('RoomScreen map picker', () => {
       { id: 'm1', nameZh: '我的地圖', nameEn: 'My Map', revision: 1, updatedAt: '2026-01-01' },
     ]);
     render(<RoomScreen />);
+    await openSettingsGroup(/^地圖/);
     const customBtn = await screen.findByRole('radio', { name: '自訂' });
     fireEvent.click(customBtn);
     await waitFor(() =>
@@ -366,6 +406,7 @@ describe('RoomScreen map picker', () => {
     );
     (api.listMaps as ReturnType<typeof vi.fn>).mockResolvedValue([]);
     render(<RoomScreen />);
+    await openSettingsGroup(/^地圖/);
     expect(await screen.findByRole('button', { name: /建立自訂地圖/ })).toBeInTheDocument();
     expect(mocked.updateRoomSettings).not.toHaveBeenCalled();
   });
@@ -836,6 +877,7 @@ describe('RoomScreen team selector', () => {
       }),
     );
     render(<RoomScreen />);
+    await openSettingsGroup(/組隊模式/);
     fireEvent.click(await screen.findByRole('radio', { name: '各自為戰' }));
     expect(mocked.updateRoomSettings).not.toHaveBeenCalled();
     expect(
@@ -847,6 +889,7 @@ describe('RoomScreen team selector', () => {
     mocked.getRoom.mockResolvedValue(teamRoom()); // 4 seated, base 5 — free-for-all (5) fits
     mocked.updateRoomSettings.mockResolvedValue(teamRoom());
     render(<RoomScreen />);
+    await openSettingsGroup(/組隊模式/);
     fireEvent.click(await screen.findByRole('radio', { name: '各自為戰' }));
     await waitFor(() =>
       expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', { teamCount: 0 }),

@@ -1,7 +1,7 @@
 // The lobby (full parity with the web RoomScreen): members with ready/host state, host bot +
-// kick/transfer controls, the game-settings card (map, rule toggles, events mode, spectating,
-// visibility), watch/rejoin, lobby chat, native share, and the shared join/kick/spectate poll
-// semantics (client-core startLobbyPoll — the exact machine the web runs).
+// kick/transfer controls, the layered game-settings board (room/RoomSettingsPanel.tsx),
+// watch/rejoin, lobby chat, native share, and the shared join/kick/spectate poll semantics
+// (client-core startLobbyPoll — the exact machine the web runs).
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,21 +12,13 @@ import {
   ScrollView,
   Share,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { Bot, Crown, UserMinus, X } from 'lucide-react-native';
 import { OFFICIAL_MAPS } from '@trm/map-data';
-import {
-  effectiveMaxPlayers,
-  layoutsForPlayerCount,
-  seatOrderMovingToTeam,
-  shuffleSeatOrder,
-  TEAM_LAYOUTS,
-  type EventsMode,
-} from '@trm/shared';
+import { effectiveMaxPlayers, seatOrderMovingToTeam, shuffleSeatOrder } from '@trm/shared';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
 import { canStartRoom, isSoloHumanRoom } from '@trm/client-core/game/roomReady';
 import { CHAT_PRESET_IDS, chatPresetKey } from '@trm/client-core/game/chatPresets';
@@ -38,7 +30,6 @@ import {
   type RoomMember,
   type RoomSettings,
   type RoomView,
-  type RoomVisibility,
 } from '../net/rest';
 import { SERVER_ORIGIN } from '../config';
 import { useHasFeature, useSession } from '../store/session';
@@ -57,72 +48,11 @@ import {
   SectionLabel,
 } from '../theme/chrome';
 import { TeamSelector } from '../components/TeamSelector';
+import { RoomSettingsPanel } from './room/RoomSettingsPanel';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Room'>;
 
 const DIFFICULTIES: readonly BotDifficulty[] = ['EASY', 'MEDIUM', 'HARD', 'HELL'];
-
-/** A row of exclusive chips (the RN stand-in for the web Segmented control). */
-function Chips<T extends string>({
-  options,
-  value,
-  onChange,
-  disabled,
-}: {
-  options: readonly { value: T; label: string }[];
-  value: T;
-  onChange(v: T): void;
-  disabled?: boolean;
-}) {
-  const { tokens } = useTheme();
-  return (
-    <View style={styles.chips}>
-      {options.map((o) => {
-        const on = o.value === value;
-        return (
-          <Pressable
-            key={o.value}
-            accessibilityRole="button"
-            accessibilityState={{ selected: on, disabled: disabled === true }}
-            disabled={disabled}
-            onPress={() => onChange(o.value)}
-            style={[
-              styles.chip,
-              { borderColor: on ? tokens.blue : tokens.line },
-              on && { backgroundColor: `${tokens.blue}22` },
-            ]}
-          >
-            <Text style={[styles.chipText, { color: on ? tokens.blue : tokens.ink }]}>
-              {o.label}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-/** One labelled settings row with a description and a trailing control. */
-function SettingRow({
-  label,
-  desc,
-  control,
-}: {
-  label: string;
-  desc?: string | undefined;
-  control: React.ReactNode;
-}) {
-  const { tokens } = useTheme();
-  return (
-    <View style={styles.settingRow}>
-      <View style={styles.settingLabels}>
-        <Text style={[styles.settingLabel, { color: tokens.ink }]}>{label}</Text>
-        {desc ? <MutedText>{desc}</MutedText> : null}
-      </View>
-      {control}
-    </View>
-  );
-}
 
 export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
   const { t } = useTranslation();
@@ -204,9 +134,6 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
   const settingsLocked = !isHost || room.status !== 'LOBBY';
   const showEventsPicker = isHost ? canConfigureEvents : settings.eventsMode !== 'off';
   const teamCount = settings.teamCount ?? 0;
-  const teamLayoutOk =
-    teamCount === 0 ||
-    layoutsForPlayerCount(room.members.length).some((l) => l.teamCount === teamCount);
   const otherHumans = room.members.filter((m) => m.userId !== user?.id && !m.isBot);
 
   const memberName = (m: RoomMember): string =>
@@ -468,180 +395,20 @@ export function RoomScreen({ route, navigation }: Props): React.JSX.Element {
         </>
       )}
 
-      {/* ── game settings (host edits in lobby; everyone else reads) ── */}
-      <SectionLabel>{t('room.gameSettings')}</SectionLabel>
-      <Card>
-        <SettingRow
-          label={t('room.mapLabel')}
-          control={
-            settingsLocked ? (
-              <Text style={{ color: tokens.ink }}>{mapName}</Text>
-            ) : (
-              <View style={styles.mapPicker}>
-                {canBuild && (
-                  <Chips<'official' | 'custom'>
-                    options={[
-                      { value: 'official', label: t('room.mapOfficial') },
-                      { value: 'custom', label: t('room.mapCustom') },
-                    ]}
-                    value={settings.map.source}
-                    onChange={(src) => {
-                      if (src === 'official') {
-                        const first = OFFICIAL_MAPS[0];
-                        if (first) setSetting({ map: { source: 'official', mapId: first.mapId } });
-                      } else if (myMaps && myMaps.length > 0) {
-                        setSetting({ map: { source: 'custom', customMapId: myMaps[0]!.id } });
-                      }
-                    }}
-                  />
-                )}
-                {mapSel.source === 'official' ? (
-                  <Chips
-                    options={OFFICIAL_MAPS.map((m) => ({
-                      value: m.mapId,
-                      label: locale === 'en' ? m.content.meta.nameEn : m.content.meta.nameZh,
-                    }))}
-                    value={mapSel.mapId}
-                    onChange={(mapId) => setSetting({ map: { source: 'official', mapId } })}
-                  />
-                ) : (
-                  <Chips
-                    options={(myMaps ?? []).map((m) => ({
-                      value: m.id,
-                      label: locale === 'en' ? m.nameEn : m.nameZh,
-                    }))}
-                    value={mapSel.customMapId}
-                    onChange={(customMapId) =>
-                      setSetting({ map: { source: 'custom', customMapId } })
-                    }
-                  />
-                )}
-              </View>
-            )
-          }
-        />
-        {(
-          [
-            ['unlimitedStationBorrow', 'settingUnlimitedStationBorrow'],
-            ['secondDrawAfterBlindRainbow', 'settingSecondDrawAfterRainbow'],
-            ['noUnfinishedTicketPenalty', 'settingNoUnfinishedPenalty'],
-            ['doubleRouteSingleFor23', 'settingDoubleRouteSingleFor23'],
-          ] as const
-        ).map(([key, label]) => (
-          <SettingRow
-            key={key}
-            label={t(`room.${label}`)}
-            desc={t(`room.${label}Desc`)}
-            control={
-              <Switch
-                value={settings[key]}
-                disabled={settingsLocked}
-                onValueChange={(next) => setSetting({ [key]: next } as Partial<RoomSettings>)}
-              />
-            }
-          />
-        ))}
-        {showEventsPicker && (
-          <SettingRow
-            label={t('room.settingRandomEvents')}
-            desc={t('room.settingRandomEventsDesc')}
-            control={
-              <Chips<EventsMode>
-                options={(['off', 'light', 'moderate', 'intense'] as const).map((v) => ({
-                  value: v,
-                  label: t(`room.eventsMode_${v}`),
-                }))}
-                value={settings.eventsMode}
-                onChange={(v) => setSetting({ eventsMode: v })}
-                disabled={settingsLocked}
-              />
-            }
-          />
-        )}
-        <SettingRow
-          label={t('room.settingTeamMode')}
-          desc={
-            teamCount > 0 && !teamLayoutOk
-              ? t('room.teamNeedsPlayers', {
-                  teams: teamCount,
-                  players: TEAM_LAYOUTS.filter((l) => l.teamCount === teamCount)
-                    .map((l) => l.playerCount)
-                    .join(' / '),
-                  seated: room.members.length,
-                })
-              : t('room.settingTeamModeDesc')
-          }
-          control={
-            <Chips<'0' | '2' | '3'>
-              options={[
-                { value: '0', label: t('room.teamModeOff') },
-                { value: '2', label: t('room.teamMode2Teams') },
-                { value: '3', label: t('room.teamMode3Teams') },
-              ]}
-              value={String(teamCount) as '0' | '2' | '3'}
-              onChange={(v) => changeTeamCount(Number(v))}
-              disabled={settingsLocked}
-            />
-          }
-        />
-        {teamCount > 0 && (
-          <SettingRow
-            label={t('room.settingTeamAssignMode')}
-            desc={t('room.settingTeamAssignModeDesc')}
-            control={
-              <Chips<'random' | 'host' | 'self'>
-                options={[
-                  { value: 'random', label: t('room.teamAssignModeRandom') },
-                  { value: 'host', label: t('room.teamAssignModeHost') },
-                  { value: 'self', label: t('room.teamAssignModeSelf') },
-                ]}
-                value={settings.teamAssignMode}
-                onChange={(v) => setSetting({ teamAssignMode: v })}
-                disabled={settingsLocked}
-              />
-            }
-          />
-        )}
-        {room.members.filter((m) => !m.isBot).length === 1 && (
-          // Only meaningful (and only shown) while the host is the lone human at the table:
-          // the started game then waits for them instead of running the per-turn timer.
-          <SettingRow
-            label={t('room.settingSoloWaitForHost')}
-            desc={t('room.settingSoloWaitForHostDesc')}
-            control={
-              <Switch
-                value={settings.soloWaitForHost}
-                disabled={settingsLocked}
-                onValueChange={(next) => setSetting({ soloWaitForHost: next })}
-              />
-            }
-          />
-        )}
-        <SettingRow
-          label={t('room.allowSpectating')}
-          control={
-            <Switch
-              value={settings.allowSpectating}
-              disabled={settingsLocked}
-              onValueChange={(next) => setSetting({ allowSpectating: next })}
-            />
-          }
-        />
-        <SettingRow
-          label={t('room.roomVisibility')}
-          control={
-            <Chips<RoomVisibility>
-              options={[
-                { value: 'PUBLIC', label: t('room.visibility_PUBLIC') },
-                { value: 'INVITE_ONLY', label: t('room.visibility_INVITE_ONLY') },
-              ]}
-              value={settings.visibility}
-              onChange={(v) => setSetting({ visibility: v })}
-              disabled={settingsLocked}
-            />
-          }
-        />
-      </Card>
+      {/* ── game settings: a layered board (index + one page per group), issue #64 ── */}
+      <RoomSettingsPanel
+        settings={settings}
+        locked={settingsLocked}
+        canBuild={canBuild}
+        showEvents={showEventsPicker}
+        showSoloWait={room.members.filter((m) => !m.isBot).length === 1}
+        seatedCount={room.members.length}
+        myMaps={myMaps}
+        mapName={mapName}
+        locale={locale}
+        onChange={setSetting}
+        onChangeTeamCount={changeTeamCount}
+      />
 
       {/* ── lobby chat ── */}
       <SectionLabel>{t('chat.heading')}</SectionLabel>
@@ -796,10 +563,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipText: { fontSize: 13, fontWeight: '600' },
-  settingRow: { gap: 6, paddingVertical: 8 },
-  settingLabels: { gap: 2 },
-  settingLabel: { fontSize: 14, fontWeight: '700' },
-  mapPicker: { gap: 6 },
   chatMsg: { fontSize: 13, marginBottom: 2 },
   presetScroll: { flexGrow: 0, marginTop: 6 },
   chatInputRow: { flexDirection: 'row', gap: 8, alignItems: 'center', marginTop: 8 },

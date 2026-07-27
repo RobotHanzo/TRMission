@@ -148,6 +148,7 @@ export function ChoiceRow<T extends string>({
   onChange,
   testIDPrefix,
   first = false,
+  disabled = false,
 }: {
   label: string;
   icon?: RowIcon;
@@ -157,6 +158,9 @@ export function ChoiceRow<T extends string>({
   onChange(v: T): void;
   testIDPrefix?: string;
   first?: boolean;
+  /** Read-only: the choice still reads (and still says which option is on), it just can't move —
+   *  the lobby's settings look like this to everyone but the host. */
+  disabled?: boolean;
 }) {
   const { tokens } = useTheme();
   return (
@@ -178,7 +182,7 @@ export function ChoiceRow<T extends string>({
         </View>
       </View>
       {/* Hang the chips off the label, not the card edge, so the icon gutter stays a clean column. */}
-      <View style={[styles.chips, Icon != null && styles.chipsIndented]}>
+      <View style={[styles.chips, Icon != null && styles.chipsIndented, disabled && styles.dimmed]}>
         {options.map((o) => {
           const on = o.value === value;
           return (
@@ -186,7 +190,8 @@ export function ChoiceRow<T extends string>({
               key={o.value}
               testID={testIDPrefix ? `${testIDPrefix}-${o.value}` : undefined}
               accessibilityRole="button"
-              accessibilityState={{ selected: on }}
+              accessibilityState={{ selected: on, disabled }}
+              disabled={disabled}
               onPress={() => onChange(o.value)}
               style={[
                 styles.chip,

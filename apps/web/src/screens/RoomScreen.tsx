@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Crown, Globe, Lock, Map as MapIcon, UserMinus, X } from 'lucide-react';
+import { Bot, Crown, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
-import {
-  effectiveMaxPlayers,
-  layoutsForPlayerCount,
-  seatOrderMovingToTeam,
-  shuffleSeatOrder,
-  TEAM_LAYOUTS,
-  type EventsMode,
-} from '@trm/shared';
+import { effectiveMaxPlayers, seatOrderMovingToTeam, shuffleSeatOrder } from '@trm/shared';
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
@@ -19,7 +12,6 @@ import {
   type RoomView,
   type RoomMember,
   type RoomSettings,
-  type RoomVisibility,
   type MapSelector,
   type MapSummary,
   type BotDifficulty,
@@ -34,9 +26,8 @@ import { NotificationStack } from '../components/NotificationStack';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { OwnerLeaveDialog } from '../components/OwnerLeaveDialog';
 import { useConfirmAction } from '../hooks/useConfirmAction';
-import { Switch } from '../components/ui/Switch';
-import { Segmented } from '../components/ui/Segmented';
 import { TeamSelector } from '../components/TeamSelector';
+import { RoomSettingsPanel } from '../components/RoomSettingsPanel';
 import { AdSlot } from '../components/AdSlot';
 import type { Locale } from '../store/ui';
 import { chatPresetKey } from '@trm/client-core';
@@ -187,10 +178,6 @@ export function RoomScreen() {
   // (read-only) whatever mode the host already configured, so it's never a mystery mid-game.
   const showEventsPicker = isHost ? canConfigureEvents : settings.eventsMode !== 'off';
   const teamCount = settings.teamCount ?? 0;
-  // Whether the current head-count can actually form this many teams (4p→2, 6p→2 or 3).
-  const teamLayoutOk =
-    teamCount === 0 ||
-    layoutsForPlayerCount(room.members.length).some((l) => l.teamCount === teamCount);
   const setSetting = (patch: Partial<RoomSettings>) => {
     track('room_settings_change', { setting: Object.keys(patch)[0] ?? 'unknown' });
     void guard(api.updateRoomSettings(code, patch));
@@ -206,24 +193,6 @@ export function RoomScreen() {
     }
     setSetting({ teamCount: next });
   };
-  const RULE_TOGGLES = [
-    [
-      'unlimitedStationBorrow',
-      'settingUnlimitedStationBorrow',
-      'settingUnlimitedStationBorrowDesc',
-    ],
-    [
-      'secondDrawAfterBlindRainbow',
-      'settingSecondDrawAfterRainbow',
-      'settingSecondDrawAfterRainbowDesc',
-    ],
-    ['noUnfinishedTicketPenalty', 'settingNoUnfinishedPenalty', 'settingNoUnfinishedPenaltyDesc'],
-    [
-      'doubleRouteSingleFor23',
-      'settingDoubleRouteSingleFor23',
-      'settingDoubleRouteSingleFor23Desc',
-    ],
-  ] as const;
 
   const toggleReady = () => void guard(api.setReady(code, !me?.ready));
   const addBot = (d: BotDifficulty) => {
@@ -391,197 +360,20 @@ export function RoomScreen() {
           </>
         )}
 
-        <fieldset className="card stack game-settings" disabled={settingsLocked}>
-          <legend>{t('gameSettings')}</legend>
-          <div className="row between setting-row">
-            <strong>{t('mapLabel')}</strong>
-            {isHost ? (
-              <div className="row">
-                <Segmented<'official' | 'custom'>
-                  options={
-                    canBuild
-                      ? [
-                          { value: 'official', label: t('mapOfficial') },
-                          { value: 'custom', label: t('mapCustom') },
-                        ]
-                      : [{ value: 'official', label: t('mapOfficial') }]
-                  }
-                  value={settings.map.source}
-                  onChange={(src) => {
-                    if (src === 'official') {
-                      const first = OFFICIAL_MAPS[0];
-                      if (first) setSetting({ map: { source: 'official', mapId: first.mapId } });
-                    } else if (myMaps && myMaps.length > 0) {
-                      setSetting({ map: { source: 'custom', customMapId: myMaps[0]!.id } });
-                    } else {
-                      enterMaps();
-                    }
-                  }}
-                  ariaLabel={t('mapLabel')}
-                />
-                {settings.map.source === 'official' ? (
-                  <select
-                    aria-label={t('mapOfficial')}
-                    value={settings.map.mapId}
-                    onChange={(e) =>
-                      setSetting({ map: { source: 'official', mapId: e.target.value } })
-                    }
-                  >
-                    {OFFICIAL_MAPS.map((m) => (
-                      <option key={m.mapId} value={m.mapId}>
-                        {locale === 'en' ? m.content.meta.nameEn : m.content.meta.nameZh}
-                      </option>
-                    ))}
-                  </select>
-                ) : myMaps && myMaps.length > 0 ? (
-                  <select
-                    aria-label={t('mapCustom')}
-                    value={settings.map.customMapId}
-                    onChange={(e) =>
-                      setSetting({ map: { source: 'custom', customMapId: e.target.value } })
-                    }
-                  >
-                    {myMaps.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {locale === 'en' ? m.nameEn : m.nameZh}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <button onClick={enterMaps}>
-                    <MapIcon size={14} aria-hidden /> {t('mapCreateOne')}
-                  </button>
-                )}
-              </div>
-            ) : (
-              <span>{mapDisplayName(settings.map, myMaps, room.mapName, locale)}</span>
-            )}
-          </div>
-          {RULE_TOGGLES.map(([key, label, desc]) => (
-            <div key={key} className="row between setting-row">
-              <span>
-                <strong>{t(label)}</strong>
-                <br />
-                <span className="muted">{t(desc)}</span>
-              </span>
-              <Switch
-                checked={settings[key]}
-                onChange={(next) => setSetting({ [key]: next } as Partial<RoomSettings>)}
-                label={t(label)}
-              />
-            </div>
-          ))}
-          {showEventsPicker && (
-            <div className="row between setting-row">
-              <span>
-                <strong>{t('settingRandomEvents')}</strong>
-                <br />
-                <span className="muted">{t('settingRandomEventsDesc')}</span>
-              </span>
-              <Segmented<EventsMode>
-                options={[
-                  { value: 'off', label: t('eventsMode_off') },
-                  { value: 'light', label: t('eventsMode_light') },
-                  { value: 'moderate', label: t('eventsMode_moderate') },
-                  { value: 'intense', label: t('eventsMode_intense') },
-                ]}
-                value={settings.eventsMode}
-                onChange={(v) => setSetting({ eventsMode: v })}
-                ariaLabel={t('settingRandomEvents')}
-              />
-            </div>
-          )}
-          <div className="row between setting-row">
-            <span>
-              <strong>{t('settingTeamMode')}</strong>
-              <br />
-              <span className="muted">{t('settingTeamModeDesc')}</span>
-              {teamCount > 0 && !teamLayoutOk && (
-                // The server re-checks this at start; surfacing it here stops the host from
-                // discovering an impossible line-up only when they press Start.
-                <>
-                  <br />
-                  <span className="warn">
-                    {t('teamNeedsPlayers', {
-                      teams: teamCount,
-                      players: TEAM_LAYOUTS.filter((l) => l.teamCount === teamCount)
-                        .map((l) => l.playerCount)
-                        .join(' / '),
-                      seated: room.members.length,
-                    })}
-                  </span>
-                </>
-              )}
-            </span>
-            <Segmented<'0' | '2' | '3'>
-              options={[
-                { value: '0', label: t('teamModeOff') },
-                { value: '2', label: t('teamMode2Teams') },
-                { value: '3', label: t('teamMode3Teams') },
-              ]}
-              value={String(teamCount) as '0' | '2' | '3'}
-              onChange={(v) => changeTeamCount(Number(v))}
-              ariaLabel={t('settingTeamMode')}
-            />
-          </div>
-          {teamCount > 0 && (
-            <div className="row between setting-row">
-              <span>
-                <strong>{t('settingTeamAssignMode')}</strong>
-                <br />
-                <span className="muted">{t('settingTeamAssignModeDesc')}</span>
-              </span>
-              <Segmented<'random' | 'host' | 'self'>
-                options={[
-                  { value: 'random', label: t('teamAssignModeRandom') },
-                  { value: 'host', label: t('teamAssignModeHost') },
-                  { value: 'self', label: t('teamAssignModeSelf') },
-                ]}
-                value={settings.teamAssignMode}
-                onChange={(v) => setSetting({ teamAssignMode: v })}
-                ariaLabel={t('settingTeamAssignMode')}
-              />
-            </div>
-          )}
-          {room.members.filter((m) => !m.isBot).length === 1 && (
-            // Only meaningful (and only shown) while the host is the lone human at the table:
-            // the started game then waits for them instead of running the per-turn timer.
-            <div className="row between setting-row">
-              <span>
-                <strong>{t('settingSoloWaitForHost')}</strong>
-                <br />
-                <span className="muted">{t('settingSoloWaitForHostDesc')}</span>
-              </span>
-              <Switch
-                checked={settings.soloWaitForHost}
-                onChange={(next) => setSetting({ soloWaitForHost: next })}
-                label={t('settingSoloWaitForHost')}
-              />
-            </div>
-          )}
-          <div className="row between setting-row">
-            <span>
-              <strong>{t('allowSpectating')}</strong>
-            </span>
-            <Switch
-              checked={settings.allowSpectating}
-              onChange={(next) => setSetting({ allowSpectating: next })}
-              label={t('allowSpectating')}
-            />
-          </div>
-          <div className="row between setting-row">
-            <strong>{t('roomVisibility')}</strong>
-            <Segmented<RoomVisibility>
-              options={[
-                { value: 'PUBLIC', label: t('visibility_PUBLIC'), icon: Globe },
-                { value: 'INVITE_ONLY', label: t('visibility_INVITE_ONLY'), icon: Lock },
-              ]}
-              value={settings.visibility}
-              onChange={(v) => setSetting({ visibility: v })}
-              ariaLabel={t('roomVisibility')}
-            />
-          </div>
-        </fieldset>
+        <RoomSettingsPanel
+          settings={settings}
+          locked={settingsLocked}
+          canBuild={canBuild}
+          showEvents={showEventsPicker}
+          showSoloWait={room.members.filter((m) => !m.isBot).length === 1}
+          seatedCount={room.members.length}
+          myMaps={myMaps}
+          mapName={mapDisplayName(settings.map, myMaps, room.mapName, locale)}
+          locale={locale}
+          onChange={setSetting}
+          onChangeTeamCount={changeTeamCount}
+          onCreateMap={enterMaps}
+        />
 
         {canAddBot && (
           <div className="row bot-controls">
