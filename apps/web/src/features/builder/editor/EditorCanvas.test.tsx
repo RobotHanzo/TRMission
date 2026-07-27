@@ -153,3 +153,27 @@ describe('EditorCanvas selection frame', () => {
     expect(container.querySelectorAll('.editor-city--selected')).toHaveLength(2);
   });
 });
+
+describe('EditorCanvas label level-of-detail', () => {
+  it('carries each station’s authored tier onto the map, so the zoom-driven label thinning in game.css sees the same tiers the game will', () => {
+    useEditorStore.setState({
+      draft: {
+        cities: [
+          { ...cities[0]!, tier: 'major' },
+          { ...cities[1]! }, // no tier authored ⇒ minor, exactly as published content reads it
+        ],
+        routes: [],
+        tickets: [],
+      },
+    });
+
+    const { container } = render(<EditorCanvas />);
+
+    expect(container.querySelector('[data-city-id="c1"]')?.getAttribute('class')).toContain(
+      'major',
+    );
+    expect(container.querySelector('[data-city-id="c2"]')?.getAttribute('class')).not.toContain(
+      'major',
+    );
+  });
+});

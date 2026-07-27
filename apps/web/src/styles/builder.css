@@ -207,6 +207,14 @@
   position: relative;
   width: 100%;
   height: 100%;
+  /* Home defaults for the zoom-driven counter-scaling, exactly as .board-viewport carries them:
+     ZoomVar overwrites both on every transform, but until its first callback lands — and forever
+     on a canvas that never moves — an undefined --inv-scale makes every `calc(… * var(…))` in
+     game.css invalid at computed-value time. Labels then fall back to the INHERITED 16px, which
+     in a ~100-unit viewBox is a sixth of the map, and `r`/`width` fall back to 0, so the markers
+     vanish. These keep an un-tracked canvas rendering at the live board's home weights instead. */
+  --inv-scale: 0.53;
+  --marker-scale: 0.72;
 }
 .editor-inspector {
   width: 21em;
@@ -289,6 +297,13 @@
   stroke: var(--tr-ember);
   stroke-width: calc(0.6px * var(--marker-scale, 1));
   fill: color-mix(in srgb, var(--tr-ember) 25%, var(--tr-surface));
+}
+/* The canvas thins labels out by tier exactly as the game does (game.css's [data-zoom] rules), so
+   an author sees the density players will get — but never at the cost of hiding the name of the
+   station they are working on. Outranks the LOD rules on class count alone, no !important. */
+[data-zoom] .board.editor-canvas .city.editor-city--selected .city-label,
+[data-zoom] .board.editor-canvas .city.editor-city--highlighted .city-label {
+  display: block;
 }
 
 /* The multi-selection's survey plot: a dashed boundary around every selected station plus a

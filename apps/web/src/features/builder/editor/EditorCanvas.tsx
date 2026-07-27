@@ -123,6 +123,14 @@ export function EditorCanvas({
     [cities, routesForGeometry],
   );
 
+  // The tier the Stops inspector authors is what gates a label's level of detail in-game, so the
+  // canvas feeds it back the same way the live board does — an unset tier is 'minor', exactly as
+  // the published content will read it.
+  const tiers = useMemo(
+    () => new Map(draft.cities.map((c) => [c.id, c.tier ?? 'minor'])),
+    [draft.cities],
+  );
+
   const onCityPointerDown = (id: string, e: React.PointerEvent) => {
     if (!cityDrag || !svgRef.current) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
@@ -241,6 +249,7 @@ export function EditorCanvas({
             alwaysHitRoutes
             cityHitArea="group"
             cityLabel={(c) => c.nameZh}
+            cityTier={(id) => tiers.get(id) ?? 'minor'}
             routeClass={(r) =>
               'editor-route' +
               (selection?.kind === 'route' && selection.id === r.id

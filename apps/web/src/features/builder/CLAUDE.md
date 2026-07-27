@@ -18,6 +18,15 @@ zustand store (`editor/store.ts`) with undo and debounced autosave; a single SVG
 (`editor/EditorCanvas.tsx`, react-zoom-pan-pinch + the existing `boardView.ts` pixel→board
 projection) shared across stages, rendering through the shared `components/MapScene.tsx`.
 
+**Every canvas must publish the live zoom** (`editor/ZoomVar.tsx`, the builder's ZoomTracker):
+`--inv-scale`/`--marker-scale` counter-scale labels and grow markers, and `data-zoom` drives
+game.css's label level-of-detail — which needs the authored tier, so `EditorCanvas` feeds
+`cityTier` from the draft (unset ⇒ `minor`, as published content reads it) and only the
+selected/highlighted station keeps its name through the thinning. `.editor-canvas-inner` carries
+home defaults for both vars like `.board-viewport` does: undefined, every `calc(… * var(…))` in
+game.css is invalid at computed-value time, so labels fall back to the inherited 16px **in board
+units** and markers to `r: 0`.
+
 **Stops holds a selection of any size.** The store's `selection` stays the one-station case (the
 inspector, the ember ring, every other stage); a group of two or more lives in `StopsStage` and
 leaves the store selection null. Shift/ctrl-click, the multi-select switch (the touch path — the

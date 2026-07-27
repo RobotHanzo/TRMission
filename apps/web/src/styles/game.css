@@ -716,21 +716,22 @@
      far      → major + island
      regional → + secondary
      district → + tertiary   (the home view)
-     local    → + minor (everything) */
-.board-viewport[data-zoom='far'] .city:not(.major):not(.island) .city-label {
+     local    → + minor (everything)
+   Keyed off `data-zoom` alone rather than `.board-viewport`, so every surface that publishes the
+   live zoom bucket (the live board's ZoomTracker, the builder's ZoomVar) thins out identically —
+   an authored map's label density previews exactly as it will play. */
+[data-zoom='far'] .city:not(.major):not(.island) .city-label {
   display: none;
 }
-.board-viewport[data-zoom='regional'] .city:not(.major):not(.secondary):not(.island) .city-label {
+[data-zoom='regional'] .city:not(.major):not(.secondary):not(.island) .city-label {
   display: none;
 }
-.board-viewport[data-zoom='district']
-  .city:not(.major):not(.secondary):not(.tertiary):not(.island)
-  .city-label {
+[data-zoom='district'] .city:not(.major):not(.secondary):not(.tertiary):not(.island) .city-label {
   display: none;
 }
 /* Colour-blind glyph chips are dense, so keep them out of the two most zoomed-out tiers. */
-.board-viewport[data-zoom='far'] .glyph-badge,
-.board-viewport[data-zoom='regional'] .glyph-badge {
+[data-zoom='far'] .glyph-badge,
+[data-zoom='regional'] .glyph-badge {
   display: none;
 }
 
