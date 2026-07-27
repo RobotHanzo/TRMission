@@ -4,7 +4,7 @@
 // nothing but props, so none of them can drift from the in-game map. Purely presentational:
 // no stores, no i18n, no content singletons — everything arrives by props. The server's OG
 // map card mirrors this scene in string SVG from the same @trm/map-data geometry + tokens.
-import type { CSSProperties, MouseEvent, ReactNode, Ref } from 'react';
+import type { CSSProperties, MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
 import type { MapGeography, RouteGeometry } from '@trm/map-data';
 import { mapCssVars } from '@trm/map-data';
 import type { View } from '../game/geography';
@@ -116,7 +116,11 @@ export interface MapSceneProps<C extends SceneCity, R extends SceneRoute> {
 
   /* ── interaction ── */
   onRouteClick?: ((routeId: string) => void) | undefined;
-  onCityClick?: ((cityId: string) => void) | undefined;
+  /** The event carries the modifier keys, so a surface can distinguish plain from additive
+   *  clicks (the builder's shift/ctrl-click multi-selection). */
+  onCityClick?: ((cityId: string, e: MouseEvent) => void) | undefined;
+  /** Pointer-down on a city group — the builder's drag-to-move; the board leaves it unset. */
+  onCityPointerDown?: ((cityId: string, e: PointerEvent) => void) | undefined;
 
   /* ── svg root ── */
   svgRef?: Ref<SVGSVGElement> | undefined;
@@ -162,6 +166,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
   renderCityOverlay,
   onRouteClick,
   onCityClick,
+  onCityPointerDown,
   svgRef,
   onSvgClick,
   preserveAspectRatio,
@@ -306,7 +311,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         const pick = onCityClick
           ? (e: MouseEvent) => {
               e.stopPropagation();
-              onCityClick(c.id);
+              onCityClick(c.id, e);
             }
           : undefined;
         const onMarker = cityHitArea === 'group' ? undefined : buildable ? pick : undefined;
@@ -316,7 +321,16 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         const builtSeat = glowingStations?.get(c.id);
         const justBuilt = builtSeat !== undefined;
         return (
-          <g key={c.id} data-city-id={c.id} {...cityData?.(c)} className={cls} onClick={onGroup}>
+          <g
+            key={c.id}
+            data-city-id={c.id}
+            {...cityData?.(c)}
+            className={cls}
+            onClick={onGroup}
+            {...(onCityPointerDown
+              ? { onPointerDown: (e: PointerEvent) => onCityPointerDown(c.id, e) }
+              : {})}
+          >
             {/* Offered-ticket endpoint: a soft halo behind the marker so the player can trace
                 the railways a ticket needs while the chooser holds the rail. */}
             {isTarget && <circle className="ticket-target-halo" cx={c.x} cy={c.y} />}

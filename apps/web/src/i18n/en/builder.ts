@@ -97,6 +97,19 @@ export default {
   redo: 'Redo',
   stopsHint: 'Click empty space to add a stop; click a stop to edit it',
   stopsEmptyHint: 'Click the map to add a stop, or click an existing stop to edit it',
+  stopsMultiHint:
+    'Multi-select is on: click stops to add or remove them; click empty space to clear (no stop is added)',
+  selection: 'Selection',
+  selectAll: 'Select all',
+  clearSelection: 'Clear selection',
+  multiSelect: 'Multi-select',
+  selectHint:
+    'Shift- or Ctrl-click to add to the selection; Ctrl+A selects all. On touch, turn on Multi-select.',
+  selectedStops: '{{n}} stops selected',
+  moveSelected: 'Move selected together',
+  moveSelectedHint: 'Click the map to place these {{n}} stops; their spacing stays the same',
+  moveTip:
+    'You can also drag any selected stop to move the whole group; arrow keys nudge, Shift moves further.',
   editStop: 'Edit stop',
   region: 'Region',
   isIsland: 'Island',

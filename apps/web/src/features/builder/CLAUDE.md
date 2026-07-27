@@ -18,6 +18,16 @@ zustand store (`editor/store.ts`) with undo and debounced autosave; a single SVG
 (`editor/EditorCanvas.tsx`, react-zoom-pan-pinch + the existing `boardView.ts` pixel→board
 projection) shared across stages, rendering through the shared `components/MapScene.tsx`.
 
+**Stops holds a selection of any size.** The store's `selection` stays the one-station case (the
+inspector, the ember ring, every other stage); a group of two or more lives in `StopsStage` and
+leaves the store selection null. Shift/ctrl-click, the multi-select switch (the touch path — the
+builder runs in a WebView on mobile, where there are no modifier keys), or select-all build it;
+`moveCities` then translates it as ONE undo step, by drag, by arrow key, or by the move button
+landing the group's `selectionBounds` centre on the click. The dashed frame the canvas draws around
+a ≥2 selection marks exactly that centre, so what you see and where it lands agree. A stage passing
+`cityDrag` also takes station markers out of the canvas's pan gesture, so the press grabs the
+station instead of the map.
+
 A live `ValidationPanel` runs `@trm/map-data`'s `validate`/`validateGeography`/`validateForPlay`
 client-side as you edit (map-data ships TS source, so it's directly importable — no server
 round-trip needed to see errors). World cropping (`geo/world.ts`, `geo/projection.ts` —

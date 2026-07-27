@@ -93,6 +93,11 @@ interface EditorState {
   updateCity(id: string, patch: Partial<CityDraft>): void;
   removeCity(id: string): void;
   moveCity(id: string, x: number, y: number): void;
+  /** Translate every listed station by the same delta as ONE undo step. The delta is snapped to
+   *  the 0.1 grid the builder places on before it's applied, so a group keeps its exact internal
+   *  spacing however many times it's moved (and re-publishing an unmoved draft can't drift the
+   *  content hash). */
+  moveCities(ids: readonly string[], dx: number, dy: number): void;
 
   addRoute(route: RouteDraft): void;
   updateRoute(id: string, patch: Partial<RouteDraft>): void;
@@ -206,6 +211,22 @@ export const useEditorStore = create<EditorState>()((set, get) => ({
     mutate(get, set, {
       ...draft,
       cities: draft.cities.map((c) => (c.id === id ? { ...c, x, y } : c)),
+    });
+  },
+
+  moveCities: (ids, dx, dy) => {
+    const { draft } = get();
+    const moving = new Set(ids);
+    if (moving.size === 0) return;
+    const snap = (n: number): number => Math.round(n * 10) / 10;
+    const sx = snap(dx);
+    const sy = snap(dy);
+    if (sx === 0 && sy === 0) return;
+    mutate(get, set, {
+      ...draft,
+      cities: draft.cities.map((c) =>
+        moving.has(c.id) ? { ...c, x: snap(c.x + sx), y: snap(c.y + sy) } : c,
+      ),
     });
   },
 

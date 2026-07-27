@@ -291,6 +291,48 @@
   fill: color-mix(in srgb, var(--tr-ember) 25%, var(--tr-surface));
 }
 
+/* The multi-selection's survey plot: a dashed boundary around every selected station plus a
+   crosshair on its centre — the point a "move selected" click lands on. Strokes counter-scale
+   with the zoom (like every other marker here) so the frame reads the same at any zoom, while the
+   plot itself stays a region of the MAP and grows with it. */
+.selection-frame rect {
+  fill: color-mix(in srgb, var(--tr-ember) 7%, transparent);
+  stroke: var(--tr-ember);
+  stroke-width: calc(0.5px * var(--inv-scale, 1));
+  stroke-dasharray: calc(1.6px * var(--inv-scale, 1)) calc(1.2px * var(--inv-scale, 1));
+  pointer-events: none;
+}
+.selection-frame .selection-anchor {
+  fill: none;
+  stroke: var(--tr-ember);
+  stroke-width: calc(0.5px * var(--inv-scale, 1));
+  pointer-events: none;
+}
+.editor-canvas--dragging {
+  cursor: grabbing;
+}
+
+/* The Stops inspector's selection header: what is picked, and the two ways to change it. */
+.editor-select-bar {
+  gap: var(--tr-space-2);
+  padding-bottom: var(--tr-space-2);
+  border-bottom: 1px solid var(--tr-line);
+}
+.editor-select-count {
+  font-family: var(--tr-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9em;
+  color: var(--tr-ember);
+}
+.editor-select-count--empty {
+  color: var(--tr-ink-soft);
+}
+.editor-select-tip {
+  margin: 0;
+  font-size: 0.8em;
+  line-height: 1.5;
+}
+
 .editor-world-sea {
   fill: var(--tr-sea);
 }

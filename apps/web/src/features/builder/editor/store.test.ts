@@ -79,6 +79,35 @@ describe('editor store', () => {
     expect(useEditorStore.getState().dirty).toBe(true);
   });
 
+  it('moveCities translates every listed city by one delta, as a single undo step', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1', 10, 50));
+    s.placeCity(city('c2', 60.4, 50));
+    s.placeCity(city('c3', 30, 20));
+    const undoBefore = useEditorStore.getState().undoStack.length;
+
+    useEditorStore.getState().moveCities(['c1', 'c2'], 5.24, -3.31);
+
+    const { draft, undoStack } = useEditorStore.getState();
+    expect(draft.cities.find((c) => c.id === 'c1')).toMatchObject({ x: 15.2, y: 46.7 });
+    // Spacing inside the group survives the snap: c2 keeps its 50.4 lead on c1.
+    expect(draft.cities.find((c) => c.id === 'c2')).toMatchObject({ x: 65.6, y: 46.7 });
+    expect(draft.cities.find((c) => c.id === 'c3')).toMatchObject({ x: 30, y: 20 });
+    expect(undoStack).toHaveLength(undoBefore + 1);
+  });
+
+  it('moveCities ignores an empty selection or a delta that snaps to nothing', () => {
+    const s = useEditorStore.getState();
+    s.placeCity(city('c1', 10, 50));
+    const before = useEditorStore.getState().undoStack.length;
+
+    useEditorStore.getState().moveCities([], 5, 5);
+    useEditorStore.getState().moveCities(['c1'], 0.02, -0.04);
+
+    expect(useEditorStore.getState().draft.cities[0]).toMatchObject({ x: 10, y: 50 });
+    expect(useEditorStore.getState().undoStack).toHaveLength(before);
+  });
+
   it('cascades a city deletion to its incident routes and tickets', () => {
     const s = useEditorStore.getState();
     s.placeCity(city('c1'));
