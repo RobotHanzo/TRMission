@@ -5,6 +5,12 @@
 // testable across reloads.
 const REFRESH_KEY = 'trm.refresh';
 
+/** Mirrors the native type; localStorage is always readable, so `'unavailable'` never occurs here. */
+export type RefreshTokenRead = string | null | 'unavailable';
+
+export const readRefreshToken = async (): Promise<RefreshTokenRead> =>
+  localStorage.getItem(REFRESH_KEY);
+
 export const getRefreshToken = async (): Promise<string | null> =>
   localStorage.getItem(REFRESH_KEY);
 

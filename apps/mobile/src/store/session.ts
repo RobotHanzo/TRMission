@@ -1,3 +1,4 @@
+import { AppState } from 'react-native';
 import { create } from 'zustand';
 import type { MapFeatureKey, UserFeature } from '@trm/shared';
 import {
@@ -7,7 +8,7 @@ import {
   type PublicUser,
   type UserPreferences,
 } from '../net/rest';
-import { clearRefreshToken, getRefreshToken } from '../net/secureStore';
+import { clearRefreshToken, readRefreshToken } from '../net/secureStore';
 import { registerDeviceForPush, unregisterDeviceForPush } from '../push/register';
 import { useModeration } from './moderation';
 import { useUi } from './ui';
@@ -101,8 +102,23 @@ export const useSession = create<SessionState>()((set, get) => {
     // skips the network probe entirely when there is none (fresh install / signed out). When present,
     // api.me() restores the access token via the 401→refresh path (registered users *and* guests).
     async restore() {
-      const token = await getRefreshToken();
-      if (!token) {
+      const token = await readRefreshToken();
+      // `'unavailable'` is the keystore refusing the read, not an empty one (see secureStore.ts):
+      // iOS launched us in the background before the device's first unlock, so whether there is a
+      // session is simply unknown. Clearing it would sign a signed-in player out; ending the boot
+      // gate would flash Login at nobody. Hold the splash and probe again on the next foreground —
+      // by then the device is unlocked. If we are ALREADY foregrounded there is nothing to wait
+      // for, so fall through to the signed-out UI, leaving the stored token untouched for the
+      // next launch.
+      if (token === 'unavailable' && AppState.currentState !== 'active') {
+        const sub = AppState.addEventListener('change', (next) => {
+          if (next !== 'active') return;
+          sub.remove();
+          void get().restore();
+        });
+        return;
+      }
+      if (!token || token === 'unavailable') {
         set({ booting: false });
         return;
       }

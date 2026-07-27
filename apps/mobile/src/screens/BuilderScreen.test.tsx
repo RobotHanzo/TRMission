@@ -21,6 +21,7 @@ jest.mock('../config', () => ({
 
 // The session store (useCanBuild) drags in secureStore + push/register → native modules.
 jest.mock('../net/secureStore', () => ({
+  readRefreshToken: jest.fn(),
   getRefreshToken: jest.fn(),
   setRefreshToken: jest.fn(),
   clearRefreshToken: jest.fn(),

@@ -17,6 +17,7 @@ jest.mock('../net/rest', () => ({
   setAccessToken: jest.fn(),
 }));
 jest.mock('../net/secureStore', () => ({
+  readRefreshToken: jest.fn(),
   getRefreshToken: jest.fn(),
   setRefreshToken: jest.fn(),
   clearRefreshToken: jest.fn(),
@@ -27,12 +28,13 @@ jest.mock('../push/register', () => ({
   unregisterDeviceForPush: jest.fn().mockResolvedValue(undefined),
 }));
 
+import { AppState } from 'react-native';
 import { useSession } from './session';
 import { api } from '../net/rest';
-import { clearRefreshToken, getRefreshToken } from '../net/secureStore';
+import { clearRefreshToken, readRefreshToken } from '../net/secureStore';
 
 const mApi = api as jest.Mocked<typeof api>;
-const mGetRefresh = getRefreshToken as jest.Mock;
+const mGetRefresh = readRefreshToken as jest.Mock;
 const mClearRefresh = clearRefreshToken as jest.Mock;
 
 const prefs = {
@@ -64,6 +66,7 @@ describe('session store', () => {
     });
     mGetRefresh.mockResolvedValue(null);
     mClearRefresh.mockResolvedValue(undefined);
+    AppState.currentState = 'active';
   });
 
   it('playAsGuest sets the user and marks the sign-in method', async () => {
@@ -89,6 +92,46 @@ describe('session store', () => {
     await useSession.getState().restore();
     expect(mApi.me).not.toHaveBeenCalled();
     expect(useSession.getState().user).toBeNull();
+    expect(useSession.getState().booting).toBe(false);
+  });
+
+  // TRMISSION-MOBILE-3: iOS launches the app in the background before the device's first unlock
+  // and the Keychain refuses the read. Neither signing out nor ending the boot gate is right.
+  it('restore() holds boot on a locked keystore and retries when the app is foregrounded', async () => {
+    const listeners: ((s: string) => void)[] = [];
+    const remove = jest.fn();
+    const addListener = jest
+      .spyOn(AppState, 'addEventListener')
+      .mockImplementation((_event, cb) => {
+        listeners.push(cb as (s: string) => void);
+        return { remove } as ReturnType<typeof AppState.addEventListener>;
+      });
+    AppState.currentState = 'background';
+    mGetRefresh.mockResolvedValue('unavailable');
+
+    await useSession.getState().restore();
+    expect(mApi.me).not.toHaveBeenCalled();
+    expect(mClearRefresh).not.toHaveBeenCalled();
+    expect(useSession.getState().booting).toBe(true); // splash holds; no Login flash
+
+    // Unlocked and foregrounded: the keystore reads, and the session resumes.
+    mGetRefresh.mockResolvedValue('stored-refresh');
+    mApi.me.mockResolvedValue(registered);
+    AppState.currentState = 'active';
+    listeners[0]?.('active');
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(remove).toHaveBeenCalled();
+    expect(useSession.getState().user).toEqual(registered);
+    expect(useSession.getState().booting).toBe(false);
+    addListener.mockRestore();
+  });
+
+  it('restore() with a locked keystore while already foregrounded keeps the stored token', async () => {
+    AppState.currentState = 'active';
+    mGetRefresh.mockResolvedValue('unavailable');
+    await useSession.getState().restore();
+    expect(mApi.me).not.toHaveBeenCalled();
+    expect(mClearRefresh).not.toHaveBeenCalled(); // the next launch must still be able to restore
     expect(useSession.getState().booting).toBe(false);
   });
 

@@ -12,6 +12,7 @@ jest.mock('../net/rest', () => ({
   setAccessToken: jest.fn(),
 }));
 jest.mock('../net/secureStore', () => ({
+  readRefreshToken: jest.fn(),
   getRefreshToken: jest.fn(),
   setRefreshToken: jest.fn(),
   clearRefreshToken: jest.fn(),

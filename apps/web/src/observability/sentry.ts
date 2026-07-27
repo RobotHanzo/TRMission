@@ -52,7 +52,34 @@ const DENY_URLS = [
   /^chrome:\/\//i,
   /^chrome-extension:\/\//i,
   /^moz-extension:\/\//i,
+  // Cloudflare's edge-injected scripts: the Web Analytics / RUM beacon and Zaraz (which is how
+  // `lib/analytics.ts` reaches GA4 at all). We neither ship nor version them, and their crashes
+  // are always somebody else's — e.g. the beacon's CLS observer calling `Array.prototype.at` in
+  // an engine that lacks it (TRMISSION-WEB-3). Zaraz is same-origin under /cdn-cgi/, so it needs
+  // a path pattern rather than a host one.
+  /beacon\.min\.js/i,
+  /static\.cloudflareinsights\.com/i,
+  /\/cdn-cgi\//i,
 ];
+
+/**
+ * WebKit rejects promises from a number of built-ins with a bare `DOMException` that carries NO
+ * stack at all. With no frame there is nothing to attribute it to — not a file of ours, and not
+ * the same-origin edge-injected analytics that `DENY_URLS` would otherwise catch — so it lands as
+ * a stackless, unfixable report (TRMISSION-WEB-4). Matched on the pair (this exact WebKit message
+ * AND zero frames), so a real SyntaxError thrown from our own code still reports normally.
+ */
+const STACKLESS_WEBKIT_VALUES = ['The string did not match the expected pattern.'];
+
+export function isStacklessWebkitNoise(event: { exception?: { values?: unknown[] } }): boolean {
+  const values = event.exception?.values as
+    | { value?: string; stacktrace?: { frames?: unknown[] } }[]
+    | undefined;
+  if (values?.length !== 1) return false;
+  const only = values[0]!;
+  if (!STACKLESS_WEBKIT_VALUES.includes(only.value ?? '')) return false;
+  return (only.stacktrace?.frames?.length ?? 0) === 0;
+}
 
 /** Initialise the SDK and hand `./report.ts` the functions it drives. */
 export function start(): SentryHandle {
@@ -88,7 +115,7 @@ export function start(): SentryHandle {
         block: [`.${SECRET_CLASS}`],
       }),
     ],
-    beforeSend: (event) => scrubTelemetryEvent(event),
+    beforeSend: (event) => (isStacklessWebkitNoise(event) ? null : scrubTelemetryEvent(event)),
     beforeSendTransaction: (event) => scrubTelemetryEvent(event),
     beforeBreadcrumb: (crumb) => scrubTelemetryBreadcrumb(crumb),
   });

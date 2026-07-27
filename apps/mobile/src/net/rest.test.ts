@@ -2,6 +2,7 @@ import { api, setAccessToken } from './rest';
 import * as secureStore from './secureStore';
 
 jest.mock('./secureStore', () => ({
+  readRefreshToken: jest.fn(),
   getRefreshToken: jest.fn(),
   setRefreshToken: jest.fn(),
   clearRefreshToken: jest.fn(),

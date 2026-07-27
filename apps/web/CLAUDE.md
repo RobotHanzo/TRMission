@@ -143,6 +143,13 @@ route chunk (`App.tsx`) — it must never inflate the main bundle.
   kept/offered missions, or anything derived from them must carry it too.**
 - Everything on the wire to Sentry goes through `@trm/shared`'s `scrubTelemetryEvent`, the same
   denylist the server and mobile use.
+- `lib/preloadRecovery.ts` (installed from `main.tsx`) answers Vite's `vite:preloadError`: every
+  route is a lazy chunk, so a tab left open across a redeploy asks for asset hashes that no longer
+  exist and crashes the root boundary. It reloads once per minute-window to pick up the new
+  `index.html`; beyond that it lets the error through, because reloading is no longer the fix.
+  `preventDefault()` and the reload are a pair — cancelling without reloading hands `React.lazy`
+  an undefined module. nginx backs this up: `/assets/` 404s instead of falling through to the SPA
+  shell, so a stale asset can't be answered with `index.html` at 200.
 - Source maps upload only when `SENTRY_AUTH_TOKEN` is set at build time (`vite.config.ts`); they
   are deleted right after upload and never served.
 

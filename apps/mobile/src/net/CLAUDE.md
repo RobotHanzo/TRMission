@@ -11,6 +11,11 @@ The REST client, `GameSocket`, and `SandboxSocket` live in `@trm/client-core`; t
   token lives in the OS keystore (`secureStore.ts`, `expo-secure-store`). A 401 rotates via
   `POST /auth/refresh {refreshToken}` under the core's single-flight guard; issuance and rotation
   persist tokens through the transport hooks.
+- `secureStore.ts` writes with `keychainAccessible: AFTER_FIRST_UNLOCK` and reads through
+  `readRefreshToken()`, whose third state `'unavailable'` (the keystore refusing, not an empty one)
+  is load-bearing: iOS launches the app in the background before the device's first unlock, and
+  collapsing that into `null` signs a signed-in player out. Only `getRefreshToken()` — the
+  transport's read, where both states mean "nothing to rotate" — may flatten it.
 - `connection.ts` — constructs the shared `GameSocket` with `WS_URL` and a `TicketRefresh`
   (the room code from `useGameConnection`) so every in-socket reconnect re-mints a fresh
   short-TTL ws ticket instead of replaying the expired seed one.
