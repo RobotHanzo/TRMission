@@ -382,7 +382,7 @@ function BoardInner({
   const onTap = useCallback(
     (screen: { x: number; y: number }, tapCam: CameraState) => {
       if (!canClaimRef.current && !canBuildStationRef.current) return;
-      const hit = hitTest(screen, tapCam, vp, scene);
+      const hit = hitTest(screen, tapCam, vp, scene, home.span);
       if (!hit) return;
       if (hit.kind === 'city') {
         if (canBuildStationRef.current) onPickCityRef.current(hit.id);
@@ -401,7 +401,8 @@ function BoardInner({
       }
       onPickRouteRef.current(hit.id);
     },
-    [vp, scene],
+    // home.span anchors the hit-test tolerances to the renderer's zoom LOD (see hitTest.ts).
+    [vp, scene, home.span],
   );
 
   const camOpts = useMemo(() => ({ onTap, onGesture: onManualCamera }), [onTap, onManualCamera]);

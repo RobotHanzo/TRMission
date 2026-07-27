@@ -40,7 +40,16 @@ The stage that hosts this board (prop contract, layout tiers, drivers) is docume
   `BoardCanvas.web.tsx` depends on it as-is for its own separate mid-pan-repaint strategy.
 - **Manual hit-testing** (`hitTest.ts`, pure + unit-tested): Skia children aren't touch targets;
   a tap projects screen→board through the current camera and hit-tests routes (segment distance)
-  and cities (radius) against the shared geometry.
+  and cities (radius) against the shared geometry. **Every board-unit quantity in it is derived
+  per tap from the camera through the SAME counter-scales the renderer uses** (`invScale` for the
+  track hit width and the double-pair `perp` nudge, `markerScale` for the station radius and the
+  station-wins-ties margin) — which is why `hitTest` needs `homeSpan`, the anchor `webScaleEquiv`
+  maps a span onto the web's zoom scale. This is the web board's model (`game.css` strokes its
+  invisible `.hit` target at `--m-hit-w * --inv-scale`), plus a finger-slop floor in screen px.
+  Constants baked at one zoom are what made zooming in NOT improve aim (issue #68): at `SPAN_MIN`
+  the twin tracks are drawn ±0.16 board units off the chord, so a raw baked `perp` left their hit
+  lines 8× too far out and a tap on either visible track hit neither — falling through to a
+  station whose 1.7-board-unit floor was 4× its own drawn marker.
 - **One map scene** (`MapSceneSkia.tsx`): geography → routes → cities → labels → sweep overlays,
   purely presentational (mirrors web `MapScene.tsx`); every board surface renders through it.
   `BoardView` owns the Canvas, camera, glow/sweep timers, camera sync/follow, and the framers.
