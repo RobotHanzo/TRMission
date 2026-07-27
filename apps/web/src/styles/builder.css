@@ -207,14 +207,14 @@
   position: relative;
   width: 100%;
   height: 100%;
-  /* Home defaults for the zoom-driven counter-scaling, exactly as .board-viewport carries them:
-     ZoomVar overwrites both on every transform, but until its first callback lands — and forever
-     on a canvas that never moves — an undefined --inv-scale makes every `calc(… * var(…))` in
-     game.css invalid at computed-value time. Labels then fall back to the INHERITED 16px, which
-     in a ~100-unit viewBox is a sixth of the map, and `r`/`width` fall back to 0, so the markers
-     vanish. These keep an un-tracked canvas rendering at the live board's home weights instead. */
-  --inv-scale: 0.53;
-  --marker-scale: 0.72;
+  /* Home defaults for the zoom-driven counter-scaling, as .board-viewport carries them, taken down
+     to the canvas's EDITOR_MAP_WEIGHT (ZoomVar): 0.53 × 0.72 and 0.72 × 0.72. ZoomVar overwrites
+     both on every transform, but until its first callback lands — and forever on a canvas that
+     never moves — an undefined --inv-scale makes every `calc(… * var(…))` in game.css invalid at
+     computed-value time. Labels then fall back to the INHERITED 16px, which in a ~100-unit viewBox
+     is a sixth of the map, and `r`/`width` fall back to 0, so the markers vanish. */
+  --inv-scale: 0.38;
+  --marker-scale: 0.52;
 }
 .editor-inspector {
   width: 21em;

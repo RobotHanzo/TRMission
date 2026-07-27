@@ -27,6 +27,12 @@ home defaults for both vars like `.board-viewport` does: undefined, every `calc(
 game.css is invalid at computed-value time, so labels fall back to the inherited 16px **in board
 units** and markers to `r: 0`.
 
+Both vars are then trimmed to `EDITOR_MAP_WEIGHT` (0.72) — the **one deliberate departure** from
+"previews exactly as it will play". The board pins glyphs to a constant on-screen size, so their
+size tracks how big the surface is, not the zoom; those weights suit a player zoomed into a
+corridor and bury the network when you sit zoomed out over the whole map to author it. Layout is
+still exact; only the ink is lighter. Keep the CSS defaults above in step with the constant.
+
 **Stops holds a selection of any size.** The store's `selection` stays the one-station case (the
 inspector, the ember ring, every other stage); a group of two or more lives in `StopsStage` and
 leaves the store selection null. Shift/ctrl-click, the multi-select switch (the touch path — the
