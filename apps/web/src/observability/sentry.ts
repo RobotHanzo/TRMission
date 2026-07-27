@@ -63,11 +63,12 @@ const DENY_URLS = [
 ];
 
 /**
- * WebKit rejects promises from a number of built-ins with a bare `DOMException` that carries NO
- * stack at all. With no frame there is nothing to attribute it to — not a file of ours, and not
- * the same-origin edge-injected analytics that `DENY_URLS` would otherwise catch — so it lands as
- * a stackless, unfixable report (TRMISSION-WEB-4). Matched on the pair (this exact WebKit message
- * AND zero frames), so a real SyntaxError thrown from our own code still reports normally.
+ * WebKit's `Response.json()` rejects with this DOMException when the body isn't JSON, and Zaraz
+ * calls it on its own beacon responses — TRMISSION-WEB-6 caught it with a `/cdn-cgi/zaraz/s.js`
+ * frame, which `DENY_URLS` above now covers. Inside an in-app WKWebView the SAME rejection arrives
+ * with no stack at all (TRMISSION-WEB-4), and without a frame there is nothing left to attribute
+ * it to. Matched on the pair (this exact WebKit message AND zero frames), so a real SyntaxError
+ * thrown from our own code still reports normally.
  */
 const STACKLESS_WEBKIT_VALUES = ['The string did not match the expected pattern.'];
 
