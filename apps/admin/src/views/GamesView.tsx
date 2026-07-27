@@ -6,6 +6,7 @@ import { useUi } from '../store/ui';
 import { SignalBadge, aspectForStatus } from '../components/SignalBadge';
 import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { Copyable } from '../components/CopyButton';
 import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
 import { chatPresetKey } from '../game/chatPresets';
@@ -145,8 +146,8 @@ function GameDrawer({
             </div>
             <div className="oc-kv">
               <span className="k">ID</span>
-              <span className="v" title={detail.gameId}>
-                {detail.gameId}
+              <span className="v">
+                <Copyable value={detail.gameId} label="ID" />
               </span>
             </div>
             <div className="oc-kv">
@@ -156,7 +157,9 @@ function GameDrawer({
             {detail.roomCode && (
               <div className="oc-kv">
                 <span className="k">{t('games.room')}</span>
-                <span className="v">{detail.roomCode}</span>
+                <span className="v">
+                  <Copyable value={detail.roomCode} label={t('rooms.colRoom')} />
+                </span>
               </div>
             )}
             <div className="oc-kv">
@@ -184,7 +187,13 @@ function GameDrawer({
               <h3>{t('games.statusTerminated')}</h3>
               <div className="oc-kv">
                 <span className="k">{t('games.terminatedBy')}</span>
-                <span className="v">{shortId(detail.terminated.by)}</span>
+                <span className="v">
+                  <Copyable
+                    value={detail.terminated.by}
+                    display={shortId(detail.terminated.by)}
+                    label="ID"
+                  />
+                </span>
               </div>
               {detail.terminated.reason && (
                 <div className="oc-kv">
@@ -200,7 +209,8 @@ function GameDrawer({
             {detail.players.map((p) => (
               <div className="oc-kv" key={p.id}>
                 <span className="k">
-                  P{p.seat + 1} {p.displayName ?? shortId(p.id)}
+                  P{p.seat + 1} {p.displayName ? `${p.displayName} ` : ''}
+                  <Copyable value={p.id} display={shortId(p.id)} label="ID" muted />
                 </span>
                 <span className="v">{p.isBot ? `${t('games.bot')} · ${p.difficulty}` : ''}</span>
               </div>
@@ -220,7 +230,9 @@ function GameDrawer({
             ) : (
               detail.chat.map((c, i) => (
                 <div className="oc-kv" key={i}>
-                  <span className="k oc-mono">{shortId(c.playerId)}</span>
+                  <span className="k">
+                    <Copyable value={c.playerId} display={shortId(c.playerId)} label="ID" />
+                  </span>
                   <span className="v" style={{ fontFamily: 'inherit' }}>
                     {c.kind === 'preset' ? (
                       <>
@@ -413,7 +425,9 @@ export function GamesView() {
                 className="clickable"
                 onClick={() => openDetail('games', g.gameId)}
               >
-                <td className="oc-mono">{shortId(g.gameId)}</td>
+                <td>
+                  <Copyable value={g.gameId} display={shortId(g.gameId)} label="ID" />
+                </td>
                 <td>
                   <SignalBadge aspect={aspectForStatus(g.status)} label={t(statusKey(g.status))} />
                   {g.inMemory && <span className="oc-muted"> · {t('games.inMemory')}</span>}

@@ -221,6 +221,62 @@ code,
   color: var(--oc-ink);
 }
 
+/* ---- copy affordance ------------------------------------------------------------------ */
+
+/* Every id / email / code in the console pairs its value with a copy button
+ * (components/CopyButton.tsx). The button stays quiet until the row is hovered so the
+ * tables still read as data, not as a field of controls. */
+.oc-copyable {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  min-width: 0;
+  vertical-align: middle;
+}
+
+.oc-copyable .oc-copy-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.oc-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--oc-radius-sm);
+  color: var(--oc-ink-soft);
+  opacity: 0.4;
+  transition:
+    opacity 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.oc-copy-btn:hover,
+.oc-copy-btn:focus-visible {
+  opacity: 1;
+  background: var(--oc-line);
+  color: var(--oc-ink);
+}
+
+.oc-table tbody tr:hover .oc-copy-btn,
+.oc-account-row:hover .oc-copy-btn,
+.oc-kv:hover .oc-copy-btn {
+  opacity: 0.75;
+}
+
+.oc-copy-btn.copied,
+.oc-table tbody tr:hover .oc-copy-btn.copied,
+.oc-account-row:hover .oc-copy-btn.copied,
+.oc-kv:hover .oc-copy-btn.copied {
+  opacity: 1;
+  color: var(--oc-signal-clear);
+}
+
 /* ---- signal badges ------------------------------------------------------------------ */
 
 .oc-signal {
@@ -678,16 +734,13 @@ table.oc-table {
   margin-bottom: var(--oc-space-3);
 }
 
+/* A row is the pick target itself (role=option), so the copy buttons inside it are plain
+ * nested controls rather than a button inside a button. */
 .oc-account-row {
   display: flex;
   align-items: center;
   gap: var(--oc-space-2);
   padding: 6px 8px;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
   cursor: pointer;
   border-radius: var(--oc-radius-sm);
 }

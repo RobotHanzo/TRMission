@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, type RatingRow } from '../net/rest';
 import { useUi } from '../store/ui';
+import { Copyable } from '../components/CopyButton';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
 export function RatingsView() {
@@ -59,12 +60,25 @@ export function RatingsView() {
                   {'☆'.repeat(5 - r.stars)}
                 </td>
                 <td>
-                  {r.userDisplayName ?? shortId(r.userId)}{' '}
-                  <span className="oc-mono oc-muted">{shortId(r.userId)}</span>
+                  {r.userDisplayName ? `${r.userDisplayName} ` : ''}
+                  <Copyable
+                    value={r.userId}
+                    display={shortId(r.userId)}
+                    label="ID"
+                    muted={Boolean(r.userDisplayName)}
+                  />
                 </td>
                 <td>{r.text && <div>{r.text}</div>}</td>
-                <td className="oc-mono">{shortId(r.gameId)}</td>
-                <td className="oc-mono">{r.roomId}</td>
+                <td>
+                  <Copyable
+                    value={r.gameId}
+                    display={shortId(r.gameId)}
+                    label={t('ratings.colGame')}
+                  />
+                </td>
+                <td>
+                  <Copyable value={r.roomId} label={t('ratings.colRoom')} />
+                </td>
                 <td className="num">{fmtDateTime(r.createdAt, locale)}</td>
               </tr>
             ))}

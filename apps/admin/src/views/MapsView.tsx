@@ -8,6 +8,7 @@ import { fmtDateTime, shortId } from '../lib/fmt';
 import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { AccountSelectorModal } from '../components/AccountSelectorModal';
+import { Copyable } from '../components/CopyButton';
 import { MapPreview } from '../components/MapPreview';
 
 function MapDrawer({ id, onClose }: { id: string; onClose: () => void }) {
@@ -87,8 +88,22 @@ function MapDrawer({ id, onClose }: { id: string; onClose: () => void }) {
           </section>
           <section>
             <div className="oc-kv">
+              <span className="k">ID</span>
+              <span className="v">
+                <Copyable value={detail.id} label="ID" />
+              </span>
+            </div>
+            <div className="oc-kv">
               <span className="k">{t('maps.owner')}</span>
-              <span className="v">{detail.ownerDisplayName ?? shortId(detail.ownerId)}</span>
+              <span className="v">
+                {detail.ownerDisplayName ? `${detail.ownerDisplayName} ` : ''}
+                <Copyable
+                  value={detail.ownerId}
+                  display={shortId(detail.ownerId)}
+                  label="ID"
+                  muted={Boolean(detail.ownerDisplayName)}
+                />
+              </span>
             </div>
             <div className="oc-kv">
               <span className="k">{t('maps.colRevision')}</span>
@@ -105,7 +120,9 @@ function MapDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             {detail.shareCode && (
               <div className="oc-kv">
                 <span className="k">{t('maps.shareCode')}</span>
-                <span className="v oc-mono">{detail.shareCode}</span>
+                <span className="v">
+                  <Copyable value={detail.shareCode} label={t('maps.shareCode')} />
+                </span>
               </div>
             )}
           </section>
@@ -214,8 +231,19 @@ export function MapsView() {
           <tbody>
             {rows.map((m) => (
               <tr key={m.id} className="clickable" onClick={() => openDetail('maps', m.id)}>
-                <td>{m.nameEn || m.nameZh}</td>
-                <td>{m.ownerDisplayName ?? m.ownerId}</td>
+                <td>
+                  {m.nameEn || m.nameZh}{' '}
+                  <Copyable value={m.id} display={shortId(m.id)} label="ID" muted />
+                </td>
+                <td>
+                  {m.ownerDisplayName ? `${m.ownerDisplayName} ` : ''}
+                  <Copyable
+                    value={m.ownerId}
+                    display={shortId(m.ownerId)}
+                    label="ID"
+                    muted={Boolean(m.ownerDisplayName)}
+                  />
+                </td>
                 <td className="num">{m.revision}</td>
                 <td>{m.shared ? t('maps.sharedYes') : t('maps.sharedNo')}</td>
                 <td className="num">{fmtDateTime(m.updatedAt, locale)}</td>

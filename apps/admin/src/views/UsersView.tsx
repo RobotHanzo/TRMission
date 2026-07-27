@@ -8,6 +8,7 @@ import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { FeatureToggles } from '../components/FeatureToggles';
 import { OAuthBadges } from '../components/OAuthBadges';
+import { Copyable } from '../components/CopyButton';
 import { useToast } from '../store/toast';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { fmtDateTime, shortId } from '../lib/fmt';
@@ -132,14 +133,16 @@ function UserDrawer({
           <section>
             <div className="oc-kv">
               <span className="k">ID</span>
-              <span className="v" title={detail.id}>
-                {detail.id}
+              <span className="v">
+                <Copyable value={detail.id} label="ID" />
               </span>
             </div>
             {detail.email && (
               <div className="oc-kv">
                 <span className="k">{t('users.colEmail')}</span>
-                <span className="v">{detail.email}</span>
+                <span className="v">
+                  <Copyable value={detail.email} label={t('users.colEmail')} />
+                </span>
               </div>
             )}
             <div className="oc-kv">
@@ -210,7 +213,13 @@ function UserDrawer({
               <h3>{t('users.disabledBadge')}</h3>
               <div className="oc-kv">
                 <span className="k">{t('users.disabledBy')}</span>
-                <span className="v">{shortId(detail.disabledBy ?? '')}</span>
+                <span className="v">
+                  <Copyable
+                    value={detail.disabledBy ?? ''}
+                    display={shortId(detail.disabledBy ?? '')}
+                    label="ID"
+                  />
+                </span>
               </div>
               {detail.disabledReason && (
                 <div className="oc-kv">
@@ -226,7 +235,9 @@ function UserDrawer({
               <h3>{t('users.activeRooms')}</h3>
               {detail.activeRooms.map((r) => (
                 <div className="oc-kv" key={r.code}>
-                  <span className="k oc-mono">{r.code}</span>
+                  <span className="k">
+                    <Copyable value={r.code} label={t('rooms.colRoom')} />
+                  </span>
                   <span className="v">{r.status}</span>
                 </div>
               ))}
@@ -241,7 +252,13 @@ function UserDrawer({
               .slice(0, 10)
               .map((h) => (
                 <div className="oc-kv" key={h.gameId}>
-                  <span className="k oc-mono">{shortId(h.gameId)}</span>
+                  <span className="k">
+                    <Copyable
+                      value={h.gameId}
+                      display={shortId(h.gameId)}
+                      label={t('games.colGame')}
+                    />
+                  </span>
                   <span className="v">
                     {fmtDateTime(h.completedAt, locale)}
                     {h.winners.includes(detail.id) ? ` · ${t('users.wins')}` : ''}
@@ -418,9 +435,15 @@ export function UsersView() {
             {rows.map((u) => (
               <tr key={u.id} className="clickable" onClick={() => openDetail('users', u.id)}>
                 <td>
-                  {u.displayName} <span className="oc-mono oc-muted">{shortId(u.id)}</span>
+                  {u.displayName} <Copyable value={u.id} display={shortId(u.id)} label="ID" muted />
                 </td>
-                <td>{u.email ?? <span className="oc-muted">—</span>}</td>
+                <td>
+                  {u.email ? (
+                    <Copyable value={u.email} label={t('users.colEmail')} mono={false} />
+                  ) : (
+                    <span className="oc-muted">—</span>
+                  )}
+                </td>
                 <td>{u.isGuest ? t('users.guest') : t('users.registered')}</td>
                 <td>
                   <OAuthBadges oauthProviders={u.oauthProviders} hasPassword={u.hasPassword} />

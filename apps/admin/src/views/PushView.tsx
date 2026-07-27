@@ -5,6 +5,7 @@ import type { UserRow } from '../net/rest';
 import { useToast } from '../store/toast';
 import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { SignalBadge } from '../components/SignalBadge';
+import { Copyable } from '../components/CopyButton';
 import { shortId } from '../lib/fmt';
 
 const KINDS: PushKind[] = ['your_turn', 'game_started', 'game_over', 'game_paused'];
@@ -86,7 +87,18 @@ export function PushView() {
           <span className="v">
             {target ? (
               <>
-                {target.displayName} <span className="oc-mono oc-muted">{shortId(target.id)}</span>{' '}
+                {target.displayName}{' '}
+                <Copyable value={target.id} display={shortId(target.id)} label="ID" muted />{' '}
+                {target.email && (
+                  <>
+                    <Copyable
+                      value={target.email}
+                      label={t('users.colEmail')}
+                      mono={false}
+                      muted
+                    />{' '}
+                  </>
+                )}
                 <button className="oc-btn" onClick={() => setPicking(true)}>
                   {t('push.changeUser')}
                 </button>

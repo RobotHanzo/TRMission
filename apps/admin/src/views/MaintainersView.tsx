@@ -11,6 +11,7 @@ import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { Copyable } from '../components/CopyButton';
 import { Drawer } from '../components/Drawer';
 import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
@@ -72,6 +73,22 @@ function Editor({
       title={`${t('maintainers.editorTitle')} · ${row.displayName ?? shortId(row.userId)}`}
       onClose={onClose}
     >
+      <section>
+        <div className="oc-kv">
+          <span className="k">ID</span>
+          <span className="v">
+            <Copyable value={row.userId} label="ID" />
+          </span>
+        </div>
+        {row.email && (
+          <div className="oc-kv">
+            <span className="k">{t('users.colEmail')}</span>
+            <span className="v">
+              <Copyable value={row.email} label={t('users.colEmail')} />
+            </span>
+          </div>
+        )}
+      </section>
       <section>
         <h3>{t('maintainers.colRole')}</h3>
         <div className="oc-tabs" role="radiogroup">
@@ -195,7 +212,13 @@ export function MaintainersView() {
                 <tr key={m.userId}>
                   <td>
                     {m.displayName ?? <span className="oc-muted">{t('maintainers.dangling')}</span>}{' '}
-                    <span className="oc-mono oc-muted">{shortId(m.userId)}</span>
+                    <Copyable value={m.userId} display={shortId(m.userId)} label="ID" muted />
+                    {m.email && (
+                      <>
+                        {' '}
+                        <Copyable value={m.email} label={t('users.colEmail')} mono={false} muted />
+                      </>
+                    )}
                   </td>
                   <td>
                     <span className="oc-role-badge">{t(ROLE_KEY[m.role])}</span>
@@ -240,7 +263,11 @@ export function MaintainersView() {
           excludeIds={rows.map((m) => m.userId)}
           onSelect={(u) => {
             setPicking(false);
-            setEditing({ userId: u.id, displayName: u.displayName });
+            setEditing({
+              userId: u.id,
+              displayName: u.displayName,
+              ...(u.email ? { email: u.email } : {}),
+            });
           }}
           onClose={() => setPicking(false)}
         />

@@ -37,6 +37,16 @@ Read the one for the area you're touching (Claude Code loads them on demand).
 | Sentry, error boundary, replay policy                   | `src/observability/CLAUDE.md`         |
 | Server-side dashboard API, audit, purge                 | `apps/server/src/dashboard/CLAUDE.md` |
 
+## Every identifier is copyable
+
+Ids, emails, room codes and share codes are what an operator carries between this dashboard, the
+logs and Mongo, so **each one rendered anywhere — table cell, drawer panel, modal row — pairs with a
+copy button**: `components/CopyButton.tsx` (`<Copyable value display label />`, or bare
+`<CopyButton />`). Pass the **full** value as `value` and the shortened text as `display`
+(`shortId(...)`) — the clipboard must never get the truncated form. The button stops click
+propagation, so it is safe inside a clickable `<tr>`; for the same reason `AccountSelectorModal`'s
+rows are `role="option"` divs rather than `<button>`s (a copy button may not nest in a button).
+
 ## Two separate gating systems (don't conflate them)
 
 **Dashboard permissions** gate _this app_. `DASHBOARD_PERMISSIONS`/`DASHBOARD_ROLES`/

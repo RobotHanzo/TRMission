@@ -7,6 +7,7 @@ import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { FeatureToggles } from '../components/FeatureToggles';
 import { OfficialMapToggles } from '../components/OfficialMapToggles';
 import { Drawer } from '../components/Drawer';
+import { Copyable } from '../components/CopyButton';
 import { shortId } from '../lib/fmt';
 
 export function FeaturesView() {
@@ -77,8 +78,13 @@ export function FeaturesView() {
             {rows.map((u) => (
               <tr key={u.id}>
                 <td>
-                  {u.displayName} <span className="oc-mono oc-muted">{shortId(u.id)}</span>
-                  {u.email && <span className="oc-muted"> · {u.email}</span>}
+                  {u.displayName} <Copyable value={u.id} display={shortId(u.id)} label="ID" muted />
+                  {u.email && (
+                    <>
+                      {' · '}
+                      <Copyable value={u.email} label={t('users.colEmail')} mono={false} muted />
+                    </>
+                  )}
                 </td>
                 <td>
                   <span className="oc-muted" style={{ fontSize: 11 }}>
@@ -115,6 +121,22 @@ export function FeaturesView() {
           title={`${t('features.editorTitle')} · ${editing.displayName}`}
           onClose={() => setEditing(null)}
         >
+          <section>
+            <div className="oc-kv">
+              <span className="k">ID</span>
+              <span className="v">
+                <Copyable value={editing.id} label="ID" />
+              </span>
+            </div>
+            {editing.email && (
+              <div className="oc-kv">
+                <span className="k">{t('users.colEmail')}</span>
+                <span className="v">
+                  <Copyable value={editing.email} label={t('users.colEmail')} />
+                </span>
+              </div>
+            )}
+          </section>
           <section>
             <FeatureToggles
               target={{

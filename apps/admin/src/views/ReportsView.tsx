@@ -5,6 +5,7 @@ import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { SignalBadge } from '../components/SignalBadge';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { Copyable } from '../components/CopyButton';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
 const TABS: ReportStatusFilter[] = ['open', 'resolved', 'all'];
@@ -60,18 +61,50 @@ export function ReportsView() {
     }
   };
 
-  const targetOf = (r: ReportRow): string =>
-    r.kind === 'player'
-      ? (r.reportedName ?? shortId(r.reportedUserId ?? ''))
-      : `${r.mapNameZh ?? ''} (${r.mapNameEn ?? ''})`;
-  const contextOf = (r: ReportRow): string =>
-    [
-      r.gameId ? `game ${shortId(r.gameId)}` : null,
-      r.roomCode ? `room ${r.roomCode}` : null,
-      r.shareCode ? `code ${r.shareCode}` : null,
-    ]
-      .filter(Boolean)
-      .join(' · ');
+  /** Name plus the copyable id behind it — the id is what an operator pastes into Users/Maps. */
+  const TargetCell = ({ r }: { r: ReportRow }) =>
+    r.kind === 'player' ? (
+      <>
+        {r.reportedName ? `${r.reportedName} ` : ''}
+        {r.reportedUserId && (
+          <Copyable
+            value={r.reportedUserId}
+            display={shortId(r.reportedUserId)}
+            label="ID"
+            muted={Boolean(r.reportedName)}
+          />
+        )}
+      </>
+    ) : (
+      <>
+        {`${r.mapNameZh ?? ''} (${r.mapNameEn ?? ''}) `}
+        {r.mapId && <Copyable value={r.mapId} display={shortId(r.mapId)} label="ID" muted />}
+      </>
+    );
+
+  const hasContext = (r: ReportRow): boolean =>
+    Boolean(r.gameId) || Boolean(r.roomCode) || Boolean(r.shareCode);
+  const ContextCell = ({ r }: { r: ReportRow }) => (
+    <>
+      {r.gameId && (
+        <>
+          game{' '}
+          <Copyable value={r.gameId} display={shortId(r.gameId)} label={t('ratings.colGame')} />
+        </>
+      )}
+      {r.roomCode && (
+        <>
+          {r.gameId ? ' · ' : ''}room <Copyable value={r.roomCode} label={t('rooms.colRoom')} />
+        </>
+      )}
+      {r.shareCode && (
+        <>
+          {r.gameId || r.roomCode ? ' · ' : ''}code{' '}
+          <Copyable value={r.shareCode} label={t('maps.shareCode')} />
+        </>
+      )}
+    </>
+  );
 
   return (
     <div>
@@ -120,12 +153,17 @@ export function ReportsView() {
                   </span>{' '}
                   <span className="oc-chip">{t(`reports.category_${r.category}`)}</span>
                 </td>
-                <td>{r.reporterName}</td>
-                <td>{targetOf(r)}</td>
                 <td>
-                  {contextOf(r) && (
+                  {r.reporterName}{' '}
+                  <Copyable value={r.reporterId} display={shortId(r.reporterId)} label="ID" muted />
+                </td>
+                <td>
+                  <TargetCell r={r} />
+                </td>
+                <td>
+                  {hasContext(r) && (
                     <div className="oc-muted">
-                      {t('reports.context')}: {contextOf(r)}
+                      {t('reports.context')}: <ContextCell r={r} />
                     </div>
                   )}
                   {r.message && <div>{r.message}</div>}

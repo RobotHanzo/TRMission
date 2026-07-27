@@ -6,6 +6,7 @@ import {
   type LeaderboardRow,
   type LeaderboardScopeKind,
 } from '../net/rest';
+import { Copyable } from '../components/CopyButton';
 import { shortId } from '../lib/fmt';
 
 const METRICS: LeaderboardMetric[] = ['rating', 'wins', 'gamesPlayed'];
@@ -89,8 +90,13 @@ export function LeaderboardView() {
               <tr key={r.userId}>
                 <td className="num">{r.rank}</td>
                 <td>
-                  {r.displayName ?? shortId(r.userId)}{' '}
-                  <span className="oc-mono oc-muted">{shortId(r.userId)}</span>
+                  {r.displayName ? `${r.displayName} ` : ''}
+                  <Copyable
+                    value={r.userId}
+                    display={shortId(r.userId)}
+                    label="ID"
+                    muted={Boolean(r.displayName)}
+                  />
                 </td>
                 <td className="num">{r.rating}</td>
                 <td className="num">{r.wins}</td>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api, type AuditEntry } from '../net/rest';
 import { useUi } from '../store/ui';
+import { Copyable } from '../components/CopyButton';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
 export function AuditView() {
@@ -48,11 +49,20 @@ export function AuditView() {
               <tr key={e.id}>
                 <td className="num">{fmtDateTime(e.at, locale)}</td>
                 <td>
-                  {e.actorName} <span className="oc-mono oc-muted">{shortId(e.actorId)}</span>
+                  {e.actorName}{' '}
+                  <Copyable value={e.actorId} display={shortId(e.actorId)} label="ID" muted />
                 </td>
                 <td>{actionLabel(e.action)}</td>
-                <td className="oc-mono">
-                  {e.target ? `${e.target.type}:${shortId(e.target.id)}` : '—'}
+                <td>
+                  {e.target ? (
+                    <Copyable
+                      value={e.target.id}
+                      display={`${e.target.type}:${shortId(e.target.id)}`}
+                      label="ID"
+                    />
+                  ) : (
+                    '—'
+                  )}
                 </td>
                 <td style={{ whiteSpace: 'normal', maxWidth: 320 }}>
                   <span className="oc-muted" style={{ fontSize: 11 }}>

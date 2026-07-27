@@ -7,6 +7,7 @@ import { useUi } from '../store/ui';
 import { SignalBadge, aspectForStatus } from '../components/SignalBadge';
 import { Drawer } from '../components/Drawer';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { Copyable } from '../components/CopyButton';
 import { useToast } from '../store/toast';
 import { fmtDateTime, shortId } from '../lib/fmt';
 
@@ -77,8 +78,22 @@ function RoomDrawer({
               </span>
             </div>
             <div className="oc-kv">
+              <span className="k">{t('rooms.colRoom')}</span>
+              <span className="v">
+                <Copyable value={detail.code} label={t('rooms.colRoom')} />
+              </span>
+            </div>
+            <div className="oc-kv">
               <span className="k">{t('rooms.host')}</span>
-              <span className="v">{detail.hostName ?? shortId(detail.hostId)}</span>
+              <span className="v">
+                {detail.hostName ? `${detail.hostName} ` : ''}
+                <Copyable
+                  value={detail.hostId}
+                  display={shortId(detail.hostId)}
+                  label="ID"
+                  muted={Boolean(detail.hostName)}
+                />
+              </span>
             </div>
             <div className="oc-kv">
               <span className="k">{t('rooms.colVisibility')}</span>
@@ -107,8 +122,12 @@ function RoomDrawer({
               <h3>{t('rooms.linkedGame')}</h3>
               <div className="oc-kv">
                 <span className="k">ID</span>
-                <span className="v oc-mono" title={detail.gameId}>
-                  {shortId(detail.gameId)}
+                <span className="v">
+                  <Copyable
+                    value={detail.gameId}
+                    display={shortId(detail.gameId)}
+                    label={t('games.colGame')}
+                  />
                 </span>
               </div>
               {detail.gameStatus && (
@@ -125,7 +144,8 @@ function RoomDrawer({
             {detail.members.map((m) => (
               <div className="oc-kv" key={m.userId}>
                 <span className="k">
-                  P{m.seat + 1} {m.displayName}
+                  P{m.seat + 1} {m.displayName}{' '}
+                  <Copyable value={m.userId} display={shortId(m.userId)} label="ID" muted />
                 </span>
                 <span className="v">
                   {m.isBot
@@ -166,8 +186,17 @@ function RoomDrawer({
               <span className="k">{t('rooms.map')}</span>
               <span className="v">
                 {detail.settings.map.source === 'custom'
-                  ? `${t('rooms.mapCustom')} · ${shortId(detail.settings.map.id)}`
-                  : `${t('rooms.mapOfficial')} · ${detail.settings.map.id}`}
+                  ? `${t('rooms.mapCustom')} · `
+                  : `${t('rooms.mapOfficial')} · `}
+                <Copyable
+                  value={detail.settings.map.id}
+                  display={
+                    detail.settings.map.source === 'custom'
+                      ? shortId(detail.settings.map.id)
+                      : detail.settings.map.id
+                  }
+                  label="ID"
+                />
               </span>
             </div>
             <div className="oc-kv">
@@ -346,7 +375,9 @@ export function RoomsView() {
           <tbody>
             {rows.map((r) => (
               <tr key={r.code} className="clickable" onClick={() => openDetail('rooms', r.code)}>
-                <td className="oc-mono">{r.code}</td>
+                <td>
+                  <Copyable value={r.code} label={t('rooms.colRoom')} />
+                </td>
                 <td>
                   <SignalBadge aspect={aspectForStatus(r.status)} label={t(statusKey(r.status))} />
                 </td>
