@@ -73,7 +73,7 @@ export default {
   },
   HARVEST_FESTIVAL_EXPRESS: {
     name: '豐年祭加開列車',
-    desc: '持續 3 輪，東部路線每次佔領 +1 分；市場出現任三張同色牌時提早重抽',
+    desc: '持續 3 輪，慶典地區路線每次佔領 +1 分；市場出現任三張同色牌時提早重抽',
   },
   ALL_SEATS_RESERVED: {
     name: '全車對號入座',

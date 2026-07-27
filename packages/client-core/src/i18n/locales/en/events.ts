@@ -90,7 +90,7 @@ export default {
   },
   HARVEST_FESTIVAL_EXPRESS: {
     name: 'Harvest Festival Express',
-    desc: 'For 3 rounds east-coast claims score +1, and any three matching face-up cards refresh the market early',
+    desc: 'For 3 rounds claims in the festival region score +1, and any three matching face-up cards refresh the market early',
   },
   ALL_SEATS_RESERVED: {
     name: 'All Seats Reserved',
