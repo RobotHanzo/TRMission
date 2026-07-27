@@ -74,6 +74,12 @@ are binding).
   single-package work directly. Give any code-exploring subagent the graphify rules below.
 - **Keep written output short.** Plans, docs, and commit/PR bodies carry the decisions and the
   reasons behind them — not a recap of everything read along the way.
+- **Write each `CLAUDE.md` fact where its code lives.** A package/app-level `CLAUDE.md` is loaded
+  for every file under it; a nested one loads only when that area is touched, so detail parked at
+  the top costs tokens on every unrelated task. Top-level files keep what is true everywhere (what
+  it is, commands, pins, cross-cutting rules) plus an index table of the per-area docs; everything
+  else belongs in `<area>/CLAUDE.md`, cross-linked rather than duplicated. Apply the same split to
+  new docs and to any top-level file you find growing.
 
 ## Monorepo layout & build order
 

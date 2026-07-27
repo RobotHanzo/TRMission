@@ -40,6 +40,22 @@ picks by `Platform.OS`. A blank id for one platform just means that placement re
 `adUnitId()` returns Google's `TestIds` under `__DEV__` **regardless** of what is checked in:
 clicking a live ad on your own inventory is invalid traffic that can suspend the account.
 
+## The version pin, and what shipping ads declared
+
+`react-native-google-mobile-ads` is **pinned exact to 16.3.4** and the pin is load-bearing: 16.4.0
+bumps the native SDK to play-services-ads 25.4.0, whose Kotlin metadata is 2.3.0 and cannot be read
+by Expo SDK 56 / RN 0.85's Kotlin 2.1.20 toolchain (`:react-native-google-mobile-ads:`
+`compileReleaseKotlin` fails). Bumping `kotlinVersion` instead breaks other autolinked modules
+(upstream invertase#863), so keep the caret off until Expo's own Kotlin catches up.
+
+**Adding the plugin changed the OTA fingerprint** — the first OTA after it landed needed a fresh
+native build on both stores.
+
+AdMob is also what unblocked Android's `AD_ID` permission and put Device ID (flagged as tracking)
+in the iOS privacy manifest — while the manifest's top-level `NSPrivacyTracking` stays **false**
+with no tracking domains, mirroring the Mobile Ads SDK's own manifest. That pairing is
+load-bearing: read the comment in `app.config.ts` before touching either key (ITMS-91064).
+
 ## Bring-up order (`ads.ts`)
 
 `initAds()` runs UMP consent → ATT → `mobileAds().initialize()`, in that order, and only initialises

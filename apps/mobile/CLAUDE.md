@@ -17,24 +17,25 @@ TRM_SERVER_ORIGIN=http://<lan-ip>:3001 yarn workspace @trm/mobile start   # poin
 
 Read the one for the area you're touching (Claude Code loads them on demand):
 
-| Area                                         | Doc                               |
-| -------------------------------------------- | --------------------------------- |
-| Skia board, camera, LOD, hit-testing         | `src/board/CLAUDE.md`             |
-| GameStage seam, layout tiers, builder screen | `src/screens/CLAUDE.md`           |
-| In-game components, animation layer          | `src/components/game/CLAUDE.md`   |
-| REST/WS transport, auth methods              | `src/net/CLAUDE.md`               |
-| Offline games + bots                         | `src/offline/CLAUDE.md`           |
-| Tutorial (P4)                                | `src/features/tutorial/CLAUDE.md` |
-| Push notifications, Expo Go gate             | `src/push/CLAUDE.md`              |
-| AdMob placements, consent/ATT, opt-out       | `src/ads/CLAUDE.md`               |
-| Moderation, settings, session stores         | `src/store/CLAUDE.md`             |
-| Haptics, game view logic                     | `src/game/CLAUDE.md`              |
-| Orientation & layout tiers                   | `src/app/CLAUDE.md`               |
-| Live Activities (iOS)                        | `modules/live-activity/CLAUDE.md` |
-| CNG config plugins (pbxproj injection)       | `plugins/CLAUDE.md`               |
-| jest mock infrastructure                     | `__mocks__/CLAUDE.md`             |
-| Build/release/OTA lanes + CI secrets         | `.github/workflows/CLAUDE.md`     |
-| OTA mechanism, runbook, rollback             | `docs/mobile/ota.md`              |
+| Area                                              | Doc                                |
+| ------------------------------------------------- | ---------------------------------- |
+| Skia board, camera, LOD, hit-testing              | `src/board/CLAUDE.md`              |
+| GameStage seam, layout tiers, builder screen      | `src/screens/CLAUDE.md`            |
+| In-game components, animation layer               | `src/components/game/CLAUDE.md`    |
+| REST/WS transport, auth methods                   | `src/net/CLAUDE.md`                |
+| Offline games + bots                              | `src/offline/CLAUDE.md`            |
+| Tutorial (P4)                                     | `src/features/tutorial/CLAUDE.md`  |
+| Push notifications, Expo Go gate                  | `src/push/CLAUDE.md`               |
+| AdMob placements, consent/ATT, opt-out, the pin   | `src/ads/CLAUDE.md`                |
+| Moderation, settings, session stores              | `src/store/CLAUDE.md`              |
+| Haptics, game view logic                          | `src/game/CLAUDE.md`               |
+| Orientation, layout tiers, Sentry + crash capture | `src/app/CLAUDE.md`                |
+| Web-harness bundling, platform splits             | `src/web/CLAUDE.md`                |
+| Live Activities (iOS)                             | `modules/live-activity/CLAUDE.md`  |
+| CNG config plugins (pbxproj injection)            | `plugins/CLAUDE.md`                |
+| jest mock infrastructure                          | `__mocks__/CLAUDE.md`              |
+| Build/release/OTA lanes + CI secrets              | repo `.github/workflows/CLAUDE.md` |
+| OTA mechanism, fingerprint rules, runbook         | repo `docs/mobile/ota.md`          |
 
 ## Stack & pins
 
@@ -43,18 +44,9 @@ Read the one for the area you're touching (Claude Code loads them on demand):
 - **React Navigation 7** native-stack (not Expo Router — few screens, heavily custom UI).
 - **jest 29** (NOT 30): `jest-expo@56` is a jest-29 preset; a jest-30 runtime collides with its
   jest-29 internals. Keep the whole `jest*` stack on 29.
-- **Google AdMob** (`react-native-google-mobile-ads`, **pinned exact to 16.3.4**, issue #50) — two
-  placements only, both policy-bounded; `src/ads/CLAUDE.md` is the contract. The pin is load-bearing:
-  16.4.0 bumps the native SDK to play-services-ads 25.4.0, whose Kotlin metadata is 2.3.0 and cannot
-  be read by Expo SDK 56 / RN 0.85's Kotlin 2.1.20 toolchain (`:react-native-google-mobile-ads:`
-  `compileReleaseKotlin` fails). Bumping `kotlinVersion` instead breaks other autolinked modules
-  (upstream invertase#863), so keep the caret off until Expo's own Kotlin catches up. Its config plugin's props are literals in
-  `app.config.ts`, never env, because plugin props feed the OTA fingerprint. **Adding the plugin
-  changed that fingerprint**: the first OTA after it landed needs a fresh native build on both
-  stores. AdMob is also what unblocked Android's `AD_ID` and put Device ID (flagged as tracking) in
-  the iOS privacy manifest — while the manifest's top-level `NSPrivacyTracking` stays **false** with
-  no tracking domains, mirroring the Mobile Ads SDK's own manifest. That pairing is load-bearing:
-  see the comment in `app.config.ts` before touching either key (ITMS-91064).
+- **`react-native-google-mobile-ads` pinned exact to 16.3.4** (issue #50) — a Kotlin-toolchain
+  collision, not a preference; `src/ads/CLAUDE.md` has the reason and the policy boundary on
+  placements.
 - **No EAS, no Expo push service, no _paid_ SaaS.** Builds run in GitHub Actions + fastlane; OTA (P5)
   is self-hosted; push (P0 server) is direct FCM/APNs — the app only registers native device tokens.
   Free / open-source hosted services are allowed where they neither bill nor lock us in (e.g. RNRepo's
@@ -73,7 +65,8 @@ The `@trm/*` packages export raw TS via an `exports` map with no `main`, consume
 (same as Vite does for web). Metro is configured with `watchFolders = [workspaceRoot]`,
 `nodeModulesPaths` (app → hoisted root), and `unstable_enablePackageExports = true` (asserted, not
 assumed — a Metro default flip fails loud). jest resolves the same TS source through symlinks
-(realpath → `packages/*`, transformed by babel-jest).
+(realpath → `packages/*`, transformed by babel-jest). Sentry additionally requires
+`getSentryExpoConfig` here — `src/app/CLAUDE.md`.
 
 ## Load-bearing Hermes shims (`src/shims.ts`, imported first from `index.ts`)
 
@@ -91,99 +84,39 @@ Three polyfills, all self-guarding (no-op on Node/jest, active only on Hermes):
 `yarn workspace @trm/mobile web` serves the app at http://localhost:8081 so agents can drive the
 mobile UI with Playwright. Guest login, lobby/online play, offline bot games, and the tutorial all
 work end-to-end (the Skia board renders through CanvasKit wasm). Never trade native quality for
-this surface; a device smoke is still the real acceptance bar.
+this surface; a device smoke is still the real acceptance bar. How it's bundled (entry ordering,
+platform splits, the alert shim): `src/web/CLAUDE.md`.
 
 - **Pointing at a server**: `TRM_SERVER_ORIGIN=http://localhost:3001 yarn workspace @trm/mobile web`,
   and start the server with `CORS_ORIGINS=http://localhost:8081` — the browser enforces CORS where
   native clients don't. The origin bakes into the bundle at TRANSFORM time and survives Metro
   restarts in the transform cache: after changing it, start once with
   `npx expo start --web --clear`.
-- **Entry** (`index.ts` web branch): CanvasKit must finish loading before the app graph EVALUATES
-  (Skia's web modules read `global.CanvasKit` at import), so App is `require`d only after
-  `LoadSkiaWeb` resolves. `scripts/setup-web.js` copies `canvaskit.wasm` → `public/` (gitignored);
-  the `web` script runs it automatically.
-- **Platform splits** (Metro resolves `.web.ts(x)` on web; jest/native never see them — they're
-  typechecked standalone), each documented in its area's doc: `net/secureStore.web.ts`,
-  `offline/localStore.web.ts`, `screens/builderWebView.web.tsx` (iframe),
-  `board/BoardCanvas.web.tsx` + `board/webFonts.ts`, `components/game/CardRowScroll.web.tsx`.
-  Gated to `null` on web like under Expo Go: `push/expoNotifications.ts`,
-  `auth/googleSigninModule.ts`. Apple auth needs no gate (`requireOptionalNativeModule` stub;
-  `isAvailableAsync()` → false). **`ads/googleMobileAds.web.ts` must stay a real file split**, not
-  just a `Platform.OS` branch: Metro still resolves the `require()` inside such a branch when
-  bundling for web, and `react-native-google-mobile-ads` imports `react-native/Libraries/…`
-  internals that Expo's web resolver rejects — the whole web bundle fails to build.
-- **Alerts**: RNW's `Alert.alert` is a silent no-op, so `src/web/alertShim.ts` (installed from the
-  web entry branch) maps it onto `window.confirm`/`window.alert` — OK runs the LAST non-cancel
-  button, Cancel the `style: 'cancel'` one. Playwright must handle these as native dialogs
+- **Alerts** become native browser dialogs, so Playwright must handle them as such
   (`browser_handle_dialog` / `page.on('dialog')`).
 - **Selectors**: RNW emits `testID` as `data-testid`; the accessibility tree mirrors RN
   accessibility props (roles/labels), so a11y snapshots are the primary way to target UI.
 
-## Error reporting (`src/app/sentry.ts`, issue #44)
-
-`@sentry/react-native` + its `'@sentry/react-native/expo'` config plugin. Opt-in via
-`TRM_SENTRY_DSN` → `extra.sentryDsn` → `src/config.ts`; unset ⇒ `Sentry.init` is never called.
-Initialised from `index.ts` right after the shims and `installCrashCapture()`, and skipped entirely
-on the RNW web harness.
-
-- **`crashCapture.ts` stays.** It is the offline/TestFlight fallback (AsyncStorage → Settings share
-  sheet) and needs no network or account; Sentry is the online path. `RootErrorBoundary` writes the
-  local record **first**, then reports. Deliberately independent — a wedged network must not cost us
-  the report we already have locally.
-- The plugin is passed **no props**: org/project/token come from `SENTRY_ORG`/`SENTRY_PROJECT`/
-  `SENTRY_AUTH_TOKEN` at build time, which keeps the plugin entry (and so the OTA fingerprint)
-  identical whether or not a Sentry account is configured.
-- **`metro.config.js` must use `getSentryExpoConfig`, never `getDefaultConfig` + `withSentryConfig`.**
-  The latter is Sentry's bare-RN path: it wraps Expo's `serializer.customSerializer` in its own, and
-  on Metro 0.84 (SDK 56) Expo's serializer result is no longer the shape Sentry expects, so every
-  **release** bundle dies in `determineDebugIdFromBundleSource` ("Cannot read properties of
-  undefined (reading 'match')"). Dev bundling early-returns before that code, so the breakage is
-  invisible until `createBundleReleaseJsAndAssets` runs in CI — verify a config change with
-  `npx expo export:embed --platform android --dev false ...`, not with `expo start`.
-- **Adding the dependency changed the `runtimeVersion` fingerprint**: the first OTA published after
-  this landed needs a fresh native build on both stores first, or no installed binary will match it.
-- `TRM_SENTRY_*` must be set on **every** env block that re-evaluates `app.config.ts` — both store
-  lanes AND the OTA publish lane, because an applied update's manifest replaces the binary's
-  `extra`. Same lockstep rule as the Google client ids.
-- **Mobile Session Replay is wired but OFF** (both sample rates default to 0). It records the
-  screen, which on a hidden-information game includes the player's hand, and the Skia board is a
-  single native view whose masking has not been verified on a device. Verify masking on a real
-  device before raising either rate.
-- The iOS privacy manifest declares crash/performance/other-diagnostic collection (not linked to
-  identity, not tracking) — keep it in step if the SDK's collection changes.
-- **Mobile stays id-only, unlike web/admin.** The shared denylist was narrowed in 2026-07 so
-  identifiers (email, IP) reach Sentry, and web/admin now attach `{ id, email, username }` with
-  `sendDefaultPii: true`. This surface deliberately did **not** follow: it still sets
-  `sendDefaultPii: false` and `Sentry.setUser({ id })`, because linking diagnostics to identity
-  means flipping `NSPrivacyCollectedDataTypeLinked` and declaring Email Address in
-  `app.config.ts` — which changes the OTA fingerprint, so it needs a fresh native build on both
-  stores. Do the manifest edit and the SDK change in the same release or neither.
-
 ## OTA updates (expo-updates + self-hosted expo-open-ota)
 
 `app.config.ts` pins `runtimeVersion: { policy: 'fingerprint' }` and code-signing against the
-committed `certs/certificate.pem` (`fallbackToCacheTimeout: 0` — stale-while-revalidate; the
-forced-update gate `GET /version/mobile` is independent and still runs every boot). `updates.url`
-comes from `TRM_OTA_URL`, the channel from `TRM_OTA_CHANNEL` (`expo-channel-name` header), the app
-from `TRM_OTA_APP_ID` (`expo-app-id` header — **omitted, not blanked, when unset**).
-**Everything in `updates.requestHeaders` feeds the runtimeVersion fingerprint**, so the OTA lane and
-the store lanes must bake identical values; the deployed server and the `eoas` CLI are pinned to the
-same version because they only work in matched pairs. More generally, **any env var this file reads
-into a fingerprint-visible field makes the runtime version depend on which lane evaluated the file**
-— `TRM_GOOGLE_IOS_URL_SCHEME` is the one that bit us (a config-plugin prop, so hashed for Android
-even though its native effect is iOS-only: `mobile-android.yml` never set it, so no Android device
-ever saw an OTA — issue #62). `scripts/fingerprintEnv.js` is the gate: `--assert` in
-every CI env block that evaluates this config, `--audit` on mobile-ci to keep its list of required
-vars equal to the set that actually reaches the fingerprint. The private key in `certs/keys/` is gitignored
-and must never be committed. Full contract, runbook, rollback, fallbacks: `docs/mobile/ota.md`;
-host setup: `docs/release/ota-server-setup.md`.
+committed `certs/certificate.pem`; `updates.url`/channel/app-id come from `TRM_OTA_URL` /
+`TRM_OTA_CHANNEL` / `TRM_OTA_APP_ID` (the `expo-app-id` header is **omitted, not blanked, when
+unset**). The private key in `certs/keys/` is gitignored and must never be committed. Full contract,
+runbook, rollback and fallbacks: `docs/mobile/ota.md`; host setup:
+`docs/release/ota-server-setup.md`.
 
-`fingerprint.config.js` narrows what the fingerprint hashes to the native surface —
-`sourceSkips: ['ExpoConfigVersions', 'ExpoConfigExtraSection']`. Both skips are load-bearing
-(issue #55): by default `@expo/fingerprint` hashes `version`/`versionCode`/`buildNumber` and the
-whole `extra` block, which the store lanes stamp per release and the OTA lane cannot, so no publish
-could ever match a shipped binary. Two rules follow. **Nothing the app must trust across an update
-may come from `extra` or `expoConfig.version`** — `src/config.ts` reads `BUILD_NUMBER`/`APP_VERSION`
-off the native binary via expo-application, because the forced-update gate compares that build
-number against the server's `minBuild`. And **editing `fingerprint.config.js` changes every runtime
-version**, so the next OTA after such a change needs a fresh native build on both stores first.
+Three rules bind any edit to `app.config.ts` or `fingerprint.config.js`:
+
+1. **Anything a fingerprint-visible field reads from env makes the runtime version depend on which
+   lane evaluated the config**, so the OTA lane and both store lanes must bake identical values.
+   `TRM_GOOGLE_IOS_URL_SCHEME` is the one that bit us — a config-plugin prop, hashed for Android
+   even though its native effect is iOS-only, so no Android device ever saw an OTA (issue #62).
+   `scripts/fingerprintEnv.js` is the gate: `--assert` in every CI env block that evaluates the
+   config, `--audit` on mobile-ci.
+2. **Nothing the app must trust across an update may come from `extra` or `expoConfig.version`** —
+   `fingerprint.config.js` skips `ExpoConfigVersions` + `ExpoConfigExtraSection` (issue #55), so
+   `src/config.ts` reads `BUILD_NUMBER`/`APP_VERSION` off the native binary via expo-application
+   instead. The forced-update gate `GET /version/mobile` compares that build number.
+3. **Adding a dependency/plugin or editing `fingerprint.config.js` changes every runtime version** —
+   the next OTA after such a change needs a fresh native build on both stores first.
