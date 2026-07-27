@@ -1,4 +1,12 @@
+// The card raises no SafeAreaProvider of its own (it renders inside a Modal), so the tree under
+// test needs the same inset stub the screen tests use — with a home indicator and a landscape
+// notch, because reserving room for both is what issue #65 was about.
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 47, bottom: 34, left: 21, right: 0 }),
+}));
+
 import { render, fireEvent, act } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema } from '@trm/proto';
 import { ROUTES, TICKETS, ticketById } from '../../../game/content';
@@ -81,6 +89,28 @@ describe('PlayerCard (issue #14)', () => {
   it('renders nothing for an id that is not seated', () => {
     const { toJSON } = render(<PlayerCard snapshot={snap} playerId="ghost" onClose={jest.fn()} />);
     expect(toJSON()).toBeNull();
+  });
+
+  // Issue #65: the sheet sits on the bottom edge, where a phone's home indicator and rounded
+  // corners eat whatever the last row does not step back from.
+  it('keeps its content clear of the home indicator and a landscape notch', () => {
+    const { getByTestId } = render(
+      <PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />,
+    );
+    const body = getByTestId('player-card-body');
+    expect(StyleSheet.flatten(body.props.contentContainerStyle).paddingBottom).toBe(16 + 34);
+    // …and the same for the bar that replaces the body while the network is lit.
+    fireEvent.press(getByTestId('player-card-reveal'));
+    const barStyle = StyleSheet.flatten(getByTestId('player-card-reveal-bar').props.style);
+    expect(barStyle.paddingBottom).toBe(12 + 34);
+    expect(barStyle.paddingLeft).toBe(16 + 21);
+  });
+
+  it('shows a grab handle, so the sheet reads as something you can pull away', () => {
+    const { getByTestId } = render(
+      <PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />,
+    );
+    expect(getByTestId('player-card-grab')).toBeTruthy();
   });
 
   it('offers no report action for a bot', () => {

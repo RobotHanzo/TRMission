@@ -983,6 +983,8 @@ button.tracker:hover {
    while the card is open. Rendered at stage level, so it is not trapped inside the scrolling
    rail. `--seat` is set inline. On a phone it becomes a bottom sheet over the dock. */
 .player-card {
+  /* One gutter drives every row, so the phone sheet can widen it in one place (issue #65). */
+  --pcard-pad: var(--tr-space-3);
   grid-area: rail;
   z-index: 20;
   min-width: 0;
@@ -1006,7 +1008,7 @@ button.tracker:hover {
   display: flex;
   align-items: flex-start;
   gap: var(--tr-space-2);
-  padding: var(--tr-space-3);
+  padding: var(--pcard-pad);
   border-bottom: 1px solid var(--tr-line);
   background: var(--tr-surface-2);
 }
@@ -1045,7 +1047,7 @@ button.tracker:hover {
   flex: none;
 }
 .pcard-sec {
-  padding: var(--tr-space-3);
+  padding: var(--pcard-pad);
   border-bottom: 1px solid var(--tr-line);
 }
 .pcard-sec:last-child {
@@ -1232,7 +1234,7 @@ button.tracker:hover {
 }
 
 .pcard-foot {
-  padding: var(--tr-space-2) var(--tr-space-3);
+  padding: var(--tr-space-2) var(--pcard-pad);
   display: flex;
   border-top: 1px solid var(--tr-line);
 }
@@ -1320,7 +1322,10 @@ button.tracker:hover {
 }
 
 /* Phone: the card rises as a bottom sheet over the dock. No scrim — the board stays readable
-   and pannable, so a revealed network can actually be followed. */
+   and pannable, so a revealed network can actually be followed.
+   The sheet sits ON the display's edges, so every row steps back from what the phone puts there
+   (issue #65): the home indicator below, the rounded corners under both bottom corners, and a
+   landscape notch down one side. `viewport-fit=cover` in index.html is what makes env() real. */
 .game--dock .player-card {
   position: fixed;
   grid-area: auto;
@@ -1332,6 +1337,40 @@ button.tracker:hover {
   padding-bottom: env(safe-area-inset-bottom, 0px);
   animation: pcard-up 0.18s ease-out;
 }
+.pcard-sheet {
+  --pcard-pad: var(--tr-space-4);
+  /* The spring-back after a pull that did not go far enough; the pull itself is an inline
+     transform, driven by the pointer, and suppressed by .pcard-dragging. */
+  transition: transform 0.18s ease-out;
+}
+.pcard-sheet .pcard-head,
+.pcard-sheet .pcard-sec,
+.pcard-sheet .pcard-foot {
+  padding-inline: calc(var(--pcard-pad) + env(safe-area-inset-left, 0px))
+    calc(var(--pcard-pad) + env(safe-area-inset-right, 0px));
+}
+/* Pull the head down to dismiss. `touch-action: none` keeps the browser from reading the same
+   drag as a scroll of the card body; the head itself never scrolls, so nothing is lost. */
+.pcard-sheet .pcard-head {
+  position: relative;
+  padding-top: calc(var(--pcard-pad) + 8px);
+  touch-action: none;
+  cursor: grab;
+}
+.pcard-dragging {
+  transition: none;
+  cursor: grabbing;
+}
+.pcard-grab {
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  margin-inline-start: -20px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--tr-ink) 20%, transparent);
+}
 @keyframes pcard-up {
   from {
     opacity: 0;
@@ -1341,6 +1380,9 @@ button.tracker:hover {
 @media (prefers-reduced-motion: reduce) {
   .player-card {
     animation: none;
+  }
+  .pcard-sheet {
+    transition: none;
   }
 }
 

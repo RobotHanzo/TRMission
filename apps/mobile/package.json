@@ -101,6 +101,9 @@
   "jest": {
     "preset": "jest-expo",
     "resolver": "<rootDir>/jest.resolver.js",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "cacheDirectory": "<rootDir>/.jest-cache",
     "testMatch": [
       "**/*.test.ts",

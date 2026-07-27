@@ -860,6 +860,7 @@ export function GameStage({
           snapshot={snapshot}
           playerId={inspectedId}
           onClose={() => setInspectedId(null)}
+          sheet={phone}
         />
       )}
 

@@ -5,7 +5,12 @@
 // Every value it shows is already public on the wire (counts-only PublicPlayerState, the public
 // ownership/stations placements, and completedTickets); the derivation lives in
 // @trm/client-core so the mobile sheet renders the same card.
-import { useEffect, useState } from 'react';
+//
+// On a phone (`sheet`) it rises from the bottom edge instead, where it grows a grab handle and a
+// pull-down dismissal (issue #65) — the gesture a sheet is expected to answer to, and the one that
+// does not ask for a thumb on the small × in the far corner. Clearing the display's own furniture
+// (home indicator, rounded corners, a landscape notch) is the stylesheet's half of that issue.
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Map as MapIcon, X } from 'lucide-react';
 import type { GameSnapshot } from '@trm/proto';
@@ -14,6 +19,7 @@ import {
   isLowOnTrains,
   trainSupplyFraction,
 } from '@trm/client-core/game/playerCard';
+import { sheetDragOffset, shouldDismissSheet } from '@trm/client-core/game/sheetDismiss';
 import { canModerate } from '../store/moderation';
 import { seatColor, teamColor } from '../theme/colors';
 import { useAnimationsStore } from '../store/animations';
@@ -23,14 +29,20 @@ import { cityName, ticketLabel } from '../game/content';
 import { SeatAvatar } from './SeatAvatar';
 import { PlayerActionDialog } from './PlayerActionDialog';
 
+/** Movement that turns a press on the head into a drag rather than a tap on what is under it. */
+const DRAG_SLOP = 6;
+
 export function PlayerCard({
   snapshot,
   playerId,
   onClose,
+  sheet = false,
 }: {
   snapshot: GameSnapshot;
   playerId: string;
   onClose(): void;
+  /** Phone layout: the card is a bottom sheet, so it can be pulled down to dismiss. */
+  sheet?: boolean;
 }) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -40,6 +52,9 @@ export function PlayerCard({
   const clearRouteReveal = useAnimationsStore((s) => s.clearRouteReveal);
   const [revealed, setRevealed] = useState(false);
   const [reporting, setReporting] = useState(false);
+  const [pulled, setPulled] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const drag = useRef<{ id: number; from: number; lastY: number; lastAt: number } | null>(null);
 
   // Esc closes, matching the app's other dismissible overlays.
   useEffect(() => {
@@ -75,14 +90,65 @@ export function PlayerCard({
     setRevealed(true);
   };
 
+  // Pull-to-dismiss. The head is the drag surface (the body below it scrolls, and a gesture that
+  // fought the scroll would win the wrong half the time), and the pointer is captured only once
+  // the press has travelled past the slop — before that it is still a tap, so the close button and
+  // the chips underneath keep behaving like buttons.
+  const dragHandlers = sheet
+    ? {
+        onPointerDown: (e: React.PointerEvent) => {
+          if (e.button !== 0) return;
+          drag.current = {
+            id: e.pointerId,
+            from: e.clientY,
+            lastY: e.clientY,
+            lastAt: e.timeStamp,
+          };
+        },
+        onPointerMove: (e: React.PointerEvent) => {
+          const d = drag.current;
+          if (!d || d.id !== e.pointerId) return;
+          const dy = e.clientY - d.from;
+          if (!dragging) {
+            if (Math.abs(dy) < DRAG_SLOP) return;
+            e.currentTarget.setPointerCapture?.(e.pointerId);
+            setDragging(true);
+          }
+          setPulled(sheetDragOffset(dy));
+          d.lastY = e.clientY;
+          d.lastAt = e.timeStamp;
+        },
+        onPointerUp: (e: React.PointerEvent) => {
+          const d = drag.current;
+          drag.current = null;
+          if (!d || d.id !== e.pointerId || !dragging) return;
+          setDragging(false);
+          setPulled(0);
+          // px per second over the last move, so a short flick dismisses like a long pull does.
+          const dt = Math.max(1, e.timeStamp - d.lastAt);
+          if (shouldDismissSheet(e.clientY - d.from, ((e.clientY - d.lastY) / dt) * 1000))
+            onClose();
+        },
+        onPointerCancel: () => {
+          drag.current = null;
+          setDragging(false);
+          setPulled(0);
+        },
+      }
+    : {};
+
   return (
     <aside
-      className="player-card"
+      className={`player-card${sheet ? ' pcard-sheet' : ''}${dragging ? ' pcard-dragging' : ''}`}
       role="dialog"
       aria-label={`${t('playerCard')} · ${name}`}
-      style={{ ['--seat' as string]: seat }}
+      style={{
+        ['--seat' as string]: seat,
+        ...(pulled ? { transform: `translateY(${pulled}px)` } : {}),
+      }}
     >
-      <header className="pcard-head">
+      <header className="pcard-head" {...dragHandlers}>
+        {sheet && <span className="pcard-grab" aria-hidden data-testid="pcard-grab" />}
         <SeatAvatar
           avatar={avatarOf({ id: playerId, seat: view.seat, displayName: name })}
           seat={view.seat}

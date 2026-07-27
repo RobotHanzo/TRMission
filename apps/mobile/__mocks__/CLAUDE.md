@@ -8,7 +8,10 @@ components are jest-expo `*.test.tsx` — keep the globs disjoint. jest stays on
   `lucide-react-native` (Proxy stubs — it ships `.mjs` outside the transform), the official
   `react-native-reanimated/mock`, and a composed `../jest.resolver.js` (worklets
   `.native`-extension strip + the RN resolver) so reanimated 4 imports run under jest-expo.
-  gesture-handler is covered by jest-expo's own setup.
+- `../jest.setup.js` (`setupFilesAfterEnv`) pulls in gesture-handler's own `jestSetup`, which swaps
+  its native module for JS mocks. `GestureDetector` alone never needed it; a component that mounts
+  its **own** `GestureHandlerRootView` does (the player card, inside its Modal — on Android a modal
+  is a separate native window), because that view calls `RNGestureHandlerModule.install()`.
 - `expo.js` forces `isRunningInExpoGo()` false under jest (jest-expo's own native-module automock
   otherwise reports `ExpoGo` present) while delegating every other export to the real `expo`
   package — don't narrow that mock further without checking who else imports from `expo`

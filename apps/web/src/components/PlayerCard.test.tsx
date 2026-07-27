@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema } from '@trm/proto';
+import { SHEET_DISMISS_DISTANCE } from '@trm/client-core/game/sheetDismiss';
 import '../i18n'; // initialise react-i18next so labels resolve
 import i18n from '../i18n';
 import { PlayerCard } from './PlayerCard';
@@ -99,6 +100,54 @@ describe('PlayerCard (issue #14)', () => {
     render(<PlayerCard snapshot={snap} playerId="p0" onClose={() => (closed = true)} />);
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(closed).toBe(true);
+  });
+});
+
+// Issue #65: on a phone the card is a bottom sheet, and a sheet is dismissed by pulling it down.
+describe('PlayerCard as a phone sheet (issue #65)', () => {
+  beforeEach(() => {
+    useAnimations.getState().reset();
+    useRoster.getState().clear();
+    void i18n.changeLanguage('zh-Hant');
+  });
+
+  const head = (container: HTMLElement): Element => container.querySelector('.pcard-head')!;
+  const pull = (el: Element, to: number, at = 1000): void => {
+    fireEvent.pointerDown(el, { pointerId: 1, button: 0, clientY: 0, timeStamp: 0 });
+    fireEvent.pointerMove(el, { pointerId: 1, clientY: to / 2, timeStamp: at / 2 });
+    fireEvent.pointerMove(el, { pointerId: 1, clientY: to, timeStamp: at });
+    fireEvent.pointerUp(el, { pointerId: 1, clientY: to, timeStamp: at });
+  };
+
+  it('closes when the head is pulled down past the shared threshold', () => {
+    let closed = false;
+    const { container } = render(
+      <PlayerCard snapshot={snap} playerId="p0" onClose={() => (closed = true)} sheet />,
+    );
+    expect(container.querySelector('.pcard-grab')).not.toBeNull();
+    pull(head(container), SHEET_DISMISS_DISTANCE + 10);
+    expect(closed).toBe(true);
+  });
+
+  it('springs back from a short, slow pull instead of closing', () => {
+    let closed = false;
+    const { container } = render(
+      <PlayerCard snapshot={snap} playerId="p0" onClose={() => (closed = true)} sheet />,
+    );
+    // Slow: 20px over a full second is nowhere near the flick velocity either.
+    pull(head(container), 20, 1000);
+    expect(closed).toBe(false);
+    expect((container.querySelector('.player-card') as HTMLElement).style.transform).toBe('');
+  });
+
+  it('leaves the docked panel undraggable — only the phone sheet gets the gesture', () => {
+    let closed = false;
+    const { container } = render(
+      <PlayerCard snapshot={snap} playerId="p0" onClose={() => (closed = true)} />,
+    );
+    expect(container.querySelector('.pcard-grab')).toBeNull();
+    pull(head(container), SHEET_DISMISS_DISTANCE + 10);
+    expect(closed).toBe(false);
   });
 });
 

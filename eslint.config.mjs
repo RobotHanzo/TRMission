@@ -20,6 +20,7 @@ export default tseslint.config(
       // jest infrastructure is CommonJS by necessity (loaded by jest itself, not the app).
       '**/__mocks__/**',
       '**/jest.resolver.js',
+      '**/jest.setup.js',
       // plain CommonJS bin script (no build step, run directly by node).
       'tooling/tsc7/bin/**',
       // brand-asset generator (plain node script, run manually; see apps/mobile/assets/*.png).
