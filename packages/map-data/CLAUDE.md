@@ -39,6 +39,9 @@ true)` over Natural Earth admin-1 polygons — and every stop's coordinate is it
   custom-geography renderer draws the way Taiwan draws its Central Range. Unlike `taipei/`, its
   stop coordinates are hand-placed (not projected), so `test/taipei-transit.spec.ts` pins looser
   properties (no crossings, stops on land, relief walls the tunnels cross) plus the v1 hash.
+  Its `OFFICIAL_MAPS` entry also carries `recommendedTeamMode: true` — a presentation-only flag on
+  the **registry entry, never `meta`** (which `hashContent` folds in), surfaced by
+  `@trm/client-core`'s `officialMapOptions` so every picker tags it.
   Adding another official map means: a directory here, a `CONTENT_REGISTRY` entry (recovery
   resolves a persisted game's board through it), and an `OFFICIAL_MAPS` entry — the room settings
   selectors, the fork flow, and both clients' bundled content caches all iterate that list, so

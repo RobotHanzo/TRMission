@@ -20,6 +20,8 @@ export default {
   mapLabel: 'Map',
   mapOfficial: 'Official',
   mapCustom: 'Custom',
+  // Tagged on a map in the picker: this one is meant to be played in team mode.
+  mapTeamRecommended: 'Team mode recommended',
   settingUnlimitedStationBorrow: 'Unlimited station borrowing',
   settingUnlimitedStationBorrowDesc:
     'Each station may borrow every adjacent opponent route; tickets lock in and score the moment they connect.',

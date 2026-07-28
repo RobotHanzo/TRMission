@@ -195,6 +195,9 @@ describe('大臺北軌道交通 (Greater Taipei Rail Transit) map content', () =
     expect(official!.hash).toBe(TAIPEI_TRANSIT_CONTENT_HASH);
     // Its geography is content, so a fork needs no separately-generated silhouette.
     expect(official!.forkGeography).toBeUndefined();
+    // The author's map is a team-mode map; the flag is registry-only, so the pinned hash below
+    // is what proves tagging it moved no content.
+    expect(official!.recommendedTeamMode).toBe(true);
     expect(OFFICIAL_MAPS.map((m) => m.mapId)).toEqual(['taiwan', 'taipei', 'taipei-transit']);
     expect(resolveContentByHash(TAIPEI_TRANSIT_CONTENT_HASH)).toBe(TAIPEI_TRANSIT_CONTENT);
   });

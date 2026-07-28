@@ -5,6 +5,7 @@ import type zh from '../zh-Hant/offline';
 export default {
   newGame: 'New offline game',
   map: 'Map',
+  mapTeamRecommended: gameSettings.mapTeamRecommended,
   botCount: 'Bots',
   difficulty: 'Difficulty',
   difficultyEASY: difficulty.difficulty_EASY,

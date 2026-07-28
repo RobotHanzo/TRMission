@@ -106,6 +106,10 @@ export interface OfficialMap {
   /** Geography to seed a fork with when the content carries none (Taiwan's built-in silhouette
    *  is not a MapGeography). Absent for world-cropped official maps — use content.geography. */
   readonly forkGeography?: MapGeography;
+  /** The map plays best in team mode, and every picker that lists it says so. Presentation-only,
+   *  and deliberately NOT in `meta`: `hashContent` folds `meta` in, so flagging a map here never
+   *  moves its content hash (and never strands an in-flight game's board). */
+  readonly recommendedTeamMode?: boolean;
 }
 
 /** Every map shipped by TRMission itself (as opposed to a user-authored custom map). The first
@@ -123,11 +127,13 @@ export const OFFICIAL_MAPS: readonly OfficialMap[] = [
     content: TAIPEI_CONTENT,
     hash: TAIPEI_CONTENT_HASH,
   },
-  // 大臺北軌道交通 (community-authored by 嶼翼) likewise carries its own `geography`.
+  // 大臺北軌道交通 (community-authored by 嶼翼) likewise carries its own `geography`, and is the
+  // author's team-mode map — the pickers carry that recommendation next to the credit.
   {
     mapId: TAIPEI_TRANSIT_CONTENT.meta.mapId,
     content: TAIPEI_TRANSIT_CONTENT,
     hash: TAIPEI_TRANSIT_CONTENT_HASH,
+    recommendedTeamMode: true,
   },
 ];
 

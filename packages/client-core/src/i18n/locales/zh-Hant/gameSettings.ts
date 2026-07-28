@@ -18,6 +18,8 @@ export default {
   mapLabel: '地圖',
   mapOfficial: '官方',
   mapCustom: '自訂',
+  // 標在地圖選單上：這張圖建議以組隊模式遊玩。
+  mapTeamRecommended: '推薦組隊模式',
   settingUnlimitedStationBorrow: '車站無限借用路線',
   settingUnlimitedStationBorrowDesc:
     '每個車站可借用所有相鄰的對手路線；任務於連通當下即時鎖定計分。',

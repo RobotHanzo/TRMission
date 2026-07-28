@@ -114,6 +114,12 @@ describe('RoomSettingsPanel group pages', () => {
     expect(screen.getAllByText('台灣本島與離島').length).toBeGreaterThan(0);
   });
 
+  it('tags the team-mode map in the picker, credit and all', () => {
+    renderPanel();
+    fireEvent.press(screen.getByTestId('room-settings-nav-map'));
+    expect(screen.getByText('大臺北軌道交通（嶼翼） · 推薦組隊模式')).toBeTruthy();
+  });
+
   it('leaves an official map the server switched off out of the host picker', () => {
     renderPanel({ officialMapIds: ['taiwan'] });
     fireEvent.press(screen.getByTestId('room-settings-nav-map'));

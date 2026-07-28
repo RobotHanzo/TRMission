@@ -326,6 +326,17 @@
   border-radius: 999px;
   padding: 1px 7px;
 }
+/* Same pill as the author credit, but it recommends rather than attributes — so it carries the
+   accent the rest of the room uses for "this is worth reading". */
+.map-tag {
+  font-size: 0.72em;
+  font-weight: 600;
+  color: var(--tr-accent);
+  border: 1px solid color-mix(in srgb, var(--tr-accent) 45%, transparent);
+  background: color-mix(in srgb, var(--tr-accent) 12%, transparent);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
 .map-meta {
   grid-column: 2;
   margin-top: 2px;

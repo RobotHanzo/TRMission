@@ -214,7 +214,14 @@ function GroupControls({
           <ChoiceRow
             first={!canBuild}
             label={t('room.mapOfficial')}
-            options={officialMaps.map((m) => ({ value: m.mapId, label: m.label }))}
+            // A chip is one string, so the team-mode recommendation rides in the label the same
+            // way a community map's author credit already does.
+            options={officialMaps.map((m) => ({
+              value: m.mapId,
+              label: m.recommendedTeamMode
+                ? `${m.label} · ${t('room.mapTeamRecommended')}`
+                : m.label,
+            }))}
             value={settings.map.mapId}
             onChange={(mapId) => onChange({ map: { source: 'official', mapId } })}
           />

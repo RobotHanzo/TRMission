@@ -109,11 +109,14 @@ export function OfflineSetupScreen({ navigation }: Props) {
       <Text style={[styles.label, { color: tokens.inkSoft }]}>{t('offline.map')}</Text>
       <View style={styles.row}>
         {/* Offline play bundles every official map (no server switch applies without a server);
-            the shared options carry a community map's author credit in the label. */}
+            the shared options carry a community map's author credit in the label, and a map meant
+            for team mode says so next to it. */}
         {officialMapOptions(null, zh ? 'zh-Hant' : 'en').map((m) => (
           <Choice
             key={m.mapId}
-            label={m.label}
+            label={
+              m.recommendedTeamMode ? `${m.label} · ${t('offline.mapTeamRecommended')}` : m.label
+            }
             selected={mapId === m.mapId}
             onPress={() => setMapId(m.mapId)}
             tokens={tokens}

@@ -5,6 +5,7 @@ import { difficulty, eventsMode, gameSettings } from '@trm/client-core/i18n/loca
 export default {
   newGame: '新離線對局',
   map: '地圖',
+  mapTeamRecommended: gameSettings.mapTeamRecommended,
   botCount: '電腦玩家數',
   difficulty: '難度',
   difficultyEASY: difficulty.difficulty_EASY,

@@ -160,12 +160,15 @@ export function RoomSettingsPanel(props: Props) {
 function MapStop({
   name,
   author,
+  teamPick = false,
   meta,
   selected,
   onSelect,
 }: {
   name: string;
   author?: string | undefined;
+  /** Tags the stop as a map meant for team mode (see officialMaps' recommendedTeamMode). */
+  teamPick?: boolean;
   meta: string;
   selected: boolean;
   onSelect(): void;
@@ -182,6 +185,7 @@ function MapStop({
         {author !== undefined && (
           <span className="map-by">{t('builder.mapAuthor', { author })}</span>
         )}
+        {teamPick && <span className="map-tag">{t('mapTeamRecommended')}</span>}
       </span>
       <span className="map-meta">{meta}</span>
     </label>
@@ -228,6 +232,7 @@ function GroupControls({
               key={m.mapId}
               name={m.name}
               author={m.author}
+              teamPick={m.recommendedTeamMode}
               meta={t('mapSize', { cities: m.cities, routes: m.routes })}
               selected={settings.map.source === 'official' && m.mapId === selectedId}
               onSelect={() => onChange({ map: { source: 'official', mapId: m.mapId } })}

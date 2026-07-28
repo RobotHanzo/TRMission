@@ -40,6 +40,15 @@ describe('officialMapOptions', () => {
     expect(zh?.name).toBe('大臺北軌道交通');
   });
 
+  it('flags the team-mode map, so a picker can tag it before it is chosen', () => {
+    const [transit] = officialMapOptions(['taipei-transit'], 'zh-Hant');
+    const [taiwan] = officialMapOptions(['taiwan'], 'zh-Hant');
+    expect(transit?.recommendedTeamMode).toBe(true);
+    // The tag itself is a UI string each client renders, so it never leaks into the label.
+    expect(transit?.label).toBe('大臺北軌道交通（嶼翼）');
+    expect(taiwan?.recommendedTeamMode).toBe(false);
+  });
+
   it('states network size, so a picker can show it before the map is chosen', () => {
     const [taiwan] = officialMapOptions(['taiwan'], 'zh-Hant');
     expect(taiwan?.cities).toBe(OFFICIAL_MAPS[0]!.content.cities.length);

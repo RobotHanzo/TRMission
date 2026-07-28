@@ -9,6 +9,10 @@ export interface OfficialMapOption {
   label: string;
   /** Community author credit (meta.author), for pickers that render it separately. */
   author?: string;
+  /** The map is recommended for team mode — pickers tag it so a host reads that before choosing.
+   *  Not folded into `label`: the tag is a UI string, so each client renders it through its own
+   *  `t()` (this module has no i18next). */
+  recommendedTeamMode: boolean;
   /** Network size, so a picker can state how big a map is before it is chosen. */
   cities: number;
   routes: number;
@@ -45,6 +49,7 @@ export function officialMapOptions(
       // picker (mobile's choice rows) shows it without per-platform work.
       label: author === undefined ? name : `${name}（${author}）`,
       ...(author !== undefined ? { author } : {}),
+      recommendedTeamMode: m.recommendedTeamMode === true,
       cities: m.content.cities.length,
       routes: m.content.routes.length,
     };
