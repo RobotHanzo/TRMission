@@ -3,9 +3,15 @@ import type { Locale } from '../net/restTypes';
 
 export interface OfficialMapOption {
   mapId: string;
+  /** Name only, in the active locale — for pickers that render the credit as its own element. */
+  name: string;
+  /** Name with the author credit folded in, for single-string pickers (mobile's choice rows). */
   label: string;
   /** Community author credit (meta.author), for pickers that render it separately. */
   author?: string;
+  /** Network size, so a picker can state how big a map is before it is chosen. */
+  cities: number;
+  routes: number;
 }
 
 /**
@@ -34,10 +40,13 @@ export function officialMapOptions(
     const name = locale === 'en' ? nameEn : nameZh;
     return {
       mapId: m.mapId,
-      // A community-authored map carries its credit in the label itself, so every picker —
-      // web <option>s, mobile choice rows — shows it without per-platform work.
+      name,
+      // A community-authored map carries its credit in the label itself, so a single-string
+      // picker (mobile's choice rows) shows it without per-platform work.
       label: author === undefined ? name : `${name}（${author}）`,
       ...(author !== undefined ? { author } : {}),
+      cities: m.content.cities.length,
+      routes: m.content.routes.length,
     };
   });
 }

@@ -388,8 +388,8 @@ describe('RoomScreen map picker', () => {
     ]);
     render(<RoomScreen />);
     await openSettingsGroup(/^地圖/);
-    const customBtn = await screen.findByRole('radio', { name: '自訂' });
-    fireEvent.click(customBtn);
+    // One line holds both sources: picking your own map IS the switch to custom.
+    fireEvent.click(await screen.findByRole('radio', { name: /我的地圖/ }));
     await waitFor(() =>
       expect(mocked.updateRoomSettings).toHaveBeenCalledWith('ABCD', {
         map: { source: 'custom', customMapId: 'm1' },
@@ -404,15 +404,12 @@ describe('RoomScreen map picker', () => {
     });
     render(<RoomScreen />);
     await openSettingsGroup(/^地圖/);
-    const select = await screen.findByRole('combobox', { name: '官方' });
-    await waitFor(() =>
-      expect([...select.querySelectorAll('option')].map((o) => o.getAttribute('value'))).toEqual([
-        'taiwan',
-      ]),
-    );
+    await waitFor(() => expect(screen.getAllByRole('radio')).toHaveLength(1));
+    expect(screen.getByRole('radio')).toHaveAccessibleName(/台灣本島與離島/);
   });
 
   it('offers to create a map when the room is set to custom but the host has none to pick', async () => {
+    useSession.setState({ user: { ...ME, features: ['mapBuilder'] }, booting: false });
     mocked.getRoom.mockResolvedValue(
       room({
         hostId: 'u-me',

@@ -169,6 +169,188 @@
   padding-inline-start: 0;
 }
 
+/* ── The map line ──────────────────────────────────────────────────────────────
+   The map group's page is a route diagram: every map on offer is a stop on a line,
+   the one in service is the ember station, and the host's own maps continue it as a
+   dashed extension (the transit-map notation for track not yet in service) ending at
+   a "build one" terminus. A list beats a <select> here — three official maps plus your
+   own drafts all fit, so the whole choice is readable without opening anything, and
+   source (official/custom) stops being a second decision: it's which stop you pick. */
+.map-line {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.map-line-head {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-3);
+  margin: 0 0 var(--tr-space-2);
+  padding-inline-start: 38px; /* rail column + gap: the head sits over the names */
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--tr-ink-soft);
+}
+.map-line-head::after {
+  content: '';
+  flex: 1;
+  height: 0;
+  border-bottom: 1px solid var(--tr-line);
+}
+.map-line-head:not(:first-child) {
+  margin-top: var(--tr-space-4);
+}
+.map-run {
+  display: flex;
+  flex-direction: column;
+}
+
+.map-stop {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  /* Declared explicitly (name row, meta row) so the rail's `grid-row: 1 / -1` has an explicit
+     end line to span to — with implicit rows it collapses to the first row's height. */
+  grid-template-rows: auto auto;
+  gap: 0 var(--tr-space-3);
+  width: 100%;
+  padding: 10px var(--tr-space-3) 10px 0;
+  border: none;
+  border-radius: var(--tr-radius-sm);
+  background: none;
+  color: var(--tr-ink);
+  text-align: start;
+  cursor: pointer;
+}
+/* The radio itself is invisible — the station dot is its indicator — but it stays in the DOM so
+   the row keeps native checked/disabled semantics and arrow-key movement along the line. */
+.map-stop input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.map-stop:hover:not(:disabled) {
+  filter: none; /* the global button hover is a brightness filter; rows tint instead */
+  background: color-mix(in srgb, var(--tr-surface-2) 55%, transparent);
+}
+.map-stop.on {
+  background: var(--tr-surface-2);
+}
+/* The radio is invisible, so its own focus ring would be drawn around nothing — move the app's
+   ring onto the row it selects. */
+.map-stop input:focus-visible {
+  outline: none;
+}
+.map-stop:has(input:focus-visible) {
+  outline: 3px solid var(--tr-ember);
+  outline-offset: -1px;
+}
+.map-stop:disabled,
+.map-stop:has(input:disabled) {
+  cursor: default;
+  opacity: 0.65;
+}
+
+/* The rail runs the full height of a stop and is trimmed to a half-segment at each end of a
+   run, so a section reads as one line rather than a column of lollipops. */
+.map-rail {
+  grid-row: 1 / -1;
+  position: relative;
+  align-self: stretch;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding-top: 7px; /* centres the dot on the name's line, like a station on its label */
+}
+.map-rail::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  left: 50%;
+  width: 2px;
+  translate: -1px 0;
+  background: var(--tr-line);
+}
+/* A run's line starts and ends AT its terminal dots (12px = the dot's centre inside the rail
+   cell: 7px of lead-in + half of the 11px dot), not at the row's centre. */
+.map-run > :first-child .map-rail::before {
+  top: 12px;
+}
+.map-run > :last-child .map-rail::before {
+  bottom: calc(100% - 12px);
+}
+.map-run--draft .map-rail::before {
+  background: none;
+  border-left: 2px dashed var(--tr-line);
+}
+.map-dot {
+  position: relative; /* the rail is an absolutely-positioned ::before — the station sits on it */
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--tr-line);
+  border-radius: 50%;
+  background: var(--tr-surface);
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+.map-stop:hover .map-dot {
+  border-color: var(--tr-ink-soft);
+}
+.map-stop.on .map-dot {
+  border-color: var(--tr-ember);
+  background: var(--tr-ember);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tr-ember) 20%, transparent);
+}
+
+.map-name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--tr-space-2);
+  font-weight: 600;
+}
+.map-by {
+  font-size: 0.72em;
+  font-weight: 500;
+  color: var(--tr-ink-soft);
+  border: 1px solid var(--tr-line);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.map-meta {
+  grid-column: 2;
+  margin-top: 2px;
+  font-family: var(--tr-font-mono);
+  font-size: 0.74em;
+  letter-spacing: 0.02em;
+  color: var(--tr-ink-soft);
+}
+
+/* The terminus: the line runs out to an unbuilt stop. */
+.map-stop--new {
+  color: var(--tr-accent);
+  font-weight: 600;
+}
+.map-stop--new .map-name {
+  align-items: center;
+  color: inherit;
+}
+.map-stop--new .map-dot {
+  border-style: dashed;
+  border-color: var(--tr-accent);
+  background: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-dot {
+    transition: none;
+  }
+}
+
 @keyframes rsm-enter {
   from {
     opacity: 0;

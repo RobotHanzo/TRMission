@@ -36,6 +36,15 @@ describe('officialMapOptions', () => {
     expect(zh?.label).toBe('大臺北軌道交通（嶼翼）');
     expect(en?.label).toContain('嶼翼');
     expect(zh?.author).toBe('嶼翼');
+    // `name` is the same string without the credit, for pickers that render it as its own element.
+    expect(zh?.name).toBe('大臺北軌道交通');
+  });
+
+  it('states network size, so a picker can show it before the map is chosen', () => {
+    const [taiwan] = officialMapOptions(['taiwan'], 'zh-Hant');
+    expect(taiwan?.cities).toBe(OFFICIAL_MAPS[0]!.content.cities.length);
+    expect(taiwan?.routes).toBe(OFFICIAL_MAPS[0]!.content.routes.length);
+    expect(taiwan?.cities).toBeGreaterThan(0);
   });
 });
 

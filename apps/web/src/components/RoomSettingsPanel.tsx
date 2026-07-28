@@ -28,7 +28,7 @@ import {
   type RoomSettingsGroupId,
   type TranslateSetting,
 } from '@trm/client-core/game/roomSettingsMenu';
-import { firstOfficialMapId, officialMapOptions } from '@trm/client-core/game/officialMaps';
+import { officialMapOptions } from '@trm/client-core/game/officialMaps';
 import type { MapSummary, RoomSettings, RoomVisibility } from '../net/rest';
 import type { Locale } from '../store/ui';
 import { Switch } from './ui/Switch';
@@ -137,6 +137,41 @@ export function RoomSettingsPanel(props: Props) {
   );
 }
 
+/** One map on the line: a station dot on the rail, the map's name (with its author credit, for a
+ *  community map), and one mono line stating how big the network is. A native radio does the
+ *  selecting, so arrow keys, `checked` semantics and the page's `<fieldset disabled>` all come
+ *  for free — the dot IS the radio's indicator, drawn as a station instead of a bullet. */
+function MapStop({
+  name,
+  author,
+  meta,
+  selected,
+  onSelect,
+}: {
+  name: string;
+  author?: string | undefined;
+  meta: string;
+  selected: boolean;
+  onSelect(): void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <label className={selected ? 'map-stop on' : 'map-stop'}>
+      <input type="radio" name="room-map" checked={selected} onChange={onSelect} />
+      <span className="map-rail" aria-hidden>
+        <span className="map-dot" />
+      </span>
+      <span className="map-name">
+        {name}
+        {author !== undefined && (
+          <span className="map-by">{t('builder.mapAuthor', { author })}</span>
+        )}
+      </span>
+      <span className="map-meta">{meta}</span>
+    </label>
+  );
+}
+
 /** One group's controls. Each row keeps the label/description pairing the flat card had — the
  *  layer above states the value, this layer explains what it means. */
 function GroupControls({
@@ -157,65 +192,57 @@ function GroupControls({
   const teamCount = settings.teamCount ?? 0;
 
   if (group === 'map') {
-    // A member who can't edit reads the resolved name; the host gets source + list.
+    // A member who can't edit reads the resolved name; the host gets the whole line.
     if (locked) return <p className="rsm-readout">{mapName}</p>;
     const officialMaps = officialMapOptions(
       officialMapIds,
       locale,
       settings.map.source === 'official' ? settings.map.mapId : undefined,
     );
+    const selectedId =
+      settings.map.source === 'official' ? settings.map.mapId : settings.map.customMapId;
     return (
-      <div className="setting stack">
-        <Segmented<'official' | 'custom'>
-          options={
-            canBuild
-              ? [
-                  { value: 'official', label: t('mapOfficial') },
-                  { value: 'custom', label: t('mapCustom') },
-                ]
-              : [{ value: 'official', label: t('mapOfficial') }]
-          }
-          value={settings.map.source}
-          onChange={(src) => {
-            if (src === 'official') {
-              const first = firstOfficialMapId(officialMapIds);
-              if (first) onChange({ map: { source: 'official', mapId: first } });
-            } else if (myMaps && myMaps.length > 0) {
-              onChange({ map: { source: 'custom', customMapId: myMaps[0]!.id } });
-            } else {
-              onCreateMap();
-            }
-          }}
-          ariaLabel={t('mapLabel')}
-        />
-        {settings.map.source === 'official' ? (
-          <select
-            aria-label={t('mapOfficial')}
-            value={settings.map.mapId}
-            onChange={(e) => onChange({ map: { source: 'official', mapId: e.target.value } })}
-          >
-            {officialMaps.map((m) => (
-              <option key={m.mapId} value={m.mapId}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-        ) : myMaps && myMaps.length > 0 ? (
-          <select
-            aria-label={t('mapCustom')}
-            value={settings.map.customMapId}
-            onChange={(e) => onChange({ map: { source: 'custom', customMapId: e.target.value } })}
-          >
-            {myMaps.map((m) => (
-              <option key={m.id} value={m.id}>
-                {locale === 'en' ? m.nameEn : m.nameZh}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <button onClick={onCreateMap}>
-            <MapIcon size={14} aria-hidden /> {t('mapCreateOne')}
-          </button>
+      <div className="map-line" role="group" aria-label={t('mapLabel')}>
+        {/* The section heads name the two lines; with no builder feature there is only one, and
+            the page is already titled 地圖 — so they'd be labelling nothing. */}
+        {canBuild && <p className="map-line-head">{t('mapOfficialSection')}</p>}
+        <div className="map-run">
+          {officialMaps.map((m) => (
+            <MapStop
+              key={m.mapId}
+              name={m.name}
+              author={m.author}
+              meta={t('mapSize', { cities: m.cities, routes: m.routes })}
+              selected={settings.map.source === 'official' && m.mapId === selectedId}
+              onSelect={() => onChange({ map: { source: 'official', mapId: m.mapId } })}
+            />
+          ))}
+        </div>
+        {canBuild && (
+          <>
+            <p className="map-line-head">{t('mapMineSection')}</p>
+            {/* Your own maps continue the line as a dashed extension — the transit-map notation
+                for track that isn't in service yet — and it ends at a "build one" terminus. */}
+            <div className="map-run map-run--draft">
+              {(myMaps ?? []).map((m) => (
+                <MapStop
+                  key={m.id}
+                  name={locale === 'en' ? m.nameEn : m.nameZh}
+                  meta={t('builder.updatedAt', {
+                    date: new Date(m.updatedAt).toLocaleDateString(locale),
+                  })}
+                  selected={settings.map.source === 'custom' && m.id === selectedId}
+                  onSelect={() => onChange({ map: { source: 'custom', customMapId: m.id } })}
+                />
+              ))}
+              <button className="map-stop map-stop--new" onClick={onCreateMap}>
+                <span className="map-rail" aria-hidden>
+                  <span className="map-dot" />
+                </span>
+                <span className="map-name">{t('mapCreateOne')}</span>
+              </button>
+            </div>
+          </>
         )}
       </div>
     );
