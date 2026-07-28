@@ -23,6 +23,7 @@ import {
   TAIWAN_CENTRAL_RANGE_PATH,
   TAIWAN_ISLANDS,
   smoothCoastPath,
+  smoothClosedPath,
   type MapGeography,
   type MapPalette,
 } from '@trm/map-data';
@@ -76,6 +77,15 @@ export function GeographyLayer({
     () =>
       (geography?.borders ?? [])
         .map((ring) => Skia.Path.MakeFromSVGString(smoothCoastPath(ring)))
+        .filter((p): p is SkPath => !!p),
+    [geography],
+  );
+  // Authored mountain relief (the web's `.relief`/`.relief-ridge`) — hand-drawn blobs like
+  // Taiwan's central range, so the same uniform smoothing applies.
+  const reliefRings = useMemo<SkPath[]>(
+    () =>
+      (geography?.relief ?? [])
+        .map((ring) => Skia.Path.MakeFromSVGString(smoothClosedPath(ring)))
         .filter((p): p is SkPath => !!p),
     [geography],
   );
@@ -188,6 +198,22 @@ export function GeographyLayer({
                 strokeJoin="round"
                 color={P.coast}
               />
+            </Group>
+          ))}
+          {reliefRings.map((ring, i) => (
+            <Group key={`relief${i}`}>
+              <Path path={ring} color={P.relief} opacity={D.reliefOpacity} />
+              <Path
+                path={ring}
+                style="stroke"
+                strokeWidth={D.reliefRidgeW}
+                color={P.coast}
+                opacity={D.reliefOpacity}
+              >
+                <DashPathEffect
+                  intervals={D.reliefRidgeDash.split(' ').map(Number) as [number, number]}
+                />
+              </Path>
             </Group>
           ))}
           {borderRings.map((ring, i) => (

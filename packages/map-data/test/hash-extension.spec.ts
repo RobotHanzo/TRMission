@@ -95,6 +95,36 @@ describe('hashContent extension', () => {
     expect(hashContent(geoWithDefault)).not.toBe(hashContent(geoOnly));
   });
 
+  it('a meta author credit changes the hash; content without one hashes exactly as before', () => {
+    const withAuthor: GameContent = {
+      ...TAIWAN_CONTENT,
+      meta: { ...TAIWAN_CONTENT.meta, author: '嶼翼' },
+    };
+    expect(hashContent(withAuthor)).not.toBe(PINNED_HASH);
+    // The type extension alone must not move any pre-existing hash.
+    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
+  });
+
+  it('a geography relief overlay changes the hash vs geography alone', () => {
+    const geoOnly: GameContent = { ...TAIWAN_CONTENT, geography: GEO };
+    const geoWithRelief: GameContent = {
+      ...TAIWAN_CONTENT,
+      geography: {
+        ...GEO,
+        relief: [
+          [
+            [2, 2],
+            [8, 2],
+            [5, 8],
+          ],
+        ],
+      },
+    };
+    expect(hashContent(geoWithRelief)).not.toBe(hashContent(geoOnly));
+    // The type extension alone must not move any pre-existing hash.
+    expect(hashContent({ ...TAIWAN_CONTENT })).toBe(PINNED_HASH);
+  });
+
   it('a geography borders overlay changes the hash vs geography alone', () => {
     const geoOnly: GameContent = { ...TAIWAN_CONTENT, geography: GEO };
     const geoWithBorders: GameContent = {

@@ -12,6 +12,7 @@ import Svg, { Circle, G, Path } from 'react-native-svg';
 import {
   MAP_PALETTE_LIGHT,
   smoothCoastPath,
+  smoothClosedPath,
   ticketRect,
   TAIWAN_CENTRAL_RANGE_PATH,
   TAIWAN_ISLANDS,
@@ -61,6 +62,8 @@ export function RoutePreview({
     () => (geography ? geography.land.map(smoothCoastPath) : []),
     [geography],
   );
+  // Authored mountain relief (the web's rp-relief) — hand-drawn blobs, uniform smoothing.
+  const reliefPaths = useMemo(() => (geography?.relief ?? []).map(smoothClosedPath), [geography]);
   const a = cityById.get(aId);
   const b = cityById.get(bId);
   if (!a || !b) return null;
@@ -90,8 +93,8 @@ export function RoutePreview({
   return (
     <Svg viewBox={viewBox} width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
       {geography ? (
-        // A custom/cropped-world map: one smoothed ring per landmass, no relief/islands (those are
-        // hand-tuned Taiwan decorations with no generic equivalent) — same split as web's rp-geo.
+        // A custom/cropped-world map: one smoothed ring per landmass plus any authored mountain
+        // relief; no islands/compass (hand-tuned Taiwan decorations) — same split as web's rp-geo.
         <G>
           {landPaths.map((d, i) => (
             <Path
@@ -102,6 +105,9 @@ export function RoutePreview({
               strokeWidth={0.5}
               strokeLinejoin="round"
             />
+          ))}
+          {reliefPaths.map((d, i) => (
+            <Path key={`relief-${i}`} d={d} fill={P.relief} opacity={0.5} />
           ))}
         </G>
       ) : (

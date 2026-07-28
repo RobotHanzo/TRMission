@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { MapGeography, TicketView } from '@trm/map-data';
-import { ticketRect } from '@trm/map-data';
+import { ticketRect, smoothClosedPath } from '@trm/map-data';
 import { ISLANDS, TAIWAN_LAND_PATH, CENTRAL_RANGE_PATH, smoothCoastPath } from '../game/geography';
 
 export interface PreviewCity {
@@ -78,6 +78,9 @@ export function RoutePreview({ a, b, cities, routes, geography, baseView, view, 
         <g className="rp-geo">
           {geography.land.map((ring, i) => (
             <path key={i} className="rp-land" d={smoothCoastPath(ring)} />
+          ))}
+          {geography.relief?.map((ring, i) => (
+            <path key={`relief-${i}`} className="rp-relief" d={smoothClosedPath(ring)} />
           ))}
         </g>
       ) : (

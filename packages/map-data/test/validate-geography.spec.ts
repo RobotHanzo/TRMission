@@ -148,4 +148,55 @@ describe('validateGeography', () => {
     const geo: MapGeography = { ...VALID, borders: Array.from({ length: 401 }, () => ring) };
     expect(validateGeography(geo).some((e) => /border/.test(e))).toBe(true);
   });
+
+  it('accepts geography with a valid relief overlay', () => {
+    const geo: MapGeography = {
+      ...VALID,
+      relief: [
+        [
+          [40, 40],
+          [60, 40],
+          [50, 60],
+        ],
+      ],
+    };
+    expect(validateGeography(geo)).toEqual([]);
+  });
+
+  it('rejects a relief ring with fewer than 3 vertices', () => {
+    const geo: MapGeography = {
+      ...VALID,
+      relief: [
+        [
+          [0, 0],
+          [1, 1],
+        ],
+      ],
+    };
+    expect(validateGeography(geo).some((e) => /relief/.test(e))).toBe(true);
+  });
+
+  it('rejects a relief ring with a coordinate far outside the board space', () => {
+    const geo: MapGeography = {
+      ...VALID,
+      relief: [
+        [
+          [0, 0],
+          [900, 5],
+          [10, 10],
+        ],
+      ],
+    };
+    expect(validateGeography(geo).some((e) => /relief/.test(e))).toBe(true);
+  });
+
+  it('rejects too many relief rings', () => {
+    const ring: readonly (readonly [number, number])[] = [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+    ];
+    const geo: MapGeography = { ...VALID, relief: Array.from({ length: 401 }, () => ring) };
+    expect(validateGeography(geo).some((e) => /relief/.test(e))).toBe(true);
+  });
 });

@@ -14,6 +14,7 @@ export default {
   cloneMap: '複製到我的地圖',
   forkOfficialTitle: '從官方地圖建立',
   forkMap: '建立副本',
+  mapAuthor: '作者：{{author}}',
   shareCodeNotFound: '找不到此代碼',
   reportMap: '檢舉此地圖',
   reportReason: '檢舉原因',

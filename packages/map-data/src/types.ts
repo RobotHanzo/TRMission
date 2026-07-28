@@ -78,6 +78,10 @@ export interface MapMeta {
   readonly version: number;
   readonly nameZh: string;
   readonly nameEn: string;
+  /** Credit for an official map authored by a community member (e.g. Greater Taipei Rail
+   *  Transit's 嶼翼). Shown wherever official maps are listed. Optional so pre-existing
+   *  content hashes identically (`stableStringify` drops absent keys). */
+  readonly author?: string;
 }
 
 /** Presentation-only cartography for a custom map's crop of the world. Ignored by the engine. */
@@ -106,6 +110,11 @@ export interface MapGeography {
    *  ever populated by the "pick whole countries" crop mode (a manual crop box has no per-country
    *  data to draw borders from). */
   readonly borders?: readonly (readonly (readonly [number, number])[])[];
+  /** Optional mountain-relief rings, drawn between the land and the rail network the way the
+   *  bundled Taiwan map draws its Central Range (soft fill + dashed ridge stroke). Same
+   *  board-space/rounding convention as `land`. Hand-authored — the builder has no UI for these
+   *  yet, but a draft forked from an official map that carries them keeps them. */
+  readonly relief?: readonly (readonly (readonly [number, number])[])[];
 }
 
 /** The curated subset of RuleParams a map may set as its own defaults (ignored by the engine

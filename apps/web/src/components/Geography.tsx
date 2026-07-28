@@ -1,4 +1,5 @@
 import type { MapGeography } from '@trm/map-data';
+import { smoothClosedPath } from '@trm/map-data';
 import {
   BASE_VIEW,
   ISLANDS,
@@ -36,10 +37,11 @@ export interface CustomGeographyProps {
   onRingClick?: (index: number) => void;
 }
 
-/** A custom map's cropped-world land silhouette: one smoothed path per ring, no relief/islands/
- *  compass (those are hand-tuned Taiwan decorations with no generic equivalent). */
+/** A custom map's cropped-world land silhouette: one smoothed path per ring, plus its optional
+ *  hand-authored mountain relief (drawn like Taiwan's Central Range). No islands/compass — those
+ *  remain hand-tuned Taiwan decorations with no generic equivalent. */
 export function CustomGeography({ geography, selectedRings, onRingClick }: CustomGeographyProps) {
-  const { baseView, land, borders } = geography;
+  const { baseView, land, borders, relief } = geography;
   const { xs, ys } = graticuleFor(baseView);
   return (
     <g className="geo" pointerEvents={onRingClick ? 'auto' : 'none'}>
@@ -78,6 +80,16 @@ export function CustomGeography({ geography, selectedRings, onRingClick }: Custo
           >
             <path className="land-surf" d={d} />
             <path className="land" d={d} />
+          </g>
+        );
+      })}
+      {relief?.map((ring, i) => {
+        // Hand-authored blobs like Taiwan's Central Range, so the same uniform smoothing applies.
+        const d = smoothClosedPath(ring);
+        return (
+          <g key={`relief-${i}`}>
+            <path className="relief" d={d} />
+            <path className="relief-ridge" d={d} />
           </g>
         );
       })}

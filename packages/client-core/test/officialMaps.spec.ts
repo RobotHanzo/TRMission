@@ -29,6 +29,14 @@ describe('officialMapOptions', () => {
     expect(zh?.label).toBe(OFFICIAL_MAPS[0]!.content.meta.nameZh);
     expect(en?.label).toBe(OFFICIAL_MAPS[0]!.content.meta.nameEn);
   });
+
+  it('credits a community-authored map in its label (both locales)', () => {
+    const [zh] = officialMapOptions(['taipei-transit'], 'zh-Hant');
+    const [en] = officialMapOptions(['taipei-transit'], 'en');
+    expect(zh?.label).toBe('大臺北軌道交通（嶼翼）');
+    expect(en?.label).toContain('嶼翼');
+    expect(zh?.author).toBe('嶼翼');
+  });
 });
 
 describe('firstOfficialMapId', () => {

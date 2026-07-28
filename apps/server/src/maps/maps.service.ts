@@ -55,6 +55,8 @@ export interface OfficialMapSummary {
   mapId: string;
   nameZh: string;
   nameEn: string;
+  /** Community author credit (meta.author) — absent for TRMission-authored maps. */
+  author?: string;
   cities: number;
   routes: number;
 }
@@ -64,6 +66,8 @@ export interface OfficialMapAvailability {
   mapId: string;
   nameZh: string;
   nameEn: string;
+  /** Community author credit (meta.author) — absent for TRMission-authored maps. */
+  author?: string;
   enabled: boolean;
 }
 
@@ -189,6 +193,7 @@ export class MapsService {
       mapId: m.mapId,
       nameZh: m.content.meta.nameZh,
       nameEn: m.content.meta.nameEn,
+      ...(m.content.meta.author !== undefined ? { author: m.content.meta.author } : {}),
       cities: m.content.cities.length,
       routes: m.content.routes.length,
     }));
@@ -225,6 +230,7 @@ export class MapsService {
       mapId: m.mapId,
       nameZh: m.content.meta.nameZh,
       nameEn: m.content.meta.nameEn,
+      ...(m.content.meta.author !== undefined ? { author: m.content.meta.author } : {}),
       enabled: !disabled.has(m.mapId),
     }));
   }

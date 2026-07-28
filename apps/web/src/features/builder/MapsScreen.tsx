@@ -198,6 +198,9 @@ export default function MapsScreen() {
                   {m.nameZh} <span className="muted">({m.nameEn})</span>
                 </span>
                 <span className="muted maps-row-updated">
+                  {m.author !== undefined
+                    ? `${t('builder.mapAuthor', { author: m.author })} · `
+                    : ''}
                   {t('builder.peekSummary', { cities: m.cities, routes: m.routes })}
                 </span>
               </div>

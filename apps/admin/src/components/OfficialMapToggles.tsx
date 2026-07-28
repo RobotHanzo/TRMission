@@ -51,7 +51,10 @@ export function OfficialMapToggles({
     <>
       {initial.map((m) => (
         <label key={m.mapId} className="oc-kv" style={{ cursor: 'pointer' }}>
-          <span className="k">{locale === 'en' ? m.nameEn : m.nameZh}</span>
+          <span className="k">
+            {locale === 'en' ? m.nameEn : m.nameZh}
+            {m.author !== undefined ? `（${m.author}）` : ''}
+          </span>
           <input
             type="checkbox"
             checked={enabled.has(m.mapId)}

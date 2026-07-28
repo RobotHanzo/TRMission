@@ -101,6 +101,21 @@ function customLandLayer(geography?: MapGeography): string {
   return parts.join('\n');
 }
 
+/** Mountain-relief overlay for authored geography (Geography.tsx's `.relief`/`.relief-ridge`) —
+ *  the same soft fill + dashed ridge recipe the official Taiwan central range uses. */
+function customReliefLayer(geography?: MapGeography): string {
+  const parts: string[] = [];
+  for (const ring of geography?.relief ?? []) {
+    const d = smoothClosedPath(ring);
+    if (!d) continue;
+    parts.push(`<path d="${d}" fill="${P.relief}" opacity="${D.reliefOpacity}"/>`);
+    parts.push(
+      `<path d="${d}" fill="none" stroke="${P.coast}" stroke-width="${D.reliefRidgeW}" stroke-dasharray="${D.reliefRidgeDash}" opacity="${D.reliefOpacity}"/>`,
+    );
+  }
+  return parts.join('\n');
+}
+
 /** Cosmetic country-border overlay (Geography.tsx's `.country-border`), if the draft opted in. */
 function customBorderLayer(geography?: MapGeography): string {
   const parts: string[] = [];
@@ -142,6 +157,7 @@ function geographyLayer(
   return [
     graticuleLayer(view, official),
     official ? officialTaiwanLandLayer() : customLandLayer(geography),
+    official ? '' : customReliefLayer(geography),
     official ? '' : customBorderLayer(geography),
   ].join('\n');
 }

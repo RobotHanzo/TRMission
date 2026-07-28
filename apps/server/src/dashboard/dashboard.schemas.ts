@@ -149,6 +149,7 @@ export const ConfigOfficialMapsSchema = z.object({
       mapId: z.string(),
       nameZh: z.string(),
       nameEn: z.string(),
+      author: z.string().optional(),
       enabled: z.boolean(),
     }),
   ),

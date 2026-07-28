@@ -5,6 +5,7 @@ import { ROUTES } from './routes';
 import { TICKETS } from './tickets';
 import { taiwanForkGeography } from './taiwan-geography';
 import { TAIPEI_CONTENT } from './taipei';
+import { TAIPEI_TRANSIT_CONTENT } from './taipei-transit';
 import { CONTENT_V2 } from './archive/v2';
 import { CONTENT_V3 } from './archive/v3';
 import { CONTENT_V4 } from './archive/v4';
@@ -22,6 +23,7 @@ export * from './ticket-view';
 export * from './taiwan-geography';
 export * from './render-tokens';
 export * from './taipei';
+export * from './taipei-transit';
 
 export const MAP_META: MapMeta = {
   mapId: 'taiwan',
@@ -69,6 +71,10 @@ export const CONTENT_HASH: string = hashContent(TAIWAN_CONTENT);
 /** Hash of the current Greater Taipei content — the second official map (see `src/taipei/`). */
 export const TAIPEI_CONTENT_HASH: string = hashContent(TAIPEI_CONTENT);
 
+/** Hash of the current 大臺北軌道交通 content — the third official map, authored by 嶼翼
+ *  (see `src/taipei-transit/`). */
+export const TAIPEI_TRANSIT_CONTENT_HASH: string = hashContent(TAIPEI_TRANSIT_CONTENT);
+
 /**
  * Every published content version of every official map, current and archived, keyed by its
  * content hash. Content is immutable once published: editing a map ships a *new* version (bump
@@ -77,9 +83,15 @@ export const TAIPEI_CONTENT_HASH: string = hashContent(TAIPEI_CONTENT);
  * this map — a content change therefore never breaks an in-flight game's replay.
  */
 export const CONTENT_REGISTRY: ReadonlyMap<string, GameContent> = new Map(
-  [CONTENT_V2, CONTENT_V3, CONTENT_V4, CONTENT_V5, TAIWAN_CONTENT, TAIPEI_CONTENT].map(
-    (c) => [hashContent(c), c] as const,
-  ),
+  [
+    CONTENT_V2,
+    CONTENT_V3,
+    CONTENT_V4,
+    CONTENT_V5,
+    TAIWAN_CONTENT,
+    TAIPEI_CONTENT,
+    TAIPEI_TRANSIT_CONTENT,
+  ].map((c) => [hashContent(c), c] as const),
 );
 
 /** Resolve the exact content a game was created against, or undefined if its version is unknown. */
@@ -110,6 +122,12 @@ export const OFFICIAL_MAPS: readonly OfficialMap[] = [
     mapId: TAIPEI_CONTENT.meta.mapId,
     content: TAIPEI_CONTENT,
     hash: TAIPEI_CONTENT_HASH,
+  },
+  // 大臺北軌道交通 (community-authored by 嶼翼) likewise carries its own `geography`.
+  {
+    mapId: TAIPEI_TRANSIT_CONTENT.meta.mapId,
+    content: TAIPEI_TRANSIT_CONTENT,
+    hash: TAIPEI_TRANSIT_CONTENT_HASH,
   },
 ];
 

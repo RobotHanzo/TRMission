@@ -83,6 +83,9 @@ export const MapGeographyDraftSchema = z.object({
   }),
   defaultTicketView: TicketViewSchema.optional(),
   borders: z.array(ringSchema).max(MAX_GEOGRAPHY_RINGS).optional(),
+  // Mountain-relief rings (see MapGeography.relief). The builder has no UI to author these, but
+  // a draft forked from an official map that carries them must keep them across saves.
+  relief: z.array(ringSchema).max(MAX_GEOGRAPHY_RINGS).optional(),
 });
 
 export const MapRulesDraftSchema = z.object({
@@ -158,11 +161,12 @@ function compactRules(rules: z.infer<typeof MapRulesDraftSchema>): MapRules {
 function compactGeography(
   geo: NonNullable<z.infer<typeof MapDraftSchema>['geography']>,
 ): MapGeography {
-  const { defaultTicketView, borders, ...rest } = geo;
+  const { defaultTicketView, borders, relief, ...rest } = geo;
   return {
     ...rest,
     ...(defaultTicketView !== undefined ? { defaultTicketView } : {}),
     ...(borders !== undefined ? { borders } : {}),
+    ...(relief !== undefined ? { relief } : {}),
   };
 }
 
@@ -239,6 +243,7 @@ export const OfficialMapSummarySchema = z.object({
   mapId: z.string(),
   nameZh: z.string(),
   nameEn: z.string(),
+  author: z.string().optional(),
   cities: z.number(),
   routes: z.number(),
 });

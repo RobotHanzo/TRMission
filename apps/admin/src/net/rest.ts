@@ -48,6 +48,8 @@ export interface OfficialMapRow {
   mapId: string;
   nameZh: string;
   nameEn: string;
+  /** Community author credit — absent for TRMission-authored maps. */
+  author?: string;
   enabled: boolean;
 }
 

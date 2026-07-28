@@ -295,6 +295,8 @@ export interface OfficialMapSummary {
   mapId: string;
   nameZh: string;
   nameEn: string;
+  /** Community author credit (meta.author) — absent for TRMission-authored maps. */
+  author?: string;
   cities: number;
   routes: number;
 }

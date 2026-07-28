@@ -111,6 +111,16 @@ export function formatIssue(issue: ValidationIssue): string {
       return `border ring ${p.index} has a coordinate outside the allowed board range`;
     case 'tooManyBorderVertices':
       return `total border vertices ${p.count} exceeds the maximum of ${p.max}`;
+    case 'tooManyReliefRings':
+      return `too many relief rings: ${p.count} exceeds the maximum of ${p.max}`;
+    case 'reliefRingTooFewVertices':
+      return `relief ring ${p.index} has fewer than 3 vertices`;
+    case 'reliefRingNonFiniteCoordinate':
+      return `relief ring ${p.index} has a non-finite coordinate`;
+    case 'reliefRingCoordinateOutOfRange':
+      return `relief ring ${p.index} has a coordinate outside the allowed board range`;
+    case 'tooManyReliefVertices':
+      return `total relief vertices ${p.count} exceeds the maximum of ${p.max}`;
     case 'cropBboxInvalid':
       return 'crop bbox must have lonMin < lonMax and latMin < latMax';
     case 'ruleOutOfRange':
@@ -438,6 +448,38 @@ export function validateGeographyIssues(geo: MapGeography): ValidationIssue[] {
     });
     if (borderVertices > MAX_GEOGRAPHY_VERTICES) {
       push('tooManyBorderVertices', { count: borderVertices, max: MAX_GEOGRAPHY_VERTICES });
+    }
+  }
+
+  if (geo.relief) {
+    if (geo.relief.length > MAX_GEOGRAPHY_RINGS) {
+      push('tooManyReliefRings', { count: geo.relief.length, max: MAX_GEOGRAPHY_RINGS });
+    }
+    let reliefVertices = 0;
+    geo.relief.forEach((ring, i) => {
+      reliefVertices += ring.length;
+      if (ring.length < 3) {
+        push('reliefRingTooFewVertices', { index: i });
+        return;
+      }
+      for (const [x, y] of ring) {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) {
+          push('reliefRingNonFiniteCoordinate', { index: i });
+          break;
+        }
+        if (
+          x < GEOGRAPHY_COORD_MIN ||
+          x > GEOGRAPHY_COORD_MAX ||
+          y < GEOGRAPHY_COORD_MIN ||
+          y > GEOGRAPHY_COORD_MAX
+        ) {
+          push('reliefRingCoordinateOutOfRange', { index: i });
+          break;
+        }
+      }
+    });
+    if (reliefVertices > MAX_GEOGRAPHY_VERTICES) {
+      push('tooManyReliefVertices', { count: reliefVertices, max: MAX_GEOGRAPHY_VERTICES });
     }
   }
 

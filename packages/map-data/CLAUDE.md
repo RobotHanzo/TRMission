@@ -2,8 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-`@trm/map-data` is the **single authored source of truth** for official content (ADR A13) — two
-bundled maps, Taiwan (36 cities / 77 routes / 84 tickets) and Greater Taipei (38 / 72 / 56) — and is
+`@trm/map-data` is the **single authored source of truth** for official content (ADR A13) — three
+bundled maps: Taiwan (36 cities / 77 routes / 84 tickets), Greater Taipei (38 / 72 / 56), and the
+community-authored 大臺北軌道交通 (46 / 91 / 63, credited to 嶼翼 via `meta.author`) — and is
 also the shared library backing **user-authored custom maps** (validation, mission auto-generation).
 All of them draw on the same `GameContent` shape, `hashContent`, and `validate()`. Everything else
 (engine board, client catalog, Mongo seed) is derived from it. Commands:
@@ -29,7 +30,16 @@ true)` over Natural Earth admin-1 polygons — and every stop's coordinate is it
   stop by hand and it will drift out of its city. To refresh either side, re-run that call and
   re-project the stops — don't nudge one without the other. The values are baked as literals so
   this package keeps no dependency on the builder or its dataset.
-  Adding a third official map means: a directory here, a `CONTENT_REGISTRY` entry (recovery
+- `taipei-transit/` — the third official map (大臺北軌道交通, `mapId: 'taipei-transit'`), **adopted
+  from a community builder draft by 嶼翼** (credited via the optional `meta.author`, shown wherever
+  official maps are listed). Content is the author's design verbatim; adoption renamed ids to
+  `tt_*`/`TTR*`/`TTL*`/`TTS*`, normalised regions, clipped the excess Taoyuan/Yilan county area out
+  of the rings (the cut lines sit one unit outside `baseView`, so the land runs off-frame), and
+  added `geography.relief` — the optional mountain-relief rings (陽明山, 雪山山脈) that every
+  custom-geography renderer draws the way Taiwan draws its Central Range. Unlike `taipei/`, its
+  stop coordinates are hand-placed (not projected), so `test/taipei-transit.spec.ts` pins looser
+  properties (no crossings, stops on land, relief walls the tunnels cross) plus the v1 hash.
+  Adding another official map means: a directory here, a `CONTENT_REGISTRY` entry (recovery
   resolves a persisted game's board through it), and an `OFFICIAL_MAPS` entry — the room settings
   selectors, the fork flow, and both clients' bundled content caches all iterate that list, so
   nothing else needs touching. Keep Taiwan at `OFFICIAL_MAPS[0]`: the dev seed, the health

@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { OFFICIAL_MAPS } from '@trm/map-data';
+import { officialMapOptions } from '@trm/client-core/game/officialMaps';
 import { BOT_DIFFICULTIES, type BotDifficulty } from '@trm/bots';
 import { TEAM_LAYOUTS, layoutsForPlayerCount } from '@trm/shared';
 import type { EventsMode, TeamLayoutId } from '@trm/shared';
@@ -107,10 +108,12 @@ export function OfflineSetupScreen({ navigation }: Props) {
 
       <Text style={[styles.label, { color: tokens.inkSoft }]}>{t('offline.map')}</Text>
       <View style={styles.row}>
-        {OFFICIAL_MAPS.map((m) => (
+        {/* Offline play bundles every official map (no server switch applies without a server);
+            the shared options carry a community map's author credit in the label. */}
+        {officialMapOptions(null, zh ? 'zh-Hant' : 'en').map((m) => (
           <Choice
             key={m.mapId}
-            label={zh ? m.content.meta.nameZh : m.content.meta.nameEn}
+            label={m.label}
             selected={mapId === m.mapId}
             onPress={() => setMapId(m.mapId)}
             tokens={tokens}

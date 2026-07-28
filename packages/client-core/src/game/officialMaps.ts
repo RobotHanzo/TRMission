@@ -4,6 +4,8 @@ import type { Locale } from '../net/restTypes';
 export interface OfficialMapOption {
   mapId: string;
   label: string;
+  /** Community author credit (meta.author), for pickers that render it separately. */
+  author?: string;
 }
 
 /**
@@ -27,10 +29,17 @@ export function officialMapOptions(
 ): OfficialMapOption[] {
   return OFFICIAL_MAPS.filter(
     (m) => enabledMapIds === null || enabledMapIds.includes(m.mapId) || m.mapId === selectedMapId,
-  ).map((m) => ({
-    mapId: m.mapId,
-    label: locale === 'en' ? m.content.meta.nameEn : m.content.meta.nameZh,
-  }));
+  ).map((m) => {
+    const { nameEn, nameZh, author } = m.content.meta;
+    const name = locale === 'en' ? nameEn : nameZh;
+    return {
+      mapId: m.mapId,
+      // A community-authored map carries its credit in the label itself, so every picker —
+      // web <option>s, mobile choice rows — shows it without per-platform work.
+      label: author === undefined ? name : `${name}（${author}）`,
+      ...(author !== undefined ? { author } : {}),
+    };
+  });
 }
 
 /** The map to select when a host switches the source back to "official": the first one still on

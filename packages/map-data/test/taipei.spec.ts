@@ -268,7 +268,7 @@ describe('Greater Taipei map content', () => {
     expect(official!.hash).toBe(TAIPEI_CONTENT_HASH);
     // Its geography is content, so a fork needs no separately-generated silhouette.
     expect(official!.forkGeography).toBeUndefined();
-    expect(OFFICIAL_MAPS.map((m) => m.mapId)).toEqual(['taiwan', 'taipei']);
+    expect(OFFICIAL_MAPS.map((m) => m.mapId)).toEqual(['taiwan', 'taipei', 'taipei-transit']);
     expect(resolveContentByHash(TAIPEI_CONTENT_HASH)).toBe(TAIPEI_CONTENT);
   });
 

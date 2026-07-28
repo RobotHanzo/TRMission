@@ -17,6 +17,7 @@ export default {
   cloneMap: 'Clone to my maps',
   forkOfficialTitle: 'Start from an official map',
   forkMap: 'Fork',
+  mapAuthor: 'by {{author}}',
   shareCodeNotFound: 'No map found for that code',
   reportMap: 'Report this map',
   reportReason: 'Reason',
