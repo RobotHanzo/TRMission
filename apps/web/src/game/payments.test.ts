@@ -185,15 +185,15 @@ describe('station payments', () => {
     const empty = emptyHand();
     // Flag down + no cards ⇒ nothing on offer (the server would reject an empty payment).
     expect(enumerateStationPayments(empty, 2)).toHaveLength(0);
-    // Flag up ⇒ a leading zero-payment even with an empty hand; choosing it sends {null,0,0}.
+    // Flag up ⇒ a zero-payment even with an empty hand; choosing it sends {null,0,0}.
     const free = enumerateStationPayments(empty, 2, true);
-    expect(free[0]).toEqual({ color: null, colorCount: 0, locomotives: 0 });
-    // The zero option sits ALONGSIDE the normal paid options when the hand can also pay.
+    expect(free).toEqual([{ color: null, colorCount: 0, locomotives: 0 }]);
+    // Flag up REPLACES the paid options — a payable hand is still only offered the free build.
     const h = emptyHand();
     h.RED = 2;
-    const withCards = enumerateStationPayments(h, 2, true);
-    expect(withCards[0]).toEqual({ color: null, colorCount: 0, locomotives: 0 });
-    expect(withCards.some((p) => p.color === 'RED' && p.colorCount === 2)).toBe(true);
+    expect(enumerateStationPayments(h, 2, true)).toEqual([
+      { color: null, colorCount: 0, locomotives: 0 },
+    ]);
   });
 });
 

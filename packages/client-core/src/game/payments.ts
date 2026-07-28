@@ -216,12 +216,14 @@ export function stationShortfall(hand: Hand, cost: number): Shortfall {
 
 /**
  * Station cost = (#stations already built) + 1, paid in one colour (locos wild). When `freeStation`
- * is set (an active railway-gala window) a zero-card payment is offered first — the engine accepts
- * an empty payment ONLY while that flag is up, so the option must never appear otherwise.
+ * is set (an active railway-gala window) the zero-card payment is the ONLY option on offer: paying
+ * for a station the event would give away is never what a player means, so the picker doesn't ask.
+ * The engine stays permissive (it accepts either), but it accepts an empty payment ONLY while that
+ * flag is up — so the free option must never appear otherwise.
  */
 export function enumerateStationPayments(hand: Hand, cost: number, freeStation = false): Payment[] {
+  if (freeStation) return [{ color: null, colorCount: 0, locomotives: 0 }];
   const out: Payment[] = [];
-  if (freeStation) out.push({ color: null, colorCount: 0, locomotives: 0 });
   for (let loco = 0; loco <= cost; loco++) {
     if (hand.LOCOMOTIVE < loco) continue;
     const colorCount = cost - loco;
