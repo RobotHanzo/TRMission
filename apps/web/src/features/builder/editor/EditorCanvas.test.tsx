@@ -117,6 +117,51 @@ describe('EditorCanvas station dragging', () => {
     expect(onCityClick).not.toHaveBeenCalled();
   });
 
+  it('follows only the finger that grabbed the station, not a second one pinching the canvas', () => {
+    const commit = vi.fn();
+    const ids = new Set(['c1']);
+    const { container } = render(
+      <EditorCanvas selectedCities={ids} cityDrag={{ begin: () => ids, commit }} />,
+    );
+
+    fireEvent.pointerDown(container.querySelector('[data-city-id="c1"]')!, {
+      pointerId: 1,
+      clientX: 10,
+      clientY: 50,
+      button: 0,
+    });
+    // The pinch's other finger, far across the canvas. Before #72 this drove the drag, which is
+    // how a station ended up nowhere near where it was dropped.
+    fireEvent.pointerMove(window, { pointerId: 2, clientX: 90, clientY: 5 });
+    fireEvent.pointerUp(window, { pointerId: 2, clientX: 90, clientY: 5 });
+    expect(commit).not.toHaveBeenCalled();
+    expect(container.querySelector('[data-city-id="c1"] .city-dot')).toHaveAttribute('cx', '10');
+
+    fireEvent.pointerMove(window, { pointerId: 1, clientX: 30, clientY: 60 });
+    fireEvent.pointerUp(window, { pointerId: 1, clientX: 30, clientY: 60 });
+    expect(commit).toHaveBeenCalledWith(ids, 20, 10);
+  });
+
+  it('drops a gesture the browser cancels instead of leaving it to be finished later', () => {
+    const commit = vi.fn();
+    const ids = new Set(['c1']);
+    const { container } = render(
+      <EditorCanvas selectedCities={ids} cityDrag={{ begin: () => ids, commit }} />,
+    );
+    const marker = container.querySelector('[data-city-id="c1"]')!;
+
+    fireEvent.pointerDown(marker, { pointerId: 1, clientX: 10, clientY: 50, button: 0 });
+    fireEvent.pointerMove(window, { pointerId: 1, clientX: 30, clientY: 60 });
+    fireEvent.pointerCancel(window, { pointerId: 1 });
+    expect(commit).not.toHaveBeenCalled();
+    expect(container.querySelector('[data-city-id="c1"] .city-dot')).toHaveAttribute('cx', '10');
+
+    // An unrelated later gesture must not be picked up by the abandoned listeners.
+    fireEvent.pointerMove(window, { pointerId: 1, clientX: 80, clientY: 80 });
+    fireEvent.pointerUp(window, { pointerId: 1, clientX: 80, clientY: 80 });
+    expect(commit).not.toHaveBeenCalled();
+  });
+
   it('ignores a gesture the stage declines to start', () => {
     const commit = vi.fn();
     const { container } = render(

@@ -33,6 +33,16 @@ size tracks how big the surface is, not the zoom; those weights suit a player zo
 corridor and bury the network when you sit zoomed out over the whole map to author it. Layout is
 still exact; only the ink is lighter. Keep the CSS defaults above in step with the constant.
 
+**Pointer→board projection is `canvasProjection.ts`, and it must not go back to `getScreenCTM()`**
+(issue #72). Every canvas sits inside react-zoom-pan-pinch's CSS transform, and WebKit omits an
+ancestor's CSS scale from that matrix — invisible on desktop, total in the WKWebView the mobile
+builder runs in. It reads `getBoundingClientRect()` + the viewBox instead (valid because the
+pan/zoom transform is translate+scale only, and both canvases keep the default
+`preserveAspectRatio`). For the same reason every canvas gesture is bound to the `pointerId` that
+started it and ends on `pointercancel` as well as `pointerup`: a touch canvas carries several live
+pointers (the pinch it still honours), and a drag that follows whichever moved last flings the
+station across the map.
+
 **Stops holds a selection of any size.** The store's `selection` stays the one-station case (the
 inspector, the ember ring, every other stage); a group of two or more lives in `StopsStage` and
 leaves the store selection null. Shift/ctrl-click, the multi-select switch (the touch path — the

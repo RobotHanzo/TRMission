@@ -97,6 +97,11 @@ export function EditorCanvas({
   // finished over open water (the click retargets to the common ancestor). Both would otherwise
   // read as "select this" / "add a station here", so the gesture swallows the next click.
   const swallowClick = useRef(false);
+  // The pointer a station drag belongs to, or null when none is in flight. Touch is why this
+  // exists: a canvas can hold several live pointers at once (the pinch-zoom it still honours,
+  // a stray palm), they all emit pointermove on window, and a drag that listens to whichever
+  // one moved last follows the wrong finger — the station ends up wherever that finger is.
+  const dragPointer = useRef<number | null>(null);
 
   const cities = useMemo(() => {
     if (!dragPreview) return draft.cities;
@@ -139,17 +144,30 @@ export function EditorCanvas({
   const onCityPointerDown = (id: string, e: React.PointerEvent) => {
     if (!cityDrag || !svgRef.current) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    // A second finger landing on another station must not start a rival drag over the same
+    // preview — the one already in flight owns the canvas until it ends.
+    if (dragPointer.current !== null) return;
     const ids = cityDrag.begin(id, e);
     if (!ids || ids.size === 0) return;
     const svg = svgRef.current;
     const origin = clientToBoardPoint(svg, e.clientX, e.clientY);
     if (!origin) return;
     e.stopPropagation();
+    const pointerId = e.pointerId;
+    dragPointer.current = pointerId;
     const startX = e.clientX;
     const startY = e.clientY;
     let moved = false;
     let last = { dx: 0, dy: 0 };
+    const end = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', abort);
+      dragPointer.current = null;
+      setDragPreview(null);
+    };
     const move = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
       if (!moved && Math.hypot(ev.clientX - startX, ev.clientY - startY) < DRAG_SLOP_PX) return;
       moved = true;
       const p = clientToBoardPoint(svg, ev.clientX, ev.clientY);
@@ -157,10 +175,9 @@ export function EditorCanvas({
       last = { dx: p.x - origin.x, dy: p.y - origin.y };
       setDragPreview({ ids, ...last });
     };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      setDragPreview(null);
+    const up = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      end();
       if (!moved) return;
       // The click for this gesture is dispatched right after pointerup, before any timer runs.
       swallowClick.current = true;
@@ -169,8 +186,16 @@ export function EditorCanvas({
       }, 0);
       cityDrag.commit(ids, last.dx, last.dy);
     };
+    // A gesture something else takes over (the WebView handing the touch to a native recogniser,
+    // say) ends in pointercancel and never in pointerup. Drop the preview and commit nothing —
+    // leaving the listeners live would let an unrelated later gesture finish this drag.
+    const abort = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      end();
+    };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', abort);
   };
 
   const onHandlePointerDown = (e: React.PointerEvent<SVGCircleElement>) => {
@@ -182,20 +207,27 @@ export function EditorCanvas({
     e.stopPropagation();
     e.preventDefault();
     const svg = svgRef.current;
+    const pointerId = e.pointerId;
     let last = curveHandle.bow ?? bowFromPoint(a, b, geometry.get(route.id)?.mid ?? a);
     const move = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
       const p = clientToBoardPoint(svg, ev.clientX, ev.clientY);
       if (!p) return;
       last = Math.max(-BOW_LIMIT, Math.min(BOW_LIMIT, bowFromPoint(a, b, p)));
       curveHandle.onDrag(last);
     };
-    const up = () => {
+    // Unlike a station drag, the apex preview is the stage's state and isn't reverted here, so a
+    // cancelled gesture commits what the canvas is already showing rather than stranding it.
+    const up = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
       curveHandle.onCommit(last);
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
   };
 
   const handleBackgroundClick = (e: React.MouseEvent<SVGSVGElement>) => {

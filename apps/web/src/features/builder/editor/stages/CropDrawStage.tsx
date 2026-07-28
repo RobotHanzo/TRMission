@@ -70,6 +70,17 @@ export function CropDrawStage() {
     origin: { lon: number; lat: number };
     rect: CropRect;
   } | null>(null);
+  // The pointer the live gesture belongs to, or null when idle. On touch the canvas can hold
+  // several pointers at once (a pinch-zoom, a stray palm) and they all fire pointermove here —
+  // one that isn't the one drawing must not drag the rectangle to wherever it is.
+  const gesturePointer = useRef<number | null>(null);
+
+  const beginGesture = (e: React.PointerEvent): boolean => {
+    if (gesturePointer.current !== null) return false;
+    gesturePointer.current = e.pointerId;
+    return true;
+  };
+  const isGesture = (e: React.PointerEvent): boolean => gesturePointer.current === e.pointerId;
 
   const toLonLat = (clientX: number, clientY: number): { lon: number; lat: number } | null => {
     if (!svgRef.current) return null;
@@ -105,10 +116,12 @@ export function CropDrawStage() {
     if (e.button !== 0) return;
     const p = toLonLat(e.clientX, e.clientY);
     if (!p) return;
+    if (!beginGesture(e)) return;
     setDrag({ lon0: p.lon, lat0: p.lat, lon1: p.lon, lat1: p.lat });
     (e.target as Element).setPointerCapture(e.pointerId);
   };
   const onSvgPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (!isGesture(e)) return;
     if (drag) {
       const p = toLonLat(e.clientX, e.clientY);
       if (p) setDrag({ ...drag, lon1: p.lon, lat1: p.lat });
@@ -127,7 +140,9 @@ export function CropDrawStage() {
       });
     }
   };
-  const onSvgPointerUp = () => {
+  const onSvgPointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (!isGesture(e)) return;
+    gesturePointer.current = null;
     if (drag) {
       setCommitted({
         lonMin: Math.min(drag.lon0, drag.lon1),
@@ -139,10 +154,19 @@ export function CropDrawStage() {
     }
     setMoveBase(null);
   };
+  // A gesture taken over elsewhere (a native recogniser in the mobile WebView) ends in
+  // pointercancel, never pointerup: drop the in-flight rectangle rather than leaving it live.
+  const onSvgPointerCancel = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (!isGesture(e)) return;
+    gesturePointer.current = null;
+    setDrag(null);
+    setMoveBase(null);
+  };
 
   const startHandleDrag = (h: Handle) => (e: React.PointerEvent<SVGRectElement>) => {
     e.stopPropagation();
     if (!committed) return;
+    if (!beginGesture(e)) return;
     const anchor = oppositeCorner(h, committed);
     const moving = handleCorner(h, committed);
     setDrag({ lon0: anchor.lon, lat0: anchor.lat, lon1: moving.lon, lat1: moving.lat });
@@ -153,11 +177,13 @@ export function CropDrawStage() {
     if (!committed) return;
     const p = toLonLat(e.clientX, e.clientY);
     if (!p) return;
+    if (!beginGesture(e)) return;
     setMoveBase({ origin: p, rect: committed });
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
   const startOver = () => {
+    gesturePointer.current = null;
     setCommitted(null);
     setDrag(null);
     setMoveBase(null);
@@ -205,6 +231,7 @@ export function CropDrawStage() {
                 onPointerDown={startFreehand}
                 onPointerMove={onSvgPointerMove}
                 onPointerUp={onSvgPointerUp}
+                onPointerCancel={onSvgPointerCancel}
               >
                 {WORLD_OFFSETS.map((off) => (
                   <g key={`world${off}`}>
