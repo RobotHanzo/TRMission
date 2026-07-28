@@ -73,12 +73,42 @@ export const seatsOfTeam = (
 export const TEAM_POOL_CAPACITY = 4;
 
 /**
- * The lobby team-selector's one seat-swap primitive: the new seat order (userId per seat, index
- * = seat) after moving `userId` onto `targetTeam`, achieved by swapping seats with that team's
- * lowest-seat current occupant (any occupant works — `teamOfSeat` is what defines membership, not
- * which specific seat within the team). Reused three ways: the lobby's self-join endpoint (server
- * authoritative), and host-assign mode's tap-to-place handler on both clients (which then submits
- * the result through the existing host-only reseat call).
+ * The one seat-swap primitive both team-selector interactions bottom out in: the new seat order
+ * (userId per seat, index = seat) after `userIdA` and `userIdB` trade seats. Nobody else moves,
+ * so every other player's team is untouched.
+ *
+ * Team-agnostic on purpose — the callers decide what a legal pairing is. The lobby only ever
+ * offers cross-team pairs (a same-team swap would just permute turn order); {@link
+ * seatOrderMovingToTeam} picks the counterpart itself.
+ *
+ * Returns null if either id is unseated or the two are the same player.
+ */
+export function seatOrderSwappingSeats(
+  members: readonly { userId: string; seat: number }[],
+  userIdA: string,
+  userIdB: string,
+): string[] | null {
+  if (userIdA === userIdB) return null;
+  if (!members.some((m) => m.userId === userIdA)) return null;
+  if (!members.some((m) => m.userId === userIdB)) return null;
+  return members
+    .slice()
+    .sort((a, b) => a.seat - b.seat)
+    .map((m) => {
+      if (m.userId === userIdA) return userIdB;
+      if (m.userId === userIdB) return userIdA;
+      return m.userId;
+    });
+}
+
+/**
+ * The "I don't care who moves the other way" shortcut: the new seat order after moving `userId`
+ * onto `targetTeam`, achieved by swapping seats with that team's lowest-seat current occupant
+ * (any occupant works — `teamOfSeat` is what defines membership, not which specific seat within
+ * the team). Reused three ways: the lobby's self-join endpoint (server authoritative), and
+ * host-assign mode's tap-a-team-header handler on both clients (which then submits the result
+ * through the existing host-only reseat call). When the host DOES care which player comes back,
+ * the selector calls {@link seatOrderSwappingSeats} with the pair they picked instead.
  *
  * Returns null if `userId` is already on `targetTeam`, or if no seat currently belongs to it
  * (fewer members seated than `teamCount`, so that residue class is empty) — both are no-ops for
@@ -96,14 +126,7 @@ export function seatOrderMovingToTeam(
     .filter((m) => teamOfSeat(m.seat, teamCount) === targetTeam)
     .sort((a, b) => a.seat - b.seat)[0];
   if (!partner) return null;
-  return members
-    .slice()
-    .sort((a, b) => a.seat - b.seat)
-    .map((m) => {
-      if (m.userId === userId) return partner.userId;
-      if (m.userId === partner.userId) return userId;
-      return m.userId;
-    });
+  return seatOrderSwappingSeats(members, userId, partner.userId);
 }
 
 /**

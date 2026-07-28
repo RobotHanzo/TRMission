@@ -3146,6 +3146,18 @@ button.team-chip:hover {
   opacity: 0.4;
   cursor: grabbing;
 }
+/* A chip the picked player can be traded WITH — aiming at it names both ends of the swap, so it
+   has to read as a target in its own right, not just as part of its column. */
+.team-chip.swap-target {
+  border-color: var(--tr-accent);
+  border-style: dashed;
+}
+button.team-chip.swap-target:hover {
+  background: color-mix(in srgb, var(--tr-accent) 12%, var(--tr-surface-2));
+}
+.team-chip-swap-icon {
+  color: var(--tr-accent);
+}
 .team-column.team-column-drop-target {
   outline: 2px dashed var(--tr-accent);
   outline-offset: -2px;

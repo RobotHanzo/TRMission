@@ -832,6 +832,68 @@ describe('RoomScreen team selector', () => {
     );
   });
 
+  it('host-assign mode: picking a player then an opposing player swaps exactly those two', async () => {
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'host' } }),
+    );
+    mocked.reseatRoom.mockResolvedValue(teamRoom());
+    render(<RoomScreen />);
+    // Team 1 = {u-me(0), g2(2)}, team 2 = {g1(1), g3(3)}. Pick g1, then name g2 as the
+    // counterpart — the header shortcut would have taken u-me (team 1's lowest seat), so this is
+    // the pairing that used to need repeated tries.
+    fireEvent.click(await screen.findByRole('button', { name: /Guest1/ }));
+    fireEvent.click(screen.getByRole('button', { name: '與 Guest2 互換' }));
+    await waitFor(() =>
+      expect(mocked.reseatRoom).toHaveBeenCalledWith('ABCD', ['u-me', 'g2', 'g1', 'g3']),
+    );
+  });
+
+  it('host-assign mode: dragging a chip onto an opposing chip swaps that pair, not the column’s', async () => {
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'host' } }),
+    );
+    mocked.reseatRoom.mockResolvedValue(teamRoom());
+    render(<RoomScreen />);
+    const chip = await screen.findByRole('button', { name: /Guest1/ });
+    const dataTransfer = {
+      data: {} as Record<string, string>,
+      setData(format: string, value: string) {
+        this.data[format] = value;
+      },
+      getData(format: string) {
+        return this.data[format] ?? '';
+      },
+      effectAllowed: '',
+      dropEffect: '',
+    };
+    fireEvent.dragStart(chip, { dataTransfer });
+    // The drop lands on g2's list row, inside team 1's column — the chip has to win over the
+    // column underneath it, or the host gets u-me back instead of the player they aimed at.
+    const target = screen.getByRole('button', { name: '與 Guest2 互換' })
+      .parentElement as HTMLElement;
+    fireEvent.dragOver(target, { dataTransfer });
+    fireEvent.drop(target, { dataTransfer });
+    await waitFor(() =>
+      expect(mocked.reseatRoom).toHaveBeenCalledWith('ABCD', ['u-me', 'g2', 'g1', 'g3']),
+    );
+  });
+
+  it('host-assign mode: tapping a teammate of the picked player just moves the pick', async () => {
+    mocked.getRoom.mockResolvedValue(
+      teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'host' } }),
+    );
+    render(<RoomScreen />);
+    // g1 and g3 are teammates (seats 1 and 3) — swapping them would only permute turn order.
+    fireEvent.click(await screen.findByRole('button', { name: /Guest1/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Guest3/ }));
+    expect(mocked.reseatRoom).not.toHaveBeenCalled();
+    // The pick moved to g3, so an opposing chip now offers the swap against Guest3.
+    fireEvent.click(screen.getByRole('button', { name: '與 Guest2 互換' }));
+    await waitFor(() =>
+      expect(mocked.reseatRoom).toHaveBeenCalledWith('ABCD', ['u-me', 'g1', 'g3', 'g2']),
+    );
+  });
+
   it('random mode: shows a host-only shuffle button that reseats the table', async () => {
     mocked.getRoom.mockResolvedValue(
       teamRoom({ settings: { ...baseRoom().settings, teamCount: 2, teamAssignMode: 'random' } }),

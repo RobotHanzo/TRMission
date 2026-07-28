@@ -1,10 +1,12 @@
 // Replaces the flat member list whenever team mode is on — mirrors apps/web's TeamSelector
 // structure (one "platform board" column per team) with native rendering. See its header comment
-// for the interaction model shared across both apps.
+// for the interaction model shared across both apps: host-assign picks a player, then either taps
+// an opposing PLAYER (both ends named — `onSwap`) or the team HEADER (counterpart auto-picked —
+// `onAssign`). Web's drag variants have no native counterpart; tap does everything here.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Bot, Crown, Shuffle, UserMinus, X } from 'lucide-react-native';
+import { ArrowLeftRight, Bot, Crown, Shuffle, UserMinus, X } from 'lucide-react-native';
 import type { RoomMember, RoomSettings, RoomView } from '../net/rest';
 import { seatColor, teamColor } from '../theme/colors';
 import { RADIUS, SPACE, useTheme } from '../theme/useTheme';
@@ -24,6 +26,7 @@ interface TeamSelectorProps {
   myUserId: string | undefined;
   memberName: (m: RoomMember) => string;
   onAssign: (userId: string, team: number) => void;
+  onSwap: (userIdA: string, userIdB: string) => void;
   onJoinTeam: (team: number) => void;
   onShuffle: () => void;
   onRemoveBot: (botId: string) => void;
@@ -37,6 +40,7 @@ export function TeamSelector({
   myUserId,
   memberName,
   onAssign,
+  onSwap,
   onJoinTeam,
   onShuffle,
   onRemoveBot,
@@ -57,8 +61,27 @@ export function TeamSelector({
       .sort((a, b) => a.seat - b.seat),
   }));
 
-  const selectChip = (userId: string): void =>
+  const teamOfUser = (userId: string): number | null => {
+    const m = room.members.find((x) => x.userId === userId);
+    return m ? m.seat % teamCount : null;
+  };
+  const selectedTeam = selected === null ? null : teamOfUser(selected);
+  /** A chip the picked player can be traded WITH: someone else, on some other team. */
+  const isSwapTarget = (userId: string): boolean =>
+    assignable &&
+    selectedTeam !== null &&
+    userId !== selected &&
+    teamOfUser(userId) !== selectedTeam;
+
+  /** Tapping an opposing chip completes the swap the host named both ends of; else (re)pick. */
+  const tapChip = (userId: string): void => {
+    if (selected !== null && isSwapTarget(userId)) {
+      onSwap(selected, userId);
+      setSelected(null);
+      return;
+    }
     setSelected((cur) => (cur === userId ? null : userId));
+  };
   const dropOnColumn = (team: number): void => {
     if (!assignable || selected === null) return;
     onAssign(selected, team);
@@ -101,6 +124,7 @@ export function TeamSelector({
               </Pressable>
               <View style={styles.chipList}>
                 {members.map((m) => {
+                  const swapTarget = isSwapTarget(m.userId);
                   const chip = (
                     <View style={styles.chipInner}>
                       <View style={[styles.seatDot, { backgroundColor: seatColor(m.seat) }]} />
@@ -122,6 +146,7 @@ export function TeamSelector({
                             ? t('room.ready')
                             : t('room.notReady')}
                       </Text>
+                      {swapTarget && <ArrowLeftRight size={14} color={tokens.accent} />}
                     </View>
                   );
                   return (
@@ -130,10 +155,21 @@ export function TeamSelector({
                         <Pressable
                           accessibilityRole="button"
                           accessibilityState={{ selected: selected === m.userId }}
-                          onPress={() => selectChip(m.userId)}
+                          {...(swapTarget
+                            ? {
+                                accessibilityLabel: t('room.teamSwapWith', {
+                                  name: memberName(m),
+                                }),
+                              }
+                            : {})}
+                          onPress={() => tapChip(m.userId)}
                           style={[
                             styles.chip,
                             { borderColor: tokens.line, backgroundColor: tokens.surface2 },
+                            swapTarget && {
+                              borderColor: tokens.accent,
+                              borderStyle: 'dashed' as const,
+                            },
                             selected === m.userId && {
                               borderColor: tokens.ember,
                               transform: [{ translateY: -1 }],

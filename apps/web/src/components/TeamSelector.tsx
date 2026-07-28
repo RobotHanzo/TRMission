@@ -1,6 +1,6 @@
 import { useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bot, Crown, Shuffle, UserMinus, X } from 'lucide-react';
+import { ArrowLeftRight, Bot, Crown, Shuffle, UserMinus, X } from 'lucide-react';
 import type { RoomView, RoomMember, RoomSettings } from '../net/rest';
 import { seatColor, teamColor } from '../theme/colors';
 
@@ -17,8 +17,10 @@ interface TeamSelectorProps {
   isHost: boolean;
   myUserId: string | undefined;
   memberName: (m: RoomMember) => string;
-  /** Host-assign mode: move `userId` onto `team`. */
+  /** Host-assign mode: move `userId` onto `team`, counterpart chosen for the host. */
   onAssign: (userId: string, team: number) => void;
+  /** Host-assign mode: trade the seats of two specific players on different teams. */
+  onSwap: (userIdA: string, userIdB: string) => void;
   /** Self-join mode: move the caller onto `team`. */
   onJoinTeam: (team: number) => void;
   /** Random mode: reshuffle everyone. */
@@ -31,9 +33,14 @@ interface TeamSelectorProps {
 /**
  * Replaces the flat member list whenever team mode is on: one "platform board" column per team
  * (ribbon in the team's own colour), rendered per the room's `teamAssignMode` — read-only +
- * host shuffle button (random), tap-a-player-then-tap-a-team OR drag-a-chip-onto-a-column (host),
- * or a per-column Join button (self). The two host-assign interactions share the same
- * `onAssign` call, so either one is just a different way to pick the same (userId, team) pair.
+ * host shuffle button (random), pick-then-place (host), or a per-column Join button (self).
+ *
+ * Host-assign has two placements once a player is picked, both available by tap or by drag, so
+ * the host never has to re-try a move to land the pairing they wanted:
+ *   - onto another team's PLAYER → those two trade seats (`onSwap`); the host names both ends.
+ *   - onto another team's HEADER/empty space → `onAssign` picks the counterpart (lowest seat).
+ * Tapping a player on the picked player's own team just moves the pick there.
+ *
  * Host powers (kick/transfer/remove bot) stay available on every chip regardless of mode.
  */
 export function TeamSelector({
@@ -42,6 +49,7 @@ export function TeamSelector({
   myUserId,
   memberName,
   onAssign,
+  onSwap,
   onJoinTeam,
   onShuffle,
   onRemoveBot,
@@ -54,8 +62,8 @@ export function TeamSelector({
   const mode = room.settings.teamAssignMode;
   const teamCount = room.settings.teamCount;
   const assignable = mode === 'host' && isHost;
-  // Either interaction resolves to the same active member; a column lights up as a valid
-  // drop target for whichever one is in flight.
+  // Either interaction resolves to the same active member; a column or an opposing chip lights up
+  // as a valid drop target for whichever one is in flight.
   const activeUserId = selected ?? dragging;
 
   const teams = Array.from({ length: teamCount }, (_, team) => ({
@@ -65,12 +73,37 @@ export function TeamSelector({
       .sort((a, b) => a.seat - b.seat),
   }));
 
-  const assignToColumn = (userId: string, team: number) => {
-    onAssign(userId, team);
+  const teamOfUser = (userId: string): number | null => {
+    const m = room.members.find((x) => x.userId === userId);
+    return m ? m.seat % teamCount : null;
+  };
+  const activeTeam = activeUserId === null ? null : teamOfUser(activeUserId);
+  /** A chip the active player can be traded WITH: someone else, on some other team. */
+  const isSwapTarget = (userId: string): boolean =>
+    assignable &&
+    activeTeam !== null &&
+    userId !== activeUserId &&
+    teamOfUser(userId) !== activeTeam;
+
+  const clearPick = () => {
     setSelected(null);
     setDragging(null);
   };
-  const selectChip = (userId: string) => {
+  const assignToColumn = (userId: string, team: number) => {
+    onAssign(userId, team);
+    clearPick();
+  };
+  const swapWith = (userId: string) => {
+    if (activeUserId === null) return;
+    onSwap(activeUserId, userId);
+    clearPick();
+  };
+  /** Tapping an opposing chip completes the swap; anything else just (re)picks. */
+  const clickChip = (userId: string) => {
+    if (isSwapTarget(userId)) {
+      swapWith(userId);
+      return;
+    }
     setSelected((cur) => (cur === userId ? null : userId));
   };
   const dropOnColumn = (team: number) => {
@@ -92,6 +125,22 @@ export function TeamSelector({
     e.preventDefault();
     const userId = e.dataTransfer.getData('text/plain');
     if (userId) assignToColumn(userId, team);
+  };
+  // Chip-level drop wins over the column it sits in — that's the whole point of aiming at a
+  // player — so it stops the event before the column's handler picks a counterpart instead.
+  const handleChipDragOver = (e: DragEvent<HTMLLIElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+  };
+  const handleChipDrop = (userId: string) => (e: DragEvent<HTMLLIElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const dragged = e.dataTransfer.getData('text/plain');
+    if (dragged && dragged !== userId) {
+      onSwap(dragged, userId);
+      clearPick();
+    }
   };
 
   return (
@@ -133,6 +182,7 @@ export function TeamSelector({
               </button>
               <ul className="team-chip-list">
                 {members.map((m) => {
+                  const swapTarget = isSwapTarget(m.userId);
                   const chipContent = (
                     <>
                       <span
@@ -153,10 +203,17 @@ export function TeamSelector({
                           {m.ready ? t('ready') : t('notReady')}
                         </span>
                       )}
+                      {swapTarget && (
+                        <ArrowLeftRight className="team-chip-swap-icon" size={15} aria-hidden />
+                      )}
                     </>
                   );
                   return (
-                    <li key={m.userId}>
+                    <li
+                      key={m.userId}
+                      onDragOver={swapTarget ? handleChipDragOver : undefined}
+                      onDrop={swapTarget ? handleChipDrop(m.userId) : undefined}
+                    >
                       {assignable ? (
                         <button
                           type="button"
@@ -164,14 +221,18 @@ export function TeamSelector({
                             'team-chip',
                             selected === m.userId && 'selected',
                             dragging === m.userId && 'dragging',
+                            swapTarget && 'swap-target',
                           ]
                             .filter(Boolean)
                             .join(' ')}
                           aria-pressed={selected === m.userId}
+                          aria-label={
+                            swapTarget ? t('teamSwapWith', { name: memberName(m) }) : undefined
+                          }
                           draggable
                           onDragStart={handleChipDragStart(m.userId)}
                           onDragEnd={() => setDragging(null)}
-                          onClick={() => selectChip(m.userId)}
+                          onClick={() => clickChip(m.userId)}
                         >
                           {chipContent}
                         </button>

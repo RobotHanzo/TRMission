@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Crown, UserMinus, X } from 'lucide-react';
 import { OFFICIAL_MAPS } from '@trm/map-data';
-import { effectiveMaxPlayers, seatOrderMovingToTeam, shuffleSeatOrder } from '@trm/shared';
+import {
+  effectiveMaxPlayers,
+  seatOrderMovingToTeam,
+  seatOrderSwappingSeats,
+  shuffleSeatOrder,
+} from '@trm/shared';
 import { useUi } from '../store/ui';
 import { useHasFeature, useSession } from '../store/session';
 import { startLobbyPoll } from '@trm/client-core/game/lobbyPoll';
@@ -212,11 +217,17 @@ export function RoomScreen() {
   };
   const removeBot = (botId: string) => void guard(api.removeBot(code, botId));
   const kick = (userId: string) => void guard(api.kickPlayer(code, userId));
-  /** Host-assign mode: move `userId` onto `team`, swapping seats with that team's current
-   *  lowest-seat occupant (the one shared seat-math primitive, also used server-side for
+  /** Host-assign mode, team tapped: move `userId` onto `team`, swapping seats with that team's
+   *  current lowest-seat occupant (the shared seat-math primitive, also used server-side for
    *  self-join). A no-op (null) when they're already on that team. */
   const assignToTeam = (userId: string, team: number) => {
     const order = seatOrderMovingToTeam(room.members, userId, team, teamCount);
+    if (order) void guard(api.reseatRoom(code, order));
+  };
+  /** Host-assign mode, opposing player tapped: trade exactly those two seats, so the host picks
+   *  who comes back instead of re-trying until the auto-picked counterpart is the one they meant. */
+  const swapMembers = (userIdA: string, userIdB: string) => {
+    const order = seatOrderSwappingSeats(room.members, userIdA, userIdB);
     if (order) void guard(api.reseatRoom(code, order));
   };
   const joinTeam = (team: number) => void guard(api.joinTeam(code, team));
@@ -290,6 +301,7 @@ export function RoomScreen() {
             myUserId={user?.id}
             memberName={memberName}
             onAssign={assignToTeam}
+            onSwap={swapMembers}
             onJoinTeam={joinTeam}
             onShuffle={shuffleTeams}
             onRemoveBot={removeBot}

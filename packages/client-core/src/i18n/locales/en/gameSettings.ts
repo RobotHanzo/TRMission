@@ -56,7 +56,9 @@ export default {
   shuffleTeams: 'Shuffle teams',
   teamJoinButton: 'Join',
   teamHintRandom: 'The host can shuffle everyone into new teams with the button below.',
-  teamHintHost: 'Tap a player, then tap a team to move them there.',
+  teamHintHost:
+    'Tap a player, then tap someone on another team to swap the two — or tap a team’s header to move them there.',
+  teamSwapWith: 'Swap with {{name}}',
   teamHintSelf: 'Tap Join under the team you want to play on.',
   teamNeedsPlayers: '{{teams}} teams need {{players}} players ({{seated}} seated)',
   allowSpectating: 'Allow spectating',

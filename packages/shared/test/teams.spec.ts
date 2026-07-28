@@ -1,8 +1,37 @@
 import { describe, it, expect } from 'vitest';
-import { seatOrderMovingToTeam, shuffleSeatOrder, teamOfSeat } from '../src/teams';
+import {
+  seatOrderMovingToTeam,
+  seatOrderSwappingSeats,
+  shuffleSeatOrder,
+  teamOfSeat,
+} from '../src/teams';
 
 const members = (n: number) =>
   Array.from({ length: n }, (_, seat) => ({ userId: `u${seat}`, seat }));
+
+describe('seatOrderSwappingSeats', () => {
+  it('trades exactly the two named seats and leaves everyone else put', () => {
+    // 6 seats, 2 teams: team 0 = {u0, u2, u4}, team 1 = {u1, u3, u5}. Swap u0 with u5 — the
+    // counterpart the "move onto team 1" shortcut would never have picked (it takes u1).
+    const order = seatOrderSwappingSeats(members(6), 'u0', 'u5');
+    expect(order).toEqual(['u5', 'u1', 'u2', 'u3', 'u4', 'u0']);
+    const seatOf = new Map(order!.map((id, seat) => [id, seat]));
+    expect(teamOfSeat(seatOf.get('u0')!, 2)).toBe(1);
+    expect(teamOfSeat(seatOf.get('u5')!, 2)).toBe(0);
+  });
+
+  it('is order-independent', () => {
+    expect(seatOrderSwappingSeats(members(4), 'u3', 'u0')).toEqual(
+      seatOrderSwappingSeats(members(4), 'u0', 'u3'),
+    );
+  });
+
+  it('is a no-op (null) for the same player or an unseated id', () => {
+    expect(seatOrderSwappingSeats(members(4), 'u1', 'u1')).toBeNull();
+    expect(seatOrderSwappingSeats(members(4), 'ghost', 'u1')).toBeNull();
+    expect(seatOrderSwappingSeats(members(4), 'u1', 'ghost')).toBeNull();
+  });
+});
 
 describe('seatOrderMovingToTeam', () => {
   it('swaps the mover with the target team’s lowest-seat occupant', () => {
