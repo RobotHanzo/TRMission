@@ -1,5 +1,6 @@
 // Ported verbatim from apps/web/src/sound/soundModel.ts (pure event→cue mapping).
 import { Phase, type GameEvent, type GameSnapshot } from '@trm/proto';
+import { viewerWon } from '@trm/client-core/game/teams';
 import type { Cue } from './cues';
 
 export interface CueHit {
@@ -39,10 +40,11 @@ export function cuesFromEvents(snapshot: GameSnapshot, events: GameEvent[]): Cue
   return out;
 }
 
-/** The game-over cue when the snapshot is at GAME_OVER, else null. Winners = ranking[0]. */
+/**
+ * The game-over cue when the snapshot is at GAME_OVER, else null. Winning is `viewerWon` — the
+ * TEAM's result in a team game, `ranking[0]` in a free-for-all.
+ */
 export function gameOverCue(snapshot: GameSnapshot): Cue | null {
   if (snapshot.phase !== Phase.GAME_OVER) return null;
-  const me = snapshot.you?.playerId ?? null;
-  const winners = snapshot.finalScores?.ranking[0]?.playerIds ?? [];
-  return me !== null && winners.includes(me) ? 'gameOverWin' : 'gameOverNormal';
+  return viewerWon(snapshot) ? 'gameOverWin' : 'gameOverNormal';
 }

@@ -55,4 +55,18 @@ describe('gameOverCue', () => {
     } as Partial<GameSnapshot>);
     expect(gameOverCue(s)).toBe('gameOverNormal');
   });
+  it('celebrates a team win even when the local player is not the top scorer', () => {
+    const s = snap({
+      phase: Phase.GAME_OVER,
+      finalScores: {
+        ranking: [{ playerIds: ['mate'] }, { playerIds: ['p3'] }, { playerIds: ['me'] }],
+        teams: [
+          { team: 0, memberIds: ['me', 'mate'] },
+          { team: 1, memberIds: ['p3', 'p4'] },
+        ],
+        teamRanking: [{ teams: [0] }, { teams: [1] }],
+      },
+    } as Partial<GameSnapshot>);
+    expect(gameOverCue(s)).toBe('gameOverWin');
+  });
 });

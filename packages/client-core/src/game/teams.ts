@@ -112,6 +112,21 @@ export function canTakeFromPool(snap: GameSnapshot, color: CardColor): boolean {
   return snap.phase === Phase.DRAWING_CARDS && color !== 'LOCOMOTIVE';
 }
 
+/**
+ * Did the viewer win? In a team game the result belongs to the TEAM: every member of a
+ * first-place team won, including one whose own total is not the table's highest — so this reads
+ * the team ranking, never the individual one. A free-for-all falls back to `ranking[0]`.
+ * False for spectators and before the scoreboard exists.
+ */
+export function viewerWon(snap: GameSnapshot): boolean {
+  const finals = snap.finalScores;
+  const me = snap.you?.playerId;
+  if (!finals || me === undefined) return false;
+  const mine = (finals.teams ?? []).find((t) => t.memberIds.includes(me));
+  if (mine) return (finals.teamRanking?.[0]?.teams ?? []).includes(mine.team);
+  return (finals.ranking?.[0]?.playerIds ?? []).includes(me);
+}
+
 /** Team totals from the end-game scoreboard, ranked. Empty in a free-for-all. */
 export function teamStandings(
   snap: GameSnapshot,
