@@ -71,6 +71,10 @@ export function RoomSettingsPanel(props: Props) {
   const { t } = useTranslation();
   const { settings, locked } = props;
   const [open, setOpen] = useState<RoomSettingsGroupId | null>(null);
+  // Which way the last move went, so the arriving layer enters from the side it came from: a group
+  // page slides in from the right, and going back brings the index in from the left. Only the
+  // arriving layer animates (the departing one unmounts), so the pair reads as one drawer moving.
+  const [back, setBack] = useState(false);
 
   // The shared board builder takes a plain translator; i18next's overloaded `t` needs adapting.
   const tr: TranslateSetting = (key, params) => (params ? t(key, params) : t(key));
@@ -90,7 +94,13 @@ export function RoomSettingsPanel(props: Props) {
     <section className="card stack game-settings" aria-labelledby="room-settings-title">
       <div className="rsm-head">
         {current ? (
-          <button className="rsm-back" onClick={() => setOpen(null)}>
+          <button
+            className="rsm-back"
+            onClick={() => {
+              setBack(true);
+              setOpen(null);
+            }}
+          >
             <ChevronLeft size={16} aria-hidden />
             {t('settingsBack')}
           </button>
@@ -113,12 +123,18 @@ export function RoomSettingsPanel(props: Props) {
           </fieldset>
         </div>
       ) : (
-        <ul className="rsm-board">
+        <ul className={back ? 'rsm-board rsm-board--back' : 'rsm-board'}>
           {groups.map((g) => {
             const Icon = GROUP_ICONS[g.id];
             return (
               <li key={g.id}>
-                <button className="rsm-row" onClick={() => setOpen(g.id)}>
+                <button
+                  className="rsm-row"
+                  onClick={() => {
+                    setBack(false);
+                    setOpen(g.id);
+                  }}
+                >
                   <span className="rsm-badge" aria-hidden>
                     <Icon size={16} />
                   </span>
