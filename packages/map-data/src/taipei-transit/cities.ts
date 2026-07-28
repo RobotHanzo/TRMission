@@ -38,7 +38,7 @@ export const TAIPEI_TRANSIT_CITIES: readonly CityDef[] = [
   c('tt_beitou', '北投', 'Beitou', 46.6, 16.4, '臺北市', 'secondary'),
   c('tt_tamsui', '淡水', 'Tamsui', 41.7, 13.2, '新北市', 'major'),
   c('tt_bali', '八里', 'Bali', 37, 13.1, '新北市', 'secondary'),
-  c('tt_cksmemorial', '中正紀念館', 'Chiang Kai-shek Memorial Hall', 50.4, 26.5, '臺北市', 'major'),
+  c('tt_cksmemorial', '中正紀念堂', 'Chiang Kai-shek Memorial Hall', 50.4, 26.5, '臺北市', 'major'),
   c('tt_keelung', '基隆', 'Keelung', 65.9, 14.1, '基隆市', 'major'),
   c('tt_qidu', '七堵', 'Qidu', 64, 20.5, '基隆市', 'secondary'),
   c('tt_ruifang', '瑞芳', 'Ruifang', 73.5, 19, '新北市', 'secondary'),
