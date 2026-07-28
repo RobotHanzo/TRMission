@@ -2,6 +2,7 @@
 // (shared verbatim with the server's official-map social card, so neither can drift from
 // the other); this module re-exports them under their existing web names and adds the
 // viewport/pan-zoom concerns (BASE_VIEW, fitTransform, MIN/MAX_SCALE) that are web-only.
+import { HOME_FIT } from '@trm/client-core/game/boardModel';
 import {
   TAIWAN_BASE_VIEW,
   TAIWAN_OUTLINE as MD_TAIWAN_OUTLINE,
@@ -41,15 +42,15 @@ export interface FitTransform {
 
 /**
  * Frame a target rect to the viewport: the largest scale that *contains* the target (with a
- * `padding` margin), then the offset that centres it. This is the home/reset view — Taiwan is
- * tall-and-narrow inside a mostly-sea board, so a fixed scale (or a fit of the whole sea-padded
- * BASE_VIEW) leaves the island tiny; fitting the island itself keeps it large and centred on any
- * window shape. Pure so it can be unit-tested; Board.tsx measures the live `target`/`viewport`.
+ * `padding` margin), then the offset that centres it. This is the home/reset view — the board is
+ * mostly sea and off-network land, so a fixed scale (or a fit of the whole sea-padded BASE_VIEW)
+ * leaves the railways tiny; fitting the network box (`homeBounds`) keeps them large and centred on
+ * any window shape. Pure so it can be unit-tested; `frameHome` measures the live viewport.
  */
 export function fitTransform(
   target: FitTarget,
   viewport: { w: number; h: number },
-  padding = 0.9,
+  padding = HOME_FIT,
 ): FitTransform {
   const raw = Math.min((padding * viewport.w) / target.w, (padding * viewport.h) / target.h);
   const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, raw));

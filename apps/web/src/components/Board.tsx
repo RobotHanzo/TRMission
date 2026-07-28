@@ -82,6 +82,56 @@ function ZoomTracker({ targetRef }: { targetRef: RefObject<HTMLDivElement | null
   return null;
 }
 
+/**
+ * Holds the untouched board at the home framing while its box is still settling. `onInit` fires
+ * against whatever layout exists at that instant — a stylesheet, a sidebar or a scrollbar that
+ * lands one frame later leaves the board fitted to a box that no longer exists, and the player has
+ * to press "reset view" to get the framing they should have opened with. A window resize is the
+ * same story. So: re-frame whenever the viewport or the board svg changes size, and disarm for good
+ * the moment the transform moves for any other reason (a gesture, camera-follow, a tutorial
+ * spotlight) — this must never fight whoever is driving the camera.
+ */
+function HomeFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement | null> }) {
+  const controls = useControls();
+  const live = useRef<BoardTransform>({ positionX: 0, positionY: 0, scale: 1 });
+  useTransformEffect((ref) => {
+    live.current = {
+      positionX: ref.state.positionX,
+      positionY: ref.state.positionY,
+      scale: ref.state.scale,
+    };
+  });
+
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    let applied: BoardTransform | null = null;
+    let armed = true;
+    const moved = (t: BoardTransform): boolean =>
+      !applied ||
+      Math.abs(t.positionX - applied.positionX) > 1 ||
+      Math.abs(t.positionY - applied.positionY) > 1 ||
+      Math.abs(t.scale - applied.scale) > 0.005;
+    const frame = (): void => {
+      if (!armed) return;
+      // Someone else has the camera now (we only ever leave it where we put it) — stand down.
+      if (applied && moved(live.current)) {
+        armed = false;
+        return;
+      }
+      frameHome(controls, 0, homeBounds(CITIES, ACTIVE_BASE_VIEW));
+      applied = { ...live.current };
+    };
+    frame();
+    const ro = new ResizeObserver(frame);
+    ro.observe(el);
+    const svg = el.querySelector('svg.board');
+    if (svg) ro.observe(svg);
+    return () => ro.disconnect();
+  }, [controls, viewportRef]);
+  return null;
+}
+
 /** Board units spanned when auto-framing a bot's action POI (a comfortable close-up). */
 const BOT_FOLLOW_SPAN = 34;
 
@@ -603,7 +653,8 @@ export function Board({
         initialScale={1.9}
         centerOnInit
         // Frame the railway network to the real viewport once measured (same as the reset button),
-        // so first paint is the proper home view on any window shape rather than the fixed 1.9 seed.
+        // so first paint is the proper home view on any window shape rather than the fixed 1.9
+        // seed. `HomeFramer` below re-runs this until the layout stops moving.
         onInit={(ref) => frameHome(ref, 0, homeBounds(CITIES, ACTIVE_BASE_VIEW))}
         wheel={{ step: 0.0022 }}
         doubleClick={{ mode: 'zoomIn', step: 0.6 }}
@@ -615,6 +666,7 @@ export function Board({
         onPinchStart={disengageFollow}
       >
         <ZoomTracker targetRef={viewportRef} />
+        <HomeFramer viewportRef={viewportRef} />
         {!sandbox && <CameraSync snapshot={snapshot} viewportRef={viewportRef} />}
         <RevealFramer viewportRef={viewportRef} />
         <SpotlightFramer viewportRef={viewportRef} target={frameTarget ?? null} />

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { ReactZoomPanPinchContentRef } from 'react-zoom-pan-pinch';
+import { HOME_FIT } from '@trm/client-core/game/boardModel';
 import { frameHome } from './frameHome';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -32,18 +33,20 @@ const refWith = (
 };
 
 describe('frameHome', () => {
+  // 10 content px per board unit ⇒ a 40×60 box is 400×600 px; in an 800×800 viewport the height
+  // is the constraining axis, so the fit is HOME_FIT * 800 / 600.
+  const EXPECTED_SCALE = (HOME_FIT * 800) / 600;
+
   it('fits the given board-unit box to the viewport and centres it', () => {
-    // 10 content px per board unit ⇒ a 40×60 box is 400×600 px; the 800×800 viewport (0.9
-    // padding) is height-bound at 0.9 * 800 / 600.
     const { ref, setTransform } = refWith({ a: 10, e: 0, f: 0 });
 
     frameHome(ref, 0, { x: 20, y: 10, w: 40, h: 60 });
 
     const [x, y, scale] = setTransform.mock.calls[0] as [number, number, number];
-    expect(scale).toBeCloseTo(1.2, 5);
+    expect(scale).toBeCloseTo(EXPECTED_SCALE, 5);
     // Box centre (40, 40) board ⇒ (400, 400) content px ⇒ pulled to the viewport centre.
-    expect(x).toBeCloseTo(400 - 1.2 * 400, 5);
-    expect(y).toBeCloseTo(400 - 1.2 * 400, 5);
+    expect(x).toBeCloseTo(400 - EXPECTED_SCALE * 400, 5);
+    expect(y).toBeCloseTo(400 - EXPECTED_SCALE * 400, 5);
   });
 
   it('honours the svg viewBox offset, so a negative-origin base view still centres', () => {
@@ -52,9 +55,9 @@ describe('frameHome', () => {
     frameHome(ref, 0, { x: -4, y: -2, w: 40, h: 60 });
 
     const [x, y, scale] = setTransform.mock.calls[0] as [number, number, number];
-    expect(scale).toBeCloseTo(1.2, 5);
-    expect(x).toBeCloseTo(400 - 1.2 * (10 * 16 + 40), 5); // centre x = -4 + 20 = 16 board units
-    expect(y).toBeCloseTo(400 - 1.2 * (10 * 28 + 20), 5); // centre y = -2 + 30 = 28
+    expect(scale).toBeCloseTo(EXPECTED_SCALE, 5);
+    expect(x).toBeCloseTo(400 - EXPECTED_SCALE * (10 * 16 + 40), 5); // centre x = -4 + 20 = 16
+    expect(y).toBeCloseTo(400 - EXPECTED_SCALE * (10 * 28 + 20), 5); // centre y = -2 + 30 = 28
   });
 
   it('does nothing before the board is laid out (no CTM — e.g. jsdom)', () => {

@@ -4,6 +4,7 @@
 // pinch's pixel transform to that descriptor; here the descriptor IS the camera state, so
 // follow-the-actor consumes and broadcasts it with no conversion. Pure — no RN imports —
 // so every function unit-tests without a device.
+import { HOME_FIT } from '@trm/client-core/game/boardModel';
 
 export interface Viewport {
   w: number;
@@ -91,9 +92,10 @@ export function pinchTo(
  * Home/reset framing: the smallest span that CONTAINS `bounds` with a padding margin —
  * the same contain-and-centre semantics as the web's fitTransform (game/geography.ts),
  * re-expressed in span space. Width constrains directly; height constrains via the
- * viewport aspect (visible board height = span · vp.h / vp.w).
+ * viewport aspect (visible board height = span · vp.h / vp.w). The margin comes from
+ * client-core's `HOME_FIT`, so both clients settle the same distance from the railways.
  */
-export function homeCamera(bounds: Bounds, vp: Viewport, padding = 0.9): CameraState {
+export function homeCamera(bounds: Bounds, vp: Viewport, padding = HOME_FIT): CameraState {
   const span = Math.max(bounds.w / padding, (bounds.h * (vp.w / vp.h)) / padding);
   return { cx: bounds.x + bounds.w / 2, cy: bounds.y + bounds.h / 2, span };
 }

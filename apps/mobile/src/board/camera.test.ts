@@ -14,6 +14,7 @@ import {
   SPAN_MIN,
   spanMax,
 } from './camera';
+import { HOME_FIT } from '@trm/client-core/game/boardModel';
 
 const vp = { w: 400, h: 800 };
 const view = { x: -14, y: -8, w: 108, h: 112 }; // Taiwan-ish baseView shape
@@ -46,13 +47,19 @@ describe('camera projection', () => {
   });
 });
 
-describe('home framing (fitTransform semantics: contain with 0.9 padding)', () => {
+describe('home framing (fitTransform semantics: contain with the shared HOME_FIT margin)', () => {
   it('contains a tall bounds on a tall viewport by height', () => {
     const cam = homeCamera({ x: 10, y: 0, w: 40, h: 90 }, vp);
-    // height in board units shown = span * vp.h/vp.w = span*2 ⇒ span ≥ 90/0.9/2 = 50 > 40/0.9
-    expect(cam.span).toBeCloseTo(50);
+    // height in board units shown = span * vp.h/vp.w = span*2 ⇒ span ≥ 90/HOME_FIT/2 > 40/HOME_FIT
+    expect(cam.span).toBeCloseTo(90 / HOME_FIT / 2);
     expect(cam.cx).toBeCloseTo(30);
     expect(cam.cy).toBeCloseTo(45);
+  });
+
+  it('matches the web fit exactly (one shared margin, so the clients sit the same distance)', () => {
+    expect(homeCamera({ x: 0, y: 0, w: 80, h: 40 }, { w: 400, h: 200 }).span).toBeCloseTo(
+      80 / HOME_FIT,
+    );
   });
 });
 

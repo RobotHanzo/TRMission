@@ -1,11 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { smoothClosedPath } from '@trm/map-data';
+import { HOME_FIT } from '@trm/client-core/game/boardModel';
 import { MIN_SCALE, MAX_SCALE, fitTransform, smoothCoastPath } from './geography';
 
 describe('fitTransform', () => {
-  // The board is tall-and-narrow inside a wide viewport, so the home/reset view fits the island
-  // bounding box to the viewport (contain, minus a margin) and centres it. fitTransform is the
-  // pure core: it takes the island's content-space rect (measured live) + the viewport size.
+  // The home/reset view fits the network's bounding box to the viewport (contain, minus a thin
+  // margin) and centres it. fitTransform is the pure core: it takes that box in content-space
+  // pixels (projected live by frameHome) + the viewport size.
+  it('fills the constraining axis to HOME_FIT by default, leaving the rest as margin', () => {
+    const t = fitTransform({ cx: 100, cy: 100, w: 50, h: 200 }, { w: 1000, h: 500 });
+    expect(t.scale).toBeCloseTo((HOME_FIT * 500) / 200, 5);
+  });
+
   it('scales the target to fill the constraining axis, minus the padding', () => {
     // Tall target in a wide viewport → height is the limiting axis.
     const t = fitTransform({ cx: 100, cy: 100, w: 50, h: 200 }, { w: 1000, h: 500 }, 0.9);
