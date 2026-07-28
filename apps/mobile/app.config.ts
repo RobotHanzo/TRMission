@@ -413,6 +413,11 @@ const config: ExpoConfig = {
     // (issue #43) and copies the shared ActivityKit contract into it. Kept BEFORE RNRepo, which
     // wants to run last, and after everything that could still rename the app target.
     './plugins/withLiveActivity',
+    // Patches the CNG-generated AppDelegate so a NULL APNs registration error can't kill the app
+    // (Sentry TRMISSION-MOBILE-4 — iOS 26/27 violates UIKit's own nonnull contract and Expo's
+    // Swift delegate chain segfaults bridging the null back to NSError). The plugin's header has
+    // the full mechanism; it throws if the Expo template moves out from under its anchors.
+    './plugins/withRemoteNotificationErrorGuard',
     // RNRepo swaps source compilation of the covered autolinked native modules (Skia, Reanimated,
     // Worklets, gesture-handler, screens) for prebuilt, GPG-signed AARs from its public Maven — the
     // dominant cost of the Android CI native build. Anything uncovered (e.g. expo-modules-core on RN

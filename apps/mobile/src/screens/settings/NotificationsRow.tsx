@@ -35,7 +35,11 @@ export default function NotificationsRow({ first }: { first?: boolean }): React.
           return; // toggle stays off
         }
         setNotifications(true);
-        await ensurePushRegistration();
+        // A failed token fetch (APNs/FCM outage, no network — on iOS it is also the path the
+        // native null-error guard turned from a crash into a rejection, see
+        // plugins/withRemoteNotificationErrorGuard.js) must not escape as an unhandled rejection.
+        // The toggle stays ON: the session-start hook retries registration on the next restore.
+        await ensurePushRegistration().catch(() => undefined);
       } else {
         setNotifications(false);
         await unregisterDeviceForPush();

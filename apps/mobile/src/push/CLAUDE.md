@@ -3,6 +3,11 @@
 App-wide context: `apps/mobile/CLAUDE.md`. Direct FCM/APNs (no Expo push service) — the app only
 registers native device tokens against the P0 server surface.
 
+**iOS registration failure is a native landmine**, not just a rejected promise: a nil error from the
+system crashes Expo's Swift delegate chain outright, so `apps/mobile/plugins/CLAUDE.md`'s
+`withRemoteNotificationErrorGuard` patches the AppDelegate on every prebuild to keep
+`getDevicePushTokenAsync()` rejecting instead. Every caller must therefore handle a REJECTION.
+
 `register.ts` owns the token lifecycle — its module path is load-bearing (the session store's
 tests mock it): `ensurePushRegistration()` is permission-GATED and **never requests** permission
 itself (that only happens from an explicit user gesture in `PushPrompt`/`NotificationsRow`);
