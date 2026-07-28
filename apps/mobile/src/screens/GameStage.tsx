@@ -492,7 +492,9 @@ export function GameStage({
     </GamePanel>
   );
   // The countdown mounts ONCE per stage (its hook drives the warning sounds): floating over the
-  // board on compact, atop the players panel on the pane tiers.
+  // board on compact, atop the players panel on the pane tiers — except while the ticket chooser
+  // has taken the rail, where the pane tiers float it too (`floatHud(8, needKeep)`), since a
+  // mid-game keep is on the clock and auto-keeps the whole offer when it lapses.
   const playersPanel = (withCountdown: boolean) => (
     <GamePanel>
       {/* The head carries the affordance for issue #14's player card rather than a count: a row
@@ -814,7 +816,9 @@ export function GameStage({
         <View style={styles.row}>
           <View style={styles.fill}>
             {board}
-            {floatHud(8, false)}
+            {/* The chooser replaces the players panel that normally carries the countdown, so it
+                floats here for the duration — still exactly one mount either way. */}
+            {floatHud(8, needKeep)}
           </View>
           <ScrollView
             style={[styles.rail, { borderLeftColor: tokens.line }]}
@@ -843,7 +847,8 @@ export function GameStage({
       <View style={styles.row}>
         <View style={styles.fill}>
           {board}
-          {floatHud(8, false)}
+          {/* As three-pane: the chooser owns the rail while drafting, so the clock floats. */}
+          {floatHud(8, needKeep)}
         </View>
         <View style={[styles.rail, { borderLeftColor: tokens.line }]}>
           <View style={styles.commsTabs} accessibilityRole="tablist">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { CardCounts } from '@trm/proto';
@@ -28,6 +28,10 @@ interface Props {
   /** Tutorial gate: when true, the offer is previewable but committing is disabled until a beat
    *  explicitly asks the learner to keep (so they can't draft ahead of the prompt). */
   confirmDisabled?: boolean | undefined;
+  /** The turn countdown, injected because the chooser replaced the rail block that normally
+   *  carries it — a mid-game keep IS on the clock and auto-keeps all when it lapses. Renders
+   *  nothing of its own when no timer is running (the simultaneous initial draft, sandboxes). */
+  clock?: ReactNode;
   onConfirm(ids: string[]): void;
 }
 
@@ -46,6 +50,7 @@ export function TicketChooser({
   keptTicketIds,
   completedIds,
   confirmDisabled,
+  clock,
   onConfirm,
 }: Props) {
   const { t } = useTranslation();
@@ -127,6 +132,7 @@ export function TicketChooser({
         <h4>{t('chooseTickets')}</h4>
         <span className="tray-count">{kept.size}</span>
       </div>
+      {clock}
       <p className="muted chooser-hint">
         {t('keepAtLeast', { n: minKeep })} · {t('ticketPreviewHint')}
       </p>

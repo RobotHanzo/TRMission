@@ -697,10 +697,13 @@ export function GameStage({
   // The rail's inner content: the ticket chooser while drafting, else trackers/market/(hand)/missions.
   const railInner = needKeep ? (
     // Choosing tickets takes over the rail so the board stays visible and pan/zoomable; the hand
-    // and kept missions move into the chooser's own peek toggles. Keep the room vote reachable in
-    // case a player is stuck during the initial draft.
+    // and kept missions move into the chooser's own peek toggles. The countdown moves in with them
+    // — a mid-game keep is on the clock and auto-keeps the whole offer when it lapses, so hiding it
+    // behind the chooser hid the one deadline the player most needs. It mounts here INSTEAD of in
+    // `trackers` (that block isn't rendered while choosing), never alongside.
     <>
       <TicketChooser
+        clock={<TurnCountdown />}
         offered={snapshot.you?.pendingOfferTicketIds ?? []}
         minKeep={phase === Phase.SETUP_TICKETS ? 2 : 1}
         lockLong={phase === Phase.SETUP_TICKETS}

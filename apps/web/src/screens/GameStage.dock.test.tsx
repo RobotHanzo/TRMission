@@ -91,6 +91,21 @@ describe('GameStage phone dock (live game at ≤700px)', () => {
     expect(dockTablist()).toBeNull();
   });
 
+  it('keeps the turn countdown visible while drafting, inside the chooser', () => {
+    const offered = [...ticketById.keys()].slice(0, 3) as string[];
+    const snap = baseSnap();
+    snap.phase = Phase.TICKET_SELECTION;
+    snap.you!.pendingOfferTicketIds = offered;
+    useGame.setState({ snapshot: snap, rejection: null, turnTimer: null });
+    useGame.getState().applyTurnTimer('p0', 30_000, 75_000);
+    render(<GameStage snapshot={snap} commands={null} onLeave={() => {}} />);
+    // A mid-game keep is on the clock, and the chooser replaced the trackers block that normally
+    // carries the countdown — so it moves INTO the chooser, and mounts exactly once.
+    expect(document.querySelectorAll('[role="timer"]')).toHaveLength(1);
+    expect(document.querySelector('.ticket-chooser [role="timer"]')).not.toBeNull();
+    useGame.setState({ turnTimer: null });
+  });
+
   it('the sandbox keeps the plain rail even at phone width', () => {
     render(<GameStage snapshot={baseSnap()} commands={null} onLeave={() => {}} sandbox />);
     expect(document.querySelector('.game--dock')).toBeNull();
