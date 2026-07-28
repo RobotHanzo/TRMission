@@ -30,6 +30,7 @@ import {
   type BoardTransform,
 } from '../game/boardView';
 import { frameHome } from '../game/frameHome';
+import { homeBounds } from '@trm/client-core/game/boardModel';
 import { ACTIVE_BASE_VIEW, ACTIVE_GEOGRAPHY } from '../game/catalog';
 import { MapScene } from './MapScene';
 import { seatColor } from '../theme/colors';
@@ -443,7 +444,7 @@ function MapControls({ targetRef }: { targetRef: RefObject<HTMLDivElement | null
         aria-label={t('resetView')}
         onClick={() => {
           disengageFollow();
-          frameHome(controls, 200);
+          frameHome(controls, 200, homeBounds(CITIES, ACTIVE_BASE_VIEW));
         }}
       >
         <LocateFixed size={15} aria-hidden />
@@ -601,9 +602,9 @@ export function Board({
         maxScale={8}
         initialScale={1.9}
         centerOnInit
-        // Frame the island to the real viewport once measured (same as the reset button), so first
-        // paint is the proper home view on any window shape rather than the fixed 1.9 seed.
-        onInit={(ref) => frameHome(ref, 0)}
+        // Frame the railway network to the real viewport once measured (same as the reset button),
+        // so first paint is the proper home view on any window shape rather than the fixed 1.9 seed.
+        onInit={(ref) => frameHome(ref, 0, homeBounds(CITIES, ACTIVE_BASE_VIEW))}
         wheel={{ step: 0.0022 }}
         doubleClick={{ mode: 'zoomIn', step: 0.6 }}
         panning={{ velocityDisabled: true }}

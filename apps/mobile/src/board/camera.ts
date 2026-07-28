@@ -98,38 +98,8 @@ export function homeCamera(bounds: Bounds, vp: Viewport, padding = 0.9): CameraS
   return { cx: bounds.x + bounds.w / 2, cy: bounds.y + bounds.h / 2, span };
 }
 
-/**
- * What to frame at home: a custom map's land-ring bbox, else the non-island city bbox
- * padded — the pure stand-in for the web's DOM-measured `path.land` rect (frameHome).
- */
-export function boundsOfContent(content: {
-  cities: readonly { x: number; y: number; isIsland?: boolean | undefined }[];
-  geography?: { land: readonly (readonly (readonly [number, number])[])[] } | null | undefined;
-}): Bounds {
-  let minX = Infinity,
-    minY = Infinity,
-    maxX = -Infinity,
-    maxY = -Infinity;
-  if (content.geography && content.geography.land.length > 0) {
-    for (const ring of content.geography.land)
-      for (const [x, y] of ring) {
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
-      }
-    return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
-  }
-  const pad = 4;
-  for (const c of content.cities) {
-    if (c.isIsland) continue;
-    minX = Math.min(minX, c.x);
-    maxX = Math.max(maxX, c.x);
-    minY = Math.min(minY, c.y);
-    maxY = Math.max(maxY, c.y);
-  }
-  return { x: minX - pad, y: minY - pad, w: maxX - minX + 2 * pad, h: maxY - minY + 2 * pad };
-}
+/** What to frame at home — the padded network box, shared with the web board (`frameHome`). */
+export { homeBounds } from '@trm/client-core/game/boardModel';
 
 // ── LOD port ─────────────────────────────────────────────────────────────────
 // The web's zoomBucket/inv-scale/marker-scale (game/lod.ts + Board.tsx ZoomTracker) are

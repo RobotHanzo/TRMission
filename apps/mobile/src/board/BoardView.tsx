@@ -26,7 +26,7 @@ import type { Locale } from '../net/rest';
 import { frameDurationMs, type BoardFrameTarget } from './frameTarget';
 import {
   BOT_FOLLOW_SPAN,
-  boundsOfContent,
+  homeBounds,
   homeCamera,
   pinchTo,
   rasterSpec,
@@ -336,10 +336,7 @@ function BoardInner({
 
   // The active catalog is stable while a board is mounted (screens gate on useActiveContent
   // readiness before rendering), so content-derived structures build once.
-  const contentBounds = useMemo(
-    () => boundsOfContent({ cities: CITIES, geography: ACTIVE_GEOGRAPHY }),
-    [],
-  );
+  const contentBounds = useMemo(() => homeBounds(CITIES, ACTIVE_BASE_VIEW), []);
   const scene = useMemo(() => buildHitScene(CITIES, ROUTES, ROUTE_GEOMETRY), []);
   const home = useMemo(() => homeCamera(contentBounds, vp), [contentBounds, vp]);
 

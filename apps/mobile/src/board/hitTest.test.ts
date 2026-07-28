@@ -1,7 +1,7 @@
-import { TAIWAN_CONTENT, buildRouteGeometryFor } from '@trm/map-data';
+import { TAIWAN_CONTENT, TAIWAN_BASE_VIEW, buildRouteGeometryFor } from '@trm/map-data';
 import {
   boardToScreen,
-  boundsOfContent,
+  homeBounds,
   homeCamera,
   invScale,
   webScaleEquiv,
@@ -13,7 +13,7 @@ import { buildHitScene, hitTest } from './hitTest';
 const { geometry } = buildRouteGeometryFor(TAIWAN_CONTENT.cities, TAIWAN_CONTENT.routes);
 const scene = buildHitScene(TAIWAN_CONTENT.cities, TAIWAN_CONTENT.routes, geometry);
 const vp = { w: 400, h: 800 };
-const cam = homeCamera(boundsOfContent(TAIWAN_CONTENT), vp);
+const cam = homeCamera(homeBounds(TAIWAN_CONTENT.cities, TAIWAN_BASE_VIEW), vp);
 
 const hit = (px: { x: number; y: number }, at: CameraState = cam) =>
   hitTest(px, at, vp, scene, cam.span);

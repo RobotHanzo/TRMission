@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { BOW_LIMIT } from '@trm/map-data';
+import { homeBounds } from '@trm/client-core/game/boardModel';
 import { MapScene } from '../../../components/MapScene';
 import { buildRouteGeometryFor } from '../../../game/routeGeometry';
 import { frameHome } from '../../../game/frameHome';
@@ -102,6 +103,10 @@ export function EditorCanvas({
     const { ids, dx, dy } = dragPreview;
     return draft.cities.map((c) => (ids.has(c.id) ? { ...c, x: c.x + dx, y: c.y + dy } : c));
   }, [draft.cities, dragPreview]);
+
+  // What "reset view" frames: the authored network, exactly as the live board frames a published
+  // one (a draft with no stops yet falls back to the crop's own view).
+  const home = useMemo(() => homeBounds(draft.cities, view), [draft.cities, view]);
 
   const frame = useMemo(() => {
     if (!selectedCities || selectedCities.size < 2) return null;
@@ -216,10 +221,10 @@ export function EditorCanvas({
         maxScale={8}
         initialScale={1.9}
         centerOnInit
-        // Frame the geography to the viewport once measured (same as the live board), so the
+        // Frame the network to the viewport once measured (same as the live board), so the
         // canvas settles at the same effective zoom the game uses — otherwise a flat initialScale
         // leaves --inv-scale (and so city-label size) far bigger than in-game.
-        onInit={(ref) => frameHome(ref, 0)}
+        onInit={(ref) => frameHome(ref, 0, home)}
         wheel={{ step: 0.0022 }}
         // A stage that drags stations owns the press on a marker outright; everywhere else a
         // press on one still starts a pan, as it always has. (Two-finger pinch is unaffected —
@@ -227,7 +232,7 @@ export function EditorCanvas({
         panning={{ excluded: cityDrag ? ['curve-handle', 'editor-city'] : ['curve-handle'] }}
       >
         <ZoomVar targetRef={zoomVarRef} />
-        <CanvasControls fitHome />
+        <CanvasControls home={home} />
         {/* contentStyle overrides the library's default `width/height: fit-content` on the inner
             content div — without it the SVG's own 100%/100% resolves against an indefinite parent
             and falls back to its tiny intrinsic size instead of filling (and tracking) the viewport. */}

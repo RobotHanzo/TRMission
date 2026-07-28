@@ -8,7 +8,10 @@ The stage that hosts this board (prop contract, layout tiers, drivers) is docume
   `{cx, cy, span}` (board units; span = visible board-width) — identical to the protobuf
   `CameraView`, so the myTurn camera broadcast and opponent camera-follow need zero projection
   math. Reanimated shared values drive a single Skia `<Group transform>`; gestures (pan/pinch,
-  gesture-handler) mutate `cx/cy/span` on the UI thread.
+  gesture-handler) mutate `cx/cy/span` on the UI thread. Home/reset framing is
+  `homeCamera(homeBounds(...))` — client-core's padded mainland-stop box, shared with the web
+  board's `frameHome`, deliberately NOT the land (a crop can carry far more of it than the
+  railways ever reach; issue #71). The zoom-out clamp and the raster scene still use `baseView`.
 - **Throttled LOD, not per-frame styles**: continuous zoom moves the GPU transform every frame;
   the React tree re-renders only when the LOD re-quantizes (`cam.lod.{bucket,inv,marker}`) —
   at every settle, plus a threshold-throttled handful of times WHILE a zoom is in flight
