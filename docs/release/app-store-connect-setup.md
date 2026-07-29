@@ -193,9 +193,16 @@ Content is already spec'd in
 improvising in App Store Connect:
 
 - **Listing text**: `apps/mobile/fastlane/metadata/ios/{zh-Hant,en-US}/{name,subtitle,description,
-keywords,privacy_url,support_url}.txt` are already committed. Enter them once by hand in App
-  Store Connect, or push via a local `fastlane deliver` run once a `Deliverfile`/lane exists (not
-  set up yet — App Store Connect's own UI is the fastest path for a first submission).
+promotional_text,keywords,privacy_url,support_url}.txt` are already committed. Enter them once by
+  hand in App Store Connect, or push via a local `fastlane deliver` run once a `Deliverfile`/lane
+  exists (not set up yet — App Store Connect's own UI is the fastest path for a first submission).
+  `promotional_text` is the only one that can be changed **without** a new build, so keep
+  time-bound copy (a season, an event) there rather than in `description`.
+- **Only advertise ungated features.** `mapBuilder`, `replayReview` and `randomEvents` are
+  per-account grants (`@trm/shared`'s `USER_FEATURES`) and the map builder is hidden outright
+  without one, so a reviewer's fresh account sees none of them. The committed copy therefore does
+  not mention custom maps or replay; re-add them only if the global default grant
+  (`config.features`) turns them on for everyone.
 - **Screenshots**: `docs/mobile/store-screenshots.md` — iPhone 6.9" portrait + iPad 13"
   landscape/portrait, zh-Hant captured first.
 - **Age rating questionnaire**: no violence/gambling; the UGC question ("unrestricted

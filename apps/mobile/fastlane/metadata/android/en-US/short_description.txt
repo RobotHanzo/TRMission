@@ -1,1 +1,1 @@
-A multiplayer railway strategy board game set on Taiwan's railways.
+Claim routes across Taiwan's railways and complete secret mission tickets.
