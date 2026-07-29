@@ -11,13 +11,7 @@ import { MAP_PALETTE_DARK, MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { CITIES, ROUTES, cityById, cityName, routeById } from '../game/content';
 import { boardEventOverlays } from '../game/events';
 import { HUB_CITIES, ROUTE_GEOMETRY } from '../game/routeGeometry';
-import {
-  brokenExclusiveRails,
-  brokenRailMap,
-  canClaimBrokenRail,
-  myId,
-  ownershipMap,
-} from '../game/view';
+import { brokenExclusiveRails, brokenRailMap, ownershipMap } from '../game/view';
 import { cityTier } from '../game/lod';
 import { ACTIVE_BASE_VIEW, ACTIVE_GEOGRAPHY } from '../game/catalog';
 import { getSocket } from '../net/connection';
@@ -365,8 +359,6 @@ function BoardInner({
   ownedRef.current = owned;
   const closedRef = useRef(closedRoutes);
   closedRef.current = closedRoutes;
-  const brokenRailsRef = useRef(brokenRails);
-  brokenRailsRef.current = brokenRails;
   const sandboxRef = useRef(sandbox);
   sandboxRef.current = sandbox;
   const onPickRouteRef = useRef(onPickRoute);
@@ -401,14 +393,10 @@ function BoardInner({
       if (!canClaimRef.current || closedRef.current.has(hit.id) || ownedRef.current.has(hit.id)) {
         return;
       }
-      // A broken rail stays tappable while unrepaired (the tap opens the REPAIR flow); once
-      // repaired it is claim-gated to the repairer during their exclusivity window (ports the
-      // web Board's claimFilter).
-      const def = routeById.get(hit.id);
-      if (def && (def.brokenCarriages ?? 0) > 0) {
-        const info = brokenRailsRef.current.get(hit.id);
-        if (info && !canClaimBrokenRail(info, myId(snapshotRef.current))) return;
-      }
+      // A broken rail stays tappable in BOTH states: unrepaired the tap opens the REPAIR flow,
+      // and repaired-but-still-exclusive the claim flow answers with the repairer's name. The web
+      // board can drop that second tap on the floor (claimFilter) because its tooltip already
+      // explains the mark; a tap has no hover, so here silence would read as a dead board.
       onPickRouteRef.current(hit.id);
     },
     // home.span anchors the hit-test tolerances to the renderer's zoom LOD (see hitTest.ts).

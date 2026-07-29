@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react-native';
 import { create } from '@bufbuild/protobuf';
+import '../i18n'; // side-effect i18next init, so the notices below carry resolved copy
 import { GameSnapshotSchema, Phase, type GameSnapshot } from '@trm/proto';
 import type { CardColor } from '@trm/shared';
 import { ROUTES } from './content';
@@ -78,6 +79,51 @@ describe('useClaimFlow', () => {
     const notes = useAnimations.getState().notifications;
     expect(notes).toHaveLength(1);
     expect(notes[0]).toMatchObject({ variant: 'notice' });
+  });
+
+  // The board lets the tap through (no hover means no tooltip to explain the 🔧 chip), so the flow
+  // has to answer with WHO holds first claim rather than silently doing nothing.
+  it('a repaired rail inside the repairer’s window pushes the exclusivity notice, not a claim', () => {
+    const commands = commandsMock();
+    const s = snap(handOf(colorRoute.color, colorRoute.length + 1), {
+      players: [
+        { id: 'me', seat: 0, trainCars: 45, stationsRemaining: 3 },
+        { id: 'rival', seat: 1, trainCars: 45, stationsRemaining: 3 },
+      ],
+      brokenRails: [{ routeId: colorRoute.id, repairedByPlayerId: 'rival', exclusiveTurnEnds: 2 }],
+    });
+    const { result } = renderHook(() => useClaimFlow(s, commands));
+    act(() => result.current.pickRoute(colorRoute.id as string));
+    expect(result.current.claim).toBeNull();
+    const notes = useAnimations.getState().notifications;
+    expect(notes).toHaveLength(1);
+    // No roster in a unit test, so the repairer resolves to their seat label — the name is there.
+    expect(notes[0]).toMatchObject({ variant: 'notice', text: expect.stringContaining('P2') });
+  });
+
+  it('the same rail claims normally once the exclusivity window has closed', () => {
+    const commands = commandsMock();
+    const s = snap(handOf(colorRoute.color, colorRoute.length + 1), {
+      players: [
+        { id: 'me', seat: 0, trainCars: 45, stationsRemaining: 3 },
+        { id: 'rival', seat: 1, trainCars: 45, stationsRemaining: 3 },
+      ],
+      brokenRails: [{ routeId: colorRoute.id, repairedByPlayerId: 'rival', exclusiveTurnEnds: 0 }],
+    });
+    const { result } = renderHook(() => useClaimFlow(s, commands));
+    act(() => result.current.pickRoute(colorRoute.id as string));
+    expect(result.current.claim?.kind).toBe('route');
+    expect(useAnimations.getState().notifications).toHaveLength(0);
+  });
+
+  it('the repairer themself may claim inside their own window', () => {
+    const commands = commandsMock();
+    const s = snap(handOf(colorRoute.color, colorRoute.length + 1), {
+      brokenRails: [{ routeId: colorRoute.id, repairedByPlayerId: 'me', exclusiveTurnEnds: 2 }],
+    });
+    const { result } = renderHook(() => useClaimFlow(s, commands));
+    act(() => result.current.pickRoute(colorRoute.id as string));
+    expect(result.current.claim?.kind).toBe('route');
   });
 
   it('cancelClaim drops the pending claim without sending anything', () => {

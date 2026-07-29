@@ -23,6 +23,8 @@ import {
 } from './payments';
 import { enumerateTunnelExtra } from './tunnel';
 import { freeStationAvailable, hasActiveEvent, skyLanternSurcharge } from './events';
+import { brokenRailMap, canClaimBrokenRail } from './view';
+import { usePlayerName } from './playerName';
 import { useAnimationsStore } from '../store/animations';
 import type { GameCommands } from '../net/commands';
 
@@ -51,6 +53,7 @@ export interface ClaimFlow {
 export function useClaimFlow(snapshot: GameSnapshot, commands: GameCommands | null): ClaimFlow {
   const { t } = useTranslation();
   const pushNotification = useAnimationsStore((s) => s.pushNotification);
+  const playerName = usePlayerName();
 
   const [claim, setClaim] = useState<Claim | null>(null);
   // The base payment committed to a pending tunnel claim. Its cards stay in hand until the tunnel
@@ -79,6 +82,20 @@ export function useClaimFlow(snapshot: GameSnapshot, commands: GameCommands | nu
       pushNotification({
         variant: 'notice',
         text: t('insufficientCards', { need: s.need, have: s.have }),
+      });
+      return;
+    }
+    // A repaired broken rail is the repairer's alone until their exclusivity window closes — the
+    // engine rejects anyone else's claim, so name who holds first rights instead of opening a
+    // payment picker that could only bounce. The web board says this in the route's tooltip; a
+    // tap has no hover, so mobile says it as a notice (the 🔧 chip is the at-a-glance cue).
+    const repair = brokenRailMap(snapshot).get(routeId);
+    if (repair && !canClaimBrokenRail(repair, me)) {
+      pushNotification({
+        variant: 'notice',
+        text: t('events.brokenRailExclusive', {
+          name: playerName({ id: repair.repairedByPlayerId, seat: repair.repairedBySeat ?? 0 }),
+        }),
       });
       return;
     }
