@@ -5,11 +5,13 @@
 // the turns that put track on the board; stations and tunnels sit on the line as marks; the
 // section under the playhead goes to full saturation and everything past it is washed back.
 //
-// Touch differences from web: there is no range input to lay over the strip, so the strip itself
-// is the seek target (tap anywhere on it) and every control meets the 44dp tap minimum.
-import { useMemo, useState } from 'react';
+// Touch differences from web: there is no range input to lay over the strip, so the strip itself is
+// the seek target — a PanResponder, so it takes both a tap and a drag — and every control meets the
+// 44dp tap minimum.
+import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  PanResponder,
   Pressable,
   StyleSheet,
   Text,
@@ -32,6 +34,10 @@ const STRIP_H = 34;
 const LINE_THIN = 5;
 const LINE_TRACK = 13;
 const MARK = 10;
+/** The strip is 34dp of drawing; the slop is what takes it past the 44dp grab target. */
+const STRIP_SLOP = { top: 6, bottom: 6 } as const;
+/** Web's slider answers arrow keys with ±1 step; this is the same control for AT. */
+const STEP_ACTIONS = [{ name: 'increment' }, { name: 'decrement' }] as const;
 
 export function ReplayTransport({
   actions,
@@ -47,7 +53,48 @@ export function ReplayTransport({
 }): React.JSX.Element {
   const { t } = useTranslation();
   const { tokens } = useTheme();
-  const [stripWidth, setStripWidth] = useState(0);
+
+  // Everything the pan responder reads goes through a ref, because the responder is built ONCE:
+  // rebuilding it mid-drag hands the next move a virgin gestureState and the playhead sticks at the
+  // press (settings/VolumeSlider.tsx carries the same note), and `player` is a new object on every
+  // render — which a drag causes at every step it emits.
+  const stripWidth = useRef(0);
+  const totalRef = useRef(player.total);
+  totalRef.current = player.total;
+  const seekRef = useRef(player.seek);
+  seekRef.current = player.seek;
+  const dragStart = useRef({ pageX: 0, step: 0 });
+
+  const pan = useMemo(() => {
+    const seekTo = (step: number): void =>
+      seekRef.current(Math.max(0, Math.min(totalRef.current, Math.round(step))));
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      // A drag that begins near the left edge would otherwise be taken over by the native stack's
+      // back-swipe part-way through.
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: (e) => {
+        const w = stripWidth.current;
+        if (w <= 0 || totalRef.current === 0) return;
+        // `locationX` is relative to the view the touch landed ON, which is the strip itself only
+        // because every painted layer inside it is `pointerEvents="none"` — otherwise a press on a
+        // turn section would be measured from that section's left edge and seek somewhere else.
+        const step = (e.nativeEvent.locationX / w) * totalRef.current;
+        dragStart.current = { pageX: e.nativeEvent.pageX, step };
+        seekTo(step);
+      },
+      onPanResponderMove: (e) => {
+        const w = stripWidth.current;
+        if (w <= 0 || totalRef.current === 0) return;
+        // Off absolute pageX rather than an accumulated gestureState.dx, which drifts; and the drag
+        // origin is kept in FRACTIONAL steps so a slow drag across a long game doesn't lose ground
+        // to rounding at every move.
+        const start = dragStart.current;
+        seekTo(start.step + ((e.nativeEvent.pageX - start.pageX) / w) * totalRef.current);
+      },
+    });
+  }, []);
 
   const seats = useMemo(() => new Map(players.map((p) => [p.userId, p.seat])), [players]);
   const timeline = useMemo(() => buildReplayTimeline(actions, seats), [actions, seats]);
@@ -114,75 +161,85 @@ export function ReplayTransport({
         </View>
       </View>
 
-      <Pressable
+      <View
+        testID="replay-strip"
         accessibilityRole="adjustable"
         accessibilityLabel={t('history.step', { n: player.step, total: player.total })}
         accessibilityValue={{ min: 0, max: player.total, now: player.step }}
-        style={styles.strip}
-        onLayout={(e: LayoutChangeEvent) => setStripWidth(e.nativeEvent.layout.width)}
-        onPress={(e) => {
-          if (stripWidth <= 0 || player.total === 0) return;
-          const ratio = Math.max(0, Math.min(1, e.nativeEvent.locationX / stripWidth));
-          player.seek(Math.round(ratio * player.total));
+        accessibilityActions={[...STEP_ACTIONS]}
+        onAccessibilityAction={(e) => {
+          const delta = e.nativeEvent.actionName === 'increment' ? 1 : -1;
+          player.seek(Math.max(0, Math.min(player.total, player.step + delta)));
         }}
+        style={styles.strip}
+        hitSlop={STRIP_SLOP}
+        onLayout={(e: LayoutChangeEvent) => {
+          stripWidth.current = e.nativeEvent.layout.width;
+        }}
+        {...pan.panHandlers}
       >
-        {/* The rail, showing through the gaps between turns and past the last one. */}
-        <View style={[styles.rail, { backgroundColor: tokens.line }]} />
-        <View style={styles.turns}>
-          {timeline.turns.map((turn) => (
-            <View
-              key={turn.from}
-              style={[
-                styles.turn,
-                {
-                  flexGrow: turn.to - turn.from,
-                  height: turn.track > 0 ? LINE_TRACK : LINE_THIN,
-                  borderRadius: turn.track > 0 ? 2 : 1,
-                  // The opening draft is nobody's turn, so it takes no livery. Web hatches it;
-                  // RN has no repeating gradient, and flat line-colour says the same thing.
-                  backgroundColor: turn.setup
-                    ? tokens.line
-                    : turn === current
-                      ? seatColor(turn.seat)
-                      : rgba(seatColor(turn.seat), 0.62),
-                },
-              ]}
-            />
-          ))}
-        </View>
-        {/* A mark is a glyph inside a surface-coloured halo — drawn as a real wrapper View rather
-            than a shadow, because RN shadows are a soft glow on iOS and nothing at all on Android
-            without elevation, and this ring has to be crisp to read over a saturated section. */}
-        {timeline.moments.map((moment) => (
-          <View
-            key={moment.step}
-            style={[styles.halo, { left: pct(moment.step), backgroundColor: tokens.surface }]}
-          >
-            <View
-              style={
-                moment.kind === 'station'
-                  ? [styles.mark, { borderRadius: 2, backgroundColor: seatColor(moment.seat) }]
-                  : [
-                      styles.mark,
-                      {
-                        borderRadius: MARK / 2,
-                        backgroundColor: tokens.surface,
-                        borderWidth: 2.5,
-                        borderColor: seatColor(moment.seat),
-                      },
-                    ]
-              }
-            />
+        {/* Paint only. The strip View above has to stay the touch target for the whole gesture, so
+            the drawing is sunk behind one `pointerEvents="none"` layer — web does exactly this with
+            `pointer-events: none` on `.strip-plot`, for the same reason. */}
+        <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+          {/* The rail, showing through the gaps between turns and past the last one. */}
+          <View style={[styles.rail, { backgroundColor: tokens.line }]} />
+          <View style={styles.turns}>
+            {timeline.turns.map((turn) => (
+              <View
+                key={turn.from}
+                style={[
+                  styles.turn,
+                  {
+                    flexGrow: turn.to - turn.from,
+                    height: turn.track > 0 ? LINE_TRACK : LINE_THIN,
+                    borderRadius: turn.track > 0 ? 2 : 1,
+                    // The opening draft is nobody's turn, so it takes no livery. Web hatches it;
+                    // RN has no repeating gradient, and flat line-colour says the same thing.
+                    backgroundColor: turn.setup
+                      ? tokens.line
+                      : turn === current
+                        ? seatColor(turn.seat)
+                        : rgba(seatColor(turn.seat), 0.62),
+                  },
+                ]}
+              />
+            ))}
           </View>
-        ))}
-        <View
-          style={[
-            styles.ahead,
-            { left: pct(player.step), backgroundColor: rgba(tokens.surface, 0.62) },
-          ]}
-        />
-        <View style={[styles.head3, { left: pct(player.step), backgroundColor: tokens.ember }]} />
-      </Pressable>
+          {/* A mark is a glyph inside a surface-coloured halo — drawn as a real wrapper View rather
+              than a shadow, because RN shadows are a soft glow on iOS and nothing at all on Android
+              without elevation, and this ring has to be crisp to read over a saturated section. */}
+          {timeline.moments.map((moment) => (
+            <View
+              key={moment.step}
+              style={[styles.halo, { left: pct(moment.step), backgroundColor: tokens.surface }]}
+            >
+              <View
+                style={
+                  moment.kind === 'station'
+                    ? [styles.mark, { borderRadius: 2, backgroundColor: seatColor(moment.seat) }]
+                    : [
+                        styles.mark,
+                        {
+                          borderRadius: MARK / 2,
+                          backgroundColor: tokens.surface,
+                          borderWidth: 2.5,
+                          borderColor: seatColor(moment.seat),
+                        },
+                      ]
+                }
+              />
+            </View>
+          ))}
+          <View
+            style={[
+              styles.ahead,
+              { left: pct(player.step), backgroundColor: rgba(tokens.surface, 0.62) },
+            ]}
+          />
+          <View style={[styles.head3, { left: pct(player.step), backgroundColor: tokens.ember }]} />
+        </View>
+      </View>
 
       <View style={styles.foot}>
         <TransportButton
@@ -282,9 +339,9 @@ const styles = StyleSheet.create({
   speedText: { fontSize: 11, fontVariant: ['tabular-nums'] },
   speedTextOn: { fontWeight: '700' },
 
-  strip: { height: STRIP_H, justifyContent: 'center' },
-  // Absolute children need an explicit `top` here: without one, yoga falls back to the static
-  // position, which inside a centring container is not the middle of the strip.
+  strip: { height: STRIP_H },
+  // Absolute children need an explicit `top`: without one, yoga falls back to the static position,
+  // which is wherever the layer happens to sit in the paint stack — not the middle of the strip.
   rail: { position: 'absolute', left: 0, right: 0, top: (STRIP_H - 1) / 2, height: 1 },
   turns: { flexDirection: 'row', alignItems: 'center', gap: 1, height: STRIP_H },
   turn: { flexBasis: 0, minWidth: 1 },

@@ -214,10 +214,17 @@
   position: relative;
   height: 30px;
 }
+/* Decoration, and it must stay decoration to the POINTER too, not just to AT (issue #76). The
+   layers below carry z-index, and `.strip-plot` — position:absolute with z-index:auto — is not a
+   stacking context, so those layers escape into the ancestor's and paint ABOVE the range input
+   that follows them in tree order. Hit-testing follows paint order, so without this the wash
+   ahead of the playhead swallowed every click and drag from the playhead rightward — at step 0,
+   the whole strip. */
 .strip-plot {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  pointer-events: none;
 }
 /* The rail, showing through the gaps between turns and past the last one. */
 .strip-plot::after {
@@ -309,8 +316,8 @@
   transition: left 0.18s linear;
 }
 
-/* One real control over the painted strip: dragging, arrow keys and AT all land on this slider.
-   It stays fully transparent rather than opacity:0 so its focus ring still paints. */
+/* One real control over the painted strip: click-to-seek, dragging, arrow keys and AT all land on
+   this slider. It stays fully transparent rather than opacity:0 so its focus ring still paints. */
 .strip-input {
   position: absolute;
   inset: 0;
@@ -323,15 +330,22 @@
   background: transparent;
   -webkit-appearance: none;
   appearance: none;
-  cursor: pointer;
+  cursor: grab;
+}
+.strip-input:active {
+  cursor: grabbing;
 }
 .strip-input::-webkit-slider-runnable-track {
   height: 100%;
   background: transparent;
 }
+/* A range input's value maps across `width - thumb`, insetting the landing point by half a thumb,
+   so a fat invisible thumb puts the playhead up to 9px from where you clicked. The thumb is the
+   playhead here and the playhead is 2px, so match it: the ember line lands under the pointer.
+   Nothing is lost — the whole track takes the press and starts the drag, thumb width or not. */
 .strip-input::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 18px;
+  width: 2px;
   height: 100%;
   background: transparent;
 }
@@ -340,7 +354,7 @@
   background: transparent;
 }
 .strip-input::-moz-range-thumb {
-  width: 18px;
+  width: 2px;
   height: 42px;
   border: none;
   background: transparent;

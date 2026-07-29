@@ -35,8 +35,15 @@ which leaves only marks sparse enough to sit on the line itself. Don't add a sec
 Two more rules hold it together:
 
 - **The painted strip is decoration; the range input over it is the control.** Everything in
-  `.strip-plot` is `aria-hidden`, and the one `<input type="range">` owns dragging, arrow keys and
-  the a11y tree. Don't attach click handlers to glyphs — per-moment seeking would need N focusable
+  `.strip-plot` is `aria-hidden` **and** `pointer-events: none`, and the one `<input type="range">`
+  owns click-to-seek, dragging, arrow keys and the a11y tree. The second half of that is
+  load-bearing, not tidiness: `.strip-plot` carries no stacking context, so its z-indexed layers
+  paint above the input that follows them in tree order, and hit-testing follows paint order — the
+  wash ahead of the playhead ate every click and drag from the playhead rightward, which at step 0
+  is the whole strip (issue #76). Any new layer in there inherits the immunity; keep it that way.
+  The thumb is 2px wide to match the painted playhead, because a range maps its value across
+  `width - thumb` and a fat thumb lands the seek up to half a thumb from the pointer.
+  Don't attach click handlers to glyphs — per-moment seeking would need N focusable
   targets in the tab order to stay accessible, and the rail's log already names the current step.
   Turn-at-a-time seeking is the keyboard path, via `turnBoundaries`.
 - **Marker shape carries the meaning, colour only says whose seat**, so the strip survives the
@@ -50,6 +57,9 @@ card chrome and its children are sections, so `PerspectiveSwitcher`/`ReplayShare
 
 `apps/mobile/src/features/replay/ReplayTransport.tsx` is the RN port of this component and must
 stay recognisably the same instrument. Its differences are forced by the platform, not taste: the
-strip itself is the seek target (no range input to lay over it), marks wear a real halo View (RN
-shadows are a glow on iOS and nothing on Android), and the opening draft is flat line-colour rather
-than hatched (no repeating gradients).
+strip itself is the seek target (no range input to lay over it), so a `PanResponder` on it supplies
+the tap and the drag, with the whole painting sunk behind one `pointerEvents="none"` layer — the
+same rule as `.strip-plot` here, and there it also keeps `locationX` measured from the strip rather
+than from whichever turn section the finger landed on. Marks wear a real halo View (RN shadows are
+a glow on iOS and nothing on Android), and the opening draft is flat line-colour rather than hatched
+(no repeating gradients).
