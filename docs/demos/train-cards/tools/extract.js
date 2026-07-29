@@ -47,8 +47,38 @@ function namespaceAll(markup, prefix, ids) {
 }
 const sanitize = (id) => id.replace(/[^A-Za-z0-9_-]/g, '');
 
+/**
+ * Per-car dark-mode ink remaps, authored hex → dark hex.
+ *
+ * The sheet is drawn on a near-black page, so eight of the nine vehicles already sit well on
+ * a dark card: their dark areas are windows and door bands enclosed by a light body. The open
+ * wagon is the exception — its whole body IS the dark navy family, so on a dark card face
+ * (~#24272a) it reads as a hole rather than a vehicle. Dark mode lifts that family into a lit
+ * steel range, keeping the blue-grey character and every relationship between the inks.
+ * Liveries are never touched.
+ */
+const DARK_INK = {
+  BLACK: {
+    '#12222f': '#465c70', // outer frame / skirt
+    '#142536': '#4d647a', // sill + rib strokes
+    '#242e3a': '#54697d', // interior back wall
+    '#334454': '#647d94', // interior panels
+    '#64717a': '#93a3ae', // interior highlight
+  },
+};
+
+/** `.sel { fill: #aaa }` → the dark-mode counterpart, or null when nothing in it is remapped. */
+function darkRule(sel, body, remap) {
+  const decls = [];
+  for (const m of body.matchAll(/(fill|stroke)\s*:\s*(#[0-9a-fA-F]{3,6})/g)) {
+    const to = remap[m[2].toLowerCase()];
+    if (to) decls.push(`${m[1]}: ${to}`);
+  }
+  return decls.length ? `${sel} { ${decls.join('; ')} }` : null;
+}
+
 /** Build one standalone <svg> for a body of markup, carrying only the rules/defs it uses. */
-function build({ style, defs, body, prefix, viewBox }) {
+function build({ style, defs, body, prefix, viewBox, darkInk }) {
   const usedCls = new Set([...body.matchAll(/\bcls-(\d+)\b/g)].map((m) => m[1]));
   // a class referenced by a kept rule (e.g. `.cls-7 { clip-path: url(#x) }`) can pull in defs
   const allDefs = defBlocks(defs);
@@ -80,7 +110,32 @@ function build({ style, defs, body, prefix, viewBox }) {
   }
   const ids = [...usedIds];
   const defsMarkup = ids.map((id) => allDefs[id]).join('\n    ');
-  const css = keptRules.join('\n      ');
+
+  // Dark mode: the OS preference is the default signal; an explicit data-theme on the host
+  // document wins in BOTH directions (higher specificity than the media query's bare .cls
+  // selectors). Standalone — as a file or an <img> — only the media query can apply, which is
+  // the right fallback.
+  let dark = '';
+  if (darkInk) {
+    const remap = Object.fromEntries(Object.entries(darkInk).map(([k, v]) => [k.toLowerCase(), v]));
+    const media = [], onDark = [], onLight = [];
+    for (const r of rules(style)) {
+      const sel = r.sel.filter((s) => [...kept].some((n) => s === `.cls-${n}`));
+      if (!sel.length) continue;
+      const flipped = darkRule(sel.join(', '), r.body, remap);
+      if (!flipped) continue;
+      media.push('  ' + flipped);
+      onDark.push(darkRule(sel.map((s) => `:root[data-theme='dark'] ${s}`).join(', '), r.body, remap));
+      onLight.push(`${sel.map((s) => `:root[data-theme='light'] ${s}`).join(', ')} { ${r.body} }`);
+    }
+    if (media.length) {
+      dark =
+        `\n\n      /* Dark mode — see DARK_INK in tools/extract.js for why this car is remapped. */\n` +
+        `      @media (prefers-color-scheme: dark) {\n      ${media.join('\n      ')}\n      }\n` +
+        `      ${onDark.join('\n      ')}\n      ${onLight.join('\n      ')}`;
+    }
+  }
+  const css = keptRules.join('\n      ') + dark;
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${viewBox}" class="rs-art" aria-hidden="true" focusable="false">\n` +
     `  <defs>\n    <style>\n      ${css}\n    </style>\n    ${defsMarkup}\n  </defs>\n` +
@@ -103,10 +158,37 @@ const SHEET = [
   { key: 'LOCOMOTIVE', id: 'R20型柴電機車', a: 889, b: 1012, prefix: 'l' },
 ];
 
+/**
+ * Each vehicle's inked bounds on its source sheet, measured per-pixel (getBBox is no use here —
+ * it ignores clip paths, and several cars have clipped overflow). Every crop is re-centred into
+ * one shared BOX, so all nine come out at the same scale.
+ */
+const BOX = { w: 176, h: 79 };
+const INKED = {
+  RED: { x: 30, y: 100.67, w: 170.33, h: 73.33 },
+  ORANGE: { x: 212.33, y: 170, w: 170.33, h: 73.33 },
+  YELLOW: { x: 56, y: 61.67, w: 171.67, h: 72.67 },
+  GREEN: { x: 30, y: 425.33, w: 170.67, h: 73.33 },
+  BLUE: { x: 212.33, y: 364.33, w: 170.33, h: 66 },
+  PURPLE: { x: 394.33, y: 432.67, w: 170.67, h: 66 },
+  BLACK: { x: 30, y: 614.67, w: 170.67, h: 64.67 },
+  WHITE: { x: 394.33, y: 614.67, w: 170.67, h: 64.67 },
+  LOCOMOTIVE: { x: 212.33, y: 680, w: 170.33, h: 71.33 },
+};
+const cropFor = (key) => {
+  const b = INKED[key];
+  if (!b) return null;
+  return [(b.x + b.w / 2 - BOX.w / 2).toFixed(2), (b.y + b.h / 2 - BOX.h / 2).toFixed(2),
+    BOX.w, BOX.h].join(' ');
+};
+
 const manifest = [];
 for (const t of SHEET) {
   const body = sheetLines.slice(t.a - 1, t.b).join('\n');
-  const svg = build({ ...sheet, body, prefix: `${t.prefix}-`, viewBox: '0 0 595.28 844.32' });
+  const svg = build({
+    ...sheet, body, prefix: `${t.prefix}-`, darkInk: DARK_INK[t.key],
+    viewBox: cropFor(t.key) ?? '0 0 595.28 844.32',
+  });
   const file = path.join(OUT, `${t.key}.svg`);
   fs.writeFileSync(file, svg);
   manifest.push({ key: t.key, id: t.id, file });
@@ -119,7 +201,10 @@ const l610 = y610.src.split(/\r?\n/);
 const body610 = l610.slice(73, 176).join('\n');
 fs.writeFileSync(
   path.join(OUT, 'YELLOW.svg'),
-  build({ ...y610, body: `<g id="y610">\n${body610}\n</g>`, prefix: 'y-', viewBox: '0 0 283.46 142.33' }),
+  build({
+    ...y610, body: `<g id="y610">\n${body610}\n</g>`, prefix: 'y-',
+    viewBox: cropFor('YELLOW'), darkInk: DARK_INK.YELLOW,
+  }),
 );
 manifest.push({ key: 'YELLOW', id: '610 (阿里山號 replacement)', file: path.join(OUT, 'YELLOW.svg') });
 

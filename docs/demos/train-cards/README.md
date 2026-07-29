@@ -31,6 +31,21 @@ One SVG per `CardColor`, cropped from the source sheets and normalised to a `176
 all nine vehicles share one scale. Every `cls-N` class and every clipPath/gradient id is prefixed
 per file, so any number of them can be inlined into one document without colliding.
 
+### Dark mode
+
+The sheet is drawn on a near-black page, so eight of the nine cars already sit well on a dark
+card: their dark areas are windows and door bands enclosed by a light body. **30G1000型敞車 is the
+exception** — its whole body is the dark navy family, so against a dark card face (~`#24272a`) it
+read as a hole rather than a vehicle. `DARK_INK` in `tools/extract.js` lifts that one family into
+a lit steel range, preserving the relationships between the inks; no livery is touched. Pixels
+below 1.6:1 against the dark face: **67% → 0%**, mean contrast 2.39 → 3.91.
+
+The switch lives in each illustration's own `<style>`: `prefers-color-scheme` is the default
+signal, and an explicit `data-theme` on the host document overrides it **in both directions**
+(the `:root[data-theme=…]` selectors outrank the media query's bare class selectors). Opened
+standalone — as a file or through `<img>` — only the media query can apply, which is correct.
+Add a car to `DARK_INK` and re-run `extract.js` to give it the same treatment.
+
 Sources (kept out of the repo — they live wherever you dropped them):
 
 - `台鐵任務-車廂.svg` — the nine-up sheet
@@ -38,9 +53,19 @@ Sources (kept out of the repo — they live wherever you dropped them):
 
 ## `tools/`
 
-- `extract.js <sourceDir> <outDir>` — crops + namespaces the art. The crop boxes are hard-coded
-  from a pixel-accurate measurement of the original sheets; re-measure if the artwork is redrawn.
-- `build-demo.js <outDir>` — regenerates `index.html`, inlining whatever is in `art/`.
+Run from this directory, in this order — `build-demo.js` inlines whatever `extract.js` last wrote:
+
+```bash
+node tools/extract.js <dir-holding-the-source-svgs> ./art
+rm -f art/_ALISHAN.svg art/manifest.json     # 阿里山號 is extracted for reference, not shipped
+node tools/build-demo.js .
+```
+
+- `extract.js` crops, namespaces, and applies the dark-mode ink remap. The crop boxes in `INKED`
+  are a per-pixel measurement of the original sheets (`getBBox` is no use — it ignores clip paths,
+  and several cars have clipped overflow); re-measure if the artwork is redrawn.
+- `build-demo.js` regenerates `index.html`. An optional second argument writes a body-only
+  variant for hosts that supply their own document skeleton.
 
 `index.html` is committed as generated output — edit `build-demo.js` and re-run rather than
 patching the HTML in place.

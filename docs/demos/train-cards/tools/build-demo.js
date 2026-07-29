@@ -2,9 +2,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const ART = path.join(__dirname, 'cars');
+// Inlines whatever extract.js already put in <OUT>/art — run that first.
 const OUT = process.argv[2];
-fs.mkdirSync(path.join(OUT, 'art'), { recursive: true });
+const ART = path.join(OUT, 'art');
 
 const CARS = [
   { key: 'RED', hex: '#D72631', ink: '#FFFFFF', zh: '紅', glyph: '▲', name: '普悠瑪', model: 'TEMU2000型', role: '城際自強號' },
@@ -19,7 +19,6 @@ const CARS = [
 ];
 
 for (const c of CARS) {
-  fs.copyFileSync(path.join(ART, `${c.key}.svg`), path.join(OUT, 'art', `${c.key}.svg`));
   c.svg = fs.readFileSync(path.join(ART, `${c.key}.svg`), 'utf8').replace(/\n\s*/g, '\n');
 }
 
@@ -240,8 +239,18 @@ section { margin-top: 44px; }
       <dd>檔案以引擎的 <code>CardColor</code> 命名（<code>art/RED.svg</code> … <code>art/LOCOMOTIVE.svg</code>），class 與 clipPath id 都已加前綴，可安全地並存於同一份文件。</dd>
       <dt>比例</dt>
       <dd>插畫是側視全車，比原本手繪的車廂寬得多；卡面因此把圖釘在上方、左右滿版，下緣留給符號與張數標籤。</dd>
-      <dt>待確認</dt>
-      <dd>黑色的 30G1000型敞車在深色主題下對比偏低（深色車身壓在深色卡面上）。切到深色主題可以看到，若要採用可能需要替卡面加一層淺色底。</dd>
+      <dt>深色主題</dt>
+      <dd>
+        原稿畫在近黑底上，所以九款車在深色卡面本來就站得住——深色的部分都是被淺色車身包住的車窗與車門。
+        唯一的例外是 <b>30G1000型敞車</b>：整台車就是那組深藍黑，壓在深色卡面（約 <code>#24272a</code>）上會變成一個洞。
+        深色主題因此把它那組色階整體提亮到有光的鋼藍，色階之間的關係與塗裝都不動；
+        低於 1.6:1 的像素從 <b>67%</b> 降到 <b>0%</b>，平均對比 2.39 → 3.91。
+      </dd>
+      <dt>切換方式</dt>
+      <dd>
+        深色色階寫在插畫自己的 <code>&lt;style&gt;</code> 裡：以 <code>prefers-color-scheme</code> 為預設，
+        再由 <code>data-theme</code> 覆寫（兩個方向都蓋得過去）。單獨開啟 SVG 檔時只有前者生效，正是預期的行為。
+      </dd>
     </dl>
   </div>
 </div>
