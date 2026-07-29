@@ -79,6 +79,11 @@ export default defineConfig({
   plugins: [react(), ogPreviewPlugin(), ...sentryPlugins()],
   build: {
     sourcemap: uploadSourceMaps ? 'hidden' : false,
+    // The shared sound cues (@trm/client-core/assets/sounds) are imported as URLs and fetched by
+    // the Web Audio player. Keep them as files: the smallest ones fall under the default inline
+    // limit, and base64-ing audio into the entry chunk costs the landing path bytes it never uses
+    // (a cue is only needed once sound is unlocked) and loses per-file caching.
+    assetsInlineLimit: (filePath) => (filePath.endsWith('.mp3') ? false : undefined),
     rollupOptions: {
       output: {
         // Split the big, stable third-party libs out of the app chunk so they cache across

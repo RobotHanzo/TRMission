@@ -1,6 +1,5 @@
-// Ported verbatim from apps/web/src/sound/soundModel.ts (pure event→cue mapping).
 import { Phase, type GameEvent, type GameSnapshot } from '@trm/proto';
-import { viewerWon } from '@trm/client-core/game/teams';
+import { viewerWon } from '../game/teams';
 import type { Cue } from './cues';
 
 export interface CueHit {

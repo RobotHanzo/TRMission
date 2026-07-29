@@ -1,9 +1,12 @@
-import { ALL_CUES, CUES, type Cue } from './cues';
+import type { SoundPlayer as CoreSoundPlayer } from '@trm/client-core/sound/player';
+import { ALL_CUES, CUES, CUE_URLS, type Cue } from './cues';
 
-export interface SoundPlayer {
-  preload(): Promise<void>;
-  unlock(): void;
-  play(cue: Cue, gainScale?: number): void;
+/**
+ * The web implementation of the shared contract (Web Audio API). `schedule` is required here —
+ * it is the whole reason the countdown cues survive a hidden tab (see `@trm/client-core`'s
+ * `useSoundDriver`); mobile leaves it undefined.
+ */
+export interface SoundPlayer extends CoreSoundPlayer {
   /**
    * Schedule a cue to sound `inMs` from now on the AudioContext clock. Unlike setTimeout/rAF,
    * the audio clock is NOT throttled in hidden/minimized tabs, so a pre-scheduled cue lands on
@@ -11,8 +14,6 @@ export interface SoundPlayer {
    * scheduled — no context, context not running, cue not decoded, or sound disabled).
    */
   schedule(cue: Cue, inMs: number, gainScale?: number): () => void;
-  setEnabled(on: boolean): void;
-  setVolume(v: number): void;
 }
 
 interface Opts {
@@ -94,7 +95,7 @@ export function createSoundPlayer(opts: Opts = {}): SoundPlayer {
         ALL_CUES.map(async (cue) => {
           if (buffers.has(cue)) return;
           try {
-            const res = await fetch(CUES[cue].src);
+            const res = await fetch(CUE_URLS[cue]);
             const arr = await res.arrayBuffer();
             buffers.set(cue, await c.decodeAudioData(arr));
           } catch {

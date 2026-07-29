@@ -1,49 +1,40 @@
-export type Cue =
-  | 'cardDraw'
-  | 'yourTurn'
-  | 'tunnelDraw'
-  | 'tunnelSuccess'
-  | 'tunnelPayment'
-  | 'missionComplete'
-  | 'gameOverWin'
-  | 'gameOverNormal'
-  | 'stationBuilt'
-  | 'railwayBuilt'
-  | 'railRepaired'
-  | 'eventStart'
-  | 'chatMessage'
-  | 'countdownWarning'
-  | 'countdownLapsed';
+// The cue vocabulary + gain/throttle table are shared with mobile (@trm/client-core/sound/cues);
+// only the asset binding is web-specific. Vite emits each mp3 from the shared assets folder as a
+// hashed URL, which the Web Audio player fetches + decodes.
+import cardDraw from '@trm/client-core/assets/sounds/card-draw.mp3';
+import yourTurn from '@trm/client-core/assets/sounds/your-turn.mp3';
+import tunnelDraw from '@trm/client-core/assets/sounds/tunnel-draw.mp3';
+import tunnelSuccess from '@trm/client-core/assets/sounds/tunnel-success.mp3';
+import tunnelPayment from '@trm/client-core/assets/sounds/tunnel-payment.mp3';
+import missionComplete from '@trm/client-core/assets/sounds/mission-complete.mp3';
+import gameOverWin from '@trm/client-core/assets/sounds/game-over-win.mp3';
+import gameOverNormal from '@trm/client-core/assets/sounds/game-over-normal.mp3';
+import stationBuilt from '@trm/client-core/assets/sounds/station-built.mp3';
+import railwayBuilt from '@trm/client-core/assets/sounds/railway-built.mp3';
+import railRepaired from '@trm/client-core/assets/sounds/rail-repaired.mp3';
+import eventStart from '@trm/client-core/assets/sounds/event-start.mp3';
+import chatMessage from '@trm/client-core/assets/sounds/chat-message.mp3';
+import countdownWarning from '@trm/client-core/assets/sounds/countdown-warning.mp3';
+import countdownLapsed from '@trm/client-core/assets/sounds/countdown-lapsed.mp3';
+import type { Cue } from '@trm/client-core/sound/cues';
 
-export interface CueDef {
-  /** Path under Vite's public/ root (served at this URL). */
-  src: string;
-  /** Base playback gain (0–1), multiplied by the master volume. */
-  gain: number;
-  /** Minimum ms between two plays of this cue; a play inside the window is dropped. */
-  throttleMs: number;
-}
+export * from '@trm/client-core/sound/cues';
 
-export const CUES: Record<Cue, CueDef> = {
-  cardDraw: { src: '/sounds/card-draw.mp3', gain: 0.8, throttleMs: 55 },
-  yourTurn: { src: '/sounds/your-turn.mp3', gain: 0.9, throttleMs: 250 },
-  tunnelDraw: { src: '/sounds/tunnel-draw.mp3', gain: 0.8, throttleMs: 0 },
-  tunnelSuccess: { src: '/sounds/tunnel-success.mp3', gain: 0.9, throttleMs: 200 },
-  tunnelPayment: { src: '/sounds/tunnel-payment.mp3', gain: 0.9, throttleMs: 200 },
-  missionComplete: { src: '/sounds/mission-complete.mp3', gain: 1.0, throttleMs: 300 },
-  gameOverWin: { src: '/sounds/game-over-win.mp3', gain: 1.0, throttleMs: 1000 },
-  gameOverNormal: { src: '/sounds/game-over-normal.mp3', gain: 0.9, throttleMs: 1000 },
-  stationBuilt: { src: '/sounds/station-built.mp3', gain: 0.9, throttleMs: 70 },
-  railwayBuilt: { src: '/sounds/railway-built.mp3', gain: 0.9, throttleMs: 70 },
-  railRepaired: { src: '/sounds/rail-repaired.mp3', gain: 0.9, throttleMs: 200 },
-  eventStart: { src: '/sounds/event-start.mp3', gain: 1.0, throttleMs: 300 },
-  chatMessage: { src: '/sounds/chat-message.mp3', gain: 0.7, throttleMs: 200 },
-  // Per-turn countdown (issue #13): a tick each of the final seconds, a distinct tone when it lapses.
-  countdownWarning: { src: '/sounds/countdown-warning.mp3', gain: 0.7, throttleMs: 500 },
-  countdownLapsed: { src: '/sounds/countdown-lapsed.mp3', gain: 0.9, throttleMs: 500 },
+/** Served URL for each cue's audio (one static import per cue, so Rollup emits them all). */
+export const CUE_URLS: Record<Cue, string> = {
+  cardDraw,
+  yourTurn,
+  tunnelDraw,
+  tunnelSuccess,
+  tunnelPayment,
+  missionComplete,
+  gameOverWin,
+  gameOverNormal,
+  stationBuilt,
+  railwayBuilt,
+  railRepaired,
+  eventStart,
+  chatMessage,
+  countdownWarning,
+  countdownLapsed,
 };
-
-/** Gain multiplier for a cue triggered by an opponent's action (vs the local player's). */
-export const OPPONENT_GAIN = 0.5;
-
-export const ALL_CUES = Object.keys(CUES) as Cue[];

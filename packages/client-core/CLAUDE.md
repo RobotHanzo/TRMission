@@ -8,9 +8,16 @@ this package must NEVER import `react-dom`, `react-native`, or any `expo-*`/DOM/
 own copy; keep the version ranges aligned across `apps/web`, `apps/mobile`, and this package).
 
 Layout mirrors the app-side `src/` folders it was extracted from (`net/`, `game/`, `store/`,
-`tutorial/`, `i18n/`, `theme/`). Platform differences are injected through small adapter
+`sound/`, `tutorial/`, `i18n/`, `theme/`). Platform differences are injected through small adapter
 interfaces (e.g. the REST client's token persistence + base-URL config), never `Platform.OS`
 checks — this package has no platform APIs to check.
+
+`assets/` is the exception to "headless": it holds the shared **SFX** (`assets/sounds/*.mp3`, one
+copy for both clients, exported via the `./assets/*` subpath) that `src/sound/cues.ts` names. Each
+app binds those file names to its own asset reference — a Vite-emitted URL on web, a Metro asset id
+on mobile — and implements the `SoundPlayer` contract (Web Audio vs expo-audio); the cue table,
+event→cue model, `useSoundDriver` and `useSoundSetup` are all shared. Adding a cue means dropping
+the mp3 here, adding a `CUES` row, and adding one asset import per app.
 
 Rules:
 

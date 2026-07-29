@@ -1,19 +1,15 @@
-// The SAME SoundPlayer interface the web exports (apps/web/src/sound/player.ts) — that surface is
-// the binding P2 contract; only the factory internals differ. SDK 56 removed expo-av, so this is
-// built on expo-audio: one AudioPlayer per cue, preloaded from the bundled assets, each play()
-// rewinding to 0 at `def.gain * gainScale * masterVolume`. The enabled/volume/lastPlayed throttle
-// state ports verbatim from the web factory.
+// The native implementation of the shared SoundPlayer contract (@trm/client-core/sound/player) —
+// the only platform-specific piece of the sound stack; the cue table, event→cue model and driver
+// hooks are shared with web. SDK 56 removed expo-av, so this is built on expo-audio: one
+// AudioPlayer per cue, preloaded from the bundled assets, each play() rewinding to 0 at
+// `def.gain * gainScale * masterVolume`. `schedule` stays unimplemented (no audio clock to hang it
+// on, and native timers aren't tab-throttled): the countdown cues fire from useTurnCountdown's
+// interval in components/game/TurnCountdown.tsx instead.
 import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
+import type { SoundPlayer } from '@trm/client-core/sound/player';
 import { ALL_CUES, CUES, CUE_ASSETS, type Cue } from './cues';
 
-export interface SoundPlayer {
-  preload(): Promise<void>;
-  /** No-op on native — mobile playback needs no user-gesture unlock (web autoplay policy only). */
-  unlock(): void;
-  play(cue: Cue, gainScale?: number): void;
-  setEnabled(on: boolean): void;
-  setVolume(v: number): void;
-}
+export type { SoundPlayer };
 
 /** The slice of expo-audio's AudioPlayer the factory drives (injectable in tests). */
 export interface CuePlayer {

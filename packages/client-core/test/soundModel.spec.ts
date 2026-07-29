@@ -1,6 +1,6 @@
-// Ported from apps/web/src/sound/soundModel.test.ts (vitest → jest globals; assertions verbatim).
+import { describe, it, expect } from 'vitest';
 import { Phase, type GameEvent, type GameSnapshot } from '@trm/proto';
-import { cuesFromEvents, gameOverCue } from './soundModel';
+import { cuesFromEvents, gameOverCue } from '../src/sound/soundModel';
 
 const ev = (cs: string, value: Record<string, unknown>): GameEvent =>
   ({ event: { case: cs, value } }) as unknown as GameEvent;

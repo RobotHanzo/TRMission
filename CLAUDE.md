@@ -97,7 +97,9 @@ packages/proto  → shared → map-data → engine → bots/codec → client-cor
 - `@trm/client-core` — the **shared headless client core** for web + mobile: REST client (platform
   transports injected), `GameSocket`, `SandboxSocket`, zustand stores (game/chat/log/animations),
   game view logic (payments/tunnel/events/tickets/content catalog), the tutorial core
-  (types/curriculum/focus/scenario player + tutorial i18n), and card/cartography colour tokens.
+  (types/curriculum/focus/scenario player + tutorial i18n), the sound layer (cue catalog, the
+  `assets/sounds` SFX themselves, event→cue model, driver/setup hooks — only the `SoundPlayer`
+  implementation is platform-native), and card/cartography colour tokens.
   `react`/`zustand`/`i18next` are peerDependencies — keep both apps pinned to the SAME react
   version (pinned exactly; a second nested copy splits module identity and breaks hooks).
 - `apps/server` — NestJS: WebSocket gateway + REST (auth/lobby/history/dashboard) + Mongo + OpenAPI + bots.

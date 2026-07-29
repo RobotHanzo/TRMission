@@ -13,8 +13,8 @@ callers.
 
 **Drivers** mounted once in GameStage: `useAnimationDriver` (store→store; card flights/sweeps/
 floats/banners render in `components/game/AnimationLayer.tsx` via the measured `animTargets`
-registry), `useSoundDriver` (expo-audio port — SDK 56 removed expo-av; same `SoundPlayer` interface
-as web), and `useHaptics` (`../game/CLAUDE.md`).
+registry), `useSoundDriver` (a binding of the shared driver in `@trm/client-core/sound` over the
+expo-audio `SoundPlayer` — SDK 56 removed expo-av), and `useHaptics` (`../game/CLAUDE.md`).
 
 Live Activities are driven from **GameScreen**, never GameStage (the offline sandbox and tutorial
 also render GameStage) — see `apps/mobile/modules/live-activity/CLAUDE.md`.

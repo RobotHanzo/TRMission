@@ -11,7 +11,8 @@
     "./*": {
       "types": "./src/*.ts",
       "default": "./src/*.ts"
-    }
+    },
+    "./assets/*": "./assets/*"
   },
   "scripts": {
     "typecheck": "tsc7 --noEmit",
