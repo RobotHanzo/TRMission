@@ -99,7 +99,9 @@ packages/proto  → shared → map-data → engine → bots/codec → client-cor
   game view logic (payments/tunnel/events/tickets/content catalog), the tutorial core
   (types/curriculum/focus/scenario player + tutorial i18n), the sound layer (cue catalog, the
   `assets/sounds` SFX themselves, event→cue model, driver/setup hooks — only the `SoundPlayer`
-  implementation is platform-native), and card/cartography colour tokens.
+  implementation is platform-native), card/cartography colour tokens, and the **train-car artwork**
+  (`src/art/trainCars.ts`, generated from `assets/art/` — one CSS-free, palette-tokenised SVG body
+  per card colour that both DOM and react-native-svg render).
   `react`/`zustand`/`i18next` are peerDependencies — keep both apps pinned to the SAME react
   version (pinned exactly; a second nested copy splits module identity and breaks hooks).
 - `apps/server` — NestJS: WebSocket gateway + REST (auth/lobby/history/dashboard) + Mongo + OpenAPI + bots.

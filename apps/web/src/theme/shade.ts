@@ -1,6 +1,10 @@
-// Tiny deterministic colour helpers for deriving the shading used by the
-// original train-car artwork. Pure hex maths (no color-mix) so it renders
-// identically everywhere and is independent of the page theme.
+// Tiny deterministic colour helpers for the livery washes and tints the card/ticket chrome
+// derives from a colour token. Pure hex maths (no color-mix) so it renders identically
+// everywhere and is independent of the page theme.
+//
+// These once also drove the procedurally-drawn train cars; that artwork is now the authored
+// sheets in @trm/client-core/art/trainCars, which carry their own inks, so the shading helpers
+// they needed (shade/tint/luminance) are gone.
 
 type Rgb = readonly [number, number, number];
 
@@ -27,20 +31,8 @@ export const mix = (a: string, b: string, t: number): string => {
   return toHex([ar + (br - ar) * t, ag + (bg - ag) * t, ab + (bb - ab) * t]);
 };
 
-/** Darken toward a warm near-black. */
-export const shade = (hex: string, t: number): string => mix(hex, '#16120c', t);
-
-/** Lighten toward white. */
-export const tint = (hex: string, t: number): string => mix(hex, '#ffffff', t);
-
 /** `rgba()` string from a hex + alpha — used for theme-friendly colour washes. */
 export const rgba = (hex: string, alpha: number): string => {
   const [r, g, b] = parse(hex);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-};
-
-/** Relative luminance (0..1) — used to pick light/dark glass tints per card colour. */
-export const luminance = (hex: string): number => {
-  const [r, g, b] = parse(hex).map((v) => v / 255) as [number, number, number];
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 };

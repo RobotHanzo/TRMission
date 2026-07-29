@@ -32,6 +32,10 @@ export default tseslint.config(
       // plain node script run by hand before a Play submission to regenerate the Data safety
       // answers (docs/release/play-data-safety.md).
       'docs/release/play-data-safety.mjs',
+      // plain node scripts run by hand to regenerate committed output, not app code: the shared
+      // train-car art module (packages/client-core/src/art/) and the demo page that showcases it.
+      'packages/client-core/tools/*.mjs',
+      'docs/demos/**/tools/*.js',
       // Expo config plugins: CommonJS by necessity (Expo `require`s them from app.config.ts's
       // `plugins` array, outside any TS transform). Their logic is covered by *.test.ts instead.
       'apps/mobile/plugins/*.js',

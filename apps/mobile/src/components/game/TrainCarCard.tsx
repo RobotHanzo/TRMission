@@ -22,6 +22,10 @@ interface Props {
 
 const CARD_W = 92;
 const ASPECT = 92 / 64; // card width : height (art + padding), matching the web proportions
+/** Height reserved under the artwork for the glyph + count chips (chip 14/15dp + a 4dp inset).
+ *  The illustration is ~2.2:1 and runs the full card width, so it is height-bound in this band —
+ *  too small a reserve and the vehicle's underframe sits behind the chips. */
+const ART_BOTTOM = 19;
 
 export function TrainCarCard({ color, count, showGlyph = true, showCount = true, size }: Props) {
   const tok = CARD_COLOR_TOKENS[color];
@@ -53,7 +57,7 @@ export function TrainCarCard({ color, count, showGlyph = true, showCount = true,
         ) : (
           <View style={[styles.edge, { backgroundColor: tok.hex }]} />
         )}
-        <View style={styles.art}>
+        <View style={styles.art} pointerEvents="none">
           <TrainCarArt color={color} />
         </View>
         {showGlyph && (
@@ -86,20 +90,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.06)',
   },
   edge: { position: 'absolute', top: 0, left: 0, right: 0, height: 5 },
-  art: { flex: 1, marginTop: 5, paddingHorizontal: 2 },
+  // The illustration is a side elevation at ~2.2:1 — wider than the card face — so it gets a
+  // full-bleed band pinned between the colour edge and the chip row, the same treatment the web
+  // card gives it. The glyph moved to the bottom row with the count for the same reason: at this
+  // width the art runs the full face, and a top-left chip would sit on the vehicle's nose.
+  art: { position: 'absolute', left: 0, right: 0, top: 8, bottom: ART_BOTTOM },
   glyphChip: {
     position: 'absolute',
-    top: 7,
     left: 4,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    bottom: 4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(0,0,0,0.25)',
   },
-  glyphText: { fontSize: 9, fontWeight: '700' },
+  glyphText: { fontSize: 8, fontWeight: '700' },
   countChip: {
     position: 'absolute',
     right: 4,

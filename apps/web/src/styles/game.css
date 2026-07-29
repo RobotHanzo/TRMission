@@ -1610,11 +1610,13 @@ button.tracker:hover {
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
     0 1px 2px rgba(0, 0, 0, 0.25);
 }
+/* The illustrations are side elevations at ~2.2:1 — far wider than the card face — so they get a
+   full-bleed band pinned above the chip row rather than being centred in the whole face. */
 .rs-art {
   display: block;
   width: 100%;
   height: 100%;
-  padding: 9px 6px 4px;
+  padding: 13px 0 21px;
 }
 .train-card-glyph {
   position: absolute;

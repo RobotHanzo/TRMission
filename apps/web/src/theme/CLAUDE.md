@@ -2,6 +2,14 @@
 
 App-wide context: `apps/web/CLAUDE.md`.
 
+`useIsDark.ts` answers "is the app rendering dark right now?" reactively, for the components that
+must pick colours in JS rather than through a CSS token — the train-car night livery. `App.tsx`
+still owns the `data-theme` stamp on `<html>`; the resolution RULE is `isDarkTheme` in
+`@trm/client-core/theme/tokens`, shared with mobile's `useTheme()` so the two cannot drift.
+
+`shade.ts` is down to `mix`/`rgba`: the shading helpers it also used to export existed for the
+procedurally-drawn train cars, which are now the authored sheets in `@trm/client-core/art/trainCars`.
+
 `colors.ts` holds the 8 card colours (each with a colour-blind glyph) and `SEAT_COLORS` (abstract
 seat indices coloured here, distinct from card colours). The hexes are canonical in `@trm/map-data`'s
 render tokens (shared with the server's OG card); `tokens-parity.test.ts` gates `tokens.css`'s

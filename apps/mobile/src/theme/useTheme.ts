@@ -8,6 +8,7 @@ import {
   LIGHT_TOKENS,
   RADIUS,
   SPACE,
+  isDarkTheme,
   type ChromeTokens,
 } from '@trm/client-core/theme/tokens';
 import { useUi } from '../store/ui';
@@ -20,7 +21,7 @@ export interface AppTheme {
 }
 
 export function resolveTheme(pref: 'system' | 'light' | 'dark', systemDark: boolean): AppTheme {
-  const dark = pref === 'dark' || (pref === 'system' && systemDark);
+  const dark = isDarkTheme(pref, systemDark);
   return { tokens: dark ? DARK_TOKENS : LIGHT_TOKENS, dark };
 }
 

@@ -4,6 +4,17 @@
 // Board-map colour TOKENS for cards/routes live in ./colors (canonical in @trm/map-data);
 // this module is the app-chrome palette + spacing/radius scales.
 
+import type { Theme } from '../net/restTypes';
+
+/**
+ * Does the app render dark right now? The preference is persisted per account; 'system' defers to
+ * the OS, which each client reads its own way (matchMedia on web, useColorScheme on native) — the
+ * RULE is shared so the two can't drift, because both the chrome tokens and the train-car night
+ * livery (`../art/trainCars`) key off the same answer.
+ */
+export const isDarkTheme = (pref: Theme, systemDark: boolean): boolean =>
+  pref === 'dark' || (pref === 'system' && systemDark);
+
 export interface ChromeTokens {
   /** EMU blue (primary). */
   blue: string;
