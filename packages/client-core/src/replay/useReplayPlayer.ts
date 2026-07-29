@@ -16,6 +16,11 @@ import type { LogStoreApi } from '../store/log';
 
 /** Auto-play cadence (ms per action) — near the tutorial's calm 900 ms beat. */
 export const STEP_MS = 1100;
+/** Offered autoplay rates. A long game is several hundred actions; 1× start to finish is a
+ *  ten-minute sit, so watching one back needs a way to skim without giving up the animations. */
+export const REPLAY_SPEEDS = [1, 2, 4] as const;
+/** Floor on the sped-up delay, so 4× over a tunnel reveal still leaves the flip on screen. */
+const MIN_STEP_MS = 160;
 /** State checkpoints every N actions so seeks rebuild from nearby, not genesis. */
 const CHECKPOINT_EVERY = 32;
 
@@ -26,10 +31,13 @@ export interface ReplayControls {
   viewer: PlayerId | null;
   atEnd: boolean;
   error: boolean;
+  /** Autoplay rate multiplier (1 = the natural STEP_MS cadence). Manual stepping ignores it. */
+  speed: number;
   /** True right after an animated forward step(); false after any silent rebuild (seek/prev/
    *  setViewer/initial mount) — the glide-vs-snap signal for the replay camera-follow. */
   animate: boolean;
   setViewer(viewer: PlayerId | null): void;
+  setSpeed(speed: number): void;
   play(): void;
   pause(): void;
   next(): void;
@@ -58,6 +66,7 @@ export function useReplayPlayer(
   const [viewer, setViewerState] = useState<PlayerId | null>(initialViewer);
   const [error, setError] = useState(false);
   const [animate, setAnimate] = useState(false);
+  const [speed, setSpeed] = useState(1);
 
   const stepRef = useRef(0);
   const viewerRef = useRef(viewer);
@@ -238,9 +247,11 @@ export function useReplayPlayer(
       setPlaying(false);
       return;
     }
-    const id = setTimeout(next, nextDelay.current);
+    const id = setTimeout(next, Math.max(MIN_STEP_MS, nextDelay.current / speed));
     return () => clearTimeout(id);
-  }, [playing, step, error, actions.length, next]);
+    // `speed` re-arms the pending tick, so a rate change takes effect on the NEXT action rather
+    // than only after the one already scheduled at the old cadence lands.
+  }, [playing, step, error, actions.length, next, speed]);
 
   // Optional integrity seal at the end (diagnostic only — never blocks the UX).
   useEffect(() => {
@@ -262,7 +273,9 @@ export function useReplayPlayer(
     atEnd: step >= actions.length,
     error,
     animate,
+    speed,
     setViewer,
+    setSpeed,
     play,
     pause,
     next,

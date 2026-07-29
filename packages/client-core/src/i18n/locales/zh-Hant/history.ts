@@ -13,6 +13,13 @@ export default {
   perspective: '視角',
   publicView: '公開視角',
   step: '第 {{n}} / {{total}} 步',
+  turnOf: '第 {{n}} 回合 · {{name}}',
+  openingDraft: '起始任務抽選',
+  beforeStart: '開局前',
+  prevTurn: '上一回合',
+  nextTurn: '下一回合',
+  speed: '播放速度',
+  speedTimes: '{{n}} 倍速',
   backToHistory: '返回對局紀錄',
   bot: '機器人',
 };

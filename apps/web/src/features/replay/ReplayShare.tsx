@@ -1,7 +1,8 @@
 // Replay sharing: any seated player of the game may flip the replay between private
 // (participants only) and view-by-link (anyone holding the URL); everyone gets a
-// copy-link shortcut. Reuses the perspective-switcher pill styling so the rail reads
-// as one control family.
+// copy-link shortcut. Sits in the rail's footer, in the same pill family as the
+// perspective switcher but at a quieter weight — this decides who else can watch,
+// so it should never compete with the control you actually came here to use.
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Link2, Lock } from 'lucide-react';
@@ -42,7 +43,7 @@ export function ReplayShare({
   };
 
   return (
-    <div className="card perspective-switcher replay-share">
+    <div className="replay-share">
       <div className="perspective-label">{t('history.share')}</div>
       <div className="perspective-pills">
         {canConfigure && (
@@ -52,19 +53,22 @@ export function ReplayShare({
               onClick={() => change('private')}
               title={t('history.visibilityHintPrivate')}
             >
-              <Lock size={14} aria-hidden /> {t('history.visibilityPrivate')}
+              <Lock size={13} aria-hidden /> {t('history.visibilityPrivate')}
             </button>
             <button
               className={'perspective-pill' + (visibility === 'link' ? ' is-active' : '')}
               onClick={() => change('link')}
               title={t('history.visibilityHintLink')}
             >
-              <Link2 size={14} aria-hidden /> {t('history.visibilityLink')}
+              <Link2 size={13} aria-hidden /> {t('history.visibilityLink')}
             </button>
           </>
         )}
-        <button className="perspective-pill" onClick={copy}>
-          {copied ? <Check size={14} aria-hidden /> : <Link2 size={14} aria-hidden />}
+        <button
+          className={'perspective-pill perspective-pill--copy' + (copied ? ' is-copied' : '')}
+          onClick={copy}
+        >
+          {copied ? <Check size={13} aria-hidden /> : <Link2 size={13} aria-hidden />}
           {copied ? t('history.linkCopied') : t('history.copyLink')}
         </button>
       </div>

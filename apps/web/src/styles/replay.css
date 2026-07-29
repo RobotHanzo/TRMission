@@ -1,3 +1,7 @@
+/* Replay — the board, one rail, and the route strip.
+   The strip is where this screen spends its ink: turn bands in seat colours, an EMU-blue rail for
+   distance covered, an ember playhead, and station glyphs at the moments worth seeking to. Every
+   colour is an existing token; nothing here invents a palette next to the board it wraps. */
 .replay {
   flex: 1;
   min-height: 0;
@@ -13,46 +17,397 @@
   min-height: 0;
   display: flex;
 }
+
+/* ── The rail: ONE card, hairline-divided into perspective / log / share ─────── */
 .replay-rail {
   grid-area: rail;
   display: flex;
   flex-direction: column;
-  gap: var(--tr-space-3);
   min-height: 0;
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  box-shadow: var(--tr-shadow);
+  overflow: hidden;
 }
-/* LogPanel is normally styled as a child of `.comms` (game.css); here it sits directly in the
-   replay rail, so give it the same card chrome + internal scroll. */
+/* LogPanel is normally styled as a child of `.comms` (game.css); here it is the rail's body. */
 .replay-rail .log-panel {
   flex: 1;
   min-height: 120px;
   display: flex;
   flex-direction: column;
-  gap: var(--tr-space-3);
   padding: var(--tr-space-3) var(--tr-space-3) 0;
+  overflow: hidden;
+}
+
+/* ── Section eyebrows — the timetable leader idiom from `.tray-head` ─────────── */
+.perspective-label {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tr-ink-soft);
+}
+.perspective-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(to right, var(--tr-line) 0 6px, transparent 6px 10px);
+}
+
+.perspective-switcher {
+  flex: none;
+  display: grid;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-3);
+  border-bottom: 1px solid var(--tr-line);
+}
+.perspective-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tr-space-1);
+}
+.perspective-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px var(--tr-space-2);
+  border-radius: var(--tr-radius-sm);
+  border: 1px solid var(--tr-line);
+  background: var(--tr-surface);
+  color: var(--tr-ink-soft);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.perspective-pill:hover:not(:disabled) {
+  filter: none;
+  color: var(--tr-ink);
+  border-color: color-mix(in srgb, var(--seat, var(--tr-blue)) 40%, var(--tr-line));
+}
+.perspective-pill.is-active {
+  color: var(--tr-ink);
+  font-weight: 600;
+  background: color-mix(in srgb, var(--seat, var(--tr-blue)) 13%, var(--tr-surface));
+  border-color: color-mix(in srgb, var(--seat, var(--tr-blue)) 55%, var(--tr-line));
+}
+/* The seat's livery bar, not a dot: it echoes the strip's turn bands and the trains on the map. */
+.perspective-dot {
+  width: 4px;
+  height: 13px;
+  border-radius: 1px;
+  background: var(--seat, var(--tr-ink-soft));
+  display: inline-block;
+  flex: none;
+}
+
+/* ── Share: the rail's footer, deliberately the quietest thing in it ─────────── */
+.replay-share {
+  flex: none;
+  display: grid;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-3);
+  border-top: 1px solid var(--tr-line);
+  background: color-mix(in srgb, var(--tr-surface-2) 45%, var(--tr-surface));
+}
+.replay-share .perspective-pill {
+  background: var(--tr-surface);
+}
+.perspective-pill--copy {
+  margin-left: auto;
+}
+.perspective-pill--copy.is-copied {
+  color: var(--tr-ok);
+  border-color: color-mix(in srgb, var(--tr-ok) 55%, var(--tr-line));
+}
+.replay-share .error {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+/* ── The transport ──────────────────────────────────────────────────────────── */
+.replay-transport {
+  grid-area: controls;
+  display: grid;
+  gap: var(--tr-space-2);
+  padding: var(--tr-space-3) var(--tr-space-4) var(--tr-space-2);
   background: var(--tr-surface);
   border: 1px solid var(--tr-line);
   border-radius: var(--tr-radius);
-  overflow: hidden;
+  box-shadow: var(--tr-shadow);
 }
-.replay-controls {
-  grid-area: controls;
+.transport-head {
   display: flex;
   align-items: center;
   gap: var(--tr-space-3);
-  padding: var(--tr-space-2) var(--tr-space-3);
-  background: var(--tr-surface);
-  border: 1px solid var(--tr-line);
-  border-radius: var(--tr-radius);
+  min-width: 0;
 }
-.replay-scrubber {
+.transport-now {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  min-width: 0;
+}
+.transport-now-bar {
+  flex: none;
+  width: 4px;
+  height: 15px;
+  border-radius: 1px;
+  background: var(--seat, var(--tr-line));
+}
+.transport-now-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The dashed leader runs the readout out to the speed control — same device the tray headings use,
+   so the transport reads as part of the timetable rather than a media player dropped on top. */
+.transport-head::before {
+  content: '';
+  order: 1;
   flex: 1;
-  min-width: 120px;
+  height: 1px;
+  min-width: var(--tr-space-4);
+  background: repeating-linear-gradient(to right, var(--tr-line) 0 6px, transparent 6px 10px);
+}
+.transport-speed {
+  order: 2;
+  flex: none;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--tr-surface-2);
+  border-radius: 999px;
+}
+.speed-btn {
+  border: none;
+  background: transparent;
+  color: var(--tr-ink-soft);
+  font-family: var(--tr-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  padding: 2px var(--tr-space-2);
+  border-radius: 999px;
+  min-height: 20px;
+}
+.speed-btn:hover:not(:disabled) {
+  filter: none;
+  color: var(--tr-ink);
+}
+.speed-btn.is-active {
+  background: var(--tr-surface);
+  color: var(--tr-ink);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(31, 35, 40, 0.14);
+}
+
+/* ── The route strip ────────────────────────────────────────────────────────── */
+.replay-strip {
+  position: relative;
+  height: 34px;
+}
+.strip-plot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+/* The rail, showing through the gaps between turns and past the last one. */
+.strip-plot::after {
+  content: '';
+  position: absolute;
+  top: 11px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--tr-line);
+}
+
+/* The line, in sections: one per turn, as long as that turn ran, in the acting seat's livery.
+   Turn order is learned in one cycle and then repeats, so the sections stay a thin rule rather
+   than a bar chart — what varies is section LENGTH (who stalled on a long draft) and where the
+   current turn sits, and that is what the height change is spent on. */
+.strip-turns {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  right: 0;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+.strip-turn {
+  flex-basis: 0;
+  min-width: 1px;
+  height: 7px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--seat) 72%, transparent);
+}
+/* The section the train is in, raised off the line. */
+.strip-turn.is-now {
+  height: 15px;
+  border-radius: 2px;
+  background: var(--seat);
+}
+/* The opening mission draft is simultaneous — hatched, because it is not anyone's turn. */
+.strip-turn.is-setup {
+  background: repeating-linear-gradient(45deg, var(--tr-line) 0 3px, transparent 3px 6px);
+}
+
+/* Station glyphs hanging off the line. Shape carries the meaning and colour only says whose, so
+   the strip survives the colour-blind setting; size carries how notable — a claim is the everyday
+   move, a station or a tunnel is the turn someone will want to find again. */
+.strip-moment {
+  position: absolute;
+  border: 1.5px solid var(--seat);
+}
+.strip-moment.is-claim,
+.strip-moment.is-repair {
+  top: 22px;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  transform: rotate(45deg);
+}
+.strip-moment.is-claim {
+  background: var(--seat);
+}
+.strip-moment.is-station,
+.strip-moment.is-tunnel {
+  top: 21px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+}
+.strip-moment.is-station {
+  border-radius: 1px;
+  background: var(--seat);
+}
+.strip-moment.is-tunnel {
+  border-radius: 50%;
+}
+
+/* The stretch not yet travelled, washed toward the card — quiet enough to read as ahead of you,
+   solid enough that the rest of the game's shape is still legible before you get there. */
+.strip-ahead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--tr-surface) 62%, transparent);
+}
+/* Where you are — one ember line straight through every layer, and nothing else. */
+.strip-head {
+  position: absolute;
+  top: 0;
+  bottom: 2px;
+  width: 2px;
+  margin-left: -1px;
+  z-index: 3;
+  background: var(--tr-ember);
+}
+/* Only glide while it is playing — during a drag the scrubber has to track the pointer exactly. */
+.replay-transport.is-playing .strip-head,
+.replay-transport.is-playing .strip-ahead {
+  transition: left 0.18s linear;
+}
+
+/* One real control over the painted strip: dragging, arrow keys and AT all land on this slider.
+   It stays fully transparent rather than opacity:0 so its focus ring still paints. */
+.strip-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--tr-radius-sm);
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.strip-input::-webkit-slider-runnable-track {
+  height: 100%;
+  background: transparent;
+}
+.strip-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 100%;
+  background: transparent;
+}
+.strip-input::-moz-range-track {
+  height: 100%;
+  background: transparent;
+}
+.strip-input::-moz-range-thumb {
+  width: 18px;
+  height: 42px;
+  border: none;
+  background: transparent;
+}
+
+.transport-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-3);
+}
+.transport-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-1);
+}
+.transport-buttons .icon-btn {
+  border-color: transparent;
+  background: transparent;
+  color: var(--tr-ink-soft);
+  padding: 6px;
+}
+.transport-buttons .icon-btn:hover:not(:disabled) {
+  filter: none;
+  color: var(--tr-ink);
+  background: var(--tr-surface-2);
+}
+.transport-buttons .transport-play {
+  color: var(--tr-ink);
+  background: var(--tr-surface-2);
+  border-color: var(--tr-line);
+  margin: 0 2px;
+}
+.transport-buttons .transport-play:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--tr-blue) 12%, var(--tr-surface-2));
 }
 .replay-step {
+  margin-left: auto;
+  font-family: var(--tr-font-mono);
   font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
   white-space: nowrap;
   color: var(--tr-ink-soft);
 }
+
+/* Maintainer-only banner above the stage (AdminReplayScreen) — states which kind of finished
+   game this is before anything below it is trusted as a complete record. */
+.replay-admin-notice {
+  flex: none;
+  margin: 0 0 var(--tr-space-3);
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border: 1px solid color-mix(in srgb, var(--tr-ember) 40%, var(--tr-line));
+  border-left-width: 3px;
+  border-radius: var(--tr-radius-sm);
+  background: color-mix(in srgb, var(--tr-ember) 8%, var(--tr-surface));
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .replay-error {
   max-width: 420px;
   margin: var(--tr-space-8) auto;
@@ -60,37 +415,14 @@
   gap: var(--tr-space-3);
   justify-items: start;
 }
-.perspective-switcher {
-  display: grid;
-  gap: var(--tr-space-2);
-  flex: none;
+
+@media (prefers-reduced-motion: reduce) {
+  .replay-transport.is-playing .strip-head,
+  .replay-transport.is-playing .strip-ahead {
+    transition: none;
+  }
 }
-.perspective-label {
-  font-size: 0.85em;
-  color: var(--tr-ink-soft);
-}
-.perspective-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--tr-space-2);
-}
-.perspective-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--tr-space-1);
-  padding: 3px var(--tr-space-3);
-  border-radius: 999px;
-}
-.perspective-pill.is-active {
-  outline: 2px solid var(--tr-accent);
-  outline-offset: 1px;
-}
-.perspective-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-}
+
 @media (max-width: 900px) {
   .replay {
     grid-template:
@@ -127,15 +459,15 @@
     min-height: 0;
     overflow-y: auto;
   }
-  .replay-controls {
-    flex-wrap: wrap;
+  .replay-transport {
+    padding: var(--tr-space-2) var(--tr-space-3);
   }
-  /* The scrubber gets its own full-width row under the step buttons. */
-  .replay-scrubber {
-    flex: 1 1 100%;
-    order: 9;
+  /* Thumb-sized transport; the strip keeps its full width on its own row. */
+  .transport-buttons .icon-btn {
+    padding: var(--tr-space-2);
   }
-  .replay-step {
-    margin-left: auto;
+  .speed-btn {
+    min-height: 30px;
+    padding: 2px var(--tr-space-3);
   }
 }

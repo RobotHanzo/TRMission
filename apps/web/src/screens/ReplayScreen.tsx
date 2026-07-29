@@ -4,7 +4,6 @@
 // live game singletons or the WebSocket.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
 import { buildBoard } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
 import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
@@ -29,6 +28,7 @@ import { LogPanel } from '../components/LogPanel';
 import { useReplayPlayer } from '../features/replay/useReplayPlayer';
 import { PerspectiveSwitcher } from '../features/replay/PerspectiveSwitcher';
 import { ReplayShare } from '../features/replay/ReplayShare';
+import { ReplayTransport } from '../features/replay/ReplayTransport';
 import { frameTargetForAction } from '../features/replay/frameTarget';
 import { isReplayVersionCompatible } from '../features/replay/compatibility';
 import '../styles/replay.css';
@@ -241,8 +241,11 @@ export function ReplayStage({
           onLeave={onLeave ?? (() => {})}
         />
       </div>
+      {/* One rail, hairline-divided: who you're watching as, what happened, who else can watch —
+          rather than three cards of equal weight floating in a column. */}
       <aside className="replay-rail">
         <PerspectiveSwitcher players={players} viewer={player.viewer} onChange={player.setViewer} />
+        <LogPanel />
         {share && (
           <ReplayShare
             gameId={share.gameId}
@@ -250,49 +253,8 @@ export function ReplayStage({
             canConfigure={share.canConfigure}
           />
         )}
-        <LogPanel />
       </aside>
-      <div className="replay-controls">
-        <button
-          className="icon-btn"
-          onClick={player.prev}
-          disabled={player.step <= 0}
-          aria-label={t('tutorial.prevStep')}
-          title={t('tutorial.prevStep')}
-        >
-          <SkipBack size={16} aria-hidden />
-        </button>
-        <button
-          className="icon-btn"
-          onClick={player.playing ? player.pause : player.play}
-          disabled={player.atEnd}
-          aria-label={player.playing ? t('tutorial.pause') : t('tutorial.play')}
-          title={player.playing ? t('tutorial.pause') : t('tutorial.play')}
-        >
-          {player.playing ? <Pause size={16} aria-hidden /> : <Play size={16} aria-hidden />}
-        </button>
-        <button
-          className="icon-btn"
-          onClick={player.next}
-          disabled={player.atEnd}
-          aria-label={t('tutorial.nextStep')}
-          title={t('tutorial.nextStep')}
-        >
-          <SkipForward size={16} aria-hidden />
-        </button>
-        <input
-          type="range"
-          className="replay-scrubber"
-          min={0}
-          max={player.total}
-          value={player.step}
-          onChange={(e) => player.seek(Number(e.target.value))}
-          aria-label={t('history.step', { n: player.step, total: player.total })}
-        />
-        <span className="replay-step">
-          {t('history.step', { n: player.step, total: player.total })}
-        </span>
-      </div>
+      <ReplayTransport actions={actions} players={players} player={player} />
     </div>
   );
 }

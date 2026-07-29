@@ -14,6 +14,13 @@ export default {
   perspective: 'Perspective',
   publicView: 'Public view',
   step: 'Step {{n}} / {{total}}',
+  turnOf: 'Turn {{n}} · {{name}}',
+  openingDraft: 'Opening mission draft',
+  beforeStart: 'Before the first move',
+  prevTurn: 'Previous turn',
+  nextTurn: 'Next turn',
+  speed: 'Playback speed',
+  speedTimes: '{{n}}× speed',
   backToHistory: 'Back to history',
   bot: 'Bot',
 } satisfies TranslationShape<typeof zh>;
